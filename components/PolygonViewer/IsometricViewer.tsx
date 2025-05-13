@@ -1188,7 +1188,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     const iconSize = size / 2;
     const iconX = x + size - iconSize / 2;
     const iconY = y - size + iconSize / 2;
-    
+  
+    // Draw the icon background
     ctx.beginPath();
     ctx.arc(iconX, iconY, iconSize, 0, Math.PI * 2);
     ctx.fillStyle = markerType === 'home' ? '#4b70e2' : '#e27a4b';
@@ -1196,11 +1197,49 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     ctx.strokeStyle = '#FFFFFF';
     ctx.lineWidth = 1;
     ctx.stroke();
+  
+    // Draw icon symbol - house for home, tools for work
+    if (markerType === 'home') {
+      // Draw a house icon instead of just the letter 'H'
+      ctx.fillStyle = '#FFFFFF';
     
-    // Draw icon symbol
-    ctx.fillStyle = '#FFFFFF';
-    ctx.font = `bold ${iconSize * 0.8}px Arial`;
-    ctx.fillText(markerType === 'home' ? 'H' : 'W', iconX, iconY);
+      // Calculate house dimensions based on icon size
+      const houseWidth = iconSize * 0.8;
+      const houseHeight = iconSize * 0.6;
+      const roofHeight = iconSize * 0.4;
+    
+      // Draw the roof (triangle)
+      ctx.beginPath();
+      ctx.moveTo(iconX - houseWidth/2, iconY - houseHeight/2 + roofHeight/2);
+      ctx.lineTo(iconX, iconY - houseHeight/2 - roofHeight/2);
+      ctx.lineTo(iconX + houseWidth/2, iconY - houseHeight/2 + roofHeight/2);
+      ctx.closePath();
+      ctx.fill();
+    
+      // Draw the house body (rectangle)
+      ctx.fillRect(
+        iconX - houseWidth/2, 
+        iconY - houseHeight/2 + roofHeight/2, 
+        houseWidth, 
+        houseHeight
+      );
+    
+      // Draw a small door
+      ctx.fillStyle = '#4b70e2'; // Same as background color
+      const doorWidth = houseWidth * 0.4;
+      const doorHeight = houseHeight * 0.6;
+      ctx.fillRect(
+        iconX - doorWidth/2,
+        iconY - houseHeight/2 + roofHeight/2 + houseHeight - doorHeight,
+        doorWidth,
+        doorHeight
+      );
+    } else {
+      // For work, keep the 'W' text
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = `bold ${iconSize * 0.8}px Arial`;
+      ctx.fillText('W', iconX, iconY);
+    }
   };
 
   // Define isometric projection functions at the component level
@@ -1677,9 +1716,43 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             ctx.strokeStyle = '#FFFFFF';
             ctx.lineWidth = 1;
             ctx.stroke();
+            
+            // Draw a house icon instead of just the letter 'H'
             ctx.fillStyle = '#FFFFFF';
-            ctx.font = 'bold 10px Arial';
-            ctx.fillText('H', position.x - 15 + 15, position.y - 15);
+            
+            // Calculate house dimensions
+            const houseWidth = 8;
+            const houseHeight = 6;
+            const roofHeight = 4;
+            const iconX = position.x - 15 + 15;
+            const iconY = position.y - 15;
+            
+            // Draw the roof (triangle)
+            ctx.beginPath();
+            ctx.moveTo(iconX - houseWidth/2, iconY - houseHeight/2 + roofHeight/2);
+            ctx.lineTo(iconX, iconY - houseHeight/2 - roofHeight/2);
+            ctx.lineTo(iconX + houseWidth/2, iconY - houseHeight/2 + roofHeight/2);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Draw the house body (rectangle)
+            ctx.fillRect(
+              iconX - houseWidth/2, 
+              iconY - houseHeight/2 + roofHeight/2, 
+              houseWidth, 
+              houseHeight
+            );
+            
+            // Draw a small door
+            ctx.fillStyle = '#4b70e2'; // Same as background color
+            const doorWidth = houseWidth * 0.4;
+            const doorHeight = houseHeight * 0.6;
+            ctx.fillRect(
+              iconX - doorWidth/2,
+              iconY - houseHeight/2 + roofHeight/2 + houseHeight - doorHeight,
+              doorWidth,
+              doorHeight
+            );
           } else {
             // Draw a single citizen marker
             createCitizenMarker(
