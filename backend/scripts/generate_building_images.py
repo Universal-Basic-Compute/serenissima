@@ -47,6 +47,11 @@ def scan_building_files() -> List[Dict[str, Any]]:
                 file_path = os.path.join(root, file)
                 relative_path = os.path.relpath(file_path, BUILDINGS_DATA_DIR)
                 
+                # Skip index files and other non-building files in the root directory
+                if os.path.dirname(relative_path) == '' and file.lower() in ['index.json', 'readme.json', 'metadata.json']:
+                    log.info(f"Skipping non-building file: {file}")
+                    continue
+                
                 try:
                     with open(file_path, 'r', encoding='utf-8') as f:
                         building_data = json.load(f)
@@ -56,6 +61,11 @@ def scan_building_files() -> List[Dict[str, Any]]:
                         log.warning(f"Skipping {file_path}: Not a valid building JSON object")
                         continue
                     
+                    # Skip files that don't have a name or type - likely not buildings
+                    if 'name' not in building_data and 'type' not in building_data:
+                        log.warning(f"Skipping {file_path}: Not a building (missing name and type)")
+                        continue
+                    
                     # Add file path information
                     building_data['_file_path'] = file_path
                     building_data['_relative_path'] = relative_path
@@ -63,9 +73,15 @@ def scan_building_files() -> List[Dict[str, Any]]:
                     
                     # Extract category and subcategory from path
                     path_parts = relative_path.split(os.sep)
+                    
+                    # Only process files that are in a category directory
                     if len(path_parts) >= 2:
                         building_data['_category_dir'] = path_parts[0]
                         building_data['_subcategory_dir'] = path_parts[1] if len(path_parts) > 2 else None
+                    else:
+                        # Skip files in the root directory - they're not properly categorized buildings
+                        log.warning(f"Skipping {file_path}: Not in a category directory")
+                        continue
                     
                     # Ensure the building has at least a name
                     if 'name' not in building_data:
@@ -198,14 +214,12 @@ def process_building(building: Dict[str, Any], force_regenerate: bool = False) -
     # Create a safe filename from the building name
     safe_name = name.lower().replace(' ', '_').replace("'", '').replace('"', '')
     
-    # Handle the case where both category and subcategory are unknown
-    if category == 'unknown' and not subcategory:
-        # Use a special directory for uncategorized buildings
-        output_dir = os.path.join(BUILDINGS_IMAGE_DIR, 'uncategorized')
     # Determine the output directory structure
-    elif subcategory:
+    # Always use category/subcategory structure
+    if subcategory:
         output_dir = os.path.join(BUILDINGS_IMAGE_DIR, category, subcategory)
     else:
+        # If no subcategory, use just the category
         output_dir = os.path.join(BUILDINGS_IMAGE_DIR, category)
     
     # Create the output directory if it doesn't exist
