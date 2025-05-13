@@ -47,10 +47,10 @@ export async function GET() {
                record.get('LastIncome') !== null))
       .map(record => {
         // Get the building points count, default to 1 if not available to avoid division by zero
-        const buildingPointsCount = record.get('BuildingPointsCount') || 1;
+        const buildingPointsCount = Number(record.get('BuildingPointsCount')) || 1;
         
         // Calculate income per building point
-        const rawIncome = record.get('LastIncome') || 0;
+        const rawIncome = Number(record.get('LastIncome')) || 0;
         const incomePerBuildingPoint = buildingPointsCount > 0 
           ? rawIncome / buildingPointsCount 
           : rawIncome;
