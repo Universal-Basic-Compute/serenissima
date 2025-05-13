@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Building, BuildingCategory } from '@/lib/services/BuildingService';
+import { Building, BuildingCategory } from '@/lib/models/BuildingModels';
 import { getBackendBaseUrl } from '@/lib/apiUtils';
 
 interface BuildingState {
