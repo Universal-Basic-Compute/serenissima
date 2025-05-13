@@ -128,5 +128,10 @@ export const EventTypes = {
   // Resource events
   RESOURCE_ADDED: 'resourceAdded',
   RESOURCE_REMOVED: 'resourceRemoved',
-  SHOW_RESOURCE_DETAILS: 'showResourceDetails'
+  SHOW_RESOURCE_DETAILS: 'showResourceDetails',
+  
+  // Scene events
+  SCENE_BASE_RENDERED: 'SCENE_BASE_RENDERED',
+  BUILDING_REMOVED: 'BUILDING_REMOVED',
+  BUILDING_UPDATED: 'BUILDING_UPDATED'
 };
