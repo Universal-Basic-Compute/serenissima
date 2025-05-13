@@ -1117,7 +1117,11 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       
       // Check if click is on any dock point
       if (activeView === 'buildings') {
+        let dockPointClicked = false;
+        
         for (const polygon of polygons) {
+          if (dockPointClicked) break;
+          
           if (polygon.dockPoints && Array.isArray(polygon.dockPoints)) {
             for (const point of polygon.dockPoints) {
               if (!point.edge) continue;
@@ -1160,11 +1164,14 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
                 // Deselect any selected building
                 setSelectedBuildingId(null);
                 
-                return;
+                dockPointClicked = true;
+                break;
               }
             }
           }
         }
+        
+        if (dockPointClicked) return;
         
         // Check if click is on any bridge point
         let bridgePointClicked = false;
