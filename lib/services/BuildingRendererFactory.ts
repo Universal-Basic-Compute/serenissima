@@ -28,9 +28,17 @@ export interface IBuildingRenderer {
  */
 class UniversalBuildingRenderer implements IBuildingRenderer {
   private gltfLoader: GLTFLoader;
+  private loadingQueue: string[] = [];
+  private loadingInProgress: Set<string> = new Set();
+  private maxConcurrentLoads: number = 3; // Limit concurrent model loads
+  private loadingTimeout: number = 15000; // 15 second timeout for model loading
+  private modelCache: Map<string, THREE.Object3D> = new Map();
+  private pendingBuildings: Map<string, BuildingData> = new Map();
+  private debug: boolean = false;
   
   constructor(private options: BuildingRendererOptions) {
     this.gltfLoader = new GLTFLoader();
+    this.debug = options.debug || false;
     
     // Check if model files exist
     this.checkModelFilesExist();
@@ -40,7 +48,9 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
    * Debug function to check if model files exist in the public directory
    */
   private async checkModelFilesExist(): Promise<void> {
-    console.log(`%c Checking for model files in public directory...`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
+    if (!this.debug) return;
+    
+    this.logDebug(`Checking for model files in public directory...`);
     
     // Common building types to check
     const buildingTypes = ['market-stall', 'house', 'workshop', 'tavern', 'dock'];
@@ -51,13 +61,21 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
         const modelPath = this.getModelPath(type, variant);
         try {
           const response = await fetch(modelPath, { method: 'HEAD' });
-          console.log(`%c Model ${type}/${variant}: ${response.ok ? 'EXISTS' : 'MISSING'} (${response.status})`, 
+          this.logDebug(`Model ${type}/${variant}: ${response.ok ? 'EXISTS' : 'MISSING'} (${response.status})`, 
             `background: ${response.ok ? '#00FF00' : '#FF0000'}; color: black; padding: 2px 5px; font-weight: bold;`);
         } catch (error) {
-          console.warn(`%c Error checking model ${type}/${variant}: ${error.message}`, 
-            'background: #FF0000; color: white; padding: 2px 5px; font-weight: bold;');
+          console.warn(`Error checking model ${type}/${variant}: ${error.message}`);
         }
       }
+    }
+  }
+  
+  /**
+   * Conditionally log debug messages
+   */
+  private logDebug(message: string, ...args: any[]): void {
+    if (this.debug) {
+      console.log(`%c ${message}`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;', ...args);
     }
   }
   
@@ -74,26 +92,15 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
       .replace(/'/g, '')
       .replace(/&/g, 'and');
     
-    // Add logging to debug model paths
+    // Create the model path
     const modelPath = `/models/buildings/${normalizedType}/${variant}.glb`;
-    console.log(`%c Model path for ${buildingType}/${variant}: ${modelPath}`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
     
-    // Log the full URL for easier debugging
-    const fullUrl = new URL(modelPath, window.location.origin).href;
-    console.log(`%c Full model URL: ${fullUrl}`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
-    
-    // Check if the file exists using fetch HEAD request
-    fetch(modelPath, { method: 'HEAD' })
-      .then(response => {
-        if (response.ok) {
-          console.log(`%c Model file exists at ${modelPath}`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
-        } else {
-          console.warn(`%c Model file does NOT exist at ${modelPath} (${response.status})`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
-        }
-      })
-      .catch(error => {
-        console.warn(`%c Error checking if model exists at ${modelPath}: ${error.message}`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
-      });
+    if (this.debug) {
+      // Log the full URL for easier debugging
+      const fullUrl = new URL(modelPath, window.location.origin).href;
+      this.logDebug(`Model path for ${buildingType}/${variant}: ${modelPath}`);
+      this.logDebug(`Full model URL: ${fullUrl}`);
+    }
     
     return modelPath;
   }
@@ -339,176 +346,270 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
   }
   
   /**
+   * Process the loading queue
+   */
+  private processLoadingQueue(): void {
+    // Skip if we're at the concurrent loading limit
+    if (this.loadingInProgress.size >= this.maxConcurrentLoads) return;
+    
+    // Get the next building ID from the queue
+    const nextBuildingId = this.loadingQueue.shift();
+    if (!nextBuildingId) return;
+    
+    // Mark as loading
+    this.loadingInProgress.add(nextBuildingId);
+    
+    // Find the building data
+    const building = this.pendingBuildings.get(nextBuildingId);
+    if (!building) {
+      this.loadingInProgress.delete(nextBuildingId);
+      this.processLoadingQueue();
+      return;
+    }
+    
+    // Load the model
+    this.loadBuildingModel(building)
+      .finally(() => {
+        // Remove from in-progress set
+        this.loadingInProgress.delete(nextBuildingId);
+        // Process next in queue
+        this.processLoadingQueue();
+      });
+  }
+  
+  /**
+   * Get the model position
+   */
+  private getModelPosition(building: BuildingData): THREE.Vector3 {
+    let position: THREE.Vector3;
+    
+    if ('lat' in building.position && 'lng' in building.position) {
+      position = this.options.positionManager.latLngToScenePosition(building.position);
+    } else {
+      position = new THREE.Vector3(
+        building.position.x,
+        building.position.y || 0,
+        building.position.z
+      );
+    }
+    
+    // Find ground level
+    const groundPosition = this.findGroundLevel(position);
+    if (groundPosition) {
+      position.y = groundPosition.y;
+    }
+    
+    // Special handling for different building types
+    if (building.type === 'market-stall') {
+      position.y += 0.05;
+    }
+    
+    return position;
+  }
+  
+  /**
+   * Configure a model for a specific building
+   */
+  private configureModel(model: THREE.Object3D, building: BuildingData): void {
+    // Position the model
+    const position = this.getModelPosition(building);
+    model.position.copy(position);
+    
+    // Set rotation
+    model.rotation.y = building.rotation || 0;
+    
+    // Add metadata
+    model.userData = {
+      buildingId: building.id,
+      type: building.type,
+      landId: building.land_id,
+      owner: building.owner || building.created_by,
+      position: building.position
+    };
+    
+    // Configure for rendering
+    model.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+        
+        if (child.material instanceof THREE.MeshStandardMaterial) {
+          child.material.needsUpdate = true;
+          child.material.roughness = 0.7;
+          child.material.metalness = 0.3;
+          child.material.emissive.set(0x202020);
+          // Ensure materials are properly configured for shadows
+          child.material.transparent = false; // Disable transparency for better shadows
+          child.material.depthWrite = true;   // Ensure depth is written
+        }
+      }
+      
+      // Hide any grid objects in the model
+      if (child.name && (child.name.includes('grid') || child.name.includes('Grid'))) {
+        child.visible = false;
+      }
+    });
+    
+    // Add connection points if they exist
+    if (building.connectionPoints && building.connectionPoints.length > 0) {
+      building.connectionPoints.forEach((point, index) => {
+        const geometry = new THREE.SphereGeometry(0.2, 8, 8);
+        const material = new THREE.MeshBasicMaterial({ 
+          color: 0xFFAA00 
+        });
+        const sphere = new THREE.Mesh(geometry, material);
+      
+        sphere.position.set(point.x, point.y, point.z);
+        sphere.userData = {
+          type: 'connection-point',
+          index
+        };
+      
+        model.add(sphere);
+      });
+    }
+    
+    // Add to scene
+    this.options.scene.add(model);
+  }
+  
+  /**
+   * Load building model with caching
+   */
+  private async loadBuildingModel(building: BuildingData): Promise<THREE.Object3D> {
+    // Create a cache key based on building type and variant
+    const cacheKey = `${building.type}_${building.variant || 'model'}`;
+    
+    // Check if we have a cached model
+    if (this.modelCache.has(cacheKey)) {
+      // Clone the cached model
+      const cachedModel = this.modelCache.get(cacheKey)!;
+      const clonedModel = cachedModel.clone();
+      
+      // Position and configure the cloned model
+      this.configureModel(clonedModel, building);
+      
+      return clonedModel;
+    }
+    
+    // If not cached, load the model
+    try {
+      const modelPath = this.getModelPath(building.type, building.variant || 'model');
+      
+      if (this.debug) {
+        this.logDebug(`Attempting to load model from: ${modelPath}`);
+      }
+      
+      // Create a low detail model to show while loading
+      const tempModel = this.createLowDetailModel(building);
+      this.options.scene.add(tempModel);
+      
+      // Load with timeout
+      const gltf = await Promise.race([
+        new Promise<GLTF>((resolve, reject) => {
+          this.gltfLoader.load(
+            modelPath,
+            (gltf) => {
+              if (this.debug) {
+                this.logDebug(`Successfully loaded GLB for ${building.id} from ${modelPath}`);
+              }
+              resolve(gltf);
+            },
+            undefined,
+            reject
+          );
+        }),
+        new Promise<never>((_, reject) => 
+          setTimeout(() => reject(new Error('Model load timeout')), this.loadingTimeout)
+        )
+      ]);
+      
+      // Remove the temporary model
+      this.options.scene.remove(tempModel);
+      
+      const model = gltf.scene;
+      
+      // Cache a clone of the base model before configuring
+      this.modelCache.set(cacheKey, model.clone());
+      
+      // Configure the model for this specific building
+      this.configureModel(model, building);
+      
+      return model;
+    } catch (error) {
+      console.warn(`Failed to load model for ${building.id} of type ${building.type}: ${error.message}`);
+      return this.createColoredBoxModel(building, this.getModelPosition(building));
+    }
+  }
+  
+  /**
+   * Get distance to camera
+   */
+  private getDistanceToCamera(building: BuildingData): number {
+    const camera = this.getCameraFromScene();
+    if (!camera) return 100; // Default to a large distance if no camera
+    
+    // Calculate building position
+    let position: THREE.Vector3;
+    if ('lat' in building.position && 'lng' in building.position) {
+      position = this.options.positionManager.latLngToScenePosition(building.position);
+    } else {
+      position = new THREE.Vector3(
+        building.position.x,
+        building.position.y || 0,
+        building.position.z
+      );
+    }
+    
+    return camera.position.distanceTo(position);
+  }
+  
+  /**
    * Render a building
    * @param building Building data
    * @returns Promise resolving to THREE.Object3D
    */
   public async render(building: BuildingData): Promise<THREE.Object3D> {
     try {
-      console.log(`%c Rendering building ${building.id} of type ${building.type}`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
-      
-      // Get camera position to determine distance
-      const camera = this.getCameraFromScene();
-      
-      // Calculate building position
-      let position: THREE.Vector3;
-      
-      if ('lat' in building.position && 'lng' in building.position) {
-        position = this.options.positionManager.latLngToScenePosition(building.position);
-        console.log(`%c Converted lat/lng position to scene position: ${position.x}, ${position.y}, ${position.z}`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
-      } else {
-        position = new THREE.Vector3(
-          building.position.x,
-          building.position.y || 0,
-          building.position.z
-        );
-        console.log(`%c Using direct position: ${position.x}, ${position.y}, ${position.z}`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
+      if (this.debug) {
+        this.logDebug(`Rendering building ${building.id} of type ${building.type}`);
       }
       
-      // Calculate distance to camera
-      const distanceToCamera = camera ? 
-        camera.position.distanceTo(position) : 0;
+      // Generate a unique ID for this building if not provided
+      const buildingId = building.id || `building_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
       
-      // Use low detail model for distant buildings (more than 50 units away)
+      // Store in pending buildings map
+      this.pendingBuildings.set(buildingId, building);
+      
+      // Check camera distance to prioritize loading
+      const distanceToCamera = this.getDistanceToCamera(building);
+      
+      // Create a low-detail model immediately for distant buildings
       if (distanceToCamera > 50) {
-        console.log(`%c Building ${building.id} is distant (${distanceToCamera.toFixed(2)} units), using low detail model`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
+        if (this.debug) {
+          this.logDebug(`Building ${building.id} is distant (${distanceToCamera.toFixed(2)} units), using low detail model`);
+        }
         return this.createLowDetailModel(building);
       }
       
-      // Try to load the actual GLB model
-      try {
-        const modelPath = this.getModelPath(building.type, building.variant || 'model');
-        console.log(`%c Attempting to load model from: ${modelPath}`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
-        
-        // Create a low detail model to show while loading
-        const tempModel = this.createLowDetailModel(building);
-        this.options.scene.add(tempModel);
-        
-        // Load the GLB model with a timeout
-        const gltf = await Promise.race([
-          new Promise<GLTF>((resolve, reject) => {
-            this.gltfLoader.load(
-              modelPath,
-              (gltf) => {
-                console.log(`%c Successfully loaded GLB for ${building.id} from ${modelPath}`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
-                resolve(gltf);
-              },
-              (xhr) => {
-                const progress = Math.round(xhr.loaded / xhr.total * 100);
-                console.log(`%c ${building.id} model ${progress}% loaded`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
-              },
-              (error) => {
-                console.warn(`%c Model not found for ${building.id} at ${modelPath} - using fallback. Error: ${error.message}`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
-                reject(error);
-              }
-            );
-          }),
-          // Add a 10-second timeout to prevent hanging on slow loads
-          new Promise<GLTF>((_, reject) => 
-            setTimeout(() => {
-              console.warn(`%c Model load timeout for ${building.id} at ${modelPath}`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
-              reject(new Error('Model load timeout'));
-            }, 10000)
-          )
-        ]);
-        
-        // Remove the temporary model
-        this.options.scene.remove(tempModel);
-        
-        // Get the model from the GLTF scene
-        const model = gltf.scene;
-        
-        // Find the ground level at this position using raycasting
-        const groundPosition = this.findGroundLevel(position);
-        if (groundPosition) {
-          // Use the detected ground height
-          console.log(`%c Found ground at height ${groundPosition.y} for building ${building.id}`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
-          position.y = groundPosition.y;
-        } else {
-          // Fallback to default ground level if detection fails
-          console.log(`%c No ground found for building ${building.id}, using default height (0)`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
-          position.y = 0;
-        }
-        
-        // Set position and rotation
-        model.position.copy(position);
-        model.rotation.y = building.rotation || 0;
-        
-        // Add metadata to the model
-        model.userData = {
-          buildingId: building.id,
-          type: building.type,
-          landId: building.land_id,
-          owner: building.owner || building.created_by,
-          position: building.position
-        };
-        
-        // Configure model for better rendering
-        model.traverse((child) => {
-          if (child instanceof THREE.Mesh) {
-            child.castShadow = true;
-            child.receiveShadow = true;
-            
-            if (child.material instanceof THREE.MeshStandardMaterial) {
-              child.material.needsUpdate = true;
-              child.material.roughness = 0.7;
-              child.material.metalness = 0.3;
-              child.material.emissive.set(0x202020);
-              // Ensure materials are properly configured for shadows
-              child.material.transparent = false; // Disable transparency for better shadows
-              child.material.depthWrite = true;   // Ensure depth is written
-            }
-          }
-          
-          // Hide any grid objects in the model
-          if (child.name && (child.name.includes('grid') || child.name.includes('Grid'))) {
-            child.visible = false;
-          }
-        });
-        
-        // Add connection points if they exist
-        if (building.connectionPoints && building.connectionPoints.length > 0) {
-          building.connectionPoints.forEach((point, index) => {
-            const geometry = new THREE.SphereGeometry(0.2, 8, 8);
-            const material = new THREE.MeshBasicMaterial({ 
-              color: 0xFFAA00 
-            });
-            const sphere = new THREE.Mesh(geometry, material);
-          
-            sphere.position.set(point.x, point.y, point.z);
-            sphere.userData = {
-              type: 'connection-point',
-              index
-            };
-          
-            model.add(sphere);
-          });
-        }
-        
-        // Special handling for different building types
-        if (building.type === 'market-stall') {
-          // Position market stalls slightly above ground
-          model.position.y += 0.05;
-        }
-        
-        // Add to scene
-        this.options.scene.add(model);
-        
-        console.log(`%c Successfully added model for building ${building.id} to scene`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
-        return model;
-      } catch (error) {
-        // Check if this is a 404 error and log as warning instead of error
-        if (error instanceof Error && error.message && error.message.includes('404')) {
-          console.warn(`%c Model not found for ${building.id} (404), using colored box instead`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
-        } else {
-          console.error(`%c Failed to load GLB model for ${building.id}, using colored box instead: ${error instanceof Error ? error.message : String(error)}`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
-        }
-      
-        // If GLB loading fails, create a colored box with a label
-        return this.createColoredBoxModel(building, position);
+      // For closer buildings, add to loading queue with priority based on distance
+      if (distanceToCamera < 20) {
+        // High priority - add to front of queue
+        this.loadingQueue.unshift(buildingId);
+      } else {
+        // Normal priority - add to end of queue
+        this.loadingQueue.push(buildingId);
       }
+      
+      // Start processing the queue if not already in progress
+      if (this.loadingInProgress.size < this.maxConcurrentLoads) {
+        this.processLoadingQueue();
+      }
+      
+      // Return a low-detail model immediately while the high-detail one loads
+      return this.createLowDetailModel(building);
     } catch (error) {
-      console.error(`%c Error rendering building ${building.id}: ${error instanceof Error ? error.message : String(error)}`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
+      console.error(`Error rendering building ${building.id}: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
     }
   }

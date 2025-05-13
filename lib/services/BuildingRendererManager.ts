@@ -53,7 +53,8 @@ export class BuildingRendererManager {
     this.rendererFactory = new BuildingRendererFactory({
       scene,
       positionManager: buildingPositionManager,
-      cacheService: buildingCacheService
+      cacheService: buildingCacheService,
+      debug: false // Disable debug logging for better performance
     });
     
     // Subscribe to building events
@@ -175,6 +176,11 @@ export class BuildingRendererManager {
     try {
       const startTime = performance.now();
       
+      // Generate a unique ID for this building if not provided
+      if (!building.id) {
+        building.id = `building_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+      }
+      
       // Get the appropriate renderer for this building type
       const renderer = this.rendererFactory.getRenderer(building.type);
       
@@ -191,18 +197,29 @@ export class BuildingRendererManager {
         
         return existingMesh;
       } else {
-        // Create new mesh
-        const mesh = await renderer.render(building);
+        // Create new mesh with a timeout to prevent hanging
+        const meshPromise = renderer.render(building);
         
-        // Store reference to the mesh
-        this.buildingMeshes.set(building.id, mesh);
+        // Add a timeout to prevent hanging on slow model loads
+        const timeoutPromise = new Promise<null>((_, reject) => {
+          setTimeout(() => reject(new Error('Building render timeout')), 15000);
+        });
         
-        // Track performance
-        const endTime = performance.now();
-        this.totalRenderTime += (endTime - startTime);
-        this.renderCount++;
+        // Race the promises
+        const mesh = await Promise.race([meshPromise, timeoutPromise]);
         
-        return mesh;
+        if (mesh) {
+          // Store reference to the mesh
+          this.buildingMeshes.set(building.id, mesh);
+          
+          // Track performance
+          const endTime = performance.now();
+          this.totalRenderTime += (endTime - startTime);
+          this.renderCount++;
+          
+          return mesh;
+        }
+        return null;
       }
     } catch (error) {
       log.error(`Error rendering building ${building.id}:`, error);
@@ -345,10 +362,18 @@ export class BuildingRendererManager {
     }
     
     try {
-      console.log('%c BuildingRendererManager: Refreshing buildings', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
+      // Fetch buildings from API with a timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
       
-      // Fetch buildings from API
-      const response = await fetch('/api/buildings');
+      const response = await fetch('/api/buildings', {
+        signal: controller.signal,
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      });
+      
+      clearTimeout(timeoutId);
       
       if (!response.ok) {
         throw new Error(`Failed to fetch buildings: ${response.status}`);
@@ -357,17 +382,28 @@ export class BuildingRendererManager {
       const data = await response.json();
       const buildings = data.buildings || [];
       
-      console.log(`%c BuildingRendererManager: Refreshing ${buildings.length} buildings`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
-      
       // Track which buildings we've processed
       const processedBuildingIds = new Set<string>();
       
-      // Process each building
-      for (const building of buildings) {
-        if (!building.id) continue;
-        
-        processedBuildingIds.add(building.id);
-        await this.renderBuilding(building);
+      // Sort buildings by distance to camera for priority loading
+      const sortedBuildings = this.sortBuildingsByDistance(buildings);
+      
+      // Process each building with a limit on concurrent loads
+      const concurrentLimit = 5;
+      const chunks = this.chunkArray(sortedBuildings, concurrentLimit);
+      
+      for (const chunk of chunks) {
+        // Process each chunk in parallel
+        await Promise.all(chunk.map(async (building) => {
+          if (!building.id) return;
+          
+          processedBuildingIds.add(building.id);
+          try {
+            await this.renderBuilding(building);
+          } catch (error) {
+            log.error(`Error rendering building ${building.id}:`, error);
+          }
+        }));
       }
       
       // Remove any meshes for buildings that no longer exist
@@ -376,11 +412,106 @@ export class BuildingRendererManager {
           this.removeBuilding(id);
         }
       }
-      
-      console.log('%c BuildingRendererManager: Buildings refresh complete', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
     } catch (error) {
-      console.error('%c Error refreshing buildings:', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;', error);
+      console.error('Error refreshing buildings:', error);
+      
+      // If the fetch failed, try to use any existing buildings data
+      if (this.buildingMeshes.size === 0) {
+        // Try to load some default buildings as fallback
+        try {
+          const fallbackBuildings = this.getFallbackBuildings();
+          for (const building of fallbackBuildings) {
+            await this.renderBuilding(building);
+          }
+        } catch (fallbackError) {
+          log.error('Error loading fallback buildings:', fallbackError);
+        }
+      }
     }
+  }
+  
+  /**
+   * Sort buildings by distance to camera
+   */
+  private sortBuildingsByDistance(buildings: BuildingData[]): BuildingData[] {
+    if (!this.scene) return buildings;
+    
+    // Find camera
+    let camera: THREE.Camera | null = null;
+    this.scene.traverse((object) => {
+      if (object instanceof THREE.Camera) {
+        camera = object;
+      }
+    });
+    
+    if (!camera) return buildings;
+    
+    // Calculate distances
+    const buildingsWithDistance = buildings.map(building => {
+      let position: THREE.Vector3;
+      
+      if ('lat' in building.position && 'lng' in building.position) {
+        position = buildingPositionManager.latLngToScenePosition(building.position);
+      } else {
+        position = new THREE.Vector3(
+          building.position.x,
+          building.position.y || 0,
+          building.position.z
+        );
+      }
+      
+      const distance = camera!.position.distanceTo(position);
+      
+      return {
+        building,
+        distance
+      };
+    });
+    
+    // Sort by distance (closest first)
+    buildingsWithDistance.sort((a, b) => a.distance - b.distance);
+    
+    // Return sorted buildings
+    return buildingsWithDistance.map(item => item.building);
+  }
+  
+  /**
+   * Split array into chunks for batch processing
+   */
+  private chunkArray<T>(array: T[], chunkSize: number): T[][] {
+    const chunks: T[][] = [];
+    for (let i = 0; i < array.length; i += chunkSize) {
+      chunks.push(array.slice(i, i + chunkSize));
+    }
+    return chunks;
+  }
+  
+  /**
+   * Get fallback buildings when API fails
+   */
+  private getFallbackBuildings(): BuildingData[] {
+    return [
+      {
+        id: 'fallback_building_1',
+        type: 'market-stall',
+        land_id: 'fallback_land_1',
+        position: { x: 0, y: 0, z: 0 },
+        rotation: 0,
+        variant: 'model',
+        created_by: 'system',
+        created_at: new Date().toISOString()
+      },
+      {
+        id: 'fallback_building_2',
+        type: 'house',
+        land_id: 'fallback_land_2',
+        position: { x: 5, y: 0, z: 5 },
+        rotation: 0,
+        variant: 'model',
+        created_by: 'system',
+        created_at: new Date().toISOString()
+      }
+    ];
   }
   
   /**

@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { debounce } from 'lodash';
 import { useSceneReady } from '@/lib/components/SceneReadyProvider';
 import { eventBus, EventTypes } from '@/lib/eventBus';
 import { buildingRendererManager } from '@/lib/services/BuildingRendererManager';
@@ -87,54 +88,47 @@ const BuildingRendererManager: React.FC<BuildingRendererManagerProps> = ({
     };
   }, [isSceneReady, scene, active, debug]);
   
+  // Create a debounced refresh function to prevent multiple rapid refreshes
+  const debouncedRefresh = useCallback(
+    debounce(() => {
+      if (!isSceneReady || !scene) return;
+      
+      console.log('BuildingRendererManager: Refreshing buildings (debounced)');
+      
+      buildingRendererManager.refreshBuildings()
+        .then(() => {
+          updateBuildingCount();
+          setLastRefresh(new Date());
+        })
+        .catch(error => {
+          log.error('Error refreshing buildings:', error);
+        });
+    }, 500), // 500ms debounce time
+    [isSceneReady, scene]
+  );
+
   // Function to refresh buildings
   const refreshBuildings = () => {
     if (!isSceneReady || !scene) return;
     
     console.log('%c BuildingRendererManager: Refreshing buildings', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
     
+    // Use the debounced version to prevent multiple rapid refreshes
+    debouncedRefresh();
+    
     // First check if we already have buildings
     const currentCount = buildingRendererManager.getBuildingMeshes().size;
     
-    buildingRendererManager.refreshBuildings()
-      .then(() => {
-        updateBuildingCount();
-        setLastRefresh(new Date());
-        
-        // Check if buildings were successfully loaded
-        const newCount = buildingRendererManager.getBuildingMeshes().size;
-        if (newCount === 0 && currentCount > 0) {
-          console.warn('%c BuildingRendererManager: Buildings disappeared after refresh, trying again...', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
-          // Try again with a slight delay
-          setTimeout(() => {
-            buildingRendererManager.refreshBuildings()
-              .then(() => updateBuildingCount())
-              .catch(error => console.error('Error in second refresh attempt:', error));
-          }, 1000);
-        }
-      })
-      .catch(error => {
-        log.error('Error refreshing buildings:', error);
-        
-        // If refresh fails, try a more aggressive approach
-        setTimeout(() => {
-          console.log('%c BuildingRendererManager: Trying alternative refresh approach', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
-          // Force a scene update if possible
-          if (scene.userData && scene.userData.renderer) {
-            scene.userData.renderer.render(scene, scene.userData.camera);
-          }
-          
-          // Dispatch custom event to ensure buildings are processed
-          window.dispatchEvent(new CustomEvent('regenerateBuildingMarkers'));
-          
-          // Try refreshing again after a moment
-          setTimeout(() => {
-            buildingRendererManager.refreshBuildings()
-              .then(() => updateBuildingCount())
-              .catch(error => console.error('Error in alternative refresh:', error));
-          }, 500);
-        }, 500);
-      });
+    // If we have no buildings, try the more aggressive approach immediately
+    if (currentCount === 0) {
+      // Force a scene update if possible
+      if (scene.userData && scene.userData.renderer) {
+        scene.userData.renderer.render(scene, scene.userData.camera);
+      }
+      
+      // Dispatch custom event to ensure buildings are processed
+      window.dispatchEvent(new CustomEvent('regenerateBuildingMarkers'));
+    }
   };
   
   // Update building count
