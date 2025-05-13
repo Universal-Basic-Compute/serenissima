@@ -733,17 +733,17 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       
       // Apply different styles for hover and selected states
       if (isSelected) {
-        // Selected state: brighter with a thicker border
-        ctx.fillStyle = lightenColor(fillColor, 20);
+        // Selected state: much brighter with a thicker border
+        ctx.fillStyle = lightenColor(fillColor, 35); // Increased brightness for selection
         ctx.fill();
-        ctx.strokeStyle = '#FF6700'; // Orange highlight for selected
-        ctx.lineWidth = 3;
+        ctx.strokeStyle = '#FF3300'; // Bright red-orange for selected
+        ctx.lineWidth = 3.5;
       } else if (isHovered) {
-        // Hover state: more noticeable with a brighter color and thicker border
-        ctx.fillStyle = lightenColor(fillColor, 15); // Increased brightness
+        // Hover state: significantly brighter with a more vibrant border
+        ctx.fillStyle = lightenColor(fillColor, 25); // Increased brightness for hover
         ctx.fill();
-        ctx.strokeStyle = '#FF9900'; // Brighter orange for hover
-        ctx.lineWidth = 2.5; // Slightly thicker border
+        ctx.strokeStyle = '#FFCC00'; // Bright yellow for hover
+        ctx.lineWidth = 3; // Thicker border
       } else {
         // Normal state
         ctx.fillStyle = fillColor;
