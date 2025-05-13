@@ -56,14 +56,14 @@ export class TimeDescriptionService {
     afternoon: [
       'as the afternoon sun cast long shadows across the piazzas',
       'while gondolas glided through the sun-dappled canals',
-      'as the day's business began to slow in the counting houses',
-      'when the afternoon light softened the city's marble facades',
+      'as the day\'s business began to slow in the counting houses',
+      'when the afternoon light softened the city\'s marble facades',
       'as children played in the smaller campos and courtyards',
       'while the afternoon breeze carried the scent of the sea',
       'as nobles emerged for their afternoon promenades',
       'when the workshops of Murano glowed with molten glass',
       'as the tide shifted in the lagoon',
-      'while merchants began tallying the day's earnings'
+      'while merchants began tallying the day\'s earnings'
     ],
     // Evening (18-20)
     evening: [
@@ -72,7 +72,7 @@ export class TimeDescriptionService {
       'as the sunset set the western sky ablaze',
       'when families gathered for the evening meal',
       'as the evening bells called the faithful to vespers',
-      'while the day's heat gave way to a gentle evening breeze',
+      'while the day\'s heat gave way to a gentle evening breeze',
       'as the first stars appeared in the twilight sky',
       'when the evening brought a welcome coolness to the air',
       'as the gondoliers lit their lanterns for evening journeys',
@@ -89,7 +89,7 @@ export class TimeDescriptionService {
       'as the night wrapped the city in its velvet embrace',
       'when the canals became mirrors for the moon and stars',
       'as the nocturnal creatures of Venice emerged from shadow',
-      'while the city's secrets were whispered in darkened corners'
+      'while the city\'s secrets were whispered in darkened corners'
     ]
   };
   
