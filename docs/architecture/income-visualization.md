@@ -76,6 +76,25 @@ Key responsibilities:
 The `colorUtils.ts` module provides utilities for calculating colors based on income values:
 
 ```typescript
+export interface ColorScaleConfig {
+  minIncome: number;
+  maxIncome: number;
+  lowIncomeColor: THREE.Color;
+  midIncomeColor: THREE.Color;
+  highIncomeColor: THREE.Color;
+}
+
+export const DEFAULT_COLOR_SCALE: ColorScaleConfig = {
+  minIncome: 0,
+  maxIncome: 1000,
+  // Soft Venetian blue for low income
+  lowIncomeColor: new THREE.Color('#6699CC'),
+  // Muted gold/amber for medium income
+  midIncomeColor: new THREE.Color('#CCB266'),
+  // Terracotta/brick red for high income (common in Venetian architecture)
+  highIncomeColor: new THREE.Color('#A54A2A')
+};
+
 export function getIncomeBasedColor(income: number, config: Partial<ColorScaleConfig> = {}): THREE.Color {
   // Merge provided config with defaults
   const fullConfig: ColorScaleConfig = {
@@ -92,11 +111,11 @@ export function getIncomeBasedColor(income: number, config: Partial<ColorScaleCo
   const resultColor = new THREE.Color();
   
   if (normalizedIncome >= 0.5) {
-    // Map from yellow to red
+    // Map from muted gold to terracotta
     const t = (normalizedIncome - 0.5) * 2; // Scale 0.5-1.0 to 0-1
     return resultColor.lerpColors(midIncomeColor, highIncomeColor, t);
   } else {
-    // Map from green to yellow
+    // Map from soft blue to muted gold
     const t = normalizedIncome * 2; // Scale 0-0.5 to 0-1
     return resultColor.lerpColors(lowIncomeColor, midIncomeColor, t);
   }

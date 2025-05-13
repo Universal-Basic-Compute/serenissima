@@ -238,27 +238,28 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     };
   }, [isDragging, dragStart]);
 
-  // Get color based on income using a gradient
+  // Get color based on income using a gradient with softer, Renaissance-appropriate colors
   const getIncomeColor = (income: number | undefined): string => {
-    if (income === undefined) return '#FFF5D0'; // Default sand color for no data
+    if (income === undefined) return '#E8DCC0'; // Softer parchment color for no data
     
     // Normalize income to a 0-1 scale
     const normalizedIncome = Math.min(Math.max((income - minIncome) / (maxIncome - minIncome), 0), 1);
     
-    // Create a gradient from blue (low) to yellow (medium) to red (high)
+    // Create a gradient from soft blue (low) to muted gold (medium) to terracotta red (high)
+    // These colors are more appropriate for Renaissance Venice
     if (normalizedIncome <= 0.5) {
-      // Blue to Yellow (0-0.5)
+      // Soft blue to muted gold (0-0.5)
       const t = normalizedIncome * 2; // Scale 0-0.5 to 0-1
-      const r = Math.floor(0 + t * 255);
-      const g = Math.floor(0 + t * 255);
-      const b = Math.floor(255 - t * 255);
+      const r = Math.floor(102 + t * (204 - 102)); // 102 to 204
+      const g = Math.floor(153 + t * (178 - 153)); // 153 to 178
+      const b = Math.floor(204 - t * (204 - 102)); // 204 to 102
       return `rgb(${r}, ${g}, ${b})`;
     } else {
-      // Yellow to Red (0.5-1)
+      // Muted gold to terracotta red (0.5-1)
       const t = (normalizedIncome - 0.5) * 2; // Scale 0.5-1 to 0-1
-      const r = 255;
-      const g = Math.floor(255 - t * 255);
-      const b = 0;
+      const r = Math.floor(204 + t * (165 - 204)); // 204 to 165
+      const g = Math.floor(178 - t * (178 - 74)); // 178 to 74
+      const b = Math.floor(102 - t * (102 - 42)); // 102 to 42
       return `rgb(${r}, ${g}, ${b})`;
     }
   };
@@ -497,14 +498,14 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       
       // Create gradient for legend
       const gradientHtml = `
-        <div class="w-full h-6 mb-1 rounded" style="background: linear-gradient(to right, #0000FF, #FFFF00, #FF0000);"></div>
+        <div class="w-full h-6 mb-1 rounded" style="background: linear-gradient(to right, #6699CC, #CCB266, #A54A2A);"></div>
       `;
       
       // Update legend content
       legend.innerHTML = `
-        <h3 class="text-sm font-bold mb-2">Income Legend</h3>
+        <h3 class="text-sm font-serif font-bold mb-2">Income Legend</h3>
         ${gradientHtml}
-        <div class="flex justify-between text-xs">
+        <div class="flex justify-between text-xs font-serif">
           <span>${minIncome.toFixed(0)} Ducats</span>
           <span>${((maxIncome + minIncome) / 2).toFixed(0)} Ducats</span>
           <span>${maxIncome.toFixed(0)} Ducats</span>
