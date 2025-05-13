@@ -210,9 +210,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Calculate isometric projection - modified to make north up
+    // Calculate isometric projection - modified to make north up with proper aspect ratio
     const isoX = (x: number, y: number) => (x) * scale + canvas.width / 2 + offset.x; // Remove negation to fix east-west orientation
-    const isoY = (x: number, y: number) => (-y) * scale + canvas.height / 2 + offset.y; // Keep y negated for north-south orientation
+    const isoY = (x: number, y: number) => (-y) * scale * 1.4 + canvas.height / 2 + offset.y; // Multiply by 1.4 to stretch vertically
     
     // Draw water background
     ctx.fillStyle = '#87CEEB';
@@ -238,9 +238,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       // Convert lat/lng to isometric coordinates
       const coords = polygon.coordinates.map((coord: {lat: number, lng: number}) => {
         // Normalize coordinates relative to center of Venice
-        // Scale factor adjusted to make the map more readable with latitude correction
+        // Scale factor adjusted to make the map more readable
         const x = (coord.lng - 12.3326) * 20000;
-        const y = (coord.lat - 45.4371) * 20000 * 0.7; // Added 0.7 latitude correction factor
+        const y = (coord.lat - 45.4371) * 20000; // Remove the 0.7 factor here since we're applying it in the projection
         
         return {
           x: isoX(x, y),
@@ -300,9 +300,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         let x, y;
         if ('lat' in position && 'lng' in position) {
           // Normalize coordinates relative to center of Venice
-          // Scale factor adjusted to match the map with latitude correction
+          // Scale factor adjusted to match the map
           x = (position.lng - 12.3326) * 20000;
-          y = (position.lat - 45.4371) * 20000 * 0.7; // Added 0.7 latitude correction factor
+          y = (position.lat - 45.4371) * 20000; // Remove the 0.7 factor
         } else if ('x' in position && 'z' in position) {
           x = position.x;
           y = position.z;
@@ -348,7 +348,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             
             // Normalize coordinates
             const x = (point.edge.lng - 12.3326) * 20000;
-            const y = (point.edge.lat - 45.4371) * 20000 * 0.7; // Added 0.7 latitude correction factor
+            const y = (point.edge.lat - 45.4371) * 20000; // Remove the 0.7 factor
             
             const isoPos = {
               x: isoX(x, y),
@@ -373,7 +373,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             
             // Normalize coordinates
             const x = (point.edge.lng - 12.3326) * 20000;
-            const y = (point.edge.lat - 45.4371) * 20000 * 0.7; // Added 0.7 latitude correction factor
+            const y = (point.edge.lat - 45.4371) * 20000; // Remove the 0.7 factor
             
             const isoPos = {
               x: isoX(x, y),
