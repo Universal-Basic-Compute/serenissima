@@ -415,6 +415,9 @@ export class CitizenDisplayManager {
         console.log('CitizenDisplayManager: Manager is active, recreating markers');
         this.removeAllMarkers();
         this.createCitizenMarkers();
+        
+        // Force markers to be visible
+        this.ensureMarkersAreVisible();
       } else {
         console.log('CitizenDisplayManager: Manager is not active, skipping marker creation');
       }
@@ -436,6 +439,9 @@ export class CitizenDisplayManager {
         console.log('CitizenDisplayManager: Recreating markers with fallback data after error');
         this.removeAllMarkers();
         this.createCitizenMarkers();
+        
+        // Force markers to be visible even with fallback data
+        this.ensureMarkersAreVisible();
       }
     } finally {
       // Clear the refreshing flag when done, regardless of success or failure
@@ -455,6 +461,7 @@ export class CitizenDisplayManager {
       this.refreshCitizens().then(() => {
         console.log(`CitizenDisplayManager: Loaded ${this.citizens.length} citizens from API`);
         this.createCitizenMarkers();
+        this.ensureMarkersAreVisible();
         this.debugState();
       }).catch(error => {
         console.error('CitizenDisplayManager: Error loading citizens:', error);
@@ -462,6 +469,7 @@ export class CitizenDisplayManager {
         this.addDebugCitizensIfNeeded();
         this.groupCitizensByLocation();
         this.createCitizenMarkers();
+        this.ensureMarkersAreVisible();
         this.debugState();
       });
       return;
@@ -505,6 +513,9 @@ export class CitizenDisplayManager {
     // Create markers for all groups
     this.createCitizenMarkers();
     
+    // Ensure all markers are visible
+    this.ensureMarkersAreVisible();
+    
     // Debug the state
     this.debugState();
   }
@@ -528,10 +539,14 @@ export class CitizenDisplayManager {
         this.loadCitizens().then(() => {
           // Create markers after citizens are loaded
           this.createCitizenMarkers();
+          // Ensure markers are visible
+          this.ensureMarkersAreVisible();
         });
       } else {
         // Create markers immediately if citizens are already loaded
         this.createCitizenMarkers();
+        // Ensure markers are visible
+        this.ensureMarkersAreVisible();
       }
       
       // Add event listeners
@@ -1800,6 +1815,54 @@ export class CitizenDisplayManager {
    */
   public isActiveView(): boolean {
     return this.isActive;
+  }
+  
+  /**
+   * Ensure all markers are visible by raising them if needed
+   */
+  private ensureMarkersAreVisible(): void {
+    console.log('CitizenDisplayManager: Ensuring markers are visible');
+    
+    // Raise all markers slightly to ensure they're visible
+    this.markers.forEach(marker => {
+      // Get current position
+      const currentY = marker.position.y;
+      
+      // Ensure minimum height
+      if (currentY < 2.0) {
+        marker.position.y = 2.0;
+        console.log(`Raised marker from ${currentY} to 2.0`);
+      }
+      
+      // Ensure marker is visible
+      marker.visible = true;
+      
+      // Make all children visible too
+      marker.traverse(child => {
+        child.visible = true;
+      });
+    });
+    
+    console.log(`CitizenDisplayManager: Ensured visibility of ${this.markers.length} markers`);
+  }
+  
+  /**
+   * Force all citizen markers to be visible
+   */
+  public forceMarkersVisible(): void {
+    console.log('CitizenDisplayManager: Forcing all markers to be visible');
+    
+    // If we don't have any markers but have citizens, create them
+    if (this.markers.length === 0 && this.citizens.length > 0) {
+      console.log('CitizenDisplayManager: Creating markers before forcing visibility');
+      this.createCitizenMarkers();
+    }
+    
+    // Ensure all markers are visible
+    this.ensureMarkersAreVisible();
+    
+    // Debug the state
+    this.debugState();
   }
   
   /**

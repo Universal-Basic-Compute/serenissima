@@ -591,10 +591,17 @@ export default function SimpleViewer({ qualityMode = 'high', waterQuality = 'hig
     // Update citizen display active state
     if (citizenDisplayRef.current) {
       const shouldBeActive = activeView === 'citizens';
-    
+  
       if (shouldBeActive) {
         // If we're activating the citizens view, make sure it's active
         citizenDisplayRef.current.setActive(true);
+      
+        // Force markers to be visible after a short delay to ensure everything is loaded
+        setTimeout(() => {
+          if (citizenDisplayRef.current) {
+            citizenDisplayRef.current.forceMarkersVisible();
+          }
+        }, 500);
       } else if (citizenDisplayRef.current.isActiveView()) {
         // Only deactivate if it's currently active
         citizenDisplayRef.current.setActive(false);
