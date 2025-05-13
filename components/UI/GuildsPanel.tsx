@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchGuilds, Guild } from '@/lib/airtableUtils';
 import ReactMarkdown from 'react-markdown';
+import { FaTimes } from 'react-icons/fa';
 
 interface GuildsPanelProps {
   onClose: () => void;
@@ -232,7 +233,7 @@ function GuildDetails({ guild, onBack, formatDate, getLandName }: GuildDetailsPr
   const [members, setMembers] = useState<GuildMember[]>([]);
   const [loadingMembers, setLoadingMembers] = useState<boolean>(true);
   const [membersError, setMembersError] = useState<string | null>(null);
-  const [showApplicationForm, setShowApplicationForm] = useState<boolean>(false);
+  const [showApplicationModal, setShowApplicationModal] = useState<boolean>(false);
   const [applicationText, setApplicationText] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
@@ -364,25 +365,62 @@ function GuildDetails({ guild, onBack, formatDate, getLandName }: GuildDetailsPr
                 </div>
               )}
               
-              {/* Add state variables for application form */}
               {/* Apply for Membership button right after members list */}
-              <div className="mt-4 space-y-3">
-                {!showApplicationForm ? (
-                  <div className="flex space-x-2">
-                    <button 
-                      className="flex-1 px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
-                      onClick={() => setShowApplicationForm(true)}
-                    >
-                      Apply for Membership
-                    </button>
-                    <button
-                      className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center"
-                      onClick={() => {
-                        // Open Compagno chat
-                        window.dispatchEvent(new CustomEvent('openCompagnoChat'));
+              <div className="mt-4">
+                <button 
+                  className="w-full px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
+                  onClick={() => setShowApplicationModal(true)}
+                >
+                  Apply for Membership
+                </button>
+              </div>
+              
+              {/* Guild Application Modal */}
+              {showApplicationModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+                  <div className="bg-white rounded-lg shadow-lg w-[800px] max-w-[95vw] max-h-[90vh] border-4 border-amber-700 overflow-hidden">
+                    <div className="bg-amber-700 text-white p-4 flex justify-between items-center">
+                      <h3 className="text-xl font-serif">Application to {guild.guildName}</h3>
+                      <button 
+                        onClick={() => setShowApplicationModal(false)}
+                        className="text-white hover:text-amber-200 transition-colors"
+                      >
+                        <FaTimes size={20} />
+                      </button>
+                    </div>
+                    
+                    <div className="p-6 overflow-y-auto max-h-[calc(90vh-8rem)]">
+                      <div className="mb-6">
+                        <h4 className="text-lg font-serif text-amber-800 mb-2">Guild Information</h4>
+                        <div className="bg-amber-50 p-4 rounded-lg border border-amber-200 mb-4">
+                          <p className="mb-2"><span className="font-semibold">Guild Name:</span> {guild.guildName}</p>
+                          <p className="mb-2"><span className="font-semibold">Patron Saint:</span> {guild.patronSaint || 'None'}</p>
+                          <p className="mb-2"><span className="font-semibold">Entry Fee:</span> {guild.entryFee ? `⚜️ ${Number(guild.entryFee).toLocaleString()} ducats` : 'None'}</p>
+                          <p className="mb-2"><span className="font-semibold">Location:</span> {getLandName(guild.primaryLocation)}</p>
+                          <p><span className="font-semibold">Leadership:</span> {guild.leadershipStructure || 'Traditional guild structure'}</p>
+                        </div>
                         
-                        // Create guild info for the system prompt
-                        const guildInfo = `
+                        <h4 className="text-lg font-serif text-amber-800 mb-2">Your Application</h4>
+                        <p className="text-sm text-amber-700 mb-4">
+                          Please write your application to join the {guild.guildName}. Explain why you wish to join and what skills or contributions you can offer.
+                        </p>
+                        
+                        <textarea
+                          value={applicationText}
+                          onChange={(e) => setApplicationText(e.target.value)}
+                          className="w-full h-64 p-4 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 mb-4 font-serif"
+                          placeholder="Write your application here..."
+                        />
+                        
+                        <div className="flex justify-between items-center">
+                          <button
+                            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center"
+                            onClick={() => {
+                              // Open Compagno chat
+                              window.dispatchEvent(new CustomEvent('openCompagnoChat'));
+                              
+                              // Create guild info for the system prompt
+                              const guildInfo = `
 Guild Name: ${guild.guildName}
 Description: ${guild.description}
 Patron Saint: ${guild.patronSaint || 'None'}
@@ -390,91 +428,78 @@ Entry Fee: ${guild.entryFee ? `${guild.entryFee} ducats` : 'None'}
 Leadership Structure: ${guild.leadershipStructure || 'Traditional guild structure'}
 Voting System: ${guild.votingSystem || 'Standard guild voting'}
 Meeting Frequency: ${guild.meetingFrequency || 'As needed'}
-                        `;
-                        
-                        // Send message to Compagno with guild info in addSystem
-                        window.dispatchEvent(new CustomEvent('sendCompagnoMessage', {
-                          detail: {
-                            message: `Hey Compagno, can you help me to apply to the ${guild.guildName} Guild?`,
-                            addSystem: `The user is asking about applying to a guild in Venice. Here is information about the guild they're interested in:\n${guildInfo}\n\nHelp them understand the application process, requirements, and benefits of joining this guild. Be encouraging but also explain any obligations or fees they should be aware of.`
-                          }
-                        }));
-                      }}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-                      </svg>
-                      Get Help
-                    </button>
-                  </div>
-                ) : (
-                  <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
-                    <h4 className="text-lg font-serif text-amber-800 mb-2">Guild Application</h4>
-                    <p className="text-sm text-amber-700 mb-4">
-                      Please write your application to join the {guild.guildName}. Explain why you wish to join and what skills or contributions you can offer.
-                    </p>
-                    
-                    <textarea
-                      value={applicationText}
-                      onChange={(e) => setApplicationText(e.target.value)}
-                      className="w-full h-40 p-3 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 mb-4"
-                      placeholder="Write your application here..."
-                    />
-                    
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={async () => {
-                          setIsSubmitting(true);
-                          try {
-                            // Here you would normally submit the application to your backend
-                            // For now, we'll just simulate a submission
-                            await new Promise(resolve => setTimeout(resolve, 1000));
-                            
-                            // Show success message
-                            alert(`Your application to the ${guild.guildName} has been submitted successfully! The guild masters will review your application and contact you soon.`);
-                            
-                            // Reset form
-                            setApplicationText('');
-                            setShowApplicationForm(false);
-                          } catch (error) {
-                            console.error('Error submitting guild application:', error);
-                            alert('There was an error submitting your application. Please try again.');
-                          } finally {
-                            setIsSubmitting(false);
-                          }
-                        }}
-                        disabled={isSubmitting || !applicationText.trim()}
-                        className={`px-4 py-2 rounded-md flex items-center ${
-                          isSubmitting || !applicationText.trim()
-                            ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
-                            : 'bg-green-600 text-white hover:bg-green-700'
-                        }`}
-                      >
-                        {isSubmitting ? (
-                          <>
-                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              `;
+                              
+                              // Send message to Compagno with guild info in addSystem
+                              window.dispatchEvent(new CustomEvent('sendCompagnoMessage', {
+                                detail: {
+                                  message: `Hey Compagno, can you help me to apply to the ${guild.guildName} Guild?`,
+                                  addSystem: `The user is asking about applying to a guild in Venice. Here is information about the guild they're interested in:\n${guildInfo}\n\nHelp them understand the application process, requirements, and benefits of joining this guild. Be encouraging but also explain any obligations or fees they should be aware of.`
+                                }
+                              }));
+                            }}
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
                             </svg>
-                            Submitting...
-                          </>
-                        ) : (
-                          'Submit Application'
-                        )}
-                      </button>
-                      <button
-                        onClick={() => {
-                          setApplicationText('');
-                          setShowApplicationForm(false);
-                        }}
-                        className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition-colors"
-                      >
-                        Cancel
-                      </button>
+                            Get Help with Application
+                          </button>
+                          
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => setShowApplicationModal(false)}
+                              className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition-colors"
+                            >
+                              Cancel
+                            </button>
+                            
+                            <button
+                              onClick={async () => {
+                                setIsSubmitting(true);
+                                try {
+                                  // Here you would normally submit the application to your backend
+                                  // For now, we'll just simulate a submission
+                                  await new Promise(resolve => setTimeout(resolve, 1000));
+                                  
+                                  // Show success message
+                                  alert(`Your application to the ${guild.guildName} has been submitted successfully! The guild masters will review your application and contact you soon.`);
+                                  
+                                  // Reset form and close modal
+                                  setApplicationText('');
+                                  setShowApplicationModal(false);
+                                } catch (error) {
+                                  console.error('Error submitting guild application:', error);
+                                  alert('There was an error submitting your application. Please try again.');
+                                } finally {
+                                  setIsSubmitting(false);
+                                }
+                              }}
+                              disabled={isSubmitting || !applicationText.trim()}
+                              className={`px-4 py-2 rounded-md flex items-center ${
+                                isSubmitting || !applicationText.trim()
+                                  ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
+                                  : 'bg-green-600 text-white hover:bg-green-700'
+                              }`}
+                            >
+                              {isSubmitting ? (
+                                <>
+                                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                  </svg>
+                                  Submitting...
+                                </>
+                              ) : (
+                                'Submit Application'
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
             
             {/* Make the guild information text smaller */}
