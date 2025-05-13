@@ -211,8 +211,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     // Calculate isometric projection - modified to make north up
-    const isoX = (x: number, y: number) => (-x) * scale + canvas.width / 2 + offset.x; // Negate x to flip east-west
-    const isoY = (x: number, y: number) => (-y) * scale + canvas.height / 2 + offset.y; // Negate y to flip north-south
+    const isoX = (x: number, y: number) => (x) * scale + canvas.width / 2 + offset.x; // Remove negation to fix east-west orientation
+    const isoY = (x: number, y: number) => (-y) * scale + canvas.height / 2 + offset.y; // Keep y negated for north-south orientation
     
     // Draw water background
     ctx.fillStyle = '#87CEEB';
