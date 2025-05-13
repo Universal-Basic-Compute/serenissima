@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { BuildingCategory, BuildingDefinition, PlacementResult, PlacementContext, BuildingData } from '../models/BuildingTypes';
 
 // Re-export BuildingData from models
-export type { BuildingData } from '../models/BuildingTypes';
+export type { BuildingData };
 
 /**
  * Service for managing building data
