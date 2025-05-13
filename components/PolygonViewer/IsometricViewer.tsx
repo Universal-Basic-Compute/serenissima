@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { debounce } from 'lodash';
 import { eventBus, EventTypes } from '@/lib/eventBus';
+import { fetchCoatOfArmsImage } from '@/app/utils/coatOfArmsUtils';
 
 interface IsometricViewerProps {
   activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
@@ -22,6 +23,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [incomeData, setIncomeData] = useState<Record<string, number>>({});
   const [minIncome, setMinIncome] = useState<number>(0);
   const [maxIncome, setMaxIncome] = useState<number>(1000);
+  const [ownerCoatOfArmsMap, setOwnerCoatOfArmsMap] = useState<Record<string, string>>({});
+  const [coatOfArmsImages, setCoatOfArmsImages] = useState<Record<string, HTMLImageElement>>({});
+  const [loadingCoatOfArms, setLoadingCoatOfArms] = useState<boolean>(false);
 
   // Load polygons
   useEffect(() => {
@@ -76,6 +80,137 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       console.error('Error fetching income data:', error);
     }
   }, []);
+  
+  // Fetch coat of arms data
+  useEffect(() => {
+    const fetchCoatOfArms = async () => {
+      try {
+        setLoadingCoatOfArms(true);
+        const response = await fetch('/api/get-coat-of-arms');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.coatOfArms && typeof data.coatOfArms === 'object') {
+            setOwnerCoatOfArmsMap(data.coatOfArms);
+            
+            // Preload images
+            const imagePromises: Promise<void>[] = [];
+            const newImages: Record<string, HTMLImageElement> = {};
+            
+            Object.entries(data.coatOfArms).forEach(([owner, url]) => {
+              if (url) {
+                const img = new Image();
+                const imagePromise = new Promise<void>((resolve) => {
+                  img.onload = () => resolve();
+                  img.onerror = () => resolve(); // Continue even if image fails to load
+                  img.src = url as string;
+                });
+                
+                imagePromises.push(imagePromise);
+                newImages[owner] = img;
+              }
+            });
+            
+            await Promise.all(imagePromises);
+            setCoatOfArmsImages(newImages);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching coat of arms:', error);
+      } finally {
+        setLoadingCoatOfArms(false);
+      }
+    };
+    
+    fetchCoatOfArms();
+  }, []);
+  
+  // Function to create a circular clipping of an image
+  const createCircularImage = (ctx: CanvasRenderingContext2D, img: HTMLImageElement, x: number, y: number, size: number) => {
+    // Save the current context state
+    ctx.save();
+    
+    // Create a circular clipping path
+    ctx.beginPath();
+    ctx.arc(x, y, size / 2, 0, Math.PI * 2);
+    ctx.closePath();
+    
+    // Add a white border around the circle
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    
+    // Clip to the circle
+    ctx.clip();
+    
+    // Calculate dimensions to maintain aspect ratio
+    let drawWidth = size;
+    let drawHeight = size;
+    let offsetX = 0;
+    let offsetY = 0;
+    
+    if (img.width > img.height) {
+      // Landscape image
+      drawHeight = (img.height / img.width) * size;
+      offsetY = (size - drawHeight) / 2;
+    } else if (img.height > img.width) {
+      // Portrait image
+      drawWidth = (img.width / img.height) * size;
+      offsetX = (size - drawWidth) / 2;
+    }
+    
+    // Draw the image with proper aspect ratio
+    ctx.drawImage(img, x - (drawWidth / 2) + offsetX, y - (drawHeight / 2) + offsetY, drawWidth, drawHeight);
+    
+    // Restore the context state
+    ctx.restore();
+  };
+  
+  // Function to create a default circular avatar for owners without coat of arms
+  const createDefaultCircularAvatar = (ctx: CanvasRenderingContext2D, owner: string, x: number, y: number, size: number) => {
+    // Save the current context state
+    ctx.save();
+    
+    // Generate a deterministic color based on the owner name
+    const getColorFromString = (str: string): string => {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      
+      // Generate a hue between 0 and 360
+      const hue = Math.abs(hash) % 360;
+      
+      // Use a fixed saturation and lightness for better visibility
+      return `hsl(${hue}, 70%, 60%)`;
+    };
+    
+    // Get a color based on the owner name
+    const baseColor = getColorFromString(owner);
+    
+    // Draw a circular background
+    ctx.beginPath();
+    ctx.arc(x, y, size / 2, 0, Math.PI * 2);
+    ctx.fillStyle = baseColor;
+    ctx.fill();
+    
+    // Add a white border
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    
+    // Add the owner's initials
+    ctx.font = `bold ${size * 0.4}px Arial`;
+    ctx.fillStyle = 'white';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    // Get the first letter of the owner name
+    const initial = owner.charAt(0).toUpperCase();
+    ctx.fillText(initial, x, y);
+    
+    // Restore the context state
+    ctx.restore();
+  };
   
   // Fetch income data when in land view
   useEffect(() => {
@@ -395,7 +530,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     if (activeView === 'land') {
       // Only show text if zoom level is above a certain threshold (closer zoom)
       const showText = scale >= 4.5; // Increased threshold so text only appears when zoomed in closer
-      
+        
       if (showText) {
         polygonsToRender.forEach(({ polygon, centroidX, centroidY }) => {
           if (polygon.historicalName) {
@@ -405,6 +540,32 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             ctx.fillStyle = '#000';
             ctx.textAlign = 'center';
             ctx.fillText(polygon.historicalName, centroidX, centroidY);
+          }
+        });
+      }
+    }
+      
+    // Third pass: Draw coat of arms for lands with owners (only in land view)
+    if (activeView === 'land') {
+      // Only show coat of arms if zoom level is above a certain threshold
+      const showCoatOfArms = scale >= 2.5; // Adjust this threshold as needed
+        
+      if (showCoatOfArms) {
+        polygonsToRender.forEach(({ polygon, centroidX, centroidY }) => {
+          // Check if polygon has an owner
+          const owner = landOwners[polygon.id];
+          if (!owner) return;
+            
+          // Calculate size based on zoom level
+          const size = Math.min(30, Math.max(15, Math.floor(scale * 8)));
+            
+          // Check if we have a coat of arms image for this owner
+          if (owner in coatOfArmsImages && coatOfArmsImages[owner]) {
+            // Draw circular coat of arms
+            createCircularImage(ctx, coatOfArmsImages[owner], centroidX, centroidY, size);
+          } else {
+            // Draw default avatar with initial
+            createDefaultCircularAvatar(ctx, owner, centroidX, centroidY, size);
           }
         });
       }

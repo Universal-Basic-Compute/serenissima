@@ -1,0 +1,71 @@
+import { NextResponse } from 'next/server';
+import Airtable from 'airtable';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
+
+// Get Airtable credentials
+const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
+const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
+const AIRTABLE_USERS_TABLE = process.env.AIRTABLE_USERS_TABLE || "USERS";
+
+export async function GET() {
+  try {
+    console.log("Fetching coat of arms data from Users Airtable...");
+    
+    // Initialize Airtable
+    if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
+      console.error("Missing Airtable credentials");
+      return NextResponse.json(
+        { error: "Server configuration error" },
+        { status: 500 }
+      );
+    }
+    
+    // Configure Airtable
+    Airtable.configure({
+      apiKey: AIRTABLE_API_KEY
+    });
+    
+    // Connect to the Users table
+    const base = Airtable.base(AIRTABLE_BASE_ID);
+    
+    // Fetch all records from the Users table
+    const records = await base(AIRTABLE_USERS_TABLE).select().all();
+    console.log(`Retrieved ${records.length} user records from Airtable`);
+    
+    // Extract coat of arms data from the records
+    const coatOfArms: Record<string, string> = {};
+    
+    records.forEach(record => {
+      const username = record.get('UserName');
+      const coatOfArmsImage = record.get('CoatOfArmsImage');
+      
+      if (username && coatOfArmsImage) {
+        // Ensure the URL is properly formatted
+        let imageUrl = coatOfArmsImage as string;
+        
+        // If the URL doesn't start with http or /, add the production URL
+        if (!imageUrl.startsWith('http') && !imageUrl.startsWith('/')) {
+          imageUrl = `https://serenissima.ai/coat-of-arms/${username}.png`;
+        } else if (imageUrl.startsWith('/')) {
+          imageUrl = `https://serenissima.ai${imageUrl}`;
+        }
+        
+        coatOfArms[username as string] = imageUrl;
+      }
+    });
+    
+    console.log(`Extracted coat of arms data for ${Object.keys(coatOfArms).length} users`);
+    
+    // Return the coat of arms data
+    return NextResponse.json({ coatOfArms });
+  } catch (error) {
+    console.error('Error fetching coat of arms data from Airtable:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch coat of arms data' },
+      { status: 500 }
+    );
+  }
+}
