@@ -489,10 +489,16 @@ If you decide not to build anything at this time, return an empty JSON object.
                     else:
                         print(f"AI {ai_username} decided not to build anything at this time")
                         return {}
-                else:
-                    print(f"No JSON decision found in AI response. Full response:")
+                except Exception as e:
+                    print(f"Error extracting decision from AI response: {str(e)}")
+                    print(f"Full response content that caused the error:")
                     print(content)
                     return None
+                
+                return None
+            else:
+                print(f"Error processing building strategy request for AI user {ai_username}: {response_data}")
+                return None
                 except Exception as e:
                     print(f"Error extracting decision from AI response: {str(e)}")
                     print(f"Full response content that caused the error:")
