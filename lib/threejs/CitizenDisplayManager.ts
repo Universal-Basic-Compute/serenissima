@@ -492,6 +492,9 @@ export class CitizenDisplayManager {
       this.scene.add(marker);
     });
     
+    // Create building markers for home and work locations
+    this.createBuildingMarkers();
+    
     // If we have a previously selected group, try to reselect it
     if (this.selectedGroup && this.citizenGroups.has(this.selectedGroup)) {
       this.createDetailedExpandedView(this.selectedGroup);
@@ -603,7 +606,7 @@ export class CitizenDisplayManager {
   /**
    * Create a circular background for a citizen icon
    */
-  private createCircularBackground(): THREE.Sprite {
+  private createCircularBackground(color: string = 'rgba(200, 200, 255, 0.8)'): THREE.Sprite {
     // Create a canvas for the background
     const canvas = document.createElement('canvas');
     const size = 128;
@@ -617,15 +620,10 @@ export class CitizenDisplayManager {
       return new THREE.Sprite(material);
     }
     
-    // Draw a filled circle with a gradient
-    const gradient = context.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
-    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
-    gradient.addColorStop(0.7, 'rgba(200, 200, 255, 0.8)');
-    gradient.addColorStop(1, 'rgba(150, 150, 255, 0.6)');
-    
+    // Draw a filled circle with the specified color
     context.beginPath();
     context.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
-    context.fillStyle = gradient;
+    context.fillStyle = color;
     context.fill();
     
     // Add a white border
@@ -1034,6 +1032,89 @@ export class CitizenDisplayManager {
   }
   
   /**
+   * Show a selection UI for multiple citizens in a building
+   */
+  private showBuildingCitizensSelection(buildingId: string, citizens: any[]): void {
+    // Create a detailed view for the building with all citizens
+    const buildingGroup = this.scene.getObjectByName(`building-citizen-group-${buildingId}`) as THREE.Group;
+    if (!buildingGroup) return;
+    
+    // Remove all children
+    while (buildingGroup.children.length > 0) {
+      buildingGroup.remove(buildingGroup.children[0]);
+    }
+    
+    // Create a background panel
+    const backgroundPanel = this.createBackgroundPanel(citizens.length);
+    buildingGroup.add(backgroundPanel);
+    
+    // Create a sprite for each citizen in the building
+    citizens.forEach((citizen, index) => {
+      // Calculate position in a grid or circle based on count
+      let x, z;
+      
+      if (citizens.length <= 4) {
+        // For 1-4 citizens, arrange in a 2x2 grid
+        const row = Math.floor(index / 2);
+        const col = index % 2;
+        x = (col - 0.5) * 2.5;
+        z = (row - 0.5) * 2.5;
+      } else {
+        // For more citizens, arrange in a circle
+        const angle = (index / citizens.length) * Math.PI * 2;
+        const radius = 2.5;
+        x = Math.cos(angle) * radius;
+        z = Math.sin(angle) * radius;
+      }
+      
+      // Create a container for this citizen
+      const container = new THREE.Group();
+      container.position.set(x, 0, z);
+      container.userData = { 
+        citizenId: citizen.id,
+        citizen: citizen
+      };
+      
+      // Create a sprite for the citizen icon
+      const sprite = this.createCitizenSprite(citizen.profileImage || '/images/citizens/default.png');
+      sprite.scale.set(2, 2, 1);
+      container.add(sprite);
+      
+      // Add a circular background with color based on marker type (home/work)
+      const backgroundColor = citizen.markerType === 'home' ? 
+        'rgba(100, 150, 255, 0.8)' : 'rgba(255, 150, 100, 0.8)';
+      const backgroundSprite = this.createCircularBackground(backgroundColor);
+      backgroundSprite.scale.set(2.2, 2.2, 1);
+      backgroundSprite.renderOrder = 999;
+      container.add(backgroundSprite);
+      
+      // Add citizen name
+      const nameIndicator = this.createTextSprite(citizen.name || 'Unknown Citizen', false);
+      nameIndicator.position.set(0, 1.2, 0.1);
+      container.add(nameIndicator);
+      
+      // Add occupation if available
+      if (citizen.occupation) {
+        const occupationIndicator = this.createTextSprite(
+          citizen.occupation, 
+          true, 
+          0.7
+        );
+        occupationIndicator.position.set(0, 1.6, 0.1);
+        container.add(occupationIndicator);
+      }
+      
+      buildingGroup.add(container);
+    });
+    
+    // Add a title for the building
+    const markerType = citizens[0].markerType === 'home' ? 'Residents' : 'Workers';
+    const locationTitle = this.createTextSprite(`${markerType} (${citizens.length})`, false, 1.2);
+    locationTitle.position.set(0, 3, 0);
+    buildingGroup.add(locationTitle);
+  }
+  
+  /**
    * Debug the current state of the CitizenDisplayManager
    */
   private debugState(): void {
@@ -1116,23 +1197,29 @@ export class CitizenDisplayManager {
     // Update the raycaster
     this.raycaster.setFromCamera(this.mouse, this.camera);
     
-    // Find intersections with citizen groups
+    // Find intersections with citizen groups and building markers
     const intersects = this.raycaster.intersectObjects(this.scene.children, true);
     
-    // Find the first intersected object that belongs to a citizen group
+    // Find the first intersected object that belongs to a citizen group or building marker
     let intersectedGroup: string | null = null;
+    let intersectedBuildingId: string | null = null;
     
     for (const intersect of intersects) {
       let obj: THREE.Object3D | null = intersect.object;
       
-      // Traverse up to find the group
-      while (obj && (!obj.userData || !obj.userData.type || obj.userData.type !== 'citizen-group')) {
+      // Traverse up to find the group or building marker
+      while (obj && (!obj.userData || !obj.userData.type || (obj.userData.type !== 'citizen-group' && obj.userData.type !== 'building-citizen-group'))) {
         obj = obj.parent;
       }
       
-      if (obj && obj.userData && obj.userData.locationKey) {
-        intersectedGroup = obj.userData.locationKey;
-        break;
+      if (obj && obj.userData) {
+        if (obj.userData.type === 'citizen-group' && obj.userData.locationKey) {
+          intersectedGroup = obj.userData.locationKey;
+          break;
+        } else if (obj.userData.type === 'building-citizen-group') {
+          intersectedBuildingId = obj.userData.buildingId;
+          break;
+        }
       }
     }
     
@@ -1313,3 +1400,204 @@ export class CitizenDisplayManager {
     this.textureCache.clear();
   }
 }
+  /**
+   * Create an icon to indicate home or work
+   */
+  private createTypeIcon(type: 'home' | 'work'): THREE.Sprite {
+    // Create a canvas for the icon
+    const canvas = document.createElement('canvas');
+    canvas.width = 64;
+    canvas.height = 64;
+    const context = canvas.getContext('2d');
+    
+    if (context) {
+      // Draw a circle background
+      context.fillStyle = type === 'home' ? '#4b70e2' : '#e27a4b';
+      context.beginPath();
+      context.arc(32, 32, 24, 0, Math.PI * 2);
+      context.fill();
+      
+      // Draw the icon
+      context.fillStyle = '#ffffff';
+      context.beginPath();
+      
+      if (type === 'home') {
+        // Draw a house icon
+        context.moveTo(32, 16);
+        context.lineTo(48, 32);
+        context.lineTo(44, 32);
+        context.lineTo(44, 48);
+        context.lineTo(20, 48);
+        context.lineTo(20, 32);
+        context.lineTo(16, 32);
+        context.closePath();
+      } else {
+        // Draw a work/tools icon
+        context.moveTo(24, 20);
+        context.lineTo(32, 28);
+        context.lineTo(40, 20);
+        context.lineTo(44, 24);
+        context.lineTo(36, 32);
+        context.lineTo(44, 40);
+        context.lineTo(40, 44);
+        context.lineTo(32, 36);
+        context.lineTo(24, 44);
+        context.lineTo(20, 40);
+        context.lineTo(28, 32);
+        context.lineTo(20, 24);
+        context.closePath();
+      }
+      
+      context.fill();
+    }
+    
+    // Create a texture from the canvas
+    const texture = new THREE.CanvasTexture(canvas);
+    const material = new THREE.SpriteMaterial({ 
+      map: texture,
+      transparent: true,
+      depthTest: false
+    });
+    
+    const sprite = new THREE.Sprite(material);
+    sprite.scale.set(0.7, 0.7, 1);
+    
+    return sprite;
+  }
+  /**
+   * Create building markers for home and work locations
+   */
+  private createBuildingMarkers(): void {
+    // Group citizens by building
+    const buildingMap = new Map<string, any[]>();
+    
+    this.citizens.forEach(citizen => {
+      // Process home buildings
+      if (citizen.Home && citizen.isHome) {
+        if (!buildingMap.has(citizen.Home)) {
+          buildingMap.set(citizen.Home, []);
+        }
+        buildingMap.get(citizen.Home)?.push({
+          ...citizen,
+          markerType: 'home'
+        });
+      }
+      
+      // Process work buildings
+      if (citizen.Work && citizen.isWork) {
+        if (!buildingMap.has(citizen.Work)) {
+          buildingMap.set(citizen.Work, []);
+        }
+        buildingMap.get(citizen.Work)?.push({
+          ...citizen,
+          markerType: 'work'
+        });
+      }
+    });
+    
+    // Create markers for each building
+    buildingMap.forEach((citizens, buildingId) => {
+      // Find the first citizen with a position (should be the same for all citizens in the building)
+      const citizenWithPosition = citizens.find(c => c.position);
+      if (!citizenWithPosition || !citizenWithPosition.position) return;
+      
+      // Create a marker for this building
+      const marker = this.createBuildingCitizenMarker(buildingId, citizens, citizenWithPosition.position);
+      this.markers.push(marker);
+      this.scene.add(marker);
+    });
+  }
+  
+  /**
+   * Create a marker for a building with citizens
+   */
+  private createBuildingCitizenMarker(buildingId: string, citizens: any[], position: any): THREE.Group {
+    // Convert position to lat/lng format if needed
+    let lat, lng;
+    if (typeof position === 'object') {
+      lat = position.lat !== undefined ? position.lat : position.x;
+      lng = position.lng !== undefined ? position.lng : position.z;
+    } else {
+      console.warn(`Invalid position format for building ${buildingId}:`, position);
+      return new THREE.Group(); // Return empty group
+    }
+    
+    // Convert lat/lng to scene position
+    const scenePosition = this.latLngToScenePosition(lat, lng);
+    
+    // Create a group to hold the marker
+    const group = new THREE.Group();
+    group.position.copy(scenePosition);
+    group.name = `building-citizen-group-${buildingId}`;
+    group.userData = {
+      type: 'building-citizen-group',
+      buildingId,
+      citizens
+    };
+    
+    // Find the ground level at this position
+    const groundLevel = this.findGroundLevel(scenePosition);
+    if (groundLevel !== null) {
+      group.position.y = groundLevel + 2.5; // Position above the building
+    } else {
+      group.position.y = 2.5; // Default height if ground not found
+    }
+    
+    // Create markers for home and work citizens
+    const homeCitizens = citizens.filter(c => c.markerType === 'home');
+    const workCitizens = citizens.filter(c => c.markerType === 'work');
+    
+    // Create home marker if there are home citizens
+    if (homeCitizens.length > 0) {
+      const homeMarker = this.createBuildingResidentMarker(homeCitizens, 'home');
+      homeMarker.position.set(-0.5, 0, 0); // Position slightly to the left
+      group.add(homeMarker);
+    }
+    
+    // Create work marker if there are work citizens
+    if (workCitizens.length > 0) {
+      const workMarker = this.createBuildingResidentMarker(workCitizens, 'work');
+      workMarker.position.set(0.5, 0, 0); // Position slightly to the right
+      group.add(workMarker);
+    }
+    
+    return group;
+  }
+  
+  /**
+   * Create a marker for residents or workers in a building
+   */
+  private createBuildingResidentMarker(citizens: any[], markerType: 'home' | 'work'): THREE.Group {
+    const container = new THREE.Group();
+    container.name = `${markerType}-marker`;
+    
+    // Use the first citizen for the main icon
+    const primaryCitizen = citizens[0];
+    
+    // Create a sprite for the citizen icon
+    const sprite = this.createCitizenSprite(primaryCitizen.profileImage || '/images/citizens/default.png');
+    sprite.scale.set(1.5, 1.5, 1);
+    container.add(sprite);
+    
+    // Add a circular background with different colors for home vs work
+    const backgroundSprite = this.createCircularBackground(
+      markerType === 'home' ? 'rgba(100, 150, 255, 0.8)' : 'rgba(255, 150, 100, 0.8)'
+    );
+    backgroundSprite.scale.set(1.7, 1.7, 1);
+    backgroundSprite.renderOrder = 999;
+    container.add(backgroundSprite);
+    
+    // Add an icon to indicate home or work
+    const iconSprite = this.createTypeIcon(markerType);
+    iconSprite.position.set(0.7, 0.7, 0.1);
+    container.add(iconSprite);
+    
+    // If there are multiple citizens, add a count indicator
+    if (citizens.length > 1) {
+      const countIndicator = this.createCountIndicator(citizens.length);
+      countIndicator.position.set(-0.7, 0.7, 0.1);
+      container.add(countIndicator);
+    }
+    
+    return container;
+  }

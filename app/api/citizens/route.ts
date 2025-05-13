@@ -82,6 +82,9 @@ export async function GET(request: Request) {
         position = {};
       }
       
+      // Determine if this is a home or work building
+      const isHome = citizen.home === record.fields.BuildingId;
+      
       return {
         id: citizen.id,
         name: citizen.name,
@@ -95,7 +98,16 @@ export async function GET(request: Request) {
         wealth: citizen.wealth || 'Average',
         landId: record.fields.Land,
         buildingId: record.fields.BuildingId,
-        buildingType: record.fields.Type
+        buildingType: record.fields.Type,
+        isHome: isHome,
+        isWork: citizen.work === record.fields.BuildingId,
+        // Add NeedsCompletionScore for compatibility with CitizenDetailsPanel
+        NeedsCompletionScore: 0.75, // Default value, replace with actual calculation if available
+        CitizenId: citizen.id,
+        ImageUrl: citizen.imageUrl,
+        Home: citizen.home,
+        Work: citizen.work,
+        CreatedAt: record.fields.CreatedAt || new Date().toISOString()
       };
     }).filter(Boolean); // Remove null entries
     
