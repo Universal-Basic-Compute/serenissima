@@ -684,6 +684,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     
         // If no building is hovered, clear the hover state
         if (!foundHoveredBuilding && hoveredBuildingId !== null) {
+          console.log('No building hovered, clearing hoveredBuildingId');
           setHoveredBuildingId(null);
           canvas.style.cursor = isDragging ? 'grabbing' : 'grab';
         }
@@ -1061,12 +1062,14 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         const size = getBuildingSize(building.type);
         const color = getBuildingColor(building.type);
         
-        // Determine if this building is hovered or selected
-        const isHovered = hoveredBuildingId === building.id;
-        const isSelected = selectedBuildingId === building.id;
+        // Determine if this building is hovered or selected with more explicit check
+        const isHovered = hoveredBuildingId !== null && hoveredBuildingId === building.id;
+        const isSelected = selectedBuildingId !== null && selectedBuildingId === building.id;
         
         // Debug logging for hover state
-        console.log(`Drawing building ${building.id}, hovered: ${isHovered}, selected: ${isSelected}`);
+        if (isHovered) {
+          console.log(`Building ${building.id} is hovered, applying hover style`);
+        }
         
         // Draw simple square for building with hover/select states
         const squareSize = Math.max(size.width, size.depth) * scale * 0.6;
@@ -1077,14 +1080,11 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           ctx.fillStyle = lightenColor(color, 35); // Increased brightness for selection
           ctx.strokeStyle = '#FF3300'; // Bright red-orange for selected
           ctx.lineWidth = 3.5;
-          console.log('APPLYING SELECTED STYLE TO BUILDING:', building.id);
         } else if (isHovered) {
           // Make hover state MUCH more dramatic for testing
           ctx.fillStyle = '#FF00FF'; // Bright magenta for hover - very obvious
           ctx.strokeStyle = '#FFFF00'; // Bright yellow border
           ctx.lineWidth = 5; // Extra thick border
-          
-          console.log('APPLYING HOVER STYLE TO BUILDING:', building.id);
         } else {
           // Normal state
           ctx.fillStyle = color;
@@ -1103,7 +1103,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         ctx.stroke();
         
         // Add a small indicator for the building type with fixed font size
-        ctx.fillStyle = '#000';
+        ctx.fillStyle = isHovered ? '#FFFFFF' : '#000'; // White text on hover for better visibility
         ctx.font = `10px Arial`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -1217,7 +1217,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       });
     }
     
-  }, [loading, polygons, landOwners, users, activeView, buildings, scale, offset, incomeData, minIncome, maxIncome, hoveredPolygonId, selectedPolygonId, emptyBuildingPoints]);
+  }, [loading, polygons, landOwners, users, activeView, buildings, scale, offset, incomeData, minIncome, maxIncome, hoveredPolygonId, selectedPolygonId, hoveredBuildingId, selectedBuildingId, emptyBuildingPoints, mousePosition]);
   
 
   // Handle window resize
