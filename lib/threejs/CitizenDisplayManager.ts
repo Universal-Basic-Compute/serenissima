@@ -489,7 +489,7 @@ export class CitizenDisplayManager {
         }
         
         // Create a location key
-        const locationKey = `${parseFloat(lat).toFixed(5)}_${parseFloat(lng).toFixed(5)}`;
+        const locationKey = `${parseFloat(lat.toString()).toFixed(5)}_${parseFloat(lng.toString()).toFixed(5)}`;
         
         if (!this.citizenGroups.has(locationKey)) {
           this.citizenGroups.set(locationKey, []);
@@ -978,7 +978,7 @@ export class CitizenDisplayManager {
           if (response.ok) {
             console.log(`🔍 Image exists at ${url} but couldn't be loaded as texture`);
           } else {
-            console.warn(`🔍 Image does not exist at ${url} (${response.status})`);
+            console.warn(`🔍 Image does not exist at ${url} (${response.status.toString()})`);
           }
         })
         .catch(fetchError => {
