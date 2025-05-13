@@ -40,22 +40,22 @@ const BuildingRendererManager: React.FC<BuildingRendererManagerProps> = ({
       'SCENE_BASE_RENDERED',
       (data) => {
         console.log('BuildingRendererManager: Received sceneBaseRendered event', data);
-        
+    
         // Only initialize if water and land are initialized
         if (data.waterInitialized && data.landInitialized) {
           // Set scene as initialized
           setSceneInitialized(true);
-          
+      
           // Initialize the building renderer manager now
           // Add a check to ensure scene is still valid
           if (scene) {
             console.log('BuildingRendererManager: Initializing with scene', scene);
             buildingRendererManager.initialize(scene);
-            
+        
             // Initial refresh of buildings with a small delay
             setTimeout(() => {
               refreshBuildings();
-              
+          
               // Check if buildings are visible after a delay
               setTimeout(() => {
                 const count = buildingRendererManager.getBuildingMeshes().size;
