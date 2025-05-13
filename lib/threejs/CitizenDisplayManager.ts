@@ -13,39 +13,6 @@ export interface CitizenDisplayOptions {
     width?: number;
     height?: number;
   };
-  /**
-   * Animate fade-in effect for materials
-   */
-  private animateFadeIn(material: THREE.MeshBasicMaterial): void {
-    // Start with opacity 0
-    material.opacity = 0;
-
-    // Create a fade-in animation
-    const startTime = performance.now();
-    const duration = 800; // 800ms fade-in duration
-
-    // Animation function
-    const animate = () => {
-      const currentTime = performance.now();
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-
-      // Use an ease-in function for smoother appearance
-      material.opacity = progress * progress;
-      material.needsUpdate = true;
-
-      // Continue animation until complete
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      } else {
-        material.opacity = 1; // Ensure we end at full opacity
-        material.needsUpdate = true;
-      }
-    };
-
-    // Start the animation
-    requestAnimationFrame(animate);
-  }
 }
 
 export interface CitizenMarkerOptions {
