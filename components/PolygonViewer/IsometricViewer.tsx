@@ -1993,7 +1993,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     }
     
     // Draw citizen markers if in citizens view
-    if (activeView === 'citizens' && citizensLoaded) {
+    if (activeView === 'citizens' && activeView !== 'buildings' && citizensLoaded) {
       // Draw citizens at their home and work locations
       Object.entries(citizensByBuilding).forEach(([buildingId, buildingCitizens]) => {
         // Find the building position
