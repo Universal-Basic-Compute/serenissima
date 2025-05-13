@@ -1,31 +1,25 @@
 import { useState, useRef, MouseEvent } from 'react';
 
 export function useDraggable() {
+  const [position, setPosition] = useState({ x: 20, y: 20 });
   const [isDragging, setIsDragging] = useState(false);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
   const elementRef = useRef<HTMLDivElement>(null);
-  const offsetRef = useRef({ x: 0, y: 0 });
+  const dragStartPos = useRef({ x: 0, y: 0 });
 
   const handleMouseDown = (e: MouseEvent) => {
-    if (!elementRef.current) return;
-    
-    // Calculate the offset from the mouse position to the element's top-left corner
-    const rect = elementRef.current.getBoundingClientRect();
-    offsetRef.current = {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
-    };
-    
     setIsDragging(true);
+    dragStartPos.current = {
+      x: e.clientX - position.x,
+      y: e.clientY - position.y
+    };
   };
 
   const handleMouseMove = (e: MouseEvent) => {
     if (!isDragging) return;
     
-    // Calculate new position based on mouse position and offset
     setPosition({
-      x: e.clientX - offsetRef.current.x,
-      y: e.clientY - offsetRef.current.y
+      x: e.clientX - dragStartPos.current.x,
+      y: e.clientY - dragStartPos.current.y
     });
   };
 
