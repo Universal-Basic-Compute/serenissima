@@ -1509,6 +1509,7 @@ export class CitizenDisplayManager {
     
     return sprite;
   }
+  
   /**
    * Create building markers for home and work locations
    */
@@ -1646,3 +1647,4 @@ export class CitizenDisplayManager {
     
     return container;
   }
+}
