@@ -14,9 +14,8 @@ export default class SimpleCamera {
       500 // Far clipping plane (decreased from 1000 to reduce depth range)
     );
     
-    // Position camera for a better view of Venice - centered and less tilted
-    // Venice coordinates are approximately centered at (0, 0, 0) in our scene
-    this.camera.position.set(0, 30, 40); // Higher up and further back for less tilt
+    // Position camera at the specified coordinates (-8, 21, 18)
+    this.camera.position.set(-8, 21, 18); // Updated from (0, 30, 40) to (-8, 21, 18)
     this.camera.lookAt(0, 0, 0); // Looking at the center of Venice
     
     // Create controls
@@ -58,11 +57,23 @@ export default class SimpleCamera {
     
     // Initialize debug display
     this.createDebugDisplay();
+    
+    // Restore camera position from localStorage if available
+    this.restoreCameraPosition();
   }
   
   public update() {
     this.controls.update();
     this.updateDebugDisplay();
+    
+    // Save camera position to localStorage when it changes
+    const currentPosition = {
+      x: this.camera.position.x,
+      y: this.camera.position.y,
+      z: this.camera.position.z
+    };
+    
+    localStorage.setItem('cameraPosition', JSON.stringify(currentPosition));
   }
   
   public cleanup() {
@@ -113,6 +124,20 @@ export default class SimpleCamera {
         <div>Y: ${target.y.toFixed(2)}</div>
         <div>Z: ${target.z.toFixed(2)}</div>
       `;
+    }
+  }
+  
+  // Method to restore camera position from localStorage
+  private restoreCameraPosition() {
+    try {
+      const savedPosition = localStorage.getItem('cameraPosition');
+      if (savedPosition) {
+        const position = JSON.parse(savedPosition);
+        this.camera.position.set(position.x, position.y, position.z);
+        this.controls.update();
+      }
+    } catch (error) {
+      console.error('Error restoring camera position:', error);
     }
   }
 }
