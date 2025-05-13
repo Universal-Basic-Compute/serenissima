@@ -238,6 +238,35 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     };
   }, [isDragging, dragStart]);
 
+  // Emit map transformation events for other components to sync with
+  useEffect(() => {
+    // Create a function to emit the current map transformation state
+    const emitMapTransform = () => {
+      window.dispatchEvent(new CustomEvent('mapTransformed', {
+        detail: {
+          offset,
+          scale,
+          rotation: 0, // Add rotation if implemented
+          tilt: 0 // Add tilt if implemented
+        }
+      }));
+    };
+    
+    // Emit on any transformation change
+    emitMapTransform();
+    
+    // Also listen for requests for the current transformation
+    const handleRequestTransform = () => {
+      emitMapTransform();
+    };
+    
+    window.addEventListener('requestMapTransform', handleRequestTransform);
+    
+    return () => {
+      window.removeEventListener('requestMapTransform', handleRequestTransform);
+    };
+  }, [offset, scale]);
+
   // Get color based on income using a gradient with softer, Renaissance-appropriate colors
   const getIncomeColor = (income: number | undefined): string => {
     if (income === undefined) return '#E8DCC0'; // Softer parchment color for no data
