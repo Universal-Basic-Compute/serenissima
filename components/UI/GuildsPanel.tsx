@@ -236,6 +236,7 @@ function GuildDetails({ guild, onBack, formatDate, getLandName }: GuildDetailsPr
   const [showApplicationModal, setShowApplicationModal] = useState<boolean>(false);
   const [applicationText, setApplicationText] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [userGuildId, setUserGuildId] = useState<string | null>(null);
 
   // Fetch guild members when the component mounts
   useEffect(() => {
@@ -261,6 +262,23 @@ function GuildDetails({ guild, onBack, formatDate, getLandName }: GuildDetailsPr
 
     fetchGuildMembers();
   }, [guild.guildId]);
+  
+  // Check if the current user is already in a guild
+  useEffect(() => {
+    // Get the current user's profile from localStorage
+    const savedProfile = localStorage.getItem('userProfile');
+    if (savedProfile) {
+      try {
+        const profile = JSON.parse(savedProfile);
+        // If the profile has a guildId, store it
+        if (profile.guildId) {
+          setUserGuildId(profile.guildId);
+        }
+      } catch (error) {
+        console.error('Error parsing user profile:', error);
+      }
+    }
+  }, []);
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
       {/* Header with banner image */}
@@ -367,12 +385,20 @@ function GuildDetails({ guild, onBack, formatDate, getLandName }: GuildDetailsPr
               
               {/* Apply for Membership button right after members list */}
               <div className="mt-4">
-                <button 
-                  className="w-full px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
-                  onClick={() => setShowApplicationModal(true)}
-                >
-                  Apply for Membership
-                </button>
+                {userGuildId ? (
+                  <div className="text-amber-700 text-sm italic text-center p-2 bg-amber-100 rounded">
+                    {userGuildId === guild.guildId ? 
+                      "You are already a member of this guild." : 
+                      "You are already a member of another guild. You must leave your current guild before joining a new one."}
+                  </div>
+                ) : (
+                  <button 
+                    className="w-full px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
+                    onClick={() => setShowApplicationModal(true)}
+                  >
+                    Apply for Membership
+                  </button>
+                )}
               </div>
               
               {/* Guild Application Modal */}
