@@ -10,10 +10,10 @@ const BUILDINGS_TABLE = 'Buildings';
 const CITIZENS_TABLE = 'CITIZENS';
 
 // Helper function to format image URLs
-function formatImageUrl(url: string | undefined, citizenId: string): string {
+function formatImageUrl(url: string | undefined, citizenId?: string): string {
   // If no URL is provided, use the CitizenId to construct the path
   if (!url) {
-    return `/images/citizens/${citizenId}.png`;
+    return `/images/citizens/${citizenId || 'default'}.png`;
   }
   
   // If it's already an absolute URL, return it as is
@@ -29,7 +29,7 @@ function formatImageUrl(url: string | undefined, citizenId: string): string {
       url = `/images/citizens/${url.split('/').pop()}`;
     } else {
       // Otherwise use the CitizenId
-      url = `/images/citizens/${citizenId}.png`;
+      url = `/images/citizens/${citizenId || 'default'}.png`;
     }
   }
   
@@ -180,7 +180,7 @@ export async function GET(request: Request) {
     
     // Map buildings to citizens with positions
     const citizens = buildingRecords.map(record => {
-      const citizenId = record.fields.Occupant;
+      const citizenId = String(record.fields.Occupant);
       const citizen = citizenMap.get(citizenId);
       
       if (!citizen) {
@@ -226,23 +226,7 @@ export async function GET(request: Request) {
       // Determine if this is a home or work building
       const isHome = citizen.home === record.fields.BuildingId;
       
-      // Helper function to format image URLs
-      function formatImageUrl(url: string | undefined): string {
-        if (!url) return '/images/citizens/default.png';
-        
-        // If it's already an absolute URL, return it as is
-        if (url.startsWith('http')) return url;
-        
-        // If it doesn't start with a slash, add one
-        if (!url.startsWith('/')) url = '/' + url;
-        
-        // If it doesn't include the citizens directory, add it
-        if (!url.includes('/citizens/')) {
-          url = `/images/citizens/${url.split('/').pop()}`;
-        }
-        
-        return url;
-      }
+      // Use the outer formatImageUrl function
       
       // Ensure we have a consistent structure with all required fields
       return {
