@@ -4,6 +4,14 @@ import { ThreeDErrorBoundary } from '@/lib/components/ThreeDErrorBoundary';
 import { useSceneReady } from '@/lib/components/SceneReadyProvider';
 import { buildingRendererManager } from '@/lib/services/BuildingRendererManager';
 import { eventBus, EventTypes } from '@/lib/eventBus';
+
+// Extend EventTypes with the missing building event types
+declare module '@/lib/eventBus' {
+  interface EventTypes {
+    BUILDING_REMOVED: string;
+    BUILDING_UPDATED: string;
+  }
+}
 import { log } from '@/lib/logUtils';
 
 interface BuildingRendererProps {
