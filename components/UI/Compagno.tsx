@@ -5,6 +5,7 @@ import remarkGfm from 'remark-gfm';
 import { timeDescriptionService } from '@/lib/services/TimeDescriptionService';
 import { extractPageText } from '@/lib/utils/pageTextExtractor';
 import Portal from './Portal';
+import { useDraggable } from '@/lib/hooks/useDraggable';
 
 interface Notification {
   notificationId: string;
@@ -78,6 +79,16 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
   const [isLoadingUserMessages, setIsLoadingUserMessages] = useState<boolean>(false);
   const [userSearchQuery, setUserSearchQuery] = useState<string>('');
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
+  
+  // Add draggable functionality
+  const {
+    elementRef,
+    position,
+    isDragging,
+    handleMouseDown,
+    handleMouseMove,
+    handleMouseUp
+  } = useDraggable();
 
   // Fetch notifications
   const fetchNotifications = useCallback(async (forceRefresh = false) => {
@@ -837,7 +848,21 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
 
   return (
     <Portal>
-      <div className={`fixed bottom-4 right-4 z-[100] ${className}`}>
+      <div 
+        ref={elementRef}
+        className={`fixed z-[100] ${className}`}
+        style={{
+          left: isOpen ? `${position.x}px` : 'auto',
+          top: isOpen ? `${position.y}px` : 'auto',
+          bottom: isOpen ? 'auto' : '4rem',
+          right: isOpen ? 'auto' : '4rem',
+          cursor: isDragging ? 'grabbing' : 'grab'
+        }}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+      >
       {/* Collapsed state - just show the mask icon */}
       {!isOpen && (
         <button 
