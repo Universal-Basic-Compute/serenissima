@@ -55,13 +55,64 @@ export default class SimpleCamera {
     // Set initial target to the center of Venice
     this.controls.target.set(0, 0, 0);
     this.controls.update();
+    
+    // Initialize debug display
+    this.createDebugDisplay();
   }
   
   public update() {
     this.controls.update();
+    this.updateDebugDisplay();
   }
   
   public cleanup() {
     this.controls.dispose();
+    // Remove debug display when cleaning up
+    const debugDisplay = document.getElementById('camera-debug-display');
+    if (debugDisplay) {
+      debugDisplay.remove();
+    }
+  }
+  
+  // Create a div element for the debug display
+  public createDebugDisplay() {
+    if (!document.getElementById('camera-debug-display')) {
+      const debugDisplay = document.createElement('div');
+      debugDisplay.id = 'camera-debug-display';
+      debugDisplay.style.position = 'absolute';
+      debugDisplay.style.bottom = '10px';
+      debugDisplay.style.left = '10px';
+      debugDisplay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+      debugDisplay.style.color = 'white';
+      debugDisplay.style.padding = '8px';
+      debugDisplay.style.borderRadius = '4px';
+      debugDisplay.style.fontFamily = 'monospace';
+      debugDisplay.style.fontSize = '12px';
+      debugDisplay.style.zIndex = '1000';
+      document.body.appendChild(debugDisplay);
+    }
+    
+    // Update the debug display with camera position
+    this.updateDebugDisplay();
+  }
+
+  // Method to update the debug display with current camera information
+  public updateDebugDisplay() {
+    const debugDisplay = document.getElementById('camera-debug-display');
+    if (debugDisplay) {
+      const position = this.camera.position;
+      const target = this.controls.target;
+      
+      debugDisplay.innerHTML = `
+        <div><strong>Camera Position:</strong></div>
+        <div>X: ${position.x.toFixed(2)}</div>
+        <div>Y: ${position.y.toFixed(2)}</div>
+        <div>Z: ${position.z.toFixed(2)}</div>
+        <div><strong>Look Target:</strong></div>
+        <div>X: ${target.x.toFixed(2)}</div>
+        <div>Y: ${target.y.toFixed(2)}</div>
+        <div>Z: ${target.z.toFixed(2)}</div>
+      `;
+    }
   }
 }
