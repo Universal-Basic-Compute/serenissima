@@ -53,6 +53,9 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
     
     // Check if model files exist
     this.checkModelFilesExist();
+    
+    // Preload common models
+    this.preloadCommonModels();
   }
   
   /**
@@ -114,6 +117,61 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
     }
     
     return modelPath;
+  }
+
+  /**
+   * Check if model files exist in the public directory
+   */
+  private async checkModelFilesExist(): Promise<void> {
+    if (!this.debug) return;
+    
+    this.logDebug(`Checking for model files in public directory...`);
+    
+    // Common building types to check
+    const buildingTypes = ['market-stall', 'house', 'workshop', 'tavern', 'dock', 'warehouse'];
+    const variants = ['model'];
+    
+    for (const type of buildingTypes) {
+      for (const variant of variants) {
+        const modelPath = this.getModelPath(type, variant);
+        try {
+          const response = await fetch(modelPath, { method: 'HEAD' });
+          this.logDebug(`Model ${type}/${variant}: ${response.ok ? 'EXISTS' : 'MISSING'} (${response.status})`, 
+            `background: ${response.ok ? '#00FF00' : '#FF0000'}; color: black; padding: 2px 5px; font-weight: bold;`);
+        } catch (error) {
+          console.warn(`Error checking model ${type}/${variant}: ${error.message}`);
+        }
+      }
+    }
+  }
+
+  /**
+   * Preload common building models to improve initial loading performance
+   */
+  private preloadCommonModels(): void {
+    if (!this.debug) return;
+    
+    this.logDebug('Preloading common building models...');
+    
+    // List of common building types to preload
+    const commonTypes = ['market-stall', 'house', 'workshop', 'tavern'];
+    
+    // Preload each model
+    commonTypes.forEach(type => {
+      const modelPath = this.getModelPath(type);
+      this.gltfLoader.load(
+        modelPath,
+        (gltf) => {
+          // Store in cache
+          this.modelCache.set(`${type}_model`, gltf.scene.clone());
+          this.logDebug(`Preloaded model for ${type}`);
+        },
+        undefined,
+        (error) => {
+          console.warn(`Failed to preload model for ${type}: ${error.message}`);
+        }
+      );
+    });
   }
   
   /**
@@ -218,184 +276,77 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
     // Get color for this building type
     const color = this.getBuildingColorByType(building.type);
     
-    // Create a key for the instanced mesh based on building type
-    const instanceKey = building.type;
+    // Create a group for the low-detail model
+    const group = new THREE.Group();
     
-    // Check if we already have an instanced mesh for this building type
-    if (!this.buildingInstances.has(instanceKey)) {
-      // Create a new instanced mesh for this building type
-      const geometry = new THREE.BoxGeometry(size.width/4, size.height/4, size.depth/4);
-      const material = new THREE.MeshBasicMaterial({
+    // Create a base for the building
+    const baseGeometry = new THREE.BoxGeometry(size.width * 0.5, size.height * 0.5, size.depth * 0.5);
+    const baseMaterial = new THREE.MeshBasicMaterial({
+      color: color,
+      transparent: true,
+      opacity: 0.8
+    });
+    
+    const base = new THREE.Mesh(baseGeometry, baseMaterial);
+    base.position.y = size.height * 0.25; // Half the height
+    group.add(base);
+    
+    // Add a roof for certain building types
+    if (['house', 'tavern', 'workshop', 'church', 'palace'].includes(building.type)) {
+      const roofGeometry = new THREE.ConeGeometry(size.width * 0.3, size.height * 0.2, 4);
+      const roofMaterial = new THREE.MeshBasicMaterial({
+        color: 0x8B4513, // Brown color for roof
         transparent: true,
         opacity: 0.8
       });
       
-      // Create an instanced mesh with capacity for many buildings of this type
-      const instancedMesh = new THREE.InstancedMesh(
-        geometry, 
-        material, 
-        this.maxInstancesPerType
-      );
-      instancedMesh.count = 0; // Start with 0 instances
-      instancedMesh.frustumCulled = true; // Enable frustum culling
+      const roof = new THREE.Mesh(roofGeometry, roofMaterial);
+      roof.position.y = size.height * 0.6; // Position on top of the base
+      roof.rotation.y = Math.PI / 4; // Rotate 45 degrees
       
-      // Add to scene
-      this.options.scene.add(instancedMesh);
-      
-      // Store in our map
-      this.buildingInstances.set(instanceKey, {
-        mesh: instancedMesh,
-        count: 0,
-        instanceMap: new Map() // Map building IDs to instance indices
-      });
+      group.add(roof);
     }
     
-    // Get the instanced mesh data
-    const instanceData = this.buildingInstances.get(instanceKey)!;
+    // Position the group
+    group.position.copy(position);
+    group.rotation.y = building.rotation || 0;
     
-    // Check if this building already has an instance
-    if (instanceData.instanceMap.has(building.id)) {
-      // Update existing instance
-      const instanceIndex = instanceData.instanceMap.get(building.id)!;
-      
-      // Create matrix for this instance
-      const matrix = new THREE.Matrix4();
-      matrix.setPosition(position);
-      
-      // Apply rotation
-      const rotationMatrix = new THREE.Matrix4();
-      rotationMatrix.makeRotationY(building.rotation || 0);
-      matrix.multiply(rotationMatrix);
-      
-      // Update the instance matrix
-      instanceData.mesh.setMatrixAt(instanceIndex, matrix);
-      instanceData.mesh.instanceMatrix.needsUpdate = true;
-      
-      // Update the instance color
-      instanceData.mesh.setColorAt(instanceIndex, new THREE.Color(color));
-      if (instanceData.mesh.instanceColor) {
-        instanceData.mesh.instanceColor.needsUpdate = true;
-      }
-      
-      // Create a proxy object that represents this instance
-      const proxy = new THREE.Object3D();
-      proxy.position.copy(position);
-      proxy.rotation.y = building.rotation || 0;
-      proxy.userData = {
-        buildingId: building.id,
-        type: building.type,
-        landId: building.land_id,
-        owner: building.owner || building.created_by,
-        position: building.position,
-        isLowDetail: true,
-        isInstancedProxy: true,
-        instanceIndex: instanceIndex,
-        instanceKey: instanceKey
-      };
-      
-      return proxy;
-    } else {
-      // Add a new instance
-      const instanceIndex = instanceData.count;
-      
-      // Check if we've reached the maximum instances
-      if (instanceIndex >= this.maxInstancesPerType) {
-        console.warn(`Maximum instances reached for building type ${building.type}`);
-        
-        // Fall back to a regular mesh
-        const geometry = new THREE.BoxGeometry(size.width/4, size.height/4, size.depth/4);
-        const material = new THREE.MeshBasicMaterial({ 
-          color: color,
-          transparent: true,
-          opacity: 0.8
-        });
-        
-        const model = new THREE.Mesh(geometry, material);
-        model.position.copy(position);
-        model.rotation.y = building.rotation || 0;
-        
-        model.userData = {
-          buildingId: building.id,
-          type: building.type,
-          landId: building.land_id,
-          owner: building.owner || building.created_by,
-          position: building.position,
-          isLowDetail: true
-        };
-        
-        this.options.scene.add(model);
-        return model;
-      }
-      
-      // Create matrix for this instance
-      const matrix = new THREE.Matrix4();
-      matrix.setPosition(position);
-      
-      // Apply rotation
-      const rotationMatrix = new THREE.Matrix4();
-      rotationMatrix.makeRotationY(building.rotation || 0);
-      matrix.multiply(rotationMatrix);
-      
-      // Set the instance matrix
-      instanceData.mesh.setMatrixAt(instanceIndex, matrix);
-      instanceData.mesh.instanceMatrix.needsUpdate = true;
-      
-      // Set the instance color
-      instanceData.mesh.setColorAt(instanceIndex, new THREE.Color(color));
-      if (instanceData.mesh.instanceColor) {
-        instanceData.mesh.instanceColor.needsUpdate = true;
-      }
-      
-      // Increment the instance count
-      instanceData.count++;
-      instanceData.mesh.count = instanceData.count;
-      
-      // Map this building ID to its instance index
-      instanceData.instanceMap.set(building.id, instanceIndex);
-      
-      // Create a proxy object that represents this instance
-      const proxy = new THREE.Object3D();
-      proxy.position.copy(position);
-      proxy.rotation.y = building.rotation || 0;
-      proxy.userData = {
-        buildingId: building.id,
-        type: building.type,
-        landId: building.land_id,
-        owner: building.owner || building.created_by,
-        position: building.position,
-        isLowDetail: true,
-        isInstancedProxy: true,
-        instanceIndex: instanceIndex,
-        instanceKey: instanceKey
-      };
-      
-      return proxy;
-    }
+    // Add metadata
+    group.userData = {
+      buildingId: building.id,
+      type: building.type,
+      landId: building.land_id,
+      owner: building.owner || building.created_by,
+      position: building.position,
+      isLowDetail: true
+    };
+    
+    return group;
   }
 
   /**
-   * Get approximate building size based on type - to refactor
+   * Get approximate building size based on type
    */
   private getBuildingSizeByType(type: string): {width: number, height: number, depth: number} {
-    switch(type) {
+    switch(type.toLowerCase()) {
       case 'market-stall':
-        return {width: 2, height: 2, depth: 2};
+        return {width: 1.5, height: 1.5, depth: 1.5};
       case 'dock':
-        return {width: 4, height: 1, depth: 4};
+        return {width: 3, height: 0.5, depth: 3};
       case 'house':
-        return {width: 3, height: 4, depth: 3};
+        return {width: 2, height: 2.5, depth: 2};
       case 'workshop':
-        return {width: 3, height: 3, depth: 3};
+        return {width: 2.5, height: 2, depth: 2.5};
       case 'warehouse':
-        return {width: 4, height: 3, depth: 4};
+        return {width: 3, height: 2, depth: 3};
       case 'tavern':
-        return {width: 3, height: 3, depth: 3};
+        return {width: 2.5, height: 2.5, depth: 2.5};
       case 'church':
-        return {width: 4, height: 6, depth: 4};
+        return {width: 3, height: 5, depth: 3};
       case 'palace':
-        return {width: 5, height: 6, depth: 5};
+        return {width: 4, height: 4, depth: 4};
       default:
-        return {width: 2.5, height: 3, depth: 2.5};
+        return {width: 2, height: 2, depth: 2};
     }
   }
 
@@ -407,17 +358,19 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
       case 'market-stall':
         return 0xf5a442; // Orange
       case 'house':
-        return 0x42f54e; // Green
+        return 0xe8c39e; // Light tan for houses
       case 'workshop':
-        return 0xf54242; // Red
+        return 0xc77f3f; // Brown for workshops
       case 'warehouse':
-        return 0x8c42f5; // Purple
+        return 0x8c7f5d; // Dark tan for warehouses
       case 'tavern':
-        return 0xf5d442; // Yellow
+        return 0xd4a76a; // Warm tan for taverns
       case 'church':
-        return 0xf5f5f5; // White
+        return 0xf5f5f5; // White for churches
       case 'palace':
-        return 0xf542a7; // Pink
+        return 0xf5e7c1; // Cream for palaces
+      case 'dock':
+        return 0x8b7355; // Wood brown for docks
       default:
         return 0xD2B48C; // Tan (default)
     }
@@ -430,9 +383,14 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
     // Create a group to hold our objects
     const group = new THREE.Group();
     
-    // Create a box with a color based on building type, but make it 50% smaller (0.5 instead of 1)
-    console.log(`%c Creating fallback box for building ${building.id} of type ${building.type}`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
-    const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5); // Changed from 1,1,1 to 0.5,0.5,0.5 (50% smaller)
+    // Get building size based on type
+    const size = this.getBuildingSizeByType(building.type);
+    
+    // Create a box with a color based on building type
+    console.log(`Creating fallback box for building ${building.id} of type ${building.type}`);
+    
+    // Create a more detailed fallback model
+    const baseGeometry = new THREE.BoxGeometry(size.width * 0.8, size.height * 0.8, size.depth * 0.8);
     const color = this.getBuildingColorByType(building.type);
     const material = new THREE.MeshStandardMaterial({ 
       color: color,
@@ -440,12 +398,29 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
       metalness: 0.2
     });
     
-    const box = new THREE.Mesh(geometry, material);
+    const box = new THREE.Mesh(baseGeometry, material);
     box.castShadow = true;
     box.receiveShadow = true;
     
     // Add the box to the group
     group.add(box);
+    
+    // Add a roof for houses and similar buildings
+    if (['house', 'tavern', 'workshop', 'market-stall'].includes(building.type)) {
+      const roofGeometry = new THREE.ConeGeometry(size.width * 0.6, size.height * 0.4, 4);
+      const roofMaterial = new THREE.MeshStandardMaterial({
+        color: 0x8B4513, // Brown color for roof
+        roughness: 0.8,
+        metalness: 0.1
+      });
+      
+      const roof = new THREE.Mesh(roofGeometry, roofMaterial);
+      roof.position.y = size.height * 0.6; // Position on top of the box
+      roof.rotation.y = Math.PI / 4; // Rotate 45 degrees
+      roof.castShadow = true;
+      
+      group.add(roof);
+    }
     
     // Create a text label to show the building type
     const canvas = document.createElement('canvas');
@@ -469,8 +444,8 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
       });
       
       const label = new THREE.Sprite(labelMaterial);
-      label.position.set(0, 1, 0); // Position slightly lower due to smaller box
-      label.scale.set(1.5, 0.4, 1); // Scale down label to match smaller box
+      label.position.set(0, size.height + 0.5, 0); // Position above the building
+      label.scale.set(2, 0.5, 1);
       
       // Add the label to the group
       group.add(label);
@@ -712,7 +687,13 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
     
     // If not cached, load the model
     try {
-      const modelPath = this.getModelPath(building.type, building.variant || 'model');
+      // Normalize the building type to ensure consistent path format
+      const normalizedType = building.type.toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/'/g, '')
+        .replace(/&/g, 'and');
+      
+      const modelPath = `/models/buildings/${normalizedType}/${building.variant || 'model'}.glb`;
       
       if (this.debug) {
         this.logDebug(`Attempting to load model from: ${modelPath}`);
@@ -733,7 +714,13 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
               }
               resolve(gltf);
             },
-            undefined,
+            (progress) => {
+              // Log loading progress for debugging
+              if (this.debug && progress.lengthComputable) {
+                const percentComplete = Math.round((progress.loaded / progress.total) * 100);
+                this.logDebug(`Loading progress for ${building.id}: ${percentComplete}%`);
+              }
+            },
             reject
           );
         }),
@@ -756,6 +743,29 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
       return model;
     } catch (error) {
       console.warn(`Failed to load model for ${building.id} of type ${building.type}: ${error.message}`);
+      
+      // Try alternative model paths if the primary path fails
+      try {
+        // Try a fallback path with just the base type (e.g., "house" instead of "large-house")
+        const baseType = building.type.split('-')[0];
+        if (baseType && baseType !== building.type) {
+          const fallbackPath = `/models/buildings/${baseType}/${building.variant || 'model'}.glb`;
+          console.log(`Trying fallback model path: ${fallbackPath}`);
+          
+          const gltf = await this.gltfLoader.loadAsync(fallbackPath);
+          const model = gltf.scene;
+          
+          // Cache and configure the model
+          this.modelCache.set(cacheKey, model.clone());
+          this.configureModel(model, building);
+          
+          return model;
+        }
+      } catch (fallbackError) {
+        console.warn(`Fallback model also failed for ${building.id}: ${fallbackError.message}`);
+      }
+      
+      // If all loading attempts fail, create a colored box model as fallback
       return this.createColoredBoxModel(building, this.getModelPosition(building));
     }
   }
