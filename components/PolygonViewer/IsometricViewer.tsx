@@ -762,7 +762,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     // Calculate isometric projection - modified to make north up with proper aspect ratio
-    const isoX = (x: number, y: number) => (x) * scale + canvas.width / 2 + offset.x; // Remove negation to fix east-west orientation
+    const isoX = (x: number, y: number) => (-x) * scale + canvas.width / 2 + offset.x; // Negate x to fix the east-west orientation
     const isoY = (x: number, y: number) => (-y) * scale * 1.4 + canvas.height / 2 + offset.y; // Multiply by 1.4 to stretch vertically
     
     // Draw water background
