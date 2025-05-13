@@ -229,6 +229,22 @@ Every day at 6:00 PM UTC, the rent payment system processes two types of rent pa
 
 This process simulates the rental economy of Venice, with citizens paying rent for housing and businesses paying rent for commercial spaces.
 
+### AI Land Bidding (8:00 PM UTC)
+
+**Script**: `backend/engine/bidonlands.py`
+
+Every day at 8:00 PM UTC, the AI land bidding system allows AI users to participate in the land market:
+
+1. The script identifies all users marked as AI in the system
+2. For each AI user, it checks their compute balance and existing bids
+3. For lands with income potential, AI users will:
+   - Place new bids (at 30x the land's last income) if they have sufficient compute
+   - Increase existing bids by 14% if they already have a bid on the land
+4. AI users only bid if they have at least twice the bid amount in their compute balance
+5. An admin notification is created with statistics about all bidding activity
+
+This process creates a dynamic land market with AI participation, ensuring that valuable lands receive competitive bids even without human players bidding on them.
+
 ## Technical Implementation
 
 These automated processes are scheduled using cron jobs set up in the `backend/startup.sh` script. Each process runs independently and handles its own error logging and recovery.
