@@ -247,31 +247,25 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
         }
         
         setUsers(usersList);
-      }
-    } catch (error) {
-      console.error('Error fetching users:', error);
-      
-      // Set fallback users
-      setUsers([
-        {
+      } else {
+        // If no users returned but request was successful, just ensure Compagno is available
+        setUsers([{
           username: 'compagno',
           firstName: 'Compagno',
           lastName: 'Bot',
           coatOfArmsImage: null
-        },
-        {
-          username: 'marco_polo',
-          firstName: 'Marco',
-          lastName: 'Polo',
-          coatOfArmsImage: null
-        },
-        {
-          username: 'doge_venice',
-          firstName: 'Doge',
-          lastName: 'of Venice',
-          coatOfArmsImage: null
-        }
-      ]);
+        }]);
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      
+      // Just ensure Compagno is available when there's an error
+      setUsers([{
+        username: 'compagno',
+        firstName: 'Compagno',
+        lastName: 'Bot',
+        coatOfArmsImage: null
+      }]);
     } finally {
       setIsLoadingUsers(false);
     }
@@ -303,32 +297,14 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
       
       if (data.success && data.messages && Array.isArray(data.messages)) {
         setUserMessages(data.messages);
+      } else {
+        // If no messages or invalid format, set empty array
+        setUserMessages([]);
       }
     } catch (error) {
       console.error('Error fetching user messages:', error);
-      
-      // Set fallback messages
-      const now = new Date();
-      setUserMessages([
-        {
-          messageId: '1',
-          sender: username,
-          receiver: otherUser,
-          content: 'Hello there!',
-          type: 'message',
-          createdAt: new Date(now.getTime() - 3600000).toISOString(),
-          readAt: new Date(now.getTime() - 3500000).toISOString()
-        },
-        {
-          messageId: '2',
-          sender: otherUser,
-          receiver: username,
-          content: 'Greetings! How may I assist you today?',
-          type: 'message',
-          createdAt: new Date(now.getTime() - 3400000).toISOString(),
-          readAt: new Date(now.getTime() - 3300000).toISOString()
-        }
-      ]);
+      // Set empty array on error instead of fallback messages
+      setUserMessages([]);
     } finally {
       setIsLoadingUserMessages(false);
     }
