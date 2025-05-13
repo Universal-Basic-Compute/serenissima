@@ -186,7 +186,7 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
     selectedBuilding: Building | null;
     selectedVariant: string | null;
     availableVariants: string[];
-    placeableBuilding: Building | null;
+    placeableBuilding: { name: string; variant: string; } | null;
     handleSelectBuilding: (building: Building) => void;
     handleSelectVariant: (variant: string) => void;
     handlePlaceBuilding: () => void;
@@ -542,10 +542,7 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
           <PlaceableObjectManager
             active={true}
             type="building"
-            objectData={{
-              name: placeableBuilding?.name?.toLowerCase().replace(/\s+/g, '-') || '',
-              variant: placeableBuilding?.variant
-            }}
+            objectData={placeableBuilding}
             constraints={{
               requireLandOwnership: true
             }}
