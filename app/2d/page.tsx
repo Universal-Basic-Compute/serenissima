@@ -11,7 +11,6 @@ import BuildingsToolbar from '@/components/BuildingsView/BuildingsToolbar';
 import WalletButton from '@/components/UI/WalletButton';
 import ResourceDropdowns from '@/components/UI/ResourceDropdowns';
 import BuildingRendererManager from '@/components/BuildingsView/BuildingRendererManager';
-import WaterAnimation from '@/components/PolygonViewer/WaterAnimation';
 
 // Import the 2D viewer component with no SSR
 const IsometricViewer = dynamic(() => import('../../components/PolygonViewer/IsometricViewer'), {
@@ -60,11 +59,6 @@ export default function TwoDPage() {
     <div className="relative w-full h-screen">
       {/* Main 2D Isometric Viewer */}
       <IsometricViewer activeView={activeView} />
-      
-      {/* Water Animation Layer */}
-      {activeView !== 'buildings' && (
-        <WaterAnimation className="opacity-60" />
-      )}
       
       {/* Building Renderer Manager - ensures buildings are rendered properly */}
       <BuildingRendererManager active={activeView === 'buildings'} debug={true} />
