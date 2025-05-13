@@ -63,6 +63,19 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
         isMuted: muted
       }
     }));
+    
+    // Also notify Compagno about audio settings changes
+    window.dispatchEvent(new CustomEvent('compagnoSettingsChanged', {
+      detail: {
+        type: 'audio',
+        settings: {
+          masterVolume: master,
+          musicVolume: music,
+          effectsVolume: effects,
+          isMuted: muted
+        }
+      }
+    }));
   };
   
   // Apply water quality settings to the game
@@ -115,6 +128,23 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
         detail: {
           showFps,
           showDebugInfo
+        }
+      }));
+      
+      // Notify Compagno about all settings changes
+      window.dispatchEvent(new CustomEvent('compagnoSettingsChanged', {
+        detail: {
+          type: 'all',
+          settings: {
+            qualityMode,
+            waterQuality,
+            masterVolume,
+            musicVolume,
+            effectsVolume,
+            isMuted,
+            showFps,
+            showDebugInfo
+          }
         }
       }));
       

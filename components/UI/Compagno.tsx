@@ -612,7 +612,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
     }
   };
 
-  const sendMessage = async (content: string, additionalSystemPrompt?: string) => {
+  const sendMessage = async (content: string, additionalSystemPrompt?: string, addContext?: string, images?: string[]) => {
     if (!content.trim()) return;
     
     // Optimistically add user message to UI
@@ -634,6 +634,23 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
       // Use the additional system prompt if provided, otherwise use the default
       const systemPrompt = additionalSystemPrompt || defaultSystemPrompt;
       
+      // Prepare request body
+      const requestBody: any = {
+        content: content,
+        model: 'claude-3-7-sonnet-latest',
+        mode: 'creative',
+        addSystem: systemPrompt
+      };
+      
+      // Add optional parameters if provided
+      if (addContext) {
+        requestBody.addContext = addContext;
+      }
+      
+      if (images && images.length > 0) {
+        requestBody.images = images;
+      }
+      
       const response = await fetch(
         `${KINOS_BACKEND_BASE_URL}/blueprints/${BLUEPRINT}/kins/${username}/messages`,
         {
@@ -641,12 +658,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            content: content,
-            model: 'claude-3-7-sonnet-latest',
-            mode: 'creative',
-            addSystem: systemPrompt
-          }),
+          body: JSON.stringify(requestBody),
         }
       );
 

@@ -28,6 +28,10 @@ export async function POST(request: Request) {
       response = "Land in Venice is precious and limited. You can purchase available parcels in the marketplace. Prime locations near the Grand Canal command higher prices but may yield greater returns.";
     } else if (lowerMessage.includes('doge') || lowerMessage.includes('government')) {
       response = "Venice is governed by the Most Serene Republic, led by the Doge and the Council of Ten. As a noble, you may participate in governance by joining councils and voting on important matters.";
+    } else if (lowerMessage.includes('guild') || lowerMessage.includes('guilds')) {
+      response = "The guilds of Venice are powerful organizations that control various trades and crafts. Each guild has its own rules, leadership structure, and patron saint. You can join a guild to gain access to special resources, knowledge, and business opportunities.";
+    } else if (lowerMessage.includes('settings') || lowerMessage.includes('options') || lowerMessage.includes('preferences')) {
+      response = "You can adjust your settings by clicking the 'Settings' button in the top navigation bar. From there, you can modify graphics quality, sound volumes, and debug options to optimize your experience in La Serenissima.";
     }
     
     // Add a slight delay to simulate processing time
