@@ -3,6 +3,15 @@ import { v4 as uuidv4 } from 'uuid';
 import { eventBus, EventTypes } from '../eventBus';
 import { getWalletAddress } from '../walletUtils';
 
+// Extend EventTypes with dock-related events
+declare module '../eventBus' {
+  interface EventTypes {
+    DOCK_PLACED: string;
+    DOCK_DELETED: string;
+    DOCK_UPDATED: string;
+  }
+}
+
 // Define dock-related event types
 EventTypes.DOCK_PLACED = 'dock_placed';
 EventTypes.DOCK_DELETED = 'dock_deleted';
