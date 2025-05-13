@@ -545,6 +545,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             // Calculate offset to position text below coat of arms
             // The coat of arms size is calculated as: Math.min(59, Math.max(29, Math.floor(scale * 15.7)))
             const coatOfArmsSize = Math.min(59, Math.max(29, Math.floor(scale * 15.7)));
+            const fontSize = 10; // Define the font size to match the fixed font size we're using
             const textYOffset = coatOfArmsSize / 2 + fontSize + 5; // Half the coat of arms size + font size + padding
             
             // Draw text below the coat of arms
