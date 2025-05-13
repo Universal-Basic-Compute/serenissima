@@ -197,10 +197,14 @@ export async function GET(request: Request) {
         if (typeof occupant === 'string') {
           citizenId = occupant;
         } else if (Array.isArray(occupant) && occupant.length > 0) {
-          citizenId = String(occupant[0]);
+          // Ensure we're converting to string properly
+          citizenId = typeof occupant[0] === 'string' ? occupant[0] : String(occupant[0]);
         } else if (typeof occupant === 'object' && occupant !== null) {
-          citizenId = String(Object.values(occupant)[0]);
+          // Get the first value and ensure it's a string
+          const firstValue = Object.values(occupant)[0];
+          citizenId = typeof firstValue === 'string' ? firstValue : String(firstValue);
         } else {
+          // For any other type, convert to string
           citizenId = String(occupant);
         }
       }
