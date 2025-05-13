@@ -54,4 +54,5 @@ See the following documents for detailed information on each architectural compo
 - [State Management](./state-management.md)
 - [Event System](./events.md)
 - [3D Rendering](./rendering.md)
+- [Persistent Rendering](./persistent-rendering.md)
 - [Economic Simulation](./economic-simulation.md)
