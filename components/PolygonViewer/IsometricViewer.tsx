@@ -1717,6 +1717,75 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       });
     }
     
+    // Draw dock points and bridge points if in buildings view, but more discreet
+    if (activeView === 'buildings' && polygons.length > 0) {
+      // Draw dock points with subtle styling
+      polygons.forEach(polygon => {
+        if (polygon.dockPoints && Array.isArray(polygon.dockPoints)) {
+          polygon.dockPoints.forEach((point: any) => {
+            if (!point.edge) return;
+            
+            // Convert lat/lng to isometric coordinates
+            const x = (point.edge.lng - 12.3326) * 20000;
+            const y = (point.edge.lat - 45.4371) * 20000;
+            
+            const isoPos = {
+              x: calculateIsoX(x, y, scale, offset, canvas.width),
+              y: calculateIsoY(x, y, scale, offset, canvas.height)
+            };
+            
+            // Draw a small, semi-transparent circle for dock points
+            ctx.beginPath();
+            ctx.arc(isoPos.x, isoPos.y, 2 * scale, 0, Math.PI * 2);
+            
+            // Use a subtle blue color with low opacity
+            ctx.fillStyle = 'rgba(0, 120, 215, 0.3)';
+            ctx.fill();
+            
+            // Add a very subtle border
+            ctx.strokeStyle = 'rgba(0, 120, 215, 0.4)';
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          });
+        }
+        
+        // Draw bridge points with subtle styling
+        if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints)) {
+          polygon.bridgePoints.forEach((point: any) => {
+            if (!point.edge) return;
+            
+            // Convert lat/lng to isometric coordinates
+            const x = (point.edge.lng - 12.3326) * 20000;
+            const y = (point.edge.lat - 45.4371) * 20000;
+            
+            const isoPos = {
+              x: calculateIsoX(x, y, scale, offset, canvas.width),
+              y: calculateIsoY(x, y, scale, offset, canvas.height)
+            };
+            
+            // Draw a small, semi-transparent square for bridge points
+            const pointSize = 2 * scale;
+            
+            // Use a subtle orange/brown color with low opacity
+            ctx.fillStyle = 'rgba(180, 120, 60, 0.3)';
+            ctx.beginPath();
+            ctx.rect(
+              isoPos.x - pointSize/2, 
+              isoPos.y - pointSize/2, 
+              pointSize, 
+              pointSize
+            );
+            ctx.fill();
+            
+            // Add a very subtle border
+            ctx.strokeStyle = 'rgba(180, 120, 60, 0.4)';
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          });
+        }
+      });
+    }
+    
     // Draw citizen markers if in citizens view
     if (activeView === 'citizens' && citizensLoaded) {
       // Draw citizens at their home and work locations
