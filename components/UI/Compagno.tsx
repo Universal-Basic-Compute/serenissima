@@ -1260,6 +1260,18 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                           >
                             How do I build structures?
                           </button>
+                          <button
+                            onClick={() => handleSuggestedQuestion("Tell me about the guilds of Venice")}
+                            className="text-xs bg-gradient-to-r from-amber-100 to-amber-200 hover:from-amber-200 hover:to-amber-300 text-amber-900 px-3 py-1.5 rounded-full border border-amber-300 transition-colors shadow-sm"
+                          >
+                            Tell me about the guilds of Venice
+                          </button>
+                          <button
+                            onClick={() => handleSuggestedQuestion("How do I adjust my settings?")}
+                            className="text-xs bg-gradient-to-r from-amber-100 to-amber-200 hover:from-amber-200 hover:to-amber-300 text-amber-900 px-3 py-1.5 rounded-full border border-amber-300 transition-colors shadow-sm"
+                          >
+                            How do I adjust my settings?
+                          </button>
                         </div>
                       </div>
                     )}
