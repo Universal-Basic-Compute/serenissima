@@ -11,6 +11,12 @@ declare module '@/lib/eventBus' {
     SCENE_BASE_RENDERED: string;
   }
 }
+
+// Ensure TypeScript recognizes the extended EventTypes
+const ExtendedEventTypes = {
+  ...EventTypes,
+  SCENE_BASE_RENDERED: 'SCENE_BASE_RENDERED'
+};
 import { buildingRendererManager } from '@/lib/services/BuildingRendererManager';
 
 interface BaseSceneLayerProps {
@@ -65,7 +71,7 @@ const BaseSceneLayer: React.FC<BaseSceneLayerProps> = ({
     isInitializedRef.current = true;
 
     // Emit event to notify that base scene is rendered
-    eventBus.emit(EventTypes.SCENE_BASE_RENDERED, { 
+    eventBus.emit(ExtendedEventTypes.SCENE_BASE_RENDERED, { 
       waterInitialized: true,
       landInitialized: true
     });
@@ -104,7 +110,7 @@ const BaseSceneLayer: React.FC<BaseSceneLayerProps> = ({
           buildingsInitializedRef.current = true;
           
           // Emit event to notify that buildings are rendered
-          eventBus.emit(EventTypes.SCENE_BASE_RENDERED, {
+          eventBus.emit(ExtendedEventTypes.SCENE_BASE_RENDERED, {
             buildingsInitialized: true
           });
           
