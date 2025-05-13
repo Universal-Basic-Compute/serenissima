@@ -23,6 +23,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [incomeData, setIncomeData] = useState<Record<string, number>>({});
   const [minIncome, setMinIncome] = useState<number>(0);
   const [maxIncome, setMaxIncome] = useState<number>(1000);
+  const [incomeDataLoaded, setIncomeDataLoaded] = useState<boolean>(false);
   const [ownerCoatOfArmsMap, setOwnerCoatOfArmsMap] = useState<Record<string, string>>({});
   const [coatOfArmsImages, setCoatOfArmsImages] = useState<Record<string, HTMLImageElement>>({});
   const [loadingCoatOfArms, setLoadingCoatOfArms] = useState<boolean>(false);
@@ -52,6 +53,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const fetchIncomeData = useCallback(async () => {
     try {
       console.log('Fetching income data...');
+      setIncomeDataLoaded(false); // Reset to false when starting to fetch
+      
       const response = await fetch('/api/get-income-data');
       if (response.ok) {
         const data = await response.json();
@@ -73,6 +76,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           setMinIncome(min !== Infinity ? min : 0);
           setMaxIncome(max !== -Infinity ? max : 1000);
           setIncomeData(incomeMap);
+          setIncomeDataLoaded(true); // Set to true when data is loaded
           console.log(`Income data loaded: ${Object.keys(incomeMap).length} entries, min=${min}, max=${max}`);
         }
       }
@@ -464,8 +468,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       // Get polygon owner color or income-based color
       let fillColor = '#FFF5D0'; // Default sand color
       if (activeView === 'land') {
-        if (polygon.id && incomeData[polygon.id] !== undefined) {
-          // Use income-based color in land view
+        if (incomeDataLoaded && polygon.id && incomeData[polygon.id] !== undefined) {
+          // Use income-based color in land view ONLY if income data is loaded
           fillColor = getIncomeColor(incomeData[polygon.id]);
         } else if (polygon.id && landOwners[polygon.id]) {
           // Use owner color in land view
