@@ -2,48 +2,48 @@ import { NextRequest, NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
 
+// ✅ Compatible Next.js 15
 export async function GET(
   request: NextRequest,
-  context: { params: Record<string, string | string[]> }
-): Promise<NextResponse> {
+  context: { params: { path?: string[] } } // RouteHandlerContext n'est pas exporté publiquement, on le reconstitue ici
+) {
   try {
-    const rawPath = context.params.path;
+    const pathArray = context.params.path;
 
-    const pathArray = Array.isArray(rawPath) ? rawPath : [rawPath];
-    if (!pathArray || pathArray.length === 0) {
-      return NextResponse.json(
-        { error: 'Missing path parameter' },
-        { status: 400 }
+    if (!pathArray || !Array.isArray(pathArray)) {
+      return new NextResponse(
+        JSON.stringify({ error: 'Invalid path' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    const relativePath = pathArray.join('/');
-    console.log(`Requested path: ${relativePath}`);
+    // Join path segments to construct the relative path
+    const filePath = pathArray.join('/');
+    console.log(`Serving file from data directory: ${filePath}`);
 
-    // ✅ Protection contre les traversals "../"
-    const dataRoot = path.join(process.cwd(), 'data');
-    const absolutePath = path.join(dataRoot, relativePath);
-    if (!absolutePath.startsWith(dataRoot)) {
-      return NextResponse.json(
-        { error: 'Invalid path: access denied' },
-        { status: 403 }
-      );
-    }
+    // Construct the absolute path to the file
+    const absolutePath = path.join(process.cwd(), 'data', filePath);
+    console.log(`Absolute path: ${absolutePath}`);
 
+    // Check if the file exists
     try {
       await fs.access(absolutePath);
-    } catch {
-      return NextResponse.json(
-        { error: 'File not found', path: relativePath },
-        { status: 404 }
+    } catch (error) {
+      console.log(`File not found: ${absolutePath}`);
+      return new NextResponse(
+        JSON.stringify({ error: 'File not found', path: filePath }),
+        { status: 404, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
+    // Read the file content
     const fileData = await fs.readFile(absolutePath, 'utf8');
 
-    const ext = path.extname(absolutePath).toLowerCase();
+    // Determine content type
+    const extension = path.extname(filePath).toLowerCase();
     let contentType = 'application/octet-stream';
-    switch (ext) {
+
+    switch (extension) {
       case '.json':
         contentType = 'application/json';
         break;
@@ -53,8 +53,10 @@ export async function GET(
       case '.csv':
         contentType = 'text/csv';
         break;
+      // Add more types as needed
     }
 
+    // Return file content
     return new NextResponse(fileData, {
       headers: {
         'Content-Type': contentType,
@@ -62,10 +64,11 @@ export async function GET(
       },
     });
   } catch (error: any) {
-    console.error('Unhandled error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error', details: error.message },
-      { status: 500 }
+    console.error('Error serving file:', error);
+
+    return new NextResponse(
+      JSON.stringify({ error: 'Failed to serve file', details: error.message }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
 }
