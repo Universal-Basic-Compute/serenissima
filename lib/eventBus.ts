@@ -80,7 +80,6 @@ export const EventTypes = {
   USER_PROFILE_UPDATED: 'userProfileUpdated',
   WALLET_CHANGED: 'walletChanged',
   BUILDING_PLACED: 'buildingPlaced',
-  DOCK_PLACED: 'dockPlaced',
   VIEW_MODE_CHANGED: 'viewModeChanged',
   POLYGONS_LOADED: 'polygonsLoaded',
   POLYGON_DELETED: 'polygonDeleted',
@@ -88,11 +87,6 @@ export const EventTypes = {
   OWNER_COLORS_UPDATED: 'ownerColorsUpdated',
   OWNER_COAT_OF_ARMS_UPDATED: 'ownerCoatOfArmsUpdated',
   POLYGON_OWNER_UPDATED: 'polygonOwnerUpdated',
-  // Building and infrastructure events
-  DOCK_DELETED: 'dockDeleted',
-  DOCK_UPDATED: 'dockUpdated',
-  DOCK_SELECTED: 'dockSelected',
-  DOCK_HOVER: 'dockHover',
   // Interaction events
   INTERACTION_CLICK: 'interactionClick',
   INTERACTION_MOUSE_DOWN: 'interactionMouseDown',
@@ -130,7 +124,6 @@ export const EventTypes = {
   HIDE_TOOLTIP: 'hideTooltip',
   PATH_CALCULATED: 'pathCalculated',
   BRIDGE_SELECTED: 'bridgeSelected',
-  TRANSPORT_DOCK_SELECTED: 'transportDockSelected',
   
   // Resource events
   RESOURCE_ADDED: 'resourceAdded',
