@@ -595,8 +595,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           }
           
           const isoPos = {
-            x: isoX(x, y),
-            y: isoY(x, y)
+            x: calculateIsoX(x, y, scale, offset, canvas.width),
+            y: calculateIsoY(x, y, scale, offset, canvas.height)
           };
           
           // Get building size
@@ -683,8 +683,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           }
           
           const isoPos = {
-            x: isoX(x, y),
-            y: isoY(x, y)
+            x: calculateIsoX(x, y, scale, offset, canvas.width),
+            y: calculateIsoY(x, y, scale, offset, canvas.height)
           };
           
           // Get building size
@@ -943,7 +943,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     if (activeView === 'buildings' && buildings.length > 0) {
       buildings.forEach(building => {
         if (!building.position) return;
-        
+            
         let position;
         if (typeof building.position === 'string') {
           try {
@@ -954,7 +954,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         } else {
           position = building.position;
         }
-        
+            
         // Convert lat/lng to isometric coordinates
         let x, y;
         if ('lat' in position && 'lng' in position) {
@@ -968,10 +968,10 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         } else {
           return;
         }
-        
+            
         const isoPos = {
-          x: isoX(x, y),
-          y: isoY(x, y)
+          x: calculateIsoX(x, y, scale, offset, canvas.width),
+          y: calculateIsoY(x, y, scale, offset, canvas.height)
         };
         
         // Draw building based on type
@@ -1035,16 +1035,16 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints)) {
           polygon.bridgePoints.forEach((point: any) => {
             if (!point.edge) return;
-            
+                
             // Normalize coordinates
             const x = (point.edge.lng - 12.3326) * 20000;
             const y = (point.edge.lat - 45.4371) * 20000; // Remove the 0.7 factor
-            
+                
             const isoPos = {
-              x: isoX(x, y),
-              y: isoY(x, y)
+              x: calculateIsoX(x, y, scale, offset, canvas.width),
+              y: calculateIsoY(x, y, scale, offset, canvas.height)
             };
-            
+                
             // Draw bridge point
             ctx.beginPath();
             ctx.arc(isoPos.x, isoPos.y, 5 * scale, 0, Math.PI * 2);
@@ -1055,21 +1055,21 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             ctx.stroke();
           });
         }
-        
+            
         // Draw dock points
         if (polygon.dockPoints && Array.isArray(polygon.dockPoints)) {
           polygon.dockPoints.forEach((point: any) => {
             if (!point.edge) return;
-            
+                
             // Normalize coordinates
             const x = (point.edge.lng - 12.3326) * 20000;
             const y = (point.edge.lat - 45.4371) * 20000; // Remove the 0.7 factor
-            
+                
             const isoPos = {
-              x: isoX(x, y),
-              y: isoY(x, y)
+              x: calculateIsoX(x, y, scale, offset, canvas.width),
+              y: calculateIsoY(x, y, scale, offset, canvas.height)
             };
-            
+                
             // Draw dock point
             ctx.beginPath();
             ctx.arc(isoPos.x, isoPos.y, 5 * scale, 0, Math.PI * 2);
