@@ -358,7 +358,7 @@ The building system allows players to browse, place, and manage buildings in the
    - Integration with other building-related tools
 
 5. **PlaceableObjectManager**: Unified component for placing objects.
-   - Handles placement of buildings
+   - Handles placement of buildings and other object types
    - Applies type-specific constraints and validation
    - Provides consistent UI for object placement
    - Supports rotation and positioning
