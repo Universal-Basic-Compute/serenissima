@@ -1618,29 +1618,29 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         };
         
         // Check if mouse is over this building point
-        const pointSize = 2.8 * scale;
+        const pointSize = 2.5 * scale; // Slightly smaller (was 2.8)
         const isHovered = 
           mousePosition.x >= isoPos.x - pointSize && 
           mousePosition.x <= isoPos.x + pointSize && 
           mousePosition.y >= isoPos.y - pointSize && 
           mousePosition.y <= isoPos.y + pointSize;
         
-        // Draw a small orange circle for empty building points
-        // 30% smaller (2.8 instead of 4), with hover state and 20% more transparency
+        // Draw a small circle for empty building points with more subtle colors
         ctx.beginPath();
         ctx.arc(isoPos.x, isoPos.y, pointSize, 0, Math.PI * 2);
     
-        // Apply different opacity based on hover state
-        // Normal: 30% opacity, Hovered: 50% opacity (20% more transparent than before)
+        // Apply different opacity and color based on hover state
+        // Use a more muted, earthy color that blends better with the map
+        // Normal: very low opacity, Hovered: slightly higher opacity
         ctx.fillStyle = isHovered 
-          ? 'rgba(255, 140, 0, 0.5)' // Hovered: 50% opacity (was 0.7)
-          : 'rgba(255, 140, 0, 0.3)'; // Normal: 30% opacity (was 0.5)
+          ? 'rgba(180, 140, 100, 0.4)' // Hovered: muted terracotta with 40% opacity (was orange with 50%)
+          : 'rgba(180, 140, 100, 0.2)'; // Normal: muted terracotta with 20% opacity (was orange with 30%)
         
         ctx.fill();
         
         // Add a subtle border when hovered
         if (isHovered) {
-          ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)'; // Less opaque white (was 0.8)
           ctx.lineWidth = 1;
           ctx.stroke();
           
