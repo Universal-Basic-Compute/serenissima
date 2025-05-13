@@ -966,25 +966,59 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
 
   // Helper function to get building color based on type
   function getBuildingColor(type: string): string {
+    // Generate a deterministic color based on the building type
+    const getColorFromType = (str: string): string => {
+      // Create a hash from the string
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      
+      // Use the hash to generate HSL values in appropriate ranges for Venetian architecture
+      // Hue: Limit to earthy/warm tones (20-50 for browns/oranges/reds, 180-220 for blues)
+      let hue = Math.abs(hash) % 360;
+      
+      // Adjust hue to be in appropriate ranges for Venetian architecture
+      if (hue > 50 && hue < 180) {
+        hue = 30 + (hue % 20); // Redirect to earthy tones
+      } else if (hue > 220 && hue < 350) {
+        hue = 200 + (hue % 20); // Redirect to Venetian blues
+      }
+      
+      // Saturation: Muted for period-appropriate look (30-60%)
+      const saturation = 30 + (Math.abs(hash >> 8) % 30);
+      
+      // Lightness: Medium to light for visibility (45-75%)
+      const lightness = 45 + (Math.abs(hash >> 16) % 30);
+      
+      return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    };
+    
+    // Special cases for common building types
     switch(type.toLowerCase()) {
       case 'market-stall':
-        return '#f5a442'; // Orange
+        return '#E6C275'; // Warm gold/amber for market stalls
       case 'house':
-        return '#e8c39e'; // Light tan for houses
+        return '#E8D2B5'; // Venetian terracotta/sand for houses
       case 'workshop':
-        return '#c77f3f'; // Brown for workshops
+        return '#A67D5D'; // Rich wood brown for workshops
       case 'warehouse':
-        return '#8c7f5d'; // Dark tan for warehouses
+        return '#8C7B68'; // Darker earthy brown for warehouses
       case 'tavern':
-        return '#d4a76a'; // Warm tan for taverns
+        return '#B5835A'; // Warm oak brown for taverns
       case 'church':
-        return '#f5f5f5'; // White for churches
+        return '#E6E6D9'; // Off-white/ivory for churches
       case 'palace':
-        return '#f5e7c1'; // Cream for palaces
+        return '#D9C7A7'; // Pale stone/marble for palaces
       case 'dock':
-        return '#8b7355'; // Wood brown for docks
+        return '#7D6C55'; // Dark wood brown for docks
+      case 'bridge':
+        return '#C9B18F'; // Stone bridge color
+      case 'gondola-station':
+        return '#5D7A8C'; // Blue-gray for gondola stations
       default:
-        return '#D2B48C'; // Tan (default)
+        // For any other building type, generate a deterministic color
+        return getColorFromType(type);
     }
   }
 
