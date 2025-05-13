@@ -17,7 +17,7 @@ import { getIncomeDataService } from '@/lib/services/IncomeDataService';
 export default function SimpleViewer({ qualityMode = 'high', waterQuality = 'high', activeView = 'land' }: {
   qualityMode: 'high' | 'performance';
   waterQuality?: 'high' | 'medium' | 'low';
-  activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge';
+  activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens';
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [polygons, setPolygons] = useState([]);
