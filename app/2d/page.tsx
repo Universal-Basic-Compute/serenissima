@@ -11,6 +11,7 @@ import BuildingsToolbar from '@/components/BuildingsView/BuildingsToolbar';
 import WalletButton from '@/components/UI/WalletButton';
 import ResourceDropdowns from '@/components/UI/ResourceDropdowns';
 import BuildingRendererManager from '@/components/BuildingsView/BuildingRendererManager';
+import BuildingMenu from '@/components/PolygonViewer/BuildingMenu';
 
 // Import the 2D viewer component with no SSR
 const IsometricViewer = dynamic(() => import('../../components/PolygonViewer/IsometricViewer'), {
