@@ -1501,12 +1501,12 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         // 30% smaller (2.8 instead of 4), with hover state and 20% more transparency
         ctx.beginPath();
         ctx.arc(isoPos.x, isoPos.y, pointSize, 0, Math.PI * 2);
-        
+    
         // Apply different opacity based on hover state
-        // Normal: 50% opacity, Hovered: 70% opacity (20% more opaque)
+        // Normal: 30% opacity, Hovered: 50% opacity (20% more transparent than before)
         ctx.fillStyle = isHovered 
-          ? 'rgba(255, 140, 0, 0.7)' // Hovered: 70% opacity
-          : 'rgba(255, 140, 0, 0.5)'; // Normal: 50% opacity
+          ? 'rgba(255, 140, 0, 0.5)' // Hovered: 50% opacity (was 0.7)
+          : 'rgba(255, 140, 0, 0.3)'; // Normal: 30% opacity (was 0.5)
         
         ctx.fill();
         
