@@ -367,7 +367,8 @@ export default function SimpleViewer({ qualityMode = 'high', waterQuality = 'hig
         // Handle land selection
         setSelectedPolygonId(landId);
       },
-      sandColor: 0xfff0c0 // Add this line to make land lighter and more yellow
+      sandColor: 0xfff0c0, // Add this line to make land lighter and more yellow
+      landOnly: false // Prevent duplicate land rendering since BaseSceneLayer handles it
     });
     polygonRendererRef.current = polygonRenderer;
     

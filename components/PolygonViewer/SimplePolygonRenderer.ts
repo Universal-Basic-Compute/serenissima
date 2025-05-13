@@ -58,6 +58,7 @@ export default class SimplePolygonRenderer {
   private sandColor: number = 0xfff5d0; // Default to even lighter, more yellow sand color
   private textureLoadAttempts: number = 0;
   private hasRenderedLand: boolean = false;
+  private options: SimplePolygonRendererProps & { landOnly?: boolean } = { scene: null, polygons: [], bounds: null };
   
   // Properties for hover and click detection
   private raycaster: THREE.Raycaster;
@@ -109,6 +110,16 @@ export default class SimplePolygonRenderer {
     sandColor?: number; // Add this to the type
     landOnly?: boolean; // New parameter
   }) {
+    // Store the landOnly option in this.options
+    this.options = {
+      scene,
+      polygons,
+      bounds,
+      positionManager: buildingPositionManager,
+      cacheService: buildingCacheService,
+      debug: false,
+      landOnly
+    };
     this.scene = scene;
     this.polygons = polygons;
     this.bounds = bounds;
@@ -403,6 +414,13 @@ export default class SimplePolygonRenderer {
       wireframe: false,
       flatShading: false
     });
+    
+    // Skip rendering land polygons if landOnly is false (BaseSceneLayer is handling it)
+    if (this.options.landOnly === false) {
+      console.log('Skipping land polygon rendering as BaseSceneLayer is handling it');
+      this.hasRenderedLand = true;
+      return;
+    }
     
     // Process each polygon
     this.polygons.forEach(polygon => {
