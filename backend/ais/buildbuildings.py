@@ -288,25 +288,25 @@ def send_building_strategy_request(ai_username: str, data_package: Dict) -> bool
             "Content-Type": "application/json"
         }
         
-        # Create a detailed prompt for the AI
+        # Create a detailed prompt that addresses the AI directly as the decision-maker
         prompt = f"""
-I need your help to develop a building strategy for maximizing income in La Serenissima.
+As a landowner in La Serenissima, you need to decide on your next building investment.
 
-Here is my current situation:
-- I own {len(data_package['lands'])} lands
-- I have {len(data_package['buildings'])} buildings
-- My current net income is {data_package['user']['financial']['net_income']} ducats
-- I have {data_package['user']['ducats']} ducats available
+Here's your current situation:
+- You own {len(data_package['lands'])} lands
+- You have {len(data_package['buildings'])} buildings
+- Your current net income is {data_package['user']['financial']['net_income']} ducats
+- You have {data_package['user']['ducats']} ducats available
 
-Please analyze the data provided and help me:
-1. Evaluate my current building portfolio
-2. Identify opportunities for new buildings that would maximize income
-3. Suggest specific building types and locations based on my lands
-4. Create a prioritized building plan that considers my available ducats
+What building would you like to construct next to maximize your income? Consider:
+1. Your current building portfolio
+2. Opportunities for new buildings that would increase your income
+3. Which of your lands would be best for new construction
+4. How to prioritize your building plan based on your available ducats
 
-Focus on maximizing income while maintaining a sustainable maintenance cost.
+Focus on maximizing your income while maintaining sustainable maintenance costs.
 
-IMPORTANT: At the end of your response, include a JSON object with your specific building recommendation:
+After your analysis, provide your building decision in this JSON format:
 ```json
 {{
   "building_type": "type-of-building-to-build",
@@ -315,7 +315,7 @@ IMPORTANT: At the end of your response, include a JSON object with your specific
 }}
 ```
 
-If you don't recommend building anything at this time, return an empty JSON object:
+If you decide not to build anything at this time, return an empty JSON object:
 ```json
 {{}}
 ```
@@ -323,24 +323,24 @@ If you don't recommend building anything at this time, return an empty JSON obje
         
         # Create system instructions with the detailed data
         system_instructions = f"""
-You are advising {ai_username}, an AI landowner in La Serenissima, on building strategy.
+You are {ai_username}, an AI landowner in La Serenissima. You make your own decisions about building strategy.
 
-Here is the complete data about their current situation:
+Here is the complete data about your current situation:
 {json.dumps(data_package, indent=2)}
 
-When developing your building strategy recommendations:
-1. Analyze which lands have the most building potential (consider building points and water access)
-2. Evaluate which building types would generate the most income based on their situation
+When developing your building strategy:
+1. Analyze which of your lands have the most building potential (consider building points and water access)
+2. Evaluate which building types would generate the most income for you
 3. Consider the maintenance costs of different building types
 4. Prioritize buildings that have the best income-to-maintenance ratio
 5. Create a specific, actionable plan with building types and target lands
-6. Consider the available ducats when making recommendations
+6. Consider your available ducats when making decisions
 
-Your advice should be specific, data-driven, and focused on maximizing income.
+Your decision should be specific, data-driven, and focused on maximizing your income.
 
-IMPORTANT: You must end your response with a JSON object containing your specific building recommendation.
-If you recommend building something, include the building_type, land_id, and reason.
-If you don't recommend building anything at this time, return an empty JSON object.
+IMPORTANT: You must end your response with a JSON object containing your specific building decision.
+If you decide to build something, include the building_type, land_id, and reason.
+If you decide not to build anything at this time, return an empty JSON object.
 """
         
         # Prepare the request payload
