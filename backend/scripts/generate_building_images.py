@@ -214,13 +214,17 @@ def process_building(building: Dict[str, Any], force_regenerate: bool = False) -
     # Create a safe filename from the building name
     safe_name = name.lower().replace(' ', '_').replace("'", '').replace('"', '')
     
+    # Convert category and subcategory to safe directory names (replace spaces with underscores)
+    safe_category = category.replace(' ', '_')
+    safe_subcategory = subcategory.replace(' ', '_')
+    
     # Determine the output directory structure
-    # Always use category/subcategory structure
-    if subcategory:
-        output_dir = os.path.join(BUILDINGS_IMAGE_DIR, category, subcategory)
+    # Always use category/subcategory structure with safe directory names
+    if safe_subcategory:
+        output_dir = os.path.join(BUILDINGS_IMAGE_DIR, safe_category, safe_subcategory)
     else:
         # If no subcategory, use just the category
-        output_dir = os.path.join(BUILDINGS_IMAGE_DIR, category)
+        output_dir = os.path.join(BUILDINGS_IMAGE_DIR, safe_category)
     
     # Create the output directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
