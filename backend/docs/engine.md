@@ -6,6 +6,26 @@ This document explains the automated processes that occur daily in the La Sereni
 
 The game engine runs several automated processes at scheduled times throughout the day to simulate the living economy of Renaissance Venice. These processes occur without requiring player intervention.
 
+### Building Maintenance Collection (7:00 AM UTC)
+
+**Script**: `backend/engine/pay_building_maintenance.py`
+
+Every day at 7:00 AM UTC, the building maintenance collection system processes maintenance costs for all buildings:
+
+1. The script identifies all buildings in the system
+2. For each building:
+   - It looks up the building type's JSON file to find the maintenance cost
+   - It identifies the building owner
+   - It deducts the maintenance cost from the owner's Ducats balance
+   - It transfers the maintenance cost to the Consiglio dei Dieci
+3. If an owner has insufficient funds, the system logs the missed payment
+4. Transaction records are created for all maintenance payments
+5. Notifications are sent to:
+   - Building owners summarizing maintenance costs paid for their buildings
+   - Administrators with statistics about total maintenance collected
+
+This process simulates the ongoing costs of maintaining buildings in Renaissance Venice, ensuring that building ownership requires financial responsibility beyond the initial construction cost.
+
 ### Treasury Redistribution (8:00 AM UTC)
 
 **Script**: `backend/engine/treasuryRedistribution.py`

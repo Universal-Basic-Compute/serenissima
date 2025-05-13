@@ -35,6 +35,7 @@ def run_scheduled_tasks():
             
             # Map of hours (UTC) to tasks
             tasks = {
+                7: ("engine/pay_building_maintenance.py", "Building maintenance collection"),
                 8: ("engine/treasuryRedistribution.py", "Treasury redistribution"),
                 9: ("engine/distributeLeases.py", "Lease distribution"),
                 10: ("engine/citizensgetjobs.py", "Citizen job assignment"),
