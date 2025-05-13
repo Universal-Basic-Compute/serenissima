@@ -918,7 +918,14 @@ export default function SimpleViewer({ qualityMode = 'high', waterQuality = 'hig
     if (waterRef.current) {
       waterRef.current.setQuality(qualityMode === 'high' ? 'high' : 'medium');
     }
-  }, [qualityMode]);
+    
+    // Also notify BaseSceneLayer about quality change
+    if (waterQuality) {
+      window.dispatchEvent(new CustomEvent('waterQualityChanged', {
+        detail: { waterQuality }
+      }));
+    }
+  }, [qualityMode, waterQuality]);
   
   
   // Update quality mode when it changes from parent

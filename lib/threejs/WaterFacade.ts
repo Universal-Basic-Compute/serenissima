@@ -166,7 +166,7 @@ export class WaterFacade {
         throw error; // Will be caught by the outer try/catch
       });
 
-      console.log('Creating water with color:', '#' + this.color.toString(16).padStart(6, '0'));
+      console.log(`Creating water with size: ${this.size}, quality: ${this.quality}, position: ${JSON.stringify(this.position)}, color: #${this.color.toString(16).padStart(6, '0')}`);
       
       // Water material
       const water = new Water(
@@ -220,6 +220,9 @@ export class WaterFacade {
       
       // Set render order to ensure water renders before land
       water.renderOrder = 0;
+      
+      // Ensure water is visible
+      water.visible = true;
       
       return water;
     } catch (error) {
@@ -565,6 +568,12 @@ export class WaterFacade {
     }
     
     this.lastUpdateTime = currentTime;
+    
+    // Force water to be visible
+    if (this.water && !this.water.visible) {
+      console.log('Water was invisible, making it visible');
+      this.water.visible = true;
+    }
     
     try {
       if (this.water.material instanceof THREE.ShaderMaterial) {
