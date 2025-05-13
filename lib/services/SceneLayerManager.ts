@@ -4,6 +4,13 @@ import { eventBus, EventTypes } from '../eventBus';
 // Import other dependencies
 import { buildingRendererManager } from './BuildingRendererManager';
 
+// Extend the EventTypes interface to include SCENE_BASE_RENDERED
+declare module '../eventBus' {
+  interface EventTypes {
+    SCENE_BASE_RENDERED: string;
+  }
+}
+
 // Define the SCENE_BASE_RENDERED event type
 // This needs to be defined before it's used
 if (!EventTypes.SCENE_BASE_RENDERED) {
