@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import traceback
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple, Any
 import requests
@@ -288,6 +289,12 @@ def send_building_strategy_request(ai_username: str, data_package: Dict) -> Opti
             "Content-Type": "application/json"
         }
         
+        # Log the API request details
+        print(f"Sending building strategy request to AI user {ai_username}")
+        print(f"API URL: {url}")
+        print(f"User has {data_package['user']['ducats']} ducats")
+        print(f"User owns {len(data_package['lands'])} lands and {len(data_package['buildings'])} buildings")
+        
         # Create a detailed prompt that addresses the AI directly as the decision-maker
         prompt = f"""
 As a landowner in La Serenissima, you need to decide on your next building investment.
@@ -352,19 +359,28 @@ If you decide not to build anything at this time, return an empty JSON object.
         }
         
         # Make the API request
+        print(f"Making API request to Kinos for {ai_username}...")
         response = requests.post(url, headers=headers, json=payload)
+        
+        # Log the API response details
+        print(f"API response status code: {response.status_code}")
         
         # Check if the request was successful
         if response.status_code == 200 or response.status_code == 201:
             response_data = response.json()
             status = response_data.get("status")
             
+            print(f"API response status: {status}")
+            
             if status == "completed":
                 print(f"Successfully sent building strategy request to AI user {ai_username}")
                 
                 # Get the AI's response
+                print(f"Fetching messages for {ai_username}...")
                 messages_url = f"https://api.kinos-engine.ai/v2/blueprints/{blueprint}/kins/{ai_username}/channels/system/messages"
                 messages_response = requests.get(messages_url, headers=headers)
+                
+                print(f"Messages API response status code: {messages_response.status_code}")
                 
                 if messages_response.status_code == 200:
                     messages_data = messages_response.json()
@@ -375,13 +391,17 @@ If you decide not to build anything at this time, return an empty JSON object.
                         if msg.get("role") == "assistant"
                     ]
                     
+                    print(f"Found {len(assistant_messages)} assistant messages")
+                    
                     if assistant_messages:
                         # Sort by timestamp (newest first)
                         assistant_messages.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
                         latest_message = assistant_messages[0]
                         
                         # Log the AI's response
-                        print(f"AI {ai_username} response: {latest_message.get('content')}")
+                        content = latest_message.get('content', '')
+                        print(f"AI {ai_username} response length: {len(content)} characters")
+                        print(f"AI {ai_username} response preview: {content[:200]}...")
                         
                         # Try to extract the JSON decision from the response
                         try:
@@ -392,6 +412,8 @@ If you decide not to build anything at this time, return an empty JSON object.
                             
                             if json_match:
                                 json_str = json_match.group(1)
+                                print(f"Found JSON in response: {json_str}")
+                                
                                 decision = json.loads(json_str)
                                 
                                 # Log the decision
@@ -412,11 +434,18 @@ If you decide not to build anything at this time, return an empty JSON object.
                                     print(f"AI {ai_username} decided not to build anything at this time")
                                     return {}
                             else:
-                                print(f"No JSON decision found in AI response")
+                                print(f"No JSON decision found in AI response. Full response:")
+                                print(content)
                                 return None
                         except Exception as e:
                             print(f"Error extracting decision from AI response: {str(e)}")
+                            print(f"Full response content that caused the error:")
+                            print(content)
                             return None
+                    else:
+                        print(f"No assistant messages found for {ai_username}")
+                else:
+                    print(f"Error fetching messages: {messages_response.text}")
                 
                 return None
             else:
@@ -427,6 +456,7 @@ If you decide not to build anything at this time, return an empty JSON object.
             return None
     except Exception as e:
         print(f"Error sending building strategy request to AI user {ai_username}: {str(e)}")
+        print(f"Exception traceback: {traceback.format_exc()}")
         return None
 
 def create_admin_notification(tables, ai_strategy_results: Dict[str, bool]) -> None:
@@ -624,10 +654,13 @@ def send_building_placement_request(ai_username: str, decision: Dict, polygon_da
     try:
         if not decision or "building_type" not in decision or "land_id" not in decision:
             print(f"No valid building decision from AI {ai_username}, skipping placement request")
+            print(f"Decision data: {json.dumps(decision)}")
             return False
         
         building_type = decision["building_type"]
         land_id = decision["land_id"]
+        
+        print(f"Processing building placement for {ai_username}: {building_type} on land {land_id}")
         
         # Determine which point type is needed for this building
         point_type = "land"  # Default for most buildings
@@ -636,14 +669,28 @@ def send_building_placement_request(ai_username: str, decision: Dict, polygon_da
         elif building_type == "bridge":
             point_type = "bridge"
         
+        print(f"Building {building_type} requires point type: {point_type}")
+        
         # Filter available points by land_id and point_type
         filtered_points = [
             point for point in available_points[point_type]
             if point["polygon_id"] == land_id
         ]
         
+        print(f"Found {len(filtered_points)} available {point_type} points for land {land_id}")
+        
         if not filtered_points:
             print(f"No available {point_type} points found for land {land_id}, cannot place {building_type}")
+            print(f"Available points summary:")
+            for pt_type, points in available_points.items():
+                print(f"  - {pt_type}: {len(points)} points")
+                land_counts = {}
+                for pt in points:
+                    land_id = pt.get("polygon_id", "unknown")
+                    if land_id not in land_counts:
+                        land_counts[land_id] = 0
+                    land_counts[land_id] += 1
+                print(f"    Points by land: {land_counts}")
             return False
         
         # Get building type details
@@ -652,6 +699,8 @@ def send_building_placement_request(ai_username: str, decision: Dict, polygon_da
             "name": building_type.capitalize(),
             "shortDescription": f"A {building_type}"
         })
+        
+        print(f"Building type info: {json.dumps(building_type_info)}")
         
         api_key = get_kinos_api_key()
         blueprint = "serenissima-ai"
@@ -710,19 +759,28 @@ Your response must be a JSON object with:
         }
         
         # Make the API request
+        print(f"Making building placement API request to Kinos for {ai_username}...")
         response = requests.post(url, headers=headers, json=payload)
+        
+        # Log the API response details
+        print(f"Building placement API response status code: {response.status_code}")
         
         # Check if the request was successful
         if response.status_code == 200 or response.status_code == 201:
             response_data = response.json()
             status = response_data.get("status")
             
+            print(f"Building placement API response status: {status}")
+            
             if status == "completed":
                 print(f"Successfully sent building placement request to AI user {ai_username}")
                 
                 # Get the AI's response
+                print(f"Fetching placement messages for {ai_username}...")
                 messages_url = f"https://api.kinos-engine.ai/v2/blueprints/{blueprint}/kins/{ai_username}/channels/system/messages"
                 messages_response = requests.get(messages_url, headers=headers)
+                
+                print(f"Placement messages API response status code: {messages_response.status_code}")
                 
                 if messages_response.status_code == 200:
                     messages_data = messages_response.json()
@@ -733,13 +791,17 @@ Your response must be a JSON object with:
                         if msg.get("role") == "assistant"
                     ]
                     
+                    print(f"Found {len(assistant_messages)} assistant messages for placement")
+                    
                     if assistant_messages:
                         # Sort by timestamp (newest first)
                         assistant_messages.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
                         latest_message = assistant_messages[0]
                         
                         # Log the AI's response
-                        print(f"AI {ai_username} placement response: {latest_message.get('content')}")
+                        content = latest_message.get('content', '')
+                        print(f"AI {ai_username} placement response length: {len(content)} characters")
+                        print(f"AI {ai_username} placement response preview: {content[:200]}...")
                         
                         # Try to extract the JSON decision from the response
                         try:
@@ -750,6 +812,8 @@ Your response must be a JSON object with:
                             
                             if json_match:
                                 json_str = json_match.group(1)
+                                print(f"Found JSON in placement response: {json_str}")
+                                
                                 placement_decision = json.loads(json_str)
                                 
                                 # Log the decision
@@ -770,6 +834,7 @@ Your response must be a JSON object with:
                                         # Now we need to create the building
                                         # 1. Get the construction cost for this building type
                                         construction_cost = building_type_info.get("constructionCost", 0)
+                                        print(f"Construction cost for {building_type}: {construction_cost} ducats")
                                         
                                         # 2. Check if the user has enough ducats
                                         from app.user_utils import find_user_by_identifier
@@ -784,6 +849,7 @@ Your response must be a JSON object with:
                                             return False
                                         
                                         user_ducats = user_record["fields"].get("Ducats", 0)
+                                        print(f"User {ai_username} has {user_ducats} ducats")
                                         
                                         if user_ducats < construction_cost:
                                             print(f"User {ai_username} does not have enough ducats to build {building_type}. Required: {construction_cost}, Available: {user_ducats}")
@@ -798,13 +864,16 @@ Your response must be a JSON object with:
                                         
                                         consiglio_record = consiglio_records[0]
                                         consiglio_ducats = consiglio_record["fields"].get("Ducats", 0)
+                                        print(f"ConsiglioDeiDieci has {consiglio_ducats} ducats before transfer")
                                         
                                         # Update user's ducats
+                                        print(f"Updating {ai_username}'s ducats from {user_ducats} to {user_ducats - construction_cost}")
                                         tables["users"].update(user_record["id"], {
                                             "Ducats": user_ducats - construction_cost
                                         })
                                         
                                         # Update ConsiglioDeiDieci's ducats
+                                        print(f"Updating ConsiglioDeiDieci's ducats from {consiglio_ducats} to {consiglio_ducats + construction_cost}")
                                         tables["users"].update(consiglio_record["id"], {
                                             "Ducats": consiglio_ducats + construction_cost
                                         })
@@ -859,7 +928,12 @@ Your response must be a JSON object with:
                                             })
                                         }
                                         
-                                        tables["notifications"].create(notification)
+                                        try:
+                                            tables["notifications"].create(notification)
+                                            print(f"Created notification for {ai_username} about new building")
+                                        except Exception as notification_error:
+                                            print(f"Error creating notification: {str(notification_error)}")
+                                            # Continue even if notification creation fails
                                         
                                         return True
                                     else:
@@ -867,9 +941,17 @@ Your response must be a JSON object with:
                                 else:
                                     print(f"No selected_point_index in placement decision")
                             else:
-                                print(f"No JSON decision found in AI placement response")
+                                print(f"No JSON decision found in AI placement response. Full response:")
+                                print(content)
                         except Exception as e:
                             print(f"Error extracting placement decision from AI response: {str(e)}")
+                            print(f"Exception traceback: {traceback.format_exc()}")
+                            print(f"Full response content that caused the error:")
+                            print(content)
+                    else:
+                        print(f"No assistant messages found for placement for {ai_username}")
+                else:
+                    print(f"Error fetching placement messages: {messages_response.text}")
                 
                 return False
             else:
@@ -880,23 +962,45 @@ Your response must be a JSON object with:
             return False
     except Exception as e:
         print(f"Error sending building placement request to AI user {ai_username}: {str(e)}")
+        print(f"Exception traceback: {traceback.format_exc()}")
         return False
 
 def process_ai_building_strategies(dry_run: bool = False):
     """Main function to process AI building strategies."""
     print(f"Starting AI building strategy process (dry_run={dry_run})")
     
+    # Import traceback for detailed error logging
+    import traceback
+    
     # Initialize Airtable connection
-    tables = initialize_airtable()
+    try:
+        tables = initialize_airtable()
+        print("Successfully initialized Airtable connection")
+    except Exception as e:
+        print(f"Failed to initialize Airtable: {str(e)}")
+        print(f"Exception traceback: {traceback.format_exc()}")
+        return
     
     # Get AI users
-    ai_users = get_ai_users(tables)
-    if not ai_users:
-        print("No AI users found, exiting")
+    try:
+        ai_users = get_ai_users(tables)
+        if not ai_users:
+            print("No AI users found, exiting")
+            return
+        print(f"Successfully retrieved {len(ai_users)} AI users")
+    except Exception as e:
+        print(f"Failed to get AI users: {str(e)}")
+        print(f"Exception traceback: {traceback.format_exc()}")
         return
     
     # Get all buildings for reference
-    all_buildings = get_all_buildings(tables)
+    try:
+        all_buildings = get_all_buildings(tables)
+        print(f"Successfully retrieved {len(all_buildings)} buildings")
+    except Exception as e:
+        print(f"Failed to get all buildings: {str(e)}")
+        print(f"Exception traceback: {traceback.format_exc()}")
+        return
     
     # Track results for each AI
     ai_strategy_results = {}
@@ -905,51 +1009,90 @@ def process_ai_building_strategies(dry_run: bool = False):
     for ai_user in ai_users:
         ai_username = ai_user["fields"].get("Username")
         if not ai_username:
+            print("Skipping AI user with no username")
             continue
         
+        print(f"\n{'='*80}")
         print(f"Processing AI user: {ai_username}")
+        print(f"{'='*80}")
         
-        # Get lands owned by this AI
-        user_lands = get_user_lands(tables, ai_username)
-        
-        # Get buildings owned by this AI
-        user_buildings = get_user_buildings(tables, ai_username)
-        
-        # Get polygon data for this user's lands
-        polygon_data = get_polygon_data_for_user(ai_username, user_lands)
-        
-        # Get available building points
-        available_points = get_available_building_points(polygon_data, user_buildings)
-        
-        # Check if there are any available building points
-        total_points = sum(len(points) for points in available_points.values())
-        if total_points == 0:
-            print(f"No available building points for AI user {ai_username}, skipping")
-            ai_strategy_results[ai_username] = False
-            continue
-        
-        # Prepare the data package for the AI
-        data_package = prepare_ai_building_strategy(ai_user, user_lands, user_buildings, all_buildings)
-        
-        # Send the building strategy request to the AI
-        if not dry_run:
-            # First call: Get building decision
-            decision = send_building_strategy_request(ai_username, data_package)
+        try:
+            # Get lands owned by this AI
+            user_lands = get_user_lands(tables, ai_username)
+            print(f"Retrieved {len(user_lands)} lands for {ai_username}")
             
-            if decision:
-                # Second call: Get placement decision
-                building_types = get_building_types_from_api()
-                placement_success = send_building_placement_request(
-                    ai_username, 
-                    decision, 
-                    polygon_data, 
-                    available_points,
-                    building_types
-                )
-                
-                ai_strategy_results[ai_username] = placement_success
-            else:
+            if not user_lands:
+                print(f"AI user {ai_username} has no lands, skipping")
                 ai_strategy_results[ai_username] = False
+                continue
+            
+            # Get buildings owned by this AI
+            user_buildings = get_user_buildings(tables, ai_username)
+            print(f"Retrieved {len(user_buildings)} buildings for {ai_username}")
+            
+            # Get polygon data for this user's lands
+            polygon_data = get_polygon_data_for_user(ai_username, user_lands)
+            print(f"Retrieved polygon data for {len(polygon_data)} lands")
+            
+            # Get available building points
+            available_points = get_available_building_points(polygon_data, user_buildings)
+            
+            # Check if there are any available building points
+            total_points = sum(len(points) for points in available_points.values())
+            print(f"Found {total_points} total available building points for {ai_username}")
+            
+            if total_points == 0:
+                print(f"No available building points for AI user {ai_username}, skipping")
+                ai_strategy_results[ai_username] = False
+                continue
+            
+            # Prepare the data package for the AI
+            data_package = prepare_ai_building_strategy(ai_user, user_lands, user_buildings, all_buildings)
+            print(f"Prepared data package for {ai_username}")
+            
+            # Send the building strategy request to the AI
+            if not dry_run:
+                print(f"\n{'-'*80}")
+                print(f"STEP 1: Get building decision for {ai_username}")
+                print(f"{'-'*80}")
+                
+                # First call: Get building decision
+                decision = send_building_strategy_request(ai_username, data_package)
+                
+                if decision is not None:
+                    print(f"\n{'-'*80}")
+                    print(f"STEP 2: Get placement decision for {ai_username}")
+                    print(f"{'-'*80}")
+                    
+                    # Second call: Get placement decision
+                    building_types = get_building_types_from_api()
+                    placement_success = send_building_placement_request(
+                        ai_username, 
+                        decision, 
+                        polygon_data, 
+                        available_points,
+                        building_types
+                    )
+                    
+                    ai_strategy_results[ai_username] = placement_success
+                    print(f"Building strategy for {ai_username} completed with result: {'SUCCESS' if placement_success else 'FAILED'}")
+                else:
+                    print(f"No valid building decision received for {ai_username}")
+                    ai_strategy_results[ai_username] = False
+            else:
+                # In dry run mode, just log what would happen
+                print(f"[DRY RUN] Would send building strategy request to AI user {ai_username}")
+                print(f"[DRY RUN] Data package summary:")
+                print(f"  - User: {data_package['user']['username']}")
+                print(f"  - Lands: {len(data_package['lands'])}")
+                print(f"  - Buildings: {len(data_package['buildings'])}")
+                print(f"  - Net Income: {data_package['user']['financial']['net_income']}")
+                print(f"  - Available building points: {total_points}")
+                ai_strategy_results[ai_username] = True
+        except Exception as e:
+            print(f"Error processing AI user {ai_username}: {str(e)}")
+            print(f"Exception traceback: {traceback.format_exc()}")
+            ai_strategy_results[ai_username] = False
         else:
             # In dry run mode, just log what would happen
             print(f"[DRY RUN] Would send building strategy request to AI user {ai_username}")
@@ -963,11 +1106,22 @@ def process_ai_building_strategies(dry_run: bool = False):
     
     # Create admin notification with summary
     if not dry_run and ai_strategy_results:
-        create_admin_notification(tables, ai_strategy_results)
+        try:
+            create_admin_notification(tables, ai_strategy_results)
+            print("Created admin notification with AI building strategy results")
+        except Exception as e:
+            print(f"Error creating admin notification: {str(e)}")
+            print(f"Exception traceback: {traceback.format_exc()}")
     else:
         print(f"[DRY RUN] Would create admin notification with strategy results: {ai_strategy_results}")
     
-    print("AI building strategy process completed")
+    # Print final summary
+    print("\nAI Building Strategy Results Summary:")
+    for ai_name, success in ai_strategy_results.items():
+        status = "SUCCESS" if success else "FAILED"
+        print(f"- {ai_name}: {status}")
+    
+    print("\nAI building strategy process completed")
 
 if __name__ == "__main__":
     # Check if this is a dry run
