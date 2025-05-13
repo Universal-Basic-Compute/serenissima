@@ -739,6 +739,15 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     return inside;
   }
 
+  // Define isometric projection functions at the component level
+  const calculateIsoX = (x: number, y: number, currentScale: number, currentOffset: {x: number, y: number}, canvasWidth: number) => {
+    return (-x) * currentScale + canvasWidth / 2 + currentOffset.x; // Negate x to fix the east-west orientation
+  };
+  
+  const calculateIsoY = (x: number, y: number, currentScale: number, currentOffset: {x: number, y: number}, canvasHeight: number) => {
+    return (-y) * currentScale * 1.4 + canvasHeight / 2 + currentOffset.y; // Multiply by 1.4 to stretch vertically
+  };
+
   // Draw the isometric view
   useEffect(() => {
     if (loading || !canvasRef.current || polygons.length === 0) return;
@@ -761,9 +770,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Calculate isometric projection - modified to make north up with proper aspect ratio
-    const isoX = (x: number, y: number) => (-x) * scale + canvas.width / 2 + offset.x; // Negate x to fix the east-west orientation
-    const isoY = (x: number, y: number) => (-y) * scale * 1.4 + canvas.height / 2 + offset.y; // Multiply by 1.4 to stretch vertically
+    // Create local shorthand functions that use the current state values
+    const isoX = (x: number, y: number) => calculateIsoX(x, y, scale, offset, canvas.width);
+    const isoY = (x: number, y: number) => calculateIsoY(x, y, scale, offset, canvas.height);
     
     // Draw water background
     ctx.fillStyle = '#87CEEB';
