@@ -12,31 +12,43 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
   const [isVisible, setIsVisible] = useState(false);
   const [building, setBuilding] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null); // Add error state
   
   // Fetch building details when a building is selected
   useEffect(() => {
     if (selectedBuildingId) {
       setIsLoading(true);
+      setError(null); // Reset error state when fetching new building
       
       fetch(`/api/buildings/${selectedBuildingId}`)
         .then(response => {
           if (!response.ok) {
+            if (response.status === 404) {
+              throw new Error(`Building not found (ID: ${selectedBuildingId})`);
+            }
             throw new Error(`Failed to fetch building: ${response.status} ${response.statusText}`);
           }
           return response.json();
         })
         .then(data => {
           console.log('Building data:', data);
-          setBuilding(data.building);
+          if (data && data.building) {
+            setBuilding(data.building);
+          } else {
+            throw new Error('Invalid building data format');
+          }
         })
         .catch(error => {
           console.error('Error fetching building details:', error);
+          setError(error.message || 'Failed to load building details');
+          setBuilding(null); // Clear building data on error
         })
         .finally(() => {
           setIsLoading(false);
         });
     } else {
       setBuilding(null);
+      setError(null);
     }
   }, [selectedBuildingId]);
   
@@ -62,7 +74,7 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
         {/* Header with improved styling */}
         <div className="flex justify-between items-center mb-6 border-b-2 border-amber-300 pb-3">
           <h2 className="text-2xl font-serif font-semibold text-amber-800">
-            {building?.type ? `${building.type} Details` : 'Building Details'}
+            {!isLoading && !error && building ? `${building.type} Details` : 'Building Details'}
           </h2>
           <button 
             onClick={onClose}
@@ -74,11 +86,25 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
           </button>
         </div>
         
+        {/* Error message */}
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 p-4 rounded-lg mb-4">
+            <h3 className="font-bold mb-1">Error</h3>
+            <p>{error}</p>
+            <button 
+              onClick={onClose}
+              className="mt-3 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        )}
+        
         {isLoading ? (
           <div className="flex-grow flex items-center justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-600"></div>
           </div>
-        ) : building ? (
+        ) : !error && building ? (
           <div className="space-y-6 overflow-y-auto flex-grow">
             {/* Building Type */}
             <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
@@ -182,7 +208,9 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
           </div>
         ) : (
           <div className="flex-grow flex items-center justify-center">
-            <p className="text-gray-500 italic">No building selected</p>
+            <p className="text-gray-500 italic">
+              {error ? 'Unable to load building details' : 'No building selected'}
+            </p>
           </div>
         )}
         
