@@ -383,112 +383,40 @@ If you decide not to build anything at this time, return an empty JSON object.
                 
                 # Try to extract the JSON decision from the response
                 try:
-                    # Look for JSON block in the response with a more direct approach
+                    # Simple direct string extraction for the key fields
                     import re
                     
-                    # Print the full content for debugging
-                    print(f"Full content length: {len(content)}")
-                    print(f"Content excerpt: {content[:100]}...")
-                    print(f"Content end excerpt: {content[-100:]}...")
-                    
-                    # First try to find the JSON block directly
-                    if "```json" in content and "```" in content[content.index("```json")+7:]:
-                        start_idx = content.index("```json") + 7
-                        end_idx = content.index("```", start_idx)
-                        json_str = content[start_idx:end_idx].strip()
-                        print(f"Extracted JSON using direct string search: {json_str[:100]}...")
-                    else:
-                        # Fall back to regex if direct search fails
-                        json_match = re.search(r'```json\s*([\s\S]*?)\s*```', content, re.DOTALL)
+                    # Extract building_type
+                    building_type_match = re.search(r'"building_type"\s*:\s*"([^"]+)"', content)
+                    if building_type_match:
+                        building_type = building_type_match.group(1)
                         
-                        if not json_match:
-                            # If that fails, try looking for any JSON-like object with building_type and land_id
-                            json_match = re.search(r'\{\s*"building_type"\s*:\s*"[^"]+"\s*,\s*"land_id"\s*:\s*"[^"]+"\s*', content, re.DOTALL)
-                        
-                        if json_match:
-                            json_str = json_match.group(1).strip() if json_match.groups() else content[json_match.start():].strip()
+                        # Extract land_id
+                        land_id_match = re.search(r'"land_id"\s*:\s*"([^"]+)"', content)
+                        if land_id_match:
+                            land_id = land_id_match.group(1)
                             
-                            # Find the closing brace to complete the JSON object if needed
-                            if json_str.count('{') > json_str.count('}'):
-                                remaining = content[json_match.end():]
-                                closing_brace_pos = remaining.find('}')
-                                if closing_brace_pos >= 0:
-                                    json_str += remaining[:closing_brace_pos+1]
+                            # Extract reason (optional)
+                            reason_match = re.search(r'"reason"\s*:\s*"([^"]+)"', content)
+                            reason = reason_match.group(1) if reason_match else "No reason provided"
                             
-                            print(f"Extracted JSON using regex: {json_str[:100]}...")
-                        else:
-                            # Last resort: try to find any JSON object in the content
-                            start_idx = content.find('{')
-                            if start_idx >= 0:
-                                # Find the matching closing brace
-                                brace_count = 1
-                                end_idx = start_idx + 1
-                                while end_idx < len(content) and brace_count > 0:
-                                    if content[end_idx] == '{':
-                                        brace_count += 1
-                                    elif content[end_idx] == '}':
-                                        brace_count -= 1
-                                    end_idx += 1
-                                
-                                if brace_count == 0:
-                                    json_str = content[start_idx:end_idx].strip()
-                                    print(f"Extracted JSON using brace matching: {json_str[:100]}...")
-                                else:
-                                    print("Failed to find matching JSON braces")
-                                    return None
-                            else:
-                                print("No JSON object found in content")
-                                return None
-                    
-                    # Try to parse the JSON
-                    try:
-                        decision = json.loads(json_str)
-                        print(f"Successfully parsed JSON decision: {json.dumps(decision)}")
-                    except json.JSONDecodeError as e:
-                        print(f"JSON parsing error: {str(e)}")
-                        # If parsing fails, try to clean the string
-                        cleaned_json = json_str.replace('\n', ' ').replace('\r', '').replace("'", '"').strip()
-                        # Make sure it's a complete JSON object
-                        if not cleaned_json.endswith('}'):
-                            cleaned_json += '}'
-                        try:
-                            decision = json.loads(cleaned_json)
-                            print(f"Successfully parsed cleaned JSON: {json.dumps(decision)}")
-                        except Exception as e2:
-                            print(f"Cleaned JSON parsing error: {str(e2)}")
-                            # If all else fails, manually extract the fields
-                            building_type_match = re.search(r'"building_type"\s*:\s*"([^"]+)"', json_str)
-                            land_id_match = re.search(r'"land_id"\s*:\s*"([^"]+)"', json_str)
-                            reason_match = re.search(r'"reason"\s*:\s*"([^"]+)"', json_str)
+                            # Create the decision dictionary
+                            decision = {
+                                "building_type": building_type,
+                                "land_id": land_id,
+                                "reason": reason
+                            }
                             
-                            if building_type_match and land_id_match:
-                                decision = {
-                                    "building_type": building_type_match.group(1),
-                                    "land_id": land_id_match.group(1),
-                                    "reason": reason_match.group(1) if reason_match else "No reason provided"
-                                }
-                                print(f"Manually extracted decision: {json.dumps(decision)}")
-                            else:
-                                print("Failed to extract required fields from JSON")
-                                return None
+                            print(f"AI {ai_username} decision: {json.dumps(decision)}")
+                            print(f"AI {ai_username} wants to build a {building_type} on land {land_id}")
+                            print(f"Reason: {reason}")
+                            
+                            return decision
                     
-                    # Log the decision
-                    print(f"AI {ai_username} decision: {json.dumps(decision)}")
-                    
-                    # If there's a building decision, return it
-                    if decision and "building_type" in decision and "land_id" in decision:
-                        building_type = decision["building_type"]
-                        land_id = decision["land_id"]
-                        reason = decision.get("reason", "No reason provided")
-                        
-                        print(f"AI {ai_username} wants to build a {building_type} on land {land_id}")
-                        print(f"Reason: {reason}")
-                        
-                        # Return the decision
-                        return decision
-                    else:
-                        print(f"AI {ai_username} decided not to build anything at this time")
-                        return {}
+                    # If we get here, no valid decision was found
+                    print(f"No valid building decision found in AI response. Full response:")
+                    print(content)
+                    return None
                 except Exception as e:
                     print(f"Error extracting decision from AI response: {str(e)}")
                     print(f"Full response content that caused the error:")
@@ -830,99 +758,32 @@ Your response must be a JSON object with:
                 
                 # Try to extract the JSON decision from the response
                 try:
-                    # Look for JSON block in the response with a more direct approach
+                    # Simple direct string extraction for the key fields
                     import re
                     
-                    # Print the full content for debugging
-                    print(f"Full content length: {len(content)}")
-                    print(f"Content excerpt: {content[:100]}...")
-                    print(f"Content end excerpt: {content[-100:]}...")
-                    
-                    # First try to find the JSON block directly
-                    if "```json" in content and "```" in content[content.index("```json")+7:]:
-                        start_idx = content.index("```json") + 7
-                        end_idx = content.index("```", start_idx)
-                        json_str = content[start_idx:end_idx].strip()
-                        print(f"Extracted JSON using direct string search: {json_str[:100]}...")
-                    else:
-                        # Fall back to regex if direct search fails
-                        json_match = re.search(r'```json\s*([\s\S]*?)\s*```', content, re.DOTALL)
+                    # Extract selected_point_index
+                    index_match = re.search(r'"selected_point_index"\s*:\s*(\d+)', content)
+                    if index_match:
+                        selected_index = int(index_match.group(1))
                         
-                        if not json_match:
-                            # If that fails, try looking for any JSON-like object with selected_point_index
-                            json_match = re.search(r'\{\s*"selected_point_index"\s*:\s*\d+', content, re.DOTALL)
+                        # Extract reason (optional)
+                        reason_match = re.search(r'"reason"\s*:\s*"([^"]+)"', content)
+                        reason = reason_match.group(1) if reason_match else "No reason provided"
                         
-                        if json_match:
-                            json_str = json_match.group(1).strip() if json_match.groups() else content[json_match.start():].strip()
-                            
-                            # Find the closing brace to complete the JSON object if needed
-                            if json_str.count('{') > json_str.count('}'):
-                                remaining = content[json_match.end():]
-                                closing_brace_pos = remaining.find('}')
-                                if closing_brace_pos >= 0:
-                                    json_str += remaining[:closing_brace_pos+1]
-                            
-                            print(f"Extracted JSON using regex: {json_str[:100]}...")
-                        else:
-                            # Last resort: try to find any JSON object in the content
-                            start_idx = content.find('{')
-                            if start_idx >= 0:
-                                # Find the matching closing brace
-                                brace_count = 1
-                                end_idx = start_idx + 1
-                                while end_idx < len(content) and brace_count > 0:
-                                    if content[end_idx] == '{':
-                                        brace_count += 1
-                                    elif content[end_idx] == '}':
-                                        brace_count -= 1
-                                    end_idx += 1
-                                
-                                if brace_count == 0:
-                                    json_str = content[start_idx:end_idx].strip()
-                                    print(f"Extracted JSON using brace matching: {json_str[:100]}...")
-                                else:
-                                    print("Failed to find matching JSON braces")
-                                    return False
-                            else:
-                                print("No JSON object found in content")
-                                return False
-                    
-                    # Try to parse the JSON
-                    try:
-                        placement_decision = json.loads(json_str)
-                        print(f"Successfully parsed JSON placement decision: {json.dumps(placement_decision)}")
-                    except json.JSONDecodeError as e:
-                        print(f"JSON parsing error: {str(e)}")
-                        # If parsing fails, try to clean the string
-                        cleaned_json = json_str.replace('\n', ' ').replace('\r', '').replace("'", '"').strip()
-                        # Make sure it's a complete JSON object
-                        if not cleaned_json.endswith('}'):
-                            cleaned_json += '}'
-                        try:
-                            placement_decision = json.loads(cleaned_json)
-                            print(f"Successfully parsed cleaned JSON: {json.dumps(placement_decision)}")
-                        except Exception as e2:
-                            print(f"Cleaned JSON parsing error: {str(e2)}")
-                            # If all else fails, manually extract the fields
-                            selected_point_index_match = re.search(r'"selected_point_index"\s*:\s*(\d+)', json_str)
-                            reason_match = re.search(r'"reason"\s*:\s*"([^"]+)"', json_str)
-                            
-                            if selected_point_index_match:
-                                placement_decision = {
-                                    "selected_point_index": int(selected_point_index_match.group(1)),
-                                    "reason": reason_match.group(1) if reason_match else "No reason provided"
-                                }
-                                print(f"Manually extracted placement decision: {json.dumps(placement_decision)}")
-                            else:
-                                print("Failed to extract required fields from JSON")
-                                return False
+                        # Create the placement decision dictionary
+                        placement_decision = {
+                            "selected_point_index": selected_index,
+                            "reason": reason
+                        }
                         
-                        # Log the decision
                         print(f"AI {ai_username} placement decision: {json.dumps(placement_decision)}")
                         
-                        # Check if the decision is valid
-                        if "selected_point_index" in placement_decision:
-                            selected_index = placement_decision["selected_point_index"]
+                        # Validate the index
+                        if 0 <= selected_index < len(filtered_points):
+                            selected_point = filtered_points[selected_index]
+                            
+                            print(f"AI {ai_username} selected point {selected_index} at position {selected_point['lat']}, {selected_point['lng']}")
+                            print(f"Reason: {reason}")
                             
                             # Validate the index
                             if 0 <= selected_index < len(filtered_points):
