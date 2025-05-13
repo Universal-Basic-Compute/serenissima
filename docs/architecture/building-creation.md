@@ -240,7 +240,7 @@ Buildings are part of the economic simulation:
 Buildings connect with the road and transportation systems:
 
 1. **Road Connections**: Buildings can connect to roads for access
-2. **Dock Connections**: Special buildings (docks) connect water and land transportation
+2. **Water Access Points**: Buildings can connect to water transportation networks
 3. **Transportation Effects**: Building placement affects transportation efficiency
 4. **Access Requirements**: Some buildings require road or water access
 

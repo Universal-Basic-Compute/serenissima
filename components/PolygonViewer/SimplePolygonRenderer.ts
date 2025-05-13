@@ -1004,7 +1004,7 @@ export default class SimplePolygonRenderer {
       
       // If no building point was clicked, check for transport markers
       const transportMarkers = [...this.transportPointManager.getBridgePointMarkers(),
-                               ...this.transportPointManager.getDockPointMarkers()].filter(
+                               ...this.transportPointManager.getWaterAccessPointMarkers()].filter(
         obj => obj instanceof THREE.Mesh
       );
       
@@ -2208,29 +2208,29 @@ export default class SimplePolygonRenderer {
       return;
     }
     
-    // Get docks for start and end polygons
-    const startDocks = waterGraph.polygonToDocks[startPolygon.id];
-    const endDocks = waterGraph.polygonToDocks[endPolygon.id];
+    // Get water access points for start and end polygons
+    const startAccessPoints = waterGraph.polygonToDocks[startPolygon.id];
+    const endAccessPoints = waterGraph.polygonToDocks[endPolygon.id];
     
-    if (!startDocks || startDocks.length === 0 || !endDocks || endDocks.length === 0) {
-      console.warn('One or both polygons do not have docks');
+    if (!startAccessPoints || startAccessPoints.length === 0 || !endAccessPoints || endAccessPoints.length === 0) {
+      console.warn('One or both polygons do not have water access points');
       this.drawDirectPath(this.measurementPoints[0], this.measurementPoints[1]);
       return;
     }
     
-    console.log(`Found ${startDocks.length} docks in start polygon and ${endDocks.length} docks in end polygon`);
+    console.log(`Found ${startAccessPoints.length} water access points in start polygon and ${endAccessPoints.length} water access points in end polygon`);
     
-    // Find the best dock in each polygon (closest to the start/end points)
-    const bestStartDock = this.findBestDock(startDocks, startPoint, waterGraph.enhanced);
-    const bestEndDock = this.findBestDock(endDocks, endPoint, waterGraph.enhanced);
+    // Find the best water access point in each polygon (closest to the start/end points)
+    const bestStartAccessPoint = this.findBestWaterAccessPoint(startAccessPoints, startPoint, waterGraph.enhanced);
+    const bestEndAccessPoint = this.findBestWaterAccessPoint(endAccessPoints, endPoint, waterGraph.enhanced);
     
-    if (!bestStartDock || !bestEndDock) {
-      console.warn('Could not find suitable docks');
+    if (!bestStartAccessPoint || !bestEndAccessPoint) {
+      console.warn('Could not find suitable water access points');
       this.drawDirectPath(this.measurementPoints[0], this.measurementPoints[1]);
       return;
     }
     
-    console.log(`Using dock ${bestStartDock.id} to ${bestEndDock.id}`);
+    console.log(`Using water access point ${bestStartAccessPoint.id} to ${bestEndAccessPoint.id}`);
     
     // Create path points
     const pathPoints: THREE.Vector3[] = [];
@@ -2238,49 +2238,49 @@ export default class SimplePolygonRenderer {
     // Add start point
     pathPoints.push(this.measurementPoints[0]);
     
-    // Add start dock edge point
-    const startDockEdgeCoord = normalizeCoordinates(
-      [bestStartDock.edge],
+    // Add start water access point edge point
+    const startAccessPointEdgeCoord = normalizeCoordinates(
+      [bestStartAccessPoint.edge],
       this.bounds.centerLat,
       this.bounds.centerLng,
       this.bounds.scale,
       this.bounds.latCorrectionFactor
     )[0];
     
-    pathPoints.push(new THREE.Vector3(startDockEdgeCoord.x, 0.15, -startDockEdgeCoord.y));
+    pathPoints.push(new THREE.Vector3(startAccessPointEdgeCoord.x, 0.15, -startAccessPointEdgeCoord.y));
     
-    // Add start dock water point
-    const startDockWaterCoord = normalizeCoordinates(
-      [bestStartDock.position],
+    // Add start water access point water point
+    const startAccessPointWaterCoord = normalizeCoordinates(
+      [bestStartAccessPoint.position],
       this.bounds.centerLat,
       this.bounds.centerLng,
       this.bounds.scale,
       this.bounds.latCorrectionFactor
     )[0];
     
-    pathPoints.push(new THREE.Vector3(startDockWaterCoord.x, 0.15, -startDockWaterCoord.y));
+    pathPoints.push(new THREE.Vector3(startAccessPointWaterCoord.x, 0.15, -startAccessPointWaterCoord.y));
     
-    // Add end dock water point
-    const endDockWaterCoord = normalizeCoordinates(
-      [bestEndDock.position],
+    // Add end water access point water point
+    const endAccessPointWaterCoord = normalizeCoordinates(
+      [bestEndAccessPoint.position],
       this.bounds.centerLat,
       this.bounds.centerLng,
       this.bounds.scale,
       this.bounds.latCorrectionFactor
     )[0];
     
-    pathPoints.push(new THREE.Vector3(endDockWaterCoord.x, 0.15, -endDockWaterCoord.y));
+    pathPoints.push(new THREE.Vector3(endAccessPointWaterCoord.x, 0.15, -endAccessPointWaterCoord.y));
     
-    // Add end dock edge point
-    const endDockEdgeCoord = normalizeCoordinates(
-      [bestEndDock.edge],
+    // Add end water access point edge point
+    const endAccessPointEdgeCoord = normalizeCoordinates(
+      [bestEndAccessPoint.edge],
       this.bounds.centerLat,
       this.bounds.centerLng,
       this.bounds.scale,
       this.bounds.latCorrectionFactor
     )[0];
     
-    pathPoints.push(new THREE.Vector3(endDockEdgeCoord.x, 0.15, -endDockEdgeCoord.y));
+    pathPoints.push(new THREE.Vector3(endAccessPointEdgeCoord.x, 0.15, -endAccessPointEdgeCoord.y));
     
     // Add end point
     pathPoints.push(this.measurementPoints[1]);
@@ -2329,32 +2329,32 @@ export default class SimplePolygonRenderer {
   }
   
   /**
-   * Find the best dock in a polygon for a given point
+   * Find the best water access point in a polygon for a given point
    */
-  private findBestDock(dockIds: string[], point: {lat: number, lng: number}, 
+  private findBestWaterAccessPoint(accessPointIds: string[], point: {lat: number, lng: number}, 
                        enhancedGraph: any): {id: string, position: any, edge: any} | null {
-    if (!dockIds || dockIds.length === 0) return null;
+    if (!accessPointIds || accessPointIds.length === 0) return null;
     
-    // If there's only one dock, use it
-    if (dockIds.length === 1) {
-      const dockId = dockIds[0];
-      const dockData = enhancedGraph[dockId];
+    // If there's only one water access point, use it
+    if (accessPointIds.length === 1) {
+      const accessPointId = accessPointIds[0];
+      const accessPointData = enhancedGraph[accessPointId];
       return {
-        id: dockId,
-        position: dockData.position,
-        edge: dockData.edge
+        id: accessPointId,
+        position: accessPointData.position,
+        edge: accessPointData.edge
       };
     }
     
-    // Find the dock closest to the point
-    let bestDock = null;
+    // Find the water access point closest to the point
+    let bestAccessPoint = null;
     let minDistance = Infinity;
     
-    dockIds.forEach(dockId => {
-      const dockData = enhancedGraph[dockId];
-      if (!dockData) return;
+    accessPointIds.forEach(accessPointId => {
+      const accessPointData = enhancedGraph[accessPointId];
+      if (!accessPointData) return;
       
-      // Calculate distance to the dock edge (not water point)
+      // Calculate distance to the water access point edge (not water point)
       const distance = this.calculateDistanceInMeters(
         new THREE.Vector3(
           (point.lat - this.bounds.centerLat) * this.bounds.scale * this.bounds.latCorrectionFactor,
@@ -2362,23 +2362,23 @@ export default class SimplePolygonRenderer {
           -(point.lng - this.bounds.centerLng) * this.bounds.scale
         ),
         new THREE.Vector3(
-          (dockData.edge.lat - this.bounds.centerLat) * this.bounds.scale * this.bounds.latCorrectionFactor,
+          (accessPointData.edge.lat - this.bounds.centerLat) * this.bounds.scale * this.bounds.latCorrectionFactor,
           0,
-          -(dockData.edge.lng - this.bounds.centerLng) * this.bounds.scale
+          -(accessPointData.edge.lng - this.bounds.centerLng) * this.bounds.scale
         )
       );
       
       if (distance < minDistance) {
         minDistance = distance;
-        bestDock = {
-          id: dockId,
-          position: dockData.position,
-          edge: dockData.edge
+        bestAccessPoint = {
+          id: accessPointId,
+          position: accessPointData.position,
+          edge: accessPointData.edge
         };
       }
     });
     
-    return bestDock;
+    return bestAccessPoint;
   }
   
   /**
