@@ -71,9 +71,10 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     }, 300);
   };
   
-  const formatDucats = (amount: number) => {
+  const formatDucats = (amount: number | string) => {
     if (!amount && amount !== 0) return 'Unknown';
-    return amount.toLocaleString() + ' ⚜️'; // Using lys emoji instead of ₫
+    const numericAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+    return isNaN(numericAmount) ? 'Unknown' : numericAmount.toLocaleString() + ' ⚜️'; // Using lys emoji instead of ₫
   };
   
   const formatDate = (dateString: string) => {
