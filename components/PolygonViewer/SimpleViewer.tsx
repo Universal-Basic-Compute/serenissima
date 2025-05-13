@@ -653,6 +653,9 @@ export default function SimpleViewer({ qualityMode = 'high', waterQuality = 'hig
         polygonRendererRef.current.forceShowBuildingMarkers();
         console.log('Forced building markers to be visible');
       }
+      
+      // Also ensure buildings are visible through the BuildingRendererManager
+      eventBus.emit(EventTypes.BUILDING_PLACED, { refresh: true });
     };
     
     window.addEventListener('ensureBuildingsVisible', handleEnsureBuildingsVisible);
