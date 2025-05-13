@@ -125,6 +125,36 @@ def get_building_types_info() -> Dict:
         }
     }
 
+def get_building_types_from_api() -> Dict:
+    """Get information about different building types from the API."""
+    try:
+        # Get API base URL from environment variables, with a default fallback
+        api_base_url = os.getenv("API_BASE_URL", "https://serenissima.ai")
+        
+        # Construct the API URL
+        url = f"{api_base_url}/api/building-types"
+        
+        print(f"Fetching building types from API: {url}")
+        
+        # Make the API request
+        response = requests.get(url)
+        
+        # Check if the request was successful
+        if response.status_code == 200:
+            building_types = response.json()
+            print(f"Successfully fetched {len(building_types)} building types from API")
+            return building_types
+        else:
+            print(f"Error fetching building types from API: {response.status_code} - {response.text}")
+            # Fall back to the hardcoded building types
+            print("Using fallback building types data")
+            return get_building_types_info()
+    except Exception as e:
+        print(f"Exception fetching building types from API: {str(e)}")
+        # Fall back to the hardcoded building types
+        print("Using fallback building types data due to exception")
+        return get_building_types_info()
+
 def get_kinos_api_key() -> str:
     """Get the Kinos API key from environment variables."""
     load_dotenv()
@@ -168,8 +198,8 @@ def prepare_ai_building_strategy(ai_user: Dict, user_lands: List[Dict], user_bui
         }
         buildings_data.append(building_info)
     
-    # Get building types information
-    building_types = get_building_types_info()
+    # Get building types information from API
+    building_types = get_building_types_from_api()
     
     # Create a summary of buildings by type
     building_summary = {}
