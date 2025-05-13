@@ -426,6 +426,41 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     }
   }, [activeView]);
   
+  // Check image paths when citizens are loaded
+  const checkImagePaths = async () => {
+    console.log('Checking image paths...');
+    
+    // Check if the citizens directory exists
+    try {
+      const response = await fetch('/images/citizens/default.jpg', { method: 'HEAD' });
+      console.log(`Default image check: ${response.ok ? 'EXISTS' : 'NOT FOUND'} (${response.status})`);
+    } catch (error) {
+      console.error('Error checking default image:', error);
+    }
+    
+    // Check a few citizen images
+    if (citizens.length > 0) {
+      for (let i = 0; i < Math.min(5, citizens.length); i++) {
+        const citizen = citizens[i];
+        const imageUrl = citizen.ImageUrl || `/images/citizens/${citizen.CitizenId}.jpg`;
+        
+        try {
+          const response = await fetch(imageUrl, { method: 'HEAD' });
+          console.log(`Citizen ${citizen.CitizenId} image check: ${imageUrl} - ${response.ok ? 'EXISTS' : 'NOT FOUND'} (${response.status})`);
+        } catch (error) {
+          console.error(`Error checking image for citizen ${citizen.CitizenId}:`, error);
+        }
+      }
+    }
+  };
+  
+  // Call image path check when citizens are loaded
+  useEffect(() => {
+    if (activeView === 'citizens' && citizensLoaded) {
+      checkImagePaths();
+    }
+  }, [activeView, citizensLoaded]);
+  
   // Function to load citizens data
   const loadCitizens = useCallback(async () => {
     try {
@@ -1908,6 +1943,44 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             <p className="text-lg font-serif">Loading Venice...</p>
           </div>
         </div>
+      )}
+      
+      {/* Debug button for citizen images */}
+      {activeView === 'citizens' && (
+        <button
+          onClick={async () => {
+            console.log('Checking citizen images...');
+            try {
+              const response = await fetch('/api/check-citizen-images');
+              const data = await response.json();
+              console.log('Citizen images check result:', data);
+              
+              // Also check a few specific citizen images
+              if (citizens.length > 0) {
+                console.log('Checking specific citizen images...');
+                for (let i = 0; i < Math.min(3, citizens.length); i++) {
+                  const citizen = citizens[i];
+                  const imageUrl = citizen.ImageUrl || `/images/citizens/${citizen.CitizenId}.jpg`;
+                  
+                  try {
+                    const imgResponse = await fetch(imageUrl, { method: 'HEAD' });
+                    console.log(`Image check for ${citizen.CitizenId}: ${imageUrl} - ${imgResponse.ok ? 'EXISTS' : 'NOT FOUND'} (${imgResponse.status})`);
+                  } catch (error) {
+                    console.error(`Error checking image for ${citizen.CitizenId}:`, error);
+                  }
+                }
+              }
+              
+              alert(`Citizen images directory exists: ${data.directoryExists}\nTotal image files: ${data.imageFiles}\nDefault image exists: ${data.defaultImageExists}`);
+            } catch (error) {
+              console.error('Error checking citizen images:', error);
+              alert(`Error checking citizen images: ${error instanceof Error ? error.message : String(error)}`);
+            }
+          }}
+          className="absolute bottom-20 right-4 bg-red-600 text-white px-3 py-1 rounded text-sm"
+        >
+          Debug Images
+        </button>
       )}
     </div>
   );

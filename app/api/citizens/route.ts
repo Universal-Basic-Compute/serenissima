@@ -12,28 +12,41 @@ const CITIZENS_TABLE = 'CITIZENS';
 
 // Helper function to format image URLs
 function formatImageUrl(url: string | undefined | null, citizenId?: string): string {
+  console.log(`Formatting image URL for citizen ${citizenId}:`, url);
+  
   // If no URL is provided, use the CitizenId to construct the path
   if (!url) {
-    return `/images/citizens/${citizenId || 'default'}.jpg`;
+    const defaultPath = `/images/citizens/${citizenId || 'default'}.jpg`;
+    console.log(`No URL provided, using default path: ${defaultPath}`);
+    return defaultPath;
   }
   
   // If it's already an absolute URL, return it as is
-  if (url.startsWith('http')) return url;
+  if (url.startsWith('http')) {
+    console.log(`Using absolute URL: ${url}`);
+    return url;
+  }
   
   // If it doesn't start with a slash, add one
-  if (!url.startsWith('/')) url = '/' + url;
+  if (!url.startsWith('/')) {
+    url = '/' + url;
+    console.log(`Added leading slash: ${url}`);
+  }
   
   // If it doesn't include the citizens directory, add it
   if (!url.includes('/citizens/')) {
     // Check if the URL already has a filename
     if (url.includes('.png') || url.includes('.jpg') || url.includes('.jpeg') || url.includes('.gif')) {
       url = `/images/citizens/${url.split('/').pop()}`;
+      console.log(`Extracted filename and added to citizens path: ${url}`);
     } else {
       // Otherwise use the CitizenId
       url = `/images/citizens/${citizenId || 'default'}.jpg`;
+      console.log(`Using CitizenId for path: ${url}`);
     }
   }
   
+  console.log(`Final formatted URL: ${url}`);
   return url;
 }
 
@@ -140,6 +153,18 @@ export async function GET(request: Request) {
     });
     
     console.log(`Returning ${citizens.length} citizens with positions`);
+    
+    // Log a sample of the citizens data
+    if (citizens.length > 0) {
+      console.log('Sample citizen data:', {
+        id: citizens[0].CitizenId,
+        name: citizens[0].name,
+        imageUrl: citizens[0].ImageUrl,
+        home: citizens[0].Home,
+        work: citizens[0].Work
+      });
+    }
+    
     return NextResponse.json(citizens);
   } catch (error) {
     console.error('Error fetching citizens from Airtable:', error);

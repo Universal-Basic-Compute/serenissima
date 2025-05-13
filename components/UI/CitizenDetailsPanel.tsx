@@ -77,39 +77,75 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
       
       <div className="flex mb-4">
         {citizen.ImageUrl ? (
-          <img 
-            src={citizen.ImageUrl.endsWith('.jpg') ? citizen.ImageUrl : `/images/citizens/${citizen.CitizenId}.jpg`} 
-            alt={`${citizen.FirstName} ${citizen.LastName}`} 
-            className="w-24 h-24 object-cover rounded-lg border-2 border-amber-600"
-            onError={(e) => {
-              // Fallback if image fails to load
-              (e.target as HTMLImageElement).style.display = 'none';
-              (e.target as HTMLImageElement).parentElement!.innerHTML = `
-                <div class="w-24 h-24 bg-amber-200 rounded-lg border-2 border-amber-600 flex items-center justify-center text-amber-800">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
-              `;
-            }}
-          />
+          <>
+            <img 
+              src={citizen.ImageUrl.endsWith('.jpg') ? citizen.ImageUrl : `/images/citizens/${citizen.CitizenId}.jpg`} 
+              alt={`${citizen.FirstName} ${citizen.LastName}`} 
+              className="w-24 h-24 object-cover rounded-lg border-2 border-amber-600"
+              onLoad={(e) => {
+                console.log(`Successfully loaded citizen image: ${(e.target as HTMLImageElement).src}`);
+              }}
+              onError={(e) => {
+                // Log the error
+                console.error(`Failed to load citizen image: ${(e.target as HTMLImageElement).src}`);
+                
+                // Try to fetch the image directly to see if it exists
+                fetch((e.target as HTMLImageElement).src, { method: 'HEAD' })
+                  .then(response => {
+                    console.log(`Image HEAD request returned: ${response.status} ${response.statusText}`);
+                  })
+                  .catch(error => {
+                    console.error(`Image HEAD request failed: ${error}`);
+                  });
+                
+                // Fallback if image fails to load
+                (e.target as HTMLImageElement).style.display = 'none';
+                (e.target as HTMLImageElement).parentElement!.innerHTML = `
+                  <div class="w-24 h-24 bg-amber-200 rounded-lg border-2 border-amber-600 flex items-center justify-center text-amber-800">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                `;
+              }}
+            />
+            <div className="text-xs text-gray-500 mt-1">Image URL: {citizen.ImageUrl}</div>
+          </>
         ) : (
-          <img 
-            src={`/images/citizens/${citizen.CitizenId}.jpg`}
-            alt={`${citizen.FirstName} ${citizen.LastName}`} 
-            className="w-24 h-24 object-cover rounded-lg border-2 border-amber-600"
-            onError={(e) => {
-              // Fallback if image fails to load
-              (e.target as HTMLImageElement).style.display = 'none';
-              (e.target as HTMLImageElement).parentElement!.innerHTML = `
-                <div class="w-24 h-24 bg-amber-200 rounded-lg border-2 border-amber-600 flex items-center justify-center text-amber-800">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
-              `;
-            }}
-          />
+          <>
+            <img 
+              src={`/images/citizens/${citizen.CitizenId}.jpg`}
+              alt={`${citizen.FirstName} ${citizen.LastName}`} 
+              className="w-24 h-24 object-cover rounded-lg border-2 border-amber-600"
+              onLoad={(e) => {
+                console.log(`Successfully loaded citizen image: ${(e.target as HTMLImageElement).src}`);
+              }}
+              onError={(e) => {
+                // Log the error
+                console.error(`Failed to load citizen image: ${(e.target as HTMLImageElement).src}`);
+                
+                // Try to fetch the image directly to see if it exists
+                fetch((e.target as HTMLImageElement).src, { method: 'HEAD' })
+                  .then(response => {
+                    console.log(`Image HEAD request returned: ${response.status} ${response.statusText}`);
+                  })
+                  .catch(error => {
+                    console.error(`Image HEAD request failed: ${error}`);
+                  });
+                
+                // Fallback if image fails to load
+                (e.target as HTMLImageElement).style.display = 'none';
+                (e.target as HTMLImageElement).parentElement!.innerHTML = `
+                  <div class="w-24 h-24 bg-amber-200 rounded-lg border-2 border-amber-600 flex items-center justify-center text-amber-800">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                `;
+              }}
+            />
+            <div className="text-xs text-gray-500 mt-1">Image path: /images/citizens/{citizen.CitizenId}.jpg</div>
+          </>
         )}
         
         <div className="ml-4">
