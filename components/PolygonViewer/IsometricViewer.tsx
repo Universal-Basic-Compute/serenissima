@@ -147,6 +147,14 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       setTransportStartPoint(null);
       setTransportEndPoint(null);
       setTransportPath([]);
+      
+      // Also switch to transport view if not already there
+      if (activeView !== 'transport') {
+        // Dispatch an event to switch to transport view
+        window.dispatchEvent(new CustomEvent('switchToTransportView', {
+          detail: { view: 'transport' }
+        }));
+      }
     };
     
     window.addEventListener('showTransportRoutes', handleShowTransportRoutes);
@@ -154,7 +162,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     return () => {
       window.removeEventListener('showTransportRoutes', handleShowTransportRoutes);
     };
-  }, []);
+  }, [activeView]);
   
   // Fetch income data
   const fetchIncomeData = useCallback(async () => {
@@ -742,6 +750,13 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     if (!canvas) return;
     
     const handleMouseMove = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      
+      // Always update mouse position regardless of other hover states
+      setMousePosition({ x: mouseX, y: mouseY });
+      
       // Only process hover detection in land view or buildings view
       if (activeView !== 'land' && activeView !== 'buildings') {
         // Reset hover states if not in land or buildings view
@@ -756,13 +771,6 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       }
       
       if (isDragging) return; // Skip hover detection while dragging
-      
-      const rect = canvas.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-      
-      // Update mouse position state
-      setMousePosition({ x: mouseX, y: mouseY });
       
       // Check if mouse is over any polygon (for land view)
       if (activeView === 'land') {
@@ -1022,8 +1030,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
       
-      // Handle transport mode clicks
-      if (transportMode) {
+      // Handle transport mode clicks - make sure this is the first condition checked
+      if (activeView === 'transport' && transportMode) {
+        console.log('Transport mode click detected');
         // Convert screen coordinates to lat/lng
         const point = screenToLatLng(mouseX, mouseY, scale, offset, canvas.width, canvas.height);
         
@@ -2001,7 +2010,13 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       });
       
       // Draw transport route planning UI if in transport mode
-      if (transportMode) {
+      if (activeView === 'transport' && transportMode) {
+        console.log('Drawing transport mode UI', { 
+          transportStartPoint, 
+          transportEndPoint, 
+          mousePosition 
+        });
+        
         // Draw instructions
         ctx.font = '16px Arial';
         ctx.fillStyle = '#FFFFFF';
@@ -2122,7 +2137,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           }
         }
         
-        // Draw hover indicator for transport mode
+        // Draw hover indicator for transport mode - ALWAYS draw this when in transport mode
         if (transportMode && !transportEndPoint) {
           // Draw a circle at mouse position
           ctx.beginPath();
