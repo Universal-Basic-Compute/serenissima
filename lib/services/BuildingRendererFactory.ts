@@ -1046,6 +1046,44 @@ export class BuildingRendererFactory {
   }
   
   /**
+   * Public debug method to check all model paths
+   * Can be called from outside to diagnose model loading issues
+   */
+  public debugModelPaths(): void {
+    console.log('%c Checking building model paths...', 'background: #FFFF00; color: black; padding: 2px 5px;');
+    
+    // Common building types to check
+    const buildingTypes = ['market-stall', 'house', 'workshop', 'tavern', 'artisan-s-house'];
+    
+    buildingTypes.forEach(type => {
+      const oldPath = `/models/buildings/${type}/model.glb`;
+      const newPath = `/assets/buildings/models/${type}/model.glb`;
+      
+      // Check old path
+      fetch(oldPath, { method: 'HEAD' })
+        .then(response => {
+          console.log(`%c Old path ${oldPath}: ${response.ok ? 'EXISTS' : 'MISSING'} (${response.status})`, 
+            `background: ${response.ok ? '#00FF00' : '#FF0000'}; color: black; padding: 2px;`);
+        })
+        .catch(error => {
+          console.log(`%c Old path ${oldPath}: ERROR - ${error.message}`, 
+            'background: #FF0000; color: white; padding: 2px;');
+        });
+      
+      // Check new path
+      fetch(newPath, { method: 'HEAD' })
+        .then(response => {
+          console.log(`%c New path ${newPath}: ${response.ok ? 'EXISTS' : 'MISSING'} (${response.status})`, 
+            `background: ${response.ok ? '#00FF00' : '#FF0000'}; color: black; padding: 2px;`);
+        })
+        .catch(error => {
+          console.log(`%c New path ${newPath}: ERROR - ${error.message}`, 
+            'background: #FF0000; color: white; padding: 2px;');
+        });
+    });
+  }
+  
+  /**
    * Create a building at a specific building point
    * This is a convenience method that delegates to the universal renderer
    * @param buildingData Building data including position, type, etc.

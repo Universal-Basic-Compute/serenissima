@@ -56,10 +56,10 @@ export class BuildingRendererManager {
       cacheService: buildingCacheService,
       debug: true // Enable debug logging temporarily to diagnose model loading issues
     });
+
+    // Debug model paths using the factory method
+    this.rendererFactory.debugModelPaths();
   
-    // Add this line to debug model paths
-    (this.rendererFactory as any).debugModelPaths();
-    
     // Subscribe to building events
     this.subscribeToEvents();
     
