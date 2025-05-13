@@ -856,7 +856,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
               {/* Notification indicator */}
               {unreadCount > 0 && (
                 <button 
-                  onClick={() => setShowNotifications(!showNotifications)}
+                  onClick={() => setActiveTab(activeTab === 'notifications' ? 'chats' : 'notifications')}
                   className="ml-3 relative"
                 >
                   <FaBell className="h-5 w-5" />
@@ -1070,7 +1070,8 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                               alt="" 
                               className="w-6 h-6"
                               onError={(e) => {
-                                (e.target as HTMLImageElement).style.display = 'none';
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
                               }}
                             />
                           </div>
