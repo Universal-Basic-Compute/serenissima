@@ -30,16 +30,32 @@ const BuildingRendererManager: React.FC<BuildingRendererManagerProps> = ({
   useEffect(() => {
     if (!isSceneReady || !scene || !active) return;
     
-    log.info('BuildingRendererManager: Initializing');
+    log.info('BuildingRendererManager: Waiting for base scene elements to render');
     
-    // Add a delay to ensure land and water are rendered first
-    const initializationTimer = setTimeout(() => {
-      buildingRendererManager.initialize(scene);
-      setSceneInitialized(true);
-      
-      // Initial refresh of buildings only after initialization
-      refreshBuildings();
-    }, 1500); // 1.5 second delay to allow land and water to render
+    // Don't initialize immediately - wait for the SCENE_BASE_RENDERED event
+    // This ensures water and land are rendered first
+    
+    // Listen for scene base rendered event
+    const sceneBaseRenderedSubscription = eventBus.subscribe(
+      'SCENE_BASE_RENDERED',
+      (data) => {
+        console.log('BuildingRendererManager: Received sceneBaseRendered event', data);
+        
+        // Only initialize if water and land are initialized
+        if (data.waterInitialized && data.landInitialized) {
+          // Set scene as initialized
+          setSceneInitialized(true);
+          
+          // Initialize the building renderer manager now
+          buildingRendererManager.initialize(scene);
+          
+          // Initial refresh of buildings with a small delay
+          setTimeout(() => {
+            refreshBuildings();
+          }, 500);
+        }
+      }
+    );
     
     // Set up periodic refresh to ensure buildings remain visible
     // Only start this after initialization
@@ -82,22 +98,6 @@ const BuildingRendererManager: React.FC<BuildingRendererManagerProps> = ({
     
     window.addEventListener('ensureBuildingsVisible', handleEnsureBuildingsVisible);
     
-    // Listen for scene base rendered event
-    const sceneBaseRenderedSubscription = eventBus.subscribe(
-      'SCENE_BASE_RENDERED', // Use string literal instead of enum value that doesn't exist
-      (data) => {
-        console.log('BuildingRendererManager: Received sceneBaseRendered event', data);
-        // Set scene as initialized
-        setSceneInitialized(true);
-        
-        // Initialize the building renderer manager now
-        buildingRendererManager.initialize(scene);
-        
-        // Initial refresh of buildings
-        refreshBuildings();
-      }
-    );
-    
     // Subscribe to building events
     const buildingPlacedSubscription = eventBus.subscribe(
       EventTypes.BUILDING_PLACED, 
@@ -121,7 +121,6 @@ const BuildingRendererManager: React.FC<BuildingRendererManagerProps> = ({
     
     // Cleanup function
     return () => {
-      clearTimeout(initializationTimer);
       if (refreshInterval) clearInterval(refreshInterval);
       if (visibilityCheckInterval) clearInterval(visibilityCheckInterval);
       window.removeEventListener('ensureBuildingsVisible', handleEnsureBuildingsVisible);

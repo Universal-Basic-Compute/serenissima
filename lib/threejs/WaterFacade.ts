@@ -218,8 +218,8 @@ export class WaterFacade {
       water.rotation.x = -Math.PI / 2;
       water.position.set(this.position.x, 0, this.position.z); // Ensure water is at exactly y=0
       
-      // Set render order to ensure water renders before land
-      water.renderOrder = 0;
+      // Set render order to ensure water renders FIRST
+      water.renderOrder = -10; // Very low number to ensure it renders before everything else
       
       // Ensure water is visible
       water.visible = true;

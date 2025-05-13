@@ -78,26 +78,29 @@ const BaseSceneLayer: React.FC<BaseSceneLayerProps> = ({
 
     console.log('BaseSceneLayer: Initializing persistent buildings');
 
-    // Initialize the building renderer manager
-    buildingRendererManager.initialize(scene);
-    
-    // Load all buildings
-    buildingRendererManager.refreshBuildings()
-      .then(() => {
-        console.log('BaseSceneLayer: Buildings loaded successfully');
-        buildingsInitializedRef.current = true;
-        
-        // Emit event to notify that buildings are rendered
-        eventBus.emit(EventTypes.SCENE_BASE_RENDERED, {
-          buildingsInitialized: true
+    // Add a delay to ensure water and land are fully rendered before loading buildings
+    setTimeout(() => {
+      // Initialize the building renderer manager
+      buildingRendererManager.initialize(scene);
+      
+      // Load all buildings
+      buildingRendererManager.refreshBuildings()
+        .then(() => {
+          console.log('BaseSceneLayer: Buildings loaded successfully');
+          buildingsInitializedRef.current = true;
+          
+          // Emit event to notify that buildings are rendered
+          eventBus.emit(EventTypes.SCENE_BASE_RENDERED, {
+            buildingsInitialized: true
+          });
+          
+          // Ensure buildings are visible by default
+          window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+        })
+        .catch(error => {
+          console.error('BaseSceneLayer: Error loading buildings:', error);
         });
-        
-        // Ensure buildings are visible by default
-        window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
-      })
-      .catch(error => {
-        console.error('BaseSceneLayer: Error loading buildings:', error);
-      });
+    }, 1000); // Add a 1 second delay to ensure water and land are fully rendered
 
     // No cleanup needed here - buildings will be cleaned up with the scene
   }, [scene, isInitializedRef.current]);

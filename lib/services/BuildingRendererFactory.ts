@@ -1002,17 +1002,20 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
       // Check camera distance to prioritize loading
       const distanceToCamera = this.getDistanceToCamera(building);
       
-      // Create a low-detail model immediately for very distant buildings
-      // Increased distance threshold from 50 to 150 to show more detailed models
+      // Create a low-detail model immediately for all buildings
+      // This ensures something is visible while the detailed model loads
+      const lowDetailModel = this.createLowDetailModel(building);
+      this.scene.add(lowDetailModel);
+      
+      // For distant buildings, just return the low-detail model
       if (distanceToCamera > 150) {
         if (this.debug) {
           this.logDebug(`Building ${building.id} is distant (${distanceToCamera.toFixed(2)} units), using low detail model`);
         }
-        return this.createLowDetailModel(building);
+        return lowDetailModel;
       }
       
       // For closer buildings, add to loading queue with priority based on distance
-      // Increased distance threshold from 20 to 50 for high priority loading
       if (distanceToCamera < 50) {
         // High priority - add to front of queue
         this.loadingQueue.unshift(buildingId);
@@ -1026,8 +1029,8 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
         this.processLoadingQueue();
       }
       
-      // Return a low-detail model immediately while the high-detail one loads
-      return this.createLowDetailModel(building);
+      // Return the low-detail model immediately while the high-detail one loads
+      return lowDetailModel;
     } catch (error) {
       console.error(`Error rendering building ${building.id}: ${error instanceof Error ? error.message : String(error)}`);
       throw error;

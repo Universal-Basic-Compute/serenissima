@@ -350,8 +350,8 @@ export default class SimplePolygonRenderer {
         // Create mesh with shared material
         const mesh = new THREE.Mesh(geometry, this.sharedMaterial as THREE.Material);
         
-        // Set render order to ensure land renders above water
-        mesh.renderOrder = 1;
+        // Set render order to ensure land renders AFTER water but BEFORE buildings
+        mesh.renderOrder = -5; // Higher than water (-10) but lower than buildings (0 or higher)
       
         // Position mesh - adjust rotation to make top surface flat
         mesh.rotation.x = -Math.PI / 2;
@@ -457,8 +457,8 @@ export default class SimplePolygonRenderer {
         // Create mesh with shared material
         const mesh = new THREE.Mesh(geometry, this.sharedMaterial as THREE.Material);
         
-        // Set render order to ensure land renders above water
-        mesh.renderOrder = 1;
+        // Set render order to ensure land renders AFTER water but BEFORE buildings
+        mesh.renderOrder = -5; // Higher than water (-10) but lower than buildings (0 or higher)
       
         // Position mesh - adjust rotation to make top surface flat
         mesh.rotation.x = -Math.PI / 2;
