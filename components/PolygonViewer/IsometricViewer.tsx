@@ -1167,13 +1167,12 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         };
         
         // Draw a small orange circle for empty building points
+        // 30% smaller (2.8 instead of 4), 50% transparent, no edge
         ctx.beginPath();
-        ctx.arc(isoPos.x, isoPos.y, 4 * scale, 0, Math.PI * 2);
-        ctx.fillStyle = '#FF8C00'; // Orange color
+        ctx.arc(isoPos.x, isoPos.y, 2.8 * scale, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 140, 0, 0.5)'; // Orange color with 50% transparency
         ctx.fill();
-        ctx.strokeStyle = '#000';
-        ctx.lineWidth = 1;
-        ctx.stroke();
+        // Remove the stroke (edge)
       });
     }
     
