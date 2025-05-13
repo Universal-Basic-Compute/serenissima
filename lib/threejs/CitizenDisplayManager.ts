@@ -271,6 +271,7 @@ export class CitizenDisplayManager {
       }
       
       const data = await response.json();
+      console.log('CitizenDisplayManager: Raw API response:', data);
       
       // Ensure data is an array
       if (Array.isArray(data)) {
@@ -284,19 +285,38 @@ export class CitizenDisplayManager {
       
       console.log(`CitizenDisplayManager: Loaded ${this.citizens.length} citizens`);
       
+      // Log the first few citizens for debugging
+      if (this.citizens.length > 0) {
+        console.log('Sample citizens:');
+        this.citizens.slice(0, 3).forEach((citizen, index) => {
+          console.log(`Citizen ${index + 1}:`, {
+            id: citizen.id,
+            name: citizen.name || `${citizen.firstName} ${citizen.lastName}`,
+            position: citizen.position,
+            imageUrl: citizen.profileImage || citizen.ImageUrl,
+            home: citizen.Home,
+            work: citizen.Work
+          });
+        });
+      }
+      
       // Add debug citizens if needed
       this.addDebugCitizensIfNeeded();
       
       // Group citizens by location
       this.groupCitizensByLocation();
+      console.log(`CitizenDisplayManager: Grouped into ${this.citizenGroups.size} location groups`);
       
       // If active, recreate markers
       if (this.isActive) {
+        console.log('CitizenDisplayManager: Manager is active, recreating markers');
         this.removeAllMarkers();
         this.createCitizenMarkers();
         
         // Force citizens to be visible
         this.forceVisibleCitizens();
+      } else {
+        console.log('CitizenDisplayManager: Manager is not active, skipping marker creation');
       }
       
       // Emit event that citizens were loaded
@@ -310,6 +330,7 @@ export class CitizenDisplayManager {
       
       // If active, recreate markers with whatever data we have
       if (this.isActive) {
+        console.log('CitizenDisplayManager: Recreating markers with fallback data after error');
         this.removeAllMarkers();
         this.createCitizenMarkers();
         this.forceVisibleCitizens();
@@ -564,9 +585,13 @@ export class CitizenDisplayManager {
     // Find the ground level at this position
     const groundLevel = this.findGroundLevel(position);
     if (groundLevel !== null) {
-      group.position.y = groundLevel + 0.5; // Position slightly above ground
+      // Increase the height offset from 0.5 to 2.0 to ensure citizens are clearly above land
+      group.position.y = groundLevel + 2.0; // Position higher above ground
+      console.log(`Citizen group at ${locationKey} positioned at height ${group.position.y} (ground level: ${groundLevel})`);
     } else {
-      group.position.y = 0.5; // Default height if ground not found
+      // Default height if ground not found - also increase this
+      group.position.y = 2.0; // Default height if ground not found
+      console.log(`Citizen group at ${locationKey} using default height (ground level not found)`);
     }
     
     // Add a base marker (collapsed view)
@@ -688,6 +713,8 @@ export class CitizenDisplayManager {
    * Create a sprite for a citizen icon
    */
   private createCitizenSprite(imageUrl: string): THREE.Sprite {
+    console.log(`Attempting to create citizen sprite with image: ${imageUrl}`);
+    
     // Try to get from cache first
     let texture = this.textureCache.get(imageUrl);
     
@@ -699,19 +726,28 @@ export class CitizenDisplayManager {
       const tryLoadTexture = (paths: string[]) => {
         if (paths.length === 0) {
           console.warn(`Failed to load texture for citizen image: ${imageUrl}, using generated default`);
-          return this.createDefaultCitizenTexture();
+          const defaultTexture = this.createDefaultCitizenTexture();
+          this.textureCache.set(imageUrl, defaultTexture); // Cache the default texture
+          return defaultTexture;
         }
         
-        return loader.load(paths[0], 
+        const currentPath = paths[0];
+        console.log(`Attempting to load citizen image from: ${currentPath}`);
+        
+        return loader.load(
+          currentPath, 
           // Success callback
           (loadedTexture) => {
+            console.log(`Successfully loaded citizen image from: ${currentPath}`);
             this.textureCache.set(imageUrl, loadedTexture);
           },
           // Progress callback
-          undefined,
+          (xhr) => {
+            console.log(`Loading citizen image ${currentPath}: ${Math.round(xhr.loaded / xhr.total * 100)}%`);
+          },
           // Error callback
-          () => {
-            console.warn(`Failed to load texture from ${paths[0]}, trying next path...`);
+          (error) => {
+            console.warn(`Failed to load citizen image from ${currentPath}, trying next path...`, error);
             // Try the next path
             texture = tryLoadTexture(paths.slice(1));
           }
@@ -719,10 +755,15 @@ export class CitizenDisplayManager {
       };
       
       // Try multiple possible paths for the citizen image
-      texture = tryLoadTexture([
+      const possiblePaths = [
         imageUrl,
+        `/images/citizens/${imageUrl.split('/').pop()}`, // Try just the filename in the citizens folder
         `/images/citizens/default.png`
-      ]);
+      ];
+      
+      texture = tryLoadTexture(possiblePaths);
+    } else {
+      console.log(`Using cached texture for citizen image: ${imageUrl}`);
     }
     
     const material = new THREE.SpriteMaterial({ 
@@ -738,6 +779,8 @@ export class CitizenDisplayManager {
    * Create a default citizen texture when image loading fails
    */
   private createDefaultCitizenTexture(): THREE.Texture {
+    console.log('Creating default citizen texture as fallback');
+    
     // Create a canvas for the default citizen image
     const canvas = document.createElement('canvas');
     const size = 128;
@@ -747,16 +790,18 @@ export class CitizenDisplayManager {
     const context = canvas.getContext('2d');
     if (!context) {
       // Fallback if context creation fails
+      console.error('Failed to get 2D context for default citizen texture');
       return new THREE.Texture();
     }
     
-    // Draw a simple face icon
-    context.fillStyle = '#4b70e2'; // Blue background
+    // Draw a more distinctive fallback icon
+    // Blue background
+    context.fillStyle = '#4b70e2';
     context.beginPath();
     context.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
     context.fill();
     
-    // Draw a white border
+    // White border
     context.strokeStyle = '#FFFFFF';
     context.lineWidth = 4;
     context.stroke();
@@ -776,8 +821,15 @@ export class CitizenDisplayManager {
     context.lineWidth = 6;
     context.stroke();
     
+    // Add text "Citizen"
+    context.font = 'bold 16px Arial';
+    context.textAlign = 'center';
+    context.textBaseline = 'bottom';
+    context.fillText('Citizen', size/2, size - 10);
+    
     // Create a texture from the canvas
     const texture = new THREE.CanvasTexture(canvas);
+    console.log('Default citizen texture created successfully');
     
     return texture;
   }
@@ -1536,12 +1588,14 @@ export class CitizenDisplayManager {
    * Create building markers for home and work locations
    */
   private createBuildingMarkers(): void {
+    console.log('CitizenDisplayManager: Creating building markers for citizens');
+    
     // Group citizens by building
     const buildingMap = new Map<string, any[]>();
     
     this.citizens.forEach(citizen => {
       // Process home buildings
-      if (citizen.Home && citizen.isHome) {
+      if (citizen.Home) {
         if (!buildingMap.has(citizen.Home)) {
           buildingMap.set(citizen.Home, []);
         }
@@ -1549,10 +1603,11 @@ export class CitizenDisplayManager {
           ...citizen,
           markerType: 'home'
         });
+        console.log(`Citizen ${citizen.id || citizen.CitizenId} (${citizen.firstName} ${citizen.lastName}) lives in building ${citizen.Home}`);
       }
       
       // Process work buildings
-      if (citizen.Work && citizen.isWork) {
+      if (citizen.Work) {
         if (!buildingMap.has(citizen.Work)) {
           buildingMap.set(citizen.Work, []);
         }
@@ -1560,14 +1615,22 @@ export class CitizenDisplayManager {
           ...citizen,
           markerType: 'work'
         });
+        console.log(`Citizen ${citizen.id || citizen.CitizenId} (${citizen.firstName} ${citizen.lastName}) works in building ${citizen.Work}`);
       }
     });
+    
+    console.log(`Found ${buildingMap.size} buildings with citizens (home or work)`);
     
     // Create markers for each building
     buildingMap.forEach((citizens, buildingId) => {
       // Find the first citizen with a position (should be the same for all citizens in the building)
       const citizenWithPosition = citizens.find(c => c.position);
-      if (!citizenWithPosition || !citizenWithPosition.position) return;
+      if (!citizenWithPosition || !citizenWithPosition.position) {
+        console.warn(`No position found for building ${buildingId} with ${citizens.length} citizens`);
+        return;
+      }
+      
+      console.log(`Creating marker for building ${buildingId} with ${citizens.length} citizens at position:`, citizenWithPosition.position);
       
       // Create a marker for this building
       const marker = this.createBuildingCitizenMarker(buildingId, citizens, citizenWithPosition.position);
@@ -1606,9 +1669,13 @@ export class CitizenDisplayManager {
     // Find the ground level at this position
     const groundLevel = this.findGroundLevel(scenePosition);
     if (groundLevel !== null) {
-      group.position.y = groundLevel + 2.5; // Position above the building
+      // Increase height to ensure visibility
+      group.position.y = groundLevel + 3.5; // Position higher above buildings
+      console.log(`Building citizen marker for building ${buildingId} positioned at height ${group.position.y} (ground level: ${groundLevel})`);
     } else {
-      group.position.y = 2.5; // Default height if ground not found
+      // Default height if ground not found - also increase this
+      group.position.y = 3.5; // Default height if ground not found
+      console.log(`Building citizen marker for building ${buildingId} using default height (ground level not found)`);
     }
     
     // Create markers for home and work citizens
