@@ -45,8 +45,6 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
 
   // Load building categories when component mounts
   useEffect(() => {
-    loadBuildingCategories();
-    
     // Listen for building placement activation
     const handleActivateBuildingPlacement = (event: CustomEvent) => {
       const { buildingName, variant } = event.detail;
@@ -60,7 +58,7 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
     return () => {
       window.removeEventListener('activateBuildingPlacement', handleActivateBuildingPlacement as EventListener);
     };
-  }, [loadBuildingCategories]);
+  }, []);
   
   // Fetch buildings when the component mounts
   useEffect(() => {
@@ -102,6 +100,22 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
     };
     
     fetchBuildings();
+    
+    // Listen for building point clicks
+    const handleBuildingPointClick = (event: CustomEvent) => {
+      if (event.detail && event.detail.pointId) {
+        console.log('%c BuildingsToolbar: Building point clicked:', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;', event.detail);
+        // Trigger the building menu to open
+        const showBuildingMenuEvent = new CustomEvent('showBuildingMenu');
+        window.dispatchEvent(showBuildingMenuEvent);
+      }
+    };
+    
+    window.addEventListener('buildingPointClick', handleBuildingPointClick as EventListener);
+    
+    return () => {
+      window.removeEventListener('buildingPointClick', handleBuildingPointClick as EventListener);
+    };
   }, []);
 
   return (

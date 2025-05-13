@@ -1057,22 +1057,28 @@ export default class SimplePolygonRenderer {
       const intersects = this.raycaster.intersectObjects(buildingMarkers);
       
       if (intersects.length > 0) {
-        const intersected = intersects[0].object;
-        if (intersected.userData && intersected.userData.id) {
-          // Show a tooltip with building point information
-          eventBus.emit(EventTypes.SHOW_TOOLTIP, {
-            type: 'building-point',
-            polygonId: intersected.userData.polygonId,
-            position: intersected.userData.position,
-            screenX: event.clientX,
-            screenY: event.clientY
-          });
-          
-          // Hide tooltip after a delay
-          setTimeout(() => {
-            eventBus.emit(EventTypes.HIDE_TOOLTIP);
-          }, 2000);
-          
+        // Use the BuildingPointManager's click handler
+        const clickedPointId = this.buildingPointManager.handleClick(this.raycaster);
+        
+        if (clickedPointId) {
+          // The event is dispatched in handleClick, so we don't need to do it here
+          // But we'll still show a tooltip
+          const intersected = intersects[0].object;
+          if (intersected.userData && intersected.userData.id) {
+            // Show a tooltip with building point information
+            eventBus.emit(EventTypes.SHOW_TOOLTIP, {
+              type: 'building-point',
+              polygonId: intersected.userData.polygonId,
+              position: intersected.userData.position,
+              screenX: event.clientX,
+              screenY: event.clientY
+            });
+            
+            // Hide tooltip after a delay
+            setTimeout(() => {
+              eventBus.emit(EventTypes.HIDE_TOOLTIP);
+            }, 2000);
+          }
           return;
         }
       }

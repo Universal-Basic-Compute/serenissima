@@ -193,6 +193,44 @@ this.hoveredPointId
       onHover(null);
     }
   }
+  
+  /**
+   * Handle click events on building points
+   * @param raycaster The raycaster to use for intersection testing
+   * @returns The ID of the clicked building point, or null if none was clicked
+   */
+  public handleClick(raycaster: THREE.Raycaster): string | null {
+    // Filter to only include Mesh objects
+    const buildingPointMarkers = this.buildingPointMarkers.filter(
+      obj => obj instanceof THREE.Mesh
+    );
+
+    const intersects = raycaster.intersectObjects(buildingPointMarkers);
+
+    if (intersects.length > 0) {
+      const intersected = intersects[0].object;
+      const userData = intersected.userData;
+
+      if (userData && userData.id) {
+        console.log('Building point clicked:', userData);
+        
+        // Dispatch a custom event for the building point click
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('buildingPointClick', {
+            detail: {
+              pointId: userData.id,
+              polygonId: userData.polygonId,
+              position: userData.position
+            }
+          }));
+        }
+        
+        return userData.id;
+      }
+    }
+    
+    return null;
+  }
 
   public getBuildingPointMarkers(): THREE.Object3D[] {
     return this.buildingPointMarkers;
