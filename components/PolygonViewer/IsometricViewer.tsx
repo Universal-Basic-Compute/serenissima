@@ -1685,30 +1685,30 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         };
         
         // Check if mouse is over this building point
-        const pointSize = 2.5 * scale; // Slightly smaller (was 2.8)
+        const pointSize = 2.2 * scale; // Even smaller (was 2.5)
         const isHovered = 
           mousePosition.x >= isoPos.x - pointSize && 
           mousePosition.x <= isoPos.x + pointSize && 
           mousePosition.y >= isoPos.y - pointSize && 
           mousePosition.y <= isoPos.y + pointSize;
         
-        // Draw a small circle for empty building points with more subtle colors
+        // Draw a small circle for empty building points with even more subtle colors
         ctx.beginPath();
         ctx.arc(isoPos.x, isoPos.y, pointSize, 0, Math.PI * 2);
     
         // Apply different opacity and color based on hover state
-        // Use a more muted, earthy color that blends better with the map
+        // Use an even more muted, earthy color that better blends with the map
         // Normal: very low opacity, Hovered: slightly higher opacity
         ctx.fillStyle = isHovered 
-          ? 'rgba(180, 140, 100, 0.4)' // Hovered: muted terracotta with 40% opacity (was orange with 50%)
-          : 'rgba(180, 140, 100, 0.2)'; // Normal: muted terracotta with 20% opacity (was orange with 30%)
+          ? 'rgba(160, 140, 120, 0.3)' // Hovered: muted sand/earth tone with 30% opacity (was 40%)
+          : 'rgba(160, 140, 120, 0.15)'; // Normal: muted sand/earth tone with 15% opacity (was 20%)
         
         ctx.fill();
         
         // Add a subtle border when hovered
         if (isHovered) {
-          ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)'; // Less opaque white (was 0.8)
-          ctx.lineWidth = 1;
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; // Less opaque white (was 0.6)
+          ctx.lineWidth = 0.8; // Thinner line (was 1)
           ctx.stroke();
           
           // Update cursor to pointer when hovering over a building point
