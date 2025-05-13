@@ -162,6 +162,26 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
     };
   }, []);
   
+  // Define the return type of useBuildingMenu hook
+  interface BuildingMenuHookResult {
+    categories: BuildingCategory[];
+    loading: boolean;
+    selectedBuilding: Building | null;
+    selectedVariant: string | null;
+    availableVariants: string[];
+    placeableBuilding: { name: string; variant: string; } | null;
+    handleSelectBuilding: (building: Building) => void;
+    handleSelectVariant: (variant: string) => void;
+    handlePlaceBuilding: () => void;
+    handlePlacementComplete: () => void;
+    handleCancelPlacement: () => void;
+    handleCloseDetailModal: () => void;
+    handlePreviousVariant: () => void;
+    handleNextVariant: () => void;
+    loadBuildingCategories: () => Promise<void>;
+    setSelectedBuilding: React.Dispatch<React.SetStateAction<Building | null>>;
+  }
+
   // Use the custom hook to handle all building menu logic
   const {
     categories,
@@ -180,24 +200,7 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
     handleNextVariant,
     loadBuildingCategories,
     setSelectedBuilding
-  } = useBuildingMenu(visible || showViaEvent) as {
-    categories: BuildingCategory[];
-    loading: boolean;
-    selectedBuilding: Building | null;
-    selectedVariant: string | null;
-    availableVariants: string[];
-    placeableBuilding: { name: string; variant: string; } | null;
-    handleSelectBuilding: (building: Building) => void;
-    handleSelectVariant: (variant: string) => void;
-    handlePlaceBuilding: () => void;
-    handlePlacementComplete: () => void;
-    handleCancelPlacement: () => void;
-    handleCloseDetailModal: () => void;
-    handlePreviousVariant: () => void;
-    handleNextVariant: () => void;
-    loadBuildingCategories: () => Promise<void>;
-    setSelectedBuilding: React.Dispatch<React.SetStateAction<Building | null>>;
-  };
+  } = useBuildingMenu(visible || showViaEvent) as unknown as BuildingMenuHookResult;
 
   // Add state to track the building cost in the detail view
   const [buildingCost, setBuildingCost] = useState<number | undefined>(undefined);
