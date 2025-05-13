@@ -951,8 +951,8 @@ export class CitizenDisplayManager {
           // Success callback
           (loadedTexture) => {
             this.logImageLoadingAttempt(currentUrl, true);
-            // Create a circular texture
-            const circularTexture = this.createCircularTexture(loadedTexture);
+            // Create a circular texture - don't invert for citizen sprites
+            const circularTexture = this.createCircularTexture(loadedTexture, false);
             this.textureCache.set(imageUrl, circularTexture);
           },
           // Progress callback
@@ -1007,7 +1007,7 @@ export class CitizenDisplayManager {
   /**
    * Create a circular texture from a loaded texture
    */
-  private createCircularTexture(texture: THREE.Texture): THREE.Texture {
+  private createCircularTexture(texture: THREE.Texture, invert: boolean = false): THREE.Texture {
     // Check if texture.image exists
     if (!texture.image) {
       console.warn('Texture image is null, creating fallback texture');
@@ -1060,7 +1060,24 @@ export class CitizenDisplayManager {
       }
 
       // Draw the image with proper aspect ratio
-      ctx.drawImage(texture.image, offsetX, offsetY, drawWidth, drawHeight);
+      if (invert) {
+        // Save context state before transformations
+        ctx.save();
+        // Translate to center of canvas
+        ctx.translate(size/2, size/2);
+        // Scale y by -1 to flip vertically
+        ctx.scale(1, -1);
+        // Translate back
+        ctx.translate(-size/2, -size/2);
+        // Draw the image
+        ctx.drawImage(texture.image, offsetX, offsetY, drawWidth, drawHeight);
+        // Restore context state
+        ctx.restore();
+      } else {
+        // Draw normally without inversion
+        ctx.drawImage(texture.image, offsetX, offsetY, drawWidth, drawHeight);
+      }
+      
       ctx.restore();
 
       // Create a new texture from the canvas
@@ -2229,6 +2246,7 @@ export class CitizenDisplayManager {
     const sprite = this.createCitizenSprite(imageUrl);
     sprite.scale.set(1.5, 1.5, 1);
     sprite.renderOrder = 1000; // Higher render order so it appears in front of the background
+    // Don't add any position offset - keep it centered on the background
     container.add(sprite);
     
     // Add an icon to indicate home or work
