@@ -3,6 +3,7 @@ import { FaTimes, FaChevronDown, FaSpinner, FaVolumeUp, FaVolumeMute, FaBell, Fa
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { timeDescriptionService } from '@/lib/services/TimeDescriptionService';
+import { extractPageText } from '@/lib/utils/pageTextExtractor';
 
 interface Notification {
   notificationId: string;
@@ -631,8 +632,13 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
       // Default system prompt
       const defaultSystemPrompt = "You are Compagno, a Venetian guide in La Serenissima, a digital recreation of Renaissance Venice. Respond in a friendly, helpful manner with a slight Venetian flair. Your knowledge includes Venice's history, the game's mechanics, and how to navigate the digital city. Always be helpful and concise.";
       
+      // Extract text from the current page
+      const pageText = extractPageText();
+      const pageContext = pageText ? `\n\nThe user is currently viewing a page with the following content:\n${pageText}` : '';
+      
       // Use the additional system prompt if provided, otherwise use the default
-      const systemPrompt = additionalSystemPrompt || defaultSystemPrompt;
+      // Add the page context to the system prompt
+      const systemPrompt = (additionalSystemPrompt || defaultSystemPrompt) + pageContext;
       
       // Prepare request body
       const requestBody: any = {
@@ -791,11 +797,20 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
         setActiveTab('chats');
         setSelectedUser('compagno');
         
+        // Extract text from the current page
+        const pageText = extractPageText();
+        const pageContext = pageText ? `\n\nThe user is currently viewing a page with the following content:\n${pageText}` : '';
+        
+        // Add page context to the system prompt if provided
+        const systemPrompt = event.detail.addSystem 
+          ? event.detail.addSystem + pageContext
+          : undefined;
+        
         // Small delay to ensure the chat is ready
         setTimeout(() => {
           sendMessage(
             event.detail.message, 
-            event.detail.addSystem,
+            systemPrompt,
             event.detail.addContext,
             event.detail.images
           );
