@@ -148,7 +148,7 @@ def assign_citizen_to_building(tables, citizen: Dict, building: Dict) -> bool:
                 "Details": json.dumps(details),
                 "CreatedAt": datetime.datetime.now().isoformat(),
                 "ReadAt": None,  # Changed from IsRead: False to ReadAt: None
-                "User": citizen_id  # Changed from RelatedUserId to User
+                "User": citizen['fields']['CitizenId']  # Use CitizenId instead of citizen_id
             })
             
             log.info(f"Created notification for {citizen_name}")

@@ -212,7 +212,7 @@ export async function GET(request: Request) {
       const citizen = citizenMap.get(citizenId);
       
       if (!citizen) {
-        console.warn(`Citizen ${citizenId} not found for building ${record.id}`);
+        console.warn(`Citizen ${citizenId} not found for building ${record.fields.BuildingId}`);
         return null;
       }
       

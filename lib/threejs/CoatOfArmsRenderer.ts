@@ -157,7 +157,7 @@ export class CoatOfArmsRenderer {
 
     // Mark this mesh as a coat of arms
     plane.userData.isCoatOfArms = true;
-    plane.userData.polygonId = polygon.id;
+    plane.userData.polygonId = polygon.id || polygon.BuildingId;
     
     // Get owner value for error handling
     const ownerValue = polygon.owner || polygon.User || "Unknown";
@@ -441,7 +441,7 @@ export class CoatOfArmsRenderer {
 
     // Mark this mesh as a coat of arms
     plane.userData.isCoatOfArms = true;
-    plane.userData.polygonId = polygon.id;
+    plane.userData.polygonId = polygon.id || polygon.BuildingId;
 
     // Create a canvas for the default coat of arms
     const canvas = document.createElement('canvas');

@@ -230,7 +230,7 @@ export class CitizenDisplayManager {
    */
   private handleCitizenHover(citizenId: string): void {
     // Find the citizen in our data
-    const citizen = this.citizens.find(c => c.id === citizenId || c.CitizenId === citizenId);
+    const citizen = this.citizens.find(c => c.CitizenId === citizenId || c.id === citizenId);
     if (!citizen) return;
     
     // Update hover state without refreshing everything
@@ -294,7 +294,7 @@ export class CitizenDisplayManager {
    */
   private removeCitizen(citizenId: string): void {
     // Find the citizen in our data
-    const index = this.citizens.findIndex(c => c.id === citizenId || c.CitizenId === citizenId);
+    const index = this.citizens.findIndex(c => c.CitizenId === citizenId || c.id === citizenId);
     if (index === -1) return;
     
     // Remove the citizen
@@ -1196,7 +1196,7 @@ export class CitizenDisplayManager {
       const container = new THREE.Group();
       container.position.set(x, 0, z);
       container.userData = { 
-        citizenId: citizen.id,
+        citizenId: citizen.CitizenId || citizen.id,
         citizen: citizen
       };
       
@@ -1261,7 +1261,7 @@ export class CitizenDisplayManager {
       const container = new THREE.Group();
       container.position.set(x, 0, z);
       container.userData = { 
-        citizenId: citizen.id,
+        citizenId: citizen.CitizenId || citizen.id,
         citizen: citizen
       };
       
@@ -2063,9 +2063,9 @@ export class CitizenDisplayManager {
     for (const polygon of polygons) {
       if (polygon.buildingPoints && Array.isArray(polygon.buildingPoints)) {
         const buildingPoint = polygon.buildingPoints.find((bp: any) => 
+          bp.BuildingId === buildingId || 
           bp.buildingId === buildingId || 
-          bp.id === buildingId || 
-          bp.BuildingId === buildingId
+          bp.id === buildingId
         );
         
         if (buildingPoint) {
@@ -2116,7 +2116,7 @@ export class CitizenDisplayManager {
       }
       
       // Also check if the polygon itself has a buildingId property that matches
-      if (polygon.buildingId === buildingId || polygon.BuildingId === buildingId) {
+      if (polygon.BuildingId === buildingId || polygon.buildingId === buildingId) {
         console.log(`Polygon ${polygon.id} itself has buildingId ${buildingId}`);
         
         // Use the polygon's center as the building position
