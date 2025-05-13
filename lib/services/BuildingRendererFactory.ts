@@ -51,6 +51,11 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
     this.gltfLoader = new GLTFLoader();
     this.debug = options.debug || false;
     
+    // Ensure we have a valid scene reference
+    if (!options.scene) {
+      console.error('BuildingRendererOptions must include a valid scene');
+    }
+    
     // Check if model files exist
     this.checkModelFilesExist();
     
@@ -503,8 +508,12 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
       isFallbackModel: true
     };
     
-    // Add to scene
-    this.options.scene.add(group);
+    // Check if scene exists before adding
+    if (this.options.scene) {
+      this.options.scene.add(group);
+    } else {
+      console.warn(`Cannot add fallback model for building ${building.id} to scene: scene is undefined`);
+    }
     
     return group;
   }
@@ -528,6 +537,12 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
     
     // Increase precision for mesh detection
     raycaster.params.Mesh.threshold = 0.1;
+    
+    // Check if we have a valid scene
+    if (!this.options.scene) {
+      console.warn('Cannot find ground level: scene is undefined');
+      return null;
+    }
     
     // Find all land meshes in the scene
     const landMeshes: THREE.Object3D[] = [];
@@ -985,7 +1000,15 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
       // Create a low-detail model immediately for all buildings
       // This ensures something is visible while the detailed model loads
       const lowDetailModel = this.createLowDetailModel(building);
-      this.scene.add(lowDetailModel);
+      
+      // IMPORTANT: Check if this.options.scene exists before adding the model
+      if (!this.options.scene) {
+        console.error(`Scene is undefined when rendering building ${building.id}`);
+        return lowDetailModel; // Return the model without adding it to the scene
+      }
+      
+      // Now safely add to scene
+      this.options.scene.add(lowDetailModel);
       
       // For distant buildings, just return the low-detail model
       if (distanceToCamera > 150) {
