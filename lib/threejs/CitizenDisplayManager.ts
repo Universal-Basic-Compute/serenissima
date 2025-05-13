@@ -38,6 +38,7 @@ export class CitizenDisplayManager {
   private mouseClickHandler: (event: MouseEvent) => void;
   private lastUpdateTime: number = 0;
   private updateInterval: number = 30000; // 30 seconds
+  private _isRefreshing: boolean = false;
 
   constructor(options: CitizenDisplayOptions) {
     this.scene = options.scene;
@@ -191,7 +192,14 @@ export class CitizenDisplayManager {
     // Listen for citizens loaded event
     eventBus.subscribe(EventTypes.CITIZENS_LOADED, (data) => {
       console.log('Citizens loaded event received:', data);
-      this.refreshCitizens();
+      
+      // IMPORTANT: Only refresh if the event wasn't triggered by this instance
+      if (!this._isRefreshing) {
+        console.log('CitizenDisplayManager: Refreshing citizens from external CITIZENS_LOADED event');
+        this.refreshCitizens();
+      } else {
+        console.log('CitizenDisplayManager: Ignoring CITIZENS_LOADED event during our own refresh');
+      }
     });
     
     // Listen for citizen hover event
@@ -246,6 +254,9 @@ export class CitizenDisplayManager {
    */
   public async refreshCitizens(): Promise<void> {
     console.log('CitizenDisplayManager: Refreshing citizens data');
+    
+    // Set the flag to indicate we're refreshing
+    this._isRefreshing = true;
     
     // Update the last update time
     this.lastUpdateTime = Date.now();
@@ -335,6 +346,9 @@ export class CitizenDisplayManager {
         this.createCitizenMarkers();
         this.forceVisibleCitizens();
       }
+    } finally {
+      // Clear the refreshing flag when done, regardless of success or failure
+      this._isRefreshing = false;
     }
   }
   
