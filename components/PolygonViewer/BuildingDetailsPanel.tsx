@@ -398,24 +398,12 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                     style={{ maxWidth: '300px' }}
                   />
                   
-                  {/* Land ID in small text */}
-                  <p className="text-xs text-gray-500 mt-1">
-                    Land ID: <span className="font-medium">{building.land_id}</span>
-                  </p>
+                  {/* Remove the Land ID and Position information */}
                 </div>
               ) : (
-                <div>
-                  <p className="text-gray-700">Land ID: <span className="font-medium">{building.land_id}</span></p>
-                  <p className="text-xs text-gray-500 mt-1 italic">Loading land details...</p>
+                <div className="flex items-center justify-center h-[200px]">
+                  <p className="text-gray-500 italic">Loading land details...</p>
                 </div>
-              )}
-              
-              {building.position && (
-                <p className="text-xs text-gray-500 mt-2">
-                  Position: {typeof building.position === 'string' 
-                    ? building.position.substring(0, 20) + '...' 
-                    : JSON.stringify(building.position).substring(0, 20) + '...'}
-                </p>
               )}
             </div>
             
