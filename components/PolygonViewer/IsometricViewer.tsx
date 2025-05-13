@@ -849,10 +849,12 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         // Check if mouse is over any dock point
         let foundHoveredDockPoint = false;
       
-        polygons.forEach(polygon => {
+        for (const polygon of polygons) {
+          if (foundHoveredDockPoint) break;
+        
           if (polygon.dockPoints && Array.isArray(polygon.dockPoints)) {
-            polygon.dockPoints.forEach((point: any) => {
-              if (!point.edge) return;
+            for (const point of polygon.dockPoints) {
+              if (!point.edge) continue;
             
               // Convert lat/lng to isometric coordinates
               const x = (point.edge.lng - 12.3326) * 20000;
@@ -876,11 +878,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
                 canvas.style.cursor = 'pointer';
                 break;
               }
-            });
+            }
           }
-        
-          if (foundHoveredDockPoint) return;
-        });
+        }
       
         if (!foundHoveredDockPoint && hoveredDockPoint !== null) {
           setHoveredDockPoint(null);
@@ -889,10 +889,12 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         // Check if mouse is over any bridge point
         let foundHoveredBridgePoint = false;
       
-        polygons.forEach(polygon => {
+        for (const polygon of polygons) {
+          if (foundHoveredBridgePoint) break;
+        
           if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints)) {
-            polygon.bridgePoints.forEach((point: any) => {
-              if (!point.edge) return;
+            for (const point of polygon.bridgePoints) {
+              if (!point.edge) continue;
             
               // Convert lat/lng to isometric coordinates
               const x = (point.edge.lng - 12.3326) * 20000;
@@ -916,11 +918,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
                 canvas.style.cursor = 'pointer';
                 break;
               }
-            });
+            }
           }
-        
-          if (foundHoveredBridgePoint) return;
-        });
+        }
       
         if (!foundHoveredBridgePoint && hoveredBridgePoint !== null) {
           setHoveredBridgePoint(null);
@@ -1167,7 +1167,11 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         }
         
         // Check if click is on any bridge point
+        let bridgePointClicked = false;
+        
         for (const polygon of polygons) {
+          if (bridgePointClicked) break;
+          
           if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints)) {
             for (const point of polygon.bridgePoints) {
               if (!point.edge) continue;
@@ -1210,11 +1214,14 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
                 // Deselect any selected building
                 setSelectedBuildingId(null);
                 
-                return;
+                bridgePointClicked = true;
+                break;
               }
             }
           }
         }
+        
+        if (bridgePointClicked) return;
       }
       
       // Handle clicks in citizens view
