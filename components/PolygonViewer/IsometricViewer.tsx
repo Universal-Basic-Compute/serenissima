@@ -189,7 +189,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       e.preventDefault();
       const delta = e.deltaY * -0.01;
       // Change the minimum zoom to 1.5 so users can't zoom out too far
-      setScale(prevScale => Math.max(1.5, Math.min(9, prevScale + delta)));
+      // Increase maximum zoom by 20% from 9 to 10.8
+      setScale(prevScale => Math.max(1.5, Math.min(10.8, prevScale + delta)));
     };
     
     const canvas = canvasRef.current;
@@ -392,14 +393,15 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
 
     // Second pass: Draw all polygon names (only in land view)
     if (activeView === 'land') {
-      // Only show text if zoom level is above a certain threshold (mid-level zoom)
-      const showText = scale >= 0.8; // Adjust this threshold as needed
+      // Only show text if zoom level is above a certain threshold (closer zoom)
+      const showText = scale >= 4.5; // Increased threshold so text only appears when zoomed in closer
       
       if (showText) {
         polygonsToRender.forEach(({ polygon, centroidX, centroidY }) => {
           if (polygon.historicalName) {
-            // Draw text - keep the original style
-            ctx.font = '10px Arial';
+            // Draw text - adjust font size based on zoom level for better readability
+            const fontSize = Math.min(12, Math.max(8, Math.floor(scale * 1.5)));
+            ctx.font = `${fontSize}px Arial`;
             ctx.fillStyle = '#000';
             ctx.textAlign = 'center';
             ctx.fillText(polygon.historicalName, centroidX, centroidY);
@@ -469,7 +471,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         
         // Add a small indicator for the building type
         ctx.fillStyle = '#000';
-        ctx.font = `${Math.max(8, 10 * scale)}px Arial`;
+        const fontSize = Math.min(14, Math.max(8, Math.floor(scale * 1.2)));
+        ctx.font = `${fontSize}px Arial`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         // Use first letter of building type as an indicator
