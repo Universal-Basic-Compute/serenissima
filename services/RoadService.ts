@@ -245,6 +245,39 @@ export class RoadService {
   }
   
   /**
+   * Load roads from Airtable
+   * @returns Promise resolving to loaded roads
+   */
+  public async loadRoadsFromAirtable(): Promise<RoadData[]> {
+    try {
+      console.log('RoadService: Loading roads from Airtable');
+      // This is a placeholder implementation
+      // In a real implementation, you would fetch from Airtable API
+      const response = await fetch('/api/get-roads-airtable');
+      
+      if (!response.ok) {
+        throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      
+      if (result.success && Array.isArray(result.roads)) {
+        // Update local roads
+        this.roads = result.roads;
+        this.saveRoadsToStorage();
+        
+        console.log(`RoadService: Loaded ${this.roads.length} roads from Airtable`);
+        return this.roads;
+      } else {
+        throw new Error('Invalid response format from Airtable');
+      }
+    } catch (error) {
+      console.error('Failed to load roads from Airtable:', error);
+      return this.roads; // Return local roads as fallback
+    }
+  }
+
+  /**
    * Load roads from server (API)
    * @returns Promise resolving to loaded roads
    */
@@ -271,6 +304,48 @@ export class RoadService {
     } catch (error) {
       console.error('Failed to load roads from server:', error);
       return this.roads; // Return local roads as fallback
+    }
+  }
+  /**
+   * Save road to Airtable
+   * @param roadId - Road ID to save
+   * @param landId - Optional land ID where road is placed
+   * @param walletAddress - Optional wallet address of creator
+   * @returns Promise resolving to saved road data
+   */
+  public async saveRoadToAirtable(roadId: string, landId?: string, walletAddress?: string): Promise<any> {
+    try {
+      const road = this.getRoadById(roadId);
+      if (!road) {
+        throw new Error(`Road with ID ${roadId} not found`);
+      }
+      
+      // Add additional metadata if provided
+      const roadToSave = {
+        ...road,
+        landId: landId || road.landId,
+        createdBy: walletAddress || road.createdBy
+      };
+      
+      const response = await fetch('/api/save-road-airtable', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(roadToSave)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      console.log(`RoadService: Saved road ${roadId} to Airtable`, result);
+      
+      return result;
+    } catch (error) {
+      console.error('Failed to save road to Airtable:', error);
+      throw error;
     }
   }
 }
