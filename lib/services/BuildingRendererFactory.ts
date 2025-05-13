@@ -31,6 +31,34 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
   
   constructor(private options: BuildingRendererOptions) {
     this.gltfLoader = new GLTFLoader();
+    
+    // Check if model files exist
+    this.checkModelFilesExist();
+  }
+  
+  /**
+   * Debug function to check if model files exist in the public directory
+   */
+  private async checkModelFilesExist(): Promise<void> {
+    console.log(`%c Checking for model files in public directory...`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
+    
+    // Common building types to check
+    const buildingTypes = ['market-stall', 'house', 'workshop', 'tavern', 'dock'];
+    const variants = ['model'];
+    
+    for (const type of buildingTypes) {
+      for (const variant of variants) {
+        const modelPath = this.getModelPath(type, variant);
+        try {
+          const response = await fetch(modelPath, { method: 'HEAD' });
+          console.log(`%c Model ${type}/${variant}: ${response.ok ? 'EXISTS' : 'MISSING'} (${response.status})`, 
+            `background: ${response.ok ? '#00FF00' : '#FF0000'}; color: black; padding: 2px 5px; font-weight: bold;`);
+        } catch (error) {
+          console.warn(`%c Error checking model ${type}/${variant}: ${error.message}`, 
+            'background: #FF0000; color: white; padding: 2px 5px; font-weight: bold;');
+        }
+      }
+    }
   }
   
   /**
@@ -48,7 +76,24 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
     
     // Add logging to debug model paths
     const modelPath = `/models/buildings/${normalizedType}/${variant}.glb`;
-    console.log(`Model path for ${buildingType}/${variant}: ${modelPath}`);
+    console.log(`%c Model path for ${buildingType}/${variant}: ${modelPath}`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
+    
+    // Log the full URL for easier debugging
+    const fullUrl = new URL(modelPath, window.location.origin).href;
+    console.log(`%c Full model URL: ${fullUrl}`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
+    
+    // Check if the file exists using fetch HEAD request
+    fetch(modelPath, { method: 'HEAD' })
+      .then(response => {
+        if (response.ok) {
+          console.log(`%c Model file exists at ${modelPath}`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
+        } else {
+          console.warn(`%c Model file does NOT exist at ${modelPath} (${response.status})`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
+        }
+      })
+      .catch(error => {
+        console.warn(`%c Error checking if model exists at ${modelPath}: ${error.message}`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
+      });
     
     return modelPath;
   }
@@ -59,8 +104,8 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
   private createLowDetailModel(building: BuildingData): THREE.Object3D {
     // Create a simple box geometry instead of loading the full model
     const size = this.getBuildingSizeByType(building.type);
-    // Make the size half as large
-    const geometry = new THREE.BoxGeometry(size.width/2, size.height/2, size.depth/2);
+    // Make the size 50% smaller (0.25 instead of 0.5)
+    const geometry = new THREE.BoxGeometry(size.width/4, size.height/4, size.depth/4);
     const material = new THREE.MeshBasicMaterial({ 
       color: this.getBuildingColorByType(building.type),
       transparent: true,
@@ -160,8 +205,9 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
     // Create a group to hold our objects
     const group = new THREE.Group();
     
-    // Create a box with a color based on building type, but make it 2x smaller
-    const geometry = new THREE.BoxGeometry(1, 1, 1); // Changed from 2,2,2 to 1,1,1 (half size)
+    // Create a box with a color based on building type, but make it 50% smaller (0.5 instead of 1)
+    console.log(`%c Creating fallback box for building ${building.id} of type ${building.type}`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
+    const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5); // Changed from 1,1,1 to 0.5,0.5,0.5 (50% smaller)
     const color = this.getBuildingColorByType(building.type);
     const material = new THREE.MeshStandardMaterial({ 
       color: color,
@@ -198,8 +244,8 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
       });
       
       const label = new THREE.Sprite(labelMaterial);
-      label.position.set(0, 2, 0);
-      label.scale.set(2, 0.5, 1);
+      label.position.set(0, 1, 0); // Position slightly lower due to smaller box
+      label.scale.set(1.5, 0.4, 1); // Scale down label to match smaller box
       
       // Add the label to the group
       group.add(label);
@@ -299,7 +345,7 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
    */
   public async render(building: BuildingData): Promise<THREE.Object3D> {
     try {
-      console.log(`Rendering building ${building.id} of type ${building.type}`);
+      console.log(`%c Rendering building ${building.id} of type ${building.type}`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
       
       // Get camera position to determine distance
       const camera = this.getCameraFromScene();
@@ -309,12 +355,14 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
       
       if ('lat' in building.position && 'lng' in building.position) {
         position = this.options.positionManager.latLngToScenePosition(building.position);
+        console.log(`%c Converted lat/lng position to scene position: ${position.x}, ${position.y}, ${position.z}`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
       } else {
         position = new THREE.Vector3(
           building.position.x,
           building.position.y || 0,
           building.position.z
         );
+        console.log(`%c Using direct position: ${position.x}, ${position.y}, ${position.z}`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
       }
       
       // Calculate distance to camera
@@ -323,13 +371,14 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
       
       // Use low detail model for distant buildings (more than 50 units away)
       if (distanceToCamera > 50) {
+        console.log(`%c Building ${building.id} is distant (${distanceToCamera.toFixed(2)} units), using low detail model`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
         return this.createLowDetailModel(building);
       }
       
       // Try to load the actual GLB model
       try {
         const modelPath = this.getModelPath(building.type, building.variant || 'model');
-        console.log(`Attempting to load model from: ${modelPath}`);
+        console.log(`%c Attempting to load model from: ${modelPath}`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
         
         // Create a low detail model to show while loading
         const tempModel = this.createLowDetailModel(building);
@@ -340,19 +389,26 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
           new Promise<GLTF>((resolve, reject) => {
             this.gltfLoader.load(
               modelPath,
-              resolve,
+              (gltf) => {
+                console.log(`%c Successfully loaded GLB for ${building.id} from ${modelPath}`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
+                resolve(gltf);
+              },
               (xhr) => {
-                console.log(`${building.id} model ${Math.round(xhr.loaded / xhr.total * 100)}% loaded`);
+                const progress = Math.round(xhr.loaded / xhr.total * 100);
+                console.log(`%c ${building.id} model ${progress}% loaded`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
               },
               (error) => {
-                console.warn(`Model not found for ${building.id} at ${modelPath} - using fallback`);
+                console.warn(`%c Model not found for ${building.id} at ${modelPath} - using fallback. Error: ${error.message}`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
                 reject(error);
               }
             );
           }),
           // Add a 10-second timeout to prevent hanging on slow loads
           new Promise<GLTF>((_, reject) => 
-            setTimeout(() => reject(new Error('Model load timeout')), 10000)
+            setTimeout(() => {
+              console.warn(`%c Model load timeout for ${building.id} at ${modelPath}`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
+              reject(new Error('Model load timeout'));
+            }, 10000)
           )
         ]);
         
@@ -366,11 +422,11 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
         const groundPosition = this.findGroundLevel(position);
         if (groundPosition) {
           // Use the detected ground height
-          console.log(`Found ground at height ${groundPosition.y} for building ${building.id}`);
+          console.log(`%c Found ground at height ${groundPosition.y} for building ${building.id}`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
           position.y = groundPosition.y;
         } else {
           // Fallback to default ground level if detection fails
-          console.log(`No ground found for building ${building.id}, using default height (0)`);
+          console.log(`%c No ground found for building ${building.id}, using default height (0)`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
           position.y = 0;
         }
         
@@ -438,21 +494,21 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
         // Add to scene
         this.options.scene.add(model);
         
-        console.log(`Successfully loaded and added model for building ${building.id}`);
+        console.log(`%c Successfully added model for building ${building.id} to scene`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
         return model;
       } catch (error) {
         // Check if this is a 404 error and log as warning instead of error
         if (error instanceof Error && error.message && error.message.includes('404')) {
-          console.warn(`Model not found for ${building.id}, using colored box instead`);
+          console.warn(`%c Model not found for ${building.id} (404), using colored box instead`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
         } else {
-          console.error(`Failed to load GLB model for ${building.id}, using colored box instead:`, error);
+          console.error(`%c Failed to load GLB model for ${building.id}, using colored box instead: ${error instanceof Error ? error.message : String(error)}`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
         }
       
         // If GLB loading fails, create a colored box with a label
         return this.createColoredBoxModel(building, position);
       }
     } catch (error) {
-      console.error(`Error rendering building ${building.id}:`, error);
+      console.error(`%c Error rendering building ${building.id}: ${error instanceof Error ? error.message : String(error)}`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
       throw error;
     }
   }

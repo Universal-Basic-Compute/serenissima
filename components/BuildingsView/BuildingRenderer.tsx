@@ -55,6 +55,30 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     log.info('BuildingRenderer: Initializing building renderer manager');
     buildingRendererManager.initialize(scene);
     
+    console.log(`%c BuildingRenderer: Checking for model files in public directory...`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
+
+    // Check if the models directory exists
+    fetch('/models/buildings/', { method: 'HEAD' })
+      .then(response => {
+        console.log(`%c Models directory check: ${response.ok ? 'EXISTS' : 'MISSING'} (${response.status})`, 
+          `background: ${response.ok ? '#00FF00' : '#FF0000'}; color: black; padding: 2px 5px; font-weight: bold;`);
+      })
+      .catch(error => {
+        console.warn(`%c Error checking models directory: ${error.message}`, 
+          'background: #FF0000; color: white; padding: 2px 5px; font-weight: bold;');
+      });
+
+    // Check for a specific model file
+    fetch('/models/buildings/market-stall/model.glb', { method: 'HEAD' })
+      .then(response => {
+        console.log(`%c Market stall model check: ${response.ok ? 'EXISTS' : 'MISSING'} (${response.status})`, 
+          `background: ${response.ok ? '#00FF00' : '#FF0000'}; color: black; padding: 2px 5px; font-weight: bold;`);
+      })
+      .catch(error => {
+        console.warn(`%c Error checking market stall model: ${error.message}`, 
+          'background: #FF0000; color: white; padding: 2px 5px; font-weight: bold;');
+      });
+    
     // Refresh buildings to load initial state
     setIsLoading(true);
     buildingRendererManager.refreshBuildings()
