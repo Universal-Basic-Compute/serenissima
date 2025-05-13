@@ -810,7 +810,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
 
   // Define isometric projection functions at the component level
   const calculateIsoX = (x: number, y: number, currentScale: number, currentOffset: {x: number, y: number}, canvasWidth: number) => {
-    return (-x) * currentScale + canvasWidth / 2 + currentOffset.x; // Negate x to fix the east-west orientation
+    return x * currentScale + canvasWidth / 2 + currentOffset.x; // Correct east-west orientation
   };
   
   const calculateIsoY = (x: number, y: number, currentScale: number, currentOffset: {x: number, y: number}, canvasHeight: number) => {
