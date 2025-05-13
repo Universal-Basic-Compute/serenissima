@@ -1,4 +1,4 @@
-import { ServiceError, NotFoundError } from '../errors/ServiceErrors';
+import { ServiceError, NotFoundError } from '../lib/errors/ServiceErrors';
 
 /**
  * Interface for dock connection point data
