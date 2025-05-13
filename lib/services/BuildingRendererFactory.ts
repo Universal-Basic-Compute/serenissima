@@ -12,6 +12,7 @@ interface BuildingRendererOptions {
   scene: THREE.Scene;
   positionManager: typeof buildingPositionManager;
   cacheService: typeof buildingCacheService;
+  debug?: boolean;
 }
 
 /**
