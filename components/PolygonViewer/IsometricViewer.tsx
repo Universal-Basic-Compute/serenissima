@@ -444,11 +444,22 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         const citizen = citizens[i];
         const imageUrl = citizen.ImageUrl || `/images/citizens/${citizen.CitizenId}.jpg`;
         
-        try {
-          const response = await fetch(imageUrl, { method: 'HEAD' });
-          console.log(`Citizen ${citizen.CitizenId} image check: ${imageUrl} - ${response.ok ? 'EXISTS' : 'NOT FOUND'} (${response.status})`);
-        } catch (error) {
-          console.error(`Error checking image for citizen ${citizen.CitizenId}:`, error);
+        // Try multiple possible paths for each citizen
+        const urlsToTry = [
+          imageUrl,
+          `/images/citizens/${citizen.CitizenId}.jpg`,
+          `/images/citizens/${citizen.CitizenId}.png`,
+          `/images/citizens/default.jpg`
+        ];
+        
+        for (const url of urlsToTry) {
+          try {
+            const response = await fetch(url, { method: 'HEAD' });
+            console.log(`Citizen ${citizen.CitizenId} image check: ${url} - ${response.ok ? 'EXISTS' : 'NOT FOUND'} (${response.status})`);
+            if (response.ok) break; // Stop checking if we found a working URL
+          } catch (error) {
+            console.error(`Error checking image for citizen ${citizen.CitizenId} at ${url}:`, error);
+          }
         }
       }
     }
@@ -1968,13 +1979,25 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
                 console.log('Checking specific citizen images...');
                 for (let i = 0; i < Math.min(3, citizens.length); i++) {
                   const citizen = citizens[i];
-                  const imageUrl = citizen.ImageUrl || `/images/citizens/${citizen.CitizenId}.jpg`;
                   
-                  try {
-                    const imgResponse = await fetch(imageUrl, { method: 'HEAD' });
-                    console.log(`Image check for ${citizen.CitizenId}: ${imageUrl} - ${imgResponse.ok ? 'EXISTS' : 'NOT FOUND'} (${imgResponse.status})`);
-                  } catch (error) {
-                    console.error(`Error checking image for ${citizen.CitizenId}:`, error);
+                  // Try multiple possible paths for each citizen
+                  const urlsToTry = [
+                    citizen.ImageUrl,
+                    `/images/citizens/${citizen.CitizenId}.jpg`,
+                    `/images/citizens/${citizen.CitizenId}.png`,
+                    `/images/citizens/default.jpg`
+                  ].filter(Boolean); // Remove any undefined/null values
+                  
+                  console.log(`URLs to try for citizen ${citizen.CitizenId}:`, urlsToTry);
+                  
+                  for (const url of urlsToTry) {
+                    try {
+                      const imgResponse = await fetch(url, { method: 'HEAD' });
+                      console.log(`Image check for ${citizen.CitizenId}: ${url} - ${imgResponse.ok ? 'EXISTS' : 'NOT FOUND'} (${imgResponse.status})`);
+                      if (imgResponse.ok) break; // Stop checking if we found a working URL
+                    } catch (error) {
+                      console.error(`Error checking image for ${citizen.CitizenId} at ${url}:`, error);
+                    }
                   }
                 }
               }

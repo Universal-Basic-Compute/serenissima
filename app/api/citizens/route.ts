@@ -46,6 +46,9 @@ function formatImageUrl(url: string | undefined | null, citizenId?: string): str
     }
   }
   
+  // Ensure the URL doesn't have any double slashes (except in http://)
+  url = url.replace(/([^:])\/\//g, '$1/');
+  
   console.log(`Final formatted URL: ${url}`);
   return url;
 }
