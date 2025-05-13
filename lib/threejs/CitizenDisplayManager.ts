@@ -70,6 +70,21 @@ export class CitizenDisplayManager {
     // Load citizens
     await this.loadCitizens();
     
+    // Check if citizen images exist
+    if (this.citizens.length > 0) {
+      console.log('Checking if citizen images exist...');
+      
+      const checkPromises = this.citizens.slice(0, 5).map(async (citizen) => {
+        const imageUrl = this.getCitizenImageUrl(citizen);
+        const exists = await this.checkIfImageExists(imageUrl);
+        console.log(`Citizen image for ${citizen.CitizenId || citizen.id}: ${imageUrl} - ${exists ? 'exists' : 'does not exist'}`);
+        return { citizenId: citizen.CitizenId || citizen.id, imageUrl, exists };
+      });
+      
+      const results = await Promise.all(checkPromises);
+      console.log('Image check results:', results);
+    }
+    
     // Add debug citizens if needed
     this.addDebugCitizensIfNeeded();
     
@@ -83,6 +98,16 @@ export class CitizenDisplayManager {
     this.subscribeToEvents();
     
     console.log(`Initialized with ${this.citizens.length} citizens in ${this.citizenGroups.size} groups`);
+  }
+  
+  private async checkIfImageExists(url: string): Promise<boolean> {
+    try {
+      const response = await fetch(url, { method: 'HEAD' });
+      return response.ok;
+    } catch (error) {
+      console.warn(`Error checking if image exists at ${url}:`, error);
+      return false;
+    }
   }
   
   /**
@@ -915,21 +940,31 @@ export class CitizenDisplayManager {
     let texture = this.textureCache.get(imageUrl);
     
     if (!texture) {
-      // Create an array of URLs to try in order - prioritize serenissima.ai
+      // Extract citizen ID from URL if possible
+      let citizenId = null;
+      const match = imageUrl.match(/\/citizens\/([^\/\.]+)\.png/);
+      if (match && match[1]) {
+        citizenId = match[1];
+      }
+      
+      // Create an array of URLs to try in order - prioritize direct CitizenId path
       const urlsToTry = [
         // 1. Try the original URL as provided
         imageUrl,
         
-        // 2. Try with serenissima.ai domain if it's a relative path
+        // 2. If we extracted a citizen ID, try the direct path
+        citizenId ? `/images/citizens/${citizenId}.png` : null,
+        
+        // 3. Try with serenissima.ai domain if it's a relative path
         imageUrl.startsWith('/') ? `https://serenissima.ai${imageUrl}` : null,
         
-        // 3. Try with current origin as fallback
+        // 4. Try with current origin as fallback
         imageUrl.startsWith('/') ? `${window.location.origin}${imageUrl}` : null,
         
-        // 4. Try just the filename in the citizens folder
+        // 5. Try just the filename in the citizens folder
         `/images/citizens/${imageUrl.split('/').pop()}`,
         
-        // 5. Default fallback
+        // 6. Default fallback
         `/images/citizens/default.png`
       ].filter(Boolean); // Remove null entries
       
@@ -952,7 +987,7 @@ export class CitizenDisplayManager {
           currentUrl,
           // Success callback
           (loadedTexture) => {
-            console.log(`Successfully loaded citizen image from: ${currentUrl}`);
+            this.logImageLoadingAttempt(currentUrl, true);
             // Create a circular texture
             const circularTexture = this.createCircularTexture(loadedTexture);
             this.textureCache.set(imageUrl, circularTexture);
@@ -963,7 +998,7 @@ export class CitizenDisplayManager {
           },
           // Error callback
           (error) => {
-            console.warn(`Failed to load citizen image from ${currentUrl}, trying next URL...`, error);
+            this.logImageLoadingAttempt(currentUrl, false, error);
             // Try the next URL
             texture = tryNextUrl(index + 1);
           }
@@ -983,6 +1018,27 @@ export class CitizenDisplayManager {
     });
     
     return new THREE.Sprite(material);
+  }
+  
+  private logImageLoadingAttempt(url: string, success: boolean, error?: any): void {
+    if (success) {
+      console.log(`✅ Successfully loaded image: ${url}`);
+    } else {
+      console.warn(`❌ Failed to load image: ${url}`, error);
+      
+      // Check if the image exists using fetch
+      fetch(url, { method: 'HEAD' })
+        .then(response => {
+          if (response.ok) {
+            console.log(`🔍 Image exists at ${url} but couldn't be loaded as texture`);
+          } else {
+            console.warn(`🔍 Image does not exist at ${url} (${response.status})`);
+          }
+        })
+        .catch(fetchError => {
+          console.warn(`🔍 Error checking if image exists at ${url}:`, fetchError);
+        });
+    }
   }
   
   /**
@@ -2179,6 +2235,13 @@ export class CitizenDisplayManager {
     
     if (!imageUrl) {
       console.warn(`No image URL found for citizen:`, citizen);
+      
+      // If we have a CitizenId, use that to construct the path
+      if (citizen.CitizenId || citizen.id) {
+        const citizenId = citizen.CitizenId || citizen.id;
+        return `/images/citizens/${citizenId}.png`;
+      }
+      
       return '/images/citizens/default.png';
     }
     

@@ -10,8 +10,11 @@ const BUILDINGS_TABLE = 'Buildings';
 const CITIZENS_TABLE = 'CITIZENS';
 
 // Helper function to format image URLs
-function formatImageUrl(url: string | undefined): string {
-  if (!url) return '/images/citizens/default.png';
+function formatImageUrl(url: string | undefined, citizenId: string): string {
+  // If no URL is provided, use the CitizenId to construct the path
+  if (!url) {
+    return `/images/citizens/${citizenId}.png`;
+  }
   
   // If it's already an absolute URL, return it as is
   if (url.startsWith('http')) return url;
@@ -21,7 +24,13 @@ function formatImageUrl(url: string | undefined): string {
   
   // If it doesn't include the citizens directory, add it
   if (!url.includes('/citizens/')) {
-    url = `/images/citizens/${url.split('/').pop()}`;
+    // Check if the URL already has a filename
+    if (url.includes('.png') || url.includes('.jpg') || url.includes('.jpeg') || url.includes('.gif')) {
+      url = `/images/citizens/${url.split('/').pop()}`;
+    } else {
+      // Otherwise use the CitizenId
+      url = `/images/citizens/${citizenId}.png`;
+    }
   }
   
   return url;
@@ -248,8 +257,8 @@ export async function GET(request: Request) {
         SocialClass: citizen.socialClass, // Ensure both formats are available
         description: citizen.description,
         Description: citizen.description, // Ensure both formats are available
-        profileImage: formatImageUrl(citizen.imageUrl),
-        ImageUrl: formatImageUrl(citizen.imageUrl), // Ensure both formats are available
+        profileImage: formatImageUrl(citizen.imageUrl, citizen.id),
+        ImageUrl: formatImageUrl(citizen.imageUrl, citizen.id), // Ensure both formats are available
         position: position,
         occupation: citizen.work || 'Resident',
         wealth: citizen.wealth || 'Average',
@@ -298,8 +307,8 @@ function getDebugCitizens() {
       SocialClass: 'Merchant',
       description: 'Famous explorer and merchant who traveled through Asia along the Silk Road',
       Description: 'Famous explorer and merchant who traveled through Asia along the Silk Road',
-      profileImage: formatImageUrl('/images/citizens/citizen1.png'),
-      ImageUrl: formatImageUrl('/images/citizens/citizen1.png'),
+      profileImage: formatImageUrl('/images/citizens/citizen1.png', 'debug-citizen-1'),
+      ImageUrl: formatImageUrl('/images/citizens/citizen1.png', 'debug-citizen-1'),
       position: { lat: 45.4371, lng: 12.3358 },
       occupation: 'Explorer',
       wealth: 'Wealthy',
@@ -326,8 +335,8 @@ function getDebugCitizens() {
       SocialClass: 'Artist',
       description: 'Venetian composer, virtuoso violinist, and priest, known for his baroque compositions',
       Description: 'Venetian composer, virtuoso violinist, and priest, known for his baroque compositions',
-      profileImage: formatImageUrl('/images/citizens/citizen2.png'),
-      ImageUrl: formatImageUrl('/images/citizens/citizen2.png'),
+      profileImage: formatImageUrl('/images/citizens/citizen2.png', 'debug-citizen-2'),
+      ImageUrl: formatImageUrl('/images/citizens/citizen2.png', 'debug-citizen-2'),
       position: { lat: 45.4375, lng: 12.3368 },
       occupation: 'Composer',
       wealth: 'Comfortable',
@@ -354,8 +363,8 @@ function getDebugCitizens() {
       SocialClass: 'Nobility',
       description: 'Venetian noblewoman who became the Queen of Cyprus through her marriage to James II',
       Description: 'Venetian noblewoman who became the Queen of Cyprus through her marriage to James II',
-      profileImage: formatImageUrl('/images/citizens/citizen3.png'),
-      ImageUrl: formatImageUrl('/images/citizens/citizen3.png'),
+      profileImage: formatImageUrl('/images/citizens/citizen3.png', 'debug-citizen-3'),
+      ImageUrl: formatImageUrl('/images/citizens/citizen3.png', 'debug-citizen-3'),
       position: { lat: 45.4365, lng: 12.3348 },
       occupation: 'Queen of Cyprus',
       wealth: 'Very Wealthy',
@@ -382,8 +391,8 @@ function getDebugCitizens() {
       SocialClass: 'Adventurer',
       description: 'Venetian author, adventurer, and famous womanizer',
       Description: 'Venetian author, adventurer, and famous womanizer',
-      profileImage: formatImageUrl('/images/citizens/citizen4.png'),
-      ImageUrl: formatImageUrl('/images/citizens/citizen4.png'),
+      profileImage: formatImageUrl('/images/citizens/citizen4.png', 'debug-citizen-4'),
+      ImageUrl: formatImageUrl('/images/citizens/citizen4.png', 'debug-citizen-4'),
       position: { lat: 45.4380, lng: 12.3378 },
       occupation: 'Writer',
       wealth: 'Variable',
@@ -410,8 +419,8 @@ function getDebugCitizens() {
       SocialClass: 'Scholar',
       description: 'Venetian philosopher who was the first woman to receive a doctoral degree from a university',
       Description: 'Venetian philosopher who was the first woman to receive a doctoral degree from a university',
-      profileImage: formatImageUrl('/images/citizens/citizen5.png'),
-      ImageUrl: formatImageUrl('/images/citizens/citizen5.png'),
+      profileImage: formatImageUrl('/images/citizens/citizen5.png', 'debug-citizen-5'),
+      ImageUrl: formatImageUrl('/images/citizens/citizen5.png', 'debug-citizen-5'),
       position: { lat: 45.4368, lng: 12.3362 },
       occupation: 'Philosopher',
       wealth: 'Comfortable',
