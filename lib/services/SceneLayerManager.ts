@@ -105,8 +105,11 @@ export class SceneLayerManager {
   /**
    * Switch to a different view
    */
-  public switchToView(viewName: string): void {
+  public switchToView(viewName: string, options: { preserveLayers?: string[] } = {}): void {
     console.log(`SceneLayerManager: Switching to ${viewName} view`);
+    
+    // Get the layers that should be preserved
+    const preserveLayers = options.preserveLayers || [];
     
     // Validate scene is still available
     if (!this.scene) {
@@ -116,12 +119,13 @@ export class SceneLayerManager {
     
     // Instead of hiding all view layers, only hide non-persistent layers
     this.viewLayers.forEach((layer, name) => {
-      // Skip base layers (land, water, buildings) and the current view
+      // Skip base layers (land, water), preserved layers, and the current view
       if (name !== 'baseLayerSubscription' && 
           name !== viewName && 
           name !== 'land' && 
           name !== 'water' && 
           name !== 'buildings' && 
+          !preserveLayers.includes(name) && 
           layer.setVisible) {
         layer.setVisible(false);
       }
@@ -132,6 +136,14 @@ export class SceneLayerManager {
     if (viewLayer && viewLayer.setVisible) {
       viewLayer.setVisible(true);
     }
+    
+    // Ensure preserved layers remain visible
+    preserveLayers.forEach(layerName => {
+      const layer = this.viewLayers.get(layerName);
+      if (layer && layer.setVisible) {
+        layer.setVisible(true);
+      }
+    });
     
     // Buildings are always visible, but we may need to update their visibility
     // based on the view mode (e.g., in buildings view they should be highlighted)
@@ -167,7 +179,23 @@ export class SceneLayerManager {
     }
     
     // Emit view change event
-    eventBus.emit(EventTypes.VIEW_MODE_CHANGED, { viewMode: viewName });
+    eventBus.emit(EventTypes.VIEW_MODE_CHANGED, { 
+      viewMode: viewName, 
+      preservedLayers: preserveLayers 
+    });
+  }
+  
+  /**
+   * Ensure a specific layer is visible
+   */
+  public ensureLayerVisible(layerName: string): void {
+    const layer = this.viewLayers.get(layerName);
+    if (layer && layer.setVisible) {
+      layer.setVisible(true);
+      console.log(`SceneLayerManager: Ensured layer ${layerName} is visible`);
+    } else {
+      console.warn(`SceneLayerManager: Cannot make layer ${layerName} visible - not found or missing setVisible method`);
+    }
   }
   
   /**

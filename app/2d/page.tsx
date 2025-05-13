@@ -48,7 +48,18 @@ export default function TwoDPage() {
     // Use SceneLayerManager to switch views if it's initialized
     if (sceneLayerManager.isBaseLayerInitialized()) {
       console.log(`2D Page: Switching to ${activeView} view using SceneLayerManager`);
-      sceneLayerManager.switchToView(activeView);
+      
+      // Instead of completely switching views, we'll add the new view while preserving buildings
+      if (activeView !== 'buildings') {
+        // First ensure buildings are visible (if they weren't already)
+        sceneLayerManager.ensureLayerVisible('buildings');
+        
+        // Then switch to the new view, but keep buildings visible
+        sceneLayerManager.switchToView(activeView, { preserveLayers: ['buildings'] });
+      } else {
+        // If we're switching to buildings view, just make it the primary view
+        sceneLayerManager.switchToView('buildings');
+      }
     }
     
     // Dispatch events for specific views
