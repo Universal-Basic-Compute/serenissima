@@ -186,6 +186,7 @@ export async function GET(request: Request) {
       const citizenId = occupant ? 
         (typeof occupant === 'string' ? occupant : 
           Array.isArray(occupant) && occupant.length > 0 ? String(occupant[0]) : 
+          typeof occupant === 'object' ? String(Object.values(occupant)[0]) : 
           String(occupant)) : '';
       const citizen = citizenMap.get(citizenId);
       
