@@ -40,7 +40,10 @@ interface SimplePolygonRendererProps {
     scale: number;
     latCorrectionFactor: number;
   };
-  sandColor?: number; // Add this line
+  sandColor?: number;
+  positionManager?: any;
+  cacheService?: any;
+  debug?: boolean;
 }
 
 export default class SimplePolygonRenderer {
