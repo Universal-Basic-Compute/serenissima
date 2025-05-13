@@ -47,7 +47,17 @@ def run_scheduled_tasks():
                 17: ("engine/dailywages.py", "Daily wage payments"),
                 18: ("engine/dailyrentpayments.py", "Daily rent payments"),
                 19: ("ais/bidonlands.py", "AI land bidding"),
-                20: ("ais/buildbuildings.py", "AI building construction")
+                20: ("ais/buildbuildings.py", "AI building construction"),
+                21: ("ais/answertomessages.py", "AI message responses"),
+                23: ("ais/answertomessages.py", "AI message responses"),
+                1: ("ais/answertomessages.py", "AI message responses"),
+                3: ("ais/answertomessages.py", "AI message responses"),
+                5: ("ais/answertomessages.py", "AI message responses"),
+                7: ("ais/answertomessages.py", "AI message responses"),
+                9: ("ais/answertomessages.py", "AI message responses"),
+                11: ("ais/answertomessages.py", "AI message responses"),
+                13: ("ais/answertomessages.py", "AI message responses"),
+                15: ("ais/answertomessages.py", "AI message responses")
             }
             
             # Check if there's a task for the current hour
