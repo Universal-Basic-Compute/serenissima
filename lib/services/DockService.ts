@@ -18,6 +18,11 @@ declare module '../eventBus' {
   }
 }
 
+// Type guard to check if a property exists on EventTypes
+function hasEventType(key: string): key is keyof typeof EventTypes {
+  return key in EventTypes;
+}
+
 /**
  * Interface for dock data
  */
@@ -124,11 +129,19 @@ export class DockService {
     }
 
     // Emit event
-    eventBus.emit((EventTypes as any).DOCK_PLACED, {
-      dockId,
-      type: 'dock',
-      data: dockData
-    });
+    if (hasEventType('DOCK_PLACED')) {
+      eventBus.emit(EventTypes.DOCK_PLACED, {
+        dockId,
+        type: 'dock',
+        data: dockData
+      });
+    } else {
+      eventBus.emit((EventTypes as any).DOCK_PLACED, {
+        dockId,
+        type: 'dock',
+        data: dockData
+      });
+    }
 
     return dockData;
   }
@@ -191,10 +204,17 @@ export class DockService {
     }
 
     // Emit event
-    eventBus.emit((EventTypes as any).DOCK_DELETED, {
-      dockId: id,
-      data: dockData
-    });
+    if (hasEventType('DOCK_DELETED')) {
+      eventBus.emit(EventTypes.DOCK_DELETED, {
+        dockId: id,
+        data: dockData
+      });
+    } else {
+      eventBus.emit((EventTypes as any).DOCK_DELETED, {
+        dockId: id,
+        data: dockData
+      });
+    }
 
     return true;
   }
@@ -241,10 +261,17 @@ export class DockService {
     }
 
     // Emit event
-    eventBus.emit((EventTypes as any).DOCK_UPDATED, {
-      dockId: id,
-      data: updatedDock
-    });
+    if (hasEventType('DOCK_UPDATED')) {
+      eventBus.emit(EventTypes.DOCK_UPDATED, {
+        dockId: id,
+        data: updatedDock
+      });
+    } else {
+      eventBus.emit((EventTypes as any).DOCK_UPDATED, {
+        dockId: id,
+        data: updatedDock
+      });
+    }
 
     return updatedDock;
   }
