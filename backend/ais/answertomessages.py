@@ -146,8 +146,8 @@ def create_response_message(tables, ai_username: str, sender_username: str, resp
             "Sender": ai_username,
             "Receiver": sender_username,
             "Content": response_content,
-            "CreatedAt": now,
-            "UpdatedAt": now
+            "CreatedAt": now
+            # Remove "UpdatedAt" field as it doesn't exist in the MESSAGES table
         }
         
         tables["messages"].create(message)
