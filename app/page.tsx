@@ -751,9 +751,9 @@ export default function SimplePage() {
             }}
           />
           
-          {/* Building menu */}
+          {/* Building menu - only show when triggered by an event */}
           <BuildingMenu 
-            visible={true} 
+            visible={false} 
             onClose={() => {
               // Keep the buildings view active, just close the menu
               setActiveView('buildings');
