@@ -1004,7 +1004,7 @@ export default class SimplePolygonRenderer {
       
       // If no building point was clicked, check for transport markers
       const transportMarkers = [...this.transportPointManager.getBridgePointMarkers(),
-                               ...this.transportPointManager.getWaterAccessPointMarkers()].filter(
+                               ...this.transportPointManager.getDockPointMarkers()].filter(
         obj => obj instanceof THREE.Mesh
       );
       
