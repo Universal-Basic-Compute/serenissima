@@ -49,7 +49,12 @@ export class BuildingRendererManager {
       this.cleanup();
     }
     
+    // Ensure scene is set before anything else
     this.scene = scene;
+    
+    // Log to confirm scene is set
+    console.log('BuildingRendererManager: Scene initialized', this.scene);
+    
     this.rendererFactory = new BuildingRendererFactory({
       scene,
       positionManager: buildingPositionManager,
@@ -171,8 +176,8 @@ export class BuildingRendererManager {
    * @returns Promise resolving to the rendered mesh or null if rendering failed
    */
   public async renderBuilding(building: BuildingData): Promise<THREE.Object3D | null> {
-    if (!this.isInitialized || !this.rendererFactory) {
-      log.warn('BuildingRendererManager not initialized');
+    if (!this.isInitialized || !this.rendererFactory || !this.scene) {
+      log.warn('BuildingRendererManager not initialized or scene is undefined');
       return null;
     }
     
@@ -234,6 +239,12 @@ export class BuildingRendererManager {
         const mesh = await Promise.race([meshPromise, timeoutPromise]);
         
         if (mesh) {
+          // Before adding to scene, check again that scene exists
+          if (!this.scene) {
+            log.error(`Scene became undefined while rendering building ${building.id}`);
+            return null;
+          }
+          
           // Store reference to the mesh
           this.buildingMeshes.set(building.id, mesh);
           
@@ -668,8 +679,9 @@ export class BuildingRendererManager {
     // Don't remove building meshes, just mark as not initialized
     // This allows buildings to persist between view changes
     
-    this.isInitialized = false;
+    // Clear the scene reference first
     this.scene = null;
+    this.isInitialized = false;
     this.rendererFactory = null;
     
     // Clear performance monitoring interval
