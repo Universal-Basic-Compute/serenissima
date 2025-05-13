@@ -58,24 +58,69 @@ interface BuildingCategory {
 }
 
 // Helper function to calculate building cost
-const calculateBuildingCost = (buildingType: string): number => {
-  // Define costs for different building types
-  const buildingCosts: Record<string, number> = {
-    'market-stall': 100,
-    'house': 200,
-    'workshop': 300,
-    'warehouse': 400,
-    'tavern': 250,
-    'church': 500,
-    'palace': 1000,
-    // Add more building types as needed
-  };
-  
-  // Normalize building type (remove spaces, lowercase)
-  const normalizedType = buildingType.toLowerCase().replace(/\s+/g, '-');
-  
-  // Return cost or default if not found
-  return buildingCosts[normalizedType] || 150; // Default cost is 150
+const calculateBuildingCost = async (buildingType: string): Promise<number> => {
+  try {
+    // Normalize building type (remove spaces, lowercase)
+    const normalizedType = buildingType.toLowerCase().replace(/\s+/g, '-');
+    
+    // Fetch the building data from its JSON file
+    // The path structure follows the pattern in the data directory
+    // First try to determine the category path
+    let response;
+    
+    // Try different category paths since we don't know which one contains this building
+    const categoryPaths = [
+      'public_government/civic_buildings',
+      'residential',
+      'commercial',
+      'production',
+      'infrastructure',
+      'military_defence',
+      'special',
+      'criminal'
+    ];
+    
+    for (const categoryPath of categoryPaths) {
+      try {
+        response = await fetch(`/data/buildings/${categoryPath}/${normalizedType}.json`);
+        if (response.ok) break;
+      } catch (error) {
+        console.log(`Building not found in ${categoryPath}`);
+      }
+    }
+    
+    // If we found the building data, extract the cost
+    if (response && response.ok) {
+      const buildingData = await response.json();
+      
+      // Get the cost from the constructionCosts.ducats property
+      if (buildingData.constructionCosts && buildingData.constructionCosts.ducats) {
+        console.log(`Found cost for ${buildingType}: ${buildingData.constructionCosts.ducats} ducats`);
+        return buildingData.constructionCosts.ducats;
+      }
+    }
+    
+    // If we couldn't find the building data or it doesn't have a cost, use fallback values
+    console.warn(`Could not find cost data for ${buildingType}, using fallback values`);
+    
+    // Fallback costs for common building types
+    const fallbackCosts: Record<string, number> = {
+      'market-stall': 100,
+      'house': 200,
+      'workshop': 300,
+      'warehouse': 400,
+      'tavern': 250,
+      'church': 500,
+      'palace': 1000,
+      'town-hall': 5000000, // Special case for town hall
+    };
+    
+    // Return the fallback cost or default if not found
+    return fallbackCosts[normalizedType] || 150;
+  } catch (error) {
+    console.error(`Error getting building cost for ${buildingType}:`, error);
+    return 150; // Default cost on error
+  }
 };
 
 export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBuildingClose }: BuildingMenuProps) {
@@ -399,10 +444,12 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
                           
                           // Normalize the building type, ensuring we always have a valid string
                           const buildingType = (selectedBuilding.type || selectedBuilding.name || "unknown").toLowerCase();
-                          const buildingCost = calculateBuildingCost(buildingType);
+                          
+                          // Get the building cost from the JSON file
+                          const buildingCost = await calculateBuildingCost(buildingType);
                           
                           // Show confirmation dialog
-                          if (!window.confirm(`Confirm building construction: ${selectedBuilding.name}\nCost: ${buildingCost} $COMPUTE`)) {
+                          if (!window.confirm(`Confirm building construction: ${selectedBuilding.name}\nCost: ${buildingCost.toLocaleString()} $COMPUTE`)) {
                             return;
                           }
                           
