@@ -1,7 +1,7 @@
 /**
  * Building menu component for browsing and placing buildings
  */
-import React, { ErrorInfo, useEffect, useState } from 'react';
+import React, { ErrorInfo, useEffect, useState, useRef } from 'react';
 import { Tab } from '@headlessui/react';
 import ErrorBoundary from '../ErrorBoundary/ErrorBoundary';
 import { useBuildingMenu } from '@/hooks/useBuildingMenu';
@@ -199,6 +199,28 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
     setSelectedBuilding: React.Dispatch<React.SetStateAction<Building | null>>;
   };
 
+  // Add state to track the building cost in the detail view
+  const [buildingCost, setBuildingCost] = useState<number | undefined>(undefined);
+
+  // Add this effect to fetch the cost when a building is selected
+  useEffect(() => {
+    if (selectedBuilding) {
+      const fetchCost = async () => {
+        try {
+          const cost = await calculateBuildingCost(selectedBuilding.type || selectedBuilding.name);
+          setBuildingCost(cost);
+        } catch (error) {
+          console.error(`Error fetching cost for ${selectedBuilding.name}:`, error);
+          setBuildingCost(undefined);
+        }
+      };
+      
+      fetchCost();
+    } else {
+      setBuildingCost(undefined);
+    }
+  }, [selectedBuilding]);
+
   // Handle closing the menu
   const handleClose = () => {
     // Reset local state
@@ -302,32 +324,66 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
                           className="p-3 bg-white rounded-lg"
                         >
                           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                            {category.buildings.map((building) => (
-                            <div
-                              key={building.name || building.id}
-                              className="bg-amber-50 rounded-lg p-2 cursor-pointer hover:bg-amber-100 transition-colors"
-                              onClick={() => {
-                                handleSelectBuilding(building);
-                                if (onBuildingSelect) onBuildingSelect();
-                              }}
-                            >
-                              <div className="aspect-square bg-amber-100 rounded-lg overflow-hidden mb-2">
-                                {building.thumbnail && (
-                                  <img
-                                    src={building.thumbnail}
-                                    alt={building.name}
-                                    className="w-full h-full object-cover"
-                                  />
-                                )}
-                              </div>
-                              <h3 className="text-sm font-medium text-amber-800 truncate">
-                                {building.name}
-                              </h3>
-                              <p className="text-xs text-amber-600 truncate">
-                                {building.subcategory}
-                              </p>
-                            </div>
-                          ))}
+                            {category.buildings.map((building) => {
+                              // Add state to track the cost for each building
+                              const [buildingCost, setBuildingCost] = useState<number | null>(null);
+                              const [isLoadingCost, setIsLoadingCost] = useState<boolean>(false);
+                              
+                              // Fetch the cost when the building card is rendered
+                              useEffect(() => {
+                                const fetchBuildingCost = async () => {
+                                  setIsLoadingCost(true);
+                                  try {
+                                    const cost = await calculateBuildingCost(building.type || building.name);
+                                    setBuildingCost(cost);
+                                  } catch (error) {
+                                    console.error(`Error fetching cost for ${building.name}:`, error);
+                                    setBuildingCost(null);
+                                  } finally {
+                                    setIsLoadingCost(false);
+                                  }
+                                };
+                                
+                                fetchBuildingCost();
+                              }, [building.type, building.name]);
+                              
+                              return (
+                                <div
+                                  key={building.name || building.id}
+                                  className="bg-amber-50 rounded-lg p-2 cursor-pointer hover:bg-amber-100 transition-colors"
+                                  onClick={() => {
+                                    handleSelectBuilding(building);
+                                    if (onBuildingSelect) onBuildingSelect();
+                                  }}
+                                >
+                                  <div className="aspect-square bg-amber-100 rounded-lg overflow-hidden mb-2">
+                                    {building.thumbnail && (
+                                      <img
+                                        src={building.thumbnail}
+                                        alt={building.name}
+                                        className="w-full h-full object-cover"
+                                      />
+                                    )}
+                                  </div>
+                                  <h3 className="text-sm font-medium text-amber-800 truncate">
+                                    {building.name}
+                                  </h3>
+                                  <p className="text-xs text-amber-600 truncate">
+                                    {building.subcategory}
+                                  </p>
+                                  {/* Add the cost display here */}
+                                  <p className="text-xs font-medium mt-1">
+                                    {isLoadingCost ? (
+                                      <span className="text-gray-500">Loading cost...</span>
+                                    ) : buildingCost !== null ? (
+                                      <span className="text-amber-700">{buildingCost.toLocaleString()} $COMPUTE</span>
+                                    ) : (
+                                      <span className="text-red-500">Cost unavailable</span>
+                                    )}
+                                  </p>
+                                </div>
+                              );
+                            })}
                         </div>
                       </Tab.Panel>
                       );
@@ -427,6 +483,18 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
                           <span className="text-amber-700">{selectedBuilding.era}</span>
                         </div>
                       )}
+                      
+                      {/* Add cost information here */}
+                      <div className="text-sm col-span-2 mt-2 p-2 bg-amber-100 rounded-md">
+                        <span className="font-medium text-amber-800">Construction Cost:</span>{' '}
+                        <span className="text-amber-700 font-bold">
+                          {buildingCost !== undefined ? (
+                            `${buildingCost.toLocaleString()} $COMPUTE`
+                          ) : (
+                            <span className="text-gray-500">Loading...</span>
+                          )}
+                        </span>
+                      </div>
                     </div>
                   </div>
                   
