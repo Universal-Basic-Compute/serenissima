@@ -372,7 +372,14 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
                           }
                           
                           // Get the building cost
-                          const buildingCost = calculateBuildingCost(selectedBuilding.type);
+                          // Make sure we have a valid type string before calling toLowerCase()
+                          const buildingType = selectedBuilding.type || selectedBuilding.name;
+                          if (!buildingType) {
+                            alert('Invalid building type');
+                            return;
+                          }
+                          
+                          const buildingCost = calculateBuildingCost(buildingType);
                           
                           // Show confirmation dialog
                           if (!window.confirm(`Confirm building construction: ${selectedBuilding.name}\nCost: ${buildingCost} $COMPUTE`)) {
@@ -387,7 +394,8 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
                           // Create the building directly via API
                           const buildingService = BuildingService.getInstance();
                           const buildingData = {
-                            type: selectedBuilding.name.toLowerCase().replace(/\s+/g, '-'),
+                            // Use a normalized type that's guaranteed to be a string
+                            type: (buildingType || "unknown").toLowerCase().replace(/\s+/g, '-'),
                             land_id: buildingPoint.polygonId,
                             position: buildingPoint.position,
                             rotation: 0, // Default rotation
