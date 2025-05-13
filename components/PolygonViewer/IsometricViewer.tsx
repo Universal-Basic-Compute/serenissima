@@ -463,17 +463,20 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       
       // Get polygon owner color or income-based color
       let fillColor = '#FFF5D0'; // Default sand color
-      if (activeView === 'land' && polygon.id && incomeData[polygon.id] !== undefined) {
-        // Use income-based color in land view
-        fillColor = getIncomeColor(incomeData[polygon.id]);
-      } else if (polygon.id && landOwners[polygon.id]) {
-        // Use owner color in other views
-        const owner = landOwners[polygon.id];
-        const user = users[owner];
-        if (user && user.color) {
-          fillColor = user.color;
+      if (activeView === 'land') {
+        if (polygon.id && incomeData[polygon.id] !== undefined) {
+          // Use income-based color in land view
+          fillColor = getIncomeColor(incomeData[polygon.id]);
+        } else if (polygon.id && landOwners[polygon.id]) {
+          // Use owner color in land view
+          const owner = landOwners[polygon.id];
+          const user = users[owner];
+          if (user && user.color) {
+            fillColor = user.color;
+          }
         }
       }
+      // For other views, keep the default yellow color
       
       // Convert lat/lng to isometric coordinates
       const coords = polygon.coordinates.map((coord: {lat: number, lng: number}) => {
@@ -557,7 +560,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           if (!owner) return;
             
           // Calculate size based on zoom level - INCREASED BY 40%
-          const size = Math.min(42, Math.max(21, Math.floor(scale * 11.2)));
+          const size = Math.min(59, Math.max(29, Math.floor(scale * 15.7))); // Increased by 40%
             
           // Check if we have a coat of arms image for this owner
           if (owner in coatOfArmsImages && coatOfArmsImages[owner]) {
