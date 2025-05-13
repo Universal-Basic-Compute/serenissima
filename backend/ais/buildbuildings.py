@@ -385,13 +385,43 @@ If you decide not to build anything at this time, return an empty JSON object.
                 try:
                     # Look for JSON block in the response
                     import re
+                    # Improved regex pattern to better handle multiline JSON blocks with proper formatting
                     json_match = re.search(r'```json\s*(.*?)\s*```', content, re.DOTALL)
                     
                     if json_match:
-                        json_str = json_match.group(1)
+                        json_str = json_match.group(1).strip()
                         print(f"Found JSON in response: {json_str}")
                         
-                        decision = json.loads(json_str)
+                        try:
+                            decision = json.loads(json_str)
+                            print(f"Successfully parsed JSON decision: {json.dumps(decision)}")
+                        except json.JSONDecodeError as json_err:
+                            print(f"JSON parsing error: {str(json_err)}")
+                            print(f"Problematic JSON string: '{json_str}'")
+                            
+                            # Try to clean the JSON string and parse again
+                            cleaned_json = json_str.replace("'", '"').replace("\n", " ").strip()
+                            print(f"Attempting with cleaned JSON: {cleaned_json}")
+                            try:
+                                decision = json.loads(cleaned_json)
+                                print(f"Successfully parsed cleaned JSON: {json.dumps(decision)}")
+                            except:
+                                # If all else fails, try to manually extract the fields
+                                print("Attempting manual extraction of JSON fields")
+                                building_type_match = re.search(r'"building_type"\s*:\s*"([^"]+)"', json_str)
+                                land_id_match = re.search(r'"land_id"\s*:\s*"([^"]+)"', json_str)
+                                reason_match = re.search(r'"reason"\s*:\s*"([^"]+)"', json_str)
+                                
+                                if building_type_match and land_id_match:
+                                    decision = {
+                                        "building_type": building_type_match.group(1),
+                                        "land_id": land_id_match.group(1),
+                                        "reason": reason_match.group(1) if reason_match else "No reason provided"
+                                    }
+                                    print(f"Manually extracted decision: {json.dumps(decision)}")
+                                else:
+                                    print("Failed to extract required fields from JSON")
+                                    return None
                         
                         # Log the decision
                         print(f"AI {ai_username} decision: {json.dumps(decision)}")
@@ -760,10 +790,37 @@ Your response must be a JSON object with:
                     json_match = re.search(r'```json\s*(.*?)\s*```', content, re.DOTALL)
                     
                     if json_match:
-                        json_str = json_match.group(1)
+                        json_str = json_match.group(1).strip()
                         print(f"Found JSON in placement response: {json_str}")
                         
-                        placement_decision = json.loads(json_str)
+                        try:
+                            placement_decision = json.loads(json_str)
+                            print(f"Successfully parsed JSON placement decision: {json.dumps(placement_decision)}")
+                        except json.JSONDecodeError as json_err:
+                            print(f"JSON parsing error in placement response: {str(json_err)}")
+                            print(f"Problematic JSON string: '{json_str}'")
+                            
+                            # Try to clean the JSON string and parse again
+                            cleaned_json = json_str.replace("'", '"').replace("\n", " ").strip()
+                            print(f"Attempting with cleaned JSON: {cleaned_json}")
+                            try:
+                                placement_decision = json.loads(cleaned_json)
+                                print(f"Successfully parsed cleaned JSON: {json.dumps(placement_decision)}")
+                            except:
+                                # If all else fails, try to manually extract the fields
+                                print("Attempting manual extraction of JSON fields")
+                                selected_point_index_match = re.search(r'"selected_point_index"\s*:\s*(\d+)', json_str)
+                                reason_match = re.search(r'"reason"\s*:\s*"([^"]+)"', json_str)
+                                
+                                if selected_point_index_match:
+                                    placement_decision = {
+                                        "selected_point_index": int(selected_point_index_match.group(1)),
+                                        "reason": reason_match.group(1) if reason_match else "No reason provided"
+                                    }
+                                    print(f"Manually extracted placement decision: {json.dumps(placement_decision)}")
+                                else:
+                                    print("Failed to extract required fields from JSON")
+                                    return False
                         
                         # Log the decision
                         print(f"AI {ai_username} placement decision: {json.dumps(placement_decision)}")
