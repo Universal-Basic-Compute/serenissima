@@ -2134,6 +2134,86 @@ export class CitizenDisplayManager {
     return null;
   }
   
+  // Find building position from polygon data
+  private findBuildingPosition(buildingId: string, polygons: any[]): { lat: number, lng: number } | null {
+    // First, try to find the building in the buildingPoints of all polygons
+    for (const polygon of polygons) {
+      if (polygon.buildingPoints && Array.isArray(polygon.buildingPoints)) {
+        const buildingPoint = polygon.buildingPoints.find((bp: any) => 
+          bp.BuildingId === buildingId || 
+          bp.buildingId === buildingId || 
+          bp.id === buildingId
+        );
+        
+        if (buildingPoint) {
+          // Found the building point, return its position
+          console.log(`Found building ${buildingId} in polygon ${polygon.id} buildingPoints`);
+          
+          // Check if the building point has a position property
+          if (buildingPoint.position) {
+            return buildingPoint.position;
+          }
+          
+          // If not, check if it has lat/lng properties
+          if (buildingPoint.lat !== undefined && buildingPoint.lng !== undefined) {
+            return { lat: buildingPoint.lat, lng: buildingPoint.lng };
+          }
+          
+          // If not, check if it has x/z properties (sometimes used instead of lat/lng)
+          if (buildingPoint.x !== undefined && buildingPoint.z !== undefined) {
+            return { lat: buildingPoint.x, lng: buildingPoint.z };
+          }
+        }
+      }
+    }
+    
+    // If we couldn't find the building in buildingPoints, try to use the polygon center
+    // This is a fallback for when buildings don't have explicit positions
+    for (const polygon of polygons) {
+      // Check if this polygon contains the building
+      if (polygon.buildings && Array.isArray(polygon.buildings)) {
+        const building = polygon.buildings.find((b: any) => 
+          b.id === buildingId || 
+          b.buildingId === buildingId || 
+          b.BuildingId === buildingId
+        );
+        
+        if (building) {
+          console.log(`Found building ${buildingId} in polygon ${polygon.id} buildings array`);
+          
+          // Use the polygon's center as the building position
+          if (polygon.center) {
+            return polygon.center;
+          } else if (polygon.centroid) {
+            return polygon.centroid;
+          } else if (polygon.coatOfArmsCenter) {
+            return polygon.coatOfArmsCenter;
+          }
+        }
+      }
+      
+      // Also check if the polygon itself has a buildingId property that matches
+      if (polygon.BuildingId === buildingId || polygon.buildingId === buildingId) {
+        console.log(`Polygon ${polygon.id} itself has buildingId ${buildingId}`);
+        
+        // Use the polygon's center as the building position
+        if (polygon.center) {
+          return polygon.center;
+        } else if (polygon.centroid) {
+          return polygon.centroid;
+        } else if (polygon.coatOfArmsCenter) {
+          return polygon.coatOfArmsCenter;
+        }
+      }
+    }
+    
+    console.warn(`Could not find position for building ${buildingId} in any polygon`);
+    return null;
+  }
+  
+  /**
+   * Create a marker for a building with citizens
+   */
   /**
    * Create a marker for a building with citizens
    */

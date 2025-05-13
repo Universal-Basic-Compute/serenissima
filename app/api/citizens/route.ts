@@ -55,8 +55,46 @@ export async function GET(request: Request) {
       return NextResponse.json(getDebugCitizens());
     }
     
+    // Try to fetch buildings to get their positions
+    let buildingRecords: any[] = [];
+    try {
+      buildingRecords = await base(BUILDINGS_TABLE)
+        .select({
+          view: 'Grid view',
+        })
+        .firstPage();
+      
+      console.log(`Retrieved ${buildingRecords.length} buildings from Airtable`);
+    } catch (buildingError) {
+      console.warn('Error fetching buildings, will use fallback positions:', buildingError);
+    }
+    
     // Map citizens to the expected format
     const citizens = citizenRecords.map(record => {
+      // Default to random position near Venice
+      let position = { lat: 45.4371 + Math.random() * 0.01, lng: 12.3326 + Math.random() * 0.01 };
+      
+      // Try to find the building for this citizen
+      if (record.fields.Home && buildingRecords.length > 0) {
+        const homeBuilding = buildingRecords.find(b => 
+          b.fields.BuildingId === record.fields.Home
+        );
+        
+        if (homeBuilding && homeBuilding.fields.Position) {
+          try {
+            // Parse position if it's a string
+            if (typeof homeBuilding.fields.Position === 'string') {
+              position = JSON.parse(homeBuilding.fields.Position);
+            } else {
+              position = homeBuilding.fields.Position;
+            }
+            console.log(`Found position for citizen ${record.fields.CitizenId}'s home:`, position);
+          } catch (error) {
+            console.warn(`Error parsing position for building ${record.fields.Home}:`, error);
+          }
+        }
+      }
+      
       return {
         id: record.fields.CitizenId,
         CitizenId: record.fields.CitizenId,
@@ -71,7 +109,7 @@ export async function GET(request: Request) {
         Description: record.fields.Description,
         profileImage: formatImageUrl(record.fields.ImageUrl as string, record.fields.CitizenId),
         ImageUrl: formatImageUrl(record.fields.ImageUrl as string, record.fields.CitizenId),
-        position: { lat: 45.4371 + Math.random() * 0.01, lng: 12.3326 + Math.random() * 0.01 }, // Random position near Venice
+        position: position, // Use building position if found, otherwise random
         occupation: record.fields.Occupation || 'Citizen',
         wealth: record.fields.Wealth || 'Average',
         Wealth: record.fields.Wealth || 'Average',
