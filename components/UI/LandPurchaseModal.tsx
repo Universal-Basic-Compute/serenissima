@@ -293,7 +293,7 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
               const userData = await userResponse.json();
               console.log('Fetched updated user data:', userData);
             
-              // Dispatch event to update user profile with new compute amount
+              // Dispatch event to update user profile with new Ducats
               console.log('Dispatching userProfileUpdated event');
               window.dispatchEvent(new CustomEvent('userProfileUpdated', {
                 detail: userData
@@ -304,9 +304,9 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
                 const storedProfile = localStorage.getItem('userProfile');
                 if (storedProfile) {
                   const profile = JSON.parse(storedProfile);
-                  profile.computeAmount = userData.compute_amount;
+                  profile.Ducats = userData.ducats;
                   localStorage.setItem('userProfile', JSON.stringify(profile));
-                  console.log('Updated localStorage with new compute amount:', userData.compute_amount);
+                  console.log('Updated localStorage with new Ducats:', userData.ducats);
                 }
               } catch (storageError) {
                 console.error('Error updating localStorage:', storageError);
@@ -401,7 +401,7 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
             if (userResponse.ok) {
               const userData = await userResponse.json();
       
-              // Dispatch event to update user profile with new compute amount
+              // Dispatch event to update user profile with new Ducats
               window.dispatchEvent(new CustomEvent('userProfileUpdated', {
                 detail: userData
               }));

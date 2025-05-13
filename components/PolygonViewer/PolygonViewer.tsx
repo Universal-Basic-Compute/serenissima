@@ -156,7 +156,7 @@ export default function PolygonViewer() {
         },
         body: JSON.stringify({
           wallet_address: walletAddress,
-          compute_amount: amount,
+          ducats: amount,
         }),
       });
       
@@ -515,16 +515,16 @@ export default function PolygonViewer() {
             
             const data = await response.json();
             if (data && data.user_name) {
-              console.log(`Successfully fetched updated profile for ${data.user_name} with compute: ${data.compute_amount}`);
+              console.log(`Successfully fetched updated profile for ${data.user_name} with compute: ${data.ducats}`);
               
-              // Update local storage with new compute amount
+              // Update local storage with new Ducats
               const storedProfile = localStorage.getItem('userProfile');
               if (storedProfile) {
                 try {
                   const profile = JSON.parse(storedProfile);
-                  profile.computeAmount = data.compute_amount;
+                  profile.Ducats = data.ducats;
                   localStorage.setItem('userProfile', JSON.stringify(profile));
-                  console.log(`Updated localStorage profile with compute amount: ${data.compute_amount}`);
+                  console.log(`Updated localStorage profile with Ducats: ${data.ducats}`);
                 } catch (e) {
                   console.error('Error updating stored profile:', e);
                 }

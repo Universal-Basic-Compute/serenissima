@@ -3,7 +3,7 @@
 Treasury Redistribution Script for La Serenissima.
 
 This script:
-1. Calculates 10% of the ComputeAmount from the ConsiglioDeiDieci treasury
+1. Calculates 10% of the Ducats from the ConsiglioDeiDieci treasury
 2. Redistributes this amount to all citizens based on social class:
    - 40% to Nobili (nobili)
    - 30% to Cittadini
@@ -157,8 +157,8 @@ def update_compute_balance(tables, user_id: str, amount: float, operation: str =
             log.warning(f"User not found: {user_id}")
             return False
         
-        # Get current compute amount
-        current_amount = user['fields'].get('ComputeAmount', 0)
+        # Get current Ducats
+        current_amount = user['fields'].get('Ducats', 0)
         
         # Calculate new amount
         if operation == "add":
@@ -171,7 +171,7 @@ def update_compute_balance(tables, user_id: str, amount: float, operation: str =
         
         # Update the user record
         tables['users'].update(user_id, {
-            'ComputeAmount': new_amount
+            'Ducats': new_amount
         })
         
         log.info(f"Updated compute balance for user {user_id}: {current_amount} -> {new_amount}")
@@ -377,7 +377,7 @@ def redistribute_treasury(dry_run: bool = False):
     
     consiglio_id = consiglio['id']
     consiglio_username = consiglio['fields'].get('Username', 'ConsiglioDeiDieci')
-    consiglio_balance = consiglio['fields'].get('ComputeAmount', 0)
+    consiglio_balance = consiglio['fields'].get('Ducats', 0)
     
     log.info(f"ConsiglioDeiDieci balance: {consiglio_balance} ⚜️ Ducats")
     

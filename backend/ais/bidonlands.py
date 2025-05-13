@@ -91,7 +91,7 @@ def create_or_update_bid(tables, ai_user: Dict, land: Dict, existing_bid: Option
         
         # Get AI user's compute balance
         ai_username = ai_user["fields"].get("Username")
-        ai_compute = ai_user["fields"].get("ComputeAmount", 0)
+        ai_compute = ai_user["fields"].get("Ducats", 0)
         
         # Check if AI has enough compute (2x the bid amount)
         if ai_compute < bid_amount * 2:

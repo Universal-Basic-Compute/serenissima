@@ -35,7 +35,7 @@ export interface UserProfile {
   familyMotto?: string;
   familyCoatOfArms?: string;
   color?: string;
-  computeAmount?: number;
+  Ducats?: number;
   walletAddress?: string;
 }
 

@@ -1,57 +1,89 @@
 {
-  "totalErrors": 5,
+  "totalErrors": 9,
   "totalWarnings": 0,
   "exitCode": 1,
-  "timestamp": "2025-05-13T00:37:05.864Z",
+  "timestamp": "2025-05-13T03:55:55.846Z",
   "errors": [
     {
       "filePath": "components/PolygonViewer/BuildingMenu.tsx",
-      "line": 13,
-      "column": 11,
-      "code": "TS2430",
-      "message": "Interface 'Building' incorrectly extends interface 'import(\"C:/Users/reyno/serenissima/lib/models/BuildingModels\").Building'.",
-      "type": "error"
-    },
-    {
-      "filePath": "components/PolygonViewer/BuildingMenu.tsx",
-      "line": 276,
+      "line": 290,
       "column": 69,
       "code": "TS2339",
       "message": "Property 'description' does not exist on type 'Building'.",
       "type": "error"
     },
     {
-      "filePath": "components/UI/Compagno.tsx",
-      "line": 1027,
-      "column": 87,
+      "filePath": "lib/services/DockService.ts",
+      "line": 7,
+      "column": 12,
       "code": "TS2339",
-      "message": "Property 'style' does not exist on type 'Element'.",
+      "message": "Property 'DOCK_PLACED' does not exist on type '{ POLYGON_SELECTED: string; POLYGON_HOVER: string; LAND_OWNERSHIP_CHANGED: string; COMPUTE_BALANCE_CHANGED: string; LAND_PURCHASED: string; SHOW_LAND_PURCHASE_MODAL: string; KEEP_LAND_DETAILS_PANEL_OPEN: string; ... 41 more ...; SHOW_RESOURCE_DETAILS: string; }'.",
       "type": "error"
     },
     {
-      "filePath": "hooks/useBuildingMenu.ts",
-      "line": 74,
-      "column": 39,
+      "filePath": "lib/services/DockService.ts",
+      "line": 8,
+      "column": 12,
       "code": "TS2339",
-      "message": "Property 'type' does not exist on type 'Building'.",
+      "message": "Property 'DOCK_DELETED' does not exist on type '{ POLYGON_SELECTED: string; POLYGON_HOVER: string; LAND_OWNERSHIP_CHANGED: string; COMPUTE_BALANCE_CHANGED: string; LAND_PURCHASED: string; SHOW_LAND_PURCHASE_MODAL: string; KEEP_LAND_DETAILS_PANEL_OPEN: string; ... 41 more ...; SHOW_RESOURCE_DETAILS: string; }'.",
       "type": "error"
     },
     {
-      "filePath": "lib/threejs/WaterFacade.ts",
-      "line": 410,
-      "column": 9,
-      "code": "TS2304",
-      "message": "Cannot find name 'waterGeometry'.",
+      "filePath": "lib/services/DockService.ts",
+      "line": 9,
+      "column": 12,
+      "code": "TS2339",
+      "message": "Property 'DOCK_UPDATED' does not exist on type '{ POLYGON_SELECTED: string; POLYGON_HOVER: string; LAND_OWNERSHIP_CHANGED: string; COMPUTE_BALANCE_CHANGED: string; LAND_PURCHASED: string; SHOW_LAND_PURCHASE_MODAL: string; KEEP_LAND_DETAILS_PANEL_OPEN: string; ... 41 more ...; SHOW_RESOURCE_DETAILS: string; }'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/services/DockService.ts",
+      "line": 117,
+      "column": 30,
+      "code": "TS2339",
+      "message": "Property 'DOCK_PLACED' does not exist on type '{ POLYGON_SELECTED: string; POLYGON_HOVER: string; LAND_OWNERSHIP_CHANGED: string; COMPUTE_BALANCE_CHANGED: string; LAND_PURCHASED: string; SHOW_LAND_PURCHASE_MODAL: string; KEEP_LAND_DETAILS_PANEL_OPEN: string; ... 41 more ...; SHOW_RESOURCE_DETAILS: string; }'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/services/DockService.ts",
+      "line": 184,
+      "column": 30,
+      "code": "TS2339",
+      "message": "Property 'DOCK_DELETED' does not exist on type '{ POLYGON_SELECTED: string; POLYGON_HOVER: string; LAND_OWNERSHIP_CHANGED: string; COMPUTE_BALANCE_CHANGED: string; LAND_PURCHASED: string; SHOW_LAND_PURCHASE_MODAL: string; KEEP_LAND_DETAILS_PANEL_OPEN: string; ... 41 more ...; SHOW_RESOURCE_DETAILS: string; }'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/services/DockService.ts",
+      "line": 234,
+      "column": 30,
+      "code": "TS2339",
+      "message": "Property 'DOCK_UPDATED' does not exist on type '{ POLYGON_SELECTED: string; POLYGON_HOVER: string; LAND_OWNERSHIP_CHANGED: string; COMPUTE_BALANCE_CHANGED: string; LAND_PURCHASED: string; SHOW_LAND_PURCHASE_MODAL: string; KEEP_LAND_DETAILS_PANEL_OPEN: string; ... 41 more ...; SHOW_RESOURCE_DETAILS: string; }'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/threejs/CitizenDisplayManager.ts",
+      "line": 506,
+      "column": 43,
+      "code": "TS2345",
+      "message": "Argument of type 'number' is not assignable to parameter of type 'string'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/threejs/CitizenDisplayManager.ts",
+      "line": 506,
+      "column": 73,
+      "code": "TS2345",
+      "message": "Argument of type 'number' is not assignable to parameter of type 'string'.",
       "type": "error"
     }
   ],
-  "rawOutputLines": 7,
+  "rawOutputLines": 10,
   "firstFewLines": [
-    "components/PolygonViewer/BuildingMenu.tsx(13,11): error TS2430: Interface 'Building' incorrectly extends interface 'import(\"C:/Users/reyno/serenissima/lib/models/BuildingModels\").Building'.\r",
-    "  Property 'size' is optional in type 'Building' but required in type 'Building'.\r",
-    "components/PolygonViewer/BuildingMenu.tsx(276,69): error TS2339: Property 'description' does not exist on type 'Building'.\r",
-    "components/UI/Compagno.tsx(1027,87): error TS2339: Property 'style' does not exist on type 'Element'.\r",
-    "hooks/useBuildingMenu.ts(74,39): error TS2339: Property 'type' does not exist on type 'Building'.\r"
+    "components/PolygonViewer/BuildingMenu.tsx(290,69): error TS2339: Property 'description' does not exist on type 'Building'.\r",
+    "lib/services/DockService.ts(7,12): error TS2339: Property 'DOCK_PLACED' does not exist on type '{ POLYGON_SELECTED: string; POLYGON_HOVER: string; LAND_OWNERSHIP_CHANGED: string; COMPUTE_BALANCE_CHANGED: string; LAND_PURCHASED: string; SHOW_LAND_PURCHASE_MODAL: string; KEEP_LAND_DETAILS_PANEL_OPEN: string; ... 41 more ...; SHOW_RESOURCE_DETAILS: string; }'.\r",
+    "lib/services/DockService.ts(8,12): error TS2339: Property 'DOCK_DELETED' does not exist on type '{ POLYGON_SELECTED: string; POLYGON_HOVER: string; LAND_OWNERSHIP_CHANGED: string; COMPUTE_BALANCE_CHANGED: string; LAND_PURCHASED: string; SHOW_LAND_PURCHASE_MODAL: string; KEEP_LAND_DETAILS_PANEL_OPEN: string; ... 41 more ...; SHOW_RESOURCE_DETAILS: string; }'.\r",
+    "lib/services/DockService.ts(9,12): error TS2339: Property 'DOCK_UPDATED' does not exist on type '{ POLYGON_SELECTED: string; POLYGON_HOVER: string; LAND_OWNERSHIP_CHANGED: string; COMPUTE_BALANCE_CHANGED: string; LAND_PURCHASED: string; SHOW_LAND_PURCHASE_MODAL: string; KEEP_LAND_DETAILS_PANEL_OPEN: string; ... 41 more ...; SHOW_RESOURCE_DETAILS: string; }'.\r",
+    "lib/services/DockService.ts(117,30): error TS2339: Property 'DOCK_PLACED' does not exist on type '{ POLYGON_SELECTED: string; POLYGON_HOVER: string; LAND_OWNERSHIP_CHANGED: string; COMPUTE_BALANCE_CHANGED: string; LAND_PURCHASED: string; SHOW_LAND_PURCHASE_MODAL: string; KEEP_LAND_DETAILS_PANEL_OPEN: string; ... 41 more ...; SHOW_RESOURCE_DETAILS: string; }'.\r"
   ],
   "compilerExitCode": 1
 }

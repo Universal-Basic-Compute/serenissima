@@ -41,7 +41,7 @@ The server will start at http://localhost:8000
 
 The Users table should have the following fields:
 - Wallet (text): The wallet address
-- ComputeAmount (number): The amount of compute resources invested
+- Ducats (number): The amount of compute resources invested
 - Username (text): The user's username
 - Email (text): The user's email address
 

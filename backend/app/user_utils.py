@@ -40,7 +40,7 @@ def find_user_by_identifier(users_table, identifier, create_if_missing=False):
             print(f"Creating new user record for {identifier}")
             record = users_table.create({
                 "Wallet": identifier,
-                "ComputeAmount": 0
+                "Ducats": 0
             })
             return record
         
@@ -75,7 +75,7 @@ def update_compute_balance(users_table, user_id, amount, operation="add"):
         if not record:
             raise HTTPException(status_code=404, detail=f"User record not found: {user_id}")
         
-        current_amount = record["fields"].get("ComputeAmount", 0)
+        current_amount = record["fields"].get("Ducats", 0)
         
         if operation == "add":
             new_amount = current_amount + amount
@@ -88,7 +88,7 @@ def update_compute_balance(users_table, user_id, amount, operation="add"):
         
         # Update the record
         updated_record = users_table.update(user_id, {
-            "ComputeAmount": new_amount
+            "Ducats": new_amount
         })
         
         return updated_record
@@ -126,7 +126,7 @@ def transfer_compute(users_table, from_user, to_user, amount):
         to_id = to_record["id"]
         
         # Check if sender has enough compute
-        from_amount = from_record["fields"].get("ComputeAmount", 0)
+        from_amount = from_record["fields"].get("Ducats", 0)
         if from_amount < amount:
             raise HTTPException(status_code=400, detail=f"Insufficient balance. Required: {amount}, Available: {from_amount}")
         

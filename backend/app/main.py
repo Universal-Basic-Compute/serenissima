@@ -165,7 +165,7 @@ app.add_middleware(
 # Define request models
 class WalletRequest(BaseModel):
     wallet_address: str
-    compute_amount: float = None
+    ducats: float = None
     user_name: str = None
     first_name: str = None  # Add this field
     last_name: str = None   # Add this field
@@ -179,7 +179,7 @@ class WalletRequest(BaseModel):
 class WalletResponse(BaseModel):
     id: str
     wallet_address: str
-    compute_amount: float = None
+    ducats: float = None
     user_name: str = None
     first_name: str = None  # Add this field
     last_name: str = None   # Add this field
@@ -264,8 +264,8 @@ async def store_wallet(wallet_data: WalletRequest):
             # Create update fields dictionary
             update_fields = {}
             
-            if wallet_data.compute_amount is not None:
-                update_fields["ComputeAmount"] = wallet_data.compute_amount
+            if wallet_data.ducats is not None:
+                update_fields["Ducats"] = wallet_data.ducats
                 
             if wallet_data.user_name:
                 update_fields["Username"] = wallet_data.user_name
@@ -301,7 +301,7 @@ async def store_wallet(wallet_data: WalletRequest):
             return {
                 "id": record["id"],
                 "wallet_address": record["fields"].get("Wallet", ""),
-                "compute_amount": record["fields"].get("ComputeAmount", 0),
+                "ducats": record["fields"].get("Ducats", 0),
                 "user_name": record["fields"].get("Username", None),
                 "first_name": record["fields"].get("FirstName", None),
                 "last_name": record["fields"].get("LastName", None),
@@ -317,8 +317,8 @@ async def store_wallet(wallet_data: WalletRequest):
             "Wallet": wallet_data.wallet_address
         }
         
-        if wallet_data.compute_amount is not None:
-            fields["ComputeAmount"] = wallet_data.compute_amount
+        if wallet_data.ducats is not None:
+            fields["Ducats"] = wallet_data.ducats
             
         if wallet_data.user_name:
             fields["Username"] = wallet_data.user_name
@@ -357,7 +357,7 @@ async def store_wallet(wallet_data: WalletRequest):
         return {
             "id": record["id"],
             "wallet_address": record["fields"].get("Wallet", ""),
-            "compute_amount": record["fields"].get("ComputeAmount", 0),
+            "ducats": record["fields"].get("Ducats", 0),
             "user_name": record["fields"].get("Username", None),
             "first_name": record["fields"].get("FirstName", None),
             "last_name": record["fields"].get("LastName", None),
@@ -397,7 +397,7 @@ async def get_wallet(wallet_address: str):
         return {
             "id": record["id"],
             "wallet_address": record["fields"].get("Wallet", ""),
-            "compute_amount": record["fields"].get("ComputeAmount", 0),
+            "ducats": record["fields"].get("Ducats", 0),
             "user_name": record["fields"].get("Username", None),
             "first_name": record["fields"].get("FirstName", None),
             "last_name": record["fields"].get("LastName", None),
@@ -421,8 +421,8 @@ async def transfer_compute_endpoint(wallet_data: WalletRequest):
     if not wallet_data.wallet_address:
         raise HTTPException(status_code=400, detail="Wallet address is required")
     
-    if wallet_data.compute_amount is None or wallet_data.compute_amount <= 0:
-        raise HTTPException(status_code=400, detail="Compute amount must be greater than 0")
+    if wallet_data.ducats is None or wallet_data.ducats <= 0:
+        raise HTTPException(status_code=400, detail="Ducats must be greater than 0")
     
     try:
         # Normalize the wallet address to lowercase for case-insensitive comparison
@@ -437,20 +437,20 @@ async def transfer_compute_endpoint(wallet_data: WalletRequest):
         ]
         
         # Log the incoming amount for debugging
-        print(f"Received compute transfer request: {wallet_data.compute_amount} COMPUTE")
+        print(f"Received compute transfer request: {wallet_data.ducats} COMPUTE")
         
         # Use the full amount without any conversion
-        transfer_amount = wallet_data.compute_amount
+        transfer_amount = wallet_data.ducats
         
         if matching_records:
             # Update existing record
             record = matching_records[0]
-            current_amount = record["fields"].get("ComputeAmount", 0)
+            current_amount = record["fields"].get("Ducats", 0)
             new_amount = current_amount + transfer_amount
             
-            print(f"Updating wallet {record['id']} compute amount from {current_amount} to {new_amount}")
+            print(f"Updating wallet {record['id']} Ducats from {current_amount} to {new_amount}")
             updated_record = users_table.update(record["id"], {
-                "ComputeAmount": new_amount
+                "Ducats": new_amount
             })
             
             # Add transaction record to TRANSACTIONS table
@@ -476,7 +476,7 @@ async def transfer_compute_endpoint(wallet_data: WalletRequest):
             return {
                 "id": updated_record["id"],
                 "wallet_address": updated_record["fields"].get("Wallet", ""),
-                "compute_amount": updated_record["fields"].get("ComputeAmount", 0),
+                "ducats": updated_record["fields"].get("Ducats", 0),
                 "user_name": updated_record["fields"].get("Username", None),
                 "email": updated_record["fields"].get("Email", None),
                 "family_motto": updated_record["fields"].get("FamilyMotto", None),
@@ -484,10 +484,10 @@ async def transfer_compute_endpoint(wallet_data: WalletRequest):
             }
         else:
             # Create new record
-            print(f"Creating new wallet record with compute amount {transfer_amount}")
+            print(f"Creating new wallet record with Ducats {transfer_amount}")
             record = users_table.create({
                 "Wallet": wallet_data.wallet_address,
-                "ComputeAmount": transfer_amount
+                "Ducats": transfer_amount
             })
             
             # Add transaction record to TRANSACTIONS table
@@ -514,7 +514,7 @@ async def transfer_compute_endpoint(wallet_data: WalletRequest):
             return {
                 "id": record["id"],
                 "wallet_address": record["fields"].get("Wallet", ""),
-                "compute_amount": record["fields"].get("ComputeAmount", 0),
+                "ducats": record["fields"].get("Ducats", 0),
                 "user_name": record["fields"].get("Username", None),
                 "email": record["fields"].get("Email", None),
                 "family_motto": record["fields"].get("FamilyMotto", None)
@@ -532,8 +532,8 @@ async def withdraw_compute(wallet_data: WalletRequest):
     if not wallet_data.wallet_address:
         raise HTTPException(status_code=400, detail="Wallet address is required")
     
-    if wallet_data.compute_amount is None or wallet_data.compute_amount <= 0:
-        raise HTTPException(status_code=400, detail="Compute amount must be greater than 0")
+    if wallet_data.ducats is None or wallet_data.ducats <= 0:
+        raise HTTPException(status_code=400, detail="Ducats must be greater than 0")
     
     try:
         # Check if wallet exists
@@ -544,29 +544,29 @@ async def withdraw_compute(wallet_data: WalletRequest):
         if not existing_records:
             raise HTTPException(status_code=404, detail="Wallet not found")
         
-        # Get current compute amount
+        # Get current Ducats
         record = existing_records[0]
-        current_amount = record["fields"].get("ComputeAmount", 0)
+        current_amount = record["fields"].get("Ducats", 0)
         
         # Check if user has enough compute to withdraw
-        if current_amount < wallet_data.compute_amount:
+        if current_amount < wallet_data.ducats:
             raise HTTPException(status_code=400, detail="Insufficient compute balance")
         
         # Calculate new amount
-        new_amount = current_amount - wallet_data.compute_amount
+        new_amount = current_amount - wallet_data.ducats
         
         # Update the record
-        print(f"Withdrawing {wallet_data.compute_amount} compute from wallet {record['id']}")
-        print(f"Updating compute amount from {current_amount} to {new_amount}")
+        print(f"Withdrawing {wallet_data.ducats} compute from wallet {record['id']}")
+        print(f"Updating Ducats from {current_amount} to {new_amount}")
         
         updated_record = users_table.update(record["id"], {
-            "ComputeAmount": new_amount
+            "Ducats": new_amount
         })
         
         return {
             "id": updated_record["id"],
             "wallet_address": updated_record["fields"].get("Wallet", ""),
-            "compute_amount": updated_record["fields"].get("ComputeAmount", 0),
+            "ducats": updated_record["fields"].get("Ducats", 0),
             "user_name": updated_record["fields"].get("Username", None),
             "email": updated_record["fields"].get("Email", None),
             "family_motto": updated_record["fields"].get("FamilyMotto", None),
@@ -1263,7 +1263,7 @@ async def execute_transaction(transaction_id: str, data: dict):
                     raise HTTPException(status_code=404, detail=f"Buyer not found: {buyer_username}")
                 
                 buyer_record = buyer_records[0]
-                buyer_compute = buyer_record["fields"].get("ComputeAmount", 0)
+                buyer_compute = buyer_record["fields"].get("Ducats", 0)
                 
                 # Check if buyer has enough compute
                 if buyer_compute < price:
@@ -1275,7 +1275,7 @@ async def execute_transaction(transaction_id: str, data: dict):
                     raise HTTPException(status_code=404, detail=f"Seller not found: {seller_username}")
                 
                 seller_record = seller_records[0]
-                seller_compute = seller_record["fields"].get("ComputeAmount", 0)
+                seller_compute = seller_record["fields"].get("Ducats", 0)
                 
                 print(f"Transferring {price} compute from {buyer_username} (balance: {buyer_compute}) to {seller_username} (balance: {seller_compute})")
                 
@@ -1293,14 +1293,14 @@ async def execute_transaction(transaction_id: str, data: dict):
                     "status": "pending"
                 }
                 
-                # Update buyer's compute amount
+                # Update buyer's Ducats
                 users_table.update(buyer_record["id"], {
-                    "ComputeAmount": buyer_compute - price
+                    "Ducats": buyer_compute - price
                 })
                 
-                # Update seller's compute amount
+                # Update seller's Ducats
                 users_table.update(seller_record["id"], {
-                    "ComputeAmount": seller_compute + price
+                    "Ducats": seller_compute + price
                 })
                 
                 # Update transaction log status
@@ -1534,8 +1534,8 @@ async def transfer_compute_solana(wallet_data: WalletRequest):
     if not wallet_data.wallet_address:
         raise HTTPException(status_code=400, detail="Wallet address is required")
     
-    if wallet_data.compute_amount is None or wallet_data.compute_amount <= 0:
-        raise HTTPException(status_code=400, detail="Compute amount must be greater than 0")
+    if wallet_data.ducats is None or wallet_data.ducats <= 0:
+        raise HTTPException(status_code=400, detail="Ducats must be greater than 0")
     
     try:
         # Check if wallet exists - try multiple search approaches
@@ -1553,10 +1553,10 @@ async def transfer_compute_solana(wallet_data: WalletRequest):
             existing_records = users_table.all(formula=formula)
         
         # Log the incoming amount for debugging
-        print(f"Received compute transfer request: {wallet_data.compute_amount} COMPUTE")
+        print(f"Received compute transfer request: {wallet_data.ducats} COMPUTE")
         
         # Use the full amount without any conversion
-        transfer_amount = wallet_data.compute_amount
+        transfer_amount = wallet_data.ducats
         
         # Call the Node.js script to perform the Solana transfer
         import subprocess
@@ -1614,12 +1614,12 @@ async def transfer_compute_solana(wallet_data: WalletRequest):
         if existing_records:
             # Update existing record
             record = existing_records[0]
-            current_amount = record["fields"].get("ComputeAmount", 0)
+            current_amount = record["fields"].get("Ducats", 0)
             new_amount = current_amount + transfer_amount
             
-            print(f"Updating wallet {record['id']} compute amount from {current_amount} to {new_amount}")
+            print(f"Updating wallet {record['id']} Ducats from {current_amount} to {new_amount}")
             updated_record = users_table.update(record["id"], {
-                "ComputeAmount": new_amount
+                "Ducats": new_amount
             })
             
             # Add transaction record to TRANSACTIONS table
@@ -1647,7 +1647,7 @@ async def transfer_compute_solana(wallet_data: WalletRequest):
             return {
                 "id": updated_record["id"],
                 "wallet_address": updated_record["fields"].get("Wallet", ""),
-                "compute_amount": updated_record["fields"].get("ComputeAmount", 0),
+                "ducats": updated_record["fields"].get("Ducats", 0),
                 "user_name": updated_record["fields"].get("Username", None),
                 "email": updated_record["fields"].get("Email", None),
                 "family_motto": updated_record["fields"].get("FamilyMotto", None),
@@ -1657,10 +1657,10 @@ async def transfer_compute_solana(wallet_data: WalletRequest):
             }
         else:
             # Create new record
-            print(f"Creating new wallet record with compute amount {transfer_amount}")
+            print(f"Creating new wallet record with Ducats {transfer_amount}")
             record = users_table.create({
                 "Wallet": wallet_data.wallet_address,
-                "ComputeAmount": transfer_amount
+                "Ducats": transfer_amount
             })
             
             # Add transaction record to TRANSACTIONS table
@@ -1688,7 +1688,7 @@ async def transfer_compute_solana(wallet_data: WalletRequest):
             return {
                 "id": record["id"],
                 "wallet_address": record["fields"].get("Wallet", ""),
-                "compute_amount": record["fields"].get("ComputeAmount", 0),
+                "ducats": record["fields"].get("Ducats", 0),
                 "user_name": record["fields"].get("Username", None),
                 "email": record["fields"].get("Email", None),
                 "family_motto": record["fields"].get("FamilyMotto", None),
@@ -1714,14 +1714,14 @@ async def transfer_compute_between_users(data: dict):
     if not data.get("to_wallet"):
         raise HTTPException(status_code=400, detail="Recipient wallet address is required")
     
-    if not data.get("compute_amount") or data.get("compute_amount") <= 0:
-        raise HTTPException(status_code=400, detail="Compute amount must be greater than 0")
+    if not data.get("ducats") or data.get("ducats") <= 0:
+        raise HTTPException(status_code=400, detail="Ducats must be greater than 0")
     
     try:
         # Use the utility function to handle the transfer
         from_wallet = data["from_wallet"]
         to_wallet = data["to_wallet"]
-        amount = data["compute_amount"]
+        amount = data["ducats"]
         
         # Perform the transfer
         from_record, to_record = transfer_compute(users_table, from_wallet, to_wallet, amount)
@@ -1753,8 +1753,8 @@ async def transfer_compute_between_users(data: dict):
             "from_wallet": from_wallet,
             "to_wallet": to_wallet,
             "amount": amount,
-            "from_balance": from_record["fields"].get("ComputeAmount", 0),
-            "to_balance": to_record["fields"].get("ComputeAmount", 0)
+            "from_balance": from_record["fields"].get("Ducats", 0),
+            "to_balance": to_record["fields"].get("Ducats", 0)
         }
     except HTTPException:
         raise
@@ -1771,8 +1771,8 @@ async def withdraw_compute_solana(wallet_data: WalletRequest):
     if not wallet_data.wallet_address:
         raise HTTPException(status_code=400, detail="Wallet address is required")
     
-    if wallet_data.compute_amount is None or wallet_data.compute_amount <= 0:
-        raise HTTPException(status_code=400, detail="Compute amount must be greater than 0")
+    if wallet_data.ducats is None or wallet_data.ducats <= 0:
+        raise HTTPException(status_code=400, detail="Ducats must be greater than 0")
     
     try:
         # Check if user has any active loans
@@ -1806,16 +1806,16 @@ async def withdraw_compute_solana(wallet_data: WalletRequest):
         if not existing_records:
             raise HTTPException(status_code=404, detail="Wallet not found")
         
-        # Get current compute amount
+        # Get current Ducats
         record = existing_records[0]
-        current_amount = record["fields"].get("ComputeAmount", 0)
+        current_amount = record["fields"].get("Ducats", 0)
         
         # Check if user has enough compute to withdraw
-        if current_amount < wallet_data.compute_amount:
+        if current_amount < wallet_data.ducats:
             raise HTTPException(status_code=400, detail="Insufficient compute balance")
         
         # Calculate new amount
-        new_amount = current_amount - wallet_data.compute_amount
+        new_amount = current_amount - wallet_data.ducats
         
         # Call the Node.js script to perform the Solana transfer
         import subprocess
@@ -1824,13 +1824,13 @@ async def withdraw_compute_solana(wallet_data: WalletRequest):
         import base64
         
         # Create a message for the user to sign (in a real app)
-        message = f"Authorize withdrawal of {wallet_data.compute_amount} COMPUTE tokens at {time.time()}"
+        message = f"Authorize withdrawal of {wallet_data.ducats} COMPUTE tokens at {time.time()}"
         message_b64 = base64.b64encode(message.encode()).decode()
         
         # Create a temporary JSON file with the withdrawal details
         transfer_data = {
             "user": wallet_data.wallet_address,
-            "amount": wallet_data.compute_amount,
+            "amount": wallet_data.ducats,
             "message": message,
             # In a real app, the frontend would provide this signature
             # "signature": user_signature_from_frontend
@@ -1868,17 +1868,17 @@ async def withdraw_compute_solana(wallet_data: WalletRequest):
                 signature = "simulated_" + base64.b64encode(os.urandom(32)).decode()
                 
                 # Update the record in Airtable
-                print(f"Withdrawing {wallet_data.compute_amount} compute from wallet {record['id']}")
-                print(f"Updating compute amount from {current_amount} to {new_amount}")
+                print(f"Withdrawing {wallet_data.ducats} compute from wallet {record['id']}")
+                print(f"Updating Ducats from {current_amount} to {new_amount}")
                 
                 updated_record = users_table.update(record["id"], {
-                    "ComputeAmount": new_amount
+                    "Ducats": new_amount
                 })
                 
                 return {
                     "id": updated_record["id"],
                     "wallet_address": updated_record["fields"].get("Wallet", ""),
-                    "compute_amount": updated_record["fields"].get("ComputeAmount", 0),
+                    "ducats": updated_record["fields"].get("Ducats", 0),
                     "user_name": updated_record["fields"].get("Username", None),
                     "email": updated_record["fields"].get("Email", None),
                     "family_motto": updated_record["fields"].get("FamilyMotto", None),
@@ -1887,7 +1887,7 @@ async def withdraw_compute_solana(wallet_data: WalletRequest):
                     "transaction_details": {
                         "from_wallet": wallet_data.wallet_address,
                         "to_wallet": "Treasury",
-                        "amount": wallet_data.compute_amount,
+                        "amount": wallet_data.ducats,
                         "status": "completed",
                         "message": message,
                         "message_b64": message_b64,
@@ -1904,17 +1904,17 @@ async def withdraw_compute_solana(wallet_data: WalletRequest):
             raise HTTPException(status_code=500, detail="Failed to parse withdrawal result")
         
         # Update the record
-        print(f"Withdrawing {wallet_data.compute_amount} compute from wallet {record['id']}")
-        print(f"Updating compute amount from {current_amount} to {new_amount}")
+        print(f"Withdrawing {wallet_data.ducats} compute from wallet {record['id']}")
+        print(f"Updating Ducats from {current_amount} to {new_amount}")
         
         updated_record = users_table.update(record["id"], {
-            "ComputeAmount": new_amount
+            "Ducats": new_amount
         })
         
         return {
             "id": updated_record["id"],
             "wallet_address": updated_record["fields"].get("Wallet", ""),
-            "compute_amount": updated_record["fields"].get("ComputeAmount", 0),
+            "ducats": updated_record["fields"].get("Ducats", 0),
             "user_name": updated_record["fields"].get("Username", None),
             "email": updated_record["fields"].get("Email", None),
             "family_motto": updated_record["fields"].get("FamilyMotto", None),
@@ -1923,7 +1923,7 @@ async def withdraw_compute_solana(wallet_data: WalletRequest):
             "transaction_details": {
                 "from_wallet": wallet_data.wallet_address,
                 "to_wallet": "Treasury",
-                "amount": wallet_data.compute_amount,
+                "amount": wallet_data.ducats,
                 "status": "completed"
             }
         }
@@ -1983,7 +1983,7 @@ async def get_users():
                 'first_name': fields.get('FirstName', ''),
                 'last_name': fields.get('LastName', ''),
                 'wallet_address': fields.get('Wallet', ''),
-                'compute_amount': fields.get('ComputeAmount', 0),
+                'ducats': fields.get('Ducats', 0),
                 'family_motto': fields.get('FamilyMotto', ''),
                 'coat_of_arms_image': fields.get('CoatOfArmsImage', '')
             }
@@ -2272,11 +2272,11 @@ async def apply_for_loan(loan_application: dict):
                     
                     if borrower_records:
                         borrower_record = borrower_records[0]
-                        current_compute = borrower_record["fields"].get("ComputeAmount", 0)
+                        current_compute = borrower_record["fields"].get("Ducats", 0)
                         
                         # Update borrower's compute balance
                         users_table.update(borrower_record["id"], {
-                            "ComputeAmount": current_compute + principal
+                            "Ducats": current_compute + principal
                         })
                         
                         print(f"Transferred {principal} compute to borrower {borrower}")
@@ -2511,11 +2511,11 @@ async def make_loan_payment(loan_id: str, payment_data: dict):
                     borrower_records = users_table.all(formula=f"{{Wallet}}='{borrower}'")
                     if borrower_records:
                         borrower_record = borrower_records[0]
-                        current_compute = borrower_record["fields"].get("ComputeAmount", 0)
+                        current_compute = borrower_record["fields"].get("Ducats", 0)
                         
                         # Deduct payment from compute balance
                         users_table.update(borrower_record["id"], {
-                            "ComputeAmount": current_compute - payment_amount
+                            "Ducats": current_compute - payment_amount
                         })
                         
                         print(f"Updated borrower {borrower} compute balance: {current_compute} -> {current_compute - payment_amount}")
@@ -2619,8 +2619,8 @@ async def inject_compute_complete(data: dict):
     if not data.get("wallet_address"):
         raise HTTPException(status_code=400, detail="Wallet address is required")
     
-    if not data.get("compute_amount") or data.get("compute_amount") <= 0:
-        raise HTTPException(status_code=400, detail="Compute amount must be greater than 0")
+    if not data.get("ducats") or data.get("ducats") <= 0:
+        raise HTTPException(status_code=400, detail="Ducats must be greater than 0")
     
     if not data.get("transaction_signature"):
         raise HTTPException(status_code=400, detail="Transaction signature is required")
@@ -2641,20 +2641,20 @@ async def inject_compute_complete(data: dict):
             existing_records = users_table.all(formula=formula)
         
         # Log the incoming amount for debugging
-        print(f"Received compute injection completion: {data['compute_amount']} COMPUTE")
+        print(f"Received compute injection completion: {data['ducats']} COMPUTE")
         
         # Use the full amount without any conversion
-        transfer_amount = data["compute_amount"]
+        transfer_amount = data["ducats"]
         
         if existing_records:
             # Update existing record
             record = existing_records[0]
-            current_amount = record["fields"].get("ComputeAmount", 0)
+            current_amount = record["fields"].get("Ducats", 0)
             new_amount = current_amount + transfer_amount
             
-            print(f"Updating wallet {record['id']} compute amount from {current_amount} to {new_amount}")
+            print(f"Updating wallet {record['id']} Ducats from {current_amount} to {new_amount}")
             updated_record = users_table.update(record["id"], {
-                "ComputeAmount": new_amount
+                "Ducats": new_amount
             })
             
             # Add transaction record to TRANSACTIONS table
@@ -2682,7 +2682,7 @@ async def inject_compute_complete(data: dict):
             return {
                 "id": updated_record["id"],
                 "wallet_address": updated_record["fields"].get("Wallet", ""),
-                "compute_amount": updated_record["fields"].get("ComputeAmount", 0),
+                "ducats": updated_record["fields"].get("Ducats", 0),
                 "user_name": updated_record["fields"].get("Username", None),
                 "email": updated_record["fields"].get("Email", None),
                 "family_motto": updated_record["fields"].get("FamilyMotto", None),
@@ -2691,10 +2691,10 @@ async def inject_compute_complete(data: dict):
             }
         else:
             # Create new record
-            print(f"Creating new wallet record with compute amount {transfer_amount}")
+            print(f"Creating new wallet record with Ducats {transfer_amount}")
             record = users_table.create({
                 "Wallet": data["wallet_address"],
-                "ComputeAmount": transfer_amount
+                "Ducats": transfer_amount
             })
             
             # Add transaction record to TRANSACTIONS table
@@ -2722,7 +2722,7 @@ async def inject_compute_complete(data: dict):
             return {
                 "id": record["id"],
                 "wallet_address": record["fields"].get("Wallet", ""),
-                "compute_amount": record["fields"].get("ComputeAmount", 0),
+                "ducats": record["fields"].get("Ducats", 0),
                 "user_name": record["fields"].get("Username", None),
                 "email": record["fields"].get("Email", None),
                 "family_motto": record["fields"].get("FamilyMotto", None),

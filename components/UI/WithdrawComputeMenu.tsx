@@ -8,10 +8,10 @@ import { LoanStatus } from '@/lib/services/LoanService';
 interface WithdrawComputeMenuProps {
   onClose: () => void;
   onWithdraw: (amount: number) => Promise<void>;
-  computeAmount?: number;
+  Ducats?: number;
 }
 
-export default function WithdrawComputeMenu({ onClose, onWithdraw, computeAmount = 0 }: WithdrawComputeMenuProps) {
+export default function WithdrawComputeMenu({ onClose, onWithdraw, Ducats = 0 }: WithdrawComputeMenuProps) {
   const [amount, setAmount] = useState<number>(0);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +23,7 @@ export default function WithdrawComputeMenu({ onClose, onWithdraw, computeAmount
       return;
     }
 
-    if (withdrawAmount > computeAmount) {
+    if (withdrawAmount > Ducats) {
       setError('You cannot withdraw more than your available balance');
       return;
     }
@@ -112,7 +112,7 @@ export default function WithdrawComputeMenu({ onClose, onWithdraw, computeAmount
             <p className="text-amber-800 mb-1">Your current balance:</p>
             <p className="font-bold text-2xl text-amber-700">
               <AnimatedDucats 
-                value={computeAmount} 
+                value={Ducats} 
                 suffix="⚜️ ducats" 
                 duration={1200}
               />
@@ -128,7 +128,7 @@ export default function WithdrawComputeMenu({ onClose, onWithdraw, computeAmount
             className="w-full px-3 py-2 border border-amber-300 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-amber-500"
             placeholder="Enter amount..."
             min="1"
-            max={computeAmount}
+            max={Ducats}
           />
           
           {error && (
@@ -141,28 +141,28 @@ export default function WithdrawComputeMenu({ onClose, onWithdraw, computeAmount
           
           <div className="grid grid-cols-2 gap-2 mb-4">
             <ActionButton 
-              onClick={() => setAmount(Math.floor(computeAmount * 0.25))} 
+              onClick={() => setAmount(Math.floor(Ducats * 0.25))} 
               variant="secondary"
               disabled={isProcessing}
             >
               25%
             </ActionButton>
             <ActionButton 
-              onClick={() => setAmount(Math.floor(computeAmount * 0.5))} 
+              onClick={() => setAmount(Math.floor(Ducats * 0.5))} 
               variant="secondary"
               disabled={isProcessing}
             >
               50%
             </ActionButton>
             <ActionButton 
-              onClick={() => setAmount(Math.floor(computeAmount * 0.75))} 
+              onClick={() => setAmount(Math.floor(Ducats * 0.75))} 
               variant="secondary"
               disabled={isProcessing}
             >
               75%
             </ActionButton>
             <ActionButton 
-              onClick={() => setAmount(computeAmount)} 
+              onClick={() => setAmount(Ducats)} 
               variant="secondary"
               disabled={isProcessing}
             >
@@ -175,7 +175,7 @@ export default function WithdrawComputeMenu({ onClose, onWithdraw, computeAmount
           <ActionButton 
             onClick={() => handleWithdraw(amount)} 
             variant="primary"
-            disabled={isProcessing || amount <= 0 || amount > computeAmount}
+            disabled={isProcessing || amount <= 0 || amount > Ducats}
           >
             {isProcessing ? (
               <span className="flex items-center">

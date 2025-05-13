@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   try {
-    const { wallet_address, compute_amount } = await request.json();
+    const { wallet_address, ducats } = await request.json();
     
     if (!wallet_address) {
       return NextResponse.json(
@@ -11,9 +11,9 @@ export async function POST(request: Request) {
       );
     }
     
-    if (!compute_amount || compute_amount <= 0) {
+    if (!ducats || ducats <= 0) {
       return NextResponse.json(
-        { success: false, error: 'Compute amount must be greater than 0' },
+        { success: false, error: 'Ducats must be greater than 0' },
         { status: 400 }
       );
     }
@@ -49,7 +49,7 @@ export async function POST(request: Request) {
       },
       body: JSON.stringify({
         wallet_address,
-        compute_amount,
+        ducats,
       }),
     });
     

@@ -170,8 +170,8 @@ def update_compute_balance(tables, user_id: str, amount: float, operation: str =
             log.warning(f"User not found: {user_id}")
             return None
         
-        # Get current compute amount
-        current_amount = user['fields'].get('ComputeAmount', 0)
+        # Get current Ducats
+        current_amount = user['fields'].get('Ducats', 0)
         
         # Calculate new amount
         if operation == "add":
@@ -187,7 +187,7 @@ def update_compute_balance(tables, user_id: str, amount: float, operation: str =
         
         # Update the user record
         updated_user = tables['users'].update(user_id, {
-            'ComputeAmount': new_amount
+            'Ducats': new_amount
         })
         
         log.info(f"Updated compute balance for user {user_id}: {current_amount} -> {new_amount}")
@@ -354,7 +354,7 @@ def process_lease_payment(tables, land: Dict, building: Dict, dry_run: bool = Fa
         return False, 0, 0
     
     # Check if building owner has enough funds
-    building_owner_balance = building_owner_record['fields'].get('ComputeAmount', 0)
+    building_owner_balance = building_owner_record['fields'].get('Ducats', 0)
     if building_owner_balance < lease_amount:
         log.warning(f"Building owner {building_owner} has insufficient funds: {building_owner_balance} < {lease_amount}")
         

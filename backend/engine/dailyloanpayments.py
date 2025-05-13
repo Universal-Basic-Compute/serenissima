@@ -124,8 +124,8 @@ def update_compute_balance(tables, user_id: str, amount: float, operation: str =
             log.warning(f"User not found: {user_id}")
             return None
         
-        # Get current compute amount
-        current_amount = user['fields'].get('ComputeAmount', 0)
+        # Get current Ducats
+        current_amount = user['fields'].get('Ducats', 0)
         
         # Calculate new amount
         if operation == "add":
@@ -138,7 +138,7 @@ def update_compute_balance(tables, user_id: str, amount: float, operation: str =
         
         # Update the user record
         updated_user = tables['users'].update(user_id, {
-            'ComputeAmount': new_amount
+            'Ducats': new_amount
         })
         
         log.info(f"Updated compute balance for user {user_id}: {current_amount} -> {new_amount}")
@@ -297,7 +297,7 @@ def process_loan_payment(tables, loan: Dict, dry_run: bool = False) -> bool:
         return False
     
     # Check if borrower has enough compute
-    borrower_compute = borrower_record['fields'].get('ComputeAmount', 0)
+    borrower_compute = borrower_record['fields'].get('Ducats', 0)
     if borrower_compute < payment_amount:
         log.warning(f"Borrower {borrower} has insufficient compute balance: {borrower_compute} < {payment_amount}")
         

@@ -229,7 +229,7 @@ export async function transferCompute(walletAddress: string, amount: number) {
       },
       body: JSON.stringify({
         wallet_address: walletAddress,
-        compute_amount: amount,
+        ducats: amount,
         transaction_signature: signature,
       }),
     });
@@ -272,7 +272,7 @@ export async function withdrawCompute(walletAddress: string, amount: number) {
         },
         body: JSON.stringify({
           wallet_address: walletAddress,
-          compute_amount: amount,
+          ducats: amount,
         }),
       });
       
@@ -293,7 +293,7 @@ export async function withdrawCompute(walletAddress: string, amount: number) {
       },
       body: JSON.stringify({
         wallet_address: walletAddress,
-        compute_amount: amount,
+        ducats: amount,
       }),
       // Add a timeout to prevent hanging requests
       signal: AbortSignal.timeout(15000) // 15 second timeout

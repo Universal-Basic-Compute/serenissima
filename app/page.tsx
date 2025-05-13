@@ -358,7 +358,7 @@ export default function SimplePage() {
     familyMotto?: string;
     familyCoatOfArms?: string;
     color?: string;
-    computeAmount?: number;
+    Ducats?: number;
     walletAddress?: string;
   } | null>(null);
   
@@ -438,7 +438,7 @@ export default function SimplePage() {
         coatOfArmsImage: coatOfArmsImage,
         familyMotto: familyMotto.trim(),
         familyCoatOfArms: familyCoatOfArms.trim(),
-        computeAmount: data.compute_amount,
+        Ducats: data.ducats,
         color: selectedColor,
         walletAddress: currentWalletAddress
       };
@@ -1147,7 +1147,7 @@ export default function SimplePage() {
       <WithdrawComputeMenu
         onClose={() => setWithdrawMenuOpen(false)}
         onWithdraw={handleWithdrawCompute}
-        computeAmount={userProfile?.computeAmount || 0}
+        Ducats={userProfile?.Ducats || 0}
       />
     )}
     

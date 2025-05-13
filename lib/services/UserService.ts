@@ -45,7 +45,7 @@ export interface UserProfile {
   familyMotto?: string;
   familyCoatOfArms?: string;
   color?: string;
-  computeAmount?: number;
+  Ducats?: number;
   walletAddress?: string;
 }
 
@@ -476,8 +476,8 @@ export class UserService {
           hasLastName: !!data.last_name,
           hasCoatOfArms: !!data.coat_of_arms_image,
           hasMotto: !!data.family_motto,
-          hasComputeAmount: typeof data.compute_amount === 'number',
-          computeAmount: data.compute_amount
+          hasDucats: typeof data.ducats === 'number',
+          Ducats: data.ducats
         });
         
         // Create user profile
@@ -488,7 +488,7 @@ export class UserService {
           coatOfArmsImage: data.coat_of_arms_image,
           familyMotto: data.family_motto,
           familyCoatOfArms: data.family_coat_of_arms,
-          computeAmount: data.compute_amount,
+          Ducats: data.ducats,
           color: data.color || '#8B4513',
           walletAddress: address
         };
@@ -505,7 +505,7 @@ export class UserService {
           coat_of_arms_image: this.currentUser.coatOfArmsImage,
           family_motto: this.currentUser.familyMotto,
           family_coat_of_arms: this.currentUser.familyCoatOfArms,
-          compute_amount: this.currentUser.computeAmount,
+          ducats: this.currentUser.Ducats,
           color: this.currentUser.color,
           wallet_address: address
         });
@@ -687,19 +687,19 @@ export class UserService {
       log.info(`Profile updated successfully for wallet: ${maskedAddress}`);
       
       // Update current user
-      const previousComputeAmount = this.currentUser?.computeAmount;
+      const previousDucats = this.currentUser?.Ducats;
       this.currentUser = {
         ...this.currentUser,
         ...profile,
-        computeAmount: data.compute_amount,
+        Ducats: data.ducats,
         walletAddress: this.walletAddress
       } as UserProfile;
       
       log.debug('Updated user profile', {
         username: this.currentUser.username,
-        computeAmountChanged: previousComputeAmount !== this.currentUser.computeAmount,
-        previousComputeAmount,
-        newComputeAmount: this.currentUser.computeAmount
+        DucatsChanged: previousDucats !== this.currentUser.Ducats,
+        previousDucats,
+        newDucats: this.currentUser.Ducats
       });
       
       // Update caches
@@ -712,7 +712,7 @@ export class UserService {
           coat_of_arms_image: this.currentUser.coatOfArmsImage,
           family_motto: this.currentUser.familyMotto,
           family_coat_of_arms: this.currentUser.familyCoatOfArms,
-          compute_amount: this.currentUser.computeAmount,
+          ducats: this.currentUser.Ducats,
           color: this.currentUser.color,
           wallet_address: this.walletAddress
         });

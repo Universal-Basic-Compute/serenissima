@@ -53,7 +53,7 @@ export function useWallet() {
               coatOfArmsImage: data.coat_of_arms_image,
               familyMotto: data.family_motto,
               familyCoatOfArms: data.family_coat_of_arms,
-              computeAmount: data.compute_amount,
+              Ducats: data.ducats,
               color: data.color || '#8B4513',
               walletAddress: storedWallet
             };
@@ -197,7 +197,7 @@ export function useWallet() {
               lastName: userData.last_name || userData.user_name.split(' ').slice(1).join(' ') || '',
               coatOfArmsImage: userData.coat_of_arms_image,
               familyMotto: userData.family_motto,
-              computeAmount: userData.compute_amount,
+              Ducats: userData.ducats,
               walletAddress: address
             };
             setUserProfile(userProfile);

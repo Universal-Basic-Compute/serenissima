@@ -12,7 +12,7 @@ The game engine runs several automated processes at scheduled times throughout t
 
 Every day at 8:00 AM UTC, the treasury redistribution system allocates funds from the Consiglio dei Dieci to citizens:
 
-1. The script calculates 10% of the ConsiglioDeiDieci's ComputeAmount to redistribute
+1. The script calculates 10% of the ConsiglioDeiDieci's Ducats to redistribute
 2. This amount is distributed to citizens based on social class:
    - 40% to Nobili
    - 30% to Cittadini

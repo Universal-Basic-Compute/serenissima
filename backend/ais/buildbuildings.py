@@ -83,7 +83,7 @@ def get_building_types(tables) -> List[Dict]:
 
 def can_afford_building(ai_user: Dict, building_type: Dict) -> bool:
     """Check if AI user can afford to build this building type."""
-    ai_compute = ai_user["fields"].get("ComputeAmount", 0)
+    ai_compute = ai_user["fields"].get("Ducats", 0)
     building_cost = building_type["fields"].get("BuildCost", 0)
     
     # AI should have at least 2x the building cost to ensure they have funds for other activities
@@ -134,7 +134,7 @@ def create_building(tables, ai_user: Dict, land: Dict, building_type: Dict) -> b
         building_cost = building_type["fields"].get("BuildCost", 0)
         
         # Check if AI has enough compute
-        ai_compute = ai_user["fields"].get("ComputeAmount", 0)
+        ai_compute = ai_user["fields"].get("Ducats", 0)
         if ai_compute < building_cost:
             print(f"AI {ai_username} doesn't have enough compute to build {building_type_name} on {land_id}. Needs {building_cost}, has {ai_compute}")
             return False
@@ -162,7 +162,7 @@ def create_building(tables, ai_user: Dict, land: Dict, building_type: Dict) -> b
         # Deduct the cost from AI's compute balance
         new_compute = ai_compute - building_cost
         tables["users"].update(ai_user["id"], {
-            "ComputeAmount": new_compute
+            "Ducats": new_compute
         })
         print(f"Updated AI {ai_username} compute balance from {ai_compute} to {new_compute}")
         

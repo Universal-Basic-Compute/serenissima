@@ -133,7 +133,7 @@ export default function MapPage() {
         },
         body: JSON.stringify({
           wallet_address: walletAddress,
-          compute_amount: amount,
+          ducats: amount,
         }),
       });
       
@@ -1772,8 +1772,8 @@ export default function MapPage() {
               <button
                 onClick={async () => {
                   if (walletAddress) {
-                    // Ask for compute amount using a prompt
-                    const amountStr = prompt('Enter compute amount to invest:', '1');
+                    // Ask for Ducats using a prompt
+                    const amountStr = prompt('Enter Ducats to invest:', '1');
                     if (amountStr) {
                       const amount = parseFloat(amountStr);
                       if (!isNaN(amount) && amount > 0) {

@@ -131,8 +131,8 @@ def update_compute_balance(tables, user_id: str, amount: float, operation: str =
             log.warning(f"User not found: {user_id}")
             return None
         
-        # Get current compute amount
-        current_amount = user['fields'].get('ComputeAmount', 0)
+        # Get current Ducats
+        current_amount = user['fields'].get('Ducats', 0)
         
         # Calculate new amount
         if operation == "add":
@@ -145,7 +145,7 @@ def update_compute_balance(tables, user_id: str, amount: float, operation: str =
         
         # Update the user record
         updated_user = tables['users'].update(user_id, {
-            'ComputeAmount': new_amount
+            'Ducats': new_amount
         })
         
         log.info(f"Updated compute balance for user {user_id}: {current_amount} -> {new_amount}")
@@ -293,7 +293,7 @@ def process_wage_payment(tables, citizen: Dict, dry_run: bool = False) -> tuple[
         return False, 0
     
     # Check if business owner has enough funds
-    business_owner_balance = business_owner_record['fields'].get('ComputeAmount', 0)
+    business_owner_balance = business_owner_record['fields'].get('Ducats', 0)
     if business_owner_balance < wages:
         log.warning(f"Business owner {business_owner} has insufficient funds: {business_owner_balance} < {wages}")
         return False, 0

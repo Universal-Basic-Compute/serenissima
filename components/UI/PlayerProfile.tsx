@@ -8,7 +8,7 @@ interface PlayerProfileProps {
   coatOfArmsImage?: string | null;
   familyMotto?: string;
   walletAddress?: string; // Add wallet address prop
-  computeAmount?: number; // Add this property
+  Ducats?: number; // Add this property
   size?: 'tiny' | 'small' | 'medium' | 'large';
   onClick?: () => void;
   className?: string;
@@ -27,7 +27,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
   coatOfArmsImage,
   familyMotto,
   walletAddress, // New prop
-  computeAmount, // New prop
+  Ducats, // New prop
   size = 'medium',
   onClick,
   className = '',
@@ -42,7 +42,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
     lastName: string;
     coatOfArmsImage: string | null;
     familyMotto?: string;
-    computeAmount?: number; // Add this to the state
+    Ducats?: number; // Add this to the state
   } | null>(null);
   
   const [isLoading, setIsLoading] = useState(false);
@@ -60,7 +60,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
         lastName,
         coatOfArmsImage: coatOfArmsImage || null,
         familyMotto,
-        computeAmount // Include the compute amount if provided directly
+        Ducats // Include the Ducats if provided directly
       });
       return;
     }
@@ -71,14 +71,14 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
           (username && event.detail.user_name === username) || 
           (walletAddress && event.detail.wallet_address === walletAddress)
         )) {
-        console.log(`Received profile update for ${username || walletAddress} with compute: ${event.detail.compute_amount}`);
+        console.log(`Received profile update for ${username || walletAddress} with compute: ${event.detail.ducats}`);
         setUserData({
           username: event.detail.user_name || username || 'Unknown',
           firstName: event.detail.first_name || event.detail.user_name?.split(' ')[0] || firstName || 'Unknown',
           lastName: event.detail.last_name || event.detail.user_name?.split(' ').slice(1).join(' ') || lastName || 'User',
           coatOfArmsImage: event.detail.coat_of_arms_image || coatOfArmsImage,
           familyMotto: event.detail.family_motto || familyMotto,
-          computeAmount: event.detail.compute_amount
+          Ducats: event.detail.ducats
         });
       }
     };
@@ -148,7 +148,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
     firstName: firstName || 'Unknown',
     lastName: lastName || 'User',
     coatOfArmsImage: coatOfArmsImage,
-    computeAmount: computeAmount !== undefined ? computeAmount : 0,
+    Ducats: Ducats !== undefined ? Ducats : 0,
     // Don't add any default color here
   };
 
@@ -190,12 +190,12 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
           {displayData.username}
         </div>
         
-        {/* Ducats (Compute Amount) */}
-        {showDucats && displayData.computeAmount !== undefined && (
+        {/* Ducats (Ducats) */}
+        {showDucats && displayData.Ducats !== undefined && (
           <div className={`${dim.name} text-amber-700 font-semibold text-center w-full flex items-center justify-center mt-1 bg-amber-50 py-1 px-2 rounded-full border border-amber-200 ducats-text truncate`}>
             <span className="mr-1">⚜️</span> 
             <AnimatedDucats 
-              value={displayData.computeAmount} 
+              value={displayData.Ducats} 
               suffix="ducats" 
               prefix=""
               className="inline truncate"

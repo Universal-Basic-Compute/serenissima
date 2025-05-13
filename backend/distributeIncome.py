@@ -143,8 +143,8 @@ def update_compute_balance(users_table, user_id, amount, operation="add"):
             log.error(f"User record {user_id} not found")
             return False
         
-        # Get current compute amount
-        current_amount = user_record["fields"].get("ComputeAmount", 0)
+        # Get current Ducats
+        current_amount = user_record["fields"].get("Ducats", 0)
         
         # Calculate new amount
         if operation == "add":
@@ -159,7 +159,7 @@ def update_compute_balance(users_table, user_id, amount, operation="add"):
             return False
         
         # Update the record
-        users_table.update(user_id, {"ComputeAmount": new_amount})
+        users_table.update(user_id, {"Ducats": new_amount})
         log.info(f"Updated compute balance for user {user_id} from {current_amount} to {new_amount}")
         
         return True
@@ -293,7 +293,7 @@ def distribute_income():
     
     consiglio_id = consiglio["id"]
     consiglio_username = consiglio["fields"].get("Username", "ConsiglioDeiDieci")
-    consiglio_balance = consiglio["fields"].get("ComputeAmount", 0)
+    consiglio_balance = consiglio["fields"].get("Ducats", 0)
     
     log.info(f"ConsiglioDeiDieci balance: {consiglio_balance} COMPUTE")
     
