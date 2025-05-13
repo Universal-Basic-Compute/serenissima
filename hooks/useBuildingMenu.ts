@@ -3,19 +3,7 @@ import useBuildingStore from '@/store/useBuildingStore';
 import { log } from '@/lib/logUtils';
 import { eventBus } from '@/lib/eventBus';
 import { EventTypes } from '@/lib/eventTypes';
-
-// Define the Building interface locally instead of importing it
-interface Building {
-  id: string;
-  name: string;
-  category: string;
-  subcategory: string;
-  description?: string;
-  thumbnail?: string;
-  size?: string;
-  era?: string;
-  variant?: string;
-}
+import { Building } from '@/lib/models/BuildingModels';
 
 /**
  * Custom hook to handle building menu logic
@@ -83,7 +71,7 @@ export function useBuildingMenu(visible: boolean) {
   // Function to handle building placement
   const handlePlaceBuilding = (building: Building, variant: string = 'model') => {
     setPlaceableBuilding({
-      name: building.name,
+      name: building.name || building.type, // Use name or fallback to type
       variant: variant
     });
     
