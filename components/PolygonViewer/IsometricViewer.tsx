@@ -484,48 +484,6 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     
   }, [loading, polygons, landOwners, users, activeView, buildings, scale, offset, incomeData, minIncome, maxIncome]);
   
-  // Add a legend for income colors when in land view
-  useEffect(() => {
-    // Create or update legend element
-    if (activeView === 'land') {
-      let legend = document.getElementById('income-legend');
-      if (!legend) {
-        legend = document.createElement('div');
-        legend.id = 'income-legend';
-        legend.className = 'absolute bottom-20 left-20 bg-black/70 text-white p-3 rounded-lg z-30';
-        document.body.appendChild(legend);
-      }
-      
-      // Create gradient for legend
-      const gradientHtml = `
-        <div class="w-full h-6 mb-1 rounded" style="background: linear-gradient(to right, #6699CC, #CCB266, #A54A2A);"></div>
-      `;
-      
-      // Update legend content
-      legend.innerHTML = `
-        <h3 class="text-sm font-serif font-bold mb-2">Income Legend</h3>
-        ${gradientHtml}
-        <div class="flex justify-between text-xs font-serif">
-          <span>${minIncome.toFixed(0)} Ducats</span>
-          <span>${((maxIncome + minIncome) / 2).toFixed(0)} Ducats</span>
-          <span>${maxIncome.toFixed(0)} Ducats</span>
-        </div>
-      `;
-      
-      return () => {
-        // Remove legend when component unmounts or view changes
-        if (legend && legend.parentNode) {
-          legend.parentNode.removeChild(legend);
-        }
-      };
-    } else {
-      // Remove legend if not in land view
-      const legend = document.getElementById('income-legend');
-      if (legend && legend.parentNode) {
-        legend.parentNode.removeChild(legend);
-      }
-    }
-  }, [activeView, minIncome, maxIncome]);
 
   // Handle window resize
   useEffect(() => {
@@ -664,19 +622,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       {/* Controls */}
       <div className="absolute bottom-4 right-4 bg-black/70 text-white p-3 rounded-lg shadow-lg">
         <div className="flex items-center space-x-2">
-          <button 
-            onClick={() => setScale(prev => Math.max(0.5, prev - 0.1))}
-            className="px-3 py-1 bg-amber-600 hover:bg-amber-500 rounded text-white"
-          >
-            -
-          </button>
           <span className="text-sm">{Math.round(scale * 100)}%</span>
-          <button 
-            onClick={() => setScale(prev => Math.min(5, prev + 0.1))}
-            className="px-3 py-1 bg-amber-600 hover:bg-amber-500 rounded text-white"
-          >
-            +
-          </button>
           <button 
             onClick={() => {
               setScale(1);
