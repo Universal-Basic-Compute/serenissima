@@ -1147,7 +1147,7 @@ export class CitizenDisplayManager {
     });
     
     // Add a title for the building
-    const markerType = citizens[0].markerType === 'home' ? 'Residents' : 'Workers';
+    const markerType = citizens.length > 0 && citizens[0].markerType === 'home' ? 'Residents' : 'Workers';
     const locationTitle = this.createTextSprite(`${markerType} (${citizens.length})`, false, 1.2);
     locationTitle.position.set(0, 3, 0);
     buildingGroup.add(locationTitle);
