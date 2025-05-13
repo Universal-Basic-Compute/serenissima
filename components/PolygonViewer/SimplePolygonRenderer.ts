@@ -11,6 +11,8 @@ import { TransportPointManager } from '../../lib/components/TransportPointManage
 import { NavigationService } from '../../lib/services/NavigationService';
 import { CoatOfArmsRenderer } from '../../lib/threejs/CoatOfArmsRenderer';
 import { MeasurementTools } from '../../lib/threejs/MeasurementTools';
+import buildingPositionManager from '../../lib/services/BuildingPositionManager';
+import buildingCacheService from '../../lib/services/BuildingCacheService';
 
 /**
  * Define Polygon interface for type safety

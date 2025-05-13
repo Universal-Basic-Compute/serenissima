@@ -1,6 +1,7 @@
 import { ViewMode, ActiveViewMode } from '../PolygonViewer/types';
 import IconButton from '../UI/IconButton';
 import { eventBus, EventTypes } from '../../lib/eventBus';
+import { sceneLayerManager } from '../../lib/services/SceneLayerManager';
 
 interface ViewModeMenuProps {
   activeView: ActiveViewMode;
