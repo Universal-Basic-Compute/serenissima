@@ -763,17 +763,13 @@ export default function SimplePage() {
       {/* Buildings Toolbar - only visible in buildings view */}
       {activeView === 'buildings' && (
         <>
-          {/* First ensure buildings are visible */}
+          {/* Use SceneLayerManager for buildings view */}
           <script dangerouslySetInnerHTML={{
             __html: `
-              // Force buildings to be visible immediately
-              window.dispatchEvent(new CustomEvent('showBuildings'));
-              
-              // Also ensure buildings are visible with debug markers
-              setTimeout(() => {
-                console.log('Dispatching ensureBuildingsVisible event from inline script');
-                window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
-              }, 2000);
+              // Use SceneLayerManager for buildings view
+              if (window.sceneLayerManager && window.sceneLayerManager.isBaseLayerInitialized()) {
+                window.sceneLayerManager.switchToView('buildings');
+              }
             `
           }} />
           

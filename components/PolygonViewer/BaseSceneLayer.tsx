@@ -4,6 +4,7 @@ import { WaterFacade as SimpleWater } from '../../lib/threejs/WaterFacade';
 import SimplePolygonRenderer from './SimplePolygonRenderer';
 import { calculateBounds } from './utils';
 import { eventBus, EventTypes } from '@/lib/eventBus';
+import { buildingRendererManager } from '@/lib/services/BuildingRendererManager';
 
 interface BaseSceneLayerProps {
   scene: THREE.Scene;
@@ -20,6 +21,7 @@ const BaseSceneLayer: React.FC<BaseSceneLayerProps> = ({
   const waterRef = useRef<SimpleWater | null>(null);
   const polygonRendererRef = useRef<SimplePolygonRenderer | null>(null);
   const isInitializedRef = useRef<boolean>(false);
+  const buildingsInitializedRef = useRef<boolean>(false);
 
   // Initialize base scene elements once
   useEffect(() => {
@@ -69,6 +71,33 @@ const BaseSceneLayer: React.FC<BaseSceneLayerProps> = ({
       isInitializedRef.current = false;
     };
   }, [scene, polygons, waterQuality]);
+
+  // Initialize buildings once after land and water are ready
+  useEffect(() => {
+    if (!isInitializedRef.current || buildingsInitializedRef.current || !scene) return;
+
+    console.log('BaseSceneLayer: Initializing persistent buildings');
+
+    // Initialize the building renderer manager
+    buildingRendererManager.initialize(scene);
+    
+    // Load all buildings
+    buildingRendererManager.refreshBuildings()
+      .then(() => {
+        console.log('BaseSceneLayer: Buildings loaded successfully');
+        buildingsInitializedRef.current = true;
+        
+        // Emit event to notify that buildings are rendered
+        eventBus.emit(EventTypes.SCENE_BASE_RENDERED, {
+          buildingsInitialized: true
+        });
+      })
+      .catch(error => {
+        console.error('BaseSceneLayer: Error loading buildings:', error);
+      });
+
+    // No cleanup needed here - buildings will be cleaned up with the scene
+  }, [scene, isInitializedRef.current]);
 
   // Update water quality when it changes
   useEffect(() => {

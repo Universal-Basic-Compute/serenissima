@@ -574,6 +574,50 @@ export class BuildingRendererManager {
   }
   
   /**
+   * Set highlight mode for buildings
+   * 
+   * @param highlight Whether to highlight buildings (used in buildings view)
+   */
+  public setHighlightMode(highlight: boolean): void {
+    if (!this.isInitialized) return;
+    
+    console.log(`BuildingRendererManager: Setting highlight mode to ${highlight}`);
+    
+    // Update all building meshes
+    for (const [id, mesh] of this.buildingMeshes.entries()) {
+      // In highlight mode, we might want to:
+      // 1. Make buildings more visible (e.g., brighter materials)
+      // 2. Add outline effect
+      // 3. Make them interactive
+      
+      // For now, just adjust the material properties
+      mesh.traverse((child) => {
+        if (child instanceof THREE.Mesh && child.material) {
+          if (child.material instanceof THREE.MeshStandardMaterial) {
+            if (highlight) {
+              // Store original values if not already stored
+              if (!child.userData.originalEmissive) {
+                child.userData.originalEmissive = child.material.emissive.clone();
+                child.userData.originalEmissiveIntensity = child.material.emissiveIntensity;
+              }
+              
+              // Make buildings slightly emissive in highlight mode
+              child.material.emissive.set(0x333333);
+              child.material.emissiveIntensity = 0.3;
+            } else if (child.userData.originalEmissive) {
+              // Restore original values
+              child.material.emissive.copy(child.userData.originalEmissive);
+              child.material.emissiveIntensity = child.userData.originalEmissiveIntensity;
+            }
+            
+            child.material.needsUpdate = true;
+          }
+        }
+      });
+    }
+  }
+
+  /**
    * Clean up resources
    */
   public cleanup(): void {

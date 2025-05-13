@@ -1,16 +1,18 @@
 import * as THREE from 'three';
 import { eventBus, EventTypes } from '../eventBus';
+import { buildingRendererManager } from './BuildingRendererManager';
 
 /**
  * SceneLayerManager
  * 
  * Manages the different layers of the 3D scene, ensuring that base layers
- * (water and land) are only rendered once and persist across view changes.
+ * (water, land, and buildings) are only rendered once and persist across view changes.
  */
 export class SceneLayerManager {
   private static instance: SceneLayerManager;
   private scene: THREE.Scene | null = null;
   private baseLayerInitialized: boolean = false;
+  private buildingsInitialized: boolean = false;
   private viewLayers: Map<string, any> = new Map();
   
   /**
@@ -33,8 +35,15 @@ export class SceneLayerManager {
     const subscription = eventBus.subscribe(
       EventTypes.SCENE_BASE_RENDERED,
       (data) => {
-        console.log('SceneLayerManager: Base layer initialized', data);
-        this.baseLayerInitialized = true;
+        console.log('SceneLayerManager: Base layer event received', data);
+        
+        if (data.waterInitialized && data.landInitialized) {
+          this.baseLayerInitialized = true;
+        }
+        
+        if (data.buildingsInitialized) {
+          this.buildingsInitialized = true;
+        }
       }
     );
     
@@ -47,6 +56,13 @@ export class SceneLayerManager {
    */
   public isBaseLayerInitialized(): boolean {
     return this.baseLayerInitialized;
+  }
+  
+  /**
+   * Check if buildings are initialized
+   */
+  public areBuildingsInitialized(): boolean {
+    return this.buildingsInitialized;
   }
   
   /**
@@ -67,6 +83,8 @@ export class SceneLayerManager {
    * Switch to a different view
    */
   public switchToView(viewName: string): void {
+    console.log(`SceneLayerManager: Switching to ${viewName} view`);
+    
     // Hide all view layers
     this.viewLayers.forEach((layer, name) => {
       if (name !== 'baseLayerSubscription' && name !== viewName && layer.setVisible) {
@@ -78,6 +96,15 @@ export class SceneLayerManager {
     const viewLayer = this.viewLayers.get(viewName);
     if (viewLayer && viewLayer.setVisible) {
       viewLayer.setVisible(true);
+    }
+    
+    // Buildings are always visible, but we may need to update their visibility
+    // based on the view mode (e.g., in buildings view they should be highlighted)
+    if (this.buildingsInitialized) {
+      // Update building visibility based on view mode
+      // In buildings view, we might want to highlight them or make them interactive
+      const isBuildingsView = viewName === 'buildings';
+      buildingRendererManager.setHighlightMode(isBuildingsView);
     }
     
     // Emit view change event
@@ -97,6 +124,7 @@ export class SceneLayerManager {
     // Clear view layers
     this.viewLayers.clear();
     this.baseLayerInitialized = false;
+    this.buildingsInitialized = false;
     this.scene = null;
   }
 }

@@ -19,10 +19,12 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
       window.dispatchEvent(new CustomEvent('closeGuildsPanel'));
     }
     
-    // If switching to buildings view, dispatch a custom event to ensure buildings are visible
+    // If switching to buildings view, use SceneLayerManager
     if (view === 'buildings') {
-      console.log('Switching to buildings view, dispatching event');
-      window.dispatchEvent(new CustomEvent('showBuildings'));
+      console.log('Switching to buildings view, using SceneLayerManager');
+      if (sceneLayerManager.isBaseLayerInitialized()) {
+        sceneLayerManager.switchToView('buildings');
+      }
     }
   };
   // Helper function to check if a view is disabled

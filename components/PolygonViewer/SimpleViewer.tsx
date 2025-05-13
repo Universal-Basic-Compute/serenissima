@@ -492,15 +492,16 @@ export default function SimpleViewer({ qualityMode = 'high', waterQuality = 'hig
         polygonRendererRef.current.forceCreateBridgeAndDockPoints();
       }
       
-      // Also ensure building markers are visible if in buildings view
-      if (activeView === 'buildings' && polygonRendererRef.current) {
-        console.log('Ensuring building markers are visible after initialization');
-        polygonRendererRef.current.createBuildingPoints();
-        polygonRendererRef.current.forceShowBuildingMarkers();
-        
-        // Force a scene update
-        renderer.render(scene, cameraController.camera);
+      // Use SceneLayerManager for buildings view
+      if (activeView === 'buildings') {
+        console.log('Using SceneLayerManager for buildings view');
+        if (sceneLayerManager.isBaseLayerInitialized()) {
+          sceneLayerManager.switchToView('buildings');
+        }
       }
+      
+      // Force a scene update
+      renderer.render(scene, cameraController.camera);
     }, 1000); // Delay by 1 second to ensure everything else is loaded
     
     // Cleanup
@@ -601,11 +602,10 @@ export default function SimpleViewer({ qualityMode = 'high', waterQuality = 'hig
       }
     }
     
-    // If we're switching to buildings view, ensure the BuildingRenderer is active
-    if (activeView === 'buildings') {
-      console.log('Dispatching event to refresh buildings');
-      // Dispatch an event to refresh buildings
-      eventBus.emit(EventTypes.BUILDING_PLACED, { refresh: true });
+    // Use SceneLayerManager to switch views if it's initialized
+    if (sceneLayerManager.isBaseLayerInitialized()) {
+      console.log(`Using SceneLayerManager to switch to ${activeView} view`);
+      sceneLayerManager.switchToView(activeView);
     }
     
     // If we're switching to transport view, log additional information
