@@ -230,8 +230,11 @@ async function main() {
   let iteration = 1;
   let remainingErrors = errorData.totalErrors;
   
-  while (iteration <= MAX_ITERATIONS && remainingErrors > 0) {
-    console.log(`\n========== ITERATION ${iteration} OF ${MAX_ITERATIONS} ==========`);
+  // Continue looping until there are no more errors or we hit a safety limit
+  const ABSOLUTE_MAX_ITERATIONS = 50; // Safety limit to prevent infinite loops
+  
+  while (remainingErrors > 0 && iteration <= ABSOLUTE_MAX_ITERATIONS) {
+    console.log(`\n========== ITERATION ${iteration} OF ${ABSOLUTE_MAX_ITERATIONS} (MAX) ==========`);
     console.log(`Starting with ${remainingErrors} TypeScript errors to fix.`);
     
     // Process all batches
@@ -255,50 +258,48 @@ async function main() {
         break;
       }
       
-      // If we still have errors but this isn't the last iteration, prepare for next iteration
-      if (iteration < MAX_ITERATIONS) {
-        console.log(`Preparing for iteration ${iteration + 1}...`);
-        
-        // Reset batches with new errors
-        batches = [];
-        currentBatch = [];
-        filesInCurrentBatch = new Set();
-        
-        // Group errors by file again
-        const errorsByFile = {};
-        updatedErrorData.errors.forEach(error => {
-          if (!errorsByFile[error.filePath]) {
-            errorsByFile[error.filePath] = [];
-          }
-          errorsByFile[error.filePath].push(error);
-        });
-        
-        // Create new batches
-        Object.entries(errorsByFile).forEach(([filePath, errors]) => {
-          for (let i = 0; i < errors.length; i++) {
-            if (currentBatch.length >= BATCH_SIZE) {
-              batches.push([...currentBatch]);
-              currentBatch = [];
-              filesInCurrentBatch = new Set();
-            }
-            
-            currentBatch.push(errors[i]);
-            filesInCurrentBatch.add(filePath);
-          }
-          
-          if (currentBatch.length > 0) {
+      // If we still have errors, prepare for next iteration
+      console.log(`Preparing for iteration ${iteration + 1}...`);
+      
+      // Reset batches with new errors
+      batches = [];
+      currentBatch = [];
+      filesInCurrentBatch = new Set();
+      
+      // Group errors by file again
+      const errorsByFile = {};
+      updatedErrorData.errors.forEach(error => {
+        if (!errorsByFile[error.filePath]) {
+          errorsByFile[error.filePath] = [];
+        }
+        errorsByFile[error.filePath].push(error);
+      });
+      
+      // Create new batches
+      Object.entries(errorsByFile).forEach(([filePath, errors]) => {
+        for (let i = 0; i < errors.length; i++) {
+          if (currentBatch.length >= BATCH_SIZE) {
             batches.push([...currentBatch]);
             currentBatch = [];
             filesInCurrentBatch = new Set();
           }
-        });
-        
-        if (currentBatch.length > 0) {
-          batches.push(currentBatch);
+          
+          currentBatch.push(errors[i]);
+          filesInCurrentBatch.add(filePath);
         }
         
-        console.log(`Created ${batches.length} new batches for iteration ${iteration + 1}.`);
+        if (currentBatch.length > 0) {
+          batches.push([...currentBatch]);
+          currentBatch = [];
+          filesInCurrentBatch = new Set();
+        }
+      });
+      
+      if (currentBatch.length > 0) {
+        batches.push(currentBatch);
       }
+      
+      console.log(`Created ${batches.length} new batches for iteration ${iteration + 1}.`);
       
     } catch (error) {
       console.error('Error checking TypeScript errors:', error);
@@ -309,8 +310,13 @@ async function main() {
   }
   
   if (remainingErrors > 0) {
-    console.log(`\nCompleted with ${remainingErrors} errors remaining.`);
-    console.log('Run this script again to continue fixing errors.');
+    if (iteration > ABSOLUTE_MAX_ITERATIONS) {
+      console.log(`\nReached maximum number of iterations (${ABSOLUTE_MAX_ITERATIONS}) with ${remainingErrors} errors remaining.`);
+      console.log('You may need to fix some errors manually or run this script again.');
+    } else {
+      console.log(`\nCompleted with ${remainingErrors} errors remaining.`);
+      console.log('Run this script again to continue fixing errors.');
+    }
   } else {
     console.log('\nAll TypeScript errors have been successfully fixed!');
   }
