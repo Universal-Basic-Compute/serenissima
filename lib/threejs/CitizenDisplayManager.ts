@@ -2200,6 +2200,9 @@ export class CitizenDisplayManager {
     // Rotate the group to face upward (parallel to the ground)
     group.rotation.x = -Math.PI / 2; // Rotate to lie flat on the ground
     
+    // Rotate the group to face upward (parallel to the ground)
+    group.rotation.x = -Math.PI / 2; // Rotate to lie flat on the ground
+    
     // Create markers for home and work citizens
     const homeCitizens = citizens.filter(c => c.markerType === 'home');
     const workCitizens = citizens.filter(c => c.markerType === 'work');
