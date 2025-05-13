@@ -108,7 +108,17 @@ export class TimeDescriptionService {
       `${year}, ${timeOfDay} on the ${day}${this.getDaySuffix(day)} of ${month}`,
     
     (year: number, month: string, day: number, timeOfDay: string) => 
-      `${month} ${day}${this.getDaySuffix(day)} of the year ${year}, ${timeOfDay}`
+      `${month} ${day}${this.getDaySuffix(day)} of the year ${year}, ${timeOfDay}`,
+      
+    // Add these new decorative variants:
+    (year: number, month: string, day: number, timeOfDay: string) => 
+      `✧ ${day} ${month} ${year} ✧ ${timeOfDay}`,
+      
+    (year: number, month: string, day: number, timeOfDay: string) => 
+      `❧ ${month} ${day}${this.getDaySuffix(day)}, ${year} ❧ ${timeOfDay}`,
+      
+    (year: number, month: string, day: number, timeOfDay: string) => 
+      `Anno Domini ${year}, ${timeOfDay}`
   ];
   
   private constructor() {}

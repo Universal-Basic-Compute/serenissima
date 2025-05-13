@@ -1494,6 +1494,15 @@ export default function SimplePage() {
         .overflow-y-auto::-webkit-scrollbar-thumb:hover {
           background-color: rgba(217, 119, 6, 0.8);
         }
+        
+        /* Time description styling */
+        .time-description {
+          font-family: 'Cormorant Garamond', Georgia, serif;
+          font-style: italic;
+          color: #92400e;
+          letter-spacing: 0.02em;
+          text-shadow: 0 1px 1px rgba(255, 255, 255, 0.7);
+        }
       `}</style>
       
       {/* Settings Modal */}

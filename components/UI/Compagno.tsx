@@ -364,14 +364,19 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
   };
 
   // Format date to be more readable and immersive
-  const formatNotificationDate = (dateString: string): string => {
+  const formatNotificationDate = (dateString: string): JSX.Element => {
     try {
       // Use the message ID or timestamp as an additional seed for variety
       const seed = dateString; // You could also use a message ID if available
-      return timeDescriptionService.formatDate(dateString, seed);
+      const formattedDate = timeDescriptionService.formatDate(dateString, seed);
+      
+      // Return a JSX element with styling
+      return (
+        <span className="time-description">{formattedDate}</span>
+      );
     } catch (error) {
       console.error('Error formatting date:', error);
-      return dateString;
+      return <span>{dateString}</span>;
     }
   };
 
@@ -934,7 +939,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                       }}
                     >
                       <div className="flex justify-between items-start">
-                        <div className="text-xs text-gray-400">
+                        <div className="text-xs">
                           {formatNotificationDate(notification.createdAt)}
                         </div>
                       </div>
@@ -1201,7 +1206,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                                   }`}
                                 >
                                   <div>{message.content}</div>
-                                  <div className="text-xs text-gray-500 mt-1">
+                                  <div className="text-xs mt-1">
                                     {formatNotificationDate(message.createdAt)}
                                   </div>
                                 </div>
