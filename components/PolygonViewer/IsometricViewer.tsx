@@ -2047,6 +2047,76 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           transportMode
         });
         
+        // Add a legend for path types
+        if (transportMode && transportPath.length > 0) {
+          const legendX = 20;
+          const legendY = canvas.height - 120;
+          const legendWidth = 150;
+          const legendHeight = 100;
+          const legendPadding = 10;
+          
+          // Draw legend background
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+          ctx.fillRect(
+            legendX - legendPadding,
+            legendY - legendPadding,
+            legendWidth + legendPadding * 2,
+            legendHeight + legendPadding * 2
+          );
+          
+          // Draw legend border
+          ctx.strokeStyle = 'rgba(218, 165, 32, 0.8)';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(
+            legendX - legendPadding,
+            legendY - legendPadding,
+            legendWidth + legendPadding * 2,
+            legendHeight + legendPadding * 2
+          );
+          
+          // Draw legend title
+          ctx.fillStyle = '#FFFFFF';
+          ctx.textAlign = 'left';
+          ctx.font = '14px "Times New Roman", serif';
+          ctx.fillText('Legenda', legendX, legendY + 15);
+          
+          // Draw legend items
+          ctx.font = '12px "Times New Roman", serif';
+          
+          // Bridge point
+          ctx.beginPath();
+          ctx.arc(legendX + 10, legendY + 40, 3 * scale, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(180, 100, 50, 0.8)';
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillText('Ponte', legendX + 25, legendY + 43);
+          
+          // Building point
+          ctx.beginPath();
+          ctx.arc(legendX + 10, legendY + 60, 3 * scale, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(70, 130, 180, 0.8)';
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillText('Edificio', legendX + 25, legendY + 63);
+          
+          // Centroid point
+          ctx.beginPath();
+          ctx.arc(legendX + 10, legendY + 80, 2 * scale, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(0, 102, 153, 0.7)';
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillText('Piazza', legendX + 25, legendY + 83);
+        }
+        
         // Draw instructions with Venetian styling
         ctx.font = '16px "Times New Roman", serif';
         ctx.textAlign = 'center';
