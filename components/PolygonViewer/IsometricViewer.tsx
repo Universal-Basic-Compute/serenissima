@@ -42,6 +42,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     centroidX: number;
     centroidY: number;
   }[]>([]);
+  const [emptyBuildingPoints, setEmptyBuildingPoints] = useState<{lat: number, lng: number}[]>([]);
 
   // Load polygons
   useEffect(() => {
@@ -406,6 +407,59 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       return () => clearInterval(interval);
     }
   }, [activeView]);
+  
+  // Identify empty building points when in buildings view
+  useEffect(() => {
+    if (activeView === 'buildings' && polygons.length > 0 && buildings.length > 0) {
+      // Collect all building points from all polygons
+      const allBuildingPoints: {lat: number, lng: number}[] = [];
+      
+      polygons.forEach(polygon => {
+        if (polygon.buildingPoints && Array.isArray(polygon.buildingPoints)) {
+          polygon.buildingPoints.forEach(point => {
+            if (point && typeof point === 'object' && 'lat' in point && 'lng' in point) {
+              allBuildingPoints.push({
+                lat: point.lat,
+                lng: point.lng
+              });
+            }
+          });
+        }
+      });
+      
+      // Check which building points don't have buildings on them
+      const emptyPoints = allBuildingPoints.filter(point => {
+        // Check if there's no building at this point
+        return !buildings.some(building => {
+          if (!building.position) return false;
+          
+          let position;
+          if (typeof building.position === 'string') {
+            try {
+              position = JSON.parse(building.position);
+            } catch (e) {
+              return false;
+            }
+          } else {
+            position = building.position;
+          }
+          
+          // Check if position matches the building point
+          // Use a small threshold for floating point comparison
+          const threshold = 0.0001;
+          if ('lat' in position && 'lng' in position) {
+            return Math.abs(position.lat - point.lat) < threshold && 
+                   Math.abs(position.lng - point.lng) < threshold;
+          }
+          return false;
+        });
+      });
+      
+      setEmptyBuildingPoints(emptyPoints);
+    } else {
+      setEmptyBuildingPoints([]);
+    }
+  }, [activeView, polygons, buildings]);
 
   // Handle mouse wheel for zooming
   useEffect(() => {
@@ -1100,7 +1154,30 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       });
     }
     
-  }, [loading, polygons, landOwners, users, activeView, buildings, scale, offset, incomeData, minIncome, maxIncome, hoveredPolygonId, selectedPolygonId]);
+    // Draw empty building points if in buildings view
+    if (activeView === 'buildings' && emptyBuildingPoints.length > 0) {
+      emptyBuildingPoints.forEach(point => {
+        // Convert lat/lng to isometric coordinates
+        const x = (point.lng - 12.3326) * 20000;
+        const y = (point.lat - 45.4371) * 20000;
+        
+        const isoPos = {
+          x: calculateIsoX(x, y, scale, offset, canvas.width),
+          y: calculateIsoY(x, y, scale, offset, canvas.height)
+        };
+        
+        // Draw a small orange circle for empty building points
+        ctx.beginPath();
+        ctx.arc(isoPos.x, isoPos.y, 4 * scale, 0, Math.PI * 2);
+        ctx.fillStyle = '#FF8C00'; // Orange color
+        ctx.fill();
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      });
+    }
+    
+  }, [loading, polygons, landOwners, users, activeView, buildings, scale, offset, incomeData, minIncome, maxIncome, hoveredPolygonId, selectedPolygonId, emptyBuildingPoints]);
   
 
   // Handle window resize
