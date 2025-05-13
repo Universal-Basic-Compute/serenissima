@@ -43,7 +43,7 @@ export async function GET(request: Request) {
     // Get buildings where Occupant is not null
     const buildingRecords = await base(BUILDINGS_TABLE)
       .select({
-        filterByFormula: 'NOT({Occupant} = "")',
+        filterByFormula: 'NOT({Home} = "")',
         view: 'Grid view'
       })
       .firstPage();
