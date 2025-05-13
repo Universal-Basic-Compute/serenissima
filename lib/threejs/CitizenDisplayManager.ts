@@ -1265,12 +1265,14 @@ export class CitizenDisplayManager {
     // Update the raycaster
     this.raycaster.setFromCamera(this.mouse, this.camera);
     
-    // Find intersections with citizen groups
+    // Find intersections with citizen groups and building markers
     const intersects = this.raycaster.intersectObjects(this.scene.children, true);
     
-    // Find the first intersected object that belongs to a citizen group
+    // Find the first intersected object that belongs to a citizen group or building marker
     let clickedGroup: string | null = null;
     let clickedCitizen: any = null;
+    let clickedBuildingId: string | null = null;
+    let clickedBuildingCitizens: any[] | null = null;
     
     for (const intersect of intersects) {
       let obj: THREE.Object3D | null = intersect.object;
@@ -1290,18 +1292,24 @@ export class CitizenDisplayManager {
         }
       }
       
-      // Otherwise check if it's a citizen group
-      while (obj && (!obj.userData || !obj.userData.type || obj.userData.type !== 'citizen-group')) {
+      // Check if this is a building marker or citizen group
+      while (obj && (!obj.userData || !obj.userData.type || (obj.userData.type !== 'citizen-group' && obj.userData.type !== 'building-citizen-group'))) {
         obj = obj.parent;
       }
       
-      if (obj && obj.userData && obj.userData.locationKey) {
-        clickedGroup = obj.userData.locationKey;
-        break;
+      if (obj && obj.userData) {
+        if (obj.userData.type === 'citizen-group' && obj.userData.locationKey) {
+          clickedGroup = obj.userData.locationKey;
+          break;
+        } else if (obj.userData.type === 'building-citizen-group') {
+          clickedBuildingId = obj.userData.buildingId;
+          clickedBuildingCitizens = obj.userData.citizens;
+          break;
+        }
       }
     }
     
-    // Handle selection
+    // Handle selection of citizen groups
     if (clickedGroup) {
       // If clicking on the already selected group, deselect it
       if (clickedGroup === this.selectedGroup) {
@@ -1351,7 +1359,20 @@ export class CitizenDisplayManager {
           this.showCitizenDetails(clickedCitizen);
         }
       }
-    } else {
+    } 
+    // Handle selection of building markers
+    else if (clickedBuildingId && clickedBuildingCitizens) {
+      // If there's only one citizen, show their details
+      if (clickedBuildingCitizens.length === 1) {
+        this.showCitizenDetails(clickedBuildingCitizens[0]);
+      } 
+      // If there are multiple citizens, show a selection UI
+      else if (clickedBuildingCitizens.length > 1) {
+        this.showBuildingCitizensSelection(clickedBuildingId, clickedBuildingCitizens);
+      }
+    } 
+    // Handle deselection
+    else {
       // Clicked outside any citizen group, deselect current selection
       if (this.selectedGroup) {
         const group = this.scene.getObjectByName(`citizen-group-${this.selectedGroup}`) as THREE.Group;
