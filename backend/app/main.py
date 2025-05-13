@@ -45,7 +45,8 @@ def run_scheduled_tasks():
                 15: ("engine/dailyloanpayments.py", "Daily loan payments"),
                 16: ("engine/citizenworkmobility.py", "Citizen work mobility"),
                 17: ("engine/dailywages.py", "Daily wage payments"),
-                18: ("engine/dailyrentpayments.py", "Daily rent payments")
+                18: ("engine/dailyrentpayments.py", "Daily rent payments"),
+                19: ("engine/bidonlands.py", "AI land bidding")
             }
             
             # Check if there's a task for the current hour
