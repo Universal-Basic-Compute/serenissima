@@ -13,6 +13,18 @@ export interface CitizenDisplayOptions {
     width?: number;
     height?: number;
   };
+  /**
+   * Get the current active state
+   */
+  public isActiveView(): boolean {
+    return this.isActive;
+  }
+}
+
+export interface CitizenMarkerOptions {
+  type: 'home' | 'work';
+  position: { x: number; y: number; z: number };
+  scale?: number;
 }
 
 export class CitizenDisplayManager {
