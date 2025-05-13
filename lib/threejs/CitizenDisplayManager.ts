@@ -353,7 +353,7 @@ export class CitizenDisplayManager {
         }
         
         // Normalize position to lat/lng format
-        let lat, lng;
+        let lat: number, lng: number;
         if (typeof citizen.position === 'object') {
           lat = citizen.position.lat !== undefined ? citizen.position.lat : citizen.position.x;
           lng = citizen.position.lng !== undefined ? citizen.position.lng : citizen.position.z;
@@ -1194,7 +1194,7 @@ export class CitizenDisplayManager {
    */
   private latLngToScenePosition(lat: number, lng: number): THREE.Vector3 {
     // Calculate position relative to center
-    let x, z;
+    let x: number, z: number;
     
     // Handle both bounds formats
     if (this.bounds.centerLat !== undefined && this.bounds.centerLng !== undefined && this.bounds.scale !== undefined) {
@@ -1314,10 +1314,10 @@ export class CitizenDisplayManager {
     let clickedBuildingCitizens: any[] | null = null;
     
     for (const intersect of intersects) {
-      let obj: THREE.Object3D | null = intersect.object;
+      let obj: THREE.Object3D = intersect.object;
       
       // Check if this is a citizen item in an expanded view
-      if (obj.userData && obj.userData.citizenId) {
+      if (obj && obj.userData && obj.userData.citizenId) {
         clickedCitizen = obj.userData.citizen;
         
         // Find the parent group
@@ -1581,7 +1581,7 @@ export class CitizenDisplayManager {
    */
   private createBuildingCitizenMarker(buildingId: string, citizens: any[], position: any): THREE.Group {
     // Convert position to lat/lng format if needed
-    let lat, lng;
+    let lat: number, lng: number;
     if (typeof position === 'object') {
       lat = position.lat !== undefined ? position.lat : position.x;
       lng = position.lng !== undefined ? position.lng : position.z;
