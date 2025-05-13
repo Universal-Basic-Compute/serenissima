@@ -180,7 +180,7 @@ export async function GET(request: Request) {
     
     // Map buildings to citizens with positions
     const citizens = buildingRecords.map(record => {
-      const citizenId = String(record.fields.Occupant);
+      const citizenId = record.fields.Occupant ? String(record.fields.Occupant) : '';
       const citizen = citizenMap.get(citizenId);
       
       if (!citizen) {
