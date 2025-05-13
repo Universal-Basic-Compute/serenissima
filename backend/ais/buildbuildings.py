@@ -499,16 +499,6 @@ If you decide not to build anything at this time, return an empty JSON object.
             else:
                 print(f"Error processing building strategy request for AI user {ai_username}: {response_data}")
                 return None
-                except Exception as e:
-                    print(f"Error extracting decision from AI response: {str(e)}")
-                    print(f"Full response content that caused the error:")
-                    print(content)
-                    return None
-                
-                return None
-            else:
-                print(f"Error processing building strategy request for AI user {ai_username}: {response_data}")
-                return None
         else:
             print(f"Error from Kinos API: {response.status_code} - {response.text}")
             return None
