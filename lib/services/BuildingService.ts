@@ -2,6 +2,7 @@ import useBuildingStore from '@/store/useBuildingStore';
 import * as THREE from 'three';
 import { BuildingCategory, BuildingDefinition, PlacementResult, PlacementContext, BuildingData } from '../models/BuildingTypes';
 import { log } from '../logUtils';
+import { getWalletAddress } from '../walletUtils';
 
 // Re-export BuildingData from models
 export type { BuildingData };
