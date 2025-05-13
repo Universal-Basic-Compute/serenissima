@@ -19,6 +19,7 @@ declare global {
       pointId: string;
       polygonId: string;
       position: any;
+      pointType?: 'canal' | 'bridge';
     };
   }
 }
@@ -214,6 +215,11 @@ const calculateBuildingCost = async (buildingType: string): Promise<number> => {
 export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBuildingClose }: BuildingMenuProps) {
   // Local state to track if the menu should be shown via custom event
   const [showViaEvent, setShowViaEvent] = useState(false);
+  // Add state to track the point type
+  const [pointType, setPointType] = useState<'canal' | 'bridge' | null>(null);
+  // Add state for filtered categories
+  const [filteredCategories, setFilteredCategories] = useState<BuildingCategory[]>([]);
+  const [usingFilteredCategories, setUsingFilteredCategories] = useState<boolean>(false);
   
   // Listen for custom events to show the building menu
   useEffect(() => {
@@ -224,6 +230,12 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
     
     const handleBuildingPointClick = (event: CustomEvent) => {
       console.log('BuildingMenu: Received buildingPointClick event', event.detail);
+      
+      // Store the point type if provided
+      if (event.detail && event.detail.pointType) {
+        setPointType(event.detail.pointType);
+      }
+      
       setShowViaEvent(true);
     };
     
@@ -235,6 +247,45 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
       window.removeEventListener('buildingPointClick', handleBuildingPointClick as EventListener);
     };
   }, []);
+  
+  // Add this useEffect to filter buildings based on pointType
+  useEffect(() => {
+    if (pointType && categories.length > 0) {
+      // Create a filtered copy of the categories
+      const filteredCategories = categories.map(category => {
+        // Deep clone the category
+        const newCategory = { ...category, buildings: [...category.buildings] };
+        
+        // Filter buildings based on pointType
+        if (pointType === 'canal') {
+          // Filter for canal-related buildings
+          newCategory.buildings = newCategory.buildings.filter(building => 
+            ['cargo_landing', 'gondola_station', 'private_dock', 'public_dock', 
+             'flood_control_station', 'harbor_chain_tower', 'shipyard', 
+             'boat_workshop', 'navigation_school', 'canal_house', 'grand_canal_palace']
+              .includes(building.type.toLowerCase().replace(/\s+/g, '_'))
+          );
+        } else if (pointType === 'bridge') {
+          // Filter for bridge-related buildings
+          newCategory.buildings = newCategory.buildings.filter(building => 
+            ['bridge', 'arsenal_gate', 'rialto_bridge']
+              .includes(building.type.toLowerCase().replace(/\s+/g, '_'))
+          );
+        }
+        
+        return newCategory;
+      });
+      
+      // Filter out empty categories
+      const nonEmptyCategories = filteredCategories.filter(category => category.buildings.length > 0);
+      
+      // Update the categories state with the filtered categories
+      setFilteredCategories(nonEmptyCategories);
+      setUsingFilteredCategories(true);
+    } else {
+      setUsingFilteredCategories(false);
+    }
+  }, [pointType, categories]);
   
   // Define the return type of useBuildingMenu hook
   interface BuildingMenuHookResult {
@@ -377,7 +428,15 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
               ) : (
                 <Tab.Group>
                   <Tab.List className="flex space-x-1 bg-amber-100 p-1">
-                    {categories.map((category): React.ReactElement => {
+                    {/* Show a special header if we're in a filtered mode */}
+                    {pointType && (
+                      <div className="w-full py-2.5 text-sm font-medium leading-5 text-amber-700 bg-amber-200 rounded-lg px-3">
+                        {pointType === 'canal' ? 'Canal Structures' : 'Bridge Structures'}
+                      </div>
+                    )}
+                    
+                    {/* Only show tabs if we're not in a filtered mode */}
+                    {!pointType && (usingFilteredCategories ? filteredCategories : categories).map((category): React.ReactElement => {
                       return (
                         <Tab
                           key={category.name}
@@ -394,7 +453,7 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
                     })}
                   </Tab.List>
                   <Tab.Panels className="mt-2">
-                    {categories.map((category): React.ReactElement => {
+                    {(usingFilteredCategories ? filteredCategories : categories).map((category): React.ReactElement => {
                       return (
                         <Tab.Panel
                           key={category.name}
@@ -553,6 +612,25 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
                           
                           // Normalize the building type, ensuring we always have a valid string
                           const buildingType = (selectedBuilding.type || selectedBuilding.name || "unknown").toLowerCase();
+                          
+                          // Check if this is a special point type (canal or bridge)
+                          if (buildingPoint.pointType) {
+                            // Ensure the selected building is appropriate for this point type
+                            const isAppropriateBuilding = 
+                              (buildingPoint.pointType === 'canal' && 
+                                ['cargo_landing', 'gondola_station', 'private_dock', 'public_dock', 
+                                 'flood_control_station', 'harbor_chain_tower', 'shipyard', 
+                                 'boat_workshop', 'navigation_school', 'canal_house', 'grand_canal_palace']
+                                  .includes(buildingType.replace(/\s+/g, '_'))) ||
+                              (buildingPoint.pointType === 'bridge' && 
+                                ['bridge', 'arsenal_gate', 'rialto_bridge']
+                                  .includes(buildingType.replace(/\s+/g, '_')));
+                            
+                            if (!isAppropriateBuilding) {
+                              alert(`This building cannot be placed at a ${buildingPoint.pointType} point. Please select an appropriate ${buildingPoint.pointType} structure.`);
+                              return;
+                            }
+                          }
                           
                           // Get the building cost from the JSON file
                           const buildingCost = await calculateBuildingCost(buildingType);

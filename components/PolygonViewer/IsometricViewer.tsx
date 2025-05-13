@@ -812,12 +812,12 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             // Convert lat/lng to isometric coordinates
             const x = (point.lng - 12.3326) * 20000;
             const y = (point.lat - 45.4371) * 20000;
-            
+          
             const isoPos = {
               x: calculateIsoX(x, y, scale, offset, canvas.width),
               y: calculateIsoY(x, y, scale, offset, canvas.height)
             };
-            
+          
             // Check if mouse is over this building point
             const pointSize = 2.8 * scale;
             if (
@@ -832,12 +832,92 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             }
           }
         }
-    
+  
         // If no building is hovered, clear the hover state
         if (!foundHoveredBuilding && hoveredBuildingId !== null) {
           console.log('No building hovered, clearing hoveredBuildingId');
           setHoveredBuildingId(null);
           canvas.style.cursor = isDragging ? 'grabbing' : 'grab';
+        }
+      
+        // Check if mouse is over any dock point
+        let foundHoveredDockPoint = false;
+      
+        polygons.forEach(polygon => {
+          if (polygon.dockPoints && Array.isArray(polygon.dockPoints)) {
+            polygon.dockPoints.forEach((point: any) => {
+              if (!point.edge) return;
+            
+              // Convert lat/lng to isometric coordinates
+              const x = (point.edge.lng - 12.3326) * 20000;
+              const y = (point.edge.lat - 45.4371) * 20000;
+            
+              const isoPos = {
+                x: calculateIsoX(x, y, scale, offset, canvas.width),
+                y: calculateIsoY(x, y, scale, offset, canvas.height)
+              };
+            
+              // Check if mouse is over this dock point
+              const pointSize = 2 * scale;
+              if (
+                mouseX >= isoPos.x - pointSize && 
+                mouseX <= isoPos.x + pointSize && 
+                mouseY >= isoPos.y - pointSize && 
+                mouseY <= isoPos.y + pointSize
+              ) {
+                foundHoveredDockPoint = true;
+                setHoveredDockPoint(point.edge);
+                canvas.style.cursor = 'pointer';
+                break;
+              }
+            });
+          }
+        
+          if (foundHoveredDockPoint) return;
+        });
+      
+        if (!foundHoveredDockPoint && hoveredDockPoint !== null) {
+          setHoveredDockPoint(null);
+        }
+      
+        // Check if mouse is over any bridge point
+        let foundHoveredBridgePoint = false;
+      
+        polygons.forEach(polygon => {
+          if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints)) {
+            polygon.bridgePoints.forEach((point: any) => {
+              if (!point.edge) return;
+            
+              // Convert lat/lng to isometric coordinates
+              const x = (point.edge.lng - 12.3326) * 20000;
+              const y = (point.edge.lat - 45.4371) * 20000;
+            
+              const isoPos = {
+                x: calculateIsoX(x, y, scale, offset, canvas.width),
+                y: calculateIsoY(x, y, scale, offset, canvas.height)
+              };
+            
+              // Check if mouse is over this bridge point
+              const pointSize = 2 * scale;
+              if (
+                mouseX >= isoPos.x - pointSize && 
+                mouseX <= isoPos.x + pointSize && 
+                mouseY >= isoPos.y - pointSize && 
+                mouseY <= isoPos.y + pointSize
+              ) {
+                foundHoveredBridgePoint = true;
+                setHoveredBridgePoint(point.edge);
+                canvas.style.cursor = 'pointer';
+                break;
+              }
+            });
+          }
+        
+          if (foundHoveredBridgePoint) return;
+        });
+      
+        if (!foundHoveredBridgePoint && hoveredBridgePoint !== null) {
+          setHoveredBridgePoint(null);
         }
       } else if (hoveredBuildingId !== null) {
         // If not in buildings view, ensure building hover state is cleared
@@ -1027,6 +1107,108 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         
         // If click is not on any building, deselect
         setSelectedBuildingId(null);
+      }
+      
+      // Check if click is on any dock point
+      if (activeView === 'buildings') {
+        for (const polygon of polygons) {
+          if (polygon.dockPoints && Array.isArray(polygon.dockPoints)) {
+            for (const point of polygon.dockPoints) {
+              if (!point.edge) continue;
+              
+              // Convert lat/lng to isometric coordinates
+              const x = (point.edge.lng - 12.3326) * 20000;
+              const y = (point.edge.lat - 45.4371) * 20000;
+              
+              const isoPos = {
+                x: calculateIsoX(x, y, scale, offset, canvas.width),
+                y: calculateIsoY(x, y, scale, offset, canvas.height)
+              };
+              
+              // Check if click is on this dock point
+              const pointSize = 2 * scale;
+              if (
+                mouseX >= isoPos.x - pointSize && 
+                mouseX <= isoPos.x + pointSize && 
+                mouseY >= isoPos.y - pointSize && 
+                mouseY <= isoPos.y + pointSize
+              ) {
+                console.log('Dock point clicked at position:', point.edge);
+                
+                // Store the selected point in window for the BuildingMenu to use
+                window.__selectedBuildingPoint = {
+                  pointId: `dock-${point.edge.lat}-${point.edge.lng}`,
+                  polygonId: findPolygonIdForPoint(point.edge),
+                  position: point.edge,
+                  pointType: 'canal'
+                };
+                
+                // Dispatch an event to open the building menu at this position
+                window.dispatchEvent(new CustomEvent('buildingPointClick', {
+                  detail: { 
+                    position: point.edge,
+                    pointType: 'canal'
+                  }
+                }));
+                
+                // Deselect any selected building
+                setSelectedBuildingId(null);
+                
+                return;
+              }
+            }
+          }
+        }
+        
+        // Check if click is on any bridge point
+        for (const polygon of polygons) {
+          if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints)) {
+            for (const point of polygon.bridgePoints) {
+              if (!point.edge) continue;
+              
+              // Convert lat/lng to isometric coordinates
+              const x = (point.edge.lng - 12.3326) * 20000;
+              const y = (point.edge.lat - 45.4371) * 20000;
+              
+              const isoPos = {
+                x: calculateIsoX(x, y, scale, offset, canvas.width),
+                y: calculateIsoY(x, y, scale, offset, canvas.height)
+              };
+              
+              // Check if click is on this bridge point
+              const pointSize = 2 * scale;
+              if (
+                mouseX >= isoPos.x - pointSize && 
+                mouseX <= isoPos.x + pointSize && 
+                mouseY >= isoPos.y - pointSize && 
+                mouseY <= isoPos.y + pointSize
+              ) {
+                console.log('Bridge point clicked at position:', point.edge);
+                
+                // Store the selected point in window for the BuildingMenu to use
+                window.__selectedBuildingPoint = {
+                  pointId: `bridge-${point.edge.lat}-${point.edge.lng}`,
+                  polygonId: findPolygonIdForPoint(point.edge),
+                  position: point.edge,
+                  pointType: 'bridge'
+                };
+                
+                // Dispatch an event to open the building menu at this position
+                window.dispatchEvent(new CustomEvent('buildingPointClick', {
+                  detail: { 
+                    position: point.edge,
+                    pointType: 'bridge'
+                  }
+                }));
+                
+                // Deselect any selected building
+                setSelectedBuildingId(null);
+                
+                return;
+              }
+            }
+          }
+        }
       }
       
       // Handle clicks in citizens view
@@ -1734,17 +1916,26 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
               y: calculateIsoY(x, y, scale, offset, canvas.height)
             };
             
+            // Check if this point is hovered
+            const isHovered = hoveredDockPoint && 
+              Math.abs(hoveredDockPoint.lat - point.edge.lat) < 0.0001 && 
+              Math.abs(hoveredDockPoint.lng - point.edge.lng) < 0.0001;
+            
             // Draw a small, semi-transparent circle for dock points
             ctx.beginPath();
             ctx.arc(isoPos.x, isoPos.y, 2 * scale, 0, Math.PI * 2);
             
-            // Use a subtle blue color with low opacity
-            ctx.fillStyle = 'rgba(0, 120, 215, 0.3)';
+            // Use a subtle blue color with low opacity, brighter when hovered
+            ctx.fillStyle = isHovered 
+              ? 'rgba(0, 120, 215, 0.7)' // Brighter and more opaque when hovered
+              : 'rgba(0, 120, 215, 0.3)';
             ctx.fill();
             
-            // Add a very subtle border
-            ctx.strokeStyle = 'rgba(0, 120, 215, 0.4)';
-            ctx.lineWidth = 0.5;
+            // Add a border, more visible when hovered
+            ctx.strokeStyle = isHovered
+              ? 'rgba(255, 255, 255, 0.8)' // White border when hovered
+              : 'rgba(0, 120, 215, 0.4)';
+            ctx.lineWidth = isHovered ? 1.5 : 0.5;
             ctx.stroke();
           });
         }
@@ -1763,11 +1954,18 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
               y: calculateIsoY(x, y, scale, offset, canvas.height)
             };
             
+            // Check if this point is hovered
+            const isHovered = hoveredBridgePoint && 
+              Math.abs(hoveredBridgePoint.lat - point.edge.lat) < 0.0001 && 
+              Math.abs(hoveredBridgePoint.lng - point.edge.lng) < 0.0001;
+            
             // Draw a small, semi-transparent square for bridge points
             const pointSize = 2 * scale;
             
-            // Use a subtle orange/brown color with low opacity
-            ctx.fillStyle = 'rgba(180, 120, 60, 0.3)';
+            // Use a subtle orange/brown color with low opacity, brighter when hovered
+            ctx.fillStyle = isHovered
+              ? 'rgba(180, 120, 60, 0.7)' // Brighter and more opaque when hovered
+              : 'rgba(180, 120, 60, 0.3)';
             ctx.beginPath();
             ctx.rect(
               isoPos.x - pointSize/2, 
@@ -1777,9 +1975,11 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             );
             ctx.fill();
             
-            // Add a very subtle border
-            ctx.strokeStyle = 'rgba(180, 120, 60, 0.4)';
-            ctx.lineWidth = 0.5;
+            // Add a border, more visible when hovered
+            ctx.strokeStyle = isHovered
+              ? 'rgba(255, 255, 255, 0.8)' // White border when hovered
+              : 'rgba(180, 120, 60, 0.4)';
+            ctx.lineWidth = isHovered ? 1.5 : 0.5;
             ctx.stroke();
           });
         }
