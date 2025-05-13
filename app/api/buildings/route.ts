@@ -465,12 +465,11 @@ export async function GET(request: Request) {
       created_at: '2025-05-10T02:07:00Z'
     };
     
-    // Add the debug buildings to the beginning of the array to ensure they're processed first
-    buildings.unshift(debugBuilding1 as any);
-    buildings.unshift(debugBuilding2 as any);
-    buildings.unshift(debugBuilding3 as any);
-    buildings.unshift(debugBuilding4 as any);
-    buildings.unshift(debugBuilding5 as any);
+    // Only add debug buildings in development mode if there are no buildings from Airtable
+    if (process.env.NODE_ENV === 'development' && buildings.length === 0) {
+      console.log('No buildings found from Airtable, adding debug buildings for development');
+      buildings.push(debugBuilding1 as any);
+    }
     
     // Set cache headers to allow browsers to cache the response for a short time
     const headers = new Headers();
@@ -579,11 +578,5 @@ function getDebugBuildings() {
     created_at: '2025-05-10T02:07:00Z'
   };
   
-  return [
-    debugBuilding1,
-    debugBuilding2,
-    debugBuilding3,
-    debugBuilding4,
-    debugBuilding5
-  ];
+  return [debugBuilding1];
 }
