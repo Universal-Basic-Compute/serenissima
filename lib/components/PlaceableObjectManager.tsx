@@ -1,10 +1,13 @@
 import React, { useEffect, useState, useRef } from 'react';
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { eventBus, EventTypes } from '../eventBus';
 import { BuildingService, BuildingData } from '../services/BuildingService';
+import { getWalletAddress } from '../walletUtils';
+import { useSceneReady } from './SceneReadyProvider';
 
 // Define our local interface for building data during placement
-interface PlaceableBuildingData {
+export interface PlaceableBuildingData {
   id?: string;
   type: string;
   variant?: string;
@@ -13,51 +16,77 @@ interface PlaceableBuildingData {
     x: number;
     y: number;
     z: number;
+  } | {
+    lat: number;
+    lng: number;
   };
   rotation: number;
   created_by?: string;
 }
 
-interface PlaceableObjectManagerProps {
+export type PlaceableObjectType = 'building' | 'dock' | 'road';
+
+export interface PlaceableObjectManagerProps {
   scene?: THREE.Scene;
   camera?: THREE.PerspectiveCamera;
   polygons?: any[];
   active: boolean;
-  type: 'building'; // Simplified to only accept 'building'
-  objectData: any;
+  type: PlaceableObjectType;
+  objectData: {
+    name?: string;
+    variant?: string;
+    // Other type-specific properties
+  };
   constraints?: {
+    requireWaterEdge?: boolean;
     requireLandOwnership?: boolean;
+    requireAdminPermission?: boolean;
     snapToRoad?: boolean;
+    // Other constraint flags
   };
   onComplete?: (data: any) => void;
   onCancel?: () => void;
 }
 
 /**
- * Component for managing placeable objects (buildings)
+ * Unified component for placing objects (buildings, docks, roads, etc.)
+ * This component handles the UI and interaction for placing objects in the 3D world.
  */
 const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
-  scene,
-  camera,
+  scene: propScene,
+  camera: propCamera,
   polygons,
   active,
   type,
   objectData,
-  constraints = {},
+  constraints = {
+    requireWaterEdge: type === 'dock',
+    requireLandOwnership: type === 'building',
+    requireAdminPermission: type === 'dock'
+  },
   onComplete,
   onCancel
 }) => {
+  // Use SceneReady hook to get scene and camera if not provided
+  const { isSceneReady, scene: readyScene, camera: readyCamera } = useSceneReady();
+  
+  // Use provided scene/camera or ones from SceneReady
+  const scene = propScene || readyScene;
+  const camera = propCamera || readyCamera;
+  
   // State for placement
   const [isPlacing, setIsPlacing] = useState<boolean>(active);
   const [isValid, setIsValid] = useState<boolean>(false);
   const [rotation, setRotation] = useState<number>(0);
   const [position, setPosition] = useState<THREE.Vector3 | null>(null);
   const [landId, setLandId] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
   // Refs for Three.js objects
   const previewMeshRef = useRef<THREE.Object3D | null>(null);
   const raycasterRef = useRef<THREE.Raycaster>(new THREE.Raycaster());
   const mouseRef = useRef<THREE.Vector2>(new THREE.Vector2());
+  const helperRef = useRef<THREE.Line | null>(null);
   
   // Refs for services
   const buildingServiceRef = useRef(BuildingService.getInstance());
@@ -76,12 +105,14 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('click', handleClick);
     window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('contextmenu', handleContextMenu);
     
     // Clean up on unmount
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('click', handleClick);
       window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('contextmenu', handleContextMenu);
       
       // Remove preview mesh
       if (previewMeshRef.current && scene) {
@@ -104,6 +135,16 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
         
         previewMeshRef.current = null;
       }
+      
+      // Remove helper line
+      if (helperRef.current && scene) {
+        scene.remove(helperRef.current);
+        helperRef.current.geometry.dispose();
+        if (helperRef.current.material instanceof THREE.Material) {
+          helperRef.current.material.dispose();
+        }
+        helperRef.current = null;
+      }
     };
   }, [active, scene, camera, type, objectData]);
   
@@ -117,25 +158,29 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
       previewMeshRef.current = null;
     }
     
-    // Create a simple box for building preview
+    // Create a simple box for building preview as fallback
     const geometry = new THREE.BoxGeometry(2, 2, 2);
     const material = new THREE.MeshBasicMaterial({
-      color: 0x00ff00,
+      color: type === 'dock' ? 0x3b82f6 : 0xf59e0b, // Blue for docks, amber for buildings
       transparent: true,
       opacity: 0.5,
-      wireframe: true
+      wireframe: false
     });
     const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.y = 0.5; // Position at half height
     
-    // Add a label with the building name
+    // Add a label with the object name
     const canvas = document.createElement('canvas');
     canvas.width = 256;
     canvas.height = 64;
     const context = canvas.getContext('2d');
     if (context) {
+      context.fillStyle = 'rgba(0, 0, 0, 0.7)';
+      context.fillRect(0, 0, canvas.width, canvas.height);
       context.fillStyle = 'white';
-      context.font = '24px Arial';
-      context.fillText(objectData.name, 10, 40);
+      context.font = 'bold 24px Arial';
+      context.textAlign = 'center';
+      context.fillText(objectData.name || type, canvas.width / 2, 40);
       
       const texture = new THREE.CanvasTexture(canvas);
       const labelMaterial = new THREE.SpriteMaterial({ map: texture });
@@ -149,6 +194,76 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
     // Add to scene
     scene.add(mesh);
     previewMeshRef.current = mesh;
+    
+    // If this is a building with a name, try to load the actual model
+    if (type === 'building' && objectData.name) {
+      // Fix the model path - ensure it uses the correct format for the path
+      // Normalize the building name (remove apostrophes, replace spaces with hyphens)
+      const normalizedName = objectData.name.toLowerCase().replace(/'/g, '').replace(/\s+/g, '-');
+      const modelPath = `/models/buildings/${normalizedName}/${objectData.variant || 'model'}.glb`;
+        
+      console.log(`Attempting to load building model from: ${modelPath}`);
+        
+      // Load the actual building model
+      const gltfLoader = new GLTFLoader();
+      gltfLoader.load(
+        modelPath,
+        (gltf) => {
+          // Remove the temporary preview mesh
+          if (previewMeshRef.current && scene) {
+            scene.remove(previewMeshRef.current);
+            if (previewMeshRef.current instanceof THREE.Mesh) {
+              previewMeshRef.current.geometry.dispose();
+              if (previewMeshRef.current.material instanceof THREE.Material) {
+                previewMeshRef.current.material.dispose();
+              } else if (Array.isArray(previewMeshRef.current.material)) {
+                previewMeshRef.current.material.forEach(mat => mat.dispose());
+              }
+            }
+          }
+            
+          // Use the loaded model as the preview
+          const model = gltf.scene;
+            
+          // Make the model semi-transparent
+          model.traverse((child) => {
+            if (child instanceof THREE.Mesh && child.material) {
+              if (Array.isArray(child.material)) {
+                child.material.forEach(mat => {
+                  mat.transparent = true;
+                  mat.opacity = 0.7;
+                });
+              } else {
+                child.material.transparent = true;
+                child.material.opacity = 0.7;
+              }
+            }
+          });
+            
+          // Add the model to the scene
+          model.visible = false;
+          scene.add(model);
+          previewMeshRef.current = model;
+            
+          console.log(`Successfully loaded building model for ${objectData.name}`);
+        },
+        undefined,
+        (error) => {
+          console.error(`Error loading building model: ${error instanceof Error ? error.message : String(error)}`);
+          // Keep using the simple box preview if model loading fails
+        }
+      );
+    }
+    
+    // Create helper line for placement guidance
+    const edgeGeometry = new THREE.BufferGeometry();
+    const edgeMaterial = new THREE.LineBasicMaterial({ 
+      color: type === 'dock' ? 0x3b82f6 : 0xf59e0b 
+    });
+    const edgeLine = new THREE.Line(edgeGeometry, edgeMaterial);
+    edgeLine.visible = false;
+    scene.add(edgeLine);
+    helperRef.current = edgeLine;
   };
   
   // Update preview mesh color based on validity
@@ -162,12 +277,27 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
       if (Array.isArray(material)) {
         material.forEach(mat => {
           if (mat instanceof THREE.MeshBasicMaterial) {
-            mat.color.set(valid ? 0x00ff00 : 0xff0000);
+            mat.color.set(valid ? (type === 'dock' ? 0x3b82f6 : 0xf59e0b) : 0xff0000);
           }
         });
       } else if (material instanceof THREE.MeshBasicMaterial) {
-        material.color.set(valid ? 0x00ff00 : 0xff0000);
+        material.color.set(valid ? (type === 'dock' ? 0x3b82f6 : 0xf59e0b) : 0xff0000);
       }
+    } else if (previewMeshRef.current.type === "Group" || previewMeshRef.current.type === "Object3D") {
+      // For GLTF models, update opacity based on validity
+      previewMeshRef.current.traverse((child) => {
+        if (child instanceof THREE.Mesh && child.material) {
+          if (Array.isArray(child.material)) {
+            child.material.forEach(mat => {
+              mat.opacity = valid ? 0.7 : 0.3;
+              mat.color = new THREE.Color(valid ? 0xffffff : 0xff0000);
+            });
+          } else {
+            child.material.opacity = valid ? 0.7 : 0.3;
+            child.material.color = new THREE.Color(valid ? 0xffffff : 0xff0000);
+          }
+        }
+      });
     }
   };
   
@@ -187,33 +317,85 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
     const intersectionPoint = new THREE.Vector3();
     raycasterRef.current.ray.intersectPlane(groundPlane, intersectionPoint);
     
-    // Update position
-    setPosition(intersectionPoint);
-    
-    // Update preview mesh position
-    if (previewMeshRef.current) {
-      previewMeshRef.current.position.copy(intersectionPoint);
-      previewMeshRef.current.rotation.y = rotation;
+    if (intersectionPoint) {
+      // Find placement info based on object type
+      let placementInfo;
+      
+      if (type === 'dock') {
+        placementInfo = findWaterEdgeAtPosition(intersectionPoint);
+      } else {
+        // For buildings and other objects, find land at position
+        placementInfo = findLandAtPosition(intersectionPoint);
+      }
+      
+      if (placementInfo.position && placementInfo.landId) {
+        // Update preview mesh position
+        if (previewMeshRef.current) {
+          previewMeshRef.current.position.copy(placementInfo.position);
+          previewMeshRef.current.rotation.y = rotation;
+          previewMeshRef.current.visible = true;
+        }
+        
+        // Update helper
+        if (helperRef.current) {
+          const points = placementInfo.outline || placementInfo.edge ? 
+            (placementInfo.outline ? 
+              placementInfo.outline.map((p: any) => new THREE.Vector3(p.x, 0.05, p.z)) : 
+              [placementInfo.edge.start, placementInfo.edge.end]
+            ) : [];
+          
+          if (points.length > 0) {
+            const geometry = helperRef.current.geometry;
+            geometry.setFromPoints(points);
+            helperRef.current.visible = true;
+          } else {
+            helperRef.current.visible = false;
+          }
+        }
+        
+        // Update state
+        setPosition(placementInfo.position);
+        setLandId(placementInfo.landId);
+        setIsValid(placementInfo.isValid);
+        setErrorMessage(placementInfo.errorMessage || null);
+        
+        // Update preview mesh color based on validity
+        updatePreviewMeshColor(placementInfo.isValid);
+      } else {
+        // Hide preview if no valid placement found
+        if (previewMeshRef.current) {
+          previewMeshRef.current.visible = false;
+        }
+        if (helperRef.current) {
+          helperRef.current.visible = false;
+        }
+        
+        setPosition(null);
+        setLandId(null);
+        setIsValid(false);
+        setErrorMessage(placementInfo.errorMessage || "Invalid placement location");
+      }
     }
-    
-    // Check if position is valid
-    const valid = checkPositionValidity(intersectionPoint);
-    setIsValid(valid);
-    updatePreviewMeshColor(valid);
-    
-    // Find land ID at position
-    const landIdAtPosition = findLandIdAtPosition(intersectionPoint);
-    setLandId(landIdAtPosition);
   };
   
   // Handle click
   const handleClick = (event: MouseEvent) => {
-    if (!isPlacing || !position || !isValid) return;
+    // Only handle left clicks
+    if (event.button !== 0) return;
     
-    // Left click to place
-    if (event.button === 0) {
+    // Only place if we have a valid position
+    if (isPlacing && isValid && position && landId) {
       placeObject();
+    } else if (errorMessage) {
+      // Show error message
+      console.warn(`Cannot place object: ${errorMessage}`);
     }
+  };
+  
+  // Handle context menu (right click)
+  const handleContextMenu = (event: MouseEvent) => {
+    event.preventDefault();
+    cancelPlacement();
   };
   
   // Handle key down
@@ -248,32 +430,83 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
     if (!position || !isValid || !landId) return;
     
     try {
-      // Create building data
-      const buildingData: PlaceableBuildingData = {
-        type: objectData.name,
-        land_id: landId,
-        position: {
-          x: position.x,
-          y: position.y,
-          z: position.z
-        },
-        rotation: rotation,
-        variant: objectData.variant || 'model',
-        created_by: 'current-user' // This will be replaced by the server with the actual user ID
-      };
+      // Get the current wallet address
+      const walletAddress = getWalletAddress();
       
-      // Save building - convert to BuildingData type
-      const placedObject = await buildingServiceRef.current.saveBuilding(buildingData as BuildingData);
+      if (!walletAddress) {
+        alert('Please connect your wallet first');
+        return;
+      }
       
-      // Call onComplete callback
-      if (onComplete && placedObject) {
-        onComplete(placedObject);
+      // Create object data based on type
+      if (type === 'building') {
+        // Create building data
+        const buildingData: PlaceableBuildingData = {
+          type: objectData.name || 'unknown',
+          land_id: landId,
+          position: {
+            x: position.x,
+            y: position.y,
+            z: position.z
+          },
+          rotation: rotation,
+          variant: objectData.variant || 'model',
+          created_by: walletAddress
+        };
+        
+        // Save building
+        const placedObject = await buildingServiceRef.current.saveBuilding(buildingData as BuildingData);
+        
+        // Emit building placed event
+        eventBus.emit(EventTypes.BUILDING_PLACED, {
+          buildingId: placedObject.id,
+          type: objectData.name,
+          variant: objectData.variant || 'model',
+          data: placedObject
+        });
+        
+        // Call onComplete callback
+        if (onComplete) {
+          onComplete(placedObject);
+        }
+      } else if (type === 'dock') {
+        // Create dock data
+        const dockData = {
+          type: 'dock',
+          land_id: landId,
+          position: {
+            x: position.x,
+            y: position.y,
+            z: position.z
+          },
+          rotation: rotation,
+          created_by: walletAddress
+        };
+        
+        // Save dock (using building API for now)
+        const placedObject = await buildingServiceRef.current.saveBuilding(dockData as BuildingData);
+        
+        // Emit dock placed event
+        eventBus.emit('DOCK_PLACED', {
+          dockId: placedObject.id,
+          type: 'dock',
+          data: placedObject
+        });
+        
+        // Call onComplete callback
+        if (onComplete) {
+          onComplete(placedObject);
+        }
+      } else if (type === 'road') {
+        // Road placement would be handled here
+        console.log('Road placement not yet implemented');
       }
       
       // End placement
       setIsPlacing(false);
     } catch (error) {
       console.error(`Error placing ${type}:`, error);
+      setErrorMessage(`Failed to place ${type}: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
   
@@ -287,74 +520,159 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
     }
   };
   
-  // Check if position is valid
-  const checkPositionValidity = (position: THREE.Vector3): boolean => {
-    // Check if position is on land
-    const landIdAtPosition = findLandIdAtPosition(position);
-    
-    if (!landIdAtPosition) {
-      return false;
+  // Find land at position (for buildings)
+  const findLandAtPosition = (position: THREE.Vector3) => {
+    if (!polygons) {
+      return {
+        position: null,
+        landId: null,
+        isValid: false,
+        errorMessage: "No land data available"
+      };
     }
     
-    // Check if land is owned by the player
-    if (constraints.requireLandOwnership) {
-      const isOwnedByPlayer = checkLandOwnership(landIdAtPosition);
+    for (const polygon of polygons) {
+      // Check if position is inside this polygon
+      if (isPointInPolygon(position, polygon)) {
+        // Check if the user owns this land
+        const isOwned = checkLandOwnership(polygon.id);
+        
+        return {
+          position: new THREE.Vector3(position.x, 0, position.z),
+          landId: polygon.id,
+          outline: polygon.vertices,
+          isValid: isOwned || !constraints.requireLandOwnership,
+          errorMessage: isOwned ? null : "You don't own this land"
+        };
+      }
+    }
+    
+    return {
+      position: null,
+      landId: null,
+      isValid: false,
+      errorMessage: "Not on valid land"
+    };
+  };
+  
+  // Find water edge at position (for docks)
+  const findWaterEdgeAtPosition = (position: THREE.Vector3) => {
+    if (!polygons) {
+      return {
+        position: null,
+        landId: null,
+        isValid: false,
+        errorMessage: "No land data available"
+      };
+    }
+    
+    // This is a simplified implementation
+    // In a real implementation, this would find the closest water edge
+    
+    // For now, just return the position as valid
+    return {
+      position: position,
+      landId: "water_edge",
+      isValid: true,
+      edge: {
+        start: new THREE.Vector3(position.x - 1, 0.1, position.z),
+        end: new THREE.Vector3(position.x + 1, 0.1, position.z)
+      }
+    };
+  };
+  
+  // Check if a point is inside a polygon
+  const isPointInPolygon = (point: THREE.Vector3, polygon: any) => {
+    // Simple implementation of point-in-polygon algorithm
+    const vertices = polygon.vertices || [];
+    if (vertices.length < 3) return false;
+    
+    let inside = false;
+    for (let i = 0, j = vertices.length - 1; i < vertices.length; j = i++) {
+      const xi = vertices[i].x;
+      const zi = vertices[i].z;
+      const xj = vertices[j].x;
+      const zj = vertices[j].z;
       
-      if (!isOwnedByPlayer) {
-        return false;
-      }
+      const intersect = ((zi > point.z) !== (zj > point.z)) &&
+        (point.x < (xj - xi) * (point.z - zi) / (zj - zi) + xi);
+      
+      if (intersect) inside = !inside;
     }
     
+    return inside;
+  };
+  
+  // Check if the user owns the land
+  const checkLandOwnership = (landId: string) => {
+    // In a real implementation, this would check against actual ownership data
+    // For now, we'll assume the user owns all land for demonstration purposes
     return true;
   };
   
-  // Find land ID at position
-  const findLandIdAtPosition = (position: THREE.Vector3): string | null => {
-    if (!polygons) return null;
-    
-    // Simple implementation: find the closest polygon
-    // In a real implementation, this would use point-in-polygon tests
-    
-    let closestPolygon = null;
-    let closestDistance = Infinity;
-    
-    polygons.forEach(polygon => {
-      if (polygon.centroid) {
-        const centroidPosition = new THREE.Vector3(
-          polygon.centroid.x,
-          0,
-          polygon.centroid.z
-        );
+  // Render UI controls
+  return (
+    <div className="absolute bottom-20 left-4 bg-white bg-opacity-90 p-4 rounded-lg shadow-lg z-30">
+      <h3 className="text-lg font-medium text-gray-900 mb-2">
+        {type.charAt(0).toUpperCase() + type.slice(1)} Placement
+      </h3>
+      
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Rotation
+        </label>
+        <input
+          type="range"
+          min="0"
+          max={Math.PI * 2}
+          step="0.1"
+          value={rotation}
+          onChange={(e) => setRotation(parseFloat(e.target.value))}
+          className="w-full"
+        />
+      </div>
+      
+      {errorMessage && (
+        <div className="mb-2 text-sm text-red-600 bg-red-100 p-2 rounded">
+          {errorMessage}
+        </div>
+      )}
+      
+      <div className="flex space-x-2">
+        <button
+          onClick={placeObject}
+          disabled={!isValid}
+          className={`px-4 py-2 rounded-md ${
+            isValid
+              ? (type === 'dock' 
+                ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                : 'bg-amber-600 text-white hover:bg-amber-700')
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          }`}
+        >
+          Place {type.charAt(0).toUpperCase() + type.slice(1)}
+        </button>
         
-        const distance = position.distanceTo(centroidPosition);
-        
-        if (distance < closestDistance) {
-          closestDistance = distance;
-          closestPolygon = polygon;
+        <button
+          onClick={cancelPlacement}
+          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+        >
+          Cancel
+        </button>
+      </div>
+      
+      <div className="mt-2 text-xs text-gray-500">
+        {isValid
+          ? `Position valid. Click to place the ${type}.`
+          : type === 'dock'
+            ? 'Move cursor to a water edge to place dock.'
+            : 'Move cursor to a land parcel you own to place building.'
         }
-      }
-    });
-    
-    // Check if the closest polygon is within a reasonable distance
-    if (closestPolygon && closestDistance < 50) {
-      return closestPolygon.id;
-    }
-    
-    return null;
-  };
-  
-  // Check if land is owned by the player
-  const checkLandOwnership = (landId: string): boolean => {
-    // This is a placeholder implementation
-    // In a real application, this would check if the land is owned by the player
-    
-    // For now, just return true
-    return true;
-  };
-  
-  
-  // Render nothing - this is a non-visual component
-  return null;
+        <br />
+        <span className="italic">Press R to rotate, Escape to cancel</span>
+      </div>
+    </div>
+  );
 };
 
 export default PlaceableObjectManager;

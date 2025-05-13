@@ -5,7 +5,7 @@ import PlaceableObjectManager from '@/lib/components/PlaceableObjectManager';
 import { useBuildingMenu } from '@/hooks/useBuildingMenu';
 import { eventBus } from '@/lib/eventBus';
 import { EventTypes } from '@/lib/eventTypes';
-import { FaWater } from 'react-icons/fa';
+import { FaWater, FaRoad, FaBuilding } from 'react-icons/fa';
 import { normalizeCoordinates } from '@/components/PolygonViewer/utils';
 import { useSceneReady } from '@/lib/components/SceneReadyProvider';
 
@@ -22,11 +22,10 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
   polygons,
   onRefreshBuildings
 }) => {
-  const [isRoadCreatorActive, setIsRoadCreatorActive] = useState(false); // Kept for state compatibility but not used
-  const [placeableObjectType, setPlaceableObjectType] = useState<'building' | null>(null);
+  // State for different creation tools
+  const [placeableObjectType, setPlaceableObjectType] = useState<'building' | 'dock' | 'road' | null>(null);
   const [showBuildingRenderer, setShowBuildingRenderer] = useState(true);
   const [selectedBuildingType, setSelectedBuildingType] = useState<string>('');
-  const [showCanalCreator, setShowCanalCreator] = useState(false);
   const [selectedVariant, setSelectedVariant] = useState<string>('model');
   const [buildings, setBuildings] = useState<any[]>([]);
 
@@ -53,7 +52,6 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
       setSelectedBuildingType(buildingName);
       setSelectedVariant(variant || 'model');
       setPlaceableObjectType('building');
-      setIsRoadCreatorActive(false);
     };
     
     window.addEventListener('activateBuildingPlacement', handleActivateBuildingPlacement as EventListener);
@@ -107,6 +105,7 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
 
   return (
     <div className="absolute bottom-4 left-4 z-20 flex flex-col space-y-2">
+      {/* Building Browser Button */}
       <button
         onClick={() => {
           // Trigger the building menu to open
@@ -115,47 +114,57 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
           
           // Reset other active states
           setPlaceableObjectType(null);
-          setIsRoadCreatorActive(false);
-          setShowCanalCreator(false);
         }}
         className="px-4 py-2 bg-amber-600 text-white rounded-md shadow-md hover:bg-amber-700 transition-colors flex items-center space-x-2"
         title="Browse and place buildings on your land"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-          <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4zm3 1h6v4H7V5zm8 8v-4H7v4h8z" clipRule="evenodd" />
-        </svg>
+        <FaBuilding className="h-5 w-5" />
         <span>Browse Buildings</span>
       </button>
       
-      {/* Road creator functionality removed due to missing component */}
+      {/* Dock Creator Button */}
+      <button
+        onClick={() => {
+          setPlaceableObjectType(prev => prev === 'dock' ? null : 'dock');
+        }}
+        className={`px-4 py-2 ${placeableObjectType === 'dock' ? 'bg-blue-700' : 'bg-blue-600'} text-white rounded-md shadow-md hover:bg-blue-700 transition-colors flex items-center space-x-2`}
+        title="Create docks along water edges"
+      >
+        <FaWater className="h-5 w-5" />
+        <span>{placeableObjectType === 'dock' ? 'Cancel Dock' : 'Create Dock'}</span>
+      </button>
       
-      {showCanalCreator && scene && camera && (
-        <div className="absolute top-0 left-0 right-0 bottom-0 z-30">
-          {/* This div captures clicks to prevent interaction with the map */}
-          <div 
-            className="absolute inset-0"
-            onClick={(e) => e.stopPropagation()}
-          />
-        </div>
-      )}
+      {/* Road Creator Button */}
+      <button
+        onClick={() => {
+          setPlaceableObjectType(prev => prev === 'road' ? null : 'road');
+        }}
+        className={`px-4 py-2 ${placeableObjectType === 'road' ? 'bg-gray-700' : 'bg-gray-600'} text-white rounded-md shadow-md hover:bg-gray-700 transition-colors flex items-center space-x-2`}
+        title="Create roads between buildings"
+      >
+        <FaRoad className="h-5 w-5" />
+        <span>{placeableObjectType === 'road' ? 'Cancel Road' : 'Create Road'}</span>
+      </button>
       
-      
-      {placeableObjectType === 'building' && (
+      {/* Placeable Object Manager - handles all object types */}
+      {placeableObjectType && (
         <PlaceableObjectManager
-          scene={scene}
-          camera={camera}
+          scene={actualScene}
+          camera={actualCamera}
           polygons={polygons}
           active={true}
-          type="building"
+          type={placeableObjectType}
           objectData={{
-            name: selectedBuildingType,
-            variant: selectedVariant
+            name: placeableObjectType === 'building' ? selectedBuildingType : placeableObjectType,
+            variant: placeableObjectType === 'building' ? selectedVariant : 'default'
           }}
           constraints={{
-            requireLandOwnership: true
+            requireLandOwnership: placeableObjectType === 'building',
+            requireWaterEdge: placeableObjectType === 'dock',
+            requireAdminPermission: placeableObjectType === 'dock'
           }}
-          onComplete={(buildingData) => {
-            console.log('Building created:', buildingData);
+          onComplete={(objectData) => {
+            console.log(`${placeableObjectType} created:`, objectData);
             setPlaceableObjectType(null);
             if (onRefreshBuildings) {
               onRefreshBuildings();
@@ -166,7 +175,6 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
           }}
         />
       )}
-      
       
       {/* Always render the BuildingRenderer to show existing buildings */}
       {showBuildingRenderer ? (
