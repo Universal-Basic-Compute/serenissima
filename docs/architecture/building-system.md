@@ -69,7 +69,7 @@ The building system follows a layered architecture with clear separation between
    - Integration with other building-related tools
 
 5. **PlaceableObjectManager**: Unified component for placing different object types.
-   - Handles placement of buildings, docks, and other object types
+   - Handles placement of buildings and other object types
    - Applies type-specific constraints and validation
    - Provides consistent UI for object placement
    - Supports rotation and positioning for all object types

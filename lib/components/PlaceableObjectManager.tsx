@@ -21,9 +21,7 @@ export interface PlaceableObjectManagerProps {
     // Other type-specific properties
   };
   constraints?: {
-    requireWaterEdge?: boolean;
     requireLandOwnership?: boolean;
-    requireAdminPermission?: boolean;
     snapToRoad?: boolean;
     // Other constraint flags
   };
@@ -32,7 +30,7 @@ export interface PlaceableObjectManagerProps {
 }
 
 /**
- * Unified component for placing objects (buildings, docks, roads, etc.)
+ * Unified component for placing objects (buildings, roads, etc.)
  * This component handles the UI and interaction for placing objects in the 3D world.
  */
 const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
@@ -43,9 +41,7 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
   type,
   objectData,
   constraints = {
-    requireWaterEdge: type === 'dock',
-    requireLandOwnership: type === 'building',
-    requireAdminPermission: type === 'dock'
+    requireLandOwnership: type === 'building'
   },
   onComplete,
   onCancel
@@ -241,7 +237,7 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
     // Create helper line for placement guidance
     const edgeGeometry = new THREE.BufferGeometry();
     const edgeMaterial = new THREE.LineBasicMaterial({ 
-      color: type === 'dock' ? 0x3b82f6 : 0xf59e0b 
+      color: 0xf59e0b 
     });
     const edgeLine = new THREE.Line(edgeGeometry, edgeMaterial);
     edgeLine.visible = false;

@@ -148,9 +148,7 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
             variant: placeableObjectType === 'building' ? selectedVariant : 'default'
           }}
           constraints={{
-            requireLandOwnership: placeableObjectType === 'building',
-            requireWaterEdge: placeableObjectType === 'dock',
-            requireAdminPermission: placeableObjectType === 'dock'
+            requireLandOwnership: placeableObjectType === 'building'
           }}
           onComplete={(objectData) => {
             console.log(`${placeableObjectType} created:`, objectData);
