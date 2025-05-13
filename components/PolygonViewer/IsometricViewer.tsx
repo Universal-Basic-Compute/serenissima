@@ -210,9 +210,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Calculate isometric projection
-    const isoX = (x: number, y: number) => (x - y) * 0.866 * scale + canvas.width / 2 + offset.x;
-    const isoY = (x: number, y: number) => (x + y) * 0.5 * scale + canvas.height / 2 + offset.y;
+    // Calculate isometric projection - modified to make north up
+    const isoX = (x: number, y: number) => (y) * scale + canvas.width / 2 + offset.x;
+    const isoY = (x: number, y: number) => (-x) * scale + canvas.height / 2 + offset.y;
     
     // Draw water background
     ctx.fillStyle = '#87CEEB';
@@ -238,8 +238,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       // Convert lat/lng to isometric coordinates
       const coords = polygon.coordinates.map((coord: {lat: number, lng: number}) => {
         // Normalize coordinates relative to center of Venice
-        const x = (coord.lng - 12.3326) * 10000;
-        const y = (coord.lat - 45.4371) * 10000;
+        // Scale factor adjusted to make the map more readable
+        const x = (coord.lng - 12.3326) * 20000;
+        const y = (coord.lat - 45.4371) * 20000;
         
         return {
           x: isoX(x, y),
@@ -299,8 +300,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         let x, y;
         if ('lat' in position && 'lng' in position) {
           // Normalize coordinates relative to center of Venice
-          x = (position.lng - 12.3326) * 10000;
-          y = (position.lat - 45.4371) * 10000;
+          // Scale factor adjusted to match the map
+          x = (position.lng - 12.3326) * 20000;
+          y = (position.lat - 45.4371) * 20000;
         } else if ('x' in position && 'z' in position) {
           x = position.x;
           y = position.z;
@@ -323,7 +325,16 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         ctx.lineWidth = 1;
         
         // Draw isometric box
-        drawIsometricBox(ctx, isoPos.x, isoPos.y, size.width * scale, size.height * scale, size.depth * scale, color, building.rotation || 0);
+        drawIsometricBox(
+          ctx, 
+          isoPos.x, 
+          isoPos.y, 
+          size.width * scale * 0.6, // Reduced by 40%
+          size.height * scale * 0.6, // Reduced by 40%
+          size.depth * scale * 0.6, // Reduced by 40%
+          color, 
+          building.rotation || 0
+        );
       });
     }
     
@@ -336,8 +347,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             if (!point.edge) return;
             
             // Normalize coordinates
-            const x = (point.edge.lng - 12.3326) * 10000;
-            const y = (point.edge.lat - 45.4371) * 10000;
+            const x = (point.edge.lng - 12.3326) * 20000;
+            const y = (point.edge.lat - 45.4371) * 20000;
             
             const isoPos = {
               x: isoX(x, y),
@@ -361,8 +372,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             if (!point.edge) return;
             
             // Normalize coordinates
-            const x = (point.edge.lng - 12.3326) * 10000;
-            const y = (point.edge.lat - 45.4371) * 10000;
+            const x = (point.edge.lng - 12.3326) * 20000;
+            const y = (point.edge.lat - 45.4371) * 20000;
             
             const isoPos = {
               x: isoX(x, y),
