@@ -12,7 +12,16 @@ import { BuildingService } from '@/lib/services/BuildingService';
 import { getWalletAddress } from '@/lib/walletUtils';
 import { eventBus, EventTypes } from '@/lib/eventBus';
 
-// Moved to the top of the file
+// Add global type declaration for the selected building point
+declare global {
+  interface Window {
+    __selectedBuildingPoint?: {
+      pointId: string;
+      polygonId: string;
+      position: any;
+    };
+  }
+}
 
 // Building Card Component
 interface BuildingCardProps {

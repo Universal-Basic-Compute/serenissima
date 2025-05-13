@@ -805,6 +805,33 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             break; // Break after finding the first hovered building
           }
         }
+        
+        // Check if mouse is over any empty building point
+        if (!foundHoveredBuilding) {
+          for (const point of emptyBuildingPoints) {
+            // Convert lat/lng to isometric coordinates
+            const x = (point.lng - 12.3326) * 20000;
+            const y = (point.lat - 45.4371) * 20000;
+            
+            const isoPos = {
+              x: calculateIsoX(x, y, scale, offset, canvas.width),
+              y: calculateIsoY(x, y, scale, offset, canvas.height)
+            };
+            
+            // Check if mouse is over this building point
+            const pointSize = 2.8 * scale;
+            if (
+              mouseX >= isoPos.x - pointSize && 
+              mouseX <= isoPos.x + pointSize && 
+              mouseY >= isoPos.y - pointSize && 
+              mouseY <= isoPos.y + pointSize
+            ) {
+              foundHoveredBuilding = true;
+              canvas.style.cursor = 'pointer';
+              break;
+            }
+          }
+        }
     
         // If no building is hovered, clear the hover state
         if (!foundHoveredBuilding && hoveredBuildingId !== null) {
@@ -953,6 +980,46 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             window.dispatchEvent(new CustomEvent('showBuildingDetailsPanel', {
               detail: { buildingId: building.id }
             }));
+            
+            return;
+          }
+        }
+        
+        // Check if click is on any empty building point
+        for (const point of emptyBuildingPoints) {
+          // Convert lat/lng to isometric coordinates
+          const x = (point.lng - 12.3326) * 20000;
+          const y = (point.lat - 45.4371) * 20000;
+          
+          const isoPos = {
+            x: calculateIsoX(x, y, scale, offset, canvas.width),
+            y: calculateIsoY(x, y, scale, offset, canvas.height)
+          };
+          
+          // Check if click is on this building point
+          const pointSize = 2.8 * scale;
+          if (
+            mouseX >= isoPos.x - pointSize && 
+            mouseX <= isoPos.x + pointSize && 
+            mouseY >= isoPos.y - pointSize && 
+            mouseY <= isoPos.y + pointSize
+          ) {
+            console.log('Building point clicked at position:', point);
+            
+            // Store the selected building point in window for the BuildingMenu to use
+            window.__selectedBuildingPoint = {
+              pointId: `point-${point.lat}-${point.lng}`,
+              polygonId: findPolygonIdForPoint(point),
+              position: point
+            };
+            
+            // Dispatch an event to open the building menu at this position
+            window.dispatchEvent(new CustomEvent('buildingPointClick', {
+              detail: { position: point }
+            }));
+            
+            // Deselect any selected building
+            setSelectedBuildingId(null);
             
             return;
           }
@@ -1987,6 +2054,49 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(typeIndicator, x, y);
+  }
+
+  // Helper function to find which polygon contains this building point
+  function findPolygonIdForPoint(point: {lat: number, lng: number}): string {
+    for (const polygon of polygons) {
+      if (polygon.buildingPoints && Array.isArray(polygon.buildingPoints)) {
+        // Check if this point is in the polygon's buildingPoints
+        const found = polygon.buildingPoints.some((bp: any) => {
+          const threshold = 0.0001; // Small threshold for floating point comparison
+          return Math.abs(bp.lat - point.lat) < threshold && 
+                 Math.abs(bp.lng - point.lng) < threshold;
+        });
+        
+        if (found) {
+          return polygon.id;
+        }
+      }
+    }
+    
+    // If we can't find the exact polygon, try to find which polygon contains this point
+    for (const polygon of polygons) {
+      if (polygon.coordinates && polygon.coordinates.length > 2) {
+        if (isPointInPolygonCoordinates(point, polygon.coordinates)) {
+          return polygon.id;
+        }
+      }
+    }
+    
+    return 'unknown';
+  }
+
+  // Helper function to check if a point is inside polygon coordinates
+  function isPointInPolygonCoordinates(point: {lat: number, lng: number}, coordinates: {lat: number, lng: number}[]): boolean {
+    let inside = false;
+    for (let i = 0, j = coordinates.length - 1; i < coordinates.length; j = i++) {
+      const xi = coordinates[i].lng, yi = coordinates[i].lat;
+      const xj = coordinates[j].lng, yj = coordinates[j].lat;
+      
+      const intersect = ((yi > point.lat) !== (yj > point.lat))
+          && (point.lng < (xj - xi) * (point.lat - yi) / (yj - yi) + xi);
+      if (intersect) inside = !inside;
+    }
+    return inside;
   }
 
   // Helper function to lighten a color
