@@ -3,11 +3,11 @@
  */
 import React, { ErrorInfo, useEffect, useState } from 'react';
 import { Tab } from '@headlessui/react';
-import PlaceableBuilding from './PlaceableBuilding';
 import ErrorBoundary from '../ErrorBoundary/ErrorBoundary';
 import { useBuildingMenu } from '@/hooks/useBuildingMenu';
 import { log } from '@/lib/logUtils';
 import { Building as ImportedBuilding } from '@/lib/models/BuildingModels';
+import PlaceableObjectManager from '@/lib/components/PlaceableObjectManager';
 
 // Define the Building interface to match the imported Building type
 interface Building extends ImportedBuilding {
@@ -333,10 +333,17 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
         
         {/* Placeable Building */}
         {placeableBuilding && (
-          <PlaceableBuilding
-            buildingName={placeableBuilding?.name?.toLowerCase().replace(/\s+/g, '-') || ''}
-            variant={placeableBuilding?.variant}
-            onPlace={handlePlacementComplete}
+          <PlaceableObjectManager
+            active={true}
+            type="building"
+            objectData={{
+              name: placeableBuilding?.name?.toLowerCase().replace(/\s+/g, '-') || '',
+              variant: placeableBuilding?.variant
+            }}
+            constraints={{
+              requireLandOwnership: true
+            }}
+            onComplete={handlePlacementComplete}
             onCancel={handleCancelPlacement}
           />
         )}

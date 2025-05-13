@@ -23,7 +23,7 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
   onRefreshBuildings
 }) => {
   // State for different creation tools
-  const [placeableObjectType, setPlaceableObjectType] = useState<'building' | 'dock' | 'road' | null>(null);
+  const [placeableObjectType, setPlaceableObjectType] = useState<'building' | 'road' | null>(null);
   const [showBuildingRenderer, setShowBuildingRenderer] = useState(true);
   const [selectedBuildingType, setSelectedBuildingType] = useState<string>('');
   const [selectedVariant, setSelectedVariant] = useState<string>('model');
@@ -122,17 +122,6 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
         <span>Browse Buildings</span>
       </button>
       
-      {/* Dock Creator Button */}
-      <button
-        onClick={() => {
-          setPlaceableObjectType(prev => prev === 'dock' ? null : 'dock');
-        }}
-        className={`px-4 py-2 ${placeableObjectType === 'dock' ? 'bg-blue-700' : 'bg-blue-600'} text-white rounded-md shadow-md hover:bg-blue-700 transition-colors flex items-center space-x-2`}
-        title="Create docks along water edges"
-      >
-        <FaWater className="h-5 w-5" />
-        <span>{placeableObjectType === 'dock' ? 'Cancel Dock' : 'Create Dock'}</span>
-      </button>
       
       {/* Road Creator Button */}
       <button

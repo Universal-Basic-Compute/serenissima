@@ -2,29 +2,12 @@ import React, { useEffect, useState, useRef } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { eventBus, EventTypes } from '../eventBus';
-import { BuildingService, BuildingData } from '../services/BuildingService';
+import { BuildingService } from '../services/BuildingService';
+import { BuildingData, BuildingPosition } from '../models/BuildingTypes';
 import { getWalletAddress } from '../walletUtils';
 import { useSceneReady } from './SceneReadyProvider';
 
-// Define our local interface for building data during placement
-export interface PlaceableBuildingData {
-  id?: string;
-  type: string;
-  variant?: string;
-  land_id: string;
-  position: {
-    x: number;
-    y: number;
-    z: number;
-  } | {
-    lat: number;
-    lng: number;
-  };
-  rotation: number;
-  created_by?: string;
-}
-
-export type PlaceableObjectType = 'building' | 'dock' | 'road';
+export type PlaceableObjectType = 'building' | 'road';
 
 export interface PlaceableObjectManagerProps {
   scene?: THREE.Scene;
@@ -161,7 +144,7 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
     // Create a simple box for building preview as fallback
     const geometry = new THREE.BoxGeometry(2, 2, 2);
     const material = new THREE.MeshBasicMaterial({
-      color: type === 'dock' ? 0x3b82f6 : 0xf59e0b, // Blue for docks, amber for buildings
+      color: 0xf59e0b, // Amber color for buildings
       transparent: true,
       opacity: 0.5,
       wireframe: false
@@ -277,11 +260,11 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
       if (Array.isArray(material)) {
         material.forEach(mat => {
           if (mat instanceof THREE.MeshBasicMaterial) {
-            mat.color.set(valid ? (type === 'dock' ? 0x3b82f6 : 0xf59e0b) : 0xff0000);
+            mat.color.set(valid ? 0xf59e0b : 0xff0000);
           }
         });
       } else if (material instanceof THREE.MeshBasicMaterial) {
-        material.color.set(valid ? (type === 'dock' ? 0x3b82f6 : 0xf59e0b) : 0xff0000);
+        material.color.set(valid ? 0xf59e0b : 0xff0000);
       }
     } else if (previewMeshRef.current.type === "Group" || previewMeshRef.current.type === "Object3D") {
       // For GLTF models, update opacity based on validity
@@ -321,12 +304,8 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
       // Find placement info based on object type
       let placementInfo;
       
-      if (type === 'dock') {
-        placementInfo = findWaterEdgeAtPosition(intersectionPoint);
-      } else {
-        // For buildings and other objects, find land at position
-        placementInfo = findLandAtPosition(intersectionPoint);
-      }
+      // For buildings and other objects, find land at position
+      placementInfo = findLandAtPosition(intersectionPoint);
       
       if (placementInfo.position && placementInfo.landId) {
         // Update preview mesh position
@@ -438,68 +417,36 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
         return;
       }
       
-      // Create object data based on type
-      if (type === 'building') {
-        // Create building data
-        const buildingData: PlaceableBuildingData = {
-          type: objectData.name || 'unknown',
-          land_id: landId,
-          position: {
-            x: position.x,
-            y: position.y,
-            z: position.z
-          },
-          rotation: rotation,
-          variant: objectData.variant || 'model',
-          created_by: walletAddress
-        };
-        
-        // Save building
-        const placedObject = await buildingServiceRef.current.saveBuilding(buildingData as BuildingData);
-        
-        // Emit building placed event
-        eventBus.emit(EventTypes.BUILDING_PLACED, {
-          buildingId: placedObject.id,
-          type: objectData.name,
-          variant: objectData.variant || 'model',
-          data: placedObject
-        });
-        
-        // Call onComplete callback
-        if (onComplete) {
-          onComplete(placedObject);
-        }
-      } else if (type === 'dock') {
-        // Create dock data
-        const dockData = {
-          type: 'dock',
-          land_id: landId,
-          position: {
-            x: position.x,
-            y: position.y,
-            z: position.z
-          },
-          rotation: rotation,
-          created_by: walletAddress
-        };
-        
-        // Save dock (using building API for now)
-        const placedObject = await buildingServiceRef.current.saveBuilding(dockData as BuildingData);
-        
-        // Emit dock placed event
-        eventBus.emit('DOCK_PLACED', {
-          dockId: placedObject.id,
-          type: 'dock',
-          data: placedObject
-        });
-        
-        // Call onComplete callback
-        if (onComplete) {
-          onComplete(placedObject);
-        }
-      } else if (type === 'road') {
-        // Road placement would be handled here
-        console.log('Road placement not yet implemented');
+      // Create building data
+      const buildingData: BuildingData = {
+        id: '', // Will be assigned by the server
+        type: objectData.name || 'unknown',
+        land_id: landId,
+        position: {
+          x: position.x,
+          y: position.y,
+          z: position.z
+        },
+        rotation: rotation,
+        variant: objectData.variant || 'model',
+        created_by: walletAddress,
+        created_at: new Date().toISOString()
+      };
+      
+      // Save building
+      const placedObject = await buildingServiceRef.current.saveBuilding(buildingData);
+      
+      // Emit building placed event
+      eventBus.emit(EventTypes.BUILDING_PLACED, {
+        buildingId: placedObject.id,
+        type: objectData.name,
+        variant: objectData.variant || 'model',
+        data: placedObject
+      });
+      
+      // Call onComplete callback
+      if (onComplete) {
+        onComplete(placedObject);
       }
       
       // End placement
@@ -552,32 +499,6 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
       landId: null,
       isValid: false,
       errorMessage: "Not on valid land"
-    };
-  };
-  
-  // Find water edge at position (for docks)
-  const findWaterEdgeAtPosition = (position: THREE.Vector3) => {
-    if (!polygons) {
-      return {
-        position: null,
-        landId: null,
-        isValid: false,
-        errorMessage: "No land data available"
-      };
-    }
-    
-    // This is a simplified implementation
-    // In a real implementation, this would find the closest water edge
-    
-    // For now, just return the position as valid
-    return {
-      position: position,
-      landId: "water_edge",
-      isValid: true,
-      edge: {
-        start: new THREE.Vector3(position.x - 1, 0.1, position.z),
-        end: new THREE.Vector3(position.x + 1, 0.1, position.z)
-      }
     };
   };
   
@@ -644,9 +565,7 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
           disabled={!isValid}
           className={`px-4 py-2 rounded-md ${
             isValid
-              ? (type === 'dock' 
-                ? 'bg-blue-600 text-white hover:bg-blue-700' 
-                : 'bg-amber-600 text-white hover:bg-amber-700')
+              ? 'bg-amber-600 text-white hover:bg-amber-700'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
           }`}
         >
@@ -664,9 +583,7 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
       <div className="mt-2 text-xs text-gray-500">
         {isValid
           ? `Position valid. Click to place the ${type}.`
-          : type === 'dock'
-            ? 'Move cursor to a water edge to place dock.'
-            : 'Move cursor to a land parcel you own to place building.'
+          : 'Move cursor to a land parcel you own to place building.'
         }
         <br />
         <span className="italic">Press R to rotate, Escape to cancel</span>
