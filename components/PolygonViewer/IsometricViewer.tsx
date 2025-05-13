@@ -2227,80 +2227,92 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         if (transportPath.length > 0) {
           // First draw a subtle shadow/glow effect
           ctx.beginPath();
-          
+            
           // Start at the first point
           const firstPoint = transportPath[0];
           const firstX = (firstPoint.lng - 12.3326) * 20000;
           const firstY = (firstPoint.lat - 45.4371) * 20000;
-          
+            
           ctx.moveTo(isoX(firstX, firstY), isoY(firstX, firstY));
-          
+            
           // Connect all points
           for (let i = 1; i < transportPath.length; i++) {
             const point = transportPath[i];
             const x = (point.lng - 12.3326) * 20000;
             const y = (point.lat - 45.4371) * 20000;
-            
+              
             ctx.lineTo(isoX(x, y), isoY(x, y));
           }
-          
+            
           // Style the path shadow
           ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
           ctx.lineWidth = 6 * scale;
           ctx.stroke();
-          
-          // Now draw the main path with a Venetian blue color
-          ctx.beginPath();
-          ctx.moveTo(isoX(firstX, firstY), isoY(firstX, firstY));
-          
-          // Connect all points again for the main path
-          for (let i = 1; i < transportPath.length; i++) {
-            const point = transportPath[i];
-            const x = (point.lng - 12.3326) * 20000;
-            const y = (point.lat - 45.4371) * 20000;
             
-            ctx.lineTo(isoX(x, y), isoY(x, y));
+          // Now draw segments with different colors based on transport mode
+          for (let i = 0; i < transportPath.length - 1; i++) {
+            const point1 = transportPath[i];
+            const point2 = transportPath[i + 1];
+              
+            const x1 = (point1.lng - 12.3326) * 20000;
+            const y1 = (point1.lat - 45.4371) * 20000;
+            const x2 = (point2.lng - 12.3326) * 20000;
+            const y2 = (point2.lat - 45.4371) * 20000;
+              
+            ctx.beginPath();
+            ctx.moveTo(isoX(x1, y1), isoY(x1, y1));
+            ctx.lineTo(isoX(x2, y2), isoY(x2, y2));
+              
+            // Style based on transport mode
+            if (point1.transportMode === 'gondola') {
+              // Venetian blue for water transport
+              ctx.strokeStyle = 'rgba(0, 102, 153, 0.8)';
+              ctx.lineWidth = 4 * scale;
+              ctx.stroke();
+                
+              // Add a wavy effect for water
+              ctx.beginPath();
+              ctx.moveTo(isoX(x1, y1), isoY(x1, y1));
+                
+              // Add a slight wave effect
+              const waveOffset = Math.sin(i * 0.5) * 0.5 * scale;
+              ctx.lineTo(isoX(x2, y2) + waveOffset, isoY(x2, y2) + waveOffset);
+                
+              // Style the water effect
+              ctx.strokeStyle = 'rgba(135, 206, 235, 0.6)'; // Light blue
+              ctx.lineWidth = 2 * scale;
+              ctx.stroke();
+            } else {
+              // Terracotta for walking paths
+              ctx.strokeStyle = 'rgba(204, 85, 0, 0.8)';
+              ctx.lineWidth = 4 * scale;
+              ctx.stroke();
+                
+              // Add a subtle texture for walking paths
+              ctx.beginPath();
+              ctx.setLineDash([2 * scale, 2 * scale]);
+              ctx.moveTo(isoX(x1, y1), isoY(x1, y1));
+              ctx.lineTo(isoX(x2, y2), isoY(x2, y2));
+              ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+              ctx.lineWidth = 1 * scale;
+              ctx.stroke();
+              ctx.setLineDash([]);
+            }
           }
-          
-          // Style the main path - Venetian blue
-          ctx.strokeStyle = 'rgba(0, 102, 153, 0.8)'; // Venetian blue
-          ctx.lineWidth = 4 * scale;
-          ctx.stroke();
-          
-          // Add a subtle water-like effect with a lighter blue line
-          ctx.beginPath();
-          ctx.moveTo(isoX(firstX, firstY), isoY(firstX, firstY));
-          
-          // Connect all points with slight offset for water effect
-          for (let i = 1; i < transportPath.length; i++) {
-            const point = transportPath[i];
-            const x = (point.lng - 12.3326) * 20000;
-            const y = (point.lat - 45.4371) * 20000;
             
-            // Add a slight wave effect
-            const waveOffset = Math.sin(i * 0.5) * 0.5 * scale;
-            
-            ctx.lineTo(isoX(x, y) + waveOffset, isoY(x, y) + waveOffset);
-          }
-          
-          // Style the water effect
-          ctx.strokeStyle = 'rgba(135, 206, 235, 0.6)'; // Light blue
-          ctx.lineWidth = 2 * scale;
-          ctx.stroke();
-          
           // Draw waypoints with improved styling
           for (let i = 1; i < transportPath.length - 1; i++) {
             const point = transportPath[i];
             const x = (point.lng - 12.3326) * 20000;
             const y = (point.lat - 45.4371) * 20000;
-            
+              
             const screenX = isoX(x, y);
             const screenY = isoY(x, y);
-            
+              
             // Determine node size based on type
             let nodeSize = 2.5 * scale;
             let nodeColor = 'rgba(218, 165, 32, 0.7)'; // Default gold
-            
+              
             // Color and size based on node type
             if (point.type === 'bridge') {
               nodeSize = 3 * scale;
@@ -2311,54 +2323,179 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             } else if (point.type === 'centroid') {
               nodeSize = 2 * scale;
               nodeColor = 'rgba(0, 102, 153, 0.7)'; // Venetian blue for centroids
+            } else if (point.type === 'canal') {
+              nodeSize = 3 * scale;
+              nodeColor = 'rgba(0, 150, 200, 0.8)'; // Bright blue for canal points
             }
-            
+              
             // Draw a small circle for each waypoint
             ctx.beginPath();
             ctx.arc(screenX, screenY, nodeSize, 0, Math.PI * 2);
             ctx.fillStyle = nodeColor;
             ctx.fill();
-            
+              
             // Add a subtle white border
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
             ctx.lineWidth = 0.8;
             ctx.stroke();
           }
-          
-          // Add distance indicator if path is calculated
-          // Calculate total distance
+            
+          // Update the legend to include canal points and transport modes
+          if (transportMode && transportPath.length > 0) {
+            const legendX = 20;
+            const legendY = canvas.height - 160; // Increased height for more items
+            const legendWidth = 180;
+            const legendHeight = 140;
+            const legendPadding = 10;
+              
+            // Draw legend background
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+            ctx.fillRect(
+              legendX - legendPadding,
+              legendY - legendPadding,
+              legendWidth + legendPadding * 2,
+              legendHeight + legendPadding * 2
+            );
+              
+            // Draw legend border
+            ctx.strokeStyle = 'rgba(218, 165, 32, 0.8)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(
+              legendX - legendPadding,
+              legendY - legendPadding,
+              legendWidth + legendPadding * 2,
+              legendHeight + legendPadding * 2
+            );
+              
+            // Draw legend title
+            ctx.fillStyle = '#FFFFFF';
+            ctx.textAlign = 'left';
+            ctx.font = '14px "Times New Roman", serif';
+            ctx.fillText('Legenda', legendX, legendY + 15);
+              
+            // Draw legend items
+            ctx.font = '12px "Times New Roman", serif';
+              
+            // Bridge point
+            ctx.beginPath();
+            ctx.arc(legendX + 10, legendY + 40, 3 * scale, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(180, 100, 50, 0.8)';
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillText('Ponte', legendX + 25, legendY + 43);
+              
+            // Building point
+            ctx.beginPath();
+            ctx.arc(legendX + 10, legendY + 60, 3 * scale, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(70, 130, 180, 0.8)';
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillText('Edificio', legendX + 25, legendY + 63);
+              
+            // Centroid point
+            ctx.beginPath();
+            ctx.arc(legendX + 10, legendY + 80, 2 * scale, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(0, 102, 153, 0.7)';
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillText('Piazza', legendX + 25, legendY + 83);
+              
+            // Canal point
+            ctx.beginPath();
+            ctx.arc(legendX + 10, legendY + 100, 3 * scale, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(0, 150, 200, 0.8)';
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillText('Canale', legendX + 25, legendY + 103);
+              
+            // Walking path
+            ctx.beginPath();
+            ctx.moveTo(legendX + 5, legendY + 120);
+            ctx.lineTo(legendX + 15, legendY + 120);
+            ctx.strokeStyle = 'rgba(204, 85, 0, 0.8)';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillText('A piedi', legendX + 25, legendY + 123);
+              
+            // Water path
+            ctx.beginPath();
+            ctx.moveTo(legendX + 5, legendY + 140);
+            ctx.lineTo(legendX + 15, legendY + 140);
+            ctx.strokeStyle = 'rgba(0, 102, 153, 0.8)';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillText('In gondola', legendX + 25, legendY + 143);
+          }
+            
+          // Calculate total distance and time
           let totalDistance = 0;
+          let walkingDistance = 0;
+          let waterDistance = 0;
+            
           for (let i = 1; i < transportPath.length; i++) {
             const point1 = transportPath[i-1];
             const point2 = transportPath[i];
-            
+              
             // Calculate distance between consecutive points
             const distance = calculateDistance(
               { lat: point1.lat, lng: point1.lng },
               { lat: point2.lat, lng: point2.lng }
             );
-            
+              
             totalDistance += distance;
+              
+            // Track distance by mode
+            if (point1.transportMode === 'gondola') {
+              waterDistance += distance;
+            } else {
+              walkingDistance += distance;
+            }
           }
-          
-          // Format distance for display
+            
+          // Calculate estimated time (walking at 5 km/h, gondola at 10 km/h)
+          const walkingTimeHours = walkingDistance / 1000 / 5;
+          const waterTimeHours = waterDistance / 1000 / 10;
+          const totalTimeMinutes = Math.round((walkingTimeHours + waterTimeHours) * 60);
+            
+          // Format distances for display
           let distanceText = '';
           if (totalDistance < 1000) {
             distanceText = `${Math.round(totalDistance)} metri`; // meters in Italian
           } else {
             distanceText = `${(totalDistance / 1000).toFixed(2)} km`;
           }
-          
-          // Create a distance indicator box
-          const distanceLabel = `Distanza: ${distanceText}`;
-          const labelWidth = ctx.measureText(distanceLabel).width;
-          const labelHeight = 20;
+            
+          // Create a distance and time indicator box
+          const infoLabel = `Distanza: ${distanceText} | Tempo: ${totalTimeMinutes} min`;
+          const walkingLabel = `A piedi: ${Math.round(walkingDistance)} m`;
+          const gondolaLabel = `In gondola: ${Math.round(waterDistance)} m`;
+            
+          const labelWidth = Math.max(
+            ctx.measureText(infoLabel).width,
+            ctx.measureText(walkingLabel).width,
+            ctx.measureText(gondolaLabel).width
+          );
+          const labelHeight = 60; // Height for three lines of text
           const labelPadding = 10;
-          
+            
           // Position in bottom right
           const labelX = canvas.width - labelWidth - labelPadding * 3;
           const labelY = canvas.height - labelHeight - labelPadding * 3;
-          
+            
           // Draw background
           ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
           ctx.fillRect(
@@ -2367,7 +2504,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             labelWidth + labelPadding * 2,
             labelHeight + labelPadding * 2
           );
-          
+            
           // Draw border with Venetian gold
           ctx.strokeStyle = 'rgba(218, 165, 32, 0.8)';
           ctx.lineWidth = 1;
@@ -2377,11 +2514,13 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             labelWidth + labelPadding * 2,
             labelHeight + labelPadding * 2
           );
-          
+            
           // Draw text
           ctx.fillStyle = '#FFFFFF';
           ctx.textAlign = 'left';
-          ctx.fillText(distanceLabel, labelX, labelY + labelHeight / 2);
+          ctx.fillText(infoLabel, labelX, labelY + 15);
+          ctx.fillText(walkingLabel, labelX, labelY + 35);
+          ctx.fillText(gondolaLabel, labelX, labelY + 55);
         }
         
         // Draw hover indicator for transport mode - ALWAYS draw this when in transport mode

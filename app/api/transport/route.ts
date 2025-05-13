@@ -52,12 +52,13 @@ interface Polygon {
   bridgePoints: BridgePoint[];
   buildingPoints: BuildingPoint[];
   centroid?: Point;
+  canalPoints?: BridgePoint[];
 }
 
 interface GraphNode {
   id: string;
   position: Point;
-  type: 'building' | 'bridge' | 'centroid';
+  type: 'building' | 'bridge' | 'centroid' | 'canal';
   polygonId: string;
 }
 
@@ -136,7 +137,7 @@ function buildGraph(polygons: Polygon[]): Graph {
     edges: {}
   };
   
-  // Add nodes for each polygon's centroid, building points, and bridge points
+  // Add nodes for each polygon's centroid, building points, bridge points, and canal points
   for (const polygon of polygons) {
     // Add centroid node
     if (polygon.centroid) {
@@ -179,6 +180,22 @@ function buildGraph(polygons: Polygon[]): Graph {
         }
       }
     }
+    
+    // Add canal point nodes
+    if (polygon.canalPoints) {
+      for (const point of polygon.canalPoints) {
+        if (point.edge) {
+          const pointId = point.id || `canal-${point.edge.lat}-${point.edge.lng}`;
+          graph.nodes[pointId] = {
+            id: pointId,
+            position: point.edge,
+            type: 'canal',
+            polygonId: polygon.id
+          };
+          graph.edges[pointId] = [];
+        }
+      }
+    }
   }
   
   // Connect nodes within each polygon
@@ -193,17 +210,25 @@ function buildGraph(polygons: Polygon[]): Graph {
         const node2 = polygonNodes[j];
         const distance = calculateDistance(node1.position, node2.position);
         
+        // Calculate weight based on node types - water travel is twice as fast
+        let weight = distance;
+        
+        // If both nodes are canal points, reduce the weight by half (making water travel twice as fast)
+        if (node1.type === 'canal' && node2.type === 'canal') {
+          weight = distance / 2;
+        }
+        
         // Add bidirectional edges
         graph.edges[node1.id].push({
           from: node1.id,
           to: node2.id,
-          weight: distance
+          weight: weight
         });
         
         graph.edges[node2.id].push({
           from: node2.id,
           to: node1.id,
-          weight: distance
+          weight: weight
         });
       }
     }
@@ -255,6 +280,42 @@ function buildGraph(polygons: Polygon[]): Graph {
           }
         }
       }
+    }
+  }
+  
+  // Connect all canal points across all polygons
+  // This represents the ability to travel by water between any two canal points
+  const allCanalPoints = Object.values(graph.nodes).filter(node => node.type === 'canal');
+  
+  for (let i = 0; i < allCanalPoints.length; i++) {
+    const canalNode1 = allCanalPoints[i];
+    
+    for (let j = i + 1; j < allCanalPoints.length; j++) {
+      const canalNode2 = allCanalPoints[j];
+      
+      // Skip if they're in the same polygon (already connected above)
+      if (canalNode1.polygonId === canalNode2.polygonId) {
+        continue;
+      }
+      
+      // Calculate distance between canal points
+      const distance = calculateDistance(canalNode1.position, canalNode2.position);
+      
+      // Water travel is twice as fast, so divide the weight by 2
+      const weight = distance / 2;
+      
+      // Add bidirectional edges
+      graph.edges[canalNode1.id].push({
+        from: canalNode1.id,
+        to: canalNode2.id,
+        weight: weight
+      });
+      
+      graph.edges[canalNode2.id].push({
+        from: canalNode2.id,
+        to: canalNode1.id,
+        weight: weight
+      });
     }
   }
   
@@ -422,20 +483,57 @@ async function findPath(startPoint: Point, endPoint: Point): Promise<any> {
     }
     
     // Convert node IDs to actual points for the response
-    const pathPoints = result.path.map(nodeId => {
+    const pathPoints = result.path.map((nodeId, index) => {
       const node = graph.nodes[nodeId];
+      
+      // Determine transport mode between this node and the next
+      let transportMode = 'walking';
+      if (index < result.path.length - 1) {
+        const nextNodeId = result.path[index + 1];
+        const nextNode = graph.nodes[nextNodeId];
+        
+        if (node.type === 'canal' && nextNode.type === 'canal') {
+          transportMode = 'gondola';
+        }
+      }
+      
       return {
         ...node.position,
         nodeId,
         type: node.type,
-        polygonId: node.polygonId
+        polygonId: node.polygonId,
+        transportMode
       };
     });
+    
+    // Calculate the actual travel time based on distance and mode
+    let totalWalkingDistance = 0;
+    let totalWaterDistance = 0;
+    
+    for (let i = 0; i < pathPoints.length - 1; i++) {
+      const point1 = pathPoints[i];
+      const point2 = pathPoints[i + 1];
+      const distance = calculateDistance(point1, point2);
+      
+      if (point1.transportMode === 'gondola') {
+        totalWaterDistance += distance;
+      } else {
+        totalWalkingDistance += distance;
+      }
+    }
+    
+    // Assuming walking speed of 5 km/h and gondola speed of 10 km/h
+    const walkingTimeHours = totalWalkingDistance / 1000 / 5;
+    const waterTimeHours = totalWaterDistance / 1000 / 10;
+    const totalTimeMinutes = (walkingTimeHours + waterTimeHours) * 60;
     
     return {
       success: true,
       path: pathPoints,
       distance: result.distance,
+      walkingDistance: totalWalkingDistance,
+      waterDistance: totalWaterDistance,
+      estimatedTimeMinutes: Math.round(totalTimeMinutes),
       startPolygon: startPolygon.id,
       endPolygon: endPolygon.id
     };
