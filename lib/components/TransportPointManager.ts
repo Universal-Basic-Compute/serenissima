@@ -10,6 +10,8 @@ interface TransportPolygon extends Polygon {
     connection?: {
       targetPolygonId?: string;
       targetPoint: { lat: number; lng: number };
+      historicalName?: string;
+      historicalDescription?: string;
     };
   }>;
   dockPoints?: Array<{
@@ -313,10 +315,7 @@ export class TransportPointManager {
           const highlightMaterial = new THREE.MeshBasicMaterial({
             color: userData.type.startsWith('bridge') ? 0xFFAA00 : 0x00CCFF,
             transparent: true,
-            opacity: 1.0,
-            // Add emissive property for better visibility
-            emissive: userData.type.startsWith('bridge') ? 0xFF8800 : 0x0088CC,
-            emissiveIntensity: 0.5
+            opacity: 1.0
           });
 
           // Store the original material if not already stored
