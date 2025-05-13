@@ -522,6 +522,16 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     if (!canvas) return;
     
     const handleMouseMove = (e: MouseEvent) => {
+      // Only process hover detection in land view
+      if (activeView !== 'land') {
+        // Reset hover state and cursor if not in land view
+        if (hoveredPolygonId) {
+          setHoveredPolygonId(null);
+        }
+        canvas.style.cursor = isDragging ? 'grabbing' : 'grab';
+        return;
+      }
+      
       if (isDragging) return; // Skip hover detection while dragging
       
       const rect = canvas.getBoundingClientRect();
@@ -546,6 +556,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     };
     
     const handleClick = (e: MouseEvent) => {
+      // Only process click detection in land view
+      if (activeView !== 'land') return;
+      
       if (isDragging) return; // Skip click handling while dragging
       
       const rect = canvas.getBoundingClientRect();
@@ -579,7 +592,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       canvas.removeEventListener('mousemove', handleMouseMove);
       canvas.removeEventListener('click', handleClick);
     };
-  }, [polygonsToRender, isDragging]);
+  }, [polygonsToRender, isDragging, activeView, hoveredPolygonId]);
 
   // Helper function to check if a point is inside a polygon
   function isPointInPolygon(x: number, y: number, polygon: {x: number, y: number}[]): boolean {
@@ -598,6 +611,13 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   // Draw the isometric view
   useEffect(() => {
     if (loading || !canvasRef.current || polygons.length === 0) return;
+    
+    // Reset hover and selection state when switching away from land view
+    if (activeView !== 'land') {
+      if (hoveredPolygonId) setHoveredPolygonId(null);
+      if (selectedPolygonId) setSelectedPolygonId(null);
+      if (showLandDetailsPanel) setShowLandDetailsPanel(false);
+    }
     
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
