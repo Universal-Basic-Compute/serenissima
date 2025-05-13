@@ -752,12 +752,12 @@ Your response must be a JSON object with:
                 content = response_data.get('content', '')
                 print(f"AI {ai_username} placement response length: {len(content)} characters")
                 print(f"AI {ai_username} placement response preview: {content[:200]}...")
-                        
-                        # Try to extract the JSON decision from the response
-                        try:
-                            # Look for JSON block in the response
-                            import re
-                            json_match = re.search(r'```json\s*(.*?)\s*```', content, re.DOTALL)
+                
+                # Try to extract the JSON decision from the response
+                try:
+                    # Look for JSON block in the response
+                    import re
+                    json_match = re.search(r'```json\s*(.*?)\s*```', content, re.DOTALL)
                             
                             if json_match:
                                 json_str = json_match.group(1)
