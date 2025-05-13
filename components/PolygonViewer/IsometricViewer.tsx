@@ -143,22 +143,23 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   useEffect(() => {
     const handleShowTransportRoutes = () => {
       console.log('Activating transport route planning mode');
-      setTransportMode(true);
-      setTransportStartPoint(null);
-      setTransportEndPoint(null);
-      setTransportPath([]);
       
-      // Add this debug log
-      console.log('Transport mode state set to:', true);
-      
-      // Also switch to transport view if not already there
+      // Force the active view to be 'transport' first
       if (activeView !== 'transport') {
         console.log('Switching to transport view');
-        // Dispatch an event to switch to transport view
         window.dispatchEvent(new CustomEvent('switchToTransportView', {
           detail: { view: 'transport' }
         }));
       }
+      
+      // Set a small timeout to ensure view has changed before activating transport mode
+      setTimeout(() => {
+        setTransportMode(true);
+        setTransportStartPoint(null);
+        setTransportEndPoint(null);
+        setTransportPath([]);
+        console.log('Transport mode state set to:', true);
+      }, 100);
     };
     
     window.addEventListener('showTransportRoutes', handleShowTransportRoutes);
@@ -1421,6 +1422,21 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     return { lat, lng };
   };
   
+  // Helper function to calculate distance between two points
+  const calculateDistance = (point1: {lat: number, lng: number}, point2: {lat: number, lng: number}): number => {
+    const R = 6371000; // Earth radius in meters
+    const lat1 = point1.lat * Math.PI / 180;
+    const lat2 = point2.lat * Math.PI / 180;
+    const deltaLat = (point2.lat - point1.lat) * Math.PI / 180;
+    const deltaLng = (point2.lng - point1.lng) * Math.PI / 180;
+
+    const a = Math.sin(deltaLat/2) * Math.sin(deltaLat/2) +
+            Math.cos(lat1) * Math.cos(lat2) *
+            Math.sin(deltaLng/2) * Math.sin(deltaLng/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  };
+  
   // Function to calculate the transport route
   const calculateTransportRoute = async (start: {lat: number, lng: number}, end: {lat: number, lng: number}) => {
     try {
@@ -2031,20 +2047,45 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           transportMode
         });
         
-        // Draw instructions
-        ctx.font = '16px Arial';
-        ctx.fillStyle = '#FFFFFF';
+        // Draw instructions with Venetian styling
+        ctx.font = '16px "Times New Roman", serif';
         ctx.textAlign = 'center';
-        
-        if (calculatingPath) {
-          ctx.fillText('Calculating route...', canvas.width / 2, 50);
-        } else if (!transportStartPoint) {
-          ctx.fillText('Click to set starting point', canvas.width / 2, 50);
-        } else if (!transportEndPoint) {
-          ctx.fillText('Click to set destination point', canvas.width / 2, 50);
-        } else {
-          ctx.fillText('Route found! Click to set a new starting point', canvas.width / 2, 50);
-        }
+
+        // Create a semi-transparent background for the text
+        const instructionText = calculatingPath 
+          ? 'Calcolando il percorso...' // "Calculating route..." in Italian
+          : !transportStartPoint 
+            ? 'Clicca per impostare il punto di partenza' // "Click to set starting point" in Italian
+            : !transportEndPoint 
+              ? 'Clicca per impostare la destinazione' // "Click to set destination" in Italian
+              : 'Percorso trovato! Clicca per impostare un nuovo punto di partenza'; // "Route found!" in Italian
+
+        const textWidth = ctx.measureText(instructionText).width;
+        const textHeight = 20;
+        const padding = 10;
+
+        // Draw text background
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+        ctx.fillRect(
+          canvas.width / 2 - textWidth / 2 - padding,
+          30 - padding,
+          textWidth + padding * 2,
+          textHeight + padding * 2
+        );
+
+        // Draw text border with Venetian gold
+        ctx.strokeStyle = 'rgba(218, 165, 32, 0.8)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(
+          canvas.width / 2 - textWidth / 2 - padding,
+          30 - padding,
+          textWidth + padding * 2,
+          textHeight + padding * 2
+        );
+
+        // Draw the text
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillText(instructionText, canvas.width / 2, 40);
         
         // Draw start point if set
         if (transportStartPoint) {
@@ -2054,20 +2095,29 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           const startScreenX = isoX(startX, startY);
           const startScreenY = isoY(startX, startY);
           
-          // Draw a green circle for start point
+          // Draw a gold circle for start point with Venetian styling
           ctx.beginPath();
-          ctx.arc(startScreenX, startScreenY, 10 * scale, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(0, 255, 0, 0.7)';
+          ctx.arc(startScreenX, startScreenY, 8 * scale, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(218, 165, 32, 0.8)'; // Venetian gold
           ctx.fill();
+          
+          // Add a white border
           ctx.strokeStyle = '#FFFFFF';
           ctx.lineWidth = 2;
           ctx.stroke();
           
-          // Add "Start" label
-          ctx.font = `${Math.max(10, 12 * scale)}px Arial`;
+          // Add a subtle outer glow
+          ctx.beginPath();
+          ctx.arc(startScreenX, startScreenY, 10 * scale, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(218, 165, 32, 0.4)';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+          
+          // Add "Start" label with Venetian styling
+          ctx.font = `${Math.max(10, 12 * scale)}px 'Times New Roman', serif`;
           ctx.fillStyle = '#FFFFFF';
           ctx.textAlign = 'center';
-          ctx.fillText('Start', startScreenX, startScreenY - 15 * scale);
+          ctx.fillText('Partenza', startScreenX, startScreenY - 15 * scale); // Italian for "Departure"
         }
         
         // Draw end point if set
@@ -2078,25 +2128,34 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           const endScreenX = isoX(endX, endY);
           const endScreenY = isoY(endX, endY);
           
-          // Draw a red circle for end point
+          // Draw a red circle for end point with Venetian styling
           ctx.beginPath();
-          ctx.arc(endScreenX, endScreenY, 10 * scale, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
+          ctx.arc(endScreenX, endScreenY, 8 * scale, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(180, 30, 30, 0.8)'; // Venetian red
           ctx.fill();
+          
+          // Add a white border
           ctx.strokeStyle = '#FFFFFF';
           ctx.lineWidth = 2;
           ctx.stroke();
           
-          // Add "End" label
-          ctx.font = `${Math.max(10, 12 * scale)}px Arial`;
+          // Add a subtle outer glow
+          ctx.beginPath();
+          ctx.arc(endScreenX, endScreenY, 10 * scale, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(180, 30, 30, 0.4)';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+          
+          // Add "End" label with Venetian styling
+          ctx.font = `${Math.max(10, 12 * scale)}px 'Times New Roman', serif`;
           ctx.fillStyle = '#FFFFFF';
           ctx.textAlign = 'center';
-          ctx.fillText('End', endScreenX, endScreenY - 15 * scale);
+          ctx.fillText('Arrivo', endScreenX, endScreenY - 15 * scale); // Italian for "Arrival"
         }
         
         // Draw the calculated path if available
         if (transportPath.length > 0) {
-          // Draw path line
+          // First draw a subtle shadow/glow effect
           ctx.beginPath();
           
           // Start at the first point
@@ -2115,17 +2174,51 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             ctx.lineTo(isoX(x, y), isoY(x, y));
           }
           
-          // Style the path
-          ctx.strokeStyle = '#FFCC00'; // Bright yellow
-          ctx.lineWidth = 4 * scale;
-          ctx.stroke();
-          
-          // Draw a semi-transparent overlay
-          ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+          // Style the path shadow
+          ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
           ctx.lineWidth = 6 * scale;
           ctx.stroke();
           
-          // Draw waypoints
+          // Now draw the main path with a Venetian blue color
+          ctx.beginPath();
+          ctx.moveTo(isoX(firstX, firstY), isoY(firstX, firstY));
+          
+          // Connect all points again for the main path
+          for (let i = 1; i < transportPath.length; i++) {
+            const point = transportPath[i];
+            const x = (point.lng - 12.3326) * 20000;
+            const y = (point.lat - 45.4371) * 20000;
+            
+            ctx.lineTo(isoX(x, y), isoY(x, y));
+          }
+          
+          // Style the main path - Venetian blue
+          ctx.strokeStyle = 'rgba(0, 102, 153, 0.8)'; // Venetian blue
+          ctx.lineWidth = 4 * scale;
+          ctx.stroke();
+          
+          // Add a subtle water-like effect with a lighter blue line
+          ctx.beginPath();
+          ctx.moveTo(isoX(firstX, firstY), isoY(firstX, firstY));
+          
+          // Connect all points with slight offset for water effect
+          for (let i = 1; i < transportPath.length; i++) {
+            const point = transportPath[i];
+            const x = (point.lng - 12.3326) * 20000;
+            const y = (point.lat - 45.4371) * 20000;
+            
+            // Add a slight wave effect
+            const waveOffset = Math.sin(i * 0.5) * 0.5 * scale;
+            
+            ctx.lineTo(isoX(x, y) + waveOffset, isoY(x, y) + waveOffset);
+          }
+          
+          // Style the water effect
+          ctx.strokeStyle = 'rgba(135, 206, 235, 0.6)'; // Light blue
+          ctx.lineWidth = 2 * scale;
+          ctx.stroke();
+          
+          // Draw waypoints with improved styling
           for (let i = 1; i < transportPath.length - 1; i++) {
             const point = transportPath[i];
             const x = (point.lng - 12.3326) * 20000;
@@ -2134,33 +2227,122 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             const screenX = isoX(x, y);
             const screenY = isoY(x, y);
             
-            // Draw a small circle for each waypoint
-            ctx.beginPath();
-            ctx.arc(screenX, screenY, 3 * scale, 0, Math.PI * 2);
+            // Determine node size based on type
+            let nodeSize = 2.5 * scale;
+            let nodeColor = 'rgba(218, 165, 32, 0.7)'; // Default gold
             
-            // Color based on node type
-            let fillColor = '#FFCC00'; // Default
+            // Color and size based on node type
             if (point.type === 'bridge') {
-              fillColor = '#FF6600'; // Orange for bridges
+              nodeSize = 3 * scale;
+              nodeColor = 'rgba(180, 100, 50, 0.8)'; // Brown for bridges
             } else if (point.type === 'building') {
-              fillColor = '#00CCFF'; // Blue for buildings
+              nodeSize = 3 * scale;
+              nodeColor = 'rgba(70, 130, 180, 0.8)'; // Steel blue for buildings
+            } else if (point.type === 'centroid') {
+              nodeSize = 2 * scale;
+              nodeColor = 'rgba(0, 102, 153, 0.7)'; // Venetian blue for centroids
             }
             
-            ctx.fillStyle = fillColor;
+            // Draw a small circle for each waypoint
+            ctx.beginPath();
+            ctx.arc(screenX, screenY, nodeSize, 0, Math.PI * 2);
+            ctx.fillStyle = nodeColor;
             ctx.fill();
+            
+            // Add a subtle white border
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
           }
+          
+          // Add distance indicator if path is calculated
+          // Calculate total distance
+          let totalDistance = 0;
+          for (let i = 1; i < transportPath.length; i++) {
+            const point1 = transportPath[i-1];
+            const point2 = transportPath[i];
+            
+            // Calculate distance between consecutive points
+            const distance = calculateDistance(
+              { lat: point1.lat, lng: point1.lng },
+              { lat: point2.lat, lng: point2.lng }
+            );
+            
+            totalDistance += distance;
+          }
+          
+          // Format distance for display
+          let distanceText = '';
+          if (totalDistance < 1000) {
+            distanceText = `${Math.round(totalDistance)} metri`; // meters in Italian
+          } else {
+            distanceText = `${(totalDistance / 1000).toFixed(2)} km`;
+          }
+          
+          // Create a distance indicator box
+          const distanceLabel = `Distanza: ${distanceText}`;
+          const labelWidth = ctx.measureText(distanceLabel).width;
+          const labelHeight = 20;
+          const labelPadding = 10;
+          
+          // Position in bottom right
+          const labelX = canvas.width - labelWidth - labelPadding * 3;
+          const labelY = canvas.height - labelHeight - labelPadding * 3;
+          
+          // Draw background
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+          ctx.fillRect(
+            labelX - labelPadding,
+            labelY - labelPadding,
+            labelWidth + labelPadding * 2,
+            labelHeight + labelPadding * 2
+          );
+          
+          // Draw border with Venetian gold
+          ctx.strokeStyle = 'rgba(218, 165, 32, 0.8)';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(
+            labelX - labelPadding,
+            labelY - labelPadding,
+            labelWidth + labelPadding * 2,
+            labelHeight + labelPadding * 2
+          );
+          
+          // Draw text
+          ctx.fillStyle = '#FFFFFF';
+          ctx.textAlign = 'left';
+          ctx.fillText(distanceLabel, labelX, labelY + labelHeight / 2);
         }
         
         // Draw hover indicator for transport mode - ALWAYS draw this when in transport mode
-        if (transportMode && !transportEndPoint) {
-          // Draw a circle at mouse position
+        if (activeView === 'transport' && transportMode) {
+          // Draw a circle at mouse position with Venetian styling
           ctx.beginPath();
-          ctx.arc(mousePosition.x, mousePosition.y, 8 * scale, 0, Math.PI * 2);
-          ctx.fillStyle = transportStartPoint ? 'rgba(255, 0, 0, 0.5)' : 'rgba(0, 255, 0, 0.5)';
+          ctx.arc(mousePosition.x, mousePosition.y, 6 * scale, 0, Math.PI * 2);
+          
+          // Use Venetian colors - gold for start point, red for end point
+          const fillColor = transportStartPoint 
+            ? 'rgba(180, 30, 30, 0.6)'  // Red for end point
+            : 'rgba(218, 165, 32, 0.6)'; // Gold for start point
+          
+          ctx.fillStyle = fillColor;
           ctx.fill();
+          
+          // Add a subtle white border
           ctx.strokeStyle = '#FFFFFF';
           ctx.lineWidth = 1;
           ctx.stroke();
+          
+          // Add a pulsing effect to make it more noticeable
+          const pulseSize = 8 * scale * (0.8 + 0.2 * Math.sin(Date.now() / 300));
+          ctx.beginPath();
+          ctx.arc(mousePosition.x, mousePosition.y, pulseSize, 0, Math.PI * 2);
+          ctx.strokeStyle = fillColor;
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+          
+          // Change cursor style to crosshair for better precision
+          canvas.style.cursor = 'crosshair';
         }
       }
     }
