@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { getBackendBaseUrl } from '@/lib/apiUtils';
 import PlayerProfile from '../UI/PlayerProfile';
 
@@ -12,13 +12,16 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
   const [isVisible, setIsVisible] = useState(false);
   const [building, setBuilding] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null); // Add error state
+  const [error, setError] = useState<string | null>(null);
+  const [landData, setLandData] = useState<any>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [landRendered, setLandRendered] = useState<boolean>(false);
   
   // Fetch building details when a building is selected
   useEffect(() => {
     if (selectedBuildingId) {
       setIsLoading(true);
-      setError(null); // Reset error state when fetching new building
+      setError(null);
       
       fetch(`/api/buildings/${selectedBuildingId}`)
         .then(response => {
@@ -34,6 +37,11 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
           console.log('Building data:', data);
           if (data && data.building) {
             setBuilding(data.building);
+            
+            // If we have a land_id, fetch the land data
+            if (data.building.land_id) {
+              fetchLandData(data.building.land_id);
+            }
           } else {
             throw new Error('Invalid building data format');
           }
@@ -41,7 +49,7 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
         .catch(error => {
           console.error('Error fetching building details:', error);
           setError(error.message || 'Failed to load building details');
-          setBuilding(null); // Clear building data on error
+          setBuilding(null);
         })
         .finally(() => {
           setIsLoading(false);
@@ -49,6 +57,142 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
     } else {
       setBuilding(null);
       setError(null);
+    }
+  }, [selectedBuildingId]);
+  
+  // Function to fetch land data
+  const fetchLandData = async (landId: string) => {
+    try {
+      // First try to get land data from window.__polygonData if available
+      if (typeof window !== 'undefined' && window.__polygonData) {
+        const polygon = window.__polygonData.find((p: any) => p.id === landId);
+        if (polygon) {
+          setLandData(polygon);
+          return;
+        }
+      }
+      
+      // Otherwise fetch from API
+      const response = await fetch(`/api/get-polygon/${landId}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch land data: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      if (data && data.polygon) {
+        setLandData(data.polygon);
+      }
+    } catch (error) {
+      console.error('Error fetching land data:', error);
+    }
+  };
+  
+  // Function to render a top-down view of the land
+  const renderLandTopView = (polygon: any, canvas: HTMLCanvasElement): void => {
+    if (!polygon.coordinates || polygon.coordinates.length < 3) return;
+    
+    // Set canvas size
+    canvas.width = 300;
+    canvas.height = 200;
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Extract coordinates
+    const coords = polygon.coordinates;
+    
+    // Find min/max to scale the polygon to fit the canvas
+    let minLat = coords[0]?.lat || 0, maxLat = coords[0]?.lat || 0;
+    let minLng = coords[0]?.lng || 0, maxLng = coords[0]?.lng || 0;
+    
+    coords.forEach((coord: any) => {
+      if (coord) {
+        minLat = Math.min(minLat, coord.lat);
+        maxLat = Math.max(maxLat, coord.lat);
+        minLng = Math.min(minLng, coord.lng);
+        maxLng = Math.max(maxLng, coord.lng);
+      }
+    });
+    
+    // Add padding
+    const padding = 20;
+    const scaleX = (canvas.width - padding * 2) / (maxLng - minLng);
+    const scaleY = (canvas.height - padding * 2) / (maxLat - minLat);
+    
+    // Use the smaller scale to maintain aspect ratio
+    const scale = Math.min(scaleX, scaleY);
+    
+    // Center the polygon
+    const centerX = (canvas.width / 2) - ((minLng + maxLng) / 2) * scale;
+    const centerY = (canvas.height / 2) + ((minLat + maxLat) / 2) * scale;
+    
+    // Draw the polygon
+    ctx.beginPath();
+    coords.forEach((coord: any, index: number) => {
+      const x = (coord.lng * scale) + centerX;
+      const y = centerY - (coord.lat * scale);
+        
+      if (index === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+    });
+    ctx.closePath();
+      
+    // Fill with a sand color
+    ctx.fillStyle = '#f5e9c8';
+    ctx.fill();
+      
+    // Draw border
+    ctx.strokeStyle = '#8B4513';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    
+    // Mark the building position if available
+    if (building && building.position) {
+      try {
+        let position;
+        if (typeof building.position === 'string') {
+          position = JSON.parse(building.position);
+        } else {
+          position = building.position;
+        }
+        
+        if (position && position.lat && position.lng) {
+          const x = (position.lng * scale) + centerX;
+          const y = centerY - (position.lat * scale);
+          
+          // Draw a marker for the building
+          ctx.beginPath();
+          ctx.arc(x, y, 6, 0, Math.PI * 2);
+          ctx.fillStyle = '#FF5500';
+          ctx.fill();
+          ctx.strokeStyle = '#FFFFFF';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+        }
+      } catch (error) {
+        console.error('Error parsing building position:', error);
+      }
+    }
+  };
+  
+  // Render land when data is available
+  useEffect(() => {
+    if (landData && canvasRef.current && !landRendered) {
+      renderLandTopView(landData, canvasRef.current);
+      setLandRendered(true);
+    }
+  }, [landData, landRendered, building]);
+  
+  // Reset landRendered when selectedBuildingId changes
+  useEffect(() => {
+    if (selectedBuildingId) {
+      setLandRendered(false);
     }
   }, [selectedBuildingId]);
   
@@ -60,6 +204,22 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
       setIsVisible(false);
     }
   }, [selectedBuildingId]);
+  
+  // Function to adjust date by subtracting 500 years
+  const adjustDate = (dateString: string): string => {
+    try {
+      const date = new Date(dateString);
+      date.setFullYear(date.getFullYear() - 500);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch (error) {
+      console.error('Error adjusting date:', error);
+      return 'Unknown date';
+    }
+  };
   
   // Early return if not visible or no selected building
   if (!visible || !selectedBuildingId) return null;
@@ -115,12 +275,38 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
               )}
             </div>
             
-            {/* Location */}
+            {/* Location with land visualization */}
             <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
               <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Location</h3>
-              <p className="text-gray-700">Land ID: <span className="font-medium">{building.land_id}</span></p>
+              
+              {landData ? (
+                <div className="flex flex-col items-center">
+                  {/* Land name */}
+                  <p className="font-serif text-lg font-semibold text-amber-800 mb-2">
+                    {landData.historicalName || landData.englishName || 'Land Plot'}
+                  </p>
+                  
+                  {/* Canvas for land visualization */}
+                  <canvas 
+                    ref={canvasRef} 
+                    className="w-full h-[200px] border border-amber-100 rounded-lg mb-2"
+                    style={{ maxWidth: '300px' }}
+                  />
+                  
+                  {/* Land ID in small text */}
+                  <p className="text-xs text-gray-500 mt-1">
+                    Land ID: <span className="font-medium">{building.land_id}</span>
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-gray-700">Land ID: <span className="font-medium">{building.land_id}</span></p>
+                  <p className="text-xs text-gray-500 mt-1 italic">Loading land details...</p>
+                </div>
+              )}
+              
               {building.position && (
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 mt-2">
                   Position: {typeof building.position === 'string' 
                     ? building.position.substring(0, 20) + '...' 
                     : JSON.stringify(building.position).substring(0, 20) + '...'}
@@ -185,17 +371,13 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
               </div>
             )}
             
-            {/* Creation Information */}
+            {/* Creation Information with adjusted date (500 years earlier) */}
             <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
               <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Creation Details</h3>
               <div className="text-sm">
                 <p className="text-gray-700">
                   Created: <span className="font-medium">
-                    {new Date(building.created_at).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}
+                    {adjustDate(building.created_at)}
                   </span>
                 </p>
                 {building.created_by && (
