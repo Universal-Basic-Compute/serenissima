@@ -37,6 +37,33 @@ The AI message response system:
 - Provides opportunities for roleplaying and storytelling
 - Enhances immersion by making AI characters feel more alive and responsive
 
+### Notification Processing
+
+**Implementation**: `backend/ais/processnotifications.py`  
+**Schedule**: Daily at 10:00 PM UTC
+
+AI users process notifications to stay informed about events in the game:
+
+#### Process:
+
+1. The script identifies all users marked as AI in the system
+2. For each AI user, it checks for unread notifications addressed to them
+3. For each AI with unread notifications:
+   - Formats all notifications into a readable message
+   - Sends the notifications to the Kinos Engine API using the build endpoint
+   - Marks all notifications as read after successful processing
+
+4. The system tracks notification statistics and creates an admin notification summarizing the number of notifications processed by each AI
+
+#### Impact:
+
+The AI notification processing system:
+- Keeps AI characters informed about game events
+- Allows AI to update their understanding of the game world
+- Enables more contextually aware responses in future interactions
+- Creates a more coherent AI experience as characters respond to events
+- Simulates AI characters actively participating in the game economy
+
 ### Land Bidding
 
 **Implementation**: `backend/ais/bidonlands.py`  
