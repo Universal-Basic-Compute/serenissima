@@ -181,6 +181,11 @@ export class BuildingRendererManager {
         building.id = `building_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
       }
       
+      console.log(`Rendering building ${building.id} of type ${building.type} at position:`, 
+        building.position instanceof THREE.Vector3 ? 
+        `(${building.position.x}, ${building.position.y}, ${building.position.z})` : 
+        JSON.stringify(building.position));
+      
       // Get the appropriate renderer for this building type
       const renderer = this.rendererFactory.getRenderer(building.type);
       
@@ -188,6 +193,23 @@ export class BuildingRendererManager {
       if (this.buildingMeshes.has(building.id)) {
         // Update existing mesh
         const existingMesh = this.buildingMeshes.get(building.id)!;
+        
+        // Check if the mesh is already in the scene
+        let isInScene = false;
+        this.scene?.traverse((object) => {
+          if (object === existingMesh) {
+            isInScene = true;
+          }
+        });
+        
+        // If the mesh is not in the scene, add it back
+        if (!isInScene && this.scene) {
+          this.scene.add(existingMesh);
+          console.log(`Re-added existing building ${building.id} to scene`);
+        } else {
+          console.log(`Building ${building.id} already exists in scene, updating`);
+        }
+        
         renderer.update(building, existingMesh);
         
         // Track performance

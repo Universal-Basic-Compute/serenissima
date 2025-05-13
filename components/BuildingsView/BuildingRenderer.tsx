@@ -82,32 +82,8 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     // Don't refresh buildings here - let BuildingRendererManager handle it
     setIsLoading(false);
     
-    // Subscribe to building events
-    const buildingPlacedSubscription = eventBus.subscribe(
-      EventTypes.BUILDING_PLACED, 
-      (data) => {
-        log.info('BuildingRenderer: Building placed event received', data);
-        if (data.refresh) {
-          setIsLoading(true);
-          buildingRendererManager.refreshBuildings()
-            .then(() => {
-              setIsLoading(false);
-              // Update building count
-              setBuildingCount(buildingRendererManager.getBuildingMeshes().size);
-            })
-            .catch(error => {
-              log.error('Error refreshing buildings:', error);
-              setIsLoading(false);
-            });
-        } else if (data.data) {
-          buildingRendererManager.renderBuilding(data.data)
-            .then(() => {
-              // Update building count
-              setBuildingCount(buildingRendererManager.getBuildingMeshes().size);
-            });
-        }
-      }
-    );
+    // Don't subscribe to building events here - let BuildingRendererManager handle it
+    const buildingPlacedSubscription = { unsubscribe: () => {} }; // Dummy subscription
     
     const buildingRemovedSubscription = eventBus.subscribe(
       EventTypes.BUILDING_REMOVED,
