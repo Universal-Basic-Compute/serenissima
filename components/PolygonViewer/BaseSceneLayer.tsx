@@ -5,7 +5,7 @@ import SimplePolygonRenderer from './SimplePolygonRenderer';
 import { calculateBounds } from './utils';
 import { eventBus, EventTypes } from '@/lib/eventBus';
 
-// Extend EventTypes if SCENE_BASE_RENDERED is missing
+// Extend EventTypes to include SCENE_BASE_RENDERED
 declare module '@/lib/eventBus' {
   interface EventTypes {
     SCENE_BASE_RENDERED: string;
