@@ -123,17 +123,25 @@ export class SceneLayerManager {
       // Update building visibility based on view mode
       // In buildings view, we might want to highlight them or make them interactive
       const isBuildingsView = viewName === 'buildings';
-      buildingRendererManager.setHighlightMode(isBuildingsView);
-      
-      // Ensure buildings are visible after view change
-      setTimeout(() => {
-        if (buildingRendererManager.getBuildingMeshes().size === 0) {
-          console.log('SceneLayerManager: No buildings found after view change, refreshing...');
-          buildingRendererManager.refreshBuildings();
-        } else {
-          console.log(`SceneLayerManager: Found ${buildingRendererManager.getBuildingMeshes().size} buildings after view change`);
-        }
-      }, 500);
+      try {
+        buildingRendererManager.setHighlightMode(isBuildingsView);
+        
+        // Ensure buildings are visible after view change
+        setTimeout(() => {
+          try {
+            if (buildingRendererManager.getBuildingMeshes().size === 0) {
+              console.warn('SceneLayerManager: No buildings found after view change, refreshing...');
+              buildingRendererManager.refreshBuildings();
+            } else {
+              console.log(`SceneLayerManager: Found ${buildingRendererManager.getBuildingMeshes().size} buildings after view change`);
+            }
+          } catch (error) {
+            console.warn('Error checking building meshes:', error);
+          }
+        }, 500);
+      } catch (error) {
+        console.warn('Error updating building highlight mode:', error);
+      }
     }
     
     // Emit view change event

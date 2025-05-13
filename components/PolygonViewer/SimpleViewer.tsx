@@ -69,7 +69,7 @@ export default function SimpleViewer({ qualityMode = 'high', waterQuality = 'hig
         signal: controller.signal
       }).catch(error => {
         if (error.name === 'AbortError') {
-          console.log('Users fetch request aborted after timeout - this is expected behavior');
+          console.warn('Users fetch request timed out - this is expected behavior');
         } else {
           console.warn('Fetch request failed:', error);
         }
@@ -133,7 +133,7 @@ export default function SimpleViewer({ qualityMode = 'high', waterQuality = 'hig
         return fallbackUsers;
       }
     } catch (error) {
-      console.error('Error loading users data:', error);
+      console.warn('Error loading users data:', error);
       
       // Create a default ConsiglioDeiDieci user as fallback
       const fallbackUsers = {

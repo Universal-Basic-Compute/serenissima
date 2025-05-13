@@ -70,9 +70,9 @@ const useBuildingStore = create<BuildingState & BuildingActions>((set, get) => (
             });
           } catch (error) {
             if (error instanceof Error && error.name === 'AbortError') {
-              console.log(`Timeout fetching buildings for ${category} from Next.js API, falling back to direct API`);
+              console.warn(`Timeout fetching buildings for ${category} from Next.js API, falling back to direct API`);
             } else {
-              console.error(`Error fetching buildings for ${category} from Next.js API:`, error);
+              console.warn(`Error fetching buildings for ${category} from Next.js API:`, error);
             }
             // Continue to fallback
             response = { ok: false };
@@ -80,17 +80,19 @@ const useBuildingStore = create<BuildingState & BuildingActions>((set, get) => (
           
           // If that fails, try the direct backend API
           if (!response.ok) {
-            console.log(`Falling back to direct API for ${category}`);
+            console.warn(`Falling back to direct API for ${category}`);
             try {
               response = await fetch(`${apiBaseUrl}/api/buildings/${category}`, {
                 signal: AbortSignal.timeout(8000) // Increased from 5s to 8s timeout
               });
             } catch (error) {
               if (error instanceof Error && error.name === 'AbortError') {
-                console.log(`Timeout fetching buildings for ${category} from direct API`);
-                throw new Error(`Timeout fetching buildings for ${category}`);
+                console.warn(`Timeout fetching buildings for ${category} from direct API`);
+                // Don't throw, just continue with other categories
+                continue;
               }
-              throw error; // Re-throw other errors
+              console.warn(`Error fetching from direct API: ${error instanceof Error ? error.message : String(error)}`);
+              continue; // Skip to next category instead of throwing
             }
           }
           
@@ -138,14 +140,14 @@ const useBuildingStore = create<BuildingState & BuildingActions>((set, get) => (
                 console.log(`Added mock building for ${category}`);
               }
             } catch (mockError) {
-              console.error(`Error creating mock building for ${category}:`, mockError);
+              console.warn(`Error creating mock building for ${category}:`, mockError);
             }
           }
         } catch (error) {
           if (error instanceof Error && error.name === 'AbortError') {
-            console.log(`Request aborted for ${category} buildings - this is normal during navigation or timeout`);
+            console.warn(`Request aborted for ${category} buildings - this is normal during navigation or timeout`);
           } else {
-            console.error(`Error loading ${category} buildings:`, error);
+            console.warn(`Error loading ${category} buildings:`, error);
           }
         }
       }
@@ -154,12 +156,13 @@ const useBuildingStore = create<BuildingState & BuildingActions>((set, get) => (
       set({ categories: loadedCategories, loading: false });
       return loadedCategories;
     } catch (error) {
-      console.error('Error loading building data:', error);
+      console.warn('Error loading building data:', error);
       set({ 
         error: error instanceof Error ? error.message : 'Unknown error',
         loading: false 
       });
-      throw error;
+      // Return empty array instead of throwing
+      return [];
     }
   },
 

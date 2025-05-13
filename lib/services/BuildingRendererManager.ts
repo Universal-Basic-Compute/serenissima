@@ -421,7 +421,9 @@ export class BuildingRendererManager {
       clearTimeout(timeoutId);
       
       if (!response.ok) {
-        throw new Error(`Failed to fetch buildings: ${response.status}`);
+        console.warn(`Failed to fetch buildings: ${response.status} - continuing with existing buildings`);
+        // Don't throw here, just continue with existing buildings
+        return;
       }
       
       const data = await response.json();
@@ -452,7 +454,7 @@ export class BuildingRendererManager {
           try {
             await this.renderBuilding(building);
           } catch (error) {
-            log.error(`Error rendering building ${building.id}:`, error);
+            log.warn(`Error rendering building ${building.id}:`, error);
           }
         }));
       }
@@ -473,9 +475,9 @@ export class BuildingRendererManager {
     } catch (error) {
       // Handle AbortError separately
       if (error instanceof Error && error.name === 'AbortError') {
-        console.log('Building refresh request aborted - this is normal during navigation or timeout');
+        console.warn('Building refresh request timed out - continuing with existing buildings');
       } else {
-        console.error('Error refreshing buildings:', error);
+        console.warn('Error refreshing buildings:', error);
       }
       
       // If the fetch failed, try to use any existing buildings data
@@ -487,7 +489,7 @@ export class BuildingRendererManager {
             await this.renderBuilding(building);
           }
         } catch (fallbackError) {
-          log.error('Error loading fallback buildings:', fallbackError);
+          console.warn('Error loading fallback buildings:', fallbackError);
         }
       }
     }

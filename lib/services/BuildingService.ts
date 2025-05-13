@@ -287,10 +287,10 @@ export class BuildingService {
       });
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
-        log.info('Buildings fetch request aborted after timeout - this is expected behavior');
+        log.warn('Buildings fetch request timed out - returning empty array');
       } else {
-        log.error('Error fetching buildings:', error);
-        log.error('Stack trace:', error instanceof Error ? error.stack : String(error));
+        log.warn('Error fetching buildings:', error);
+        log.warn('Stack trace:', error instanceof Error ? error.stack : String(error));
       }
       
       // Return empty array instead of throwing to prevent UI errors
