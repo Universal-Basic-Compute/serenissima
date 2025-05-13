@@ -1384,7 +1384,7 @@ export default class SimplePolygonRenderer {
     animate();
   }
 
-  public cleanup(preserveLand: boolean = false) {
+  public cleanup(preserveLand: boolean = true) {
     if (preserveLand) {
       // Only clean up non-land elements
       console.log('Cleaning up non-land elements only (preserving land)');

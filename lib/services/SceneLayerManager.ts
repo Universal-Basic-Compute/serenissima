@@ -85,9 +85,15 @@ export class SceneLayerManager {
   public switchToView(viewName: string): void {
     console.log(`SceneLayerManager: Switching to ${viewName} view`);
     
-    // Hide all view layers
+    // Instead of hiding all view layers, only hide non-persistent layers
     this.viewLayers.forEach((layer, name) => {
-      if (name !== 'baseLayerSubscription' && name !== viewName && layer.setVisible) {
+      // Skip base layers (land, water, buildings) and the current view
+      if (name !== 'baseLayerSubscription' && 
+          name !== viewName && 
+          name !== 'land' && 
+          name !== 'water' && 
+          name !== 'buildings' && 
+          layer.setVisible) {
         layer.setVisible(false);
       }
     });

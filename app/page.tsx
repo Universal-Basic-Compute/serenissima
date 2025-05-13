@@ -73,7 +73,7 @@ export default function SimplePage() {
   const [showInfo, setShowInfo] = useState(false);
   // Define the view type to ensure consistency with our ActiveViewMode type
   type ViewType = 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
-  const [activeView, setActiveView] = useState<ViewType>('land');
+  const [activeView, setActiveView] = useState<ViewType>('buildings');
   const [show3DView, setShow3DView] = useState<boolean>(true);
   const [selectedCitizen, setSelectedCitizen] = useState<any>(null);
   
@@ -116,9 +116,15 @@ export default function SimplePage() {
     }
   }, [activeView, showGuildsPanel]);
   
-  // Since 'land' is the default view, fetch income data on initial load
+  // Handle initial view loading
   useEffect(() => {
-    if (activeView === 'land') {
+    if (activeView === 'buildings') {
+      console.log('Initial load with buildings view, ensuring buildings are visible...');
+      
+      // Dispatch an event to ensure buildings are visible
+      const ensureBuildingsVisibleEvent = new CustomEvent('ensureBuildingsVisible');
+      window.dispatchEvent(ensureBuildingsVisibleEvent);
+    } else if (activeView === 'land') {
       console.log('Initial load with land view, fetching income data...');
       
       // Dispatch an event to trigger income data loading

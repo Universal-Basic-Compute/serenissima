@@ -91,6 +91,9 @@ const BaseSceneLayer: React.FC<BaseSceneLayerProps> = ({
         eventBus.emit(EventTypes.SCENE_BASE_RENDERED, {
           buildingsInitialized: true
         });
+        
+        // Ensure buildings are visible by default
+        window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
       })
       .catch(error => {
         console.error('BaseSceneLayer: Error loading buildings:', error);

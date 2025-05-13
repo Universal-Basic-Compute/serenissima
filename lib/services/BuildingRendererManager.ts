@@ -626,16 +626,9 @@ export class BuildingRendererManager {
     // Unsubscribe from events
     this.unsubscribeFromEvents();
     
-    // Remove all building meshes
-    for (const [id, mesh] of this.buildingMeshes.entries()) {
-      if (this.rendererFactory) {
-        const buildingType = mesh.userData?.type || 'default';
-        const renderer = this.rendererFactory.getRenderer(buildingType);
-        renderer.dispose(mesh);
-      }
-    }
+    // Don't remove building meshes, just mark as not initialized
+    // This allows buildings to persist between view changes
     
-    this.buildingMeshes.clear();
     this.isInitialized = false;
     this.scene = null;
     this.rendererFactory = null;
