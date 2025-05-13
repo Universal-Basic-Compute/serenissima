@@ -39,6 +39,7 @@ export class CitizenDisplayManager {
   private lastUpdateTime: number = 0;
   private updateInterval: number = 30000; // 30 seconds
   private _isRefreshing: boolean = false;
+  private citizensLoaded: boolean = false;
 
   constructor(options: CitizenDisplayOptions) {
     this.scene = options.scene;
@@ -189,50 +190,39 @@ export class CitizenDisplayManager {
    * Subscribe to citizen-related events
    */
   private subscribeToEvents(): void {
-    // Listen for citizens loaded event
-    eventBus.subscribe(EventTypes.CITIZENS_LOADED, (data) => {
-      console.log('Citizens loaded event received:', data);
-      
-      // IMPORTANT: Only refresh if the event wasn't triggered by this instance
-      if (!this._isRefreshing) {
-        console.log('CitizenDisplayManager: Refreshing citizens from external CITIZENS_LOADED event');
-        this.refreshCitizens();
-      } else {
-        console.log('CitizenDisplayManager: Ignoring CITIZENS_LOADED event during our own refresh');
-      }
-    });
-    
     // Listen for citizen hover event
     eventBus.subscribe(EventTypes.CITIZEN_HOVER, (data) => {
       console.log('Citizen hover event received:', data);
-      this.refreshCitizens();
+      // Don't call refreshCitizens here, just handle the hover state
+      this.handleCitizenHover(data.citizenId);
     });
     
     // Listen for citizen added event
     eventBus.subscribe('CITIZEN_ADDED', (data) => {
       console.log('Citizen added event received:', data);
-      this.refreshCitizens();
+      // Only add the new citizen instead of refreshing all
+      this.addCitizen(data.citizen);
     });
     
     // Listen for citizen removed event
     eventBus.subscribe('CITIZEN_REMOVED', (data) => {
       console.log('Citizen removed event received:', data);
-      this.refreshCitizens();
+      // Only remove the specific citizen
+      this.removeCitizen(data.citizenId);
     });
     
     // Listen for loadCitizens custom event
     window.addEventListener('loadCitizens', () => {
       console.log('CitizenDisplayManager: Received loadCitizens event');
       
-      // Only refresh and activate if not already active
-      if (!this.isActive) {
-        console.log('CitizenDisplayManager: Activating and refreshing citizens');
-        this.refreshCitizens();
+      // Only load citizens if we haven't already
+      if (this.citizens.length === 0) {
+        console.log('CitizenDisplayManager: No citizens loaded yet, loading now');
+        this.loadCitizens();
         this.setActive(true);
       } else {
-        console.log('CitizenDisplayManager: Already active, just refreshing data');
-        // Still refresh data but don't toggle active state
-        this.refreshCitizens();
+        console.log('CitizenDisplayManager: Citizens already loaded, just activating');
+        this.setActive(true);
       }
     });
     
@@ -240,19 +230,125 @@ export class CitizenDisplayManager {
     eventBus.subscribe(EventTypes.VIEW_MODE_CHANGED, (data) => {
       if (data.viewMode === 'citizens') {
         console.log('CitizenDisplayManager: Citizens view activated');
-        this.refreshCitizens();
+        // Only load citizens if we haven't already
+        if (this.citizens.length === 0) {
+          this.loadCitizens();
+        }
         this.setActive(true);
       } else if (this.isActive) {
         console.log('CitizenDisplayManager: Deactivating citizens view');
         this.setActive(false);
       }
     });
+    
+    // Listen for CITIZENS_INITIALLY_LOADED event (our custom event that won't cause loops)
+    eventBus.subscribe('CITIZENS_INITIALLY_LOADED', (data) => {
+      console.log('CitizenDisplayManager: Initial citizens load complete:', data);
+      // No need to refresh here, we just loaded the data
+    });
+  }
+  
+  /**
+   * Handle citizen hover event
+   */
+  private handleCitizenHover(citizenId: string): void {
+    // Find the citizen in our data
+    const citizen = this.citizens.find(c => c.id === citizenId || c.CitizenId === citizenId);
+    if (!citizen) return;
+    
+    // Update hover state without refreshing everything
+    // Implementation depends on how hover is visualized
+    console.log(`Handling hover for citizen ${citizenId}`);
+  }
+  
+  /**
+   * Add a citizen to the display
+   */
+  private addCitizen(citizen: any): void {
+    // Add the citizen to our data
+    this.citizens.push(citizen);
+    
+    // Update the citizen groups
+    this.groupCitizensByLocation();
+    
+    // If active, create a marker for this citizen
+    if (this.isActive) {
+      // Find the group this citizen belongs to
+      const position = citizen.position;
+      if (!position) return;
+      
+      // Normalize position to lat/lng format
+      const lat = position.lat !== undefined ? position.lat : position.x;
+      const lng = position.lng !== undefined ? position.lng : position.z;
+      
+      // Create a location key
+      const locationKey = `${parseFloat(lat).toFixed(5)}_${parseFloat(lng).toFixed(5)}`;
+      
+      // Get the group or create it
+      if (!this.citizenGroups.has(locationKey)) {
+        this.citizenGroups.set(locationKey, []);
+      }
+      
+      // Add the citizen to the group
+      this.citizenGroups.get(locationKey)?.push({
+        ...citizen,
+        position: { lat, lng }
+      });
+      
+      // Create or update the marker for this group
+      const existingMarker = this.markers.find(m => m.userData?.locationKey === locationKey);
+      if (existingMarker) {
+        // Update the existing marker
+        this.scene.remove(existingMarker);
+        const updatedMarker = this.createCitizenGroupMarker(locationKey, this.citizenGroups.get(locationKey) || []);
+        this.markers.push(updatedMarker);
+        this.scene.add(updatedMarker);
+      } else {
+        // Create a new marker
+        const marker = this.createCitizenGroupMarker(locationKey, this.citizenGroups.get(locationKey) || []);
+        this.markers.push(marker);
+        this.scene.add(marker);
+      }
+    }
+  }
+  
+  /**
+   * Remove a citizen from the display
+   */
+  private removeCitizen(citizenId: string): void {
+    // Find the citizen in our data
+    const index = this.citizens.findIndex(c => c.id === citizenId || c.CitizenId === citizenId);
+    if (index === -1) return;
+    
+    // Remove the citizen
+    this.citizens.splice(index, 1);
+    
+    // Update the citizen groups
+    this.groupCitizensByLocation();
+    
+    // If active, update the markers
+    if (this.isActive) {
+      this.removeAllMarkers();
+      this.createCitizenMarkers();
+    }
   }
   
   /**
    * Refresh citizens from the API
    */
   public async refreshCitizens(): Promise<void> {
+    // If citizens are already loaded and we're not forcing a refresh, just use the cached data
+    if (this.citizensLoaded && this.citizens.length > 0 && !this._isRefreshing) {
+      console.log('CitizenDisplayManager: Using cached citizens data');
+      
+      // If active, ensure markers are created
+      if (this.isActive && this.markers.length === 0) {
+        this.createCitizenMarkers();
+      }
+      
+      return;
+    }
+    
     console.log('CitizenDisplayManager: Refreshing citizens data');
     
     // Set the flag to indicate we're refreshing
@@ -325,20 +421,20 @@ export class CitizenDisplayManager {
       this.groupCitizensByLocation();
       console.log(`CitizenDisplayManager: Grouped into ${this.citizenGroups.size} location groups`);
       
+      // Set the flag to indicate citizens have been loaded
+      this.citizensLoaded = true;
+      
       // If active, recreate markers
       if (this.isActive) {
         console.log('CitizenDisplayManager: Manager is active, recreating markers');
         this.removeAllMarkers();
         this.createCitizenMarkers();
-        
-        // Force citizens to be visible
-        this.forceVisibleCitizens();
       } else {
         console.log('CitizenDisplayManager: Manager is not active, skipping marker creation');
       }
       
-      // Emit event that citizens were loaded
-      eventBus.emit(EventTypes.CITIZENS_LOADED, { count: this.citizens.length });
+      // Emit event that citizens were loaded - use our custom event to avoid loops
+      eventBus.emit('CITIZENS_INITIALLY_LOADED', { count: this.citizens.length });
     } catch (error) {
       console.error('CitizenDisplayManager: Error loading citizens:', error);
       
@@ -346,12 +442,14 @@ export class CitizenDisplayManager {
       this.addDebugCitizensIfNeeded();
       this.groupCitizensByLocation();
       
+      // Set the flag to indicate citizens have been loaded (even if they're debug citizens)
+      this.citizensLoaded = true;
+      
       // If active, recreate markers with whatever data we have
       if (this.isActive) {
         console.log('CitizenDisplayManager: Recreating markers with fallback data after error');
         this.removeAllMarkers();
         this.createCitizenMarkers();
-        this.forceVisibleCitizens();
       }
     } finally {
       // Clear the refreshing flag when done, regardless of success or failure
@@ -438,19 +536,21 @@ export class CitizenDisplayManager {
     if (active) {
       console.log('CitizenDisplayManager: Creating markers and adding event listeners');
       
-      // Always refresh citizens when activating the view
-      console.log('CitizenDisplayManager: Refreshing citizens on activation');
-      this.refreshCitizens();
+      // Only load citizens if we haven't already
+      if (!this.citizensLoaded || this.citizens.length === 0) {
+        console.log('CitizenDisplayManager: No citizens loaded yet, loading now');
+        this.loadCitizens().then(() => {
+          // Create markers after citizens are loaded
+          this.createCitizenMarkers();
+        });
+      } else {
+        // Create markers immediately if citizens are already loaded
+        this.createCitizenMarkers();
+      }
       
-      // Create markers and add event listeners
-      this.createCitizenMarkers();
+      // Add event listeners
       window.addEventListener('mousemove', this.mouseMoveHandler);
       window.addEventListener('click', this.mouseClickHandler);
-      
-      // Force citizens to be visible
-      setTimeout(() => {
-        this.forceVisibleCitizens();
-      }, 500);
       
       // Debug the state
       this.debugState();
@@ -469,6 +569,12 @@ export class CitizenDisplayManager {
    * Load citizens from the API
    */
   private async loadCitizens(): Promise<void> {
+    // If citizens are already loaded, don't reload
+    if (this.citizensLoaded && this.citizens.length > 0) {
+      console.log('Citizens already loaded, using cached data');
+      return;
+    }
+
     try {
       // Use the correct API URL (Next.js API routes run on the same port as the app)
       const apiUrl = '/api/citizens';
@@ -503,11 +609,25 @@ export class CitizenDisplayManager {
       
       console.log(`Loaded ${this.citizens.length} citizens`);
       
+      // Set the flag to indicate citizens have been loaded
+      this.citizensLoaded = true;
+      
+      // Group citizens by location
+      this.groupCitizensByLocation();
+      
       // Emit event that citizens were loaded
-      eventBus.emit(EventTypes.CITIZENS_LOADED, { count: this.citizens.length });
+      // Use a custom event type to avoid the loop
+      eventBus.emit('CITIZENS_INITIALLY_LOADED', { count: this.citizens.length });
     } catch (error) {
       console.error('Error loading citizens:', error);
       this.citizens = [];
+      
+      // Add debug citizens as fallback
+      this.addDebugCitizensIfNeeded();
+      this.groupCitizensByLocation();
+      
+      // Set the flag to indicate citizens have been loaded (even if they're debug citizens)
+      this.citizensLoaded = true;
     }
   }
 
