@@ -50,7 +50,12 @@ def scan_building_files() -> List[Dict[str, Any]]:
                 try:
                     with open(file_path, 'r', encoding='utf-8') as f:
                         building_data = json.load(f)
-                        
+                    
+                    # Validate that this is actually a building file
+                    if not isinstance(building_data, dict):
+                        log.warning(f"Skipping {file_path}: Not a valid building JSON object")
+                        continue
+                    
                     # Add file path information
                     building_data['_file_path'] = file_path
                     building_data['_relative_path'] = relative_path
@@ -62,8 +67,16 @@ def scan_building_files() -> List[Dict[str, Any]]:
                         building_data['_category_dir'] = path_parts[0]
                         building_data['_subcategory_dir'] = path_parts[1] if len(path_parts) > 2 else None
                     
+                    # Ensure the building has at least a name
+                    if 'name' not in building_data:
+                        # Use the filename as the name
+                        building_data['name'] = os.path.splitext(file)[0].replace('_', ' ').title()
+                        log.warning(f"Building in {file_path} has no name, using filename: {building_data['name']}")
+                    
                     buildings.append(building_data)
                     log.info(f"Loaded building: {building_data.get('name', file)} from {relative_path}")
+                except json.JSONDecodeError as e:
+                    log.error(f"Error parsing JSON in {file_path}: {e}")
                 except Exception as e:
                     log.error(f"Error loading building file {file_path}: {e}")
     
@@ -81,6 +94,12 @@ def create_image_prompt(building: Dict[str, Any]) -> str:
     
     # Create a base prompt
     base_prompt = f"A realistic detailed illustration of a {name}, a {category} building in 15th century Venice."
+    
+    # If we have minimal information, add some generic details based on the name
+    if not description and not completed_prompt:
+        base_prompt += f" This is a historical Venetian {name.lower()} with characteristic Renaissance architecture."
+        base_prompt += " The building features typical Venetian Gothic elements like pointed arches, ornate windows, and decorative facades."
+        base_prompt += " It stands along a canal with gondolas nearby, surrounded by other period-appropriate structures."
     
     # Add subcategory if available
     if subcategory:
@@ -179,8 +198,12 @@ def process_building(building: Dict[str, Any], force_regenerate: bool = False) -
     # Create a safe filename from the building name
     safe_name = name.lower().replace(' ', '_').replace("'", '').replace('"', '')
     
+    # Handle the case where both category and subcategory are unknown
+    if category == 'unknown' and not subcategory:
+        # Use a special directory for uncategorized buildings
+        output_dir = os.path.join(BUILDINGS_IMAGE_DIR, 'uncategorized')
     # Determine the output directory structure
-    if subcategory:
+    elif subcategory:
         output_dir = os.path.join(BUILDINGS_IMAGE_DIR, category, subcategory)
     else:
         output_dir = os.path.join(BUILDINGS_IMAGE_DIR, category)
