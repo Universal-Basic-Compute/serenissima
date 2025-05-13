@@ -23,7 +23,7 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
   onRefreshBuildings
 }) => {
   const [isRoadCreatorActive, setIsRoadCreatorActive] = useState(false); // Kept for state compatibility but not used
-  const [placeableObjectType, setPlaceableObjectType] = useState<'dock' | 'building' | null>(null);
+  const [placeableObjectType, setPlaceableObjectType] = useState<'building' | null>(null);
   const [showBuildingRenderer, setShowBuildingRenderer] = useState(true);
   const [selectedBuildingType, setSelectedBuildingType] = useState<string>('');
   const [showCanalCreator, setShowCanalCreator] = useState(false);
@@ -166,7 +166,6 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
           }}
         />
       )}
-      
       
       
       {/* Always render the BuildingRenderer to show existing buildings */}

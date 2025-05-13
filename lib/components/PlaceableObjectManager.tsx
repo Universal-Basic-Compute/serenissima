@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef } from 'react';
 import * as THREE from 'three';
 import { eventBus, EventTypes } from '../eventBus';
 import { BuildingService } from '../services/BuildingService';
-import { getDockService } from '../services/DockService';
 
 // Import BuildingData interface from BuildingService
 import { BuildingData as ServiceBuildingData } from '../services/BuildingService';
@@ -27,20 +26,18 @@ interface PlaceableObjectManagerProps {
   camera?: THREE.PerspectiveCamera;
   polygons?: any[];
   active: boolean;
-  type: 'building' | 'dock';
+  type: 'building'; // Simplified to only accept 'building'
   objectData: any;
   constraints?: {
     requireLandOwnership?: boolean;
-    allowWaterPlacement?: boolean;
     snapToRoad?: boolean;
-    snapToWater?: boolean;
   };
   onComplete?: (data: any) => void;
   onCancel?: () => void;
 }
 
 /**
- * Component for managing placeable objects (buildings, docks, etc.)
+ * Component for managing placeable objects (buildings)
  */
 const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
   scene,
@@ -67,7 +64,6 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
   
   // Refs for services
   const buildingServiceRef = useRef(BuildingService.getInstance());
-  const dockServiceRef = useRef(getDockService());
   
   // Initialize placement
   useEffect(() => {
@@ -114,7 +110,7 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
     };
   }, [active, scene, camera, type, objectData]);
   
-  // Create preview mesh based on object type
+  // Create preview mesh
   const createPreviewMesh = () => {
     if (!scene) return;
     
@@ -124,77 +120,33 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
       previewMeshRef.current = null;
     }
     
-    let mesh: THREE.Object3D;
+    // Create a simple box for building preview
+    const geometry = new THREE.BoxGeometry(2, 2, 2);
+    const material = new THREE.MeshBasicMaterial({
+      color: 0x00ff00,
+      transparent: true,
+      opacity: 0.5,
+      wireframe: true
+    });
+    const mesh = new THREE.Mesh(geometry, material);
     
-    // Create mesh based on object type
-    if (type === 'building') {
-      // Create a simple box for building preview
-      const geometry = new THREE.BoxGeometry(2, 2, 2);
-      const material = new THREE.MeshBasicMaterial({
-        color: 0x00ff00,
-        transparent: true,
-        opacity: 0.5,
-        wireframe: true
-      });
-      mesh = new THREE.Mesh(geometry, material);
+    // Add a label with the building name
+    const canvas = document.createElement('canvas');
+    canvas.width = 256;
+    canvas.height = 64;
+    const context = canvas.getContext('2d');
+    if (context) {
+      context.fillStyle = 'white';
+      context.font = '24px Arial';
+      context.fillText(objectData.name, 10, 40);
       
-      // Add a label with the building name
-      const canvas = document.createElement('canvas');
-      canvas.width = 256;
-      canvas.height = 64;
-      const context = canvas.getContext('2d');
-      if (context) {
-        context.fillStyle = 'white';
-        context.font = '24px Arial';
-        context.fillText(objectData.name, 10, 40);
-        
-        const texture = new THREE.CanvasTexture(canvas);
-        const labelMaterial = new THREE.SpriteMaterial({ map: texture });
-        const label = new THREE.Sprite(labelMaterial);
-        label.position.set(0, 2, 0);
-        label.scale.set(5, 1.25, 1);
-        
-        mesh.add(label);
-      }
-    } else if (type === 'dock') {
-      // Create a simple platform for dock preview
-      const geometry = new THREE.BoxGeometry(4, 0.5, 8);
-      const material = new THREE.MeshBasicMaterial({
-        color: 0x0088ff,
-        transparent: true,
-        opacity: 0.5,
-        wireframe: true
-      });
-      mesh = new THREE.Mesh(geometry, material);
+      const texture = new THREE.CanvasTexture(canvas);
+      const labelMaterial = new THREE.SpriteMaterial({ map: texture });
+      const label = new THREE.Sprite(labelMaterial);
+      label.position.set(0, 2, 0);
+      label.scale.set(5, 1.25, 1);
       
-      // Add a label
-      const canvas = document.createElement('canvas');
-      canvas.width = 256;
-      canvas.height = 64;
-      const context = canvas.getContext('2d');
-      if (context) {
-        context.fillStyle = 'white';
-        context.font = '24px Arial';
-        context.fillText('Dock', 10, 40);
-        
-        const texture = new THREE.CanvasTexture(canvas);
-        const labelMaterial = new THREE.SpriteMaterial({ map: texture });
-        const label = new THREE.Sprite(labelMaterial);
-        label.position.set(0, 2, 0);
-        label.scale.set(5, 1.25, 1);
-        
-        mesh.add(label);
-      }
-    } else {
-      // Default fallback
-      const geometry = new THREE.SphereGeometry(1, 16, 16);
-      const material = new THREE.MeshBasicMaterial({
-        color: 0xff0000,
-        transparent: true,
-        opacity: 0.5,
-        wireframe: true
-      });
-      mesh = new THREE.Mesh(geometry, material);
+      mesh.add(label);
     }
     
     // Add to scene
@@ -299,34 +251,22 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
     if (!position || !isValid || !landId) return;
     
     try {
-      let placedObject;
+      // Create building data
+      const buildingData: BuildingData = {
+        type: objectData.name,
+        land_id: landId,
+        position: {
+          x: position.x,
+          y: position.y,
+          z: position.z
+        },
+        rotation: rotation,
+        variant: objectData.variant || 'model',
+        created_by: 'current-user' // This will be replaced by the server with the actual user ID
+      };
       
-      // Place object based on type
-      if (type === 'building') {
-        // Create building data
-        const buildingData: BuildingData = {
-          type: objectData.name,
-          land_id: landId,
-          position: {
-            x: position.x,
-            y: position.y,
-            z: position.z
-          },
-          rotation: rotation,
-          variant: objectData.variant || 'model',
-          created_by: 'current-user' // This will be replaced by the server with the actual user ID
-        };
-        
-        // Save building - convert to ServiceBuildingData type
-        placedObject = await buildingServiceRef.current.saveBuilding(buildingData as ServiceBuildingData);
-      } else if (type === 'dock') {
-        // Create dock
-        placedObject = await dockServiceRef.current.createDock(
-          landId,
-          position,
-          rotation
-        );
-      }
+      // Save building - convert to ServiceBuildingData type
+      const placedObject = await buildingServiceRef.current.saveBuilding(buildingData as ServiceBuildingData);
       
       // Call onComplete callback
       if (onComplete && placedObject) {
@@ -366,12 +306,6 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
       if (!isOwnedByPlayer) {
         return false;
       }
-    }
-    
-    // Check type-specific constraints
-    if (type === 'dock') {
-      // Docks should be placed at water edges
-      return checkDockPlacementValidity(position);
     }
     
     return true;
@@ -421,14 +355,6 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
     return true;
   };
   
-  // Check if dock placement is valid
-  const checkDockPlacementValidity = (position: THREE.Vector3): boolean => {
-    // This is a placeholder implementation
-    // In a real application, this would check if the position is at a water edge
-    
-    // For now, just return true
-    return true;
-  };
   
   // Render nothing - this is a non-visual component
   return null;
