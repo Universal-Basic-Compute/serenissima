@@ -1,12 +1,28 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { BuildingService, BuildingData } from '@/lib/services/BuildingService';
+import { BuildingService } from '@/lib/services/BuildingService';
 import { eventBus } from '@/lib/eventBus';
 import { EventTypes } from '@/lib/eventTypes';
 import { getWalletAddress } from '@/lib/walletUtils';
 
 export type PlaceableObjectType = 'building' | 'dock';
+
+// Define the BuildingData interface locally since it's not exported from BuildingService
+export interface BuildingData {
+  id: string;
+  type: string;
+  variant: string;
+  land_id: string;
+  position: {
+    x: number;
+    y: number;
+    z: number;
+  };
+  rotation: number;
+  created_by: string;
+  created_at?: string;
+}
 
 export interface PlaceableObjectProps {
   scene?: THREE.Scene;
