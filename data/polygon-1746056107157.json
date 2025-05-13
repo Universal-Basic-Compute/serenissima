@@ -58,7 +58,7 @@
     "lat": 45.438957929966705,
     "lng": 12.337213025604335
   },
-  "dockPoints": [
+  "canalPoints": [
     {
       "edge": {
         "lat": 45.43881387129818,
@@ -70,7 +70,8 @@
       },
       "historicalName": "Fondamenta dei Mercanti Orientali",
       "englishName": "Foundation of the Eastern Merchants",
-      "historicalDescription": "This dock name reflects the historical importance of Campo San Zuane Grisostomo (St. John Chrysostom) as a commercial area with strong ties to the Eastern Mediterranean trade. During the Renaissance, this area housed the Fondaco dei Tedeschi nearby and was frequented by merchants from Constantinople, the Levant, and other eastern territories. The Byzantine connection is particularly appropriate given that San Giovanni Crisostomo (John Chrysostom) was himself a prominent Byzantine saint and patriarch of Constantinople."
+      "historicalDescription": "This dock name reflects the historical importance of Campo San Zuane Grisostomo (St. John Chrysostom) as a commercial area with strong ties to the Eastern Mediterranean trade. During the Renaissance, this area housed the Fondaco dei Tedeschi nearby and was frequented by merchants from Constantinople, the Levant, and other eastern territories. The Byzantine connection is particularly appropriate given that San Giovanni Crisostomo (John Chrysostom) was himself a prominent Byzantine saint and patriarch of Constantinople.",
+      "id": "dock_45.438814_12.336423"
     }
   ],
   "bridgePoints": [
@@ -97,7 +98,8 @@
             "lng": 12.336434209641283
           }
         }
-      }
+      },
+      "id": "bridge_45.439563_12.336450"
     },
     {
       "edge": {
@@ -122,7 +124,8 @@
             "lng": 12.337016248997514
           }
         }
-      }
+      },
+      "id": "bridge_45.439540_12.337008"
     },
     {
       "edge": {
@@ -147,7 +150,8 @@
             "lng": 12.33714499503023
           }
         }
-      }
+      },
+      "id": "bridge_45.439458_12.337132"
     },
     {
       "edge": {
@@ -172,13 +176,15 @@
             "lng": 12.337929541167085
           }
         }
-      }
+      },
+      "id": "bridge_45.439177_12.337826"
     },
     {
       "edge": {
         "lat": 45.43848263356351,
         "lng": 12.337104761895006
-      }
+      },
+      "id": "bridge_45.438483_12.337105"
     }
   ],
   "buildingPoints": [
@@ -187,35 +193,40 @@
       "lng": 12.336874668830708,
       "streetName": "Calle dei Mercanti Tedeschi",
       "streetNameEnglish": "Street of the German Merchants",
-      "streetDescription": "This street reflects the historical presence of German merchants near Campo San Zuane Grisostomo (St. John Chrysostom Square). The area was close to the Fondaco dei Tedeschi, the trading post and residence for German merchants in Venice during the Renaissance period, which was a crucial hub for commerce between Venice and Northern Europe."
+      "streetDescription": "This street reflects the historical presence of German merchants near Campo San Zuane Grisostomo (St. John Chrysostom Square). The area was close to the Fondaco dei Tedeschi, the trading post and residence for German merchants in Venice during the Renaissance period, which was a crucial hub for commerce between Venice and Northern Europe.",
+      "id": "building_45.438756_12.336875"
     },
     {
       "lat": 45.43878114084863,
       "lng": 12.337300023193869,
       "streetName": "Ruga dei Librai",
       "streetNameEnglish": "Row of Booksellers",
-      "streetDescription": "The area around Campo San Zuane Grisostomo was known for its book trade in the 16th century. This name commemorates the booksellers and printers who had shops in this district, including the renowned Aldine Press founded by Aldus Manutius, which was located nearby and revolutionized book printing in Renaissance Venice."
+      "streetDescription": "The area around Campo San Zuane Grisostomo was known for its book trade in the 16th century. This name commemorates the booksellers and printers who had shops in this district, including the renowned Aldine Press founded by Aldus Manutius, which was located nearby and revolutionized book printing in Renaissance Venice.",
+      "id": "building_45.438781_12.337300"
     },
     {
       "lat": 45.43874640541977,
       "lng": 12.337916168635887,
       "streetName": "Salizada dei Garzoni",
       "streetNameEnglish": "Paved Road of the Apprentices",
-      "streetDescription": "This salizada (one of the first paved streets in Venice) would reference the young apprentices who worked in the various workshops and businesses around Campo San Zuane Grisostomo. The area was home to many artisans and craftsmen who trained young garzoni (apprentices) in various trades during the Renaissance."
+      "streetDescription": "This salizada (one of the first paved streets in Venice) would reference the young apprentices who worked in the various workshops and businesses around Campo San Zuane Grisostomo. The area was home to many artisans and craftsmen who trained young garzoni (apprentices) in various trades during the Renaissance.",
+      "id": "building_45.438746_12.337916"
     },
     {
       "lat": 45.43914824709456,
       "lng": 12.336713491915798,
       "streetName": "Rio Terà dei Bombardieri",
       "streetNameEnglish": "Filled Canal of the Bombardiers",
-      "streetDescription": "This street name indicates a former canal that was filled in (rio terà) and references the bombardieri, members of the artillery guild who had connections to this area. The bombardieri were an important military guild in Renaissance Venice, responsible for cannon operation and defense of the Republic."
+      "streetDescription": "This street name indicates a former canal that was filled in (rio terà) and references the bombardieri, members of the artillery guild who had connections to this area. The bombardieri were an important military guild in Renaissance Venice, responsible for cannon operation and defense of the Republic.",
+      "id": "building_45.439148_12.336713"
     },
     {
       "lat": 45.43920383480786,
       "lng": 12.337463724034262,
       "streetName": "Calle della Chiesa Greca",
       "streetNameEnglish": "Street of the Greek Church",
-      "streetDescription": "This name would reference the nearby Greek Orthodox community that had a presence in this part of Venice. Though the main Greek church (San Giorgio dei Greci) was located elsewhere, smaller Greek prayer houses or chapels might have existed near Campo San Zuane Grisostomo, reflecting Venice's important role as a bridge between Eastern and Western Christianity during the Renaissance."
+      "streetDescription": "This name would reference the nearby Greek Orthodox community that had a presence in this part of Venice. Though the main Greek church (San Giorgio dei Greci) was located elsewhere, smaller Greek prayer houses or chapels might have existed near Campo San Zuane Grisostomo, reflecting Venice's important role as a bridge between Eastern and Western Christianity during the Renaissance.",
+      "id": "building_45.439204_12.337464"
     }
   ],
   "id": "polygon-1746056107157"

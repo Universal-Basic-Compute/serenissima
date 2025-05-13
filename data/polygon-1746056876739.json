@@ -190,7 +190,7 @@
     "lat": 45.437002597109824,
     "lng": 12.331469226085867
   },
-  "dockPoints": [
+  "canalPoints": [
     {
       "edge": {
         "lat": 45.43226266973143,
@@ -202,7 +202,8 @@
       },
       "historicalName": "Fondamenta dei Dai",
       "englishName": "Foundation of the Dice",
-      "historicalDescription": "This dock takes its name from the adjacent Ponte dei Dai (Bridge of Dice) in Cannaregio. The area was historically associated with gambling activities, particularly dice games, which were popular despite periodic attempts by Venetian authorities to regulate them. Merchants and gondoliers would gather here, making it a bustling commercial landing point."
+      "historicalDescription": "This dock takes its name from the adjacent Ponte dei Dai (Bridge of Dice) in Cannaregio. The area was historically associated with gambling activities, particularly dice games, which were popular despite periodic attempts by Venetian authorities to regulate them. Merchants and gondoliers would gather here, making it a bustling commercial landing point.",
+      "id": "dock_45.432263_12.337001"
     },
     {
       "edge": {
@@ -215,7 +216,8 @@
       },
       "historicalName": "Riva dei Giocatori",
       "englishName": "Bank of the Gamblers",
-      "historicalDescription": "Located near Ponte dei Dai, this dock served as a gathering point for professional gamblers and nobles seeking entertainment in the 16th century. The name reflects the gambling culture that flourished in this part of Cannaregio, where wealthy Venetians and visitors would arrive by boat to participate in games of chance in nearby establishments."
+      "historicalDescription": "Located near Ponte dei Dai, this dock served as a gathering point for professional gamblers and nobles seeking entertainment in the 16th century. The name reflects the gambling culture that flourished in this part of Cannaregio, where wealthy Venetians and visitors would arrive by boat to participate in games of chance in nearby establishments.",
+      "id": "dock_45.432920_12.339157"
     },
     {
       "edge": {
@@ -228,7 +230,8 @@
       },
       "historicalName": "Fondamenta della Scommessa",
       "englishName": "Foundation of the Wager",
-      "historicalDescription": "This dock earned its name from the betting activities that took place in the vicinity of Ponte dei Dai. During the Renaissance, it was common for Venetian nobles and merchants to place wagers on various events, from regattas to political outcomes. This fondamenta would have served local residents and visitors coming to engage in both legitimate and illicit betting."
+      "historicalDescription": "This dock earned its name from the betting activities that took place in the vicinity of Ponte dei Dai. During the Renaissance, it was common for Venetian nobles and merchants to place wagers on various events, from regattas to political outcomes. This fondamenta would have served local residents and visitors coming to engage in both legitimate and illicit betting.",
+      "id": "dock_45.433092_12.339765"
     },
     {
       "edge": {
@@ -241,7 +244,8 @@
       },
       "historicalName": "Riva dei Tessitori Cannaregiani",
       "englishName": "Bank of the Cannaregio Weavers",
-      "historicalDescription": "This dock served the textile workers who lived and worked in this section of Cannaregio during the 15th-16th centuries. Textile production was a major industry in Venice, and many skilled weavers established workshops in this area. The dock would have been used for receiving raw materials and shipping finished textiles, providing an important economic function for the local artisan community."
+      "historicalDescription": "This dock served the textile workers who lived and worked in this section of Cannaregio during the 15th-16th centuries. Textile production was a major industry in Venice, and many skilled weavers established workshops in this area. The dock would have been used for receiving raw materials and shipping finished textiles, providing an important economic function for the local artisan community.",
+      "id": "dock_45.433265_12.340372"
     }
   ],
   "bridgePoints": [
@@ -268,7 +272,8 @@
             "lng": 12.334503116820631
           }
         }
-      }
+      },
+      "id": "bridge_45.434559_12.334531"
     },
     {
       "edge": {
@@ -293,7 +298,8 @@
             "lng": 12.334791823465384
           }
         }
-      }
+      },
+      "id": "bridge_45.434224_12.334821"
     },
     {
       "edge": {
@@ -318,7 +324,8 @@
             "lng": 12.335566743663513
           }
         }
-      }
+      },
+      "id": "bridge_45.433080_12.335615"
     },
     {
       "edge": {
@@ -343,7 +350,8 @@
             "lng": 12.335585519126617
           }
         }
-      }
+      },
+      "id": "bridge_45.432820_12.335631"
     },
     {
       "edge": {
@@ -368,7 +376,8 @@
             "lng": 12.34077405594901
           }
         }
-      }
+      },
+      "id": "bridge_45.434362_12.340747"
     },
     {
       "edge": {
@@ -393,7 +402,8 @@
             "lng": 12.34059680663661
           }
         }
-      }
+      },
+      "id": "bridge_45.434835_12.340573"
     },
     {
       "edge": {
@@ -418,7 +428,8 @@
             "lng": 12.340419557324209
           }
         }
-      }
+      },
+      "id": "bridge_45.435308_12.340400"
     },
     {
       "edge": {
@@ -443,7 +454,8 @@
             "lng": 12.338427399784397
           }
         }
-      }
+      },
+      "id": "bridge_45.436452_12.338458"
     },
     {
       "edge": {
@@ -468,7 +480,8 @@
             "lng": 12.33765937244753
           }
         }
-      }
+      },
+      "id": "bridge_45.435631_12.337648"
     },
     {
       "edge": {
@@ -493,7 +506,8 @@
             "lng": 12.337676806806126
           }
         }
-      }
+      },
+      "id": "bridge_45.434416_12.337646"
     },
     {
       "edge": {
@@ -518,7 +532,8 @@
             "lng": 12.334924460688788
           }
         }
-      }
+      },
+      "id": "bridge_45.434649_12.334891"
     }
   ],
   "buildingPoints": [
@@ -527,259 +542,296 @@
       "lng": 12.33637215657257,
       "streetName": "Calle dei Dadi",
       "streetNameEnglish": "Street of the Dice",
-      "streetDescription": "Named after the dice games that were popular in this area of Cannaregio during the Renaissance. The nearby Ponte dei Dai (Bridge of Dice) was a known gathering spot for gamblers."
+      "streetDescription": "Named after the dice games that were popular in this area of Cannaregio during the Renaissance. The nearby Ponte dei Dai (Bridge of Dice) was a known gathering spot for gamblers.",
+      "id": "building_45.432386_12.336372"
     },
     {
       "lat": 45.43299895619959,
       "lng": 12.336457387123952,
       "streetName": "Fondamenta dei Giocatori",
       "streetNameEnglish": "Foundation of the Gamblers",
-      "streetDescription": "This fondamenta (walkway along a canal) was frequented by gamblers who would congregate near Ponte dei Dai for games of chance, particularly popular among merchants and sailors in this area of Cannaregio."
+      "streetDescription": "This fondamenta (walkway along a canal) was frequented by gamblers who would congregate near Ponte dei Dai for games of chance, particularly popular among merchants and sailors in this area of Cannaregio.",
+      "id": "building_45.432999_12.336457"
     },
     {
       "lat": 45.43284688356636,
       "lng": 12.337188360063267,
       "streetName": "Rio Terà della Fortuna",
       "streetNameEnglish": "Filled Canal of Fortune",
-      "streetDescription": "A former canal that was filled in (rio terà) and named after the goddess of fortune. The name references the gambling activities that took place near Ponte dei Dai, where fortunes could be won or lost on a throw of dice."
+      "streetDescription": "A former canal that was filled in (rio terà) and named after the goddess of fortune. The name references the gambling activities that took place near Ponte dei Dai, where fortunes could be won or lost on a throw of dice.",
+      "id": "building_45.432847_12.337188"
     },
     {
       "lat": 45.43297040796682,
       "lng": 12.337784939849598,
       "streetName": "Calle del Sestiere",
       "streetNameEnglish": "Street of the District",
-      "streetDescription": "A street marking an important boundary within Cannaregio, one of Venice's six sestieri (districts). It served as a main thoroughfare connected to the Ponte dei Dai area."
+      "streetDescription": "A street marking an important boundary within Cannaregio, one of Venice's six sestieri (districts). It served as a main thoroughfare connected to the Ponte dei Dai area.",
+      "id": "building_45.432970_12.337785"
     },
     {
       "lat": 45.432899534785975,
       "lng": 12.33841134885974,
       "streetName": "Sottoportego dei Banchieri",
       "streetNameEnglish": "Passageway of the Bankers",
-      "streetDescription": "A covered passageway where money changers and informal bankers would set up to facilitate gambling activities near Ponte dei Dai, exchanging different currencies for local gamblers and visiting merchants."
+      "streetDescription": "A covered passageway where money changers and informal bankers would set up to facilitate gambling activities near Ponte dei Dai, exchanging different currencies for local gamblers and visiting merchants.",
+      "id": "building_45.432900_12.338411"
     },
     {
       "lat": 45.433325206033665,
       "lng": 12.335760747388953,
       "streetName": "Calle dei Contarini",
       "streetNameEnglish": "Street of the Contarini",
-      "streetDescription": "Named after the noble Contarini family who owned properties in this part of Cannaregio. The Contarini were one of Venice's most powerful nobili families, producing eight Doges between the 11th and 17th centuries."
+      "streetDescription": "Named after the noble Contarini family who owned properties in this part of Cannaregio. The Contarini were one of Venice's most powerful nobili families, producing eight Doges between the 11th and 17th centuries.",
+      "id": "building_45.433325_12.335761"
     },
     {
       "lat": 45.43338747585315,
       "lng": 12.336456975700854,
       "streetName": "Fondamenta del Ghetto Vecchio",
       "streetNameEnglish": "Foundation of the Old Ghetto",
-      "streetDescription": "This fondamenta leads toward the Ghetto Vecchio (Old Ghetto), established in 1516 in Cannaregio as the world's first ghetto where Jewish residents were required to live. It connected the Jewish quarter with the gambling area of Ponte dei Dai."
+      "streetDescription": "This fondamenta leads toward the Ghetto Vecchio (Old Ghetto), established in 1516 in Cannaregio as the world's first ghetto where Jewish residents were required to live. It connected the Jewish quarter with the gambling area of Ponte dei Dai.",
+      "id": "building_45.433387_12.336457"
     },
     {
       "lat": 45.43332588602413,
       "lng": 12.337200519990331,
       "streetName": "Calle degli Azzardosi",
       "streetNameEnglish": "Street of the Risk-Takers",
-      "streetDescription": "Named after the risk-takers who frequented the gambling establishments near Ponte dei Dai. These azzardosi (risk-takers) would often stake large sums on games of chance."
+      "streetDescription": "Named after the risk-takers who frequented the gambling establishments near Ponte dei Dai. These azzardosi (risk-takers) would often stake large sums on games of chance.",
+      "id": "building_45.433326_12.337201"
     },
     {
       "lat": 45.43331632437769,
       "lng": 12.337636949902612,
       "streetName": "Ruga dei Mercanti Tedeschi",
       "streetNameEnglish": "Street of the German Merchants",
-      "streetDescription": "A commercial street where German merchants conducted business. Cannaregio hosted many foreign merchants, and this area near Ponte dei Dai saw significant trade activity from German-speaking territories."
+      "streetDescription": "A commercial street where German merchants conducted business. Cannaregio hosted many foreign merchants, and this area near Ponte dei Dai saw significant trade activity from German-speaking territories.",
+      "id": "building_45.433316_12.337637"
     },
     {
       "lat": 45.43333209585151,
       "lng": 12.338250670064962,
       "streetName": "Calle della Scommessa",
       "streetNameEnglish": "Street of the Bet",
-      "streetDescription": "Named for the betting activities that took place in this area of Cannaregio. Near Ponte dei Dai, various forms of gambling including betting on outcomes of events were common, despite periodic attempts by authorities to control such activities."
+      "streetDescription": "Named for the betting activities that took place in this area of Cannaregio. Near Ponte dei Dai, various forms of gambling including betting on outcomes of events were common, despite periodic attempts by authorities to control such activities.",
+      "id": "building_45.433332_12.338251"
     },
     {
       "lat": 45.4333421027435,
       "lng": 12.339057257901523,
       "streetName": "Salizada dei Grisoni",
       "streetNameEnglish": "Paved Street of the Grisoni Family",
-      "streetDescription": "A paved street (salizada) named after the Grisoni, a family of Venetian merchants who lived in Cannaregio. They likely had properties near Ponte dei Dai and contributed to paving this street, which was considered a mark of prestige."
+      "streetDescription": "A paved street (salizada) named after the Grisoni, a family of Venetian merchants who lived in Cannaregio. They likely had properties near Ponte dei Dai and contributed to paving this street, which was considered a mark of prestige.",
+      "id": "building_45.433342_12.339057"
     },
     {
       "lat": 45.433351822894515,
       "lng": 12.339655212394224,
       "streetName": "Campiello della Sorte",
       "streetNameEnglish": "Small Square of Fate",
-      "streetDescription": "A small square where locals would gather to try their luck at games of chance. Its proximity to Ponte dei Dai made it a natural extension of the gambling activities for which the bridge was named."
+      "streetDescription": "A small square where locals would gather to try their luck at games of chance. Its proximity to Ponte dei Dai made it a natural extension of the gambling activities for which the bridge was named.",
+      "id": "building_45.433352_12.339655"
     },
     {
       "lat": 45.433787857446994,
       "lng": 12.335692525829796,
       "streetName": "Calle dei Bisazzieri",
       "streetNameEnglish": "Street of the Bag Makers",
-      "streetDescription": "Named after the craftsmen who made bags and pouches. In Cannaregio near Ponte dei Dai, these artisans would have produced the small pouches used by gamblers to hold their coins and dice."
+      "streetDescription": "Named after the craftsmen who made bags and pouches. In Cannaregio near Ponte dei Dai, these artisans would have produced the small pouches used by gamblers to hold their coins and dice.",
+      "id": "building_45.433788_12.335693"
     },
     {
       "lat": 45.43373597994378,
       "lng": 12.336530030340532,
       "streetName": "Rio Terà del Tabarro",
       "streetNameEnglish": "Filled Canal of the Cloak",
-      "streetDescription": "A former canal that was filled in and named after the tabarro, a traditional Venetian cloak. Gamblers at Ponte dei Dai often wore these cloaks to conceal their identities or their wealth while engaged in games of chance."
+      "streetDescription": "A former canal that was filled in and named after the tabarro, a traditional Venetian cloak. Gamblers at Ponte dei Dai often wore these cloaks to conceal their identities or their wealth while engaged in games of chance.",
+      "id": "building_45.433736_12.336530"
     },
     {
       "lat": 45.43374827369632,
       "lng": 12.337134886942446,
       "streetName": "Calle delle Osterie",
       "streetNameEnglish": "Street of the Taverns",
-      "streetDescription": "Named for the numerous taverns that lined this street near Ponte dei Dai in Cannaregio. These establishments served wine and food to gamblers and provided additional spaces for games of chance."
+      "streetDescription": "Named for the numerous taverns that lined this street near Ponte dei Dai in Cannaregio. These establishments served wine and food to gamblers and provided additional spaces for games of chance.",
+      "id": "building_45.433748_12.337135"
     },
     {
       "lat": 45.4337703737344,
       "lng": 12.33768248195427,
       "streetName": "Sottoportego del Punto",
       "streetNameEnglish": "Passageway of the Point",
-      "streetDescription": "A covered passageway named after 'il punto' (the point), a term used in dice games to refer to the score. Located near Ponte dei Dai, this passage might have contained small shops catering to gamblers."
+      "streetDescription": "A covered passageway named after 'il punto' (the point), a term used in dice games to refer to the score. Located near Ponte dei Dai, this passage might have contained small shops catering to gamblers.",
+      "id": "building_45.433770_12.337682"
     },
     {
       "lat": 45.43389409299611,
       "lng": 12.338261024564801,
       "streetName": "Fondamenta delle Sette",
       "streetNameEnglish": "Foundation of the Seven",
-      "streetDescription": "Named after the lucky number seven in dice games. This fondamenta near Ponte dei Dai would have been lined with buildings where gamblers gathered, hoping to roll the fortuitous seven."
+      "streetDescription": "Named after the lucky number seven in dice games. This fondamenta near Ponte dei Dai would have been lined with buildings where gamblers gathered, hoping to roll the fortuitous seven.",
+      "id": "building_45.433894_12.338261"
     },
     {
       "lat": 45.43382529002097,
       "lng": 12.338926543447885,
       "streetName": "Calle dei Timonieri",
       "streetNameEnglish": "Street of the Helmsmen",
-      "streetDescription": "Named after the helmsmen who navigated Venetian ships. Many sailors, including timonieri, would frequent the gambling areas near Ponte dei Dai during their shore leave in this part of Cannaregio."
+      "streetDescription": "Named after the helmsmen who navigated Venetian ships. Many sailors, including timonieri, would frequent the gambling areas near Ponte dei Dai during their shore leave in this part of Cannaregio.",
+      "id": "building_45.433825_12.338927"
     },
     {
       "lat": 45.43379036565127,
       "lng": 12.339742708722426,
       "streetName": "Ruga dei Cartai",
       "streetNameEnglish": "Street of the Card Makers",
-      "streetDescription": "A commercial street where playing card makers had their workshops. Although Ponte dei Dai was primarily associated with dice, card games were also popular, and artisans in this area of Cannaregio produced playing cards for gamblers."
+      "streetDescription": "A commercial street where playing card makers had their workshops. Although Ponte dei Dai was primarily associated with dice, card games were also popular, and artisans in this area of Cannaregio produced playing cards for gamblers.",
+      "id": "building_45.433790_12.339743"
     },
     {
       "lat": 45.43390233593154,
       "lng": 12.340299038520747,
       "streetName": "Calle dei Proibiti",
       "streetNameEnglish": "Street of the Forbidden",
-      "streetDescription": "Named for the illicit activities that sometimes took place here. Despite periodic prohibitions against gambling by Venetian authorities, games continued in this area near Ponte dei Dai, sometimes in secret locations along this street."
+      "streetDescription": "Named for the illicit activities that sometimes took place here. Despite periodic prohibitions against gambling by Venetian authorities, games continued in this area near Ponte dei Dai, sometimes in secret locations along this street.",
+      "id": "building_45.433902_12.340299"
     },
     {
       "lat": 45.43420150472642,
       "lng": 12.33510646886132,
       "streetName": "Fondamenta dei Sensali",
       "streetNameEnglish": "Foundation of the Brokers",
-      "streetDescription": "Named after the brokers who facilitated various transactions. In the Ponte dei Dai area of Cannaregio, these sensali might have arranged high-stakes games or acted as intermediaries for wealthy gamblers who preferred to remain anonymous."
+      "streetDescription": "Named after the brokers who facilitated various transactions. In the Ponte dei Dai area of Cannaregio, these sensali might have arranged high-stakes games or acted as intermediaries for wealthy gamblers who preferred to remain anonymous.",
+      "id": "building_45.434202_12.335106"
     },
     {
       "lat": 45.434289106253246,
       "lng": 12.335749904515762,
       "streetName": "Calle del Zecchinetta",
       "streetNameEnglish": "Street of the Zecchinetta Game",
-      "streetDescription": "Named after a popular card game in Renaissance Venice. Near Ponte dei Dai, this street would have contained establishments where the game of zecchinetta was played, a gambling activity that used a special deck of cards."
+      "streetDescription": "Named after a popular card game in Renaissance Venice. Near Ponte dei Dai, this street would have contained establishments where the game of zecchinetta was played, a gambling activity that used a special deck of cards.",
+      "id": "building_45.434289_12.335750"
     },
     {
       "lat": 45.434303706923934,
       "lng": 12.338287886535172,
       "streetName": "Rio Terà dei Trentuno",
       "streetNameEnglish": "Filled Canal of Thirty-One",
-      "streetDescription": "A former canal that was filled in and named after the card game 'trentuno' (thirty-one), which was popular among gamblers in this area of Cannaregio near Ponte dei Dai."
+      "streetDescription": "A former canal that was filled in and named after the card game 'trentuno' (thirty-one), which was popular among gamblers in this area of Cannaregio near Ponte dei Dai.",
+      "id": "building_45.434304_12.338288"
     },
     {
       "lat": 45.43429998033557,
       "lng": 12.339070681814897,
       "streetName": "Calle dei Notturni",
       "streetNameEnglish": "Street of the Night Owls",
-      "streetDescription": "Named for the late-night gamblers who frequented this area. Gambling activities near Ponte dei Dai in Cannaregio would often continue throughout the night, with dedicated players known as 'notturni' pursuing their fortunes until dawn."
+      "streetDescription": "Named for the late-night gamblers who frequented this area. Gambling activities near Ponte dei Dai in Cannaregio would often continue throughout the night, with dedicated players known as 'notturni' pursuing their fortunes until dawn.",
+      "id": "building_45.434300_12.339071"
     },
     {
       "lat": 45.43433625118107,
       "lng": 12.339559159924809,
       "streetName": "Corte dei Barattieri",
       "streetNameEnglish": "Court of the Swindlers",
-      "streetDescription": "A small courtyard named after those who cheated at games of chance. Near Ponte dei Dai, authorities would sometimes apprehend barattieri (swindlers) who used loaded dice or other tricks to defraud fellow gamblers."
+      "streetDescription": "A small courtyard named after those who cheated at games of chance. Near Ponte dei Dai, authorities would sometimes apprehend barattieri (swindlers) who used loaded dice or other tricks to defraud fellow gamblers.",
+      "id": "building_45.434336_12.339559"
     },
     {
       "lat": 45.434261729992144,
       "lng": 12.340307228645557,
       "streetName": "Calle dei Lanzichenecchi",
       "streetNameEnglish": "Street of the Landsknechts",
-      "streetDescription": "Named after the German mercenary soldiers who frequented this area. These Landsknechts were known for their love of gambling when off duty and would often gather near Ponte dei Dai in Cannaregio for games of chance."
+      "streetDescription": "Named after the German mercenary soldiers who frequented this area. These Landsknechts were known for their love of gambling when off duty and would often gather near Ponte dei Dai in Cannaregio for games of chance.",
+      "id": "building_45.434262_12.340307"
     },
     {
       "lat": 45.43479049123919,
       "lng": 12.339029540157567,
       "streetName": "Fondamenta delle Maschere",
       "streetNameEnglish": "Foundation of the Masks",
-      "streetDescription": "Named for the masks worn by gamblers seeking anonymity. In Venice, particularly near gambling hotspots like Ponte dei Dai in Cannaregio, wealthy citizens and nobles would wear masks to conceal their identities while gambling."
+      "streetDescription": "Named for the masks worn by gamblers seeking anonymity. In Venice, particularly near gambling hotspots like Ponte dei Dai in Cannaregio, wealthy citizens and nobles would wear masks to conceal their identities while gambling.",
+      "id": "building_45.434790_12.339030"
     },
     {
       "lat": 45.43470563680112,
       "lng": 12.339527165722982,
       "streetName": "Ruga della Sfida",
       "streetNameEnglish": "Street of the Challenge",
-      "streetDescription": "A commercial street where gamblers would challenge each other to games of chance. Near Ponte dei Dai, this was where formal gambling challenges would be issued, often involving significant stakes."
+      "streetDescription": "A commercial street where gamblers would challenge each other to games of chance. Near Ponte dei Dai, this was where formal gambling challenges would be issued, often involving significant stakes.",
+      "id": "building_45.434706_12.339527"
     },
     {
       "lat": 45.43478382812825,
       "lng": 12.340304821828004,
       "streetName": "Calle del Baccarat",
       "streetNameEnglish": "Street of Baccarat",
-      "streetDescription": "Named after the card game that became popular among Venetian nobility. Though Ponte dei Dai was primarily known for dice games, this nearby street in Cannaregio hosted establishments where the card game of baccarat was played."
+      "streetDescription": "Named after the card game that became popular among Venetian nobility. Though Ponte dei Dai was primarily known for dice games, this nearby street in Cannaregio hosted establishments where the card game of baccarat was played.",
+      "id": "building_45.434784_12.340305"
     },
     {
       "lat": 45.435246343388656,
       "lng": 12.338993637208638,
       "streetName": "Salizada dei Perdenti",
       "streetNameEnglish": "Paved Street of the Losers",
-      "streetDescription": "A paved street with a somewhat humorous name referring to those who lost at gambling. Many who crossed Ponte dei Dai full of hope would leave this way after losing their money at the nearby gaming establishments."
+      "streetDescription": "A paved street with a somewhat humorous name referring to those who lost at gambling. Many who crossed Ponte dei Dai full of hope would leave this way after losing their money at the nearby gaming establishments.",
+      "id": "building_45.435246_12.338994"
     },
     {
       "lat": 45.4351542769555,
       "lng": 12.339599653614748,
       "streetName": "Calle del Mantello",
       "streetNameEnglish": "Street of the Cloak",
-      "streetDescription": "Named after the cloaks used for concealment. Gamblers near Ponte dei Dai in Cannaregio often wore mantelli (cloaks) to hide their activities or to conceal their wealth and social status while engaged in games of chance."
+      "streetDescription": "Named after the cloaks used for concealment. Gamblers near Ponte dei Dai in Cannaregio often wore mantelli (cloaks) to hide their activities or to conceal their wealth and social status while engaged in games of chance.",
+      "id": "building_45.435154_12.339600"
     },
     {
       "lat": 45.43523383169708,
       "lng": 12.340208158417937,
       "streetName": "Rio Terà della Bassetta",
       "streetNameEnglish": "Filled Canal of Bassetta",
-      "streetDescription": "A former canal filled in and named after 'bassetta,' a popular card game in Renaissance Venice. This game was played in establishments near Ponte dei Dai in Cannaregio, attracting both noblemen and commoners."
+      "streetDescription": "A former canal filled in and named after 'bassetta,' a popular card game in Renaissance Venice. This game was played in establishments near Ponte dei Dai in Cannaregio, attracting both noblemen and commoners.",
+      "id": "building_45.435234_12.340208"
     },
     {
       "lat": 45.43567052561604,
       "lng": 12.33839865860219,
       "streetName": "Calle dei Giustiniani",
       "streetNameEnglish": "Street of the Giustiniani",
-      "streetDescription": "Named after the noble Giustiniani family who owned properties in this part of Cannaregio. Members of this nobili family were known to frequent the gambling establishments near Ponte dei Dai."
+      "streetDescription": "Named after the noble Giustiniani family who owned properties in this part of Cannaregio. Members of this nobili family were known to frequent the gambling establishments near Ponte dei Dai.",
+      "id": "building_45.435671_12.338399"
     },
     {
       "lat": 45.435616412367544,
       "lng": 12.338996238608463,
       "streetName": "Fondamenta del Banco Fallito",
       "streetNameEnglish": "Foundation of the Failed Bank",
-      "streetDescription": "Named after a gambling establishment where the house went bankrupt. Near Ponte dei Dai, this fondamenta commemorated a notable event where gamblers were so successful that they broke the bank of a local gaming house."
+      "streetDescription": "Named after a gambling establishment where the house went bankrupt. Near Ponte dei Dai, this fondamenta commemorated a notable event where gamblers were so successful that they broke the bank of a local gaming house.",
+      "id": "building_45.435616_12.338996"
     },
     {
       "lat": 45.435617963408205,
       "lng": 12.339607343809242,
       "streetName": "Calle dei Sbirri",
       "streetNameEnglish": "Street of the Police Officers",
-      "streetDescription": "Named after the law enforcement officers who patrolled this area. Given the gambling activities around Ponte dei Dai in Cannaregio, sbirri would regularly monitor the area to prevent violence and enforce regulations against illegal gambling."
+      "streetDescription": "Named after the law enforcement officers who patrolled this area. Given the gambling activities around Ponte dei Dai in Cannaregio, sbirri would regularly monitor the area to prevent violence and enforce regulations against illegal gambling.",
+      "id": "building_45.435618_12.339607"
     },
     {
       "lat": 45.436109698671906,
       "lng": 12.338361156392805,
       "streetName": "Sottoportego del Moro",
       "streetNameEnglish": "Passageway of the Moor",
-      "streetDescription": "A covered passageway possibly named after a Moorish merchant or resident. Venice had significant trade with North Africa, and some Moorish traders might have frequented the gambling establishments near Ponte dei Dai in Cannaregio."
+      "streetDescription": "A covered passageway possibly named after a Moorish merchant or resident. Venice had significant trade with North Africa, and some Moorish traders might have frequented the gambling establishments near Ponte dei Dai in Cannaregio.",
+      "id": "building_45.436110_12.338361"
     },
     {
       "lat": 45.43601594094616,
       "lng": 12.339080749784106,
       "streetName": "Calle dei Vincitori",
       "streetNameEnglish": "Street of the Winners",
-      "streetDescription": "Named as a counterpoint to the Street of the Losers, this calle celebrated the lucky few who walked away from the gambling areas near Ponte dei Dai as winners, perhaps becoming local legends in the process."
+      "streetDescription": "Named as a counterpoint to the Street of the Losers, this calle celebrated the lucky few who walked away from the gambling areas near Ponte dei Dai as winners, perhaps becoming local legends in the process.",
+      "id": "building_45.436016_12.339081"
     }
   ],
   "id": "polygon-1746056876739"

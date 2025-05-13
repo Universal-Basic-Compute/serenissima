@@ -23,7 +23,7 @@ interface Polygon {
   centroid?: {lat: number, lng: number};
   center?: {lat: number, lng: number}; // Added center property
   bridgePoints?: any[];
-  dockPoints?: any[];
+  canalPoints?: any[];
   buildingPoints?: any[];
   historicalName?: string;
   englishName?: string;
@@ -77,7 +77,7 @@ export default class SimplePolygonRenderer {
   private hoveredPointId: string | null = null;
   private buildingPointMarkers: THREE.Object3D[] = [];
   public bridgePointMarkers: THREE.Object3D[] = [];
-  public dockPointMarkers: THREE.Object3D[] = [];
+  public canalPointMarkers: THREE.Object3D[] = [];
   
   // Component managers
   private coatOfArmsRenderer: CoatOfArmsRenderer;
@@ -948,7 +948,7 @@ export default class SimplePolygonRenderer {
           
           // Find the marker to get its userData
           const marker = [...this.transportPointManager.getBridgePointMarkers(),
-                          ...this.transportPointManager.getDockPointMarkers()].find(
+                          ...this.transportPointManager.getCanalPointMarkers()].find(
             m => m.userData && m.userData.id === id
           );
           
@@ -1154,7 +1154,7 @@ export default class SimplePolygonRenderer {
       
       // If no building point was clicked, check for transport markers
       const transportMarkers = [...this.transportPointManager.getBridgePointMarkers(),
-                               ...this.transportPointManager.getDockPointMarkers()].filter(
+                               ...this.transportPointManager.getCanalPointMarkers()].filter(
         obj => obj instanceof THREE.Mesh
       );
       
@@ -1540,7 +1540,7 @@ export default class SimplePolygonRenderer {
   /**
    * Force creation of bridge and dock points
    */
-  public forceCreateBridgeAndDockPoints() {
+  public forceCreateBridgeAndCanalPoints() {
     console.log('FORCE Creating bridge and dock points for transport view');
     
     // Delegate to the TransportPointManager
@@ -1854,13 +1854,13 @@ export default class SimplePolygonRenderer {
   private saveUpdatedPolygonData(polygon: any) {
     console.log(`Saving updated polygon data for ${polygon.id}:`, {
       bridgePointsCount: polygon.bridgePoints?.length || 0,
-      dockPointsCount: polygon.dockPoints?.length || 0,
+      canalPointsCount: polygon.canalPoints?.length || 0,
       buildingPointsCount: polygon.buildingPoints?.length || 0
     });
     console.log("Full polygon data being sent:", JSON.stringify({
       id: polygon.id,
       bridgePoints: polygon.bridgePoints,
-      dockPoints: polygon.dockPoints,
+      canalPoints: polygon.canalPoints,
       buildingPoints: polygon.buildingPoints
     }, null, 2));
 
@@ -1873,7 +1873,7 @@ export default class SimplePolygonRenderer {
       body: JSON.stringify({
         id: polygon.id,
         bridgePoints: polygon.bridgePoints,
-        dockPoints: polygon.dockPoints,
+        canalPoints: polygon.canalPoints,
         buildingPoints: polygon.buildingPoints
       }),
     })

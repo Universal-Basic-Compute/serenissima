@@ -82,7 +82,7 @@
     "lat": 45.43478563632465,
     "lng": 12.32156883006317
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -107,7 +107,8 @@
             "lng": 12.322872141257001
           }
         }
-      }
+      },
+      "id": "bridge_45.434404_12.322803"
     },
     {
       "edge": {
@@ -132,7 +133,8 @@
             "lng": 12.32051606261156
           }
         }
-      }
+      },
+      "id": "bridge_45.434273_12.320577"
     }
   ],
   "buildingPoints": [
@@ -141,56 +143,64 @@
       "lng": 12.321393594302208,
       "streetName": "Calle dei Schiavoni",
       "streetNameEnglish": "Street of the Slavonians",
-      "streetDescription": "This name references the Slavic traders from Dalmatia who frequented this area near Calle Larga dei Ragusei. 'Schiavoni' was a term used for Slavic people in Venice, particularly those from the eastern Adriatic coast who formed an important merchant community in Dorsoduro during the Renaissance."
+      "streetDescription": "This name references the Slavic traders from Dalmatia who frequented this area near Calle Larga dei Ragusei. 'Schiavoni' was a term used for Slavic people in Venice, particularly those from the eastern Adriatic coast who formed an important merchant community in Dorsoduro during the Renaissance.",
+      "id": "building_45.434152_12.321394"
     },
     {
       "lat": 45.43423095097035,
       "lng": 12.322021480939377,
       "streetName": "Fondamenta della Lana",
       "streetNameEnglish": "Foundation of the Wool",
-      "streetDescription": "This waterside street would reference the wool trade that was significant in Venice. Dorsoduro housed several wool processing workshops in the Renaissance period, and this name would indicate a location where wool merchants or artisans might have operated their businesses or where wool was unloaded from boats."
+      "streetDescription": "This waterside street would reference the wool trade that was significant in Venice. Dorsoduro housed several wool processing workshops in the Renaissance period, and this name would indicate a location where wool merchants or artisans might have operated their businesses or where wool was unloaded from boats.",
+      "id": "building_45.434231_12.322021"
     },
     {
       "lat": 45.434687184041266,
       "lng": 12.321493920819899,
       "streetName": "Rio Terà dei Carmini",
       "streetNameEnglish": "Filled Canal of the Carmelites",
-      "streetDescription": "This name refers to a filled-in canal near the Church of Santa Maria dei Carmini in Dorsoduro. The Carmelite Order had a significant presence in this area, and many streets in the vicinity bear names referencing the religious order and their church, which was an important landmark since the 14th century."
+      "streetDescription": "This name refers to a filled-in canal near the Church of Santa Maria dei Carmini in Dorsoduro. The Carmelite Order had a significant presence in this area, and many streets in the vicinity bear names referencing the religious order and their church, which was an important landmark since the 14th century.",
+      "id": "building_45.434687_12.321494"
     },
     {
       "lat": 45.43469023628161,
       "lng": 12.321904386114724,
       "streetName": "Sottoportego del Console",
       "streetNameEnglish": "Passageway of the Consul",
-      "streetDescription": "This covered passageway would reference the nearby presence of a foreign consul, likely Ragusan (from Dubrovnik), given the proximity to Calle Larga dei Ragusei. Venice hosted many foreign diplomatic representatives during the Renaissance, and the Ragusan Republic maintained important trade relations with Venice."
+      "streetDescription": "This covered passageway would reference the nearby presence of a foreign consul, likely Ragusan (from Dubrovnik), given the proximity to Calle Larga dei Ragusei. Venice hosted many foreign diplomatic representatives during the Renaissance, and the Ragusan Republic maintained important trade relations with Venice.",
+      "id": "building_45.434690_12.321904"
     },
     {
       "lat": 45.43470996199627,
       "lng": 12.322564098698502,
       "streetName": "Calle dei Cortesi",
       "streetNameEnglish": "Street of the Cortesi Family",
-      "streetDescription": "Named after the Cortesi, a merchant family that likely had properties in this area of Dorsoduro during the Renaissance period. Venetian streets were often named after prominent local families who owned palaces or conducted business in the area."
+      "streetDescription": "Named after the Cortesi, a merchant family that likely had properties in this area of Dorsoduro during the Renaissance period. Venetian streets were often named after prominent local families who owned palaces or conducted business in the area.",
+      "id": "building_45.434710_12.322564"
     },
     {
       "lat": 45.43513838837134,
       "lng": 12.32141827912322,
       "streetName": "Salizada dei Mercanti Dalmati",
       "streetNameEnglish": "Paved Street of the Dalmatian Merchants",
-      "streetDescription": "A paved street (salizada) named for the merchants from Dalmatia who would have conducted business in this area near Calle Larga dei Ragusei. Dalmatian traders were important to Venice's commerce with the eastern Adriatic, and this area of Dorsoduro would have seen significant activity from these merchants."
+      "streetDescription": "A paved street (salizada) named for the merchants from Dalmatia who would have conducted business in this area near Calle Larga dei Ragusei. Dalmatian traders were important to Venice's commerce with the eastern Adriatic, and this area of Dorsoduro would have seen significant activity from these merchants.",
+      "id": "building_45.435138_12.321418"
     },
     {
       "lat": 45.43508600346525,
       "lng": 12.322020145866391,
       "streetName": "Campiello della Toletta",
       "streetNameEnglish": "Small Square of the Small Table",
-      "streetDescription": "This small square would be named after a small table or counter (toletta) that might have been used by money changers or merchants in this commercial area of Dorsoduro. The name could also reference a small altar or devotional table that once existed in the square."
+      "streetDescription": "This small square would be named after a small table or counter (toletta) that might have been used by money changers or merchants in this commercial area of Dorsoduro. The name could also reference a small altar or devotional table that once existed in the square.",
+      "id": "building_45.435086_12.322020"
     },
     {
       "lat": 45.435066714893814,
       "lng": 12.32268271069962,
       "streetName": "Ruga degli Argentieri",
       "streetNameEnglish": "Street of the Silversmiths",
-      "streetDescription": "A commercial street (ruga) where silversmiths had their workshops and stores. Craft guilds often clustered in specific areas of Venice, and this name would suggest that silversmiths practiced their trade in this part of Dorsoduro during the Renaissance period."
+      "streetDescription": "A commercial street (ruga) where silversmiths had their workshops and stores. Craft guilds often clustered in specific areas of Venice, and this name would suggest that silversmiths practiced their trade in this part of Dorsoduro during the Renaissance period.",
+      "id": "building_45.435067_12.322683"
     }
   ],
   "id": "polygon-1745879262533"

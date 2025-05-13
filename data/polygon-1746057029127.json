@@ -62,7 +62,7 @@
     "lat": 45.4357260803709,
     "lng": 12.34975735686033
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -87,7 +87,8 @@
             "lng": 12.349368945865583
           }
         }
-      }
+      },
+      "id": "bridge_45.435759_12.349406"
     }
   ],
   "buildingPoints": [
@@ -96,14 +97,16 @@
       "lng": 12.349671898330278,
       "streetName": "Calle del Campanil di San Moisè",
       "streetNameEnglish": "Street of the Bell Tower of Saint Moses",
-      "streetDescription": "This street would be named after the bell tower of the nearby San Moisè church, which was an important landmark in the San Marco district during the Renaissance. The church of San Moisè was one of the most prominent in the area, and streets were commonly named after nearby religious structures. Located near Calle de l'Anzolo, this name reflects the Venetian tradition of orienting streets by significant religious architecture."
+      "streetDescription": "This street would be named after the bell tower of the nearby San Moisè church, which was an important landmark in the San Marco district during the Renaissance. The church of San Moisè was one of the most prominent in the area, and streets were commonly named after nearby religious structures. Located near Calle de l'Anzolo, this name reflects the Venetian tradition of orienting streets by significant religious architecture.",
+      "id": "building_45.435366_12.349672"
     },
     {
       "lat": 45.436591963865055,
       "lng": 12.350287236376307,
       "streetName": "Ruga dei Orafi di San Marco",
       "streetNameEnglish": "Row of the Goldsmiths of Saint Mark",
-      "streetDescription": "This street name reflects the presence of goldsmiths' workshops in this wealthy area near St. Mark's Square. The San Marco district was known for its luxury crafts and high-end commerce, with goldsmiths being particularly prominent in the Renaissance period. 'Ruga' typically indicated a commercial street lined with shops of the same trade. The proximity to Calle de l'Anzolo would make this a logical location for such prestigious artisans who would serve the wealthy families and officials who lived in and frequented the area."
+      "streetDescription": "This street name reflects the presence of goldsmiths' workshops in this wealthy area near St. Mark's Square. The San Marco district was known for its luxury crafts and high-end commerce, with goldsmiths being particularly prominent in the Renaissance period. 'Ruga' typically indicated a commercial street lined with shops of the same trade. The proximity to Calle de l'Anzolo would make this a logical location for such prestigious artisans who would serve the wealthy families and officials who lived in and frequented the area.",
+      "id": "building_45.436592_12.350287"
     }
   ],
   "id": "polygon-1746057029127"

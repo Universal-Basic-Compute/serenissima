@@ -108,7 +108,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [showCitizenDetailsPanel, setShowCitizenDetailsPanel] = useState<boolean>(false);
   
   // State for dock and bridge points
-  const [hoveredDockPoint, setHoveredDockPoint] = useState<{lat: number, lng: number} | null>(null);
+  const [hoveredCanalPoint, setHoveredCanalPoint] = useState<{lat: number, lng: number} | null>(null);
   const [hoveredBridgePoint, setHoveredBridgePoint] = useState<{lat: number, lng: number} | null>(null);
 
   // Load polygons
@@ -854,13 +854,13 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         }
       
         // Check if mouse is over any dock point
-        let foundHoveredDockPoint = false;
+        let foundHoveredCanalPoint = false;
       
         for (const polygon of polygons) {
-          if (foundHoveredDockPoint) break;
+          if (foundHoveredCanalPoint) break;
         
-          if (polygon.dockPoints && Array.isArray(polygon.dockPoints)) {
-            for (const point of polygon.dockPoints) {
+          if (polygon.canalPoints && Array.isArray(polygon.canalPoints)) {
+            for (const point of polygon.canalPoints) {
               if (!point.edge) continue;
             
               // Convert lat/lng to isometric coordinates
@@ -880,8 +880,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
                 mouseY >= isoPos.y - pointSize && 
                 mouseY <= isoPos.y + pointSize
               ) {
-                foundHoveredDockPoint = true;
-                setHoveredDockPoint(point.edge);
+                foundHoveredCanalPoint = true;
+                setHoveredCanalPoint(point.edge);
                 canvas.style.cursor = 'pointer';
                 break;
               }
@@ -889,8 +889,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           }
         }
       
-        if (!foundHoveredDockPoint && hoveredDockPoint !== null) {
-          setHoveredDockPoint(null);
+        if (!foundHoveredCanalPoint && hoveredCanalPoint !== null) {
+          setHoveredCanalPoint(null);
         }
       
         // Check if mouse is over any bridge point
@@ -1129,13 +1129,13 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       
       // Check if click is on any dock point
       if (activeView === 'buildings') {
-        let dockPointClicked = false;
+        let canalPointClicked = false;
         
         for (const polygon of polygons) {
-          if (dockPointClicked) break;
+          if (canalPointClicked) break;
           
-          if (polygon.dockPoints && Array.isArray(polygon.dockPoints)) {
-            for (const point of polygon.dockPoints) {
+          if (polygon.canalPoints && Array.isArray(polygon.canalPoints)) {
+            for (const point of polygon.canalPoints) {
               if (!point.edge) continue;
               
               // Convert lat/lng to isometric coordinates
@@ -1176,14 +1176,14 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
                 // Deselect any selected building
                 setSelectedBuildingId(null);
                 
-                dockPointClicked = true;
+                canalPointClicked = true;
                 break;
               }
             }
           }
         }
         
-        if (dockPointClicked) return;
+        if (canalPointClicked) return;
         
         // Check if click is on any bridge point
         let bridgePointClicked = false;
@@ -1860,8 +1860,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         }
             
         // Draw dock points
-        if (polygon.dockPoints && Array.isArray(polygon.dockPoints)) {
-          polygon.dockPoints.forEach((point: any) => {
+        if (polygon.canalPoints && Array.isArray(polygon.canalPoints)) {
+          polygon.canalPoints.forEach((point: any) => {
             if (!point.edge) return;
                 
             // Normalize coordinates
@@ -1935,8 +1935,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     if (activeView === 'buildings' && polygons.length > 0) {
       // Draw dock points with subtle styling
       polygons.forEach(polygon => {
-        if (polygon.dockPoints && Array.isArray(polygon.dockPoints)) {
-          polygon.dockPoints.forEach((point: any) => {
+        if (polygon.canalPoints && Array.isArray(polygon.canalPoints)) {
+          polygon.canalPoints.forEach((point: any) => {
             if (!point.edge) return;
             
             // Convert lat/lng to isometric coordinates
@@ -1949,9 +1949,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             };
             
             // Check if this point is hovered
-            const isHovered = hoveredDockPoint && 
-              Math.abs(hoveredDockPoint.lat - point.edge.lat) < 0.0001 && 
-              Math.abs(hoveredDockPoint.lng - point.edge.lng) < 0.0001;
+            const isHovered = hoveredCanalPoint && 
+              Math.abs(hoveredCanalPoint.lat - point.edge.lat) < 0.0001 && 
+              Math.abs(hoveredCanalPoint.lng - point.edge.lng) < 0.0001;
             
             // Draw a small, semi-transparent circle for dock points
             ctx.beginPath();

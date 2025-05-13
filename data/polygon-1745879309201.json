@@ -46,7 +46,7 @@
     "lat": 45.438014814308225,
     "lng": 12.32076977516263
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -71,7 +71,8 @@
             "lng": 12.32098909023531
           }
         }
-      }
+      },
+      "id": "bridge_45.437086_12.321025"
     }
   ],
   "buildingPoints": [
@@ -80,35 +81,40 @@
       "lng": 12.320635510734297,
       "streetName": "Calle delle Monache Eremite",
       "streetNameEnglish": "Street of the Hermit Nuns",
-      "streetDescription": "Named after the Augustinian hermit nuns who maintained a convent near the Fondamenta de le Eremite during the 15th-16th centuries. These secluded religious women were known for their strict observance of isolation and prayer."
+      "streetDescription": "Named after the Augustinian hermit nuns who maintained a convent near the Fondamenta de le Eremite during the 15th-16th centuries. These secluded religious women were known for their strict observance of isolation and prayer.",
+      "id": "building_45.437514_12.320636"
     },
     {
       "lat": 45.438019666029355,
       "lng": 12.320565406917131,
       "streetName": "Rio Terà del Chiostro",
       "streetNameEnglish": "Filled Canal of the Cloister",
-      "streetDescription": "This street was originally a small canal that was filled in (rio terà) during the 16th century. It led to the cloister of the hermit nuns' convent, serving as an important access point for supplies and occasional visitors to the secluded religious community."
+      "streetDescription": "This street was originally a small canal that was filled in (rio terà) during the 16th century. It led to the cloister of the hermit nuns' convent, serving as an important access point for supplies and occasional visitors to the secluded religious community.",
+      "id": "building_45.438020_12.320565"
     },
     {
       "lat": 45.438070115514165,
       "lng": 12.321188183958201,
       "streetName": "Sottoportego della Pergamena",
       "streetNameEnglish": "Passageway of the Parchment",
-      "streetDescription": "This covered passageway references the manuscript production that took place in the convent near Fondamenta de le Eremite. The nuns were known to create religious manuscripts and prayer books, using pergamena (parchment) for important religious texts."
+      "streetDescription": "This covered passageway references the manuscript production that took place in the convent near Fondamenta de le Eremite. The nuns were known to create religious manuscripts and prayer books, using pergamena (parchment) for important religious texts.",
+      "id": "building_45.438070_12.321188"
     },
     {
       "lat": 45.43842970544335,
       "lng": 12.32053780113149,
       "streetName": "Calle dei Cordami Benedetti",
       "streetNameEnglish": "Street of the Blessed Ropes",
-      "streetDescription": "Located near the waterfront where rope makers (cordai) would craft special cords that were blessed by the hermit nuns for use on Venetian ships. These blessed ropes were believed to provide protection during sea voyages and were highly valued by Venetian merchants and sailors."
+      "streetDescription": "Located near the waterfront where rope makers (cordai) would craft special cords that were blessed by the hermit nuns for use on Venetian ships. These blessed ropes were believed to provide protection during sea voyages and were highly valued by Venetian merchants and sailors.",
+      "id": "building_45.438430_12.320538"
     },
     {
       "lat": 45.43879720778024,
       "lng": 12.320666908944801,
       "streetName": "Salizada dei Donà",
       "streetNameEnglish": "Paved Street of the Donà Family",
-      "streetDescription": "Named after the noble Donà family who were patrons of the hermit nuns' convent in the 16th century. The Donà were a prominent Venetian nobili family who funded the paving of this street (hence 'salizada', meaning paved) and contributed significantly to the convent's maintenance and expansion."
+      "streetDescription": "Named after the noble Donà family who were patrons of the hermit nuns' convent in the 16th century. The Donà were a prominent Venetian nobili family who funded the paving of this street (hence 'salizada', meaning paved) and contributed significantly to the convent's maintenance and expansion.",
+      "id": "building_45.438797_12.320667"
     }
   ],
   "id": "polygon-1745879309201"

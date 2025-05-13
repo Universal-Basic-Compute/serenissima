@@ -118,7 +118,7 @@
     "lat": 45.432298512928,
     "lng": 12.337212067514681
   },
-  "dockPoints": [
+  "canalPoints": [
     {
       "edge": {
         "lat": 45.435393589159844,
@@ -130,7 +130,8 @@
       },
       "historicalName": "Fondamenta dei Garzotti",
       "englishName": "Foundation of the Apprentices",
-      "historicalDescription": "This dock near San Thomà in San Polo would have served the numerous workshops and artisans' studios in the area. 'Garzotti' refers to the young apprentices who would have trained under master craftsmen in the textile and other trades that flourished in this commercial district during the Renaissance. The dock would have been a landing point for materials and goods used in the various workshops along Calle de San Thomà."
+      "historicalDescription": "This dock near San Thomà in San Polo would have served the numerous workshops and artisans' studios in the area. 'Garzotti' refers to the young apprentices who would have trained under master craftsmen in the textile and other trades that flourished in this commercial district during the Renaissance. The dock would have been a landing point for materials and goods used in the various workshops along Calle de San Thomà.",
+      "id": "dock_45.435394_12.327872"
     }
   ],
   "bridgePoints": [
@@ -157,7 +158,8 @@
             "lng": 12.327645100139108
           }
         }
-      }
+      },
+      "id": "bridge_45.436365_12.327572"
     },
     {
       "edge": {
@@ -182,7 +184,8 @@
             "lng": 12.327875770114389
           }
         }
-      }
+      },
+      "id": "bridge_45.436756_12.327819"
     },
     {
       "edge": {
@@ -207,7 +210,8 @@
             "lng": 12.327215946696725
           }
         }
-      }
+      },
+      "id": "bridge_45.437163_12.327121"
     },
     {
       "edge": {
@@ -232,7 +236,8 @@
             "lng": 12.327001369975534
           }
         }
-      }
+      },
+      "id": "bridge_45.437690_12.326907"
     },
     {
       "edge": {
@@ -257,7 +262,8 @@
             "lng": 12.326618152426999
           }
         }
-      }
+      },
+      "id": "bridge_45.438811_12.326553"
     },
     {
       "edge": {
@@ -282,7 +288,8 @@
             "lng": 12.325590834003709
           }
         }
-      }
+      },
+      "id": "bridge_45.438465_12.325609"
     },
     {
       "edge": {
@@ -307,7 +314,8 @@
             "lng": 12.322926956209677
           }
         }
-      }
+      },
+      "id": "bridge_45.437637_12.323002"
     },
     {
       "edge": {
@@ -332,7 +340,8 @@
             "lng": 12.32385500052883
           }
         }
-      }
+      },
+      "id": "bridge_45.437103_12.323849"
     },
     {
       "edge": {
@@ -357,7 +366,8 @@
             "lng": 12.325307446288388
           }
         }
-      }
+      },
+      "id": "bridge_45.436292_12.325369"
     },
     {
       "edge": {
@@ -382,7 +392,8 @@
             "lng": 12.32592256622247
           }
         }
-      }
+      },
+      "id": "bridge_45.436061_12.325977"
     },
     {
       "edge": {
@@ -407,7 +418,8 @@
             "lng": 12.326537686156552
           }
         }
-      }
+      },
+      "id": "bridge_45.435830_12.326585"
     },
     {
       "edge": {
@@ -432,7 +444,8 @@
             "lng": 12.327009754943173
           }
         }
-      }
+      },
+      "id": "bridge_45.435507_12.327030"
     }
   ],
   "buildingPoints": [
@@ -441,196 +454,224 @@
       "lng": 12.327435959770266,
       "streetName": "Calle dei Baretteri di San Polo",
       "streetNameEnglish": "Street of the Cap Makers of San Polo",
-      "streetDescription": "Named after the cap makers (baretteri) who had workshops in this area of San Polo near San Thomà. These craftsmen were part of a respected guild that produced the distinctive Venetian caps worn by citizens of various social classes."
+      "streetDescription": "Named after the cap makers (baretteri) who had workshops in this area of San Polo near San Thomà. These craftsmen were part of a respected guild that produced the distinctive Venetian caps worn by citizens of various social classes.",
+      "id": "building_45.435624_12.327436"
     },
     {
       "lat": 45.43557146661115,
       "lng": 12.328082259999043,
       "streetName": "Rio Terà San Thomà",
       "streetNameEnglish": "Filled Canal of Saint Thomas",
-      "streetDescription": "This street was originally a canal that was filled in (rio terà means 'filled canal'), named after the nearby Church of San Thomà. Such filled canals were common in Venice's urban development history, creating new pedestrian thoroughfares."
+      "streetDescription": "This street was originally a canal that was filled in (rio terà means 'filled canal'), named after the nearby Church of San Thomà. Such filled canals were common in Venice's urban development history, creating new pedestrian thoroughfares.",
+      "id": "building_45.435571_12.328082"
     },
     {
       "lat": 45.436049127130204,
       "lng": 12.326725353535236,
       "streetName": "Calle dei Frari",
       "streetNameEnglish": "Street of the Friars",
-      "streetDescription": "Named for its proximity to the Franciscan Friary and the Basilica di Santa Maria Gloriosa dei Frari, one of the most important churches in Venice. The Franciscans (called 'Frari' in Venetian dialect) had a significant presence in this sestiere."
+      "streetDescription": "Named for its proximity to the Franciscan Friary and the Basilica di Santa Maria Gloriosa dei Frari, one of the most important churches in Venice. The Franciscans (called 'Frari' in Venetian dialect) had a significant presence in this sestiere.",
+      "id": "building_45.436049_12.326725"
     },
     {
       "lat": 45.436165395978556,
       "lng": 12.327431482146897,
       "streetName": "Salizada dei Pisani",
       "streetNameEnglish": "Paved Street of the Pisani Family",
-      "streetDescription": "Named after the noble Pisani family who had a palazzo in this area. A 'salizada' indicates one of the first paved streets in Venice, showing the importance of this thoroughfare and the influence of the Pisani family in San Polo."
+      "streetDescription": "Named after the noble Pisani family who had a palazzo in this area. A 'salizada' indicates one of the first paved streets in Venice, showing the importance of this thoroughfare and the influence of the Pisani family in San Polo.",
+      "id": "building_45.436165_12.327431"
     },
     {
       "lat": 45.43648615102929,
       "lng": 12.325526268032268,
       "streetName": "Calle del Campaniel",
       "streetNameEnglish": "Street of the Bell Tower",
-      "streetDescription": "Named after the bell tower (campanile) of the Church of San Thomà or another nearby church. Bell towers were important landmarks in Renaissance Venice, serving both religious and civic functions as timekeepers."
+      "streetDescription": "Named after the bell tower (campanile) of the Church of San Thomà or another nearby church. Bell towers were important landmarks in Renaissance Venice, serving both religious and civic functions as timekeepers.",
+      "id": "building_45.436486_12.325526"
     },
     {
       "lat": 45.43660380793762,
       "lng": 12.326160409911646,
       "streetName": "Fondamenta dei Nomboli",
       "streetNameEnglish": "Foundation of the Nomboli Family",
-      "streetDescription": "A canalside walkway named after the Nomboli, a merchant family who had properties along this canal in the San Polo district. Fondamente are streets running alongside canals, typically wider than regular calli."
+      "streetDescription": "A canalside walkway named after the Nomboli, a merchant family who had properties along this canal in the San Polo district. Fondamente are streets running alongside canals, typically wider than regular calli.",
+      "id": "building_45.436604_12.326160"
     },
     {
       "lat": 45.43646632605806,
       "lng": 12.32678831186682,
       "streetName": "Ruga dei Oresi",
       "streetNameEnglish": "Street of the Goldsmiths",
-      "streetDescription": "A commercial street (ruga) where goldsmiths and jewelers had their workshops and shops. The San Polo area had several artisan streets organized by trade, with the goldsmiths (oresi) being particularly prestigious craftsmen."
+      "streetDescription": "A commercial street (ruga) where goldsmiths and jewelers had their workshops and shops. The San Polo area had several artisan streets organized by trade, with the goldsmiths (oresi) being particularly prestigious craftsmen.",
+      "id": "building_45.436466_12.326788"
     },
     {
       "lat": 45.437013726675985,
       "lng": 12.32497959506678,
       "streetName": "Calle della Scuola",
       "streetNameEnglish": "Street of the School",
-      "streetDescription": "Named after a scuola (confraternity or lay brotherhood) that had its headquarters nearby. Scuole were important civic and religious institutions in Renaissance Venice, providing welfare, education, and religious services."
+      "streetDescription": "Named after a scuola (confraternity or lay brotherhood) that had its headquarters nearby. Scuole were important civic and religious institutions in Renaissance Venice, providing welfare, education, and religious services.",
+      "id": "building_45.437014_12.324980"
     },
     {
       "lat": 45.436982035423874,
       "lng": 12.325608619596364,
       "streetName": "Sottoportego dei Tintori",
       "streetNameEnglish": "Covered Passageway of the Dyers",
-      "streetDescription": "A covered passageway (sottoportego) named after the dyers who worked in this area of San Polo. The textile industry was vital to Venice's economy, and dyers were essential craftsmen who colored fabrics with exotic imported dyes."
+      "streetDescription": "A covered passageway (sottoportego) named after the dyers who worked in this area of San Polo. The textile industry was vital to Venice's economy, and dyers were essential craftsmen who colored fabrics with exotic imported dyes.",
+      "id": "building_45.436982_12.325609"
     },
     {
       "lat": 45.43703611496543,
       "lng": 12.326278459899825,
       "streetName": "Calle del Forno di San Thomà",
       "streetNameEnglish": "Street of the Bakery of Saint Thomas",
-      "streetDescription": "Named after a public bakery (forno) that operated near the Church of San Thomà. Public bakeries were important community facilities in Renaissance Venice, as most homes lacked private ovens due to fire hazards."
+      "streetDescription": "Named after a public bakery (forno) that operated near the Church of San Thomà. Public bakeries were important community facilities in Renaissance Venice, as most homes lacked private ovens due to fire hazards.",
+      "id": "building_45.437036_12.326278"
     },
     {
       "lat": 45.43695595085747,
       "lng": 12.326786745374779,
       "streetName": "Corte Contarini",
       "streetNameEnglish": "Contarini Courtyard",
-      "streetDescription": "A small courtyard named after the Contarini family, one of Venice's most illustrious noble families who provided eight Doges to the Republic. This family likely owned property or a palazzo near this courtyard in the San Polo district."
+      "streetDescription": "A small courtyard named after the Contarini family, one of Venice's most illustrious noble families who provided eight Doges to the Republic. This family likely owned property or a palazzo near this courtyard in the San Polo district.",
+      "id": "building_45.436956_12.326787"
     },
     {
       "lat": 45.43749194600759,
       "lng": 12.32434188872925,
       "streetName": "Campiello dei Meloni",
       "streetNameEnglish": "Small Square of the Melons",
-      "streetDescription": "A small square (campiello) where melon sellers would gather to sell their produce. Food markets were scattered throughout Renaissance Venice, with specific areas designated for different types of produce."
+      "streetDescription": "A small square (campiello) where melon sellers would gather to sell their produce. Food markets were scattered throughout Renaissance Venice, with specific areas designated for different types of produce.",
+      "id": "building_45.437492_12.324342"
     },
     {
       "lat": 45.4374929986549,
       "lng": 12.325031461687308,
       "streetName": "Calle dei Bombaseri",
       "streetNameEnglish": "Street of the Cotton Fabric Makers",
-      "streetDescription": "Named after the craftsmen who made cotton fabrics. The bombaseri worked with cotton (bombaso) to create fabrics that were lighter than wool and less expensive than silk, serving the middle-class market in Renaissance Venice."
+      "streetDescription": "Named after the craftsmen who made cotton fabrics. The bombaseri worked with cotton (bombaso) to create fabrics that were lighter than wool and less expensive than silk, serving the middle-class market in Renaissance Venice.",
+      "id": "building_45.437493_12.325031"
     },
     {
       "lat": 45.437496957848225,
       "lng": 12.325511154368423,
       "streetName": "Rio Terà dei Sabbioneri",
       "streetNameEnglish": "Filled Canal of the Sand Merchants",
-      "streetDescription": "A former canal, now filled in, where sand merchants (sabbioneri) would dock their boats to sell sand used in construction and glassmaking. Sand was an essential material in Venice for building and artisanal production."
+      "streetDescription": "A former canal, now filled in, where sand merchants (sabbioneri) would dock their boats to sell sand used in construction and glassmaking. Sand was an essential material in Venice for building and artisanal production.",
+      "id": "building_45.437497_12.325511"
     },
     {
       "lat": 45.43735680581042,
       "lng": 12.326245881522368,
       "streetName": "Calle dei Sarti di San Polo",
       "streetNameEnglish": "Street of the Tailors of San Polo",
-      "streetDescription": "Named for the tailors (sarti) who had their workshops in this area near San Thomà. The clothing industry was significant in Renaissance Venice, with tailors creating garments for all social classes."
+      "streetDescription": "Named for the tailors (sarti) who had their workshops in this area near San Thomà. The clothing industry was significant in Renaissance Venice, with tailors creating garments for all social classes.",
+      "id": "building_45.437357_12.326246"
     },
     {
       "lat": 45.43744176606157,
       "lng": 12.326784993427896,
       "streetName": "Ramo dei Cavalletti",
       "streetNameEnglish": "Branch of the Sawhorses",
-      "streetDescription": "A small branch street (ramo) named after the carpenter's sawhorses (cavalletti) that were likely made or sold here. This reflects the presence of woodworkers in the artisan-rich district of San Polo."
+      "streetDescription": "A small branch street (ramo) named after the carpenter's sawhorses (cavalletti) that were likely made or sold here. This reflects the presence of woodworkers in the artisan-rich district of San Polo.",
+      "id": "building_45.437442_12.326785"
     },
     {
       "lat": 45.43782076583785,
       "lng": 12.323746977503774,
       "streetName": "Calle del Traghetto di San Thomà",
       "streetNameEnglish": "Street of the San Thomà Ferry Crossing",
-      "streetDescription": "Named after the gondola ferry service (traghetto) that crossed the Grand Canal near San Thomà. These crossings were vital transportation links in Renaissance Venice, allowing people to cross the Grand Canal before the construction of many bridges."
+      "streetDescription": "Named after the gondola ferry service (traghetto) that crossed the Grand Canal near San Thomà. These crossings were vital transportation links in Renaissance Venice, allowing people to cross the Grand Canal before the construction of many bridges.",
+      "id": "building_45.437821_12.323747"
     },
     {
       "lat": 45.437908274809864,
       "lng": 12.324327263358121,
       "streetName": "Fondamenta dei Sartori",
       "streetNameEnglish": "Foundation of the Tailors",
-      "streetDescription": "A canalside street where tailors had their workshops. The location along a canal provided good lighting for the detailed work of cutting and sewing garments, making it an ideal location for tailors' workshops."
+      "streetDescription": "A canalside street where tailors had their workshops. The location along a canal provided good lighting for the detailed work of cutting and sewing garments, making it an ideal location for tailors' workshops.",
+      "id": "building_45.437908_12.324327"
     },
     {
       "lat": 45.43783230471295,
       "lng": 12.324963864008392,
       "streetName": "Calle dei Stagneri Piccola",
       "streetNameEnglish": "Small Street of the Tinsmiths",
-      "streetDescription": "A narrow street where tinsmiths (stagneri) had their small workshops, crafting items from tin and other metals. The designation 'piccola' (small) distinguished it from a possibly larger street of tinsmiths elsewhere."
+      "streetDescription": "A narrow street where tinsmiths (stagneri) had their small workshops, crafting items from tin and other metals. The designation 'piccola' (small) distinguished it from a possibly larger street of tinsmiths elsewhere.",
+      "id": "building_45.437832_12.324964"
     },
     {
       "lat": 45.437912445630054,
       "lng": 12.32561307928644,
       "streetName": "Salizada dei Mercanti",
       "streetNameEnglish": "Paved Street of the Merchants",
-      "streetDescription": "One of the first paved streets in the area, frequented by merchants trading in the San Polo district. Being paved (salizada) made it easier for carts to transport goods, marking it as an important commercial thoroughfare."
+      "streetDescription": "One of the first paved streets in the area, frequented by merchants trading in the San Polo district. Being paved (salizada) made it easier for carts to transport goods, marking it as an important commercial thoroughfare.",
+      "id": "building_45.437912_12.325613"
     },
     {
       "lat": 45.437961367524814,
       "lng": 12.326308727847488,
       "streetName": "Calle dei Botteri",
       "streetNameEnglish": "Street of the Barrel Makers",
-      "streetDescription": "Named after the barrel makers (botteri) who crafted wooden casks and barrels for storing wine, oil, and other goods. Barrels were essential for Venice's extensive maritime trade, making this a significant artisanal profession."
+      "streetDescription": "Named after the barrel makers (botteri) who crafted wooden casks and barrels for storing wine, oil, and other goods. Barrels were essential for Venice's extensive maritime trade, making this a significant artisanal profession.",
+      "id": "building_45.437961_12.326309"
     },
     {
       "lat": 45.43793468230991,
       "lng": 12.326903442017308,
       "streetName": "Ruga dei Spezieri",
       "streetNameEnglish": "Street of the Spice Merchants",
-      "streetDescription": "A commercial street where spice merchants (spezieri) had their shops. Venice was the European center for the spice trade with the East, making the spice merchants among the wealthiest and most influential traders in the city."
+      "streetDescription": "A commercial street where spice merchants (spezieri) had their shops. Venice was the European center for the spice trade with the East, making the spice merchants among the wealthiest and most influential traders in the city.",
+      "id": "building_45.437935_12.326903"
     },
     {
       "lat": 45.43789134990875,
       "lng": 12.32752276750892,
       "streetName": "Sottoportego della Madonna",
       "streetNameEnglish": "Covered Passageway of the Madonna",
-      "streetDescription": "A covered walkway named after a shrine or image of the Virgin Mary that was displayed in a niche. Such religious imagery was common throughout Venice, with many sottoporteghi named after the religious icons they contained."
+      "streetDescription": "A covered walkway named after a shrine or image of the Virgin Mary that was displayed in a niche. Such religious imagery was common throughout Venice, with many sottoporteghi named after the religious icons they contained.",
+      "id": "building_45.437891_12.327523"
     },
     {
       "lat": 45.43827979408991,
       "lng": 12.323604581140609,
       "streetName": "Calle dei Tagiapiera",
       "streetNameEnglish": "Street of the Stonemasons",
-      "streetDescription": "Named after the stonemasons (tagiapiera in Venetian dialect) who worked on the construction and decoration of the many stone buildings in Venice. Despite being a city built on water, Venice made extensive use of imported stone for its grand buildings."
+      "streetDescription": "Named after the stonemasons (tagiapiera in Venetian dialect) who worked on the construction and decoration of the many stone buildings in Venice. Despite being a city built on water, Venice made extensive use of imported stone for its grand buildings.",
+      "id": "building_45.438280_12.323605"
     },
     {
       "lat": 45.43824426897673,
       "lng": 12.324331340503994,
       "streetName": "Campiello San Stin",
       "streetNameEnglish": "Small Square of Saint Stephen",
-      "streetDescription": "A small square near the Church of San Stin (the Venetian name for Santo Stefano), in the San Polo district not far from San Thomà. Such small squares often formed the heart of neighborhood life in Renaissance Venice."
+      "streetDescription": "A small square near the Church of San Stin (the Venetian name for Santo Stefano), in the San Polo district not far from San Thomà. Such small squares often formed the heart of neighborhood life in Renaissance Venice.",
+      "id": "building_45.438244_12.324331"
     },
     {
       "lat": 45.43839918445191,
       "lng": 12.326301049069482,
       "streetName": "Calle dei Scoacamini",
       "streetNameEnglish": "Street of the Chimney Sweeps",
-      "streetDescription": "Named after the chimney sweeps (scoacamini) who lived or gathered here. Given the fire hazards in densely populated Venice, chimney sweeps performed an essential service by keeping chimneys clear of soot and reducing fire risks."
+      "streetDescription": "Named after the chimney sweeps (scoacamini) who lived or gathered here. Given the fire hazards in densely populated Venice, chimney sweeps performed an essential service by keeping chimneys clear of soot and reducing fire risks.",
+      "id": "building_45.438399_12.326301"
     },
     {
       "lat": 45.43840519491021,
       "lng": 12.326797446002958,
       "streetName": "Fondamenta dei Remeri",
       "streetNameEnglish": "Foundation of the Oar Makers",
-      "streetDescription": "A canalside street where artisans specialized in crafting oars (remi) for gondolas and other Venetian boats. The remeri were crucial to Venice's transportation system, as every boat required multiple well-crafted oars."
+      "streetDescription": "A canalside street where artisans specialized in crafting oars (remi) for gondolas and other Venetian boats. The remeri were crucial to Venice's transportation system, as every boat required multiple well-crafted oars.",
+      "id": "building_45.438405_12.326797"
     },
     {
       "lat": 45.438372793919015,
       "lng": 12.327419910422085,
       "streetName": "Calle del Magazen",
       "streetNameEnglish": "Street of the Warehouse",
-      "streetDescription": "Named after a warehouse (magazen) that stored goods for merchants in the San Polo district. Venice's commercial prosperity depended on efficient storage and distribution of goods, making warehouses vital to the city's economy."
+      "streetDescription": "Named after a warehouse (magazen) that stored goods for merchants in the San Polo district. Venice's commercial prosperity depended on efficient storage and distribution of goods, making warehouses vital to the city's economy.",
+      "id": "building_45.438373_12.327420"
     }
   ],
   "id": "polygon-1746072707138"

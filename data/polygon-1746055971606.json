@@ -34,7 +34,7 @@
     "lat": 45.44235443190306,
     "lng": 12.337902387700058
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -59,7 +59,8 @@
             "lng": 12.337861796936966
           }
         }
-      }
+      },
+      "id": "bridge_45.442690_12.337864"
     },
     {
       "edge": {
@@ -84,7 +85,8 @@
             "lng": 12.33847781094072
           }
         }
-      }
+      },
+      "id": "bridge_45.442527_12.338494"
     },
     {
       "edge": {
@@ -109,7 +111,8 @@
             "lng": 12.338180979809739
           }
         }
-      }
+      },
+      "id": "bridge_45.442140_12.338088"
     }
   ],
   "buildingPoints": [
@@ -118,7 +121,8 @@
       "lng": 12.337540285499045,
       "streetName": "Calle dei Merciai di San Zulian",
       "streetNameEnglish": "Street of the Mercers of San Zulian",
-      "streetDescription": "This name references the mercers (fabric and small goods merchants) who would have had shops near the Church of San Zulian (Saint Julian) in this commercial district. Located near Calle dei Sartori (Tailors' Street), this would form a natural extension of the textile and clothing trades that clustered in this central area of Venice, close to the bustling Mercerie shopping district connecting Rialto to San Marco."
+      "streetDescription": "This name references the mercers (fabric and small goods merchants) who would have had shops near the Church of San Zulian (Saint Julian) in this commercial district. Located near Calle dei Sartori (Tailors' Street), this would form a natural extension of the textile and clothing trades that clustered in this central area of Venice, close to the bustling Mercerie shopping district connecting Rialto to San Marco.",
+      "id": "building_45.442373_12.337540"
     }
   ],
   "id": "polygon-1746055971606"

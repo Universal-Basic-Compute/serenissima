@@ -38,7 +38,7 @@
     "lat": 45.43200179413452,
     "lng": 12.332972451887564
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -63,7 +63,8 @@
             "lng": 12.333480327703992
           }
         }
-      }
+      },
+      "id": "bridge_45.432629_12.333445"
     },
     {
       "edge": {
@@ -88,7 +89,8 @@
             "lng": 12.33353933630232
           }
         }
-      }
+      },
+      "id": "bridge_45.432113_12.333505"
     }
   ],
   "buildingPoints": [
@@ -97,21 +99,24 @@
       "lng": 12.3330403319003,
       "streetName": "Calle del Mercante Feltrin",
       "streetNameEnglish": "Street of the Feltrin Merchant",
-      "streetDescription": "This name references the historical presence of merchants from Feltre (Feltrini) who settled in this area of San Moisè. During the Renaissance, many mainland merchants established businesses in Venice, and those from Feltre were known for cloth and wool trade. The name connects directly to 'Campiello de la Feltrina,' suggesting this street led to the small square named after a woman from Feltre or a Feltrin family business."
+      "streetDescription": "This name references the historical presence of merchants from Feltre (Feltrini) who settled in this area of San Moisè. During the Renaissance, many mainland merchants established businesses in Venice, and those from Feltre were known for cloth and wool trade. The name connects directly to 'Campiello de la Feltrina,' suggesting this street led to the small square named after a woman from Feltre or a Feltrin family business.",
+      "id": "building_45.431984_12.333040"
     },
     {
       "lat": 45.43241442649399,
       "lng": 12.33309753886029,
       "streetName": "Ruga dei Setaioli di San Moisè",
       "streetNameEnglish": "Row of the Silk Merchants of San Moisè",
-      "streetDescription": "This name reflects the silk trade that flourished in the San Moisè district during the Renaissance. 'Ruga' typically designated commercial streets with shops of the same trade. San Moisè was a wealthy area close to Piazza San Marco where luxury textile merchants, particularly silk traders, established their businesses catering to the nobili class. The proximity to the church of San Moisè would have made this a prestigious location for high-end textile commerce."
+      "streetDescription": "This name reflects the silk trade that flourished in the San Moisè district during the Renaissance. 'Ruga' typically designated commercial streets with shops of the same trade. San Moisè was a wealthy area close to Piazza San Marco where luxury textile merchants, particularly silk traders, established their businesses catering to the nobili class. The proximity to the church of San Moisè would have made this a prestigious location for high-end textile commerce.",
+      "id": "building_45.432414_12.333098"
     },
     {
       "lat": 45.43294215096145,
       "lng": 12.333054473994908,
       "streetName": "Sottoportego della Zecca Vecchia",
       "streetNameEnglish": "Passageway of the Old Mint",
-      "streetDescription": "This name suggests a covered passageway ('sottoportego') that may have connected to or been along a route toward Venice's original mint. While the main Zecca was relocated near San Marco, historical references indicate that an older monetary exchange point existed in this area before the centralization of Venice's minting operations. San Moisè's proximity to the commercial and administrative heart of Venice makes this a plausible historical reference, as financial activities were concentrated in this general district."
+      "streetDescription": "This name suggests a covered passageway ('sottoportego') that may have connected to or been along a route toward Venice's original mint. While the main Zecca was relocated near San Marco, historical references indicate that an older monetary exchange point existed in this area before the centralization of Venice's minting operations. San Moisè's proximity to the commercial and administrative heart of Venice makes this a plausible historical reference, as financial activities were concentrated in this general district.",
+      "id": "building_45.432942_12.333054"
     }
   ],
   "id": "polygon-1746056766342"

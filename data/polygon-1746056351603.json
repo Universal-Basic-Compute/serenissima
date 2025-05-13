@@ -74,7 +74,7 @@
     "lat": 45.43556191524828,
     "lng": 12.335251919240763
   },
-  "dockPoints": [
+  "canalPoints": [
     {
       "edge": {
         "lat": 45.43643296568505,
@@ -86,7 +86,8 @@
       },
       "historicalName": "Riva dei Fuseri",
       "englishName": "Landing of the Spindle Makers",
-      "historicalDescription": "Named after the Fuseri (spindle makers) who had workshops in this area. Calle dei Fuseri was home to artisans who created wooden spindles used in Venice's important textile industry. This dock would have served as a loading point for materials and finished products."
+      "historicalDescription": "Named after the Fuseri (spindle makers) who had workshops in this area. Calle dei Fuseri was home to artisans who created wooden spindles used in Venice's important textile industry. This dock would have served as a loading point for materials and finished products.",
+      "id": "dock_45.436433_12.333443"
     },
     {
       "edge": {
@@ -99,7 +100,8 @@
       },
       "historicalName": "Fondamenta San Luca",
       "englishName": "Foundation of Saint Luke",
-      "historicalDescription": "Named after the nearby Church of San Luca (Saint Luke), an important parish church in the San Marco district. This fondamenta would have served as a main access point for parishioners and clergy arriving by water, as well as for merchants doing business in this commercial area near Rialto."
+      "historicalDescription": "Named after the nearby Church of San Luca (Saint Luke), an important parish church in the San Marco district. This fondamenta would have served as a main access point for parishioners and clergy arriving by water, as well as for merchants doing business in this commercial area near Rialto.",
+      "id": "dock_45.436636_12.334073"
     },
     {
       "edge": {
@@ -112,7 +114,8 @@
       },
       "historicalName": "Riva dei Mercanti di Seta",
       "englishName": "Landing of the Silk Merchants",
-      "historicalDescription": "This area near San Luca was known for luxury trades, including silk merchants. The dock would have been used by traders bringing silk from the East, as well as local craftsmen who worked with these luxurious textiles. The proximity to Rialto made it an important commercial landing point for these valuable goods."
+      "historicalDescription": "This area near San Luca was known for luxury trades, including silk merchants. The dock would have been used by traders bringing silk from the East, as well as local craftsmen who worked with these luxurious textiles. The proximity to Rialto made it an important commercial landing point for these valuable goods.",
+      "id": "dock_45.436905_12.334625"
     }
   ],
   "bridgePoints": [
@@ -139,7 +142,8 @@
             "lng": 12.335803924252481
           }
         }
-      }
+      },
+      "id": "bridge_45.436467_12.335805"
     },
     {
       "edge": {
@@ -164,7 +168,8 @@
             "lng": 12.336635409047098
           }
         }
-      }
+      },
+      "id": "bridge_45.435857_12.336653"
     },
     {
       "edge": {
@@ -189,7 +194,8 @@
             "lng": 12.336783605836938
           }
         }
-      }
+      },
+      "id": "bridge_45.435541_12.336739"
     },
     {
       "edge": {
@@ -214,7 +220,8 @@
             "lng": 12.334924460688788
           }
         }
-      }
+      },
+      "id": "bridge_45.434724_12.334958"
     },
     {
       "edge": {
@@ -239,7 +246,8 @@
             "lng": 12.334503116820631
           }
         }
-      }
+      },
+      "id": "bridge_45.434585_12.334475"
     },
     {
       "edge": {
@@ -264,7 +272,8 @@
             "lng": 12.333634542700604
           }
         }
-      }
+      },
+      "id": "bridge_45.435639_12.333660"
     }
   ],
   "buildingPoints": [
@@ -273,84 +282,96 @@
       "lng": 12.334849541585465,
       "streetName": "Sottoportego dei Mercanti di Perle",
       "streetNameEnglish": "Underpass of the Pearl Merchants",
-      "streetDescription": "This narrow covered passage was frequented by merchants dealing in pearls and precious stones who would conduct business near San Luca. Pearl traders were an important subset of the luxury goods market in Renaissance Venice, supplying materials to local jewelers."
+      "streetDescription": "This narrow covered passage was frequented by merchants dealing in pearls and precious stones who would conduct business near San Luca. Pearl traders were an important subset of the luxury goods market in Renaissance Venice, supplying materials to local jewelers.",
+      "id": "building_45.435007_12.334850"
     },
     {
       "lat": 45.434990929072725,
       "lng": 12.33546809849761,
       "streetName": "Calle del Bancogiro",
       "streetNameEnglish": "Street of the Bank Clearing",
-      "streetDescription": "Named after the banking clearing house system that operated in Venice near San Luca. The 'bancogiro' was an innovative public banking system established in 1619 to facilitate commercial transactions between merchants, reflecting Venice's sophisticated financial infrastructure."
+      "streetDescription": "Named after the banking clearing house system that operated in Venice near San Luca. The 'bancogiro' was an innovative public banking system established in 1619 to facilitate commercial transactions between merchants, reflecting Venice's sophisticated financial infrastructure.",
+      "id": "building_45.434991_12.335468"
     },
     {
       "lat": 45.43547028180936,
       "lng": 12.33399388041142,
       "streetName": "Rio Terà dei Merciari",
       "streetNameEnglish": "Filled Canal of the Mercers",
-      "streetDescription": "This former canal was filled in to create a street where mercers (fabric and textile merchants) had their shops. Located near San Luca and Calle dei Fuseri, this area was known for various textile trades, with mercers selling fine fabrics and notions to the wealthy Venetian population."
+      "streetDescription": "This former canal was filled in to create a street where mercers (fabric and textile merchants) had their shops. Located near San Luca and Calle dei Fuseri, this area was known for various textile trades, with mercers selling fine fabrics and notions to the wealthy Venetian population.",
+      "id": "building_45.435470_12.333994"
     },
     {
       "lat": 45.43539788528993,
       "lng": 12.33472522340781,
       "streetName": "Calle degli Orafi di San Luca",
       "streetNameEnglish": "Street of the Goldsmiths of San Luca",
-      "streetDescription": "This street was home to several goldsmith workshops associated with the parish of San Luca. Goldsmiths often established their businesses near the Fuseri (makers of spindles) since both crafts served the textile and luxury goods industries that flourished in this central commercial district."
+      "streetDescription": "This street was home to several goldsmith workshops associated with the parish of San Luca. Goldsmiths often established their businesses near the Fuseri (makers of spindles) since both crafts served the textile and luxury goods industries that flourished in this central commercial district.",
+      "id": "building_45.435398_12.334725"
     },
     {
       "lat": 45.43551563072855,
       "lng": 12.33540054639049,
       "streetName": "Salizada dei Contarini",
       "streetNameEnglish": "Paved Street of the Contarini",
-      "streetDescription": "Named after the noble Contarini family who owned property in this area near San Luca. The Contarini were one of Venice's most distinguished nobili families, producing eight Doges between the 11th and 18th centuries. This salizada (one of the first paved streets) would have led to one of their family palaces."
+      "streetDescription": "Named after the noble Contarini family who owned property in this area near San Luca. The Contarini were one of Venice's most distinguished nobili families, producing eight Doges between the 11th and 18th centuries. This salizada (one of the first paved streets) would have led to one of their family palaces.",
+      "id": "building_45.435516_12.335401"
     },
     {
       "lat": 45.43595585211796,
       "lng": 12.33409624522483,
       "streetName": "Ruga dei Librai",
       "streetNameEnglish": "Row of the Booksellers",
-      "streetDescription": "A commercial street where booksellers and publishers had their shops near San Luca. Venice was a major center of printing and publishing in Renaissance Europe, with the city's printers producing approximately one-third of all printed books in Italy by the late 15th century."
+      "streetDescription": "A commercial street where booksellers and publishers had their shops near San Luca. Venice was a major center of printing and publishing in Renaissance Europe, with the city's printers producing approximately one-third of all printed books in Italy by the late 15th century.",
+      "id": "building_45.435956_12.334096"
     },
     {
       "lat": 45.435886609273076,
       "lng": 12.33463685127008,
       "streetName": "Calle dei Banchieri",
       "streetNameEnglish": "Street of the Bankers",
-      "streetDescription": "This street near San Luca and the Rialto was home to several banking establishments. Being close to the commercial heart of Venice, this area naturally attracted financial services that supported the mercantile activities of the Republic's traders and merchants."
+      "streetDescription": "This street near San Luca and the Rialto was home to several banking establishments. Being close to the commercial heart of Venice, this area naturally attracted financial services that supported the mercantile activities of the Republic's traders and merchants.",
+      "id": "building_45.435887_12.334637"
     },
     {
       "lat": 45.43600157776339,
       "lng": 12.33547863638287,
       "streetName": "Fondamenta dei Loredan",
       "streetNameEnglish": "Foundation of the Loredan",
-      "streetDescription": "A canalside street named after the prominent Loredan family who owned a palace in this area near San Luca. The Loredan produced three Doges and many military leaders, ambassadors, and church officials who contributed significantly to Venetian politics and culture."
+      "streetDescription": "A canalside street named after the prominent Loredan family who owned a palace in this area near San Luca. The Loredan produced three Doges and many military leaders, ambassadors, and church officials who contributed significantly to Venetian politics and culture.",
+      "id": "building_45.436002_12.335479"
     },
     {
       "lat": 45.43599882592307,
       "lng": 12.335940072921396,
       "streetName": "Campiello della Fenice Piccola",
       "streetNameEnglish": "Small Square of the Little Phoenix",
-      "streetDescription": "A small square possibly named after a minor theater or meeting hall in the San Luca district that predated the more famous Teatro La Fenice. Entertainment venues were common in this central area, providing cultural activities for merchants and nobles alike."
+      "streetDescription": "A small square possibly named after a minor theater or meeting hall in the San Luca district that predated the more famous Teatro La Fenice. Entertainment venues were common in this central area, providing cultural activities for merchants and nobles alike.",
+      "id": "building_45.435999_12.335940"
     },
     {
       "lat": 45.43639511288429,
       "lng": 12.33398232231047,
       "streetName": "Calle del Cancellier",
       "streetNameEnglish": "Street of the Chancellor",
-      "streetDescription": "Named either after a chancellor who lived there or due to its proximity to one of the administrative offices of the Republic near San Luca. Chancellors were important government officials who managed documentation and correspondence for the Venetian state."
+      "streetDescription": "Named either after a chancellor who lived there or due to its proximity to one of the administrative offices of the Republic near San Luca. Chancellors were important government officials who managed documentation and correspondence for the Venetian state.",
+      "id": "building_45.436395_12.333982"
     },
     {
       "lat": 45.43646004513538,
       "lng": 12.334810265537335,
       "streetName": "Sottoportego dei Notari",
       "streetNameEnglish": "Underpass of the Notaries",
-      "streetDescription": "A covered passage where notaries may have had their small offices or meeting points. Being close to San Luca and the commercial district, notaries would have been essential for legalizing the numerous contracts and commercial agreements made in this business-oriented neighborhood."
+      "streetDescription": "A covered passage where notaries may have had their small offices or meeting points. Being close to San Luca and the commercial district, notaries would have been essential for legalizing the numerous contracts and commercial agreements made in this business-oriented neighborhood.",
+      "id": "building_45.436460_12.334810"
     },
     {
       "lat": 45.43642832643798,
       "lng": 12.335447160874871,
       "streetName": "Calle dei Testori",
       "streetNameEnglish": "Street of the Weavers of Headwear",
-      "streetDescription": "Named after the craftsmen who specialized in weaving fine fabrics for headwear. Located near Calle dei Fuseri, these artisans were part of the textile manufacturing ecosystem that made Venice famous for luxury clothing items, including elaborate hats and headdresses for nobility and wealthy citizens."
+      "streetDescription": "Named after the craftsmen who specialized in weaving fine fabrics for headwear. Located near Calle dei Fuseri, these artisans were part of the textile manufacturing ecosystem that made Venice famous for luxury clothing items, including elaborate hats and headdresses for nobility and wealthy citizens.",
+      "id": "building_45.436428_12.335447"
     }
   ],
   "id": "polygon-1746056351603"

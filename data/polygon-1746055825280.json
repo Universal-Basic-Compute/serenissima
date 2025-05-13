@@ -54,7 +54,7 @@
     "lat": 45.44301163787857,
     "lng": 12.33313293486802
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -79,7 +79,8 @@
             "lng": 12.33208921286491
           }
         }
-      }
+      },
+      "id": "bridge_45.443898_12.332081"
     },
     {
       "edge": {
@@ -104,7 +105,8 @@
             "lng": 12.333851424167706
           }
         }
-      }
+      },
+      "id": "bridge_45.442920_12.333803"
     }
   ],
   "buildingPoints": [
@@ -113,14 +115,16 @@
       "lng": 12.333112160169447,
       "streetName": "Calle dei Mercanti Fiamminghi",
       "streetNameEnglish": "Street of the Flemish Merchants",
-      "streetDescription": "This name reflects the historical presence of Flemish merchants near Ca' Vendramin in Cannaregio during the Renaissance. Venice maintained strong trade relations with Flanders, and many Flemish traders established businesses in this northern district of Venice, known for its commercial activities and proximity to foreign merchant communities."
+      "streetDescription": "This name reflects the historical presence of Flemish merchants near Ca' Vendramin in Cannaregio during the Renaissance. Venice maintained strong trade relations with Flanders, and many Flemish traders established businesses in this northern district of Venice, known for its commercial activities and proximity to foreign merchant communities.",
+      "id": "building_45.443141_12.333112"
     },
     {
       "lat": 45.44349629700334,
       "lng": 12.33240963827077,
       "streetName": "Sottoportego della Seta Colorata",
       "streetNameEnglish": "Passageway of the Colored Silk",
-      "streetDescription": "This name references the silk dyeing workshops that historically operated in the Cannaregio district. Near the grand palaces like Ca' Vendramin, numerous artisanal workshops processed luxury textiles, particularly colored silks. The 'sottoportego' (covered passageway) would have connected various workshops and merchant houses involved in this prestigious trade that contributed significantly to Venice's economic prosperity."
+      "streetDescription": "This name references the silk dyeing workshops that historically operated in the Cannaregio district. Near the grand palaces like Ca' Vendramin, numerous artisanal workshops processed luxury textiles, particularly colored silks. The 'sottoportego' (covered passageway) would have connected various workshops and merchant houses involved in this prestigious trade that contributed significantly to Venice's economic prosperity.",
+      "id": "building_45.443496_12.332410"
     }
   ],
   "id": "polygon-1746055825280"

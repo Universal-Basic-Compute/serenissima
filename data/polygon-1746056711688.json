@@ -78,7 +78,7 @@
     "lat": 45.43313118653068,
     "lng": 12.330518778413884
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -103,7 +103,8 @@
             "lng": 12.330743337962453
           }
         }
-      }
+      },
+      "id": "bridge_45.432064_12.330722"
     },
     {
       "edge": {
@@ -128,7 +129,8 @@
             "lng": 12.330962742659871
           }
         }
-      }
+      },
+      "id": "bridge_45.432559_12.330942"
     },
     {
       "edge": {
@@ -153,7 +155,8 @@
             "lng": 12.33118214735729
           }
         }
-      }
+      },
+      "id": "bridge_45.433055_12.331162"
     },
     {
       "edge": {
@@ -178,7 +181,8 @@
             "lng": 12.331401552054707
           }
         }
-      }
+      },
+      "id": "bridge_45.433550_12.331382"
     },
     {
       "edge": {
@@ -203,7 +207,8 @@
             "lng": 12.33047589170994
           }
         }
-      }
+      },
+      "id": "bridge_45.434746_12.330491"
     },
     {
       "edge": {
@@ -228,7 +233,8 @@
             "lng": 12.330351671783534
           }
         }
-      }
+      },
+      "id": "bridge_45.434034_12.330384"
     },
     {
       "edge": {
@@ -253,7 +259,8 @@
             "lng": 12.329662344066707
           }
         }
-      }
+      },
+      "id": "bridge_45.433300_12.329719"
     },
     {
       "edge": {
@@ -278,7 +285,8 @@
             "lng": 12.329973480312434
           }
         }
-      }
+      },
+      "id": "bridge_45.433153_12.330019"
     }
   ],
   "buildingPoints": [
@@ -287,63 +295,72 @@
       "lng": 12.329686079035742,
       "streetName": "Calle dei Speziali di Cannaregio",
       "streetNameEnglish": "Street of the Apothecaries of Cannaregio",
-      "streetDescription": "Named after the apothecaries who had shops in this area of Cannaregio during the Renaissance. These merchants sold spices, herbs, and medicinal ingredients, which were particularly valuable in Venice due to its trade connections with the East."
+      "streetDescription": "Named after the apothecaries who had shops in this area of Cannaregio during the Renaissance. These merchants sold spices, herbs, and medicinal ingredients, which were particularly valuable in Venice due to its trade connections with the East.",
+      "id": "building_45.432092_12.329686"
     },
     {
       "lat": 45.432090137377436,
       "lng": 12.33020542070194,
       "streetName": "Rio Terà dei Narisi",
       "streetNameEnglish": "Filled Canal of the Narisi Family",
-      "streetDescription": "This street was originally a canal that was filled in (rio terà). It takes its name from the prominent Narisi family who owned properties in this area of Cannaregio and likely contributed to the local infrastructure development in the 15th-16th centuries."
+      "streetDescription": "This street was originally a canal that was filled in (rio terà). It takes its name from the prominent Narisi family who owned properties in this area of Cannaregio and likely contributed to the local infrastructure development in the 15th-16th centuries.",
+      "id": "building_45.432090_12.330205"
     },
     {
       "lat": 45.43240816310848,
       "lng": 12.330271761004568,
       "streetName": "Sottoportego della Madonna dei Narisi",
       "streetNameEnglish": "Passageway of the Madonna of the Narisi",
-      "streetDescription": "Named after a small shrine or icon of the Madonna that was maintained by the Narisi family. Such religious markers were common in Renaissance Venice, often placed in passageways (sottoporteghi) and maintained by prominent local families as acts of devotion."
+      "streetDescription": "Named after a small shrine or icon of the Madonna that was maintained by the Narisi family. Such religious markers were common in Renaissance Venice, often placed in passageways (sottoporteghi) and maintained by prominent local families as acts of devotion.",
+      "id": "building_45.432408_12.330272"
     },
     {
       "lat": 45.43293412023628,
       "lng": 12.330195161402195,
       "streetName": "Salizada dei Tintori",
       "streetNameEnglish": "Paved Street of the Dyers",
-      "streetDescription": "This paved street (salizada) was named after the cloth dyers who operated in this part of Cannaregio. Venice was renowned for its textile industry, and dyers were essential craftsmen who used imported pigments to color fabrics produced in the city."
+      "streetDescription": "This paved street (salizada) was named after the cloth dyers who operated in this part of Cannaregio. Venice was renowned for its textile industry, and dyers were essential craftsmen who used imported pigments to color fabrics produced in the city.",
+      "id": "building_45.432934_12.330195"
     },
     {
       "lat": 45.43299547978313,
       "lng": 12.330828726291594,
       "streetName": "Calle del Ghetto Vecchio",
       "streetNameEnglish": "Street of the Old Ghetto",
-      "streetDescription": "A street leading toward or referencing the Old Ghetto, established in 1516 in Cannaregio. This was the world's first ghetto where Jewish residents were required to live, making it a historically significant location in Renaissance Venice."
+      "streetDescription": "A street leading toward or referencing the Old Ghetto, established in 1516 in Cannaregio. This was the world's first ghetto where Jewish residents were required to live, making it a historically significant location in Renaissance Venice.",
+      "id": "building_45.432995_12.330829"
     },
     {
       "lat": 45.43344423496762,
       "lng": 12.330146465284583,
       "streetName": "Fondamenta dei Lanaioli",
       "streetNameEnglish": "Foundation of the Wool Workers",
-      "streetDescription": "Named after the wool workers' guild that operated along this canal-side street (fondamenta). The wool industry was one of Venice's most important trades during the Renaissance, with many workshops established in the Cannaregio district."
+      "streetDescription": "Named after the wool workers' guild that operated along this canal-side street (fondamenta). The wool industry was one of Venice's most important trades during the Renaissance, with many workshops established in the Cannaregio district.",
+      "id": "building_45.433444_12.330146"
     },
     {
       "lat": 45.433301713175744,
       "lng": 12.330796032625754,
       "streetName": "Ruga dei Mercanti Levantini",
       "streetNameEnglish": "Commercial Street of the Levantine Merchants",
-      "streetDescription": "This commercial street (ruga) was named for the Levantine merchants who traded here. Cannaregio's proximity to the Grand Canal made it an ideal location for foreign merchants from the Eastern Mediterranean to establish warehouses and conduct business."
+      "streetDescription": "This commercial street (ruga) was named for the Levantine merchants who traded here. Cannaregio's proximity to the Grand Canal made it an ideal location for foreign merchants from the Eastern Mediterranean to establish warehouses and conduct business.",
+      "id": "building_45.433302_12.330796"
     },
     {
       "lat": 45.43386576850136,
       "lng": 12.330871236526622,
       "streetName": "Corte dei Narisi",
       "streetNameEnglish": "Court of the Narisi Family",
-      "streetDescription": "A small courtyard named after the Narisi family, who would have owned the surrounding buildings. Such family courts were common in Renaissance Venice, often featuring a central well and serving as semi-private spaces for extended family households."
+      "streetDescription": "A small courtyard named after the Narisi family, who would have owned the surrounding buildings. Such family courts were common in Renaissance Venice, often featuring a central well and serving as semi-private spaces for extended family households.",
+      "id": "building_45.433866_12.330871"
     },
     {
       "lat": 45.43424572231279,
       "lng": 12.330738851835797,
       "streetName": "Campiello della Misericordia",
       "streetNameEnglish": "Little Square of Mercy",
-      "streetDescription": "Named after its proximity to the Scuola Grande della Misericordia, one of Venice's important confraternities. This small square (campiello) would have served as a gathering place near the charitable institution that provided assistance to the poor in Renaissance Venice."
+      "streetDescription": "Named after its proximity to the Scuola Grande della Misericordia, one of Venice's important confraternities. This small square (campiello) would have served as a gathering place near the charitable institution that provided assistance to the poor in Renaissance Venice.",
+      "id": "building_45.434246_12.330739"
     }
   ],
   "id": "polygon-1746056711688"

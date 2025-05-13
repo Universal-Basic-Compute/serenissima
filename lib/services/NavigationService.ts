@@ -16,7 +16,7 @@ interface Polygon extends BasePolygon {
       };
     };
   }>;
-  dockPoints?: Array<{
+  canalPoints?: Array<{
     edge: { lat: number; lng: number };
     water: { lat: number; lng: number };
   }>;

@@ -50,7 +50,7 @@
     "lat": 45.43475021904569,
     "lng": 12.356423509601674
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -75,7 +75,8 @@
             "lng": 12.356481450451797
           }
         }
-      }
+      },
+      "id": "bridge_45.435333_12.356371"
     },
     {
       "edge": {
@@ -100,7 +101,8 @@
             "lng": 12.35704739655394
           }
         }
-      }
+      },
+      "id": "bridge_45.434701_12.356988"
     },
     {
       "edge": {
@@ -125,7 +127,8 @@
             "lng": 12.356865006340927
           }
         }
-      }
+      },
+      "id": "bridge_45.434261_12.356774"
     },
     {
       "edge": {
@@ -150,7 +153,8 @@
             "lng": 12.356650429619735
           }
         }
-      }
+      },
+      "id": "bridge_45.434050_12.356591"
     },
     {
       "edge": {
@@ -175,7 +179,8 @@
             "lng": 12.35679526890654
           }
         }
-      }
+      },
+      "id": "bridge_45.433222_12.356742"
     },
     {
       "edge": {
@@ -200,7 +205,8 @@
             "lng": 12.355855422867721
           }
         }
-      }
+      },
+      "id": "bridge_45.433505_12.355937"
     },
     {
       "edge": {
@@ -225,7 +231,8 @@
             "lng": 12.355798023594803
           }
         }
-      }
+      },
+      "id": "bridge_45.433993_12.355878"
     },
     {
       "edge": {
@@ -250,7 +257,8 @@
             "lng": 12.355740624321884
           }
         }
-      }
+      },
+      "id": "bridge_45.434481_12.355819"
     }
   ],
   "buildingPoints": [
@@ -259,42 +267,48 @@
       "lng": 12.356000310841106,
       "streetName": "Calle dei Mercanti di Seta",
       "streetNameEnglish": "Street of the Silk Merchants",
-      "streetDescription": "This name reflects the silk trade that was prominent in San Marco during the Renaissance. Nearby Ramo del Figareto would have connected to areas where silk merchants conducted business, as the San Marco district was a commercial hub with many luxury textile traders."
+      "streetDescription": "This name reflects the silk trade that was prominent in San Marco during the Renaissance. Nearby Ramo del Figareto would have connected to areas where silk merchants conducted business, as the San Marco district was a commercial hub with many luxury textile traders.",
+      "id": "building_45.434004_12.356000"
     },
     {
       "lat": 45.43302334765185,
       "lng": 12.356370889355311,
       "streetName": "Sottoportego della Madonna dei Fiori",
       "streetNameEnglish": "Passageway of the Madonna of Flowers",
-      "streetDescription": "This name references a likely religious shrine dedicated to the Madonna that would have been decorated with flowers. The 'figareto' in Ramo del Figareto suggests a place with fig trees, and this connecting passageway could have housed a small devotional altar decorated with local flora."
+      "streetDescription": "This name references a likely religious shrine dedicated to the Madonna that would have been decorated with flowers. The 'figareto' in Ramo del Figareto suggests a place with fig trees, and this connecting passageway could have housed a small devotional altar decorated with local flora.",
+      "id": "building_45.433023_12.356371"
     },
     {
       "lat": 45.43339624341329,
       "lng": 12.356330990739476,
       "streetName": "Rio Terà dei Figari",
       "streetNameEnglish": "Filled Canal of the Fig Sellers",
-      "streetDescription": "A rio terà is a filled-in canal, and this name directly connects to the 'Figareto' reference (place of figs) in the nearby Ramo del Figareto. It suggests this was once a canal that was filled in and where fig sellers might have set up their stalls or where fig trees once grew."
+      "streetDescription": "A rio terà is a filled-in canal, and this name directly connects to the 'Figareto' reference (place of figs) in the nearby Ramo del Figareto. It suggests this was once a canal that was filled in and where fig sellers might have set up their stalls or where fig trees once grew.",
+      "id": "building_45.433396_12.356331"
     },
     {
       "lat": 45.43388318981879,
       "lng": 12.356465398704358,
       "streetName": "Salizada dei Garzotti",
       "streetNameEnglish": "Paved Street of the Apprentices",
-      "streetDescription": "A 'salizada' was one of the first paved streets in Venice, and 'garzotti' refers to apprentices or young workers. This name would be appropriate for an area near Ramo del Figareto in the commercial district of San Marco where many workshops would have employed young apprentices in various crafts."
+      "streetDescription": "A 'salizada' was one of the first paved streets in Venice, and 'garzotti' refers to apprentices or young workers. This name would be appropriate for an area near Ramo del Figareto in the commercial district of San Marco where many workshops would have employed young apprentices in various crafts.",
+      "id": "building_45.433883_12.356465"
     },
     {
       "lat": 45.434328042791506,
       "lng": 12.356391876516827,
       "streetName": "Calle del Ridotto",
       "streetNameEnglish": "Street of the Gambling House",
-      "streetDescription": "The Ridotto was Venice's famous gambling house established in the 17th century in San Marco. This street name would indicate a path that led toward or was near this famous establishment, which would be geographically appropriate for a street connected to Ramo del Figareto in the Sestiere San Marco."
+      "streetDescription": "The Ridotto was Venice's famous gambling house established in the 17th century in San Marco. This street name would indicate a path that led toward or was near this famous establishment, which would be geographically appropriate for a street connected to Ramo del Figareto in the Sestiere San Marco.",
+      "id": "building_45.434328_12.356392"
     },
     {
       "lat": 45.4348282954343,
       "lng": 12.356300933634357,
       "streetName": "Ruga degli Oresi",
       "streetNameEnglish": "Street of the Goldsmiths",
-      "streetDescription": "A 'ruga' typically indicates a commercial street lined with shops of the same trade. 'Oresi' refers to goldsmiths, who were prominent in the San Marco area. This name would be historically accurate for a street near Ramo del Figareto that hosted workshops of goldsmiths creating fine jewelry for Venice's wealthy citizens."
+      "streetDescription": "A 'ruga' typically indicates a commercial street lined with shops of the same trade. 'Oresi' refers to goldsmiths, who were prominent in the San Marco area. This name would be historically accurate for a street near Ramo del Figareto that hosted workshops of goldsmiths creating fine jewelry for Venice's wealthy citizens.",
+      "id": "building_45.434828_12.356301"
     }
   ],
   "id": "polygon-1746057291098"

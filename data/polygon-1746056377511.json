@@ -46,7 +46,7 @@
     "lat": 45.436715968853875,
     "lng": 12.343348534751625
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -71,7 +71,8 @@
             "lng": 12.342588412116012
           }
         }
-      }
+      },
+      "id": "bridge_45.438063_12.342638"
     },
     {
       "edge": {
@@ -96,7 +97,8 @@
             "lng": 12.34368969280835
           }
         }
-      }
+      },
+      "id": "bridge_45.435740_12.343646"
     },
     {
       "edge": {
@@ -121,7 +123,8 @@
             "lng": 12.343364628005714
           }
         }
-      }
+      },
+      "id": "bridge_45.436019_12.343421"
     },
     {
       "edge": {
@@ -146,7 +149,8 @@
             "lng": 12.343048127341957
           }
         }
-      }
+      },
+      "id": "bridge_45.436425_12.343126"
     },
     {
       "edge": {
@@ -171,7 +175,8 @@
             "lng": 12.3427316266782
           }
         }
-      }
+      },
+      "id": "bridge_45.436832_12.342831"
     },
     {
       "edge": {
@@ -196,7 +201,8 @@
             "lng": 12.342544155667266
           }
         }
-      }
+      },
+      "id": "bridge_45.437825_12.342584"
     }
   ],
   "buildingPoints": [
@@ -205,49 +211,56 @@
       "lng": 12.343761104158794,
       "streetName": "Calle dei Battilana",
       "streetNameEnglish": "Street of the Wool Beaters",
-      "streetDescription": "Named after the artisans who beat wool to clean and soften it before spinning. The Castello district had several wool workshops near San Severo in the 15th-16th centuries, supporting Venice's important textile industry."
+      "streetDescription": "Named after the artisans who beat wool to clean and soften it before spinning. The Castello district had several wool workshops near San Severo in the 15th-16th centuries, supporting Venice's important textile industry.",
+      "id": "building_45.436123_12.343761"
     },
     {
       "lat": 45.43654321338125,
       "lng": 12.34325439637921,
       "streetName": "Rio Terà San Lorenzo",
       "streetNameEnglish": "Filled Canal of Saint Lawrence",
-      "streetDescription": "This street was originally a canal that was filled in (rio terà) during the 16th century urban renovations. The name references the nearby Church of San Lorenzo, an important religious landmark in the Castello district since medieval times."
+      "streetDescription": "This street was originally a canal that was filled in (rio terà) during the 16th century urban renovations. The name references the nearby Church of San Lorenzo, an important religious landmark in the Castello district since medieval times.",
+      "id": "building_45.436543_12.343254"
     },
     {
       "lat": 45.43653672036262,
       "lng": 12.343942029410229,
       "streetName": "Sottoportego dei Reliquiari",
       "streetNameEnglish": "Passageway of the Reliquary Makers",
-      "streetDescription": "This covered passageway (sottoportego) was home to craftsmen who created reliquaries for the many churches in Venice, including the nearby San Severo. These artisans worked with precious metals and were especially active during the 15th-16th centuries when Venice acquired numerous relics from Constantinople."
+      "streetDescription": "This covered passageway (sottoportego) was home to craftsmen who created reliquaries for the many churches in Venice, including the nearby San Severo. These artisans worked with precious metals and were especially active during the 15th-16th centuries when Venice acquired numerous relics from Constantinople.",
+      "id": "building_45.436537_12.343942"
     },
     {
       "lat": 45.43694637213912,
       "lng": 12.3431602821449,
       "streetName": "Salizada dei Greci Studiosi",
       "streetNameEnglish": "Paved Street of the Greek Scholars",
-      "streetDescription": "A paved street (salizada) named after Greek scholars who lived and studied in this area of Castello, not far from the Greek community centered around San Giorgio dei Greci. After the fall of Constantinople in 1453, many Byzantine scholars found refuge in Venice, bringing valuable manuscripts and contributing to Renaissance learning."
+      "streetDescription": "A paved street (salizada) named after Greek scholars who lived and studied in this area of Castello, not far from the Greek community centered around San Giorgio dei Greci. After the fall of Constantinople in 1453, many Byzantine scholars found refuge in Venice, bringing valuable manuscripts and contributing to Renaissance learning.",
+      "id": "building_45.436946_12.343160"
     },
     {
       "lat": 45.43701901832259,
       "lng": 12.343826196727992,
       "streetName": "Calle Grimani",
       "streetNameEnglish": "Grimani Street",
-      "streetDescription": "Named after the noble Grimani family who had a palazzo in Castello. The Grimani were prominent patrons of the arts during the Renaissance and several family members served as doges. Their connection to San Severo area included donations to local churches and charitable institutions in the 16th century."
+      "streetDescription": "Named after the noble Grimani family who had a palazzo in Castello. The Grimani were prominent patrons of the arts during the Renaissance and several family members served as doges. Their connection to San Severo area included donations to local churches and charitable institutions in the 16th century.",
+      "id": "building_45.437019_12.343826"
     },
     {
       "lat": 45.43738039430366,
       "lng": 12.343059885714915,
       "streetName": "Fondamenta dei Codici",
       "streetNameEnglish": "Foundation of the Manuscripts",
-      "streetDescription": "This waterside street (fondamenta) is named in reference to the manuscript copyists and illuminators who worked in this scholarly area near San Severo. In Renaissance Venice, the production of manuscripts and early printed books was a significant intellectual and commercial activity, especially with the nearby Benedictine monastery which housed an important library."
+      "streetDescription": "This waterside street (fondamenta) is named in reference to the manuscript copyists and illuminators who worked in this scholarly area near San Severo. In Renaissance Venice, the production of manuscripts and early printed books was a significant intellectual and commercial activity, especially with the nearby Benedictine monastery which housed an important library.",
+      "id": "building_45.437380_12.343060"
     },
     {
       "lat": 45.43744223360087,
       "lng": 12.343690100577108,
       "streetName": "Ruga degli Amanuensi",
       "streetNameEnglish": "Street of the Scribes",
-      "streetDescription": "A commercial street (ruga) where professional scribes had their workshops. Located near San Severo, these artisans produced documents, contracts, and correspondence for merchants, nobles, and the Republic's institutions. The proximity to the Scuola Grande di San Marco and various government offices created steady demand for their services throughout the Renaissance period."
+      "streetDescription": "A commercial street (ruga) where professional scribes had their workshops. Located near San Severo, these artisans produced documents, contracts, and correspondence for merchants, nobles, and the Republic's institutions. The proximity to the Scuola Grande di San Marco and various government offices created steady demand for their services throughout the Renaissance period.",
+      "id": "building_45.437442_12.343690"
     }
   ],
   "id": "polygon-1746056377511"

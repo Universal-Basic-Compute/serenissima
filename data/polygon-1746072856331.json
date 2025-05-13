@@ -106,7 +106,7 @@
     "lat": 45.43731375303353,
     "lng": 12.329916278879844
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -131,7 +131,8 @@
             "lng": 12.330765023106384
           }
         }
-      }
+      },
+      "id": "bridge_45.437147_12.330738"
     },
     {
       "edge": {
@@ -156,7 +157,8 @@
             "lng": 12.33087231146698
           }
         }
-      }
+      },
+      "id": "bridge_45.436797_12.330840"
     }
   ],
   "buildingPoints": [
@@ -165,56 +167,64 @@
       "lng": 12.329719436395054,
       "streetName": "Calle dei Mercanti di San Polo",
       "streetNameEnglish": "Street of the Merchants of San Polo",
-      "streetDescription": "This calle would have been named after the merchants who conducted business in the San Polo district, which was a commercial hub near the Rialto market. Many merchant families established their businesses in this contrada during the Renaissance period."
+      "streetDescription": "This calle would have been named after the merchants who conducted business in the San Polo district, which was a commercial hub near the Rialto market. Many merchant families established their businesses in this contrada during the Renaissance period.",
+      "id": "building_45.436515_12.329719"
     },
     {
       "lat": 45.43708167607411,
       "lng": 12.32968677351004,
       "streetName": "Rio Terà dei Frari",
       "streetNameEnglish": "Filled Canal of the Friars",
-      "streetDescription": "Named for its proximity to the Basilica di Santa Maria Gloriosa dei Frari, one of the most important churches in Venice. Rio Terà indicates this was once a canal that was filled in, creating a street that would have connected the neighborhood to this significant Franciscan church in San Polo."
+      "streetDescription": "Named for its proximity to the Basilica di Santa Maria Gloriosa dei Frari, one of the most important churches in Venice. Rio Terà indicates this was once a canal that was filled in, creating a street that would have connected the neighborhood to this significant Franciscan church in San Polo.",
+      "id": "building_45.437082_12.329687"
     },
     {
       "lat": 45.43699811793944,
       "lng": 12.33040671468677,
       "streetName": "Sottoportego dei Marangoni",
       "streetNameEnglish": "Passageway of the Carpenters",
-      "streetDescription": "This covered passageway would have been associated with the guild of carpenters (marangoni) who were essential to Venice's shipbuilding industry. San Polo hosted several artisan workshops, and carpentry was a vital trade in the maritime republic."
+      "streetDescription": "This covered passageway would have been associated with the guild of carpenters (marangoni) who were essential to Venice's shipbuilding industry. San Polo hosted several artisan workshops, and carpentry was a vital trade in the maritime republic.",
+      "id": "building_45.436998_12.330407"
     },
     {
       "lat": 45.4375032998409,
       "lng": 12.329168661927296,
       "streetName": "Ruga dei Oresi di San Polo",
       "streetNameEnglish": "Row of the Goldsmiths of San Polo",
-      "streetDescription": "This street would have been home to goldsmiths and jewelry makers. 'Ruga' typically designated commercial streets with specialized shops under arcades. The goldsmiths' guild was highly respected in Renaissance Venice, and they likely had workshops in this contrada."
+      "streetDescription": "This street would have been home to goldsmiths and jewelry makers. 'Ruga' typically designated commercial streets with specialized shops under arcades. The goldsmiths' guild was highly respected in Renaissance Venice, and they likely had workshops in this contrada.",
+      "id": "building_45.437503_12.329169"
     },
     {
       "lat": 45.43750106051819,
       "lng": 12.329726880839882,
       "streetName": "Calle Pisani di San Polo",
       "streetNameEnglish": "Pisani Family Street of San Polo",
-      "streetDescription": "Named after the noble Pisani family who likely owned property in this area. Many Venetian streets were named after prominent nobili families who built palazzi in the neighborhood. The Pisani were one of Venice's most influential families during the Renaissance."
+      "streetDescription": "Named after the noble Pisani family who likely owned property in this area. Many Venetian streets were named after prominent nobili families who built palazzi in the neighborhood. The Pisani were one of Venice's most influential families during the Renaissance.",
+      "id": "building_45.437501_12.329727"
     },
     {
       "lat": 45.43791456222895,
       "lng": 12.329136934226803,
       "streetName": "Salizada dei Meloni",
       "streetNameEnglish": "Paved Street of the Melons",
-      "streetDescription": "This 'salizada' (paved street) was likely named after melon vendors or a market area specializing in melons. San Polo's proximity to the Rialto market meant that many food vendors and specialty markets were spread throughout the contrada."
+      "streetDescription": "This 'salizada' (paved street) was likely named after melon vendors or a market area specializing in melons. San Polo's proximity to the Rialto market meant that many food vendors and specialty markets were spread throughout the contrada.",
+      "id": "building_45.437915_12.329137"
     },
     {
       "lat": 45.437985630538286,
       "lng": 12.32965616596355,
       "streetName": "Fondamenta dei Traghettatori",
       "streetNameEnglish": "Foundation of the Ferrymen",
-      "streetDescription": "This riverside street would have been named for the gondoliers who operated ferry crossings (traghetti) across the Grand Canal. San Polo, bordering the Grand Canal, would have had several such ferry points, essential for transportation in a city of islands."
+      "streetDescription": "This riverside street would have been named for the gondoliers who operated ferry crossings (traghetti) across the Grand Canal. San Polo, bordering the Grand Canal, would have had several such ferry points, essential for transportation in a city of islands.",
+      "id": "building_45.437986_12.329656"
     },
     {
       "lat": 45.43791336448906,
       "lng": 12.330375078385961,
       "streetName": "Corte Mocenigo",
       "streetNameEnglish": "Mocenigo Court",
-      "streetDescription": "A small courtyard named after the powerful Mocenigo family, who produced several Doges of Venice. The family likely owned property or a palazzo in the San Polo district, and the small court would have been part of or adjacent to their property."
+      "streetDescription": "A small courtyard named after the powerful Mocenigo family, who produced several Doges of Venice. The family likely owned property or a palazzo in the San Polo district, and the small court would have been part of or adjacent to their property.",
+      "id": "building_45.437913_12.330375"
     }
   ],
   "id": "polygon-1746072856331"

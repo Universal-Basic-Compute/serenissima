@@ -50,7 +50,7 @@
     "lat": 45.43540950167617,
     "lng": 12.325718729489502
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -75,7 +75,8 @@
             "lng": 12.325307446288388
           }
         }
-      }
+      },
+      "id": "bridge_45.436250_12.325246"
     },
     {
       "edge": {
@@ -100,7 +101,8 @@
             "lng": 12.32592256622247
           }
         }
-      }
+      },
+      "id": "bridge_45.436006_12.325868"
     },
     {
       "edge": {
@@ -125,7 +127,8 @@
             "lng": 12.326537686156552
           }
         }
-      }
+      },
+      "id": "bridge_45.435763_12.326490"
     },
     {
       "edge": {
@@ -150,7 +153,8 @@
             "lng": 12.327009754943173
           }
         }
-      }
+      },
+      "id": "bridge_45.435439_12.326989"
     },
     {
       "edge": {
@@ -175,7 +179,8 @@
             "lng": 12.325987302358236
           }
         }
-      }
+      },
+      "id": "bridge_45.434799_12.326061"
     },
     {
       "edge": {
@@ -200,7 +205,8 @@
             "lng": 12.324370920841563
           }
         }
-      }
+      },
+      "id": "bridge_45.436011_12.324409"
     }
   ],
   "buildingPoints": [
@@ -209,49 +215,56 @@
       "lng": 12.325372019602352,
       "streetName": "Calle dei Tintori di Seta",
       "streetNameEnglish": "Street of the Silk Dyers",
-      "streetDescription": "Dorsoduro was known for textile workshops, especially those dyeing silk fabrics. Near San Sebastiano, several silk dyers operated workshops taking advantage of the nearby canals for water access essential to their craft. This name reflects the important craft guild presence in this area during the Renaissance."
+      "streetDescription": "Dorsoduro was known for textile workshops, especially those dyeing silk fabrics. Near San Sebastiano, several silk dyers operated workshops taking advantage of the nearby canals for water access essential to their craft. This name reflects the important craft guild presence in this area during the Renaissance.",
+      "id": "building_45.435232_12.325372"
     },
     {
       "lat": 45.43532938164237,
       "lng": 12.326050878432557,
       "streetName": "Fondamenta San Basilio",
       "streetNameEnglish": "Foundation of Saint Basil",
-      "streetDescription": "This waterside street would be named for the ancient church of San Basilio that once stood in Dorsoduro near the current location of San Sebastiano. Though the original church no longer exists, its memory was preserved in street names. Many Venetian fondamente (canal-side streets) were named after nearby religious buildings."
+      "streetDescription": "This waterside street would be named for the ancient church of San Basilio that once stood in Dorsoduro near the current location of San Sebastiano. Though the original church no longer exists, its memory was preserved in street names. Many Venetian fondamente (canal-side streets) were named after nearby religious buildings.",
+      "id": "building_45.435329_12.326051"
     },
     {
       "lat": 45.43527033474255,
       "lng": 12.326847176614615,
       "streetName": "Rio Terà Foscarini",
       "streetNameEnglish": "Filled Canal of the Foscarini",
-      "streetDescription": "Named after the noble Foscarini family who had a significant palazzo in this area of Dorsoduro. Rio Terà indicates a former canal that was filled in to create a street, common in Venice's urban development. The Foscarini were prominent patrons in this sestiere during the Renaissance."
+      "streetDescription": "Named after the noble Foscarini family who had a significant palazzo in this area of Dorsoduro. Rio Terà indicates a former canal that was filled in to create a street, common in Venice's urban development. The Foscarini were prominent patrons in this sestiere during the Renaissance.",
+      "id": "building_45.435270_12.326847"
     },
     {
       "lat": 45.435633859202966,
       "lng": 12.3248317631772,
       "streetName": "Sottoportego del Veronese",
       "streetNameEnglish": "Passageway of Veronese",
-      "streetDescription": "A covered passageway named in honor of Paolo Veronese, the famous painter who created numerous masterpieces for the Church of San Sebastiano between 1555 and 1570. His workshop would have been nearby, and he is buried in this church, making this a fitting tribute in the immediate vicinity."
+      "streetDescription": "A covered passageway named in honor of Paolo Veronese, the famous painter who created numerous masterpieces for the Church of San Sebastiano between 1555 and 1570. His workshop would have been nearby, and he is buried in this church, making this a fitting tribute in the immediate vicinity.",
+      "id": "building_45.435634_12.324832"
     },
     {
       "lat": 45.435704099559324,
       "lng": 12.325531972095815,
       "streetName": "Calle della Confraternita",
       "streetNameEnglish": "Street of the Brotherhood",
-      "streetDescription": "This name references the Scuola di San Sebastiano, the confraternity associated with the church. These lay brotherhoods were vital to Venetian social and religious life, providing charitable services and commissioning artworks. The confraternity would have had its meeting halls near the church in Dorsoduro."
+      "streetDescription": "This name references the Scuola di San Sebastiano, the confraternity associated with the church. These lay brotherhoods were vital to Venetian social and religious life, providing charitable services and commissioning artworks. The confraternity would have had its meeting halls near the church in Dorsoduro.",
+      "id": "building_45.435704_12.325532"
     },
     {
       "lat": 45.43576002743695,
       "lng": 12.3259873325887,
       "streetName": "Ruga dei Corrazzeri",
       "streetNameEnglish": "Street of the Armor Makers",
-      "streetDescription": "This commercial street would be named for the armor makers who had workshops in this area of Dorsoduro. 'Ruga' typically designated a street with shops. The nearby Giudecca canal provided good transportation for heavy materials, making this area practical for metalworking crafts including armor production for Venice's military and naval forces."
+      "streetDescription": "This commercial street would be named for the armor makers who had workshops in this area of Dorsoduro. 'Ruga' typically designated a street with shops. The nearby Giudecca canal provided good transportation for heavy materials, making this area practical for metalworking crafts including armor production for Venice's military and naval forces.",
+      "id": "building_45.435760_12.325987"
     },
     {
       "lat": 45.4360807656986,
       "lng": 12.324915544142405,
       "streetName": "Campiello dei Martiri",
       "streetNameEnglish": "Small Square of the Martyrs",
-      "streetDescription": "A small square named in reference to Saint Sebastian and other martyred saints depicted in the church. This name would be appropriate for a small campo near the church of San Sebastiano, reflecting the religious iconography that would have been familiar to Renaissance Venetians in this parish."
+      "streetDescription": "A small square named in reference to Saint Sebastian and other martyred saints depicted in the church. This name would be appropriate for a small campo near the church of San Sebastiano, reflecting the religious iconography that would have been familiar to Renaissance Venetians in this parish.",
+      "id": "building_45.436081_12.324916"
     }
   ],
   "id": "polygon-1745879420223"

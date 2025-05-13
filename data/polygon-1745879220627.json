@@ -34,7 +34,7 @@
     "lat": 45.434759251232684,
     "lng": 12.31878597058245
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -59,7 +59,8 @@
             "lng": 12.318894623712167
           }
         }
-      }
+      },
+      "id": "bridge_45.435149_12.318836"
     },
     {
       "edge": {
@@ -84,7 +85,8 @@
             "lng": 12.31963245470868
           }
         }
-      }
+      },
+      "id": "bridge_45.435309_12.319602"
     }
   ],
   "buildingPoints": [
@@ -93,14 +95,16 @@
       "lng": 12.317913926970006,
       "streetName": "Sottoportego dei Tintori",
       "streetNameEnglish": "Passageway of the Dyers",
-      "streetDescription": "This sottoportego (covered passageway) near Calle Sporca in Cannaregio would have been named after the dyers who operated in this district. Cannaregio was known for textile production in Renaissance Venice, with many workshops using the canal waters for dyeing fabrics. The tintori (dyers) formed an important guild that controlled the quality and processes of fabric coloration."
+      "streetDescription": "This sottoportego (covered passageway) near Calle Sporca in Cannaregio would have been named after the dyers who operated in this district. Cannaregio was known for textile production in Renaissance Venice, with many workshops using the canal waters for dyeing fabrics. The tintori (dyers) formed an important guild that controlled the quality and processes of fabric coloration.",
+      "id": "building_45.434739_12.317914"
     },
     {
       "lat": 45.434824143811994,
       "lng": 12.318670945656423,
       "streetName": "Calle dei Ebrei Vecchi",
       "streetNameEnglish": "Street of the Old Jews",
-      "streetDescription": "Located in Cannaregio near Calle Sporca, this street name reflects the historical presence of Venice's Jewish community. Cannaregio contained the first Jewish Ghetto in Europe, established in 1516. 'Ebrei Vecchi' would refer to the original Jewish settlers or the older part of the Jewish quarter, distinguishing it from newer areas that developed as the community expanded within the confined ghetto."
+      "streetDescription": "Located in Cannaregio near Calle Sporca, this street name reflects the historical presence of Venice's Jewish community. Cannaregio contained the first Jewish Ghetto in Europe, established in 1516. 'Ebrei Vecchi' would refer to the original Jewish settlers or the older part of the Jewish quarter, distinguishing it from newer areas that developed as the community expanded within the confined ghetto.",
+      "id": "building_45.434824_12.318671"
     }
   ],
   "id": "polygon-1745879220627"

@@ -34,7 +34,7 @@
     "lat": 45.43810621533953,
     "lng": 12.340252195199714
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -59,7 +59,8 @@
             "lng": 12.340279313639805
           }
         }
-      }
+      },
+      "id": "bridge_45.437661_12.340240"
     }
   ],
   "buildingPoints": [
@@ -68,14 +69,16 @@
       "lng": 12.340249752107278,
       "streetName": "Calle del Doge Barbarigo",
       "streetNameEnglish": "Street of Doge Barbarigo",
-      "streetDescription": "Named after Agostino Barbarigo, who served as Doge of Venice from 1486 to 1501 during the Renaissance. His palace was located near San Marco, and this calle would commemorate one of the notable Doges who helped maintain Venice's diplomatic relations during a pivotal period. The name follows the convention of streets named after prominent Venetian leaders in the San Marco district."
+      "streetDescription": "Named after Agostino Barbarigo, who served as Doge of Venice from 1486 to 1501 during the Renaissance. His palace was located near San Marco, and this calle would commemorate one of the notable Doges who helped maintain Venice's diplomatic relations during a pivotal period. The name follows the convention of streets named after prominent Venetian leaders in the San Marco district.",
+      "id": "building_45.437943_12.340250"
     },
     {
       "lat": 45.43838561719342,
       "lng": 12.34031419811156,
       "streetName": "Sottoportego dei Camerlenghi",
       "streetNameEnglish": "Passageway of the Treasurers",
-      "streetDescription": "This covered passageway would reference the Camerlenghi, who were financial officials responsible for managing the Republic's treasury. Located in San Marco near the Doge's administrative center, this path would have been used by officials traveling between financial offices and the Palazzo Ducale. The name reflects Venice's sophisticated government structure and the importance of financial administration to the maritime republic."
+      "streetDescription": "This covered passageway would reference the Camerlenghi, who were financial officials responsible for managing the Republic's treasury. Located in San Marco near the Doge's administrative center, this path would have been used by officials traveling between financial offices and the Palazzo Ducale. The name reflects Venice's sophisticated government structure and the importance of financial administration to the maritime republic.",
+      "id": "building_45.438386_12.340314"
     }
   ],
   "id": "polygon-1746056173670"

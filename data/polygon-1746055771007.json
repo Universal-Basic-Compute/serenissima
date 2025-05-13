@@ -38,7 +38,7 @@
     "lat": 45.44369892962761,
     "lng": 12.33290494076297
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -63,7 +63,8 @@
             "lng": 12.333851424167706
           }
         }
-      }
+      },
+      "id": "bridge_45.442927_12.333900"
     },
     {
       "edge": {
@@ -88,7 +89,8 @@
             "lng": 12.33208921286491
           }
         }
-      }
+      },
+      "id": "bridge_45.443954_12.332098"
     }
   ],
   "buildingPoints": [
@@ -97,7 +99,8 @@
       "lng": 12.332825198392337,
       "streetName": "Calle dei Fioleri",
       "streetNameEnglish": "Street of the Glassblowers",
-      "streetDescription": "This name refers to the skilled glass artisans who specialized in creating thin glass vessels, particularly bottles and vials. Near the Fondamenta de la Misericordia, several workshops of these specialized glassblowers operated during the Renaissance period, supplying containers for the many apothecaries and perfumers of Venice. The term 'fiola' (vial) gave rise to the profession name 'fioleri', distinguishing these craftsmen from other glass artisans who focused on different products."
+      "streetDescription": "This name refers to the skilled glass artisans who specialized in creating thin glass vessels, particularly bottles and vials. Near the Fondamenta de la Misericordia, several workshops of these specialized glassblowers operated during the Renaissance period, supplying containers for the many apothecaries and perfumers of Venice. The term 'fiola' (vial) gave rise to the profession name 'fioleri', distinguishing these craftsmen from other glass artisans who focused on different products.",
+      "id": "building_45.443810_12.332825"
     }
   ],
   "id": "polygon-1746055771007"

@@ -492,7 +492,7 @@ export default function SimpleViewer({ qualityMode = 'high', waterQuality = 'hig
     setTimeout(() => {
       if (activeView === 'transport' && polygonRendererRef.current) {
         console.log('Creating transport markers after initialization');
-        polygonRendererRef.current.forceCreateBridgeAndDockPoints();
+        polygonRendererRef.current.forceCreateBridgeAndCanalPoints();
       }
       
       // Use SceneLayerManager for buildings view
@@ -618,29 +618,29 @@ export default function SimpleViewer({ qualityMode = 'high', waterQuality = 'hig
       // Check if we have any polygons with bridge or dock points
       if (polygons && polygons.length > 0) {
         let bridgePointCount = 0;
-        let dockPointCount = 0;
+        let canalPointCount = 0;
         let polygonsWithBridgePoints = 0;
-        let polygonsWithDockPoints = 0;
+        let polygonsWithCanalPoints = 0;
         
         polygons.forEach(polygon => {
           if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints) && polygon.bridgePoints.length > 0) {
             bridgePointCount += polygon.bridgePoints.length;
             polygonsWithBridgePoints++;
           }
-          if (polygon.dockPoints && Array.isArray(polygon.dockPoints) && polygon.dockPoints.length > 0) {
-            dockPointCount += polygon.dockPoints.length;
-            polygonsWithDockPoints++;
+          if (polygon.canalPoints && Array.isArray(polygon.canalPoints) && polygon.canalPoints.length > 0) {
+            canalPointCount += polygon.canalPoints.length;
+            polygonsWithCanalPoints++;
           }
         });
         
         console.log(`Found ${bridgePointCount} bridge points in ${polygonsWithBridgePoints} polygons`);
-        console.log(`Found ${dockPointCount} dock points in ${polygonsWithDockPoints} polygons`);
+        console.log(`Found ${canalPointCount} dock points in ${polygonsWithCanalPoints} polygons`);
         
         // Log a sample of the first polygon with dock points for debugging
-        const samplePolygon = polygons.find(p => p.dockPoints && p.dockPoints.length > 0);
+        const samplePolygon = polygons.find(p => p.canalPoints && p.canalPoints.length > 0);
         if (samplePolygon) {
           console.log('Sample polygon with dock points:', samplePolygon.id);
-          console.log('First dock point:', samplePolygon.dockPoints[0]);
+          console.log('First dock point:', samplePolygon.canalPoints[0]);
         }
       } else {
         console.warn('No polygons available to check for bridge/dock points');
@@ -768,8 +768,8 @@ export default function SimpleViewer({ qualityMode = 'high', waterQuality = 'hig
       if (polygonRendererRef.current) {
         console.log("Attempting to force create transport markers...");
         
-        // Use the public forceCreateBridgeAndDockPoints method
-        polygonRendererRef.current.forceCreateBridgeAndDockPoints();
+        // Use the public forceCreateBridgeAndCanalPoints method
+        polygonRendererRef.current.forceCreateBridgeAndCanalPoints();
       }
     }
     
@@ -1071,7 +1071,7 @@ export default function SimpleViewer({ qualityMode = 'high', waterQuality = 'hig
           <h3 className="text-lg font-serif mb-2">Transport Points</h3>
           <div className="flex items-center mb-1">
             <div className="w-4 h-4 rounded-full bg-[#00AAFF] mr-2"></div>
-            <span>Dock Points</span>
+            <span>Canal Points</span>
           </div>
           <div className="flex items-center mb-1">
             <div className="w-4 h-4 rounded-full bg-[#FF5500] mr-2"></div>

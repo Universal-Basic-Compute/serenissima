@@ -58,7 +58,7 @@
     "lat": 45.44242813002662,
     "lng": 12.333846692599792
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -83,7 +83,8 @@
             "lng": 12.3334824201679
           }
         }
-      }
+      },
+      "id": "bridge_45.441637_12.333492"
     },
     {
       "edge": {
@@ -108,7 +109,8 @@
             "lng": 12.333863070330597
           }
         }
-      }
+      },
+      "id": "bridge_45.442028_12.333869"
     },
     {
       "edge": {
@@ -133,7 +135,8 @@
             "lng": 12.334243720493294
           }
         }
-      }
+      },
+      "id": "bridge_45.442420_12.334246"
     }
   ],
   "buildingPoints": [
@@ -142,21 +145,24 @@
       "lng": 12.332882111829612,
       "streetName": "Calle dei Miracolati",
       "streetNameEnglish": "Street of the Miraculously Healed",
-      "streetDescription": "This street name refers to those who claimed to be healed after praying at the Chiesa di Santa Maria dei Miracoli. During the Renaissance, this church was known for miraculous healing, particularly after its construction in the late 15th century. Located near Calle Salamon in Cannaregio, this name reflects the spiritual significance of the nearby church and its importance to local residents who sought divine intervention for ailments."
+      "streetDescription": "This street name refers to those who claimed to be healed after praying at the Chiesa di Santa Maria dei Miracoli. During the Renaissance, this church was known for miraculous healing, particularly after its construction in the late 15th century. Located near Calle Salamon in Cannaregio, this name reflects the spiritual significance of the nearby church and its importance to local residents who sought divine intervention for ailments.",
+      "id": "building_45.441610_12.332882"
     },
     {
       "lat": 45.44211524971786,
       "lng": 12.333434878734733,
       "streetName": "Rio Terà dei Scalpellini",
       "streetNameEnglish": "Filled Canal of the Stonemasons",
-      "streetDescription": "This filled canal would reference the stonemasons who worked on the exquisite marble façade of the Church of Santa Maria dei Miracoli. The church, completed in the 1480s, required skilled stonemasons for its ornate marble work. In Cannaregio near Calle Salamon, this area would have housed workshops for artisans working on the church's construction and maintenance. 'Rio Terà' indicates a former canal that was filled in to create a street, common in Venice's urban development."
+      "streetDescription": "This filled canal would reference the stonemasons who worked on the exquisite marble façade of the Church of Santa Maria dei Miracoli. The church, completed in the 1480s, required skilled stonemasons for its ornate marble work. In Cannaregio near Calle Salamon, this area would have housed workshops for artisans working on the church's construction and maintenance. 'Rio Terà' indicates a former canal that was filled in to create a street, common in Venice's urban development.",
+      "id": "building_45.442115_12.333435"
     },
     {
       "lat": 45.442590017509865,
       "lng": 12.33420713137328,
       "streetName": "Sottoportego dei Marmorari",
       "streetNameEnglish": "Passageway of the Marble Workers",
-      "streetDescription": "This covered passageway would honor the marble workers who created the stunning polychrome marble decorations of Santa Maria dei Miracoli. The church is famous for its marble inlay work and decorative panels. A sottoportego (covered passageway) near Calle Salamon would have provided shelter for workers or storage for valuable marble materials. The guild of Marmorari (marble workers) held significant status in Renaissance Venice due to their specialized skills in working with imported luxury materials."
+      "streetDescription": "This covered passageway would honor the marble workers who created the stunning polychrome marble decorations of Santa Maria dei Miracoli. The church is famous for its marble inlay work and decorative panels. A sottoportego (covered passageway) near Calle Salamon would have provided shelter for workers or storage for valuable marble materials. The guild of Marmorari (marble workers) held significant status in Renaissance Venice due to their specialized skills in working with imported luxury materials.",
+      "id": "building_45.442590_12.334207"
     }
   ],
   "id": "polygon-1746055909289"

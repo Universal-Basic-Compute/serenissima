@@ -62,7 +62,7 @@
     "lat": 45.43634638035644,
     "lng": 12.342094842906995
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -87,7 +87,8 @@
             "lng": 12.3427316266782
           }
         }
-      }
+      },
+      "id": "bridge_45.436884_12.342632"
     },
     {
       "edge": {
@@ -112,7 +113,8 @@
             "lng": 12.343048127341957
           }
         }
-      }
+      },
+      "id": "bridge_45.436470_12.342970"
     },
     {
       "edge": {
@@ -137,7 +139,8 @@
             "lng": 12.343364628005714
           }
         }
-      }
+      },
+      "id": "bridge_45.436056_12.343308"
     },
     {
       "edge": {
@@ -162,7 +165,8 @@
             "lng": 12.341157687498292
           }
         }
-      }
+      },
+      "id": "bridge_45.435932_12.341184"
     },
     {
       "edge": {
@@ -187,7 +191,8 @@
             "lng": 12.341165500233611
           }
         }
-      }
+      },
+      "id": "bridge_45.436564_12.341227"
     },
     {
       "edge": {
@@ -212,7 +217,8 @@
             "lng": 12.341730105231246
           }
         }
-      }
+      },
+      "id": "bridge_45.437073_12.341753"
     }
   ],
   "buildingPoints": [
@@ -221,35 +227,40 @@
       "lng": 12.34268779873875,
       "streetName": "Calle dei Cambiavalute",
       "streetNameEnglish": "Street of the Money Changers",
-      "streetDescription": "This name references the money changers who operated near San Marco, exchanging foreign currencies for Venetian ducats. Given the proximity to the commercial center of Venice, money changers would have been common in this area during the Renaissance period, serving merchants and visitors from across Europe and the Mediterranean."
+      "streetDescription": "This name references the money changers who operated near San Marco, exchanging foreign currencies for Venetian ducats. Given the proximity to the commercial center of Venice, money changers would have been common in this area during the Renaissance period, serving merchants and visitors from across Europe and the Mediterranean.",
+      "id": "building_45.435891_12.342688"
     },
     {
       "lat": 45.43636029123372,
       "lng": 12.341430170767959,
       "streetName": "Rio Terà del Pozzo Antico",
       "streetNameEnglish": "Filled Canal of the Ancient Well",
-      "streetDescription": "This name draws from the 'Pozzo Roverso' (Reversed Well) mentioned in the court's name, but refers to an ancient well that would have been a significant landmark. Rio Terà indicates this was once a canal that was filled in, common in Venice's urban development. The well would have been essential for local water supply in the San Marco district."
+      "streetDescription": "This name draws from the 'Pozzo Roverso' (Reversed Well) mentioned in the court's name, but refers to an ancient well that would have been a significant landmark. Rio Terà indicates this was once a canal that was filled in, common in Venice's urban development. The well would have been essential for local water supply in the San Marco district.",
+      "id": "building_45.436360_12.341430"
     },
     {
       "lat": 45.436357176162176,
       "lng": 12.342012129612145,
       "streetName": "Salizada dei Drappi d'Oro",
       "streetNameEnglish": "Paved Street of the Golden Cloths",
-      "streetDescription": "This name refers to the luxurious gold-threaded fabrics that were sold and displayed by merchants near San Marco. The prestigious location near the heart of Venice would have been home to high-end textile merchants. 'Salizada' indicates this was one of the earlier paved streets in Venice, signifying its importance."
+      "streetDescription": "This name refers to the luxurious gold-threaded fabrics that were sold and displayed by merchants near San Marco. The prestigious location near the heart of Venice would have been home to high-end textile merchants. 'Salizada' indicates this was one of the earlier paved streets in Venice, signifying its importance.",
+      "id": "building_45.436357_12.342012"
     },
     {
       "lat": 45.43639067789714,
       "lng": 12.342712173497414,
       "streetName": "Sottoportego delle Maschere",
       "streetNameEnglish": "Passageway of the Masks",
-      "streetDescription": "This covered passageway would reference Venice's famous tradition of mask-making and carnival celebrations. The San Marco area was central to festivities, and mask workshops would have been located nearby. Sottoportegos are the distinctive covered passages that run beneath buildings, connecting different areas of Venice."
+      "streetDescription": "This covered passageway would reference Venice's famous tradition of mask-making and carnival celebrations. The San Marco area was central to festivities, and mask workshops would have been located nearby. Sottoportegos are the distinctive covered passages that run beneath buildings, connecting different areas of Venice.",
+      "id": "building_45.436391_12.342712"
     },
     {
       "lat": 45.436765432809025,
       "lng": 12.341952471222918,
       "streetName": "Calle dei Orologi",
       "streetNameEnglish": "Street of the Clockmakers",
-      "streetDescription": "This name references the clockmakers who may have had workshops in this area of San Marco, possibly connected to the maintenance of the famous Torre dell'Orologio (Clock Tower) in Piazza San Marco. Precision instrument makers and clockmakers were highly respected artisans in Renaissance Venice, serving the wealthy nobili families of the Republic."
+      "streetDescription": "This name references the clockmakers who may have had workshops in this area of San Marco, possibly connected to the maintenance of the famous Torre dell'Orologio (Clock Tower) in Piazza San Marco. Precision instrument makers and clockmakers were highly respected artisans in Renaissance Venice, serving the wealthy nobili families of the Republic.",
+      "id": "building_45.436765_12.341952"
     }
   ],
   "id": "polygon-1746056403060"

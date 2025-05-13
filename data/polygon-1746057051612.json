@@ -50,7 +50,7 @@
     "lat": 45.43387161032942,
     "lng": 12.349266848445648
   },
-  "dockPoints": [
+  "canalPoints": [
     {
       "edge": {
         "lat": 45.4329318254225,
@@ -62,7 +62,8 @@
       },
       "historicalName": "Riva dei Fornai di San Marco",
       "englishName": "Dock of the Bakers of Saint Mark",
-      "historicalDescription": "This dock would have served the nearby bakeries on Calle dei Forni, which literally means 'Street of the Ovens/Bakeries'. San Marco was one of the most important districts in Renaissance Venice, and bread production was essential to the city's food supply. Bakers (fornai) would have used this dock to receive grain deliveries and distribute baked goods throughout the city via water transport."
+      "historicalDescription": "This dock would have served the nearby bakeries on Calle dei Forni, which literally means 'Street of the Ovens/Bakeries'. San Marco was one of the most important districts in Renaissance Venice, and bread production was essential to the city's food supply. Bakers (fornai) would have used this dock to receive grain deliveries and distribute baked goods throughout the city via water transport.",
+      "id": "dock_45.432932_12.348625"
     }
   ],
   "bridgePoints": [
@@ -89,7 +90,8 @@
             "lng": 12.350068112110883
           }
         }
-      }
+      },
+      "id": "bridge_45.433967_12.349961"
     },
     {
       "edge": {
@@ -114,7 +116,8 @@
             "lng": 12.348778353958124
           }
         }
-      }
+      },
+      "id": "bridge_45.434148_12.348834"
     }
   ],
   "buildingPoints": [
@@ -123,42 +126,48 @@
       "lng": 12.34921629842145,
       "streetName": "Calle dei Pestrineri",
       "streetNameEnglish": "Street of the Grain Millers",
-      "streetDescription": "Near San Marco, grain millers (pestrineri) would process wheat for the bakeries (forni) in the area. This name reflects the close connection between the millers who ground flour and the bakers who used it to make bread for Venetian citizens and visiting merchants."
+      "streetDescription": "Near San Marco, grain millers (pestrineri) would process wheat for the bakeries (forni) in the area. This name reflects the close connection between the millers who ground flour and the bakers who used it to make bread for Venetian citizens and visiting merchants.",
+      "id": "building_45.432986_12.349216"
     },
     {
       "lat": 45.433564114050824,
       "lng": 12.348683390030535,
       "streetName": "Sottoportego del Forno Ducale",
       "streetNameEnglish": "Passageway of the Ducal Bakery",
-      "streetDescription": "This covered passageway would have led to one of the special bakeries that supplied bread to the Doge's Palace. The ducal household required large quantities of fine bread, and dedicated bakers with special privileges would have worked near San Marco to ensure fresh delivery to the palace."
+      "streetDescription": "This covered passageway would have led to one of the special bakeries that supplied bread to the Doge's Palace. The ducal household required large quantities of fine bread, and dedicated bakers with special privileges would have worked near San Marco to ensure fresh delivery to the palace.",
+      "id": "building_45.433564_12.348683"
     },
     {
       "lat": 45.43345319767021,
       "lng": 12.349380546617203,
       "streetName": "Rio Terà dei Panificatori",
       "streetNameEnglish": "Filled Canal of the Breadmakers",
-      "streetDescription": "This former canal was filled in (rio terà) and became associated with the breadmaking guild that had numerous members in this district. The Panificatori guild was influential in Renaissance Venice, controlling bread production which was essential for feeding the city's population."
+      "streetDescription": "This former canal was filled in (rio terà) and became associated with the breadmaking guild that had numerous members in this district. The Panificatori guild was influential in Renaissance Venice, controlling bread production which was essential for feeding the city's population.",
+      "id": "building_45.433453_12.349381"
     },
     {
       "lat": 45.433962450693016,
       "lng": 12.34941942615068,
       "streetName": "Salizada della Farina",
       "streetNameEnglish": "Paved Street of the Flour",
-      "streetDescription": "A salizada was a prestigious paved street, and this one would have connected the flour warehouses to the bakeries of San Marco. Flour distribution was carefully regulated in Venice, as bread was a staple food, and this street would have seen the daily transport of this essential ingredient to nearby ovens."
+      "streetDescription": "A salizada was a prestigious paved street, and this one would have connected the flour warehouses to the bakeries of San Marco. Flour distribution was carefully regulated in Venice, as bread was a staple food, and this street would have seen the daily transport of this essential ingredient to nearby ovens.",
+      "id": "building_45.433962_12.349419"
     },
     {
       "lat": 45.43441632030042,
       "lng": 12.349228580749102,
       "streetName": "Ruga dei Pistor",
       "streetNameEnglish": "Commercial Street of the Bakers",
-      "streetDescription": "A 'ruga' was a commercial street lined with shops. 'Pistor' is the Venetian term for baker. This street would have featured several bakery shops where Venetians could purchase bread. The bakers' guild (Arte dei Pistori) was well-organized and had shops concentrated in specific areas like this one near San Marco."
+      "streetDescription": "A 'ruga' was a commercial street lined with shops. 'Pistor' is the Venetian term for baker. This street would have featured several bakery shops where Venetians could purchase bread. The bakers' guild (Arte dei Pistori) was well-organized and had shops concentrated in specific areas like this one near San Marco.",
+      "id": "building_45.434416_12.349229"
     },
     {
       "lat": 45.434382132395264,
       "lng": 12.349854365004038,
       "streetName": "Campiello del Forno Antico",
       "streetNameEnglish": "Small Square of the Ancient Bakery",
-      "streetDescription": "This small square would have been named after one of the oldest bakeries in the San Marco district. Venice's bakeries were not just commercial enterprises but community institutions, and an ancient, well-established forno would have been a neighborhood landmark worthy of having a small square named after it."
+      "streetDescription": "This small square would have been named after one of the oldest bakeries in the San Marco district. Venice's bakeries were not just commercial enterprises but community institutions, and an ancient, well-established forno would have been a neighborhood landmark worthy of having a small square named after it.",
+      "id": "building_45.434382_12.349854"
     }
   ],
   "id": "polygon-1746057051612"

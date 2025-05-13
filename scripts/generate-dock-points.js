@@ -133,7 +133,7 @@ function isPointInPolygon(point, polygon) {
 }
 
 // Main function to generate dock points
-async function generateDockPoints() {
+async function generateCanalPoints() {
   try {
     // Ensure directories exist before proceeding
     const polygonsDir = ensureDirectoriesExist();
@@ -173,7 +173,7 @@ async function generateDockPoints() {
       allPolygons.push(data);
     }
     
-    let totalDockPoints = 0;
+    let totalCanalPoints = 0;
     
     // Process each polygon
     for (const file of files) {
@@ -189,40 +189,40 @@ async function generateDockPoints() {
       const centroid = calculateCentroid(data.coordinates);
       
       // Initialize dock points array if it doesn't exist
-      if (!data.dockPoints) {
-        data.dockPoints = [];
+      if (!data.canalPoints) {
+        data.canalPoints = [];
       }
       
       // Sample points along the polygon perimeter at 50-meter intervals
       const perimeter = [...data.coordinates];
-      const potentialDockPoints = [];
+      const potentialCanalPoints = [];
       
       for (let i = 0; i < perimeter.length; i++) {
         const point1 = perimeter[i];
         const point2 = perimeter[(i + 1) % perimeter.length];
         
         // Add the current vertex
-        potentialDockPoints.push(point1);
+        potentialCanalPoints.push(point1);
         
         // Add interpolated points along this edge
         const interpolated = interpolatePoints(point1, point2, 50);
-        potentialDockPoints.push(...interpolated);
+        potentialCanalPoints.push(...interpolated);
       }
       
-      console.log(`Polygon ${file}: Found ${potentialDockPoints.length} potential dock points`);
+      console.log(`Polygon ${file}: Found ${potentialCanalPoints.length} potential dock points`);
       
       // For each potential dock point, check if it can be a valid dock
-      const dockPoints = [];
+      const canalPoints = [];
       const bridgePoints = [];
       
-      for (const point of potentialDockPoints) {
+      for (const point of potentialCanalPoints) {
         // Extend the line from centroid through point by 20 meters
         const extendedPoint = extendLine(centroid, point, 20);
         
         // Check if the extended point is in water (not in any polygon)
         if (!isPointInAnyPolygon(extendedPoint, allPolygons)) {
           // This is a valid dock point
-          dockPoints.push({
+          canalPoints.push({
             edge: point,
             water: extendedPoint
           });
@@ -234,25 +234,25 @@ async function generateDockPoints() {
         }
       }
       
-      console.log(`Polygon ${file}: Created ${dockPoints.length} valid dock points and ${bridgePoints.length} bridge points`);
-      totalDockPoints += dockPoints.length;
+      console.log(`Polygon ${file}: Created ${canalPoints.length} valid dock points and ${bridgePoints.length} bridge points`);
+      totalCanalPoints += canalPoints.length;
       
       // Update the polygon data with both dock points and bridge points
-      data.dockPoints = dockPoints;
+      data.canalPoints = canalPoints;
       data.bridgePoints = bridgePoints;
       
       // Write the updated data back to the file
       fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
     }
     
-    console.log(`Completed! Generated ${totalDockPoints} dock points and bridge points across all polygons.`);
+    console.log(`Completed! Generated ${totalCanalPoints} dock points and bridge points across all polygons.`);
   } catch (error) {
     console.error('Error generating dock points:', error);
   }
 }
 
 // Run the function
-generateDockPoints();
+generateCanalPoints();
 const fs = require('fs');
 const path = require('path');
 
@@ -388,7 +388,7 @@ function isPointInPolygon(point, polygon) {
 }
 
 // Main function to generate dock points
-async function generateDockPoints() {
+async function generateCanalPoints() {
   try {
     // Ensure directories exist before proceeding
     const polygonsDir = ensureDirectoriesExist();
@@ -428,7 +428,7 @@ async function generateDockPoints() {
       allPolygons.push(data);
     }
     
-    let totalDockPoints = 0;
+    let totalCanalPoints = 0;
     
     // Process each polygon
     for (const file of files) {
@@ -444,40 +444,40 @@ async function generateDockPoints() {
       const centroid = calculateCentroid(data.coordinates);
       
       // Initialize dock points array if it doesn't exist
-      if (!data.dockPoints) {
-        data.dockPoints = [];
+      if (!data.canalPoints) {
+        data.canalPoints = [];
       }
       
       // Sample points along the polygon perimeter at 50-meter intervals
       const perimeter = [...data.coordinates];
-      const potentialDockPoints = [];
+      const potentialCanalPoints = [];
       
       for (let i = 0; i < perimeter.length; i++) {
         const point1 = perimeter[i];
         const point2 = perimeter[(i + 1) % perimeter.length];
         
         // Add the current vertex
-        potentialDockPoints.push(point1);
+        potentialCanalPoints.push(point1);
         
         // Add interpolated points along this edge
         const interpolated = interpolatePoints(point1, point2, 50);
-        potentialDockPoints.push(...interpolated);
+        potentialCanalPoints.push(...interpolated);
       }
       
-      console.log(`Polygon ${file}: Found ${potentialDockPoints.length} potential dock points`);
+      console.log(`Polygon ${file}: Found ${potentialCanalPoints.length} potential dock points`);
       
       // For each potential dock point, check if it can be a valid dock
-      const dockPoints = [];
+      const canalPoints = [];
       const bridgePoints = [];
       
-      for (const point of potentialDockPoints) {
+      for (const point of potentialCanalPoints) {
         // Extend the line from centroid through point by 20 meters
         const extendedPoint = extendLine(centroid, point, 20);
         
         // Check if the extended point is in water (not in any polygon)
         if (!isPointInAnyPolygon(extendedPoint, allPolygons)) {
           // This is a valid dock point
-          dockPoints.push({
+          canalPoints.push({
             edge: point,
             water: extendedPoint
           });
@@ -489,22 +489,22 @@ async function generateDockPoints() {
         }
       }
       
-      console.log(`Polygon ${file}: Created ${dockPoints.length} valid dock points and ${bridgePoints.length} bridge points`);
-      totalDockPoints += dockPoints.length;
+      console.log(`Polygon ${file}: Created ${canalPoints.length} valid dock points and ${bridgePoints.length} bridge points`);
+      totalCanalPoints += canalPoints.length;
       
       // Update the polygon data with both dock points and bridge points
-      data.dockPoints = dockPoints;
+      data.canalPoints = canalPoints;
       data.bridgePoints = bridgePoints;
       
       // Write the updated data back to the file
       fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
     }
     
-    console.log(`Completed! Generated ${totalDockPoints} dock points and bridge points across all polygons.`);
+    console.log(`Completed! Generated ${totalCanalPoints} dock points and bridge points across all polygons.`);
   } catch (error) {
     console.error('Error generating dock points:', error);
   }
 }
 
 // Run the function
-generateDockPoints();
+generateCanalPoints();

@@ -17,7 +17,7 @@
     "glass": 60,
     "fabric": 100
   },
-  "maintenanceCost": 45000,
+  "maintenanceCost": 4500,
   "constructionTime": 1209600000,
   "incomeGeneration": 60000,
   "employmentCapacity": 25,

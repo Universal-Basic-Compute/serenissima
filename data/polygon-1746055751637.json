@@ -38,7 +38,7 @@
     "lat": 45.44421978011155,
     "lng": 12.33130586726011
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -63,7 +63,8 @@
             "lng": 12.330852526064543
           }
         }
-      }
+      },
+      "id": "bridge_45.443877_12.330934"
     },
     {
       "edge": {
@@ -88,7 +89,8 @@
             "lng": 12.330184826211976
           }
         }
-      }
+      },
+      "id": "bridge_45.444366_12.330223"
     }
   ],
   "buildingPoints": [
@@ -97,14 +99,16 @@
       "lng": 12.33141725057714,
       "streetName": "Calle dei Gattari",
       "streetNameEnglish": "Street of the Cat Keepers",
-      "streetDescription": "This name reflects the historical connection to the nearby Fondamenta de le Gatte (Foundation of the Cats). In Renaissance Venice, certain families or individuals were known for keeping cats to control the rodent population, especially near canals and waterfront areas. The 'gattari' were people who specialized in raising or tending to cats, which were valued for protecting food stores and controlling disease-carrying pests in this part of Dorsoduro."
+      "streetDescription": "This name reflects the historical connection to the nearby Fondamenta de le Gatte (Foundation of the Cats). In Renaissance Venice, certain families or individuals were known for keeping cats to control the rodent population, especially near canals and waterfront areas. The 'gattari' were people who specialized in raising or tending to cats, which were valued for protecting food stores and controlling disease-carrying pests in this part of Dorsoduro.",
+      "id": "building_45.444152_12.331417"
     },
     {
       "lat": 45.44444185590032,
       "lng": 12.330684436344137,
       "streetName": "Rio Terà dei Barcaroli",
       "streetNameEnglish": "Filled Canal of the Boatmen",
-      "streetDescription": "This name refers to a former canal that was filled in (Rio Terà) and the boatmen (barcaroli) who would have operated in this waterway near Fondamenta de le Gatte. Barcaroli were essential workers in Venice's transportation system, ferrying people and goods through the city's canals. This area in Dorsoduro would have been frequented by these boatmen due to its proximity to waterways, making this a historically appropriate name that honors a significant Venetian profession during the Renaissance period."
+      "streetDescription": "This name refers to a former canal that was filled in (Rio Terà) and the boatmen (barcaroli) who would have operated in this waterway near Fondamenta de le Gatte. Barcaroli were essential workers in Venice's transportation system, ferrying people and goods through the city's canals. This area in Dorsoduro would have been frequented by these boatmen due to its proximity to waterways, making this a historically appropriate name that honors a significant Venetian profession during the Renaissance period.",
+      "id": "building_45.444442_12.330684"
     }
   ],
   "id": "polygon-1746055751637"

@@ -78,7 +78,7 @@
     "lat": 45.439666480386975,
     "lng": 12.338253051888808
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -103,7 +103,8 @@
             "lng": 12.338810164905794
           }
         }
-      }
+      },
+      "id": "bridge_45.440929_12.338799"
     },
     {
       "edge": {
@@ -128,7 +129,8 @@
             "lng": 12.339024741626986
           }
         }
-      }
+      },
+      "id": "bridge_45.440779_12.339024"
     },
     {
       "edge": {
@@ -153,7 +155,8 @@
             "lng": 12.339280033406084
           }
         }
-      }
+      },
+      "id": "bridge_45.439710_12.339272"
     },
     {
       "edge": {
@@ -178,13 +181,15 @@
             "lng": 12.337929541167085
           }
         }
-      }
+      },
+      "id": "bridge_45.439166_12.338033"
     },
     {
       "edge": {
         "lat": 45.43940858871469,
         "lng": 12.33749099999315
-      }
+      },
+      "id": "bridge_45.439409_12.337491"
     },
     {
       "edge": {
@@ -209,7 +214,8 @@
             "lng": 12.33714499503023
           }
         }
-      }
+      },
+      "id": "bridge_45.439503_12.337158"
     },
     {
       "edge": {
@@ -234,7 +240,8 @@
             "lng": 12.337016248997514
           }
         }
-      }
+      },
+      "id": "bridge_45.439597_12.337024"
     },
     {
       "edge": {
@@ -259,7 +266,8 @@
             "lng": 12.336434209641283
           }
         }
-      }
+      },
+      "id": "bridge_45.439593_12.336418"
     },
     {
       "edge": {
@@ -284,7 +292,8 @@
             "lng": 12.33601387591066
           }
         }
-      }
+      },
+      "id": "bridge_45.440101_12.336053"
     },
     {
       "edge": {
@@ -309,7 +318,8 @@
             "lng": 12.338296435782334
           }
         }
-      }
+      },
+      "id": "bridge_45.440327_12.338274"
     }
   ],
   "buildingPoints": [
@@ -318,49 +328,56 @@
       "lng": 12.33824846150248,
       "streetName": "Calle dei Argentieri",
       "streetNameEnglish": "Street of the Silversmiths",
-      "streetDescription": "Located near Ruga dei Oresi (Street of Goldsmiths), this calle was historically home to silversmiths who often worked in close proximity to goldsmiths in Cannaregio. These artisans were part of the same guild but specialized in different precious metals."
+      "streetDescription": "Located near Ruga dei Oresi (Street of Goldsmiths), this calle was historically home to silversmiths who often worked in close proximity to goldsmiths in Cannaregio. These artisans were part of the same guild but specialized in different precious metals.",
+      "id": "building_45.439341_12.338248"
     },
     {
       "lat": 45.43975917521335,
       "lng": 12.336154085833284,
       "streetName": "Sottoportego della Zecca",
       "streetNameEnglish": "Passageway of the Mint",
-      "streetDescription": "This covered passageway led toward the direction of the Venetian Mint (Zecca). While the actual Mint was located in San Marco, this name indicates a path frequently used by workers who lived in Cannaregio and transported precious metals between the Oresi district and the Zecca."
+      "streetDescription": "This covered passageway led toward the direction of the Venetian Mint (Zecca). While the actual Mint was located in San Marco, this name indicates a path frequently used by workers who lived in Cannaregio and transported precious metals between the Oresi district and the Zecca.",
+      "id": "building_45.439759_12.336154"
     },
     {
       "lat": 45.43985752810615,
       "lng": 12.33696061385093,
       "streetName": "Rio Terà dei Sabbioneri",
       "streetNameEnglish": "Filled Canal of the Sand Merchants",
-      "streetDescription": "This former canal was filled in and converted to a street where sand merchants (sabbioneri) would sell their wares. Sand was an essential material for glassmaking and metalworking, both important crafts in the area around Ruga dei Oresi in Cannaregio."
+      "streetDescription": "This former canal was filled in and converted to a street where sand merchants (sabbioneri) would sell their wares. Sand was an essential material for glassmaking and metalworking, both important crafts in the area around Ruga dei Oresi in Cannaregio.",
+      "id": "building_45.439858_12.336961"
     },
     {
       "lat": 45.4398317175816,
       "lng": 12.337635857417283,
       "streetName": "Fondamenta Morosini",
       "streetNameEnglish": "Morosini Foundation",
-      "streetDescription": "Named after the prominent Morosini family who owned property in this area of Cannaregio. The Morosini were an ancient noble Venetian family who produced several doges and had business interests in the jewelry and precious metals trade connected to the nearby Ruga dei Oresi."
+      "streetDescription": "Named after the prominent Morosini family who owned property in this area of Cannaregio. The Morosini were an ancient noble Venetian family who produced several doges and had business interests in the jewelry and precious metals trade connected to the nearby Ruga dei Oresi.",
+      "id": "building_45.439832_12.337636"
     },
     {
       "lat": 45.43979672454739,
       "lng": 12.338114740446546,
       "streetName": "Salizada dei Gioiellieri",
       "streetNameEnglish": "Paved Street of the Jewelers",
-      "streetDescription": "This slightly wider, paved street (salizada) housed workshops of jewelers who set the gold pieces crafted by the oresi (goldsmiths) of the neighboring Ruga. It was one of the first streets in this area to be paved with stone, indicating its commercial importance in Renaissance Venice."
+      "streetDescription": "This slightly wider, paved street (salizada) housed workshops of jewelers who set the gold pieces crafted by the oresi (goldsmiths) of the neighboring Ruga. It was one of the first streets in this area to be paved with stone, indicating its commercial importance in Renaissance Venice.",
+      "id": "building_45.439797_12.338115"
     },
     {
       "lat": 45.439751571286294,
       "lng": 12.338822290487904,
       "streetName": "Campiello della Bilancia",
       "streetNameEnglish": "Small Square of the Scale",
-      "streetDescription": "This small square was named after the official weighing scales kept there to verify the weight and purity of precious metals and jewels. Located close to Ruga dei Oresi, it was an important regulatory spot where the Guild of Goldsmiths would inspect and certify materials used by artisans in the area."
+      "streetDescription": "This small square was named after the official weighing scales kept there to verify the weight and purity of precious metals and jewels. Located close to Ruga dei Oresi, it was an important regulatory spot where the Guild of Goldsmiths would inspect and certify materials used by artisans in the area.",
+      "id": "building_45.439752_12.338822"
     },
     {
       "lat": 45.44028751561175,
       "lng": 12.338847882429395,
       "streetName": "Ruga degli Intagliatori",
       "streetNameEnglish": "Street of the Engravers",
-      "streetDescription": "Parallel to Ruga dei Oresi, this street housed workshops of skilled engravers who decorated gold and silver items produced by neighboring goldsmiths. These artisans specialized in delicate etchings and designs that adorned jewelry, religious objects, and fine metalwork popular among Venetian nobility."
+      "streetDescription": "Parallel to Ruga dei Oresi, this street housed workshops of skilled engravers who decorated gold and silver items produced by neighboring goldsmiths. These artisans specialized in delicate etchings and designs that adorned jewelry, religious objects, and fine metalwork popular among Venetian nobility.",
+      "id": "building_45.440288_12.338848"
     }
   ],
   "id": "polygon-1746056070563"

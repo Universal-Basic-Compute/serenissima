@@ -1,0 +1,7 @@
+2025-05-13 23:15:33,729 - maintenance_collector - INFO - Starting maintenance cost collection process
+2025-05-13 23:15:37,817 - maintenance_collector - ERROR - Error fetching buildings: HTTPConnectionPool(host='localhost', port=5000): Max retries exceeded with url: /buildings (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001F9B6D5F190>: Failed to establish a new connection: [WinError 10061] Aucune connexion n’a pu être établie car l’ordinateur cible l’a expressément refusée'))
+2025-05-13 23:15:37,817 - maintenance_collector - INFO - Found 0 buildings to process
+2025-05-13 23:15:37,818 - maintenance_collector - INFO - Maintenance collection complete. Processed 0 buildings.
+2025-05-13 23:15:37,818 - maintenance_collector - INFO - Total maintenance collected: 0 ducats
+2025-05-13 23:15:37,819 - maintenance_collector - INFO - Buildings with errors: 0
+2025-05-13 23:15:41,915 - maintenance_collector - ERROR - Error sending admin notification to NLR: HTTPConnectionPool(host='localhost', port=5000): Max retries exceeded with url: /notifications (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001F9B6D5E380>: Failed to establish a new connection: [WinError 10061] Aucune connexion n’a pu être établie car l’ordinateur cible l’a expressément refusée'))

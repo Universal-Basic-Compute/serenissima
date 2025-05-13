@@ -78,7 +78,7 @@
     "lat": 45.43698319281915,
     "lng": 12.339161692491246
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -103,7 +103,8 @@
             "lng": 12.340541549750409
           }
         }
-      }
+      },
+      "id": "bridge_45.437035_12.340494"
     },
     {
       "edge": {
@@ -128,7 +129,8 @@
             "lng": 12.338427399784397
           }
         }
-      }
+      },
+      "id": "bridge_45.436508_12.338397"
     },
     {
       "edge": {
@@ -153,7 +155,8 @@
             "lng": 12.337552724530191
           }
         }
-      }
+      },
+      "id": "bridge_45.436719_12.337635"
     }
   ],
   "buildingPoints": [
@@ -162,56 +165,64 @@
       "lng": 12.338262390025603,
       "streetName": "Calle del Leone Marciano",
       "streetNameEnglish": "Street of the Marcian Lion",
-      "streetDescription": "Named after the winged lion symbol of St. Mark, the patron saint of Venice. This street would have been appropriate near the Sestiere di San Marco where symbols of Venetian authority were prominent."
+      "streetDescription": "Named after the winged lion symbol of St. Mark, the patron saint of Venice. This street would have been appropriate near the Sestiere di San Marco where symbols of Venetian authority were prominent.",
+      "id": "building_45.436711_12.338262"
     },
     {
       "lat": 45.43662457941057,
       "lng": 12.33903965780346,
       "streetName": "Ruga dei Notabili",
       "streetNameEnglish": "Arcade of the Notables",
-      "streetDescription": "This name references the noble families who might have conducted business or had residences near Ca' Giustinian. 'Ruga' typically indicated commercial streets with porticoes, where important merchants or officials would meet."
+      "streetDescription": "This name references the noble families who might have conducted business or had residences near Ca' Giustinian. 'Ruga' typically indicated commercial streets with porticoes, where important merchants or officials would meet.",
+      "id": "building_45.436625_12.339040"
     },
     {
       "lat": 45.436673954903604,
       "lng": 12.339535845108832,
       "streetName": "Salizada dei Musicisti",
       "streetNameEnglish": "Paved Road of the Musicians",
-      "streetDescription": "The area near Ca' Giustinian has long been associated with music and performance. This salizada (one of the first paved streets in Venice) would honor the musicians who performed in nearby noble houses or churches."
+      "streetDescription": "The area near Ca' Giustinian has long been associated with music and performance. This salizada (one of the first paved streets in Venice) would honor the musicians who performed in nearby noble houses or churches.",
+      "id": "building_45.436674_12.339536"
     },
     {
       "lat": 45.43716542487794,
       "lng": 12.338300853536627,
       "streetName": "Rio Terà del Ridotto",
       "streetNameEnglish": "Filled Canal of the Ridotto",
-      "streetDescription": "References the famous Ridotto gambling house established in the San Marco district in 1638. 'Rio Terà' indicates a filled-in canal, common in Venice's urban development, which would have connected to this important social establishment."
+      "streetDescription": "References the famous Ridotto gambling house established in the San Marco district in 1638. 'Rio Terà' indicates a filled-in canal, common in Venice's urban development, which would have connected to this important social establishment.",
+      "id": "building_45.437165_12.338301"
     },
     {
       "lat": 45.43710894974199,
       "lng": 12.339042458010164,
       "streetName": "Calle dei Diplomatici",
       "streetNameEnglish": "Street of the Diplomats",
-      "streetDescription": "Near Ca' Giustinian in San Marco, many diplomatic missions would have been located. This calle would have been frequented by ambassadors and envoys making their way to and from the Doge's Palace for official business."
+      "streetDescription": "Near Ca' Giustinian in San Marco, many diplomatic missions would have been located. This calle would have been frequented by ambassadors and envoys making their way to and from the Doge's Palace for official business.",
+      "id": "building_45.437109_12.339042"
     },
     {
       "lat": 45.43713899690239,
       "lng": 12.339495465599903,
       "streetName": "Sottoportego dei Giustiniani",
       "streetNameEnglish": "Passageway of the Giustiniani",
-      "streetDescription": "Named directly for the Giustinian family, one of Venice's nobili houses. This covered passageway (sottoportego) would have connected buildings owned by the family or led to their courtyard (corte)."
+      "streetDescription": "Named directly for the Giustinian family, one of Venice's nobili houses. This covered passageway (sottoportego) would have connected buildings owned by the family or led to their courtyard (corte).",
+      "id": "building_45.437139_12.339495"
     },
     {
       "lat": 45.43757228864902,
       "lng": 12.338349425378684,
       "streetName": "Fondamenta delle Maschere",
       "streetNameEnglish": "Foundation of the Masks",
-      "streetDescription": "This waterside street (fondamenta) would reference Venice's carnival tradition and mask-making craft. The San Marco district was central to carnival celebrations, with artisans crafting elaborate masks for nobility and citizens alike."
+      "streetDescription": "This waterside street (fondamenta) would reference Venice's carnival tradition and mask-making craft. The San Marco district was central to carnival celebrations, with artisans crafting elaborate masks for nobility and citizens alike.",
+      "id": "building_45.437572_12.338349"
     },
     {
       "lat": 45.437486165638,
       "lng": 12.338822815398736,
       "streetName": "Calle della Fenice Antica",
       "streetNameEnglish": "Street of the Ancient Phoenix",
-      "streetDescription": "Named in relation to an earlier theater or performance space that preceded the famous La Fenice theater. The San Marco area has long been a center for arts and performance in Venice, making this name historically appropriate."
+      "streetDescription": "Named in relation to an earlier theater or performance space that preceded the famous La Fenice theater. The San Marco area has long been a center for arts and performance in Venice, making this name historically appropriate.",
+      "id": "building_45.437486_12.338823"
     }
   ],
   "id": "polygon-1746056319492"

@@ -74,7 +74,7 @@
     "lat": 45.43263155336768,
     "lng": 12.324171833328618
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -99,7 +99,8 @@
             "lng": 12.324263353329865
           }
         }
-      }
+      },
+      "id": "bridge_45.433090_12.324158"
     },
     {
       "edge": {
@@ -124,7 +125,8 @@
             "lng": 12.324982185345856
           }
         }
-      }
+      },
+      "id": "bridge_45.433197_12.324931"
     },
     {
       "edge": {
@@ -149,7 +151,8 @@
             "lng": 12.325701017361848
           }
         }
-      }
+      },
+      "id": "bridge_45.433304_12.325703"
     },
     {
       "edge": {
@@ -174,7 +177,8 @@
             "lng": 12.323871247105016
           }
         }
-      }
+      },
+      "id": "bridge_45.432295_12.323869"
     },
     {
       "edge": {
@@ -199,7 +203,8 @@
             "lng": 12.32189764497873
           }
         }
-      }
+      },
+      "id": "bridge_45.432378_12.321948"
     }
   ],
   "buildingPoints": [
@@ -208,42 +213,48 @@
       "lng": 12.322304692697571,
       "streetName": "Calle dei Gondolieri",
       "streetNameEnglish": "Street of the Gondoliers",
-      "streetDescription": "This name reflects the presence of gondoliers who traditionally lived near San Barnaba. In the Renaissance period, many boatmen settled in Dorsoduro due to its proximity to important waterways, making this a historically accurate name for the area."
+      "streetDescription": "This name reflects the presence of gondoliers who traditionally lived near San Barnaba. In the Renaissance period, many boatmen settled in Dorsoduro due to its proximity to important waterways, making this a historically accurate name for the area.",
+      "id": "building_45.432293_12.322305"
     },
     {
       "lat": 45.432296590718174,
       "lng": 12.323114988792474,
       "streetName": "Fondamenta dei Pittori",
       "streetNameEnglish": "Foundation of the Painters",
-      "streetDescription": "Dorsoduro was known for housing many artists' workshops during the Renaissance. This name honors the painters who lived and worked near San Barnaba, including several who contributed to the nearby Scuola Grande di San Rocco and churches in the area."
+      "streetDescription": "Dorsoduro was known for housing many artists' workshops during the Renaissance. This name honors the painters who lived and worked near San Barnaba, including several who contributed to the nearby Scuola Grande di San Rocco and churches in the area.",
+      "id": "building_45.432297_12.323115"
     },
     {
       "lat": 45.432785348924995,
       "lng": 12.323723316885534,
       "streetName": "Sottoportego del Tagliapietra",
       "streetNameEnglish": "Passageway of the Stonecutter",
-      "streetDescription": "The Tagliapietra were a notable family of stonecutters who worked in Venice during the Renaissance. This name would be appropriate for a covered passageway near San Barnaba, reflecting the craft guilds that were vital to Venetian construction and artistry."
+      "streetDescription": "The Tagliapietra were a notable family of stonecutters who worked in Venice during the Renaissance. This name would be appropriate for a covered passageway near San Barnaba, reflecting the craft guilds that were vital to Venetian construction and artistry.",
+      "id": "building_45.432785_12.323723"
     },
     {
       "lat": 45.432791994316176,
       "lng": 12.324415068949339,
       "streetName": "Rio Terà dei Carmini",
       "streetNameEnglish": "Filled Canal of the Carmelites",
-      "streetDescription": "This name refers to the nearby Chiesa di Santa Maria dei Carmini (Church of the Carmelites). 'Rio Terà' indicates a canal that was filled in to create a street, a common practice in Venice. The Carmelite order had significant presence in this part of Dorsoduro during the Renaissance."
+      "streetDescription": "This name refers to the nearby Chiesa di Santa Maria dei Carmini (Church of the Carmelites). 'Rio Terà' indicates a canal that was filled in to create a street, a common practice in Venice. The Carmelite order had significant presence in this part of Dorsoduro during the Renaissance.",
+      "id": "building_45.432792_12.324415"
     },
     {
       "lat": 45.43278560210383,
       "lng": 12.325031222295157,
       "streetName": "Calle della Toletta",
       "streetNameEnglish": "Street of the Small Table",
-      "streetDescription": "This name historically indicates a street where money changers or small merchants would set up their tables ('toletta' is Venetian for small table). Located near San Barnaba, this would be appropriate for an area where local commerce took place during the Renaissance period."
+      "streetDescription": "This name historically indicates a street where money changers or small merchants would set up their tables ('toletta' is Venetian for small table). Located near San Barnaba, this would be appropriate for an area where local commerce took place during the Renaissance period.",
+      "id": "building_45.432786_12.325031"
     },
     {
       "lat": 45.43287726726038,
       "lng": 12.325527636751696,
       "streetName": "Salizada dei Caotorta",
       "streetNameEnglish": "Paved Street of the Caotorta Family",
-      "streetDescription": "The Caotorta were a nobili Venetian family with properties in Dorsoduro. A 'salizada' was a prestigious paved street (when most were unpaved), often named after prominent families who lived there. This would accurately reflect the Renaissance Venetian practice of commemorating noble families in street names."
+      "streetDescription": "The Caotorta were a nobili Venetian family with properties in Dorsoduro. A 'salizada' was a prestigious paved street (when most were unpaved), often named after prominent families who lived there. This would accurately reflect the Renaissance Venetian practice of commemorating noble families in street names.",
+      "id": "building_45.432877_12.325528"
     }
   ],
   "id": "polygon-1745879086976"

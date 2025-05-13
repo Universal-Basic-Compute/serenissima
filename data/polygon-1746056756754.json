@@ -66,7 +66,7 @@
     "lat": 45.43313127078681,
     "lng": 12.332461463393921
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -91,7 +91,8 @@
             "lng": 12.331948786356488
           }
         }
-      }
+      },
+      "id": "bridge_45.433183_12.331984"
     }
   ],
   "buildingPoints": [
@@ -100,7 +101,8 @@
       "lng": 12.332607979632417,
       "streetName": "Calle dei Profumieri",
       "streetNameEnglish": "Street of the Perfumers",
-      "streetDescription": "This small street near Fondamenta dei Narisi in Dorsoduro would have been named after the artisans who created perfumes and scented waters in the Renaissance period. The name 'Narisi' itself relates to the nose (naso), making this area a fitting location for perfumers who worked with fragrances. These craftsmen would have created luxury products for Venetian nobility using exotic ingredients imported through Venice's extensive trade networks with the East."
+      "streetDescription": "This small street near Fondamenta dei Narisi in Dorsoduro would have been named after the artisans who created perfumes and scented waters in the Renaissance period. The name 'Narisi' itself relates to the nose (naso), making this area a fitting location for perfumers who worked with fragrances. These craftsmen would have created luxury products for Venetian nobility using exotic ingredients imported through Venice's extensive trade networks with the East.",
+      "id": "building_45.433325_12.332608"
     }
   ],
   "id": "polygon-1746056756754"

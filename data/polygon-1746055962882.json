@@ -34,7 +34,7 @@
     "lat": 45.44197626180815,
     "lng": 12.335961901176358
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -59,7 +59,8 @@
             "lng": 12.335421880803086
           }
         }
-      }
+      },
+      "id": "bridge_45.442672_12.335417"
     },
     {
       "edge": {
@@ -84,7 +85,8 @@
             "lng": 12.33617558153627
           }
         }
-      }
+      },
+      "id": "bridge_45.442386_12.336232"
     },
     {
       "edge": {
@@ -109,7 +111,8 @@
             "lng": 12.335612764677979
           }
         }
-      }
+      },
+      "id": "bridge_45.441833_12.335564"
     },
     {
       "edge": {
@@ -134,7 +137,8 @@
             "lng": 12.334818383774735
           }
         }
-      }
+      },
+      "id": "bridge_45.442126_12.334832"
     }
   ],
   "buildingPoints": [
@@ -143,14 +147,16 @@
       "lng": 12.3355916640629,
       "streetName": "Calle dei Mercanti Albanesi",
       "streetNameEnglish": "Street of the Albanian Merchants",
-      "streetDescription": "This name reflects the significant Albanian merchant presence in Venice during the Renaissance. Near the existing Calle degli Albanesi in San Marco, Albanian merchants established trading posts and businesses, particularly after fleeing Ottoman expansion in the 15th century. They formed a small but notable commercial community specializing in importing goods from the Eastern Mediterranean."
+      "streetDescription": "This name reflects the significant Albanian merchant presence in Venice during the Renaissance. Near the existing Calle degli Albanesi in San Marco, Albanian merchants established trading posts and businesses, particularly after fleeing Ottoman expansion in the 15th century. They formed a small but notable commercial community specializing in importing goods from the Eastern Mediterranean.",
+      "id": "building_45.441881_12.335592"
     },
     {
       "lat": 45.4420153698075,
       "lng": 12.336002360286445,
       "streetName": "Sottoportego dei Dogi Bizantini",
       "streetNameEnglish": "Passageway of the Byzantine Doges",
-      "streetDescription": "This covered passageway name acknowledges Venice's deep historical connections to Byzantium. In the San Marco area, where Byzantine influence was strongly felt in architecture and art, this passageway would reference the early Venetian doges who maintained close diplomatic and commercial ties with Constantinople. The name honors the Byzantine heritage that shaped Venetian culture, particularly evident in the nearby Basilica di San Marco."
+      "streetDescription": "This covered passageway name acknowledges Venice's deep historical connections to Byzantium. In the San Marco area, where Byzantine influence was strongly felt in architecture and art, this passageway would reference the early Venetian doges who maintained close diplomatic and commercial ties with Constantinople. The name honors the Byzantine heritage that shaped Venetian culture, particularly evident in the nearby Basilica di San Marco.",
+      "id": "building_45.442015_12.336002"
     }
   ],
   "id": "polygon-1746055962882"

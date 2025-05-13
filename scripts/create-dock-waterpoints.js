@@ -39,7 +39,7 @@ async function createDockWaterpoints() {
     
     console.log(`Found ${files.length} polygon files`);
     
-    let totalDockPoints = 0;
+    let totalCanalPoints = 0;
     let createdWaterpoints = 0;
     
     // Process each polygon
@@ -47,18 +47,18 @@ async function createDockWaterpoints() {
       const filePath = path.join(polygonsDir, file);
       const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
       
-      if (!data.dockPoints || !Array.isArray(data.dockPoints)) {
+      if (!data.canalPoints || !Array.isArray(data.canalPoints)) {
         console.log(`Skipping ${file}: No dock points found`);
         continue;
       }
       
-      console.log(`Processing ${data.dockPoints.length} dock points for polygon ${file}`);
-      totalDockPoints += data.dockPoints.length;
+      console.log(`Processing ${data.canalPoints.length} dock points for polygon ${file}`);
+      totalCanalPoints += data.canalPoints.length;
       
       // Create waterpoints for each dock point
-      for (const dockPoint of data.dockPoints) {
+      for (const canalPoint of data.canalPoints) {
         // Use the water point (20m outside the polygon)
-        const position = dockPoint.water;
+        const position = canalPoint.water;
         
         // Create a waterpoint at this position
         const waterpoint = await createWaterPoint(position, 'dock');
@@ -68,7 +68,7 @@ async function createDockWaterpoints() {
           createdWaterpoints++;
           
           // Update the dock point with the waterpoint ID
-          dockPoint.waterpointId = waterpoint.id;
+          canalPoint.waterpointId = waterpoint.id;
         }
       }
       
@@ -76,7 +76,7 @@ async function createDockWaterpoints() {
       fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
     }
     
-    console.log(`Completed! Created ${createdWaterpoints} waterpoints for ${totalDockPoints} dock points.`);
+    console.log(`Completed! Created ${createdWaterpoints} waterpoints for ${totalCanalPoints} dock points.`);
   } catch (error) {
     console.error('Error creating dock waterpoints:', error);
   }

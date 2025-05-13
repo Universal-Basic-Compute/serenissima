@@ -46,7 +46,7 @@
     "lat": 45.4413580704064,
     "lng": 12.328975595557488
   },
-  "dockPoints": [
+  "canalPoints": [
     {
       "edge": {
         "lat": 45.44202757018885,
@@ -58,7 +58,8 @@
       },
       "historicalName": "Fondamenta del Megio",
       "englishName": "Millet Foundation Dock",
-      "historicalDescription": "This dock name derives from its location near Calle del Megio (Millet Street) in Sestiere Dorsoduro. 'Megio' refers to millet, a grain that was commonly traded in this area during the Renaissance period. The dock would have served local merchants and residents in this part of Dorsoduro, possibly as a landing point for grain shipments and other goods coming into this neighborhood."
+      "historicalDescription": "This dock name derives from its location near Calle del Megio (Millet Street) in Sestiere Dorsoduro. 'Megio' refers to millet, a grain that was commonly traded in this area during the Renaissance period. The dock would have served local merchants and residents in this part of Dorsoduro, possibly as a landing point for grain shipments and other goods coming into this neighborhood.",
+      "id": "dock_45.442028_12.329515"
     }
   ],
   "bridgePoints": [
@@ -85,7 +86,8 @@
             "lng": 12.329451060123585
           }
         }
-      }
+      },
+      "id": "bridge_45.441485_12.329416"
     },
     {
       "edge": {
@@ -110,7 +112,8 @@
             "lng": 12.329101031847141
           }
         }
-      }
+      },
+      "id": "bridge_45.440998_12.329072"
     }
   ],
   "buildingPoints": [
@@ -119,7 +122,8 @@
       "lng": 12.329083105975489,
       "streetName": "Calle dei Granai",
       "streetNameEnglish": "Street of the Granaries",
-      "streetDescription": "This street name refers to the granaries or grain storage facilities that were historically present in this area of Dorsoduro. 'Megio' in 'Calle del Megio' refers to millet, a type of grain, so 'Calle dei Granai' would be a complementary name for a nearby street, referencing the broader grain storage and distribution activities in this neighborhood during the Renaissance period. Grain was an essential commodity in Venice, with dedicated public storehouses to ensure food security for the population."
+      "streetDescription": "This street name refers to the granaries or grain storage facilities that were historically present in this area of Dorsoduro. 'Megio' in 'Calle del Megio' refers to millet, a type of grain, so 'Calle dei Granai' would be a complementary name for a nearby street, referencing the broader grain storage and distribution activities in this neighborhood during the Renaissance period. Grain was an essential commodity in Venice, with dedicated public storehouses to ensure food security for the population.",
+      "id": "building_45.441453_12.329083"
     }
   ],
   "id": "polygon-1746072757215"

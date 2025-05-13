@@ -70,7 +70,7 @@
     "lat": 45.43675565615939,
     "lng": 12.32839151473853
   },
-  "dockPoints": [
+  "canalPoints": [
     {
       "edge": {
         "lat": 45.4357916543061,
@@ -82,7 +82,8 @@
       },
       "historicalName": "Fondamenta dei Saoneri",
       "englishName": "Foundation of the Soap Makers",
-      "historicalDescription": "This dock would be named after the soap makers (saoneri) who had their workshops along Calle Seconda de li Saoneri in San Polo. During the Renaissance, soap production was an important Venetian trade, with the guild of soap makers being well-established in the city. The proximity of this dock to their workshops would have made it convenient for receiving raw materials like olive oil and soda ash and shipping finished soap products throughout the Mediterranean."
+      "historicalDescription": "This dock would be named after the soap makers (saoneri) who had their workshops along Calle Seconda de li Saoneri in San Polo. During the Renaissance, soap production was an important Venetian trade, with the guild of soap makers being well-established in the city. The proximity of this dock to their workshops would have made it convenient for receiving raw materials like olive oil and soda ash and shipping finished soap products throughout the Mediterranean.",
+      "id": "dock_45.435792_12.329102"
     }
   ],
   "bridgePoints": [
@@ -109,7 +110,8 @@
             "lng": 12.327001369975534
           }
         }
-      }
+      },
+      "id": "bridge_45.437617_12.327096"
     },
     {
       "edge": {
@@ -134,7 +136,8 @@
             "lng": 12.327645100139108
           }
         }
-      }
+      },
+      "id": "bridge_45.436390_12.327718"
     },
     {
       "edge": {
@@ -159,7 +162,8 @@
             "lng": 12.327875770114389
           }
         }
-      }
+      },
+      "id": "bridge_45.436774_12.327933"
     },
     {
       "edge": {
@@ -184,7 +188,8 @@
             "lng": 12.327215946696725
           }
         }
-      }
+      },
+      "id": "bridge_45.437173_12.327310"
     }
   ],
   "buildingPoints": [
@@ -193,28 +198,32 @@
       "lng": 12.329028786002976,
       "streetName": "Calle dei Saponai",
       "streetNameEnglish": "Street of the Soap Makers",
-      "streetDescription": "This name reflects the soap-making industry that was prominent in this area of San Polo. 'Saponai' is another term for soap makers, similar to 'Saoneri'. This would be appropriate as a neighboring street to 'Calle Seconda de li Saoneri', suggesting a concentration of soap-making workshops in this particular area during the Renaissance period."
+      "streetDescription": "This name reflects the soap-making industry that was prominent in this area of San Polo. 'Saponai' is another term for soap makers, similar to 'Saoneri'. This would be appropriate as a neighboring street to 'Calle Seconda de li Saoneri', suggesting a concentration of soap-making workshops in this particular area during the Renaissance period.",
+      "id": "building_45.436018_12.329029"
     },
     {
       "lat": 45.43648667228274,
       "lng": 12.32839772934099,
       "streetName": "Ruga dei Spezieri di San Polo",
       "streetNameEnglish": "Row of the Spice Merchants of San Polo",
-      "streetDescription": "The term 'Ruga' typically indicated a commercial street, and spice merchants ('Spezieri') were vital to Venetian commerce. San Polo, being close to the Rialto market, was home to numerous merchants. This name suggests a street where spice merchants had their shops, reflecting Venice's role as a major center for the spice trade between East and West."
+      "streetDescription": "The term 'Ruga' typically indicated a commercial street, and spice merchants ('Spezieri') were vital to Venetian commerce. San Polo, being close to the Rialto market, was home to numerous merchants. This name suggests a street where spice merchants had their shops, reflecting Venice's role as a major center for the spice trade between East and West.",
+      "id": "building_45.436487_12.328398"
     },
     {
       "lat": 45.43686597224165,
       "lng": 12.328416663417654,
       "streetName": "Rio Terà dei Meloni",
       "streetNameEnglish": "Filled Canal of the Melons",
-      "streetDescription": "A 'Rio Terà' indicates a filled-in canal, common in Venice's urban development. 'Meloni' (melons) suggests this was once a landing where fruit, specifically melons, would have been unloaded from boats for local markets. San Polo's proximity to the Grand Canal made it an ideal location for small produce markets that served the local community."
+      "streetDescription": "A 'Rio Terà' indicates a filled-in canal, common in Venice's urban development. 'Meloni' (melons) suggests this was once a landing where fruit, specifically melons, would have been unloaded from boats for local markets. San Polo's proximity to the Grand Canal made it an ideal location for small produce markets that served the local community.",
+      "id": "building_45.436866_12.328417"
     },
     {
       "lat": 45.437356999537656,
       "lng": 12.327839935606425,
       "streetName": "Sottoportego dei Pistori",
       "streetNameEnglish": "Passageway of the Bakers",
-      "streetDescription": "A 'Sottoportego' is a passageway that goes under a building. 'Pistori' is an old Venetian term for bakers. This name would be appropriate for a small covered passage where bakers or bread sellers might have had small shops. The area around Calle de li Saoneri in San Polo would have had various artisans and food producers to serve the local residential population."
+      "streetDescription": "A 'Sottoportego' is a passageway that goes under a building. 'Pistori' is an old Venetian term for bakers. This name would be appropriate for a small covered passage where bakers or bread sellers might have had small shops. The area around Calle de li Saoneri in San Polo would have had various artisans and food producers to serve the local residential population.",
+      "id": "building_45.437357_12.327840"
     }
   ],
   "id": "polygon-1746072737712"

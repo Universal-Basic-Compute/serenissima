@@ -50,7 +50,7 @@
     "lat": 45.432470229470916,
     "lng": 12.326617795179395
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -75,7 +75,8 @@
             "lng": 12.326169900230779
           }
         }
-      }
+      },
+      "id": "bridge_45.432294_12.326068"
     }
   ],
   "buildingPoints": [
@@ -84,14 +85,16 @@
       "lng": 12.32582187608287,
       "streetName": "Calle dei Maestri Vetrai",
       "streetNameEnglish": "Street of the Glass Masters",
-      "streetDescription": "This name references the glassmakers who, while primarily based in Murano, had connections and showrooms near San Marco. In the Renaissance period, Venetian glass was world-renowned, and merchants would often display their finest pieces near the commercial center of San Marco. The 'maestri vetrai' (glass masters) were highly respected artisans who contributed significantly to Venice's economic prosperity and artistic reputation."
+      "streetDescription": "This name references the glassmakers who, while primarily based in Murano, had connections and showrooms near San Marco. In the Renaissance period, Venetian glass was world-renowned, and merchants would often display their finest pieces near the commercial center of San Marco. The 'maestri vetrai' (glass masters) were highly respected artisans who contributed significantly to Venice's economic prosperity and artistic reputation.",
+      "id": "building_45.432557_12.325822"
     },
     {
       "lat": 45.432545113127965,
       "lng": 12.326620567891567,
       "streetName": "Sottoportego del Leone",
       "streetNameEnglish": "Underpass of the Lion",
-      "streetDescription": "Near the Calle dei Cerchieri in San Marco, this name would refer to a covered passageway potentially marked by a stone relief of a lion, the symbol of St. Mark and of the Venetian Republic. Such decorative elements were common in Renaissance Venice, especially in prestigious areas like San Marco. The 'sottoportego' (underpass) would connect two streets or small squares, providing shelter during acqua alta (high water) events, which were already a concern in historical Venice."
+      "streetDescription": "Near the Calle dei Cerchieri in San Marco, this name would refer to a covered passageway potentially marked by a stone relief of a lion, the symbol of St. Mark and of the Venetian Republic. Such decorative elements were common in Renaissance Venice, especially in prestigious areas like San Marco. The 'sottoportego' (underpass) would connect two streets or small squares, providing shelter during acqua alta (high water) events, which were already a concern in historical Venice.",
+      "id": "building_45.432545_12.326621"
     }
   ],
   "id": "polygon-1745879015190"

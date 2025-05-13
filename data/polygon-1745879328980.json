@@ -66,7 +66,7 @@
     "lat": 45.436314002786006,
     "lng": 12.321785905541278
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -91,7 +91,8 @@
             "lng": 12.32098909023531
           }
         }
-      }
+      },
+      "id": "bridge_45.437040_12.320954"
     },
     {
       "edge": {
@@ -116,7 +117,8 @@
             "lng": 12.323272207593241
           }
         }
-      }
+      },
+      "id": "bridge_45.436054_12.323212"
     }
   ],
   "buildingPoints": [
@@ -125,35 +127,40 @@
       "lng": 12.321569212928221,
       "streetName": "Calle dei Specchieri",
       "streetNameEnglish": "Street of the Mirror Makers",
-      "streetDescription": "This name references the mirror-making artisans who had workshops near San Marco. Venice was famous for its production of high-quality mirrors during the Renaissance, especially after the development of cristallo glass on Murano. Mirror makers would have been prominent near this wealthy area where noble families would purchase luxury items."
+      "streetDescription": "This name references the mirror-making artisans who had workshops near San Marco. Venice was famous for its production of high-quality mirrors during the Renaissance, especially after the development of cristallo glass on Murano. Mirror makers would have been prominent near this wealthy area where noble families would purchase luxury items.",
+      "id": "building_45.436118_12.321569"
     },
     {
       "lat": 45.43608751354005,
       "lng": 12.322063552632242,
       "streetName": "Sottoportego dei Marzeri",
       "streetNameEnglish": "Underpass of the Mercers",
-      "streetDescription": "The marzeri were general merchants who sold fabrics, clothing, and small luxury goods. This name would be fitting for a covered passageway (sottoportego) near San Marco, as these merchants often clustered near the commercial heart of Venice to sell their wares to wealthy patrons and visitors to the city."
+      "streetDescription": "The marzeri were general merchants who sold fabrics, clothing, and small luxury goods. This name would be fitting for a covered passageway (sottoportego) near San Marco, as these merchants often clustered near the commercial heart of Venice to sell their wares to wealthy patrons and visitors to the city.",
+      "id": "building_45.436088_12.322064"
     },
     {
       "lat": 45.43656445812937,
       "lng": 12.320811476434514,
       "streetName": "Rio Terà dei Gioiellieri",
       "streetNameEnglish": "Filled Canal of the Jewelers",
-      "streetDescription": "This name suggests a former canal that was filled in (rio terà) where jewelers had their shops. The San Marco area was home to many luxury artisans, including jewelers who served the nobili families. The Rialto and San Marco areas were centers for the jewelry trade in Renaissance Venice, making this a plausible street name."
+      "streetDescription": "This name suggests a former canal that was filled in (rio terà) where jewelers had their shops. The San Marco area was home to many luxury artisans, including jewelers who served the nobili families. The Rialto and San Marco areas were centers for the jewelry trade in Renaissance Venice, making this a plausible street name.",
+      "id": "building_45.436564_12.320811"
     },
     {
       "lat": 45.43641682463639,
       "lng": 12.321444501587635,
       "streetName": "Calle dei Maschereri",
       "streetNameEnglish": "Street of the Mask Makers",
-      "streetDescription": "Venice was famous for its carnival traditions and mask makers (maschereri) who created elaborate masks for festivals and celebrations. This guild would have had workshops in central areas like San Marco to cater to wealthy patrons. The proximity to theaters and entertainment venues in this area would make this a logical location for mask makers."
+      "streetDescription": "Venice was famous for its carnival traditions and mask makers (maschereri) who created elaborate masks for festivals and celebrations. This guild would have had workshops in central areas like San Marco to cater to wealthy patrons. The proximity to theaters and entertainment venues in this area would make this a logical location for mask makers.",
+      "id": "building_45.436417_12.321445"
     },
     {
       "lat": 45.43647278541954,
       "lng": 12.322109547576058,
       "streetName": "Fondamenta dei Cortigiani",
       "streetNameEnglish": "Foundation of the Courtiers",
-      "streetDescription": "This name references a walkway along a canal (fondamenta) frequented by courtiers or courtesans. The San Marco area, being close to the political center of Venice, would have been frequented by various officials, dignitaries, and those who served in diplomatic or administrative capacities. This name suggests a path used by those connected to the political life of the Republic."
+      "streetDescription": "This name references a walkway along a canal (fondamenta) frequented by courtiers or courtesans. The San Marco area, being close to the political center of Venice, would have been frequented by various officials, dignitaries, and those who served in diplomatic or administrative capacities. This name suggests a path used by those connected to the political life of the Republic.",
+      "id": "building_45.436473_12.322110"
     }
   ],
   "id": "polygon-1745879328980"

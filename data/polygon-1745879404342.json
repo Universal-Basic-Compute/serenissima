@@ -62,7 +62,7 @@
     "lat": 45.4401962087928,
     "lng": 12.32620066400255
   },
-  "dockPoints": [
+  "canalPoints": [
     {
       "edge": {
         "lat": 45.441401301051535,
@@ -74,7 +74,8 @@
       },
       "historicalName": "Riva della Testa",
       "englishName": "Dock of the Head",
-      "historicalDescription": "Named after the adjacent Calle de la Testa (Street of the Head), this dock would have been the main water landing for the neighborhood. The name likely refers to a shop sign or family emblem featuring a head that was once prominent in the area."
+      "historicalDescription": "Named after the adjacent Calle de la Testa (Street of the Head), this dock would have been the main water landing for the neighborhood. The name likely refers to a shop sign or family emblem featuring a head that was once prominent in the area.",
+      "id": "dock_45.441401_12.324098"
     },
     {
       "edge": {
@@ -87,7 +88,8 @@
       },
       "historicalName": "Fondamenta dei Cappellai",
       "englishName": "Foundation of the Hatmakers",
-      "historicalDescription": "This dock served the hatmakers' workshops that were historically concentrated near Calle de la Testa. Venice was known for its millinery trade, and this fondamenta would have been used to receive raw materials and ship finished hats throughout the Mediterranean."
+      "historicalDescription": "This dock served the hatmakers' workshops that were historically concentrated near Calle de la Testa. Venice was known for its millinery trade, and this fondamenta would have been used to receive raw materials and ship finished hats throughout the Mediterranean.",
+      "id": "dock_45.441620_12.324784"
     },
     {
       "edge": {
@@ -100,7 +102,8 @@
       },
       "historicalName": "Riva dei Maschereri",
       "englishName": "Dock of the Mask Makers",
-      "historicalDescription": "Located near the traditional workshops of Venice's famous mask makers, this dock would have been crucial for the carnival trade. Artisans would receive materials and ship their elaborate masks from this landing, particularly important given Venice's renowned carnival traditions."
+      "historicalDescription": "Located near the traditional workshops of Venice's famous mask makers, this dock would have been crucial for the carnival trade. Artisans would receive materials and ship their elaborate masks from this landing, particularly important given Venice's renowned carnival traditions.",
+      "id": "dock_45.441838_12.325471"
     },
     {
       "edge": {
@@ -113,7 +116,8 @@
       },
       "historicalName": "Fondamenta San Canzian",
       "englishName": "Foundation of Saint Cantian",
-      "historicalDescription": "Named after the nearby Church of San Canzian, this dock would have served both the church and surrounding parish. The church dates to medieval times and was an important religious center in this district of Venice, making its namesake dock significant for local commerce."
+      "historicalDescription": "Named after the nearby Church of San Canzian, this dock would have served both the church and surrounding parish. The church dates to medieval times and was an important religious center in this district of Venice, making its namesake dock significant for local commerce.",
+      "id": "dock_45.441953_12.326111"
     },
     {
       "edge": {
@@ -126,7 +130,8 @@
       },
       "historicalName": "Riva dei Filatoi",
       "englishName": "Dock of the Spinners",
-      "historicalDescription": "This dock served the textile workers who operated spinning wheels (filatoi) in workshops near Calle de la Testa. Venice's textile industry was vital to its economy during the Renaissance, and this dock would have been used to transport raw silk and cotton as well as finished threads."
+      "historicalDescription": "This dock served the textile workers who operated spinning wheels (filatoi) in workshops near Calle de la Testa. Venice's textile industry was vital to its economy during the Renaissance, and this dock would have been used to transport raw silk and cotton as well as finished threads.",
+      "id": "dock_45.442069_12.326751"
     }
   ],
   "bridgePoints": [
@@ -153,7 +158,8 @@
             "lng": 12.327368178734062
           }
         }
-      }
+      },
+      "id": "bridge_45.441687_12.327327"
     },
     {
       "edge": {
@@ -178,7 +184,8 @@
             "lng": 12.327325263389824
           }
         }
-      }
+      },
+      "id": "bridge_45.441191_12.327263"
     },
     {
       "edge": {
@@ -203,7 +210,8 @@
             "lng": 12.32715360201287
           }
         }
-      }
+      },
+      "id": "bridge_45.440739_12.327113"
     },
     {
       "edge": {
@@ -228,7 +236,8 @@
             "lng": 12.326618152426999
           }
         }
-      }
+      },
+      "id": "bridge_45.438864_12.326683"
     },
     {
       "edge": {
@@ -253,7 +262,8 @@
             "lng": 12.325345006956212
           }
         }
-      }
+      },
+      "id": "bridge_45.439339_12.325482"
     },
     {
       "edge": {
@@ -278,7 +288,8 @@
             "lng": 12.324827340616338
           }
         }
-      }
+      },
+      "id": "bridge_45.439730_12.324913"
     },
     {
       "edge": {
@@ -303,7 +314,8 @@
             "lng": 12.324309674276464
           }
         }
-      }
+      },
+      "id": "bridge_45.440122_12.324345"
     },
     {
       "edge": {
@@ -328,7 +340,8 @@
             "lng": 12.323837605489842
           }
         }
-      }
+      },
+      "id": "bridge_45.440652_12.323878"
     }
   ],
   "buildingPoints": [
@@ -337,140 +350,160 @@
       "lng": 12.32590376199248,
       "streetName": "Calle dei Intagliatori",
       "streetNameEnglish": "Street of the Wood Carvers",
-      "streetDescription": "Named after the wood carving artisans who had workshops in this area during the 15th-16th centuries. These craftsmen were known for their detailed ornamental work on furniture and architectural elements found in Venetian palazzi."
+      "streetDescription": "Named after the wood carving artisans who had workshops in this area during the 15th-16th centuries. These craftsmen were known for their detailed ornamental work on furniture and architectural elements found in Venetian palazzi.",
+      "id": "building_45.439358_12.325904"
     },
     {
       "lat": 45.43926470700684,
       "lng": 12.326686364913202,
       "streetName": "Sottoportego del Leone Coronato",
       "streetNameEnglish": "Passageway of the Crowned Lion",
-      "streetDescription": "Named after a stone relief of the Lion of St. Mark wearing a crown that was displayed in this covered passageway. Near Calle de la Testa, this symbol represented Venetian authority and pride in the Republic."
+      "streetDescription": "Named after a stone relief of the Lion of St. Mark wearing a crown that was displayed in this covered passageway. Near Calle de la Testa, this symbol represented Venetian authority and pride in the Republic.",
+      "id": "building_45.439265_12.326686"
     },
     {
       "lat": 45.43974174562667,
       "lng": 12.325346206843928,
       "streetName": "Rio Terà delle Maschere",
       "streetNameEnglish": "Filled Canal of the Masks",
-      "streetDescription": "This former canal was filled in during the 16th century. The name refers to mask makers who had workshops here, supplying masks for Venetian Carnival and theatrical performances, which were popular entertainments in Renaissance Venice."
+      "streetDescription": "This former canal was filled in during the 16th century. The name refers to mask makers who had workshops here, supplying masks for Venetian Carnival and theatrical performances, which were popular entertainments in Renaissance Venice.",
+      "id": "building_45.439742_12.325346"
     },
     {
       "lat": 45.43973842112091,
       "lng": 12.326020267698143,
       "streetName": "Fondamenta dei Velutai",
       "streetNameEnglish": "Foundation of the Velvet Makers",
-      "streetDescription": "Named after the velvet textile manufacturers who operated in this area. Venetian velvet was highly prized throughout Europe during the Renaissance, and this street housed workshops where premium velvets were produced."
+      "streetDescription": "Named after the velvet textile manufacturers who operated in this area. Venetian velvet was highly prized throughout Europe during the Renaissance, and this street housed workshops where premium velvets were produced.",
+      "id": "building_45.439738_12.326020"
     },
     {
       "lat": 45.439763875018414,
       "lng": 12.326590955407303,
       "streetName": "Calle del Cappellaio",
       "streetNameEnglish": "Street of the Hatter",
-      "streetDescription": "Named after a notable hat maker's shop that existed here during the 16th century. Located near Calle de la Testa (which references 'head'), this complementary street name referred to the craftsman who made headwear for Venetian nobles."
+      "streetDescription": "Named after a notable hat maker's shop that existed here during the 16th century. Located near Calle de la Testa (which references 'head'), this complementary street name referred to the craftsman who made headwear for Venetian nobles.",
+      "id": "building_45.439764_12.326591"
     },
     {
       "lat": 45.44028968308011,
       "lng": 12.324677689846409,
       "streetName": "Campiello della Cisterna",
       "streetNameEnglish": "Small Square of the Cistern",
-      "streetDescription": "Named for the public water cistern that was located in this small square. These cisterns were vital infrastructure in Renaissance Venice for collecting and filtering rainwater, as the city had no natural freshwater sources."
+      "streetDescription": "Named for the public water cistern that was located in this small square. These cisterns were vital infrastructure in Renaissance Venice for collecting and filtering rainwater, as the city had no natural freshwater sources.",
+      "id": "building_45.440290_12.324678"
     },
     {
       "lat": 45.44026247909273,
       "lng": 12.32538475027021,
       "streetName": "Ruga dei Merletti",
       "streetNameEnglish": "Street of the Lace Makers",
-      "streetDescription": "This commercial street was home to sellers of Venetian lace, a luxury item produced primarily on the island of Burano. The fine needlework was renowned throughout Europe and was an important export of the Venetian Republic."
+      "streetDescription": "This commercial street was home to sellers of Venetian lace, a luxury item produced primarily on the island of Burano. The fine needlework was renowned throughout Europe and was an important export of the Venetian Republic.",
+      "id": "building_45.440262_12.325385"
     },
     {
       "lat": 45.44016939788178,
       "lng": 12.325967636625789,
       "streetName": "Corte Pisani",
       "streetNameEnglish": "Pisani Court",
-      "streetDescription": "Named after the noble Pisani family who owned property in this area during the Renaissance. The Pisani were a prominent nobili family who produced several important figures in Venetian politics and military affairs."
+      "streetDescription": "Named after the noble Pisani family who owned property in this area during the Renaissance. The Pisani were a prominent nobili family who produced several important figures in Venetian politics and military affairs.",
+      "id": "building_45.440169_12.325968"
     },
     {
       "lat": 45.44016726475566,
       "lng": 12.326669110245644,
       "streetName": "Calle dei Sigilli",
       "streetNameEnglish": "Street of the Seals",
-      "streetDescription": "Named after craftsmen who made official seals used by the Venetian government and noble families to authenticate documents. Located near Calle de la Testa, these artisans created intricate images in metal that represented authority and lineage."
+      "streetDescription": "Named after craftsmen who made official seals used by the Venetian government and noble families to authenticate documents. Located near Calle de la Testa, these artisans created intricate images in metal that represented authority and lineage.",
+      "id": "building_45.440167_12.326669"
     },
     {
       "lat": 45.44067134656824,
       "lng": 12.324766205250484,
       "streetName": "Salizada dei Mercanti Bizantini",
       "streetNameEnglish": "Paved Street of the Byzantine Merchants",
-      "streetDescription": "One of the first paved streets in this area, named for the Byzantine merchants who conducted trade here. Venice maintained strong commercial ties with Constantinople/Byzantium throughout much of its history."
+      "streetDescription": "One of the first paved streets in this area, named for the Byzantine merchants who conducted trade here. Venice maintained strong commercial ties with Constantinople/Byzantium throughout much of its history.",
+      "id": "building_45.440671_12.324766"
     },
     {
       "lat": 45.440601420168534,
       "lng": 12.325454319624434,
       "streetName": "Sottoportego dei Profumieri",
       "streetNameEnglish": "Passageway of the Perfumers",
-      "streetDescription": "This covered passageway housed shops selling exotic scents and perfumes. Venice was a major importer of spices, resins, and aromatic substances from the East, which perfumers used to create luxury scented products for noble clientele."
+      "streetDescription": "This covered passageway housed shops selling exotic scents and perfumes. Venice was a major importer of spices, resins, and aromatic substances from the East, which perfumers used to create luxury scented products for noble clientele.",
+      "id": "building_45.440601_12.325454"
     },
     {
       "lat": 45.440583813867356,
       "lng": 12.32607271601671,
       "streetName": "Rio Terà della Volpe",
       "streetNameEnglish": "Filled Canal of the Fox",
-      "streetDescription": "A former canal that was filled in, possibly named after the sign of a tavern or shop displaying a fox, or after the nickname of a local character. Animal symbolism was common in Venetian street naming conventions."
+      "streetDescription": "A former canal that was filled in, possibly named after the sign of a tavern or shop displaying a fox, or after the nickname of a local character. Animal symbolism was common in Venetian street naming conventions.",
+      "id": "building_45.440584_12.326073"
     },
     {
       "lat": 45.44070547732458,
       "lng": 12.326572008995425,
       "streetName": "Calle del Ritratto",
       "streetNameEnglish": "Street of the Portrait",
-      "streetDescription": "Named for a portrait painter who had a studio here during the 16th century. Being near Calle de la Testa (referring to 'head'), this street likely housed artists who specialized in painting portraits of Venetian nobles and wealthy merchants."
+      "streetDescription": "Named for a portrait painter who had a studio here during the 16th century. Being near Calle de la Testa (referring to 'head'), this street likely housed artists who specialized in painting portraits of Venetian nobles and wealthy merchants.",
+      "id": "building_45.440705_12.326572"
     },
     {
       "lat": 45.441124168091775,
       "lng": 12.324146536472826,
       "streetName": "Fondamenta degli Ambasciatori",
       "streetNameEnglish": "Foundation of the Ambassadors",
-      "streetDescription": "This canalside walkway was named for the foreign ambassadors who may have resided in buildings along this stretch. Venice hosted diplomatic representatives from many nations during its height as a maritime power."
+      "streetDescription": "This canalside walkway was named for the foreign ambassadors who may have resided in buildings along this stretch. Venice hosted diplomatic representatives from many nations during its height as a maritime power.",
+      "id": "building_45.441124_12.324147"
     },
     {
       "lat": 45.44114300500742,
       "lng": 12.32475261739824,
       "streetName": "Calle dei Parrucchieri",
       "streetNameEnglish": "Street of the Wigmakers",
-      "streetDescription": "This street, located near Calle de la Testa, was home to artisans who crafted wigs, which became fashionable in Venice during the later Renaissance period. These specialized craftsmen served the Venetian elite who followed European fashion trends."
+      "streetDescription": "This street, located near Calle de la Testa, was home to artisans who crafted wigs, which became fashionable in Venice during the later Renaissance period. These specialized craftsmen served the Venetian elite who followed European fashion trends.",
+      "id": "building_45.441143_12.324753"
     },
     {
       "lat": 45.44118098460479,
       "lng": 12.325425638000086,
       "streetName": "Campiello delle Candele",
       "streetNameEnglish": "Small Square of the Candles",
-      "streetDescription": "Named after the candlemakers who operated in this small square. Candle production was an important craft in Renaissance Venice, as quality beeswax and tallow candles were essential for lighting in homes, churches, and palaces."
+      "streetDescription": "Named after the candlemakers who operated in this small square. Candle production was an important craft in Renaissance Venice, as quality beeswax and tallow candles were essential for lighting in homes, churches, and palaces.",
+      "id": "building_45.441181_12.325426"
     },
     {
       "lat": 45.441102616712264,
       "lng": 12.326035304031823,
       "streetName": "Corte Malipiero",
       "streetNameEnglish": "Malipiero Court",
-      "streetDescription": "Named after the noble Malipiero family who owned property surrounding this courtyard. The Malipiero were an ancient Venetian nobili family who contributed several doges and military commanders to the Republic's history."
+      "streetDescription": "Named after the noble Malipiero family who owned property surrounding this courtyard. The Malipiero were an ancient Venetian nobili family who contributed several doges and military commanders to the Republic's history.",
+      "id": "building_45.441103_12.326035"
     },
     {
       "lat": 45.44106531061337,
       "lng": 12.326587810750574,
       "streetName": "Ruga dei Coralli",
       "streetNameEnglish": "Street of the Coral Workers",
-      "streetDescription": "This commercial street housed craftsmen who worked with Mediterranean coral to create jewelry and decorative items. Coral was highly valued in Renaissance Venice and was crafted into luxury goods for both domestic use and export."
+      "streetDescription": "This commercial street housed craftsmen who worked with Mediterranean coral to create jewelry and decorative items. Coral was highly valued in Renaissance Venice and was crafted into luxury goods for both domestic use and export.",
+      "id": "building_45.441065_12.326588"
     },
     {
       "lat": 45.44155105372713,
       "lng": 12.325843868480456,
       "streetName": "Calle della Scimmia",
       "streetNameEnglish": "Street of the Monkey",
-      "streetDescription": "Named after an exotic pet monkey kept by a wealthy merchant or perhaps the sign of a shop or tavern. Exotic animals were sometimes brought to Venice through its extensive trade networks and became symbols for businesses or streets."
+      "streetDescription": "Named after an exotic pet monkey kept by a wealthy merchant or perhaps the sign of a shop or tavern. Exotic animals were sometimes brought to Venice through its extensive trade networks and became symbols for businesses or streets.",
+      "id": "building_45.441551_12.325844"
     },
     {
       "lat": 45.441523385923084,
       "lng": 12.326687241224311,
       "streetName": "Sottoportego dei Miniatori",
       "streetNameEnglish": "Passageway of the Illuminators",
-      "streetDescription": "Named for the artists who specialized in manuscript illumination and miniature painting. These highly skilled artisans created detailed decorations for books, official documents, and small portraits, catering to wealthy patrons and the Venetian government."
+      "streetDescription": "Named for the artists who specialized in manuscript illumination and miniature painting. These highly skilled artisans created detailed decorations for books, official documents, and small portraits, catering to wealthy patrons and the Venetian government.",
+      "id": "building_45.441523_12.326687"
     }
   ],
   "id": "polygon-1745879404342"

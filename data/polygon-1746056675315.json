@@ -34,7 +34,7 @@
     "lat": 45.43261435526686,
     "lng": 12.328993401138392
   },
-  "dockPoints": [
+  "canalPoints": [
     {
       "edge": {
         "lat": 45.43220854645863,
@@ -46,7 +46,8 @@
       },
       "historicalName": "Fondamenta Giustinian",
       "englishName": "Giustinian's Foundation",
-      "historicalDescription": "Named after the prominent Giustinian family who owned property in this area of San Marco. The Giustinian were a nobili Venetian family who contributed several Doges to the Republic and maintained a significant presence in the San Marco district during the Renaissance period. This dock would have served their palazzo and the surrounding neighborhood."
+      "historicalDescription": "Named after the prominent Giustinian family who owned property in this area of San Marco. The Giustinian were a nobili Venetian family who contributed several Doges to the Republic and maintained a significant presence in the San Marco district during the Renaissance period. This dock would have served their palazzo and the surrounding neighborhood.",
+      "id": "dock_45.432209_12.328431"
     }
   ],
   "bridgePoints": [
@@ -73,7 +74,8 @@
             "lng": 12.328860363571254
           }
         }
-      }
+      },
+      "id": "bridge_45.432864_12.328874"
     },
     {
       "edge": {
@@ -98,7 +100,8 @@
             "lng": 12.329973480312434
           }
         }
-      }
+      },
+      "id": "bridge_45.433135_12.329928"
     }
   ],
   "buildingPoints": [
@@ -107,14 +110,16 @@
       "lng": 12.32870022860157,
       "streetName": "Calle dei Mercanti di Seta",
       "streetNameEnglish": "Street of the Silk Merchants",
-      "streetDescription": "This name reflects the presence of silk merchants in the San Marco district during the Renaissance. The area near Calle Giustinian was known for luxury trade, and silk was one of Venice's most prized imports from the East. Silk merchants would have established shops in this prestigious location to serve the noble families and wealthy citizens of the San Marco district."
+      "streetDescription": "This name reflects the presence of silk merchants in the San Marco district during the Renaissance. The area near Calle Giustinian was known for luxury trade, and silk was one of Venice's most prized imports from the East. Silk merchants would have established shops in this prestigious location to serve the noble families and wealthy citizens of the San Marco district.",
+      "id": "building_45.432499_12.328700"
     },
     {
       "lat": 45.43288389373005,
       "lng": 12.329316037106123,
       "streetName": "Sottoportego dei Camerlenghi",
       "streetNameEnglish": "Underpass of the Treasurers",
-      "streetDescription": "This name references the Camerlenghi, who were treasury officials in the Venetian Republic responsible for state finances. The San Marco area housed many government functions, and this sottoportego (covered passageway) would likely connect to buildings where financial matters were handled. The Giustinian family, being prominent in Venetian politics, would have been well-acquainted with these officials, making this a fitting name for a passage near Calle Giustinian."
+      "streetDescription": "This name references the Camerlenghi, who were treasury officials in the Venetian Republic responsible for state finances. The San Marco area housed many government functions, and this sottoportego (covered passageway) would likely connect to buildings where financial matters were handled. The Giustinian family, being prominent in Venetian politics, would have been well-acquainted with these officials, making this a fitting name for a passage near Calle Giustinian.",
+      "id": "building_45.432884_12.329316"
     }
   ],
   "id": "polygon-1746056675315"

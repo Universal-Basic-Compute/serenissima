@@ -502,8 +502,8 @@ async function enhancePolygonData() {
       let itemsCount = 0;
       if (mode === 'bridges' && polygonData.bridgePoints && Array.isArray(polygonData.bridgePoints)) {
         itemsCount = polygonData.bridgePoints.filter(point => point.connection).length;
-      } else if (mode === 'docks' && polygonData.dockPoints && Array.isArray(polygonData.dockPoints)) {
-        itemsCount = polygonData.dockPoints.length;
+      } else if (mode === 'docks' && polygonData.canalPoints && Array.isArray(polygonData.canalPoints)) {
+        itemsCount = polygonData.canalPoints.length;
       } else if (mode === 'buildings' && polygonData.buildingPoints && Array.isArray(polygonData.buildingPoints)) {
         itemsCount = polygonData.buildingPoints.length;
       }
@@ -604,18 +604,18 @@ async function enhancePolygonData() {
             console.warn(`Ran out of bridge names for polygon ${polygonData.id}`);
           }
         }
-      } else if (mode === 'docks' && polygonData.dockPoints && polygonData.dockPoints.length > 0) {
+      } else if (mode === 'docks' && polygonData.canalPoints && polygonData.canalPoints.length > 0) {
         // Assign dock names to dock points
-        for (let i = 0; i < polygonData.dockPoints.length; i++) {
-          const dockPoint = polygonData.dockPoints[i];
+        for (let i = 0; i < polygonData.canalPoints.length; i++) {
+          const canalPoint = polygonData.canalPoints[i];
           
           if (itemIndex < generatedItems.length) {
             const dockName = generatedItems[itemIndex++];
             
             // Add name and description to dock point
-            dockPoint.historicalName = dockName.historicalName;
-            dockPoint.englishName = dockName.englishName;
-            dockPoint.historicalDescription = dockName.historicalDescription;
+            canalPoint.historicalName = dockName.historicalName;
+            canalPoint.englishName = dockName.englishName;
+            canalPoint.historicalDescription = dockName.historicalDescription;
             
             console.log(`Assigned dock name: "${dockName.historicalName}" (${dockName.englishName})`);
           } else {

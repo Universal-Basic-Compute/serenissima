@@ -42,7 +42,7 @@
     "lat": 45.44527763840166,
     "lng": 12.326886973395338
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -67,7 +67,8 @@
             "lng": 12.327272571817119
           }
         }
-      }
+      },
+      "id": "bridge_45.445014_12.327210"
     },
     {
       "edge": {
@@ -92,7 +93,8 @@
             "lng": 12.326681144729335
           }
         }
-      }
+      },
+      "id": "bridge_45.444858_12.326703"
     },
     {
       "edge": {
@@ -117,7 +119,8 @@
             "lng": 12.326453156963069
           }
         }
-      }
+      },
+      "id": "bridge_45.445161_12.326526"
     }
   ],
   "buildingPoints": [
@@ -126,7 +129,8 @@
       "lng": 12.326887449941127,
       "streetName": "Calle del Banco Rosso",
       "streetNameEnglish": "Street of the Red Bank",
-      "streetDescription": "This street name refers to one of the pawnshops ('banco') that operated in the Ghetto Novo during the Renaissance. The Jewish community was permitted to operate money-lending businesses, and these banks were often identified by colors. The 'Banco Rosso' (Red Bank) was one of the prominent pawnshops that served Venetians who needed small loans, and where the Jewish moneylenders worked under strict regulations imposed by the Venetian Republic."
+      "streetDescription": "This street name refers to one of the pawnshops ('banco') that operated in the Ghetto Novo during the Renaissance. The Jewish community was permitted to operate money-lending businesses, and these banks were often identified by colors. The 'Banco Rosso' (Red Bank) was one of the prominent pawnshops that served Venetians who needed small loans, and where the Jewish moneylenders worked under strict regulations imposed by the Venetian Republic.",
+      "id": "building_45.445387_12.326887"
     }
   ],
   "id": "polygon-1746055579728"

@@ -17,7 +17,7 @@
     "iron": 30,
     "sand": 500
   },
-  "maintenanceCost": 12500,
+  "maintenanceCost": 1250,
   "constructionTime": 518400000,
   "incomeGeneration": 5000,
   "employmentCapacity": 1,

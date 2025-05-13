@@ -74,7 +74,7 @@
     "lat": 45.43118239703004,
     "lng": 12.325575847550898
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -99,7 +99,8 @@
             "lng": 12.326169900230779
           }
         }
-      }
+      },
+      "id": "bridge_45.432264_12.326272"
     },
     {
       "edge": {
@@ -124,7 +125,8 @@
             "lng": 12.32661303714668
           }
         }
-      }
+      },
+      "id": "bridge_45.431187_12.326562"
     },
     {
       "edge": {
@@ -149,7 +151,8 @@
             "lng": 12.326430646933668
           }
         }
-      }
+      },
+      "id": "bridge_45.430684_12.326352"
     },
     {
       "edge": {
@@ -174,7 +177,8 @@
             "lng": 12.325136859399048
           }
         }
-      }
+      },
+      "id": "bridge_45.430492_12.325140"
     },
     {
       "edge": {
@@ -199,7 +203,8 @@
             "lng": 12.324686638645543
           }
         }
-      }
+      },
+      "id": "bridge_45.431546_12.324754"
     },
     {
       "edge": {
@@ -224,7 +229,8 @@
             "lng": 12.324694685272588
           }
         }
-      }
+      },
+      "id": "bridge_45.431840_12.324754"
     }
   ],
   "buildingPoints": [
@@ -233,49 +239,56 @@
       "lng": 12.325751719430423,
       "streetName": "Calle dei Tintori",
       "streetNameEnglish": "Street of the Dyers",
-      "streetDescription": "San Polo was known for its textile industry during the Renaissance. This street would recognize the cloth dyers who operated workshops in this area, using water from nearby canals for their craft. Their colored fabrics contributed to Venice's reputation for luxury textiles."
+      "streetDescription": "San Polo was known for its textile industry during the Renaissance. This street would recognize the cloth dyers who operated workshops in this area, using water from nearby canals for their craft. Their colored fabrics contributed to Venice's reputation for luxury textiles.",
+      "id": "building_45.430564_12.325752"
     },
     {
       "lat": 45.431092773060186,
       "lng": 12.325109139087365,
       "streetName": "Sottoportego delle Meraviglie",
       "streetNameEnglish": "Passageway of Wonders",
-      "streetDescription": "Named in relation to the nearby 'Ponte de le Maravegie' (Bridge of Wonders), this covered passageway would continue the theme of the 'marvelous' that gave the bridge its name. The bridge likely earned its name from unusual sights, curious shops, or perhaps spectacular views in this area."
+      "streetDescription": "Named in relation to the nearby 'Ponte de le Maravegie' (Bridge of Wonders), this covered passageway would continue the theme of the 'marvelous' that gave the bridge its name. The bridge likely earned its name from unusual sights, curious shops, or perhaps spectacular views in this area.",
+      "id": "building_45.431093_12.325109"
     },
     {
       "lat": 45.43092616064907,
       "lng": 12.32571962695894,
       "streetName": "Rio Terà dei Frari",
       "streetNameEnglish": "Filled Canal of the Friars",
-      "streetDescription": "This name references the proximity to the Basilica di Santa Maria Gloriosa dei Frari, one of the most important churches in Venice located in San Polo. Rio Terà indicates this was once a canal that was filled in, creating a street where water once flowed, a common practice in Venice's urban development."
+      "streetDescription": "This name references the proximity to the Basilica di Santa Maria Gloriosa dei Frari, one of the most important churches in Venice located in San Polo. Rio Terà indicates this was once a canal that was filled in, creating a street where water once flowed, a common practice in Venice's urban development.",
+      "id": "building_45.430926_12.325720"
     },
     {
       "lat": 45.43154203455939,
       "lng": 12.325523050723296,
       "streetName": "Calle della Seta",
       "streetNameEnglish": "Street of Silk",
-      "streetDescription": "San Polo hosted numerous silk merchants and artisans during the Renaissance period. This street would commemorate the important silk trade that brought great wealth to Venice through its connections with the East, highlighting the commercial importance of this district."
+      "streetDescription": "San Polo hosted numerous silk merchants and artisans during the Renaissance period. This street would commemorate the important silk trade that brought great wealth to Venice through its connections with the East, highlighting the commercial importance of this district.",
+      "id": "building_45.431542_12.325523"
     },
     {
       "lat": 45.43153200033438,
       "lng": 12.326319236065505,
       "streetName": "Fondamenta dei Mercanti",
       "streetNameEnglish": "Foundation of the Merchants",
-      "streetDescription": "This name would be appropriate for a street running alongside a canal in the San Polo area, which was a hub of commercial activity. 'Fondamenta' refers to streets that run along canals, and merchants would have used these waterways to transport goods to and from their shops and warehouses."
+      "streetDescription": "This name would be appropriate for a street running alongside a canal in the San Polo area, which was a hub of commercial activity. 'Fondamenta' refers to streets that run along canals, and merchants would have used these waterways to transport goods to and from their shops and warehouses.",
+      "id": "building_45.431532_12.326319"
     },
     {
       "lat": 45.43187150994009,
       "lng": 12.325541397579858,
       "streetName": "Salizada dei Morosini",
       "streetNameEnglish": "Paved Street of the Morosini",
-      "streetDescription": "Named after the powerful Morosini family who likely owned property in this area of San Polo. The Morosini were one of Venice's most illustrious nobili families, producing doges and military leaders. 'Salizada' indicates this was one of the first paved streets in the area, suggesting the importance of the family."
+      "streetDescription": "Named after the powerful Morosini family who likely owned property in this area of San Polo. The Morosini were one of Venice's most illustrious nobili families, producing doges and military leaders. 'Salizada' indicates this was one of the first paved streets in the area, suggesting the importance of the family.",
+      "id": "building_45.431872_12.325541"
     },
     {
       "lat": 45.43184101356824,
       "lng": 12.326238743511613,
       "streetName": "Campiello del Gambaro",
       "streetNameEnglish": "Small Square of the Crab",
-      "streetDescription": "This name would refer to a small square near Ponte de le Maravegie that might have featured a shop sign depicting a crab, or perhaps was home to a seafood merchant. Animal imagery was common in Venetian street names, often derived from shop signs or family crests in the vicinity."
+      "streetDescription": "This name would refer to a small square near Ponte de le Maravegie that might have featured a shop sign depicting a crab, or perhaps was home to a seafood merchant. Animal imagery was common in Venetian street names, often derived from shop signs or family crests in the vicinity.",
+      "id": "building_45.431841_12.326239"
     }
   ],
   "id": "polygon-1745879036720"

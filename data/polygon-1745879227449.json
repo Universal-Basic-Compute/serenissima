@@ -30,7 +30,7 @@
     "lat": 45.43556544079619,
     "lng": 12.319229005769357
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -55,7 +55,8 @@
             "lng": 12.318757384017571
           }
         }
-      }
+      },
+      "id": "bridge_45.435712_12.318796"
     },
     {
       "edge": {
@@ -80,7 +81,8 @@
             "lng": 12.318894623712167
           }
         }
-      }
+      },
+      "id": "bridge_45.435276_12.318953"
     },
     {
       "edge": {
@@ -105,7 +107,8 @@
             "lng": 12.31963245470868
           }
         }
-      }
+      },
+      "id": "bridge_45.435415_12.319663"
     }
   ],
   "buildingPoints": [
@@ -114,21 +117,24 @@
       "lng": 12.318792302285676,
       "streetName": "Calle dei Droghieri",
       "streetNameEnglish": "Street of the Druggists",
-      "streetDescription": "This name reflects the historical presence of apothecaries and spice merchants near Fondamenta de le Erbe in Dorsoduro. The proximity to herb markets ('erbe') made it a natural location for droghieri who sold medicinal herbs, spices, and compounds during the Renaissance period. Venice was a major hub for the spice trade from the East, and these merchants were essential to both medicine and cooking."
+      "streetDescription": "This name reflects the historical presence of apothecaries and spice merchants near Fondamenta de le Erbe in Dorsoduro. The proximity to herb markets ('erbe') made it a natural location for droghieri who sold medicinal herbs, spices, and compounds during the Renaissance period. Venice was a major hub for the spice trade from the East, and these merchants were essential to both medicine and cooking.",
+      "id": "building_45.435531_12.318792"
     },
     {
       "lat": 45.43556878000789,
       "lng": 12.3193104992613,
       "streetName": "Rio Terà dei Erbaioli",
       "streetNameEnglish": "Filled Canal of the Herb Sellers",
-      "streetDescription": "This name references the filled-in canal (rio terà) where herb sellers would gather to trade. It directly connects to the nearby Fondamenta de le Erbe, as 'erbaioli' were vendors specialized in fresh culinary and medicinal herbs. This area in Dorsoduro would have been bustling with these merchants who supplied Venetian households and apothecaries with essential herbs grown in the mainland territories of the Venetian Republic."
+      "streetDescription": "This name references the filled-in canal (rio terà) where herb sellers would gather to trade. It directly connects to the nearby Fondamenta de le Erbe, as 'erbaioli' were vendors specialized in fresh culinary and medicinal herbs. This area in Dorsoduro would have been bustling with these merchants who supplied Venetian households and apothecaries with essential herbs grown in the mainland territories of the Venetian Republic.",
+      "id": "building_45.435569_12.319310"
     },
     {
       "lat": 45.43567337504869,
       "lng": 12.320103175199636,
       "streetName": "Sottoportego del Basilico",
       "streetNameEnglish": "Passageway of the Basil",
-      "streetDescription": "This covered passageway (sottoportego) would likely connect to the herb market area. Basil was a prized herb in Renaissance Venice, used both in cooking and believed to have protective properties. The name suggests a small passage where perhaps specific herb vendors specialized in aromatic plants might have set up their stalls. Such specific herb designations were common in Venice's intricate street naming system, reflecting the microeconomies of different areas."
+      "streetDescription": "This covered passageway (sottoportego) would likely connect to the herb market area. Basil was a prized herb in Renaissance Venice, used both in cooking and believed to have protective properties. The name suggests a small passage where perhaps specific herb vendors specialized in aromatic plants might have set up their stalls. Such specific herb designations were common in Venice's intricate street naming system, reflecting the microeconomies of different areas.",
+      "id": "building_45.435673_12.320103"
     }
   ],
   "id": "polygon-1745879227449"

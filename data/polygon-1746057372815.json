@@ -58,7 +58,7 @@
     "lat": 45.429248447475935,
     "lng": 12.357714218999487
   },
-  "dockPoints": [
+  "canalPoints": [
     {
       "edge": {
         "lat": 45.42775690220777,
@@ -70,7 +70,8 @@
       },
       "historicalName": "Fondamenta delle Teresiane",
       "englishName": "Foundation of the Teresians",
-      "historicalDescription": "Named after the Carmelite nuns of the Order of Saint Teresa who established a convent near Calle de le Terese in the 17th century. This dock would have served the convent and surrounding community."
+      "historicalDescription": "Named after the Carmelite nuns of the Order of Saint Teresa who established a convent near Calle de le Terese in the 17th century. This dock would have served the convent and surrounding community.",
+      "id": "dock_45.427757_12.357536"
     },
     {
       "edge": {
@@ -83,7 +84,8 @@
       },
       "historicalName": "Riva dei Tintori di Lana",
       "englishName": "Bank of the Wool Dyers",
-      "historicalDescription": "This dock name reflects the wool dyeing workshops that operated in this area during the Renaissance period. The textile industry was vital to Venice's economy, and many specialized craftsmen had workshops near Calle de le Terese."
+      "historicalDescription": "This dock name reflects the wool dyeing workshops that operated in this area during the Renaissance period. The textile industry was vital to Venice's economy, and many specialized craftsmen had workshops near Calle de le Terese.",
+      "id": "dock_45.428144_12.357111"
     },
     {
       "edge": {
@@ -96,7 +98,8 @@
       },
       "historicalName": "Fondamenta dei Carmini",
       "englishName": "Foundation of the Carmelites",
-      "historicalDescription": "Named for its proximity to the Church of Santa Maria dei Carmini and the Carmelite order. This religious connection would be particularly appropriate for a dock near Calle de le Terese, which itself references the Teresine (Discalced Carmelites)."
+      "historicalDescription": "Named for its proximity to the Church of Santa Maria dei Carmini and the Carmelite order. This religious connection would be particularly appropriate for a dock near Calle de le Terese, which itself references the Teresine (Discalced Carmelites).",
+      "id": "dock_45.428531_12.356686"
     },
     {
       "edge": {
@@ -109,7 +112,8 @@
       },
       "historicalName": "Riva di San Nicolò dei Mendicoli",
       "englishName": "Bank of Saint Nicholas of the Beggars",
-      "historicalDescription": "Named after the nearby parish church of San Nicolò dei Mendicoli, one of Venice's oldest churches. This area was historically home to poorer Venetians, including many fishermen and laborers who would use this dock."
+      "historicalDescription": "Named after the nearby parish church of San Nicolò dei Mendicoli, one of Venice's oldest churches. This area was historically home to poorer Venetians, including many fishermen and laborers who would use this dock.",
+      "id": "dock_45.428918_12.356261"
     },
     {
       "edge": {
@@ -122,7 +126,8 @@
       },
       "historicalName": "Fondamenta dei Comparetti",
       "englishName": "Foundation of the Godfathers",
-      "historicalDescription": "Refers to a prominent family or confraternity of godfathers who may have lived or operated near Calle de le Terese. Confraternities were important social institutions in Renaissance Venice, often maintaining their own docks for members' use."
+      "historicalDescription": "Refers to a prominent family or confraternity of godfathers who may have lived or operated near Calle de le Terese. Confraternities were important social institutions in Renaissance Venice, often maintaining their own docks for members' use.",
+      "id": "dock_45.429305_12.355836"
     }
   ],
   "bridgePoints": [
@@ -149,7 +154,8 @@
             "lng": 12.354865897307434
           }
         }
-      }
+      },
+      "id": "bridge_45.430231_12.354967"
     },
     {
       "edge": {
@@ -174,7 +180,8 @@
             "lng": 12.355847585806885
           }
         }
-      }
+      },
+      "id": "bridge_45.430291_12.355858"
     },
     {
       "edge": {
@@ -199,7 +206,8 @@
             "lng": 12.356518138060608
           }
         }
-      }
+      },
+      "id": "bridge_45.430458_12.356510"
     },
     {
       "edge": {
@@ -224,7 +232,8 @@
             "lng": 12.35718869031433
           }
         }
-      }
+      },
+      "id": "bridge_45.430626_12.357162"
     },
     {
       "edge": {
@@ -249,7 +258,8 @@
             "lng": 12.357859242568054
           }
         }
-      }
+      },
+      "id": "bridge_45.430793_12.357815"
     },
     {
       "edge": {
@@ -274,7 +284,8 @@
             "lng": 12.358529794821777
           }
         }
-      }
+      },
+      "id": "bridge_45.430960_12.358467"
     },
     {
       "edge": {
@@ -299,7 +310,8 @@
             "lng": 12.359517098014859
           }
         }
-      }
+      },
+      "id": "bridge_45.430216_12.359420"
     },
     {
       "edge": {
@@ -324,7 +336,8 @@
             "lng": 12.359480441158322
           }
         }
-      }
+      },
+      "id": "bridge_45.429742_12.359404"
     },
     {
       "edge": {
@@ -349,7 +362,8 @@
             "lng": 12.359443784301785
           }
         }
-      }
+      },
+      "id": "bridge_45.429267_12.359388"
     }
   ],
   "buildingPoints": [
@@ -358,161 +372,184 @@
       "lng": 12.35838949963697,
       "streetName": "Calle del Convento delle Terese",
       "streetNameEnglish": "Street of the Terese Convent",
-      "streetDescription": "Named after the Carmelite convent of Saint Teresa established in the 17th century in this area. The Teresians were a reformed branch of the Carmelite order and their convent was a significant religious institution in this part of Venice."
+      "streetDescription": "Named after the Carmelite convent of Saint Teresa established in the 17th century in this area. The Teresians were a reformed branch of the Carmelite order and their convent was a significant religious institution in this part of Venice.",
+      "id": "building_45.427744_12.358389"
     },
     {
       "lat": 45.42824487705509,
       "lng": 12.35774420213812,
       "streetName": "Rio Terà dei Carmini",
       "streetNameEnglish": "Filled Canal of the Carmelites",
-      "streetDescription": "This street was originally a canal that was filled in. Named after the Carmelite order, which had a strong presence in this area with the nearby Church of the Carmini and the Terese convent."
+      "streetDescription": "This street was originally a canal that was filled in. Named after the Carmelite order, which had a strong presence in this area with the nearby Church of the Carmini and the Terese convent.",
+      "id": "building_45.428245_12.357744"
     },
     {
       "lat": 45.42824936230018,
       "lng": 12.358537022545656,
       "streetName": "Fondamenta delle Monache",
       "streetNameEnglish": "Foundation of the Nuns",
-      "streetDescription": "This canalside walkway was named after the nuns who resided in the nearby Terese convent. Fondamenta traditionally refers to streets running alongside canals."
+      "streetDescription": "This canalside walkway was named after the nuns who resided in the nearby Terese convent. Fondamenta traditionally refers to streets running alongside canals.",
+      "id": "building_45.428249_12.358537"
     },
     {
       "lat": 45.42877133027887,
       "lng": 12.357039068295453,
       "streetName": "Calle della Lana",
       "streetNameEnglish": "Street of the Wool",
-      "streetDescription": "Named after the wool trade that was prevalent in this area during the Renaissance. The Terese district had numerous workshops where wool was processed and woven into textiles."
+      "streetDescription": "Named after the wool trade that was prevalent in this area during the Renaissance. The Terese district had numerous workshops where wool was processed and woven into textiles.",
+      "id": "building_45.428771_12.357039"
     },
     {
       "lat": 45.428714571311424,
       "lng": 12.357680435614304,
       "streetName": "Sottoportego dei Tintori",
       "streetNameEnglish": "Passageway of the Dyers",
-      "streetDescription": "A covered passageway named after the cloth dyers who operated in this area. The textile industry required specialized artisans to dye fabrics, and they often worked near the canals for easy waste disposal and water access."
+      "streetDescription": "A covered passageway named after the cloth dyers who operated in this area. The textile industry required specialized artisans to dye fabrics, and they often worked near the canals for easy waste disposal and water access.",
+      "id": "building_45.428715_12.357680"
     },
     {
       "lat": 45.42879234215603,
       "lng": 12.358435338661655,
       "streetName": "Calle dei Cordami",
       "streetNameEnglish": "Street of the Ropes",
-      "streetDescription": "Named after rope makers who had workshops in this area. Venice's maritime economy required vast quantities of ropes for its ships, and rope making was an important craft in the Terese district."
+      "streetDescription": "Named after rope makers who had workshops in this area. Venice's maritime economy required vast quantities of ropes for its ships, and rope making was an important craft in the Terese district.",
+      "id": "building_45.428792_12.358435"
     },
     {
       "lat": 45.42920447251479,
       "lng": 12.356614009552892,
       "streetName": "Salizada Santa Teresa",
       "streetNameEnglish": "Paved Street of Saint Teresa",
-      "streetDescription": "One of the main paved streets (salizada) in the area, named after Saint Teresa of Ávila, the patron saint of the Teresian Carmelite order whose convent was nearby. Salizadas were wider and paved earlier than ordinary calli."
+      "streetDescription": "One of the main paved streets (salizada) in the area, named after Saint Teresa of Ávila, the patron saint of the Teresian Carmelite order whose convent was nearby. Salizadas were wider and paved earlier than ordinary calli.",
+      "id": "building_45.429204_12.356614"
     },
     {
       "lat": 45.429188487717575,
       "lng": 12.357142831446273,
       "streetName": "Campiello del Filatoio",
       "streetNameEnglish": "Small Square of the Spinning Wheel",
-      "streetDescription": "This small square was named after the spinning wheels used in the textile industry that flourished in the area. Spinning wool was a common occupation for women who might have worked for the textile merchants."
+      "streetDescription": "This small square was named after the spinning wheels used in the textile industry that flourished in the area. Spinning wool was a common occupation for women who might have worked for the textile merchants.",
+      "id": "building_45.429188_12.357143"
     },
     {
       "lat": 45.42912840789326,
       "lng": 12.358313394161534,
       "streetName": "Ruga dei Laneri",
       "streetNameEnglish": "Street of the Wool Workers",
-      "streetDescription": "A commercial street (ruga) where wool workers had their shops and workshops. The wool trade was significant in Venice's economy, and this area contained many artisans involved in various stages of wool processing."
+      "streetDescription": "A commercial street (ruga) where wool workers had their shops and workshops. The wool trade was significant in Venice's economy, and this area contained many artisans involved in various stages of wool processing.",
+      "id": "building_45.429128_12.358313"
     },
     {
       "lat": 45.42957582316587,
       "lng": 12.355988778363576,
       "streetName": "Calle del Refettorio",
       "streetNameEnglish": "Street of the Refectory",
-      "streetDescription": "Named after the dining hall of the Terese convent. Religious institutions were central to neighborhood organization in Renaissance Venice, and their buildings often gave names to nearby streets."
+      "streetDescription": "Named after the dining hall of the Terese convent. Religious institutions were central to neighborhood organization in Renaissance Venice, and their buildings often gave names to nearby streets.",
+      "id": "building_45.429576_12.355989"
     },
     {
       "lat": 45.429678134317264,
       "lng": 12.356515515462801,
       "streetName": "Fondamenta dei Scudi",
       "streetNameEnglish": "Foundation of the Shields",
-      "streetDescription": "This canalside walkway may have been named after a workshop that produced shields or after a family with shields in their coat of arms. Military equipment production was an important industry in Venice."
+      "streetDescription": "This canalside walkway may have been named after a workshop that produced shields or after a family with shields in their coat of arms. Military equipment production was an important industry in Venice.",
+      "id": "building_45.429678_12.356516"
     },
     {
       "lat": 45.42967897793118,
       "lng": 12.3572590628992,
       "streetName": "Corte Pisani",
       "streetNameEnglish": "Pisani Court",
-      "streetDescription": "Named after the Pisani family, one of Venice's nobili families who may have had a palazzo in this area. Noble families often gave their names to the courts and streets where their residences were located."
+      "streetDescription": "Named after the Pisani family, one of Venice's nobili families who may have had a palazzo in this area. Noble families often gave their names to the courts and streets where their residences were located.",
+      "id": "building_45.429679_12.357259"
     },
     {
       "lat": 45.42963796218538,
       "lng": 12.357721326463725,
       "streetName": "Rio Terà della Carità",
       "streetNameEnglish": "Filled Canal of Charity",
-      "streetDescription": "Originally a canal that was filled in, named after charitable works possibly connected to the convent. Religious institutions often provided social services and charity to the poor of their districts."
+      "streetDescription": "Originally a canal that was filled in, named after charitable works possibly connected to the convent. Religious institutions often provided social services and charity to the poor of their districts.",
+      "id": "building_45.429638_12.357721"
     },
     {
       "lat": 45.4296973875343,
       "lng": 12.358511055858635,
       "streetName": "Calle del Chiostro",
       "streetNameEnglish": "Street of the Cloister",
-      "streetDescription": "Named after the cloister of the Terese convent. The architectural components of significant religious buildings frequently provided names for adjacent streets."
+      "streetDescription": "Named after the cloister of the Terese convent. The architectural components of significant religious buildings frequently provided names for adjacent streets.",
+      "id": "building_45.429697_12.358511"
     },
     {
       "lat": 45.4296982276676,
       "lng": 12.359084453120557,
       "streetName": "Sottoportego della Disciplina",
       "streetNameEnglish": "Passageway of the Discipline",
-      "streetDescription": "A covered passageway possibly named after a confraternity that practiced religious self-discipline or after the strict regimen followed by the Teresian Carmelites, known for their ascetic practices."
+      "streetDescription": "A covered passageway possibly named after a confraternity that practiced religious self-discipline or after the strict regimen followed by the Teresian Carmelites, known for their ascetic practices.",
+      "id": "building_45.429698_12.359084"
     },
     {
       "lat": 45.430057645487096,
       "lng": 12.355189260829755,
       "streetName": "Calle dei Teleri",
       "streetNameEnglish": "Street of the Looms",
-      "streetDescription": "Named after the looms used in textile production, which was a major industry in this area. The textile workshops would have contained numerous looms for weaving wool and other fibers."
+      "streetDescription": "Named after the looms used in textile production, which was a major industry in this area. The textile workshops would have contained numerous looms for weaving wool and other fibers.",
+      "id": "building_45.430058_12.355189"
     },
     {
       "lat": 45.4301305024602,
       "lng": 12.355792857874693,
       "streetName": "Fondamenta dei Lavraneri",
       "streetNameEnglish": "Foundation of the Laurel Workers",
-      "streetDescription": "This canalside street may have been named after artisans who worked with laurel wood or after merchants who traded in laurel products used for medicinal and culinary purposes."
+      "streetDescription": "This canalside street may have been named after artisans who worked with laurel wood or after merchants who traded in laurel products used for medicinal and culinary purposes.",
+      "id": "building_45.430131_12.355793"
     },
     {
       "lat": 45.43005628333682,
       "lng": 12.357034419358186,
       "streetName": "Calle dei Oratori",
       "streetNameEnglish": "Street of the Oratories",
-      "streetDescription": "Named after small prayer chapels that may have been connected to the convent or to lay confraternities in the area. Religious devotion permeated Venetian society and small oratories were common features in neighborhoods."
+      "streetDescription": "Named after small prayer chapels that may have been connected to the convent or to lay confraternities in the area. Religious devotion permeated Venetian society and small oratories were common features in neighborhoods.",
+      "id": "building_45.430056_12.357034"
     },
     {
       "lat": 45.43008750767867,
       "lng": 12.357850007535736,
       "streetName": "Ramo delle Convertite",
       "streetNameEnglish": "Branch of the Converted Women",
-      "streetDescription": "A side street (ramo) possibly named after a home for 'reformed' women or former prostitutes who sought religious life. Such institutions were often linked to convents like the Terese."
+      "streetDescription": "A side street (ramo) possibly named after a home for 'reformed' women or former prostitutes who sought religious life. Such institutions were often linked to convents like the Terese.",
+      "id": "building_45.430088_12.357850"
     },
     {
       "lat": 45.43011013197549,
       "lng": 12.35850917978513,
       "streetName": "Calle della Scuola di Carità",
       "streetNameEnglish": "Street of the Charity School",
-      "streetDescription": "Named after a school that provided education to poor children, possibly operated by the Terese convent. Religious orders frequently ran schools as part of their charitable works."
+      "streetDescription": "Named after a school that provided education to poor children, possibly operated by the Terese convent. Religious orders frequently ran schools as part of their charitable works.",
+      "id": "building_45.430110_12.358509"
     },
     {
       "lat": 45.430039415972445,
       "lng": 12.359048196697325,
       "streetName": "Corte Zen",
       "streetNameEnglish": "Zen Court",
-      "streetDescription": "Named after the Zen family, another prominent Venetian nobili family who may have had property in this area. Noble families' residences were important landmarks in Venetian neighborhoods."
+      "streetDescription": "Named after the Zen family, another prominent Venetian nobili family who may have had property in this area. Noble families' residences were important landmarks in Venetian neighborhoods.",
+      "id": "building_45.430039_12.359048"
     },
     {
       "lat": 45.43042659102505,
       "lng": 12.357747449157962,
       "streetName": "Calle del Forno",
       "streetNameEnglish": "Street of the Oven",
-      "streetDescription": "Named after a communal oven that would have served the neighborhood, possibly including the convent. Bakeries were essential facilities in urban neighborhoods, providing bread for residents."
+      "streetDescription": "Named after a communal oven that would have served the neighborhood, possibly including the convent. Bakeries were essential facilities in urban neighborhoods, providing bread for residents.",
+      "id": "building_45.430427_12.357747"
     },
     {
       "lat": 45.4305463758714,
       "lng": 12.358451250661815,
       "streetName": "Sottoportego delle Muneghette",
       "streetNameEnglish": "Passageway of the Little Nuns",
-      "streetDescription": "A covered passage named after novices or young nuns at the Terese convent. 'Muneghette' is a Venetian dialect term for young nuns or novices, reflecting the important presence of the convent in local life."
+      "streetDescription": "A covered passage named after novices or young nuns at the Terese convent. 'Muneghette' is a Venetian dialect term for young nuns or novices, reflecting the important presence of the convent in local life.",
+      "id": "building_45.430546_12.358451"
     }
   ],
   "id": "polygon-1746057372815"

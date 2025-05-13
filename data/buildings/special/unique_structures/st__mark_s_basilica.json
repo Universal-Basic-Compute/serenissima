@@ -18,7 +18,7 @@
     "marble": 800,
     "gold": 200
   },
-  "maintenanceCost": 125000,
+  "maintenanceCost": 12500,
   "constructionTime": 10368000000,
   "incomeGeneration": 150000,
   "employmentCapacity": 60,

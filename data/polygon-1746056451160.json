@@ -90,7 +90,7 @@
     "lat": 45.43544312205228,
     "lng": 12.345168456956333
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -115,7 +115,8 @@
             "lng": 12.34447023604957
           }
         }
-      }
+      },
+      "id": "bridge_45.437829_12.344505"
     },
     {
       "edge": {
@@ -140,7 +141,8 @@
             "lng": 12.345918885552926
           }
         }
-      }
+      },
+      "id": "bridge_45.436858_12.345878"
     },
     {
       "edge": {
@@ -165,7 +167,8 @@
             "lng": 12.346036902749582
           }
         }
-      }
+      },
+      "id": "bridge_45.435718_12.345991"
     },
     {
       "edge": {
@@ -190,7 +193,8 @@
             "lng": 12.346052996003671
           }
         }
-      }
+      },
+      "id": "bridge_45.435477_12.345964"
     },
     {
       "edge": {
@@ -215,7 +219,8 @@
             "lng": 12.344443376238056
           }
         }
-      }
+      },
+      "id": "bridge_45.434933_12.344515"
     }
   ],
   "buildingPoints": [
@@ -224,63 +229,72 @@
       "lng": 12.344939998116532,
       "streetName": "Sottoportego dei Ortodossi",
       "streetNameEnglish": "Portico of the Orthodox",
-      "streetDescription": "This covered passageway near Calle dei Greci would have connected to the Greek Orthodox church of San Giorgio dei Greci, referencing the Greek community that had been granted permission to establish their own church in the 16th century."
+      "streetDescription": "This covered passageway near Calle dei Greci would have connected to the Greek Orthodox church of San Giorgio dei Greci, referencing the Greek community that had been granted permission to establish their own church in the 16th century.",
+      "id": "building_45.433921_12.344940"
     },
     {
       "lat": 45.43426303373523,
       "lng": 12.345130541422515,
       "streetName": "Calle della Scuola Greca",
       "streetNameEnglish": "Street of the Greek School",
-      "streetDescription": "This street would have led to the Greek community's school (scuola) where Greek language, theology, and culture were taught to preserve their heritage. The Greek community in Castello was highly educated and maintained strong cultural traditions."
+      "streetDescription": "This street would have led to the Greek community's school (scuola) where Greek language, theology, and culture were taught to preserve their heritage. The Greek community in Castello was highly educated and maintained strong cultural traditions.",
+      "id": "building_45.434263_12.345131"
     },
     {
       "lat": 45.43482828612638,
       "lng": 12.344983014838448,
       "streetName": "Fondamenta Flangini",
       "streetNameEnglish": "Flangini Foundation",
-      "streetDescription": "Named after the prominent Greek-Venetian Flangini family who were wealthy merchants in the area. Tommaso Flangini, a notable family member, funded a Greek college in Venice during the Renaissance period, making significant contributions to Greek education in the Castello district."
+      "streetDescription": "Named after the prominent Greek-Venetian Flangini family who were wealthy merchants in the area. Tommaso Flangini, a notable family member, funded a Greek college in Venice during the Renaissance period, making significant contributions to Greek education in the Castello district.",
+      "id": "building_45.434828_12.344983"
     },
     {
       "lat": 45.43520512353547,
       "lng": 12.344955296556204,
       "streetName": "Rio Terà dei Patriarchi",
       "streetNameEnglish": "Filled Canal of the Patriarchs",
-      "streetDescription": "This former canal, later filled in, would have referenced the Eastern Orthodox patriarchs who occasionally visited or maintained correspondence with the Greek community in Venice. The name honors the religious leadership connection between Venice and the Eastern Orthodox Church."
+      "streetDescription": "This former canal, later filled in, would have referenced the Eastern Orthodox patriarchs who occasionally visited or maintained correspondence with the Greek community in Venice. The name honors the religious leadership connection between Venice and the Eastern Orthodox Church.",
+      "id": "building_45.435205_12.344955"
     },
     {
       "lat": 45.435744085436035,
       "lng": 12.345067607418693,
       "streetName": "Campiello della Iconografia",
       "streetNameEnglish": "Small Square of the Iconography",
-      "streetDescription": "This small square would have been known for workshops of Greek icon painters who settled in the area. The Byzantine tradition of iconography was preserved by Greek artisans in Venice, many of whom lived and worked near Calle dei Greci in Castello."
+      "streetDescription": "This small square would have been known for workshops of Greek icon painters who settled in the area. The Byzantine tradition of iconography was preserved by Greek artisans in Venice, many of whom lived and worked near Calle dei Greci in Castello.",
+      "id": "building_45.435744_12.345068"
     },
     {
       "lat": 45.436101937699256,
       "lng": 12.34513790974545,
       "streetName": "Ruga dei Mercanti Levantini",
       "streetNameEnglish": "Street of the Levantine Merchants",
-      "streetDescription": "This commercial street would have housed shops of merchants trading goods from the Eastern Mediterranean (Levant). Greek, Armenian, and other Eastern traders established businesses here, importing spices, silks, and other luxury goods from Constantinople and beyond."
+      "streetDescription": "This commercial street would have housed shops of merchants trading goods from the Eastern Mediterranean (Levant). Greek, Armenian, and other Eastern traders established businesses here, importing spices, silks, and other luxury goods from Constantinople and beyond.",
+      "id": "building_45.436102_12.345138"
     },
     {
       "lat": 45.43662854062894,
       "lng": 12.345173493015137,
       "streetName": "Salizada San Nicolò dei Greci",
       "streetNameEnglish": "Paved Street of Saint Nicholas of the Greeks",
-      "streetDescription": "A paved street dedicated to Saint Nicholas, highly venerated in the Eastern Orthodox tradition and particularly important to Greek sailors and merchants. This would have been one of the more prestigious streets in the Greek quarter of Castello."
+      "streetDescription": "A paved street dedicated to Saint Nicholas, highly venerated in the Eastern Orthodox tradition and particularly important to Greek sailors and merchants. This would have been one of the more prestigious streets in the Greek quarter of Castello.",
+      "id": "building_45.436629_12.345173"
     },
     {
       "lat": 45.43705618201654,
       "lng": 12.344995890477469,
       "streetName": "Calle dei Codici Bizantini",
       "streetNameEnglish": "Street of the Byzantine Manuscripts",
-      "streetDescription": "This street likely housed scribes and scholars who worked with Greek manuscripts. Following the fall of Constantinople in 1453, many Byzantine scholars fled to Venice, bringing valuable manuscripts and establishing workshops to preserve Greek literary traditions in the Castello district."
+      "streetDescription": "This street likely housed scribes and scholars who worked with Greek manuscripts. Following the fall of Constantinople in 1453, many Byzantine scholars fled to Venice, bringing valuable manuscripts and establishing workshops to preserve Greek literary traditions in the Castello district.",
+      "id": "building_45.437056_12.344996"
     },
     {
       "lat": 45.437528717072205,
       "lng": 12.345142822231459,
       "streetName": "Sottoportego del Metochi",
       "streetNameEnglish": "Portico of the Metochion",
-      "streetDescription": "Named after a metochion (a dependent monastery or religious representation) that would have served as a Venetian embassy of Mount Athos or another major Eastern Orthodox monastic center. These religious outposts facilitated cultural and religious exchanges between Venice and the Orthodox East."
+      "streetDescription": "Named after a metochion (a dependent monastery or religious representation) that would have served as a Venetian embassy of Mount Athos or another major Eastern Orthodox monastic center. These religious outposts facilitated cultural and religious exchanges between Venice and the Orthodox East.",
+      "id": "building_45.437529_12.345143"
     }
   ],
   "id": "polygon-1746056451160"

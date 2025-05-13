@@ -1,5 +1,6 @@
 {
   "name": "Fisherman's Cottage",
+  "pointType": "canal",
   "category": "Residential",
   "subcategory": "Basic Residences",
   "tier": 1,
@@ -14,7 +15,7 @@
     "timber": 50,
     "bricks": 20
   },
-  "maintenanceCost": 8000,
+  "maintenanceCost": 800,
   "constructionTime": 172800000,
   "incomeGeneration": 8000,
   "residentsCapacity": 4,

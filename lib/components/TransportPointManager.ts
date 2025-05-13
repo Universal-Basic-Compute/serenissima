@@ -14,7 +14,7 @@ interface TransportPolygon extends Polygon {
       historicalDescription?: string;
     };
   }>;
-  dockPoints?: Array<{
+  canalPoints?: Array<{
     edge: { lat: number; lng: number };
     water: { lat: number; lng: number };
   }>;
@@ -34,7 +34,7 @@ export class TransportPointManager {
   private scene: THREE.Scene;
   private bounds: any;
   private bridgePointMarkers: THREE.Object3D[] = [];
-  private dockPointMarkers: THREE.Object3D[] = [];
+  private canalPointMarkers: THREE.Object3D[] = [];
   private hoveredPointId: string | null = null;
   private navigationService: NavigationService;
   private pathMarkers: THREE.Object3D[] = [];
@@ -145,8 +145,8 @@ export class TransportPointManager {
       }
 
       // Process dock points
-      if (polygon.dockPoints && Array.isArray(polygon.dockPoints) && polygon.dockPoints.length > 0) {
-        polygon.dockPoints.forEach((point, index) => {
+      if (polygon.canalPoints && Array.isArray(polygon.canalPoints) && polygon.canalPoints.length > 0) {
+        polygon.canalPoints.forEach((point, index) => {
           try {
             // Create markers for both edge and water points
             const edgeCoord = normalizeCoordinates(
@@ -181,7 +181,7 @@ export class TransportPointManager {
             };
 
             this.scene.add(edgeMarker);
-            this.dockPointMarkers.push(edgeMarker);
+            this.canalPointMarkers.push(edgeMarker);
 
             // We still create the water point and line objects but don't add them to the scene
             // This maintains the data structure while hiding the visual elements
@@ -203,7 +203,7 @@ export class TransportPointManager {
             line.renderOrder = 99;
             
             // Store the line in our array but don't add it to the scene
-            this.dockPointMarkers.push(line);
+            this.canalPointMarkers.push(line);
 
             // Create a marker for the water point (but don't add to scene)
             const waterGeometry = new THREE.SphereGeometry(0.3, 12, 12);
@@ -221,7 +221,7 @@ export class TransportPointManager {
             };
             
             // Store the water marker in our array but don't add it to the scene
-            this.dockPointMarkers.push(waterMarker);
+            this.canalPointMarkers.push(waterMarker);
           } catch (error) {
             console.error(`Error creating dock point for polygon ${polygon.id}:`, error);
           }
@@ -229,7 +229,7 @@ export class TransportPointManager {
       }
     });
 
-    console.log(`Created ${this.bridgePointMarkers.length} bridge markers and ${this.dockPointMarkers.length} dock markers`);
+    console.log(`Created ${this.bridgePointMarkers.length} bridge markers and ${this.canalPointMarkers.length} dock markers`);
     
     // Set the polygons in the navigation service
     this.navigationService.setPolygons(polygons);
@@ -256,7 +256,7 @@ export class TransportPointManager {
     this.bridgePointMarkers = [];
 
     // Clear dock markers
-    this.dockPointMarkers.forEach(marker => {
+    this.canalPointMarkers.forEach(marker => {
       this.scene.remove(marker);
       if (marker instanceof THREE.Mesh) {
         if (marker.geometry) marker.geometry.dispose();
@@ -272,7 +272,7 @@ export class TransportPointManager {
         }
       }
     });
-    this.dockPointMarkers = [];
+    this.canalPointMarkers = [];
     
     // Clear path markers
     this.clearPathMarkers();
@@ -282,7 +282,7 @@ export class TransportPointManager {
     this.bridgePointMarkers.forEach(marker => {
       marker.visible = visible;
     });
-    this.dockPointMarkers.forEach(marker => {
+    this.canalPointMarkers.forEach(marker => {
       marker.visible = visible;
     });
     this.pathMarkers.forEach(marker => {
@@ -296,7 +296,7 @@ export class TransportPointManager {
     raycaster.params.Line = { threshold: 0.2 };
     
     // Combine all markers for raycasting (excluding lines)
-    const allMarkers = [...this.bridgePointMarkers, ...this.dockPointMarkers].filter(
+    const allMarkers = [...this.bridgePointMarkers, ...this.canalPointMarkers].filter(
       obj => obj instanceof THREE.Mesh
     );
 
@@ -335,7 +335,7 @@ export class TransportPointManager {
       }
     } else if (this.hoveredPointId) {
       // Reset previously hovered point
-      const hoveredPoint = [...this.bridgePointMarkers, ...this.dockPointMarkers].find(
+      const hoveredPoint = [...this.bridgePointMarkers, ...this.canalPointMarkers].find(
         marker => marker instanceof THREE.Mesh && marker.userData && marker.userData.id === this.hoveredPointId
       );
 
@@ -553,8 +553,8 @@ export class TransportPointManager {
     return this.bridgePointMarkers;
   }
 
-  public getDockPointMarkers(): THREE.Object3D[] {
-    return this.dockPointMarkers;
+  public getCanalPointMarkers(): THREE.Object3D[] {
+    return this.canalPointMarkers;
   }
 
   public getPathMarkers(): THREE.Object3D[] {

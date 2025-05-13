@@ -17,7 +17,7 @@
     "glass": 50,
     "marble": 30
   },
-  "maintenanceCost": 20000,
+  "maintenanceCost": 2000,
   "constructionTime": 432000000,
   "incomeGeneration": 35000,
   "employmentCapacity": 5,

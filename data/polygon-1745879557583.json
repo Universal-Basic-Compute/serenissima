@@ -58,7 +58,7 @@
     "lat": 45.44018357145245,
     "lng": 12.315531711029106
   },
-  "dockPoints": [
+  "canalPoints": [
     {
       "edge": {
         "lat": 45.43922850156615,
@@ -70,7 +70,8 @@
       },
       "historicalName": "Riva di Santa Chiara",
       "englishName": "Saint Claire's Shore",
-      "historicalDescription": "Named after the convent of Santa Chiara that dominated this area since the 13th century. This was the main landing point for visitors to the religious complex and served as an important arrival point for those entering Venice from the mainland."
+      "historicalDescription": "Named after the convent of Santa Chiara that dominated this area since the 13th century. This was the main landing point for visitors to the religious complex and served as an important arrival point for those entering Venice from the mainland.",
+      "id": "dock_45.439229_12.314634"
     },
     {
       "edge": {
@@ -83,7 +84,8 @@
       },
       "historicalName": "Fondamenta dei Pellegrini",
       "englishName": "Foundation of the Pilgrims",
-      "historicalDescription": "This dock served pilgrims who arrived in Venice before continuing their journey to the Holy Land. Santa Chiara area, being close to the entry point of the city, was often the first stop for pilgrims, who would seek blessing and rest at the convent before their arduous journey."
+      "historicalDescription": "This dock served pilgrims who arrived in Venice before continuing their journey to the Holy Land. Santa Chiara area, being close to the entry point of the city, was often the first stop for pilgrims, who would seek blessing and rest at the convent before their arduous journey.",
+      "id": "dock_45.439838_12.314623"
     },
     {
       "edge": {
@@ -96,7 +98,8 @@
       },
       "historicalName": "Riva degli Orzeri",
       "englishName": "Shore of the Barley Merchants",
-      "historicalDescription": "This landing was used by merchants who traded barley and other grains. Located near warehouses in the Santa Chiara district, it was strategically positioned to receive grain shipments that would then be distributed throughout the city."
+      "historicalDescription": "This landing was used by merchants who traded barley and other grains. Located near warehouses in the Santa Chiara district, it was strategically positioned to receive grain shipments that would then be distributed throughout the city.",
+      "id": "dock_45.440328_12.314473"
     },
     {
       "edge": {
@@ -109,7 +112,8 @@
       },
       "historicalName": "Fondamenta dei Botteri",
       "englishName": "Foundation of the Barrel Makers",
-      "historicalDescription": "Named after the guild of barrel makers who had workshops in this area. Barrels were essential for Venice's maritime trade, and this dock allowed easy loading of newly crafted barrels onto ships, as well as receiving wood supplies for their manufacture."
+      "historicalDescription": "Named after the guild of barrel makers who had workshops in this area. Barrels were essential for Venice's maritime trade, and this dock allowed easy loading of newly crafted barrels onto ships, as well as receiving wood supplies for their manufacture.",
+      "id": "dock_45.440817_12.314322"
     },
     {
       "edge": {
@@ -122,7 +126,8 @@
       },
       "historicalName": "Riva della Dogana Vecchia",
       "englishName": "Shore of the Old Customs House",
-      "historicalDescription": "Before the construction of the more famous Dogana da Mar, an earlier customs checkpoint existed near Santa Chiara. This dock served as a control point for goods entering Venice from the mainland, where duties were collected and merchandise inspected."
+      "historicalDescription": "Before the construction of the more famous Dogana da Mar, an earlier customs checkpoint existed near Santa Chiara. This dock served as a control point for goods entering Venice from the mainland, where duties were collected and merchandise inspected.",
+      "id": "dock_45.441506_12.316114"
     },
     {
       "edge": {
@@ -135,7 +140,8 @@
       },
       "historicalName": "Fondamenta dei Bombardieri",
       "englishName": "Foundation of the Cannoneers",
-      "historicalDescription": "Named for the artillery specialists who had a training ground nearby. Venice's military might depended on these skilled cannoneers, and this dock was used to transport cannons and gunpowder to and from the Arsenal and to ships in the lagoon."
+      "historicalDescription": "Named for the artillery specialists who had a training ground nearby. Venice's military might depended on these skilled cannoneers, and this dock was used to transport cannons and gunpowder to and from the Arsenal and to ships in the lagoon.",
+      "id": "dock_45.441208_12.316704"
     },
     {
       "edge": {
@@ -148,7 +154,8 @@
       },
       "historicalName": "Riva dei Monasteri",
       "englishName": "Shore of the Monasteries",
-      "historicalDescription": "This dock served several religious institutions in the area, not just Santa Chiara. It was used by monks and nuns from various orders to receive supplies and visitors, highlighting the significant religious presence in this part of Renaissance Venice."
+      "historicalDescription": "This dock served several religious institutions in the area, not just Santa Chiara. It was used by monks and nuns from various orders to receive supplies and visitors, highlighting the significant religious presence in this part of Renaissance Venice.",
+      "id": "dock_45.440674_12.317182"
     }
   ],
   "bridgePoints": [],
@@ -158,105 +165,120 @@
       "lng": 12.315515960064499,
       "streetName": "Calle Santa Chiara",
       "streetNameEnglish": "Saint Clare Street",
-      "streetDescription": "Named after the monastery of Santa Chiara that was located in this area since the 13th century. It was a significant religious landmark in this western part of Venice before many structures were demolished during Napoleon's era."
+      "streetDescription": "Named after the monastery of Santa Chiara that was located in this area since the 13th century. It was a significant religious landmark in this western part of Venice before many structures were demolished during Napoleon's era.",
+      "id": "building_45.439301_12.315516"
     },
     {
       "lat": 45.43974293913629,
       "lng": 12.315359022415073,
       "streetName": "Rio Terà dei Benedettini",
       "streetNameEnglish": "Filled Canal of the Benedictines",
-      "streetDescription": "This street was once a canal that was filled in (rio terà). Named after the Benedictine monks who had a presence near Santa Chiara, as they operated several monasteries in the western regions of Venice during the Renaissance period."
+      "streetDescription": "This street was once a canal that was filled in (rio terà). Named after the Benedictine monks who had a presence near Santa Chiara, as they operated several monasteries in the western regions of Venice during the Renaissance period.",
+      "id": "building_45.439743_12.315359"
     },
     {
       "lat": 45.439704290547226,
       "lng": 12.316091220271515,
       "streetName": "Fondamenta dei Traghettatori",
       "streetNameEnglish": "Quay of the Ferrymen",
-      "streetDescription": "A quayside street named after the ferrymen who operated boats connecting this western edge of Venice to the mainland. Santa Chiara was historically one of the important arrival points for travelers coming from the mainland."
+      "streetDescription": "A quayside street named after the ferrymen who operated boats connecting this western edge of Venice to the mainland. Santa Chiara was historically one of the important arrival points for travelers coming from the mainland.",
+      "id": "building_45.439704_12.316091"
     },
     {
       "lat": 45.440139603616686,
       "lng": 12.315425125748447,
       "streetName": "Calle dei Pellegrini",
       "streetNameEnglish": "Street of the Pilgrims",
-      "streetDescription": "Named for the pilgrims who would arrive in Venice through the Santa Chiara area, often their first point of entry when coming from Rome or other mainland cities before proceeding to other destinations in the city or embarking for the Holy Land."
+      "streetDescription": "Named for the pilgrims who would arrive in Venice through the Santa Chiara area, often their first point of entry when coming from Rome or other mainland cities before proceeding to other destinations in the city or embarking for the Holy Land.",
+      "id": "building_45.440140_12.315425"
     },
     {
       "lat": 45.44015909231989,
       "lng": 12.316144955098444,
       "streetName": "Sottoportego della Madonnetta",
       "streetNameEnglish": "Passageway of the Little Madonna",
-      "streetDescription": "Named after a small shrine to the Madonna that was located in this covered passageway. Such shrines were common in Renaissance Venice, providing places for local devotion and lighting the way in dark passages."
+      "streetDescription": "Named after a small shrine to the Madonna that was located in this covered passageway. Such shrines were common in Renaissance Venice, providing places for local devotion and lighting the way in dark passages.",
+      "id": "building_45.440159_12.316145"
     },
     {
       "lat": 45.44015540045619,
       "lng": 12.31663267378385,
       "streetName": "Corte dei Guardiani",
       "streetNameEnglish": "Court of the Guardians",
-      "streetDescription": "A small courtyard named after the guards who were stationed in this area of Santa Chiara to monitor those entering and leaving the city, as it was an important entry point to Venice from the mainland."
+      "streetDescription": "A small courtyard named after the guards who were stationed in this area of Santa Chiara to monitor those entering and leaving the city, as it was an important entry point to Venice from the mainland.",
+      "id": "building_45.440155_12.316633"
     },
     {
       "lat": 45.44052250981003,
       "lng": 12.314909552952955,
       "streetName": "Ruga dei Vetrai",
       "streetNameEnglish": "Street of the Glassmakers",
-      "streetDescription": "Though most glassmaking was centered in Murano, some glass workshops operated in this area of Santa Chiara during the Renaissance, particularly those making simpler items rather than the fine artistic pieces of Murano."
+      "streetDescription": "Though most glassmaking was centered in Murano, some glass workshops operated in this area of Santa Chiara during the Renaissance, particularly those making simpler items rather than the fine artistic pieces of Murano.",
+      "id": "building_45.440523_12.314910"
     },
     {
       "lat": 45.44059020347471,
       "lng": 12.315542857266314,
       "streetName": "Salizada dei Barcaioli",
       "streetNameEnglish": "Paved Street of the Boatmen",
-      "streetDescription": "One of the few paved streets (salizada) in this area during the Renaissance, named after the boatmen who operated small vessels transporting goods and people between Santa Chiara and other parts of Venice and the mainland."
+      "streetDescription": "One of the few paved streets (salizada) in this area during the Renaissance, named after the boatmen who operated small vessels transporting goods and people between Santa Chiara and other parts of Venice and the mainland.",
+      "id": "building_45.440590_12.315543"
     },
     {
       "lat": 45.440571682813086,
       "lng": 12.316165262948607,
       "streetName": "Campiello dei Forestieri",
       "streetNameEnglish": "Small Square of the Foreigners",
-      "streetDescription": "A small square where foreign visitors often gathered after arriving in Venice through the Santa Chiara entry point. This area would have been one of the first Venice experiences for many travelers during the Renaissance."
+      "streetDescription": "A small square where foreign visitors often gathered after arriving in Venice through the Santa Chiara entry point. This area would have been one of the first Venice experiences for many travelers during the Renaissance.",
+      "id": "building_45.440572_12.316165"
     },
     {
       "lat": 45.440535014779684,
       "lng": 12.316774277008236,
       "streetName": "Calle dei Bastioni",
       "streetNameEnglish": "Street of the Bastions",
-      "streetDescription": "Named after the defensive structures that were part of this western edge of Venice. Santa Chiara area had defensive elements as it was facing the mainland and needed protection."
+      "streetDescription": "Named after the defensive structures that were part of this western edge of Venice. Santa Chiara area had defensive elements as it was facing the mainland and needed protection.",
+      "id": "building_45.440535_12.316774"
     },
     {
       "lat": 45.440924828460616,
       "lng": 12.314934080267372,
       "streetName": "Fondamenta delle Merci",
       "streetNameEnglish": "Quay of the Merchandise",
-      "streetDescription": "A canalside street where goods were unloaded from boats. Santa Chiara was an important commercial entry point where merchandise arriving from the mainland would first enter the city before being distributed throughout Venice."
+      "streetDescription": "A canalside street where goods were unloaded from boats. Santa Chiara was an important commercial entry point where merchandise arriving from the mainland would first enter the city before being distributed throughout Venice.",
+      "id": "building_45.440925_12.314934"
     },
     {
       "lat": 45.441040018104935,
       "lng": 12.315493469734362,
       "streetName": "Rio Terà del Monastero",
       "streetNameEnglish": "Filled Canal of the Monastery",
-      "streetDescription": "A former canal that was filled in and converted to a street, running alongside or near the Santa Chiara monastery, which was an important religious institution in this part of Venice from the 13th century until the Napoleonic era."
+      "streetDescription": "A former canal that was filled in and converted to a street, running alongside or near the Santa Chiara monastery, which was an important religious institution in this part of Venice from the 13th century until the Napoleonic era.",
+      "id": "building_45.441040_12.315493"
     },
     {
       "lat": 45.44100847343616,
       "lng": 12.315972744401224,
       "streetName": "Calle dei Doganieri",
       "streetNameEnglish": "Street of the Customs Officers",
-      "streetDescription": "Named after the customs officials who worked in this area checking goods entering Venice. Santa Chiara functioned as an entry checkpoint for merchandise and travelers coming from the mainland."
+      "streetDescription": "Named after the customs officials who worked in this area checking goods entering Venice. Santa Chiara functioned as an entry checkpoint for merchandise and travelers coming from the mainland.",
+      "id": "building_45.441008_12.315973"
     },
     {
       "lat": 45.44146812768612,
       "lng": 12.314934127384998,
       "streetName": "Sottoportego dei Carmelitani",
       "streetNameEnglish": "Passageway of the Carmelites",
-      "streetDescription": "A covered passageway named after the Carmelite friars who had a presence near the Santa Chiara district. Religious orders were significant landowners and maintained important buildings in Renaissance Venice."
+      "streetDescription": "A covered passageway named after the Carmelite friars who had a presence near the Santa Chiara district. Religious orders were significant landowners and maintained important buildings in Renaissance Venice.",
+      "id": "building_45.441468_12.314934"
     },
     {
       "lat": 45.441483058348595,
       "lng": 12.315507581159116,
       "streetName": "Corte Pisani",
       "streetNameEnglish": "Pisani Court",
-      "streetDescription": "Named after the noble Pisani family who may have owned property in this area. The Pisani were one of Venice's nobili families who had estates throughout the city, including properties in the western districts near Santa Chiara."
+      "streetDescription": "Named after the noble Pisani family who may have owned property in this area. The Pisani were one of Venice's nobili families who had estates throughout the city, including properties in the western districts near Santa Chiara.",
+      "id": "building_45.441483_12.315508"
     }
   ]
 }

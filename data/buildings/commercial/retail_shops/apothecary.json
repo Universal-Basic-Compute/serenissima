@@ -16,7 +16,7 @@
     "stone": 60,
     "glass": 20
   },
-  "maintenanceCost": 7500,
+  "maintenanceCost": 750,
   "constructionTime": 259200000,
   "incomeGeneration": 14000,
   "employmentCapacity": 3,

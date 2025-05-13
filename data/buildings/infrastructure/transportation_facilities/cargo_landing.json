@@ -16,7 +16,7 @@
     "stone": 500,
     "iron": 150
   },
-  "maintenanceCost": 45000,
+  "maintenanceCost": 4500,
   "constructionTime": 864000000,
   "incomeGeneration": 60000,
   "employmentCapacity": 30,

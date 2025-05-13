@@ -78,7 +78,7 @@
     "lat": 45.43510312952261,
     "lng": 12.337252050978096
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -103,7 +103,8 @@
             "lng": 12.33765937244753
           }
         }
-      }
+      },
+      "id": "bridge_45.435572_12.337670"
     },
     {
       "edge": {
@@ -128,7 +129,8 @@
             "lng": 12.337676806806126
           }
         }
-      }
+      },
+      "id": "bridge_45.434497_12.337708"
     },
     {
       "edge": {
@@ -153,7 +155,8 @@
             "lng": 12.336783605836938
           }
         }
-      }
+      },
+      "id": "bridge_45.435534_12.336828"
     }
   ],
   "buildingPoints": [
@@ -162,28 +165,32 @@
       "lng": 12.336675219544299,
       "streetName": "Calle dei Orologiai",
       "streetNameEnglish": "Street of the Clockmakers",
-      "streetDescription": "This street name honors the clockmakers who historically had workshops near San Marco. Venice was known for its skilled clockmakers during the Renaissance, who crafted intricate timepieces for the nobility and wealthy merchants. Being close to Calle dei Favri (Blacksmiths' Street) in San Marco would make sense as these crafts often required similar metalworking skills and would cluster in the same neighborhood."
+      "streetDescription": "This street name honors the clockmakers who historically had workshops near San Marco. Venice was known for its skilled clockmakers during the Renaissance, who crafted intricate timepieces for the nobility and wealthy merchants. Being close to Calle dei Favri (Blacksmiths' Street) in San Marco would make sense as these crafts often required similar metalworking skills and would cluster in the same neighborhood.",
+      "id": "building_45.434752_12.336675"
     },
     {
       "lat": 45.43466548339968,
       "lng": 12.337312727556599,
       "streetName": "Salizada dei Mercanti di Rialto",
       "streetNameEnglish": "Paved Street of the Rialto Merchants",
-      "streetDescription": "This elevated and paved street ('salizada' indicates it was raised above flood level) would have been used by merchants traveling between San Marco and the Rialto market, Venice's commercial heart. Many merchants had offices in the San Marco district but conducted business at Rialto. The proximity to Calle dei Favri would place this on a logical route between the political center of Venice (San Marco) and its commercial center."
+      "streetDescription": "This elevated and paved street ('salizada' indicates it was raised above flood level) would have been used by merchants traveling between San Marco and the Rialto market, Venice's commercial heart. Many merchants had offices in the San Marco district but conducted business at Rialto. The proximity to Calle dei Favri would place this on a logical route between the political center of Venice (San Marco) and its commercial center.",
+      "id": "building_45.434665_12.337313"
     },
     {
       "lat": 45.43517821246773,
       "lng": 12.33666094996229,
       "streetName": "Rio Terà dei Casselleri",
       "streetNameEnglish": "Filled Canal of the Casket Makers",
-      "streetDescription": "This name indicates a former canal that was filled in ('rio terà') where casket makers once had their workshops. Casket makers (casselleri) crafted ornate boxes and caskets for jewelry and valuables for wealthy Venetian families. Their proximity to San Marco would be logical as their wealthy clientele lived and conducted business in this prestigious area of Venice, and they would have worked alongside other metal crafters like the 'favri' (blacksmiths)."
+      "streetDescription": "This name indicates a former canal that was filled in ('rio terà') where casket makers once had their workshops. Casket makers (casselleri) crafted ornate boxes and caskets for jewelry and valuables for wealthy Venetian families. Their proximity to San Marco would be logical as their wealthy clientele lived and conducted business in this prestigious area of Venice, and they would have worked alongside other metal crafters like the 'favri' (blacksmiths).",
+      "id": "building_45.435178_12.336661"
     },
     {
       "lat": 45.435210961770984,
       "lng": 12.337370869621257,
       "streetName": "Sottoportego del Leone d'Oro",
       "streetNameEnglish": "Passageway of the Golden Lion",
-      "streetDescription": "This covered passageway ('sottoportego') would likely have been named after a relief sculpture or sign depicting a golden lion (a symbol of Venice's patron saint, St. Mark) that adorned a nearby building. The San Marco district featured many such passageways connecting streets and small squares, often named after distinctive architectural features or nearby businesses. Its location near Calle dei Favri would place it in the heart of the San Marco district, possibly leading toward Piazza San Marco where the winged lion symbol was prominently displayed."
+      "streetDescription": "This covered passageway ('sottoportego') would likely have been named after a relief sculpture or sign depicting a golden lion (a symbol of Venice's patron saint, St. Mark) that adorned a nearby building. The San Marco district featured many such passageways connecting streets and small squares, often named after distinctive architectural features or nearby businesses. Its location near Calle dei Favri would place it in the heart of the San Marco district, possibly leading toward Piazza San Marco where the winged lion symbol was prominently displayed.",
+      "id": "building_45.435211_12.337371"
     }
   ],
   "id": "polygon-1746056619863"

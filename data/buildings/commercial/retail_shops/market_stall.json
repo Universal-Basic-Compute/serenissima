@@ -13,7 +13,7 @@
     "ducats": 150000,
     "timber": 20
   },
-  "maintenanceCost": 1000,
+  "maintenanceCost": 100,
   "constructionTime": 86400000,
   "incomeGeneration": 8000,
   "employmentCapacity": 1,

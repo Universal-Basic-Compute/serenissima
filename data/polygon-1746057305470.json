@@ -54,7 +54,7 @@
     "lat": 45.43353227509495,
     "lng": 12.357257016987134
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -79,7 +79,8 @@
             "lng": 12.357331710709518
           }
         }
-      }
+      },
+      "id": "bridge_45.435066_12.357300"
     },
     {
       "edge": {
@@ -104,7 +105,8 @@
             "lng": 12.35679526890654
           }
         }
-      }
+      },
+      "id": "bridge_45.433237_12.356849"
     },
     {
       "edge": {
@@ -129,7 +131,8 @@
             "lng": 12.356650429619735
           }
         }
-      }
+      },
+      "id": "bridge_45.433974_12.356709"
     },
     {
       "edge": {
@@ -154,7 +157,8 @@
             "lng": 12.356865006340927
           }
         }
-      }
+      },
+      "id": "bridge_45.434313_12.356956"
     },
     {
       "edge": {
@@ -179,7 +183,8 @@
             "lng": 12.35704739655394
           }
         }
-      }
+      },
+      "id": "bridge_45.434750_12.357106"
     }
   ],
   "buildingPoints": [
@@ -188,35 +193,40 @@
       "lng": 12.357346830571354,
       "streetName": "Calle dei Merciai di San Zulian",
       "streetNameEnglish": "Street of the Haberdashers of San Zulian",
-      "streetDescription": "This name reflects the presence of haberdashery shops in the San Zulian area during the Renaissance. Merciai (haberdashers) sold ribbons, buttons, and various clothing accessories, and were common in the commercial heart of San Marco, particularly near churches like San Zulian where wealthy patrons would shop after services."
+      "streetDescription": "This name reflects the presence of haberdashery shops in the San Zulian area during the Renaissance. Merciai (haberdashers) sold ribbons, buttons, and various clothing accessories, and were common in the commercial heart of San Marco, particularly near churches like San Zulian where wealthy patrons would shop after services.",
+      "id": "building_45.433020_12.357347"
     },
     {
       "lat": 45.43358538546674,
       "lng": 12.35726820232925,
       "streetName": "Ruga dei Oresi di San Marco",
       "streetNameEnglish": "Row of the Goldsmiths of San Marco",
-      "streetDescription": "The term 'Ruga' typically designated streets with shops under porticoes. This street would have housed goldsmiths (oresi) who worked in the prestigious San Marco district. Goldsmiths were highly regulated by the Venetian Republic and concentrated in specific areas, including near San Zulian, which was close to the wealthy clientele of Piazza San Marco."
+      "streetDescription": "The term 'Ruga' typically designated streets with shops under porticoes. This street would have housed goldsmiths (oresi) who worked in the prestigious San Marco district. Goldsmiths were highly regulated by the Venetian Republic and concentrated in specific areas, including near San Zulian, which was close to the wealthy clientele of Piazza San Marco.",
+      "id": "building_45.433585_12.357268"
     },
     {
       "lat": 45.434025190638955,
       "lng": 12.35738647703288,
       "streetName": "Sottoportego del Capitello Votivo",
       "streetNameEnglish": "Passage of the Votive Shrine",
-      "streetDescription": "This name refers to a covered passageway (sottoportego) that contained a small religious shrine or capitello, common in Venice. In the San Zulian area, these shrines often commemorated deliverance from plague or other calamities. They typically contained a small Madonna or saint image and served as focal points for neighborhood devotion."
+      "streetDescription": "This name refers to a covered passageway (sottoportego) that contained a small religious shrine or capitello, common in Venice. In the San Zulian area, these shrines often commemorated deliverance from plague or other calamities. They typically contained a small Madonna or saint image and served as focal points for neighborhood devotion.",
+      "id": "building_45.434025_12.357386"
     },
     {
       "lat": 45.434497020146345,
       "lng": 12.357337427476228,
       "streetName": "Salizada dei Specchieri",
       "streetNameEnglish": "Paved Street of the Mirror Makers",
-      "streetDescription": "A 'salizada' was one of the first paved streets in Venice. This name commemorates the mirror makers (specchieri) who were especially prominent in the San Marco area. Venetian mirrors were famous throughout Europe, and the glass industry was protected by the Republic. The proximity to San Zulian would have provided these artisans access to wealthy customers."
+      "streetDescription": "A 'salizada' was one of the first paved streets in Venice. This name commemorates the mirror makers (specchieri) who were especially prominent in the San Marco area. Venetian mirrors were famous throughout Europe, and the glass industry was protected by the Republic. The proximity to San Zulian would have provided these artisans access to wealthy customers.",
+      "id": "building_45.434497_12.357337"
     },
     {
       "lat": 45.434820594650034,
       "lng": 12.357384033031352,
       "streetName": "Rio Terà dei Baretteri",
       "streetNameEnglish": "Filled Canal of the Cap Makers",
-      "streetDescription": "A 'rio terà' was a filled-in canal that became a street. This name references the baretteri (cap makers), who formed an important guild in Renaissance Venice. Their presence near San Zulian would be historically accurate as this central area of San Marco housed many textile and clothing trades, serving the nobility and wealthy merchants who frequented the area."
+      "streetDescription": "A 'rio terà' was a filled-in canal that became a street. This name references the baretteri (cap makers), who formed an important guild in Renaissance Venice. Their presence near San Zulian would be historically accurate as this central area of San Marco housed many textile and clothing trades, serving the nobility and wealthy merchants who frequented the area.",
+      "id": "building_45.434821_12.357384"
     }
   ],
   "id": "polygon-1746057305470"

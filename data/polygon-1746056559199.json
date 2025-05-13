@@ -42,7 +42,7 @@
     "lat": 45.43515085955428,
     "lng": 12.330618380879772
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -67,7 +67,8 @@
             "lng": 12.331233709228059
           }
         }
-      }
+      },
+      "id": "bridge_45.435190_12.331193"
     },
     {
       "edge": {
@@ -92,7 +93,8 @@
             "lng": 12.33047589170994
           }
         }
-      }
+      },
+      "id": "bridge_45.434782_12.330461"
     }
   ],
   "buildingPoints": [
@@ -101,7 +103,8 @@
       "lng": 12.330605784646242,
       "streetName": "Calle del Cappello d'Oro",
       "streetNameEnglish": "Street of the Golden Hat",
-      "streetDescription": "This name would be appropriate for a street near Corte de l'Albero in San Marco, as it could reference a prestigious hatmaker's shop that once operated in this fashionable commercial district. The sestiere of San Marco was known for luxury artisans and shops catering to nobility. 'Cappello d'Oro' suggests a high-end establishment that might have served the wealthy merchants and nobles who frequented this central area of Venice close to Piazza San Marco."
+      "streetDescription": "This name would be appropriate for a street near Corte de l'Albero in San Marco, as it could reference a prestigious hatmaker's shop that once operated in this fashionable commercial district. The sestiere of San Marco was known for luxury artisans and shops catering to nobility. 'Cappello d'Oro' suggests a high-end establishment that might have served the wealthy merchants and nobles who frequented this central area of Venice close to Piazza San Marco.",
+      "id": "building_45.435330_12.330606"
     }
   ],
   "id": "polygon-1746056559199"

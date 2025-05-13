@@ -62,7 +62,7 @@
     "lat": 45.440640557718275,
     "lng": 12.327903586207727
   },
-  "dockPoints": [
+  "canalPoints": [
     {
       "edge": {
         "lat": 45.442266562856126,
@@ -74,7 +74,8 @@
       },
       "historicalName": "Fondamenta dei Mestieri",
       "englishName": "Foundation of the Trades",
-      "historicalDescription": "This dock near Calle de la Vida in the Santa Croce district would have served the various artisans and tradespeople who worked in this working-class area during the Renaissance. Santa Croce was known for its workshops and small industries, making this name historically appropriate for a landing where goods and materials for various trades would be loaded and unloaded."
+      "historicalDescription": "This dock near Calle de la Vida in the Santa Croce district would have served the various artisans and tradespeople who worked in this working-class area during the Renaissance. Santa Croce was known for its workshops and small industries, making this name historically appropriate for a landing where goods and materials for various trades would be loaded and unloaded.",
+      "id": "dock_45.442267_12.328160"
     }
   ],
   "bridgePoints": [
@@ -101,7 +102,8 @@
             "lng": 12.32715360201287
           }
         }
-      }
+      },
+      "id": "bridge_45.440641_12.327195"
     },
     {
       "edge": {
@@ -126,7 +128,8 @@
             "lng": 12.327325263389824
           }
         }
-      }
+      },
+      "id": "bridge_45.441228_12.327388"
     },
     {
       "edge": {
@@ -151,7 +154,8 @@
             "lng": 12.327368178734062
           }
         }
-      }
+      },
+      "id": "bridge_45.441713_12.327409"
     }
   ],
   "buildingPoints": [
@@ -160,56 +164,64 @@
       "lng": 12.327625314317945,
       "streetName": "Calle dei Tintori di Lana",
       "streetNameEnglish": "Street of the Wool Dyers",
-      "streetDescription": "This street was home to artisans who specialized in dyeing wool textiles. Santa Croce was known for textile production, and many dye workshops existed near water sources for their operations. The wool industry was crucial to Venice's economy during the Renaissance period."
+      "streetDescription": "This street was home to artisans who specialized in dyeing wool textiles. Santa Croce was known for textile production, and many dye workshops existed near water sources for their operations. The wool industry was crucial to Venice's economy during the Renaissance period.",
+      "id": "building_45.439447_12.327625"
     },
     {
       "lat": 45.440018828870244,
       "lng": 12.327632013853323,
       "streetName": "Rio Terà dei Sabbioneri",
       "streetNameEnglish": "Filled Canal of the Sand Merchants",
-      "streetDescription": "A former canal that was filled in and converted to a street. The sabbioneri were merchants who collected and sold sand from the lagoon, used in construction and glassmaking. This area in Santa Croce would have been a logical place for sand merchants to operate, being close to transportation routes."
+      "streetDescription": "A former canal that was filled in and converted to a street. The sabbioneri were merchants who collected and sold sand from the lagoon, used in construction and glassmaking. This area in Santa Croce would have been a logical place for sand merchants to operate, being close to transportation routes.",
+      "id": "building_45.440019_12.327632"
     },
     {
       "lat": 45.44041157277237,
       "lng": 12.327619395537884,
       "streetName": "Sottoportego della Seda",
       "streetNameEnglish": "Passageway of Silk",
-      "streetDescription": "A covered passageway named after the silk trade which was vital to Venice's economy. Located near Calle de la Vida, this passageway would have connected buildings where silk weavers and merchants conducted business. The silk industry was heavily regulated by the Venetian government to maintain quality standards."
+      "streetDescription": "A covered passageway named after the silk trade which was vital to Venice's economy. Located near Calle de la Vida, this passageway would have connected buildings where silk weavers and merchants conducted business. The silk industry was heavily regulated by the Venetian government to maintain quality standards.",
+      "id": "building_45.440412_12.327619"
     },
     {
       "lat": 45.44040094081925,
       "lng": 12.328208776707966,
       "streetName": "Fondamenta dei Traghetti",
       "streetNameEnglish": "Foundation of the Ferries",
-      "streetDescription": "This waterside street was where gondola ferries would dock to transport people across the Grand Canal. Before the construction of many bridges, traghetti (ferry crossings) were essential for movement throughout Venice. This location in Santa Croce would have been a key crossing point."
+      "streetDescription": "This waterside street was where gondola ferries would dock to transport people across the Grand Canal. Before the construction of many bridges, traghetti (ferry crossings) were essential for movement throughout Venice. This location in Santa Croce would have been a key crossing point.",
+      "id": "building_45.440401_12.328209"
     },
     {
       "lat": 45.44084041100006,
       "lng": 12.327784542166798,
       "streetName": "Calle dei Filacanevi",
       "streetNameEnglish": "Street of the Hemp Spinners",
-      "streetDescription": "Named after the craftsmen who spun hemp fibers into ropes and cordage, essential for Venice's maritime industry. Hemp processing was often located in Santa Croce due to its proximity to both water transport and the naval facilities. These craftsmen supplied the Arsenal and merchant ships with vital sailing equipment."
+      "streetDescription": "Named after the craftsmen who spun hemp fibers into ropes and cordage, essential for Venice's maritime industry. Hemp processing was often located in Santa Croce due to its proximity to both water transport and the naval facilities. These craftsmen supplied the Arsenal and merchant ships with vital sailing equipment.",
+      "id": "building_45.440840_12.327785"
     },
     {
       "lat": 45.441335464462604,
       "lng": 12.327572728565857,
       "streetName": "Campiello della Fornace",
       "streetNameEnglish": "Small Square of the Furnace",
-      "streetDescription": "A small square named after a local glass or brick furnace that operated nearby. Industrial activities requiring high heat were often placed in less densely populated areas like parts of Santa Croce to reduce fire risk. This would have been a workplace for skilled artisans producing either glass items or construction materials."
+      "streetDescription": "A small square named after a local glass or brick furnace that operated nearby. Industrial activities requiring high heat were often placed in less densely populated areas like parts of Santa Croce to reduce fire risk. This would have been a workplace for skilled artisans producing either glass items or construction materials.",
+      "id": "building_45.441335_12.327573"
     },
     {
       "lat": 45.44168419741536,
       "lng": 12.327646190180237,
       "streetName": "Salizada dei Barcaroli",
       "streetNameEnglish": "Paved Street of the Boatmen",
-      "streetDescription": "One of the few paved streets (salizada) in this area, named after the boatmen who would live nearby. Santa Croce's proximity to various canals made it an ideal residential area for those who worked on Venice's waterways. Barcaroli were essential to the city's transportation system, moving both goods and people."
+      "streetDescription": "One of the few paved streets (salizada) in this area, named after the boatmen who would live nearby. Santa Croce's proximity to various canals made it an ideal residential area for those who worked on Venice's waterways. Barcaroli were essential to the city's transportation system, moving both goods and people.",
+      "id": "building_45.441684_12.327646"
     },
     {
       "lat": 45.44169693667406,
       "lng": 12.328230137985816,
       "streetName": "Corte Donà",
       "streetNameEnglish": "Donà Court",
-      "streetDescription": "Named after the Donà family, who were prominent nobles in Venetian history. This small courtyard would have been adjacent to a property owned by this nobili family. The Donà family produced several Doges and held significant political influence in Renaissance Venice, with properties throughout the city including this area of Santa Croce."
+      "streetDescription": "Named after the Donà family, who were prominent nobles in Venetian history. This small courtyard would have been adjacent to a property owned by this nobili family. The Donà family produced several Doges and held significant political influence in Renaissance Venice, with properties throughout the city including this area of Santa Croce.",
+      "id": "building_45.441697_12.328230"
     }
   ],
   "id": "polygon-1745879481263"

@@ -17,7 +17,7 @@
     "iron": 80,
     "marble": 30
   },
-  "maintenanceCost": 25000,
+  "maintenanceCost": 2500,
   "constructionTime": 1209600000,
   "incomeGeneration": 10000,
   "employmentCapacity": 2,

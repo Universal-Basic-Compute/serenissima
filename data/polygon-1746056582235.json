@@ -62,7 +62,7 @@
     "lat": 45.433825282883205,
     "lng": 12.333936987373551
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -87,13 +87,15 @@
             "lng": 12.334791823465384
           }
         }
-      }
+      },
+      "id": "bridge_45.434191_12.334763"
     },
     {
       "edge": {
         "lat": 45.433882336018335,
         "lng": 12.334886281642143
-      }
+      },
+      "id": "bridge_45.433882_12.334886"
     },
     {
       "edge": {
@@ -118,7 +120,8 @@
             "lng": 12.334454207783573
           }
         }
-      }
+      },
+      "id": "bridge_45.433510_12.334414"
     },
     {
       "edge": {
@@ -143,7 +146,8 @@
             "lng": 12.333024709325366
           }
         }
-      }
+      },
+      "id": "bridge_45.434078_12.333057"
     },
     {
       "edge": {
@@ -168,7 +172,8 @@
             "lng": 12.333478002648883
           }
         }
-      }
+      },
+      "id": "bridge_45.434387_12.333545"
     }
   ],
   "buildingPoints": [
@@ -177,28 +182,32 @@
       "lng": 12.33345720801754,
       "streetName": "Ruga dei Mercanti di Caffè",
       "streetNameEnglish": "Street of the Coffee Merchants",
-      "streetDescription": "Near Calle del Caffettier in San Marco, this street would have been home to merchants who imported and sold coffee beans. Coffee became immensely popular in Venice in the late Renaissance period, with the first coffee house opening in Piazza San Marco in the early 17th century. Venetian merchants were among the first Europeans to trade extensively in coffee from the Ottoman Empire."
+      "streetDescription": "Near Calle del Caffettier in San Marco, this street would have been home to merchants who imported and sold coffee beans. Coffee became immensely popular in Venice in the late Renaissance period, with the first coffee house opening in Piazza San Marco in the early 17th century. Venetian merchants were among the first Europeans to trade extensively in coffee from the Ottoman Empire.",
+      "id": "building_45.433630_12.333457"
     },
     {
       "lat": 45.43359840356082,
       "lng": 12.334118008103061,
       "streetName": "Calle dei Speziali",
       "streetNameEnglish": "Street of the Spice Merchants",
-      "streetDescription": "This street name references the spice merchants who would have operated in the San Marco district, near the Rialto markets. Spice trade was crucial to Venetian wealth during the Renaissance, and shops selling exotic spices from the East would have been common in this commercial area. The proximity to Calle del Caffettier is logical as both coffee and spices were luxury imports handled by specialized merchants."
+      "streetDescription": "This street name references the spice merchants who would have operated in the San Marco district, near the Rialto markets. Spice trade was crucial to Venetian wealth during the Renaissance, and shops selling exotic spices from the East would have been common in this commercial area. The proximity to Calle del Caffettier is logical as both coffee and spices were luxury imports handled by specialized merchants.",
+      "id": "building_45.433598_12.334118"
     },
     {
       "lat": 45.43401898647304,
       "lng": 12.33347102980398,
       "streetName": "Sottoportego della Bottega d'Oro",
       "streetNameEnglish": "Passageway of the Golden Shop",
-      "streetDescription": "This covered passageway would have been named after a prestigious shop or workshop with gilded signage or decorations. The San Marco area was known for its luxury crafts and goods, particularly those catering to wealthy patrons and visitors. A sottoportego (covered passageway) with this name would indicate a notable landmark that served as a reference point for locals and visitors alike."
+      "streetDescription": "This covered passageway would have been named after a prestigious shop or workshop with gilded signage or decorations. The San Marco area was known for its luxury crafts and goods, particularly those catering to wealthy patrons and visitors. A sottoportego (covered passageway) with this name would indicate a notable landmark that served as a reference point for locals and visitors alike.",
+      "id": "building_45.434019_12.333471"
     },
     {
       "lat": 45.43408574321019,
       "lng": 12.33419547844121,
       "streetName": "Rio Terà dei Benintendi",
       "streetNameEnglish": "Filled Canal of the Benintendi Family",
-      "streetDescription": "Rio Terà indicates a filled-in canal, common in Venice's urban development. The Benintendi would represent a prominent Venetian merchant family who might have owned properties along this former waterway. The naming of streets after influential families was a common practice in Renaissance Venice, particularly if the family had contributed to local development or held significant property in the area."
+      "streetDescription": "Rio Terà indicates a filled-in canal, common in Venice's urban development. The Benintendi would represent a prominent Venetian merchant family who might have owned properties along this former waterway. The naming of streets after influential families was a common practice in Renaissance Venice, particularly if the family had contributed to local development or held significant property in the area.",
+      "id": "building_45.434086_12.334195"
     }
   ],
   "id": "polygon-1746056582235"

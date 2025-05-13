@@ -15,7 +15,7 @@
     "bricks": 80,
     "stone": 30
   },
-  "maintenanceCost": 10000,
+  "maintenanceCost": 1000,
   "constructionTime": 259200000,
   "incomeGeneration": 12000,
   "residentsCapacity": 5,

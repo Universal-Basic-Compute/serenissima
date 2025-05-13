@@ -23,9 +23,9 @@ function processPolygonFile(filePath) {
     const polygon = JSON.parse(data);
     let modified = false;
     
-    // Process dockPoints
-    if (polygon.dockPoints && Array.isArray(polygon.dockPoints)) {
-      polygon.dockPoints.forEach(point => {
+    // Process canalPoints
+    if (polygon.canalPoints && Array.isArray(polygon.canalPoints)) {
+      polygon.canalPoints.forEach(point => {
         if (point.edge && !point.id) {
           point.id = generateId('dock', point.edge.lat, point.edge.lng);
           modified = true;

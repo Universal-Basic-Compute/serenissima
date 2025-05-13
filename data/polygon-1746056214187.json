@@ -38,7 +38,7 @@
     "lat": 45.43791589189734,
     "lng": 12.343493555828202
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -63,7 +63,8 @@
             "lng": 12.343511372881892
           }
         }
-      }
+      },
+      "id": "bridge_45.438138_12.343524"
     },
     {
       "edge": {
@@ -88,7 +89,8 @@
             "lng": 12.34447023604957
           }
         }
-      }
+      },
+      "id": "bridge_45.437968_12.344436"
     }
   ],
   "buildingPoints": [
@@ -97,7 +99,8 @@
       "lng": 12.34363612213905,
       "streetName": "Calle dei Crociferi",
       "streetNameEnglish": "Street of the Crosiers",
-      "streetDescription": "This name refers to the Order of the Crosiers (Ordine dei Crociferi), a religious brotherhood that maintained a hospital and church near San Giovanni Laterano in Castello during the Renaissance period. The Crociferi were known for their charitable work caring for the sick and pilgrims, and their presence in this area dates back to the 12th century. The street would have been named for their prominent establishment in the neighborhood."
+      "streetDescription": "This name refers to the Order of the Crosiers (Ordine dei Crociferi), a religious brotherhood that maintained a hospital and church near San Giovanni Laterano in Castello during the Renaissance period. The Crociferi were known for their charitable work caring for the sick and pilgrims, and their presence in this area dates back to the 12th century. The street would have been named for their prominent establishment in the neighborhood.",
+      "id": "building_45.437851_12.343636"
     }
   ],
   "id": "polygon-1746056214187"

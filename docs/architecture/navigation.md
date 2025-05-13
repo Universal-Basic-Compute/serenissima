@@ -95,7 +95,7 @@ The navigation system uses several key data structures:
          targetPoint?: { lat: number; lng: number };
        };
      }>;
-     dockPoints?: Array<{
+     canalPoints?: Array<{
        edge: { lat: number; lng: number };
        water: { lat: number; lng: number };
      }>;

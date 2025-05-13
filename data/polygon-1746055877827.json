@@ -70,13 +70,14 @@
     "lat": 45.44243674009472,
     "lng": 12.332462296493448
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
         "lat": 45.442194045814965,
         "lng": 12.331593625717868
-      }
+      },
+      "id": "bridge_45.442194_12.331594"
     },
     {
       "edge": {
@@ -101,7 +102,8 @@
             "lng": 12.331725514272186
           }
         }
-      }
+      },
+      "id": "bridge_45.442717_12.331760"
     },
     {
       "edge": {
@@ -126,7 +128,8 @@
             "lng": 12.331368780473206
           }
         }
-      }
+      },
+      "id": "bridge_45.442947_12.331401"
     }
   ],
   "buildingPoints": [
@@ -135,21 +138,24 @@
       "lng": 12.332470087728924,
       "streetName": "Calle dei Squararoli",
       "streetNameEnglish": "Street of the Boat Builders",
-      "streetDescription": "This street name refers to the squararoli, specialized boat builders who worked alongside the remèr (oar makers) in this area of Dorsoduro. These craftsmen were responsible for building small gondolas and other Venetian boats, forming an essential part of the maritime economy that defined this waterfront district near the Fondamenta del Remèr."
+      "streetDescription": "This street name refers to the squararoli, specialized boat builders who worked alongside the remèr (oar makers) in this area of Dorsoduro. These craftsmen were responsible for building small gondolas and other Venetian boats, forming an essential part of the maritime economy that defined this waterfront district near the Fondamenta del Remèr.",
+      "id": "building_45.442091_12.332470"
     },
     {
       "lat": 45.442599119387324,
       "lng": 12.33250848851288,
       "streetName": "Rio Terà della Toletta",
       "streetNameEnglish": "Filled Canal of the Small Table",
-      "streetDescription": "This name refers to a filled-in canal near the area historically known as 'Toletta' in Dorsoduro. The term 'toletta' likely referred to a small table or counter where goods were sold or services provided. This area was known for small workshops and commerce, connecting to the artisanal character of the Fondamenta del Remèr district where many boat-related crafts were practiced."
+      "streetDescription": "This name refers to a filled-in canal near the area historically known as 'Toletta' in Dorsoduro. The term 'toletta' likely referred to a small table or counter where goods were sold or services provided. This area was known for small workshops and commerce, connecting to the artisanal character of the Fondamenta del Remèr district where many boat-related crafts were practiced.",
+      "id": "building_45.442599_12.332508"
     },
     {
       "lat": 45.4430247704161,
       "lng": 12.33192144392349,
       "streetName": "Sottoportego dei Maestri d'Ascia",
       "streetNameEnglish": "Passageway of the Axe Masters",
-      "streetDescription": "This name honors the maestri d'ascia, highly skilled woodworkers who shaped oars, hulls and other wooden boat components with axes and specialized tools. These craftsmen worked closely with the remèr (oar makers) in this part of Dorsoduro. The sottoportego (covered passageway) would have connected workshops or provided shelter for these artisans as they moved between the fondamenta and inland workshops."
+      "streetDescription": "This name honors the maestri d'ascia, highly skilled woodworkers who shaped oars, hulls and other wooden boat components with axes and specialized tools. These craftsmen worked closely with the remèr (oar makers) in this part of Dorsoduro. The sottoportego (covered passageway) would have connected workshops or provided shelter for these artisans as they moved between the fondamenta and inland workshops.",
+      "id": "building_45.443025_12.331921"
     }
   ],
   "id": "polygon-1746055877827"

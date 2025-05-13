@@ -70,7 +70,7 @@
     "lat": 45.436929656979245,
     "lng": 12.323016191731254
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -95,7 +95,8 @@
             "lng": 12.322238532304137
           }
         }
-      }
+      },
+      "id": "bridge_45.437992_12.322187"
     },
     {
       "edge": {
@@ -120,7 +121,8 @@
             "lng": 12.322926956209677
           }
         }
-      }
+      },
+      "id": "bridge_45.437639_12.322852"
     },
     {
       "edge": {
@@ -145,7 +147,8 @@
             "lng": 12.32385500052883
           }
         }
-      }
+      },
+      "id": "bridge_45.437029_12.323861"
     },
     {
       "edge": {
@@ -170,7 +173,8 @@
             "lng": 12.324370920841563
           }
         }
-      }
+      },
+      "id": "bridge_45.436084_12.324333"
     },
     {
       "edge": {
@@ -195,7 +199,8 @@
             "lng": 12.323272207593241
           }
         }
-      }
+      },
+      "id": "bridge_45.436178_12.323332"
     }
   ],
   "buildingPoints": [
@@ -204,63 +209,72 @@
       "lng": 12.323601164634622,
       "streetName": "Calle dei Lanaioli",
       "streetNameEnglish": "Street of the Wool Workers",
-      "streetDescription": "Named after the wool workers who operated in this area of Santa Croce during the Renaissance. Venice's textile industry was significant, with wool processing being an important trade near San Pantalon."
+      "streetDescription": "Named after the wool workers who operated in this area of Santa Croce during the Renaissance. Venice's textile industry was significant, with wool processing being an important trade near San Pantalon.",
+      "id": "building_45.435990_12.323601"
     },
     {
       "lat": 45.436506573452476,
       "lng": 12.32364196295332,
       "streetName": "Rio Terà dei Tolentini",
       "streetNameEnglish": "Filled Canal of the Tolentini",
-      "streetDescription": "Named after the nearby Church of San Nicolò da Tolentino. 'Rio Terà' indicates this was once a canal that was filled in, a common practice in Venice's urban development. The Tolentini area was an important religious center in Santa Croce."
+      "streetDescription": "Named after the nearby Church of San Nicolò da Tolentino. 'Rio Terà' indicates this was once a canal that was filled in, a common practice in Venice's urban development. The Tolentini area was an important religious center in Santa Croce.",
+      "id": "building_45.436507_12.323642"
     },
     {
       "lat": 45.436880490353396,
       "lng": 12.322398688188928,
       "streetName": "Sottoportego del Filatoio",
       "streetNameEnglish": "Passageway of the Spinning Wheel",
-      "streetDescription": "This covered passageway likely housed or led to workshops where spinning wheels were used for textile production. Located near San Pantalon, it reflects the area's connection to the textile trades that flourished in Renaissance Venice."
+      "streetDescription": "This covered passageway likely housed or led to workshops where spinning wheels were used for textile production. Located near San Pantalon, it reflects the area's connection to the textile trades that flourished in Renaissance Venice.",
+      "id": "building_45.436880_12.322399"
     },
     {
       "lat": 45.43686279774443,
       "lng": 12.323155748957616,
       "streetName": "Fondamenta dei Tintori",
       "streetNameEnglish": "Foundation of the Dyers",
-      "streetDescription": "Named for the cloth dyers who worked along this canal-side street. Dyers required access to water for their trade, and this fondamenta in Santa Croce would have housed workshops where textiles were colored using various pigments and techniques."
+      "streetDescription": "Named for the cloth dyers who worked along this canal-side street. Dyers required access to water for their trade, and this fondamenta in Santa Croce would have housed workshops where textiles were colored using various pigments and techniques.",
+      "id": "building_45.436863_12.323156"
     },
     {
       "lat": 45.436823394816514,
       "lng": 12.323726300243319,
       "streetName": "Calle della Carità",
       "streetNameEnglish": "Street of Charity",
-      "streetDescription": "Named for a charitable institution or confraternity that operated in this area near San Pantalon. Such organizations were common in Renaissance Venice, providing welfare, dowries for poor girls, and other forms of social assistance."
+      "streetDescription": "Named for a charitable institution or confraternity that operated in this area near San Pantalon. Such organizations were common in Renaissance Venice, providing welfare, dowries for poor girls, and other forms of social assistance.",
+      "id": "building_45.436823_12.323726"
     },
     {
       "lat": 45.43736754817018,
       "lng": 12.32165637171261,
       "streetName": "Corte Grimani",
       "streetNameEnglish": "Grimani Court",
-      "streetDescription": "Named after the Grimani family, who were prominent Venetian nobles with several members serving as doges and cardinals. This small courtyard in Santa Croce would indicate the family owned property or a palazzo in this area of the city."
+      "streetDescription": "Named after the Grimani family, who were prominent Venetian nobles with several members serving as doges and cardinals. This small courtyard in Santa Croce would indicate the family owned property or a palazzo in this area of the city.",
+      "id": "building_45.437368_12.321656"
     },
     {
       "lat": 45.43739514021348,
       "lng": 12.32236761784128,
       "streetName": "Salizada dei Frari",
       "streetNameEnglish": "Paved Street of the Friars",
-      "streetDescription": "Named for its proximity to the Franciscan friars (known as 'Frari' in Venetian dialect) of the nearby Santa Maria Gloriosa dei Frari church. Salizada indicates this was one of the earliest paved streets in Venice, connecting San Pantalon to the important Frari complex."
+      "streetDescription": "Named for its proximity to the Franciscan friars (known as 'Frari' in Venetian dialect) of the nearby Santa Maria Gloriosa dei Frari church. Salizada indicates this was one of the earliest paved streets in Venice, connecting San Pantalon to the important Frari complex.",
+      "id": "building_45.437395_12.322368"
     },
     {
       "lat": 45.4377257479957,
       "lng": 12.3217211601957,
       "streetName": "Campiello San Rocco",
       "streetNameEnglish": "Small Square of Saint Roch",
-      "streetDescription": "Named after Saint Roch, patron saint against plague, who was especially venerated in Venice after the devastating plague outbreaks. This small square near San Pantalon would likely have contained a shrine or small church dedicated to the saint."
+      "streetDescription": "Named after Saint Roch, patron saint against plague, who was especially venerated in Venice after the devastating plague outbreaks. This small square near San Pantalon would likely have contained a shrine or small church dedicated to the saint.",
+      "id": "building_45.437726_12.321721"
     },
     {
       "lat": 45.43771190923782,
       "lng": 12.322548970129358,
       "streetName": "Ruga dei Spezieri",
       "streetNameEnglish": "Street of the Spice Merchants",
-      "streetDescription": "A 'ruga' was a commercial street lined with shops of the same trade. This one in Santa Croce housed spice merchants, reflecting Venice's important role in the spice trade with the East. Located near San Pantalon, it would have been bustling with merchants selling exotic spices, herbs, and medicinal ingredients."
+      "streetDescription": "A 'ruga' was a commercial street lined with shops of the same trade. This one in Santa Croce housed spice merchants, reflecting Venice's important role in the spice trade with the East. Located near San Pantalon, it would have been bustling with merchants selling exotic spices, herbs, and medicinal ingredients.",
+      "id": "building_45.437712_12.322549"
     }
   ],
   "id": "polygon-1745879354937"

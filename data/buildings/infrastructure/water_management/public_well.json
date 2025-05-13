@@ -15,7 +15,7 @@
     "iron": 20,
     "bronze": 10
   },
-  "maintenanceCost": 7500,
+  "maintenanceCost": 750,
   "constructionTime": 172800000,
   "incomeGeneration": 8000,
   "employmentCapacity": 1,

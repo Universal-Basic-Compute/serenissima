@@ -29,8 +29,8 @@ export async function POST(request: Request) {
       existingData.bridgePoints = data.bridgePoints;
     }
     
-    if (data.dockPoints !== undefined) {
-      existingData.dockPoints = data.dockPoints;
+    if (data.canalPoints !== undefined) {
+      existingData.canalPoints = data.canalPoints;
     }
     
     if (data.buildingPoints !== undefined) {

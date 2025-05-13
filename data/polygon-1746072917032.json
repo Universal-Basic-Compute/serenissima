@@ -54,7 +54,7 @@
     "lat": 45.43962407590167,
     "lng": 12.331146687294936
   },
-  "dockPoints": [],
+  "canalPoints": [],
   "bridgePoints": [
     {
       "edge": {
@@ -79,7 +79,8 @@
             "lng": 12.331854519019032
           }
         }
-      }
+      },
+      "id": "bridge_45.439881_12.331842"
     },
     {
       "edge": {
@@ -104,7 +105,8 @@
             "lng": 12.33151723123541
           }
         }
-      }
+      },
+      "id": "bridge_45.439501_12.331542"
     },
     {
       "edge": {
@@ -129,7 +131,8 @@
             "lng": 12.330837961802388
           }
         }
-      }
+      },
+      "id": "bridge_45.439782_12.330842"
     }
   ],
   "buildingPoints": [
@@ -138,21 +141,24 @@
       "lng": 12.330504291812062,
       "streetName": "Calle dei Stagneri Formosani",
       "streetNameEnglish": "Street of the Tinsmiths of Formosa",
-      "streetDescription": "This name references the tinsmiths (stagneri) who had workshops near Santa Maria Formosa in the Renaissance period. The church plaza was a center of commercial activity, and metalworkers were among the artisans who established their businesses in the surrounding area. The 'Formosani' suffix connects these craftsmen specifically to the Santa Maria Formosa district."
+      "streetDescription": "This name references the tinsmiths (stagneri) who had workshops near Santa Maria Formosa in the Renaissance period. The church plaza was a center of commercial activity, and metalworkers were among the artisans who established their businesses in the surrounding area. The 'Formosani' suffix connects these craftsmen specifically to the Santa Maria Formosa district.",
+      "id": "building_45.438704_12.330504"
     },
     {
       "lat": 45.43928678984584,
       "lng": 12.331084386971606,
       "streetName": "Sottoportego della Dogaressa",
       "streetNameEnglish": "Passageway of the Doge's Wife",
-      "streetDescription": "This name refers to a covered passageway near Calle de la Regina (Street of the Queen). The proximity of these royal-themed names is historically consistent, as the area near Santa Maria Formosa was home to several noble families connected to the Venetian government. The name suggests a passage that might have been used by the wife of a Doge when visiting the church or nearby palaces during ceremonial occasions."
+      "streetDescription": "This name refers to a covered passageway near Calle de la Regina (Street of the Queen). The proximity of these royal-themed names is historically consistent, as the area near Santa Maria Formosa was home to several noble families connected to the Venetian government. The name suggests a passage that might have been used by the wife of a Doge when visiting the church or nearby palaces during ceremonial occasions.",
+      "id": "building_45.439287_12.331084"
     },
     {
       "lat": 45.43963395212712,
       "lng": 12.331188614918116,
       "streetName": "Rio Terà dei Orafi",
       "streetNameEnglish": "Filled Canal of the Goldsmiths",
-      "streetDescription": "A 'Rio Terà' is a filled-in canal that was converted to a street, common in Venice's urban development. This name suggests goldsmiths (orafi) once had workshops along this former canal near Santa Maria Formosa. The area was known for luxury crafts and the presence of wealthy patrons from nearby noble residences would have supported such high-value trades like goldsmithing, making this a historically plausible street name for the district."
+      "streetDescription": "A 'Rio Terà' is a filled-in canal that was converted to a street, common in Venice's urban development. This name suggests goldsmiths (orafi) once had workshops along this former canal near Santa Maria Formosa. The area was known for luxury crafts and the presence of wealthy patrons from nearby noble residences would have supported such high-value trades like goldsmithing, making this a historically plausible street name for the district.",
+      "id": "building_45.439634_12.331189"
     }
   ],
   "id": "polygon-1746072917032"
