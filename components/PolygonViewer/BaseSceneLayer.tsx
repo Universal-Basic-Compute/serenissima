@@ -4,6 +4,13 @@ import { WaterFacade as SimpleWater } from '../../lib/threejs/WaterFacade';
 import SimplePolygonRenderer from './SimplePolygonRenderer';
 import { calculateBounds } from './utils';
 import { eventBus, EventTypes } from '@/lib/eventBus';
+
+// Extend EventTypes if SCENE_BASE_RENDERED is missing
+declare module '@/lib/eventBus' {
+  interface EventTypes {
+    SCENE_BASE_RENDERED: string;
+  }
+}
 import { buildingRendererManager } from '@/lib/services/BuildingRendererManager';
 
 interface BaseSceneLayerProps {
