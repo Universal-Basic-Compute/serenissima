@@ -1,12 +1,14 @@
 import * as THREE from 'three';
 import { normalizeCoordinates } from '../../components/PolygonViewer/utils';
 import { Polygon } from '../../components/PolygonViewer/types';
+import { NavigationService } from '../../lib/services/NavigationService';
 
 // Extend the Polygon interface to include transport points
 interface TransportPolygon extends Polygon {
   bridgePoints?: Array<{
     edge: { lat: number; lng: number };
     connection?: {
+      targetPolygonId?: string;
       targetPoint: { lat: number; lng: number };
     };
   }>;
@@ -32,10 +34,13 @@ export class TransportPointManager {
   private bridgePointMarkers: THREE.Object3D[] = [];
   private dockPointMarkers: THREE.Object3D[] = [];
   private hoveredPointId: string | null = null;
+  private navigationService: NavigationService;
+  private pathMarkers: THREE.Object3D[] = [];
 
   constructor({ scene, bounds }: TransportPointManagerProps) {
     this.scene = scene;
     this.bounds = bounds;
+    this.navigationService = NavigationService.getInstance();
   }
 
   public createTransportPoints(polygons: TransportPolygon[]): void {
@@ -66,8 +71,7 @@ export class TransportPointManager {
     // Process each polygon
     polygons.forEach((polygon: TransportPolygon) => {
       // Process bridge points
-      if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints) && polygon.bridgePoints.length
-> 0) {
+      if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints) && polygon.bridgePoints.length > 0) {
         polygon.bridgePoints.forEach((point, index) => {
           try {
             const normalizedCoord = normalizeCoordinates(
@@ -90,6 +94,7 @@ export class TransportPointManager {
               id: `bridge-${polygon.id}-${index}`,
               type: 'bridge',
               polygonId: polygon.id,
+              targetPolygonId: point.connection?.targetPolygonId,
               position: `${point.edge.lat.toFixed(6)}, ${point.edge.lng.toFixed(6)}`
             };
 
@@ -220,8 +225,10 @@ export class TransportPointManager {
       }
     });
 
-    console.log(`Created ${this.bridgePointMarkers.length} bridge markers and
-${this.dockPointMarkers.length} dock markers`);
+    console.log(`Created ${this.bridgePointMarkers.length} bridge markers and ${this.dockPointMarkers.length} dock markers`);
+    
+    // Set the polygons in the navigation service
+    this.navigationService.setPolygons(polygons);
   }
 
   public clearTransportMarkers(): void {
@@ -262,6 +269,9 @@ ${this.dockPointMarkers.length} dock markers`);
       }
     });
     this.dockPointMarkers = [];
+    
+    // Clear path markers
+    this.clearPathMarkers();
   }
 
   public setVisible(visible: boolean): void {
@@ -271,9 +281,12 @@ ${this.dockPointMarkers.length} dock markers`);
     this.dockPointMarkers.forEach(marker => {
       marker.visible = visible;
     });
+    this.pathMarkers.forEach(marker => {
+      marker.visible = visible;
+    });
   }
 
-  public handleHover(raycaster: THREE.Raycaster, onHover: (id: string | null) => void): void {
+  public handleHover(raycaster: THREE.Raycaster, onHover: (id: string | null, userData?: any) => void): void {
     // Combine all markers for raycasting (excluding lines)
     const allMarkers = [...this.bridgePointMarkers, ...this.dockPointMarkers].filter(
       obj => obj instanceof THREE.Mesh
@@ -306,13 +319,12 @@ ${this.dockPointMarkers.length} dock markers`);
         }
 
         // Call the hover callback
-        onHover(userData.id);
+        onHover(userData.id, userData);
       }
     } else if (this.hoveredPointId) {
       // Reset previously hovered point
       const hoveredPoint = [...this.bridgePointMarkers, ...this.dockPointMarkers].find(
-        marker => marker instanceof THREE.Mesh && marker.userData && marker.userData.id ===
-this.hoveredPointId
+        marker => marker instanceof THREE.Mesh && marker.userData && marker.userData.id === this.hoveredPointId
       );
 
       if (hoveredPoint && hoveredPoint instanceof THREE.Mesh) {
@@ -340,6 +352,188 @@ this.hoveredPointId
     }
   }
 
+  /**
+   * Visualize a path between two polygons
+   */
+  public visualizePath(startPolygonId: string, endPolygonId: string): void {
+    // Clear any existing path markers
+    this.clearPathMarkers();
+    
+    // Find the path using the navigation service
+    const path = this.navigationService.findShortestPath(startPolygonId, endPolygonId);
+    
+    if (path.length < 2) {
+      console.log('No path found or path too short');
+      return;
+    }
+    
+    console.log(`Visualizing path with ${path.length} nodes: ${path.join(' -> ')}`);
+    
+    // Get bridge information for the path
+    const bridges = this.navigationService.getBridgesForPath(path);
+    
+    // Create path markers
+    const pathMaterial = new THREE.LineBasicMaterial({
+      color: 0xFFFF00,
+      linewidth: 3,
+      transparent: true,
+      opacity: 0.8
+    });
+    
+    // Create markers for each polygon in the path
+    for (let i = 0; i < path.length; i++) {
+      const polygonId = path[i];
+      const position = this.navigationService.getNodePosition(polygonId);
+      
+      if (position) {
+        // Normalize the position
+        const normalizedPos = normalizeCoordinates(
+          [{ lat: position.x, lng: position.z }],
+          this.bounds.centerLat,
+          this.bounds.centerLng,
+          this.bounds.scale,
+          this.bounds.latCorrectionFactor
+        )[0];
+        
+        // Create a marker for the polygon
+        const geometry = new THREE.SphereGeometry(0.4, 16, 16);
+        const material = new THREE.MeshBasicMaterial({
+          color: i === 0 ? 0x00FF00 : (i === path.length - 1 ? 0xFF0000 : 0xFFAA00),
+          transparent: true,
+          opacity: 0.8
+        });
+        
+        const marker = new THREE.Mesh(geometry, material);
+        marker.position.set(normalizedPos.x, 0.3, -normalizedPos.y);
+        marker.renderOrder = 110;
+        
+        // Add metadata
+        marker.userData = {
+          id: `path-node-${polygonId}`,
+          type: 'path-node',
+          polygonId: polygonId,
+          index: i
+        };
+        
+        this.scene.add(marker);
+        this.pathMarkers.push(marker);
+      }
+    }
+    
+    // Create lines for each bridge in the path
+    bridges.forEach((bridge, index) => {
+      try {
+        if (bridge.sourcePoint && bridge.targetPoint) {
+          // Normalize the bridge points
+          const sourceCoord = normalizeCoordinates(
+            [bridge.sourcePoint],
+            this.bounds.centerLat,
+            this.bounds.centerLng,
+            this.bounds.scale,
+            this.bounds.latCorrectionFactor
+          )[0];
+          
+          const targetCoord = normalizeCoordinates(
+            [bridge.targetPoint],
+            this.bounds.centerLat,
+            this.bounds.centerLng,
+            this.bounds.scale,
+            this.bounds.latCorrectionFactor
+          )[0];
+          
+          // Create a line geometry
+          const lineGeometry = new THREE.BufferGeometry();
+          const vertices = new Float32Array([
+            sourceCoord.x, 0.25, -sourceCoord.y,
+            targetCoord.x, 0.25, -targetCoord.y
+          ]);
+          lineGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+          
+          // Create the line
+          const line = new THREE.Line(lineGeometry, pathMaterial);
+          line.renderOrder = 105;
+          
+          this.scene.add(line);
+          this.pathMarkers.push(line);
+        } else if (bridge.isVirtual) {
+          // For virtual bridges, create a line between polygon centroids
+          const fromPosition = this.navigationService.getNodePosition(bridge.fromPolygonId);
+          const toPosition = this.navigationService.getNodePosition(bridge.toPolygonId);
+          
+          if (fromPosition && toPosition) {
+            // Normalize the positions
+            const fromCoord = normalizeCoordinates(
+              [{ lat: fromPosition.x, lng: fromPosition.z }],
+              this.bounds.centerLat,
+              this.bounds.centerLng,
+              this.bounds.scale,
+              this.bounds.latCorrectionFactor
+            )[0];
+            
+            const toCoord = normalizeCoordinates(
+              [{ lat: toPosition.x, lng: toPosition.z }],
+              this.bounds.centerLat,
+              this.bounds.centerLng,
+              this.bounds.scale,
+              this.bounds.latCorrectionFactor
+            )[0];
+            
+            // Create a line geometry
+            const lineGeometry = new THREE.BufferGeometry();
+            const vertices = new Float32Array([
+              fromCoord.x, 0.25, -fromCoord.y,
+              toCoord.x, 0.25, -toCoord.y
+            ]);
+            lineGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+            
+            // Create the line with a dashed material for virtual bridges
+            const virtualMaterial = new THREE.LineDashedMaterial({
+              color: 0xFFFF00,
+              linewidth: 2,
+              scale: 1,
+              dashSize: 0.5,
+              gapSize: 0.3,
+              transparent: true,
+              opacity: 0.6
+            });
+            
+            const line = new THREE.Line(lineGeometry, virtualMaterial);
+            line.computeLineDistances(); // Required for dashed lines
+            line.renderOrder = 105;
+            
+            this.scene.add(line);
+            this.pathMarkers.push(line);
+          }
+        }
+      } catch (error) {
+        console.error(`Error creating path visualization for bridge ${index}:`, error);
+      }
+    });
+  }
+
+  /**
+   * Clear path visualization markers
+   */
+  public clearPathMarkers(): void {
+    this.pathMarkers.forEach(marker => {
+      this.scene.remove(marker);
+      if (marker instanceof THREE.Mesh) {
+        if (marker.geometry) marker.geometry.dispose();
+        if (marker.material instanceof THREE.Material) {
+          marker.material.dispose();
+        } else if (Array.isArray(marker.material)) {
+          marker.material.forEach(m => m.dispose());
+        }
+      } else if (marker instanceof THREE.Line) {
+        if (marker.geometry) marker.geometry.dispose();
+        if (marker.material instanceof THREE.Material) {
+          marker.material.dispose();
+        }
+      }
+    });
+    this.pathMarkers = [];
+  }
+
   public getBridgePointMarkers(): THREE.Object3D[] {
     return this.bridgePointMarkers;
   }
@@ -348,7 +542,12 @@ this.hoveredPointId
     return this.dockPointMarkers;
   }
 
+  public getPathMarkers(): THREE.Object3D[] {
+    return this.pathMarkers;
+  }
+
   public cleanup(): void {
     this.clearTransportMarkers();
+    this.clearPathMarkers();
   }
 }
