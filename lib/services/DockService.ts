@@ -3,7 +3,13 @@ import { v4 as uuidv4 } from 'uuid';
 import { eventBus, EventTypes } from '../eventBus';
 import { getWalletAddress } from '../walletUtils';
 
-// Extend EventTypes with dock-related events
+// Define dock-related event types
+// We need to add these to the EventTypes object first
+(EventTypes as any).DOCK_PLACED = 'dock_placed';
+(EventTypes as any).DOCK_DELETED = 'dock_deleted';
+(EventTypes as any).DOCK_UPDATED = 'dock_updated';
+
+// Then extend the EventTypes interface
 declare module '../eventBus' {
   interface EventTypes {
     DOCK_PLACED: string;
@@ -11,11 +17,6 @@ declare module '../eventBus' {
     DOCK_UPDATED: string;
   }
 }
-
-// Define dock-related event types
-EventTypes.DOCK_PLACED = 'dock_placed';
-EventTypes.DOCK_DELETED = 'dock_deleted';
-EventTypes.DOCK_UPDATED = 'dock_updated';
 
 /**
  * Interface for dock data
@@ -123,7 +124,7 @@ export class DockService {
     }
 
     // Emit event
-    eventBus.emit(EventTypes.DOCK_PLACED, {
+    eventBus.emit((EventTypes as any).DOCK_PLACED, {
       dockId,
       type: 'dock',
       data: dockData
@@ -190,7 +191,7 @@ export class DockService {
     }
 
     // Emit event
-    eventBus.emit(EventTypes.DOCK_DELETED, {
+    eventBus.emit((EventTypes as any).DOCK_DELETED, {
       dockId: id,
       data: dockData
     });
@@ -240,7 +241,7 @@ export class DockService {
     }
 
     // Emit event
-    eventBus.emit(EventTypes.DOCK_UPDATED as keyof typeof EventTypes, {
+    eventBus.emit((EventTypes as any).DOCK_UPDATED, {
       dockId: id,
       data: updatedDock
     });
