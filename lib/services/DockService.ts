@@ -3,6 +3,15 @@ import { v4 as uuidv4 } from 'uuid';
 import { eventBus, EventTypes } from '../eventBus';
 import { getWalletAddress } from '../walletUtils';
 
+// Add missing event types
+declare module '../eventBus' {
+  interface EventTypes {
+    DOCK_PLACED: string;
+    DOCK_DELETED: string;
+    DOCK_UPDATED: string;
+  }
+}
+
 /**
  * Interface for dock data
  */
@@ -109,7 +118,7 @@ export class DockService {
     }
 
     // Emit event
-    eventBus.emit(EventTypes.DOCK_PLACED, {
+    eventBus.emit(EventTypes.DOCK_PLACED as string, {
       dockId,
       type: 'dock',
       data: dockData
@@ -176,7 +185,7 @@ export class DockService {
     }
 
     // Emit event
-    eventBus.emit(EventTypes.DOCK_DELETED, {
+    eventBus.emit(EventTypes.DOCK_DELETED as string, {
       dockId: id,
       data: dockData
     });
@@ -226,7 +235,7 @@ export class DockService {
     }
 
     // Emit event
-    eventBus.emit(EventTypes.DOCK_UPDATED, {
+    eventBus.emit(EventTypes.DOCK_UPDATED as string, {
       dockId: id,
       data: updatedDock
     });
