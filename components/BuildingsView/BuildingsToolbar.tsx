@@ -164,19 +164,9 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
         />
       )}
       
-      {/* Always render the BuildingRenderer to show existing buildings */}
-      {showBuildingRenderer ? (
-        <>
-          <BuildingRenderer active={true} />
-          <BuildingRendererManager active={true} debug={true} />
-        </>
-      ) : (
-        <div className="hidden">
-          {(() => {
-            console.warn('BuildingsToolbar: BuildingRenderer is not shown');
-            return null;
-          })()}
-        </div>
+      {/* Only render the BuildingRendererManager to show existing buildings */}
+      {showBuildingRenderer && (
+        <BuildingRendererManager active={true} debug={true} />
       )}
     </div>
   );

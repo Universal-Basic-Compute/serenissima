@@ -353,6 +353,13 @@ export class BuildingRendererManager {
   }
   
   /**
+   * Check if a building with the given ID already exists in the scene
+   */
+  public buildingExists(buildingId: string): boolean {
+    return this.buildingMeshes.has(buildingId);
+  }
+
+  /**
    * Refresh all buildings
    */
   public async refreshBuildings(): Promise<void> {
@@ -397,7 +404,11 @@ export class BuildingRendererManager {
         await Promise.all(chunk.map(async (building) => {
           if (!building.id) return;
           
+          // Skip if we've already processed this building in this refresh cycle
+          if (processedBuildingIds.has(building.id)) return;
+          
           processedBuildingIds.add(building.id);
+          
           try {
             await this.renderBuilding(building);
           } catch (error) {

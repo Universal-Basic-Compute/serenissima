@@ -53,7 +53,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     if (!scene || !active) return;
     
     log.info('BuildingRenderer: Initializing building renderer manager');
-    buildingRendererManager.initialize(scene);
+    // Don't initialize buildingRendererManager here - let BuildingRendererManager handle it
     
     console.log(`%c BuildingRenderer: Checking for model files in public directory...`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
 
@@ -79,18 +79,8 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
           'background: #FF0000; color: white; padding: 2px 5px; font-weight: bold;');
       });
     
-    // Refresh buildings to load initial state
-    setIsLoading(true);
-    buildingRendererManager.refreshBuildings()
-      .then(() => {
-        setIsLoading(false);
-        // Update building count
-        setBuildingCount(buildingRendererManager.getBuildingMeshes().size);
-      })
-      .catch(error => {
-        log.error('Error refreshing buildings:', error);
-        setIsLoading(false);
-      });
+    // Don't refresh buildings here - let BuildingRendererManager handle it
+    setIsLoading(false);
     
     // Subscribe to building events
     const buildingPlacedSubscription = eventBus.subscribe(
@@ -141,17 +131,10 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
       }
     );
     
-    // Listen for custom events to ensure buildings are visible
+    // Don't listen for ensureBuildingsVisible events here - let BuildingRendererManager handle it
     const handleEnsureBuildingsVisible = () => {
-      log.info('BuildingRenderer: Ensuring buildings are visible');
-      buildingRendererManager.refreshBuildings()
-        .then(() => {
-          // Update building count
-          setBuildingCount(buildingRendererManager.getBuildingMeshes().size);
-        });
+      log.info('BuildingRenderer: Received ensureBuildingsVisible but ignoring (handled by BuildingRendererManager)');
     };
-    
-    window.addEventListener('ensureBuildingsVisible', handleEnsureBuildingsVisible);
     
     // Cleanup function
     return () => {

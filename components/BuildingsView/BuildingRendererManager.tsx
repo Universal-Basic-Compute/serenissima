@@ -65,8 +65,10 @@ const BuildingRendererManager: React.FC<BuildingRendererManagerProps> = ({
       (data) => {
         log.info('BuildingRendererManager: Building placed event received', data);
         if (data.refresh) {
-          refreshBuildings();
+          // Use the debounced refresh to prevent multiple rapid refreshes
+          debouncedRefresh();
         } else if (data.data) {
+          // For individual buildings, render directly
           buildingRendererManager.renderBuilding(data.data)
             .then(() => {
               updateBuildingCount();
@@ -88,6 +90,9 @@ const BuildingRendererManager: React.FC<BuildingRendererManagerProps> = ({
     };
   }, [isSceneReady, scene, active, debug]);
   
+  // Track the timestamp of the last refresh request
+  const [lastRefreshTimestamp, setLastRefreshTimestamp] = useState<number>(0);
+  
   // Create a debounced refresh function to prevent multiple rapid refreshes
   const debouncedRefresh = useCallback(
     debounce(() => {
@@ -95,16 +100,23 @@ const BuildingRendererManager: React.FC<BuildingRendererManagerProps> = ({
       
       console.log('BuildingRendererManager: Refreshing buildings (debounced)');
       
+      // Add a timestamp to track when the last refresh was initiated
+      const refreshTimestamp = Date.now();
+      setLastRefreshTimestamp(refreshTimestamp);
+      
       buildingRendererManager.refreshBuildings()
         .then(() => {
-          updateBuildingCount();
-          setLastRefresh(new Date());
+          // Only update if this is still the most recent refresh request
+          if (refreshTimestamp === lastRefreshTimestamp) {
+            updateBuildingCount();
+            setLastRefresh(new Date());
+          }
         })
         .catch(error => {
           log.error('Error refreshing buildings:', error);
         });
     }, 500), // 500ms debounce time
-    [isSceneReady, scene]
+    [isSceneReady, scene, lastRefreshTimestamp]
   );
 
   // Function to refresh buildings
