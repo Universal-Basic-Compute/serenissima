@@ -784,9 +784,11 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
               className="w-32 h-32 mask-float"
               onError={(e) => {
                 // Fallback if image doesn't exist
-                (e.target as HTMLImageElement).style.display = 'none';
-                const sibling = (e.target as HTMLImageElement).nextElementSibling as HTMLElement;
-                if (sibling) sibling.style.display = 'block';
+                if (e.target) {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                  const sibling = (e.target as HTMLImageElement).nextElementSibling as HTMLElement;
+                  if (sibling) sibling.style.display = 'block';
+                }
               }}
             />
             <div className="hidden text-2xl font-serif">C</div>
@@ -820,9 +822,11 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                   className="w-6 h-6 mask-float"
                   onError={(e) => {
                     // Fallback if image doesn't exist
-                    (e.target as HTMLImageElement).style.display = 'none';
-                    const sibling = (e.target as HTMLImageElement).nextElementSibling as HTMLElement;
-                    if (sibling) sibling.style.display = 'block';
+                    if (e.target) {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                      const sibling = (e.target as HTMLImageElement).nextElementSibling as HTMLElement;
+                      if (sibling) sibling.style.display = 'block';
+                    }
                   }}
                 />
                 <div className="hidden text-xl font-serif">C</div>
@@ -999,8 +1003,13 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                                   alt="" 
                                   className="w-8 h-8 rounded-full object-cover"
                                   onError={(e) => {
-                                    (e.target as HTMLImageElement).style.display = 'none';
-                                    (e.target as HTMLImageElement).nextElementSibling.style.display = 'flex';
+                                    if (e.target) {
+                                      (e.target as HTMLImageElement).style.display = 'none';
+                                      const nextSibling = (e.target as HTMLImageElement).nextElementSibling;
+                                      if (nextSibling) {
+                                        (nextSibling as HTMLElement).style.display = 'flex';
+                                      }
+                                    }
                                   }}
                                 />
                               ) : (
@@ -1046,8 +1055,10 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                               alt="" 
                               className="w-6 h-6"
                               onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.style.display = 'none';
+                                if (e.target) {
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = 'none';
+                                }
                               }}
                             />
                           </div>
