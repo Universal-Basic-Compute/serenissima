@@ -178,11 +178,15 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
     if (type === 'building' && objectData.name) {
       // Fix the model path - ensure it uses the correct format for the path
       // Normalize the building name (remove apostrophes, replace spaces with hyphens)
-      const normalizedName = objectData.name.toLowerCase().replace(/'/g, '').replace(/\s+/g, '-');
+      const normalizedName = objectData.name.toLowerCase()
+        .replace(/'/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/&/g, 'and');
+    
       const modelPath = `/models/buildings/${normalizedName}/${objectData.variant || 'model'}.glb`;
-        
+      
       console.log(`Attempting to load building model from: ${modelPath}`);
-        
+      
       // Load the actual building model
       const gltfLoader = new GLTFLoader();
       gltfLoader.load(
@@ -200,10 +204,10 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
               }
             }
           }
-            
+          
           // Use the loaded model as the preview
           const model = gltf.scene;
-            
+          
           // Make the model semi-transparent
           model.traverse((child) => {
             if (child instanceof THREE.Mesh && child.material) {
@@ -218,18 +222,20 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
               }
             }
           });
-            
+          
           // Add the model to the scene
-          model.visible = false;
           scene.add(model);
           previewMeshRef.current = model;
-            
+          
           console.log(`Successfully loaded building model for ${objectData.name}`);
         },
         undefined,
         (error) => {
           console.error(`Error loading building model: ${error instanceof Error ? error.message : String(error)}`);
-          // Keep using the simple box preview if model loading fails
+          // Keep using the simple box preview if model loading fails, but make it smaller
+          if (previewMeshRef.current instanceof THREE.Mesh) {
+            previewMeshRef.current.scale.set(0.5, 0.5, 0.5); // Make the fallback box half size
+          }
         }
       );
     }

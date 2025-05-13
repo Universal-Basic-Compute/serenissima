@@ -41,7 +41,10 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
    */
   private getModelPath(buildingType: string, variant: string = 'model'): string {
     // Normalize building type to handle any case or format issues
-    const normalizedType = buildingType.toLowerCase().trim().replace(/\s+/g, '-');
+    const normalizedType = buildingType.toLowerCase().trim()
+      .replace(/\s+/g, '-')
+      .replace(/'/g, '')
+      .replace(/&/g, 'and');
     
     // Add logging to debug model paths
     const modelPath = `/models/buildings/${normalizedType}/${variant}.glb`;
@@ -56,7 +59,8 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
   private createLowDetailModel(building: BuildingData): THREE.Object3D {
     // Create a simple box geometry instead of loading the full model
     const size = this.getBuildingSizeByType(building.type);
-    const geometry = new THREE.BoxGeometry(size.width, size.height, size.depth);
+    // Make the size half as large
+    const geometry = new THREE.BoxGeometry(size.width/2, size.height/2, size.depth/2);
     const material = new THREE.MeshBasicMaterial({ 
       color: this.getBuildingColorByType(building.type),
       transparent: true,
@@ -110,6 +114,16 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
         return {width: 4, height: 1, depth: 4};
       case 'house':
         return {width: 3, height: 4, depth: 3};
+      case 'workshop':
+        return {width: 3, height: 3, depth: 3};
+      case 'warehouse':
+        return {width: 4, height: 3, depth: 4};
+      case 'tavern':
+        return {width: 3, height: 3, depth: 3};
+      case 'church':
+        return {width: 4, height: 6, depth: 4};
+      case 'palace':
+        return {width: 5, height: 6, depth: 5};
       default:
         return {width: 2.5, height: 3, depth: 2.5};
     }
@@ -146,8 +160,8 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
     // Create a group to hold our objects
     const group = new THREE.Group();
     
-    // Create a box with a color based on building type
-    const geometry = new THREE.BoxGeometry(2, 2, 2);
+    // Create a box with a color based on building type, but make it 2x smaller
+    const geometry = new THREE.BoxGeometry(1, 1, 1); // Changed from 2,2,2 to 1,1,1 (half size)
     const color = this.getBuildingColorByType(building.type);
     const material = new THREE.MeshStandardMaterial({ 
       color: color,
@@ -321,25 +335,26 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
         const tempModel = this.createLowDetailModel(building);
         this.options.scene.add(tempModel);
         
-        // Load the GLB model
-        const gltf = await new Promise<GLTF>((resolve, reject) => {
-          this.gltfLoader.load(
-            modelPath,
-            resolve,
-            (xhr) => {
-              console.log(`${building.id} model ${Math.round(xhr.loaded / xhr.total * 100)}% loaded`);
-            },
-            (error) => {
-              // Check if this is a 404 error
-              if (error instanceof Error && error.message && error.message.includes('404')) {
-                console.warn(`Model not found for ${building.id} at ${modelPath} (404) - using fallback`);
-              } else {
-                console.error(`Error loading model for ${building.id}:`, error);
+        // Load the GLB model with a timeout
+        const gltf = await Promise.race([
+          new Promise<GLTF>((resolve, reject) => {
+            this.gltfLoader.load(
+              modelPath,
+              resolve,
+              (xhr) => {
+                console.log(`${building.id} model ${Math.round(xhr.loaded / xhr.total * 100)}% loaded`);
+              },
+              (error) => {
+                console.warn(`Model not found for ${building.id} at ${modelPath} - using fallback`);
+                reject(error);
               }
-              reject(error);
-            }
-          );
-        });
+            );
+          }),
+          // Add a 10-second timeout to prevent hanging on slow loads
+          new Promise<GLTF>((_, reject) => 
+            setTimeout(() => reject(new Error('Model load timeout')), 10000)
+          )
+        ]);
         
         // Remove the temporary model
         this.options.scene.remove(tempModel);
