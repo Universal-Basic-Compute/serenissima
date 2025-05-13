@@ -21,22 +21,149 @@ function ensureBuildingsDirExists() {
   return BUILDINGS_DIR;
 }
 
+// Function to search for buildings in subcategory folders
+async function findBuildingFile(buildingId: string): Promise<any> {
+  const buildingsDir = ensureBuildingsDirExists();
+  
+  // First, try direct lookup by ID
+  const directFilePath = path.join(buildingsDir, `${buildingId}.json`);
+  if (fs.existsSync(directFilePath)) {
+    try {
+      const fileContent = fs.readFileSync(directFilePath, 'utf8');
+      return JSON.parse(fileContent);
+    } catch (error) {
+      console.error(`Error reading building file ${directFilePath}:`, error);
+    }
+  }
+  
+  // If not found, search in category/subcategory structure
+  try {
+    // Get all category directories
+    const categories = fs.readdirSync(buildingsDir, { withFileTypes: true })
+      .filter(dirent => dirent.isDirectory())
+      .map(dirent => dirent.name);
+    
+    // Search through each category
+    for (const category of categories) {
+      const categoryPath = path.join(buildingsDir, category);
+      
+      // Check if this is a subcategory structure
+      const hasSubcategories = fs.readdirSync(categoryPath, { withFileTypes: true })
+        .some(dirent => dirent.isDirectory());
+      
+      if (hasSubcategories) {
+        // Get all subcategory directories
+        const subcategories = fs.readdirSync(categoryPath, { withFileTypes: true })
+          .filter(dirent => dirent.isDirectory())
+          .map(dirent => dirent.name);
+        
+        // Search through each subcategory
+        for (const subcategory of subcategories) {
+          const subcategoryPath = path.join(categoryPath, subcategory);
+          
+          // Check if the buildingId matches the subcategory name
+          if (subcategory.toLowerCase() === buildingId.toLowerCase()) {
+            // Return a list of buildings in this subcategory
+            const files = fs.readdirSync(subcategoryPath)
+              .filter(file => file.endsWith('.json'));
+            
+            if (files.length > 0) {
+              // Return the first building as an example
+              const filePath = path.join(subcategoryPath, files[0]);
+              try {
+                const fileContent = fs.readFileSync(filePath, 'utf8');
+                const building = JSON.parse(fileContent);
+                return {
+                  ...building,
+                  isSubcategory: true,
+                  subcategory: subcategory,
+                  category: category,
+                  availableBuildings: files.map(file => file.replace('.json', ''))
+                };
+              } catch (error) {
+                console.error(`Error reading building file ${filePath}:`, error);
+              }
+            }
+          }
+          
+          // Get all building definition files in this subcategory
+          const files = fs.readdirSync(subcategoryPath)
+            .filter(file => file.endsWith('.json'));
+          
+          // Check each file
+          for (const file of files) {
+            // Check if the filename (without extension) matches the buildingId
+            if (file.toLowerCase().replace('.json', '') === buildingId.toLowerCase()) {
+              const filePath = path.join(subcategoryPath, file);
+              try {
+                const fileContent = fs.readFileSync(filePath, 'utf8');
+                const building = JSON.parse(fileContent);
+                return {
+                  ...building,
+                  subcategory: subcategory,
+                  category: category
+                };
+              } catch (error) {
+                console.error(`Error reading building file ${filePath}:`, error);
+              }
+            }
+          }
+        }
+      } else {
+        // No subcategories, check files directly in the category
+        const files = fs.readdirSync(categoryPath)
+          .filter(file => file.endsWith('.json'));
+        
+        // Check if the category name matches the buildingId
+        if (category.toLowerCase() === buildingId.toLowerCase()) {
+          // Return a list of buildings in this category
+          if (files.length > 0) {
+            // Return the first building as an example
+            const filePath = path.join(categoryPath, files[0]);
+            try {
+              const fileContent = fs.readFileSync(filePath, 'utf8');
+              const building = JSON.parse(fileContent);
+              return {
+                ...building,
+                isCategory: true,
+                category: category,
+                availableBuildings: files.map(file => file.replace('.json', ''))
+              };
+            } catch (error) {
+              console.error(`Error reading building file ${filePath}:`, error);
+            }
+          }
+        }
+        
+        // Check each file
+        for (const file of files) {
+          // Check if the filename (without extension) matches the buildingId
+          if (file.toLowerCase().replace('.json', '') === buildingId.toLowerCase()) {
+            const filePath = path.join(categoryPath, file);
+            try {
+              const fileContent = fs.readFileSync(filePath, 'utf8');
+              const building = JSON.parse(fileContent);
+              return {
+                ...building,
+                category: category
+              };
+            } catch (error) {
+              console.error(`Error reading building file ${filePath}:`, error);
+            }
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error searching for building in category structure:', error);
+  }
+  
+  return null;
+}
+
 // Function to read building from local JSON file
 function readBuildingFromFile(buildingId: string) {
-  const buildingsDir = ensureBuildingsDirExists();
-  const filePath = path.join(buildingsDir, `${buildingId}.json`);
-  
-  if (!fs.existsSync(filePath)) {
-    return null;
-  }
-  
-  try {
-    const fileContent = fs.readFileSync(filePath, 'utf8');
-    return JSON.parse(fileContent);
-  } catch (error) {
-    console.error(`Error reading building file ${filePath}:`, error);
-    return null;
-  }
+  return findBuildingFile(buildingId);
 }
 
 export async function GET(
@@ -88,8 +215,23 @@ export async function GET(
     }
     
     // If Airtable fetch failed or returned no results, try local file
-    const buildingData = readBuildingFromFile(buildingId);
+    const buildingData = await findBuildingFile(buildingId);
     if (buildingData) {
+      // Check if this is a category or subcategory
+      if (buildingData.isCategory) {
+        return NextResponse.json({ 
+          category: buildingData.category,
+          availableBuildings: buildingData.availableBuildings
+        });
+      } else if (buildingData.isSubcategory) {
+        return NextResponse.json({ 
+          category: buildingData.category,
+          subcategory: buildingData.subcategory,
+          availableBuildings: buildingData.availableBuildings
+        });
+      }
+      
+      // Regular building
       return NextResponse.json({ building: buildingData });
     }
     
