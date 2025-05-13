@@ -565,7 +565,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       
       // Check if mouse is over any building (for buildings view)
       if (activeView === 'buildings') {
-        let hoveredId = null;
+        let foundHoveredBuilding = false;
         
         // Calculate building positions and check if mouse is over any
         for (const building of buildings) {
@@ -610,17 +610,25 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             mouseY >= isoPos.y - squareSize/2 &&
             mouseY <= isoPos.y + squareSize/2
           ) {
-            hoveredId = building.id;
-            canvas.style.cursor = 'pointer';
+            foundHoveredBuilding = true;
+            
+            // Only update state if it's a different building
+            if (hoveredBuildingId !== building.id) {
+              setHoveredBuildingId(building.id);
+              canvas.style.cursor = 'pointer';
+            }
             break;
           }
         }
         
-        if (!hoveredId) {
+        // If no building is hovered, clear the hover state
+        if (!foundHoveredBuilding && hoveredBuildingId !== null) {
+          setHoveredBuildingId(null);
           canvas.style.cursor = isDragging ? 'grabbing' : 'grab';
         }
-        
-        setHoveredBuildingId(hoveredId);
+      } else if (hoveredBuildingId !== null) {
+        // If not in buildings view, ensure building hover state is cleared
+        setHoveredBuildingId(null);
       }
     };
     
