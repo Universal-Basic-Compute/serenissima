@@ -2,44 +2,44 @@ import { NextRequest, NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
 
-// ✅ Compatible Next.js 15
 export async function GET(
   request: NextRequest,
-  context: { params: { path?: string[] } } // RouteHandlerContext n'est pas exporté publiquement, on le reconstitue ici
+  context: { params: Promise<{ path?: string[] }> }
 ) {
   try {
-    const pathArray = context.params.path;
+    const { path: pathSegments } = await context.params;
 
-    if (!pathArray || !Array.isArray(pathArray)) {
+    if (!pathSegments || pathSegments.length === 0) {
       return new NextResponse(
-        JSON.stringify({ error: 'Invalid path' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'No path provided' }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        }
       );
     }
 
-    // Join path segments to construct the relative path
-    const filePath = pathArray.join('/');
+    const filePath = pathSegments.join('/');
     console.log(`Serving file from data directory: ${filePath}`);
 
-    // Construct the absolute path to the file
     const absolutePath = path.join(process.cwd(), 'data', filePath);
     console.log(`Absolute path: ${absolutePath}`);
 
-    // Check if the file exists
     try {
       await fs.access(absolutePath);
     } catch (error) {
       console.log(`File not found: ${absolutePath}`);
       return new NextResponse(
         JSON.stringify({ error: 'File not found', path: filePath }),
-        { status: 404, headers: { 'Content-Type': 'application/json' } }
+        {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' },
+        }
       );
     }
 
-    // Read the file content
     const fileData = await fs.readFile(absolutePath, 'utf8');
 
-    // Determine content type
     const extension = path.extname(filePath).toLowerCase();
     let contentType = 'application/octet-stream';
 
@@ -53,10 +53,8 @@ export async function GET(
       case '.csv':
         contentType = 'text/csv';
         break;
-      // Add more types as needed
     }
 
-    // Return file content
     return new NextResponse(fileData, {
       headers: {
         'Content-Type': contentType,
@@ -64,11 +62,14 @@ export async function GET(
       },
     });
   } catch (error: any) {
-    console.error('Error serving file:', error);
+    console.error(`Error serving file from data directory:`, error);
 
     return new NextResponse(
       JSON.stringify({ error: 'Failed to serve file', details: error.message }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      }
     );
   }
 }
