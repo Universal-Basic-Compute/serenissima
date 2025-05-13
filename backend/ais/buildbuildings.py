@@ -371,6 +371,7 @@ If you decide not to build anything at this time, return an empty JSON object.
             status = response_data.get("status")
             
             print(f"API response status: {status}")
+            print(f"Full API response: {json.dumps(response_data)}")
             
             if status == "completed":
                 print(f"Successfully sent building strategy request to AI user {ai_username}")
@@ -384,6 +385,7 @@ If you decide not to build anything at this time, return an empty JSON object.
                 
                 if messages_response.status_code == 200:
                     messages_data = messages_response.json()
+                    print(f"Messages API response data: {json.dumps(messages_data)}")
                     
                     # Find the most recent assistant message
                     assistant_messages = [
@@ -444,6 +446,13 @@ If you decide not to build anything at this time, return an empty JSON object.
                             return None
                     else:
                         print(f"No assistant messages found for {ai_username}")
+                        print(f"Full messages response: {json.dumps(messages_data)}")
+                        
+                        # Try to get the content directly from the response_data
+                        if "content" in response_data:
+                            print(f"Found content in direct response: {response_data['content']}")
+                        else:
+                            print(f"No content found in direct response either")
                 else:
                     print(f"Error fetching messages: {messages_response.text}")
                 
