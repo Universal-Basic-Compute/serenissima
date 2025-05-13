@@ -121,7 +121,24 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
     handleNextVariant,
     loadBuildingCategories,
     setSelectedBuilding
-  } = useBuildingMenu(visible || showViaEvent);
+  } = useBuildingMenu(visible || showViaEvent) as {
+    categories: BuildingCategory[];
+    loading: boolean;
+    selectedBuilding: Building | null;
+    selectedVariant: string | null;
+    availableVariants: string[];
+    placeableBuilding: Building | null;
+    handleSelectBuilding: (building: Building) => void;
+    handleSelectVariant: (variant: string) => void;
+    handlePlaceBuilding: () => void;
+    handlePlacementComplete: () => void;
+    handleCancelPlacement: () => void;
+    handleCloseDetailModal: () => void;
+    handlePreviousVariant: () => void;
+    handleNextVariant: () => void;
+    loadBuildingCategories: () => Promise<void>;
+    setSelectedBuilding: React.Dispatch<React.SetStateAction<Building | null>>;
+  };
 
   // Handle closing the menu
   const handleClose = () => {
