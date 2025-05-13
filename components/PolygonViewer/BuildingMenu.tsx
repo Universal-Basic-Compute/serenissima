@@ -12,6 +12,71 @@ import { BuildingService } from '@/lib/services/BuildingService';
 import { getWalletAddress } from '@/lib/walletUtils';
 import { eventBus, EventTypes } from '@/lib/eventBus';
 
+// Moved to the top of the file
+
+// Building Card Component
+interface BuildingCardProps {
+  building: Building;
+  onSelect: (building: Building) => void;
+}
+
+const BuildingCard: React.FC<BuildingCardProps> = ({ building, onSelect }) => {
+  // Now these hooks are in a stable component, not inside a map function
+  const [buildingCost, setBuildingCost] = useState<number | null>(null);
+  const [isLoadingCost, setIsLoadingCost] = useState<boolean>(false);
+  
+  // Fetch the cost when the building card is rendered
+  useEffect(() => {
+    const fetchBuildingCost = async () => {
+      setIsLoadingCost(true);
+      try {
+        const cost = await calculateBuildingCost(building.type || building.name);
+        setBuildingCost(cost);
+      } catch (error) {
+        console.error(`Error fetching cost for ${building.name}:`, error);
+        setBuildingCost(null);
+      } finally {
+        setIsLoadingCost(false);
+      }
+    };
+    
+    fetchBuildingCost();
+  }, [building.type, building.name]);
+  
+  return (
+    <div
+      className="bg-amber-50 rounded-lg p-2 cursor-pointer hover:bg-amber-100 transition-colors"
+      onClick={() => onSelect(building)}
+    >
+      <div className="aspect-square bg-amber-100 rounded-lg overflow-hidden mb-2">
+        {building.thumbnail && (
+          <img
+            src={building.thumbnail}
+            alt={building.name}
+            className="w-full h-full object-cover"
+          />
+        )}
+      </div>
+      <h3 className="text-sm font-medium text-amber-800 truncate">
+        {building.name}
+      </h3>
+      <p className="text-xs text-amber-600 truncate">
+        {building.subcategory}
+      </p>
+      {/* Add the cost display here */}
+      <p className="text-xs font-medium mt-1">
+        {isLoadingCost ? (
+          <span className="text-gray-500">Loading cost...</span>
+        ) : buildingCost !== null ? (
+          <span className="text-amber-700">{buildingCost.toLocaleString()} $COMPUTE</span>
+        ) : (
+          <span className="text-red-500">Cost unavailable</span>
+        )}
+      </p>
+    </div>
+  );
+};
+
 // Add global type declaration for the selected building point
 declare global {
   interface Window {
@@ -327,67 +392,17 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
                           className="p-3 bg-white rounded-lg"
                         >
                           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                            {category.buildings.map((building) => {
-                              // Add state to track the cost for each building
-                              const [buildingCost, setBuildingCost] = useState<number | null>(null);
-                              const [isLoadingCost, setIsLoadingCost] = useState<boolean>(false);
-                              
-                              // Fetch the cost when the building card is rendered
-                              useEffect(() => {
-                                const fetchBuildingCost = async () => {
-                                  setIsLoadingCost(true);
-                                  try {
-                                    const cost = await calculateBuildingCost(building.type || building.name);
-                                    setBuildingCost(cost);
-                                  } catch (error) {
-                                    console.error(`Error fetching cost for ${building.name}:`, error);
-                                    setBuildingCost(null);
-                                  } finally {
-                                    setIsLoadingCost(false);
-                                  }
-                                };
-                                
-                                fetchBuildingCost();
-                              }, [building.type, building.name]);
-                              
-                              return (
-                                <div
-                                  key={building.name || building.id}
-                                  className="bg-amber-50 rounded-lg p-2 cursor-pointer hover:bg-amber-100 transition-colors"
-                                  onClick={() => {
-                                    handleSelectBuilding(building);
-                                    if (onBuildingSelect) onBuildingSelect();
-                                  }}
-                                >
-                                  <div className="aspect-square bg-amber-100 rounded-lg overflow-hidden mb-2">
-                                    {building.thumbnail && (
-                                      <img
-                                        src={building.thumbnail}
-                                        alt={building.name}
-                                        className="w-full h-full object-cover"
-                                      />
-                                    )}
-                                  </div>
-                                  <h3 className="text-sm font-medium text-amber-800 truncate">
-                                    {building.name}
-                                  </h3>
-                                  <p className="text-xs text-amber-600 truncate">
-                                    {building.subcategory}
-                                  </p>
-                                  {/* Add the cost display here */}
-                                  <p className="text-xs font-medium mt-1">
-                                    {isLoadingCost ? (
-                                      <span className="text-gray-500">Loading cost...</span>
-                                    ) : buildingCost !== null ? (
-                                      <span className="text-amber-700">{buildingCost.toLocaleString()} $COMPUTE</span>
-                                    ) : (
-                                      <span className="text-red-500">Cost unavailable</span>
-                                    )}
-                                  </p>
-                                </div>
-                              );
-                            })}
-                        </div>
+                            {category.buildings.map((building) => (
+                              <BuildingCard 
+                                key={building.name || building.id}
+                                building={building}
+                                onSelect={(building) => {
+                                  handleSelectBuilding(building);
+                                  if (onBuildingSelect) onBuildingSelect();
+                                }}
+                              />
+                            ))}
+                          </div>
                       </Tab.Panel>
                       );
                     })}
