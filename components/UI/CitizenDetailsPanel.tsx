@@ -73,7 +73,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
   
   const formatDucats = (amount: number) => {
     if (!amount && amount !== 0) return 'Unknown';
-    return amount.toLocaleString() + ' ₫';
+    return amount.toLocaleString() + ' ⚜️'; // Using lys emoji instead of ₫
   };
   
   const formatDate = (dateString: string) => {
@@ -81,8 +81,14 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     
     try {
       const date = new Date(dateString);
+      
+      // Convert modern date to Renaissance era (1500s)
+      // Simply replace the year with 1525 to place it in Renaissance Venice
+      const renaissanceDate = new Date(date);
+      renaissanceDate.setFullYear(1525);
+      
       // Format as "Month Day, Year" without the time
-      return date.toLocaleDateString('en-US', { 
+      return renaissanceDate.toLocaleDateString('en-US', { 
         year: 'numeric', 
         month: 'long', 
         day: 'numeric' 
