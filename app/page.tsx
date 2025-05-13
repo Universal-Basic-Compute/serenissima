@@ -1507,6 +1507,35 @@ export default function SimplePage() {
           letter-spacing: 0.02em;
           text-shadow: 0 1px 1px rgba(255, 255, 255, 0.7);
         }
+        
+        /* Message bubble styling */
+        .user-bubble, .assistant-bubble {
+          position: relative;
+          z-index: 5;
+        }
+        
+        .markdown-content {
+          position: relative;
+          z-index: 10;
+          pointer-events: auto;
+        }
+        
+        /* Force text to be visible */
+        .markdown-content p, 
+        .markdown-content h1, 
+        .markdown-content h2, 
+        .markdown-content h3, 
+        .markdown-content ul, 
+        .markdown-content ol, 
+        .markdown-content li, 
+        .markdown-content blockquote,
+        .markdown-content code,
+        .markdown-content pre {
+          color: inherit !important;
+          opacity: 1 !important;
+          visibility: visible !important;
+          display: block !important;
+        }
       `}</style>
       
       {/* Settings Modal */}

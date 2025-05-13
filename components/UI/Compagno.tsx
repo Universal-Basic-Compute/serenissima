@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { timeDescriptionService } from '@/lib/services/TimeDescriptionService';
 import { extractPageText } from '@/lib/utils/pageTextExtractor';
+import Portal from './Portal';
 
 interface Notification {
   notificationId: string;
@@ -835,7 +836,8 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
   }
 
   return (
-    <div className={`fixed bottom-4 right-4 z-50 ${className}`}>
+    <Portal>
+      <div className={`fixed bottom-4 right-4 z-[100] ${className}`}>
       {/* Collapsed state - just show the mask icon */}
       {!isOpen && (
         <button 
@@ -1194,7 +1196,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                                     : 'assistant-bubble rounded-bl-none'
                                 }`}
                               >
-                                <div className="markdown-content">
+                                <div className="markdown-content relative z-10">
                                   <ReactMarkdown 
                                     remarkPlugins={[remarkGfm]}
                                     components={{
@@ -1211,7 +1213,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                                       p: ({node, ...props}) => <p {...props} className="my-1" />
                                     }}
                                   >
-                                    {message.content}
+                                    {message.content || "No content available"}
                                   </ReactMarkdown>
                                 </div>
                                 
@@ -1275,8 +1277,8 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                                       : 'assistant-bubble rounded-bl-none'
                                   }`}
                                 >
-                                  <div>{message.content}</div>
-                                  <div className="text-xs mt-1">
+                                  <div style={{ position: 'relative', zIndex: 10 }}>{message.content || "No content available"}</div>
+                                  <div className="text-xs mt-1" style={{ position: 'relative', zIndex: 10 }}>
                                     {formatNotificationDate(message.createdAt)}
                                   </div>
                                 </div>
@@ -1371,7 +1373,8 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
           
         </div>
       )}
-    </div>
+      </div>
+    </Portal>
   );
 };
 
