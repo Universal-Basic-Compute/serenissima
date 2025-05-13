@@ -135,63 +135,9 @@ export class CitizenDisplayManager {
   private addDebugCitizensIfNeeded(): void {
     // Only add debug citizens if we have none
     if (this.citizens.length === 0) {
-      console.log('No citizens loaded, adding debug citizens');
-      
-      // Add some debug citizens at different locations in Venice
-      const debugCitizens = [
-        {
-          id: 'debug-citizen-1',
-          name: 'Marco Polo',
-          profileImage: '/images/citizens/citizen1.png',
-          position: { lat: 45.4371, lng: 12.3358 },
-          occupation: 'Explorer',
-          owner: 'system',
-          landId: 'polygon-1',
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: 'debug-citizen-2',
-          name: 'Antonio Vivaldi',
-          profileImage: '/images/citizens/citizen2.png',
-          position: { lat: 45.4375, lng: 12.3368 },
-          occupation: 'Composer',
-          owner: 'system',
-          landId: 'polygon-2',
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: 'debug-citizen-3',
-          name: 'Caterina Cornaro',
-          profileImage: '/images/citizens/citizen3.png',
-          position: { lat: 45.4365, lng: 12.3348 },
-          occupation: 'Queen of Cyprus',
-          owner: 'system',
-          landId: 'polygon-3',
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: 'debug-citizen-4',
-          name: 'Giacomo Casanova',
-          profileImage: '/images/citizens/citizen4.png',
-          position: { lat: 45.4380, lng: 12.3378 },
-          occupation: 'Adventurer',
-          owner: 'system',
-          landId: 'polygon-4',
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: 'debug-citizen-5',
-          name: 'Elena Cornaro Piscopia',
-          profileImage: '/images/citizens/citizen5.png',
-          position: { lat: 45.4368, lng: 12.3362 },
-          occupation: 'Philosopher',
-          owner: 'system',
-          landId: 'polygon-5',
-          createdAt: new Date().toISOString()
-        }
-      ];
-      
-      this.citizens = debugCitizens;
+      console.log('No citizens loaded, but not adding debug citizens anymore');
+      // The debug citizens creation code has been removed
+      // This method now just logs a message but doesn't add any debug citizens
     }
   }
   
