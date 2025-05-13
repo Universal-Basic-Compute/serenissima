@@ -690,19 +690,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       {/* Controls */}
       <div className="absolute bottom-4 right-4 bg-black/70 text-white p-3 rounded-lg shadow-lg">
         <div className="flex items-center space-x-2">
-          <button 
-            onClick={() => setScale(prev => Math.max(1.5, prev - 0.1))}
-            className="px-3 py-1 bg-amber-600 hover:bg-amber-500 rounded text-white"
-          >
-            -
-          </button>
           <span className="text-sm">{Math.round(scale * 100)}%</span>
-          <button 
-            onClick={() => setScale(prev => Math.min(9, prev + 0.1))}
-            className="px-3 py-1 bg-amber-600 hover:bg-amber-500 rounded text-white"
-          >
-            +
-          </button>
           <button 
             onClick={() => {
               setScale(3); // Reset to 3x zoom instead of 1x
