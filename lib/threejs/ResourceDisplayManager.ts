@@ -478,21 +478,21 @@ export class ResourceDisplayManager {
     
     // Add a circular background for better visibility FIRST
     const backgroundSprite = this.createCircularBackground(primaryResource.category);
-    backgroundSprite.scale.set(1.8, 1.8, 1); // Slightly larger than the icon
+    backgroundSprite.scale.set(2.2, 2.2, 1); // Slightly larger than the icon
     backgroundSprite.renderOrder = 999; // Render behind the icon
     container.add(backgroundSprite);
     
     // Create a sprite for the resource icon SECOND (so it renders on top)
     const sprite = this.createResourceSprite(primaryResource.type);
-    sprite.scale.set(1.5, 1.5, 1); // Slightly smaller than before
-    sprite.renderOrder = 1000; // Ensure it renders on top of the background
+    sprite.scale.set(2, 2, 1);
+    sprite.renderOrder = 1000; // Higher render order
     container.add(sprite);
     
     // If there are multiple resources, add a count indicator
     if (resources.length > 1) {
       const countIndicator = this.createCountIndicator(resources.length);
       countIndicator.position.set(0.7, 0.7, 0.1);
-      countIndicator.renderOrder = 1001; // Ensure it renders on top of everything
+      countIndicator.renderOrder = 1001; // Even higher render order
       container.add(countIndicator);
     }
     
@@ -770,41 +770,51 @@ export class ResourceDisplayManager {
     let texture = this.textureCache.get(normalizedType);
     
     if (!texture) {
-      // Load the texture
-      const loader = new THREE.TextureLoader();
+      // Create an array of URLs to try in order
+      const urlsToTry = [
+        `/assets/icons/resources/${normalizedType}.png`,
+        `/assets/icons/resources/${normalizedType}.jpg`,
+        `/images/resources/${normalizedType}.png`,
+        `/images/resources/${normalizedType}.jpg`,
+        `/assets/icons/resources/default.png`,
+        `/images/resources/default.png`
+      ];
       
-      // Try multiple paths to find the resource image
-      const tryLoadTexture = (paths: string[]) => {
-        if (paths.length === 0) {
-          console.warn(`Failed to load texture for resource type: ${resourceType}, using fallback`);
-          return loader.load('/assets/icons/resources/default.png');
+      console.log(`Will try these URLs for resource ${resourceType}:`, urlsToTry);
+
+      // Function to try loading the next URL in the array
+      const tryNextUrl = (index: number) => {
+        if (index >= urlsToTry.length) {
+          console.warn(`All URLs failed for resource type: ${resourceType}, creating default texture`);
+          return this.createDefaultResourceTexture(resourceType);
         }
         
-        return loader.load(paths[0], 
+        const currentUrl = urlsToTry[index];
+        console.log(`Trying URL ${index + 1}/${urlsToTry.length} for resource: ${currentUrl}`);
+        
+        const loader = new THREE.TextureLoader();
+        return loader.load(
+          currentUrl,
           // Success callback
           (loadedTexture) => {
-            this.textureCache.set(normalizedType, loadedTexture);
+            console.log(`Successfully loaded texture for ${resourceType} from ${currentUrl}`);
+            // Create a circular texture
+            const circularTexture = this.createCircularTexture(loadedTexture);
+            this.textureCache.set(normalizedType, circularTexture);
           },
           // Progress callback
           undefined,
           // Error callback
-          () => {
-            console.warn(`Failed to load texture from ${paths[0]}, trying next path...`);
-            // Try the next path
-            texture = tryLoadTexture(paths.slice(1));
+          (error) => {
+            console.warn(`Failed to load from ${currentUrl}:`, error);
+            // Try the next URL
+            texture = tryNextUrl(index + 1);
           }
         );
       };
       
-      // Try multiple possible paths for the resource image with the correct path first
-      texture = tryLoadTexture([
-        `/assets/icons/resources/${normalizedType}.png`,
-        `/assets/icons/resources/${normalizedType}.jpg`,
-        `/assets/icons/resources/default.png`,
-        `/images/resources/${normalizedType}.png`,
-        `/images/resources/${normalizedType}.jpg`,
-        `/images/resources/default.png`
-      ]);
+      // Start trying URLs
+      texture = tryNextUrl(0);
     }
     
     const material = new THREE.SpriteMaterial({ 
@@ -813,7 +823,12 @@ export class ResourceDisplayManager {
       depthTest: false
     });
     
-    return new THREE.Sprite(material);
+    const sprite = new THREE.Sprite(material);
+    
+    // Add fade-in animation
+    this.animateFadeIn(material);
+    
+    return sprite;
   }
 
   /**
@@ -1233,3 +1248,173 @@ export class ResourceDisplayManager {
     this.textureCache.clear();
   }
 }
+  /**
+   * Create a circular texture from a loaded texture
+   */
+  private createCircularTexture(texture: THREE.Texture): THREE.Texture {
+    // Check if texture.image exists
+    if (!texture.image) {
+      console.warn('Texture image is null, creating fallback texture');
+      return this.createDefaultResourceTexture('unknown');
+    }
+
+    // Create a canvas to draw the circular mask
+    const canvas = document.createElement('canvas');
+    const size = 512; // Increased size for better quality
+    canvas.width = size;
+    canvas.height = size;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return texture; // Fallback if context creation fails
+
+    try {
+      // Clear the canvas first
+      ctx.clearRect(0, 0, size, size);
+
+      // Draw a circular clipping path
+      ctx.beginPath();
+      ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
+      ctx.closePath();
+
+      // Add a white stroke around the circle
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth = 8;
+      ctx.stroke();
+
+      // Create a new clipping path for the image
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(size/2, size/2, size/2 - 12, 0, Math.PI * 2);
+      ctx.clip();
+
+      // Calculate dimensions to maintain aspect ratio
+      let drawWidth = size - 24;
+      let drawHeight = size - 24;
+      let offsetX = 12;
+      let offsetY = 12;
+
+      if (texture.image.width > texture.image.height) {
+        // Landscape image
+        drawHeight = (texture.image.height / texture.image.width) * (size - 24);
+        offsetY = (size - drawHeight) / 2;
+      } else if (texture.image.height > texture.image.width) {
+        // Portrait image
+        drawWidth = (texture.image.width / texture.image.height) * (size - 24);
+        offsetX = (size - drawWidth) / 2;
+      }
+
+      // Draw the image with proper aspect ratio
+      ctx.drawImage(texture.image, offsetX, offsetY, drawWidth, drawHeight);
+      ctx.restore();
+
+      // Create a new texture from the canvas
+      const circularTexture = new THREE.CanvasTexture(canvas);
+      circularTexture.needsUpdate = true;
+
+      return circularTexture;
+    } catch (error) {
+      console.error('Error creating circular texture:', error);
+      return texture; // Return the original texture as fallback
+    }
+  }
+
+  /**
+   * Create a default resource texture when image loading fails
+   */
+  private createDefaultResourceTexture(resourceType: string): THREE.Texture {
+    console.log(`Creating default texture for resource type: ${resourceType}`);
+    
+    // Create a canvas for the default resource image
+    const canvas = document.createElement('canvas');
+    const size = 256;
+    canvas.width = size;
+    canvas.height = size;
+    
+    const context = canvas.getContext('2d');
+    if (!context) {
+      // Fallback if context creation fails
+      console.error('Failed to get 2D context for default resource texture');
+      return new THREE.Texture();
+    }
+    
+    // Get color based on resource type or category
+    let color = '#4b70e2'; // Default blue
+    
+    // Try to determine a color based on resource type
+    if (resourceType.includes('wood') || resourceType.includes('timber')) {
+      color = '#8B4513'; // Brown for wood
+    } else if (resourceType.includes('stone') || resourceType.includes('iron')) {
+      color = '#708090'; // Slate gray for stone/minerals
+    } else if (resourceType.includes('food') || resourceType.includes('fish')) {
+      color = '#228B22'; // Forest green for food
+    } else if (resourceType.includes('cloth') || resourceType.includes('textile')) {
+      color = '#CD5C5C'; // Indian red for textiles
+    } else if (resourceType.includes('spice')) {
+      color = '#FF8C00'; // Dark orange for spices
+    }
+    
+    // Draw a filled circle with the color
+    context.beginPath();
+    context.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
+    context.fillStyle = color;
+    context.fill();
+    
+    // Add a white border
+    context.strokeStyle = '#FFFFFF';
+    context.lineWidth = 8;
+    context.stroke();
+    
+    // Add resource type text
+    context.fillStyle = '#FFFFFF';
+    context.font = 'bold 32px Arial';
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    
+    // Get first letter or first two letters of resource type
+    const displayText = resourceType.substring(0, 2).toUpperCase();
+    context.fillText(displayText, size/2, size/2);
+    
+    // Add "RESOURCE" text at bottom
+    context.font = 'bold 24px Arial';
+    context.fillText('RESOURCE', size/2, size - 30);
+    
+    // Create a texture from the canvas
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+    
+    return texture;
+  }
+
+  /**
+   * Animate fade-in effect for materials
+   */
+  private animateFadeIn(material: THREE.Material): void {
+    // Start with opacity 0
+    material.opacity = 0;
+
+    // Create a fade-in animation
+    const startTime = performance.now();
+    const duration = 800; // 800ms fade-in duration
+
+    // Animation function
+    const animate = () => {
+      const currentTime = performance.now();
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      // Use an ease-in function for smoother appearance
+      material.opacity = progress * progress;
+      material.needsUpdate = true;
+
+      // Continue animation until complete
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        material.opacity = 1; // Ensure we end at full opacity
+        material.needsUpdate = true;
+      }
+    };
+
+    // Start the animation
+    requestAnimationFrame(animate);
+  }
