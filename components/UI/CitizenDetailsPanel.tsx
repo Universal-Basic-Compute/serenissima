@@ -8,6 +8,9 @@ interface CitizenDetailsPanelProps {
 
 const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onClose }) => {
   const [isVisible, setIsVisible] = useState(false);
+  const [homeBuilding, setHomeBuilding] = useState<any>(null);
+  const [workBuilding, setWorkBuilding] = useState<any>(null);
+  const [isLoadingBuildings, setIsLoadingBuildings] = useState(false);
   
   useEffect(() => {
     // Animate in when component mounts
@@ -21,10 +24,44 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     };
     
     window.addEventListener('keydown', handleEscKey);
+    
+    // Fetch building details if we have building IDs
+    if (citizen.Home || citizen.Work) {
+      fetchBuildingDetails();
+    }
+    
     return () => {
       window.removeEventListener('keydown', handleEscKey);
     };
-  }, []);
+  }, [citizen]);
+  
+  const fetchBuildingDetails = async () => {
+    setIsLoadingBuildings(true);
+    
+    try {
+      // Fetch home building if available
+      if (citizen.Home) {
+        const homeResponse = await fetch(`/api/buildings/${citizen.Home}`);
+        if (homeResponse.ok) {
+          const homeData = await homeResponse.json();
+          setHomeBuilding(homeData);
+        }
+      }
+      
+      // Fetch work building if available
+      if (citizen.Work) {
+        const workResponse = await fetch(`/api/buildings/${citizen.Work}`);
+        if (workResponse.ok) {
+          const workData = await workResponse.json();
+          setWorkBuilding(workData);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching building details:', error);
+    } finally {
+      setIsLoadingBuildings(false);
+    }
+  };
   
   const handleClose = () => {
     // Animate out before closing
@@ -34,11 +71,32 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     }, 300);
   };
   
+  const formatDucats = (amount: number) => {
+    if (!amount && amount !== 0) return 'Unknown';
+    return amount.toLocaleString() + ' ₫';
+  };
+  
+  const formatDate = (dateString: string) => {
+    if (!dateString) return 'Unknown';
+    
+    try {
+      const date = new Date(dateString);
+      // Format as "Month Day, Year" without the time
+      return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+    } catch (e) {
+      return 'Unknown date';
+    }
+  };
+  
   if (!citizen) return null;
   
   // Determine social class color
   const getSocialClassColor = (socialClass: string): string => {
-    switch (socialClass.toLowerCase()) {
+    switch (socialClass?.toLowerCase()) {
       case 'nobili':
         return 'bg-yellow-100 text-yellow-800 border-yellow-300'; // Gold
       case 'cittadini':
@@ -46,6 +104,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
       case 'popolani':
         return 'bg-amber-100 text-amber-800 border-amber-300'; // Brown
       case 'facchini':
+      case 'laborer':
         return 'bg-gray-100 text-gray-800 border-gray-300'; // Gray
       default:
         return 'bg-amber-100 text-amber-800 border-amber-300'; // Default
@@ -56,12 +115,12 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
   
   return (
     <div 
-      className={`fixed top-20 right-4 bg-amber-50 border-2 border-amber-700 rounded-lg p-4 shadow-lg max-w-md z-20 transition-all duration-300 ${
+      className={`fixed top-20 right-4 bg-amber-50 border-2 border-amber-700 rounded-lg p-6 shadow-lg max-w-md z-20 transition-all duration-300 ${
         isVisible ? 'opacity-100 transform translate-x-0' : 'opacity-0 transform translate-x-10'
       }`}
     >
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-serif text-amber-800">
+        <h2 className="text-2xl font-serif text-amber-800">
           {citizen.FirstName} {citizen.LastName}
         </h2>
         <button 
@@ -75,13 +134,14 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
         </button>
       </div>
       
-      <div className="flex mb-4">
-        {citizen.ImageUrl ? (
-          <>
+      <div className="flex flex-col items-center mb-6">
+        {/* Much larger image */}
+        <div className="w-48 h-48 mb-4 relative">
+          {citizen.ImageUrl ? (
             <img 
               src={citizen.ImageUrl.endsWith('.jpg') ? citizen.ImageUrl : `/images/citizens/${citizen.CitizenId}.jpg`} 
               alt={`${citizen.FirstName} ${citizen.LastName}`} 
-              className="w-24 h-24 object-cover rounded-lg border-2 border-amber-600"
+              className="w-full h-full object-cover rounded-lg border-2 border-amber-600 shadow-lg"
               onLoad={(e) => {
                 console.log(`Successfully loaded citizen image: ${(e.target as HTMLImageElement).src}`);
               }}
@@ -101,22 +161,19 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
                 // Fallback if image fails to load
                 (e.target as HTMLImageElement).style.display = 'none';
                 (e.target as HTMLImageElement).parentElement!.innerHTML = `
-                  <div class="w-24 h-24 bg-amber-200 rounded-lg border-2 border-amber-600 flex items-center justify-center text-amber-800">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div class="w-full h-full bg-amber-200 rounded-lg border-2 border-amber-600 flex items-center justify-center text-amber-800">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </div>
                 `;
               }}
             />
-            <div className="text-xs text-gray-500 mt-1">Image URL: {citizen.ImageUrl}</div>
-          </>
-        ) : (
-          <>
+          ) : (
             <img 
               src={`/images/citizens/${citizen.CitizenId}.jpg`}
               alt={`${citizen.FirstName} ${citizen.LastName}`} 
-              className="w-24 h-24 object-cover rounded-lg border-2 border-amber-600"
+              className="w-full h-full object-cover rounded-lg border-2 border-amber-600 shadow-lg"
               onLoad={(e) => {
                 console.log(`Successfully loaded citizen image: ${(e.target as HTMLImageElement).src}`);
               }}
@@ -124,63 +181,73 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
                 // Log the error
                 console.error(`Failed to load citizen image: ${(e.target as HTMLImageElement).src}`);
                 
-                // Try to fetch the image directly to see if it exists
-                fetch((e.target as HTMLImageElement).src, { method: 'HEAD' })
-                  .then(response => {
-                    console.log(`Image HEAD request returned: ${response.status} ${response.statusText}`);
-                  })
-                  .catch(error => {
-                    console.error(`Image HEAD request failed: ${error}`);
-                  });
-                
                 // Fallback if image fails to load
                 (e.target as HTMLImageElement).style.display = 'none';
                 (e.target as HTMLImageElement).parentElement!.innerHTML = `
-                  <div class="w-24 h-24 bg-amber-200 rounded-lg border-2 border-amber-600 flex items-center justify-center text-amber-800">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div class="w-full h-full bg-amber-200 rounded-lg border-2 border-amber-600 flex items-center justify-center text-amber-800">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </div>
                 `;
               }}
             />
-            <div className="text-xs text-gray-500 mt-1">Image path: /images/citizens/{citizen.CitizenId}.jpg</div>
-          </>
-        )}
+          )}
+        </div>
         
-        <div className="ml-4">
-          <div className={`px-2 py-1 rounded-full text-sm font-medium inline-block ${socialClassStyle}`}>
+        {/* Social class and wealth info */}
+        <div className="text-center">
+          <div className={`px-3 py-1.5 rounded-full text-sm font-medium inline-block mb-2 ${socialClassStyle}`}>
             {citizen.SocialClass}
           </div>
-          <div className="text-amber-600 text-sm mt-2">Wealth: {citizen.Wealth || 'Unknown'}</div>
-          <div className="text-amber-600 text-sm">Needs Score: {citizen.NeedsCompletionScore.toFixed(2)}</div>
-          <div className="text-amber-600 text-sm">Citizen ID: {citizen.CitizenId}</div>
+          
+          <div className="text-amber-700 text-sm font-medium">
+            Wealth: {formatDucats(citizen.Wealth)}
+          </div>
         </div>
       </div>
       
-      <div className="mb-4">
-        <h3 className="text-lg font-serif text-amber-800 mb-2">About</h3>
+      <div className="mb-6">
+        <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">About</h3>
         <p className="text-amber-700 italic">{citizen.Description || 'No description available.'}</p>
       </div>
       
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-4 mb-6">
         <div>
-          <h3 className="text-lg font-serif text-amber-800 mb-2">Home</h3>
-          <div className="bg-amber-100 p-2 rounded-lg">
-            <p className="text-amber-700">{citizen.Home || 'Unknown'}</p>
+          <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Home</h3>
+          <div className="bg-amber-100 p-3 rounded-lg">
+            {isLoadingBuildings ? (
+              <p className="text-amber-700 italic">Loading...</p>
+            ) : homeBuilding ? (
+              <div>
+                <p className="text-amber-800 font-medium">{homeBuilding.name || homeBuilding.type}</p>
+                <p className="text-amber-700 text-sm">{homeBuilding.type}</p>
+              </div>
+            ) : (
+              <p className="text-amber-700">{citizen.Home || 'Unknown'}</p>
+            )}
           </div>
         </div>
         
         <div>
-          <h3 className="text-lg font-serif text-amber-800 mb-2">Work</h3>
-          <div className="bg-amber-100 p-2 rounded-lg">
-            <p className="text-amber-700">{citizen.Work || 'Unemployed'}</p>
+          <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Work</h3>
+          <div className="bg-amber-100 p-3 rounded-lg">
+            {isLoadingBuildings ? (
+              <p className="text-amber-700 italic">Loading...</p>
+            ) : workBuilding ? (
+              <div>
+                <p className="text-amber-800 font-medium">{workBuilding.name || workBuilding.type}</p>
+                <p className="text-amber-700 text-sm">{workBuilding.type}</p>
+              </div>
+            ) : (
+              <p className="text-amber-700">{citizen.Work || 'Unemployed'}</p>
+            )}
           </div>
         </div>
       </div>
       
-      <div className="mt-4 text-xs text-amber-500 italic">
-        Citizen of Venice since {new Date(citizen.CreatedAt).toLocaleDateString()}
+      <div className="mt-4 text-xs text-amber-500 italic text-center">
+        Citizen of Venice since {formatDate(citizen.CreatedAt)}
       </div>
     </div>
   );
