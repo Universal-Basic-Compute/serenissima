@@ -31,6 +31,12 @@ type AirtableTable = {
   ): void;
 };
 
+// Define type for Airtable base
+interface AirtableBase {
+  (tableName: string): any;
+  select(options: any): any;
+}
+
 // Initialize Airtable base if API key and base ID are available
 const base = apiKey && baseId ? new Airtable({ apiKey }).base(baseId) : null;
 
@@ -96,10 +102,10 @@ export async function POST(request: Request) {
     const existingBuildings = await new Promise<any[]>((resolve, reject) => {
       const buildings: any[] = [];
       
-      (base!.select({
+      (base as unknown as AirtableBase).select({
         filterByFormula: `{Land} = '${data.land_id}'`,
         view: 'Grid view'
-      }) as any)
+      })
       .eachPage(
         function page(records, fetchNextPage) {
           records.forEach(record => {
@@ -161,7 +167,7 @@ export async function POST(request: Request) {
           return;
         }
         
-        (base!('USERS') as AirtableTable).select({
+        (base!('USERS') as unknown as AirtableTable).select({
           filterByFormula: `{WalletAddress} = '${data.walletAddress}'`
         }).firstPage((err, records) => {
           if (err) {
@@ -193,7 +199,7 @@ export async function POST(request: Request) {
 
       // Update the user's Ducats balance
       await new Promise((resolve, reject) => {
-        (base!('USERS') as AirtableTable).update([
+        (base!('USERS') as unknown as AirtableTable).update([
           {
             id: (userRecord as AirtableRecord).id,
             fields: {
@@ -212,7 +218,7 @@ export async function POST(request: Request) {
       // Also add Ducats to ConsiglioDeiDieci
       try {
         const consiglioDeiDieciRecord = await new Promise((resolve, reject) => {
-          (base!('USERS') as AirtableTable).select({
+          (base!('USERS') as unknown as AirtableTable).select({
             filterByFormula: `{UserName} = 'ConsiglioDeiDieci'`
           }).firstPage((err, records) => {
             if (err) {
@@ -233,7 +239,7 @@ export async function POST(request: Request) {
         const newConsiglioDucats = currentConsiglioDucats + data.cost;
 
         await new Promise((resolve, reject) => {
-          (base!('USERS') as AirtableTable).update([
+          (base!('USERS') as unknown as AirtableTable).update([
             {
               id: (consiglioDeiDieciRecord as AirtableRecord).id,
               fields: {
@@ -266,7 +272,7 @@ export async function POST(request: Request) {
     // Create a record in Airtable
     const buildingId = `building-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
     const record = await new Promise((resolve, reject) => {
-      (base!('BUILDINGS') as AirtableTable).create({
+      (base!('BUILDINGS') as unknown as AirtableTable).create({
         BuildingId: buildingId,
         Type: data.type,
         Land: data.land_id,
