@@ -406,8 +406,9 @@ export class WaterFacade {
       console.error('Failed to create even fallback water:', error);
       
       // Create an absolute minimal fallback - create a minimal Water object
+      const minimalGeometry = new THREE.PlaneGeometry(this.size, this.size, 1, 1);
       const minimalWater = new Water(
-        waterGeometry,
+        minimalGeometry,
         {
           textureWidth: 64,
           textureHeight: 64,
