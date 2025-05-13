@@ -938,7 +938,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       }
       
       // Check if mouse is over any citizen marker (for citizens view)
-      if (activeView === 'citizens') {
+      if (activeView === 'citizens' as ViewType) {
         let foundHoveredCitizen = false;
         
         // Check each building with citizens
