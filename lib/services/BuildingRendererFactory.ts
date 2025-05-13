@@ -143,7 +143,7 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
           this.logDebug(`Preloaded model for ${type}`);
         },
         undefined,
-        (error) => {
+        (error: Error) => {
           console.warn(`Failed to preload model for ${type}: ${error.message}`);
         }
       );
