@@ -1,5 +1,12 @@
 import * as THREE from 'three';
 import { eventBus, EventTypes } from '../eventBus';
+
+// Extend EventTypes interface to include SCENE_BASE_RENDERED
+declare module '../eventBus' {
+  interface EventTypes {
+    SCENE_BASE_RENDERED: string;
+  }
+}
 import { buildingRendererManager } from './BuildingRendererManager';
 
 /**
