@@ -362,25 +362,69 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
     }
   };
 
-  // Format date to be more readable and remove 500 years
+  // Format date to be more readable and immersive
   const formatNotificationDate = (dateString: string): string => {
     try {
       const date = new Date(dateString);
       // Subtract 500 years from the year
       date.setFullYear(date.getFullYear() - 500);
       
-      // Format as "Month Day, Year at HH:MM AM/PM"
-      return date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
-      });
+      // Get components for custom formatting
+      const year = date.getFullYear();
+      const day = date.getDate();
+      const hour = date.getHours();
+      const minute = date.getMinutes();
+      const isPM = hour >= 12;
+      const hour12 = hour % 12 || 12;
+      
+      // Array of month names in Italian style
+      const months = [
+        'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
+        'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'
+      ];
+      const month = months[date.getMonth()];
+      
+      // Time of day descriptions
+      let timeOfDay = '';
+      if (hour < 6) timeOfDay = 'before dawn';
+      else if (hour < 9) timeOfDay = 'early morning';
+      else if (hour < 12) timeOfDay = 'morning';
+      else if (hour < 14) timeOfDay = 'midday';
+      else if (hour < 17) timeOfDay = 'afternoon';
+      else if (hour < 20) timeOfDay = 'evening';
+      else timeOfDay = 'night';
+      
+      // Create different format variants based on the minute value
+      // This ensures different messages get different formats
+      const variant = minute % 5; // 0-4 variants
+      
+      switch (variant) {
+        case 0:
+          return `${year}, ${month} ${day}th, ${timeOfDay}`;
+        case 1:
+          return `${day} ${month} ${year}, ${timeOfDay}`;
+        case 2:
+          return `${month} ${day}th of the year ${year}, ${hour12}:${minute.toString().padStart(2, '0')} ${isPM ? 'post meridiem' : 'ante meridiem'}`;
+        case 3:
+          return `The ${day}${getDaySuffix(day)} day of ${month}, ${year}`;
+        case 4:
+        default:
+          return `${year}, ${timeOfDay} on the ${day}${getDaySuffix(day)} of ${month}`;
+      }
     } catch (error) {
       console.error('Error formatting date:', error);
       return dateString;
+    }
+  };
+
+  // Helper function to get the correct suffix for the day
+  const getDaySuffix = (day: number): string => {
+    if (day > 3 && day < 21) return 'th';
+    switch (day % 10) {
+      case 1: return 'st';
+      case 2: return 'nd';
+      case 3: return 'rd';
+      default: return 'th';
     }
   };
 
