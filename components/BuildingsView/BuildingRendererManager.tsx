@@ -41,6 +41,15 @@ const BuildingRendererManager: React.FC<BuildingRendererManagerProps> = ({
       refreshBuildings();
     }, 30000); // Refresh every 30 seconds
     
+    // Add a more frequent check specifically for when buildings disappear
+    const visibilityCheckInterval = setInterval(() => {
+      const count = buildingRendererManager.getBuildingMeshes().size;
+      if (count === 0 && buildingCount > 0) {
+        console.warn('BuildingRendererManager: Buildings disappeared, refreshing...');
+        refreshBuildings();
+      }
+    }, 5000); // Check every 5 seconds
+    
     // Listen for events to ensure buildings are visible
     const handleEnsureBuildingsVisible = () => {
       log.info('BuildingRendererManager: Ensuring buildings are visible (event)');
@@ -68,6 +77,7 @@ const BuildingRendererManager: React.FC<BuildingRendererManagerProps> = ({
     // Cleanup function
     return () => {
       clearInterval(refreshInterval);
+      clearInterval(visibilityCheckInterval);
       window.removeEventListener('ensureBuildingsVisible', handleEnsureBuildingsVisible);
       buildingPlacedSubscription.unsubscribe();
       
@@ -81,13 +91,49 @@ const BuildingRendererManager: React.FC<BuildingRendererManagerProps> = ({
   const refreshBuildings = () => {
     if (!isSceneReady || !scene) return;
     
+    console.log('BuildingRendererManager: Refreshing buildings');
+    
+    // First check if we already have buildings
+    const currentCount = buildingRendererManager.getBuildingMeshes().size;
+    
     buildingRendererManager.refreshBuildings()
       .then(() => {
         updateBuildingCount();
         setLastRefresh(new Date());
+        
+        // Check if buildings were successfully loaded
+        const newCount = buildingRendererManager.getBuildingMeshes().size;
+        if (newCount === 0 && currentCount > 0) {
+          console.warn('BuildingRendererManager: Buildings disappeared after refresh, trying again...');
+          // Try again with a slight delay
+          setTimeout(() => {
+            buildingRendererManager.refreshBuildings()
+              .then(() => updateBuildingCount())
+              .catch(error => console.error('Error in second refresh attempt:', error));
+          }, 1000);
+        }
       })
       .catch(error => {
         log.error('Error refreshing buildings:', error);
+        
+        // If refresh fails, try a more aggressive approach
+        setTimeout(() => {
+          console.log('BuildingRendererManager: Trying alternative refresh approach');
+          // Force a scene update if possible
+          if (scene.userData && scene.userData.renderer) {
+            scene.userData.renderer.render(scene, scene.userData.camera);
+          }
+          
+          // Dispatch custom event to ensure buildings are processed
+          window.dispatchEvent(new CustomEvent('regenerateBuildingMarkers'));
+          
+          // Try refreshing again after a moment
+          setTimeout(() => {
+            buildingRendererManager.refreshBuildings()
+              .then(() => updateBuildingCount())
+              .catch(error => console.error('Error in alternative refresh:', error));
+          }, 500);
+        }, 500);
       });
   };
   
