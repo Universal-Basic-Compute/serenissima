@@ -542,7 +542,14 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             ctx.font = `${fontSize}px Arial`;
             ctx.fillStyle = '#000';
             ctx.textAlign = 'center';
-            ctx.fillText(polygon.historicalName, centroidX, centroidY);
+            
+            // Calculate offset to position text below coat of arms
+            // The coat of arms size is calculated as: Math.min(59, Math.max(29, Math.floor(scale * 15.7)))
+            const coatOfArmsSize = Math.min(59, Math.max(29, Math.floor(scale * 15.7)));
+            const textYOffset = coatOfArmsSize / 2 + fontSize + 5; // Half the coat of arms size + font size + padding
+            
+            // Draw text below the coat of arms
+            ctx.fillText(polygon.historicalName, centroidX, centroidY + textYOffset);
           }
         });
       }
