@@ -180,7 +180,9 @@ export async function GET(request: Request) {
     
     // Map buildings to citizens with positions
     const citizens = buildingRecords.map(record => {
-      const citizenId = record.fields.Occupant ? String(record.fields.Occupant) : '';
+      // Convert Airtable Occupant field to string, ensuring type safety
+      const occupant = record.fields.Occupant;
+      const citizenId = occupant ? String(occupant) : '';
       const citizen = citizenMap.get(citizenId);
       
       if (!citizen) {
