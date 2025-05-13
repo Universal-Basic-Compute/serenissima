@@ -67,7 +67,7 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
     this.logDebug(`Checking for model files in public directory...`);
     
     // Common building types to check
-    const buildingTypes = ['market-stall', 'house', 'workshop', 'tavern', 'dock'];
+    const buildingTypes = ['market-stall', 'house', 'workshop', 'tavern', 'dock', 'warehouse'];
     const variants = ['model'];
     
     for (const type of buildingTypes) {
@@ -77,8 +77,9 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
           const response = await fetch(modelPath, { method: 'HEAD' });
           this.logDebug(`Model ${type}/${variant}: ${response.ok ? 'EXISTS' : 'MISSING'} (${response.status})`, 
             `background: ${response.ok ? '#00FF00' : '#FF0000'}; color: black; padding: 2px 5px; font-weight: bold;`);
-        } catch (error) {
-          console.warn(`Error checking model ${type}/${variant}: ${error.message}`);
+        } catch (error: unknown) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          console.warn(`Error checking model ${type}/${variant}: ${errorMessage}`);
         }
       }
     }
@@ -119,31 +120,6 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
     return modelPath;
   }
 
-  /**
-   * Check if model files exist in the public directory
-   */
-  private async checkModelFilesExist(): Promise<void> {
-    if (!this.debug) return;
-    
-    this.logDebug(`Checking for model files in public directory...`);
-    
-    // Common building types to check
-    const buildingTypes = ['market-stall', 'house', 'workshop', 'tavern', 'dock', 'warehouse'];
-    const variants = ['model'];
-    
-    for (const type of buildingTypes) {
-      for (const variant of variants) {
-        const modelPath = this.getModelPath(type, variant);
-        try {
-          const response = await fetch(modelPath, { method: 'HEAD' });
-          this.logDebug(`Model ${type}/${variant}: ${response.ok ? 'EXISTS' : 'MISSING'} (${response.status})`, 
-            `background: ${response.ok ? '#00FF00' : '#FF0000'}; color: black; padding: 2px 5px; font-weight: bold;`);
-        } catch (error) {
-          console.warn(`Error checking model ${type}/${variant}: ${error.message}`);
-        }
-      }
-    }
-  }
 
   /**
    * Preload common building models to improve initial loading performance
@@ -742,7 +718,7 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
       
       return model;
     } catch (error) {
-      console.warn(`Failed to load model for ${building.id} of type ${building.type}: ${error.message}`);
+      console.warn(`Failed to load model for ${building.id} of type ${building.type}: ${error instanceof Error ? error.message : String(error)}`);
       
       // Try alternative model paths if the primary path fails
       try {
@@ -762,7 +738,7 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
           return model;
         }
       } catch (fallbackError) {
-        console.warn(`Fallback model also failed for ${building.id}: ${fallbackError.message}`);
+        console.warn(`Fallback model also failed for ${building.id}: ${fallbackError instanceof Error ? fallbackError.message : String(fallbackError)}`);
       }
       
       // If all loading attempts fail, create a colored box model as fallback
