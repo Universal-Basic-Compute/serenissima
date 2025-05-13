@@ -290,6 +290,9 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
     // Get building size
     const size = this.getBuildingSizeByType(building.type);
     
+    // Apply 2x reduction to low-detail models too
+    const scaleFactor = 0.5;
+    
     // Get position
     let position: THREE.Vector3;
     if ('lat' in building.position && 'lng' in building.position) {
@@ -315,7 +318,11 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
     const group = new THREE.Group();
     
     // Create a base for the building
-    const baseGeometry = new THREE.BoxGeometry(size.width * 0.5, size.height * 0.5, size.depth * 0.5);
+    const baseGeometry = new THREE.BoxGeometry(
+      size.width * 0.5 * scaleFactor, 
+      size.height * 0.5 * scaleFactor, 
+      size.depth * 0.5 * scaleFactor
+    );
     const baseMaterial = new THREE.MeshBasicMaterial({
       color: color,
       transparent: true,
@@ -323,12 +330,16 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
     });
     
     const base = new THREE.Mesh(baseGeometry, baseMaterial);
-    base.position.y = size.height * 0.25; // Half the height
+    base.position.y = size.height * 0.25 * scaleFactor; // Half the height
     group.add(base);
     
     // Add a roof for certain building types
     if (['house', 'tavern', 'workshop', 'church', 'palace'].includes(building.type)) {
-      const roofGeometry = new THREE.ConeGeometry(size.width * 0.3, size.height * 0.2, 4);
+      const roofGeometry = new THREE.ConeGeometry(
+        size.width * 0.3 * scaleFactor, 
+        size.height * 0.2 * scaleFactor, 
+        4
+      );
       const roofMaterial = new THREE.MeshBasicMaterial({
         color: 0x8B4513, // Brown color for roof
         transparent: true,
@@ -336,7 +347,7 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
       });
       
       const roof = new THREE.Mesh(roofGeometry, roofMaterial);
-      roof.position.y = size.height * 0.6; // Position on top of the base
+      roof.position.y = size.height * 0.6 * scaleFactor; // Position on top of the base
       roof.rotation.y = Math.PI / 4; // Rotate 45 degrees
       
       group.add(roof);
@@ -421,8 +432,8 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
     // Get building size based on type
     const size = this.getBuildingSizeByType(building.type);
     
-    // CHANGE: Make the fallback cube 4x smaller by dividing all dimensions by 4
-    const scaleFactor = 0.25; // 1/4 of the original size
+    // Make the fallback cube 8x smaller (4x from before * 2x additional reduction)
+    const scaleFactor = 0.125; // 1/8 of the original size
     
     // Create a box with a color based on building type
     console.log(`Creating fallback box for building ${building.id} of type ${building.type}`);
@@ -490,9 +501,9 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
       });
       
       const label = new THREE.Sprite(labelMaterial);
-      // CHANGE: Adjust label position to account for smaller building
-      label.position.set(0, size.height * scaleFactor + 0.5, 0); // Position above the building
-      label.scale.set(2, 0.5, 1);
+      // Adjust label position to account for smaller building
+      label.position.set(0, size.height * scaleFactor + 0.25, 0); // Position above the building
+      label.scale.set(1, 0.25, 1); // Make the label smaller too
       
       // Add the label to the group
       group.add(label);
@@ -595,8 +606,8 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
         const xPos = center.x - halfWidth + (x * modelSize.x / (gridSize - 1));
         const zPos = center.z - halfDepth + (z * modelSize.z / (gridSize - 1));
         
-        // Create ray origin at the bottom of the model
-        rayOrigins.push(new THREE.Vector3(xPos, center.y + 100, zPos));
+        // Create ray origin high above the model
+        rayOrigins.push(new THREE.Vector3(xPos, 100, zPos));
       }
     }
     
@@ -643,18 +654,20 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
       const modelBottomY = boundingBox.min.y;
       
       // Calculate the adjustment needed
-      const adjustment = highestY - modelBottomY + 0.05; // Add a small offset to prevent z-fighting
+      const adjustment = highestY - modelBottomY;
       
       // Apply the adjustment
-      model.position.y += adjustment;
+      model.position.y = highestY;
       
       if (this.debug) {
         this.logDebug(`Adjusted model ${building.id} to ground level. Adjustment: ${adjustment}`);
       }
     } else {
-      // If no ground was found, use a default height
+      // If no ground was found, use a default height of 0
+      model.position.y = 0;
+      
       if (this.debug) {
-        this.logDebug(`No ground found for model ${building.id}, using default height`);
+        this.logDebug(`No ground found for model ${building.id}, using default height of 0`);
       }
     }
   }
@@ -747,6 +760,9 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
   private configureModel(model: THREE.Object3D, building: BuildingData): void {
     // First get the horizontal position
     const position = this.getModelPosition(building);
+    
+    // Scale the model down by 50% (2x smaller)
+    model.scale.set(0.5, 0.5, 0.5);
     
     // Create a bounding box for the model to determine its dimensions
     const boundingBox = new THREE.Box3().setFromObject(model);
