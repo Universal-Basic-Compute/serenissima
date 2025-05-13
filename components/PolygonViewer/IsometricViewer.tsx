@@ -686,8 +686,10 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         polygon,
         coords,
         fillColor,
-        centroidX: centerX,
-        centroidY: centerY
+        centroidX: centerX, // Store both for compatibility
+        centroidY: centerY,
+        centerX,    // Add these explicitly
+        centerY
       });
     });
 
@@ -717,11 +719,11 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         ctx.strokeStyle = '#FF6700'; // Orange highlight for selected
         ctx.lineWidth = 3;
       } else if (isHovered) {
-        // Hover state: slightly brighter
-        ctx.fillStyle = lightenColor(fillColor, 10);
+        // Hover state: more noticeable with a brighter color and thicker border
+        ctx.fillStyle = lightenColor(fillColor, 15); // Increased brightness
         ctx.fill();
-        ctx.strokeStyle = '#FFB700'; // Yellow highlight for hover
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#FF9900'; // Brighter orange for hover
+        ctx.lineWidth = 2.5; // Slightly thicker border
       } else {
         // Normal state
         ctx.fillStyle = fillColor;
