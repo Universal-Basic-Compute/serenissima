@@ -364,100 +364,7 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
           </div>
         ) : !error && building ? (
           <div className="space-y-6 overflow-y-auto flex-grow">
-            {/* Building Type */}
-            <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-              <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Building Type</h3>
-              <p className="font-serif text-xl font-semibold text-amber-800">{building.type}</p>
-              {building.variant && (
-                <p className="mt-1 text-sm italic text-amber-600">Variant: {building.variant}</p>
-              )}
-            </div>
-            
-            {/* Location with land visualization */}
-            <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-              <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Location</h3>
-              
-              {landData ? (
-                <div className="flex flex-col items-center">
-                  {/* Land name */}
-                  <p className="font-serif text-lg font-semibold text-amber-800 mb-2">
-                    {landData.historicalName || landData.englishName || 'Land Plot'}
-                  </p>
-                  
-                  {/* Canvas for land visualization */}
-                  <canvas 
-                    ref={canvasRef} 
-                    className="w-full h-[200px] border border-amber-100 rounded-lg mb-2"
-                    style={{ maxWidth: '300px' }}
-                  />
-                  
-                  {/* Remove the Land ID and Position information */}
-                </div>
-              ) : (
-                <div className="flex items-center justify-center h-[200px]">
-                  <p className="text-gray-500 italic">Loading land details...</p>
-                </div>
-              )}
-            </div>
-            
-            {/* Owner information */}
-            <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-              <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Owner</h3>
-              {building.owner ? (
-                <div className="flex items-center justify-center">
-                  <PlayerProfile 
-                    username={building.owner}
-                    walletAddress={building.owner}
-                    size="medium"
-                    className="mx-auto"
-                  />
-                </div>
-              ) : (
-                <p className="text-center text-gray-500 italic">No owner information</p>
-              )}
-            </div>
-            
-            {/* Financial Information */}
-            {(building.lease_amount || building.rent_amount) && (
-              <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-                <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Financial Details</h3>
-                
-                {building.lease_amount !== undefined && (
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-gray-700">Lease Amount:</span>
-                    <span className="font-semibold text-amber-800">
-                      {building.lease_amount.toLocaleString()} ⚜️ ducats
-                    </span>
-                  </div>
-                )}
-                
-                {building.rent_amount !== undefined && (
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-700">Rent Amount:</span>
-                    <span className="font-semibold text-amber-800">
-                      {building.rent_amount.toLocaleString()} ⚜️ ducats
-                    </span>
-                  </div>
-                )}
-              </div>
-            )}
-            
-            {/* Occupant Information */}
-            {building.occupant && (
-              <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-                <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Occupant</h3>
-                <div className="flex items-center justify-center">
-                  <PlayerProfile 
-                    username={building.occupant}
-                    walletAddress={building.occupant}
-                    size="medium"
-                    className="mx-auto"
-                  />
-                </div>
-              </div>
-            )}
-            
-            {/* Building Definition Information */}
+            {/* Building Definition Information - MOVED TO TOP */}
             {buildingDefinition && (
               <>
                 {/* Name and Category */}
@@ -539,6 +446,88 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                   </div>
                 )}
               </>
+            )}
+            
+            {/* Financial Information - MOVED UP */}
+            {(building.lease_amount || building.rent_amount) && (
+              <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+                <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Financial Details</h3>
+                
+                {building.lease_amount !== undefined && (
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-gray-700">Lease Amount:</span>
+                    <span className="font-semibold text-amber-800">
+                      {building.lease_amount.toLocaleString()} ⚜️ ducats
+                    </span>
+                  </div>
+                )}
+                
+                {building.rent_amount !== undefined && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-700">Rent Amount:</span>
+                    <span className="font-semibold text-amber-800">
+                      {building.rent_amount.toLocaleString()} ⚜️ ducats
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {/* Location with land visualization */}
+            <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+              <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Location</h3>
+              
+              {landData ? (
+                <div className="flex flex-col items-center">
+                  {/* Land name */}
+                  <p className="font-serif text-lg font-semibold text-amber-800 mb-2">
+                    {landData.historicalName || landData.englishName || 'Land Plot'}
+                  </p>
+                  
+                  {/* Canvas for land visualization */}
+                  <canvas 
+                    ref={canvasRef} 
+                    className="w-full h-[200px] border border-amber-100 rounded-lg mb-2"
+                    style={{ maxWidth: '300px' }}
+                  />
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-[200px]">
+                  <p className="text-gray-500 italic">Loading land details...</p>
+                </div>
+              )}
+            </div>
+            
+            {/* Owner information */}
+            <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+              <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Owner</h3>
+              {building.owner ? (
+                <div className="flex items-center justify-center">
+                  <PlayerProfile 
+                    username={building.owner}
+                    walletAddress={building.owner}
+                    size="medium"
+                    className="mx-auto"
+                  />
+                </div>
+              ) : (
+                <p className="text-center text-gray-500 italic">No owner information</p>
+              )}
+            </div>
+            
+            {/* Occupant Information */}
+            {building.occupant && (
+              <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+                <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Occupant</h3>
+                <div className="flex items-center justify-center">
+                  <PlayerProfile 
+                    username={building.occupant}
+                    walletAddress={building.occupant}
+                    size="medium"
+                    className="mx-auto"
+                  />
+                </div>
+              </div>
             )}
             
             {/* Creation Information with adjusted date (500 years earlier) */}
