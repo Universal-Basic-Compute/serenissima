@@ -142,9 +142,50 @@ def get_building_types_from_api() -> Dict:
         
         # Check if the request was successful
         if response.status_code == 200:
-            building_types = response.json()
-            print(f"Successfully fetched {len(building_types)} building types from API")
-            return building_types
+            response_data = response.json()
+            
+            # Check if the response has the expected structure
+            if "success" in response_data and response_data["success"] and "buildingTypes" in response_data:
+                building_types = response_data["buildingTypes"]
+                print(f"Successfully fetched {len(building_types)} building types from API")
+                
+                # Transform the data into the format we need
+                transformed_types = {}
+                for building in building_types:
+                    if "type" in building and "name" in building:
+                        building_type = building["type"]
+                        
+                        # Extract income and maintenance from the building data
+                        income = building.get("income", 0)
+                        maintenance = building.get("maintenanceCost", 0)
+                        
+                        # If income/maintenance aren't directly available, try to get them from constructionCosts
+                        if income == 0 and "constructionCosts" in building:
+                            # Some buildings might have income in their constructionCosts
+                            income = building["constructionCosts"].get("income", 0)
+                        
+                        if maintenance == 0 and "constructionCosts" in building:
+                            # Some buildings might have maintenance in their constructionCosts
+                            maintenance = building["constructionCosts"].get("maintenance", 0)
+                        
+                        # Create an entry for this building type
+                        transformed_types[building_type] = {
+                            "name": building["name"],
+                            "income": income,
+                            "maintenance": maintenance,
+                            "description": building.get("description", ""),
+                            "category": building.get("category", ""),
+                            "subcategory": building.get("subcategory", ""),
+                            "tier": building.get("tier", 1),
+                            "constructionCosts": building.get("constructionCosts", {})
+                        }
+                
+                return transformed_types
+            else:
+                print(f"Unexpected API response format: {response_data}")
+                # Fall back to the hardcoded building types
+                print("Using fallback building types data due to unexpected response format")
+                return get_building_types_info()
         else:
             print(f"Error fetching building types from API: {response.status_code} - {response.text}")
             # Fall back to the hardcoded building types
