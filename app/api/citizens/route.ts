@@ -38,264 +38,56 @@ function formatImageUrl(url: string | undefined, citizenId?: string): string {
 
 export async function GET(request: Request) {
   try {
-    console.log('Fetching citizens with houses from Airtable...');
+    console.log('Fetching citizens from Airtable...');
     
-    // Get buildings where Occupant is not null
-    const buildingRecords = await base(BUILDINGS_TABLE)
-      .select({
-        filterByFormula: 'NOT({Home} = "")',
-        view: 'Grid view'
-      })
-      .firstPage();
-    
-    console.log(`Found ${buildingRecords.length} buildings with occupants`);
-    
-    // Extract citizen IDs from buildings
-    const citizenIds = buildingRecords.map(record => record.fields.Occupant).filter(Boolean);
-    
-    if (citizenIds.length === 0) {
-      console.log('No citizens found in buildings, returning debug citizens');
-      return NextResponse.json(getDebugCitizens());
-    }
-    
-    // Create a formula to find citizens by ID
-    const formula = `OR(${citizenIds.map(id => `{CitizenId} = '${id}'`).join(', ')})`;
-    
-    // Fetch citizens from Airtable
+    // Get all citizens directly without filtering for buildings
     const citizenRecords = await base(CITIZENS_TABLE)
       .select({
-        filterByFormula: formula,
-        view: 'Grid view'
+        view: 'Grid view',
+        // Don't filter by Home field - get all citizens
       })
       .firstPage();
     
     console.log(`Retrieved ${citizenRecords.length} citizens from Airtable`);
     
-    // Create a map of citizens by ID
-    const citizenMap = new Map();
-    citizenRecords.forEach(record => {
-      citizenMap.set(record.fields.CitizenId, {
-        id: record.fields.CitizenId,
-        name: `${record.fields.FirstName} ${record.fields.LastName}`,
-        firstName: record.fields.FirstName,
-        lastName: record.fields.LastName,
-        socialClass: record.fields.SocialClass,
-        description: record.fields.Description,
-        imageUrl: record.fields.ImageUrl,
-        wealth: record.fields.Wealth,
-        home: record.fields.Home,
-        work: record.fields.Work,
-        CreatedAt: record.fields.CreatedAt || new Date().toISOString()
-      });
-    });
-    
-    // Load polygon data to find building positions
-    let polygons = [];
-    try {
-      // Try to load polygons from the API
-      const polygonsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/get-polygons`);
-      if (polygonsResponse.ok) {
-        const polygonsData = await polygonsResponse.json();
-        polygons = polygonsData.polygons || [];
-        console.log(`Loaded ${polygons.length} polygons for building position lookup`);
-      }
-    } catch (error) {
-      console.warn('Error loading polygons for building position lookup:', error);
-    }
-    
-    // Helper function to find building positions from polygon data
-    function findBuildingPosition(buildingId: string, polygons: any[]): { lat: number, lng: number } | null {
-      // First, try to find the building in the buildingPoints of all polygons
-      for (const polygon of polygons) {
-        if (polygon.buildingPoints && Array.isArray(polygon.buildingPoints)) {
-          const buildingPoint = polygon.buildingPoints.find((bp: any) => 
-            bp.buildingId === buildingId || 
-            bp.id === buildingId || 
-            bp.BuildingId === buildingId
-          );
-          
-          if (buildingPoint) {
-            // Found the building point, return its position
-            console.log(`API: Found building ${buildingId} in polygon ${polygon.id} buildingPoints`);
-            
-            // Check if the building point has a position property
-            if (buildingPoint.position) {
-              return buildingPoint.position;
-            }
-            
-            // If not, check if it has lat/lng properties
-            if (buildingPoint.lat !== undefined && buildingPoint.lng !== undefined) {
-              return { lat: buildingPoint.lat, lng: buildingPoint.lng };
-            }
-            
-            // If not, check if it has x/z properties (sometimes used instead of lat/lng)
-            if (buildingPoint.x !== undefined && buildingPoint.z !== undefined) {
-              return { lat: buildingPoint.x, lng: buildingPoint.z };
-            }
-          }
-        }
-      }
-      
-      // If we couldn't find the building in buildingPoints, try to use the polygon center
-      for (const polygon of polygons) {
-        // Check if this polygon contains the building
-        if (polygon.buildings && Array.isArray(polygon.buildings)) {
-          const building = polygon.buildings.find((b: any) => 
-            b.id === buildingId || 
-            b.buildingId === buildingId || 
-            b.BuildingId === buildingId
-          );
-          
-          if (building) {
-            console.log(`API: Found building ${buildingId} in polygon ${polygon.id} buildings array`);
-            
-            // Use the polygon's center as the building position
-            if (polygon.center) {
-              return polygon.center;
-            } else if (polygon.centroid) {
-              return polygon.centroid;
-            } else if (polygon.coatOfArmsCenter) {
-              return polygon.coatOfArmsCenter;
-            }
-          }
-        }
-        
-        // Also check if the polygon itself has a buildingId property that matches
-        if (polygon.buildingId === buildingId || polygon.BuildingId === buildingId) {
-          console.log(`API: Polygon ${polygon.id} itself has buildingId ${buildingId}`);
-          
-          // Use the polygon's center as the building position
-          if (polygon.center) {
-            return polygon.center;
-          } else if (polygon.centroid) {
-            return polygon.centroid;
-          } else if (polygon.coatOfArmsCenter) {
-            return polygon.coatOfArmsCenter;
-          }
-        }
-      }
-      
-      return null;
-    }
-    
-    // Map buildings to citizens with positions
-    const citizens = buildingRecords.map(record => {
-      // Convert Airtable Occupant field to string, ensuring type safety
-      const occupant = record.fields.Occupant;
-      
-      // Define types for Airtable fields which can have various formats
-      type Collaborator = { id: string; email: string; name: string };
-      type Attachment = { id: string; url: string; filename: string; size: number; type: string };
-      
-      // Define a more specific type for Airtable's field format
-      type AirtableFieldValue = string | number | boolean | Collaborator | 
-                               readonly string[] | readonly Collaborator[] | readonly Attachment[] | undefined | null;
-      
-      // Explicitly cast the Airtable field to string to fix type error
-      let citizenId = '';
-      if (occupant) {
-        if (typeof occupant === 'string') {
-          citizenId = occupant;
-        } else if (Array.isArray(occupant) && occupant.length > 0) {
-          // Ensure we're converting to string properly
-          citizenId = typeof occupant[0] === 'string' ? occupant[0] : String(occupant[0]);
-        } else if (typeof occupant === 'object' && occupant !== null) {
-          // Get the first value and ensure it's a string
-          const firstValue = Object.values(occupant)[0];
-          citizenId = typeof firstValue === 'string' ? firstValue : String(firstValue);
-        } else {
-          // For any other type, convert to string safely
-          // First convert to unknown, then to string to avoid TypeScript error
-          citizenId = String(occupant as unknown);
-        }
-      }
-      const citizen = citizenMap.get(citizenId);
-      
-      if (!citizen) {
-        console.warn(`Citizen ${citizenId} not found for building ${record.fields.BuildingId}`);
-        return null;
-      }
-      
-      // Get building ID
-      const buildingId = record.fields.BuildingId;
-      
-      // Find building position from polygon data
-      let position;
-      if (buildingId) {
-        position = findBuildingPosition(buildingId, polygons);
-        
-        if (position) {
-          console.log(`Found position for building ${buildingId}:`, position);
-        } else {
-          console.warn(`No position found for building ${buildingId}, trying to parse from record`);
-          
-          // Try to parse position from building record as fallback
-          try {
-            position = typeof record.fields.Position === 'string' 
-              ? JSON.parse(record.fields.Position) 
-              : record.fields.Position;
-          } catch (e) {
-            console.warn(`Invalid position format for building ${record.id}:`, e);
-            position = {};
-          }
-        }
-      } else {
-        // Try to parse position from building record if no buildingId
-        try {
-          position = typeof record.fields.Position === 'string' 
-            ? JSON.parse(record.fields.Position) 
-            : record.fields.Position;
-        } catch (e) {
-          console.warn(`Invalid position format for building ${record.id}:`, e);
-          position = {};
-        }
-      }
-      
-      // Determine if this is a home or work building
-      const isHome = citizen.home === record.fields.BuildingId;
-      
-      // Use the outer formatImageUrl function
-      
-      // Ensure we have a consistent structure with all required fields
-      return {
-        id: citizen.id,
-        CitizenId: citizen.id, // Ensure both formats are available
-        name: citizen.name,
-        firstName: citizen.firstName,
-        lastName: citizen.lastName,
-        FirstName: citizen.firstName, // Ensure both formats are available
-        LastName: citizen.lastName, // Ensure both formats are available
-        socialClass: citizen.socialClass,
-        SocialClass: citizen.socialClass, // Ensure both formats are available
-        description: citizen.description,
-        Description: citizen.description, // Ensure both formats are available
-        profileImage: formatImageUrl(citizen.imageUrl as string, citizen.id),
-        ImageUrl: formatImageUrl(citizen.imageUrl as string, citizen.id), // Ensure both formats are available
-        position: position,
-        occupation: citizen.work || 'Resident',
-        wealth: citizen.wealth || 'Average',
-        Wealth: citizen.wealth || 'Average', // Ensure both formats are available
-        landId: record.fields.Land,
-        buildingId: record.fields.BuildingId,
-        buildingType: record.fields.Type,
-        isHome: isHome,
-        isWork: citizen.work === record.fields.BuildingId,
-        Home: citizen.home, // Ensure both formats are available
-        Work: citizen.work, // Ensure both formats are available
-        // Add NeedsCompletionScore for compatibility with CitizenDetailsPanel
-        NeedsCompletionScore: 0.75, // Default value, replace with actual calculation if available
-        CreatedAt: citizen.CreatedAt || new Date().toISOString()
-      };
-    }).filter(Boolean); // Remove null entries
-    
-    console.log(`Returning ${citizens.length} citizens with house positions`);
-    
-    // If no valid citizens found, return debug citizens
-    if (citizens.length === 0) {
-      console.log('No valid citizens found, returning debug citizens');
+    if (citizenRecords.length === 0) {
+      console.log('No citizens found in Airtable, returning debug citizens');
       return NextResponse.json(getDebugCitizens());
     }
     
+    // Map citizens to the expected format
+    const citizens = citizenRecords.map(record => {
+      return {
+        id: record.fields.CitizenId,
+        CitizenId: record.fields.CitizenId,
+        name: `${record.fields.FirstName} ${record.fields.LastName}`,
+        firstName: record.fields.FirstName,
+        lastName: record.fields.LastName,
+        FirstName: record.fields.FirstName,
+        LastName: record.fields.LastName,
+        socialClass: record.fields.SocialClass,
+        SocialClass: record.fields.SocialClass,
+        description: record.fields.Description,
+        Description: record.fields.Description,
+        profileImage: formatImageUrl(record.fields.ImageUrl as string, record.fields.CitizenId),
+        ImageUrl: formatImageUrl(record.fields.ImageUrl as string, record.fields.CitizenId),
+        position: { lat: 45.4371 + Math.random() * 0.01, lng: 12.3326 + Math.random() * 0.01 }, // Random position near Venice
+        occupation: record.fields.Occupation || 'Citizen',
+        wealth: record.fields.Wealth || 'Average',
+        Wealth: record.fields.Wealth || 'Average',
+        landId: record.fields.Land || 'polygon-1',
+        buildingId: record.fields.Home,
+        buildingType: 'Palazzo',
+        isHome: true,
+        isWork: false,
+        Home: record.fields.Home,
+        Work: record.fields.Work,
+        NeedsCompletionScore: 0.75,
+        CreatedAt: record.fields.CreatedAt || new Date().toISOString()
+      };
+    });
+    
+    console.log(`Returning ${citizens.length} citizens with positions`);
     return NextResponse.json(citizens);
   } catch (error) {
     console.error('Error fetching citizens from Airtable:', error);
@@ -306,7 +98,58 @@ export async function GET(request: Request) {
 
 // Enhance the debug citizens to ensure they have all required fields
 function getDebugCitizens() {
-  // Return an empty array instead of the 5 debug citizens
-  console.log('Returning empty array instead of debug citizens');
-  return [];
+  console.log('Creating debug citizens');
+  
+  // Create 5 debug citizens with all required fields
+  const debugCitizens = [];
+  
+  const firstNames = ['Marco', 'Giovanni', 'Antonio', 'Francesco', 'Lucia', 'Isabella', 'Caterina'];
+  const lastNames = ['Contarini', 'Morosini', 'Dandolo', 'Foscari', 'Grimani', 'Barbarigo', 'Mocenigo'];
+  const socialClasses = ['Nobili', 'Cittadini', 'Popolani', 'Facchini'];
+  
+  for (let i = 0; i < 5; i++) {
+    const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+    const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+    const socialClass = socialClasses[Math.floor(Math.random() * socialClasses.length)];
+    
+    debugCitizens.push({
+      id: `debug-citizen-${i+1}`,
+      CitizenId: `debug-citizen-${i+1}`,
+      name: `${firstName} ${lastName}`,
+      firstName: firstName,
+      lastName: lastName,
+      FirstName: firstName,
+      LastName: lastName,
+      socialClass: socialClass,
+      SocialClass: socialClass,
+      description: `A ${socialClass.toLowerCase()} of Venice, living in the city during the Renaissance period.`,
+      Description: `A ${socialClass.toLowerCase()} of Venice, living in the city during the Renaissance period.`,
+      profileImage: `/images/citizens/default.png`,
+      ImageUrl: `/images/citizens/default.png`,
+      position: { lat: 45.4371 + Math.random() * 0.01, lng: 12.3326 + Math.random() * 0.01 },
+      occupation: socialClass === 'Nobili' ? 'Merchant' : 
+                 socialClass === 'Cittadini' ? 'Artisan' : 
+                 socialClass === 'Popolani' ? 'Shopkeeper' : 'Laborer',
+      wealth: socialClass === 'Nobili' ? 'Wealthy' : 
+              socialClass === 'Cittadini' ? 'Comfortable' : 
+              socialClass === 'Popolani' ? 'Modest' : 'Poor',
+      Wealth: socialClass === 'Nobili' ? 'Wealthy' : 
+              socialClass === 'Cittadini' ? 'Comfortable' : 
+              socialClass === 'Popolani' ? 'Modest' : 'Poor',
+      landId: `polygon-${i+1}`,
+      buildingId: `building-${i+1}`,
+      buildingType: socialClass === 'Nobili' ? 'Palazzo' : 
+                   socialClass === 'Cittadini' ? 'Merchant House' : 
+                   socialClass === 'Popolani' ? 'Townhouse' : 'Cottage',
+      isHome: true,
+      isWork: false,
+      Home: `building-${i+1}`,
+      Work: `building-${i+10}`,
+      NeedsCompletionScore: 0.75,
+      CreatedAt: new Date().toISOString()
+    });
+  }
+  
+  console.log(`Created ${debugCitizens.length} debug citizens`);
+  return debugCitizens;
 }
