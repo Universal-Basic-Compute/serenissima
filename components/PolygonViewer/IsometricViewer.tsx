@@ -117,6 +117,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [transportEndPoint, setTransportEndPoint] = useState<{lat: number, lng: number} | null>(null);
   const [transportPath, setTransportPath] = useState<any[]>([]);
   const [calculatingPath, setCalculatingPath] = useState<boolean>(false);
+  const [gondolaPositions, setGondolaPositions] = useState<{x: number, y: number, angle: number}[]>([]);
+  const gondolaAnimationRef = useRef<number | null>(null);
 
   // Load polygons
   useEffect(() => {
@@ -3161,6 +3163,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       case 'bridge':
         return '#C9B18F'; // Stone bridge color
       case 'gondola-station':
+        return '#5D7A8C'; // Blue-gray for gondola stations
+      case 'gondola_station':
         return '#5D7A8C'; // Blue-gray for gondola stations
       default:
         // For any other building type, generate a deterministic color
