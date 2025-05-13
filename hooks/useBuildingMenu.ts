@@ -4,9 +4,11 @@ import { log } from '@/lib/logUtils';
 import { eventBus } from '@/lib/eventBus';
 import { EventTypes } from '@/lib/eventTypes';
 import { Building } from '@/lib/models/BuildingModels';
+import { BuildingService } from '@/lib/services/BuildingService';
 
 /**
  * Custom hook to handle building menu logic
+ * This hook centralizes all building menu related state and actions
  */
 export function useBuildingMenu(visible: boolean) {
   // Get state and actions from the store
@@ -24,6 +26,9 @@ export function useBuildingMenu(visible: boolean) {
     setAvailableVariants,
     setPlaceableBuilding
   } = useBuildingStore();
+
+  // Get the BuildingService instance
+  const buildingService = BuildingService.getInstance();
 
   // Fetch available variants when a new building is selected
   useEffect(() => {
@@ -70,32 +75,47 @@ export function useBuildingMenu(visible: boolean) {
 
   // Function to handle building placement
   const handlePlaceBuilding = (building: Building, variant: string = 'model') => {
+    // Normalize the building name to match the expected format
+    const normalizedName = building.name?.toLowerCase().replace(/\s+/g, '-') || building.type;
+    
     setPlaceableBuilding({
-      name: building.name || building.type, // Use name or fallback to type
+      name: normalizedName,
       variant: variant
     });
     
     // Dispatch an event to notify the BuildingsToolbar to activate the building placement mode
     window.dispatchEvent(new CustomEvent('activateBuildingPlacement', {
       detail: {
-        buildingName: building.name,
+        buildingName: normalizedName,
         variant: variant
       }
     }));
+    
+    // Also emit an event through the event bus for components that listen to it
+    eventBus.emit(EventTypes.BUILDING_SELECTED, {
+      building: building,
+      variant: variant,
+      forPlacement: true
+    });
     
     setSelectedBuilding(null); // Close the modal if open
   };
 
   // Function to handle building placement completion
-  const handlePlacementComplete = (position: { x: number, y: number }) => {
-    log.info(`Building placed at position: ${position.x}, ${position.y}`);
+  const handlePlacementComplete = (data: any) => {
+    log.info(`Building placed: ${JSON.stringify(data)}`);
     
-    // Dispatch a custom event to notify other components about building placement
+    // Emit an event through the event bus
+    eventBus.emit(EventTypes.BUILDING_PLACED, {
+      data: data
+    });
+    
+    // Also dispatch a custom DOM event for backward compatibility
     window.dispatchEvent(new CustomEvent('buildingPlaced', {
       detail: {
         buildingName: placeableBuilding?.name,
         variant: placeableBuilding?.variant,
-        position
+        position: data.position
       }
     }));
     
@@ -105,6 +125,9 @@ export function useBuildingMenu(visible: boolean) {
   // Function to cancel building placement
   const handleCancelPlacement = () => {
     setPlaceableBuilding(null);
+    
+    // Emit an event to notify that placement was canceled
+    eventBus.emit(EventTypes.BUILDING_PLACEMENT_CANCELED, {});
   };
 
   // Function to close the building detail modal

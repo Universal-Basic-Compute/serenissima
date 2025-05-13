@@ -33,6 +33,9 @@ export const EventTypes = {
   // Building-specific events
   BUILDING_SELECTED: 'buildingSelected',
   BUILDING_HOVER: 'buildingHover',
+  BUILDING_PLACEMENT_STARTED: 'buildingPlacementStarted',
+  BUILDING_PLACEMENT_CANCELED: 'buildingPlacementCanceled',
+  BUILDING_PLACEMENT_COMPLETED: 'buildingPlacementCompleted',
   BUILDING_CONSTRUCTION_STARTED: 'buildingConstructionStarted',
   BUILDING_CONSTRUCTION_COMPLETED: 'buildingConstructionCompleted',
   BUILDING_INCOME_GENERATED: 'buildingIncomeGenerated',

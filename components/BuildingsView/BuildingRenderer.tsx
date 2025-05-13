@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { ThreeDErrorBoundary } from '@/lib/components/ThreeDErrorBoundary';
 import { useSceneReady } from '@/lib/components/SceneReadyProvider';
 import { buildingRendererManager } from '@/lib/services/BuildingRendererManager';
+import { eventBus, EventTypes } from '@/lib/eventBus';
 
 interface BuildingRendererProps {
   active?: boolean;
@@ -15,6 +16,7 @@ interface BuildingRendererProps {
  * 
  * This component is responsible for rendering buildings in the 3D scene.
  * It uses the BuildingRendererManager to handle the actual rendering logic.
+ * This is a thin wrapper around the BuildingRendererManager service for React integration.
  */
 const BuildingRenderer: React.FC<BuildingRendererProps> = ({ 
   active = true,
@@ -37,11 +39,47 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     // Refresh buildings to load initial state
     buildingRendererManager.refreshBuildings();
     
+    // Subscribe to building events
+    const buildingPlacedSubscription = eventBus.subscribe(
+      EventTypes.BUILDING_PLACED, 
+      (data) => {
+        console.log('BuildingRenderer: Building placed event received', data);
+        if (data.refresh) {
+          buildingRendererManager.refreshBuildings();
+        } else if (data.data) {
+          buildingRendererManager.renderBuilding(data.data);
+        }
+      }
+    );
+    
+    const buildingRemovedSubscription = eventBus.subscribe(
+      EventTypes.BUILDING_REMOVED,
+      (data) => {
+        console.log('BuildingRenderer: Building removed event received', data);
+        if (data.buildingId) {
+          buildingRendererManager.removeBuilding(data.buildingId);
+        }
+      }
+    );
+    
+    // Listen for custom events to ensure buildings are visible
+    const handleEnsureBuildingsVisible = () => {
+      console.log('BuildingRenderer: Ensuring buildings are visible');
+      buildingRendererManager.refreshBuildings();
+    };
+    
+    window.addEventListener('ensureBuildingsVisible', handleEnsureBuildingsVisible);
+    
     // Cleanup function
     return () => {
       if (!active) {
         buildingRendererManager.cleanup();
       }
+      
+      // Unsubscribe from events
+      buildingPlacedSubscription.unsubscribe();
+      buildingRemovedSubscription.unsubscribe();
+      window.removeEventListener('ensureBuildingsVisible', handleEnsureBuildingsVisible);
     };
   }, [scene, active]);
   

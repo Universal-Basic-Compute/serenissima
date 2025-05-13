@@ -19,6 +19,7 @@ export class BuildingRendererManager {
   private rendererFactory: BuildingRendererFactory | null = null;
   private buildingMeshes: Map<string, THREE.Object3D> = new Map();
   private isInitialized: boolean = false;
+  private eventSubscriptions: { unsubscribe: () => void }[] = [];
   
   /**
    * Get the singleton instance
@@ -34,7 +35,13 @@ export class BuildingRendererManager {
    * Initialize the manager with a scene
    */
   public initialize(scene: THREE.Scene): void {
-    if (this.isInitialized) return;
+    // If already initialized with this scene, just return
+    if (this.isInitialized && this.scene === scene) return;
+    
+    // If initialized with a different scene, clean up first
+    if (this.isInitialized && this.scene !== scene) {
+      this.cleanup();
+    }
     
     this.scene = scene;
     this.rendererFactory = new BuildingRendererFactory({
@@ -47,15 +54,18 @@ export class BuildingRendererManager {
     this.subscribeToEvents();
     
     this.isInitialized = true;
-    console.log('BuildingRendererManager initialized');
+    console.log('BuildingRendererManager initialized with scene');
   }
   
   /**
    * Subscribe to building-related events
    */
   private subscribeToEvents(): void {
+    // Clear any existing subscriptions
+    this.unsubscribeFromEvents();
+    
     // Handle building placed events
-    eventBus.subscribe(EventTypes.BUILDING_PLACED, (data: any) => {
+    const buildingPlacedSubscription = eventBus.subscribe(EventTypes.BUILDING_PLACED, (data: any) => {
       if (data.refresh) {
         this.refreshBuildings();
       } else if (data.data) {
@@ -64,18 +74,50 @@ export class BuildingRendererManager {
     });
     
     // Handle building removed events
-    eventBus.subscribe(EventTypes.BUILDING_REMOVED, (data: any) => {
+    const buildingRemovedSubscription = eventBus.subscribe(EventTypes.BUILDING_REMOVED, (data: any) => {
       if (data.buildingId) {
         this.removeBuilding(data.buildingId);
       }
     });
     
     // Handle building updated events
-    eventBus.subscribe(EventTypes.BUILDING_UPDATED, (data: any) => {
+    const buildingUpdatedSubscription = eventBus.subscribe(EventTypes.BUILDING_UPDATED, (data: any) => {
       if (data.building) {
         this.updateBuilding(data.building);
       }
     });
+    
+    // Store subscriptions for cleanup
+    this.eventSubscriptions.push(
+      buildingPlacedSubscription,
+      buildingRemovedSubscription,
+      buildingUpdatedSubscription
+    );
+    
+    // Listen for custom events to ensure buildings are visible
+    const handleEnsureBuildingsVisible = () => {
+      console.log('BuildingRendererManager: Ensuring buildings are visible');
+      this.refreshBuildings();
+    };
+    
+    window.addEventListener('ensureBuildingsVisible', handleEnsureBuildingsVisible);
+    
+    // Store DOM event listener for cleanup
+    this.eventSubscriptions.push({
+      unsubscribe: () => {
+        window.removeEventListener('ensureBuildingsVisible', handleEnsureBuildingsVisible);
+      }
+    });
+  }
+  
+  /**
+   * Unsubscribe from all events
+   */
+  private unsubscribeFromEvents(): void {
+    this.eventSubscriptions.forEach(subscription => {
+      subscription.unsubscribe();
+    });
+    this.eventSubscriptions = [];
   }
   
   /**
@@ -149,6 +191,8 @@ export class BuildingRendererManager {
       
       // Remove from our tracking map
       this.buildingMeshes.delete(buildingId);
+      
+      console.log(`Removed building ${buildingId}`);
     }
   }
   
@@ -162,6 +206,8 @@ export class BuildingRendererManager {
     }
     
     try {
+      console.log('BuildingRendererManager: Refreshing buildings');
+      
       // Fetch buildings from API
       const response = await fetch('/api/buildings');
       
@@ -191,9 +237,32 @@ export class BuildingRendererManager {
           this.removeBuilding(id);
         }
       }
+      
+      console.log('BuildingRendererManager: Buildings refresh complete');
     } catch (error) {
       console.error('Error refreshing buildings:', error);
     }
+  }
+  
+  /**
+   * Get all building meshes
+   */
+  public getBuildingMeshes(): Map<string, THREE.Object3D> {
+    return this.buildingMeshes;
+  }
+  
+  /**
+   * Check if a building exists
+   */
+  public hasBuildingMesh(buildingId: string): boolean {
+    return this.buildingMeshes.has(buildingId);
+  }
+  
+  /**
+   * Get a building mesh by ID
+   */
+  public getBuildingMesh(buildingId: string): THREE.Object3D | undefined {
+    return this.buildingMeshes.get(buildingId);
   }
   
   /**
@@ -201,6 +270,11 @@ export class BuildingRendererManager {
    */
   public cleanup(): void {
     if (!this.isInitialized) return;
+    
+    console.log('BuildingRendererManager: Cleaning up resources');
+    
+    // Unsubscribe from events
+    this.unsubscribeFromEvents();
     
     // Remove all building meshes
     for (const [id, mesh] of this.buildingMeshes.entries()) {
@@ -213,6 +287,10 @@ export class BuildingRendererManager {
     
     this.buildingMeshes.clear();
     this.isInitialized = false;
+    this.scene = null;
+    this.rendererFactory = null;
+    
+    console.log('BuildingRendererManager: Cleanup complete');
   }
 }
 
