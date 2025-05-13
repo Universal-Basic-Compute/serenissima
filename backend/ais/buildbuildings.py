@@ -376,8 +376,8 @@ If you decide not to build anything at this time, return an empty JSON object.
             if status == "completed":
                 print(f"Successfully sent building strategy request to AI user {ai_username}")
                 
-                # The response content is directly in the response_data
-                content = response_data.get('content', '')
+                # The response content is in the response field of response_data
+                content = response_data.get('response', '')
                 print(f"AI {ai_username} response length: {len(content)} characters")
                 print(f"AI {ai_username} response preview: {content[:200]}...")
                 
@@ -751,8 +751,8 @@ Your response must be a JSON object with:
             if status == "completed":
                 print(f"Successfully sent building placement request to AI user {ai_username}")
                 
-                # The response content is directly in the response_data
-                content = response_data.get('content', '')
+                # The response content is in the response field of response_data
+                content = response_data.get('response', '')
                 print(f"AI {ai_username} placement response length: {len(content)} characters")
                 print(f"AI {ai_username} placement response preview: {content[:200]}...")
                 
