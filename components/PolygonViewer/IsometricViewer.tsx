@@ -54,6 +54,10 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [hoveredCitizenType, setHoveredCitizenType] = useState<'home' | 'work' | null>(null);
   const [selectedCitizen, setSelectedCitizen] = useState<any>(null);
   const [showCitizenDetailsPanel, setShowCitizenDetailsPanel] = useState<boolean>(false);
+  
+  // State for dock and bridge points
+  const [hoveredDockPoint, setHoveredDockPoint] = useState<{lat: number, lng: number} | null>(null);
+  const [hoveredBridgePoint, setHoveredBridgePoint] = useState<{lat: number, lng: number} | null>(null);
 
   // Load polygons
   useEffect(() => {
