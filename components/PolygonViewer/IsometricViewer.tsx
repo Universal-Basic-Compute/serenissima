@@ -428,6 +428,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     }
   }, [activeView]);
   
+  
   // Load citizens if in citizens view
   useEffect(() => {
     if (activeView === 'citizens') {
