@@ -229,11 +229,11 @@ Every day at 6:00 PM UTC, the rent payment system processes two types of rent pa
 
 This process simulates the rental economy of Venice, with citizens paying rent for housing and businesses paying rent for commercial spaces.
 
-### AI Land Bidding (8:00 PM UTC)
+### AI Land Bidding (7:00 PM UTC)
 
-**Script**: `backend/engine/bidonlands.py`
+**Script**: `backend/ais/bidonlands.py`
 
-Every day at 8:00 PM UTC, the AI land bidding system allows AI users to participate in the land market:
+Every day at 7:00 PM UTC, the AI land bidding system allows AI users to participate in the land market:
 
 1. The script identifies all users marked as AI in the system
 2. For each AI user, it checks their compute balance and existing bids
@@ -244,6 +244,23 @@ Every day at 8:00 PM UTC, the AI land bidding system allows AI users to particip
 5. An admin notification is created with statistics about all bidding activity
 
 This process creates a dynamic land market with AI participation, ensuring that valuable lands receive competitive bids even without human players bidding on them.
+
+### AI Building Construction (8:00 PM UTC)
+
+**Script**: `backend/ais/buildbuildings.py`
+
+Every day at 8:00 PM UTC, the AI building construction system allows AI users to develop lands they own:
+
+1. The script identifies all users marked as AI in the system
+2. For each AI user, it checks their compute balance and lands they own
+3. For each land with available building points, AI users will:
+   - Evaluate which building types can fit within the remaining points
+   - Prioritize buildings with higher income potential
+   - Construct buildings if they have sufficient compute
+4. AI users only build if they have at least twice the building cost in their compute balance
+5. An admin notification is created with statistics about all building activity
+
+This process encourages land development and creates a more dynamic game world, with AI users actively improving their properties and generating income through building operations.
 
 ## Technical Implementation
 
