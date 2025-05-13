@@ -313,10 +313,6 @@ export default function SimpleViewer({ qualityMode = 'high', waterQuality = 'hig
     const cameraController = new SimpleCamera(renderer.domElement);
     cameraControllerRef.current = cameraController;
     
-    // Position camera to see the buildings
-    cameraController.camera.position.set(45, 20, 12); // Position camera to see the market stall
-    cameraController.controls.target.set(45, 0, 12); // Look at the market stall position
-    
     // IMPORTANT: Expose scene, camera, and polygons to window object
     if (typeof window !== 'undefined') {
       window.__threeContext = {
