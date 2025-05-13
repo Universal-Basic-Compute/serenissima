@@ -327,9 +327,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
       const delta = e.deltaY * -0.01;
-      // Change the minimum zoom to 1.5 so users can't zoom out too far
-      // Increase maximum zoom by 20% from 9 to 10.8
-      setScale(prevScale => Math.max(1.5, Math.min(10.8, prevScale + delta)));
+      // Change the minimum zoom to 1.0 to allow one more level of unzoom
+      // Keep the maximum zoom at 10.8
+      setScale(prevScale => Math.max(1.0, Math.min(10.8, prevScale + delta)));
     };
     
     const canvas = canvasRef.current;
@@ -536,7 +536,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     // Second pass: Draw all polygon names (only in land view)
     if (activeView === 'land') {
       // Only show text if zoom level is above a certain threshold (closer zoom)
-      const showText = scale >= 3.5; // Reduced threshold to allow text to appear at one more zoom level out
+      const showText = scale >= 2.0; // Further reduced threshold to match new minimum zoom level
         
       if (showText) {
         polygonsToRender.forEach(({ polygon, centroidX, centroidY }) => {
@@ -561,17 +561,14 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       
     // Third pass: Draw coat of arms for lands with owners (only in land view)
     if (activeView === 'land') {
-      // Only show coat of arms if zoom level is above a certain threshold
-      const showCoatOfArms = scale >= 2.5; // Adjust this threshold as needed
-        
-      if (showCoatOfArms) {
-        polygonsToRender.forEach(({ polygon, centroidX, centroidY }) => {
-          // Check if polygon has an owner
-          const owner = landOwners[polygon.id];
-          if (!owner) return;
-            
-          // Calculate size based on zoom level - INCREASED BY 40%
-          const size = Math.min(59, Math.max(29, Math.floor(scale * 15.7))); // Increased by 40%
+      // Always show coat of arms in land view regardless of zoom level
+      polygonsToRender.forEach(({ polygon, centroidX, centroidY }) => {
+        // Check if polygon has an owner
+        const owner = landOwners[polygon.id];
+        if (!owner) return;
+          
+        // Calculate size based on zoom level - INCREASED BY 60% (original + 40% + 20%)
+        const size = Math.min(71, Math.max(35, Math.floor(scale * 18.84))); // Increased by 60% total
             
           // Check if we have a coat of arms image for this owner
           if (owner in coatOfArmsImages && coatOfArmsImages[owner]) {
@@ -582,7 +579,6 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             createDefaultCircularAvatar(ctx, owner, centroidX, centroidY, size);
           }
         });
-      }
     }
     
     // Draw buildings if in buildings view
