@@ -146,7 +146,8 @@ def create_response_message(tables, ai_username: str, sender_username: str, resp
             "Sender": ai_username,
             "Receiver": sender_username,
             "Content": response_content,
-            "CreatedAt": now
+            "CreatedAt": now,
+            "Type": "message"  # Add the Type field with value "message"
             # Remove "UpdatedAt" field as it doesn't exist in the MESSAGES table
         }
         
