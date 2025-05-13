@@ -549,6 +549,100 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
     // If no intersection found, return null
     return null;
   }
+  
+  /**
+   * Adjust model position to sit properly on the ground using raycasting
+   */
+  private adjustModelToGround(model: THREE.Object3D, building: BuildingData): void {
+    // Create a bounding box for the model
+    const boundingBox = new THREE.Box3().setFromObject(model);
+    const modelSize = new THREE.Vector3();
+    boundingBox.getSize(modelSize);
+    
+    // Create a raycaster to find the ground
+    const raycaster = new THREE.Raycaster();
+    
+    // Cast multiple rays from different points on the model's base
+    // to ensure we find the highest ground point
+    const rayOrigins: THREE.Vector3[] = [];
+    
+    // Get the model's center position
+    const center = new THREE.Vector3();
+    boundingBox.getCenter(center);
+    
+    // Create a grid of points on the base of the model
+    const gridSize = 3; // 3x3 grid
+    const halfWidth = modelSize.x / 2;
+    const halfDepth = modelSize.z / 2;
+    
+    for (let x = 0; x < gridSize; x++) {
+      for (let z = 0; z < gridSize; z++) {
+        const xPos = center.x - halfWidth + (x * modelSize.x / (gridSize - 1));
+        const zPos = center.z - halfDepth + (z * modelSize.z / (gridSize - 1));
+        
+        // Create ray origin at the bottom of the model
+        rayOrigins.push(new THREE.Vector3(xPos, center.y + 100, zPos));
+      }
+    }
+    
+    // Find all land meshes in the scene
+    const landMeshes: THREE.Object3D[] = [];
+    this.options.scene.traverse(object => {
+      // Include all meshes except those we want to exclude
+      if (object instanceof THREE.Mesh && 
+          !object.userData.buildingId && 
+          !object.userData.isWater &&
+          !object.userData.isCoatOfArms) {
+        landMeshes.push(object);
+      }
+    });
+    
+    if (this.debug) {
+      this.logDebug(`Found ${landMeshes.length} land meshes for ground detection`);
+    }
+    
+    // Find the highest ground point
+    let highestY = -Infinity;
+    
+    rayOrigins.forEach(origin => {
+      // Set up the raycaster
+      raycaster.set(origin, new THREE.Vector3(0, -1, 0));
+      
+      // Find intersections with land
+      const intersects = raycaster.intersectObjects(landMeshes, true);
+      
+      if (intersects.length > 0) {
+        // Get the Y position of the intersection
+        const intersectionY = intersects[0].point.y;
+        
+        // Update highest Y if this is higher
+        if (intersectionY > highestY) {
+          highestY = intersectionY;
+        }
+      }
+    });
+    
+    // If we found a ground point, adjust the model's position
+    if (highestY !== -Infinity) {
+      // Calculate the current bottom Y of the model
+      const modelBottomY = boundingBox.min.y;
+      
+      // Calculate the adjustment needed
+      const adjustment = highestY - modelBottomY + 0.05; // Add a small offset to prevent z-fighting
+      
+      // Apply the adjustment
+      model.position.y += adjustment;
+      
+      if (this.debug) {
+        this.logDebug(`Adjusted model ${building.id} to ground level. Adjustment: ${adjustment}`);
+      }
+    } else {
+      // If no ground was found, use a default height
+      if (this.debug) {
+        this.logDebug(`No ground found for model ${building.id}, using default height`);
+      }
+    }
+  }
 
   /**
    * Get camera from scene
@@ -636,9 +730,20 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
    * Configure a model for a specific building
    */
   private configureModel(model: THREE.Object3D, building: BuildingData): void {
-    // Position the model
+    // First get the horizontal position
     const position = this.getModelPosition(building);
+    
+    // Create a bounding box for the model to determine its dimensions
+    const boundingBox = new THREE.Box3().setFromObject(model);
+    const modelHeight = boundingBox.max.y - boundingBox.min.y;
+    const modelBottomY = boundingBox.min.y;
+    
+    // Calculate the offset needed to place the bottom of the model at ground level
+    const verticalOffset = -modelBottomY;
+    
+    // Position the model at the calculated position with the vertical offset
     model.position.copy(position);
+    model.position.y += verticalOffset; // This ensures the bottom of the model is at ground level
     
     // Set rotation
     model.rotation.y = building.rotation || 0;
@@ -696,6 +801,9 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
     
     // Add to scene
     this.options.scene.add(model);
+    
+    // After adding to scene, perform a raycast to find the ground level
+    this.adjustModelToGround(model, building);
   }
   
   /**
