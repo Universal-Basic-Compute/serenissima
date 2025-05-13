@@ -117,7 +117,7 @@ def assign_citizen_to_building(tables, citizen: Dict, building: Dict) -> bool:
         
         # Update building record with new occupant
         tables['buildings'].update(building_id, {
-            'Occupant': citizen_id
+            'Occupant': citizen['fields']['CitizenId']  # Use CitizenId field instead of record id
         })
         
         # Create a notification for the user
@@ -133,7 +133,7 @@ def assign_citizen_to_building(tables, citizen: Dict, building: Dict) -> bool:
             # Create notification content
             content = f"{citizen_name} has moved into {building_name}"
             details = {
-                "citizen_id": citizen_id,
+                "citizen_id": citizen['fields']['CitizenId'],  # Use CitizenId field instead of record id
                 "citizen_name": citizen_name,
                 "building_id": building_id,
                 "building_name": building_name,
