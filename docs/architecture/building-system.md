@@ -242,9 +242,6 @@ Building models are stored as GLB files in the public directory:
 │   ├── model.glb       # Default model
 │   ├── winter.glb      # Winter variant
 │   └── festival.glb    # Festival variant
-├── dock/
-│   ├── model.glb
-│   └── damaged.glb
 └── ...
 ```
 

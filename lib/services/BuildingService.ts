@@ -253,7 +253,7 @@ export class BuildingService {
     }
     
     // Building-specific validation could be added here
-    // For example, docks would need to be placed at water edges
+    // For example, specialized buildings might have specific placement requirements
     
     // Default to valid placement
     return { valid: true };

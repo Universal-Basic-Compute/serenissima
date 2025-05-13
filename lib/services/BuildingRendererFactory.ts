@@ -122,8 +122,6 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
     switch(type.toLowerCase()) {
       case 'market-stall':
         return 0xf5a442; // Orange
-      case 'dock':
-        return 0x4287f5; // Blue
       case 'house':
         return 0x42f54e; // Green
       case 'workshop':
@@ -510,7 +508,7 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
       building.connectionPoints.forEach((point, index) => {
         const geometry = new THREE.SphereGeometry(0.2, 8, 8);
         const material = new THREE.MeshBasicMaterial({ 
-          color: building.type === 'dock' ? 0x00AAFF : 0xFFAA00 
+          color: 0xFFAA00 
         });
         const sphere = new THREE.Mesh(geometry, material);
         

@@ -59,7 +59,6 @@ export interface BuildingData {
   owner?: string;
   mesh?: THREE.Object3D; // Reference to the 3D object (not persisted)
   connectionPoints?: {x: number, y: number, z: number}[]; // Connection points for all building types
-  waterEdge?: {lat: number, lng: number}; // For dock buildings
 }
 
 /**
