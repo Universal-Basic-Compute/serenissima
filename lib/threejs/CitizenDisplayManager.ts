@@ -98,6 +98,13 @@ export class CitizenDisplayManager {
     this.subscribeToEvents();
     
     console.log(`Initialized with ${this.citizens.length} citizens in ${this.citizenGroups.size} groups`);
+    
+    // Create markers if we're active
+    if (this.isActive) {
+      console.log('CitizenDisplayManager: Manager is active during initialization, creating markers');
+      this.createCitizenMarkers();
+      this.ensureMarkersAreVisible();
+    }
   }
   
   private async checkIfImageExists(url: string): Promise<boolean> {
@@ -186,15 +193,14 @@ export class CitizenDisplayManager {
     window.addEventListener('loadCitizens', () => {
       console.log('CitizenDisplayManager: Received loadCitizens event');
       
-      // Only load citizens if we haven't already
-      if (this.citizens.length === 0) {
-        console.log('CitizenDisplayManager: No citizens loaded yet, loading now');
-        this.loadCitizens();
+      // Always refresh citizens and activate when this event is received
+      console.log('CitizenDisplayManager: Refreshing citizens and activating view');
+      this.refreshCitizens().then(() => {
         this.setActive(true);
-      } else {
-        console.log('CitizenDisplayManager: Citizens already loaded, just activating');
-        this.setActive(true);
-      }
+        // Ensure markers are visible
+        this.ensureMarkersAreVisible();
+        console.log('CitizenDisplayManager: Citizens refreshed and view activated');
+      });
     });
     
     // Listen for citizens view activation

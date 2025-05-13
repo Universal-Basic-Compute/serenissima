@@ -277,6 +277,11 @@ export default function SimplePage() {
       setActiveView('knowledge');
     } else if (pathname === '/citizens') {
       setActiveView('citizens');
+      // Dispatch an event to load citizens
+      setTimeout(() => {
+        console.log('Dispatching loadCitizens event from URL handler');
+        window.dispatchEvent(new CustomEvent('loadCitizens'));
+      }, 500);
     } else if (pathname === '/guilds') {
       setShowGuildsPanel(true);
       setActiveView('guilds');
@@ -309,6 +314,11 @@ export default function SimplePage() {
         setShowLoansPanel(false);
         setShowGuildsPanel(false);
         setActiveView('citizens');
+        // Dispatch an event to load citizens
+        setTimeout(() => {
+          console.log('Dispatching loadCitizens event from popstate handler');
+          window.dispatchEvent(new CustomEvent('loadCitizens'));
+        }, 500);
       } else if (path === '/guilds') {
         setShowGovernancePanel(false);
         setShowKnowledgePanel(false);
@@ -647,6 +657,7 @@ export default function SimplePage() {
       
       // Check the current pathname to determine which view to open
       if (pathname === '/citizens') {
+        console.log('Direct navigation to citizens page detected');
         // Open the citizens view
         setActiveView('citizens');
         // Dispatch an event to load citizens after a short delay
@@ -670,7 +681,7 @@ export default function SimplePage() {
         console.log('Direct navigation to unknown path:', pathname);
       }
     }
-  }, []);
+  }, [pathname]);
 
   // Prefill form fields when editing a profile
   useEffect(() => {
