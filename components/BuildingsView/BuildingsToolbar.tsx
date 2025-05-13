@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import * as THREE from 'three';
 import BuildingRenderer from './BuildingRenderer';
+import BuildingRendererManager from './BuildingRendererManager';
 import PlaceableObjectManager from '@/lib/components/PlaceableObjectManager';
 import { useBuildingMenu } from '@/hooks/useBuildingMenu';
 import { eventBus } from '@/lib/eventBus';
@@ -165,9 +166,10 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
       
       {/* Always render the BuildingRenderer to show existing buildings */}
       {showBuildingRenderer ? (
-        <BuildingRenderer 
-          active={true} 
-        />
+        <>
+          <BuildingRenderer active={true} />
+          <BuildingRendererManager active={true} debug={true} />
+        </>
       ) : (
         <div className="hidden">
           {(() => {
