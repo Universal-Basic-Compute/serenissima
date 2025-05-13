@@ -52,6 +52,17 @@ const BuildingRendererManager: React.FC<BuildingRendererManagerProps> = ({
           // Initial refresh of buildings with a small delay
           setTimeout(() => {
             refreshBuildings();
+            
+            // Force a second refresh after a longer delay to ensure buildings are visible
+            setTimeout(() => {
+              const count = buildingRendererManager.getBuildingMeshes().size;
+              if (count === 0) {
+                console.warn('BuildingRendererManager: No buildings after initial refresh, trying again...');
+                refreshBuildings();
+              } else {
+                console.log(`BuildingRendererManager: ${count} buildings visible after initial refresh`);
+              }
+            }, 2000);
           }, 500);
         }
       }

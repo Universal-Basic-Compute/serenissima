@@ -96,6 +96,20 @@ const BaseSceneLayer: React.FC<BaseSceneLayerProps> = ({
           
           // Ensure buildings are visible by default
           window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+          
+          // Add a second refresh after a delay to ensure buildings are really visible
+          setTimeout(() => {
+            const buildingCount = buildingRendererManager.getBuildingMeshes().size;
+            if (buildingCount === 0) {
+              console.warn('BaseSceneLayer: No buildings visible after initialization, refreshing again');
+              buildingRendererManager.refreshBuildings()
+                .then(() => {
+                  console.log(`BaseSceneLayer: Buildings refreshed again, now have ${buildingRendererManager.getBuildingMeshes().size} buildings`);
+                });
+            } else {
+              console.log(`BaseSceneLayer: ${buildingCount} buildings visible after initialization`);
+            }
+          }, 2000);
         })
         .catch(error => {
           console.error('BaseSceneLayer: Error loading buildings:', error);

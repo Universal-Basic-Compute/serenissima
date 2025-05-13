@@ -266,6 +266,21 @@ export default function SimplePage() {
       setTimeout(() => {
         window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
       }, 1000);
+      
+      // Add a second check after a longer delay
+      setTimeout(() => {
+        console.log('Secondary check for buildings visibility');
+        window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+        
+        // Also dispatch a building refresh event
+        eventBus.emit(EventTypes.BUILDING_PLACED, { refresh: true });
+      }, 3000);
+    } else {
+      // For other views, still ensure buildings are visible but with a longer delay
+      setTimeout(() => {
+        console.log(`Ensuring buildings are visible in ${activeView} view`);
+        window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+      }, 2000);
     }
   }, []); // Empty dependency array means this runs once on mount
 

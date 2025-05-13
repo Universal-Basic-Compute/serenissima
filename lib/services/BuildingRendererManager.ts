@@ -393,6 +393,8 @@ export class BuildingRendererManager {
       return;
     }
     
+    console.log('%c BuildingRendererManager: Refreshing buildings', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
+    
     try {
       // Fetch buildings from API with a timeout
       const controller = new AbortController();
@@ -413,6 +415,8 @@ export class BuildingRendererManager {
       
       const data = await response.json();
       const buildings = data.buildings || [];
+      
+      console.log(`BuildingRendererManager: Fetched ${buildings.length} buildings from API`);
       
       // Track which buildings we've processed
       const processedBuildingIds = new Set<string>();
@@ -447,6 +451,13 @@ export class BuildingRendererManager {
         if (!processedBuildingIds.has(id)) {
           this.removeBuilding(id);
         }
+      }
+      
+      console.log(`BuildingRendererManager: Refresh complete, now have ${this.buildingMeshes.size} buildings in scene`);
+      
+      // Force a scene update if possible to ensure buildings are visible
+      if (this.scene && this.scene.userData && this.scene.userData.renderer && this.scene.userData.camera) {
+        this.scene.userData.renderer.render(this.scene, this.scene.userData.camera);
       }
     } catch (error) {
       // Handle AbortError separately
@@ -586,8 +597,21 @@ export class BuildingRendererManager {
     
     console.log(`BuildingRendererManager: Setting highlight mode to ${highlight}`);
     
+    // Check if we have any buildings
+    if (this.buildingMeshes.size === 0) {
+      console.warn('BuildingRendererManager: No buildings to highlight, refreshing...');
+      this.refreshBuildings();
+      return;
+    }
+    
     // Update all building meshes
     for (const [id, mesh] of this.buildingMeshes.entries()) {
+      // Make sure the mesh is visible
+      if (!mesh.visible) {
+        console.log(`BuildingRendererManager: Building ${id} was invisible, making it visible`);
+        mesh.visible = true;
+      }
+      
       // In highlight mode, we might want to:
       // 1. Make buildings more visible (e.g., brighter materials)
       // 2. Add outline effect
@@ -596,6 +620,11 @@ export class BuildingRendererManager {
       // For now, just adjust the material properties
       mesh.traverse((child) => {
         if (child instanceof THREE.Mesh && child.material) {
+          // Ensure the mesh is visible
+          if (!child.visible) {
+            child.visible = true;
+          }
+          
           if (child.material instanceof THREE.MeshStandardMaterial) {
             if (highlight) {
               // Store original values if not already stored
@@ -617,6 +646,11 @@ export class BuildingRendererManager {
           }
         }
       });
+    }
+    
+    // Force a scene update if possible
+    if (this.scene && this.scene.userData && this.scene.userData.renderer && this.scene.userData.camera) {
+      this.scene.userData.renderer.render(this.scene, this.scene.userData.camera);
     }
   }
 
