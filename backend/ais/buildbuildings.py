@@ -71,6 +71,7 @@ def get_user_buildings(tables, username: str) -> List[Dict]:
     """Get all buildings owned by a specific user."""
     try:
         # Query buildings where the user is the owner
+        # Use "Owner" instead of "owner" for the field name
         formula = f"{{Owner}}='{username}'"
         buildings = tables["buildings"].all(formula=formula)
         print(f"Found {len(buildings)} buildings owned by {username}")
