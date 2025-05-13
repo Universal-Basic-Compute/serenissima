@@ -5,6 +5,10 @@ import { useSceneReady } from '@/lib/components/SceneReadyProvider';
 import { buildingRendererManager } from '@/lib/services/BuildingRendererManager';
 import { eventBus, EventTypes } from '@/lib/eventBus';
 
+// Define the missing building event types
+const BUILDING_REMOVED = 'BUILDING_REMOVED';
+const BUILDING_UPDATED = 'BUILDING_UPDATED';
+
 // Extend EventTypes with the missing building event types
 declare module '@/lib/eventBus' {
   interface EventTypes {
@@ -86,7 +90,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     const buildingPlacedSubscription = { unsubscribe: () => {} }; // Dummy subscription
     
     const buildingRemovedSubscription = eventBus.subscribe(
-      EventTypes.BUILDING_REMOVED,
+      BUILDING_REMOVED,
       (data) => {
         log.info('BuildingRenderer: Building removed event received', data);
         if (data.buildingId) {
@@ -98,7 +102,7 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     );
     
     const buildingUpdatedSubscription = eventBus.subscribe(
-      EventTypes.BUILDING_UPDATED,
+      BUILDING_UPDATED,
       (data) => {
         log.info('BuildingRenderer: Building updated event received', data);
         if (data.building) {
