@@ -85,9 +85,22 @@ export async function GET(request: Request) {
           try {
             // Parse position if it's a string
             if (typeof homeBuilding.fields.Position === 'string') {
-              position = JSON.parse(homeBuilding.fields.Position);
-            } else {
-              position = homeBuilding.fields.Position;
+              const parsedPosition = JSON.parse(homeBuilding.fields.Position);
+              // Ensure the parsed position has the correct structure
+              if (parsedPosition && typeof parsedPosition.lat === 'number' && typeof parsedPosition.lng === 'number') {
+                position = parsedPosition;
+              }
+            } else if (typeof homeBuilding.fields.Position === 'object' && 
+                      homeBuilding.fields.Position !== null &&
+                      'lat' in homeBuilding.fields.Position && 
+                      'lng' in homeBuilding.fields.Position &&
+                      typeof homeBuilding.fields.Position.lat === 'number' &&
+                      typeof homeBuilding.fields.Position.lng === 'number') {
+              // Ensure the object has the correct structure
+              position = {
+                lat: homeBuilding.fields.Position.lat,
+                lng: homeBuilding.fields.Position.lng
+              };
             }
             console.log(`Found position for citizen ${record.fields.CitizenId}'s home:`, position);
           } catch (error) {
