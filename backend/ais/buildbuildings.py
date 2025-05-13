@@ -385,40 +385,40 @@ If you decide not to build anything at this time, return an empty JSON object.
                 try:
                     # Look for JSON block in the response
                     import re
-                            json_match = re.search(r'```json\s*(.*?)\s*```', content, re.DOTALL)
+                    json_match = re.search(r'```json\s*(.*?)\s*```', content, re.DOTALL)
+                    
+                    if json_match:
+                        json_str = json_match.group(1)
+                        print(f"Found JSON in response: {json_str}")
+                        
+                        decision = json.loads(json_str)
+                        
+                        # Log the decision
+                        print(f"AI {ai_username} decision: {json.dumps(decision)}")
+                        
+                        # If there's a building decision, return it
+                        if decision and "building_type" in decision and "land_id" in decision:
+                            building_type = decision["building_type"]
+                            land_id = decision["land_id"]
+                            reason = decision.get("reason", "No reason provided")
                             
-                            if json_match:
-                                json_str = json_match.group(1)
-                                print(f"Found JSON in response: {json_str}")
-                                
-                                decision = json.loads(json_str)
-                                
-                                # Log the decision
-                                print(f"AI {ai_username} decision: {json.dumps(decision)}")
-                                
-                                # If there's a building decision, return it
-                                if decision and "building_type" in decision and "land_id" in decision:
-                                    building_type = decision["building_type"]
-                                    land_id = decision["land_id"]
-                                    reason = decision.get("reason", "No reason provided")
-                                    
-                                    print(f"AI {ai_username} wants to build a {building_type} on land {land_id}")
-                                    print(f"Reason: {reason}")
-                                    
-                                    # Return the decision
-                                    return decision
-                                else:
-                                    print(f"AI {ai_username} decided not to build anything at this time")
-                                    return {}
-                            else:
-                                print(f"No JSON decision found in AI response. Full response:")
-                                print(content)
-                                return None
-                        except Exception as e:
-                            print(f"Error extracting decision from AI response: {str(e)}")
-                            print(f"Full response content that caused the error:")
-                            print(content)
-                            return None
+                            print(f"AI {ai_username} wants to build a {building_type} on land {land_id}")
+                            print(f"Reason: {reason}")
+                            
+                            # Return the decision
+                            return decision
+                        else:
+                            print(f"AI {ai_username} decided not to build anything at this time")
+                            return {}
+                    else:
+                        print(f"No JSON decision found in AI response. Full response:")
+                        print(content)
+                        return None
+                except Exception as e:
+                    print(f"Error extracting decision from AI response: {str(e)}")
+                    print(f"Full response content that caused the error:")
+                    print(content)
+                    return None
                 
                 return None
             else:
@@ -755,9 +755,8 @@ Your response must be a JSON object with:
                         
                         # Try to extract the JSON decision from the response
                         try:
-                            content = latest_message.get('content', '')
-                    # Look for JSON block in the response
-                    import re
+                            # Look for JSON block in the response
+                            import re
                             json_match = re.search(r'```json\s*(.*?)\s*```', content, re.DOTALL)
                             
                             if json_match:
