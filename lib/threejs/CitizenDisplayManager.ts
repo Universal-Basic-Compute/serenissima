@@ -652,7 +652,7 @@ export class CitizenDisplayManager {
       const lng = position.lng !== undefined ? position.lng : position.z;
       
       // Create a location key based on position (with reduced precision to group nearby citizens)
-      const locationKey = `${parseFloat(lat).toFixed(5)}_${parseFloat(lng).toFixed(5)}`;
+      const locationKey = `${parseFloat(lat.toString()).toFixed(5)}_${parseFloat(lng.toString()).toFixed(5)}`;
       
       if (!this.citizenGroups.has(locationKey)) {
         this.citizenGroups.set(locationKey, []);
