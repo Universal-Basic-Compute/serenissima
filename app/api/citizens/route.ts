@@ -9,6 +9,24 @@ const base = new Airtable({
 const BUILDINGS_TABLE = 'Buildings';
 const CITIZENS_TABLE = 'CITIZENS';
 
+// Helper function to format image URLs
+function formatImageUrl(url: string | undefined): string {
+  if (!url) return '/images/citizens/default.png';
+  
+  // If it's already an absolute URL, return it as is
+  if (url.startsWith('http')) return url;
+  
+  // If it doesn't start with a slash, add one
+  if (!url.startsWith('/')) url = '/' + url;
+  
+  // If it doesn't include the citizens directory, add it
+  if (!url.includes('/citizens/')) {
+    url = `/images/citizens/${url.split('/').pop()}`;
+  }
+  
+  return url;
+}
+
 export async function GET(request: Request) {
   try {
     console.log('Fetching citizens with houses from Airtable...');
@@ -86,6 +104,24 @@ export async function GET(request: Request) {
       // Determine if this is a home or work building
       const isHome = citizen.home === record.fields.BuildingId;
       
+      // Helper function to format image URLs
+      function formatImageUrl(url: string | undefined): string {
+        if (!url) return '/images/citizens/default.png';
+        
+        // If it's already an absolute URL, return it as is
+        if (url.startsWith('http')) return url;
+        
+        // If it doesn't start with a slash, add one
+        if (!url.startsWith('/')) url = '/' + url;
+        
+        // If it doesn't include the citizens directory, add it
+        if (!url.includes('/citizens/')) {
+          url = `/images/citizens/${url.split('/').pop()}`;
+        }
+        
+        return url;
+      }
+      
       // Ensure we have a consistent structure with all required fields
       return {
         id: citizen.id,
@@ -99,8 +135,8 @@ export async function GET(request: Request) {
         SocialClass: citizen.socialClass, // Ensure both formats are available
         description: citizen.description,
         Description: citizen.description, // Ensure both formats are available
-        profileImage: citizen.imageUrl || '/images/citizens/default.png',
-        ImageUrl: citizen.imageUrl || '/images/citizens/default.png', // Ensure both formats are available
+        profileImage: formatImageUrl(citizen.imageUrl),
+        ImageUrl: formatImageUrl(citizen.imageUrl), // Ensure both formats are available
         position: position,
         occupation: citizen.work || 'Resident',
         wealth: citizen.wealth || 'Average',
@@ -149,8 +185,8 @@ function getDebugCitizens() {
       SocialClass: 'Merchant',
       description: 'Famous explorer and merchant who traveled through Asia along the Silk Road',
       Description: 'Famous explorer and merchant who traveled through Asia along the Silk Road',
-      profileImage: '/images/citizens/citizen1.png',
-      ImageUrl: '/images/citizens/citizen1.png',
+      profileImage: formatImageUrl('/images/citizens/citizen1.png'),
+      ImageUrl: formatImageUrl('/images/citizens/citizen1.png'),
       position: { lat: 45.4371, lng: 12.3358 },
       occupation: 'Explorer',
       wealth: 'Wealthy',
@@ -177,8 +213,8 @@ function getDebugCitizens() {
       SocialClass: 'Artist',
       description: 'Venetian composer, virtuoso violinist, and priest, known for his baroque compositions',
       Description: 'Venetian composer, virtuoso violinist, and priest, known for his baroque compositions',
-      profileImage: '/images/citizens/citizen2.png',
-      ImageUrl: '/images/citizens/citizen2.png',
+      profileImage: formatImageUrl('/images/citizens/citizen2.png'),
+      ImageUrl: formatImageUrl('/images/citizens/citizen2.png'),
       position: { lat: 45.4375, lng: 12.3368 },
       occupation: 'Composer',
       wealth: 'Comfortable',
@@ -205,8 +241,8 @@ function getDebugCitizens() {
       SocialClass: 'Nobility',
       description: 'Venetian noblewoman who became the Queen of Cyprus through her marriage to James II',
       Description: 'Venetian noblewoman who became the Queen of Cyprus through her marriage to James II',
-      profileImage: '/images/citizens/citizen3.png',
-      ImageUrl: '/images/citizens/citizen3.png',
+      profileImage: formatImageUrl('/images/citizens/citizen3.png'),
+      ImageUrl: formatImageUrl('/images/citizens/citizen3.png'),
       position: { lat: 45.4365, lng: 12.3348 },
       occupation: 'Queen of Cyprus',
       wealth: 'Very Wealthy',
@@ -233,8 +269,8 @@ function getDebugCitizens() {
       SocialClass: 'Adventurer',
       description: 'Venetian author, adventurer, and famous womanizer',
       Description: 'Venetian author, adventurer, and famous womanizer',
-      profileImage: '/images/citizens/citizen4.png',
-      ImageUrl: '/images/citizens/citizen4.png',
+      profileImage: formatImageUrl('/images/citizens/citizen4.png'),
+      ImageUrl: formatImageUrl('/images/citizens/citizen4.png'),
       position: { lat: 45.4380, lng: 12.3378 },
       occupation: 'Writer',
       wealth: 'Variable',
@@ -261,8 +297,8 @@ function getDebugCitizens() {
       SocialClass: 'Scholar',
       description: 'Venetian philosopher who was the first woman to receive a doctoral degree from a university',
       Description: 'Venetian philosopher who was the first woman to receive a doctoral degree from a university',
-      profileImage: '/images/citizens/citizen5.png',
-      ImageUrl: '/images/citizens/citizen5.png',
+      profileImage: formatImageUrl('/images/citizens/citizen5.png'),
+      ImageUrl: formatImageUrl('/images/citizens/citizen5.png'),
       position: { lat: 45.4368, lng: 12.3362 },
       occupation: 'Philosopher',
       wealth: 'Comfortable',

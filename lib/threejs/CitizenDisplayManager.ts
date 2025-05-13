@@ -309,6 +309,13 @@ export class CitizenDisplayManager {
             work: citizen.Work
           });
         });
+        
+        // Log image URLs for debugging
+        console.log('Sample citizens with image URLs:');
+        this.citizens.slice(0, 3).forEach((citizen, index) => {
+          const imageUrl = citizen.profileImage || citizen.ImageUrl;
+          console.log(`Citizen ${index + 1} (${citizen.firstName || ''} ${citizen.lastName || ''}): Image URL = ${imageUrl}`);
+        });
       }
       
       // Add debug citizens if needed
@@ -720,7 +727,47 @@ export class CitizenDisplayManager {
     });
     
     // Create and return the sprite
-    return new THREE.Sprite(material);
+    const sprite = new THREE.Sprite(material);
+    
+    // Start with opacity 0 for fade-in animation
+    material.opacity = 0;
+    this.animateFadeIn(material);
+    
+    return sprite;
+  }
+  
+  /**
+   * Animate fade-in effect for materials
+   */
+  private animateFadeIn(material: THREE.Material): void {
+    // Start with opacity 0
+    material.opacity = 0;
+
+    // Create a fade-in animation
+    const startTime = performance.now();
+    const duration = 800; // 800ms fade-in duration
+
+    // Animation function
+    const animate = () => {
+      const currentTime = performance.now();
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      // Use an ease-in function for smoother appearance
+      material.opacity = progress * progress;
+      material.needsUpdate = true;
+
+      // Continue animation until complete
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        material.opacity = 1; // Ensure we end at full opacity
+        material.needsUpdate = true;
+      }
+    };
+
+    // Start the animation
+    requestAnimationFrame(animate);
   }
 
   /**
@@ -733,49 +780,63 @@ export class CitizenDisplayManager {
     let texture = this.textureCache.get(imageUrl);
     
     if (!texture) {
-      // Load the texture
-      const loader = new THREE.TextureLoader();
+      // Create an array of URLs to try in order - prioritize serenissima.ai
+      const urlsToTry = [
+        // 1. Try the original URL as provided
+        imageUrl,
+        
+        // 2. Try with serenissima.ai domain if it's a relative path
+        imageUrl.startsWith('/') ? `https://serenissima.ai${imageUrl}` : null,
+        
+        // 3. Try with current origin as fallback
+        imageUrl.startsWith('/') ? `${window.location.origin}${imageUrl}` : null,
+        
+        // 4. Try just the filename in the citizens folder
+        `/images/citizens/${imageUrl.split('/').pop()}`,
+        
+        // 5. Default fallback
+        `/images/citizens/default.png`
+      ].filter(Boolean); // Remove null entries
       
-      // Try multiple paths to find the citizen image
-      const tryLoadTexture = (paths: string[]) => {
-        if (paths.length === 0) {
-          console.warn(`Failed to load texture for citizen image: ${imageUrl}, using generated default`);
+      console.log(`Will try these URLs for citizen image:`, urlsToTry);
+
+      // Function to try loading the next URL in the array
+      const tryNextUrl = (index: number) => {
+        if (index >= urlsToTry.length) {
+          console.warn(`All URLs failed for citizen image: ${imageUrl}, creating default texture`);
           const defaultTexture = this.createDefaultCitizenTexture();
           this.textureCache.set(imageUrl, defaultTexture); // Cache the default texture
           return defaultTexture;
         }
         
-        const currentPath = paths[0];
-        console.log(`Attempting to load citizen image from: ${currentPath}`);
+        const currentUrl = urlsToTry[index];
+        console.log(`Trying URL ${index + 1}/${urlsToTry.length} for citizen image: ${currentUrl}`);
         
+        const loader = new THREE.TextureLoader();
         return loader.load(
-          currentPath, 
+          currentUrl,
           // Success callback
           (loadedTexture) => {
-            console.log(`Successfully loaded citizen image from: ${currentPath}`);
-            this.textureCache.set(imageUrl, loadedTexture);
+            console.log(`Successfully loaded citizen image from: ${currentUrl}`);
+            // Create a circular texture
+            const circularTexture = this.createCircularTexture(loadedTexture);
+            this.textureCache.set(imageUrl, circularTexture);
           },
           // Progress callback
           (xhr) => {
-            console.log(`Loading citizen image ${currentPath}: ${Math.round(xhr.loaded / xhr.total * 100)}%`);
+            console.log(`Loading citizen image ${currentUrl}: ${Math.round(xhr.loaded / xhr.total * 100)}%`);
           },
           // Error callback
           (error) => {
-            console.warn(`Failed to load citizen image from ${currentPath}, trying next path...`, error);
-            // Try the next path
-            texture = tryLoadTexture(paths.slice(1));
+            console.warn(`Failed to load citizen image from ${currentUrl}, trying next URL...`, error);
+            // Try the next URL
+            texture = tryNextUrl(index + 1);
           }
         );
       };
       
-      // Try multiple possible paths for the citizen image
-      const possiblePaths = [
-        imageUrl,
-        `/images/citizens/${imageUrl.split('/').pop()}`, // Try just the filename in the citizens folder
-        `/images/citizens/default.png`
-      ];
-      
-      texture = tryLoadTexture(possiblePaths);
+      // Start trying URLs
+      texture = tryNextUrl(0);
     } else {
       console.log(`Using cached texture for citizen image: ${imageUrl}`);
     }
@@ -787,6 +848,76 @@ export class CitizenDisplayManager {
     });
     
     return new THREE.Sprite(material);
+  }
+  
+  /**
+   * Create a circular texture from a loaded texture
+   */
+  private createCircularTexture(texture: THREE.Texture): THREE.Texture {
+    // Check if texture.image exists
+    if (!texture.image) {
+      console.warn('Texture image is null, creating fallback texture');
+      return this.createDefaultCitizenTexture();
+    }
+
+    // Create a canvas to draw the circular mask
+    const canvas = document.createElement('canvas');
+    const size = 512; // Increased size for better quality
+    canvas.width = size;
+    canvas.height = size;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return texture; // Fallback if context creation fails
+
+    try {
+      // Clear the canvas first
+      ctx.clearRect(0, 0, size, size);
+
+      // Draw a circular clipping path
+      ctx.beginPath();
+      ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
+      ctx.closePath();
+
+      // Add a white stroke around the circle
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth = 8;
+      ctx.stroke();
+
+      // Create a new clipping path for the image
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(size/2, size/2, size/2 - 12, 0, Math.PI * 2);
+      ctx.clip();
+
+      // Calculate dimensions to maintain aspect ratio
+      let drawWidth = size - 24;
+      let drawHeight = size - 24;
+      let offsetX = 12;
+      let offsetY = 12;
+
+      if (texture.image.width > texture.image.height) {
+        // Landscape image
+        drawHeight = (texture.image.height / texture.image.width) * (size - 24);
+        offsetY = (size - drawHeight) / 2;
+      } else if (texture.image.height > texture.image.width) {
+        // Portrait image
+        drawWidth = (texture.image.width / texture.image.height) * (size - 24);
+        offsetX = (size - drawWidth) / 2;
+      }
+
+      // Draw the image with proper aspect ratio
+      ctx.drawImage(texture.image, offsetX, offsetY, drawWidth, drawHeight);
+      ctx.restore();
+
+      // Create a new texture from the canvas
+      const circularTexture = new THREE.CanvasTexture(canvas);
+      circularTexture.needsUpdate = true;
+
+      return circularTexture;
+    } catch (error) {
+      console.error('Error creating circular texture:', error);
+      return texture; // Return the original texture as fallback
+    }
   }
   
   /**
@@ -1723,8 +1854,11 @@ export class CitizenDisplayManager {
     // Use the first citizen for the main icon
     const primaryCitizen = citizens[0];
     
+    // Get the image URL, with fallbacks
+    const imageUrl = this.getCitizenImageUrl(primaryCitizen);
+    
     // Create a sprite for the citizen icon
-    const sprite = this.createCitizenSprite(primaryCitizen.profileImage || '/images/citizens/default.png');
+    const sprite = this.createCitizenSprite(imageUrl);
     sprite.scale.set(1.5, 1.5, 1);
     container.add(sprite);
     
@@ -1749,4 +1883,29 @@ export class CitizenDisplayManager {
     }
     
     return container;
+  }
+  
+  /**
+   * Get the citizen image URL with fallbacks
+   */
+  private getCitizenImageUrl(citizen: any): string {
+    // Check all possible image URL properties
+    const imageUrl = citizen.profileImage || citizen.ImageUrl || citizen.imageUrl;
+    
+    if (!imageUrl) {
+      console.warn(`No image URL found for citizen:`, citizen);
+      return '/images/citizens/default.png';
+    }
+    
+    // If the URL is already absolute, return it as is
+    if (imageUrl.startsWith('http')) {
+      return imageUrl;
+    }
+    
+    // If it's a relative path, ensure it starts with a slash
+    if (!imageUrl.startsWith('/')) {
+      return `/${imageUrl}`;
+    }
+    
+    return imageUrl;
   }
