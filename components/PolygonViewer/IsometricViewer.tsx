@@ -429,6 +429,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   }, [activeView]);
   
   
+  
   // Load citizens if in citizens view
   useEffect(() => {
     if (activeView === 'citizens') {
@@ -2464,7 +2465,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       )}
       
       {/* Building Details Panel */}
-      {showBuildingDetailsPanel && selectedBuildingId && (
+      {showBuildingDetailsPanel && selectedBuildingId && (activeView === 'buildings' || activeView === 'land') && (
         <BuildingDetailsPanel
           selectedBuildingId={selectedBuildingId}
           onClose={() => {
