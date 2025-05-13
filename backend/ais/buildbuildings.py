@@ -383,30 +383,43 @@ If you decide not to build anything at this time, return an empty JSON object.
                 
                 # Try to extract the JSON decision from the response
                 try:
-                    # Look for JSON block in the response
+                    # Look for JSON block in the response with a more robust approach
                     import re
-                    # Improved regex pattern to better handle multiline JSON blocks with proper formatting
+                    
+                    # First try the standard markdown JSON block format
                     json_match = re.search(r'```json\s*([\s\S]*?)\s*```', content, re.DOTALL)
                     
+                    if not json_match:
+                        # If that fails, try looking for any JSON-like object with building_type and land_id
+                        json_match = re.search(r'\{\s*"building_type"\s*:\s*"[^"]+"\s*,\s*"land_id"\s*:\s*"[^"]+"\s*', content, re.DOTALL)
+                    
                     if json_match:
-                        json_str = json_match.group(1).strip()
+                        json_str = json_match.group(1).strip() if json_match.group(1) else content[json_match.start():].strip()
+                        
+                        # Find the closing brace to complete the JSON object if needed
+                        if json_str.count('{') > json_str.count('}'):
+                            remaining = content[json_match.end():]
+                            closing_brace_pos = remaining.find('}')
+                            if closing_brace_pos >= 0:
+                                json_str += remaining[:closing_brace_pos+1]
+                        
                         print(f"Found JSON in response: {json_str}")
                         
+                        # Try to parse the JSON
                         try:
                             decision = json.loads(json_str)
                             print(f"Successfully parsed JSON decision: {json.dumps(decision)}")
-                        except json.JSONDecodeError as json_err:
-                            print(f"JSON parsing error: {str(json_err)}")
-                            print(f"Problematic JSON string: '{json_str}'")
-                            
-                            # Try to clean the JSON string and parse again
-                            cleaned_json = json_str.replace("'", '"').replace("\n", " ").strip()
-                            print(f"Attempting with cleaned JSON: {cleaned_json}")
+                        except json.JSONDecodeError:
+                            # If parsing fails, try to clean the string
+                            cleaned_json = json_str.replace('\n', ' ').replace('\r', '').replace("'", '"').strip()
+                            # Make sure it's a complete JSON object
+                            if not cleaned_json.endswith('}'):
+                                cleaned_json += '}'
                             try:
                                 decision = json.loads(cleaned_json)
                                 print(f"Successfully parsed cleaned JSON: {json.dumps(decision)}")
                             except:
-                                # If all else fails, try to manually extract the fields
+                                # If all else fails, manually extract the fields
                                 print("Attempting manual extraction of JSON fields")
                                 building_type_match = re.search(r'"building_type"\s*:\s*"([^"]+)"', json_str)
                                 land_id_match = re.search(r'"land_id"\s*:\s*"([^"]+)"', json_str)
@@ -785,29 +798,43 @@ Your response must be a JSON object with:
                 
                 # Try to extract the JSON decision from the response
                 try:
-                    # Look for JSON block in the response
+                    # Look for JSON block in the response with a more robust approach
                     import re
+                    
+                    # First try the standard markdown JSON block format
                     json_match = re.search(r'```json\s*([\s\S]*?)\s*```', content, re.DOTALL)
                     
+                    if not json_match:
+                        # If that fails, try looking for any JSON-like object with selected_point_index
+                        json_match = re.search(r'\{\s*"selected_point_index"\s*:\s*\d+', content, re.DOTALL)
+                    
                     if json_match:
-                        json_str = json_match.group(1).strip()
+                        json_str = json_match.group(1).strip() if json_match.group(1) else content[json_match.start():].strip()
+                        
+                        # Find the closing brace to complete the JSON object if needed
+                        if json_str.count('{') > json_str.count('}'):
+                            remaining = content[json_match.end():]
+                            closing_brace_pos = remaining.find('}')
+                            if closing_brace_pos >= 0:
+                                json_str += remaining[:closing_brace_pos+1]
+                        
                         print(f"Found JSON in placement response: {json_str}")
                         
+                        # Try to parse the JSON
                         try:
                             placement_decision = json.loads(json_str)
                             print(f"Successfully parsed JSON placement decision: {json.dumps(placement_decision)}")
-                        except json.JSONDecodeError as json_err:
-                            print(f"JSON parsing error in placement response: {str(json_err)}")
-                            print(f"Problematic JSON string: '{json_str}'")
-                            
-                            # Try to clean the JSON string and parse again
-                            cleaned_json = json_str.replace("'", '"').replace("\n", " ").strip()
-                            print(f"Attempting with cleaned JSON: {cleaned_json}")
+                        except json.JSONDecodeError:
+                            # If parsing fails, try to clean the string
+                            cleaned_json = json_str.replace('\n', ' ').replace('\r', '').replace("'", '"').strip()
+                            # Make sure it's a complete JSON object
+                            if not cleaned_json.endswith('}'):
+                                cleaned_json += '}'
                             try:
                                 placement_decision = json.loads(cleaned_json)
                                 print(f"Successfully parsed cleaned JSON: {json.dumps(placement_decision)}")
                             except:
-                                # If all else fails, try to manually extract the fields
+                                # If all else fails, manually extract the fields
                                 print("Attempting manual extraction of JSON fields")
                                 selected_point_index_match = re.search(r'"selected_point_index"\s*:\s*(\d+)', json_str)
                                 reason_match = re.search(r'"reason"\s*:\s*"([^"]+)"', json_str)
