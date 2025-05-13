@@ -316,7 +316,10 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     ctx.fillStyle = '#87CEEB';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // Draw polygons
+    // Collect all polygons and their data for rendering
+    const polygonsToRender = [];
+
+    // Process all polygons first
     polygons.forEach(polygon => {
       if (!polygon.coordinates || polygon.coordinates.length < 3) return;
       
@@ -334,9 +337,6 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         }
       }
       
-      // Start drawing polygon
-      ctx.beginPath();
-      
       // Convert lat/lng to isometric coordinates
       const coords = polygon.coordinates.map((coord: {lat: number, lng: number}) => {
         // Normalize coordinates relative to center of Venice
@@ -350,7 +350,30 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         };
       });
       
+      // Calculate centroid for text placement
+      let centroidX = 0, centroidY = 0;
+      coords.forEach(coord => {
+        centroidX += coord.x;
+        centroidY += coord.y;
+      });
+      centroidX /= coords.length;
+      centroidY /= coords.length;
+      
+      // Store polygon data for rendering
+      polygonsToRender.push({
+        polygon,
+        coords,
+        fillColor,
+        centroidX,
+        centroidY
+      });
+    });
+
+    // Now render in two passes: first the polygons, then the text
+    // First pass: Draw all polygon shapes
+    polygonsToRender.forEach(({ coords, fillColor }) => {
       // Draw polygon path
+      ctx.beginPath();
       ctx.moveTo(coords[0].x, coords[0].y);
       for (let i = 1; i < coords.length; i++) {
         ctx.lineTo(coords[i].x, coords[i].y);
@@ -363,24 +386,20 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       ctx.strokeStyle = '#8B4513';
       ctx.lineWidth = 1;
       ctx.stroke();
-      
-      // Draw polygon name if in land view
-      if (activeView === 'land' && polygon.historicalName) {
-        // Calculate centroid
-        let centroidX = 0, centroidY = 0;
-        coords.forEach(coord => {
-          centroidX += coord.x;
-          centroidY += coord.y;
-        });
-        centroidX /= coords.length;
-        centroidY /= coords.length;
-        
-        ctx.font = '10px Arial';
-        ctx.fillStyle = '#000';
-        ctx.textAlign = 'center';
-        ctx.fillText(polygon.historicalName, centroidX, centroidY);
-      }
     });
+
+    // Second pass: Draw all polygon names (only in land view)
+    if (activeView === 'land') {
+      polygonsToRender.forEach(({ polygon, centroidX, centroidY }) => {
+        if (polygon.historicalName) {
+          // Draw text - keep the original style
+          ctx.font = '10px Arial';
+          ctx.fillStyle = '#000';
+          ctx.textAlign = 'center';
+          ctx.fillText(polygon.historicalName, centroidX, centroidY);
+        }
+      });
+    }
     
     // Draw buildings if in buildings view
     if (activeView === 'buildings' && buildings.length > 0) {
