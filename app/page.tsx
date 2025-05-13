@@ -627,15 +627,8 @@ export default function SimplePage() {
       // Clear the flag
       window.__directNavigation = false;
       
-      // Check which panel to open based on the specific flag
-      if (window.__knowledgeDirectNavigation) {
-        // Clear the knowledge-specific flag
-        window.__knowledgeDirectNavigation = false;
-        
-        // Open the knowledge panel
-        setShowKnowledgePanel(true);
-        setActiveView('knowledge');
-      } else if (pathname === '/citizens') {
+      // Check the current pathname to determine which view to open
+      if (pathname === '/citizens') {
         // Open the citizens view
         setActiveView('citizens');
         // Dispatch an event to load citizens after a short delay
@@ -643,10 +636,20 @@ export default function SimplePage() {
           console.log('Dispatching loadCitizens event after direct navigation');
           window.dispatchEvent(new CustomEvent('loadCitizens'));
         }, 500);
-      } else {
-        // Open the guilds panel (default behavior)
+      } else if (window.__knowledgeDirectNavigation) {
+        // Clear the knowledge-specific flag
+        window.__knowledgeDirectNavigation = false;
+        
+        // Open the knowledge panel
+        setShowKnowledgePanel(true);
+        setActiveView('knowledge');
+      } else if (pathname === '/guilds') {
+        // Open the guilds panel
         setShowGuildsPanel(true);
         setActiveView('guilds');
+      } else {
+        // Default behavior for other paths
+        console.log('Direct navigation to unknown path:', pathname);
       }
     }
   }, []);
