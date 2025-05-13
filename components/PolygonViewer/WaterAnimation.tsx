@@ -49,11 +49,7 @@ export default function WaterAnimation({ className = '' }: WaterAnimationProps) 
     window.addEventListener('resize', resizeCanvas);
     
     // Water animation parameters
-    const baseColor = { r: 65, g: 105, b: 225 }; // Royal blue
     const waveColor = { r: 135, g: 206, b: 250 }; // Light sky blue
-    
-    // Extract shore lines from polygons
-    const shoreLines: {start: {x: number, y: number}, end: {x: number, y: number}}[] = [];
     
     // Function to convert lat/lng to canvas coordinates
     const latLngToCanvas = (lat: number, lng: number) => {
@@ -68,66 +64,42 @@ export default function WaterAnimation({ className = '' }: WaterAnimationProps) 
       return { x: isoX, y: isoY };
     };
     
-    // Extract shore segments from polygons
-    polygons.forEach(polygon => {
-      if (!polygon.coordinates || polygon.coordinates.length < 3) return;
-      
-      const coords = polygon.coordinates.map((coord: {lat: number, lng: number}) => {
-        return latLngToCanvas(coord.lat, coord.lng);
-      });
-      
-      // Create shore line segments
-      for (let i = 0; i < coords.length; i++) {
-        const start = coords[i];
-        const end = coords[(i + 1) % coords.length];
-        
-        // Add the line segment to shore lines
-        shoreLines.push({ start, end });
-      }
-    });
-    
-    // Create wave lines that follow the shore
-    const waveCount = 3; // Number of wave lines per shore segment
-    const waveDistance = 15; // Distance between wave lines
-    const waves: {
+    // Create wave polygons - multiple expanding versions of each land polygon
+    const wavePolygons: {
       points: {x: number, y: number}[],
-      amplitude: number,
+      expansionFactor: number,
       speed: number,
       phase: number
     }[] = [];
     
-    // Generate waves for each shore line
-    shoreLines.forEach(line => {
-      const dx = line.end.x - line.start.x;
-      const dy = line.end.y - line.start.y;
-      const length = Math.sqrt(dx * dx + dy * dy);
+    // Number of wave layers per polygon
+    const waveLayerCount = 3;
+    
+    // Generate expanding polygons for each land polygon
+    polygons.forEach(polygon => {
+      if (!polygon.coordinates || polygon.coordinates.length < 3) return;
       
-      // Skip very short segments
-      if (length < 10) return;
+      // Convert polygon coordinates to canvas coordinates
+      const basePoints = polygon.coordinates.map((coord: {lat: number, lng: number}) => {
+        return latLngToCanvas(coord.lat, coord.lng);
+      });
       
-      // Calculate perpendicular direction (away from land)
-      const perpX = -dy / length;
-      const perpY = dx / length;
+      // Calculate polygon centroid for expansion
+      let centroidX = 0, centroidY = 0;
+      basePoints.forEach(point => {
+        centroidX += point.x;
+        centroidY += point.y;
+      });
+      centroidX /= basePoints.length;
+      centroidY /= basePoints.length;
       
-      // Create multiple wave lines at different distances from shore
-      for (let i = 1; i <= waveCount; i++) {
-        const distance = i * waveDistance;
-        const points = [];
-        
-        // Create points along the shore segment
-        const pointCount = Math.max(5, Math.floor(length / 20));
-        for (let j = 0; j <= pointCount; j++) {
-          const t = j / pointCount;
-          const x = line.start.x + dx * t + perpX * distance;
-          const y = line.start.y + dy * t + perpY * distance;
-          points.push({ x, y });
-        }
-        
-        // Add wave with random properties
-        waves.push({
-          points,
-          amplitude: 1 + Math.random() * 1.5, // Small amplitude
-          speed: 0.02 + Math.random() * 0.03, // Slow speed
+      // Create multiple expanding versions of the polygon
+      for (let i = 1; i <= waveLayerCount; i++) {
+        // Create a new wave polygon with random properties
+        wavePolygons.push({
+          points: basePoints,
+          expansionFactor: 1 + (i * 0.02), // Very small expansion for subtle effect
+          speed: 0.0005 + (Math.random() * 0.0005), // Very slow speed for serene effect
           phase: Math.random() * Math.PI * 2
         });
       }
@@ -144,38 +116,47 @@ export default function WaterAnimation({ className = '' }: WaterAnimationProps) 
       // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
-      // Draw water background (very subtle)
-      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      gradient.addColorStop(0, `rgba(${baseColor.r}, ${baseColor.g}, ${baseColor.b}, 0.2)`);
-      gradient.addColorStop(1, `rgba(${baseColor.r - 20}, ${baseColor.g - 20}, ${baseColor.b - 20}, 0.2)`);
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
-      // Draw waves
-      ctx.lineWidth = 1;
-      
-      waves.forEach(wave => {
-        // Update wave phase
-        wave.phase += wave.speed * (deltaTime || 16);
+      // Draw wave polygons
+      wavePolygons.forEach(wavePoly => {
+        // Update phase
+        wavePoly.phase += wavePoly.speed * (deltaTime || 16);
         
+        // Calculate current expansion based on sine wave
+        const currentExpansion = 1 + (Math.sin(wavePoly.phase) * 0.01); // Very subtle pulsing
+        const totalExpansion = wavePoly.expansionFactor * currentExpansion;
+        
+        // Calculate polygon centroid for expansion
+        let centroidX = 0, centroidY = 0;
+        wavePoly.points.forEach(point => {
+          centroidX += point.x;
+          centroidY += point.y;
+        });
+        centroidX /= wavePoly.points.length;
+        centroidY /= wavePoly.points.length;
+        
+        // Draw expanded polygon
         ctx.beginPath();
         
-        // Draw wave path
-        for (let i = 0; i < wave.points.length; i++) {
-          const point = wave.points[i];
+        wavePoly.points.forEach((point, index) => {
+          // Calculate expanded point position
+          const dx = point.x - centroidX;
+          const dy = point.y - centroidY;
+          const expandedX = centroidX + (dx * totalExpansion);
+          const expandedY = centroidY + (dy * totalExpansion);
           
-          // Apply sine wave effect
-          const waveOffset = Math.sin(wave.phase + i * 0.2) * wave.amplitude;
-          
-          if (i === 0) {
-            ctx.moveTo(point.x, point.y + waveOffset);
+          if (index === 0) {
+            ctx.moveTo(expandedX, expandedY);
           } else {
-            ctx.lineTo(point.x, point.y + waveOffset);
+            ctx.lineTo(expandedX, expandedY);
           }
-        }
+        });
         
-        // Set line style - more transparent for subtle effect
-        ctx.strokeStyle = `rgba(${waveColor.r}, ${waveColor.g}, ${waveColor.b}, 0.2)`;
+        ctx.closePath();
+        
+        // Set very transparent blue stroke for wave effect
+        const opacity = 0.1 - (wavePoly.expansionFactor - 1) * 0.05; // Fade out as it expands
+        ctx.strokeStyle = `rgba(${waveColor.r}, ${waveColor.g}, ${waveColor.b}, ${opacity})`;
+        ctx.lineWidth = 1;
         ctx.stroke();
       });
       
