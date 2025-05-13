@@ -1198,6 +1198,12 @@ export class CitizenDisplayManager {
       group.remove(group.children[0]);
     }
     
+    // First, add a background panel for better text visibility
+    const backgroundPanel = this.createBackgroundPanel(citizens.length);
+    backgroundPanel.position.y = -0.05; // Position slightly below other elements
+    backgroundPanel.renderOrder = 990; // Lower render order than other elements
+    group.add(backgroundPanel);
+    
     // Create a sprite for each citizen in the group
     citizens.forEach((citizen, index) => {
       // Calculate position in a circle
@@ -1214,20 +1220,22 @@ export class CitizenDisplayManager {
         citizen: citizen
       };
       
-      // Create a sprite for the citizen icon
-      const sprite = this.createCitizenSprite(citizen.profileImage || '/images/citizens/default.png');
-      sprite.scale.set(1.5, 1.5, 1);
-      container.add(sprite);
-      
-      // Add a circular background for better visibility
+      // Add a circular background for better visibility (FIRST - lowest render order)
       const backgroundSprite = this.createCircularBackground();
       backgroundSprite.scale.set(1.7, 1.7, 1); // Slightly larger than the icon
       backgroundSprite.renderOrder = 999; // Render behind the icon
       container.add(backgroundSprite);
       
-      // Add citizen name
+      // Create a sprite for the citizen icon (SECOND - middle render order)
+      const sprite = this.createCitizenSprite(citizen.profileImage || '/images/citizens/default.png');
+      sprite.scale.set(1.5, 1.5, 1);
+      sprite.renderOrder = 1000; // Higher than background
+      container.add(sprite);
+      
+      // Add citizen name (THIRD - highest render order)
       const nameIndicator = this.createTextSprite(citizen.name || 'Unknown Citizen', true);
-      nameIndicator.position.set(0, 0.9, 0.1);
+      nameIndicator.position.set(0, 0.9, 0); // Position above the icon
+      nameIndicator.renderOrder = 1001; // Highest render order to be in front
       container.add(nameIndicator);
       
       group.add(container);
@@ -1363,13 +1371,13 @@ export class CitizenDisplayManager {
     const context = canvas.getContext('2d');
     if (!context) return new THREE.Sprite(new THREE.SpriteMaterial());
     
-    // Draw a rounded rectangle background
-    context.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    // Draw a rounded rectangle background with higher opacity
+    context.fillStyle = 'rgba(0, 0, 0, 0.8)'; // Increased opacity for better visibility
     this.roundRect(context, 0, 0, width, height, 16);
     context.fill();
     
     // Add a border
-    context.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+    context.strokeStyle = 'rgba(255, 255, 255, 0.7)'; // Increased opacity for border
     context.lineWidth = 2;
     this.roundRect(context, 1, 1, width - 2, height - 2, 15);
     context.stroke();
