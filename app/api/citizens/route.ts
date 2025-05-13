@@ -205,8 +205,8 @@ export async function GET(request: Request) {
           citizenId = typeof firstValue === 'string' ? firstValue : String(firstValue);
         } else {
           // For any other type, convert to string safely
-          // Use explicit type assertion to string to avoid TypeScript error
-          citizenId = String(occupant as string);
+          // First convert to unknown, then to string to avoid TypeScript error
+          citizenId = String(occupant as unknown);
         }
       }
       const citizen = citizenMap.get(citizenId);
@@ -269,8 +269,8 @@ export async function GET(request: Request) {
         SocialClass: citizen.socialClass, // Ensure both formats are available
         description: citizen.description,
         Description: citizen.description, // Ensure both formats are available
-        profileImage: formatImageUrl(citizen.imageUrl, citizen.id),
-        ImageUrl: formatImageUrl(citizen.imageUrl, citizen.id), // Ensure both formats are available
+        profileImage: formatImageUrl(citizen.imageUrl as string, citizen.id),
+        ImageUrl: formatImageUrl(citizen.imageUrl as string, citizen.id), // Ensure both formats are available
         position: position,
         occupation: citizen.work || 'Resident',
         wealth: citizen.wealth || 'Average',
