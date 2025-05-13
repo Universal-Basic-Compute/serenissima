@@ -1106,6 +1106,14 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     size: number = 20,
     isHovered: boolean = false
   ) => {
+    // Log citizen data for debugging
+    console.log(`Creating citizen marker for:`, {
+      citizenId: citizen.CitizenId || citizen.id,
+      name: `${citizen.FirstName || citizen.firstName || ''} ${citizen.LastName || citizen.lastName || ''}`,
+      imageUrl: citizen.ImageUrl || citizen.profileImage,
+      markerType
+    });
+
     // Draw a circular background with color based on marker type
     ctx.beginPath();
     ctx.arc(x, y, size + (isHovered ? 2 : 0), 0, Math.PI * 2);
