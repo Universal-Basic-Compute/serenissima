@@ -47,16 +47,21 @@ const BuildingRendererManager: React.FC<BuildingRendererManagerProps> = ({
           setSceneInitialized(true);
           
           // Initialize the building renderer manager now
-          buildingRendererManager.initialize(scene);
-          
-          // Initial refresh of buildings with a small delay
-          setTimeout(() => {
-            refreshBuildings();
+          // Add a check to ensure scene is still valid
+          if (scene) {
+            console.log('BuildingRendererManager: Initializing with scene', scene);
+            buildingRendererManager.initialize(scene);
             
-            // Force a second refresh after a longer delay to ensure buildings are visible
+            // Initial refresh of buildings with a small delay
             setTimeout(() => {
-              const count = buildingRendererManager.getBuildingMeshes().size;
-              if (count === 0) {
+              refreshBuildings();
+            }, 500);
+          } else {
+            console.error('BuildingRendererManager: Scene is undefined when trying to initialize');
+          }
+        }
+      }
+    );
                 console.warn('BuildingRendererManager: No buildings after initial refresh, trying again...');
                 refreshBuildings();
               } else {

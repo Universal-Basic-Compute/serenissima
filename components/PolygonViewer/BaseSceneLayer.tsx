@@ -80,7 +80,14 @@ const BaseSceneLayer: React.FC<BaseSceneLayerProps> = ({
 
     // Add a delay to ensure water and land are fully rendered before loading buildings
     setTimeout(() => {
+      // Check again that scene is still valid
+      if (!scene) {
+        console.error('BaseSceneLayer: Scene became undefined before initializing buildings');
+        return;
+      }
+      
       // Initialize the building renderer manager
+      console.log('BaseSceneLayer: Initializing buildingRendererManager with scene', scene);
       buildingRendererManager.initialize(scene);
       
       // Load all buildings
@@ -96,11 +103,11 @@ const BaseSceneLayer: React.FC<BaseSceneLayerProps> = ({
           
           // Ensure buildings are visible by default
           window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
-          
-          // Add a second refresh after a delay to ensure buildings are really visible
-          setTimeout(() => {
-            const buildingCount = buildingRendererManager.getBuildingMeshes().size;
-            if (buildingCount === 0) {
+        })
+        .catch(error => {
+          console.error('BaseSceneLayer: Error loading buildings:', error);
+        });
+    }, 1000); // Add a 1 second delay to ensure water and land are fully rendered
               console.warn('BaseSceneLayer: No buildings visible after initialization, refreshing again');
               buildingRendererManager.refreshBuildings()
                 .then(() => {
