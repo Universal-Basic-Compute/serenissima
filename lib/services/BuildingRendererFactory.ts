@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { InstancedMesh } from 'three';
+import { InstancedBufferAttribute } from 'three';
 import { BuildingData } from '../models/BuildingTypes';
 import buildingPositionManager from './BuildingPositionManager';
 import buildingCacheService from './BuildingCacheService';
@@ -36,6 +38,14 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
   private modelCache: Map<string, THREE.Object3D> = new Map();
   private pendingBuildings: Map<string, BuildingData> = new Map();
   private debug: boolean = false;
+  
+  // Instancing support
+  private buildingInstances: Map<string, {
+    mesh: THREE.InstancedMesh,
+    count: number,
+    instanceMap: Map<string, number>
+  }> = new Map();
+  private maxInstancesPerType = 1000; // Maximum instances per building type
   
   constructor(private options: BuildingRendererOptions) {
     this.gltfLoader = new GLTFLoader();
@@ -108,21 +118,13 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
   
   /**
    * Create a simplified version of the building for distant viewing
+   * Uses instancing for better performance with many buildings
    */
   private createLowDetailModel(building: BuildingData): THREE.Object3D {
-    // Create a simple box geometry instead of loading the full model
+    // Get building size
     const size = this.getBuildingSizeByType(building.type);
-    // Make the size 50% smaller (0.25 instead of 0.5)
-    const geometry = new THREE.BoxGeometry(size.width/4, size.height/4, size.depth/4);
-    const material = new THREE.MeshBasicMaterial({ 
-      color: this.getBuildingColorByType(building.type),
-      transparent: true,
-      opacity: 0.8
-    });
     
-    const model = new THREE.Mesh(geometry, material);
-    
-    // Set position
+    // Get position
     let position: THREE.Vector3;
     if ('lat' in building.position && 'lng' in building.position) {
       position = this.options.positionManager.latLngToScenePosition(building.position);
@@ -140,20 +142,162 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
       position.y = groundPosition.y;
     }
     
-    model.position.copy(position);
-    model.rotation.y = building.rotation || 0;
+    // Get color for this building type
+    const color = this.getBuildingColorByType(building.type);
     
-    // Add metadata
-    model.userData = {
-      buildingId: building.id,
-      type: building.type,
-      landId: building.land_id,
-      owner: building.owner || building.created_by,
-      position: building.position,
-      isLowDetail: true
-    };
+    // Create a key for the instanced mesh based on building type
+    const instanceKey = building.type;
     
-    return model;
+    // Check if we already have an instanced mesh for this building type
+    if (!this.buildingInstances.has(instanceKey)) {
+      // Create a new instanced mesh for this building type
+      const geometry = new THREE.BoxGeometry(size.width/4, size.height/4, size.depth/4);
+      const material = new THREE.MeshBasicMaterial({
+        transparent: true,
+        opacity: 0.8
+      });
+      
+      // Create an instanced mesh with capacity for many buildings of this type
+      const instancedMesh = new THREE.InstancedMesh(
+        geometry, 
+        material, 
+        this.maxInstancesPerType
+      );
+      instancedMesh.count = 0; // Start with 0 instances
+      instancedMesh.frustumCulled = true; // Enable frustum culling
+      
+      // Add to scene
+      this.options.scene.add(instancedMesh);
+      
+      // Store in our map
+      this.buildingInstances.set(instanceKey, {
+        mesh: instancedMesh,
+        count: 0,
+        instanceMap: new Map() // Map building IDs to instance indices
+      });
+    }
+    
+    // Get the instanced mesh data
+    const instanceData = this.buildingInstances.get(instanceKey)!;
+    
+    // Check if this building already has an instance
+    if (instanceData.instanceMap.has(building.id)) {
+      // Update existing instance
+      const instanceIndex = instanceData.instanceMap.get(building.id)!;
+      
+      // Create matrix for this instance
+      const matrix = new THREE.Matrix4();
+      matrix.setPosition(position);
+      
+      // Apply rotation
+      const rotationMatrix = new THREE.Matrix4();
+      rotationMatrix.makeRotationY(building.rotation || 0);
+      matrix.multiply(rotationMatrix);
+      
+      // Update the instance matrix
+      instanceData.mesh.setMatrixAt(instanceIndex, matrix);
+      instanceData.mesh.instanceMatrix.needsUpdate = true;
+      
+      // Update the instance color
+      instanceData.mesh.setColorAt(instanceIndex, new THREE.Color(color));
+      if (instanceData.mesh.instanceColor) {
+        instanceData.mesh.instanceColor.needsUpdate = true;
+      }
+      
+      // Create a proxy object that represents this instance
+      const proxy = new THREE.Object3D();
+      proxy.position.copy(position);
+      proxy.rotation.y = building.rotation || 0;
+      proxy.userData = {
+        buildingId: building.id,
+        type: building.type,
+        landId: building.land_id,
+        owner: building.owner || building.created_by,
+        position: building.position,
+        isLowDetail: true,
+        isInstancedProxy: true,
+        instanceIndex: instanceIndex,
+        instanceKey: instanceKey
+      };
+      
+      return proxy;
+    } else {
+      // Add a new instance
+      const instanceIndex = instanceData.count;
+      
+      // Check if we've reached the maximum instances
+      if (instanceIndex >= this.maxInstancesPerType) {
+        console.warn(`Maximum instances reached for building type ${building.type}`);
+        
+        // Fall back to a regular mesh
+        const geometry = new THREE.BoxGeometry(size.width/4, size.height/4, size.depth/4);
+        const material = new THREE.MeshBasicMaterial({ 
+          color: color,
+          transparent: true,
+          opacity: 0.8
+        });
+        
+        const model = new THREE.Mesh(geometry, material);
+        model.position.copy(position);
+        model.rotation.y = building.rotation || 0;
+        
+        model.userData = {
+          buildingId: building.id,
+          type: building.type,
+          landId: building.land_id,
+          owner: building.owner || building.created_by,
+          position: building.position,
+          isLowDetail: true
+        };
+        
+        this.options.scene.add(model);
+        return model;
+      }
+      
+      // Create matrix for this instance
+      const matrix = new THREE.Matrix4();
+      matrix.setPosition(position);
+      
+      // Apply rotation
+      const rotationMatrix = new THREE.Matrix4();
+      rotationMatrix.makeRotationY(building.rotation || 0);
+      matrix.multiply(rotationMatrix);
+      
+      // Set the instance matrix
+      instanceData.mesh.setMatrixAt(instanceIndex, matrix);
+      instanceData.mesh.instanceMatrix.needsUpdate = true;
+      
+      // Set the instance color
+      instanceData.mesh.setColorAt(instanceIndex, new THREE.Color(color));
+      if (instanceData.mesh.instanceColor) {
+        instanceData.mesh.instanceColor.needsUpdate = true;
+      }
+      
+      // Increment the instance count
+      instanceData.count++;
+      instanceData.mesh.count = instanceData.count;
+      
+      // Map this building ID to its instance index
+      instanceData.instanceMap.set(building.id, instanceIndex);
+      
+      // Create a proxy object that represents this instance
+      const proxy = new THREE.Object3D();
+      proxy.position.copy(position);
+      proxy.rotation.y = building.rotation || 0;
+      proxy.userData = {
+        buildingId: building.id,
+        type: building.type,
+        landId: building.land_id,
+        owner: building.owner || building.created_by,
+        position: building.position,
+        isLowDetail: true,
+        isInstancedProxy: true,
+        instanceIndex: instanceIndex,
+        instanceKey: instanceKey
+      };
+      
+      return proxy;
+    }
   }
 
   /**
@@ -703,25 +847,63 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
    * @param mesh Mesh to dispose
    */
   public dispose(mesh: THREE.Object3D): void {
-    // Remove from scene
-    this.options.scene.remove(mesh);
-    
-    // Dispose of geometries and materials
-    mesh.traverse((child) => {
-      if (child instanceof THREE.Mesh) {
-        if (child.geometry) {
-          child.geometry.dispose();
-        }
+    // Check if this is an instanced proxy
+    if (mesh.userData && mesh.userData.isInstancedProxy) {
+      const { instanceKey, instanceIndex, buildingId } = mesh.userData;
+      
+      // Get the instanced mesh data
+      const instanceData = this.buildingInstances.get(instanceKey);
+      if (instanceData) {
+        // Remove this building from the instance map
+        instanceData.instanceMap.delete(buildingId);
         
-        if (child.material) {
-          if (Array.isArray(child.material)) {
-            child.material.forEach(material => material.dispose());
-          } else {
-            child.material.dispose();
+        // We don't actually remove the instance from the mesh,
+        // but we could mark it as inactive by setting its scale to 0
+        const matrix = new THREE.Matrix4();
+        matrix.makeScale(0, 0, 0);
+        instanceData.mesh.setMatrixAt(instanceIndex, matrix);
+        instanceData.mesh.instanceMatrix.needsUpdate = true;
+      }
+    } else {
+      // Remove from scene
+      this.options.scene.remove(mesh);
+      
+      // Dispose of geometries and materials
+      mesh.traverse((child) => {
+        if (child instanceof THREE.Mesh) {
+          if (child.geometry) {
+            child.geometry.dispose();
+          }
+          
+          if (child.material) {
+            if (Array.isArray(child.material)) {
+              child.material.forEach(material => material.dispose());
+            } else {
+              child.material.dispose();
+            }
           }
         }
+      });
+    }
+  }
+  
+  /**
+   * Clean up all resources including instanced meshes
+   */
+  public cleanup(): void {
+    // Dispose of all instanced meshes
+    for (const [key, instanceData] of this.buildingInstances.entries()) {
+      this.options.scene.remove(instanceData.mesh);
+      instanceData.mesh.geometry.dispose();
+      if (Array.isArray(instanceData.mesh.material)) {
+        instanceData.mesh.material.forEach(m => m.dispose());
+      } else {
+        instanceData.mesh.material.dispose();
       }
-    });
+    }
+    
+    // Clear the map
+    this.buildingInstances.clear();
   }
 }
 
