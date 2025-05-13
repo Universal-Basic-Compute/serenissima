@@ -6,11 +6,11 @@ import { Tab } from '@headlessui/react';
 import ErrorBoundary from '../ErrorBoundary/ErrorBoundary';
 import { useBuildingMenu } from '@/hooks/useBuildingMenu';
 import { log } from '@/lib/logUtils';
-import { Building as ImportedBuilding } from '@/lib/models/BuildingModels';
+import { Building as ImportedBuilding, BuildingType } from '@/lib/models/BuildingModels';
 import PlaceableObjectManager from '@/lib/components/PlaceableObjectManager';
 
 // Define the Building interface with all required properties
-interface Building {
+interface Building extends Partial<ImportedBuilding> {
   id: string;
   name: string;
   category: string;
@@ -20,7 +20,6 @@ interface Building {
   size?: string;
   era?: string;
   variant?: string;
-  // Include any other properties from ImportedBuilding that are needed
   model?: string;
   scale?: number;
   rotation?: number;
