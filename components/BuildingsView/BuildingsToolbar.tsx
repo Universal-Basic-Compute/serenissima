@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import * as THREE from 'three';
-import RoadCreator from '@/components/PolygonViewer/RoadCreator';
 import BuildingRenderer from './BuildingRenderer';
 import PlaceableObjectManager from '@/lib/components/PlaceableObjectManager';
 import { useBuildingMenu } from '@/hooks/useBuildingMenu';
@@ -23,7 +22,7 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
   polygons,
   onRefreshBuildings
 }) => {
-  const [isRoadCreatorActive, setIsRoadCreatorActive] = useState(false);
+  const [isRoadCreatorActive, setIsRoadCreatorActive] = useState(false); // Kept for state compatibility but not used
   const [placeableObjectType, setPlaceableObjectType] = useState<'dock' | 'building' | null>(null);
   const [showBuildingRenderer, setShowBuildingRenderer] = useState(true);
   const [selectedBuildingType, setSelectedBuildingType] = useState<string>('');
@@ -128,23 +127,7 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
         <span>Browse Buildings</span>
       </button>
       
-      {isRoadCreatorActive && scene && camera && (
-        <RoadCreator
-          scene={scene}
-          camera={camera}
-          active={isRoadCreatorActive}
-          onComplete={(roadPoints, roadId) => {
-            console.log('Road created with ID:', roadId);
-            setIsRoadCreatorActive(false);
-            if (onRefreshBuildings) {
-              onRefreshBuildings();
-            }
-          }}
-          onCancel={() => {
-            setIsRoadCreatorActive(false);
-          }}
-        />
-      )}
+      {/* Road creator functionality removed due to missing component */}
       
       {showCanalCreator && scene && camera && (
         <div className="absolute top-0 left-0 right-0 bottom-0 z-30">
