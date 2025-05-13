@@ -1,6 +1,6 @@
 import useBuildingStore from '@/store/useBuildingStore';
 import * as THREE from 'three';
-import { BuildingCategory, Building, PlacementResult, PlacementContext } from '../models/BuildingTypes';
+import { BuildingCategory, BuildingDefinition, PlacementResult, PlacementContext } from '../models/BuildingTypes';
 
 // Re-export BuildingData from models
 export { BuildingData } from '../models/BuildingTypes';
@@ -40,7 +40,7 @@ export class BuildingService {
   /**
    * Get a building by name
    */
-  public async getBuildingByName(name: string): Promise<Building | null> {
+  public async getBuildingByName(name: string): Promise<BuildingDefinition | null> {
     return useBuildingStore.getState().getBuildingByName(name);
   }
 
@@ -153,10 +153,11 @@ export class BuildingService {
         console.warn(`Failed to fetch buildings: ${response.status}. Using fallback data.`);
         
         // Return mock data as fallback
-        const fallbackData = [
+        const fallbackData: BuildingData[] = [
           {
             id: 'building_1',
             type: 'market-stall',
+            variant: 'default',
             land_id: 'land_1',
             position: { x: 100, y: 0, z: 100 },
             rotation: 0,
