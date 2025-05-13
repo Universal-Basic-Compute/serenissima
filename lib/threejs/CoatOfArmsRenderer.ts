@@ -24,6 +24,7 @@ export class CoatOfArmsRenderer {
     this.scene = scene;
     this.bounds = bounds;
     this.textureLoader = new THREE.TextureLoader();
+    this.textureLoader.crossOrigin = 'anonymous';
   }
 
   public updateCoatOfArms(ownerCoatOfArmsMap: Record<string, string>): void {
@@ -35,23 +36,26 @@ export class CoatOfArmsRenderer {
     // Process each entry to ensure proper URL format
     Object.entries(ownerCoatOfArmsMap).forEach(([owner, url]) => {
       if (url) {
-        // If the URL doesn't start with a slash or http, add a leading slash
-        if (!url.startsWith('/') && !url.startsWith('http')) {
-          url = '/' + url;
+        let formattedUrl = url as string;
+        
+        // If the URL doesn't start with http, format it properly
+        if (!formattedUrl.startsWith('http')) {
+          // If it doesn't have a specific path but just a username, construct the standard path
+          if (!formattedUrl.includes('/coat-of-arms/')) {
+            formattedUrl = `/coat-of-arms/${owner}.png`;
+          }
+          
+          // If it's a relative path, ensure it has a leading slash
+          if (!formattedUrl.startsWith('/')) {
+            formattedUrl = `/${formattedUrl}`;
+          }
+          
+          // Always use serenissima.ai domain for production
+          formattedUrl = `https://serenissima.ai${formattedUrl}`;
         }
         
-        // If it's a username without a full path, construct the coat of arms path
-        if (!url.includes('/coat-of-arms/') && !url.startsWith('http')) {
-          url = `/coat-of-arms/${owner}.png`;
-        }
-        
-        // Always use serenissima.ai domain for production
-        if (url.startsWith('/')) {
-          url = `https://serenissima.ai${url}`;
-        }
-        
-        formattedMap[owner] = url;
-        console.log(`Formatted coat of arms URL for ${owner}: ${url}`);
+        formattedMap[owner] = formattedUrl;
+        console.log(`Formatted coat of arms URL for ${owner}: ${formattedUrl}`);
       }
     });
     
@@ -194,7 +198,11 @@ export class CoatOfArmsRenderer {
       const currentUrl = urlsToTry[index];
       console.log(`Trying URL ${index + 1}/${urlsToTry.length} for ${ownerValue}: ${currentUrl}`);
       
-      this.textureLoader.load(
+      // Create a texture loader with crossOrigin set
+      const crossOriginLoader = new THREE.TextureLoader();
+      crossOriginLoader.crossOrigin = 'anonymous';
+      
+      crossOriginLoader.load(
         currentUrl,
         (texture) => {
           console.log(`Successfully loaded texture for ${ownerValue} from ${currentUrl}`);

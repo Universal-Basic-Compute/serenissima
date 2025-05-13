@@ -43,17 +43,27 @@ export async function GET() {
       const coatOfArmsImage = record.get('CoatOfArmsImage');
       
       if (username && coatOfArmsImage) {
-        // Ensure the URL is properly formatted
+        // Ensure the URL is properly formatted for production
         let imageUrl = coatOfArmsImage as string;
         
-        // If the URL doesn't start with http or /, add the production URL
-        if (!imageUrl.startsWith('http') && !imageUrl.startsWith('/')) {
-          imageUrl = `https://serenissima.ai/coat-of-arms/${username}.png`;
-        } else if (imageUrl.startsWith('/')) {
+        // Always use the production URL for coat of arms images
+        if (!imageUrl.startsWith('http')) {
+          // If it doesn't have a specific path but just a username, construct the standard path
+          if (!imageUrl.includes('/')) {
+            imageUrl = `/coat-of-arms/${username}.png`;
+          }
+          
+          // If it's a relative path, ensure it has a leading slash
+          if (!imageUrl.startsWith('/')) {
+            imageUrl = `/${imageUrl}`;
+          }
+          
+          // Add the production domain
           imageUrl = `https://serenissima.ai${imageUrl}`;
         }
         
         coatOfArms[username as string] = imageUrl;
+        console.log(`Coat of arms for ${username}: ${imageUrl}`);
       }
     });
     

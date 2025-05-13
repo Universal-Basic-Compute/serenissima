@@ -89,14 +89,17 @@ export async function fetchCoatOfArmsImage(imageUrl: string): Promise<string> {
     throw new Error('Please provide a coat of arms image URL');
   }
   
-  // If the URL is relative, prepend the production URL
-  if (imageUrl.startsWith('/')) {
-    const productionUrl = 'https://serenissima.ai';
+  // Ensure the URL is properly formatted for production
+  const productionUrl = 'https://serenissima.ai';
+  
+  if (!imageUrl.startsWith('http')) {
+    // If it's a relative path, ensure it has a leading slash
+    if (!imageUrl.startsWith('/')) {
+      imageUrl = `/${imageUrl}`;
+    }
+    
+    // Add the production domain
     imageUrl = `${productionUrl}${imageUrl}`;
-    console.log('Using production URL for coat of arms:', imageUrl);
-  } else if (!imageUrl.startsWith('http')) {
-    const productionUrl = 'https://serenissima.ai';
-    imageUrl = `${productionUrl}/${imageUrl}`;
     console.log('Using production URL for coat of arms:', imageUrl);
   }
   
