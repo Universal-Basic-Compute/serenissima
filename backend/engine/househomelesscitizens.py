@@ -112,7 +112,7 @@ def assign_citizen_to_building(tables, citizen: Dict, building: Dict) -> bool:
     try:
         # Update citizen record with new home
         tables['citizens'].update(citizen_id, {
-            'Home': building_id
+            'Home': building['fields']['BuildingId']  # Use BuildingId field instead of record id
         })
         
         # Update building record with new occupant
@@ -135,7 +135,7 @@ def assign_citizen_to_building(tables, citizen: Dict, building: Dict) -> bool:
             details = {
                 "citizen_id": citizen['fields']['CitizenId'],  # Use CitizenId field instead of record id
                 "citizen_name": citizen_name,
-                "building_id": building_id,
+                "building_id": building['fields']['BuildingId'],  # Use BuildingId field instead of record id
                 "building_name": building_name,
                 "building_type": building['fields'].get('Type', ''),
                 "rent_amount": building['fields'].get('RentAmount', 0)
