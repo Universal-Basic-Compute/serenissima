@@ -368,7 +368,6 @@ function buildCanalNetwork(polygons: Polygon[]): Record<string, Point[]> {
         const segmentId = `canal-segment-${point1.id}-${point2.id}`;
 
         // Create a path between these two points
-        // For now, just a direct line, but could be enhanced with actual canal geometry
         canalNetwork[segmentId] = [point1.point, point2.point];
       }
     }
@@ -386,6 +385,28 @@ function buildCanalNetwork(polygons: Polygon[]): Record<string, Point[]> {
         const segmentId = `canal-segment-${point1.id}-${point2.id}`;
 
         // Create a path between these two points
+        canalNetwork[segmentId] = [point1.point, point2.point];
+      }
+    }
+  }
+
+  // Add additional connections between canal points that are likely part of the same canal
+  // This helps create a more connected network
+  for (let i = 0; i < allCanalPoints.length; i++) {
+    const point1 = allCanalPoints[i];
+    
+    for (let j = i + 1; j < allCanalPoints.length; j++) {
+      const point2 = allCanalPoints[j];
+      
+      // Skip if they're in the same polygon (already connected above)
+      if (point1.polygonId === point2.polygonId) continue;
+      
+      // Calculate distance
+      const distance = calculateDistance(point1.point, point2.point);
+      
+      // Connect points that are close but not too close (likely part of the same canal)
+      if (distance > 10 && distance < 80) {
+        const segmentId = `canal-segment-extra-${point1.id}-${point2.id}`;
         canalNetwork[segmentId] = [point1.point, point2.point];
       }
     }
@@ -436,32 +457,58 @@ function enhancePathWithCanalSegments(pathPoints: any[], canalNetwork: Record<st
           // We found a canal segment that connects our points
           canalSegmentFound = true;
 
-          // Add intermediate points along the canal
-          // For now, we'll just add a midpoint to create a curved path
-          const midpoint = {
-            lat: (point1.lat + point2.lat) / 2 + (Math.random() * 0.0001 - 0.00005),
-            lng: (point1.lng + point2.lng) / 2 + (Math.random() * 0.0001 - 0.00005),
-            type: 'canal',
-            transportMode: 'gondola',
-            isIntermediatePoint: true
-          };
-
-          enhancedPath.push(midpoint);
+          // Add 2-3 intermediate points along the canal for a more natural curve
+          const numPoints = 2 + Math.floor(Math.random() * 2); // 2 or 3 points
+          
+          for (let j = 1; j <= numPoints; j++) {
+            const fraction = j / (numPoints + 1);
+            // Add some randomness to the midpoint to create natural curves
+            const jitter = 0.00005 * (Math.random() * 2 - 1);
+            const midpoint = {
+              lat: point1.lat + (point2.lat - point1.lat) * fraction + jitter,
+              lng: point1.lng + (point2.lng - point1.lng) * fraction + jitter,
+              type: 'canal',
+              transportMode: 'gondola',
+              isIntermediatePoint: true
+            };
+            enhancedPath.push(midpoint);
+          }
           break;
         }
       }
 
-      // If no canal segment was found, just add the endpoint directly
+      // If no canal segment was found, add intermediate points anyway for visual appeal
       if (!canalSegmentFound) {
-        // Add a slight curve anyway for visual appeal
+        // Calculate distance between points
+        const distance = calculateDistance(point1, point2);
+        
+        // If distance is significant, add more intermediate points
+        const numPoints = distance > 50 ? 3 : 2;
+        
+        for (let j = 1; j <= numPoints; j++) {
+          const fraction = j / (numPoints + 1);
+          // Add some randomness to create natural curves
+          const jitter = 0.00005 * (Math.random() * 2 - 1);
+          const midpoint = {
+            lat: point1.lat + (point2.lat - point1.lat) * fraction + jitter,
+            lng: point1.lng + (point2.lng - point1.lng) * fraction + jitter,
+            type: 'canal',
+            transportMode: 'gondola',
+            isIntermediatePoint: true
+          };
+          enhancedPath.push(midpoint);
+        }
+      }
+    } else if (point1.transportMode === 'walking') {
+      // For walking paths, we can add a single intermediate point for slight curves
+      if (calculateDistance(point1, point2) > 30) { // Only for longer segments
         const midpoint = {
-          lat: (point1.lat + point2.lat) / 2 + (Math.random() * 0.0001 - 0.00005),
-          lng: (point1.lng + point2.lng) / 2 + (Math.random() * 0.0001 - 0.00005),
-          type: 'canal',
-          transportMode: 'gondola',
+          lat: (point1.lat + point2.lat) / 2 + (Math.random() * 0.00002 - 0.00001),
+          lng: (point1.lng + point2.lng) / 2 + (Math.random() * 0.00002 - 0.00001),
+          type: point1.type,
+          transportMode: 'walking',
           isIntermediatePoint: true
         };
-
         enhancedPath.push(midpoint);
       }
     }

@@ -202,22 +202,23 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             y: y1,
             targetX: x2,
             targetY: y2,
-            progress: 0,
+            progress: Math.random(), // Start at random positions along the path
+            speed: 0.0001 + (Math.random() * 0.00005), // Slightly different speeds
             angle
           };
         });
 
         // Start animation
         let lastTime = performance.now();
-
+        
         const animateGondolas = (time: number) => {
           const deltaTime = time - lastTime;
           lastTime = time;
 
           // Update gondola positions
           const newPositions = initialPositions.map(gondola => {
-            // Update progress
-            gondola.progress += deltaTime * 0.0001; // Adjust speed here
+            // Update progress based on individual gondola speed
+            gondola.progress += deltaTime * gondola.speed;
 
             if (gondola.progress > 1) {
               gondola.progress = 0;
@@ -235,7 +236,6 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           });
 
           setGondolaPositions(newPositions);
-
           gondolaAnimationRef.current = requestAnimationFrame(animateGondolas);
         };
 
@@ -2397,22 +2397,19 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
               ctx.lineWidth = 2 * scale;
               ctx.stroke();
 
-              // Add gondola icon at intermediate points
-              if (point1.isIntermediatePoint) {
-                // Draw a small gondola icon
-                const iconSize = 3 * scale;
-
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+              // Add ripple effects along the path
+              const segments = 5;
+              for (let s = 1; s < segments; s++) {
+                const segX = startX + (endX - startX) * (s / segments);
+                const segY = startY + (endY - startY) * (s / segments);
+                  
+                // Draw small ripple circles
                 ctx.beginPath();
-                ctx.ellipse(
-                  startX,
-                  startY,
-                  iconSize * 2,
-                  iconSize * 0.7,
-                  Math.atan2(endY - startY, endX - startX),
-                  0,
-                  Math.PI * 2
-                );
+                const rippleSize = 1 * scale * Math.random();
+                ctx.arc(segX + (Math.random() * 6 - 3) * scale, 
+                        segY + (Math.random() * 6 - 3) * scale, 
+                        rippleSize, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
                 ctx.fill();
               }
             } else {
