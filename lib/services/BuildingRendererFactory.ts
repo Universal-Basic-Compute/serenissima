@@ -67,7 +67,7 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
     this.logDebug(`Checking for model files in public directory...`);
     
     // Common building types to check
-    const buildingTypes = ['market-stall', 'house', 'workshop', 'tavern', 'dock', 'warehouse'];
+    const buildingTypes = ['market-stall', 'house', 'workshop', 'tavern', 'dock', 'warehouse', 'artisan-s-house'];
     const variants = ['model'];
     
     for (const type of buildingTypes) {
@@ -77,6 +77,12 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
           const response = await fetch(modelPath, { method: 'HEAD' });
           this.logDebug(`Model ${type}/${variant}: ${response.ok ? 'EXISTS' : 'MISSING'} (${response.status})`, 
             `background: ${response.ok ? '#00FF00' : '#FF0000'}; color: black; padding: 2px 5px; font-weight: bold;`);
+          
+          // Also check the old path for comparison
+          const oldPath = `/models/buildings/${type}/${variant}.glb`;
+          const oldResponse = await fetch(oldPath, { method: 'HEAD' });
+          this.logDebug(`Old path ${type}/${variant}: ${oldResponse.ok ? 'EXISTS' : 'MISSING'} (${oldResponse.status})`, 
+            `background: ${oldResponse.ok ? '#00FF00' : '#FF0000'}; color: black; padding: 2px 5px; font-weight: bold;`);
         } catch (error: unknown) {
           const errorMessage = error instanceof Error ? error.message : String(error);
           console.warn(`Error checking model ${type}/${variant}: ${errorMessage}`);
@@ -107,8 +113,8 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
       .replace(/'/g, '')
       .replace(/&/g, 'and');
     
-    // Create the model path
-    const modelPath = `/models/buildings/${normalizedType}/${variant}.glb`;
+    // Create the model path using the correct directory structure
+    const modelPath = `/assets/buildings/models/${normalizedType}/${variant}.glb`;
     
     if (this.debug) {
       // Log the full URL for easier debugging
@@ -130,7 +136,7 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
     this.logDebug('Preloading common building models...');
     
     // List of common building types to preload
-    const commonTypes = ['market-stall', 'house', 'workshop', 'tavern'];
+    const commonTypes = ['market-stall', 'house', 'workshop', 'tavern', 'artisan-s-house'];
     
     // Preload each model
     commonTypes.forEach(type => {
@@ -147,6 +153,44 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
           console.warn(`Failed to preload model for ${type}: ${error.message}`);
         }
       );
+    });
+  }
+  
+  /**
+   * Public debug method to check all model paths
+   * Can be called from outside to diagnose model loading issues
+   */
+  public debugModelPaths(): void {
+    console.log('%c Checking building model paths...', 'background: #FFFF00; color: black; padding: 2px 5px;');
+    
+    // Common building types to check
+    const buildingTypes = ['market-stall', 'house', 'workshop', 'tavern', 'artisan-s-house'];
+    
+    buildingTypes.forEach(type => {
+      const oldPath = `/models/buildings/${type}/model.glb`;
+      const newPath = `/assets/buildings/models/${type}/model.glb`;
+      
+      // Check old path
+      fetch(oldPath, { method: 'HEAD' })
+        .then(response => {
+          console.log(`%c Old path ${oldPath}: ${response.ok ? 'EXISTS' : 'MISSING'} (${response.status})`, 
+            `background: ${response.ok ? '#00FF00' : '#FF0000'}; color: black; padding: 2px;`);
+        })
+        .catch(error => {
+          console.log(`%c Old path ${oldPath}: ERROR - ${error.message}`, 
+            'background: #FF0000; color: white; padding: 2px;');
+        });
+      
+      // Check new path
+      fetch(newPath, { method: 'HEAD' })
+        .then(response => {
+          console.log(`%c New path ${newPath}: ${response.ok ? 'EXISTS' : 'MISSING'} (${response.status})`, 
+            `background: ${response.ok ? '#00FF00' : '#FF0000'}; color: black; padding: 2px;`);
+        })
+        .catch(error => {
+          console.log(`%c New path ${newPath}: ERROR - ${error.message}`, 
+            'background: #FF0000; color: white; padding: 2px;');
+        });
     });
   }
   
@@ -663,16 +707,19 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
     
     // If not cached, load the model
     try {
-      // Normalize the building type to ensure consistent path format
-      const normalizedType = building.type.toLowerCase()
-        .replace(/\s+/g, '-')
-        .replace(/'/g, '')
-        .replace(/&/g, 'and');
-      
-      const modelPath = `/models/buildings/${normalizedType}/${building.variant || 'model'}.glb`;
+      const modelPath = this.getModelPath(building.type, building.variant || 'model');
       
       if (this.debug) {
         this.logDebug(`Attempting to load model from: ${modelPath}`);
+        
+        // Add this to check if the file exists
+        fetch(modelPath, { method: 'HEAD' })
+          .then(response => {
+            this.logDebug(`Model file check: ${response.ok ? 'EXISTS' : 'MISSING'} (${response.status})`);
+          })
+          .catch(error => {
+            this.logDebug(`Error checking model file: ${error.message}`);
+          });
       }
       
       // Create a low detail model to show while loading
@@ -719,14 +766,26 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
       return model;
     } catch (error) {
       console.warn(`Failed to load model for ${building.id} of type ${building.type}: ${error instanceof Error ? error.message : String(error)}`);
+      console.warn(`Attempted to load from path: ${modelPath}`);
       
       // Try alternative model paths if the primary path fails
       try {
         // Try a fallback path with just the base type (e.g., "house" instead of "large-house")
         const baseType = building.type.split('-')[0];
         if (baseType && baseType !== building.type) {
-          const fallbackPath = `/models/buildings/${baseType}/${building.variant || 'model'}.glb`;
+          const fallbackPath = this.getModelPath(baseType, building.variant || 'model');
           console.log(`Trying fallback model path: ${fallbackPath}`);
+          
+          // Check if fallback file exists
+          if (this.debug) {
+            fetch(fallbackPath, { method: 'HEAD' })
+              .then(response => {
+                this.logDebug(`Fallback model check: ${response.ok ? 'EXISTS' : 'MISSING'} (${response.status})`);
+              })
+              .catch(error => {
+                this.logDebug(`Error checking fallback model: ${error.message}`);
+              });
+          }
           
           const gltf = await this.gltfLoader.loadAsync(fallbackPath);
           const model = gltf.scene;
