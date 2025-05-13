@@ -2,6 +2,50 @@ import { useEffect, useState, useRef } from 'react';
 import { getBackendBaseUrl } from '@/lib/apiUtils';
 import PlayerProfile from '../UI/PlayerProfile';
 
+// Add this helper function to find and load the building definition file
+const loadBuildingDefinition = async (type: string, variant?: string): Promise<any> => {
+  try {
+    // Try to find the building definition file in the data structure
+    // First, try with the specific variant if provided
+    if (variant) {
+      try {
+        const response = await fetch(`/data/buildings/${type.toLowerCase()}/${variant.toLowerCase()}.json`);
+        if (response.ok) {
+          return await response.json();
+        }
+      } catch (error) {
+        console.log(`No specific variant file found for ${type}/${variant}, trying category structure`);
+      }
+    }
+    
+    // Try to find in category/subcategory structure
+    try {
+      // This will search through all categories and subcategories
+      const response = await fetch(`/api/building-definition?type=${encodeURIComponent(type)}`);
+      if (response.ok) {
+        return await response.json();
+      }
+    } catch (error) {
+      console.log(`No building definition found in category structure for ${type}`);
+    }
+    
+    // Fallback to direct type file
+    try {
+      const response = await fetch(`/data/buildings/${type.toLowerCase()}.json`);
+      if (response.ok) {
+        return await response.json();
+      }
+    } catch (error) {
+      console.log(`No direct building definition file found for ${type}`);
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Error loading building definition:', error);
+    return null;
+  }
+};
+
 interface BuildingDetailsPanelProps {
   selectedBuildingId: string | null;
   onClose: () => void;
@@ -16,6 +60,8 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
   const [landData, setLandData] = useState<any>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [landRendered, setLandRendered] = useState<boolean>(false);
+  const [buildingDefinition, setBuildingDefinition] = useState<any>(null);
+  const [showFullDescription, setShowFullDescription] = useState<boolean>(false);
   
   // Fetch building details when a building is selected
   useEffect(() => {
@@ -59,6 +105,23 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
       setError(null);
     }
   }, [selectedBuildingId]);
+  
+  // Add this effect to load the building definition when a building is selected
+  useEffect(() => {
+    if (building?.type) {
+      loadBuildingDefinition(building.type, building.variant)
+        .then(definition => {
+          console.log('Loaded building definition:', definition);
+          setBuildingDefinition(definition);
+        })
+        .catch(error => {
+          console.error('Error loading building definition:', error);
+          setBuildingDefinition(null);
+        });
+    } else {
+      setBuildingDefinition(null);
+    }
+  }, [building]);
   
   // Function to fetch land data
   const fetchLandData = async (landId: string) => {
@@ -226,7 +289,7 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
   
   return (
     <div 
-      className={`fixed top-0 right-0 h-full w-96 bg-amber-50 shadow-xl transform transition-transform duration-300 ease-in-out z-20 border-l-4 border-amber-600 ${
+      className={`fixed top-0 right-0 h-full w-120 bg-amber-50 shadow-xl transform transition-transform duration-300 ease-in-out z-20 border-l-4 border-amber-600 ${
         isVisible ? 'translate-x-0' : 'translate-x-full'
       }`}
     >
@@ -369,6 +432,88 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                   />
                 </div>
               </div>
+            )}
+            
+            {/* Building Definition Information */}
+            {buildingDefinition && (
+              <>
+                {/* Name and Category */}
+                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Building Information</h3>
+                  
+                  {buildingDefinition.name && (
+                    <div className="mb-2">
+                      <span className="text-gray-700">Name:</span>
+                      <span className="ml-2 font-serif text-lg font-semibold text-amber-800">{buildingDefinition.name}</span>
+                    </div>
+                  )}
+                  
+                  {buildingDefinition.category && (
+                    <div className="mb-2">
+                      <span className="text-gray-700">Category:</span>
+                      <span className="ml-2 font-medium text-amber-700">{buildingDefinition.category}</span>
+                    </div>
+                  )}
+                  
+                  {buildingDefinition.subcategory && (
+                    <div className="mb-2">
+                      <span className="text-gray-700">Subcategory:</span>
+                      <span className="ml-2 font-medium text-amber-700">{buildingDefinition.subcategory}</span>
+                    </div>
+                  )}
+                  
+                  {buildingDefinition.maintenanceCost !== undefined && (
+                    <div className="mt-3 flex justify-between items-center">
+                      <span className="text-gray-700">Maintenance Cost:</span>
+                      <span className="font-semibold text-amber-800">
+                        {buildingDefinition.maintenanceCost.toLocaleString()} ⚜️ ducats/day
+                      </span>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Short Description */}
+                {buildingDefinition.shortDescription && (
+                  <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+                    <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Description</h3>
+                    <p className="text-gray-700">{buildingDefinition.shortDescription}</p>
+                    
+                    {/* Flavor Text */}
+                    {buildingDefinition.flavorText && (
+                      <p className="mt-3 text-gray-600 italic border-l-4 border-amber-200 pl-3 py-1">
+                        "{buildingDefinition.flavorText}"
+                      </p>
+                    )}
+                  </div>
+                )}
+                
+                {/* Full Description (Collapsible) */}
+                {buildingDefinition.fullDescription && (
+                  <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+                    <button 
+                      onClick={() => setShowFullDescription(!showFullDescription)}
+                      className="w-full flex justify-between items-center text-left"
+                    >
+                      <h3 className="text-sm uppercase font-medium text-amber-600">Detailed Information</h3>
+                      <svg 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        className={`h-5 w-5 transition-transform ${showFullDescription ? 'transform rotate-180' : ''}`} 
+                        fill="none" 
+                        viewBox="0 0 24 24" 
+                        stroke="currentColor"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    
+                    {showFullDescription && (
+                      <div className="mt-3 text-gray-700 border-t border-amber-200 pt-3">
+                        <p className="whitespace-pre-line">{buildingDefinition.fullDescription}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
             )}
             
             {/* Creation Information with adjusted date (500 years earlier) */}
