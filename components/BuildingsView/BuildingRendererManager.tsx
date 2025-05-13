@@ -48,7 +48,7 @@ const BuildingRendererManager: React.FC<BuildingRendererManagerProps> = ({
       
           // Initialize the building renderer manager now
           // Add a check to ensure scene is still valid
-          if (scene) {
+          if (scene && scene.isScene) {
             console.log('BuildingRendererManager: Initializing with scene', scene);
             buildingRendererManager.initialize(scene);
         
@@ -68,7 +68,7 @@ const BuildingRendererManager: React.FC<BuildingRendererManagerProps> = ({
               }, 2000);
             }, 500);
           } else {
-            console.error('BuildingRendererManager: Scene is undefined when trying to initialize');
+            console.error('BuildingRendererManager: Scene is undefined or invalid when trying to initialize');
           }
         }
       }

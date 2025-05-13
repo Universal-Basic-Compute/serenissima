@@ -42,6 +42,12 @@ export class SceneLayerManager {
    * Initialize the manager with a scene
    */
   public initialize(scene: THREE.Scene): void {
+    // Validate scene before proceeding
+    if (!scene || !scene.isScene) {
+      console.error('SceneLayerManager: Invalid scene provided');
+      return;
+    }
+    
     this.scene = scene;
     
     // Listen for base layer initialization
@@ -52,16 +58,20 @@ export class SceneLayerManager {
         
         if (data.waterInitialized && data.landInitialized) {
           this.baseLayerInitialized = true;
+          console.log('SceneLayerManager: Base layer (water and land) initialized');
         }
         
         if (data.buildingsInitialized) {
           this.buildingsInitialized = true;
+          console.log('SceneLayerManager: Buildings layer initialized');
         }
       }
     );
     
     // Store subscription for cleanup
     this.viewLayers.set('baseLayerSubscription', subscription);
+    
+    console.log('SceneLayerManager: Initialized with scene');
   }
   
   /**
@@ -98,6 +108,12 @@ export class SceneLayerManager {
   public switchToView(viewName: string): void {
     console.log(`SceneLayerManager: Switching to ${viewName} view`);
     
+    // Validate scene is still available
+    if (!this.scene) {
+      console.error('SceneLayerManager: Cannot switch view - scene is undefined');
+      return;
+    }
+    
     // Instead of hiding all view layers, only hide non-persistent layers
     this.viewLayers.forEach((layer, name) => {
       // Skip base layers (land, water, buildings) and the current view
@@ -129,11 +145,17 @@ export class SceneLayerManager {
         // Ensure buildings are visible after view change
         setTimeout(() => {
           try {
-            if (buildingRendererManager.getBuildingMeshes().size === 0) {
+            const buildingCount = buildingRendererManager.getBuildingMeshes().size;
+            if (buildingCount === 0) {
               console.warn('SceneLayerManager: No buildings found after view change, refreshing...');
               buildingRendererManager.refreshBuildings();
             } else {
-              console.log(`SceneLayerManager: Found ${buildingRendererManager.getBuildingMeshes().size} buildings after view change`);
+              console.log(`SceneLayerManager: Found ${buildingCount} buildings after view change`);
+              
+              // Force a scene update to ensure buildings are visible
+              if (this.scene && this.scene.userData && this.scene.userData.renderer && this.scene.userData.camera) {
+                this.scene.userData.renderer.render(this.scene, this.scene.userData.camera);
+              }
             }
           } catch (error) {
             console.warn('Error checking building meshes:', error);

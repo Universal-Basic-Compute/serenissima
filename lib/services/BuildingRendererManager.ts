@@ -55,6 +55,12 @@ export class BuildingRendererManager {
     // Log to confirm scene is set
     console.log('BuildingRendererManager: Scene initialized', this.scene);
     
+    // Verify scene is valid before proceeding
+    if (!scene || !scene.isScene) {
+      log.error('BuildingRendererManager: Invalid scene provided');
+      return;
+    }
+    
     this.rendererFactory = new BuildingRendererFactory({
       scene,
       positionManager: buildingPositionManager,
@@ -404,17 +410,23 @@ export class BuildingRendererManager {
       return;
     }
     
+    if (!this.scene) {
+      console.error('BuildingRendererManager: Cannot refresh buildings - scene is undefined');
+      return;
+    }
+    
     console.log('%c BuildingRendererManager: Refreshing buildings', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
     
     try {
       // Fetch buildings from API with a timeout
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // Increased to 15 second timeout
       
       const response = await fetch('/api/buildings', {
         signal: controller.signal,
         headers: {
-          'Cache-Control': 'no-cache'
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
         }
       });
       
@@ -441,6 +453,10 @@ export class BuildingRendererManager {
       const concurrentLimit = 50; // Increased from 5 to 50
       const chunks = this.chunkArray(sortedBuildings, concurrentLimit);
       
+      // Track rendering progress
+      let renderedCount = 0;
+      const totalCount = sortedBuildings.length;
+      
       for (const chunk of chunks) {
         // Process each chunk in parallel
         await Promise.all(chunk.map(async (building) => {
@@ -453,6 +469,12 @@ export class BuildingRendererManager {
           
           try {
             await this.renderBuilding(building);
+            renderedCount++;
+            
+            // Log progress for every 10% completed
+            if (renderedCount % Math.max(1, Math.floor(totalCount / 10)) === 0) {
+              console.log(`BuildingRendererManager: Rendered ${renderedCount}/${totalCount} buildings (${Math.round(renderedCount/totalCount*100)}%)`);
+            }
           } catch (error) {
             log.warn(`Error rendering building ${building.id}:`, error);
           }
@@ -485,6 +507,7 @@ export class BuildingRendererManager {
         // Try to load some default buildings as fallback
         try {
           const fallbackBuildings = this.getFallbackBuildings();
+          console.log(`BuildingRendererManager: Loading ${fallbackBuildings.length} fallback buildings`);
           for (const building of fallbackBuildings) {
             await this.renderBuilding(building);
           }

@@ -94,8 +94,8 @@ const BaseSceneLayer: React.FC<BaseSceneLayerProps> = ({
     // Add a delay to ensure water and land are fully rendered before loading buildings
     setTimeout(() => {
       // Check again that scene is still valid
-      if (!scene) {
-        console.error('BaseSceneLayer: Scene became undefined before initializing buildings');
+      if (!scene || !scene.isScene) {
+        console.error('BaseSceneLayer: Scene became undefined or invalid before initializing buildings');
         return;
       }
       
@@ -103,37 +103,43 @@ const BaseSceneLayer: React.FC<BaseSceneLayerProps> = ({
       console.log('BaseSceneLayer: Initializing buildingRendererManager with scene', scene);
       buildingRendererManager.initialize(scene);
       
-      // Load all buildings
-      buildingRendererManager.refreshBuildings()
-        .then(() => {
-          console.log('BaseSceneLayer: Buildings loaded successfully');
-          buildingsInitializedRef.current = true;
-          
-          // Emit event to notify that buildings are rendered
-          eventBus.emit(ExtendedEventTypes.SCENE_BASE_RENDERED, {
-            buildingsInitialized: true
-          });
-          
-          // Ensure buildings are visible by default
-          window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
-          
-          // Check if buildings are visible after a delay
-          setTimeout(() => {
-            const buildingCount = buildingRendererManager.getBuildingMeshes().size;
-            if (buildingCount === 0) {
-              console.warn('BaseSceneLayer: No buildings visible after initialization, refreshing again');
-              buildingRendererManager.refreshBuildings()
-                .then(() => {
-                  console.log(`BaseSceneLayer: Buildings refreshed again, now have ${buildingRendererManager.getBuildingMeshes().size} buildings`);
-                });
-            } else {
-              console.log(`BaseSceneLayer: ${buildingCount} buildings visible after initialization`);
+      // Load all buildings with retry logic
+      const loadBuildings = (retryCount = 0) => {
+        buildingRendererManager.refreshBuildings()
+          .then(() => {
+            console.log('BaseSceneLayer: Buildings loaded successfully');
+            buildingsInitializedRef.current = true;
+            
+            // Emit event to notify that buildings are rendered
+            eventBus.emit(ExtendedEventTypes.SCENE_BASE_RENDERED, {
+              buildingsInitialized: true
+            });
+            
+            // Ensure buildings are visible by default
+            window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+            
+            // Check if buildings are visible after a delay
+            setTimeout(() => {
+              const buildingCount = buildingRendererManager.getBuildingMeshes().size;
+              if (buildingCount === 0 && retryCount < 3) {
+                console.warn(`BaseSceneLayer: No buildings visible after initialization, retrying (attempt ${retryCount + 1}/3)`);
+                loadBuildings(retryCount + 1);
+              } else {
+                console.log(`BaseSceneLayer: ${buildingCount} buildings visible after initialization`);
+              }
+            }, 2000);
+          })
+          .catch(error => {
+            console.error(`BaseSceneLayer: Error loading buildings (attempt ${retryCount + 1}/3):`, error);
+            if (retryCount < 3) {
+              console.log(`BaseSceneLayer: Retrying in 2 seconds...`);
+              setTimeout(() => loadBuildings(retryCount + 1), 2000);
             }
-          }, 2000);
-        })
-        .catch(error => {
-          console.error('BaseSceneLayer: Error loading buildings:', error);
-        });
+          });
+      };
+      
+      // Start the loading process
+      loadBuildings();
     }, 1000); // Add a 1 second delay to ensure water and land are fully rendered
 
     // No cleanup needed here - buildings will be cleaned up with the scene
