@@ -978,16 +978,31 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         const size = getBuildingSize(building.type);
         const color = getBuildingColor(building.type);
         
-        // Draw building as a simple colored rectangle
-        ctx.fillStyle = color;
-        ctx.strokeStyle = '#000';
-        ctx.lineWidth = 1;
+        // Determine if this building is hovered or selected
+        const isHovered = hoveredBuildingId === building.id;
+        const isSelected = selectedBuildingId === building.id;
         
-        // Draw simple square for building
+        // Draw simple square for building with hover/select states
         const squareSize = Math.max(size.width, size.depth) * scale * 0.6;
-        ctx.fillStyle = color;
-        ctx.strokeStyle = '#000';
-        ctx.lineWidth = 1;
+        
+        // Apply different styles for hover and selected states
+        if (isSelected) {
+          // Selected state: much brighter with a thicker border
+          ctx.fillStyle = lightenColor(color, 35); // Increased brightness for selection
+          ctx.strokeStyle = '#FF3300'; // Bright red-orange for selected
+          ctx.lineWidth = 3.5;
+        } else if (isHovered) {
+          // Hover state: significantly brighter with a more vibrant border
+          ctx.fillStyle = lightenColor(color, 25); // Increased brightness for hover
+          ctx.strokeStyle = '#FFCC00'; // Bright yellow for hover
+          ctx.lineWidth = 3; // Thicker border
+        } else {
+          // Normal state
+          ctx.fillStyle = color;
+          ctx.strokeStyle = '#000';
+          ctx.lineWidth = 1;
+        }
+        
         ctx.beginPath();
         ctx.rect(
           isoPos.x - squareSize/2, 
