@@ -13,12 +13,6 @@ export interface CitizenDisplayOptions {
     width?: number;
     height?: number;
   };
-  /**
-   * Get the current active state
-   */
-  public isActiveView(): boolean {
-    return this.isActive;
-  }
 }
 
 export interface CitizenMarkerOptions {
@@ -1456,7 +1450,14 @@ export class CitizenDisplayManager {
     });
     this.textureCache.clear();
   }
-}
+  
+  /**
+   * Get the current active state
+   */
+  public isActiveView(): boolean {
+    return this.isActive;
+  }
+  
   /**
    * Create an icon to indicate home or work
    */
@@ -1659,4 +1660,3 @@ export class CitizenDisplayManager {
     
     return container;
   }
-}
