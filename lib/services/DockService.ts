@@ -240,7 +240,7 @@ export class DockService {
     }
 
     // Emit event
-    eventBus.emit(EventTypes.DOCK_UPDATED, {
+    eventBus.emit(EventTypes.DOCK_UPDATED as keyof typeof EventTypes, {
       dockId: id,
       data: updatedDock
     });
