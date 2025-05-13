@@ -1,5 +1,6 @@
 {
   "name": "Shipyard",
+  "pointType": "canal",
   "category": "Production",
   "subcategory": "Shipbuilding Industry",
   "tier": 3,

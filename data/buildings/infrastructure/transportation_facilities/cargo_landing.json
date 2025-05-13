@@ -1,5 +1,6 @@
 {
   "name": "Cargo Landing",
+  "pointType": "canal",
   "category": "Infrastructure",
   "subcategory": "Transportation Facilities",
   "tier": 3,

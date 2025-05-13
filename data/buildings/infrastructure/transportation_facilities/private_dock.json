@@ -1,5 +1,6 @@
 {
   "name": "Private Dock",
+  "pointType": "canal",
   "category": "Infrastructure",
   "subcategory": "Transportation Facilities",
   "tier": 2,

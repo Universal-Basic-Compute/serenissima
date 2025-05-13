@@ -1,5 +1,6 @@
 {
   "name": "Boat Workshop",
+  "pointType": "canal",
   "category": "Production",
   "subcategory": "Transportation Industry",
   "tier": 2,

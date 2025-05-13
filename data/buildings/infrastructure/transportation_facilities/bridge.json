@@ -1,5 +1,6 @@
 {
   "name": "Bridge",
+  "pointType": "bridge",
   "category": "Infrastructure",
   "subcategory": "Transportation Facilities",
   "tier": 2,

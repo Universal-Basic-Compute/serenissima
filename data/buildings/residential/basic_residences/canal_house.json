@@ -1,5 +1,6 @@
 {
   "name": "Canal House",
+  "pointType": "canal",
   "category": "Residential",
   "subcategory": "Basic Residences",
   "tier": 2,

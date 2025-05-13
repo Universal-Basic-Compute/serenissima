@@ -1,5 +1,6 @@
 {
   "name": "Rialto Bridge",
+  "pointType": "bridge",
   "category": "Special Buildings",
   "subcategory": "Unique Structures",
   "tier": 4,

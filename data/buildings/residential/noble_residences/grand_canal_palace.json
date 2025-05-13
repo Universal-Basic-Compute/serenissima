@@ -1,5 +1,6 @@
 {
   "name": "Grand Canal Palace",
+  "pointType": "canal",
   "category": "Residential",
   "subcategory": "Noble Residences",
   "tier": 4,

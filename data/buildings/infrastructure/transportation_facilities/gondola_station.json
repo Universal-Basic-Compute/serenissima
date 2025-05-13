@@ -1,5 +1,6 @@
 {
   "name": "Gondola Station",
+  "pointType": "canal",
   "category": "Infrastructure",
   "subcategory": "Transportation Facilities",
   "tier": 2,

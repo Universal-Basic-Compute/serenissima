@@ -1,5 +1,6 @@
 {
   "name": "Flood Control Station",
+  "pointType": "canal",
   "category": "Infrastructure",
   "subcategory": "Water Management",
   "tier": 3,
