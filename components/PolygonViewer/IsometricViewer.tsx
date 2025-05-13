@@ -35,6 +35,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [hoveredBuildingId, setHoveredBuildingId] = useState<string | null>(null);
   const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(null);
   const [showBuildingDetailsPanel, setShowBuildingDetailsPanel] = useState<boolean>(false);
+  const [mousePosition, setMousePosition] = useState<{x: number, y: number}>({ x: 0, y: 0 });
   const [polygonsToRender, setPolygonsToRender] = useState<{
     polygon: any;
     coords: {x: number, y: number}[];
@@ -598,6 +599,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       const rect = canvas.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
+      
+      // Update mouse position state
+      setMousePosition({ x: mouseX, y: mouseY });
       
       // Check if mouse is over any polygon (for land view)
       if (activeView === 'land') {
@@ -1183,10 +1187,10 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         // Check if mouse is over this building point
         const pointSize = 2.8 * scale;
         const isHovered = 
-          mouseX >= isoPos.x - pointSize && 
-          mouseX <= isoPos.x + pointSize && 
-          mouseY >= isoPos.y - pointSize && 
-          mouseY <= isoPos.y + pointSize;
+          mousePosition.x >= isoPos.x - pointSize && 
+          mousePosition.x <= isoPos.x + pointSize && 
+          mousePosition.y >= isoPos.y - pointSize && 
+          mousePosition.y <= isoPos.y + pointSize;
         
         // Draw a small orange circle for empty building points
         // 30% smaller (2.8 instead of 4), with hover state and 20% more transparency
