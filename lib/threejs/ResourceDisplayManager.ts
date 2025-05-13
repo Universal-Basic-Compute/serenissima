@@ -1247,7 +1247,7 @@ export class ResourceDisplayManager {
     });
     this.textureCache.clear();
   }
-}
+  
   /**
    * Create a circular texture from a loaded texture
    */
@@ -1418,3 +1418,4 @@ export class ResourceDisplayManager {
     // Start the animation
     requestAnimationFrame(animate);
   }
+}
