@@ -727,14 +727,17 @@ export class CitizenDisplayManager {
     // Find the ground level at this position
     const groundLevel = this.findGroundLevel(position);
     if (groundLevel !== null) {
-      // Increase the height offset from 0.5 to 2.0 to ensure citizens are clearly above land
-      group.position.y = groundLevel + 2.0; // Position higher above ground
+      // Position at ground level with a small offset to prevent z-fighting
+      group.position.y = groundLevel + 0.1; // Just slightly above ground
       console.log(`Citizen group at ${locationKey} positioned at height ${group.position.y} (ground level: ${groundLevel})`);
     } else {
-      // Default height if ground not found - also increase this
-      group.position.y = 2.0; // Default height if ground not found
+      // Default height if ground not found - also very low
+      group.position.y = 0.1; // Just slightly above zero
       console.log(`Citizen group at ${locationKey} using default height (ground level not found)`);
     }
+    
+    // Rotate the group to face upward (parallel to the ground)
+    group.rotation.x = -Math.PI / 2; // Rotate to lie flat on the ground
     
     // Add a base marker (collapsed view)
     const baseMarker = this.createBaseMarker(citizens);
@@ -785,26 +788,25 @@ export class CitizenDisplayManager {
     container.name = 'base-marker';
     container.userData = { isCitizenMarker: true };
     
-    // Create a sprite for the citizen icon
-    const sprite = this.createCitizenSprite(primaryCitizen.profileImage || '/images/citizens/default.png');
-    sprite.scale.set(2, 2, 1);
-    container.add(sprite);
-    
-    // Add a circular background for better visibility
+    // Add a circular background for better visibility (FIRST)
     const backgroundSprite = this.createCircularBackground();
     backgroundSprite.scale.set(2.2, 2.2, 1); // Slightly larger than the icon
     backgroundSprite.renderOrder = 999; // Render behind the icon
     container.add(backgroundSprite);
     
+    // Create a sprite for the citizen icon (SECOND)
+    const sprite = this.createCitizenSprite(primaryCitizen.profileImage || '/images/citizens/default.png');
+    sprite.scale.set(2, 2, 1);
+    sprite.renderOrder = 1000; // Higher render order
+    container.add(sprite);
+    
     // If there are multiple citizens, add a count indicator
     if (citizens.length > 1) {
       const countIndicator = this.createCountIndicator(citizens.length);
       countIndicator.position.set(0.7, 0.7, 0.1);
+      countIndicator.renderOrder = 1001; // Even higher render order
       container.add(countIndicator);
     }
-    
-    // Make the marker always face the camera
-    container.renderOrder = 1000;
     
     return container;
   }
@@ -1823,17 +1825,14 @@ export class CitizenDisplayManager {
   private ensureMarkersAreVisible(): void {
     console.log('CitizenDisplayManager: Ensuring markers are visible');
     
-    // Raise all markers slightly to ensure they're visible
+    // If we don't have any markers but have citizens, create them
+    if (this.markers.length === 0 && this.citizens.length > 0) {
+      console.log('CitizenDisplayManager: Creating markers before forcing visibility');
+      this.createCitizenMarkers();
+    }
+    
+    // Ensure all markers are visible
     this.markers.forEach(marker => {
-      // Get current position
-      const currentY = marker.position.y;
-      
-      // Ensure minimum height
-      if (currentY < 2.0) {
-        marker.position.y = 2.0;
-        console.log(`Raised marker from ${currentY} to 2.0`);
-      }
-      
       // Ensure marker is visible
       marker.visible = true;
       
@@ -2172,14 +2171,17 @@ export class CitizenDisplayManager {
     // Find the ground level at this position
     const groundLevel = this.findGroundLevel(scenePosition);
     if (groundLevel !== null) {
-      // Increase height to ensure visibility
-      group.position.y = groundLevel + 3.5; // Position higher above buildings
+      // Position at ground level with a small offset to prevent z-fighting
+      group.position.y = groundLevel + 0.1; // Just slightly above ground
       console.log(`Building citizen marker for building ${buildingId} positioned at height ${group.position.y} (ground level: ${groundLevel})`);
     } else {
-      // Default height if ground not found - also increase this
-      group.position.y = 3.5; // Default height if ground not found
+      // Default height if ground not found - also very low
+      group.position.y = 0.1; // Just slightly above zero
       console.log(`Building citizen marker for building ${buildingId} using default height (ground level not found)`);
     }
+    
+    // Rotate the group to face upward (parallel to the ground)
+    group.rotation.x = -Math.PI / 2; // Rotate to lie flat on the ground
     
     // Create markers for home and work citizens
     const homeCitizens = citizens.filter(c => c.markerType === 'home');
@@ -2215,28 +2217,31 @@ export class CitizenDisplayManager {
     // Get the image URL, with fallbacks
     const imageUrl = this.getCitizenImageUrl(primaryCitizen);
     
-    // Create a sprite for the citizen icon
-    const sprite = this.createCitizenSprite(imageUrl);
-    sprite.scale.set(1.5, 1.5, 1);
-    container.add(sprite);
-    
-    // Add a circular background with different colors for home vs work
+    // Create a circular background first
     const backgroundSprite = this.createCircularBackground(
       markerType === 'home' ? 'rgba(100, 150, 255, 0.8)' : 'rgba(255, 150, 100, 0.8)'
     );
     backgroundSprite.scale.set(1.7, 1.7, 1);
-    backgroundSprite.renderOrder = 999;
+    backgroundSprite.renderOrder = 999; // Lower render order so it appears behind the citizen
     container.add(backgroundSprite);
+    
+    // Create a sprite for the citizen icon and add it AFTER the background
+    const sprite = this.createCitizenSprite(imageUrl);
+    sprite.scale.set(1.5, 1.5, 1);
+    sprite.renderOrder = 1000; // Higher render order so it appears in front of the background
+    container.add(sprite);
     
     // Add an icon to indicate home or work
     const iconSprite = this.createTypeIcon(markerType);
     iconSprite.position.set(0.7, 0.7, 0.1);
+    iconSprite.renderOrder = 1001; // Even higher render order
     container.add(iconSprite);
     
     // If there are multiple citizens, add a count indicator
     if (citizens.length > 1) {
       const countIndicator = this.createCountIndicator(citizens.length);
       countIndicator.position.set(-0.7, 0.7, 0.1);
+      countIndicator.renderOrder = 1001; // Same high render order as the icon
       container.add(countIndicator);
     }
     
