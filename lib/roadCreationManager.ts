@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { BuildingService } from './buildingService';
+import { DockService, DockData } from './services/DockService';
 
 export class RoadCreationManager {
   private scene: THREE.Scene;
@@ -84,17 +84,19 @@ export class RoadCreationManager {
    */
   public async loadDockSnapPoints(): Promise<void> {
     try {
-      const buildingService = BuildingService.getInstance();
-      const docks = await buildingService.getDocks();
+      const dockService = DockService.getInstance();
+      const docks = await dockService.getDocks();
       
       // Store dock connection points for later synchronous access
       this.dockConnectionPoints = [];
       
       for (const dock of docks) {
-        for (const point of dock.connectionPoints) {
-          this.dockConnectionPoints.push(
-            new THREE.Vector3(point.x, point.y, point.z)
-          );
+        if (dock.connectionPoints) {
+          for (const point of dock.connectionPoints) {
+            this.dockConnectionPoints.push(
+              new THREE.Vector3(point.x, point.y, point.z)
+            );
+          }
         }
       }
     } catch (error) {
