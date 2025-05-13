@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { sceneLayerManager } from '@/lib/services/SceneLayerManager';
 import GovernancePanel from '../components/UI/GovernancePanel';
 import GuildsPanel from '../components/UI/GuildsPanel';
 import TechTree from '../components/Knowledge/TechTree';
@@ -100,7 +101,13 @@ export default function SimplePage() {
     } else if (pathname === '/guilds' || showGuildsPanel) {
       setActiveView('guilds');
     }
-  }, [pathname, showGovernancePanel, showKnowledgePanel, showLoansPanel, showGuildsPanel]);
+    
+    // Use SceneLayerManager to switch views if it's initialized
+    if (sceneLayerManager.isBaseLayerInitialized()) {
+      console.log(`App: Switching to ${activeView} view using SceneLayerManager`);
+      sceneLayerManager.switchToView(activeView);
+    }
+  }, [pathname, showGovernancePanel, showKnowledgePanel, showLoansPanel, showGuildsPanel, activeView]);
   
   // Close the guilds panel when switching to a different view
   useEffect(() => {
@@ -139,6 +146,15 @@ export default function SimplePage() {
     
     const handleShow3DView = () => {
       setShow3DView(true);
+    };
+    
+    // Initialize SceneLayerManager when scene is ready
+    const handleSceneReady = (event: CustomEvent) => {
+      const { scene } = event.detail;
+      if (scene) {
+        console.log('App: Scene is ready, initializing SceneLayerManager');
+        sceneLayerManager.initialize(scene);
+      }
     };
     
     const handleWaterQualityChanged = (event: CustomEvent) => {
@@ -198,6 +214,7 @@ export default function SimplePage() {
     
     window.addEventListener('hide3DView', handleHide3DView);
     window.addEventListener('show3DView', handleShow3DView);
+    window.addEventListener('sceneReady', handleSceneReady as EventListener);
     window.addEventListener('buildingMenuClosed', handleBuildingMenuClosed);
     window.addEventListener('showBuildings', handleShowBuildings);
     window.addEventListener('loadCitizens', handleLoadCitizens);
@@ -221,6 +238,7 @@ export default function SimplePage() {
     return () => {
       window.removeEventListener('hide3DView', handleHide3DView);
       window.removeEventListener('show3DView', handleShow3DView);
+      window.removeEventListener('sceneReady', handleSceneReady as EventListener);
       window.removeEventListener('buildingMenuClosed', handleBuildingMenuClosed);
       window.removeEventListener('showBuildings', handleShowBuildings);
       window.removeEventListener('loadCitizens', handleLoadCitizens);

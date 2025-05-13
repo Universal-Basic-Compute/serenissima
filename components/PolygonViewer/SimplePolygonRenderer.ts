@@ -57,6 +57,7 @@ export default class SimplePolygonRenderer {
   private users: Record<string, any> = {};
   private sandColor: number = 0xfff5d0; // Default to even lighter, more yellow sand color
   private textureLoadAttempts: number = 0;
+  private hasRenderedLand: boolean = false;
   
   // Properties for hover and click detection
   private raycaster: THREE.Raycaster;
@@ -98,13 +99,15 @@ export default class SimplePolygonRenderer {
     users = {},
     camera = null,
     onLandSelected = null,
-    sandColor = 0xfff8e0 // Changed to an even lighter, more yellow sand color
+    sandColor = 0xfff8e0, // Changed to an even lighter, more yellow sand color
+    landOnly = false // New parameter for land-only mode
   }: SimplePolygonRendererProps & { 
     activeView?: string;
     users?: Record<string, any>;
     camera?: THREE.Camera | null;
     onLandSelected?: ((landId: string) => void) | null;
     sandColor?: number; // Add this to the type
+    landOnly?: boolean; // New parameter
   }) {
     this.scene = scene;
     this.polygons = polygons;
@@ -191,26 +194,42 @@ export default class SimplePolygonRenderer {
       console.warn('Error getting users from UserService:', error);
     }
     
-    // Load sand texture
-    this.textureLoader.load(
-      '/textures/sand.jpg',
-      (texture) => {
-        texture.wrapS = THREE.RepeatWrapping;
-        texture.wrapT = THREE.RepeatWrapping;
-        texture.repeat.set(1, 1);
-        this.sandTexture = texture;
-        
-        // Check if all textures are loaded before rendering
-        this.checkTexturesAndRender();
-      },
-      undefined,
-      (error) => {
-        console.error('Error loading sand texture:', error);
-        this.textureLoadAttempts++;
-        // Check if all textures are loaded before rendering
-        this.checkTexturesAndRender();
-      }
-    );
+    // If in land-only mode, skip texture loading and render immediately
+    if (landOnly) {
+      // Create a basic material without textures
+      this.sharedMaterial = new THREE.MeshStandardMaterial({
+        color: this.sandColor,
+        side: THREE.DoubleSide,
+        roughness: 0.8,
+        metalness: 0.1,
+        wireframe: false,
+        flatShading: false
+      });
+      
+      // Render land only
+      this.renderLandOnly();
+    } else {
+      // Load sand texture
+      this.textureLoader.load(
+        '/textures/sand.jpg',
+        (texture) => {
+          texture.wrapS = THREE.RepeatWrapping;
+          texture.wrapT = THREE.RepeatWrapping;
+          texture.repeat.set(1, 1);
+          this.sandTexture = texture;
+          
+          // Check if all textures are loaded before rendering
+          this.checkTexturesAndRender();
+        },
+        undefined,
+        (error) => {
+          console.error('Error loading sand texture:', error);
+          this.textureLoadAttempts++;
+          // Check if all textures are loaded before rendering
+          this.checkTexturesAndRender();
+        }
+      );
+    }
     
     // Load normal map
     this.textureLoader.load(
@@ -259,7 +278,10 @@ export default class SimplePolygonRenderer {
   private checkTexturesAndRender() {
     // If we have the base texture or all texture loading attempts have failed, render the polygons
     if (this.sandTexture || (this.textureLoadAttempts >= 3)) {
-      this.renderPolygons();
+      // Only render land if it hasn't been rendered yet
+      if (!this.hasRenderedLand) {
+        this.renderPolygons();
+      }
       
       // Fetch and apply land owners, but don't automatically create coat of arms sprites
       // Add a small delay to ensure polygons are fully rendered first
@@ -268,6 +290,98 @@ export default class SimplePolygonRenderer {
         // The fetchAndApplyLandOwners method will call createCoatOfArmsSprites only when it has owner data
       }, 1000);
     }
+  }
+  
+  /**
+   * Render only the land polygons without any additional elements
+   * Used by BaseSceneLayer for persistent land rendering
+   */
+  private renderLandOnly() {
+    console.log('Rendering land only (persistent base layer)');
+    
+    // Process each polygon
+    this.polygons.forEach(polygon => {
+      try {
+        if (!polygon.coordinates || polygon.coordinates.length < 3) {
+          console.warn(`Invalid polygon coordinates for ${polygon.id}`);
+          return;
+        }
+        
+        // Normalize coordinates
+        const normalizedCoords = normalizeCoordinates(
+          polygon.coordinates,
+          this.bounds.centerLat,
+          this.bounds.centerLng,
+          this.bounds.scale,
+          this.bounds.latCorrectionFactor
+        );
+        
+        // Create shape
+        const shape = createPolygonShape(normalizedCoords);
+        
+        // Scale the shape slightly to create overlap between adjacent polygons
+        const scaleFactor = 1.001; // 0.1% larger
+        for (let i = 0; i < shape.curves.length; i++) {
+          const curve = shape.curves[i];
+          if (curve instanceof THREE.LineCurve) {
+            curve.v1.multiplyScalar(scaleFactor);
+            curve.v2.multiplyScalar(scaleFactor);
+          }
+        }
+
+        // Create geometry with minimal extrusion for elevation
+        const extrudeSettings = {
+          depth: 0.001,  // Make it even flatter
+          bevelEnabled: false,
+          curveSegments: 6
+        };
+      
+        // Use ExtrudeGeometry instead of ShapeGeometry for elevation
+        let geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+        
+        // Apply more aggressive smoothing to the geometry
+        geometry.computeVertexNormals();
+        
+        // Merge vertices to eliminate tiny gaps using BufferGeometryUtils
+        if (BufferGeometryUtils && BufferGeometryUtils.mergeVertices) {
+          geometry = BufferGeometryUtils.mergeVertices(geometry) as THREE.ExtrudeGeometry;
+        }
+      
+        // Create mesh with shared material
+        const mesh = new THREE.Mesh(geometry, this.sharedMaterial as THREE.Material);
+        
+        // Set render order to ensure land renders above water
+        mesh.renderOrder = 1;
+      
+        // Position mesh - adjust rotation to make top surface flat
+        mesh.rotation.x = -Math.PI / 2;
+    
+        // Position the land exactly at water level
+        mesh.position.y = 0; // Change from -5.005 to 0
+        
+        // Enable shadows for land
+        mesh.receiveShadow = true;
+        mesh.castShadow = true;
+        
+        // Add userData to identify this as a persistent land mesh
+        mesh.userData = {
+          isPersistentLand: true,
+          polygonId: polygon.id
+        };
+        
+        // Add to scene
+        this.scene.add(mesh);
+        
+        // Store reference
+        this.meshes.push(mesh);
+        
+      } catch (error) {
+        console.error(`Error rendering polygon ${polygon.id}:`, error);
+      }
+    });
+    
+    console.log(`Rendered ${this.meshes.length} land polygons (land-only mode)`);
+    this.hasRenderedLand = true;
   }
   
   // Track if coat of arms have been rendered to prevent duplicate rendering
@@ -1270,45 +1384,83 @@ export default class SimplePolygonRenderer {
     animate();
   }
 
-  public cleanup() {
-    // Remove meshes from scene and dispose resources
-    this.meshes.forEach(mesh => {
-      this.scene.remove(mesh);
-      if (mesh.geometry) mesh.geometry.dispose();
-    });
-    
-    // Clear array
-    this.meshes = [];
-    
-    // Clean up extracted components
-    this.coatOfArmsRenderer.cleanup();
-    this.buildingPointManager.cleanup();
-    this.transportPointManager.cleanup();
-    if (this.measurementTools) {
-      this.measurementTools.cleanup();
-    }
-    
-    // Clean up citizen markers
-    this.clearCitizenMarkers();
-    
-    // Clean up path visualization
-    this.pathVisualization.forEach(object => {
-      this.scene.remove(object);
-      if (object instanceof THREE.Mesh) {
-        if (object.geometry) object.geometry.dispose();
-        if (object.material instanceof THREE.Material) {
-          object.material.dispose();
-        } else if (Array.isArray(object.material)) {
-          object.material.forEach(m => m.dispose());
-        }
-      } else if (object instanceof THREE.Line) {
-        if (object.geometry) object.geometry.dispose();
-        if (object.material instanceof THREE.Material) {
-          object.material.dispose();
-        }
+  public cleanup(preserveLand: boolean = false) {
+    if (preserveLand) {
+      // Only clean up non-land elements
+      console.log('Cleaning up non-land elements only (preserving land)');
+      
+      // Clean up extracted components
+      this.coatOfArmsRenderer.cleanup();
+      this.buildingPointManager.cleanup();
+      this.transportPointManager.cleanup();
+      if (this.measurementTools) {
+        this.measurementTools.cleanup();
       }
-    });
-    this.pathVisualization = [];
+      
+      // Clean up citizen markers
+      this.clearCitizenMarkers();
+      
+      // Clean up path visualization
+      this.pathVisualization.forEach(object => {
+        this.scene.remove(object);
+        if (object instanceof THREE.Mesh) {
+          if (object.geometry) object.geometry.dispose();
+          if (object.material instanceof THREE.Material) {
+            object.material.dispose();
+          } else if (Array.isArray(object.material)) {
+            object.material.forEach(m => m.dispose());
+          }
+        } else if (object instanceof THREE.Line) {
+          if (object.geometry) object.geometry.dispose();
+          if (object.material instanceof THREE.Material) {
+            object.material.dispose();
+          }
+        }
+      });
+      this.pathVisualization = [];
+    } else {
+      // Full cleanup including land
+      console.log('Full cleanup including land');
+      
+      // Remove meshes from scene and dispose resources
+      this.meshes.forEach(mesh => {
+        this.scene.remove(mesh);
+        if (mesh.geometry) mesh.geometry.dispose();
+      });
+      
+      // Clear array
+      this.meshes = [];
+      
+      // Clean up extracted components
+      this.coatOfArmsRenderer.cleanup();
+      this.buildingPointManager.cleanup();
+      this.transportPointManager.cleanup();
+      if (this.measurementTools) {
+        this.measurementTools.cleanup();
+      }
+      
+      // Clean up citizen markers
+      this.clearCitizenMarkers();
+      
+      // Clean up path visualization
+      this.pathVisualization.forEach(object => {
+        this.scene.remove(object);
+        if (object instanceof THREE.Mesh) {
+          if (object.geometry) object.geometry.dispose();
+          if (object.material instanceof THREE.Material) {
+            object.material.dispose();
+          } else if (Array.isArray(object.material)) {
+            object.material.forEach(m => m.dispose());
+          }
+        } else if (object instanceof THREE.Line) {
+          if (object.geometry) object.geometry.dispose();
+          if (object.material instanceof THREE.Material) {
+            object.material.dispose();
+          }
+        }
+      });
+      this.pathVisualization = [];
+    }
     
     // Remove event listeners
     if (typeof window !== 'undefined') {

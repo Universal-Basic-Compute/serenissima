@@ -13,6 +13,8 @@ import LandDetailsPanel from './LandDetailsPanel'; // Import the existing panel
 import { eventBus } from '@/lib/eventBus';
 import { EventTypes } from '@/lib/eventTypes';
 import { getIncomeDataService } from '@/lib/services/IncomeDataService';
+import BaseSceneLayer from './BaseSceneLayer';
+import { sceneLayerManager } from '@/lib/services/SceneLayerManager';
 
 export default function SimpleViewer({ qualityMode = 'high', waterQuality = 'high', activeView = 'land' }: {
   qualityMode: 'high' | 'performance';
@@ -350,20 +352,10 @@ export default function SimpleViewer({ qualityMode = 'high', waterQuality = 'hig
     console.log('SimpleViewer scene:', scene);
     console.log('SimpleViewer camera:', cameraController.camera);
     
-    // Create water first (so it's rendered first)
-    const waterSize = Math.max(bounds.scale * 500, 1000);
-    const water = new SimpleWater({
-      scene,
-      size: waterSize,
-      quality: waterQuality || (qualityMode === 'high' ? 'high' : 'medium'),
-      position: { y: 0 } // Explicitly set y position to 0
-    });
-    waterRef.current = water;
+    // Initialize the SceneLayerManager with the scene
+    sceneLayerManager.initialize(scene);
     
-    // Log water quality for debugging
-    console.log('Water created with quality:', water.getQualityString());
-    
-    // Create polygon renderer after water, passing activeView, users, camera, and selection callback
+    // Create polygon renderer for view-specific elements (not land)
     const polygonRenderer = new SimplePolygonRenderer({
       scene,
       polygons,
@@ -466,9 +458,7 @@ export default function SimpleViewer({ qualityMode = 'high', waterQuality = 'hig
           cameraController.update();
         }
         
-        if (waterRef.current) {
-          waterRef.current.update();
-        }
+        // Note: We don't update water here anymore - BaseSceneLayer handles it
         
         renderer.render(scene, cameraController.camera);
       } catch (error) {
@@ -549,6 +539,9 @@ export default function SimpleViewer({ qualityMode = 'high', waterQuality = 'hig
           delete canvasRef.current.__renderer;
         }
       }
+      
+      // Clean up SceneLayerManager
+      sceneLayerManager.cleanup();
     };
   }, [polygons, loading, qualityMode, activeView, users]);
   
@@ -957,6 +950,15 @@ export default function SimpleViewer({ qualityMode = 'high', waterQuality = 'hig
   return (
     <div className="w-screen h-screen">
       <canvas ref={canvasRef} className="w-full h-full" />
+      
+      {/* Base Scene Layer - persistent water and land */}
+      {sceneRef.current && !loading && polygons.length > 0 && (
+        <BaseSceneLayer 
+          scene={sceneRef.current}
+          polygons={polygons}
+          waterQuality={waterQuality}
+        />
+      )}
       
       {/* Land Details Panel */}
       <LandDetailsPanel
