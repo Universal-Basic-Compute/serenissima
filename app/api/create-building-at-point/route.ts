@@ -127,8 +127,111 @@ export async function POST(request: Request) {
       );
     }
     
-    // Deduct compute
-    await deductCompute(data.walletAddress, data.cost);
+    // Instead of deducting compute, update the user's Ducats balance
+    try {
+      // Get the user record from Airtable
+      const userRecord = await new Promise((resolve, reject) => {
+        if (!base) {
+          reject(new Error('Airtable not configured'));
+          return;
+        }
+        
+        base('USERS').select({
+          filterByFormula: `{WalletAddress} = '${data.walletAddress}'`
+        }).firstPage((err, records) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          
+          if (records && records.length > 0) {
+            resolve(records[0]);
+          } else {
+            reject(new Error('User not found'));
+          }
+        });
+      });
+
+      // Update the user's Ducats balance
+      const currentDucats = userRecord.get('Ducats') || 0;
+      const newDucats = currentDucats - data.cost;
+
+      if (newDucats < 0) {
+        return NextResponse.json(
+          { 
+            success: false, 
+            error: `Insufficient Ducats balance. You have ${currentDucats} but need ${data.cost}.` 
+          },
+          { status: 400 }
+        );
+      }
+
+      // Update the user's Ducats balance
+      await new Promise((resolve, reject) => {
+        base.update('USERS', [
+          {
+            id: userRecord.id,
+            fields: {
+              Ducats: newDucats
+            }
+          }
+        ], function(err, records) {
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve(records);
+        });
+      });
+
+      // Also add Ducats to ConsiglioDeiDieci
+      try {
+        const consiglioDeiDieciRecord = await new Promise((resolve, reject) => {
+          base('USERS').select({
+            filterByFormula: `{UserName} = 'ConsiglioDeiDieci'`
+          }).firstPage((err, records) => {
+            if (err) {
+              reject(err);
+              return;
+            }
+            
+            if (records && records.length > 0) {
+              resolve(records[0]);
+            } else {
+              reject(new Error('ConsiglioDeiDieci user not found'));
+            }
+          });
+        });
+
+        // Update ConsiglioDeiDieci's Ducats balance
+        const currentConsiglioDucats = consiglioDeiDieciRecord.get('Ducats') || 0;
+        const newConsiglioDucats = currentConsiglioDucats + data.cost;
+
+        await new Promise((resolve, reject) => {
+          base.update('USERS', [
+            {
+              id: consiglioDeiDieciRecord.id,
+              fields: {
+                Ducats: newConsiglioDucats
+              }
+            }
+          ], function(err, records) {
+            if (err) {
+              reject(err);
+              return;
+            }
+            resolve(records);
+          });
+        });
+      } catch (consiglioDeiDieciError) {
+        console.warn('Error updating ConsiglioDeiDieci balance:', consiglioDeiDieciError);
+        // Continue even if we couldn't update ConsiglioDeiDieci
+      }
+    } catch (userBalanceError) {
+      console.warn('Error updating user balance, falling back to deductCompute:', userBalanceError);
+      // Fallback to deducting compute if Airtable update fails
+      await deductCompute(data.walletAddress, data.cost);
+    }
     
     // Ensure position is properly formatted as a string
     const positionString = typeof data.position === 'string' 

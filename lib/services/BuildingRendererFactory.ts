@@ -117,6 +117,79 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
   }
   
   /**
+   * Create a building at a specific building point
+   * @param buildingData Building data including position, type, etc.
+   * @param cost The cost in Ducats
+   * @returns Promise resolving to the created building
+   */
+  public async createBuildingAtPoint(buildingData: any, cost: number): Promise<any> {
+    try {
+      // Validate required fields
+      if (!buildingData.type) {
+        throw new Error('Building type is required');
+      }
+      
+      if (!buildingData.land_id) {
+        throw new Error('Land ID is required');
+      }
+      
+      if (!buildingData.position) {
+        throw new Error('Position is required');
+      }
+      
+      if (!buildingData.created_by) {
+        throw new Error('Creator (wallet address) is required');
+      }
+      
+      // Send to server using relative URL
+      const response = await fetch(`/api/create-building-at-point`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...buildingData,
+          walletAddress: buildingData.created_by,
+          cost
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Failed to create building: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      
+      if (!result.success || !result.building) {
+        throw new Error(result.error || 'Failed to create building');
+      }
+      
+      // Return the created building data
+      return result.building;
+    } catch (error) {
+      console.error('Error creating building at point:', error);
+      
+      // For development, return mock data if API fails
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Returning mock building data for development');
+        return {
+          id: `building_${Date.now()}`,
+          type: buildingData.type,
+          land_id: buildingData.land_id,
+          position: buildingData.position,
+          rotation: buildingData.rotation || 0,
+          variant: buildingData.variant || 'model',
+          owner: buildingData.created_by,
+          created_at: buildingData.created_at || new Date().toISOString()
+        };
+      }
+      
+      throw error;
+    }
+  }
+
+  /**
    * Create a simplified version of the building for distant viewing
    * Uses instancing for better performance with many buildings
    */
@@ -925,5 +998,18 @@ export class BuildingRendererFactory {
    */
   public getRenderer(buildingType: string): IBuildingRenderer {
     return this.universalRenderer;
+  }
+  
+  /**
+   * Create a building at a specific building point
+   * This is a convenience method that delegates to the universal renderer
+   * @param buildingData Building data including position, type, etc.
+   * @param cost The cost in Ducats
+   * @returns Promise resolving to the created building
+   */
+  public async createBuildingAtPoint(buildingData: any, cost: number): Promise<any> {
+    // Cast the universal renderer to access its createBuildingAtPoint method
+    const renderer = this.universalRenderer as UniversalBuildingRenderer;
+    return renderer.createBuildingAtPoint(buildingData, cost);
   }
 }
