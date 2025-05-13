@@ -669,11 +669,12 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         
             // Only update state if it's a different building
             if (hoveredBuildingId !== building.id) {
+              console.log('HOVER DETECTED! Setting hoveredBuildingId to:', building.id);
               setHoveredBuildingId(building.id);
               canvas.style.cursor = 'pointer';
               console.log('Hovering over building:', building.id, building.type);
             }
-            // Don't break here - continue checking all buildings to ensure we find the one on top
+            break; // Break after finding the first hovered building
           }
         }
     
@@ -1060,6 +1061,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         const isHovered = hoveredBuildingId === building.id;
         const isSelected = selectedBuildingId === building.id;
         
+        // Debug logging for hover state
+        console.log(`Drawing building ${building.id}, hovered: ${isHovered}, selected: ${isSelected}`);
+        
         // Draw simple square for building with hover/select states
         const squareSize = Math.max(size.width, size.depth) * scale * 0.6;
         
@@ -1069,14 +1073,14 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           ctx.fillStyle = lightenColor(color, 35); // Increased brightness for selection
           ctx.strokeStyle = '#FF3300'; // Bright red-orange for selected
           ctx.lineWidth = 3.5;
+          console.log('APPLYING SELECTED STYLE TO BUILDING:', building.id);
         } else if (isHovered) {
-          // Hover state: significantly brighter with a more vibrant border
-          ctx.fillStyle = lightenColor(color, 25); // Increased brightness for hover
-          ctx.strokeStyle = '#FFCC00'; // Bright yellow for hover
-          ctx.lineWidth = 3; // Thicker border
+          // Make hover state MUCH more dramatic for testing
+          ctx.fillStyle = '#FF00FF'; // Bright magenta for hover - very obvious
+          ctx.strokeStyle = '#FFFF00'; // Bright yellow border
+          ctx.lineWidth = 5; // Extra thick border
           
-          // Debug log when drawing a hovered building
-          console.log('Drawing hovered building:', building.id, building.type);
+          console.log('APPLYING HOVER STYLE TO BUILDING:', building.id);
         } else {
           // Normal state
           ctx.fillStyle = color;
@@ -1342,18 +1346,30 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
 
   // Helper function to lighten a color
   function lightenColor(color: string, percent: number): string {
+    // For debugging
+    console.log(`Lightening color ${color} by ${percent}%`);
+    
+    // If color doesn't start with #, return a default color
+    if (!color.startsWith('#')) {
+      console.warn(`Invalid color format: ${color}, using default`);
+      return '#FF00FF'; // Bright magenta as fallback
+    }
+    
     const num = parseInt(color.replace('#', ''), 16);
     const amt = Math.round(2.55 * percent);
     const R = (num >> 16) + amt;
     const G = (num >> 8 & 0x00FF) + amt;
     const B = (num & 0x0000FF) + amt;
     
-    return '#' + (
+    const result = '#' + (
       0x1000000 +
       (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 +
       (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
       (B < 255 ? (B < 1 ? 0 : B) : 255)
     ).toString(16).slice(1);
+    
+    console.log(`Lightened color: ${result}`);
+    return result;
   }
 
   // Helper function to darken a color
