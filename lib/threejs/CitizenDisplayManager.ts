@@ -13,6 +13,39 @@ export interface CitizenDisplayOptions {
     width?: number;
     height?: number;
   };
+  /**
+   * Animate fade-in effect for materials
+   */
+  private animateFadeIn(material: THREE.MeshBasicMaterial): void {
+    // Start with opacity 0
+    material.opacity = 0;
+
+    // Create a fade-in animation
+    const startTime = performance.now();
+    const duration = 800; // 800ms fade-in duration
+
+    // Animation function
+    const animate = () => {
+      const currentTime = performance.now();
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      // Use an ease-in function for smoother appearance
+      material.opacity = progress * progress;
+      material.needsUpdate = true;
+
+      // Continue animation until complete
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        material.opacity = 1; // Ensure we end at full opacity
+        material.needsUpdate = true;
+      }
+    };
+
+    // Start the animation
+    requestAnimationFrame(animate);
+  }
 }
 
 export interface CitizenMarkerOptions {
@@ -2229,20 +2262,84 @@ export class CitizenDisplayManager {
     // Get the image URL, with fallbacks
     const imageUrl = this.getCitizenImageUrl(primaryCitizen);
     
-    // Create a circular background first
-    const backgroundSprite = this.createCircularBackground(
-      markerType === 'home' ? 'rgba(100, 150, 255, 0.8)' : 'rgba(255, 150, 100, 0.8)'
-    );
-    backgroundSprite.scale.set(1.7, 1.7, 1);
-    backgroundSprite.renderOrder = 999; // Lower render order so it appears behind the citizen
-    container.add(backgroundSprite);
+    // Create a plane geometry for the texture (like in CoatOfArmsRenderer)
+    const sceneScale = this.bounds.scale || 1000;
+    const spriteScale = Math.max(0.75, sceneScale / 667);
+    const planeGeometry = new THREE.PlaneGeometry(spriteScale, spriteScale);
+    const planeMaterial = new THREE.MeshBasicMaterial({
+      map: null, // Will be set when texture loads
+      transparent: true,
+      side: THREE.DoubleSide,
+      depthTest: true,
+      depthWrite: false,
+      opacity: 0 // Start with opacity 0 for fade-in effect
+    });
     
-    // Create a sprite for the citizen icon and add it AFTER the background
-    const sprite = this.createCitizenSprite(imageUrl);
-    sprite.scale.set(1.5, 1.5, 1);
-    sprite.renderOrder = 1000; // Higher render order so it appears in front of the background
-    // Don't add any position offset - keep it centered on the background
-    container.add(sprite);
+    // Create mesh and position it
+    const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    plane.renderOrder = 1000; // Ensure it renders on top of land
+    
+    // Mark this mesh as a citizen marker
+    plane.userData.isCitizenMarker = true;
+    plane.userData.citizenId = primaryCitizen.CitizenId || primaryCitizen.id;
+    
+    // Create an array of URLs to try in order
+    const urlsToTry = [
+      imageUrl,
+      `/images/citizens/${primaryCitizen.CitizenId || primaryCitizen.id}.png`,
+      imageUrl.startsWith('/') ? `https://serenissima.ai${imageUrl}` : null,
+      imageUrl.startsWith('/') ? `${window.location.origin}${imageUrl}` : null,
+      `/images/citizens/default.png`
+    ].filter(Boolean);
+    
+    // Function to try loading the next URL in the array
+    const tryNextUrl = (index: number) => {
+      if (index >= urlsToTry.length) {
+        console.warn(`All URLs failed for citizen image: ${imageUrl}, creating default citizen image`);
+        this.createDefaultCitizenImage(container, primaryCitizen, markerType);
+        return;
+      }
+      
+      const currentUrl = urlsToTry[index];
+      console.log(`Trying URL ${index + 1}/${urlsToTry.length} for citizen image: ${currentUrl}`);
+      
+      this.textureLoader.load(
+        currentUrl,
+        (texture) => {
+          console.log(`Successfully loaded texture for citizen from ${currentUrl}`);
+          // Create a circular texture
+          const circularTexture = this.createCircularTexture(texture, false);
+          
+          // Apply the texture to the plane material
+          if (planeMaterial) {
+            planeMaterial.map = circularTexture;
+            planeMaterial.needsUpdate = true;
+            
+            // Adjust plane scale based on texture aspect ratio
+            if (texture.image && texture.image.width && texture.image.height) {
+              const aspectRatio = texture.image.width / texture.image.height;
+              const baseScale = Math.max(0.19, sceneScale / 2633);
+              plane.scale.set(baseScale * aspectRatio, baseScale, 1);
+            }
+            
+            // Add to container
+            container.add(plane);
+            
+            // Add fade-in animation
+            this.animateFadeIn(planeMaterial);
+          }
+        },
+        undefined,
+        (error) => {
+          console.warn(`Failed to load from ${currentUrl}:`, error);
+          // Try the next URL
+          tryNextUrl(index + 1);
+        }
+      );
+    };
+    
+    // Start trying URLs
+    tryNextUrl(0);
     
     // Add an icon to indicate home or work
     const iconSprite = this.createTypeIcon(markerType);
@@ -2291,5 +2388,95 @@ export class CitizenDisplayManager {
     }
     
     return imageUrl;
+  }
+  
+  /**
+   * Create a default citizen image when image loading fails
+   */
+  private createDefaultCitizenImage(container: THREE.Group, citizen: any, markerType: 'home' | 'work'): void {
+    const sceneScale = this.bounds.scale || 1000;
+    const spriteScale = Math.max(0.75, sceneScale / 667);
+    const planeGeometry = new THREE.PlaneGeometry(spriteScale, spriteScale);
+    const planeMaterial = new THREE.MeshBasicMaterial({
+      map: null, // Will be set when texture is created
+      transparent: true,
+      side: THREE.DoubleSide,
+      depthTest: true,
+      depthWrite: false,
+      opacity: 0 // Start with opacity 0 for fade-in effect
+    });
+    
+    // Create mesh and position it
+    const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    plane.renderOrder = 1000; // Ensure it renders on top of land
+    
+    // Mark this mesh as a citizen marker
+    plane.userData.isCitizenMarker = true;
+    plane.userData.citizenId = citizen.CitizenId || citizen.id;
+    
+    // Create a canvas for the default citizen image
+    const canvas = document.createElement('canvas');
+    const size = 512;
+    canvas.width = size;
+    canvas.height = size;
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      console.error('Could not get canvas context');
+      return;
+    }
+    
+    // Generate a deterministic color based on the citizen name
+    const getColorFromString = (str: string): string => {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      
+      // Generate a hue between 0 and 360
+      const hue = Math.abs(hash) % 360;
+      
+      // Use a fixed saturation and lightness for better visibility
+      return `hsl(${hue}, 70%, 60%)`;
+    };
+    
+    // Get a color based on the citizen name
+    const baseColor = getColorFromString((citizen.firstName || '') + (citizen.lastName || ''));
+    
+    // Draw a circular background
+    ctx.beginPath();
+    ctx.arc(size/2, size/2, size/2 - 4, 0, Math.PI * 2);
+    ctx.fillStyle = markerType === 'home' ? 'rgba(100, 150, 255, 0.8)' : 'rgba(255, 150, 100, 0.8)';
+    ctx.fill();
+    
+    // Add a white border
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 8;
+    ctx.stroke();
+    
+    // Add the citizen's initials
+    ctx.font = 'bold 160px Arial';
+    ctx.fillStyle = '#FFFFFF';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    // Get the first letters of the first and last name
+    const firstInitial = (citizen.firstName || '').charAt(0).toUpperCase();
+    const lastInitial = (citizen.lastName || '').charAt(0).toUpperCase();
+    ctx.fillText(firstInitial + lastInitial, size/2, size/2);
+    
+    // Create texture from canvas
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+    
+    // Apply the texture to the plane material
+    planeMaterial.map = texture;
+    planeMaterial.needsUpdate = true;
+    
+    // Add to container
+    container.add(plane);
+    
+    // Add fade-in animation
+    this.animateFadeIn(planeMaterial);
   }
 }
