@@ -38,6 +38,7 @@ interface Building extends Partial<ImportedBuilding> {
   scale?: number;
   rotation?: number;
   height?: number;
+  type?: string; // Add type property which is used in the component
 }
 
 interface BuildingMenuProps {
