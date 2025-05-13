@@ -12,6 +12,7 @@ import WalletButton from '@/components/UI/WalletButton';
 import ResourceDropdowns from '@/components/UI/ResourceDropdowns';
 import BuildingRendererManager from '@/components/BuildingsView/BuildingRendererManager';
 import BuildingMenu from '@/components/PolygonViewer/BuildingMenu';
+import SettingsModal from '@/components/UI/SettingsModal';
 
 // Import the 2D viewer component with no SSR
 const IsometricViewer = dynamic(() => import('../../components/PolygonViewer/IsometricViewer'), {
@@ -26,6 +27,11 @@ export default function TwoDPage() {
   type ViewType = 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
   const [activeView, setActiveView] = useState<ViewType>('buildings');
   const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
+  
+  // Handle settings modal
+  const handleSettingsClose = () => {
+    setShowSettingsModal(false);
+  };
   
   // Handle initial view loading
   useEffect(() => {
@@ -268,6 +274,12 @@ export default function TwoDPage() {
       <WalletButton 
         className="absolute top-4 right-4 z-10" 
         onSettingsClick={() => setShowSettingsModal(true)}
+      />
+      
+      {/* Settings Modal */}
+      <SettingsModal 
+        isOpen={showSettingsModal} 
+        onClose={handleSettingsClose} 
       />
       
       {/* Information Panel */}
