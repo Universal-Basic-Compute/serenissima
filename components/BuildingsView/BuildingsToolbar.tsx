@@ -162,6 +162,18 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
         <span>Transport Routes</span>
       </button>
       
+      {/* Transport Route Button */}
+      <button
+        onClick={() => {
+          window.dispatchEvent(new CustomEvent('showTransportRoutes'));
+        }}
+        className="px-4 py-2 bg-purple-600 text-white rounded-md shadow-md hover:bg-purple-700 transition-colors flex items-center space-x-2"
+        title="Find transport routes between locations"
+      >
+        <FaShip className="h-5 w-5" />
+        <span>Transport Routes</span>
+      </button>
+      
       {/* Placeable Object Manager - handles all object types */}
       {placeableObjectType && (
         <PlaceableObjectManager

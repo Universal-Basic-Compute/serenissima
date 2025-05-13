@@ -110,6 +110,13 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   // State for dock and bridge points
   const [hoveredCanalPoint, setHoveredCanalPoint] = useState<{lat: number, lng: number} | null>(null);
   const [hoveredBridgePoint, setHoveredBridgePoint] = useState<{lat: number, lng: number} | null>(null);
+  
+  // Transport route planning state
+  const [transportMode, setTransportMode] = useState<boolean>(false);
+  const [transportStartPoint, setTransportStartPoint] = useState<{lat: number, lng: number} | null>(null);
+  const [transportEndPoint, setTransportEndPoint] = useState<{lat: number, lng: number} | null>(null);
+  const [transportPath, setTransportPath] = useState<any[]>([]);
+  const [calculatingPath, setCalculatingPath] = useState<boolean>(false);
 
   // Load polygons
   useEffect(() => {
@@ -130,6 +137,23 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         console.error('Error loading polygons:', error);
         setLoading(false);
       });
+  }, []);
+  
+  // Handle transport mode activation
+  useEffect(() => {
+    const handleShowTransportRoutes = () => {
+      console.log('Activating transport route planning mode');
+      setTransportMode(true);
+      setTransportStartPoint(null);
+      setTransportEndPoint(null);
+      setTransportPath([]);
+    };
+    
+    window.addEventListener('showTransportRoutes', handleShowTransportRoutes);
+    
+    return () => {
+      window.removeEventListener('showTransportRoutes', handleShowTransportRoutes);
+    };
   }, []);
   
   // Fetch income data
@@ -998,6 +1022,33 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
       
+      // Handle transport mode clicks
+      if (transportMode) {
+        // Convert screen coordinates to lat/lng
+        const point = screenToLatLng(mouseX, mouseY, scale, offset, canvas.width, canvas.height);
+        
+        if (!transportStartPoint) {
+          // First click - set start point
+          setTransportStartPoint(point);
+          console.log('Transport start point set:', point);
+        } else if (!transportEndPoint) {
+          // Second click - set end point and calculate route
+          setTransportEndPoint(point);
+          console.log('Transport end point set:', point);
+          
+          // Calculate route
+          calculateTransportRoute(transportStartPoint, point);
+        } else {
+          // Third click - reset and start over
+          setTransportStartPoint(point);
+          setTransportEndPoint(null);
+          setTransportPath([]);
+          console.log('Transport route reset, new start point:', point);
+        }
+        
+        return; // Skip other click handling when in transport mode
+      }
+      
       // Handle clicks in land view
       if (activeView === 'land') {
         // Check if click is on any polygon
@@ -1328,6 +1379,70 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     }
     return inside;
   }
+  
+  // Helper function to convert screen coordinates to lat/lng
+  const screenToLatLng = (
+    screenX: number, 
+    screenY: number, 
+    currentScale: number, 
+    currentOffset: {x: number, y: number}, 
+    canvasWidth: number, 
+    canvasHeight: number
+  ): {lat: number, lng: number} => {
+    // Reverse the isometric projection
+    const x = (screenX - canvasWidth / 2 - currentOffset.x) / currentScale;
+    const y = -(screenY - canvasHeight / 2 - currentOffset.y) / (currentScale * 1.4);
+    
+    // Convert back to lat/lng
+    const lng = x / 20000 + 12.3326;
+    const lat = y / 20000 + 45.4371;
+    
+    return { lat, lng };
+  };
+  
+  // Function to calculate the transport route
+  const calculateTransportRoute = async (start: {lat: number, lng: number}, end: {lat: number, lng: number}) => {
+    try {
+      setCalculatingPath(true);
+      console.log('Calculating transport route from', start, 'to', end);
+      
+      const response = await fetch('/api/transport', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          startPoint: start,
+          endPoint: end
+        }),
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Transport route calculated:', data);
+        
+        if (data.success && data.path) {
+          setTransportPath(data.path);
+        } else {
+          console.error('Failed to calculate route:', data.error);
+          // Show error to user
+          alert(`Could not find a route: ${data.error || 'Unknown error'}`);
+          // Reset end point to allow trying again
+          setTransportEndPoint(null);
+        }
+      } else {
+        console.error('API error:', response.status);
+        alert('Error calculating route. Please try again.');
+        setTransportEndPoint(null);
+      }
+    } catch (error) {
+      console.error('Error calculating transport route:', error);
+      alert('Error calculating route. Please try again.');
+      setTransportEndPoint(null);
+    } finally {
+      setCalculatingPath(false);
+    }
+  };
   
   // Function to find building position
   const findBuildingPosition = (buildingId: string): {x: number, y: number} | null => {
@@ -1884,6 +1999,141 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           });
         }
       });
+      
+      // Draw transport route planning UI if in transport mode
+      if (transportMode) {
+        // Draw instructions
+        ctx.font = '16px Arial';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.textAlign = 'center';
+        
+        if (calculatingPath) {
+          ctx.fillText('Calculating route...', canvas.width / 2, 50);
+        } else if (!transportStartPoint) {
+          ctx.fillText('Click to set starting point', canvas.width / 2, 50);
+        } else if (!transportEndPoint) {
+          ctx.fillText('Click to set destination point', canvas.width / 2, 50);
+        } else {
+          ctx.fillText('Route found! Click to set a new starting point', canvas.width / 2, 50);
+        }
+        
+        // Draw start point if set
+        if (transportStartPoint) {
+          const startX = (transportStartPoint.lng - 12.3326) * 20000;
+          const startY = (transportStartPoint.lat - 45.4371) * 20000;
+          
+          const startScreenX = isoX(startX, startY);
+          const startScreenY = isoY(startX, startY);
+          
+          // Draw a green circle for start point
+          ctx.beginPath();
+          ctx.arc(startScreenX, startScreenY, 10 * scale, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(0, 255, 0, 0.7)';
+          ctx.fill();
+          ctx.strokeStyle = '#FFFFFF';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          
+          // Add "Start" label
+          ctx.font = `${Math.max(10, 12 * scale)}px Arial`;
+          ctx.fillStyle = '#FFFFFF';
+          ctx.textAlign = 'center';
+          ctx.fillText('Start', startScreenX, startScreenY - 15 * scale);
+        }
+        
+        // Draw end point if set
+        if (transportEndPoint) {
+          const endX = (transportEndPoint.lng - 12.3326) * 20000;
+          const endY = (transportEndPoint.lat - 45.4371) * 20000;
+          
+          const endScreenX = isoX(endX, endY);
+          const endScreenY = isoY(endX, endY);
+          
+          // Draw a red circle for end point
+          ctx.beginPath();
+          ctx.arc(endScreenX, endScreenY, 10 * scale, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
+          ctx.fill();
+          ctx.strokeStyle = '#FFFFFF';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          
+          // Add "End" label
+          ctx.font = `${Math.max(10, 12 * scale)}px Arial`;
+          ctx.fillStyle = '#FFFFFF';
+          ctx.textAlign = 'center';
+          ctx.fillText('End', endScreenX, endScreenY - 15 * scale);
+        }
+        
+        // Draw the calculated path if available
+        if (transportPath.length > 0) {
+          // Draw path line
+          ctx.beginPath();
+          
+          // Start at the first point
+          const firstPoint = transportPath[0];
+          const firstX = (firstPoint.lng - 12.3326) * 20000;
+          const firstY = (firstPoint.lat - 45.4371) * 20000;
+          
+          ctx.moveTo(isoX(firstX, firstY), isoY(firstX, firstY));
+          
+          // Connect all points
+          for (let i = 1; i < transportPath.length; i++) {
+            const point = transportPath[i];
+            const x = (point.lng - 12.3326) * 20000;
+            const y = (point.lat - 45.4371) * 20000;
+            
+            ctx.lineTo(isoX(x, y), isoY(x, y));
+          }
+          
+          // Style the path
+          ctx.strokeStyle = '#FFCC00'; // Bright yellow
+          ctx.lineWidth = 4 * scale;
+          ctx.stroke();
+          
+          // Draw a semi-transparent overlay
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+          ctx.lineWidth = 6 * scale;
+          ctx.stroke();
+          
+          // Draw waypoints
+          for (let i = 1; i < transportPath.length - 1; i++) {
+            const point = transportPath[i];
+            const x = (point.lng - 12.3326) * 20000;
+            const y = (point.lat - 45.4371) * 20000;
+            
+            const screenX = isoX(x, y);
+            const screenY = isoY(x, y);
+            
+            // Draw a small circle for each waypoint
+            ctx.beginPath();
+            ctx.arc(screenX, screenY, 3 * scale, 0, Math.PI * 2);
+            
+            // Color based on node type
+            let fillColor = '#FFCC00'; // Default
+            if (point.type === 'bridge') {
+              fillColor = '#FF6600'; // Orange for bridges
+            } else if (point.type === 'building') {
+              fillColor = '#00CCFF'; // Blue for buildings
+            }
+            
+            ctx.fillStyle = fillColor;
+            ctx.fill();
+          }
+        }
+        
+        // Draw hover indicator for transport mode
+        if (transportMode && !transportEndPoint) {
+          // Draw a circle at mouse position
+          ctx.beginPath();
+          ctx.arc(mousePosition.x, mousePosition.y, 8 * scale, 0, Math.PI * 2);
+          ctx.fillStyle = transportStartPoint ? 'rgba(255, 0, 0, 0.5)' : 'rgba(0, 255, 0, 0.5)';
+          ctx.fill();
+          ctx.strokeStyle = '#FFFFFF';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+      }
     }
     
     // Draw empty building points if in buildings view
@@ -2574,6 +2824,16 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           className="absolute bottom-20 right-4 bg-red-600 text-white px-3 py-1 rounded text-sm"
         >
           Debug Images
+        </button>
+      )}
+      
+      {/* Exit Transport Mode button */}
+      {activeView === 'transport' && transportMode && (
+        <button
+          onClick={() => setTransportMode(false)}
+          className="absolute top-20 right-4 bg-red-600 text-white px-3 py-1 rounded text-sm"
+        >
+          Exit Transport Mode
         </button>
       )}
     </div>
