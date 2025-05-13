@@ -4,9 +4,9 @@ const path = require('path');
 
 // Configuration
 const BATCH_SIZE = 5; // Number of errors to fix in each batch (increased from 3 to 5)
-const MAX_BATCHES = 100; // Increased from 5 to 100 to process more batches
+const MAX_BATCHES = 200; // Increased from 100 to 200 to process more batches
 const TS_ERRORS_FILE = 'ts-errors.json';
-const MAX_ITERATIONS = 5; // Maximum number of full iterations to run
+const MAX_ITERATIONS = 10; // Increased from 5 to 10 for more iterations
 
 // Run TypeScript compiler and save errors to JSON file
 console.log('Running TypeScript compiler to collect errors...');
