@@ -1909,3 +1909,4 @@ export class CitizenDisplayManager {
     
     return imageUrl;
   }
+}
