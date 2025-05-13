@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Script to collect building maintenance costs from owners and transfer to ConsiglioDeiDieci.
-This script should be run on a regular schedule (e.g., daily or weekly).
+This script should be run on a regular schedule (daily).
 """
 
 import os
@@ -11,6 +11,7 @@ import sys
 from datetime import datetime
 import requests
 from dotenv import load_dotenv
+from pyairtable import Api, Table
 
 # Load environment variables
 load_dotenv()
@@ -26,9 +27,18 @@ logging.basicConfig(
 )
 logger = logging.getLogger("maintenance_collector")
 
-# API endpoints and auth
-API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:3000/api")
-API_KEY = os.getenv("API_KEY")
+# Airtable credentials
+AIRTABLE_API_KEY = os.getenv("AIRTABLE_API_KEY")
+AIRTABLE_BASE_ID = os.getenv("AIRTABLE_BASE_ID")
+AIRTABLE_BUILDINGS_TABLE = os.getenv("AIRTABLE_BUILDINGS_TABLE", "BUILDINGS")
+AIRTABLE_USERS_TABLE = os.getenv("AIRTABLE_USERS_TABLE", "Users")
+AIRTABLE_NOTIFICATIONS_TABLE = os.getenv("AIRTABLE_NOTIFICATIONS_TABLE", "NOTIFICATIONS")
+
+# Initialize Airtable
+airtable = Api(AIRTABLE_API_KEY)
+buildings_table = Table(AIRTABLE_API_KEY, AIRTABLE_BASE_ID, AIRTABLE_BUILDINGS_TABLE)
+users_table = Table(AIRTABLE_API_KEY, AIRTABLE_BASE_ID, AIRTABLE_USERS_TABLE)
+notifications_table = Table(AIRTABLE_API_KEY, AIRTABLE_BASE_ID, AIRTABLE_NOTIFICATIONS_TABLE)
 
 # ConsiglioDeiDieci user ID
 CONSIGLIO_USER_ID = "ConsiglioDeiDieci"
@@ -57,41 +67,73 @@ def load_building_data(building_type):
 
 
 def get_all_buildings():
-    """Fetch all buildings from the API."""
+    """Fetch all buildings directly from Airtable."""
     try:
-        response = requests.get(f"{API_BASE_URL}/buildings", headers={"Authorization": f"Bearer {API_KEY}"})
-        response.raise_for_status()
-        return response.json().get("buildings", [])
+        records = buildings_table.all()
+        buildings = []
+        
+        for record in records:
+            building = {
+                "id": record.get("id"),
+                "type": record.get("fields", {}).get("Type"),
+                "owner": record.get("fields", {}).get("User"),
+                "land_id": record.get("fields", {}).get("Land")
+            }
+            buildings.append(building)
+            
+        logger.info(f"Successfully fetched {len(buildings)} buildings from Airtable")
+        return buildings
     except Exception as e:
-        logger.error(f"Error fetching buildings: {str(e)}")
+        logger.error(f"Error fetching buildings from Airtable: {str(e)}")
         return []
 
 
 def get_user_balance(user_id):
-    """Get current balance for a user."""
+    """Get current balance for a user directly from Airtable."""
     try:
-        response = requests.get(f"{API_BASE_URL}/users/{user_id}/balance", headers={"Authorization": f"Bearer {API_KEY}"})
-        response.raise_for_status()
-        return response.json().get("balance", 0)
+        # First try to find by username
+        formula = f"{{Username}}='{user_id}'"
+        records = users_table.all(formula=formula)
+        
+        # If not found, try by wallet address
+        if not records:
+            formula = f"{{Wallet}}='{user_id}'"
+            records = users_table.all(formula=formula)
+        
+        if records:
+            return records[0].get("fields", {}).get("Ducats", 0)
+        else:
+            logger.warning(f"User not found: {user_id}")
+            return 0
     except Exception as e:
         logger.error(f"Error fetching balance for user {user_id}: {str(e)}")
         return 0
 
 
 def update_user_balance(user_id, amount, description):
-    """Update user balance."""
+    """Update user balance directly in Airtable."""
     try:
-        payload = {
-            "amount": amount,
-            "description": description,
-            "timestamp": datetime.now().isoformat()
-        }
-        response = requests.post(
-            f"{API_BASE_URL}/users/{user_id}/transactions", 
-            json=payload,
-            headers={"Authorization": f"Bearer {API_KEY}"}
-        )
-        response.raise_for_status()
+        # First try to find by username
+        formula = f"{{Username}}='{user_id}'"
+        records = users_table.all(formula=formula)
+        
+        # If not found, try by wallet address
+        if not records:
+            formula = f"{{Wallet}}='{user_id}'"
+            records = users_table.all(formula=formula)
+        
+        if not records:
+            logger.warning(f"User not found: {user_id}")
+            return False
+        
+        user_record = records[0]
+        current_balance = user_record.get("fields", {}).get("Ducats", 0)
+        new_balance = current_balance + amount
+        
+        # Update the user's balance
+        users_table.update(user_record["id"], {"Ducats": new_balance})
+        
+        logger.info(f"Updated balance for {user_id}: {current_balance} -> {new_balance} ({description})")
         return True
     except Exception as e:
         logger.error(f"Error updating balance for user {user_id}: {str(e)}")
@@ -99,28 +141,25 @@ def update_user_balance(user_id, amount, description):
 
 
 def send_admin_notification(recipient_id, total_collected, buildings_processed, buildings_with_errors):
-    """Send an admin notification with maintenance collection summary."""
+    """Send an admin notification with maintenance collection summary directly to Airtable."""
     try:
-        notification_payload = {
-            "recipient": recipient_id,
-            "title": "Building Maintenance Collection Summary",
-            "message": f"Daily maintenance collection complete. Collected {total_collected} ducats from {buildings_processed} buildings. {buildings_with_errors} buildings had errors.",
-            "type": "admin",
-            "priority": "normal",
-            "data": {
+        notification_data = {
+            "Recipient": recipient_id,
+            "Title": "Building Maintenance Collection Summary",
+            "Message": f"Daily maintenance collection complete. Collected {total_collected} ducats from {buildings_processed} buildings. {buildings_with_errors} buildings had errors.",
+            "Type": "admin",
+            "Priority": "normal",
+            "Data": json.dumps({
                 "total_collected": total_collected,
                 "buildings_processed": buildings_processed,
                 "buildings_with_errors": buildings_with_errors,
                 "timestamp": datetime.now().isoformat()
-            }
+            }),
+            "CreatedAt": datetime.now().isoformat(),
+            "IsRead": False
         }
         
-        response = requests.post(
-            f"{API_BASE_URL}/notifications", 
-            json=notification_payload,
-            headers={"Authorization": f"Bearer {API_KEY}"}
-        )
-        response.raise_for_status()
+        notification_record = notifications_table.create(notification_data)
         logger.info(f"Successfully sent admin notification to {recipient_id}")
         return True
     except Exception as e:
