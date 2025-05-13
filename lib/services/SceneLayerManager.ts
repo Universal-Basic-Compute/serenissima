@@ -1,6 +1,9 @@
 import * as THREE from 'three';
 import { eventBus, EventTypes } from '../eventBus';
 
+// Define the SCENE_BASE_RENDERED event type
+EventTypes.SCENE_BASE_RENDERED = 'SCENE_BASE_RENDERED';
+
 // Extend EventTypes interface to include SCENE_BASE_RENDERED
 declare module '../eventBus' {
   interface EventTypes {
