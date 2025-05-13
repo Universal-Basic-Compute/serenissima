@@ -2,7 +2,7 @@ import os
 import sys
 import json
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Any
 import requests
 from dotenv import load_dotenv
 from pyairtable import Api, Table
@@ -273,7 +273,7 @@ def prepare_ai_building_strategy(ai_user: Dict, user_lands: List[Dict], user_bui
     
     return data_package
 
-def send_building_strategy_request(ai_username: str, data_package: Dict) -> bool:
+def send_building_strategy_request(ai_username: str, data_package: Dict) -> Optional[Dict]:
     """Send the building strategy request to the AI via Kinos API."""
     try:
         api_key = get_kinos_api_key()
@@ -397,7 +397,7 @@ If you decide not to build anything at this time, return an empty JSON object.
                                 # Log the decision
                                 print(f"AI {ai_username} decision: {json.dumps(decision)}")
                                 
-                                # If there's a building decision, create a building
+                                # If there's a building decision, return it
                                 if decision and "building_type" in decision and "land_id" in decision:
                                     building_type = decision["building_type"]
                                     land_id = decision["land_id"]
@@ -406,41 +406,28 @@ If you decide not to build anything at this time, return an empty JSON object.
                                     print(f"AI {ai_username} wants to build a {building_type} on land {land_id}")
                                     print(f"Reason: {reason}")
                                     
-                                    # Get the land to find a building point
-                                    land = next((l for l in data_package["lands"] if l["id"] == land_id), None)
-                                    
-                                    if land:
-                                        # Here we would need to get building points for this land
-                                        # For now, we'll just log that we would create a building
-                                        print(f"Would create a {building_type} building on land {land_id}")
-                                        
-                                        # Include pointType in the log
-                                        point_type = "land"  # Default
-                                        if building_type == "dock":
-                                            point_type = "canal"
-                                        elif building_type == "bridge":
-                                            point_type = "bridge"
-                                            
-                                        print(f"Building point type: {point_type}")
-                                    else:
-                                        print(f"Land {land_id} not found in user's lands")
+                                    # Return the decision
+                                    return decision
                                 else:
                                     print(f"AI {ai_username} decided not to build anything at this time")
+                                    return {}
                             else:
                                 print(f"No JSON decision found in AI response")
+                                return None
                         except Exception as e:
                             print(f"Error extracting decision from AI response: {str(e)}")
+                            return None
                 
-                return True
+                return None
             else:
                 print(f"Error processing building strategy request for AI user {ai_username}: {response_data}")
-                return False
+                return None
         else:
             print(f"Error from Kinos API: {response.status_code} - {response.text}")
-            return False
+            return None
     except Exception as e:
         print(f"Error sending building strategy request to AI user {ai_username}: {str(e)}")
-        return False
+        return None
 
 def create_admin_notification(tables, ai_strategy_results: Dict[str, bool]) -> None:
     """Create a notification for admins with the AI building strategy results."""
@@ -471,6 +458,339 @@ def create_admin_notification(tables, ai_strategy_results: Dict[str, bool]) -> N
         print("Created admin notification with AI building strategy results")
     except Exception as e:
         print(f"Error creating admin notification: {str(e)}")
+
+def get_polygon_data_for_user(username: str, user_lands: List[Dict]) -> List[Dict]:
+    """Get polygon data for all lands owned by the user."""
+    try:
+        polygon_data = []
+        
+        # Get the data directory path
+        data_dir = os.path.join(os.getcwd(), 'data')
+        
+        # For each land owned by the user, try to find the corresponding polygon file
+        for land in user_lands:
+            land_id = land["fields"].get("LandId", "")
+            if not land_id:
+                continue
+            
+            # Try to find the polygon file
+            polygon_file_path = os.path.join(data_dir, f"{land_id}.json")
+            if os.path.exists(polygon_file_path):
+                try:
+                    with open(polygon_file_path, 'r', encoding='utf-8') as f:
+                        polygon = json.load(f)
+                    
+                    # Add the polygon to the list
+                    polygon_data.append(polygon)
+                    print(f"Found polygon data for land {land_id}")
+                except Exception as e:
+                    print(f"Error reading polygon file for land {land_id}: {str(e)}")
+            else:
+                print(f"Polygon file not found for land {land_id}")
+        
+        return polygon_data
+    except Exception as e:
+        print(f"Error getting polygon data for user {username}: {str(e)}")
+        return []
+
+def get_available_building_points(polygons: List[Dict], existing_buildings: List[Dict]) -> Dict[str, List[Dict]]:
+    """Get available building points for each land, categorized by point type."""
+    try:
+        # Initialize result structure
+        available_points = {
+            "land": [],  # Regular building points
+            "canal": [], # Points for docks
+            "bridge": [] # Points for bridges
+        }
+        
+        # Extract positions of existing buildings
+        existing_positions = []
+        for building in existing_buildings:
+            position = building.get("position", None)
+            if position:
+                # Parse position if it's a string
+                if isinstance(position, str):
+                    try:
+                        position = json.loads(position)
+                    except:
+                        continue
+                
+                # Add to existing positions if it has lat/lng
+                if isinstance(position, dict) and "lat" in position and "lng" in position:
+                    existing_positions.append({
+                        "lat": position["lat"],
+                        "lng": position["lng"]
+                    })
+        
+        # Process each polygon
+        for polygon in polygons:
+            polygon_id = polygon.get("id", "unknown")
+            
+            # Process regular building points
+            if "buildingPoints" in polygon and isinstance(polygon["buildingPoints"], list):
+                for point in polygon["buildingPoints"]:
+                    # Skip points without lat/lng
+                    if not isinstance(point, dict) or "lat" not in point or "lng" not in point:
+                        continue
+                    
+                    # Check if this point is already occupied
+                    is_occupied = any(
+                        abs(pos["lat"] - point["lat"]) < 0.0001 and 
+                        abs(pos["lng"] - point["lng"]) < 0.0001 
+                        for pos in existing_positions
+                    )
+                    
+                    if not is_occupied:
+                        # Add polygon ID to the point for reference
+                        point_with_polygon = {
+                            "lat": point["lat"],
+                            "lng": point["lng"],
+                            "polygon_id": polygon_id,
+                            "point_type": "land"
+                        }
+                        available_points["land"].append(point_with_polygon)
+            
+            # Process canal points (for docks)
+            if "canalPoints" in polygon and isinstance(polygon["canalPoints"], list):
+                for point in polygon["canalPoints"]:
+                    # Canal points usually have an "edge" property
+                    if not isinstance(point, dict) or "edge" not in point:
+                        continue
+                    
+                    edge = point["edge"]
+                    if not isinstance(edge, dict) or "lat" not in edge or "lng" not in edge:
+                        continue
+                    
+                    # Check if this point is already occupied
+                    is_occupied = any(
+                        abs(pos["lat"] - edge["lat"]) < 0.0001 and 
+                        abs(pos["lng"] - edge["lng"]) < 0.0001 
+                        for pos in existing_positions
+                    )
+                    
+                    if not is_occupied:
+                        # Add polygon ID to the point for reference
+                        point_with_polygon = {
+                            "lat": edge["lat"],
+                            "lng": edge["lng"],
+                            "polygon_id": polygon_id,
+                            "point_type": "canal"
+                        }
+                        available_points["canal"].append(point_with_polygon)
+            
+            # Process bridge points
+            if "bridgePoints" in polygon and isinstance(polygon["bridgePoints"], list):
+                for point in polygon["bridgePoints"]:
+                    # Bridge points usually have an "edge" property
+                    if not isinstance(point, dict) or "edge" not in point:
+                        continue
+                    
+                    edge = point["edge"]
+                    if not isinstance(edge, dict) or "lat" not in edge or "lng" not in edge:
+                        continue
+                    
+                    # Check if this point is already occupied
+                    is_occupied = any(
+                        abs(pos["lat"] - edge["lat"]) < 0.0001 and 
+                        abs(pos["lng"] - edge["lng"]) < 0.0001 
+                        for pos in existing_positions
+                    )
+                    
+                    if not is_occupied:
+                        # Add polygon ID to the point for reference
+                        point_with_polygon = {
+                            "lat": edge["lat"],
+                            "lng": edge["lng"],
+                            "polygon_id": polygon_id,
+                            "point_type": "bridge"
+                        }
+                        available_points["bridge"].append(point_with_polygon)
+        
+        # Count available points
+        total_points = sum(len(points) for points in available_points.values())
+        print(f"Found {total_points} available building points:")
+        print(f"  - Land points: {len(available_points['land'])}")
+        print(f"  - Canal points: {len(available_points['canal'])}")
+        print(f"  - Bridge points: {len(available_points['bridge'])}")
+        
+        return available_points
+    except Exception as e:
+        print(f"Error getting available building points: {str(e)}")
+        return {"land": [], "canal": [], "bridge": []}
+
+def send_building_placement_request(ai_username: str, decision: Dict, polygon_data: List[Dict], 
+                                   available_points: Dict[str, List[Dict]], building_types: Dict) -> bool:
+    """Send a second request to the AI to choose a specific point for building placement."""
+    try:
+        if not decision or "building_type" not in decision or "land_id" not in decision:
+            print(f"No valid building decision from AI {ai_username}, skipping placement request")
+            return False
+        
+        building_type = decision["building_type"]
+        land_id = decision["land_id"]
+        
+        # Determine which point type is needed for this building
+        point_type = "land"  # Default for most buildings
+        if building_type == "dock":
+            point_type = "canal"
+        elif building_type == "bridge":
+            point_type = "bridge"
+        
+        # Filter available points by land_id and point_type
+        filtered_points = [
+            point for point in available_points[point_type]
+            if point["polygon_id"] == land_id
+        ]
+        
+        if not filtered_points:
+            print(f"No available {point_type} points found for land {land_id}, cannot place {building_type}")
+            return False
+        
+        # Get building type details
+        building_type_info = building_types.get(building_type, {
+            "type": building_type,
+            "name": building_type.capitalize(),
+            "shortDescription": f"A {building_type}"
+        })
+        
+        api_key = get_kinos_api_key()
+        blueprint = "serenissima-ai"
+        
+        # Construct the API URL
+        url = f"https://api.kinos-engine.ai/v2/blueprints/{blueprint}/kins/{ai_username}/messages"
+        
+        # Set up headers with API key
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
+        
+        # Create a detailed prompt for building placement
+        prompt = f"""
+You've decided to build a {building_type_info['name']} on land {land_id}.
+
+Now you need to choose a specific location for this building. I've provided a list of available building points for this land.
+
+Please select one of the available points by providing its index number from the list.
+
+Respond with a JSON object containing your selection:
+```json
+{{
+  "selected_point_index": 0,  // Replace with your chosen index
+  "reason": "Brief explanation of why you chose this point"
+}}
+```
+"""
+        
+        # Create system instructions with the detailed data
+        system_instructions = f"""
+You are {ai_username}, an AI landowner in La Serenissima.
+
+You previously decided to build a {building_type_info['name']} ({building_type}) on land {land_id}.
+
+Here is information about the land:
+{json.dumps([p for p in polygon_data if p.get("id") == land_id], indent=2)}
+
+Here are the available building points for this land (for {point_type} type buildings):
+{json.dumps(filtered_points, indent=2)}
+
+There are {len(filtered_points)} available points. Choose the best location for your {building_type_info['name']} by selecting the index of one of these points (0 to {len(filtered_points)-1}).
+
+Your response must be a JSON object with:
+1. selected_point_index: The index of your chosen point (0 to {len(filtered_points)-1})
+2. reason: A brief explanation of why you chose this location
+"""
+        
+        # Prepare the request payload
+        payload = {
+            "message": prompt,
+            "addSystem": system_instructions,
+            "min_files": 5,
+            "max_files": 15
+        }
+        
+        # Make the API request
+        response = requests.post(url, headers=headers, json=payload)
+        
+        # Check if the request was successful
+        if response.status_code == 200 or response.status_code == 201:
+            response_data = response.json()
+            status = response_data.get("status")
+            
+            if status == "completed":
+                print(f"Successfully sent building placement request to AI user {ai_username}")
+                
+                # Get the AI's response
+                messages_url = f"https://api.kinos-engine.ai/v2/blueprints/{blueprint}/kins/{ai_username}/channels/system/messages"
+                messages_response = requests.get(messages_url, headers=headers)
+                
+                if messages_response.status_code == 200:
+                    messages_data = messages_response.json()
+                    
+                    # Find the most recent assistant message
+                    assistant_messages = [
+                        msg for msg in messages_data.get("messages", [])
+                        if msg.get("role") == "assistant"
+                    ]
+                    
+                    if assistant_messages:
+                        # Sort by timestamp (newest first)
+                        assistant_messages.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
+                        latest_message = assistant_messages[0]
+                        
+                        # Log the AI's response
+                        print(f"AI {ai_username} placement response: {latest_message.get('content')}")
+                        
+                        # Try to extract the JSON decision from the response
+                        try:
+                            content = latest_message.get('content', '')
+                            # Look for JSON block in the response
+                            import re
+                            json_match = re.search(r'```json\s*(.*?)\s*```', content, re.DOTALL)
+                            
+                            if json_match:
+                                json_str = json_match.group(1)
+                                placement_decision = json.loads(json_str)
+                                
+                                # Log the decision
+                                print(f"AI {ai_username} placement decision: {json.dumps(placement_decision)}")
+                                
+                                # Check if the decision is valid
+                                if "selected_point_index" in placement_decision:
+                                    selected_index = placement_decision["selected_point_index"]
+                                    
+                                    # Validate the index
+                                    if 0 <= selected_index < len(filtered_points):
+                                        selected_point = filtered_points[selected_index]
+                                        reason = placement_decision.get("reason", "No reason provided")
+                                        
+                                        print(f"AI {ai_username} selected point {selected_index} at position {selected_point['lat']}, {selected_point['lng']}")
+                                        print(f"Reason: {reason}")
+                                        
+                                        # Here you would create the building at the selected point
+                                        # For now, we'll just log that we would create a building
+                                        print(f"Would create a {building_type} building at position {selected_point['lat']}, {selected_point['lng']} on land {land_id}")
+                                        
+                                        return True
+                                    else:
+                                        print(f"Invalid point index {selected_index}, must be between 0 and {len(filtered_points)-1}")
+                                else:
+                                    print(f"No selected_point_index in placement decision")
+                            else:
+                                print(f"No JSON decision found in AI placement response")
+                        except Exception as e:
+                            print(f"Error extracting placement decision from AI response: {str(e)}")
+                
+                return False
+            else:
+                print(f"Error processing building placement request for AI user {ai_username}: {response_data}")
+                return False
+        else:
+            print(f"Error from Kinos API: {response.status_code} - {response.text}")
+            return False
+    except Exception as e:
+        print(f"Error sending building placement request to AI user {ai_username}: {str(e)}")
+        return False
 
 def process_ai_building_strategies(dry_run: bool = False):
     """Main function to process AI building strategies."""
@@ -505,13 +825,41 @@ def process_ai_building_strategies(dry_run: bool = False):
         # Get buildings owned by this AI
         user_buildings = get_user_buildings(tables, ai_username)
         
+        # Get polygon data for this user's lands
+        polygon_data = get_polygon_data_for_user(ai_username, user_lands)
+        
+        # Get available building points
+        available_points = get_available_building_points(polygon_data, user_buildings)
+        
+        # Check if there are any available building points
+        total_points = sum(len(points) for points in available_points.values())
+        if total_points == 0:
+            print(f"No available building points for AI user {ai_username}, skipping")
+            ai_strategy_results[ai_username] = False
+            continue
+        
         # Prepare the data package for the AI
         data_package = prepare_ai_building_strategy(ai_user, user_lands, user_buildings, all_buildings)
         
         # Send the building strategy request to the AI
         if not dry_run:
-            success = send_building_strategy_request(ai_username, data_package)
-            ai_strategy_results[ai_username] = success
+            # First call: Get building decision
+            decision = send_building_strategy_request(ai_username, data_package)
+            
+            if decision:
+                # Second call: Get placement decision
+                building_types = get_building_types_from_api()
+                placement_success = send_building_placement_request(
+                    ai_username, 
+                    decision, 
+                    polygon_data, 
+                    available_points,
+                    building_types
+                )
+                
+                ai_strategy_results[ai_username] = placement_success
+            else:
+                ai_strategy_results[ai_username] = False
         else:
             # In dry run mode, just log what would happen
             print(f"[DRY RUN] Would send building strategy request to AI user {ai_username}")
@@ -520,6 +868,7 @@ def process_ai_building_strategies(dry_run: bool = False):
             print(f"  - Lands: {len(data_package['lands'])}")
             print(f"  - Buildings: {len(data_package['buildings'])}")
             print(f"  - Net Income: {data_package['user']['financial']['net_income']}")
+            print(f"  - Available building points: {total_points}")
             ai_strategy_results[ai_username] = True
     
     # Create admin notification with summary
