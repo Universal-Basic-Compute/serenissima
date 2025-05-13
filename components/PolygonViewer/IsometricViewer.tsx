@@ -565,22 +565,39 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         };
       });
       
-      // Calculate centroid for text placement
-      let centroidX = 0, centroidY = 0;
-      coords.forEach(coord => {
-        centroidX += coord.x;
-        centroidY += coord.y;
-      });
-      centroidX /= coords.length;
-      centroidY /= coords.length;
+      // Use the polygon's center property if available, otherwise calculate centroid
+      let centerX, centerY;
+      
+      if (polygon.center && polygon.center.lat && polygon.center.lng) {
+        // Use the provided center
+        const centerLat = polygon.center.lat;
+        const centerLng = polygon.center.lng;
+        
+        // Convert center to isometric coordinates
+        const x = (centerLng - 12.3326) * 20000;
+        const y = (centerLat - 45.4371) * 20000;
+        
+        centerX = isoX(x, y);
+        centerY = isoY(x, y);
+      } else {
+        // Calculate centroid as fallback
+        centerX = 0;
+        centerY = 0;
+        coords.forEach(coord => {
+          centerX += coord.x;
+          centerY += coord.y;
+        });
+        centerX /= coords.length;
+        centerY /= coords.length;
+      }
       
       // Store polygon data for rendering
       polygonsToRender.push({
         polygon,
         coords,
         fillColor,
-        centroidX,
-        centroidY
+        centerX,
+        centerY
       });
     });
 
@@ -632,7 +649,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     // Third pass: Draw coat of arms for lands with owners (only in land view)
     if (activeView === 'land') {
       // Always show coat of arms in land view regardless of zoom level
-      polygonsToRender.forEach(({ polygon, centroidX, centroidY }) => {
+      polygonsToRender.forEach(({ polygon, centerX, centerY }) => {
         // Check if polygon has an owner
         const owner = landOwners[polygon.id];
         if (!owner) return;
@@ -644,15 +661,15 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           if (owner in coatOfArmsImages && coatOfArmsImages[owner]) {
             // Draw circular coat of arms with error handling
             try {
-              createCircularImage(ctx, coatOfArmsImages[owner], centroidX, centroidY, size);
+              createCircularImage(ctx, coatOfArmsImages[owner], centerX, centerY, size);
             } catch (error) {
               console.error(`Error rendering coat of arms for ${owner}:`, error);
               // Fallback to default avatar
-              createDefaultCircularAvatar(ctx, owner, centroidX, centroidY, size);
+              createDefaultCircularAvatar(ctx, owner, centerX, centerY, size);
             }
           } else {
             // Draw default avatar with initial
-            createDefaultCircularAvatar(ctx, owner, centroidX, centroidY, size);
+            createDefaultCircularAvatar(ctx, owner, centerX, centerY, size);
           }
         });
     }
