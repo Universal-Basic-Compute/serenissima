@@ -1,13 +1,16 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { existsSync } from 'fs';
 
 // Function to recursively find all JSON files in a directory
 function findBuildingJsonFiles(dir: string): string[] {
   let results: string[] = [];
   
   try {
+    console.log(`Scanning directory: ${dir}`);
     const items = fs.readdirSync(dir);
+    console.log(`Found ${items.length} items in ${dir}`);
     
     for (const item of items) {
       const itemPath = path.join(dir, item);
@@ -15,9 +18,13 @@ function findBuildingJsonFiles(dir: string): string[] {
       
       if (stat.isDirectory()) {
         // Recursively search subdirectories
-        results = results.concat(findBuildingJsonFiles(itemPath));
+        console.log(`Found subdirectory: ${itemPath}`);
+        const subResults = findBuildingJsonFiles(itemPath);
+        console.log(`Found ${subResults.length} building files in subdirectory ${itemPath}`);
+        results = results.concat(subResults);
       } else if (item.endsWith('.json')) {
         // Add JSON files to results
+        console.log(`Found JSON file: ${itemPath}`);
         results.push(itemPath);
       }
     }
@@ -48,8 +55,42 @@ export async function GET(request: Request) {
     // Get the buildings directory path
     const buildingsDir = path.join(process.cwd(), 'data', 'buildings');
     
+    // Check if the directory exists
+    if (!existsSync(buildingsDir)) {
+      console.error(`Buildings directory does not exist: ${buildingsDir}`);
+      return NextResponse.json(
+        { success: false, error: 'Buildings directory not found' },
+        { status: 500 }
+      );
+    }
+    
+    console.log(`Searching for building types in directory: ${buildingsDir}`);
+    
     // Find all JSON files in the buildings directory and its subdirectories
     const buildingFiles = findBuildingJsonFiles(buildingsDir);
+    console.log(`Found ${buildingFiles.length} building JSON files`);
+    
+    // Log the first few files for debugging
+    if (buildingFiles.length > 0) {
+      console.log("Sample building files found:");
+      buildingFiles.slice(0, 5).forEach(file => console.log(` - ${file}`));
+    } else {
+      console.log("No building files found. Checking directory contents:");
+      try {
+        const topLevelItems = fs.readdirSync(buildingsDir);
+        console.log(`Top level items in ${buildingsDir}:`, topLevelItems);
+        
+        // Check the first subdirectory if any exist
+        if (topLevelItems.length > 0) {
+          const firstItem = path.join(buildingsDir, topLevelItems[0]);
+          if (fs.statSync(firstItem).isDirectory()) {
+            console.log(`Items in ${firstItem}:`, fs.readdirSync(firstItem));
+          }
+        }
+      } catch (error) {
+        console.error(`Error reading directory contents: ${error}`);
+      }
+    }
     
     // Load and parse each building file
     let buildings = buildingFiles.map(filePath => {
