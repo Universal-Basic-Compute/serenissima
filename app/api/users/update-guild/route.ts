@@ -51,8 +51,8 @@ export async function POST(request: Request) {
       
       // Update user's guild membership
       await base(AIRTABLE_USERS_TABLE).update(userRecord.id, {
-        'GuildId': guildId,
-        'GuildStatus': status
+        'GuildId': guildId
+        // 'GuildStatus' field removed as it doesn't exist in the Airtable table
       });
       
       return NextResponse.json({
