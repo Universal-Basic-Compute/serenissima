@@ -1,9 +1,10 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { ThreeDErrorBoundary } from '@/lib/components/ThreeDErrorBoundary';
 import { useSceneReady } from '@/lib/components/SceneReadyProvider';
 import { buildingRendererManager } from '@/lib/services/BuildingRendererManager';
 import { eventBus, EventTypes } from '@/lib/eventBus';
+import { log } from '@/lib/logUtils';
 
 interface BuildingRendererProps {
   active?: boolean;
@@ -17,6 +18,12 @@ interface BuildingRendererProps {
  * This component is responsible for rendering buildings in the 3D scene.
  * It uses the BuildingRendererManager to handle the actual rendering logic.
  * This is a thin wrapper around the BuildingRendererManager service for React integration.
+ * 
+ * @component
+ * @param {BuildingRendererProps} props - Component props
+ * @param {boolean} [props.active=true] - Whether the renderer is active
+ * @param {THREE.Scene} [props.scene] - Optional scene to render in (uses SceneReadyProvider if not provided)
+ * @param {THREE.Camera} [props.camera] - Optional camera (uses SceneReadyProvider if not provided)
  */
 const BuildingRenderer: React.FC<BuildingRendererProps> = ({ 
   active = true,
@@ -29,25 +36,53 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
   // Use the scene and camera from props or from the hook
   const scene = propScene || readyScene;
   
+  // Track loading state
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [buildingCount, setBuildingCount] = useState<number>(0);
+  
   // Initialize the building renderer manager when the scene is ready
   useEffect(() => {
     if (!scene || !active) return;
     
-    console.log('BuildingRenderer: Initializing building renderer manager');
+    log.info('BuildingRenderer: Initializing building renderer manager');
     buildingRendererManager.initialize(scene);
     
     // Refresh buildings to load initial state
-    buildingRendererManager.refreshBuildings();
+    setIsLoading(true);
+    buildingRendererManager.refreshBuildings()
+      .then(() => {
+        setIsLoading(false);
+        // Update building count
+        setBuildingCount(buildingRendererManager.getBuildingMeshes().size);
+      })
+      .catch(error => {
+        log.error('Error refreshing buildings:', error);
+        setIsLoading(false);
+      });
     
     // Subscribe to building events
     const buildingPlacedSubscription = eventBus.subscribe(
       EventTypes.BUILDING_PLACED, 
       (data) => {
-        console.log('BuildingRenderer: Building placed event received', data);
+        log.info('BuildingRenderer: Building placed event received', data);
         if (data.refresh) {
-          buildingRendererManager.refreshBuildings();
+          setIsLoading(true);
+          buildingRendererManager.refreshBuildings()
+            .then(() => {
+              setIsLoading(false);
+              // Update building count
+              setBuildingCount(buildingRendererManager.getBuildingMeshes().size);
+            })
+            .catch(error => {
+              log.error('Error refreshing buildings:', error);
+              setIsLoading(false);
+            });
         } else if (data.data) {
-          buildingRendererManager.renderBuilding(data.data);
+          buildingRendererManager.renderBuilding(data.data)
+            .then(() => {
+              // Update building count
+              setBuildingCount(buildingRendererManager.getBuildingMeshes().size);
+            });
         }
       }
     );
@@ -55,17 +90,33 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
     const buildingRemovedSubscription = eventBus.subscribe(
       EventTypes.BUILDING_REMOVED,
       (data) => {
-        console.log('BuildingRenderer: Building removed event received', data);
+        log.info('BuildingRenderer: Building removed event received', data);
         if (data.buildingId) {
           buildingRendererManager.removeBuilding(data.buildingId);
+          // Update building count
+          setBuildingCount(buildingRendererManager.getBuildingMeshes().size);
+        }
+      }
+    );
+    
+    const buildingUpdatedSubscription = eventBus.subscribe(
+      EventTypes.BUILDING_UPDATED,
+      (data) => {
+        log.info('BuildingRenderer: Building updated event received', data);
+        if (data.building) {
+          buildingRendererManager.updateBuilding(data.building);
         }
       }
     );
     
     // Listen for custom events to ensure buildings are visible
     const handleEnsureBuildingsVisible = () => {
-      console.log('BuildingRenderer: Ensuring buildings are visible');
-      buildingRendererManager.refreshBuildings();
+      log.info('BuildingRenderer: Ensuring buildings are visible');
+      buildingRendererManager.refreshBuildings()
+        .then(() => {
+          // Update building count
+          setBuildingCount(buildingRendererManager.getBuildingMeshes().size);
+        });
     };
     
     window.addEventListener('ensureBuildingsVisible', handleEnsureBuildingsVisible);
@@ -79,12 +130,19 @@ const BuildingRenderer: React.FC<BuildingRendererProps> = ({
       // Unsubscribe from events
       buildingPlacedSubscription.unsubscribe();
       buildingRemovedSubscription.unsubscribe();
+      buildingUpdatedSubscription.unsubscribe();
       window.removeEventListener('ensureBuildingsVisible', handleEnsureBuildingsVisible);
     };
   }, [scene, active]);
   
-  // This component doesn't render anything directly
-  return null;
+  // This component doesn't render anything visible directly
+  // But we can return a hidden div with debugging info
+  return (
+    <div style={{ display: 'none' }} data-testid="building-renderer">
+      <span data-building-count={buildingCount} />
+      <span data-loading={isLoading} />
+    </div>
+  );
 };
 
 // Wrap with error boundary for better error handling

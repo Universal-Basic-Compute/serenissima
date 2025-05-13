@@ -5,6 +5,7 @@ import buildingCacheService from './BuildingCacheService';
 import { eventBus } from '../eventBus';
 import { EventTypes } from '../eventTypes';
 import { BuildingData } from '../models/BuildingTypes';
+import { log } from '../logUtils';
 
 /**
  * BuildingRendererManager
@@ -12,6 +13,9 @@ import { BuildingData } from '../models/BuildingTypes';
  * Centralized manager for building rendering that coordinates between
  * the BuildingRendererFactory and the scene. This follows the facade pattern
  * to provide a simpler interface for building rendering.
+ * 
+ * @class BuildingRendererManager
+ * @singleton
  */
 export class BuildingRendererManager {
   private static instance: BuildingRendererManager;
@@ -33,6 +37,8 @@ export class BuildingRendererManager {
   
   /**
    * Initialize the manager with a scene
+   * 
+   * @param scene The Three.js scene to render buildings in
    */
   public initialize(scene: THREE.Scene): void {
     // If already initialized with this scene, just return
@@ -54,7 +60,35 @@ export class BuildingRendererManager {
     this.subscribeToEvents();
     
     this.isInitialized = true;
-    console.log('BuildingRendererManager initialized with scene');
+    log.info('BuildingRendererManager initialized with scene');
+    
+    // Initialize performance monitoring
+    this.initializePerformanceMonitoring();
+  }
+  
+  /**
+   * Initialize performance monitoring for building rendering
+   * Tracks metrics like render time and memory usage
+   */
+  private initializePerformanceMonitoring(): void {
+    // Set up performance monitoring
+    this.lastRenderTime = performance.now();
+    this.renderCount = 0;
+    this.totalRenderTime = 0;
+    
+    // Log performance stats periodically
+    if (typeof window !== 'undefined') {
+      this.performanceInterval = window.setInterval(() => {
+        if (this.renderCount > 0) {
+          const averageRenderTime = this.totalRenderTime / this.renderCount;
+          log.debug(`Building rendering performance: ${averageRenderTime.toFixed(2)}ms average (${this.renderCount} renders)`);
+          
+          // Reset counters
+          this.renderCount = 0;
+          this.totalRenderTime = 0;
+        }
+      }, 10000); // Log every 10 seconds
+    }
   }
   
   /**
@@ -120,16 +154,27 @@ export class BuildingRendererManager {
     this.eventSubscriptions = [];
   }
   
+  // Performance monitoring properties
+  private lastRenderTime: number = 0;
+  private renderCount: number = 0;
+  private totalRenderTime: number = 0;
+  private performanceInterval: number | null = null;
+  
   /**
    * Render a single building
+   * 
+   * @param building Building data to render
+   * @returns Promise resolving to the rendered mesh or null if rendering failed
    */
   public async renderBuilding(building: BuildingData): Promise<THREE.Object3D | null> {
     if (!this.isInitialized || !this.rendererFactory) {
-      console.warn('BuildingRendererManager not initialized');
+      log.warn('BuildingRendererManager not initialized');
       return null;
     }
     
     try {
+      const startTime = performance.now();
+      
       // Get the appropriate renderer for this building type
       const renderer = this.rendererFactory.getRenderer(building.type);
       
@@ -138,6 +183,12 @@ export class BuildingRendererManager {
         // Update existing mesh
         const existingMesh = this.buildingMeshes.get(building.id)!;
         renderer.update(building, existingMesh);
+        
+        // Track performance
+        const endTime = performance.now();
+        this.totalRenderTime += (endTime - startTime);
+        this.renderCount++;
+        
         return existingMesh;
       } else {
         // Create new mesh
@@ -145,12 +196,100 @@ export class BuildingRendererManager {
         
         // Store reference to the mesh
         this.buildingMeshes.set(building.id, mesh);
+        
+        // Track performance
+        const endTime = performance.now();
+        this.totalRenderTime += (endTime - startTime);
+        this.renderCount++;
+        
         return mesh;
       }
     } catch (error) {
-      console.error(`Error rendering building ${building.id}:`, error);
-      return null;
+      log.error(`Error rendering building ${building.id}:`, error);
+      
+      // Try to create a fallback representation
+      try {
+        return this.createFallbackBuilding(building);
+      } catch (fallbackError) {
+        log.error(`Failed to create fallback for building ${building.id}:`, fallbackError);
+        return null;
+      }
     }
+  }
+  
+  /**
+   * Create a fallback representation for a building when normal rendering fails
+   * 
+   * @param building Building data
+   * @returns A simple mesh representing the building
+   */
+  private createFallbackBuilding(building: BuildingData): THREE.Object3D {
+    if (!this.scene) {
+      throw new Error('Scene not initialized');
+    }
+    
+    // Create a simple box as fallback
+    const geometry = new THREE.BoxGeometry(2, 2, 2);
+    const material = new THREE.MeshBasicMaterial({
+      color: 0xff0000, // Red color to indicate error
+      wireframe: true
+    });
+    
+    const mesh = new THREE.Mesh(geometry, material);
+    
+    // Position the mesh
+    if (building.position) {
+      if ('lat' in building.position && 'lng' in building.position) {
+        // Convert lat/lng to scene position
+        const scenePos = buildingPositionManager.latLngToScenePosition(building.position);
+        mesh.position.copy(scenePos);
+      } else {
+        mesh.position.set(
+          building.position.x,
+          building.position.y || 0,
+          building.position.z
+        );
+      }
+    }
+    
+    // Set rotation
+    mesh.rotation.y = building.rotation || 0;
+    
+    // Add metadata
+    mesh.userData = {
+      buildingId: building.id,
+      type: building.type,
+      isFallback: true
+    };
+    
+    // Add to scene
+    this.scene.add(mesh);
+    
+    // Add a label to indicate this is a fallback
+    const canvas = document.createElement('canvas');
+    canvas.width = 256;
+    canvas.height = 64;
+    const context = canvas.getContext('2d');
+    
+    if (context) {
+      context.fillStyle = 'rgba(0, 0, 0, 0.7)';
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.font = 'bold 20px Arial';
+      context.fillStyle = 'white';
+      context.textAlign = 'center';
+      context.textBaseline = 'middle';
+      context.fillText(`Error: ${building.type}`, canvas.width / 2, canvas.height / 2);
+      
+      const texture = new THREE.CanvasTexture(canvas);
+      const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+      const sprite = new THREE.Sprite(spriteMaterial);
+      sprite.position.set(0, 3, 0); // Position above the box
+      sprite.scale.set(5, 1.25, 1);
+      
+      mesh.add(sprite);
+    }
+    
+    return mesh;
   }
   
   /**
@@ -271,7 +410,7 @@ export class BuildingRendererManager {
   public cleanup(): void {
     if (!this.isInitialized) return;
     
-    console.log('BuildingRendererManager: Cleaning up resources');
+    log.info('BuildingRendererManager: Cleaning up resources');
     
     // Unsubscribe from events
     this.unsubscribeFromEvents();
@@ -290,7 +429,13 @@ export class BuildingRendererManager {
     this.scene = null;
     this.rendererFactory = null;
     
-    console.log('BuildingRendererManager: Cleanup complete');
+    // Clear performance monitoring interval
+    if (this.performanceInterval !== null && typeof window !== 'undefined') {
+      window.clearInterval(this.performanceInterval);
+      this.performanceInterval = null;
+    }
+    
+    log.info('BuildingRendererManager: Cleanup complete');
   }
 }
 

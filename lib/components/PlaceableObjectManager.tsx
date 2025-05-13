@@ -413,6 +413,9 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
         return;
       }
       
+      // Show placement in progress indicator
+      setErrorMessage("Placing building...");
+      
       // Create building data
       const buildingData: BuildingData = {
         id: '', // Will be assigned by the server
@@ -429,8 +432,31 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
         created_at: new Date().toISOString()
       };
       
-      // Save building
-      const placedObject = await buildingServiceRef.current.saveBuilding(buildingData);
+      // Save building with retry logic
+      let placedObject;
+      let retryCount = 0;
+      const maxRetries = 3;
+      
+      while (retryCount < maxRetries) {
+        try {
+          placedObject = await buildingServiceRef.current.saveBuilding(buildingData);
+          break; // Success, exit the retry loop
+        } catch (saveError) {
+          retryCount++;
+          if (retryCount >= maxRetries) {
+            throw saveError; // Rethrow the error after max retries
+          }
+          
+          // Wait before retrying (exponential backoff)
+          const delay = Math.pow(2, retryCount) * 500;
+          setErrorMessage(`Retry ${retryCount}/${maxRetries} in ${delay/1000}s...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+      }
+      
+      if (!placedObject) {
+        throw new Error('Failed to place building after multiple attempts');
+      }
       
       // Emit building placed event
       eventBus.emit(EventTypes.BUILDING_PLACED, {
@@ -439,6 +465,9 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
         variant: objectData.variant || 'model',
         data: placedObject
       });
+      
+      // Show success message
+      setErrorMessage(null);
       
       // Call onComplete callback
       if (onComplete) {
@@ -450,6 +479,19 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
     } catch (error) {
       console.error(`Error placing ${type}:`, error);
       setErrorMessage(`Failed to place ${type}: ${error instanceof Error ? error.message : String(error)}`);
+      
+      // Keep placement mode active so user can try again
+      // But hide the preview mesh temporarily to indicate failure
+      if (previewMeshRef.current) {
+        previewMeshRef.current.visible = false;
+        
+        // Show it again after a short delay
+        setTimeout(() => {
+          if (previewMeshRef.current) {
+            previewMeshRef.current.visible = true;
+          }
+        }, 500);
+      }
     }
   };
   
