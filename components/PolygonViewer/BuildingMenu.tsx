@@ -6,7 +6,7 @@ import { Tab } from '@headlessui/react';
 import ErrorBoundary from '../ErrorBoundary/ErrorBoundary';
 import { useBuildingMenu } from '@/hooks/useBuildingMenu';
 import { log } from '@/lib/logUtils';
-import { Building as ImportedBuilding, BuildingType } from '@/lib/models/BuildingModels';
+import { Building as ImportedBuilding } from '@/lib/models/BuildingModels';
 import PlaceableObjectManager from '@/lib/components/PlaceableObjectManager';
 
 // Define the Building interface with all required properties
