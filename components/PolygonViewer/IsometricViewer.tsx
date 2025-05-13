@@ -324,16 +324,32 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         ctx.strokeStyle = '#000';
         ctx.lineWidth = 1;
         
-        // Draw isometric box
-        drawIsometricBox(
-          ctx, 
+        // Draw simple square for building
+        const squareSize = Math.max(size.width, size.depth) * scale * 0.6;
+        ctx.fillStyle = color;
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.rect(
+          isoPos.x - squareSize/2, 
+          isoPos.y - squareSize/2, 
+          squareSize, 
+          squareSize
+        );
+        ctx.fill();
+        ctx.stroke();
+        
+        // Add a small indicator for the building type
+        ctx.fillStyle = '#000';
+        ctx.font = `${Math.max(8, 10 * scale)}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        // Use first letter of building type as an indicator
+        const typeIndicator = building.type.charAt(0).toUpperCase();
+        ctx.fillText(
+          typeIndicator, 
           isoPos.x, 
-          isoPos.y, 
-          size.width * scale * 0.6, // Reduced by 40%
-          size.height * scale * 0.6, // Reduced by 40%
-          size.depth * scale * 0.6, // Reduced by 40%
-          color, 
-          building.rotation || 0
+          isoPos.y
         );
       });
     }
@@ -463,65 +479,30 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     }
   }
 
-  // Helper function to draw an isometric box
-  function drawIsometricBox(
+  // Helper function to draw a building (simplified for 2D view)
+  function drawBuildingSquare(
     ctx: CanvasRenderingContext2D, 
     x: number, 
     y: number, 
-    width: number, 
-    height: number, 
-    depth: number, 
+    size: number,
     color: string,
-    rotation: number = 0
+    typeIndicator: string
   ) {
-    // Calculate the four corners of the base
-    const halfWidth = width / 2;
-    const halfDepth = depth / 2;
-    
-    // Apply rotation
-    const cos = Math.cos(rotation);
-    const sin = Math.sin(rotation);
-    
-    // Calculate rotated corners
-    const corners = [
-      { x: x + (halfWidth * cos - halfDepth * sin), y: y + (halfWidth * sin + halfDepth * cos) },
-      { x: x + (-halfWidth * cos - halfDepth * sin), y: y + (-halfWidth * sin + halfDepth * cos) },
-      { x: x + (-halfWidth * cos + halfDepth * sin), y: y + (-halfWidth * sin - halfDepth * cos) },
-      { x: x + (halfWidth * cos + halfDepth * sin), y: y + (halfWidth * sin - halfDepth * cos) }
-    ];
-    
-    // Draw the top face
+    // Draw square
+    ctx.fillStyle = color;
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(corners[0].x, corners[0].y - height);
-    ctx.lineTo(corners[1].x, corners[1].y - height);
-    ctx.lineTo(corners[2].x, corners[2].y - height);
-    ctx.lineTo(corners[3].x, corners[3].y - height);
-    ctx.closePath();
-    ctx.fillStyle = lightenColor(color, 30);
+    ctx.rect(x - size/2, y - size/2, size, size);
     ctx.fill();
     ctx.stroke();
     
-    // Draw the right face
-    ctx.beginPath();
-    ctx.moveTo(corners[0].x, corners[0].y);
-    ctx.lineTo(corners[0].x, corners[0].y - height);
-    ctx.lineTo(corners[3].x, corners[3].y - height);
-    ctx.lineTo(corners[3].x, corners[3].y);
-    ctx.closePath();
-    ctx.fillStyle = lightenColor(color, 10);
-    ctx.fill();
-    ctx.stroke();
-    
-    // Draw the left face
-    ctx.beginPath();
-    ctx.moveTo(corners[0].x, corners[0].y);
-    ctx.lineTo(corners[0].x, corners[0].y - height);
-    ctx.lineTo(corners[1].x, corners[1].y - height);
-    ctx.lineTo(corners[1].x, corners[1].y);
-    ctx.closePath();
-    ctx.fillStyle = darkenColor(color, 10);
-    ctx.fill();
-    ctx.stroke();
+    // Add type indicator
+    ctx.fillStyle = '#000';
+    ctx.font = `${Math.max(8, 10 * (size/20))}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(typeIndicator, x, y);
   }
 
   // Helper function to lighten a color
