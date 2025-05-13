@@ -3,7 +3,7 @@ import { getBackendBaseUrl } from '@/lib/apiUtils';
 import PlayerProfile from '../UI/PlayerProfile';
 
 // Add this helper function to find and load the building definition file
-const loadBuildingDefinition = async (type: string, variant?: string): Promise<any> => {
+const loadBuildingDefinition = async (type: string, variant?: string, buildingData?: any): Promise<any> => {
   try {
     console.log(`Looking for building definition for type: ${type}, variant: ${variant || 'none'}`);
     
@@ -24,8 +24,8 @@ const loadBuildingDefinition = async (type: string, variant?: string): Promise<a
     // Then try the general data API with various paths
     const pathsToTry = [
       // Try with category/subcategory structure if we know them
-      ...(building?.category && building?.subcategory 
-        ? [`/api/data/buildings/${building.category}/${building.subcategory}/${type}.json`] 
+      ...(buildingData?.category && buildingData?.subcategory 
+        ? [`/api/data/buildings/${buildingData.category}/${buildingData.subcategory}/${type}.json`] 
         : []),
       // Try direct path
       `/api/data/buildings/${type}.json`,
@@ -135,7 +135,7 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
   // Add this effect to load the building definition when a building is selected
   useEffect(() => {
     if (building?.type) {
-      loadBuildingDefinition(building.type, building.variant)
+      loadBuildingDefinition(building.type, building.variant, building)
         .then(definition => {
           console.log('Loaded building definition:', definition);
           setBuildingDefinition(definition);
