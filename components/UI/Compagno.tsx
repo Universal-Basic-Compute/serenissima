@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { FaTimes, FaChevronDown, FaSpinner, FaVolumeUp, FaVolumeMute, FaBell, FaUser, FaSearch, FaArrowLeft } from 'react-icons/fa';
 import ReactMarkdown from 'react-markdown';
