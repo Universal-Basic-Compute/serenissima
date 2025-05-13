@@ -174,7 +174,10 @@ export class TransportPointManager {
             this.scene.add(edgeMarker);
             this.dockPointMarkers.push(edgeMarker);
 
-            // Create a line connecting edge to water
+            // We still create the water point and line objects but don't add them to the scene
+            // This maintains the data structure while hiding the visual elements
+            
+            // Create a line connecting edge to water (but don't add to scene)
             const lineGeometry = new THREE.BufferGeometry();
             const vertices = new Float32Array([
               edgeCoord.x, 0.15, -edgeCoord.y,
@@ -189,11 +192,11 @@ export class TransportPointManager {
 
             const line = new THREE.Line(lineGeometry, lineMaterial);
             line.renderOrder = 99;
-
-            this.scene.add(line);
+            
+            // Store the line in our array but don't add it to the scene
             this.dockPointMarkers.push(line);
 
-            // Create a marker for the water point
+            // Create a marker for the water point (but don't add to scene)
             const waterGeometry = new THREE.SphereGeometry(0.3, 12, 12);
 
             const waterMarker = new THREE.Mesh(waterGeometry, dockWaterMaterial);
@@ -207,8 +210,8 @@ export class TransportPointManager {
               polygonId: polygon.id,
               position: `${point.water.lat.toFixed(6)}, ${point.water.lng.toFixed(6)}`
             };
-
-            this.scene.add(waterMarker);
+            
+            // Store the water marker in our array but don't add it to the scene
             this.dockPointMarkers.push(waterMarker);
           } catch (error) {
             console.error(`Error creating dock point for polygon ${polygon.id}:`, error);
