@@ -12,8 +12,6 @@ declare module '../eventBus' {
 }
 
 // Define the SCENE_BASE_RENDERED event type
-// This needs to be after extending the interface but before using it
-// @ts-ignore - We're extending EventTypes at runtime
 EventTypes.SCENE_BASE_RENDERED = 'SCENE_BASE_RENDERED';
 
 /**
