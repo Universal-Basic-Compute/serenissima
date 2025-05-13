@@ -14,7 +14,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [loading, setLoading] = useState(true);
   const [landOwners, setLandOwners] = useState<Record<string, string>>({});
   const [users, setUsers] = useState<Record<string, any>>({});
-  const [scale, setScale] = useState(1);
+  const [scale, setScale] = useState(3); // Start with a 3x zoom for a closer view
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -188,7 +188,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
       const delta = e.deltaY * -0.01;
-      setScale(prevScale => Math.max(0.4, Math.min(6, prevScale + delta)));
+      // Change the minimum zoom to 1.5 so users can't zoom out too far
+      setScale(prevScale => Math.max(1.5, Math.min(9, prevScale + delta)));
     };
     
     const canvas = canvasRef.current;
@@ -690,21 +691,21 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       <div className="absolute bottom-4 right-4 bg-black/70 text-white p-3 rounded-lg shadow-lg">
         <div className="flex items-center space-x-2">
           <button 
-            onClick={() => setScale(prev => Math.max(0.4, prev - 0.1))}
+            onClick={() => setScale(prev => Math.max(1.5, prev - 0.1))}
             className="px-3 py-1 bg-amber-600 hover:bg-amber-500 rounded text-white"
           >
             -
           </button>
           <span className="text-sm">{Math.round(scale * 100)}%</span>
           <button 
-            onClick={() => setScale(prev => Math.min(6, prev + 0.1))}
+            onClick={() => setScale(prev => Math.min(9, prev + 0.1))}
             className="px-3 py-1 bg-amber-600 hover:bg-amber-500 rounded text-white"
           >
             +
           </button>
           <button 
             onClick={() => {
-              setScale(1);
+              setScale(3); // Reset to 3x zoom instead of 1x
               setOffset({ x: 0, y: 0 });
             }}
             className="px-3 py-1 bg-blue-600 hover:bg-blue-500 rounded text-white ml-2"
