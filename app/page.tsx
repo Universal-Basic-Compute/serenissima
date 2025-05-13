@@ -187,15 +187,12 @@ export default function SimplePage() {
     
     const handleLoadCitizens = () => {
       console.log('Received loadCitizens event in main page');
-      if (activeView === 'citizens') {
-        console.log('Already in citizens view, dispatching loadCitizens event again');
-        // Re-dispatch to ensure it's caught by the CitizenDisplayManager
-        setTimeout(() => {
-          window.dispatchEvent(new CustomEvent('loadCitizens'));
-        }, 200);
-      } else {
+      // Only switch to citizens view if we're not already there
+      if (activeView !== 'citizens') {
         console.log('Switching to citizens view from loadCitizens event');
         setActiveView('citizens');
+      } else {
+        console.log('Already in citizens view, not re-dispatching event to avoid infinite loop');
       }
     };
     

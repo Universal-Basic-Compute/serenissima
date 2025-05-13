@@ -215,8 +215,17 @@ export class CitizenDisplayManager {
     // Listen for loadCitizens custom event
     window.addEventListener('loadCitizens', () => {
       console.log('CitizenDisplayManager: Received loadCitizens event');
-      this.refreshCitizens();
-      this.setActive(true);
+      
+      // Only refresh and activate if not already active
+      if (!this.isActive) {
+        console.log('CitizenDisplayManager: Activating and refreshing citizens');
+        this.refreshCitizens();
+        this.setActive(true);
+      } else {
+        console.log('CitizenDisplayManager: Already active, just refreshing data');
+        // Still refresh data but don't toggle active state
+        this.refreshCitizens();
+      }
     });
     
     // Listen for citizens view activation
