@@ -386,7 +386,7 @@ If you decide not to build anything at this time, return an empty JSON object.
                     # Look for JSON block in the response
                     import re
                     # Improved regex pattern to better handle multiline JSON blocks with proper formatting
-                    json_match = re.search(r'```json\s*(.*?)\s*```', content, re.DOTALL)
+                    json_match = re.search(r'```json\s*([\s\S]*?)\s*```', content, re.DOTALL)
                     
                     if json_match:
                         json_str = json_match.group(1).strip()
@@ -787,7 +787,7 @@ Your response must be a JSON object with:
                 try:
                     # Look for JSON block in the response
                     import re
-                    json_match = re.search(r'```json\s*(.*?)\s*```', content, re.DOTALL)
+                    json_match = re.search(r'```json\s*([\s\S]*?)\s*```', content, re.DOTALL)
                     
                     if json_match:
                         json_str = json_match.group(1).strip()
