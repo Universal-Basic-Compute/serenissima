@@ -153,7 +153,10 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
       {/* Transport Route Button */}
       <button
         onClick={() => {
-          window.dispatchEvent(new CustomEvent('showTransportRoutes'));
+          console.log('Transport Routes button clicked');
+          const event = new CustomEvent('showTransportRoutes');
+          window.dispatchEvent(event);
+          console.log('showTransportRoutes event dispatched');
         }}
         className="px-4 py-2 bg-purple-600 text-white rounded-md shadow-md hover:bg-purple-700 transition-colors flex items-center space-x-2"
         title="Find transport routes between locations"

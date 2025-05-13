@@ -148,8 +148,12 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       setTransportEndPoint(null);
       setTransportPath([]);
       
+      // Add this debug log
+      console.log('Transport mode state set to:', true);
+      
       // Also switch to transport view if not already there
       if (activeView !== 'transport') {
+        console.log('Switching to transport view');
         // Dispatch an event to switch to transport view
         window.dispatchEvent(new CustomEvent('switchToTransportView', {
           detail: { view: 'transport' }
@@ -757,6 +761,11 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       // Always update mouse position regardless of other hover states
       setMousePosition({ x: mouseX, y: mouseY });
       
+      // Log mouse position when in transport mode
+      if (transportMode) {
+        console.log('Mouse position in transport mode:', { x: mouseX, y: mouseY });
+      }
+      
       // Only process hover detection in land view or buildings view
       if (activeView !== 'land' && activeView !== 'buildings') {
         // Reset hover states if not in land or buildings view
@@ -1029,6 +1038,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       const rect = canvas.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
+      
+      console.log('Click detected at:', { x: mouseX, y: mouseY });
+      console.log('Current mode:', { activeView, transportMode });
       
       // Handle transport mode clicks - make sure this is the first condition checked
       if (activeView === 'transport' && transportMode) {
@@ -2014,7 +2026,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         console.log('Drawing transport mode UI', { 
           transportStartPoint, 
           transportEndPoint, 
-          mousePosition 
+          mousePosition,
+          activeView,
+          transportMode
         });
         
         // Draw instructions
@@ -2851,6 +2865,23 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           Exit Transport Mode
         </button>
       )}
+      
+      {/* Debug Transport Mode Toggle */}
+      <button
+        onClick={() => {
+          console.log('Manually toggling transport mode from:', transportMode);
+          setTransportMode(!transportMode);
+          if (!transportMode) {
+            setTransportStartPoint(null);
+            setTransportEndPoint(null);
+            setTransportPath([]);
+          }
+          console.log('Transport mode toggled to:', !transportMode);
+        }}
+        className="absolute top-28 right-4 bg-blue-600 text-white px-3 py-1 rounded text-sm"
+      >
+        {transportMode ? 'Disable Transport Mode' : 'Enable Transport Mode'}
+      </button>
     </div>
   );
 }
