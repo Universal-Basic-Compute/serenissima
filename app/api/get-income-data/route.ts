@@ -45,12 +45,25 @@ export async function GET() {
       .filter(record => record.get('LandId') && 
               (record.get('LastIncome') !== undefined || 
                record.get('LastIncome') !== null))
-      .map(record => ({
-        polygonId: record.get('LandId'),
-        income: record.get('LastIncome') || 0
-      }));
+      .map(record => {
+        // Get the building points count, default to 1 if not available to avoid division by zero
+        const buildingPointsCount = record.get('BuildingPointsCount') || 1;
+        
+        // Calculate income per building point
+        const rawIncome = record.get('LastIncome') || 0;
+        const incomePerBuildingPoint = buildingPointsCount > 0 
+          ? rawIncome / buildingPointsCount 
+          : rawIncome;
+        
+        return {
+          polygonId: record.get('LandId'),
+          income: incomePerBuildingPoint,
+          rawIncome: rawIncome,
+          buildingPointsCount: buildingPointsCount
+        };
+      });
     
-    console.log(`Extracted income data for ${incomeData.length} land parcels`);
+    console.log(`Extracted income data for ${incomeData.length} land parcels with building points normalization`);
     
     // Return the income data
     return NextResponse.json({ incomeData });

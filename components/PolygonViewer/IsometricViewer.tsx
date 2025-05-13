@@ -268,6 +268,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   }, [offset, scale]);
 
   // Get color based on income using a gradient with softer, Renaissance-appropriate colors
+  // Income is normalized by building points count for better comparison
   const getIncomeColor = (income: number | undefined): string => {
     if (income === undefined) return '#E8DCC0'; // Softer parchment color for no data
     
@@ -671,6 +672,19 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         className="w-full h-full"
         style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
       />
+      
+      {/* Income Legend - only visible in land view */}
+      {activeView === 'land' && (
+        <div className="absolute top-20 left-20 bg-black/70 text-white px-3 py-2 rounded text-sm pointer-events-none">
+          <p>Income per building point</p>
+          <div className="w-full h-2 mt-1 rounded" style={{background: 'linear-gradient(to right, #6699CC, #CCB266, #A54A2A)'}}></div>
+          <div className="flex justify-between text-xs mt-1">
+            <span>Low</span>
+            <span>Medium</span>
+            <span>High</span>
+          </div>
+        </div>
+      )}
       
       {/* Controls */}
       <div className="absolute bottom-4 right-4 bg-black/70 text-white p-3 rounded-lg shadow-lg">

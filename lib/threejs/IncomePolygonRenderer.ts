@@ -76,7 +76,7 @@ export class IncomePolygonRenderer {
         
         // Add detailed orange logging for each polygon's income data
         /**console.log(
-          `%c[IncomePolygonRenderer] Polygon ${polygon.id}: lastIncome=${lastIncome}, serviceIncome=${serviceIncome}, final income=${income}`,
+          `%c[IncomePolygonRenderer] Polygon ${polygon.id}: income=${income} (normalized by building points)`,
           'color: orange'
         );*/
         

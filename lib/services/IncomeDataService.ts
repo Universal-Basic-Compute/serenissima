@@ -10,6 +10,8 @@ declare module '../eventBus' {
 export interface IncomeData {
   polygonId: string;
   income: number;
+  rawIncome?: number;
+  buildingPointsCount?: number;
 }
 
 export class IncomeDataService {
