@@ -479,7 +479,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     if (activeView === 'citizens' && citizensLoaded) {
       checkImagePaths();
     }
-  }, [activeView, citizensLoaded]);
+  }, [activeView, citizensLoaded, citizens]);
   
   // Function to load citizens data
   const loadCitizens = useCallback(async () => {
