@@ -6,6 +6,7 @@ import { eventBus, EventTypes } from '@/lib/eventBus';
 import { fetchCoatOfArmsImage } from '@/app/utils/coatOfArmsUtils';
 import LandDetailsPanel from './LandDetailsPanel';
 import BuildingDetailsPanel from './BuildingDetailsPanel';
+import CitizenDetailsPanel from '../UI/CitizenDetailsPanel';
 
 interface IsometricViewerProps {
   activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
@@ -44,6 +45,15 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     centroidY: number;
   }[]>([]);
   const [emptyBuildingPoints, setEmptyBuildingPoints] = useState<{lat: number, lng: number}[]>([]);
+  
+  // Citizen-related state
+  const [citizens, setCitizens] = useState<any[]>([]);
+  const [citizensByBuilding, setCitizensByBuilding] = useState<Record<string, any[]>>({});
+  const [citizensLoaded, setCitizensLoaded] = useState<boolean>(false);
+  const [hoveredCitizenBuilding, setHoveredCitizenBuilding] = useState<string | null>(null);
+  const [hoveredCitizenType, setHoveredCitizenType] = useState<'home' | 'work' | null>(null);
+  const [selectedCitizen, setSelectedCitizen] = useState<any>(null);
+  const [showCitizenDetailsPanel, setShowCitizenDetailsPanel] = useState<boolean>(false);
 
   // Load polygons
   useEffect(() => {
@@ -409,6 +419,74 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     }
   }, [activeView]);
   
+  // Load citizens if in citizens view
+  useEffect(() => {
+    if (activeView === 'citizens') {
+      loadCitizens();
+    }
+  }, [activeView]);
+  
+  // Function to load citizens data
+  const loadCitizens = useCallback(async () => {
+    try {
+      console.log('Loading citizens data...');
+      const response = await fetch('/api/citizens');
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setCitizens(data);
+          
+          // Group citizens by building
+          const byBuilding: Record<string, any[]> = {};
+          
+          data.forEach(citizen => {
+            // Add to home building
+            if (citizen.Home) {
+              if (!byBuilding[citizen.Home]) {
+                byBuilding[citizen.Home] = [];
+              }
+              byBuilding[citizen.Home].push({
+                ...citizen,
+                markerType: 'home'
+              });
+            }
+            
+            // Add to work building
+            if (citizen.Work) {
+              if (!byBuilding[citizen.Work]) {
+                byBuilding[citizen.Work] = [];
+              }
+              byBuilding[citizen.Work].push({
+                ...citizen,
+                markerType: 'work'
+              });
+            }
+          });
+          
+          setCitizensByBuilding(byBuilding);
+          setCitizensLoaded(true);
+          console.log(`Loaded ${data.length} citizens in ${Object.keys(byBuilding).length} buildings`);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading citizens:', error);
+    }
+  }, []);
+  
+  // Listen for loadCitizens event
+  useEffect(() => {
+    const handleLoadCitizens = () => {
+      console.log('Received loadCitizens event in IsometricViewer');
+      loadCitizens();
+    };
+    
+    window.addEventListener('loadCitizens', handleLoadCitizens);
+    
+    return () => {
+      window.removeEventListener('loadCitizens', handleLoadCitizens);
+    };
+  }, [loadCitizens]);
+  
   // Identify empty building points when in buildings view
   useEffect(() => {
     if (activeView === 'buildings' && polygons.length > 0 && buildings.length > 0) {
@@ -692,6 +770,59 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         // If not in buildings view, ensure building hover state is cleared
         setHoveredBuildingId(null);
       }
+      
+      // Check if mouse is over any citizen marker (for citizens view)
+      if (activeView === 'citizens') {
+        let foundHoveredCitizen = false;
+        
+        // Check each building with citizens
+        for (const [buildingId, buildingCitizens] of Object.entries(citizensByBuilding)) {
+          // Find the building position
+          const position = findBuildingPosition(buildingId);
+          if (!position) continue;
+          
+          // Check home citizens
+          const homeCitizens = buildingCitizens.filter(c => c.markerType === 'home');
+          if (homeCitizens.length > 0) {
+            // Check if mouse is over the home marker
+            const homeX = position.x - 15;
+            const homeY = position.y;
+            const homeRadius = homeCitizens.length > 1 ? 25 : 20;
+            
+            if (Math.sqrt(Math.pow(mouseX - homeX, 2) + Math.pow(mouseY - homeY, 2)) <= homeRadius) {
+              foundHoveredCitizen = true;
+              setHoveredCitizenBuilding(buildingId);
+              setHoveredCitizenType('home');
+              canvas.style.cursor = 'pointer';
+              break;
+            }
+          }
+          
+          // Check work citizens
+          const workCitizens = buildingCitizens.filter(c => c.markerType === 'work');
+          if (workCitizens.length > 0) {
+            // Check if mouse is over the work marker
+            const workX = position.x + 15;
+            const workY = position.y;
+            const workRadius = workCitizens.length > 1 ? 25 : 20;
+            
+            if (Math.sqrt(Math.pow(mouseX - workX, 2) + Math.pow(mouseY - workY, 2)) <= workRadius) {
+              foundHoveredCitizen = true;
+              setHoveredCitizenBuilding(buildingId);
+              setHoveredCitizenType('work');
+              canvas.style.cursor = 'pointer';
+              break;
+            }
+          }
+        }
+        
+        // If no citizen is hovered, reset the hover state
+        if (!foundHoveredCitizen && (hoveredCitizenBuilding !== null || hoveredCitizenType !== null)) {
+          setHoveredCitizenBuilding(null);
+          setHoveredCitizenType(null);
+          canvas.style.cursor = isDragging ? 'grabbing' : 'grab';
+        }
+      }
     };
     
     const handleClick = (e: MouseEvent) => {
@@ -784,6 +915,68 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         // If click is not on any building, deselect
         setSelectedBuildingId(null);
       }
+      
+      // Handle clicks in citizens view
+      if (activeView === 'citizens') {
+        // Check each building with citizens
+        for (const [buildingId, buildingCitizens] of Object.entries(citizensByBuilding)) {
+          // Find the building position
+          const position = findBuildingPosition(buildingId);
+          if (!position) continue;
+          
+          // Check home citizens
+          const homeCitizens = buildingCitizens.filter(c => c.markerType === 'home');
+          if (homeCitizens.length > 0) {
+            // Check if click is on the home marker
+            const homeX = position.x - 15;
+            const homeY = position.y;
+            const homeRadius = homeCitizens.length > 1 ? 25 : 20;
+            
+            if (Math.sqrt(Math.pow(mouseX - homeX, 2) + Math.pow(mouseY - homeY, 2)) <= homeRadius) {
+              // If there's only one citizen, show details
+              if (homeCitizens.length === 1) {
+                setSelectedCitizen(homeCitizens[0]);
+                setShowCitizenDetailsPanel(true);
+              } else {
+                // For multiple citizens, show a selection dialog
+                console.log(`${homeCitizens.length} residents at building ${buildingId}`);
+                // For now, just show the first citizen
+                setSelectedCitizen(homeCitizens[0]);
+                setShowCitizenDetailsPanel(true);
+              }
+              return;
+            }
+          }
+          
+          // Check work citizens
+          const workCitizens = buildingCitizens.filter(c => c.markerType === 'work');
+          if (workCitizens.length > 0) {
+            // Check if click is on the work marker
+            const workX = position.x + 15;
+            const workY = position.y;
+            const workRadius = workCitizens.length > 1 ? 25 : 20;
+            
+            if (Math.sqrt(Math.pow(mouseX - workX, 2) + Math.pow(mouseY - workY, 2)) <= workRadius) {
+              // If there's only one citizen, show details
+              if (workCitizens.length === 1) {
+                setSelectedCitizen(workCitizens[0]);
+                setShowCitizenDetailsPanel(true);
+              } else {
+                // For multiple citizens, show a selection dialog
+                console.log(`${workCitizens.length} workers at building ${buildingId}`);
+                // For now, just show the first citizen
+                setSelectedCitizen(workCitizens[0]);
+                setShowCitizenDetailsPanel(true);
+              }
+              return;
+            }
+          }
+        }
+        
+        // If click is not on any citizen marker, deselect
+        setSelectedCitizen(null);
+        setShowCitizenDetailsPanel(false);
+      }
     };
     
     canvas.addEventListener('mousemove', handleMouseMove);
@@ -808,6 +1001,118 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     }
     return inside;
   }
+  
+  // Function to find building position
+  const findBuildingPosition = (buildingId: string): {x: number, y: number} | null => {
+    // First check if any building in the buildings array matches
+    const building = buildings.find(b => b.id === buildingId);
+    if (building && building.position) {
+      let position;
+      if (typeof building.position === 'string') {
+        try {
+          position = JSON.parse(building.position);
+        } catch (e) {
+          return null;
+        }
+      } else {
+        position = building.position;
+      }
+      
+      // Convert lat/lng to isometric coordinates
+      let x, y;
+      if ('lat' in position && 'lng' in position) {
+        x = (position.lng - 12.3326) * 20000;
+        y = (position.lat - 45.4371) * 20000;
+      } else if ('x' in position && 'z' in position) {
+        x = position.x;
+        y = position.z;
+      } else {
+        return null;
+      }
+      
+      return {
+        x: calculateIsoX(x, y, scale, offset, canvasRef.current?.width || 0),
+        y: calculateIsoY(x, y, scale, offset, canvasRef.current?.height || 0)
+      };
+    }
+    
+    // If not found in buildings, check building points in polygons
+    for (const polygon of polygons) {
+      if (polygon.buildingPoints && Array.isArray(polygon.buildingPoints)) {
+        const buildingPoint = polygon.buildingPoints.find((bp: any) => 
+          bp.BuildingId === buildingId || 
+          bp.buildingId === buildingId || 
+          bp.id === buildingId
+        );
+        
+        if (buildingPoint) {
+          // Convert lat/lng to isometric coordinates
+          const x = (buildingPoint.lng - 12.3326) * 20000;
+          const y = (buildingPoint.lat - 45.4371) * 20000;
+          
+          return {
+            x: calculateIsoX(x, y, scale, offset, canvasRef.current?.width || 0),
+            y: calculateIsoY(x, y, scale, offset, canvasRef.current?.height || 0)
+          };
+        }
+      }
+    }
+    
+    return null;
+  };
+  
+  // Function to create a citizen marker
+  const createCitizenMarker = (
+    ctx: CanvasRenderingContext2D, 
+    x: number, 
+    y: number, 
+    citizen: any, 
+    markerType: 'home' | 'work',
+    size: number = 20,
+    isHovered: boolean = false
+  ) => {
+    // Draw a circular background with color based on marker type
+    ctx.beginPath();
+    ctx.arc(x, y, size + (isHovered ? 2 : 0), 0, Math.PI * 2);
+    ctx.fillStyle = markerType === 'home' 
+      ? (isHovered ? 'rgba(120, 170, 255, 0.9)' : 'rgba(100, 150, 255, 0.8)')
+      : (isHovered ? 'rgba(255, 170, 120, 0.9)' : 'rgba(255, 150, 100, 0.8)');
+    ctx.fill();
+    
+    // Add a white border, thicker when hovered
+    ctx.strokeStyle = isHovered ? '#FFFF00' : '#FFFFFF';
+    ctx.lineWidth = isHovered ? 3 : 2;
+    ctx.stroke();
+    
+    // Add the citizen's initials
+    ctx.font = `bold ${size * 0.6}px Arial`;
+    ctx.fillStyle = '#FFFFFF';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    // Get the first letters of the first and last name
+    const firstInitial = (citizen.FirstName || citizen.firstName || '').charAt(0).toUpperCase();
+    const lastInitial = (citizen.LastName || citizen.lastName || '').charAt(0).toUpperCase();
+    ctx.fillText(firstInitial + lastInitial, x, y);
+    
+    // Add a small icon to indicate home or work
+    const iconSize = size / 2;
+    const iconX = x + size - iconSize / 2;
+    const iconY = y - size + iconSize / 2;
+    
+    ctx.beginPath();
+    ctx.arc(iconX, iconY, iconSize, 0, Math.PI * 2);
+    ctx.fillStyle = markerType === 'home' ? '#4b70e2' : '#e27a4b';
+    ctx.fill();
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    
+    // Draw icon symbol
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = `bold ${iconSize * 0.8}px Arial`;
+    ctx.fillText(markerType === 'home' ? 'H' : 'W', iconX, iconY);
+  };
 
   // Define isometric projection functions at the component level
   const calculateIsoX = (x: number, y: number, currentScale: number, currentOffset: {x: number, y: number}, canvasWidth: number) => {
@@ -1217,7 +1522,137 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       });
     }
     
-  }, [loading, polygons, landOwners, users, activeView, buildings, scale, offset, incomeData, minIncome, maxIncome, hoveredPolygonId, selectedPolygonId, hoveredBuildingId, selectedBuildingId, emptyBuildingPoints, mousePosition]);
+    // Draw citizen markers if in citizens view
+    if (activeView === 'citizens' && citizensLoaded) {
+      // Draw citizens at their home and work locations
+      Object.entries(citizensByBuilding).forEach(([buildingId, buildingCitizens]) => {
+        // Find the building position
+        const position = findBuildingPosition(buildingId);
+        if (!position) return;
+        
+        // Group citizens by marker type
+        const homeCitizens = buildingCitizens.filter(c => c.markerType === 'home');
+        const workCitizens = buildingCitizens.filter(c => c.markerType === 'work');
+        
+        // Draw home citizens
+        if (homeCitizens.length > 0) {
+          // If multiple citizens, draw a group marker
+          if (homeCitizens.length > 1) {
+            // Draw a slightly larger marker with count
+            ctx.beginPath();
+            ctx.arc(position.x - 15, position.y, 25, 0, Math.PI * 2);
+            ctx.fillStyle = hoveredCitizenBuilding === buildingId && hoveredCitizenType === 'home'
+              ? 'rgba(120, 170, 255, 0.9)'
+              : 'rgba(100, 150, 255, 0.8)';
+            ctx.fill();
+            ctx.strokeStyle = hoveredCitizenBuilding === buildingId && hoveredCitizenType === 'home'
+              ? '#FFFF00'
+              : '#FFFFFF';
+            ctx.lineWidth = hoveredCitizenBuilding === buildingId && hoveredCitizenType === 'home' ? 3 : 2;
+            ctx.stroke();
+            
+            // Add count
+            ctx.font = 'bold 20px Arial';
+            ctx.fillStyle = '#FFFFFF';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(homeCitizens.length.toString(), position.x - 15, position.y);
+            
+            // Add home icon
+            ctx.beginPath();
+            ctx.arc(position.x - 15 + 15, position.y - 15, 10, 0, Math.PI * 2);
+            ctx.fillStyle = '#4b70e2';
+            ctx.fill();
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = 'bold 10px Arial';
+            ctx.fillText('H', position.x - 15 + 15, position.y - 15);
+          } else {
+            // Draw a single citizen marker
+            createCitizenMarker(
+              ctx, 
+              position.x - 15, 
+              position.y, 
+              homeCitizens[0], 
+              'home', 
+              20, 
+              hoveredCitizenBuilding === buildingId && hoveredCitizenType === 'home'
+            );
+          }
+        }
+        
+        // Draw work citizens
+        if (workCitizens.length > 0) {
+          // If multiple citizens, draw a group marker
+          if (workCitizens.length > 1) {
+            // Draw a slightly larger marker with count
+            ctx.beginPath();
+            ctx.arc(position.x + 15, position.y, 25, 0, Math.PI * 2);
+            ctx.fillStyle = hoveredCitizenBuilding === buildingId && hoveredCitizenType === 'work'
+              ? 'rgba(255, 170, 120, 0.9)'
+              : 'rgba(255, 150, 100, 0.8)';
+            ctx.fill();
+            ctx.strokeStyle = hoveredCitizenBuilding === buildingId && hoveredCitizenType === 'work'
+              ? '#FFFF00'
+              : '#FFFFFF';
+            ctx.lineWidth = hoveredCitizenBuilding === buildingId && hoveredCitizenType === 'work' ? 3 : 2;
+            ctx.stroke();
+            
+            // Add count
+            ctx.font = 'bold 20px Arial';
+            ctx.fillStyle = '#FFFFFF';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(workCitizens.length.toString(), position.x + 15, position.y);
+            
+            // Add work icon
+            ctx.beginPath();
+            ctx.arc(position.x + 15 + 15, position.y - 15, 10, 0, Math.PI * 2);
+            ctx.fillStyle = '#e27a4b';
+            ctx.fill();
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = 'bold 10px Arial';
+            ctx.fillText('W', position.x + 15 + 15, position.y - 15);
+          } else {
+            // Draw a single citizen marker
+            createCitizenMarker(
+              ctx, 
+              position.x + 15, 
+              position.y, 
+              workCitizens[0], 
+              'work', 
+              20, 
+              hoveredCitizenBuilding === buildingId && hoveredCitizenType === 'work'
+            );
+          }
+        }
+      });
+      
+      // Add a legend for citizen markers
+      const legendX = 20;
+      const legendY = canvas.height - 100;
+      
+      // Home marker legend
+      createCitizenMarker(ctx, legendX + 15, legendY, { FirstName: 'H', LastName: 'M' }, 'home', 15);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '14px Arial';
+      ctx.textAlign = 'left';
+      ctx.fillText('Home', legendX + 40, legendY);
+      
+      // Work marker legend
+      createCitizenMarker(ctx, legendX + 15, legendY + 40, { FirstName: 'W', LastName: 'K' }, 'work', 15);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '14px Arial';
+      ctx.textAlign = 'left';
+      ctx.fillText('Work', legendX + 40, legendY + 40);
+    }
+    
+  }, [loading, polygons, landOwners, users, activeView, buildings, scale, offset, incomeData, minIncome, maxIncome, hoveredPolygonId, selectedPolygonId, hoveredBuildingId, selectedBuildingId, emptyBuildingPoints, mousePosition, citizensLoaded, citizensByBuilding, hoveredCitizenBuilding, hoveredCitizenType]);
   
 
   // Handle window resize
@@ -1423,6 +1858,17 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             setSelectedBuildingId(null);
           }}
           visible={showBuildingDetailsPanel}
+        />
+      )}
+      
+      {/* Citizen Details Panel */}
+      {showCitizenDetailsPanel && selectedCitizen && (
+        <CitizenDetailsPanel
+          citizen={selectedCitizen}
+          onClose={() => {
+            setShowCitizenDetailsPanel(false);
+            setSelectedCitizen(null);
+          }}
         />
       )}
       
