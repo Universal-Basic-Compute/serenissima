@@ -204,8 +204,9 @@ export async function GET(request: Request) {
           const firstValue = Object.values(occupant)[0];
           citizenId = typeof firstValue === 'string' ? firstValue : String(firstValue);
         } else {
-          // For any other type, convert to string
-          citizenId = String(occupant);
+          // For any other type, convert to string safely
+          // Use explicit type assertion to string to avoid TypeScript error
+          citizenId = String(occupant as string);
         }
       }
       const citizen = citizenMap.get(citizenId);
