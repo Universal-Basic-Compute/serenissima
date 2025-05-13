@@ -6,8 +6,29 @@ import { getComputeBalance, deductCompute } from '@/lib/computeUtils';
 const apiKey = process.env.AIRTABLE_API_KEY;
 const baseId = process.env.AIRTABLE_BASE_ID;
 
+// Define proper types for Airtable
+type AirtableRecord = {
+  id: string;
+  fields: Record<string, any>;
+  get(field: string): any;
+};
+
+type AirtableTable = {
+  select(options: any): {
+    eachPage(
+      callback: (records: AirtableRecord[], fetchNextPage: () => void) => void,
+      done: (error: Error | null) => void
+    ): void;
+  };
+  create(
+    tableName: string,
+    data: Record<string, any>,
+    callback: (err: Error | null, record: AirtableRecord) => void
+  ): void;
+};
+
 // Initialize Airtable base if API key and base ID are available
-const base = apiKey && baseId ? new Airtable({ apiKey }).base(baseId) : null;
+const base = apiKey && baseId ? new Airtable({ apiKey }).base(baseId) as unknown as AirtableTable : null;
 
 export async function POST(request: Request) {
   try {
@@ -71,7 +92,7 @@ export async function POST(request: Request) {
     const existingBuildings = await new Promise<any[]>((resolve, reject) => {
       const buildings: any[] = [];
       
-      base.select({
+      base!.select({
         filterByFormula: `{Land} = '${data.land_id}'`,
         view: 'Grid view'
       })
@@ -241,7 +262,7 @@ export async function POST(request: Request) {
     // Create a record in Airtable
     const buildingId = `building-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
     const record = await new Promise((resolve, reject) => {
-      base.create('BUILDINGS', {
+      base!.create('BUILDINGS', {
         BuildingId: buildingId,
         Type: data.type,
         Land: data.land_id,
