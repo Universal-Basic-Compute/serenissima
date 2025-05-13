@@ -62,8 +62,12 @@ export async function GET() {
           imageUrl = `https://serenissima.ai${imageUrl}`;
         }
         
+        // Also add a local URL for fallback
+        const localUrl = `/coat-of-arms/${username}.png`;
+        
+        // Store both URLs for better fallback options
         coatOfArms[username as string] = imageUrl;
-        console.log(`Coat of arms for ${username}: ${imageUrl}`);
+        console.log(`Coat of arms for ${username}: ${imageUrl} (local fallback: ${localUrl})`);
       }
     });
     

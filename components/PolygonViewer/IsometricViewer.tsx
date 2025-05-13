@@ -102,19 +102,74 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             
             Object.entries(data.coatOfArms).forEach(([owner, url]) => {
               if (url) {
-                const img = new Image();
-                const imagePromise = new Promise<void>((resolve) => {
-                  img.onload = () => resolve();
-                  img.onerror = () => resolve(); // Continue even if image fails to load
-                  img.src = url as string;
-                });
+                // Create an array of URLs to try in order
+                const urlsToTry = [
+                  // 1. Use the URL from the API directly
+                  url as string,
+                  
+                  // 2. Try with serenissima.ai domain
+                  `https://serenissima.ai/coat-of-arms/${owner}.png`,
+                  
+                  // 3. Try with current origin as fallback
+                  `${window.location.origin}/coat-of-arms/${owner}.png`
+                ];
+                
+                console.log(`Will try these URLs for ${owner}:`, urlsToTry);
+                
+                // Create a promise that tries each URL in sequence
+                const tryLoadImage = async (): Promise<HTMLImageElement> => {
+                  for (let i = 0; i < urlsToTry.length; i++) {
+                    try {
+                      const currentUrl = urlsToTry[i];
+                      console.log(`Trying URL ${i + 1}/${urlsToTry.length} for ${owner}: ${currentUrl}`);
+                      
+                      const img = new Image();
+                      img.crossOrigin = "anonymous"; // Important for CORS
+                      
+                      // Create a promise for this specific URL
+                      const loadPromise = new Promise<HTMLImageElement>((resolve, reject) => {
+                        img.onload = () => {
+                          console.log(`Successfully loaded coat of arms for ${owner} from ${currentUrl}`);
+                          resolve(img);
+                        };
+                        img.onerror = () => {
+                          console.warn(`Failed to load coat of arms for ${owner} from ${currentUrl}`);
+                          reject(new Error(`Failed to load image from ${currentUrl}`));
+                        };
+                        img.src = currentUrl;
+                      });
+                      
+                      // Wait for this URL to load or fail
+                      return await loadPromise;
+                    } catch (error) {
+                      // If we're at the last URL and it failed, throw the error
+                      if (i === urlsToTry.length - 1) {
+                        throw error;
+                      }
+                      // Otherwise continue to the next URL
+                    }
+                  }
+                  
+                  // This should never be reached due to the throw above, but TypeScript needs it
+                  throw new Error("All URLs failed to load");
+                };
+                
+                // Add the promise to our array
+                const imagePromise = tryLoadImage()
+                  .then(img => {
+                    newImages[owner] = img;
+                  })
+                  .catch(error => {
+                    console.error(`All URLs failed for ${owner}:`, error);
+                    // We'll handle this case in the createDefaultCircularAvatar function
+                  });
                 
                 imagePromises.push(imagePromise);
-                newImages[owner] = img;
               }
             });
             
-            await Promise.all(imagePromises);
+            // Wait for all images to either load or fail
+            await Promise.allSettled(imagePromises);
             setCoatOfArmsImages(newImages);
           }
         }
@@ -130,43 +185,58 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   
   // Function to create a circular clipping of an image
   const createCircularImage = (ctx: CanvasRenderingContext2D, img: HTMLImageElement, x: number, y: number, size: number) => {
-    // Save the current context state
-    ctx.save();
-    
-    // Create a circular clipping path
-    ctx.beginPath();
-    ctx.arc(x, y, size / 2, 0, Math.PI * 2);
-    ctx.closePath();
-    
-    // Add a white border around the circle
-    ctx.strokeStyle = 'white';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    
-    // Clip to the circle
-    ctx.clip();
-    
-    // Calculate dimensions to maintain aspect ratio
-    let drawWidth = size;
-    let drawHeight = size;
-    let offsetX = 0;
-    let offsetY = 0;
-    
-    if (img.width > img.height) {
-      // Landscape image
-      drawHeight = (img.height / img.width) * size;
-      offsetY = (size - drawHeight) / 2;
-    } else if (img.height > img.width) {
-      // Portrait image
-      drawWidth = (img.width / img.height) * size;
-      offsetX = (size - drawWidth) / 2;
+    // Check if the image has loaded successfully
+    if (!img.complete || img.naturalWidth === 0 || img.naturalHeight === 0) {
+      console.warn(`Image not loaded properly, using default avatar instead`);
+      // Use the default avatar as fallback
+      createDefaultCircularAvatar(ctx, "Unknown", x, y, size);
+      return;
     }
     
-    // Draw the image with proper aspect ratio
-    ctx.drawImage(img, x - (drawWidth / 2) + offsetX, y - (drawHeight / 2) + offsetY, drawWidth, drawHeight);
-    
-    // Restore the context state
-    ctx.restore();
+    try {
+      // Save the current context state
+      ctx.save();
+      
+      // Create a circular clipping path
+      ctx.beginPath();
+      ctx.arc(x, y, size / 2, 0, Math.PI * 2);
+      ctx.closePath();
+      
+      // Add a white border around the circle
+      ctx.strokeStyle = 'white';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      
+      // Clip to the circle
+      ctx.clip();
+      
+      // Calculate dimensions to maintain aspect ratio
+      let drawWidth = size;
+      let drawHeight = size;
+      let offsetX = 0;
+      let offsetY = 0;
+      
+      if (img.width > img.height) {
+        // Landscape image
+        drawHeight = (img.height / img.width) * size;
+        offsetY = (size - drawHeight) / 2;
+      } else if (img.height > img.width) {
+        // Portrait image
+        drawWidth = (img.width / img.height) * size;
+        offsetX = (size - drawWidth) / 2;
+      }
+      
+      // Draw the image with proper aspect ratio
+      ctx.drawImage(img, x - (drawWidth / 2) + offsetX, y - (drawHeight / 2) + offsetY, drawWidth, drawHeight);
+      
+      // Restore the context state
+      ctx.restore();
+    } catch (error) {
+      console.error('Error drawing circular image:', error);
+      // If drawing fails, use default avatar
+      ctx.restore(); // Restore context before trying again
+      createDefaultCircularAvatar(ctx, "Error", x, y, size);
+    }
   };
   
   // Function to create a default circular avatar for owners without coat of arms
@@ -572,8 +642,14 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             
           // Check if we have a coat of arms image for this owner
           if (owner in coatOfArmsImages && coatOfArmsImages[owner]) {
-            // Draw circular coat of arms
-            createCircularImage(ctx, coatOfArmsImages[owner], centroidX, centroidY, size);
+            // Draw circular coat of arms with error handling
+            try {
+              createCircularImage(ctx, coatOfArmsImages[owner], centroidX, centroidY, size);
+            } catch (error) {
+              console.error(`Error rendering coat of arms for ${owner}:`, error);
+              // Fallback to default avatar
+              createDefaultCircularAvatar(ctx, owner, centroidX, centroidY, size);
+            }
           } else {
             // Draw default avatar with initial
             createDefaultCircularAvatar(ctx, owner, centroidX, centroidY, size);
