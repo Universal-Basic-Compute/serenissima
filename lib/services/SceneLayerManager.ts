@@ -1,16 +1,16 @@
 import * as THREE from 'three';
 import { eventBus, EventTypes } from '../eventBus';
 
-// Define the SCENE_BASE_RENDERED event type
-// This needs to be before the module augmentation to avoid TypeScript errors
-EventTypes.SCENE_BASE_RENDERED = 'SCENE_BASE_RENDERED';
-
 // Extend EventTypes interface to include SCENE_BASE_RENDERED
 declare module '../eventBus' {
   interface EventTypes {
     SCENE_BASE_RENDERED: string;
   }
 }
+
+// Define the SCENE_BASE_RENDERED event type
+// This needs to be after the module augmentation to properly extend the type
+EventTypes.SCENE_BASE_RENDERED = 'SCENE_BASE_RENDERED';
 import { buildingRendererManager } from './BuildingRendererManager';
 
 /**
