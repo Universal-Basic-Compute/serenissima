@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import Airtable from 'airtable';
+import { FieldSet, Record as AirtableRecord } from 'airtable';
 
 // Initialize Airtable
 const base = new Airtable({
@@ -56,7 +57,7 @@ export async function GET(request: Request) {
     }
     
     // Try to fetch buildings to get their positions
-    let buildingRecords: any[] = [];
+    let buildingRecords: readonly AirtableRecord<FieldSet>[] = [];
     try {
       buildingRecords = await base(BUILDINGS_TABLE)
         .select({
