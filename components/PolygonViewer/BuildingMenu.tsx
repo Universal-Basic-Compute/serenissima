@@ -9,8 +9,9 @@ import { log } from '@/lib/logUtils';
 import { Building as ImportedBuilding } from '@/lib/models/BuildingModels';
 import PlaceableObjectManager from '@/lib/components/PlaceableObjectManager';
 
-// Define the Building interface to match the imported Building type
-interface Building extends ImportedBuilding {
+// Define the Building interface with all required properties
+interface Building {
+  id: string;
   name: string;
   category: string;
   subcategory: string;
@@ -19,6 +20,11 @@ interface Building extends ImportedBuilding {
   size?: string;
   era?: string;
   variant?: string;
+  // Include any other properties from ImportedBuilding that are needed
+  model?: string;
+  scale?: number;
+  rotation?: number;
+  height?: number;
 }
 
 interface BuildingMenuProps {
