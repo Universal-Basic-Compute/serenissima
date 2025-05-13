@@ -118,6 +118,29 @@ def create_or_update_bid(tables, ai_user: Dict, land: Dict, existing_bid: Option
             })
             
             print(f"Updated bid for {land_id} from {current_bid} to {new_bid} by AI {ai_username}")
+            
+            # Send notification to land owner about the updated bid
+            if land_owner:
+                try:
+                    notification_content = f"AI {ai_username} has increased their bid on your land {land_id} from {current_bid} to {new_bid} compute."
+                    tables["notifications"].create({
+                        "User": land_owner,
+                        "Type": "bid_update",
+                        "Content": notification_content,
+                        "CreatedAt": now,
+                        "ReadAt": None,
+                        "Details": json.dumps({
+                            "land_id": land_id,
+                            "bidder": ai_username,
+                            "previous_bid": current_bid,
+                            "new_bid": new_bid,
+                            "timestamp": now
+                        })
+                    })
+                    print(f"Sent bid update notification to land owner {land_owner}")
+                except Exception as e:
+                    print(f"Error sending notification to land owner: {str(e)}")
+            
             return True
         else:
             # Create a new bid
@@ -136,6 +159,28 @@ def create_or_update_bid(tables, ai_user: Dict, land: Dict, existing_bid: Option
             
             tables["transactions"].create(transaction)
             print(f"Created new bid for {land_id} at {bid_amount} by AI {ai_username}")
+            
+            # Send notification to land owner about the new bid
+            if land_owner:
+                try:
+                    notification_content = f"AI {ai_username} has placed a bid of {bid_amount} compute on your land {land_id}."
+                    tables["notifications"].create({
+                        "User": land_owner,
+                        "Type": "new_bid",
+                        "Content": notification_content,
+                        "CreatedAt": now,
+                        "ReadAt": None,
+                        "Details": json.dumps({
+                            "land_id": land_id,
+                            "bidder": ai_username,
+                            "bid_amount": bid_amount,
+                            "timestamp": now
+                        })
+                    })
+                    print(f"Sent new bid notification to land owner {land_owner}")
+                except Exception as e:
+                    print(f"Error sending notification to land owner: {str(e)}")
+            
             return True
     except Exception as e:
         print(f"Error creating/updating bid: {str(e)}")
