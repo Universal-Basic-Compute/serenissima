@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Configuration
-const BATCH_SIZE = 20; // Number of errors to fix in each batch (increased from 5 to 20)
+const BATCH_SIZE = 8; // Number of errors to fix in each batch (increased from 5 to 8)
 const MAX_BATCHES = 200; // Increased from 100 to 200 to process more batches
 const TS_ERRORS_FILE = 'ts-errors.json';
 const MAX_ITERATIONS = 10; // Increased from 5 to 10 for more iterations
