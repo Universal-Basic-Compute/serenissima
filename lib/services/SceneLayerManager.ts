@@ -13,9 +13,7 @@ declare module '../eventBus' {
 
 // Define the SCENE_BASE_RENDERED event type
 // This needs to be defined before it's used
-if (!EventTypes.SCENE_BASE_RENDERED) {
-  EventTypes.SCENE_BASE_RENDERED = 'SCENE_BASE_RENDERED';
-}
+EventTypes.SCENE_BASE_RENDERED = 'SCENE_BASE_RENDERED';
 
 /**
  * SceneLayerManager
