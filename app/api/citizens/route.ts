@@ -184,7 +184,9 @@ export async function GET(request: Request) {
       const occupant = record.fields.Occupant;
       // Explicitly cast the Airtable field to string to fix type error
       const citizenId = occupant ? 
-        (typeof occupant === 'string' ? occupant : String(occupant)) : '';
+        (typeof occupant === 'string' ? occupant : 
+          Array.isArray(occupant) && occupant.length > 0 ? String(occupant[0]) : 
+          String(occupant)) : '';
       const citizen = citizenMap.get(citizenId);
       
       if (!citizen) {
