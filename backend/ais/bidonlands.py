@@ -104,7 +104,7 @@ def create_or_update_bid(tables, ai_user: Dict, land: Dict, existing_bid: Option
         if existing_bid:
             # Increase existing bid by 14% if AI has enough compute
             current_bid = existing_bid["fields"].get("Price", 0)
-            new_bid = current_bid * 1.14
+            new_bid = current_bid * 1.2
             
             if ai_compute < new_bid * 2:
                 print(f"AI {ai_username} doesn't have enough compute to increase bid on {land_id}. Needs {new_bid * 2}, has {ai_compute}")

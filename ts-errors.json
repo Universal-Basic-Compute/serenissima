@@ -1,10 +1,57 @@
 {
-  "totalErrors": 0,
+  "totalErrors": 5,
   "totalWarnings": 0,
-  "exitCode": 0,
-  "timestamp": "2025-05-12T22:17:20.092Z",
-  "errors": [],
-  "rawOutputLines": 1,
-  "firstFewLines": [],
-  "compilerExitCode": 0
+  "exitCode": 1,
+  "timestamp": "2025-05-13T00:37:05.864Z",
+  "errors": [
+    {
+      "filePath": "components/PolygonViewer/BuildingMenu.tsx",
+      "line": 13,
+      "column": 11,
+      "code": "TS2430",
+      "message": "Interface 'Building' incorrectly extends interface 'import(\"C:/Users/reyno/serenissima/lib/models/BuildingModels\").Building'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/BuildingMenu.tsx",
+      "line": 276,
+      "column": 69,
+      "code": "TS2339",
+      "message": "Property 'description' does not exist on type 'Building'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/UI/Compagno.tsx",
+      "line": 1027,
+      "column": 87,
+      "code": "TS2339",
+      "message": "Property 'style' does not exist on type 'Element'.",
+      "type": "error"
+    },
+    {
+      "filePath": "hooks/useBuildingMenu.ts",
+      "line": 74,
+      "column": 39,
+      "code": "TS2339",
+      "message": "Property 'type' does not exist on type 'Building'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/threejs/WaterFacade.ts",
+      "line": 410,
+      "column": 9,
+      "code": "TS2304",
+      "message": "Cannot find name 'waterGeometry'.",
+      "type": "error"
+    }
+  ],
+  "rawOutputLines": 7,
+  "firstFewLines": [
+    "components/PolygonViewer/BuildingMenu.tsx(13,11): error TS2430: Interface 'Building' incorrectly extends interface 'import(\"C:/Users/reyno/serenissima/lib/models/BuildingModels\").Building'.\r",
+    "  Property 'size' is optional in type 'Building' but required in type 'Building'.\r",
+    "components/PolygonViewer/BuildingMenu.tsx(276,69): error TS2339: Property 'description' does not exist on type 'Building'.\r",
+    "components/UI/Compagno.tsx(1027,87): error TS2339: Property 'style' does not exist on type 'Element'.\r",
+    "hooks/useBuildingMenu.ts(74,39): error TS2339: Property 'type' does not exist on type 'Building'.\r"
+  ],
+  "compilerExitCode": 1
 }
