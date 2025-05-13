@@ -376,34 +376,10 @@ If you decide not to build anything at this time, return an empty JSON object.
             if status == "completed":
                 print(f"Successfully sent building strategy request to AI user {ai_username}")
                 
-                # Get the AI's response
-                print(f"Fetching messages for {ai_username}...")
-                messages_url = f"https://api.kinos-engine.ai/v2/blueprints/{blueprint}/kins/{ai_username}/channels/system/messages"
-                messages_response = requests.get(messages_url, headers=headers)
-                
-                print(f"Messages API response status code: {messages_response.status_code}")
-                
-                if messages_response.status_code == 200:
-                    messages_data = messages_response.json()
-                    print(f"Messages API response data: {json.dumps(messages_data)}")
-                    
-                    # Find the most recent assistant message
-                    assistant_messages = [
-                        msg for msg in messages_data.get("messages", [])
-                        if msg.get("role") == "assistant"
-                    ]
-                    
-                    print(f"Found {len(assistant_messages)} assistant messages")
-                    
-                    if assistant_messages:
-                        # Sort by timestamp (newest first)
-                        assistant_messages.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
-                        latest_message = assistant_messages[0]
-                        
-                        # Log the AI's response
-                        content = latest_message.get('content', '')
-                        print(f"AI {ai_username} response length: {len(content)} characters")
-                        print(f"AI {ai_username} response preview: {content[:200]}...")
+                # The response content is directly in the response_data
+                content = response_data.get('content', '')
+                print(f"AI {ai_username} response length: {len(content)} characters")
+                print(f"AI {ai_username} response preview: {content[:200]}...")
                         
                         # Try to extract the JSON decision from the response
                         try:
@@ -784,33 +760,10 @@ Your response must be a JSON object with:
             if status == "completed":
                 print(f"Successfully sent building placement request to AI user {ai_username}")
                 
-                # Get the AI's response
-                print(f"Fetching placement messages for {ai_username}...")
-                messages_url = f"https://api.kinos-engine.ai/v2/blueprints/{blueprint}/kins/{ai_username}/channels/system/messages"
-                messages_response = requests.get(messages_url, headers=headers)
-                
-                print(f"Placement messages API response status code: {messages_response.status_code}")
-                
-                if messages_response.status_code == 200:
-                    messages_data = messages_response.json()
-                    
-                    # Find the most recent assistant message
-                    assistant_messages = [
-                        msg for msg in messages_data.get("messages", [])
-                        if msg.get("role") == "assistant"
-                    ]
-                    
-                    print(f"Found {len(assistant_messages)} assistant messages for placement")
-                    
-                    if assistant_messages:
-                        # Sort by timestamp (newest first)
-                        assistant_messages.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
-                        latest_message = assistant_messages[0]
-                        
-                        # Log the AI's response
-                        content = latest_message.get('content', '')
-                        print(f"AI {ai_username} placement response length: {len(content)} characters")
-                        print(f"AI {ai_username} placement response preview: {content[:200]}...")
+                # The response content is directly in the response_data
+                content = response_data.get('content', '')
+                print(f"AI {ai_username} placement response length: {len(content)} characters")
+                print(f"AI {ai_username} placement response preview: {content[:200]}...")
                         
                         # Try to extract the JSON decision from the response
                         try:
