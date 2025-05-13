@@ -38,7 +38,6 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
   private modelCache: Map<string, THREE.Object3D> = new Map();
   private pendingBuildings: Map<string, BuildingData> = new Map();
   private debug: boolean = false;
-  private sceneReady: boolean = false;
   
   // Instancing support
   private buildingInstances: Map<string, {
@@ -784,20 +783,6 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
   }
   
   /**
-   * Set scene ready state
-   * @param ready Whether the scene is ready for rendering buildings
-   */
-  public setSceneReady(ready: boolean): void {
-    this.sceneReady = ready;
-    
-    // If scene is now ready and we have pending buildings, render them
-    if (this.sceneReady && this.pendingBuildings.size > 0) {
-      console.log(`Scene is ready, rendering ${this.pendingBuildings.size} pending buildings`);
-      this.processLoadingQueue();
-    }
-  }
-
-  /**
    * Render a building
    * @param building Building data
    * @returns Promise resolving to THREE.Object3D
@@ -813,20 +798,6 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
       
       // Store in pending buildings map
       this.pendingBuildings.set(buildingId, building);
-      
-      // If scene is not ready yet, just store the building and return a placeholder
-      if (!this.sceneReady) {
-        console.log(`Scene not ready yet, queuing building ${buildingId} for later rendering`);
-        
-        // Return a simple invisible placeholder
-        const placeholder = new THREE.Object3D();
-        placeholder.visible = false;
-        placeholder.userData = {
-          buildingId: buildingId,
-          isPendingRender: true
-        };
-        return placeholder;
-      }
       
       // Check camera distance to prioritize loading
       const distanceToCamera = this.getDistanceToCamera(building);
