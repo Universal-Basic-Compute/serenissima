@@ -1091,22 +1091,27 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             mouseY <= isoPos.y + pointSize
           ) {
             console.log('Building point clicked at position:', point);
-            
+                
             // Store the selected building point in window for the BuildingMenu to use
             window.__selectedBuildingPoint = {
               pointId: `point-${point.lat}-${point.lng}`,
               polygonId: findPolygonIdForPoint(point),
               position: point
             };
-            
+                
+            console.log('Dispatching buildingPointClick event with data:', { position: point });
+                
             // Dispatch an event to open the building menu at this position
-            window.dispatchEvent(new CustomEvent('buildingPointClick', {
+            const event = new CustomEvent('buildingPointClick', {
               detail: { position: point }
-            }));
-            
+            });
+            window.dispatchEvent(event);
+                
+            console.log('buildingPointClick event dispatched');
+                
             // Deselect any selected building
             setSelectedBuildingId(null);
-            
+                
             return;
           }
         }

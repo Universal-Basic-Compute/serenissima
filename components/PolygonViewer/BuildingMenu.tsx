@@ -223,19 +223,25 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
   
   // Listen for custom events to show the building menu
   useEffect(() => {
+    console.log('BuildingMenu: Setting up event listeners');
+    
     const handleShowBuildingMenu = () => {
       console.log('BuildingMenu: Received showBuildingMenu event');
       setShowViaEvent(true);
     };
     
     const handleBuildingPointClick = (event: CustomEvent) => {
-      console.log('BuildingMenu: Received buildingPointClick event', event.detail);
+      console.log('BuildingMenu: Received buildingPointClick event with data:', event.detail);
       
       // Store the point type if provided
       if (event.detail && event.detail.pointType) {
         setPointType(event.detail.pointType);
+      } else {
+        // Reset point type if not provided
+        setPointType(null);
       }
       
+      // Make sure to set the menu to visible
       setShowViaEvent(true);
     };
     
@@ -389,7 +395,10 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
     }
   };
 
-  if (!visible && !showViaEvent) return null;
+  if (!visible && !showViaEvent) {
+    console.log('BuildingMenu: Not visible, returning null');
+    return null;
+  }
 
   return (
     <ErrorBoundary

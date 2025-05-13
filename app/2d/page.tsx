@@ -63,6 +63,20 @@ export default function TwoDPage() {
       {/* Building Renderer Manager - ensures buildings are rendered properly */}
       <BuildingRendererManager active={activeView === 'buildings'} debug={true} />
       
+      {/* Building Menu - needed for 2D view as well */}
+      <BuildingMenu 
+        visible={false} 
+        onClose={() => {
+          // Keep the buildings view active, just close the menu
+          setActiveView('buildings');
+          
+          // Ensure buildings are visible after closing menu
+          setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+          }, 500);
+        }}
+      />
+      
       {/* Buildings Toolbar - only visible in buildings view */}
       {activeView === 'buildings' && (
         <BuildingsToolbar 
