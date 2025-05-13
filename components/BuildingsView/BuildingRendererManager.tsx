@@ -55,6 +55,17 @@ const BuildingRendererManager: React.FC<BuildingRendererManagerProps> = ({
             // Initial refresh of buildings with a small delay
             setTimeout(() => {
               refreshBuildings();
+              
+              // Check if buildings are visible after a delay
+              setTimeout(() => {
+                const count = buildingRendererManager.getBuildingMeshes().size;
+                if (count === 0) {
+                  console.warn('BuildingRendererManager: No buildings after initial refresh, trying again...');
+                  refreshBuildings();
+                } else {
+                  console.log(`BuildingRendererManager: ${count} buildings visible after initial refresh`);
+                }
+              }, 2000);
             }, 500);
           } else {
             console.error('BuildingRendererManager: Scene is undefined when trying to initialize');
@@ -62,11 +73,6 @@ const BuildingRendererManager: React.FC<BuildingRendererManagerProps> = ({
         }
       }
     );
-                console.warn('BuildingRendererManager: No buildings after initial refresh, trying again...');
-                refreshBuildings();
-              } else {
-                console.log(`BuildingRendererManager: ${count} buildings visible after initial refresh`);
-              }
             }, 2000);
           }, 500);
         }
