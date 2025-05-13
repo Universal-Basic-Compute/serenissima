@@ -5,6 +5,7 @@ import { debounce } from 'lodash';
 import { eventBus, EventTypes } from '@/lib/eventBus';
 import { fetchCoatOfArmsImage } from '@/app/utils/coatOfArmsUtils';
 import LandDetailsPanel from './LandDetailsPanel';
+import BuildingDetailsPanel from './BuildingDetailsPanel';
 
 interface IsometricViewerProps {
   activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
@@ -31,6 +32,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [hoveredPolygonId, setHoveredPolygonId] = useState<string | null>(null);
   const [selectedPolygonId, setSelectedPolygonId] = useState<string | null>(null);
   const [showLandDetailsPanel, setShowLandDetailsPanel] = useState<boolean>(false);
+  const [hoveredBuildingId, setHoveredBuildingId] = useState<string | null>(null);
+  const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(null);
+  const [showBuildingDetailsPanel, setShowBuildingDetailsPanel] = useState<boolean>(false);
   const [polygonsToRender, setPolygonsToRender] = useState<{
     polygon: any;
     coords: {x: number, y: number}[];
@@ -522,11 +526,14 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     if (!canvas) return;
     
     const handleMouseMove = (e: MouseEvent) => {
-      // Only process hover detection in land view
-      if (activeView !== 'land') {
-        // Reset hover state and cursor if not in land view
+      // Only process hover detection in land view or buildings view
+      if (activeView !== 'land' && activeView !== 'buildings') {
+        // Reset hover states if not in land or buildings view
         if (hoveredPolygonId) {
           setHoveredPolygonId(null);
+        }
+        if (hoveredBuildingId) {
+          setHoveredBuildingId(null);
         }
         canvas.style.cursor = isDragging ? 'grabbing' : 'grab';
         return;
@@ -538,51 +545,175 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
       
-      // Check if mouse is over any polygon
-      let hoveredId = null;
-      for (const { polygon, coords } of polygonsToRender) {
-        if (isPointInPolygon(mouseX, mouseY, coords)) {
-          hoveredId = polygon.id;
-          canvas.style.cursor = 'pointer';
-          break;
+      // Check if mouse is over any polygon (for land view)
+      if (activeView === 'land') {
+        let hoveredId = null;
+        for (const { polygon, coords } of polygonsToRender) {
+          if (isPointInPolygon(mouseX, mouseY, coords)) {
+            hoveredId = polygon.id;
+            canvas.style.cursor = 'pointer';
+            break;
+          }
         }
+        
+        if (!hoveredId) {
+          canvas.style.cursor = isDragging ? 'grabbing' : 'grab';
+        }
+        
+        setHoveredPolygonId(hoveredId);
       }
       
-      if (!hoveredId) {
-        canvas.style.cursor = isDragging ? 'grabbing' : 'grab';
+      // Check if mouse is over any building (for buildings view)
+      if (activeView === 'buildings') {
+        let hoveredId = null;
+        
+        // Calculate building positions and check if mouse is over any
+        for (const building of buildings) {
+          if (!building.position) continue;
+          
+          let position;
+          if (typeof building.position === 'string') {
+            try {
+              position = JSON.parse(building.position);
+            } catch (e) {
+              continue;
+            }
+          } else {
+            position = building.position;
+          }
+          
+          // Convert lat/lng to isometric coordinates
+          let x, y;
+          if ('lat' in position && 'lng' in position) {
+            x = (position.lng - 12.3326) * 20000;
+            y = (position.lat - 45.4371) * 20000;
+          } else if ('x' in position && 'z' in position) {
+            x = position.x;
+            y = position.z;
+          } else {
+            continue;
+          }
+          
+          const isoPos = {
+            x: isoX(x, y),
+            y: isoY(x, y)
+          };
+          
+          // Get building size
+          const size = getBuildingSize(building.type);
+          const squareSize = Math.max(size.width, size.depth) * scale * 0.6;
+          
+          // Check if mouse is over this building
+          if (
+            mouseX >= isoPos.x - squareSize/2 &&
+            mouseX <= isoPos.x + squareSize/2 &&
+            mouseY >= isoPos.y - squareSize/2 &&
+            mouseY <= isoPos.y + squareSize/2
+          ) {
+            hoveredId = building.id;
+            canvas.style.cursor = 'pointer';
+            break;
+          }
+        }
+        
+        if (!hoveredId) {
+          canvas.style.cursor = isDragging ? 'grabbing' : 'grab';
+        }
+        
+        setHoveredBuildingId(hoveredId);
       }
-      
-      setHoveredPolygonId(hoveredId);
     };
     
     const handleClick = (e: MouseEvent) => {
-      // Only process click detection in land view
-      if (activeView !== 'land') return;
-      
       if (isDragging) return; // Skip click handling while dragging
       
       const rect = canvas.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
       
-      // Check if click is on any polygon
-      for (const { polygon, coords } of polygonsToRender) {
-        if (isPointInPolygon(mouseX, mouseY, coords)) {
-          // Set the selected polygon and show details panel
-          setSelectedPolygonId(polygon.id);
-          setShowLandDetailsPanel(true);
-          
-          // Dispatch an event for other components to respond to
-          window.dispatchEvent(new CustomEvent('showLandDetailsPanel', {
-            detail: { polygonId: polygon.id }
-          }));
-          
-          return;
+      // Handle clicks in land view
+      if (activeView === 'land') {
+        // Check if click is on any polygon
+        for (const { polygon, coords } of polygonsToRender) {
+          if (isPointInPolygon(mouseX, mouseY, coords)) {
+            // Set the selected polygon and show details panel
+            setSelectedPolygonId(polygon.id);
+            setShowLandDetailsPanel(true);
+            
+            // Dispatch an event for other components to respond to
+            window.dispatchEvent(new CustomEvent('showLandDetailsPanel', {
+              detail: { polygonId: polygon.id }
+            }));
+            
+            return;
+          }
         }
+        
+        // If click is not on any polygon, deselect
+        setSelectedPolygonId(null);
       }
       
-      // If click is not on any polygon, deselect
-      setSelectedPolygonId(null);
+      // Handle clicks in buildings view
+      if (activeView === 'buildings') {
+        // Check if click is on any building
+        for (const building of buildings) {
+          if (!building.position) continue;
+          
+          let position;
+          if (typeof building.position === 'string') {
+            try {
+              position = JSON.parse(building.position);
+            } catch (e) {
+              continue;
+            }
+          } else {
+            position = building.position;
+          }
+          
+          // Convert lat/lng to isometric coordinates
+          let x, y;
+          if ('lat' in position && 'lng' in position) {
+            x = (position.lng - 12.3326) * 20000;
+            y = (position.lat - 45.4371) * 20000;
+          } else if ('x' in position && 'z' in position) {
+            x = position.x;
+            y = position.z;
+          } else {
+            continue;
+          }
+          
+          const isoPos = {
+            x: isoX(x, y),
+            y: isoY(x, y)
+          };
+          
+          // Get building size
+          const size = getBuildingSize(building.type);
+          const squareSize = Math.max(size.width, size.depth) * scale * 0.6;
+          
+          // Check if click is on this building
+          if (
+            mouseX >= isoPos.x - squareSize/2 &&
+            mouseX <= isoPos.x + squareSize/2 &&
+            mouseY >= isoPos.y - squareSize/2 &&
+            mouseY <= isoPos.y + squareSize/2
+          ) {
+            // Set the selected building and show details panel
+            setSelectedBuildingId(building.id);
+            setShowBuildingDetailsPanel(true);
+            
+            // Dispatch an event for other components to respond to
+            window.dispatchEvent(new CustomEvent('showBuildingDetailsPanel', {
+              detail: { buildingId: building.id }
+            }));
+            
+            return;
+          }
+        }
+        
+        // If click is not on any building, deselect
+        setSelectedBuildingId(null);
+      }
     };
     
     canvas.addEventListener('mousemove', handleMouseMove);
@@ -592,7 +723,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       canvas.removeEventListener('mousemove', handleMouseMove);
       canvas.removeEventListener('click', handleClick);
     };
-  }, [polygonsToRender, isDragging, activeView, hoveredPolygonId]);
+  }, [polygonsToRender, buildings, isDragging, activeView, hoveredPolygonId, hoveredBuildingId, scale]);
 
   // Helper function to check if a point is inside a polygon
   function isPointInPolygon(x: number, y: number, polygon: {x: number, y: number}[]): boolean {
@@ -1119,6 +1250,18 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           polygons={polygons}
           landOwners={landOwners}
           visible={showLandDetailsPanel}
+        />
+      )}
+      
+      {/* Building Details Panel */}
+      {showBuildingDetailsPanel && selectedBuildingId && (
+        <BuildingDetailsPanel
+          selectedBuildingId={selectedBuildingId}
+          onClose={() => {
+            setShowBuildingDetailsPanel(false);
+            setSelectedBuildingId(null);
+          }}
+          visible={showBuildingDetailsPanel}
         />
       )}
       
