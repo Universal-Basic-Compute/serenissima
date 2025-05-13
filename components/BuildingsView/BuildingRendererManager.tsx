@@ -73,11 +73,6 @@ const BuildingRendererManager: React.FC<BuildingRendererManagerProps> = ({
         }
       }
     );
-            }, 2000);
-          }, 500);
-        }
-      }
-    );
     
     // Set up periodic refresh to ensure buildings remain visible
     // Only start this after initialization
