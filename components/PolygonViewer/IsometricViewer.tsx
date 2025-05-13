@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { debounce } from 'lodash';
 import { eventBus, EventTypes } from '@/lib/eventBus';
 import { fetchCoatOfArmsImage } from '@/app/utils/coatOfArmsUtils';
+import LandDetailsPanel from './LandDetailsPanel';
 
 interface IsometricViewerProps {
   activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
@@ -27,6 +28,16 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [ownerCoatOfArmsMap, setOwnerCoatOfArmsMap] = useState<Record<string, string>>({});
   const [coatOfArmsImages, setCoatOfArmsImages] = useState<Record<string, HTMLImageElement>>({});
   const [loadingCoatOfArms, setLoadingCoatOfArms] = useState<boolean>(false);
+  const [hoveredPolygonId, setHoveredPolygonId] = useState<string | null>(null);
+  const [selectedPolygonId, setSelectedPolygonId] = useState<string | null>(null);
+  const [showLandDetailsPanel, setShowLandDetailsPanel] = useState<boolean>(false);
+  const [polygonsToRender, setPolygonsToRender] = useState<{
+    polygon: any;
+    coords: {x: number, y: number}[];
+    fillColor: string;
+    centroidX: number;
+    centroidY: number;
+  }[]>([]);
 
   // Load polygons
   useEffect(() => {
@@ -505,6 +516,85 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     }
   };
   
+  // Add this useEffect for mouse interactions
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging) return; // Skip hover detection while dragging
+      
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      
+      // Check if mouse is over any polygon
+      let hoveredId = null;
+      for (const { polygon, coords } of polygonsToRender) {
+        if (isPointInPolygon(mouseX, mouseY, coords)) {
+          hoveredId = polygon.id;
+          canvas.style.cursor = 'pointer';
+          break;
+        }
+      }
+      
+      if (!hoveredId) {
+        canvas.style.cursor = isDragging ? 'grabbing' : 'grab';
+      }
+      
+      setHoveredPolygonId(hoveredId);
+    };
+    
+    const handleClick = (e: MouseEvent) => {
+      if (isDragging) return; // Skip click handling while dragging
+      
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      
+      // Check if click is on any polygon
+      for (const { polygon, coords } of polygonsToRender) {
+        if (isPointInPolygon(mouseX, mouseY, coords)) {
+          // Set the selected polygon and show details panel
+          setSelectedPolygonId(polygon.id);
+          setShowLandDetailsPanel(true);
+          
+          // Dispatch an event for other components to respond to
+          window.dispatchEvent(new CustomEvent('showLandDetailsPanel', {
+            detail: { polygonId: polygon.id }
+          }));
+          
+          return;
+        }
+      }
+      
+      // If click is not on any polygon, deselect
+      setSelectedPolygonId(null);
+    };
+    
+    canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('click', handleClick);
+    
+    return () => {
+      canvas.removeEventListener('mousemove', handleMouseMove);
+      canvas.removeEventListener('click', handleClick);
+    };
+  }, [polygonsToRender, isDragging]);
+
+  // Helper function to check if a point is inside a polygon
+  function isPointInPolygon(x: number, y: number, polygon: {x: number, y: number}[]): boolean {
+    let inside = false;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+      const xi = polygon[i].x, yi = polygon[i].y;
+      const xj = polygon[j].x, yj = polygon[j].y;
+      
+      const intersect = ((yi > y) !== (yj > y))
+          && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  }
+
   // Draw the isometric view
   useEffect(() => {
     if (loading || !canvasRef.current || polygons.length === 0) return;
@@ -529,7 +619,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     // Collect all polygons and their data for rendering
-    const polygonsToRender = [];
+    const newPolygonsToRender = [];
 
     // Process all polygons first
     polygons.forEach(polygon => {
@@ -592,18 +682,21 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       }
       
       // Store polygon data for rendering
-      polygonsToRender.push({
+      newPolygonsToRender.push({
         polygon,
         coords,
         fillColor,
-        centerX,
-        centerY
+        centroidX: centerX,
+        centroidY: centerY
       });
     });
 
+    // Update the polygonsToRender state
+    setPolygonsToRender(newPolygonsToRender);
+
     // Now render in two passes: first the polygons, then the text
     // First pass: Draw all polygon shapes
-    polygonsToRender.forEach(({ coords, fillColor }) => {
+    newPolygonsToRender.forEach(({ polygon, coords, fillColor }) => {
       // Draw polygon path
       ctx.beginPath();
       ctx.moveTo(coords[0].x, coords[0].y);
@@ -612,11 +705,31 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       }
       ctx.closePath();
       
-      // Fill and stroke
-      ctx.fillStyle = fillColor;
-      ctx.fill();
-      ctx.strokeStyle = '#8B4513';
-      ctx.lineWidth = 1;
+      // Determine if this polygon is hovered or selected
+      const isHovered = hoveredPolygonId === polygon.id;
+      const isSelected = selectedPolygonId === polygon.id;
+      
+      // Apply different styles for hover and selected states
+      if (isSelected) {
+        // Selected state: brighter with a thicker border
+        ctx.fillStyle = lightenColor(fillColor, 20);
+        ctx.fill();
+        ctx.strokeStyle = '#FF6700'; // Orange highlight for selected
+        ctx.lineWidth = 3;
+      } else if (isHovered) {
+        // Hover state: slightly brighter
+        ctx.fillStyle = lightenColor(fillColor, 10);
+        ctx.fill();
+        ctx.strokeStyle = '#FFB700'; // Yellow highlight for hover
+        ctx.lineWidth = 2;
+      } else {
+        // Normal state
+        ctx.fillStyle = fillColor;
+        ctx.fill();
+        ctx.strokeStyle = '#8B4513';
+        ctx.lineWidth = 1;
+      }
+      
       ctx.stroke();
     });
 
@@ -802,7 +915,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       });
     }
     
-  }, [loading, polygons, landOwners, users, activeView, buildings, scale, offset, incomeData, minIncome, maxIncome]);
+  }, [loading, polygons, landOwners, users, activeView, buildings, scale, offset, incomeData, minIncome, maxIncome, hoveredPolygonId, selectedPolygonId]);
   
 
   // Handle window resize
@@ -938,6 +1051,20 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         className="w-full h-full"
         style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
       />
+      
+      {/* Land Details Panel */}
+      {showLandDetailsPanel && selectedPolygonId && (
+        <LandDetailsPanel
+          selectedPolygonId={selectedPolygonId}
+          onClose={() => {
+            setShowLandDetailsPanel(false);
+            setSelectedPolygonId(null);
+          }}
+          polygons={polygons}
+          landOwners={landOwners}
+          visible={showLandDetailsPanel}
+        />
+      )}
       
       {/* Income Legend - only visible in land view */}
       {activeView === 'land' && (
