@@ -390,15 +390,20 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
 
     // Second pass: Draw all polygon names (only in land view)
     if (activeView === 'land') {
-      polygonsToRender.forEach(({ polygon, centroidX, centroidY }) => {
-        if (polygon.historicalName) {
-          // Draw text - keep the original style
-          ctx.font = '10px Arial';
-          ctx.fillStyle = '#000';
-          ctx.textAlign = 'center';
-          ctx.fillText(polygon.historicalName, centroidX, centroidY);
-        }
-      });
+      // Only show text if zoom level is above a certain threshold (mid-level zoom)
+      const showText = scale >= 0.8; // Adjust this threshold as needed
+      
+      if (showText) {
+        polygonsToRender.forEach(({ polygon, centroidX, centroidY }) => {
+          if (polygon.historicalName) {
+            // Draw text - keep the original style
+            ctx.font = '10px Arial';
+            ctx.fillStyle = '#000';
+            ctx.textAlign = 'center';
+            ctx.fillText(polygon.historicalName, centroidX, centroidY);
+          }
+        });
+      }
     }
     
     // Draw buildings if in buildings view
