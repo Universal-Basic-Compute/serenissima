@@ -18,6 +18,7 @@ export interface Building {
   thumbnail?: string;
   era?: string;
   variant?: string;
+  type?: string; // Added to fix TypeScript error in useBuildingMenu.ts
 }
 
 export interface BuildingCategory {
