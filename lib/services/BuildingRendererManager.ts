@@ -449,7 +449,12 @@ export class BuildingRendererManager {
         }
       }
     } catch (error) {
-      console.error('Error refreshing buildings:', error);
+      // Handle AbortError separately
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.log('Building refresh request aborted - this is normal during navigation or timeout');
+      } else {
+        console.error('Error refreshing buildings:', error);
+      }
       
       // If the fetch failed, try to use any existing buildings data
       if (this.buildingMeshes.size === 0) {

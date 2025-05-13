@@ -736,7 +736,16 @@ export default class SimplePolygonRenderer {
   private async fetchAndApplyLandOwners() {
     console.log('Fetching land owners data...');
     try {
-      const response = await fetch('/api/get-land-owners');
+      // Add a timeout to prevent hanging requests
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+      
+      const response = await fetch('/api/get-land-owners', {
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
       if (response.ok) {
         const data = await response.json();
         if (data.lands && Array.isArray(data.lands)) {
@@ -771,7 +780,11 @@ export default class SimplePolygonRenderer {
         }
       }
     } catch (error) {
-      console.error('Error fetching land owners:', error);
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.log('Land owners fetch request aborted after timeout - this is expected behavior');
+      } else {
+        console.error('Error fetching land owners:', error);
+      }
     }
   }
   

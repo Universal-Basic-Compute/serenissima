@@ -62,17 +62,36 @@ const useBuildingStore = create<BuildingState & BuildingActions>((set, get) => (
             .map(word => word.charAt(0).toUpperCase() + word.slice(1))
             .join(' & ');
           
-          // Try the Next.js API route first
-          let response = await fetch(`/api/buildings/${category}`, {
-            signal: AbortSignal.timeout(5000) // 5 second timeout
-          });
+          // Try the Next.js API route first with a longer timeout
+          let response;
+          try {
+            response = await fetch(`/api/buildings/${category}`, {
+              signal: AbortSignal.timeout(8000) // Increased from 5s to 8s timeout
+            });
+          } catch (error) {
+            if (error instanceof Error && error.name === 'AbortError') {
+              console.log(`Timeout fetching buildings for ${category} from Next.js API, falling back to direct API`);
+            } else {
+              console.error(`Error fetching buildings for ${category} from Next.js API:`, error);
+            }
+            // Continue to fallback
+            response = { ok: false };
+          }
           
           // If that fails, try the direct backend API
           if (!response.ok) {
             console.log(`Falling back to direct API for ${category}`);
-            response = await fetch(`${apiBaseUrl}/api/buildings/${category}`, {
-              signal: AbortSignal.timeout(5000) // 5 second timeout
-            });
+            try {
+              response = await fetch(`${apiBaseUrl}/api/buildings/${category}`, {
+                signal: AbortSignal.timeout(8000) // Increased from 5s to 8s timeout
+              });
+            } catch (error) {
+              if (error instanceof Error && error.name === 'AbortError') {
+                console.log(`Timeout fetching buildings for ${category} from direct API`);
+                throw new Error(`Timeout fetching buildings for ${category}`);
+              }
+              throw error; // Re-throw other errors
+            }
           }
           
           if (response.ok) {
@@ -123,7 +142,11 @@ const useBuildingStore = create<BuildingState & BuildingActions>((set, get) => (
             }
           }
         } catch (error) {
-          console.error(`Error loading ${category} buildings:`, error);
+          if (error instanceof Error && error.name === 'AbortError') {
+            console.log(`Request aborted for ${category} buildings - this is normal during navigation or timeout`);
+          } else {
+            console.error(`Error loading ${category} buildings:`, error);
+          }
         }
       }
 

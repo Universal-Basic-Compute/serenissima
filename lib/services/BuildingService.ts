@@ -225,14 +225,21 @@ export class BuildingService {
       
       log.info('Fetching buildings from:', url);
       
+      // Add a timeout to prevent hanging requests
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
       const response = await fetch(url, {
         // Add cache control headers to prevent stale data
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           'Pragma': 'no-cache',
           'Expires': '0'
-        }
+        },
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
       
       log.info('Buildings API response status:', response.status);
       
@@ -279,8 +286,12 @@ export class BuildingService {
         return building;
       });
     } catch (error) {
-      log.error('Error fetching buildings:', error);
-      log.error('Stack trace:', error instanceof Error ? error.stack : String(error));
+      if (error instanceof Error && error.name === 'AbortError') {
+        log.info('Buildings fetch request aborted after timeout - this is expected behavior');
+      } else {
+        log.error('Error fetching buildings:', error);
+        log.error('Stack trace:', error instanceof Error ? error.stack : String(error));
+      }
       
       // Return empty array instead of throwing to prevent UI errors
       return [];

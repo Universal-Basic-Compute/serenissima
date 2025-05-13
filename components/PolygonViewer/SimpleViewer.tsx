@@ -68,7 +68,11 @@ export default function SimpleViewer({ qualityMode = 'high', waterQuality = 'hig
       const response = await fetch(`${apiUrl}/api/users`, {
         signal: controller.signal
       }).catch(error => {
-        console.warn('Fetch request failed:', error);
+        if (error.name === 'AbortError') {
+          console.log('Users fetch request aborted after timeout - this is expected behavior');
+        } else {
+          console.warn('Fetch request failed:', error);
+        }
         return null; // Return null to indicate fetch failed
       });
       

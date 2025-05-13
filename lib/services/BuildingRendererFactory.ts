@@ -84,8 +84,13 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
           this.logDebug(`Old path ${type}/${variant}: ${oldResponse.ok ? 'EXISTS' : 'MISSING'} (${oldResponse.status})`, 
             `background: ${oldResponse.ok ? '#00FF00' : '#FF0000'}; color: black; padding: 2px 5px; font-weight: bold;`);
         } catch (error: unknown) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          console.warn(`Error checking model ${type}/${variant}: ${errorMessage}`);
+          // Properly handle AbortError
+          if (error instanceof Error && error.name === 'AbortError') {
+            this.logDebug(`Request aborted for model ${type}/${variant} - this is normal during navigation`);
+          } else {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            console.warn(`Error checking model ${type}/${variant}: ${errorMessage}`);
+          }
         }
       }
     }
@@ -177,8 +182,13 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
             `background: ${response.ok ? '#00FF00' : '#FF0000'}; color: black; padding: 2px;`);
         })
         .catch(error => {
-          console.log(`%c Old path ${oldPath}: ERROR - ${error.message}`, 
-            'background: #FF0000; color: white; padding: 2px;');
+          if (error.name === 'AbortError') {
+            console.log(`%c Old path ${oldPath}: Request aborted - this is normal during navigation`, 
+              'background: #FFA500; color: black; padding: 2px;');
+          } else {
+            console.log(`%c Old path ${oldPath}: ERROR - ${error.message}`, 
+              'background: #FF0000; color: white; padding: 2px;');
+          }
         });
       
       // Check new path
@@ -188,8 +198,13 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
             `background: ${response.ok ? '#00FF00' : '#FF0000'}; color: black; padding: 2px;`);
         })
         .catch(error => {
-          console.log(`%c New path ${newPath}: ERROR - ${error.message}`, 
-            'background: #FF0000; color: white; padding: 2px;');
+          if (error.name === 'AbortError') {
+            console.log(`%c New path ${newPath}: Request aborted - this is normal during navigation`, 
+              'background: #FFA500; color: black; padding: 2px;');
+          } else {
+            console.log(`%c New path ${newPath}: ERROR - ${error.message}`, 
+              'background: #FF0000; color: white; padding: 2px;');
+          }
         });
     });
   }
