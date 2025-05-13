@@ -92,6 +92,11 @@ export default function SimplePage() {
       setActiveView('knowledge');
     } else if (pathname === '/citizens') {
       setActiveView('citizens');
+      // When switching to citizens view via URL, trigger citizens loading
+      setTimeout(() => {
+        console.log('Switching to citizens view via URL, dispatching loadCitizens event');
+        window.dispatchEvent(new CustomEvent('loadCitizens'));
+      }, 500);
     } else if (pathname === '/guilds' || showGuildsPanel) {
       setActiveView('guilds');
     }
@@ -116,6 +121,13 @@ export default function SimplePage() {
       // Also dispatch an event to ensure income visualization is shown
       const showIncomeVisualizationEvent = new CustomEvent('showIncomeVisualization');
       window.dispatchEvent(showIncomeVisualizationEvent);
+    } else if (activeView === 'citizens') {
+      console.log('Initial load with citizens view, loading citizens...');
+      
+      // Dispatch an event to trigger citizens loading
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('loadCitizens'));
+      }, 500);
     }
   }, []); // Empty dependency array means this runs once on mount
   
@@ -173,10 +185,25 @@ export default function SimplePage() {
       setSelectedCitizen(data.citizen);
     };
     
+    const handleLoadCitizens = () => {
+      console.log('Received loadCitizens event in main page');
+      if (activeView === 'citizens') {
+        console.log('Already in citizens view, dispatching loadCitizens event again');
+        // Re-dispatch to ensure it's caught by the CitizenDisplayManager
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('loadCitizens'));
+        }, 200);
+      } else {
+        console.log('Switching to citizens view from loadCitizens event');
+        setActiveView('citizens');
+      }
+    };
+    
     window.addEventListener('hide3DView', handleHide3DView);
     window.addEventListener('show3DView', handleShow3DView);
     window.addEventListener('buildingMenuClosed', handleBuildingMenuClosed);
     window.addEventListener('showBuildings', handleShowBuildings);
+    window.addEventListener('loadCitizens', handleLoadCitizens);
     window.addEventListener('waterQualityChanged', handleWaterQualityChanged as EventListener);
     // These event listeners are now handled directly in the Compagno component
     
@@ -199,6 +226,7 @@ export default function SimplePage() {
       window.removeEventListener('show3DView', handleShow3DView);
       window.removeEventListener('buildingMenuClosed', handleBuildingMenuClosed);
       window.removeEventListener('showBuildings', handleShowBuildings);
+      window.removeEventListener('loadCitizens', handleLoadCitizens);
       window.removeEventListener('waterQualityChanged', handleWaterQualityChanged as EventListener);
       // These event listeners are now handled directly in the Compagno component
       subscription.unsubscribe();

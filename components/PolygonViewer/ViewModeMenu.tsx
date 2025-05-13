@@ -88,9 +88,13 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
         onClick={() => {
           if (activeView !== 'citizens') {
             console.log('ViewModeMenu: Switching to citizens view');
-            // Dispatch a custom event to ensure citizens are loaded
-            window.dispatchEvent(new CustomEvent('loadCitizens'));
             handleViewModeChange('citizens');
+            // Dispatch a custom event to ensure citizens are loaded
+            // Do this after view change to ensure components are listening
+            setTimeout(() => {
+              console.log('ViewModeMenu: Dispatching loadCitizens event');
+              window.dispatchEvent(new CustomEvent('loadCitizens'));
+            }, 100);
           }
         }}
         active={activeView === 'citizens'}

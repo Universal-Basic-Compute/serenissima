@@ -205,6 +205,25 @@ export class CitizenDisplayManager {
       console.log('Citizen removed event received:', data);
       this.refreshCitizens();
     });
+    
+    // Listen for loadCitizens custom event
+    window.addEventListener('loadCitizens', () => {
+      console.log('CitizenDisplayManager: Received loadCitizens event');
+      this.refreshCitizens();
+      this.setActive(true);
+    });
+    
+    // Listen for citizens view activation
+    eventBus.subscribe(EventTypes.VIEW_MODE_CHANGED, (data) => {
+      if (data.viewMode === 'citizens') {
+        console.log('CitizenDisplayManager: Citizens view activated');
+        this.refreshCitizens();
+        this.setActive(true);
+      } else if (this.isActive) {
+        console.log('CitizenDisplayManager: Deactivating citizens view');
+        this.setActive(false);
+      }
+    });
   }
   
   /**
@@ -370,6 +389,11 @@ export class CitizenDisplayManager {
       this.createCitizenMarkers();
       window.addEventListener('mousemove', this.mouseMoveHandler);
       window.addEventListener('click', this.mouseClickHandler);
+      
+      // Force citizens to be visible
+      setTimeout(() => {
+        this.forceVisibleCitizens();
+      }, 500);
       
       // Debug the state
       this.debugState();
