@@ -978,7 +978,7 @@ export class CitizenDisplayManager {
           if (response.ok) {
             console.log(`🔍 Image exists at ${url} but couldn't be loaded as texture`);
           } else {
-            console.warn(`🔍 Image does not exist at ${url} (${response.status.toString()})`);
+            console.warn(`🔍 Image does not exist at ${url} (${response.status})`);
           }
         })
         .catch(fetchError => {
