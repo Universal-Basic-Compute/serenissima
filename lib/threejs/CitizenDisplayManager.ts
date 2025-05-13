@@ -33,6 +33,7 @@ export class CitizenDisplayManager {
   private raycaster: THREE.Raycaster;
   private mouse: THREE.Vector2;
   private textureCache: Map<string, THREE.Texture> = new Map();
+  private textureLoader: THREE.TextureLoader;
   private isActive: boolean = false;
   private mouseMoveHandler: (event: MouseEvent) => void;
   private mouseClickHandler: (event: MouseEvent) => void;
@@ -52,6 +53,7 @@ export class CitizenDisplayManager {
     };
     this.raycaster = new THREE.Raycaster();
     this.mouse = new THREE.Vector2();
+    this.textureLoader = new THREE.TextureLoader();
 
     // Create event handlers
     this.mouseMoveHandler = this.handleMouseMove.bind(this);
