@@ -1,9 +1,21 @@
 import { useEffect, useState } from 'react';
 import useBuildingStore from '@/store/useBuildingStore';
-import { Building } from '@/lib/services/BuildingService';
 import { log } from '@/lib/logUtils';
 import { eventBus } from '@/lib/eventBus';
 import { EventTypes } from '@/lib/eventTypes';
+
+// Define the Building interface locally instead of importing it
+interface Building {
+  id: string;
+  name: string;
+  category: string;
+  subcategory: string;
+  description?: string;
+  thumbnail?: string;
+  size?: string;
+  era?: string;
+  variant?: string;
+}
 
 /**
  * Custom hook to handle building menu logic
