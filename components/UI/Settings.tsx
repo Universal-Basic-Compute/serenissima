@@ -66,7 +66,7 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
   };
   
   // Apply water quality settings to the game
-  const applyWaterQualitySettings = (quality: 'high' | 'medium' | 'low') => {
+  const applyWaterQualitySettings = (quality: 'high' | 'medium' | 'low' | 'minimal') => {
     // Dispatch custom event for water quality settings
     window.dispatchEvent(new CustomEvent('waterQualityChanged', {
       detail: {
