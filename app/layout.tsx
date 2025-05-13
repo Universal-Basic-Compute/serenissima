@@ -1,6 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { WalletProvider } from "@/components/UI/WalletProvider";
+import ClientWalletProvider from "@/components/UI/ClientWalletProvider";
 import Compagno from "@/components/UI/Compagno";
 import ClientSideEffects from "./client-effects";
 
@@ -22,11 +22,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="antialiased">
-        <WalletProvider>
+        <ClientWalletProvider>
           {children}
           <Compagno />
           <ClientSideEffects />
-        </WalletProvider>
+        </ClientWalletProvider>
       </body>
     </html>
   );
