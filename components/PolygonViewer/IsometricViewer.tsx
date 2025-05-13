@@ -1176,13 +1176,36 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           y: calculateIsoY(x, y, scale, offset, canvas.height)
         };
         
+        // Check if mouse is over this building point
+        const pointSize = 2.8 * scale;
+        const isHovered = 
+          mouseX >= isoPos.x - pointSize && 
+          mouseX <= isoPos.x + pointSize && 
+          mouseY >= isoPos.y - pointSize && 
+          mouseY <= isoPos.y + pointSize;
+        
         // Draw a small orange circle for empty building points
-        // 30% smaller (2.8 instead of 4), 50% transparent, no edge
+        // 30% smaller (2.8 instead of 4), with hover state and 20% more transparency
         ctx.beginPath();
-        ctx.arc(isoPos.x, isoPos.y, 2.8 * scale, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255, 140, 0, 0.5)'; // Orange color with 50% transparency
+        ctx.arc(isoPos.x, isoPos.y, pointSize, 0, Math.PI * 2);
+        
+        // Apply different opacity based on hover state
+        // Normal: 50% opacity, Hovered: 70% opacity (20% more opaque)
+        ctx.fillStyle = isHovered 
+          ? 'rgba(255, 140, 0, 0.7)' // Hovered: 70% opacity
+          : 'rgba(255, 140, 0, 0.5)'; // Normal: 50% opacity
+        
         ctx.fill();
-        // Remove the stroke (edge)
+        
+        // Add a subtle border when hovered
+        if (isHovered) {
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          
+          // Update cursor to pointer when hovering over a building point
+          canvas.style.cursor = 'pointer';
+        }
       });
     }
     
