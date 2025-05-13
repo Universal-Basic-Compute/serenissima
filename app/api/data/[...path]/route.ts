@@ -4,18 +4,31 @@ import path from 'path';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ path: string[] }> }
+  { params }: { params: { path: string[] } }
 ) {
-  // Await the params Promise to get the actual params object
-  const { path: pathSegments } = await params;
   try {
     // Get the file path from the URL parameters
-    const filePath = pathSegments.join('/');
+    const filePath = params.path.join('/');
     console.log(`Serving file from data directory: ${filePath}`);
     
     // Construct the absolute path to the file
     // Make sure to use path.join to handle path separators correctly across platforms
     const absolutePath = path.join(process.cwd(), 'data', filePath);
+    console.log(`Absolute path: ${absolutePath}`);
+    
+    // Check if file exists
+    try {
+      await fs.access(absolutePath);
+    } catch (error) {
+      console.log(`File not found: ${absolutePath}`);
+      return new NextResponse(
+        JSON.stringify({ error: 'File not found', path: filePath }),
+        {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
     
     // Read the file
     const fileData = await fs.readFile(absolutePath, 'utf8');
@@ -47,20 +60,9 @@ export async function GET(
   } catch (error) {
     console.error(`Error serving file from data directory:`, error);
     
-    // Check if the error is because the file doesn't exist
-    if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
-      return new NextResponse(
-        JSON.stringify({ error: 'File not found' }),
-        {
-          status: 404,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
-    }
-    
     // Return a generic error for other issues
     return new NextResponse(
-      JSON.stringify({ error: 'Failed to serve file' }),
+      JSON.stringify({ error: 'Failed to serve file', details: error.message }),
       {
         status: 500,
         headers: { 'Content-Type': 'application/json' },

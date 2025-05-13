@@ -7,71 +7,64 @@ const loadBuildingDefinition = async (type: string, variant?: string): Promise<a
   try {
     console.log(`Looking for building definition for type: ${type}, variant: ${variant || 'none'}`);
     
-    // Try the new API endpoint first
+    // First try the building-data API endpoint which searches recursively
     try {
       const response = await fetch(`/api/building-data/${encodeURIComponent(type)}`);
       if (response.ok) {
         const data = await response.json();
-        console.log('Found building definition via API:', data);
+        console.log('Found building definition via building-data API:', data);
         return data;
+      } else {
+        console.log(`building-data API returned ${response.status} for ${type}`);
       }
     } catch (error) {
-      console.log(`API endpoint not available for ${type}, trying other methods`);
+      console.log(`Error with building-data API for ${type}:`, error);
     }
     
-    // Try to find the building definition file in the data structure
-    // First, try with the specific variant if provided
-    if (variant) {
+    // Then try the general data API with various paths
+    const pathsToTry = [
+      // Try with category/subcategory structure if we know them
+      ...(building?.category && building?.subcategory 
+        ? [`/api/data/buildings/${building.category}/${building.subcategory}/${type}.json`] 
+        : []),
+      // Try direct path
+      `/api/data/buildings/${type}.json`,
+      // Try lowercase
+      `/api/data/buildings/${type.toLowerCase()}.json`,
+      // Try with underscores instead of spaces
+      `/api/data/buildings/${type.replace(/\s+/g, '_').toLowerCase()}.json`,
+      // Try with hyphens instead of spaces
+      `/api/data/buildings/${type.replace(/\s+/g, '-').toLowerCase()}.json`
+    ];
+    
+    // Try each path in sequence
+    for (const path of pathsToTry) {
       try {
-        const response = await fetch(`/data/buildings/${type.toLowerCase()}/${variant.toLowerCase()}.json`);
+        console.log(`Trying path: ${path}`);
+        const response = await fetch(path);
         if (response.ok) {
           const data = await response.json();
-          console.log('Found building definition with variant:', data);
+          console.log(`Found building definition at ${path}:`, data);
           return data;
         }
       } catch (error) {
-        console.log(`No specific variant file found for ${type}/${variant}, trying category structure`);
+        console.log(`Error fetching from ${path}:`, error);
       }
     }
     
-    // Try to find in category/subcategory structure
+    // If we still haven't found it, try the building-definition API
     try {
-      // This will search through all categories and subcategories
       const response = await fetch(`/api/building-definition?type=${encodeURIComponent(type)}`);
       if (response.ok) {
         const data = await response.json();
-        console.log('Found building definition in category structure:', data);
+        console.log('Found building definition via building-definition API:', data);
         return data;
       }
     } catch (error) {
-      console.log(`No building definition found in category structure for ${type}`);
+      console.log(`Error with building-definition API for ${type}:`, error);
     }
     
-    // Try the general data API
-    try {
-      const response = await fetch(`/api/data/buildings/${type.toLowerCase()}.json`);
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Found building definition via general data API:', data);
-        return data;
-      }
-    } catch (error) {
-      console.log(`No building definition found via general data API for ${type}`);
-    }
-    
-    // Fallback to direct type file
-    try {
-      const response = await fetch(`/data/buildings/${type.toLowerCase()}.json`);
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Found building definition via direct file:', data);
-        return data;
-      }
-    } catch (error) {
-      console.log(`No direct building definition file found for ${type}`);
-    }
-    
-    console.log(`No building definition found for ${type}`);
+    console.log(`No building definition found for ${type} after trying all methods`);
     return null;
   } catch (error) {
     console.error('Error loading building definition:', error);
