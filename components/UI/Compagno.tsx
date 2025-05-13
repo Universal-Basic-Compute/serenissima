@@ -612,7 +612,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
     }
   };
 
-  const sendMessage = async (content: string) => {
+  const sendMessage = async (content: string, additionalSystemPrompt?: string) => {
     if (!content.trim()) return;
     
     // Optimistically add user message to UI
@@ -628,6 +628,12 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
     setIsTyping(true);
     
     try {
+      // Default system prompt
+      const defaultSystemPrompt = "You are Compagno, a Venetian guide in La Serenissima, a digital recreation of Renaissance Venice. Respond in a friendly, helpful manner with a slight Venetian flair. Your knowledge includes Venice's history, the game's mechanics, and how to navigate the digital city. Always be helpful and concise.";
+      
+      // Use the additional system prompt if provided, otherwise use the default
+      const systemPrompt = additionalSystemPrompt || defaultSystemPrompt;
+      
       const response = await fetch(
         `${KINOS_BACKEND_BASE_URL}/blueprints/${BLUEPRINT}/kins/${username}/messages`,
         {
@@ -639,7 +645,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
             content: content,
             model: 'claude-3-7-sonnet-latest',
             mode: 'creative',
-            addSystem: "You are Compagno, a Venetian guide in La Serenissima, a digital recreation of Renaissance Venice. Respond in a friendly, helpful manner with a slight Venetian flair. Your knowledge includes Venice's history, the game's mechanics, and how to navigate the digital city. Always be helpful and concise."
+            addSystem: systemPrompt
           }),
         }
       );
