@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { FaTimes, FaChevronDown, FaSpinner, FaVolumeUp, FaVolumeMute, FaBell } from 'react-icons/fa';
+import { FaTimes, FaChevronDown, FaSpinner, FaVolumeUp, FaVolumeMute, FaBell, FaUser, FaSearch, FaArrowLeft } from 'react-icons/fa';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -13,17 +13,25 @@ interface Notification {
   readAt: string | null;
 }
 
-interface CompagnoProps {
-  className?: string;
-  onNotificationsRead?: (notificationIds: string[]) => void;
+interface User {
+  username: string;
+  firstName: string;
+  lastName: string;
+  coatOfArmsImage: string | null;
 }
 
 interface Message {
-  id: string;
-  role: 'user' | 'assistant';
+  id?: string;
+  messageId?: string;
+  role?: 'user' | 'assistant';
+  sender?: string;
+  receiver?: string;
   content: string;
-  timestamp: string;
-  isPlaying?: boolean; // Add this property to track audio playback state
+  type?: string;
+  timestamp?: string;
+  createdAt?: string;
+  readAt?: string | null;
+  isPlaying?: boolean; // For audio playback state
 }
 
 interface PaginationInfo {
@@ -33,9 +41,14 @@ interface PaginationInfo {
   has_more: boolean;
 }
 
+interface CompagnoProps {
+  className?: string;
+  onNotificationsRead?: (notificationIds: string[]) => void;
+}
+
 const KINOS_BACKEND_BASE_URL = 'https://api.kinos-engine.ai/v2';
 const BLUEPRINT = 'compagno';
-const DEFAULT_USERNAME = 'visitor'; // We'll use a default username for anonymous users
+const DEFAULT_USERNAME = 'visitor'; // Default username for anonymous users
 
 const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -50,21 +63,28 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
-  const [showNotifications, setShowNotifications] = useState<boolean>(true);
+  const [activeTab, setActiveTab] = useState<'notifications' | 'chats'>('notifications');
   const [lastFetchTime, setLastFetchTime] = useState<number>(Date.now());
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const fetchIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastFetchRef = useRef<number>(0);
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState<boolean>(false);
+  const [selectedUser, setSelectedUser] = useState<string | null>(null);
+  const [userMessages, setUserMessages] = useState<Message[]>([]);
+  const [isLoadingUserMessages, setIsLoadingUserMessages] = useState<boolean>(false);
+  const [userSearchQuery, setUserSearchQuery] = useState<string>('');
+  const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
   // Fetch notifications
   const fetchNotifications = useCallback(async (forceRefresh = false) => {
     // Skip fetching if the component isn't open to reduce unnecessary API calls
-    if (!isOpen && !showNotifications) return;
+    if (!isOpen && activeTab !== 'notifications') return;
     
     // Add debug output in pink
     console.log('%c[DEBUG] Starting notification fetch', 'color: #ff69b4; font-weight: bold');
     console.log('%c[DEBUG] isOpen:', 'color: #ff69b4', isOpen);
-    console.log('%c[DEBUG] showNotifications:', 'color: #ff69b4', showNotifications);
+    console.log('%c[DEBUG] activeTab:', 'color: #ff69b4', activeTab);
     console.log('%c[DEBUG] Current username:', 'color: #ff69b4', username);
     
     // Add debounce logic to prevent multiple rapid calls
@@ -194,7 +214,177 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
         console.log('%c[DEBUG] Set fallback notifications:', 'color: #ff69b4', dummyNotifications);
       }
     }
-  }, [username, lastFetchTime, notifications.length, isOpen, showNotifications]);
+  }, [username, lastFetchTime, notifications.length, isOpen, activeTab]);
+
+  // Fetch users
+  const fetchUsers = useCallback(async () => {
+    if (!isOpen || activeTab !== 'chats') return;
+    
+    setIsLoadingUsers(true);
+    
+    try {
+      const response = await fetch('/api/users');
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch users: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.success && data.users && Array.isArray(data.users)) {
+        // Add Compagno as the first user if not already present
+        const compagnoExists = data.users.some((user: User) => user.username === 'compagno');
+        
+        let usersList = [...data.users];
+        
+        if (!compagnoExists) {
+          usersList.unshift({
+            username: 'compagno',
+            firstName: 'Compagno',
+            lastName: 'Bot',
+            coatOfArmsImage: null
+          });
+        }
+        
+        setUsers(usersList);
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      
+      // Set fallback users
+      setUsers([
+        {
+          username: 'compagno',
+          firstName: 'Compagno',
+          lastName: 'Bot',
+          coatOfArmsImage: null
+        },
+        {
+          username: 'marco_polo',
+          firstName: 'Marco',
+          lastName: 'Polo',
+          coatOfArmsImage: null
+        },
+        {
+          username: 'doge_venice',
+          firstName: 'Doge',
+          lastName: 'of Venice',
+          coatOfArmsImage: null
+        }
+      ]);
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  }, [isOpen, activeTab]);
+
+  // Fetch messages between current user and selected user
+  const fetchUserMessages = useCallback(async (otherUser: string) => {
+    if (!username || !otherUser) return;
+    
+    setIsLoadingUserMessages(true);
+    
+    try {
+      const response = await fetch('/api/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          currentUser: username,
+          otherUser: otherUser
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch messages: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.success && data.messages && Array.isArray(data.messages)) {
+        setUserMessages(data.messages);
+      }
+    } catch (error) {
+      console.error('Error fetching user messages:', error);
+      
+      // Set fallback messages
+      const now = new Date();
+      setUserMessages([
+        {
+          messageId: '1',
+          sender: username,
+          receiver: otherUser,
+          content: 'Hello there!',
+          type: 'message',
+          createdAt: new Date(now.getTime() - 3600000).toISOString(),
+          readAt: new Date(now.getTime() - 3500000).toISOString()
+        },
+        {
+          messageId: '2',
+          sender: otherUser,
+          receiver: username,
+          content: 'Greetings! How may I assist you today?',
+          type: 'message',
+          createdAt: new Date(now.getTime() - 3400000).toISOString(),
+          readAt: new Date(now.getTime() - 3300000).toISOString()
+        }
+      ]);
+    } finally {
+      setIsLoadingUserMessages(false);
+    }
+  }, [username]);
+
+  // Send message to selected user
+  const sendUserMessage = async (content: string) => {
+    if (!content.trim() || !username || !selectedUser) return;
+    
+    // Optimistically add message to UI
+    const tempMessage: Message = {
+      messageId: `temp-${Date.now()}`,
+      sender: username,
+      receiver: selectedUser,
+      content: content,
+      type: 'message',
+      createdAt: new Date().toISOString(),
+      readAt: null
+    };
+    
+    setUserMessages(prev => [...prev, tempMessage]);
+    setInputValue('');
+    
+    try {
+      const response = await fetch('/api/messages/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sender: username,
+          receiver: selectedUser,
+          content: content,
+          type: 'message'
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to send message: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.success && data.message) {
+        // Replace the temp message with the real one
+        setUserMessages(prev => 
+          prev.map(msg => 
+            msg.messageId === tempMessage.messageId ? data.message : msg
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+      // Keep the temp message in the UI
+    }
+  };
 
   // Format date to be more readable and remove 500 years
   const formatNotificationDate = (dateString: string): string => {
@@ -330,7 +520,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
   // Set up notification polling
   useEffect(() => {
     // Only fetch notifications when the component is open or when notifications panel is shown
-    if (isOpen || showNotifications) {
+    if (isOpen && activeTab === 'notifications') {
       // Clear any existing interval first to prevent duplicates
       if (fetchIntervalRef.current) {
         clearInterval(fetchIntervalRef.current);
@@ -359,21 +549,44 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
         fetchIntervalRef.current = null;
       }
     }
-  }, [fetchNotifications, isOpen, showNotifications]); // Add isOpen and showNotifications as dependencies
+  }, [fetchNotifications, isOpen, activeTab]);
+
+  // Fetch users when chats tab is active
+  useEffect(() => {
+    if (isOpen && activeTab === 'chats') {
+      fetchUsers();
+    }
+  }, [fetchUsers, isOpen, activeTab]);
+
+  // Fetch messages when a user is selected
+  useEffect(() => {
+    if (selectedUser) {
+      fetchUserMessages(selectedUser);
+    }
+  }, [fetchUserMessages, selectedUser]);
 
   // Load message history when chat is opened
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && activeTab === 'chats' && selectedUser === 'compagno') {
       fetchMessageHistory();
     }
-  }, [isOpen, username]);
+  }, [isOpen, activeTab, selectedUser]);
 
   // Scroll to bottom of messages when new ones are added
   useEffect(() => {
     if (messagesEndRef.current && isOpen) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages, isOpen]);
+  }, [messages, userMessages, isOpen]);
+
+  // Update UI size when chats tab is active
+  useEffect(() => {
+    if (activeTab === 'chats') {
+      setIsExpanded(true);
+    } else {
+      setIsExpanded(false);
+    }
+  }, [activeTab]);
 
   const fetchMessageHistory = async (offset = 0) => {
     setIsLoadingHistory(true);
@@ -489,7 +702,12 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await sendMessage(inputValue);
+    
+    if (activeTab === 'chats' && selectedUser && selectedUser !== 'compagno') {
+      await sendUserMessage(inputValue);
+    } else if (activeTab === 'chats' && selectedUser === 'compagno') {
+      await sendMessage(inputValue);
+    }
   };
 
   const handleSuggestedQuestion = async (question: string) => {
@@ -560,6 +778,15 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
     }
   };
 
+  // Filter users based on search query
+  const filteredUsers = userSearchQuery
+    ? users.filter(user => 
+        user.username.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
+        user.firstName.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
+        user.lastName.toLowerCase().includes(userSearchQuery.toLowerCase())
+      )
+    : users;
+
   // Return null if on mobile
   if (isMobile) {
     return null;
@@ -600,7 +827,13 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
 
       {/* Expanded chat window */}
       {isOpen && (
-        <div className="bg-white rounded-lg shadow-xl w-96 max-h-[700px] flex flex-col border-2 border-amber-600 overflow-hidden slide-in">
+        <div 
+          className={`bg-white rounded-lg shadow-xl flex flex-col border-2 border-amber-600 overflow-hidden slide-in ${
+            isExpanded 
+              ? 'w-[800px] max-h-[700px]' 
+              : 'w-96 max-h-[700px]'
+          }`}
+        >
           {/* Header */}
           <div className="bg-amber-700 text-white p-3 flex justify-between items-center">
             <div className="flex items-center">
@@ -655,12 +888,12 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
           <div className="bg-amber-100 border-b border-amber-200 flex">
             <button
               onClick={() => {
-                setShowNotifications(true);
+                setActiveTab('notifications');
                 // Fetch latest notifications when switching to notifications view
                 fetchNotifications(true);
               }}
               className={`flex-1 py-2 text-sm font-medium relative ${
-                showNotifications ? 'bg-amber-200 text-amber-800' : 'text-amber-700 hover:bg-amber-50'
+                activeTab === 'notifications' ? 'bg-amber-200 text-amber-800' : 'text-amber-700 hover:bg-amber-50'
               }`}
             >
               Notifications
@@ -671,233 +904,400 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
               )}
             </button>
             <button
-              onClick={() => setShowNotifications(false)}
+              onClick={() => {
+                setActiveTab('chats');
+                fetchUsers();
+              }}
               className={`flex-1 py-2 text-sm font-medium ${
-                !showNotifications ? 'bg-amber-200 text-amber-800' : 'text-amber-700 hover:bg-amber-50'
+                activeTab === 'chats' ? 'bg-amber-200 text-amber-800' : 'text-amber-700 hover:bg-amber-50'
               }`}
             >
-              Chat
+              Chats
             </button>
           </div>
           
-          {/* Messages area */}
-          <div className="flex-1 overflow-y-auto p-3 bg-amber-50 bg-opacity-80" 
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E")`,
-              backgroundRepeat: 'repeat'
-            }}
-          >
-            {/* Show notifications if in notification view */}
-            {showNotifications ? (
-              <>
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-amber-800 font-serif text-lg">Notifications</h3>
-                  <div className="flex items-center">
-                    {/* Add refresh button */}
-                    <button 
-                      onClick={() => fetchNotifications(true)}
-                      className="mr-3 text-amber-600 hover:text-amber-800 flex items-center"
-                      title="Refresh notifications"
+          {/* Content area */}
+          {activeTab === 'notifications' ? (
+            // Notifications content
+            <div className="flex-1 overflow-y-auto p-3 bg-amber-50 bg-opacity-80" 
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E")`,
+                backgroundRepeat: 'repeat'
+              }}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-amber-800 font-serif text-lg">Notifications</h3>
+                <div className="flex items-center">
+                  {/* Add refresh button */}
+                  <button 
+                    onClick={() => fetchNotifications(true)}
+                    className="mr-3 text-amber-600 hover:text-amber-800 flex items-center"
+                    title="Refresh notifications"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    <span className="text-sm">Refresh</span>
+                  </button>
+                </div>
+              </div>
+              
+              {notifications.length === 0 ? (
+                <div className="text-center py-8 text-gray-500 italic">
+                  No notifications to display
+                </div>
+              ) : (
+                <>
+                  {notifications.map((notification) => (
+                    <div 
+                      key={notification.notificationId} 
+                      className={`mb-3 p-3 rounded-lg border ${
+                        notification.readAt 
+                          ? 'border-gray-200 bg-white' 
+                          : 'border-amber-300 bg-amber-50 notification-unread shadow-md'
+                      }`}
+                      onClick={() => {
+                        if (!notification.readAt) {
+                          markNotificationsAsRead([notification.notificationId]);
+                        }
+                      }}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                      </svg>
-                      <span className="text-sm">Refresh</span>
-                    </button>
-                    <button 
-                      onClick={() => setShowNotifications(false)}
-                      className="text-amber-600 hover:text-amber-800"
-                    >
-                      Return to Chat
-                    </button>
+                      <div className="flex justify-between items-start">
+                        <div className="text-xs text-gray-400">
+                          {formatNotificationDate(notification.createdAt)}
+                        </div>
+                      </div>
+                      <div className="mt-1 text-xs">{notification.content}</div>
+                    </div>
+                  ))}
+                </>
+              )}
+              
+              <div ref={messagesEndRef} />
+            </div>
+          ) : (
+            // Chats content with sidebar
+            <div className="flex-1 flex overflow-hidden">
+              {/* Users sidebar */}
+              <div className="w-1/3 border-r border-amber-200 flex flex-col bg-amber-50">
+                {/* Search bar */}
+                <div className="p-2 border-b border-amber-200">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Search users..."
+                      value={userSearchQuery}
+                      onChange={(e) => setUserSearchQuery(e.target.value)}
+                      className="w-full pl-8 pr-3 py-1 border border-amber-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    />
+                    <FaSearch className="absolute left-2 top-2 text-amber-400" />
                   </div>
                 </div>
                 
-                {notifications.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500 italic">
-                    No notifications to display
-                  </div>
-                ) : (
+                {/* Users list */}
+                <div className="flex-1 overflow-y-auto">
+                  {isLoadingUsers ? (
+                    <div className="flex justify-center items-center h-32">
+                      <FaSpinner className="animate-spin text-amber-600 text-2xl" />
+                    </div>
+                  ) : filteredUsers.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500 italic text-sm">
+                      No users found
+                    </div>
+                  ) : (
+                    <ul>
+                      {filteredUsers.map(user => (
+                        <li key={user.username}>
+                          <button
+                            onClick={() => setSelectedUser(user.username)}
+                            className={`w-full text-left p-3 flex items-center ${
+                              selectedUser === user.username 
+                                ? 'bg-amber-200' 
+                                : 'hover:bg-amber-100'
+                            }`}
+                          >
+                            <div className="w-8 h-8 rounded-full bg-amber-300 flex items-center justify-center mr-2 text-amber-800">
+                              {user.coatOfArmsImage ? (
+                                <img 
+                                  src={user.coatOfArmsImage} 
+                                  alt="" 
+                                  className="w-8 h-8 rounded-full object-cover"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).style.display = 'none';
+                                    (e.target as HTMLImageElement).nextElementSibling.style.display = 'flex';
+                                  }}
+                                />
+                              ) : (
+                                <div className="w-8 h-8 rounded-full bg-amber-300 flex items-center justify-center text-amber-800">
+                                  {user.firstName.charAt(0)}
+                                </div>
+                              )}
+                            </div>
+                            <div>
+                              <div className="font-medium text-sm">
+                                {user.username === 'compagno' ? 'Compagno' : `${user.firstName} ${user.lastName}`}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {user.username === 'compagno' ? 'Virtual Assistant' : user.username}
+                              </div>
+                            </div>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
+              
+              {/* Chat area */}
+              <div className="w-2/3 flex flex-col">
+                {selectedUser ? (
                   <>
-                    {notifications.map((notification) => (
-                      <div 
-                        key={notification.notificationId} 
-                        className={`mb-3 p-3 rounded-lg border ${
-                          notification.readAt 
-                            ? 'border-gray-200 bg-white' 
-                            : 'border-amber-300 bg-amber-50 notification-unread shadow-md'
-                        }`}
-                        onClick={() => {
-                          if (!notification.readAt) {
-                            markNotificationsAsRead([notification.notificationId]);
-                          }
-                        }}
+                    {/* Selected user header */}
+                    <div className="bg-amber-100 p-2 border-b border-amber-200 flex items-center">
+                      <button 
+                        onClick={() => setSelectedUser(null)}
+                        className="mr-2 text-amber-700 hover:text-amber-900 md:hidden"
                       >
-                        <div className="flex justify-between items-start">
-                          <div className="text-xs text-gray-400">
-                            {formatNotificationDate(notification.createdAt)}
-                          </div>
-                        </div>
-                        <div className="mt-1 text-xs">{notification.content}</div>
-                      </div>
-                    ))}
-                  </>
-                )}
-              </>
-            ) : (
-              // Original messages content
-              <>
-                {/* Load more button */}
-                {pagination && pagination.has_more && (
-                  <div className="text-center mb-4">
-                    <button
-                      onClick={loadMoreMessages}
-                      disabled={isLoadingHistory}
-                      className="px-3 py-1 text-sm bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-full border border-amber-200 transition-colors"
-                    >
-                      {isLoadingHistory ? (
-                        <span className="flex items-center justify-center">
-                          <FaSpinner className="animate-spin mr-2" />
-                          Loading...
-                        </span>
-                      ) : (
-                        'Load earlier messages'
-                      )}
-                    </button>
-                  </div>
-                )}
-                
-                {/* Loading indicator for initial load */}
-                {isLoadingHistory && messages.length === 0 && (
-                  <div className="flex justify-center items-center h-32">
-                    <FaSpinner className="animate-spin text-amber-600 text-2xl" />
-                  </div>
-                )}
-                
-                {/* Messages */}
-                {messages.map((message, index) => (
-                  <div 
-                    key={message.id || `msg-${index}`} 
-                    className={`mb-3 ${
-                      message.role === 'user' 
-                        ? 'text-right' 
-                        : 'text-left'
-                    }`}
-                  >
-                    <div 
-                      className={`inline-block p-3 rounded-lg max-w-[80%] ${
-                        message.role === 'user'
-                          ? 'user-bubble rounded-br-none'
-                          : 'assistant-bubble rounded-bl-none'
-                      }`}
-                    >
-                      <div className="markdown-content">
-                        <ReactMarkdown 
-                          remarkPlugins={[remarkGfm]}
-                          components={{
-                            // Customize how certain markdown elements are rendered
-                            a: ({node, ...props}) => <a {...props} className="text-amber-700 underline hover:text-amber-500" target="_blank" rel="noopener noreferrer" />,
-                            code: ({node, ...props}) => <code {...props} className="bg-amber-50 px-1 py-0.5 rounded text-sm font-mono" />,
-                            pre: ({node, ...props}) => <pre {...props} className="bg-amber-50 p-2 rounded my-2 overflow-x-auto text-sm font-mono" />,
-                            ul: ({node, ...props}) => <ul {...props} className="list-disc pl-5 my-1" />,
-                            ol: ({node, ...props}) => <ol {...props} className="list-decimal pl-5 my-1" />,
-                            li: ({node, ...props}) => <li {...props} className="my-0.5" />,
-                            blockquote: ({node, ...props}) => <blockquote {...props} className="border-l-4 border-amber-300 pl-3 italic my-2" />,
-                            h1: ({node, ...props}) => <h1 {...props} className="text-lg font-bold my-2" />,
-                            h2: ({node, ...props}) => <h2 {...props} className="text-md font-bold my-2" />,
-                            h3: ({node, ...props}) => <h3 {...props} className="text-sm font-bold my-1" />,
-                            p: ({node, ...props}) => <p {...props} className="my-1" />
-                          }}
-                        >
-                          {message.content}
-                        </ReactMarkdown>
-                      </div>
+                        <FaArrowLeft />
+                      </button>
                       
-                      {/* Only show voice button for assistant messages */}
-                      {message.role === 'assistant' && (
-                        <button
-                          onClick={() => handleTextToSpeech(message)}
-                          className="mt-1 text-amber-700 hover:text-amber-500 transition-colors float-right voice-button"
-                          aria-label={playingMessageId === message.id ? "Stop speaking" : "Speak message"}
-                        >
-                          {playingMessageId === message.id ? (
-                            <FaVolumeMute className="w-4 h-4" />
-                          ) : (
-                            <FaVolumeUp className="w-4 h-4" />
-                          )}
-                        </button>
+                      {selectedUser === 'compagno' ? (
+                        <div className="flex items-center">
+                          <div className="w-6 h-6 mr-2">
+                            <img 
+                              src="/images/venetian-mask.png" 
+                              alt="" 
+                              className="w-6 h-6"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = 'none';
+                              }}
+                            />
+                          </div>
+                          <span className="font-medium">Compagno</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center">
+                          <div className="w-6 h-6 rounded-full bg-amber-300 flex items-center justify-center mr-2 text-amber-800 text-xs">
+                            {users.find(u => u.username === selectedUser)?.firstName.charAt(0) || '?'}
+                          </div>
+                          <span className="font-medium">
+                            {users.find(u => u.username === selectedUser)?.firstName || ''} {users.find(u => u.username === selectedUser)?.lastName || ''}
+                          </span>
+                        </div>
                       )}
                     </div>
-                  </div>
-                ))}
-                
-                {/* Typing indicator */}
-                {isTyping && (
-                  <div className="text-left mb-3">
-                    <div className="inline-block p-3 rounded-lg max-w-[80%] typing-indicator rounded-bl-none">
-                      <div className="flex space-x-2">
-                        <div className="typing-dot animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                        <div className="typing-dot animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                        <div className="typing-dot animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                    
+                    {/* Messages area */}
+                    <div 
+                      className="flex-1 overflow-y-auto p-3 bg-amber-50 bg-opacity-80"
+                      style={{
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E")`,
+                        backgroundRepeat: 'repeat'
+                      }}
+                    >
+                      {isLoadingUserMessages ? (
+                        <div className="flex justify-center items-center h-32">
+                          <FaSpinner className="animate-spin text-amber-600 text-2xl" />
+                        </div>
+                      ) : selectedUser === 'compagno' ? (
+                        // Compagno messages
+                        <>
+                          {/* Load more button */}
+                          {pagination && pagination.has_more && (
+                            <div className="text-center mb-4">
+                              <button
+                                onClick={loadMoreMessages}
+                                disabled={isLoadingHistory}
+                                className="px-3 py-1 text-sm bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-full border border-amber-200 transition-colors"
+                              >
+                                {isLoadingHistory ? (
+                                  <span className="flex items-center justify-center">
+                                    <FaSpinner className="animate-spin mr-2" />
+                                    Loading...
+                                  </span>
+                                ) : (
+                                  'Load earlier messages'
+                                )}
+                              </button>
+                            </div>
+                          )}
+                          
+                          {/* Messages */}
+                          {messages.map((message, index) => (
+                            <div 
+                              key={message.id || `msg-${index}`} 
+                              className={`mb-3 ${
+                                message.role === 'user' 
+                                  ? 'text-right' 
+                                  : 'text-left'
+                              }`}
+                            >
+                              <div 
+                                className={`inline-block p-3 rounded-lg max-w-[80%] ${
+                                  message.role === 'user'
+                                    ? 'user-bubble rounded-br-none'
+                                    : 'assistant-bubble rounded-bl-none'
+                                }`}
+                              >
+                                <div className="markdown-content">
+                                  <ReactMarkdown 
+                                    remarkPlugins={[remarkGfm]}
+                                    components={{
+                                      a: ({node, ...props}) => <a {...props} className="text-amber-700 underline hover:text-amber-500" target="_blank" rel="noopener noreferrer" />,
+                                      code: ({node, ...props}) => <code {...props} className="bg-amber-50 px-1 py-0.5 rounded text-sm font-mono" />,
+                                      pre: ({node, ...props}) => <pre {...props} className="bg-amber-50 p-2 rounded my-2 overflow-x-auto text-sm font-mono" />,
+                                      ul: ({node, ...props}) => <ul {...props} className="list-disc pl-5 my-1" />,
+                                      ol: ({node, ...props}) => <ol {...props} className="list-decimal pl-5 my-1" />,
+                                      li: ({node, ...props}) => <li {...props} className="my-0.5" />,
+                                      blockquote: ({node, ...props}) => <blockquote {...props} className="border-l-4 border-amber-300 pl-3 italic my-2" />,
+                                      h1: ({node, ...props}) => <h1 {...props} className="text-lg font-bold my-2" />,
+                                      h2: ({node, ...props}) => <h2 {...props} className="text-md font-bold my-2" />,
+                                      h3: ({node, ...props}) => <h3 {...props} className="text-sm font-bold my-1" />,
+                                      p: ({node, ...props}) => <p {...props} className="my-1" />
+                                    }}
+                                  >
+                                    {message.content}
+                                  </ReactMarkdown>
+                                </div>
+                                
+                                {/* Only show voice button for assistant messages */}
+                                {message.role === 'assistant' && (
+                                  <button
+                                    onClick={() => handleTextToSpeech(message)}
+                                    className="mt-1 text-amber-700 hover:text-amber-500 transition-colors float-right voice-button"
+                                    aria-label={playingMessageId === message.id ? "Stop speaking" : "Speak message"}
+                                  >
+                                    {playingMessageId === message.id ? (
+                                      <FaVolumeMute className="w-4 h-4" />
+                                    ) : (
+                                      <FaVolumeUp className="w-4 h-4" />
+                                    )}
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                          
+                          {/* Typing indicator */}
+                          {isTyping && (
+                            <div className="text-left mb-3">
+                              <div className="inline-block p-3 rounded-lg max-w-[80%] typing-indicator rounded-bl-none">
+                                <div className="flex space-x-2">
+                                  <div className="typing-dot animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                                  <div className="typing-dot animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                                  <div className="typing-dot animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        // User messages
+                        <>
+                          {userMessages.length === 0 ? (
+                            <div className="text-center py-8 text-gray-500 italic">
+                              No messages yet. Start a conversation!
+                            </div>
+                          ) : (
+                            userMessages.map((message) => (
+                              <div 
+                                key={message.messageId} 
+                                className={`mb-3 ${
+                                  message.sender === username 
+                                    ? 'text-right' 
+                                    : 'text-left'
+                                }`}
+                              >
+                                <div 
+                                  className={`inline-block p-3 rounded-lg max-w-[80%] ${
+                                    message.sender === username
+                                      ? 'user-bubble rounded-br-none'
+                                      : 'assistant-bubble rounded-bl-none'
+                                  }`}
+                                >
+                                  <div>{message.content}</div>
+                                  <div className="text-xs text-gray-500 mt-1">
+                                    {formatNotificationDate(message.createdAt)}
+                                  </div>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </>
+                      )}
+                      
+                      <div ref={messagesEndRef} />
+                    </div>
+                    
+                    {/* Suggestions */}
+                    {selectedUser === 'compagno' && messages.length <= 1 && (
+                      <div className="border-t border-gray-200 p-2 bg-amber-50">
+                        <p className="text-xs text-gray-500 mb-2">Suggested questions:</p>
+                        <div className="flex flex-wrap gap-1">
+                          <button
+                            onClick={() => handleSuggestedQuestion("How do I purchase land?")}
+                            className="text-xs bg-gradient-to-r from-amber-100 to-amber-200 hover:from-amber-200 hover:to-amber-300 text-amber-900 px-3 py-1.5 rounded-full border border-amber-300 transition-colors shadow-sm"
+                          >
+                            How do I purchase land?
+                          </button>
+                          <button
+                            onClick={() => handleSuggestedQuestion("What are $COMPUTE tokens?")}
+                            className="text-xs bg-gradient-to-r from-amber-100 to-amber-200 hover:from-amber-200 hover:to-amber-300 text-amber-900 px-3 py-1.5 rounded-full border border-amber-300 transition-colors shadow-sm"
+                          >
+                            What are $COMPUTE tokens?
+                          </button>
+                          <button
+                            onClick={() => handleSuggestedQuestion("How do I build structures?")}
+                            className="text-xs bg-gradient-to-r from-amber-100 to-amber-200 hover:from-amber-200 hover:to-amber-300 text-amber-900 px-3 py-1.5 rounded-full border border-amber-300 transition-colors shadow-sm"
+                          >
+                            How do I build structures?
+                          </button>
+                        </div>
                       </div>
+                    )}
+                    
+                    {/* Input area */}
+                    <form onSubmit={handleSubmit} className="border-t border-gray-200 p-2 flex">
+                      <input
+                        type="text"
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        placeholder={`Message ${selectedUser === 'compagno' ? 'Compagno' : users.find(u => u.username === selectedUser)?.firstName || selectedUser}...`}
+                        className="flex-1 p-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                        disabled={isTyping}
+                      />
+                      <button 
+                        type="submit"
+                        className={`px-4 rounded-r-lg transition-colors ${
+                          isTyping || !inputValue.trim()
+                            ? 'bg-gray-400 text-white cursor-not-allowed'
+                            : 'bg-gradient-to-r from-amber-800 to-amber-700 text-white hover:from-amber-700 hover:to-amber-600'
+                        }`}
+                        disabled={isTyping || !inputValue.trim()}
+                      >
+                        {isTyping ? <FaSpinner className="animate-spin" /> : 'Send'}
+                      </button>
+                    </form>
+                  </>
+                ) : (
+                  // No user selected
+                  <div className="flex-1 flex items-center justify-center bg-amber-50 bg-opacity-80">
+                    <div className="text-center p-6">
+                      <div className="w-16 h-16 mx-auto mb-4 opacity-50">
+                        <FaUser className="w-full h-full text-amber-400" />
+                      </div>
+                      <h3 className="text-lg font-medium text-amber-800 mb-2">Select a Conversation</h3>
+                      <p className="text-sm text-amber-600">
+                        Choose a user from the list to view your conversation history
+                      </p>
                     </div>
                   </div>
                 )}
-              </>
-            )}
-            
-            <div ref={messagesEndRef} />
-          </div>
-          
-          {/* Suggestions */}
-          {messages.length <= 1 && (
-            <div className="border-t border-gray-200 p-2 bg-amber-50">
-              <p className="text-xs text-gray-500 mb-2">Suggested questions:</p>
-              <div className="flex flex-wrap gap-1">
-                <button
-                  onClick={() => handleSuggestedQuestion("How do I purchase land?")}
-                  className="text-xs bg-gradient-to-r from-amber-100 to-amber-200 hover:from-amber-200 hover:to-amber-300 text-amber-900 px-3 py-1.5 rounded-full border border-amber-300 transition-colors shadow-sm"
-                >
-                  How do I purchase land?
-                </button>
-                <button
-                  onClick={() => handleSuggestedQuestion("What are $COMPUTE tokens?")}
-                  className="text-xs bg-gradient-to-r from-amber-100 to-amber-200 hover:from-amber-200 hover:to-amber-300 text-amber-900 px-3 py-1.5 rounded-full border border-amber-300 transition-colors shadow-sm"
-                >
-                  What are $COMPUTE tokens?
-                </button>
-                <button
-                  onClick={() => handleSuggestedQuestion("How do I build structures?")}
-                  className="text-xs bg-gradient-to-r from-amber-100 to-amber-200 hover:from-amber-200 hover:to-amber-300 text-amber-900 px-3 py-1.5 rounded-full border border-amber-300 transition-colors shadow-sm"
-                >
-                  How do I build structures?
-                </button>
               </div>
             </div>
           )}
           
-          {/* Input area */}
-          <form onSubmit={handleSubmit} className="border-t border-gray-200 p-2 flex">
-            <input
-              type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Ask Compagno a question..."
-              className="flex-1 p-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
-              disabled={isTyping}
-            />
-            <button 
-              type="submit"
-              className={`px-4 rounded-r-lg transition-colors ${
-                isTyping || !inputValue.trim()
-                  ? 'bg-gray-400 text-white cursor-not-allowed'
-                  : 'bg-gradient-to-r from-amber-800 to-amber-700 text-white hover:from-amber-700 hover:to-amber-600'
-              }`}
-              disabled={isTyping || !inputValue.trim()}
-            >
-              {isTyping ? <FaSpinner className="animate-spin" /> : 'Send'}
-            </button>
-          </form>
         </div>
       )}
     </div>
