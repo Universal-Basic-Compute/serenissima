@@ -57,6 +57,11 @@ export class BuildingRendererManager {
       debug: false // Disable debug logging for better performance
     });
     
+    // Set scene as ready in the renderer factory
+    if (this.rendererFactory) {
+      (this.rendererFactory as any).setSceneReady(true);
+    }
+    
     // Subscribe to building events
     this.subscribeToEvents();
     

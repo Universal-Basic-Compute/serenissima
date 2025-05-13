@@ -373,6 +373,17 @@ export default class SimplePolygonRenderer {
     });
     
     console.log(`Rendered ${this.meshes.length} polygons`);
+    
+    // Emit event to signal that base terrain is rendered
+    if (typeof window !== 'undefined') {
+      setTimeout(() => {
+        console.log('Base terrain rendering complete, emitting sceneBaseRendered event');
+        eventBus.emit(EventTypes.SCENE_BASE_RENDERED, { 
+          polygonCount: this.meshes.length,
+          timestamp: Date.now()
+        });
+      }, 500); // Small delay to ensure everything is processed
+    }
   }
   
   /**

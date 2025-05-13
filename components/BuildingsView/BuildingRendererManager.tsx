@@ -23,46 +23,88 @@ const BuildingRendererManager: React.FC<BuildingRendererManagerProps> = ({
   const { isSceneReady, scene } = useSceneReady();
   const [buildingCount, setBuildingCount] = useState<number>(0);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+  // Add a new state to track scene initialization
+  const [sceneInitialized, setSceneInitialized] = useState<boolean>(false);
   
   // Initialize the building renderer manager when the scene is ready
   useEffect(() => {
     if (!isSceneReady || !scene || !active) return;
     
     log.info('BuildingRendererManager: Initializing');
-    buildingRendererManager.initialize(scene);
     
-    // Initial refresh of buildings
-    refreshBuildings();
+    // Add a delay to ensure land and water are rendered first
+    const initializationTimer = setTimeout(() => {
+      buildingRendererManager.initialize(scene);
+      setSceneInitialized(true);
+      
+      // Initial refresh of buildings only after initialization
+      refreshBuildings();
+    }, 1500); // 1.5 second delay to allow land and water to render
     
     // Set up periodic refresh to ensure buildings remain visible
-    const refreshInterval = setInterval(() => {
-      if (debug) {
-        log.info('BuildingRendererManager: Periodic refresh');
-      }
-      refreshBuildings();
-    }, 30000); // Refresh every 30 seconds
+    // Only start this after initialization
+    let refreshInterval: NodeJS.Timeout;
+    let visibilityCheckInterval: NodeJS.Timeout;
     
-    // Add a more frequent check specifically for when buildings disappear
-    const visibilityCheckInterval = setInterval(() => {
-      const count = buildingRendererManager.getBuildingMeshes().size;
-      if (count === 0 && buildingCount > 0) {
-        console.warn('BuildingRendererManager: Buildings disappeared, refreshing...');
+    const setupIntervals = () => {
+      refreshInterval = setInterval(() => {
+        if (debug) {
+          log.info('BuildingRendererManager: Periodic refresh');
+        }
         refreshBuildings();
-      }
-    }, 5000); // Check every 5 seconds
+      }, 30000); // Refresh every 30 seconds
+      
+      // Add a more frequent check specifically for when buildings disappear
+      visibilityCheckInterval = setInterval(() => {
+        const count = buildingRendererManager.getBuildingMeshes().size;
+        if (count === 0 && buildingCount > 0) {
+          console.warn('BuildingRendererManager: Buildings disappeared, refreshing...');
+          refreshBuildings();
+        }
+      }, 5000); // Check every 5 seconds
+    };
+    
+    // Only set up intervals after initialization
+    if (sceneInitialized) {
+      setupIntervals();
+    }
     
     // Listen for events to ensure buildings are visible
     const handleEnsureBuildingsVisible = () => {
-      log.info('BuildingRendererManager: Ensuring buildings are visible (event)');
-      refreshBuildings();
+      // Only respond to this event if the scene is initialized
+      if (sceneInitialized) {
+        log.info('BuildingRendererManager: Ensuring buildings are visible (event)');
+        refreshBuildings();
+      } else {
+        log.info('BuildingRendererManager: Ignoring ensureBuildingsVisible event until scene is initialized');
+      }
     };
     
     window.addEventListener('ensureBuildingsVisible', handleEnsureBuildingsVisible);
+    
+    // Listen for scene base rendered event
+    const sceneBaseRenderedSubscription = eventBus.subscribe(
+      EventTypes.SCENE_BASE_RENDERED,
+      (data) => {
+        console.log('BuildingRendererManager: Received sceneBaseRendered event', data);
+        // Set scene as initialized
+        setSceneInitialized(true);
+        
+        // Initialize the building renderer manager now
+        buildingRendererManager.initialize(scene);
+        
+        // Initial refresh of buildings
+        refreshBuildings();
+      }
+    );
     
     // Subscribe to building events
     const buildingPlacedSubscription = eventBus.subscribe(
       EventTypes.BUILDING_PLACED, 
       (data) => {
+        // Only respond to this event if the scene is initialized
+        if (!sceneInitialized) return;
+        
         log.info('BuildingRendererManager: Building placed event received', data);
         if (data.refresh) {
           // Use the debounced refresh to prevent multiple rapid refreshes
@@ -79,16 +121,18 @@ const BuildingRendererManager: React.FC<BuildingRendererManagerProps> = ({
     
     // Cleanup function
     return () => {
-      clearInterval(refreshInterval);
-      clearInterval(visibilityCheckInterval);
+      clearTimeout(initializationTimer);
+      if (refreshInterval) clearInterval(refreshInterval);
+      if (visibilityCheckInterval) clearInterval(visibilityCheckInterval);
       window.removeEventListener('ensureBuildingsVisible', handleEnsureBuildingsVisible);
       buildingPlacedSubscription.unsubscribe();
+      sceneBaseRenderedSubscription.unsubscribe();
       
       if (!active) {
         buildingRendererManager.cleanup();
       }
     };
-  }, [isSceneReady, scene, active, debug]);
+  }, [isSceneReady, scene, active, debug, sceneInitialized]);
   
   // Track the timestamp of the last refresh request
   const [lastRefreshTimestamp, setLastRefreshTimestamp] = useState<number>(0);

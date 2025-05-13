@@ -16,6 +16,7 @@ export const EventTypes = {
   VIEW_MODE_CHANGED: 'viewModeChanged',
   POLYGONS_LOADED: 'polygonsLoaded',
   POLYGON_DELETED: 'polygonDeleted',
+  SCENE_BASE_RENDERED: 'sceneBaseRendered',
   
   // UI interaction events
   INTERACTION_CLICK: 'interactionClick',
