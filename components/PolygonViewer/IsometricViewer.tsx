@@ -43,6 +43,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     fillColor: string;
     centroidX: number;
     centroidY: number;
+    centerX: number;
+    centerY: number;
   }[]>([]);
   const [emptyBuildingPoints, setEmptyBuildingPoints] = useState<{lat: number, lng: number}[]>([]);
   
@@ -1609,8 +1611,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         fillColor,
         centroidX: centerX, // Store both for compatibility
         centroidY: centerY,
-        centerX,    // Add these explicitly
-        centerY
+        centerX: centerX,    // Add these explicitly
+        centerY: centerY
       });
     });
 
