@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { RoadService, RoadData } from '../services/RoadService';
+import { RoadService, RoadData } from '../../services/RoadService';
 import { log } from '../logUtils';
 
 /**
