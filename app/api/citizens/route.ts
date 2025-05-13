@@ -183,18 +183,27 @@ export async function GET(request: Request) {
       // Convert Airtable Occupant field to string, ensuring type safety
       const occupant = record.fields.Occupant;
       
-      // Define a type for the Airtable field which can have various formats
-      type AirtableField = string | number | boolean | object | readonly any[] | undefined | null;
+      // Define types for Airtable fields which can have various formats
+      type Collaborator = { id: string; email: string; name: string };
+      type Attachment = { id: string; url: string; filename: string; size: number; type: string };
       
       // Define a more specific type for Airtable's field format
-      type AirtableFieldValue = string | number | boolean | object | readonly string[] | undefined | null;
+      type AirtableFieldValue = string | number | boolean | Collaborator | 
+                               readonly string[] | readonly Collaborator[] | readonly Attachment[] | undefined | null;
       
       // Explicitly cast the Airtable field to string to fix type error
-      const citizenId = occupant ? 
-        (typeof occupant === 'string' ? occupant : 
-          Array.isArray(occupant) && occupant.length > 0 ? String(occupant[0]) : 
-          typeof occupant === 'object' && occupant !== null ? String(Object.values(occupant)[0]) : 
-          String(occupant as AirtableFieldValue)) : '';
+      let citizenId = '';
+      if (occupant) {
+        if (typeof occupant === 'string') {
+          citizenId = occupant;
+        } else if (Array.isArray(occupant) && occupant.length > 0) {
+          citizenId = String(occupant[0]);
+        } else if (typeof occupant === 'object' && occupant !== null) {
+          citizenId = String(Object.values(occupant)[0]);
+        } else {
+          citizenId = String(occupant);
+        }
+      }
       const citizen = citizenMap.get(citizenId);
       
       if (!citizen) {
