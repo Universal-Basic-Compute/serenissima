@@ -153,7 +153,7 @@ export class WaterFacade {
         texture.repeat.set(repeatFactor, repeatFactor);
         
         // Apply anisotropic filtering for higher quality levels
-        if (this.quality === WaterQualityLevel.ULTRA || this.quality === WaterQualityLevel.HIGH) {
+        if (this.quality === WaterQualityLevel.HIGH) {
           // Get renderer from scene's userData or other appropriate source
           const renderer = this.scene.userData.renderer as THREE.WebGLRenderer;
           if (renderer && renderer.capabilities && renderer.capabilities.getMaxAnisotropy) {
@@ -374,7 +374,7 @@ export class WaterFacade {
     return water;
   }
 
-  private createFallbackWater(): Water {
+  private createFallbackWater(): Water | any {
     console.warn('Creating fallback water plane');
     this.fallbackMode = true;
     
