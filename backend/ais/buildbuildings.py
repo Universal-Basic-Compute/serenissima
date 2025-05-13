@@ -758,152 +758,152 @@ Your response must be a JSON object with:
                     # Look for JSON block in the response
                     import re
                     json_match = re.search(r'```json\s*(.*?)\s*```', content, re.DOTALL)
+                    
+                    if json_match:
+                        json_str = json_match.group(1)
+                        print(f"Found JSON in placement response: {json_str}")
+                        
+                        placement_decision = json.loads(json_str)
+                        
+                        # Log the decision
+                        print(f"AI {ai_username} placement decision: {json.dumps(placement_decision)}")
+                        
+                        # Check if the decision is valid
+                        if "selected_point_index" in placement_decision:
+                            selected_index = placement_decision["selected_point_index"]
                             
-                            if json_match:
-                                json_str = json_match.group(1)
-                                print(f"Found JSON in placement response: {json_str}")
+                            # Validate the index
+                            if 0 <= selected_index < len(filtered_points):
+                                selected_point = filtered_points[selected_index]
+                                reason = placement_decision.get("reason", "No reason provided")
                                 
-                                placement_decision = json.loads(json_str)
+                                print(f"AI {ai_username} selected point {selected_index} at position {selected_point['lat']}, {selected_point['lng']}")
+                                print(f"Reason: {reason}")
                                 
-                                # Log the decision
-                                print(f"AI {ai_username} placement decision: {json.dumps(placement_decision)}")
+                                # Now we need to create the building
+                                # 1. Get the construction cost for this building type
+                                construction_cost = building_type_info.get("constructionCost", 0)
+                                print(f"Construction cost for {building_type}: {construction_cost} ducats")
                                 
-                                # Check if the decision is valid
-                                if "selected_point_index" in placement_decision:
-                                    selected_index = placement_decision["selected_point_index"]
-                                    
-                                    # Validate the index
-                                    if 0 <= selected_index < len(filtered_points):
-                                        selected_point = filtered_points[selected_index]
-                                        reason = placement_decision.get("reason", "No reason provided")
-                                        
-                                        print(f"AI {ai_username} selected point {selected_index} at position {selected_point['lat']}, {selected_point['lng']}")
-                                        print(f"Reason: {reason}")
-                                        
-                                        # Now we need to create the building
-                                        # 1. Get the construction cost for this building type
-                                        construction_cost = building_type_info.get("constructionCost", 0)
-                                        print(f"Construction cost for {building_type}: {construction_cost} ducats")
-                                        
-                                        # 2. Check if the user has enough ducats
-                                        from app.user_utils import find_user_by_identifier
-                                        
-                                        # Get the tables from the function parameters
-                                        tables = initialize_airtable()
-                                        
-                                        # Find the user record
-                                        user_record = find_user_by_identifier(tables["users"], ai_username)
-                                        if not user_record:
-                                            print(f"User {ai_username} not found, cannot create building")
-                                            return False
-                                        
-                                        user_ducats = user_record["fields"].get("Ducats", 0)
-                                        print(f"User {ai_username} has {user_ducats} ducats")
-                                        
-                                        if user_ducats < construction_cost:
-                                            print(f"User {ai_username} does not have enough ducats to build {building_type}. Required: {construction_cost}, Available: {user_ducats}")
-                                            return False
-                                        
-                                        # 3. Transfer ducats from user to ConsiglioDeiDieci
-                                        # Find ConsiglioDeiDieci record
-                                        consiglio_records = tables["users"].all(formula="{Username}='ConsiglioDeiDieci'")
-                                        if not consiglio_records:
-                                            print("ConsiglioDeiDieci account not found, cannot transfer ducats")
-                                            return False
-                                        
-                                        consiglio_record = consiglio_records[0]
-                                        consiglio_ducats = consiglio_record["fields"].get("Ducats", 0)
-                                        print(f"ConsiglioDeiDieci has {consiglio_ducats} ducats before transfer")
-                                        
-                                        # Update user's ducats
-                                        print(f"Updating {ai_username}'s ducats from {user_ducats} to {user_ducats - construction_cost}")
-                                        tables["users"].update(user_record["id"], {
-                                            "Ducats": user_ducats - construction_cost
-                                        })
-                                        
-                                        # Update ConsiglioDeiDieci's ducats
-                                        print(f"Updating ConsiglioDeiDieci's ducats from {consiglio_ducats} to {consiglio_ducats + construction_cost}")
-                                        tables["users"].update(consiglio_record["id"], {
-                                            "Ducats": consiglio_ducats + construction_cost
-                                        })
-                                        
-                                        print(f"Transferred {construction_cost} ducats from {ai_username} to ConsiglioDeiDieci")
-                                        
-                                        # 4. Create the building record
-                                        # Generate a unique building ID
-                                        import uuid
-                                        building_id = f"building-{uuid.uuid4()}"
-                                        
-                                        # Format the position as a JSON string
-                                        position_json = json.dumps({
+                                # 2. Check if the user has enough ducats
+                                from app.user_utils import find_user_by_identifier
+                                
+                                # Get the tables from the function parameters
+                                tables = initialize_airtable()
+                                
+                                # Find the user record
+                                user_record = find_user_by_identifier(tables["users"], ai_username)
+                                if not user_record:
+                                    print(f"User {ai_username} not found, cannot create building")
+                                    return False
+                                
+                                user_ducats = user_record["fields"].get("Ducats", 0)
+                                print(f"User {ai_username} has {user_ducats} ducats")
+                                
+                                if user_ducats < construction_cost:
+                                    print(f"User {ai_username} does not have enough ducats to build {building_type}. Required: {construction_cost}, Available: {user_ducats}")
+                                    return False
+                                
+                                # 3. Transfer ducats from user to ConsiglioDeiDieci
+                                # Find ConsiglioDeiDieci record
+                                consiglio_records = tables["users"].all(formula="{Username}='ConsiglioDeiDieci'")
+                                if not consiglio_records:
+                                    print("ConsiglioDeiDieci account not found, cannot transfer ducats")
+                                    return False
+                                
+                                consiglio_record = consiglio_records[0]
+                                consiglio_ducats = consiglio_record["fields"].get("Ducats", 0)
+                                print(f"ConsiglioDeiDieci has {consiglio_ducats} ducats before transfer")
+                                
+                                # Update user's ducats
+                                print(f"Updating {ai_username}'s ducats from {user_ducats} to {user_ducats - construction_cost}")
+                                tables["users"].update(user_record["id"], {
+                                    "Ducats": user_ducats - construction_cost
+                                })
+                                
+                                # Update ConsiglioDeiDieci's ducats
+                                print(f"Updating ConsiglioDeiDieci's ducats from {consiglio_ducats} to {consiglio_ducats + construction_cost}")
+                                tables["users"].update(consiglio_record["id"], {
+                                    "Ducats": consiglio_ducats + construction_cost
+                                })
+                                
+                                print(f"Transferred {construction_cost} ducats from {ai_username} to ConsiglioDeiDieci")
+                                
+                                # 4. Create the building record
+                                # Generate a unique building ID
+                                import uuid
+                                building_id = f"building-{uuid.uuid4()}"
+                                
+                                # Format the position as a JSON string
+                                position_json = json.dumps({
+                                    "lat": selected_point["lat"],
+                                    "lng": selected_point["lng"]
+                                })
+                                
+                                # Create the building record
+                                building_record = {
+                                    "BuildingId": building_id,
+                                    "Type": building_type,
+                                    "LandId": land_id,
+                                    "LeaseAmount": 0,
+                                    "Variant": "model",
+                                    "Owner": ai_username,
+                                    "Position": position_json,
+                                    "RentAmount": 0,
+                                    "CreatedAt": datetime.now().isoformat()
+                                }
+                                
+                                print(f"Creating building record: {json.dumps(building_record)}")
+                                
+                                # Add the building to Airtable
+                                try:
+                                    new_building = tables["buildings"].create(building_record)
+                                    print(f"Created new building: {building_id} of type {building_type} for {ai_username} on land {land_id}")
+                                    print(f"Building record ID: {new_building['id']}")
+                                except Exception as building_error:
+                                    print(f"Error creating building record: {str(building_error)}")
+                                    print(f"Exception traceback: {traceback.format_exc()}")
+                                    return False
+                                
+                                # 5. Create a notification for the user
+                                notification = {
+                                    "User": ai_username,
+                                    "Type": "building_created",
+                                    "Content": f"You have successfully built a {building_type_info['name']} on your land {land_id} for {construction_cost} ducats.",
+                                    "CreatedAt": datetime.now().isoformat(),
+                                    "ReadAt": None,
+                                    "Details": json.dumps({
+                                        "building_id": building_id,
+                                        "building_type": building_type,
+                                        "land_id": land_id,
+                                        "cost": construction_cost,
+                                        "position": {
                                             "lat": selected_point["lat"],
                                             "lng": selected_point["lng"]
-                                        })
-                                        
-                                        # Create the building record
-                                        building_record = {
-                                            "BuildingId": building_id,
-                                            "Type": building_type,
-                                            "LandId": land_id,
-                                            "LeaseAmount": 0,
-                                            "Variant": "model",
-                                            "Owner": ai_username,
-                                            "Position": position_json,
-                                            "RentAmount": 0,
-                                            "CreatedAt": datetime.now().isoformat()
                                         }
-                                        
-                                        print(f"Creating building record: {json.dumps(building_record)}")
-                                        
-                                        # Add the building to Airtable
-                                        try:
-                                            new_building = tables["buildings"].create(building_record)
-                                            print(f"Created new building: {building_id} of type {building_type} for {ai_username} on land {land_id}")
-                                            print(f"Building record ID: {new_building['id']}")
-                                        except Exception as building_error:
-                                            print(f"Error creating building record: {str(building_error)}")
-                                            print(f"Exception traceback: {traceback.format_exc()}")
-                                            return False
-                                        
-                                        # 5. Create a notification for the user
-                                        notification = {
-                                            "User": ai_username,
-                                            "Type": "building_created",
-                                            "Content": f"You have successfully built a {building_type_info['name']} on your land {land_id} for {construction_cost} ducats.",
-                                            "CreatedAt": datetime.now().isoformat(),
-                                            "ReadAt": None,
-                                            "Details": json.dumps({
-                                                "building_id": building_id,
-                                                "building_type": building_type,
-                                                "land_id": land_id,
-                                                "cost": construction_cost,
-                                                "position": {
-                                                    "lat": selected_point["lat"],
-                                                    "lng": selected_point["lng"]
-                                                }
-                                            })
-                                        }
-                                        
-                                        try:
-                                            tables["notifications"].create(notification)
-                                            print(f"Created notification for {ai_username} about new building")
-                                        except Exception as notification_error:
-                                            print(f"Error creating notification: {str(notification_error)}")
-                                            # Continue even if notification creation fails
-                                        
-                                        return True
-                                    else:
-                                        print(f"Invalid point index {selected_index}, must be between 0 and {len(filtered_points)-1}")
-                                else:
-                                    print(f"No selected_point_index in placement decision")
+                                    })
+                                }
+                                
+                                try:
+                                    tables["notifications"].create(notification)
+                                    print(f"Created notification for {ai_username} about new building")
+                                except Exception as notification_error:
+                                    print(f"Error creating notification: {str(notification_error)}")
+                                    # Continue even if notification creation fails
+                                
+                                return True
                             else:
-                                print(f"No JSON decision found in AI placement response. Full response:")
-                                print(content)
-                        except Exception as e:
-                            print(f"Error extracting placement decision from AI response: {str(e)}")
-                            print(f"Exception traceback: {traceback.format_exc()}")
-                            print(f"Full response content that caused the error:")
-                            print(content)
+                                print(f"Invalid point index {selected_index}, must be between 0 and {len(filtered_points)-1}")
+                        else:
+                            print(f"No selected_point_index in placement decision")
+                    else:
+                        print(f"No JSON decision found in AI placement response. Full response:")
+                        print(content)
+                except Exception as e:
+                    print(f"Error extracting placement decision from AI response: {str(e)}")
+                    print(f"Exception traceback: {traceback.format_exc()}")
+                    print(f"Full response content that caused the error:")
+                    print(content)
                 return False
             else:
                 print(f"Error processing building placement request for AI user {ai_username}: {response_data}")
