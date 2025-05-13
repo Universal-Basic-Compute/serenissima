@@ -19,6 +19,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [buildings, setBuildings] = useState<any[]>([]);
+  const [incomeData, setIncomeData] = useState<Record<string, number>>({});
+  const [minIncome, setMinIncome] = useState<number>(0);
+  const [maxIncome, setMaxIncome] = useState<number>(1000);
 
   // Load polygons
   useEffect(() => {
@@ -40,6 +43,46 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         setLoading(false);
       });
   }, []);
+  
+  // Fetch income data
+  const fetchIncomeData = useCallback(async () => {
+    try {
+      console.log('Fetching income data...');
+      const response = await fetch('/api/get-income-data');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.incomeData && Array.isArray(data.incomeData)) {
+          // Create a map of polygon ID to income
+          const incomeMap: Record<string, number> = {};
+          let min = Infinity;
+          let max = -Infinity;
+          
+          data.incomeData.forEach((item: any) => {
+            if (item.polygonId && typeof item.income === 'number') {
+              incomeMap[item.polygonId] = item.income;
+              min = Math.min(min, item.income);
+              max = Math.max(max, item.income);
+            }
+          });
+          
+          // Set min/max income values (with reasonable defaults if needed)
+          setMinIncome(min !== Infinity ? min : 0);
+          setMaxIncome(max !== -Infinity ? max : 1000);
+          setIncomeData(incomeMap);
+          console.log(`Income data loaded: ${Object.keys(incomeMap).length} entries, min=${min}, max=${max}`);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching income data:', error);
+    }
+  }, []);
+  
+  // Fetch income data when in land view
+  useEffect(() => {
+    if (activeView === 'land') {
+      fetchIncomeData();
+    }
+  }, [activeView, fetchIncomeData]);
 
   // Fetch land owners
   useEffect(() => {
@@ -195,6 +238,31 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     };
   }, [isDragging, dragStart]);
 
+  // Get color based on income using a gradient
+  const getIncomeColor = (income: number | undefined): string => {
+    if (income === undefined) return '#FFF5D0'; // Default sand color for no data
+    
+    // Normalize income to a 0-1 scale
+    const normalizedIncome = Math.min(Math.max((income - minIncome) / (maxIncome - minIncome), 0), 1);
+    
+    // Create a gradient from blue (low) to yellow (medium) to red (high)
+    if (normalizedIncome <= 0.5) {
+      // Blue to Yellow (0-0.5)
+      const t = normalizedIncome * 2; // Scale 0-0.5 to 0-1
+      const r = Math.floor(0 + t * 255);
+      const g = Math.floor(0 + t * 255);
+      const b = Math.floor(255 - t * 255);
+      return `rgb(${r}, ${g}, ${b})`;
+    } else {
+      // Yellow to Red (0.5-1)
+      const t = (normalizedIncome - 0.5) * 2; // Scale 0.5-1 to 0-1
+      const r = 255;
+      const g = Math.floor(255 - t * 255);
+      const b = 0;
+      return `rgb(${r}, ${g}, ${b})`;
+    }
+  };
+  
   // Draw the isometric view
   useEffect(() => {
     if (loading || !canvasRef.current || polygons.length === 0) return;
@@ -222,9 +290,13 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     polygons.forEach(polygon => {
       if (!polygon.coordinates || polygon.coordinates.length < 3) return;
       
-      // Get polygon owner color
+      // Get polygon owner color or income-based color
       let fillColor = '#FFF5D0'; // Default sand color
-      if (polygon.id && landOwners[polygon.id]) {
+      if (activeView === 'land' && polygon.id && incomeData[polygon.id] !== undefined) {
+        // Use income-based color in land view
+        fillColor = getIncomeColor(incomeData[polygon.id]);
+      } else if (polygon.id && landOwners[polygon.id]) {
+        // Use owner color in other views
         const owner = landOwners[polygon.id];
         const user = users[owner];
         if (user && user.color) {
@@ -409,7 +481,50 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       });
     }
     
-  }, [loading, polygons, landOwners, users, activeView, buildings, scale, offset]);
+  }, [loading, polygons, landOwners, users, activeView, buildings, scale, offset, incomeData, minIncome, maxIncome]);
+  
+  // Add a legend for income colors when in land view
+  useEffect(() => {
+    // Create or update legend element
+    if (activeView === 'land') {
+      let legend = document.getElementById('income-legend');
+      if (!legend) {
+        legend = document.createElement('div');
+        legend.id = 'income-legend';
+        legend.className = 'absolute bottom-20 left-20 bg-black/70 text-white p-3 rounded-lg z-30';
+        document.body.appendChild(legend);
+      }
+      
+      // Create gradient for legend
+      const gradientHtml = `
+        <div class="w-full h-6 mb-1 rounded" style="background: linear-gradient(to right, #0000FF, #FFFF00, #FF0000);"></div>
+      `;
+      
+      // Update legend content
+      legend.innerHTML = `
+        <h3 class="text-sm font-bold mb-2">Income Legend</h3>
+        ${gradientHtml}
+        <div class="flex justify-between text-xs">
+          <span>${minIncome.toFixed(0)} Ducats</span>
+          <span>${((maxIncome + minIncome) / 2).toFixed(0)} Ducats</span>
+          <span>${maxIncome.toFixed(0)} Ducats</span>
+        </div>
+      `;
+      
+      return () => {
+        // Remove legend when component unmounts or view changes
+        if (legend && legend.parentNode) {
+          legend.parentNode.removeChild(legend);
+        }
+      };
+    } else {
+      // Remove legend if not in land view
+      const legend = document.getElementById('income-legend');
+      if (legend && legend.parentNode) {
+        legend.parentNode.removeChild(legend);
+      }
+    }
+  }, [activeView, minIncome, maxIncome]);
 
   // Handle window resize
   useEffect(() => {
