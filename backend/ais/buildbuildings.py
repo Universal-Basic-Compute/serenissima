@@ -87,42 +87,50 @@ def get_building_types_info() -> Dict:
         "house": {
             "type": "house",
             "name": "House",
-            "shortDescription": "Basic housing for citizens"
+            "shortDescription": "Basic housing for citizens",
+            "constructionCost": 5000
         },
         "workshop": {
             "type": "workshop",
             "name": "Workshop",
-            "shortDescription": "Small production facility for crafts and goods"
+            "shortDescription": "Small production facility for crafts and goods",
+            "constructionCost": 7500
         },
         "market-stall": {
             "type": "market-stall",
             "name": "Market Stall",
-            "shortDescription": "Small commercial space for selling goods"
+            "shortDescription": "Small commercial space for selling goods",
+            "constructionCost": 3000
         },
         "warehouse": {
             "type": "warehouse",
             "name": "Warehouse",
-            "shortDescription": "Storage facility for goods and resources"
+            "shortDescription": "Storage facility for goods and resources",
+            "constructionCost": 10000
         },
         "tavern": {
             "type": "tavern",
             "name": "Tavern",
-            "shortDescription": "Establishment for food, drink, and socializing"
+            "shortDescription": "Establishment for food, drink, and socializing",
+            "constructionCost": 8000
         },
         "dock": {
             "type": "dock",
             "name": "Dock",
-            "shortDescription": "Maritime facility for loading/unloading ships"
+            "shortDescription": "Maritime facility for loading/unloading ships",
+            "constructionCost": 12000
         },
         "church": {
             "type": "church",
             "name": "Church",
-            "shortDescription": "Religious building that provides community benefits"
+            "shortDescription": "Religious building that provides community benefits",
+            "constructionCost": 15000
         },
         "palace": {
             "type": "palace",
             "name": "Palace",
-            "shortDescription": "Prestigious building for nobility and governance"
+            "shortDescription": "Prestigious building for nobility and governance",
+            "constructionCost": 25000
         }
     }
 
@@ -149,17 +157,22 @@ def get_building_types_from_api() -> Dict:
                 building_types = response_data["buildingTypes"]
                 print(f"Successfully fetched {len(building_types)} building types from API")
                 
-                # Transform the data into the format we need - only include type, name, and shortDescription
+                # Transform the data into the format we need - include type, name, shortDescription and constructionCosts.ducats
                 transformed_types = {}
                 for building in building_types:
                     if "type" in building and "name" in building:
                         building_type = building["type"]
                         
-                        # Create an entry for this building type with only the required fields
+                        # Get construction costs if available
+                        construction_costs = building.get("constructionCosts", {})
+                        ducats_cost = construction_costs.get("ducats", 0) if construction_costs else 0
+                        
+                        # Create an entry for this building type with the required fields
                         transformed_types[building_type] = {
                             "type": building_type,
                             "name": building["name"],
-                            "shortDescription": building.get("shortDescription", "")
+                            "shortDescription": building.get("shortDescription", ""),
+                            "constructionCost": ducats_cost
                         }
                 
                 return transformed_types
@@ -292,6 +305,20 @@ Please analyze the data provided and help me:
 4. Create a prioritized building plan that considers my available ducats
 
 Focus on maximizing income while maintaining a sustainable maintenance cost.
+
+IMPORTANT: At the end of your response, include a JSON object with your specific building recommendation:
+```json
+{{
+  "building_type": "type-of-building-to-build",
+  "land_id": "id-of-land-to-build-on",
+  "reason": "brief explanation of why this building"
+}}
+```
+
+If you don't recommend building anything at this time, return an empty JSON object:
+```json
+{{}}
+```
 """
         
         # Create system instructions with the detailed data
@@ -310,6 +337,10 @@ When developing your building strategy recommendations:
 6. Consider the available ducats when making recommendations
 
 Your advice should be specific, data-driven, and focused on maximizing income.
+
+IMPORTANT: You must end your response with a JSON object containing your specific building recommendation.
+If you recommend building something, include the building_type, land_id, and reason.
+If you don't recommend building anything at this time, return an empty JSON object.
 """
         
         # Prepare the request payload
