@@ -1,13 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import * as THREE from 'three';
 import { eventBus, EventTypes } from '../eventBus';
-import { BuildingService } from '../services/BuildingService';
+import { BuildingService, BuildingData } from '../services/BuildingService';
 
-// Import BuildingData interface from BuildingService
-import { BuildingData as ServiceBuildingData } from '../services/BuildingService';
-
-// Define our local BuildingData interface that includes all properties we need
-interface BuildingData {
+// Define our local interface for building data during placement
+interface PlaceableBuildingData {
   id?: string;
   type: string;
   variant?: string;
@@ -252,7 +249,7 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
     
     try {
       // Create building data
-      const buildingData: BuildingData = {
+      const buildingData: PlaceableBuildingData = {
         type: objectData.name,
         land_id: landId,
         position: {
@@ -265,8 +262,8 @@ const PlaceableObjectManager: React.FC<PlaceableObjectManagerProps> = ({
         created_by: 'current-user' // This will be replaced by the server with the actual user ID
       };
       
-      // Save building - convert to ServiceBuildingData type
-      const placedObject = await buildingServiceRef.current.saveBuilding(buildingData as ServiceBuildingData);
+      // Save building - convert to BuildingData type
+      const placedObject = await buildingServiceRef.current.saveBuilding(buildingData as BuildingData);
       
       // Call onComplete callback
       if (onComplete && placedObject) {

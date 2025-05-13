@@ -1,6 +1,9 @@
 import useBuildingStore from '@/store/useBuildingStore';
 import * as THREE from 'three';
-import { BuildingData, BuildingCategory, Building, PlacementResult, PlacementContext } from '../models/BuildingTypes';
+import { BuildingCategory, Building, PlacementResult, PlacementContext } from '../models/BuildingTypes';
+
+// Re-export BuildingData from models
+export { BuildingData } from '../models/BuildingTypes';
 
 /**
  * Service for managing building data
