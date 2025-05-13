@@ -6,7 +6,7 @@ import PlaceableObjectManager from '@/lib/components/PlaceableObjectManager';
 import { useBuildingMenu } from '@/hooks/useBuildingMenu';
 import { eventBus } from '@/lib/eventBus';
 import { EventTypes } from '@/lib/eventTypes';
-import { FaWater, FaRoad, FaBuilding } from 'react-icons/fa';
+import { FaWater, FaRoad, FaBuilding, FaShip } from 'react-icons/fa';
 import { normalizeCoordinates } from '@/components/PolygonViewer/utils';
 import { useSceneReady } from '@/lib/components/SceneReadyProvider';
 
@@ -148,6 +148,18 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
       >
         <FaRoad className="h-5 w-5" />
         <span>{placeableObjectType === 'road' ? 'Cancel Road' : 'Create Road'}</span>
+      </button>
+      
+      {/* Transport Route Button */}
+      <button
+        onClick={() => {
+          window.dispatchEvent(new CustomEvent('showTransportRoutes'));
+        }}
+        className="px-4 py-2 bg-purple-600 text-white rounded-md shadow-md hover:bg-purple-700 transition-colors flex items-center space-x-2"
+        title="Find transport routes between locations"
+      >
+        <FaShip className="h-5 w-5" />
+        <span>Transport Routes</span>
       </button>
       
       {/* Placeable Object Manager - handles all object types */}

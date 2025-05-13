@@ -114,12 +114,12 @@ export default function TwoDPage() {
           <Link href="/" className="text-xl font-serif font-bold hover:text-amber-400 transition-colors">
             La Serenissima 2D
           </Link>
-          
+              
           <div className="ml-6">
             <ResourceDropdowns />
           </div>
         </div>
-        
+            
         <div className="flex space-x-4">
           <button 
             onClick={() => setShowSettingsModal(true)}
@@ -132,6 +132,12 @@ export default function TwoDPage() {
             className="px-3 py-1 bg-blue-600 hover:bg-blue-500 rounded text-white transition-colors font-serif"
           >
             {showInfo ? 'Hide Info' : 'Show Info'}
+          </button>
+          <button 
+            onClick={() => window.dispatchEvent(new CustomEvent('showTransportRoutes'))}
+            className="px-3 py-1 bg-purple-600 hover:bg-purple-500 rounded text-white transition-colors font-serif"
+          >
+            Transport Routes
           </button>
           <Link 
             href="/"
