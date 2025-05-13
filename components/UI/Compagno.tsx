@@ -298,12 +298,12 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
       if (data.success && data.messages && Array.isArray(data.messages)) {
         setUserMessages(data.messages);
       } else {
-        // If no messages or invalid format, set empty array
+        // Set empty array if no messages found
         setUserMessages([]);
       }
     } catch (error) {
       console.error('Error fetching user messages:', error);
-      // Set empty array on error instead of fallback messages
+      // Set empty array on error
       setUserMessages([]);
     } finally {
       setIsLoadingUserMessages(false);
@@ -1184,8 +1184,13 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                         // User messages
                         <>
                           {userMessages.length === 0 ? (
-                            <div className="text-center py-8 text-gray-500 italic">
-                              No messages yet. Start a conversation!
+                            <div className="text-center py-8">
+                              <div className="text-gray-500 italic mb-4">
+                                No messages yet with {users.find(u => u.username === selectedUser)?.firstName || selectedUser}.
+                              </div>
+                              <div className="text-amber-700 text-sm">
+                                Send a message to start your conversation!
+                              </div>
                             </div>
                           ) : (
                             userMessages.map((message) => (

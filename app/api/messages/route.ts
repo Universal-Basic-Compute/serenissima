@@ -69,32 +69,10 @@ export async function POST(request: Request) {
     } catch (error) {
       console.error('Error fetching messages from Airtable:', error);
       
-      // Return fallback sample messages
-      const now = new Date();
-      const sampleMessages = [
-        {
-          messageId: '1',
-          sender: currentUser,
-          receiver: otherUser,
-          content: 'Hello there!',
-          type: 'message',
-          createdAt: new Date(now.getTime() - 3600000).toISOString(),
-          readAt: new Date(now.getTime() - 3500000).toISOString()
-        },
-        {
-          messageId: '2',
-          sender: otherUser,
-          receiver: currentUser,
-          content: 'Greetings! How may I assist you today?',
-          type: 'message',
-          createdAt: new Date(now.getTime() - 3400000).toISOString(),
-          readAt: new Date(now.getTime() - 3300000).toISOString()
-        }
-      ];
-      
+      // Return empty array instead of fallback messages
       return NextResponse.json({
         success: true,
-        messages: sampleMessages
+        messages: []
       });
     }
     
