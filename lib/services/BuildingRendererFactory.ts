@@ -406,11 +406,18 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
     // Get building size based on type
     const size = this.getBuildingSizeByType(building.type);
     
+    // CHANGE: Make the fallback cube 4x smaller by dividing all dimensions by 4
+    const scaleFactor = 0.25; // 1/4 of the original size
+    
     // Create a box with a color based on building type
     console.log(`Creating fallback box for building ${building.id} of type ${building.type}`);
     
-    // Create a more detailed fallback model
-    const baseGeometry = new THREE.BoxGeometry(size.width * 0.8, size.height * 0.8, size.depth * 0.8);
+    // Create a more detailed fallback model with reduced size
+    const baseGeometry = new THREE.BoxGeometry(
+      size.width * 0.8 * scaleFactor, 
+      size.height * 0.8 * scaleFactor, 
+      size.depth * 0.8 * scaleFactor
+    );
     const color = this.getBuildingColorByType(building.type);
     const material = new THREE.MeshStandardMaterial({ 
       color: color,
@@ -427,7 +434,11 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
     
     // Add a roof for houses and similar buildings
     if (['house', 'tavern', 'workshop', 'market-stall'].includes(building.type)) {
-      const roofGeometry = new THREE.ConeGeometry(size.width * 0.6, size.height * 0.4, 4);
+      const roofGeometry = new THREE.ConeGeometry(
+        size.width * 0.6 * scaleFactor, 
+        size.height * 0.4 * scaleFactor, 
+        4
+      );
       const roofMaterial = new THREE.MeshStandardMaterial({
         color: 0x8B4513, // Brown color for roof
         roughness: 0.8,
@@ -435,7 +446,7 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
       });
       
       const roof = new THREE.Mesh(roofGeometry, roofMaterial);
-      roof.position.y = size.height * 0.6; // Position on top of the box
+      roof.position.y = size.height * 0.6 * scaleFactor; // Position on top of the box
       roof.rotation.y = Math.PI / 4; // Rotate 45 degrees
       roof.castShadow = true;
       
@@ -464,7 +475,8 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
       });
       
       const label = new THREE.Sprite(labelMaterial);
-      label.position.set(0, size.height + 0.5, 0); // Position above the building
+      // CHANGE: Adjust label position to account for smaller building
+      label.position.set(0, size.height * scaleFactor + 0.5, 0); // Position above the building
       label.scale.set(2, 0.5, 1);
       
       // Add the label to the group
