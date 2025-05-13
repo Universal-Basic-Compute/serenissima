@@ -82,20 +82,22 @@ export class TransportPointManager {
               this.bounds.latCorrectionFactor
             )[0];
 
-            // Create a marker for the bridge point
-            const geometry = new THREE.SphereGeometry(0.3, 12, 12);
+            // Create a larger marker for the bridge point to make it easier to select
+            const geometry = new THREE.SphereGeometry(0.5, 12, 12);
 
             const marker = new THREE.Mesh(geometry, bridgeMaterial);
             marker.position.set(normalizedCoord.x, 0.2, -normalizedCoord.y);
             marker.renderOrder = 100;
 
-            // Add metadata for tooltips
+            // Add metadata for tooltips with more robust error checking
             marker.userData = {
               id: `bridge-${polygon.id}-${index}`,
               type: 'bridge',
               polygonId: polygon.id,
-              targetPolygonId: point.connection?.targetPolygonId,
-              position: `${point.edge.lat.toFixed(6)}, ${point.edge.lng.toFixed(6)}`
+              targetPolygonId: point.connection?.targetPolygonId || null,
+              position: `${point.edge.lat.toFixed(6)}, ${point.edge.lng.toFixed(6)}`,
+              name: point.connection?.historicalName || 'Unnamed Bridge',
+              description: point.connection?.historicalDescription || 'No description available'
             };
 
             this.scene.add(marker);
@@ -119,11 +121,11 @@ export class TransportPointManager {
               ]);
               lineGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
 
-              // Create a line material
+              // Create a line material with increased width and opacity
               const lineMaterial = new THREE.LineBasicMaterial({
                 color: 0xFF8800,
                 transparent: true,
-                opacity: 0.8,
+                opacity: 0.9,
                 linewidth: 5
               });
 
@@ -287,6 +289,10 @@ export class TransportPointManager {
   }
 
   public handleHover(raycaster: THREE.Raycaster, onHover: (id: string | null, userData?: any) => void): void {
+    // Increase the raycaster's precision for better selection
+    raycaster.params.Points = { threshold: 0.5 };
+    raycaster.params.Line = { threshold: 0.2 };
+    
     // Combine all markers for raycasting (excluding lines)
     const allMarkers = [...this.bridgePointMarkers, ...this.dockPointMarkers].filter(
       obj => obj instanceof THREE.Mesh
@@ -301,12 +307,16 @@ export class TransportPointManager {
       if (userData && userData.id && userData.id !== this.hoveredPointId) {
         this.hoveredPointId = userData.id;
 
-        // Highlight the hovered point
+        // Highlight the hovered point with more prominent visual feedback
         if (intersected instanceof THREE.Mesh) {
+          // Create a more distinct highlight material
           const highlightMaterial = new THREE.MeshBasicMaterial({
-            color: userData.type.startsWith('bridge') ? 0xFF8800 : 0x00CCFF,
+            color: userData.type.startsWith('bridge') ? 0xFFAA00 : 0x00CCFF,
             transparent: true,
-            opacity: 1.0
+            opacity: 1.0,
+            // Add emissive property for better visibility
+            emissive: userData.type.startsWith('bridge') ? 0xFF8800 : 0x0088CC,
+            emissiveIntensity: 0.5
           });
 
           // Store the original material if not already stored
@@ -316,6 +326,9 @@ export class TransportPointManager {
 
           // Apply the highlight material
           intersected.material = highlightMaterial;
+          
+          // Scale up the object slightly for better visual feedback
+          intersected.scale.set(1.2, 1.2, 1.2);
         }
 
         // Call the hover callback
@@ -343,6 +356,9 @@ export class TransportPointManager {
             opacity: 0.6
           });
         }
+        
+        // Reset scale
+        hoveredPoint.scale.set(1.0, 1.0, 1.0);
       }
 
       this.hoveredPointId = null;
@@ -544,6 +560,66 @@ export class TransportPointManager {
 
   public getPathMarkers(): THREE.Object3D[] {
     return this.pathMarkers;
+  }
+
+  /**
+   * Find the nearest bridge point to a given screen position
+   * This helps with bridge selection when precise clicking is difficult
+   */
+  public findNearestBridgePoint(clientX: number, clientY: number, camera: THREE.Camera): string | null {
+    // Convert screen position to normalized device coordinates
+    const rect = (camera as any).renderer?.domElement.getBoundingClientRect();
+    if (!rect) return null;
+    
+    const x = ((clientX - rect.left) / rect.width) * 2 - 1;
+    const y = -((clientY - rect.top) / rect.height) * 2 + 1;
+    
+    // Create a raycaster
+    const raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(new THREE.Vector2(x, y), camera);
+    
+    // Filter for bridge markers only
+    const bridgeMarkers = this.bridgePointMarkers.filter(
+      obj => obj instanceof THREE.Mesh && obj.userData && obj.userData.type === 'bridge'
+    );
+    
+    // Find intersections
+    const intersects = raycaster.intersectObjects(bridgeMarkers as THREE.Object3D[]);
+    
+    if (intersects.length > 0) {
+      return intersects[0].object.userData.id;
+    }
+    
+    // If no direct hit, find the closest bridge point within a reasonable distance
+    const MAX_DISTANCE = 50; // Maximum pixel distance to consider
+    let closestId = null;
+    let closestDistance = MAX_DISTANCE;
+    
+    bridgeMarkers.forEach(marker => {
+      if (marker instanceof THREE.Mesh) {
+        // Project the 3D position to screen space
+        const position = marker.position.clone();
+        position.project(camera);
+        
+        // Convert to screen coordinates
+        const screenX = (position.x + 1) * rect.width / 2 + rect.left;
+        const screenY = (-position.y + 1) * rect.height / 2 + rect.top;
+        
+        // Calculate distance to click point
+        const distance = Math.sqrt(
+          Math.pow(screenX - clientX, 2) + 
+          Math.pow(screenY - clientY, 2)
+        );
+        
+        // Update closest if this is closer
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestId = marker.userData.id;
+        }
+      }
+    });
+    
+    return closestId;
   }
 
   public cleanup(): void {
