@@ -626,7 +626,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       const showText = scale >= 2.0; // Further reduced threshold to match new minimum zoom level
         
       if (showText) {
-        polygonsToRender.forEach(({ polygon, centroidX, centroidY }) => {
+        polygonsToRender.forEach(({ polygon, centerX, centerY }) => {
           if (polygon.historicalName) {
             // Use a fixed font size regardless of zoom level
             ctx.font = `10px Arial`;
@@ -634,13 +634,12 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             ctx.textAlign = 'center';
             
             // Calculate offset to position text below coat of arms
-            // The coat of arms size is calculated as: Math.min(59, Math.max(29, Math.floor(scale * 15.7)))
-            const coatOfArmsSize = Math.min(59, Math.max(29, Math.floor(scale * 15.7)));
+            const coatOfArmsSize = Math.min(71, Math.max(35, Math.floor(scale * 18.84)));
             const fontSize = 10; // Define the font size to match the fixed font size we're using
             const textYOffset = coatOfArmsSize / 2 + fontSize + 5; // Half the coat of arms size + font size + padding
             
-            // Draw text below the coat of arms
-            ctx.fillText(polygon.historicalName, centroidX, centroidY + textYOffset);
+            // Draw text below the coat of arms at the center position
+            ctx.fillText(polygon.historicalName, centerX, centerY + textYOffset);
           }
         });
       }
