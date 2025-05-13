@@ -904,10 +904,17 @@ Your response must be a JSON object with:
                                             "CreatedAt": datetime.now().isoformat()
                                         }
                                         
-                                        # Add the building to Airtable
-                                        new_building = tables["buildings"].create(building_record)
+                                        print(f"Creating building record: {json.dumps(building_record)}")
                                         
-                                        print(f"Created new building: {building_id} of type {building_type} for {ai_username} on land {land_id}")
+                                        # Add the building to Airtable
+                                        try:
+                                            new_building = tables["buildings"].create(building_record)
+                                            print(f"Created new building: {building_id} of type {building_type} for {ai_username} on land {land_id}")
+                                            print(f"Building record ID: {new_building['id']}")
+                                        except Exception as building_error:
+                                            print(f"Error creating building record: {str(building_error)}")
+                                            print(f"Exception traceback: {traceback.format_exc()}")
+                                            return False
                                         
                                         # 5. Create a notification for the user
                                         notification = {
