@@ -286,7 +286,7 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
                 <div className="w-full md:w-1/2 flex flex-col">
                   <div className="mb-4">
                     <h3 className="text-lg font-medium text-amber-800 mb-1">Description</h3>
-                    <p className="text-amber-700">{selectedBuilding.description || 'No description available'}</p>
+                    <p className="text-amber-700">{selectedBuilding.description}</p>
                   </div>
                   
                   <div className="mb-4">
