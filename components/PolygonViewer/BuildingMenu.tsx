@@ -38,7 +38,7 @@ interface Building extends Partial<ImportedBuilding> {
   scale?: number;
   rotation?: number;
   height?: number;
-  type?: string; // Add type property which is used in the component
+  type: string; // Make type required instead of optional
 }
 
 // Ensure the Building type is properly recognized throughout the component
@@ -374,14 +374,14 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
                             return;
                           }
                           
-                          // Get the building cost
-                          // Make sure we have a valid type string before calling toLowerCase()
-                          const buildingType = selectedBuilding.type || selectedBuilding.name;
-                          if (!buildingType) {
-                            alert('Invalid building type');
+                          // Ensure we have a valid building type
+                          if (!selectedBuilding) {
+                            alert('No building selected');
                             return;
                           }
                           
+                          // Normalize the building type, ensuring we always have a valid string
+                          const buildingType = (selectedBuilding.type || selectedBuilding.name || "unknown").toLowerCase();
                           const buildingCost = calculateBuildingCost(buildingType);
                           
                           // Show confirmation dialog
@@ -397,8 +397,8 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
                           // Create the building directly via API
                           const buildingService = BuildingService.getInstance();
                           const buildingData = {
-                            // Use a normalized type that's guaranteed to be a string
-                            type: (buildingType || "unknown").toLowerCase().replace(/\s+/g, '-'),
+                            // Use the already normalized type
+                            type: buildingType.replace(/\s+/g, '-'),
                             land_id: buildingPoint.polygonId,
                             position: buildingPoint.position,
                             rotation: 0, // Default rotation
