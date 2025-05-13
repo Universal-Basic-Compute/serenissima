@@ -125,19 +125,9 @@ export class RoadService {
 
 ### BuildingService
 
-Manages building data, including docks.
+Manages building data and operations.
 
 ```typescript
-export interface DockData {
-  id: string;
-  landId: string;
-  position: { x: number; y: number; z: number };
-  rotation: number; // Rotation in radians
-  connectionPoints: { x: number; y: number; z: number }[];
-  createdBy: string;
-  createdAt: string;
-}
-
 export class BuildingService {
   public static getInstance(): BuildingService;
   
@@ -145,13 +135,18 @@ export class BuildingService {
   public getBuildings(type?: string): Promise<any[]>;
   public getBuildingById(id: string): Promise<any | null>;
   public saveBuilding(buildingData: any): Promise<any>;
-  
-  // Dock-specific methods
-  public createDock(landId: string, position: THREE.Vector3, rotation: number): Promise<DockData>;
-  public getDocks(): Promise<DockData[]>;
-  public getDockById(id: string): Promise<DockData | null>;
+  public saveBuildingsBulk(buildingsData: any[]): Promise<any[]>;
+  public deleteBuilding(id: string): Promise<boolean>;
+  public validatePlacement(buildingType: string, context: PlacementContext): PlacementResult;
 }
 ```
+
+The BuildingService follows the singleton pattern and provides methods for:
+
+1. **Data Retrieval**: Getting all buildings or specific buildings by ID or type
+2. **Data Persistence**: Creating and saving buildings to the server
+3. **Data Validation**: Validating building placement based on context
+4. **Data Deletion**: Removing buildings from the system
 
 The RoadService follows the singleton pattern and provides methods for:
 

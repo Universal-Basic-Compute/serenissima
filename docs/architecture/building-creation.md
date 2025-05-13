@@ -357,12 +357,11 @@ The building system allows players to browse, place, and manage buildings in the
    - Toggle buttons for different building modes
    - Integration with other building-related tools
 
-5. **PlaceableObjectManager**: Unified component for creating placeable objects.
-   - Handles the UI for object placement (buildings, docks, etc.)
-   - Validates placement against type-specific constraints
-   - Provides rotation controls
-   - Creates object data and communicates with services
-   - Uses strategy pattern for type-specific behavior
+5. **PlaceableObjectManager**: Unified component for placing objects.
+   - Handles placement of buildings
+   - Applies type-specific constraints and validation
+   - Provides consistent UI for object placement
+   - Supports rotation and positioning
 
 ### Domain Logic
 

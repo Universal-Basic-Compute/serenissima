@@ -402,25 +402,22 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
           building.connectionPoints.forEach((point, index) => {
             const geometry = new THREE.SphereGeometry(0.2, 8, 8);
             const material = new THREE.MeshBasicMaterial({ 
-              color: building.type === 'dock' ? 0x00AAFF : 0xFFAA00 
+              color: 0xFFAA00 
             });
             const sphere = new THREE.Mesh(geometry, material);
-            
+          
             sphere.position.set(point.x, point.y, point.z);
             sphere.userData = {
               type: 'connection-point',
               index
             };
-            
+          
             model.add(sphere);
           });
         }
         
         // Special handling for different building types
-        if (building.type === 'dock') {
-          // Position docks slightly above water level
-          model.position.y += 0.2;
-        } else if (building.type === 'market-stall') {
+        if (building.type === 'market-stall') {
           // Position market stalls slightly above ground
           model.position.y += 0.05;
         }
@@ -470,10 +467,7 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
       mesh.position.copy(position);
       
       // Special handling for different building types
-      if (building.type === 'dock') {
-        // Position docks slightly above water level
-        mesh.position.y += 0.2;
-      } else if (building.type === 'market-stall') {
+      if (building.type === 'market-stall') {
         // Position market stalls slightly above ground
         mesh.position.y += 0.05;
       }

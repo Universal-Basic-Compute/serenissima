@@ -64,7 +64,7 @@ The building system follows a layered architecture with clear separation between
    - Supports rotation and positioning
 
 4. **BuildingsToolbar**: Provides tools for building-related actions.
-   - Buttons for creating roads, docks, and other infrastructure
+   - Buttons for creating roads and other infrastructure
    - Toggle buttons for different building modes
    - Integration with other building-related tools
 
@@ -179,33 +179,6 @@ The building system follows a layered architecture with clear separation between
                     └───────────────┘
 ```
 
-## Specialized Building Types
-
-### Docks
-
-Docks are special buildings that connect water and land transportation:
-
-1. **Placement Requirements**:
-   - Must be placed along water edges (shorelines)
-   - Require adjacent land parcel
-   - Need proper orientation relative to shoreline
-
-2. **Creation Process**:
-   - User activates dock creation mode in BuildingsToolbar
-   - PlaceableObjectManager component with type="dock" shows placement preview
-   - Water edge detection finds valid placement locations
-   - User adjusts rotation and confirms placement
-   - BuildingService.createDock() creates the dock data
-   - DockRenderer adds the dock to the scene
-
-3. **Connection Points**:
-   - Docks provide connection points for roads
-   - Connection points are calculated based on dock position and rotation
-   - Road creation system can snap to these connection points
-
-4. **Permissions**:
-   - Only administrators (ConsiglioDeiDieci) can create docks
-   - Server-side validation ensures proper permissions
 
 ## Building Data Structure
 
@@ -290,9 +263,6 @@ The building system uses several API endpoints:
 3. **POST /api/buildings**: Creates a new building
 4. **GET /api/buildings**: Retrieves all buildings (with optional type filter)
 5. **GET /api/buildings/[id]**: Retrieves a specific building by ID
-6. **POST /api/docks**: Creates a new dock
-7. **GET /api/docks**: Retrieves all docks
-8. **GET /api/docks/[id]**: Retrieves a specific dock by ID
 
 ## Usage Examples
 
@@ -334,34 +304,6 @@ eventBus.emit(EventTypes.BUILDING_PLACED, {
 });
 ```
 
-### Creating a Dock
-
-```typescript
-// 1. Activate dock creation mode
-setIsDockCreatorActive(true);
-
-// 2. In DockCreator, when user places the dock
-const landId = "polygon-123";
-const position = new THREE.Vector3(100, 0, 100);
-const rotation = Math.PI / 2;
-
-// 3. Create the dock using BuildingService
-const buildingService = new BuildingService();
-const dockData = await buildingService.createDock(
-  landId,
-  position,
-  rotation
-);
-
-// 4. Emit event for dock creation
-eventBus.emit(EventTypes.DOCK_PLACED, {
-  dockId: dockData.id,
-  type: 'dock',
-  data: dockData
-});
-
-// 5. DockRenderer will handle adding the dock to the scene
-```
 
 ## Future Enhancements
 
