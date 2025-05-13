@@ -74,11 +74,6 @@ The building system follows a layered architecture with clear separation between
    - Provides consistent UI for object placement
    - Supports rotation and positioning for all object types
 
-6. **DockRenderer**: Renders placed docks in the 3D world.
-   - Loads dock models and positions them in the scene
-   - Updates when new docks are placed
-   - Handles dock visibility based on view mode
-   - Manages dock model lifecycle and cleanup
 
 ### Domain Logic
 
@@ -86,7 +81,7 @@ The building system follows a layered architecture with clear separation between
    - Loads building definitions from JSON files
    - Provides methods for building placement and retrieval
    - Handles server communication for persistent storage
-   - Manages specialized building types (docks, etc.)
+   - Manages specialized building types
 
 2. **BuildingStore**: Centralized state management for buildings.
    - Stores available building categories and types
