@@ -272,6 +272,36 @@ export class CoatOfArmsRenderer {
     requestAnimationFrame(animate);
   }
 
+  private createDefaultCitizenTexture(): THREE.Texture {
+    // Create a canvas for the default texture
+    const canvas = document.createElement('canvas');
+    const size = 256;
+    canvas.width = size;
+    canvas.height = size;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      console.error('Could not get canvas context');
+      // Return a basic empty texture as fallback
+      return new THREE.Texture();
+    }
+
+    // Draw a simple placeholder texture
+    ctx.fillStyle = '#888888';
+    ctx.fillRect(0, 0, size, size);
+    
+    // Add a border
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(4, 4, size - 8, size - 8);
+    
+    // Create texture from canvas
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+    
+    return texture;
+  }
+
   private createCircularTexture(texture: THREE.Texture, invert: boolean = false): THREE.Texture {
     // Check if texture.image exists
     if (!texture.image) {
