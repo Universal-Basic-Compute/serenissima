@@ -1,9 +1,9 @@
 import useBuildingStore from '@/store/useBuildingStore';
 import * as THREE from 'three';
-import { BuildingCategory, BuildingDefinition, PlacementResult, PlacementContext } from '../models/BuildingTypes';
+import { BuildingCategory, BuildingDefinition, PlacementResult, PlacementContext, BuildingData } from '../models/BuildingTypes';
 
 // Re-export BuildingData from models
-export { BuildingData } from '../models/BuildingTypes';
+export type { BuildingData } from '../models/BuildingTypes';
 
 /**
  * Service for managing building data
@@ -27,21 +27,24 @@ export class BuildingService {
    * Load all building categories
    */
   public async loadBuildingCategories(): Promise<BuildingCategory[]> {
-    return useBuildingStore.getState().loadBuildingCategories();
+    const categories = await useBuildingStore.getState().loadBuildingCategories();
+    return categories as unknown as BuildingCategory[];
   }
 
   /**
    * Get building categories (returns cached data or loads if not available)
    */
   public async getBuildingCategories(): Promise<BuildingCategory[]> {
-    return useBuildingStore.getState().getBuildingCategories();
+    const categories = await useBuildingStore.getState().getBuildingCategories();
+    return categories as unknown as BuildingCategory[];
   }
 
   /**
    * Get a building by name
    */
   public async getBuildingByName(name: string): Promise<BuildingDefinition | null> {
-    return useBuildingStore.getState().getBuildingByName(name);
+    const building = await useBuildingStore.getState().getBuildingByName(name);
+    return building as BuildingDefinition | null;
   }
 
   /**
