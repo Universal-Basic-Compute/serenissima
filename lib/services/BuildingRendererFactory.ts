@@ -31,7 +31,7 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
   private gltfLoader: GLTFLoader;
   private loadingQueue: string[] = [];
   private loadingInProgress: Set<string> = new Set();
-  private maxConcurrentLoads: number = 3; // Limit concurrent model loads
+  private maxConcurrentLoads: number = 50; // Increased from 3 to 50 to allow more concurrent loads
   private loadingTimeout: number = 15000; // 15 second timeout for model loading
   private modelCache: Map<string, THREE.Object3D> = new Map();
   private pendingBuildings: Map<string, BuildingData> = new Map();
@@ -585,8 +585,9 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
       // Check camera distance to prioritize loading
       const distanceToCamera = this.getDistanceToCamera(building);
       
-      // Create a low-detail model immediately for distant buildings
-      if (distanceToCamera > 50) {
+      // Create a low-detail model immediately for very distant buildings
+      // Increased distance threshold from 50 to 150 to show more detailed models
+      if (distanceToCamera > 150) {
         if (this.debug) {
           this.logDebug(`Building ${building.id} is distant (${distanceToCamera.toFixed(2)} units), using low detail model`);
         }
@@ -594,7 +595,8 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
       }
       
       // For closer buildings, add to loading queue with priority based on distance
-      if (distanceToCamera < 20) {
+      // Increased distance threshold from 20 to 50 for high priority loading
+      if (distanceToCamera < 50) {
         // High priority - add to front of queue
         this.loadingQueue.unshift(buildingId);
       } else {

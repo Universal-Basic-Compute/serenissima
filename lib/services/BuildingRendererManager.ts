@@ -417,8 +417,8 @@ export class BuildingRendererManager {
       // Sort buildings by distance to camera for priority loading
       const sortedBuildings = this.sortBuildingsByDistance(buildings);
       
-      // Process each building with a limit on concurrent loads
-      const concurrentLimit = 5;
+      // Process each building with a higher limit on concurrent loads
+      const concurrentLimit = 50; // Increased from 5 to 50
       const chunks = this.chunkArray(sortedBuildings, concurrentLimit);
       
       for (const chunk of chunks) {
