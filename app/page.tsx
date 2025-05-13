@@ -139,27 +139,7 @@ export default function SimplePage() {
       }
     };
     
-    // Add these new handlers for Compagno
-    const handleOpenCompagnoChat = () => {
-      setIsOpen(true);
-      setActiveTab('chats');
-      setSelectedUser('compagno');
-    };
-    
-    const handleSendCompagnoMessage = (event: CustomEvent) => {
-      if (event.detail && event.detail.message) {
-        // Open the chat if it's not already open
-        setIsOpen(true);
-        setActiveTab('chats');
-        setSelectedUser('compagno');
-        
-        // Set a small delay to ensure the chat is open and ready
-        setTimeout(() => {
-          // Send the message
-          sendMessage(event.detail.message, event.detail.addSystem);
-        }, 100);
-      }
-    };
+    // We'll remove these handlers as they're now handled directly in the Compagno component
     
     const handleBuildingMenuClosed = () => {
       // Reset to buildings view when menu is closed
@@ -198,8 +178,7 @@ export default function SimplePage() {
     window.addEventListener('buildingMenuClosed', handleBuildingMenuClosed);
     window.addEventListener('showBuildings', handleShowBuildings);
     window.addEventListener('waterQualityChanged', handleWaterQualityChanged as EventListener);
-    window.addEventListener('openCompagnoChat', handleOpenCompagnoChat);
-    window.addEventListener('sendCompagnoMessage', handleSendCompagnoMessage as EventListener);
+    // These event listeners are now handled directly in the Compagno component
     
     // Subscribe to citizen details event
     const subscription = eventBus.subscribe(EventTypes.SHOW_CITIZEN_DETAILS, handleShowCitizenDetails);
@@ -221,8 +200,7 @@ export default function SimplePage() {
       window.removeEventListener('buildingMenuClosed', handleBuildingMenuClosed);
       window.removeEventListener('showBuildings', handleShowBuildings);
       window.removeEventListener('waterQualityChanged', handleWaterQualityChanged as EventListener);
-      window.removeEventListener('openCompagnoChat', handleOpenCompagnoChat);
-      window.removeEventListener('sendCompagnoMessage', handleSendCompagnoMessage as EventListener);
+      // These event listeners are now handled directly in the Compagno component
       subscription.unsubscribe();
     };
   }, [activeView]);

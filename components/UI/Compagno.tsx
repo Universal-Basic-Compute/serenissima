@@ -777,6 +777,43 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
       )
     : users;
 
+  // Add event listeners for external control
+  useEffect(() => {
+    const handleOpenCompagnoChat = () => {
+      setIsOpen(true);
+      setActiveTab('chats');
+      setSelectedUser('compagno');
+    };
+    
+    const handleSendCompagnoMessage = (event: CustomEvent) => {
+      if (event.detail && event.detail.message) {
+        setIsOpen(true);
+        setActiveTab('chats');
+        setSelectedUser('compagno');
+        
+        // Small delay to ensure the chat is ready
+        setTimeout(() => {
+          sendMessage(
+            event.detail.message, 
+            event.detail.addSystem,
+            event.detail.addContext,
+            event.detail.images
+          );
+        }, 100);
+      }
+    };
+    
+    // Add event listeners
+    window.addEventListener('openCompagnoChat', handleOpenCompagnoChat);
+    window.addEventListener('sendCompagnoMessage', handleSendCompagnoMessage as EventListener);
+    
+    // Clean up
+    return () => {
+      window.removeEventListener('openCompagnoChat', handleOpenCompagnoChat);
+      window.removeEventListener('sendCompagnoMessage', handleSendCompagnoMessage as EventListener);
+    };
+  }, []);
+  
   // Return null if on mobile
   if (isMobile) {
     return null;

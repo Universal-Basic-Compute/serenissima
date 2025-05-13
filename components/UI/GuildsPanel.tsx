@@ -416,9 +416,6 @@ function GuildDetails({ guild, onBack, formatDate, getLandName }: GuildDetailsPr
                           <button
                             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center"
                             onClick={() => {
-                              // Open Compagno chat
-                              window.dispatchEvent(new CustomEvent('openCompagnoChat'));
-                              
                               // Create guild info for the system prompt
                               const guildInfo = `
 Guild Name: ${guild.guildName}
@@ -430,13 +427,19 @@ Voting System: ${guild.votingSystem || 'Standard guild voting'}
 Meeting Frequency: ${guild.meetingFrequency || 'As needed'}
                               `;
                               
-                              // Send message to Compagno with guild info in addSystem
-                              window.dispatchEvent(new CustomEvent('sendCompagnoMessage', {
-                                detail: {
-                                  message: `Hey Compagno, can you help me to apply to the ${guild.guildName} Guild?`,
-                                  addSystem: `The user is asking about applying to a guild in Venice. Here is information about the guild they're interested in:\n${guildInfo}\n\nHelp them understand the application process, requirements, and benefits of joining this guild. Be encouraging but also explain any obligations or fees they should be aware of.`
-                                }
-                              }));
+                              // Dispatch events directly instead of relying on page.tsx handlers
+                              // First open the chat
+                              window.dispatchEvent(new CustomEvent('openCompagnoChat'));
+                              
+                              // Then send the message with a slight delay
+                              setTimeout(() => {
+                                window.dispatchEvent(new CustomEvent('sendCompagnoMessage', {
+                                  detail: {
+                                    message: `Hey Compagno, can you help me to apply to the ${guild.guildName} Guild?`,
+                                    addSystem: `The user is asking about applying to a guild in Venice. Here is information about the guild they're interested in:\n${guildInfo}\n\nHelp them understand the application process, requirements, and benefits of joining this guild. Be encouraging but also explain any obligations or fees they should be aware of.`
+                                  }
+                                }));
+                              }, 200);
                             }}
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
