@@ -84,7 +84,7 @@ const BuildingRendererManager: React.FC<BuildingRendererManagerProps> = ({
     
     // Listen for scene base rendered event
     const sceneBaseRenderedSubscription = eventBus.subscribe(
-      EventTypes.SCENE_BASE_RENDERED,
+      'SCENE_BASE_RENDERED', // Use string literal instead of enum value that doesn't exist
       (data) => {
         console.log('BuildingRendererManager: Received sceneBaseRendered event', data);
         // Set scene as initialized
