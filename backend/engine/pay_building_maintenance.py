@@ -98,6 +98,36 @@ def update_user_balance(user_id, amount, description):
         return False
 
 
+def send_admin_notification(recipient_id, total_collected, buildings_processed, buildings_with_errors):
+    """Send an admin notification with maintenance collection summary."""
+    try:
+        notification_payload = {
+            "recipient": recipient_id,
+            "title": "Building Maintenance Collection Summary",
+            "message": f"Daily maintenance collection complete. Collected {total_collected} ducats from {buildings_processed} buildings. {buildings_with_errors} buildings had errors.",
+            "type": "admin",
+            "priority": "normal",
+            "data": {
+                "total_collected": total_collected,
+                "buildings_processed": buildings_processed,
+                "buildings_with_errors": buildings_with_errors,
+                "timestamp": datetime.now().isoformat()
+            }
+        }
+        
+        response = requests.post(
+            f"{API_BASE_URL}/notifications", 
+            json=notification_payload,
+            headers={"Authorization": f"Bearer {API_KEY}"}
+        )
+        response.raise_for_status()
+        logger.info(f"Successfully sent admin notification to {recipient_id}")
+        return True
+    except Exception as e:
+        logger.error(f"Error sending admin notification to {recipient_id}: {str(e)}")
+        return False
+
+
 def collect_maintenance_costs():
     """Main function to collect maintenance costs from all building owners."""
     logger.info("Starting maintenance cost collection process")
@@ -169,6 +199,9 @@ def collect_maintenance_costs():
     logger.info(f"Maintenance collection complete. Processed {buildings_processed} buildings.")
     logger.info(f"Total maintenance collected: {total_maintenance_collected} ducats")
     logger.info(f"Buildings with errors: {buildings_with_errors}")
+    
+    # Send admin notification to NLR
+    send_admin_notification("NLR", total_maintenance_collected, buildings_processed, buildings_with_errors)
     
     return {
         "total_collected": total_maintenance_collected,
