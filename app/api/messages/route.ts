@@ -36,9 +36,12 @@ export async function POST(request: Request) {
       const base = initAirtable();
       
       // Build filter formula to get messages between the two users
+      // Include guild application messages if the otherUser is a guild ID
       const filterFormula = `OR(
         AND({Sender} = '${currentUser}', {Receiver} = '${otherUser}'),
-        AND({Sender} = '${otherUser}', {Receiver} = '${currentUser}')
+        AND({Sender} = '${otherUser}', {Receiver} = '${currentUser}'),
+        AND({Type} = 'guild_application', {Receiver} = '${currentUser}'),
+        AND({Type} = 'guild_application', {Sender} = '${currentUser}', {Receiver} = '${otherUser}')
       )`;
       
       // Fetch messages from Airtable

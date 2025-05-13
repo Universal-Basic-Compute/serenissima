@@ -300,7 +300,19 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
       const data = await response.json();
       
       if (data.success && data.messages && Array.isArray(data.messages)) {
-        setUserMessages(data.messages);
+        // Process messages to handle special types
+        const processedMessages = data.messages.map((message: Message) => {
+          // If this is a guild application message, add special formatting
+          if (message.type === 'guild_application') {
+            return {
+              ...message,
+              content: `📜 **Guild Application**\n\n${message.content}`
+            };
+          }
+          return message;
+        });
+        
+        setUserMessages(processedMessages);
       } else {
         // Set empty array if no messages found
         setUserMessages([]);
@@ -315,7 +327,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
   }, [username]);
 
   // Send message to selected user
-  const sendUserMessage = async (content: string) => {
+  const sendUserMessage = async (content: string, messageType: string = 'message') => {
     if (!content.trim() || !username || !selectedUser) return;
     
     // Optimistically add message to UI
@@ -324,10 +336,15 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
       sender: username,
       receiver: selectedUser,
       content: content,
-      type: 'message',
+      type: messageType,
       createdAt: new Date().toISOString(),
       readAt: null
     };
+    
+    // If this is a guild application response, format it specially
+    if (messageType === 'guild_application_response') {
+      tempMessage.content = `📜 **Guild Application Response**\n\n${content}`;
+    }
     
     setUserMessages(prev => [...prev, tempMessage]);
     setInputValue('');
@@ -342,7 +359,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
           sender: username,
           receiver: selectedUser,
           content: content,
-          type: 'message'
+          type: messageType
         })
       });
       
@@ -1280,7 +1297,111 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                                       : 'assistant-bubble rounded-bl-none'
                                   }`}
                                 >
-                                  <div style={{ position: 'relative', zIndex: 10 }}>{message.content || "No content available"}</div>
+                                  <div style={{ position: 'relative', zIndex: 10 }}>
+                                    {message.type === 'guild_application' ? (
+                                      <div className="guild-application">
+                                        <div className="font-bold text-amber-800 mb-2">📜 Guild Application</div>
+                                        <div className="whitespace-pre-wrap">{message.content || "No content available"}</div>
+                                        
+                                        {/* Add response buttons for guild masters */}
+                                        {message.receiver === username && (
+                                          <div className="mt-3 flex space-x-2">
+                                            <button
+                                              onClick={() => {
+                                                const response = prompt("Enter your response to this application:");
+                                                if (response) {
+                                                  // Send a response message
+                                                  sendUserMessage(response, 'guild_application_response');
+                                                  
+                                                  // Update the application message type to 'approved'
+                                                  fetch('/api/messages/update', {
+                                                    method: 'POST',
+                                                    headers: {
+                                                      'Content-Type': 'application/json',
+                                                    },
+                                                    body: JSON.stringify({
+                                                      messageId: message.messageId,
+                                                      type: 'guild_application_approved'
+                                                    })
+                                                  }).catch(err => console.error('Error updating message type:', err));
+                                                  
+                                                  // Update the user's guild status
+                                                  fetch('/api/users/update-guild', {
+                                                    method: 'POST',
+                                                    headers: {
+                                                      'Content-Type': 'application/json',
+                                                    },
+                                                    body: JSON.stringify({
+                                                      username: message.sender,
+                                                      guildId: message.receiver,
+                                                      status: 'approved'
+                                                    })
+                                                  }).catch(err => console.error('Error updating user guild status:', err));
+                                                }
+                                              }}
+                                              className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700"
+                                            >
+                                              Approve
+                                            </button>
+                                            <button
+                                              onClick={() => {
+                                                const response = prompt("Enter your reason for declining this application:");
+                                                if (response) {
+                                                  // Send a response message
+                                                  sendUserMessage(response, 'guild_application_response');
+                                                  
+                                                  // Update the application message type to 'rejected'
+                                                  fetch('/api/messages/update', {
+                                                    method: 'POST',
+                                                    headers: {
+                                                      'Content-Type': 'application/json',
+                                                    },
+                                                    body: JSON.stringify({
+                                                      messageId: message.messageId,
+                                                      type: 'guild_application_rejected'
+                                                    })
+                                                  }).catch(err => console.error('Error updating message type:', err));
+                                                  
+                                                  // Update the user's guild status
+                                                  fetch('/api/users/update-guild', {
+                                                    method: 'POST',
+                                                    headers: {
+                                                      'Content-Type': 'application/json',
+                                                    },
+                                                    body: JSON.stringify({
+                                                      username: message.sender,
+                                                      guildId: null,
+                                                      status: 'rejected'
+                                                    })
+                                                  }).catch(err => console.error('Error updating user guild status:', err));
+                                                }
+                                              }}
+                                              className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700"
+                                            >
+                                              Decline
+                                            </button>
+                                          </div>
+                                        )}
+                                      </div>
+                                    ) : message.type === 'guild_application_approved' ? (
+                                      <div className="guild-application-approved">
+                                        <div className="font-bold text-green-700 mb-2">✅ Guild Application Approved</div>
+                                        <div className="whitespace-pre-wrap">{message.content || "No content available"}</div>
+                                      </div>
+                                    ) : message.type === 'guild_application_rejected' ? (
+                                      <div className="guild-application-rejected">
+                                        <div className="font-bold text-red-700 mb-2">❌ Guild Application Rejected</div>
+                                        <div className="whitespace-pre-wrap">{message.content || "No content available"}</div>
+                                      </div>
+                                    ) : message.type === 'guild_application_response' ? (
+                                      <div className="guild-application-response">
+                                        <div className="font-bold text-amber-800 mb-2">📜 Application Response</div>
+                                        <div className="whitespace-pre-wrap">{message.content || "No content available"}</div>
+                                      </div>
+                                    ) : (
+                                      <div className="whitespace-pre-wrap">{message.content || "No content available"}</div>
+                                    )}
+                                  </div>
                                   <div className="text-xs mt-1" style={{ position: 'relative', zIndex: 10 }}>
                                     {formatNotificationDate(message.createdAt)}
                                   </div>

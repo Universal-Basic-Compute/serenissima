@@ -460,9 +460,55 @@ Meeting Frequency: ${guild.meetingFrequency || 'As needed'}
                               onClick={async () => {
                                 setIsSubmitting(true);
                                 try {
-                                  // Here you would normally submit the application to your backend
-                                  // For now, we'll just simulate a submission
-                                  await new Promise(resolve => setTimeout(resolve, 1000));
+                                  // Get the current user profile from localStorage
+                                  const savedProfile = localStorage.getItem('userProfile');
+                                  if (!savedProfile) {
+                                    throw new Error('User profile not found. Please create a profile first.');
+                                  }
+                                  
+                                  const profile = JSON.parse(savedProfile);
+                                  const username = profile.username;
+                                  
+                                  if (!username) {
+                                    throw new Error('Username not found in profile.');
+                                  }
+                                  
+                                  // 1. Send a message to the guild (as a guild application)
+                                  const messageResponse = await fetch('/api/messages/send', {
+                                    method: 'POST',
+                                    headers: {
+                                      'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({
+                                      sender: username,
+                                      receiver: guild.guildId,
+                                      content: applicationText,
+                                      type: 'guild_application'
+                                    }),
+                                  });
+                                  
+                                  if (!messageResponse.ok) {
+                                    throw new Error('Failed to send application message');
+                                  }
+                                  
+                                  const messageData = await messageResponse.json();
+                                  
+                                  // 2. Update the user's guild membership status to pending
+                                  const userUpdateResponse = await fetch('/api/users/update-guild', {
+                                    method: 'POST',
+                                    headers: {
+                                      'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({
+                                      username: username,
+                                      guildId: guild.guildId,
+                                      status: 'pending'
+                                    }),
+                                  });
+                                  
+                                  if (!userUpdateResponse.ok) {
+                                    throw new Error('Failed to update user guild status');
+                                  }
                                   
                                   // Show success message
                                   alert(`Your application to the ${guild.guildName} has been submitted successfully! The guild masters will review your application and contact you soon.`);
@@ -472,7 +518,7 @@ Meeting Frequency: ${guild.meetingFrequency || 'As needed'}
                                   setShowApplicationModal(false);
                                 } catch (error) {
                                   console.error('Error submitting guild application:', error);
-                                  alert('There was an error submitting your application. Please try again.');
+                                  alert(`There was an error submitting your application: ${error instanceof Error ? error.message : 'Unknown error'}`);
                                 } finally {
                                   setIsSubmitting(false);
                                 }
