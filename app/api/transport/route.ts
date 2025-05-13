@@ -137,6 +137,88 @@ function buildGraph(polygons: Polygon[]): Graph {
     edges: {}
   };
   
+  // Extract all canal points for later use
+  const allCanalPoints: {point: Point, id: string, polygonId: string}[] = [];
+  for (const polygon of polygons) {
+    if (polygon.canalPoints) {
+      for (const point of polygon.canalPoints) {
+        if (point.edge) {
+          const pointId = point.id || `canal-${point.edge.lat}-${point.edge.lng}`;
+          allCanalPoints.push({
+            point: point.edge,
+            id: pointId,
+            polygonId: polygon.id
+          });
+        }
+      }
+    }
+  }
+  
+  // Create a function to check if a line between two points intersects any land polygon
+  const doesLineIntersectLand = (point1: Point, point2: Point): boolean => {
+    // For each polygon, check if the line intersects any of its edges
+    for (const polygon of polygons) {
+      const coords = polygon.coordinates;
+      if (!coords || coords.length < 3) continue;
+
+      // Check if either point is inside the polygon (except for canal points)
+      const isPoint1Canal = allCanalPoints.some(cp => 
+        Math.abs(cp.point.lat - point1.lat) < 0.0001 && 
+        Math.abs(cp.point.lng - point1.lng) < 0.0001
+      );
+      
+      const isPoint2Canal = allCanalPoints.some(cp => 
+        Math.abs(cp.point.lat - point2.lat) < 0.0001 && 
+        Math.abs(cp.point.lng - point2.lng) < 0.0001
+      );
+
+      // If both points are canal points, they're valid connections
+      if (isPoint1Canal && isPoint2Canal) {
+        continue;
+      }
+
+      // Check if the line intersects any polygon edge
+      for (let i = 0, j = coords.length - 1; i < coords.length; j = i++) {
+        const intersects = doLineSegmentsIntersect(
+          point1.lng, point1.lat, 
+          point2.lng, point2.lat,
+          coords[j].lng, coords[j].lat, 
+          coords[i].lng, coords[i].lat
+        );
+        
+        if (intersects) {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
+  // Helper function to check if two line segments intersect
+  const doLineSegmentsIntersect = (
+    x1: number, y1: number, x2: number, y2: number,
+    x3: number, y3: number, x4: number, y4: number
+  ): boolean => {
+    // Calculate the direction of the lines
+    const d1x = x2 - x1;
+    const d1y = y2 - y1;
+    const d2x = x4 - x3;
+    const d2y = y4 - y3;
+
+    // Calculate the determinant
+    const det = d1x * d2y - d1y * d2x;
+    
+    // If determinant is zero, lines are parallel
+    if (det === 0) return false;
+
+    // Calculate the parameters for the intersection point
+    const s = (d1x * (y1 - y3) - d1y * (x1 - x3)) / det;
+    const t = (d2x * (y1 - y3) - d2y * (x1 - x3)) / det;
+
+    // Check if the intersection point is within both line segments
+    return s >= 0 && s <= 1 && t >= 0 && t <= 1;
+  };
+  
   // Add nodes for each polygon's centroid, building points, bridge points, and canal points
   for (const polygon of polygons) {
     // Add centroid node
@@ -208,6 +290,13 @@ function buildGraph(polygons: Polygon[]): Graph {
       
       for (let j = i + 1; j < polygonNodes.length; j++) {
         const node2 = polygonNodes[j];
+        
+        // Skip canal-to-non-canal connections (canal points should only connect to other canal points)
+        if ((node1.type === 'canal' && node2.type !== 'canal') || 
+            (node1.type !== 'canal' && node2.type === 'canal')) {
+          continue;
+        }
+        
         const distance = calculateDistance(node1.position, node2.position);
         
         // Calculate weight based on node types - water travel is twice as fast
@@ -283,15 +372,14 @@ function buildGraph(polygons: Polygon[]): Graph {
     }
   }
   
-  // Connect all canal points across all polygons
-  // This represents the ability to travel by water between any two canal points
-  const allCanalPoints = Object.values(graph.nodes).filter(node => node.type === 'canal');
+  // Connect canal points across polygons, but only if they don't cross land
+  const canalNodes = Object.values(graph.nodes).filter(node => node.type === 'canal');
   
-  for (let i = 0; i < allCanalPoints.length; i++) {
-    const canalNode1 = allCanalPoints[i];
+  for (let i = 0; i < canalNodes.length; i++) {
+    const canalNode1 = canalNodes[i];
     
-    for (let j = i + 1; j < allCanalPoints.length; j++) {
-      const canalNode2 = allCanalPoints[j];
+    for (let j = i + 1; j < canalNodes.length; j++) {
+      const canalNode2 = canalNodes[j];
       
       // Skip if they're in the same polygon (already connected above)
       if (canalNode1.polygonId === canalNode2.polygonId) {
@@ -301,21 +389,29 @@ function buildGraph(polygons: Polygon[]): Graph {
       // Calculate distance between canal points
       const distance = calculateDistance(canalNode1.position, canalNode2.position);
       
-      // Water travel is twice as fast, so divide the weight by 2
-      const weight = distance / 2;
-      
-      // Add bidirectional edges
-      graph.edges[canalNode1.id].push({
-        from: canalNode1.id,
-        to: canalNode2.id,
-        weight: weight
-      });
-      
-      graph.edges[canalNode2.id].push({
-        from: canalNode2.id,
-        to: canalNode1.id,
-        weight: weight
-      });
+      // Only connect points that are reasonably close
+      if (distance > 10 && distance < 100) {
+        // Skip if the line between these points would cross land
+        if (doesLineIntersectLand(canalNode1.position, canalNode2.position)) {
+          continue;
+        }
+        
+        // Water travel is twice as fast, so divide the weight by 2
+        const weight = distance / 2;
+        
+        // Add bidirectional edges
+        graph.edges[canalNode1.id].push({
+          from: canalNode1.id,
+          to: canalNode2.id,
+          weight: weight
+        });
+        
+        graph.edges[canalNode2.id].push({
+          from: canalNode2.id,
+          to: canalNode1.id,
+          weight: weight
+        });
+      }
     }
   }
   
@@ -346,6 +442,71 @@ function buildCanalNetwork(polygons: Polygon[]): Record<string, Point[]> {
     }
   }
 
+  // Create a function to check if a line between two points intersects any land polygon
+  const doesLineIntersectLand = (point1: Point, point2: Point): boolean => {
+    // For each polygon, check if the line intersects any of its edges
+    for (const polygon of polygons) {
+      const coords = polygon.coordinates;
+      if (!coords || coords.length < 3) continue;
+
+      // Check if either point is inside the polygon (except for canal points)
+      const isPoint1Canal = allCanalPoints.some(cp => 
+        Math.abs(cp.point.lat - point1.lat) < 0.0001 && 
+        Math.abs(cp.point.lng - point1.lng) < 0.0001
+      );
+      
+      const isPoint2Canal = allCanalPoints.some(cp => 
+        Math.abs(cp.point.lat - point2.lat) < 0.0001 && 
+        Math.abs(cp.point.lng - point2.lng) < 0.0001
+      );
+
+      // If both points are canal points, they're valid connections
+      if (isPoint1Canal && isPoint2Canal) {
+        continue;
+      }
+
+      // Check if the line intersects any polygon edge
+      for (let i = 0, j = coords.length - 1; i < coords.length; j = i++) {
+        const intersects = doLineSegmentsIntersect(
+          point1.lng, point1.lat, 
+          point2.lng, point2.lat,
+          coords[j].lng, coords[j].lat, 
+          coords[i].lng, coords[i].lat
+        );
+        
+        if (intersects) {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
+  // Helper function to check if two line segments intersect
+  const doLineSegmentsIntersect = (
+    x1: number, y1: number, x2: number, y2: number,
+    x3: number, y3: number, x4: number, y4: number
+  ): boolean => {
+    // Calculate the direction of the lines
+    const d1x = x2 - x1;
+    const d1y = y2 - y1;
+    const d2x = x4 - x3;
+    const d2y = y4 - y3;
+
+    // Calculate the determinant
+    const det = d1x * d2y - d1y * d2x;
+    
+    // If determinant is zero, lines are parallel
+    if (det === 0) return false;
+
+    // Calculate the parameters for the intersection point
+    const s = (d1x * (y1 - y3) - d1y * (x1 - x3)) / det;
+    const t = (d2x * (y1 - y3) - d2y * (x1 - x3)) / det;
+
+    // Check if the intersection point is within both line segments
+    return s >= 0 && s <= 1 && t >= 0 && t <= 1;
+  };
+
   // For each polygon, create canal segments
   for (const polygon of polygons) {
     if (!polygon.canalPoints || polygon.canalPoints.length < 2) continue;
@@ -364,23 +525,11 @@ function buildCanalNetwork(polygons: Polygon[]): Record<string, Point[]> {
         const point1 = polygonCanalPoints[i];
         const point2 = polygonCanalPoints[j];
 
-        // Create a unique ID for this canal segment
-        const segmentId = `canal-segment-${point1.id}-${point2.id}`;
+        // Skip if the line between these points would cross land
+        if (doesLineIntersectLand(point1.point, point2.point)) {
+          continue;
+        }
 
-        // Create a path between these two points
-        canalNetwork[segmentId] = [point1.point, point2.point];
-      }
-    }
-
-    // Also connect to nearby canal points in other polygons
-    for (const point1 of polygonCanalPoints) {
-      // Find nearby canal points in other polygons
-      const nearbyPoints = allCanalPoints.filter(p =>
-        p.polygonId !== polygon.id &&
-        calculateDistance(point1.point, p.point) < 100 // 100 meters max distance
-      );
-
-      for (const point2 of nearbyPoints) {
         // Create a unique ID for this canal segment
         const segmentId = `canal-segment-${point1.id}-${point2.id}`;
 
@@ -390,23 +539,27 @@ function buildCanalNetwork(polygons: Polygon[]): Record<string, Point[]> {
     }
   }
 
-  // Add additional connections between canal points that are likely part of the same canal
-  // This helps create a more connected network
+  // Connect canal points across polygons, but only if they don't cross land
   for (let i = 0; i < allCanalPoints.length; i++) {
     const point1 = allCanalPoints[i];
     
     for (let j = i + 1; j < allCanalPoints.length; j++) {
       const point2 = allCanalPoints[j];
       
-      // Skip if they're in the same polygon (already connected above)
+      // Skip if they're in the same polygon (already handled above)
       if (point1.polygonId === point2.polygonId) continue;
       
       // Calculate distance
       const distance = calculateDistance(point1.point, point2.point);
       
-      // Connect points that are close but not too close (likely part of the same canal)
-      if (distance > 10 && distance < 80) {
-        const segmentId = `canal-segment-extra-${point1.id}-${point2.id}`;
+      // Only connect points that are reasonably close
+      if (distance > 10 && distance < 100) {
+        // Skip if the line between these points would cross land
+        if (doesLineIntersectLand(point1.point, point2.point)) {
+          continue;
+        }
+        
+        const segmentId = `canal-segment-cross-${point1.id}-${point2.id}`;
         canalNetwork[segmentId] = [point1.point, point2.point];
       }
     }
