@@ -547,12 +547,13 @@ def get_available_building_points(polygons: List[Dict], existing_buildings: List
                     )
                     
                     if not is_occupied:
-                        # Add polygon ID to the point for reference
+                        # Add polygon ID and point ID to the point for reference
                         point_with_polygon = {
                             "lat": point["lat"],
                             "lng": point["lng"],
                             "polygon_id": polygon_id,
-                            "point_type": "land"
+                            "point_type": "land",
+                            "id": point.get("id", f"point-{point['lat']}-{point['lng']}")
                         }
                         available_points["land"].append(point_with_polygon)
             
@@ -575,12 +576,13 @@ def get_available_building_points(polygons: List[Dict], existing_buildings: List
                     )
                     
                     if not is_occupied:
-                        # Add polygon ID to the point for reference
+                        # Add polygon ID and point ID to the point for reference
                         point_with_polygon = {
                             "lat": edge["lat"],
                             "lng": edge["lng"],
                             "polygon_id": polygon_id,
-                            "point_type": "canal"
+                            "point_type": "canal",
+                            "id": point.get("id", f"canal-{edge['lat']}-{edge['lng']}")
                         }
                         available_points["canal"].append(point_with_polygon)
             
@@ -603,12 +605,13 @@ def get_available_building_points(polygons: List[Dict], existing_buildings: List
                     )
                     
                     if not is_occupied:
-                        # Add polygon ID to the point for reference
+                        # Add polygon ID and point ID to the point for reference
                         point_with_polygon = {
                             "lat": edge["lat"],
                             "lng": edge["lng"],
                             "polygon_id": polygon_id,
-                            "point_type": "bridge"
+                            "point_type": "bridge",
+                            "id": point.get("id", f"bridge-{edge['lat']}-{edge['lng']}")
                         }
                         available_points["bridge"].append(point_with_polygon)
         
@@ -847,11 +850,8 @@ Your response must be a JSON object with:
                                 import uuid
                                 building_id = f"building-{uuid.uuid4()}"
                                 
-                                # Format the position as a JSON string
-                                position_json = json.dumps({
-                                    "lat": selected_point["lat"],
-                                    "lng": selected_point["lng"]
-                                })
+                                # Generate a point ID if not present
+                                point_id = selected_point.get("id", f"point-{selected_point['lat']}-{selected_point['lng']}")
                                 
                                 # Create the building record
                                 building_record = {
@@ -861,7 +861,7 @@ Your response must be a JSON object with:
                                     "LeaseAmount": 0,
                                     "Variant": "model",
                                     "Owner": ai_username,
-                                    "Position": position_json,
+                                    "Point": point_id,
                                     "RentAmount": 0,
                                     "CreatedAt": datetime.now().isoformat()
                                 }
