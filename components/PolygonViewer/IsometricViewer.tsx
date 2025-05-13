@@ -51,6 +51,53 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   }[]>([]);
   const [emptyBuildingPoints, setEmptyBuildingPoints] = useState<{lat: number, lng: number}[]>([]);
   
+  // Function to load citizens data - declared early to avoid reference before declaration
+  const loadCitizens = useCallback(async () => {
+    try {
+      console.log('Loading citizens data...');
+      const response = await fetch('/api/citizens');
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setCitizens(data);
+          
+          // Group citizens by building
+          const byBuilding: Record<string, any[]> = {};
+          
+          data.forEach(citizen => {
+            // Add to home building
+            if (citizen.Home) {
+              if (!byBuilding[citizen.Home]) {
+                byBuilding[citizen.Home] = [];
+              }
+              byBuilding[citizen.Home].push({
+                ...citizen,
+                markerType: 'home'
+              });
+            }
+            
+            // Add to work building
+            if (citizen.Work) {
+              if (!byBuilding[citizen.Work]) {
+                byBuilding[citizen.Work] = [];
+              }
+              byBuilding[citizen.Work].push({
+                ...citizen,
+                markerType: 'work'
+              });
+            }
+          });
+          
+          setCitizensByBuilding(byBuilding);
+          setCitizensLoaded(true);
+          console.log(`Loaded ${data.length} citizens in ${Object.keys(byBuilding).length} buildings`);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading citizens:', error);
+    }
+  }, []);
+  
   // Citizen-related state
   const [citizens, setCitizens] = useState<any[]>([]);
   const [citizensByBuilding, setCitizensByBuilding] = useState<Record<string, any[]>>({});
@@ -484,52 +531,6 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     }
   }, [activeView, citizensLoaded, citizens]);
   
-  // Function to load citizens data
-  const loadCitizens = useCallback(async () => {
-    try {
-      console.log('Loading citizens data...');
-      const response = await fetch('/api/citizens');
-      if (response.ok) {
-        const data = await response.json();
-        if (Array.isArray(data)) {
-          setCitizens(data);
-          
-          // Group citizens by building
-          const byBuilding: Record<string, any[]> = {};
-          
-          data.forEach(citizen => {
-            // Add to home building
-            if (citizen.Home) {
-              if (!byBuilding[citizen.Home]) {
-                byBuilding[citizen.Home] = [];
-              }
-              byBuilding[citizen.Home].push({
-                ...citizen,
-                markerType: 'home'
-              });
-            }
-            
-            // Add to work building
-            if (citizen.Work) {
-              if (!byBuilding[citizen.Work]) {
-                byBuilding[citizen.Work] = [];
-              }
-              byBuilding[citizen.Work].push({
-                ...citizen,
-                markerType: 'work'
-              });
-            }
-          });
-          
-          setCitizensByBuilding(byBuilding);
-          setCitizensLoaded(true);
-          console.log(`Loaded ${data.length} citizens in ${Object.keys(byBuilding).length} buildings`);
-        }
-      }
-    } catch (error) {
-      console.error('Error loading citizens:', error);
-    }
-  }, []);
   
   // Listen for loadCitizens event
   useEffect(() => {
@@ -2466,7 +2467,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       )}
       
       {/* Building Details Panel */}
-      {showBuildingDetailsPanel && selectedBuildingId && (activeView === 'buildings' || activeView === 'land' || activeView === 'citizens') && (
+      {showBuildingDetailsPanel && selectedBuildingId && (activeView === 'buildings' || activeView === 'land' || activeView === 'citizens' as ViewType) && (
         <BuildingDetailsPanel
           selectedBuildingId={selectedBuildingId}
           onClose={() => {
