@@ -192,7 +192,7 @@ export default function SimplePage() {
         console.log('Switching to citizens view from loadCitizens event');
         setActiveView('citizens');
       } else {
-        console.log('Already in citizens view, not re-dispatching event to avoid infinite loop');
+        console.log('Already in citizens view, not re-dispatching event');
       }
     };
     

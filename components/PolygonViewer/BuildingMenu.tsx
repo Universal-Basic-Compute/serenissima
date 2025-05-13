@@ -47,13 +47,21 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
   // Listen for custom events to show the building menu
   useEffect(() => {
     const handleShowBuildingMenu = () => {
+      console.log('BuildingMenu: Received showBuildingMenu event');
+      setShowViaEvent(true);
+    };
+    
+    const handleBuildingPointClick = (event: CustomEvent) => {
+      console.log('BuildingMenu: Received buildingPointClick event', event.detail);
       setShowViaEvent(true);
     };
     
     window.addEventListener('showBuildingMenu', handleShowBuildingMenu);
+    window.addEventListener('buildingPointClick', handleBuildingPointClick as EventListener);
     
     return () => {
       window.removeEventListener('showBuildingMenu', handleShowBuildingMenu);
+      window.removeEventListener('buildingPointClick', handleBuildingPointClick as EventListener);
     };
   }, []);
   
