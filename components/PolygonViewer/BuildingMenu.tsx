@@ -63,44 +63,58 @@ const calculateBuildingCost = async (buildingType: string): Promise<number> => {
     // Normalize building type (remove spaces, lowercase)
     const normalizedType = buildingType.toLowerCase().replace(/\s+/g, '-');
     
-    // Fetch the building data from its JSON file
-    // The path structure follows the pattern in the data directory
-    // First try to determine the category path
-    let response;
-    
-    // Try different category paths since we don't know which one contains this building
-    const categoryPaths = [
-      'public_government/civic_buildings',
-      'residential',
-      'commercial',
-      'production',
-      'infrastructure',
-      'military_defence',
-      'special',
-      'criminal'
-    ];
-    
-    for (const categoryPath of categoryPaths) {
-      try {
-        response = await fetch(`/data/buildings/${categoryPath}/${normalizedType}.json`);
-        if (response.ok) break;
-      } catch (error) {
-        console.log(`Building not found in ${categoryPath}`);
+    // First try to get the building data directly from the API
+    try {
+      const response = await fetch(`/api/building-data/${normalizedType}`);
+      if (response.ok) {
+        const buildingData = await response.json();
+        if (buildingData.constructionCosts && buildingData.constructionCosts.ducats !== undefined) {
+          console.log(`Found cost for ${buildingType} via API: ${buildingData.constructionCosts.ducats} ducats`);
+          return buildingData.constructionCosts.ducats;
+        }
       }
+    } catch (apiError) {
+      console.log(`API fetch failed for ${buildingType}, trying direct file access`);
     }
     
-    // If we found the building data, extract the cost
-    if (response && response.ok) {
-      const buildingData = await response.json();
+    // If API fails, try direct file access
+    // Get the list of main categories
+    const categoriesResponse = await fetch('/api/building-categories');
+    if (!categoriesResponse.ok) {
+      throw new Error(`Failed to fetch building categories: ${categoriesResponse.status}`);
+    }
+    
+    const categories = await categoriesResponse.json();
+    
+    // Search through each category and its subcategories
+    for (const category of categories) {
+      // Get subcategories for this category
+      const subcategoriesResponse = await fetch(`/api/building-subcategories/${category}`);
+      if (!subcategoriesResponse.ok) continue;
       
-      // Get the cost from the constructionCosts.ducats property
-      if (buildingData.constructionCosts && buildingData.constructionCosts.ducats) {
-        console.log(`Found cost for ${buildingType}: ${buildingData.constructionCosts.ducats} ducats`);
-        return buildingData.constructionCosts.ducats;
+      const subcategories = await subcategoriesResponse.json();
+      
+      // Try each subcategory
+      for (const subcategory of subcategories) {
+        try {
+          const response = await fetch(`/data/buildings/${category}/${subcategory}/${normalizedType}.json`);
+          
+          if (response.ok) {
+            const buildingData = await response.json();
+            
+            if (buildingData.constructionCosts && buildingData.constructionCosts.ducats !== undefined) {
+              console.log(`Found cost for ${buildingType} in ${category}/${subcategory}: ${buildingData.constructionCosts.ducats} ducats`);
+              return buildingData.constructionCosts.ducats;
+            }
+          }
+        } catch (error) {
+          // Continue searching in other subcategories
+          continue;
+        }
       }
     }
     
-    // If we couldn't find the building data or it doesn't have a cost, use fallback values
+    // If we couldn't find the building data, use fallback values
     console.warn(`Could not find cost data for ${buildingType}, using fallback values`);
     
     // Fallback costs for common building types
