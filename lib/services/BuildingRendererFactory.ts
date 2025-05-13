@@ -432,67 +432,47 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
     // Get building size based on type
     const size = this.getBuildingSizeByType(building.type);
     
-    // Make the fallback cube 8x smaller (4x from before * 2x additional reduction)
-    const scaleFactor = 0.125; // 1/8 of the original size
+    // Make the fallback cube even smaller - 1/10 of the original size
+    const scaleFactor = 0.1; // 1/10 of the original size
     
-    // Create a box with a color based on building type
+    // Create a simple gray box with high transparency
     console.log(`Creating fallback box for building ${building.id} of type ${building.type}`);
     
-    // Create a more detailed fallback model with reduced size
+    // Create a simple gray cube
     const baseGeometry = new THREE.BoxGeometry(
-      size.width * 0.8 * scaleFactor, 
-      size.height * 0.8 * scaleFactor, 
-      size.depth * 0.8 * scaleFactor
+      size.width * scaleFactor, 
+      size.height * scaleFactor, 
+      size.depth * scaleFactor
     );
-    const color = this.getBuildingColorByType(building.type);
-    const material = new THREE.MeshStandardMaterial({ 
-      color: color,
-      roughness: 0.7,
-      metalness: 0.2
+    
+    // Use a gray color with high transparency
+    const material = new THREE.MeshBasicMaterial({ 
+      color: 0x888888, // Gray color
+      transparent: true,
+      opacity: 0.3 // Very transparent
     });
     
     const box = new THREE.Mesh(baseGeometry, material);
-    box.castShadow = true;
-    box.receiveShadow = true;
     
     // Add the box to the group
     group.add(box);
     
-    // Add a roof for houses and similar buildings
-    if (['house', 'tavern', 'workshop', 'market-stall'].includes(building.type)) {
-      const roofGeometry = new THREE.ConeGeometry(
-        size.width * 0.6 * scaleFactor, 
-        size.height * 0.4 * scaleFactor, 
-        4
-      );
-      const roofMaterial = new THREE.MeshStandardMaterial({
-        color: 0x8B4513, // Brown color for roof
-        roughness: 0.8,
-        metalness: 0.1
-      });
-      
-      const roof = new THREE.Mesh(roofGeometry, roofMaterial);
-      roof.position.y = size.height * 0.6 * scaleFactor; // Position on top of the box
-      roof.rotation.y = Math.PI / 4; // Rotate 45 degrees
-      roof.castShadow = true;
-      
-      group.add(roof);
-    }
+    // No roof needed - just the single cube
     
-    // Create a text label to show the building type
+    // Create a small text label to show the building type
     const canvas = document.createElement('canvas');
-    canvas.width = 256;
-    canvas.height = 64;
+    canvas.width = 128; // Smaller canvas
+    canvas.height = 32; // Smaller height
     const context = canvas.getContext('2d');
     
     if (context) {
-      context.fillStyle = 'rgba(0, 0, 0, 0.8)';
-      context.fillRect(0, 0, 256, 64);
-      context.font = 'bold 24px Arial';
+      context.fillStyle = 'rgba(0, 0, 0, 0.5)'; // More transparent background
+      context.fillRect(0, 0, 128, 32);
+      context.font = 'bold 12px Arial'; // Smaller font
       context.fillStyle = 'white';
       context.textAlign = 'center';
       context.textBaseline = 'middle';
-      context.fillText(building.type, 128, 32);
+      context.fillText(building.type, 64, 16);
       
       const texture = new THREE.CanvasTexture(canvas);
       const labelMaterial = new THREE.SpriteMaterial({ 
@@ -501,9 +481,9 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
       });
       
       const label = new THREE.Sprite(labelMaterial);
-      // Adjust label position to account for smaller building
-      label.position.set(0, size.height * scaleFactor + 0.25, 0); // Position above the building
-      label.scale.set(1, 0.25, 1); // Make the label smaller too
+      // Position label just above the cube
+      label.position.set(0, size.height * scaleFactor + 0.1, 0);
+      label.scale.set(0.5, 0.125, 1); // Make the label smaller
       
       // Add the label to the group
       group.add(label);
