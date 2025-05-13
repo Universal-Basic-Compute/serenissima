@@ -7,6 +7,7 @@ import { WaterFacade as SimpleWater, WaterQualityLevel } from '../../lib/threejs
 import SimplePolygonRenderer from './SimplePolygonRenderer';
 import { IncomePolygonRenderer } from '../../lib/threejs/IncomePolygonRenderer';
 import { ResourceDisplayManager } from '../../lib/threejs/ResourceDisplayManager';
+import { CitizenDisplayManager } from '../../lib/threejs/CitizenDisplayManager';
 import { calculateBounds } from './utils';
 import LandDetailsPanel from './LandDetailsPanel'; // Import the existing panel
 import { eventBus } from '@/lib/eventBus';
@@ -31,6 +32,7 @@ export default function SimpleViewer({ qualityMode = 'high', waterQuality = 'hig
   const polygonRendererRef = useRef<SimplePolygonRenderer | null>(null);
   const incomeRendererRef = useRef<IncomePolygonRenderer | null>(null);
   const resourceDisplayRef = useRef<ResourceDisplayManager | null>(null);
+  const citizenDisplayRef = useRef<CitizenDisplayManager | null>(null);
   
   // State for land selection and details panel
   const [selectedPolygonId, setSelectedPolygonId] = useState<string | null>(null);
@@ -412,6 +414,30 @@ export default function SimpleViewer({ qualityMode = 'high', waterQuality = 'hig
     
     resourceDisplayRef.current = resourceDisplay;
     
+    // Create citizen display manager
+    const citizenDisplay = new CitizenDisplayManager({
+      scene,
+      camera: cameraController.camera,
+      bounds: {
+        centerLat: bounds.centerLat || 45.4371, // Default to Venice coordinates if undefined
+        centerLng: bounds.centerLng || 12.3326,
+        scale: bounds.scale || 1000, // Use the existing scale or default
+        latCorrectionFactor: bounds.latCorrectionFactor || 1.0
+      }
+    });
+    
+    // Initialize the citizen display
+    citizenDisplay.initialize().then(() => {
+      console.log('Citizen display initialized');
+      
+      // Set active if we're in citizens view
+      if (activeView === 'citizens') {
+        citizenDisplay.setActive(true);
+      }
+    });
+    
+    citizenDisplayRef.current = citizenDisplay;
+    
     // Add ambient light
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
@@ -494,6 +520,7 @@ export default function SimpleViewer({ qualityMode = 'high', waterQuality = 'hig
       if (polygonRendererRef.current) polygonRendererRef.current.cleanup();
       if (incomeRendererRef.current) incomeRendererRef.current.cleanup();
       if (resourceDisplayRef.current) resourceDisplayRef.current.dispose();
+      if (citizenDisplayRef.current) citizenDisplayRef.current.dispose();
       if (waterRef.current) waterRef.current.dispose();
       if (cameraController) cameraController.cleanup();
       if (renderer) renderer.dispose();
@@ -558,6 +585,17 @@ export default function SimpleViewer({ qualityMode = 'high', waterQuality = 'hig
       // If activating resources view, refresh resources
       if (shouldBeActive) {
         resourceDisplayRef.current.refreshResources();
+      }
+    }
+    
+    // Update citizen display active state
+    if (citizenDisplayRef.current) {
+      const shouldBeActive = activeView === 'citizens';
+      citizenDisplayRef.current.setActive(shouldBeActive);
+    
+      // If activating citizens view, refresh citizens
+      if (shouldBeActive) {
+        citizenDisplayRef.current.refreshCitizens();
       }
     }
     
