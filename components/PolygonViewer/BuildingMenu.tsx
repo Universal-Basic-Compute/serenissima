@@ -15,7 +15,7 @@ interface Building {
   name: string;
   category: string;
   subcategory: string;
-  description?: string;
+  description: string; // Make description required instead of optional
   thumbnail?: string;
   size?: string;
   era?: string;
