@@ -188,7 +188,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
       const delta = e.deltaY * -0.01;
-      setScale(prevScale => Math.max(0.5, Math.min(5, prevScale + delta)));
+      setScale(prevScale => Math.max(0.4, Math.min(6, prevScale + delta)));
     };
     
     const canvas = canvasRef.current;
@@ -670,7 +670,19 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       {/* Controls */}
       <div className="absolute bottom-4 right-4 bg-black/70 text-white p-3 rounded-lg shadow-lg">
         <div className="flex items-center space-x-2">
+          <button 
+            onClick={() => setScale(prev => Math.max(0.4, prev - 0.1))}
+            className="px-3 py-1 bg-amber-600 hover:bg-amber-500 rounded text-white"
+          >
+            -
+          </button>
           <span className="text-sm">{Math.round(scale * 100)}%</span>
+          <button 
+            onClick={() => setScale(prev => Math.min(6, prev + 0.1))}
+            className="px-3 py-1 bg-amber-600 hover:bg-amber-500 rounded text-white"
+          >
+            +
+          </button>
           <button 
             onClick={() => {
               setScale(1);
