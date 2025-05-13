@@ -707,6 +707,7 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
     
     // If not cached, load the model
     try {
+      // Get the model path first so it's available in the catch block
       const modelPath = this.getModelPath(building.type, building.variant || 'model');
       
       if (this.debug) {
@@ -766,6 +767,9 @@ class UniversalBuildingRenderer implements IBuildingRenderer {
       return model;
     } catch (error) {
       console.warn(`Failed to load model for ${building.id} of type ${building.type}: ${error instanceof Error ? error.message : String(error)}`);
+      
+      // Get the model path again if needed for error reporting
+      const modelPath = this.getModelPath(building.type, building.variant || 'model');
       console.warn(`Attempted to load from path: ${modelPath}`);
       
       // Try alternative model paths if the primary path fails
