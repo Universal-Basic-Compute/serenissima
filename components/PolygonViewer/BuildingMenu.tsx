@@ -7,10 +7,10 @@ import PlaceableBuilding from './PlaceableBuilding';
 import ErrorBoundary from '../ErrorBoundary/ErrorBoundary';
 import { useBuildingMenu } from '@/hooks/useBuildingMenu';
 import { log } from '@/lib/logUtils';
+import { Building as ImportedBuilding } from '@/lib/models/BuildingModels';
 
-// Define the Building interface locally since it's not exported from BuildingService
-interface Building {
-  id: string;
+// Define the Building interface to match the imported Building type
+interface Building extends ImportedBuilding {
   name: string;
   category: string;
   subcategory: string;
@@ -273,7 +273,7 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
                 <div className="w-full md:w-1/2 flex flex-col">
                   <div className="mb-4">
                     <h3 className="text-lg font-medium text-amber-800 mb-1">Description</h3>
-                    <p className="text-amber-700">{selectedBuilding.description}</p>
+                    <p className="text-amber-700">{selectedBuilding.description || 'No description available'}</p>
                   </div>
                   
                   <div className="mb-4">
