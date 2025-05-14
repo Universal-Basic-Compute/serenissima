@@ -24,11 +24,48 @@ export default function TwoDPage() {
   const [activeView, setActiveView] = useState<ViewType>('buildings');
   const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
   
+  // Data state
+  const [polygons, setPolygons] = useState<any[]>([]);
+  const [buildings, setBuildings] = useState<any[]>([]);
+  const [emptyBuildingPoints, setEmptyBuildingPoints] = useState<{lat: number, lng: number}[]>([]);
+  
   // Handle settings modal
   const handleSettingsClose = () => {
     setShowSettingsModal(false);
   };
   
+  // Load polygons and buildings data
+  useEffect(() => {
+    // Fetch polygons
+    fetch('/api/get-polygons')
+      .then(response => response.json())
+      .then(data => {
+        if (data.polygons) {
+          setPolygons(data.polygons);
+          
+          // Store in window for other components
+          if (typeof window !== 'undefined') {
+            (window as any).__polygonData = data.polygons;
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Error loading polygons:', error);
+      });
+      
+    // Fetch buildings
+    fetch('/api/buildings')
+      .then(response => response.json())
+      .then(data => {
+        if (data.buildings) {
+          setBuildings(data.buildings);
+        }
+      })
+      .catch(error => {
+        console.error('Error loading buildings:', error);
+      });
+  }, []);
+
   // Handle initial view loading and ensure buildings are always visible
   useEffect(() => {
     console.log('Initial page load, ensuring buildings are always visible...');
