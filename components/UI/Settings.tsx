@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaTimes, FaCog, FaImage, FaVolumeUp, FaBug, FaSave } from 'react-icons/fa';
-import { getWalletAddress } from '@/lib/walletUtils';
+import { getWalletAddress } from '../../lib/utils/walletUtils';
 
 interface SettingsProps {
   onClose: () => void;

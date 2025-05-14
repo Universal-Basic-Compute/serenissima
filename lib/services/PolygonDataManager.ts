@@ -1,5 +1,5 @@
 import { Polygon, ViewMode } from '../../components/PolygonViewer/types';
-import { eventBus, EventTypes } from '../eventBus';
+import { eventBus, EventTypes } from '../utils/eventBus';
 
 /**
  * Manages polygon data separately from rendering logic

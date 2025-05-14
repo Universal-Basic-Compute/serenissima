@@ -1,7 +1,7 @@
 import React from 'react';
 import NextImage from 'next/image';
-import { eventBus, EventTypes } from '@/lib/eventBus';
-import { clearLandOwnershipCaches } from '@/lib/cacheUtils';
+import { eventBus, EventTypes } from '@/lib/utils/eventBus';
+import { clearLandOwnershipCaches } from '@/lib/utils/cacheUtils';
 
 interface LandPurchaseConfirmationProps {
   landId: string;

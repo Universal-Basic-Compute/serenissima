@@ -3,9 +3,9 @@
  * - Add comprehensive logging
  * - Add unit tests for service methods
  */
-import { eventBus, EventTypes } from '../eventBus';
-import { getBackendBaseUrl } from '../apiUtils';
-import { log } from '../logUtils';
+import { eventBus, EventTypes } from '../utils/eventBus';
+import { getBackendBaseUrl } from '../../lib/utils/apiUtils';
+import { log } from '../utils/logUtils';
 import { 
   ApiError, 
   AuthenticationError, 

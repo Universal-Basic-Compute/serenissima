@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import ResourceDropdown from './ResourceDropdown';
 import { ResourceService, ResourceCategory } from '@/lib/services/ResourceService';
-import { getWalletAddress } from '@/lib/walletUtils';
+import { getWalletAddress } from '../../lib/utils/walletUtils';
 
 // Define the desired order of categories
 const CATEGORY_ORDER = ['raw_materials', 'processed_materials', 'finished_goods', 'utility_resources'];

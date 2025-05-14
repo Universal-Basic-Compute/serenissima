@@ -1,7 +1,7 @@
 import { create } from 'zustand';
-import { getBackendBaseUrl } from '@/lib/apiUtils';
+import { getBackendBaseUrl } from '../../lib/utils/apiUtils';
 import { ViewMode, Polygon } from '@/components/PolygonViewer/types';
-import { eventBus, EventTypes } from '@/lib/eventBus';
+import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 
 interface PolygonState {
   // Data state

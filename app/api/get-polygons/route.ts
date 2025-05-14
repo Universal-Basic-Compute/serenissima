@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { serverUtils, calculateCentroid, validateAndRepairCoordinates } from '@/lib/fileUtils';
+import { serverUtils, calculateCentroid, validateAndRepairCoordinates } from '@/lib/utils/fileUtils';
 
 export async function GET(request: Request) {
   const url = new URL(request.url);

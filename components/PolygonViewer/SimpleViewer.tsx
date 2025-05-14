@@ -10,8 +10,8 @@ import { ResourceDisplayManager } from '../../lib/threejs/ResourceDisplayManager
 import { CitizenDisplayManager } from '../../lib/threejs/CitizenDisplayManager';
 import { calculateBounds } from './utils';
 import LandDetailsPanel from './LandDetailsPanel'; // Import the existing panel
-import { eventBus } from '@/lib/eventBus';
-import { EventTypes } from '@/lib/eventTypes';
+import { eventBus } from '@/lib/utils/eventBus';
+import { EventTypes } from '@/lib/utils/eventTypes';
 import { getIncomeDataService } from '@/lib/services/IncomeDataService';
 import BaseSceneLayer from './BaseSceneLayer';
 import { sceneLayerManager } from '@/lib/services/SceneLayerManager';

@@ -1,5 +1,5 @@
 import { Polygon, Coordinate } from '../../components/PolygonViewer/types';
-import { eventBus, EventTypes } from '../eventBus';
+import { eventBus, EventTypes } from '../utils/eventBus';
 
 /**
  * Service for handling polygon data

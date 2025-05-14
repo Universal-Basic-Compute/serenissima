@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getTransactionService } from '@/lib/services/TransactionService';
 import { Transaction } from '@/lib/store/marketStore';
-import { getWalletAddress } from '@/lib/walletUtils';
+import { getWalletAddress } from '../../lib/utils/walletUtils';
 import { formatDistanceToNow, format } from 'date-fns';
 import PlayerProfile from './PlayerProfile';
 

@@ -1,5 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { log } from '@/lib/logUtils';
+import { log } from '@/lib/utils/logUtils';
 
 interface ErrorBoundaryProps {
   children: ReactNode;

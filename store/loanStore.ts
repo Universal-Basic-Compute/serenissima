@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { LoanData, LoanService, LoanStatus, LoanPurpose } from '@/lib/services/LoanService';
-import { eventBus, EventTypes } from '@/lib/eventBus';
+import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 
 // Define custom event types if they don't exist in EventTypes
 interface ExtendedEventTypes {

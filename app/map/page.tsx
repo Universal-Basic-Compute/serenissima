@@ -1,11 +1,11 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { getBackendBaseUrl } from '@/lib/apiUtils';
+import { getBackendBaseUrl } from '../../lib/utils/apiUtils';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
 import { WalletReadyState } from '@solana/wallet-adapter-base';
 import { GoogleMap, LoadScript, DrawingManager } from '@react-google-maps/api';
-import { findClosestPointOnPolygonEdge } from '@/lib/fileUtils';
+import { findClosestPointOnPolygonEdge } from '@/lib/utils/fileUtils';
 
 // Venice coordinates
 const center = {

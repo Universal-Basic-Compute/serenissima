@@ -1,5 +1,5 @@
 // Utility functions for wallet management
-import { getBackendBaseUrl } from '@/lib/apiUtils';
+import { getBackendBaseUrl } from '../../lib/utils/apiUtils';
 
 export function getWalletAddress(): string | null {
   if (typeof window === 'undefined') return null;

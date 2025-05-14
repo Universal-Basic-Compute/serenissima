@@ -10,8 +10,8 @@
 
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import ThreeDErrorBoundary, { ThreeDErrorBoundaryProps } from '../ErrorBoundary/ThreeDErrorBoundary';
-import { log } from '@/lib/logUtils';
-import { getBackendBaseUrl } from '@/lib/apiUtils';
+import { log } from '@/lib/utils/logUtils';
+import { getBackendBaseUrl } from '../../lib/utils/apiUtils';
 import * as THREE from 'three';
 import { calculateBounds } from './utils';
 import SceneSetup from './SceneSetup';
@@ -33,7 +33,7 @@ import BridgeRenderer from './BridgeRenderer';
 import LandPurchaseModal from '../UI/LandPurchaseModal';
 import RoadCreator from '../PolygonViewer/RoadCreator';
 import { RoadManager } from '../../lib/threejs/RoadManager';
-import { eventBus, EventTypes } from '../../lib/eventBus';
+import { eventBus, EventTypes } from '../../lib/utils/eventBus';
 
 // Import both ViewMode and ActiveViewMode types
 import { ViewMode, ActiveViewMode } from './types';

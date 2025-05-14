@@ -1,5 +1,5 @@
-import { fetchResources, fetchResourceCounts } from '../resourceUtils';
-import type { ResourceNode } from '../resourceUtils';
+import { fetchResources, fetchResourceCounts } from '../utils/resourceUtils';
+import type { ResourceNode } from '../utils/resourceUtils';
 
 // Extend the ResourceNode type to include the properties we need
 interface ExtendedResourceNode extends ResourceNode {

@@ -38,7 +38,7 @@ export enum LoanPurpose {
   OTHER = 'other'
 }
 
-import { getBackendBaseUrl } from '@/lib/apiUtils';
+import { getBackendBaseUrl } from '../../lib/utils/apiUtils';
 
 export class LoanService {
   private static instance: LoanService;

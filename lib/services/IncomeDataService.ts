@@ -1,4 +1,4 @@
-import { eventBus, EventTypes } from '../eventBus';
+import { eventBus, EventTypes } from '../utils/eventBus';
 
 // Add the missing event type if it doesn't exist in EventTypes
 declare module '../eventBus' {

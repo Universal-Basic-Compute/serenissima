@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { Building, BuildingCategory } from '@/lib/models/BuildingModels';
-import { getBackendBaseUrl } from '@/lib/apiUtils';
+import { getBackendBaseUrl } from '../../lib/utils/apiUtils';
 
 interface BuildingState {
   categories: BuildingCategory[];

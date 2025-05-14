@@ -6,9 +6,9 @@ import { LoanData, LoanPurpose } from '@/lib/services/LoanService';
 interface LoanApplicationResponse extends LoanData {
   autoApproved?: boolean;
 }
-import { getWalletAddress } from '@/lib/walletUtils';
+import { getWalletAddress } from '../../lib/utils/walletUtils';
 import ErrorBoundary from '@/components/UI/ErrorBoundary';
-import { eventBus, EventTypes } from '@/lib/eventBus';
+import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 
 // Ensure EventTypes has LOAN_APPROVED
 declare module '@/lib/eventBus' {

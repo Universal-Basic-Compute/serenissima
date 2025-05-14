@@ -1,6 +1,6 @@
-import { getBackendBaseUrl } from '../apiUtils';
-import { eventBus } from '../eventBus';
-import { log } from '../logUtils';
+import { getBackendBaseUrl } from '../../lib/utils/apiUtils';
+import { eventBus } from '../utils/eventBus';
+import { log } from '../utils/logUtils';
 import { 
   ApiError, 
   AuthenticationError, 
@@ -9,7 +9,7 @@ import {
   ValidationError,
   ServiceError
 } from '../errors/ServiceErrors';
-import { getWalletAddress } from '../walletUtils';
+import { getWalletAddress } from '../utils/walletUtils';
 import { Listing, Offer, Transaction } from '../store/marketStore';
 
 // Extend the Listing interface to include updatedAt

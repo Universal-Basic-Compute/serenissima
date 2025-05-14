@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { getBackendBaseUrl } from '@/lib/apiUtils';
+import { getBackendBaseUrl } from '../../lib/utils/apiUtils';
 import PlayerProfile from '../UI/PlayerProfile';
 
 // Add this function to dynamically find the building image path

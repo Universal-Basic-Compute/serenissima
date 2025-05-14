@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getWalletAddress } from '@/lib/walletUtils';
+import { getWalletAddress } from '../../lib/utils/walletUtils';
 
 interface WalletStatusProps {
   className?: string;

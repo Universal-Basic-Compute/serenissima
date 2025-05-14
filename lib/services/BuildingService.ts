@@ -1,8 +1,8 @@
 import useBuildingStore from '@/store/useBuildingStore';
 import * as THREE from 'three';
 import { BuildingCategory, BuildingDefinition, PlacementResult, PlacementContext, BuildingData } from '../models/BuildingTypes';
-import { log } from '../logUtils';
-import { getWalletAddress } from '../walletUtils';
+import { log } from '../utils/logUtils';
+import { getWalletAddress } from '../utils/walletUtils';
 
 // Re-export BuildingData from models
 export type { BuildingData };

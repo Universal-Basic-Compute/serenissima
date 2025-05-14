@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import * as THREE from 'three';
-import { getBackendBaseUrl } from '@/lib/apiUtils';
+import { getBackendBaseUrl } from '../../lib/utils/apiUtils';
 import { useRouter } from 'next/navigation';
 import ActionButton from '../UI/ActionButton';
 import WalletStatus from '../UI/WalletStatus';
@@ -9,8 +9,8 @@ import LandPurchaseConfirmation from '../UI/LandPurchaseConfirmation';
 import ListLandForSaleModal from '../UI/ListLandForSaleModal';
 import AnimatedDucats from '../UI/AnimatedDucats';
 import { Polygon } from './types';
-import { eventBus, EventTypes } from '../../lib/eventBus';
-import { getWalletAddress } from '@/lib/walletUtils';
+import { eventBus, EventTypes } from '../../lib/utils/eventBus';
+import { getWalletAddress } from '../../lib/utils/walletUtils';
 
 // Helper function to normalize identifiers for comparison
 const normalizeIdentifier = (id: string | null | undefined): string | null => {

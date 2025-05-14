@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { serverUtils, validateAndRepairCoordinates } from '@/lib/fileUtils';
+import { serverUtils, validateAndRepairCoordinates } from '@/lib/utils/fileUtils';
 
 export async function POST(request: Request) {
   try {

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import useBuildingStore from '@/store/useBuildingStore';
-import { log } from '@/lib/logUtils';
-import { eventBus } from '@/lib/eventBus';
-import { EventTypes } from '@/lib/eventTypes';
+import { log } from '@/lib/utils/logUtils';
+import { eventBus } from '@/lib/utils/eventBus';
+import { EventTypes } from '@/lib/utils/eventTypes';
 import { Building } from '@/lib/models/BuildingModels';
 import { BuildingService } from '@/lib/services/BuildingService';
 

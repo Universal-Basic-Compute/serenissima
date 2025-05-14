@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { ThreeDErrorBoundary } from '@/lib/components/ThreeDErrorBoundary';
 import { useSceneReady } from '@/lib/components/SceneReadyProvider';
 import { buildingRendererManager } from '@/lib/services/BuildingRendererManager';
-import { eventBus, EventTypes } from '@/lib/eventBus';
+import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 
 // Define the missing building event types
 const BUILDING_REMOVED = 'BUILDING_REMOVED';
@@ -16,7 +16,7 @@ declare module '@/lib/eventBus' {
     BUILDING_UPDATED: string;
   }
 }
-import { log } from '@/lib/logUtils';
+import { log } from '@/lib/utils/logUtils';
 
 interface BuildingRendererProps {
   active?: boolean;

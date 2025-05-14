@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import ActionButton from './ActionButton';
 import AnimatedDucats from './AnimatedDucats';
 import { useLoanStore } from '@/store/loanStore';
-import { getWalletAddress } from '@/lib/walletUtils';
+import { getWalletAddress } from '../../lib/utils/walletUtils';
 import { LoanStatus } from '@/lib/services/LoanService';
 
 interface WithdrawComputeMenuProps {

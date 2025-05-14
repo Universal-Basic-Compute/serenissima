@@ -5,7 +5,7 @@ import React, { ErrorInfo, useEffect, useState, useRef } from 'react';
 import { Tab } from '@headlessui/react';
 import ErrorBoundary from '../ErrorBoundary/ErrorBoundary';
 import { useBuildingMenu } from '@/hooks/useBuildingMenu';
-import { log } from '@/lib/logUtils';
+import { log } from '@/lib/utils/logUtils';
 import { Building as ImportedBuilding } from '@/lib/models/BuildingModels';
 import { BuildingService } from '@/lib/services/BuildingService';
 import { getWalletAddress } from '../../lib/utils/walletUtils';

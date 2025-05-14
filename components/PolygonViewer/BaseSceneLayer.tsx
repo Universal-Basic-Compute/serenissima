@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { WaterFacade as SimpleWater } from '../../lib/threejs/WaterFacade';
 import SimplePolygonRenderer from './SimplePolygonRenderer';
 import { calculateBounds } from './utils';
-import { eventBus, EventTypes } from '@/lib/eventBus';
+import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 
 // Extend EventTypes to include SCENE_BASE_RENDERED
 declare module '@/lib/eventBus' {

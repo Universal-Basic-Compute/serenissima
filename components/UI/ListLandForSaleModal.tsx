@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { getBackendBaseUrl } from '@/lib/apiUtils';
-import { getWalletAddress } from '@/lib/walletUtils';
+import { getBackendBaseUrl } from '../../lib/utils/apiUtils';
+import { getWalletAddress } from '../../lib/utils/walletUtils';
 import NextImage from 'next/image';
 
 interface ListLandForSaleModalProps {
