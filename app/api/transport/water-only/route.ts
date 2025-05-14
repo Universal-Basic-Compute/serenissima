@@ -18,6 +18,8 @@ export async function POST(request: Request) {
       );
     }
     
+    console.log('Water-only route endpoint called directly with:', { startPoint, endPoint });
+    
     // Use water-only pathfinding directly
     const result = await findWaterOnlyPath(startPoint, endPoint);
     
@@ -25,7 +27,8 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Error in water-only transport route:', error);
     return NextResponse.json(
-      { success: false, error: 'An error occurred while processing the water-only route request' },
+      { success: false, error: 'An error occurred while processing the water-only route request',
+      errorDetails: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }

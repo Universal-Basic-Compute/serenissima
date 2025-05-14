@@ -847,8 +847,11 @@ function findShortestPath(graph: Graph, startNodeId: string, endNodeId: string):
 // Function to find a water-only path between two points
 async function findWaterOnlyPath(startPoint: Point, endPoint: Point): Promise<any> {
   try {
+    console.log('Starting water-only path calculation from', startPoint, 'to', endPoint);
+    
     // Load polygons and navigation graph
     const polygons = await loadPolygons();
+    console.log(`Loaded ${polygons.length} polygons for water-only pathfinding`);
     
     // Build a specialized water-only graph
     const waterGraph: Graph = {
@@ -873,6 +876,8 @@ async function findWaterOnlyPath(startPoint: Point, endPoint: Point): Promise<an
       }
     }
     
+    console.log(`Found ${allCanalPoints.length} canal points across all polygons`);
+    
     // Add nodes for all canal points
     for (const canalPoint of allCanalPoints) {
       waterGraph.nodes[canalPoint.id] = {
@@ -883,6 +888,8 @@ async function findWaterOnlyPath(startPoint: Point, endPoint: Point): Promise<an
       };
       waterGraph.edges[canalPoint.id] = [];
     }
+    
+    console.log(`Created ${Object.keys(waterGraph.nodes).length} nodes in water graph`);
     
     // Create a function to check if a line between two points intersects any land polygon
     const doesLineIntersectLand = (point1: Point, point2: Point): boolean => {
@@ -909,6 +916,7 @@ async function findWaterOnlyPath(startPoint: Point, endPoint: Point): Promise<an
     };
     
     // Connect canal points if they don't cross land
+    let edgesCreated = 0;
     for (let i = 0; i < allCanalPoints.length; i++) {
       const canalPoint1 = allCanalPoints[i];
       
@@ -933,9 +941,13 @@ async function findWaterOnlyPath(startPoint: Point, endPoint: Point): Promise<an
             to: canalPoint2.id,
             weight: distance / 2 // Water travel is twice as fast
           });
+          
+          edgesCreated++;
         }
       }
     }
+    
+    console.log(`Created ${edgesCreated} edges in water graph`);
     
     // Find the closest canal points to the start and end points
     const startNodeIds = findCloseNodes(startPoint, waterGraph, undefined, 10)
@@ -943,29 +955,75 @@ async function findWaterOnlyPath(startPoint: Point, endPoint: Point): Promise<an
     const endNodeIds = findCloseNodes(endPoint, waterGraph, undefined, 10)
       .filter(id => waterGraph.nodes[id].type === 'canal');
     
-    if (startNodeIds.length === 0 || endNodeIds.length === 0) {
+    console.log(`Found ${startNodeIds.length} potential start nodes and ${endNodeIds.length} potential end nodes`);
+    
+    if (startNodeIds.length === 0) {
+      console.error('No canal points found near the start point:', startPoint);
       return {
         success: false,
-        error: 'Could not find suitable canal points near the start or end points'
+        error: 'Could not find suitable canal points near the start point',
+        debug: {
+          startPoint,
+          allCanalPoints: allCanalPoints.length,
+          closestCanalPoint: allCanalPoints.length > 0 ? 
+            calculateDistance(startPoint, allCanalPoints[0].point) : 'No canal points available'
+        }
+      };
+    }
+    
+    if (endNodeIds.length === 0) {
+      console.error('No canal points found near the end point:', endPoint);
+      return {
+        success: false,
+        error: 'Could not find suitable canal points near the end point',
+        debug: {
+          endPoint,
+          allCanalPoints: allCanalPoints.length,
+          closestCanalPoint: allCanalPoints.length > 0 ? 
+            calculateDistance(endPoint, allCanalPoints[0].point) : 'No canal points available'
+        }
       };
     }
     
     // Try different combinations of start and end nodes
     let bestResult = null;
     let shortestDistance = Infinity;
+    let pathsAttempted = 0;
+    let pathsFound = 0;
+    
+    console.log(`Attempting to find paths between ${startNodeIds.length} start nodes and ${endNodeIds.length} end nodes`);
     
     for (const startNodeId of startNodeIds) {
       for (const endNodeId of endNodeIds) {
+        pathsAttempted++;
         const result = findShortestPath(waterGraph, startNodeId, endNodeId);
         
-        if (result && result.distance < shortestDistance) {
-          bestResult = result;
-          shortestDistance = result.distance;
+        if (result) {
+          pathsFound++;
+          if (result.distance < shortestDistance) {
+            bestResult = result;
+            shortestDistance = result.distance;
+            console.log(`Found better path with distance ${result.distance} from ${startNodeId} to ${endNodeId}`);
+          }
         }
       }
     }
     
+    console.log(`Attempted ${pathsAttempted} paths, found ${pathsFound} valid paths`);
+    
     if (!bestResult) {
+      console.error('No water path found between any combination of nodes');
+      
+      // Additional debugging: check if the graph is connected
+      const connectedComponents = findConnectedComponents(waterGraph);
+      console.log(`Graph has ${connectedComponents.length} connected components`);
+      
+      // Check if start and end nodes are in the same component
+      const startNodeComponent = findComponentForNode(startNodeIds[0], connectedComponents);
+      const endNodeComponent = findComponentForNode(endNodeIds[0], connectedComponents);
+      
+      console.log(`Start node is in component ${startNodeComponent}, end node is in component ${endNodeComponent}`);
+      
       return {
         success: false,
         error: 'No water path found between the points',
@@ -973,7 +1031,12 @@ async function findWaterOnlyPath(startPoint: Point, endPoint: Point): Promise<an
           startNodeIds,
           endNodeIds,
           totalNodes: Object.keys(waterGraph.nodes).length,
-          totalEdges: Object.values(waterGraph.edges).flat().length
+          totalEdges: Object.values(waterGraph.edges).flat().length,
+          connectedComponents: connectedComponents.length,
+          startNodeComponent,
+          endNodeComponent,
+          pathsAttempted,
+          pathsFound
         }
       };
     }
@@ -991,8 +1054,12 @@ async function findWaterOnlyPath(startPoint: Point, endPoint: Point): Promise<an
       };
     });
     
+    console.log(`Final path has ${pathPoints.length} points`);
+    
     // Enhance the path with intermediate points for smoother curves
     const enhancedPath = enhanceWaterPath(pathPoints);
+    
+    console.log(`Enhanced path has ${enhancedPath.length} points`);
     
     // Calculate the actual travel time based on distance
     let totalWaterDistance = 0;
@@ -1008,6 +1075,8 @@ async function findWaterOnlyPath(startPoint: Point, endPoint: Point): Promise<an
     const waterTimeHours = totalWaterDistance / 1000 / 10;
     const totalTimeMinutes = Math.round(waterTimeHours * 60);
     
+    console.log(`Total water distance: ${totalWaterDistance}m, estimated time: ${totalTimeMinutes} minutes`);
+    
     return {
       success: true,
       path: enhancedPath,
@@ -1021,7 +1090,9 @@ async function findWaterOnlyPath(startPoint: Point, endPoint: Point): Promise<an
     console.error('Error finding water-only path:', error);
     return {
       success: false,
-      error: 'An error occurred while finding the water-only path'
+      error: 'An error occurred while finding the water-only path',
+      errorDetails: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
     };
   }
 }
@@ -1278,6 +1349,43 @@ export async function GET(request: Request) {
       { status: 500 }
     );
   }
+}
+
+// Helper function to find connected components in the graph
+function findConnectedComponents(graph: Graph): string[][] {
+  const visited = new Set<string>();
+  const components: string[][] = [];
+  
+  for (const nodeId in graph.nodes) {
+    if (!visited.has(nodeId)) {
+      const component: string[] = [];
+      dfs(nodeId, component);
+      components.push(component);
+    }
+  }
+  
+  function dfs(nodeId: string, component: string[]) {
+    visited.add(nodeId);
+    component.push(nodeId);
+    
+    for (const edge of graph.edges[nodeId] || []) {
+      if (!visited.has(edge.to)) {
+        dfs(edge.to, component);
+      }
+    }
+  }
+  
+  return components;
+}
+
+// Helper function to find which component a node belongs to
+function findComponentForNode(nodeId: string, components: string[][]): number {
+  for (let i = 0; i < components.length; i++) {
+    if (components[i].includes(nodeId)) {
+      return i;
+    }
+  }
+  return -1;
 }
 
 export async function POST(request: Request) {
