@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { FaHome, FaBuilding, FaRoad, FaTree, FaStore, FaLandmark, FaBook } from 'react-icons/fa';
-import { eventBus, EventTypes } from '@/lib/eventBus';
+import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 import { sceneLayerManager } from '@/lib/services/SceneLayerManager';
 import BuildingsToolbar from '@/components/BuildingsView/BuildingsToolbar';
 import WalletButton from '@/components/UI/WalletButton';
