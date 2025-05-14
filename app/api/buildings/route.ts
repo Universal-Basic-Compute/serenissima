@@ -136,13 +136,13 @@ export async function POST(request: Request) {
       fields: {
         BuildingId: string;
         Type: string;
-        Land: string;
+        LandId: string; // Changed from Land to LandId
         Variant?: string;
         Position?: string;
         Point?: string;
         Notes?: string;
         Rotation?: number;
-        User: string;
+        Owner: string; // Changed from User to Owner
         CreatedAt: string;
         LeaseAmount?: number;
         RentAmount?: number;
@@ -310,10 +310,10 @@ export async function GET(request: Request) {
       fields: {
         BuildingId?: string;
         Type: string;
-        Land: string;
+        LandId: string; // Changed from Land to LandId
         LeaseAmount?: number;
         Variant?: string;
-        User: string;
+        Owner: string; // Changed from User to Owner
         Position?: string | {
           lat?: number;
           lng?: number;
