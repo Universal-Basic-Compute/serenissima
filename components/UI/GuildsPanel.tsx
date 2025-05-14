@@ -6,7 +6,7 @@ import { FaTimes } from 'react-icons/fa';
 // Extend the Window interface to include the __polygonData property
 declare global {
   interface Window {
-    __polygonData?: any[];
+    __polygonData: any[];
   }
 }
 
