@@ -28,38 +28,76 @@ const getResourceIconPath = (resourceId: string): string => {
 // Add this function to dynamically find the building image path
 const getBuildingImagePath = async (type: string, variant?: string): Promise<string> => {
   try {
-    // Normalize the type by removing spaces, hyphens, and converting to lowercase
-    const normalizedType = type.toLowerCase().replace(/[\s-_]+/g, '');
+    console.log(`Looking for image for building type: ${type}, variant: ${variant || 'none'}`);
     
-    // First try the direct flat path
-    const flatImagePath = `/images/buildings/${normalizedType}.jpg`;
+    // Create an array of possible normalized types
+    const normalizedTypes = [
+      type.toLowerCase().replace(/[\s-_]+/g, ''),                // Remove all spaces, hyphens, underscores
+      type.toLowerCase().replace(/\s+/g, '_'),                   // Replace spaces with underscores
+      type.toLowerCase().replace(/\s+/g, '-'),                   // Replace spaces with hyphens
+      type.toLowerCase().replace(/['\s]+/g, '_'),                // Replace apostrophes and spaces with underscores
+      type.toLowerCase().replace(/['\s]+/g, '')                  // Remove apostrophes and spaces
+    ];
     
-    // Check if the image exists
-    try {
-      const response = await fetch(flatImagePath, { method: 'HEAD' });
-      if (response.ok) {
-        console.log(`Using flat path for building image: ${flatImagePath}`);
-        return flatImagePath;
+    // Log all the normalized types we're going to try
+    console.log('Trying normalized types:', normalizedTypes);
+    
+    // Try each normalized type with the flat structure
+    for (const normalizedType of normalizedTypes) {
+      const flatImagePath = `/images/buildings/${normalizedType}.jpg`;
+      console.log(`Trying flat path: ${flatImagePath}`);
+      
+      try {
+        const response = await fetch(flatImagePath, { method: 'HEAD' });
+        if (response.ok) {
+          console.log(`Found image at flat path: ${flatImagePath}`);
+          return flatImagePath;
+        }
+      } catch (error) {
+        console.log(`Image not found at ${flatImagePath}`);
       }
-    } catch (error) {
-      console.log(`Image not found at ${flatImagePath}, trying alternative paths`);
     }
     
     // If flat path fails, try the API search
     try {
+      console.log(`Trying API search for building type: ${type}`);
       const response = await fetch(`/api/search-building-image?type=${encodeURIComponent(type)}`);
       if (response.ok) {
         const data = await response.json();
         if (data && data.imagePath) {
-          console.log(`Found image path via search: ${data.imagePath}`);
+          console.log(`Found image path via API search: ${data.imagePath}`);
           return data.imagePath;
+        } else {
+          console.log(`API search returned no results for type: ${type}`);
         }
+      } else {
+        console.log(`API search failed with status: ${response.status}`);
       }
     } catch (error) {
-      console.log('Error searching for building image:', error);
+      console.log('Error searching for building image via API:', error);
+    }
+    
+    // Try hierarchical paths based on common categories
+    const categories = ['commercial', 'residential', 'industrial', 'public', 'military', 'religious'];
+    for (const category of categories) {
+      for (const normalizedType of normalizedTypes) {
+        const hierarchicalPath = `/images/buildings/${category}/${normalizedType}.jpg`;
+        console.log(`Trying hierarchical path: ${hierarchicalPath}`);
+        
+        try {
+          const response = await fetch(hierarchicalPath, { method: 'HEAD' });
+          if (response.ok) {
+            console.log(`Found image at hierarchical path: ${hierarchicalPath}`);
+            return hierarchicalPath;
+          }
+        } catch (error) {
+          // Continue to next path
+        }
+      }
     }
     
     // If all else fails, use a default image
+    console.log(`No image found for building type: ${type}, using default market_stall.jpg`);
     return '/images/buildings/market_stall.jpg';
   } catch (error) {
     console.error('Error getting building image path:', error);
