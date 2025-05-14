@@ -195,7 +195,7 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
         })
         .catch(error => {
           console.error('Error resolving building image path:', error);
-          setBuildingImagePath('/images/buildings/commercial/retail_shops/market_stall.jpg');
+          setBuildingImagePath('/images/buildings/market_stall.jpg');
         });
     } else {
       setBuildingDefinition(null);
