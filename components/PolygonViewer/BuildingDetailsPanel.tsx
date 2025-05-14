@@ -5,28 +5,26 @@ import PlayerProfile from '../UI/PlayerProfile';
 // Add this function to dynamically find the building image path
 const getBuildingImagePath = async (type: string, variant?: string): Promise<string> => {
   try {
-    // Normalize the type by removing spaces and converting to lowercase
-    const normalizedType = type.toLowerCase().replace(/\s+/g, '_').replace(/-/g, '_');
+    // Normalize the type by removing spaces, hyphens, and converting to lowercase
+    const normalizedType = type.toLowerCase().replace(/[\s-_]+/g, '');
     
-    // First try to get the building definition to find the correct category/subcategory
+    // First try the direct flat path
+    const flatImagePath = `/images/buildings/${normalizedType}.jpg`;
+    
+    // Check if the image exists
     try {
-      const response = await fetch(`/api/building-definition?type=${encodeURIComponent(normalizedType)}`);
+      const response = await fetch(flatImagePath, { method: 'HEAD' });
       if (response.ok) {
-        const data = await response.json();
-        if (data && data.category && data.subcategory) {
-          // Construct path using the category and subcategory from the definition
-          const imagePath = `/images/buildings/${data.category}/${data.subcategory}/${normalizedType}.jpg`;
-          console.log(`Using path from building definition: ${imagePath}`);
-          return imagePath;
-        }
+        console.log(`Using flat path for building image: ${flatImagePath}`);
+        return flatImagePath;
       }
     } catch (error) {
-      console.log('Error fetching building definition:', error);
+      console.log(`Image not found at ${flatImagePath}, trying alternative paths`);
     }
     
-    // If we couldn't get the definition, try to search for the building in all categories
+    // If flat path fails, try the API search
     try {
-      const response = await fetch(`/api/search-building-image?type=${encodeURIComponent(normalizedType)}`);
+      const response = await fetch(`/api/search-building-image?type=${encodeURIComponent(type)}`);
       if (response.ok) {
         const data = await response.json();
         if (data && data.imagePath) {
@@ -38,11 +36,11 @@ const getBuildingImagePath = async (type: string, variant?: string): Promise<str
       console.log('Error searching for building image:', error);
     }
     
-    // If all else fails, use a default image that we know exists
-    return '/images/buildings/commercial/retail_shops/market_stall.jpg';
+    // If all else fails, use a default image
+    return '/images/buildings/market_stall.jpg';
   } catch (error) {
     console.error('Error getting building image path:', error);
-    return '/images/buildings/commercial/retail_shops/market_stall.jpg';
+    return '/images/buildings/market_stall.jpg';
   }
 };
 
@@ -132,7 +130,7 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
   const [landRendered, setLandRendered] = useState<boolean>(false);
   const [buildingDefinition, setBuildingDefinition] = useState<any>(null);
   const [showFullDescription, setShowFullDescription] = useState<boolean>(false);
-  const [buildingImagePath, setBuildingImagePath] = useState<string>('/images/buildings/commercial/retail_shops/market_stall.jpg');
+  const [buildingImagePath, setBuildingImagePath] = useState<string>('/images/buildings/market_stall.jpg');
   
   // Fetch building details when a building is selected
   useEffect(() => {
