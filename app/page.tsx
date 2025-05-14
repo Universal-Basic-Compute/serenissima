@@ -84,18 +84,6 @@ export default function TwoDPage() {
             
         <div className="flex space-x-4">
           <button 
-            onClick={() => setShowSettingsModal(true)}
-            className="px-3 py-1 bg-amber-600 hover:bg-amber-500 rounded text-white transition-colors font-serif"
-          >
-            Settings
-          </button>
-          <button 
-            onClick={() => setShowInfo(!showInfo)}
-            className="px-3 py-1 bg-blue-600 hover:bg-blue-500 rounded text-white transition-colors font-serif"
-          >
-            {showInfo ? 'Hide Info' : 'Show Info'}
-          </button>
-          <button 
             onClick={() => window.dispatchEvent(new CustomEvent('showTransportRoutes'))}
             className="px-3 py-1 bg-purple-600 hover:bg-purple-500 rounded text-white transition-colors font-serif"
           >
