@@ -1,1 +1,0 @@
-app/api/calculate-land-rent/route.ts:3:31 - TS2307: Cannot find module '@/lib/utils/airtableUtils' or its corresponding type declarations.

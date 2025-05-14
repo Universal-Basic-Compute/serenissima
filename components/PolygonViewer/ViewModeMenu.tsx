@@ -1,7 +1,6 @@
 import { ViewMode, ActiveViewMode } from '../PolygonViewer/types';
 import IconButton from '../UI/IconButton';
 import { eventBus, EventTypes } from '../../lib/utils/eventBus';
-import { sceneLayerManager } from '../../lib/services/SceneLayerManager';
 
 interface ViewModeMenuProps {
   activeView: ActiveViewMode;
@@ -19,22 +18,7 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
     if (view !== 'guilds') {
       window.dispatchEvent(new CustomEvent('closeGuildsPanel'));
     }
-    
-    // Use SceneLayerManager to handle view changes while preserving buildings
-    if (sceneLayerManager.isBaseLayerInitialized()) {
-      console.log(`ViewModeMenu: Switching to ${view} view, using SceneLayerManager`);
-      
-      if (view !== 'buildings') {
-        // First ensure buildings are visible (if they weren't already)
-        sceneLayerManager.ensureLayerVisible('buildings');
-        
-        // Then switch to the new view, but keep buildings visible
-        sceneLayerManager.switchToView(view, { preserveLayers: ['buildings'] });
-      } else {
-        // If we're switching to buildings view, just make it the primary view
-        sceneLayerManager.switchToView('buildings');
-      }
-    }
+
   };
   // Helper function to check if a view is disabled
   const isDisabled = (view: ViewMode): boolean => {
