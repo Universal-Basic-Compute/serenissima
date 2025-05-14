@@ -71,7 +71,7 @@
       "historicalName": "Riva di Santa Chiara",
       "englishName": "Saint Claire's Shore",
       "historicalDescription": "Named after the convent of Santa Chiara that dominated this area since the 13th century. This was the main landing point for visitors to the religious complex and served as an important arrival point for those entering Venice from the mainland.",
-      "id": "dock_45.439229_12.314634"
+      "id": "canal_45.439229_12.314634"
     },
     {
       "edge": {
@@ -85,7 +85,7 @@
       "historicalName": "Fondamenta dei Pellegrini",
       "englishName": "Foundation of the Pilgrims",
       "historicalDescription": "This dock served pilgrims who arrived in Venice before continuing their journey to the Holy Land. Santa Chiara area, being close to the entry point of the city, was often the first stop for pilgrims, who would seek blessing and rest at the convent before their arduous journey.",
-      "id": "dock_45.439838_12.314623"
+      "id": "canal_45.439838_12.314623"
     },
     {
       "edge": {
@@ -99,7 +99,7 @@
       "historicalName": "Riva degli Orzeri",
       "englishName": "Shore of the Barley Merchants",
       "historicalDescription": "This landing was used by merchants who traded barley and other grains. Located near warehouses in the Santa Chiara district, it was strategically positioned to receive grain shipments that would then be distributed throughout the city.",
-      "id": "dock_45.440328_12.314473"
+      "id": "canal_45.440328_12.314473"
     },
     {
       "edge": {
@@ -113,7 +113,7 @@
       "historicalName": "Fondamenta dei Botteri",
       "englishName": "Foundation of the Barrel Makers",
       "historicalDescription": "Named after the guild of barrel makers who had workshops in this area. Barrels were essential for Venice's maritime trade, and this dock allowed easy loading of newly crafted barrels onto ships, as well as receiving wood supplies for their manufacture.",
-      "id": "dock_45.440817_12.314322"
+      "id": "canal_45.440817_12.314322"
     },
     {
       "edge": {
@@ -127,7 +127,7 @@
       "historicalName": "Riva della Dogana Vecchia",
       "englishName": "Shore of the Old Customs House",
       "historicalDescription": "Before the construction of the more famous Dogana da Mar, an earlier customs checkpoint existed near Santa Chiara. This dock served as a control point for goods entering Venice from the mainland, where duties were collected and merchandise inspected.",
-      "id": "dock_45.441506_12.316114"
+      "id": "canal_45.441506_12.316114"
     },
     {
       "edge": {
@@ -141,7 +141,7 @@
       "historicalName": "Fondamenta dei Bombardieri",
       "englishName": "Foundation of the Cannoneers",
       "historicalDescription": "Named for the artillery specialists who had a training ground nearby. Venice's military might depended on these skilled cannoneers, and this dock was used to transport cannons and gunpowder to and from the Arsenal and to ships in the lagoon.",
-      "id": "dock_45.441208_12.316704"
+      "id": "canal_45.441208_12.316704"
     },
     {
       "edge": {
@@ -155,7 +155,7 @@
       "historicalName": "Riva dei Monasteri",
       "englishName": "Shore of the Monasteries",
       "historicalDescription": "This dock served several religious institutions in the area, not just Santa Chiara. It was used by monks and nuns from various orders to receive supplies and visitors, highlighting the significant religious presence in this part of Renaissance Venice.",
-      "id": "dock_45.440674_12.317182"
+      "id": "canal_45.440674_12.317182"
     }
   ],
   "bridgePoints": [],

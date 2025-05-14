@@ -99,7 +99,7 @@
       "historicalName": "Riva del Formager",
       "englishName": "Dock of the Cheese Maker",
       "historicalDescription": "Named after the nearby Ponte del Formager (Bridge of the Cheese Maker) in San Polo sestiere. This dock would have been used by cheese merchants to unload their goods for sale in the surrounding markets during the Renaissance period. Cheese was an important commodity in Venice, often imported from mainland territories under Venetian control.",
-      "id": "dock_45.430955_12.331067"
+      "id": "canal_45.430955_12.331067"
     },
     {
       "edge": {
@@ -113,7 +113,7 @@
       "historicalName": "Fondamenta dei Lanaioli",
       "englishName": "Foundation of the Wool Workers",
       "historicalDescription": "Located in San Polo, this dock would have served the wool trade workers who were prevalent in this commercial district during the Renaissance. The wool industry was one of Venice's most important guilds, and San Polo was home to many artisans and merchants connected to textile production. This fondamenta would have been used for loading and unloading wool and textile goods.",
-      "id": "dock_45.430963_12.331665"
+      "id": "canal_45.430963_12.331665"
     }
   ],
   "bridgePoints": [

@@ -83,7 +83,7 @@
       "historicalName": "Fondamenta dei Domenicani",
       "englishName": "Foundation of the Dominicans",
       "historicalDescription": "Named after the Dominican friars who had a significant presence in the Castello district. Since Calle San Domenego refers to Saint Dominic, founder of the Dominican Order, this dock would serve the monastery or church associated with these friars in the area.",
-      "id": "dock_45.431604_12.351164"
+      "id": "canal_45.431604_12.351164"
     },
     {
       "edge": {
@@ -97,7 +97,7 @@
       "historicalName": "Riva degli Arsenalotti Minori",
       "englishName": "Landing of the Minor Arsenal Workers",
       "historicalDescription": "This dock would be used by workers from the nearby Venetian Arsenal, which was the largest industrial complex in Europe during the Renaissance. The 'minori' designation indicates this was a secondary landing point for arsenal workers living in this part of Castello.",
-      "id": "dock_45.431352_12.351716"
+      "id": "canal_45.431352_12.351716"
     },
     {
       "edge": {
@@ -111,7 +111,7 @@
       "historicalName": "Fondamenta dei Fabbri d'Ancora",
       "englishName": "Foundation of the Anchor Smiths",
       "historicalDescription": "Castello's proximity to the Arsenal meant many specialized craftsmen lived in the area. This dock would be named after anchor smiths who were vital to Venice's maritime power, crafting anchors for the Republic's naval and merchant fleets.",
-      "id": "dock_45.431100_12.352268"
+      "id": "canal_45.431100_12.352268"
     },
     {
       "edge": {
@@ -125,7 +125,7 @@
       "historicalName": "Riva delle Bandiere",
       "englishName": "Landing of the Flags",
       "historicalDescription": "This dock likely served as a ceremonial landing where flags and standards of the Republic were displayed during processions or celebrations. The name reflects Venice's rich tradition of pageantry and public ceremony near San Domenego.",
-      "id": "dock_45.430849_12.352819"
+      "id": "canal_45.430849_12.352819"
     },
     {
       "edge": {
@@ -139,7 +139,7 @@
       "historicalName": "Fondamenta dei Castellani Vecchi",
       "englishName": "Foundation of the Old Castellani",
       "historicalDescription": "Named after the original inhabitants of the Castello district, one of the oldest populated areas of Venice. The Castellani were also one of the two major factions in medieval Venice (opposing the Nicolotti), and this dock would mark territory traditionally associated with their faction.",
-      "id": "dock_45.430597_12.353371"
+      "id": "canal_45.430597_12.353371"
     },
     {
       "edge": {
@@ -153,7 +153,7 @@
       "historicalName": "Riva di Santa Maria Formosa Piccola",
       "englishName": "Landing of Little Santa Maria Formosa",
       "historicalDescription": "Named for its proximity to the parish of Santa Maria Formosa, one of the important churches in this part of Venice. The 'piccola' designation indicates this was a smaller, secondary landing serving the parish residents in the San Domenego area.",
-      "id": "dock_45.430345_12.353923"
+      "id": "canal_45.430345_12.353923"
     }
   ],
   "bridgePoints": [

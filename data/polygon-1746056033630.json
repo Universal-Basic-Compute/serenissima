@@ -91,7 +91,7 @@
       "historicalName": "Riva di San Salvador",
       "englishName": "Dock of Saint Savior",
       "historicalDescription": "This landing was historically used by merchants and worshippers visiting the Church of San Salvador, an important religious site in the San Marco district since the 12th century. The dock served as a key access point for goods and materials during the church's various renovations, particularly after the 1506 reconstruction designed by Giorgio Spavento and Tullio Lombardo.",
-      "id": "dock_45.443166_12.340463"
+      "id": "canal_45.443166_12.340463"
     },
     {
       "edge": {
@@ -105,7 +105,7 @@
       "historicalName": "Fondamenta della Stella",
       "englishName": "Foundation of the Star",
       "historicalDescription": "Named after Calle Stella (Star Street), this dock served the commercial establishments in this busy area near the Rialto. The star symbol had significance for navigation and commerce in Renaissance Venice, and this fondamenta would have been used by small traders and shopkeepers operating in the narrow streets between San Marco and the Rialto markets. Merchant families with businesses along Calle Stella would have utilized this water access point for receiving goods.",
-      "id": "dock_45.442788_12.341099"
+      "id": "canal_45.442788_12.341099"
     }
   ],
   "bridgePoints": [

@@ -55,7 +55,7 @@
       "historicalName": "Fondamenta degli Scarlattieri",
       "englishName": "Foundation of the Scarlet Dyers",
       "historicalDescription": "Named after the scarlet cloth dyers who operated workshops in this area of Castello during the Renaissance. The name 'Scarlatto' (Scarlet) in Calle del Scarlatto directly references this trade, which was highly regulated by the Venetian Republic due to the valuable dyes used in creating the vibrant red cloths favored by nobility.",
-      "id": "dock_45.446280_12.317843"
+      "id": "canal_45.446280_12.317843"
     },
     {
       "edge": {
@@ -69,7 +69,7 @@
       "historicalName": "Riva di San Martino",
       "englishName": "Bank of Saint Martin",
       "historicalDescription": "This dock would be named after the nearby Church of San Martino in Castello, one of the historic parish churches in this sestiere. During the Renaissance, many Venetian docks were named after the closest religious landmarks, which served as important navigation and community reference points. San Martino was particularly important to the working-class residents of Castello.",
-      "id": "dock_45.445868_12.317346"
+      "id": "canal_45.445868_12.317346"
     },
     {
       "edge": {
@@ -83,7 +83,7 @@
       "historicalName": "Fondamenta dei Arsenalotti",
       "englishName": "Foundation of the Arsenal Workers",
       "historicalDescription": "Located in Castello near the great Venetian Arsenal, this dock would serve the specialized workers (Arsenalotti) who built and maintained Venice's renowned fleet. The Arsenalotti held special privileges in Venetian society and many lived in this eastern part of the city to be close to their workplace. This landing would have been used for transporting materials and workers to the nearby shipyards.",
-      "id": "dock_45.445456_12.316850"
+      "id": "canal_45.445456_12.316850"
     }
   ],
   "bridgePoints": [

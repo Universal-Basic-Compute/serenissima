@@ -103,7 +103,7 @@
       "historicalName": "Fondamenta della Carità",
       "englishName": "Foundation of Charity",
       "historicalDescription": "Named after the adjoining Strada de la Carità, this dock served the charitable institutions in the area, particularly the Scuola Grande della Carità which later became part of the Gallerie dell'Accademia. It was a busy landing point for supplies destined for the various charitable works.",
-      "id": "dock_45.426287_12.359443"
+      "id": "canal_45.426287_12.359443"
     },
     {
       "edge": {
@@ -117,7 +117,7 @@
       "historicalName": "Riva dei Benefattori",
       "englishName": "Shore of the Benefactors",
       "historicalDescription": "This landing was named for the wealthy patrons who would arrive by gondola to make donations to the charitable institutions along Strada de la Carità. Noble families would ceremoniously dock here when delivering alms or endowments to the nearby hospices.",
-      "id": "dock_45.425862_12.360034"
+      "id": "canal_45.425862_12.360034"
     },
     {
       "edge": {
@@ -131,7 +131,7 @@
       "historicalName": "Fondamenta degli Accademici",
       "englishName": "Foundation of the Academics",
       "historicalDescription": "After the establishment of the Accademia in the 18th century (though historically relevant to the Renaissance period), this dock served the prestigious art institution. Artists, teachers, and students would arrive here, often transporting paintings and art supplies.",
-      "id": "dock_45.425508_12.360785"
+      "id": "canal_45.425508_12.360785"
     },
     {
       "edge": {
@@ -145,7 +145,7 @@
       "historicalName": "Riva di San Vidal",
       "englishName": "Shore of Saint Vidal",
       "historicalDescription": "Named after the nearby Church of San Vidal, this dock served parishioners and clergy. The church, dedicated to the martyr San Vitale, was an important religious landmark close to Strada de la Carità, and the dock facilitated access for religious processions and ceremonies.",
-      "id": "dock_45.425154_12.361536"
+      "id": "canal_45.425154_12.361536"
     },
     {
       "edge": {
@@ -159,7 +159,7 @@
       "historicalName": "Fondamenta dei Pisani",
       "englishName": "Foundation of the Pisani Family",
       "historicalDescription": "Named after the noble Pisani family who had significant property holdings near Strada de la Carità. This dock served their palazzo and was used by family members, servants, and visiting dignitaries associated with this influential Venetian family.",
-      "id": "dock_45.424989_12.362262"
+      "id": "canal_45.424989_12.362262"
     },
     {
       "edge": {
@@ -173,7 +173,7 @@
       "historicalName": "Riva delle Elemosine",
       "englishName": "Shore of Alms",
       "historicalDescription": "This dock was where food and supplies donated to the poor would arrive by boat. Located along Strada de la Carità, it served as the main supply point for the charitable institutions that gave the street its name, with regular deliveries of grain, wine, and other necessities for distribution.",
-      "id": "dock_45.424823_12.362988"
+      "id": "canal_45.424823_12.362988"
     },
     {
       "edge": {
@@ -187,7 +187,7 @@
       "historicalName": "Fondamenta dei Gonella",
       "englishName": "Foundation of the Gonella Family",
       "historicalDescription": "Named after a merchant family that traded in textiles and had workshops near Strada de la Carità. The Gonella family, though less famous than some Venetian dynasties, played an important role in the commercial life of this district during the Renaissance period.",
-      "id": "dock_45.429271_12.362788"
+      "id": "canal_45.429271_12.362788"
     },
     {
       "edge": {
@@ -201,7 +201,7 @@
       "historicalName": "Riva degli Scultori",
       "englishName": "Shore of the Sculptors",
       "historicalDescription": "This dock served the workshops of sculptors who had establishments near Strada de la Carità. It was used for unloading marble and stone brought from mainland quarries, making it a crucial logistical point for the Renaissance artists working in the area.",
-      "id": "dock_45.429732_12.362695"
+      "id": "canal_45.429732_12.362695"
     },
     {
       "edge": {
@@ -215,7 +215,7 @@
       "historicalName": "Fondamenta di Sant'Agnese",
       "englishName": "Foundation of Saint Agnes",
       "historicalDescription": "Named after a small chapel dedicated to Saint Agnes that once stood near Strada de la Carità. This dock served the religious complex and the surrounding neighborhood, providing a landing point for devotees coming to worship or participate in the feast day celebrations.",
-      "id": "dock_45.430192_12.362586"
+      "id": "canal_45.430192_12.362586"
     },
     {
       "edge": {
@@ -229,7 +229,7 @@
       "historicalName": "Riva del Magistrato alla Carità",
       "englishName": "Shore of the Charity Magistrate",
       "historicalDescription": "This dock was used by officials overseeing Venice's charitable institutions. The Magistrato alla Carità was a governmental body responsible for supervising hospices and almshouses, and they would arrive at this dock when conducting inspections of the facilities along Strada de la Carità.",
-      "id": "dock_45.430651_12.362477"
+      "id": "canal_45.430651_12.362477"
     },
     {
       "edge": {
@@ -243,7 +243,7 @@
       "historicalName": "Fondamenta del Leone Bianco",
       "englishName": "Foundation of the White Lion",
       "historicalDescription": "Named after an inn or merchant house bearing the sign of a white lion that once stood near Strada de la Carità. This dock served commercial interests in the area and was likely used for delivering goods to nearby businesses and residences during the Renaissance period.",
-      "id": "dock_45.431111_12.362368"
+      "id": "canal_45.431111_12.362368"
     }
   ],
   "bridgePoints": [

@@ -71,7 +71,7 @@
       "historicalName": "Fondamenta delle Teresiane",
       "englishName": "Foundation of the Teresians",
       "historicalDescription": "Named after the Carmelite nuns of the Order of Saint Teresa who established a convent near Calle de le Terese in the 17th century. This dock would have served the convent and surrounding community.",
-      "id": "dock_45.427757_12.357536"
+      "id": "canal_45.427757_12.357536"
     },
     {
       "edge": {
@@ -85,7 +85,7 @@
       "historicalName": "Riva dei Tintori di Lana",
       "englishName": "Bank of the Wool Dyers",
       "historicalDescription": "This dock name reflects the wool dyeing workshops that operated in this area during the Renaissance period. The textile industry was vital to Venice's economy, and many specialized craftsmen had workshops near Calle de le Terese.",
-      "id": "dock_45.428144_12.357111"
+      "id": "canal_45.428144_12.357111"
     },
     {
       "edge": {
@@ -99,7 +99,7 @@
       "historicalName": "Fondamenta dei Carmini",
       "englishName": "Foundation of the Carmelites",
       "historicalDescription": "Named for its proximity to the Church of Santa Maria dei Carmini and the Carmelite order. This religious connection would be particularly appropriate for a dock near Calle de le Terese, which itself references the Teresine (Discalced Carmelites).",
-      "id": "dock_45.428531_12.356686"
+      "id": "canal_45.428531_12.356686"
     },
     {
       "edge": {
@@ -113,7 +113,7 @@
       "historicalName": "Riva di San Nicolò dei Mendicoli",
       "englishName": "Bank of Saint Nicholas of the Beggars",
       "historicalDescription": "Named after the nearby parish church of San Nicolò dei Mendicoli, one of Venice's oldest churches. This area was historically home to poorer Venetians, including many fishermen and laborers who would use this dock.",
-      "id": "dock_45.428918_12.356261"
+      "id": "canal_45.428918_12.356261"
     },
     {
       "edge": {
@@ -127,7 +127,7 @@
       "historicalName": "Fondamenta dei Comparetti",
       "englishName": "Foundation of the Godfathers",
       "historicalDescription": "Refers to a prominent family or confraternity of godfathers who may have lived or operated near Calle de le Terese. Confraternities were important social institutions in Renaissance Venice, often maintaining their own docks for members' use.",
-      "id": "dock_45.429305_12.355836"
+      "id": "canal_45.429305_12.355836"
     }
   ],
   "bridgePoints": [

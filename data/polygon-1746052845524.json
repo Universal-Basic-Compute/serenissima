@@ -59,7 +59,7 @@
       "historicalName": "Riva della Celestia",
       "englishName": "Dock of the Celestia",
       "historicalDescription": "Named after the adjacent Campo de la Celestia, this main dock served the Augustinian convent of Santa Maria Celestia founded in the 13th century. It was an important landing point for provisions and visitors to the convent.",
-      "id": "dock_45.427337_12.308800"
+      "id": "canal_45.427337_12.308800"
     },
     {
       "edge": {
@@ -73,7 +73,7 @@
       "historicalName": "Fondamenta degli Arsenalotti",
       "englishName": "Foundation of the Arsenal Workers",
       "historicalDescription": "Located near the Arsenal, this dock was frequented by the skilled workers (arsenalotti) who were highly respected in Venetian society. Many arsenalotti likely lived in the Celestia area due to its proximity to the Arsenal shipyards.",
-      "id": "dock_45.427570_12.309404"
+      "id": "canal_45.427570_12.309404"
     },
     {
       "edge": {
@@ -87,7 +87,7 @@
       "historicalName": "Riva dei Celestini",
       "englishName": "Dock of the Celestine Monks",
       "historicalDescription": "Named after the religious order that occupied the monastery in Campo de la Celestia. This dock would have been used primarily by the monks and those bringing supplies or conducting business with the religious community.",
-      "id": "dock_45.427804_12.310007"
+      "id": "canal_45.427804_12.310007"
     },
     {
       "edge": {
@@ -101,7 +101,7 @@
       "historicalName": "Fondamenta della Polvere",
       "englishName": "Foundation of the Gunpowder",
       "historicalDescription": "This dock's name reflects its proximity to gunpowder storage facilities near the Arsenal. The Celestia area had connections to Venice's military maritime operations, and this dock would have been used for the careful transport of explosive materials.",
-      "id": "dock_45.427102_12.310788"
+      "id": "canal_45.427102_12.310788"
     },
     {
       "edge": {
@@ -115,7 +115,7 @@
       "historicalName": "Riva delle Monache",
       "englishName": "Dock of the Nuns",
       "historicalDescription": "This landing served the convent in Campo de la Celestia where nuns resided. It would have been a protected dock, somewhat secluded to maintain the privacy of the religious women while still allowing necessary deliveries and official visitors.",
-      "id": "dock_45.426661_12.310524"
+      "id": "canal_45.426661_12.310524"
     },
     {
       "edge": {
@@ -129,7 +129,7 @@
       "historicalName": "Fondamenta dei Navicelli",
       "englishName": "Foundation of the Small Boats",
       "historicalDescription": "A dock where smaller vessels could moor in the Celestia area. Its location in a quieter part of Venice made it ideal for smaller boats to dock without the congestion of the major waterways.",
-      "id": "dock_45.426220_12.310260"
+      "id": "canal_45.426220_12.310260"
     },
     {
       "edge": {
@@ -143,7 +143,7 @@
       "historicalName": "Riva di Sant'Anna",
       "englishName": "Dock of Saint Anne",
       "historicalDescription": "Named after the cult of Saint Anne, which was popular in this area of Venice. The nearby church likely had a chapel dedicated to Saint Anne, mother of the Virgin Mary, making this a religiously significant dock in the Celestia neighborhood.",
-      "id": "dock_45.425984_12.308970"
+      "id": "canal_45.425984_12.308970"
     },
     {
       "edge": {
@@ -157,7 +157,7 @@
       "historicalName": "Fondamenta dei Bacini",
       "englishName": "Foundation of the Basins",
       "historicalDescription": "This dock took its name from its proximity to the small repair basins near the Arsenal. These basins were used for minor repairs to vessels, and the dock would have served workers and materials going to and from these maintenance facilities.",
-      "id": "dock_45.426213_12.308223"
+      "id": "canal_45.426213_12.308223"
     }
   ],
   "bridgePoints": [],

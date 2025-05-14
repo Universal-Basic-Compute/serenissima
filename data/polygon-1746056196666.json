@@ -51,7 +51,7 @@
       "historicalName": "Fondamenta dei Tornitori",
       "englishName": "Foundation of the Woodturners",
       "historicalDescription": "This dock was named after the woodturners who had workshops nearby in Calle de le Tole. These artisans specialized in creating wooden balusters, furniture legs, and decorative elements using lathes - crafts essential to Venice's furniture industry during the Renaissance.",
-      "id": "dock_45.441546_12.343297"
+      "id": "canal_45.441546_12.343297"
     },
     {
       "edge": {
@@ -65,7 +65,7 @@
       "historicalName": "Riva delle Assi",
       "englishName": "Shore of the Planks",
       "historicalDescription": "This landing was where timber planks were delivered and unloaded for the various woodworking shops in Calle de le Tole. The name reflects the area's historical connection to woodworking, as 'tole' itself refers to wooden planks or boards in Venetian dialect.",
-      "id": "dock_45.441223_12.343860"
+      "id": "canal_45.441223_12.343860"
     },
     {
       "edge": {
@@ -79,7 +79,7 @@
       "historicalName": "Fondamenta dei Marangoni",
       "englishName": "Foundation of the Carpenters",
       "historicalDescription": "The Marangoni were the guild of carpenters and joiners in Renaissance Venice. This dock served their workshops that were concentrated in the Calle de le Tole area, where they crafted everything from ornate furniture to architectural elements for Venice's palaces and churches.",
-      "id": "dock_45.440899_12.344423"
+      "id": "canal_45.440899_12.344423"
     },
     {
       "edge": {
@@ -93,7 +93,7 @@
       "historicalName": "Riva di San Zanipolo",
       "englishName": "Shore of Saints John and Paul",
       "historicalDescription": "Named for its proximity to the Basilica di San Giovanni e Paolo (locally known as San Zanipolo in Venetian dialect), one of Venice's largest churches. This dock would have served visitors and materials headed to both the basilica and the Scuola Grande di San Marco nearby from the Calle de le Tole district.",
-      "id": "dock_45.440575_12.344987"
+      "id": "canal_45.440575_12.344987"
     },
     {
       "edge": {
@@ -107,7 +107,7 @@
       "historicalName": "Fondamenta dei Falegnami",
       "englishName": "Foundation of the Woodworkers",
       "historicalDescription": "This dock was named for the falegnami (woodworkers) who were prevalent in the area of Calle de le Tole. The Falegnami guild was distinct from other woodworking specialties and focused on general carpentry. This landing would have received raw materials for their workshops that produced wooden items essential to Venetian daily life.",
-      "id": "dock_45.440252_12.345550"
+      "id": "canal_45.440252_12.345550"
     }
   ],
   "bridgePoints": [

@@ -59,7 +59,7 @@
       "historicalName": "Riva dei Mugnai",
       "englishName": "Dock of the Millers",
       "historicalDescription": "This dock was historically used by millers who operated water-powered grain mills in the vicinity. These artisans were essential to Venetian food production and would receive grain shipments at this landing before processing them into flour for the city's bakeries.",
-      "id": "dock_45.426963_12.324133"
+      "id": "canal_45.426963_12.324133"
     },
     {
       "edge": {
@@ -73,7 +73,7 @@
       "historicalName": "Fondamenta delle Reliquie",
       "englishName": "Foundation of the Relics",
       "historicalDescription": "Located near the Capuchin convent, this dock was where religious relics would arrive in Venice before being processed to the various churches. The Capuchin monks would often participate in ceremonies receiving these sacred objects, making this landing an important religious site.",
-      "id": "dock_45.426808_12.324794"
+      "id": "canal_45.426808_12.324794"
     },
     {
       "edge": {
@@ -87,7 +87,7 @@
       "historicalName": "Riva degli Arcieri",
       "englishName": "Dock of the Archers",
       "historicalDescription": "This dock was named for the city's archery guild who practiced nearby. The Republic of Venice maintained specialized military units, and this landing served as a gathering point for the archers' regiment, who would embark from here when called to service on Venetian galleys.",
-      "id": "dock_45.426653_12.325455"
+      "id": "canal_45.426653_12.325455"
     },
     {
       "edge": {
@@ -101,7 +101,7 @@
       "historicalName": "Fondamenta dei Chioveri",
       "englishName": "Foundation of the Nail-makers",
       "historicalDescription": "This dock served the nail-making workshops that were vital to Venice's shipbuilding industry. Located near the Capuchin area, metalworkers would receive raw materials here and ship their finished products to the Arsenal and other construction sites throughout the city.",
-      "id": "dock_45.426498_12.326115"
+      "id": "canal_45.426498_12.326115"
     },
     {
       "edge": {
@@ -115,7 +115,7 @@
       "historicalName": "Riva della Carità",
       "englishName": "Dock of Charity",
       "historicalDescription": "Adjacent to the Capuchin convent, this dock was where alms and charitable donations would be delivered. The Capuchin order was known for its commitment to poverty and service to the poor, making this landing an important point for the distribution of food and supplies to Venice's needy.",
-      "id": "dock_45.423580_12.324030"
+      "id": "canal_45.423580_12.324030"
     },
     {
       "edge": {
@@ -129,7 +129,7 @@
       "historicalName": "Fondamenta dei Cartai",
       "englishName": "Foundation of the Paper-makers",
       "historicalDescription": "This dock served Venice's paper-making industry, which was crucial for the city's prominence in early printing and publishing. Materials would arrive here before being crafted into paper for books, maps, and official documents of the Republic, supporting Venice's reputation as a center of Renaissance learning and commerce.",
-      "id": "dock_45.423557_12.323247"
+      "id": "canal_45.423557_12.323247"
     }
   ],
   "bridgePoints": [

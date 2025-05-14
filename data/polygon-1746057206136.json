@@ -199,7 +199,7 @@
       "historicalName": "Fondamenta della Madonna",
       "englishName": "Madonna's Foundation",
       "historicalDescription": "Named after the nearby church dedicated to the Virgin Mary in Calle de la Madonna. This dock served as a primary entry point for pilgrims visiting the sacred site during the Renaissance period.",
-      "id": "dock_45.437394_12.354825"
+      "id": "canal_45.437394_12.354825"
     },
     {
       "edge": {
@@ -213,7 +213,7 @@
       "historicalName": "Riva dei Battiloro",
       "englishName": "Gold Beaters' Shore",
       "historicalDescription": "This landing was frequented by gold beaters (battiloro) who hammered gold into thin sheets for use in artwork and gilding throughout Venice. Their workshops were located near Calle de la Madonna.",
-      "id": "dock_45.437265_12.355471"
+      "id": "canal_45.437265_12.355471"
     },
     {
       "edge": {
@@ -227,7 +227,7 @@
       "historicalName": "Fondamenta dei Cedristi",
       "englishName": "Foundation of the Citron Merchants",
       "historicalDescription": "Named for merchants who specialized in importing citrons (cedri) used in religious ceremonies by the Jewish community and for medicinal purposes. The dock was a key arrival point for these exotic fruits.",
-      "id": "dock_45.437135_12.356117"
+      "id": "canal_45.437135_12.356117"
     },
     {
       "edge": {
@@ -241,7 +241,7 @@
       "historicalName": "Riva dei Santissimi",
       "englishName": "Shore of the Most Holy",
       "historicalDescription": "A dock used primarily for religious processions related to the Madonna worship. Religious relics would arrive here before being taken to the nearby church during feast days.",
-      "id": "dock_45.437005_12.356763"
+      "id": "canal_45.437005_12.356763"
     },
     {
       "edge": {
@@ -255,7 +255,7 @@
       "historicalName": "Fondamenta dei Candelieri",
       "englishName": "Candlemakers' Foundation",
       "historicalDescription": "Named for the guild of candlemakers who supplied the numerous churches in Venice, including the Madonna's shrine in Calle de la Madonna. Beeswax and other materials arrived at this dock.",
-      "id": "dock_45.436876_12.357409"
+      "id": "canal_45.436876_12.357409"
     },
     {
       "edge": {
@@ -269,7 +269,7 @@
       "historicalName": "Riva della Consorteria",
       "englishName": "Shore of the Brotherhood",
       "historicalDescription": "Used by a religious brotherhood dedicated to the Madonna that maintained the shrines and organized processions in her honor. Their meeting hall was located near this landing.",
-      "id": "dock_45.436746_12.358055"
+      "id": "canal_45.436746_12.358055"
     },
     {
       "edge": {
@@ -283,7 +283,7 @@
       "historicalName": "Fondamenta degli Icondotti",
       "englishName": "Foundation of the Icon Carriers",
       "historicalDescription": "Named for craftsmen who transported and installed sacred icons, many depicting the Madonna, to churches and private chapels throughout Venice.",
-      "id": "dock_45.436616_12.358701"
+      "id": "canal_45.436616_12.358701"
     },
     {
       "edge": {
@@ -297,7 +297,7 @@
       "historicalName": "Riva dei Votivi",
       "englishName": "Shore of the Votive Offerings",
       "historicalDescription": "Where pilgrims would disembark to bring votive offerings to the Madonna shrine, particularly during times of plague or hardship when Venetians sought divine protection.",
-      "id": "dock_45.436487_12.359347"
+      "id": "canal_45.436487_12.359347"
     },
     {
       "edge": {
@@ -311,7 +311,7 @@
       "historicalName": "Fondamenta dei Tiepolo",
       "englishName": "Tiepolo's Foundation",
       "historicalDescription": "Named after the prominent Tiepolo family who had a palazzo near Calle de la Madonna and financially supported the local religious institutions during the Renaissance.",
-      "id": "dock_45.436829_12.359927"
+      "id": "canal_45.436829_12.359927"
     },
     {
       "edge": {
@@ -325,7 +325,7 @@
       "historicalName": "Riva delle Processioni",
       "englishName": "Shore of the Processions",
       "historicalDescription": "The starting point for religious processions that would wind through the city during feast days related to the Madonna. Decorated boats would dock here before the ceremonies began.",
-      "id": "dock_45.437680_12.361413"
+      "id": "canal_45.437680_12.361413"
     },
     {
       "edge": {
@@ -339,7 +339,7 @@
       "historicalName": "Fondamenta dei Paramenti",
       "englishName": "Foundation of the Vestments",
       "historicalDescription": "Named for the workshops of ecclesiastical vestment makers whose elaborate creations adorned priests during services at the Madonna shrine and other churches.",
-      "id": "dock_45.438015_12.362030"
+      "id": "canal_45.438015_12.362030"
     },
     {
       "edge": {
@@ -353,7 +353,7 @@
       "historicalName": "Riva delle Grazie",
       "englishName": "Shore of the Graces",
       "historicalDescription": "Named for the many 'grazie' (miracles or divine favors) attributed to the Madonna in this area. Pilgrims would arrive seeking healing or blessings.",
-      "id": "dock_45.440735_12.361690"
+      "id": "canal_45.440735_12.361690"
     },
     {
       "edge": {
@@ -367,7 +367,7 @@
       "historicalName": "Fondamenta degli Ex-Voto",
       "englishName": "Foundation of the Votive Offerings",
       "historicalDescription": "Where craftsmen specialized in creating ex-voto offerings (silver miniatures representing healed body parts) would have their workshops. These were offered to the Madonna by those who believed they were healed by her intercession.",
-      "id": "dock_45.440655_12.361028"
+      "id": "canal_45.440655_12.361028"
     },
     {
       "edge": {
@@ -381,7 +381,7 @@
       "historicalName": "Riva dei Coristi",
       "englishName": "Shore of the Choir Singers",
       "historicalDescription": "Where choir members would arrive for special services at the Madonna shrine, particularly during important religious festivals when elaborate musical performances were staged.",
-      "id": "dock_45.440574_12.360367"
+      "id": "canal_45.440574_12.360367"
     },
     {
       "edge": {
@@ -395,7 +395,7 @@
       "historicalName": "Fondamenta delle Reliquie",
       "englishName": "Foundation of the Relics",
       "historicalDescription": "A secure landing point where religious relics would arrive before being installed in the Madonna shrine or nearby churches. Guarded closely during transport to prevent theft of these precious items.",
-      "id": "dock_45.440285_12.359691"
+      "id": "canal_45.440285_12.359691"
     },
     {
       "edge": {
@@ -409,7 +409,7 @@
       "historicalName": "Riva dei Pellegrini Mariani",
       "englishName": "Shore of the Marian Pilgrims",
       "historicalDescription": "The primary landing point for pilgrims specifically coming to worship at the Madonna shrine. During certain feast days, thousands would arrive by boat to this particular dock.",
-      "id": "dock_45.439995_12.359015"
+      "id": "canal_45.439995_12.359015"
     },
     {
       "edge": {
@@ -423,7 +423,7 @@
       "historicalName": "Fondamenta dell'Annunciazione",
       "englishName": "Foundation of the Annunciation",
       "historicalDescription": "Named for the Biblical Annunciation to Mary, this dock was especially active during the feast day of the Annunciation (March 25), which was also the traditional Venetian New Year.",
-      "id": "dock_45.439671_12.358478"
+      "id": "canal_45.439671_12.358478"
     },
     {
       "edge": {
@@ -437,7 +437,7 @@
       "historicalName": "Riva della Devozione",
       "englishName": "Shore of Devotion",
       "historicalDescription": "A landing point frequented by the most devout worshippers of the Madonna, and a gathering place for prayer groups before they proceeded to the shrine in Calle de la Madonna.",
-      "id": "dock_45.439347_12.357942"
+      "id": "canal_45.439347_12.357942"
     },
     {
       "edge": {
@@ -451,7 +451,7 @@
       "historicalName": "Fondamenta dei Ceri",
       "englishName": "Foundation of the Votive Candles",
       "historicalDescription": "Where large ceremonial candles were unloaded for use in Madonna processions and ceremonies. These enormous candles were often decorated with gold leaf and carried in religious processions.",
-      "id": "dock_45.439024_12.357405"
+      "id": "canal_45.439024_12.357405"
     },
     {
       "edge": {
@@ -465,7 +465,7 @@
       "historicalName": "Riva del Rosario",
       "englishName": "Shore of the Rosary",
       "historicalDescription": "Named for the rosary beads used in Marian devotion. Craftsmen making rosaries had workshops nearby, and the dock was a gathering point for rosary prayer groups before proceeding to the Madonna shrine.",
-      "id": "dock_45.438542_12.356826"
+      "id": "canal_45.438542_12.356826"
     },
     {
       "edge": {
@@ -479,7 +479,7 @@
       "historicalName": "Fondamenta degli Incoronati",
       "englishName": "Foundation of the Crowned Ones",
       "historicalDescription": "Named for the tradition of ceremonially crowning statues of the Madonna. The dock would be elaborately decorated during these special ceremonies that typically occurred once annually.",
-      "id": "dock_45.438435_12.356198"
+      "id": "canal_45.438435_12.356198"
     },
     {
       "edge": {
@@ -493,7 +493,7 @@
       "historicalName": "Riva dei Ceristi",
       "englishName": "Shore of the Wax Workers",
       "historicalDescription": "Used by artisans who crafted elaborate wax figurines and decorations for the Madonna shrine and related religious ceremonies. Wax was an important material in Renaissance Venetian religious practice.",
-      "id": "dock_45.438327_12.355571"
+      "id": "canal_45.438327_12.355571"
     },
     {
       "edge": {
@@ -507,7 +507,7 @@
       "historicalName": "Fondamenta della Purificazione",
       "englishName": "Foundation of the Purification",
       "historicalDescription": "Named for the feast of the Purification of the Virgin (Candlemas), this dock was central to the February 2nd celebrations when candles were blessed and distributed to the faithful who arrived by boat.",
-      "id": "dock_45.438220_12.354943"
+      "id": "canal_45.438220_12.354943"
     }
   ],
   "bridgePoints": [],

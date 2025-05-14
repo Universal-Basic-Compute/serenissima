@@ -87,7 +87,7 @@
       "historicalName": "Fondamenta dei Spezieri",
       "englishName": "Foundation of the Spice Merchants",
       "historicalDescription": "This dock was historically used by spice merchants who operated shops and warehouses in Cannaregio. The name 'Spezieri' refers to vendors of exotic spices which were crucial to Venetian trade and cuisine during the Renaissance. Its proximity to Calle del Pezzetto would have made it convenient for transporting goods to the inner areas of the sestiere.",
-      "id": "dock_45.439659_12.321389"
+      "id": "canal_45.439659_12.321389"
     },
     {
       "edge": {
@@ -101,7 +101,7 @@
       "historicalName": "Riva del Fondaco",
       "englishName": "Shore of the Warehouse",
       "historicalDescription": "This landing served a significant commercial warehouse (fondaco) in Cannaregio. During the Renaissance, fondachi were centers of international trade where merchants would store goods and sometimes live. The dock would have facilitated the loading and unloading of merchandise to be distributed throughout the Cannaregio district, including the Calle del Pezzetto area.",
-      "id": "dock_45.440103_12.321818"
+      "id": "canal_45.440103_12.321818"
     },
     {
       "edge": {
@@ -115,7 +115,7 @@
       "historicalName": "Fondamenta della Seta",
       "englishName": "Foundation of Silk",
       "historicalDescription": "This dock was named for the silk trade that flourished in this part of Cannaregio. Silk production and trading was a significant industry in Renaissance Venice, with many workshops located in residential areas like those near Calle del Pezzetto. This fondamenta would have been used to transport raw silk materials and finished products to and from the workshops in the vicinity.",
-      "id": "dock_45.440547_12.322247"
+      "id": "canal_45.440547_12.322247"
     }
   ],
   "bridgePoints": [

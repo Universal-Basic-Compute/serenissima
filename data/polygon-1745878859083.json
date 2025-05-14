@@ -59,7 +59,7 @@
       "historicalName": "Fondamenta dei Mercanti",
       "englishName": "Merchants' Foundation",
       "historicalDescription": "This dock served the merchant shops near Santa Maria Formosa. During the Renaissance, this area was known for textile trading and the mercantile activities of various guilds. The name reflects the economic importance of this landing for commerce in the parish.",
-      "id": "dock_45.431008_12.333365"
+      "id": "canal_45.431008_12.333365"
     },
     {
       "edge": {
@@ -73,7 +73,7 @@
       "historicalName": "Riva di Santa Maria Formosa",
       "englishName": "Shore of Santa Maria Formosa",
       "historicalDescription": "Named after the nearby church of Santa Maria Formosa, one of Venice's oldest churches founded in the 7th century. This dock would have served as the main water entrance to the church and the campo (square) in front of it, allowing worshippers and clergy to arrive directly by boat.",
-      "id": "dock_45.429199_12.334486"
+      "id": "canal_45.429199_12.334486"
     },
     {
       "edge": {
@@ -87,7 +87,7 @@
       "historicalName": "Fondamenta dei Sartori",
       "englishName": "Tailors' Foundation",
       "historicalDescription": "This dock name references the tailors' guild that had workshops in the area of Calle dei Saloni. 'Sartori' refers to tailors, and during the Renaissance period, Venice was renowned for textile production and fine clothing. Guild members would have used this dock to receive materials and ship finished garments.",
-      "id": "dock_45.428924_12.333992"
+      "id": "canal_45.428924_12.333992"
     }
   ],
   "bridgePoints": [

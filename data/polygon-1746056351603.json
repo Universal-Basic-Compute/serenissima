@@ -87,7 +87,7 @@
       "historicalName": "Riva dei Fuseri",
       "englishName": "Landing of the Spindle Makers",
       "historicalDescription": "Named after the Fuseri (spindle makers) who had workshops in this area. Calle dei Fuseri was home to artisans who created wooden spindles used in Venice's important textile industry. This dock would have served as a loading point for materials and finished products.",
-      "id": "dock_45.436433_12.333443"
+      "id": "canal_45.436433_12.333443"
     },
     {
       "edge": {
@@ -101,7 +101,7 @@
       "historicalName": "Fondamenta San Luca",
       "englishName": "Foundation of Saint Luke",
       "historicalDescription": "Named after the nearby Church of San Luca (Saint Luke), an important parish church in the San Marco district. This fondamenta would have served as a main access point for parishioners and clergy arriving by water, as well as for merchants doing business in this commercial area near Rialto.",
-      "id": "dock_45.436636_12.334073"
+      "id": "canal_45.436636_12.334073"
     },
     {
       "edge": {
@@ -115,7 +115,7 @@
       "historicalName": "Riva dei Mercanti di Seta",
       "englishName": "Landing of the Silk Merchants",
       "historicalDescription": "This area near San Luca was known for luxury trades, including silk merchants. The dock would have been used by traders bringing silk from the East, as well as local craftsmen who worked with these luxurious textiles. The proximity to Rialto made it an important commercial landing point for these valuable goods.",
-      "id": "dock_45.436905_12.334625"
+      "id": "canal_45.436905_12.334625"
     }
   ],
   "bridgePoints": [

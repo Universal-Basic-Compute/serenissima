@@ -71,7 +71,7 @@
       "historicalName": "Riva di Santa Marta",
       "englishName": "Shore of Saint Martha",
       "historicalDescription": "Named after the church of Santa Marta in Dorsoduro, this dock served as the main landing point for people visiting the church and monastery established in the 13th century.",
-      "id": "dock_45.431244_12.314768"
+      "id": "canal_45.431244_12.314768"
     },
     {
       "edge": {
@@ -85,7 +85,7 @@
       "historicalName": "Fondamenta dei Ceramisti",
       "englishName": "Foundation of the Ceramicists",
       "historicalDescription": "This dock was frequented by artisans who created decorative ceramics and pottery. The Dorsoduro area was known for various craft workshops during the Renaissance period.",
-      "id": "dock_45.431196_12.314051"
+      "id": "canal_45.431196_12.314051"
     },
     {
       "edge": {
@@ -99,7 +99,7 @@
       "historicalName": "Riva dei Benedettini",
       "englishName": "Shore of the Benedictines",
       "historicalDescription": "Named for the Benedictine monks who had a significant presence near Santa Marta. This dock would have been used for supplies and visitors to their monastic buildings.",
-      "id": "dock_45.431148_12.313334"
+      "id": "canal_45.431148_12.313334"
     },
     {
       "edge": {
@@ -113,7 +113,7 @@
       "historicalName": "Fondamenta delle Convertite",
       "englishName": "Foundation of the Converted Women",
       "historicalDescription": "This dock served a convent for reformed prostitutes near Santa Marta, an institution established to provide shelter and rehabilitation for women seeking to leave prostitution.",
-      "id": "dock_45.431099_12.312617"
+      "id": "canal_45.431099_12.312617"
     },
     {
       "edge": {
@@ -127,7 +127,7 @@
       "historicalName": "Riva dei Zattieri",
       "englishName": "Shore of the Raftsmen",
       "historicalDescription": "Located near the wider Giudecca Canal, this dock was used by raftsmen who transported timber from the mainland into Venice, crucial for the city's shipbuilding industry.",
-      "id": "dock_45.431051_12.311901"
+      "id": "canal_45.431051_12.311901"
     },
     {
       "edge": {
@@ -141,7 +141,7 @@
       "historicalName": "Fondamenta della Lana",
       "englishName": "Foundation of the Wool",
       "historicalDescription": "This dock served wool merchants and processors in Dorsoduro. The wool trade was highly regulated and vital to Venice's economy during the Renaissance.",
-      "id": "dock_45.431282_12.311186"
+      "id": "canal_45.431282_12.311186"
     },
     {
       "edge": {
@@ -155,7 +155,7 @@
       "historicalName": "Riva dei Vetrari",
       "englishName": "Shore of the Glassmakers",
       "historicalDescription": "While most glassmaking was concentrated on Murano, some glassmakers had workshops in Dorsoduro, and this dock would have served their transportation needs.",
-      "id": "dock_45.431513_12.310470"
+      "id": "canal_45.431513_12.310470"
     },
     {
       "edge": {
@@ -169,7 +169,7 @@
       "historicalName": "Fondamenta delle Erbe",
       "englishName": "Foundation of the Herbs",
       "historicalDescription": "A landing where boats bringing herbs, vegetables, and medicinal plants would dock. These would supply local markets and apothecaries in the Santa Marta area.",
-      "id": "dock_45.432147_12.310110"
+      "id": "canal_45.432147_12.310110"
     },
     {
       "edge": {
@@ -183,7 +183,7 @@
       "historicalName": "Riva dei Brentatori",
       "englishName": "Shore of the Wine Carriers",
       "historicalDescription": "Named after the brentatori, workers who carried wine in special wooden containers called 'brente'. This dock would have been crucial for wine deliveries to Dorsoduro.",
-      "id": "dock_45.432550_12.310465"
+      "id": "canal_45.432550_12.310465"
     },
     {
       "edge": {
@@ -197,7 +197,7 @@
       "historicalName": "Fondamenta San Nicolò",
       "englishName": "Foundation of Saint Nicholas",
       "historicalDescription": "Named after a small chapel dedicated to Saint Nicholas that once stood nearby. Saint Nicholas was particularly important to Venetian sailors and merchants.",
-      "id": "dock_45.432953_12.310820"
+      "id": "canal_45.432953_12.310820"
     },
     {
       "edge": {
@@ -211,7 +211,7 @@
       "historicalName": "Riva delle Saline",
       "englishName": "Shore of the Salt Works",
       "historicalDescription": "This dock was connected to Venice's vital salt trade, possibly where salt from the lagoon salt pans was unloaded before being stored or traded.",
-      "id": "dock_45.433356_12.311175"
+      "id": "canal_45.433356_12.311175"
     },
     {
       "edge": {
@@ -225,7 +225,7 @@
       "historicalName": "Fondamenta dei Remeri",
       "englishName": "Foundation of the Oar Makers",
       "historicalDescription": "Dedicated to the craftsmen who made oars for Venetian boats and galleys. The remeri guild was essential to Venice's maritime power and had workshops in various districts including Dorsoduro.",
-      "id": "dock_45.433759_12.311529"
+      "id": "canal_45.433759_12.311529"
     },
     {
       "edge": {
@@ -239,7 +239,7 @@
       "historicalName": "Riva del Lazaretto",
       "englishName": "Shore of the Quarantine Station",
       "historicalDescription": "This dock may have been used for boats heading to or from quarantine facilities, reflecting Venice's advanced public health measures during plague outbreaks.",
-      "id": "dock_45.434162_12.311884"
+      "id": "canal_45.434162_12.311884"
     },
     {
       "edge": {
@@ -253,7 +253,7 @@
       "historicalName": "Fondamenta dei Granai",
       "englishName": "Foundation of the Granaries",
       "historicalDescription": "This dock served nearby granaries where Venice stored its vital grain supplies. Food security was a major concern for the maritime republic.",
-      "id": "dock_45.434566_12.312239"
+      "id": "canal_45.434566_12.312239"
     },
     {
       "edge": {
@@ -267,7 +267,7 @@
       "historicalName": "Riva dei Cerchiai",
       "englishName": "Shore of the Coopers",
       "historicalDescription": "Named for the barrel makers who supplied containers essential for storing and shipping goods. Their craft was vital to Venetian commerce and shipping.",
-      "id": "dock_45.434969_12.312594"
+      "id": "canal_45.434969_12.312594"
     },
     {
       "edge": {
@@ -281,7 +281,7 @@
       "historicalName": "Fondamenta degli Incurabili",
       "englishName": "Foundation of the Incurables",
       "historicalDescription": "This dock served the Ospedale degli Incurabili (Hospital for Incurables) founded in the 16th century near Santa Marta to treat those with syphilis and other chronic diseases.",
-      "id": "dock_45.435372_12.312949"
+      "id": "canal_45.435372_12.312949"
     },
     {
       "edge": {
@@ -295,7 +295,7 @@
       "historicalName": "Riva dei Carbonai",
       "englishName": "Shore of the Charcoal Sellers",
       "historicalDescription": "This dock was where charcoal, essential for heating and cooking, was delivered to the Dorsoduro district by boats from the mainland forests.",
-      "id": "dock_45.435775_12.313304"
+      "id": "canal_45.435775_12.313304"
     },
     {
       "edge": {
@@ -309,7 +309,7 @@
       "historicalName": "Fondamenta dei Marmorari",
       "englishName": "Foundation of the Marble Workers",
       "historicalDescription": "Used by craftsmen who worked with marble for Venetian buildings and monuments. The dock would have facilitated the unloading of heavy marble blocks from quarries.",
-      "id": "dock_45.436178_12.313659"
+      "id": "canal_45.436178_12.313659"
     },
     {
       "edge": {
@@ -323,7 +323,7 @@
       "historicalName": "Riva dei Tabacchi",
       "englishName": "Shore of the Tobacco",
       "historicalDescription": "Following tobacco's introduction to Venice in the late Renaissance, this dock may have been where tobacco shipments were received for processing or distribution in the city.",
-      "id": "dock_45.436581_12.314014"
+      "id": "canal_45.436581_12.314014"
     }
   ],
   "bridgePoints": [

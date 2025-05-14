@@ -51,7 +51,7 @@
       "historicalName": "Riva degli Armaioli",
       "englishName": "Dock of the Armorers",
       "historicalDescription": "This dock was named after the armorers' workshops that were located nearby in the San Gerardo Sagredo area during the 15th-16th centuries. Venice had a significant arms industry that supplied its naval forces, and this landing would have served the craftsmen who specialized in producing plate armor, helmets, and shields for the Republic's military needs.",
-      "id": "dock_45.425108_12.311713"
+      "id": "canal_45.425108_12.311713"
     },
     {
       "edge": {
@@ -65,7 +65,7 @@
       "historicalName": "Fondamenta dei Merletti",
       "englishName": "Foundation of the Lacemakers",
       "historicalDescription": "Located near San Gerardo Sagredo, this dock was associated with Venice's renowned lace-making industry. From the 16th century onward, Venetian lace (punto in aria) was highly prized throughout Europe. This landing likely served workshops or households where predominantly women created intricate needle lace patterns, with finished goods being transported by water to markets or noble households.",
-      "id": "dock_45.426170_12.311456"
+      "id": "canal_45.426170_12.311456"
     }
   ],
   "bridgePoints": [],

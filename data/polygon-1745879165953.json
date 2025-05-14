@@ -79,7 +79,7 @@
       "historicalName": "Fondamenta dei Candelabri",
       "englishName": "Dock of the Candlemakers",
       "historicalDescription": "This dock was named after the candlemakers' guild that operated workshops near Santa Maria Formosa. Candles were essential for both religious and practical purposes in Renaissance Venice, and this fondamenta served tradesmen bringing wax and other materials.",
-      "id": "dock_45.431229_12.316479"
+      "id": "canal_45.431229_12.316479"
     },
     {
       "edge": {
@@ -93,7 +93,7 @@
       "historicalName": "Riva dei Notai",
       "englishName": "Landing of the Notaries",
       "historicalDescription": "Located near the administrative buildings in the Santa Maria Formosa district, this dock was frequented by notaries and legal officials. Many important legal documents were drafted and certified in this area, making it a hub for Venetian bureaucracy.",
-      "id": "dock_45.431184_12.317202"
+      "id": "canal_45.431184_12.317202"
     },
     {
       "edge": {
@@ -107,7 +107,7 @@
       "historicalName": "Fondamenta delle Specchiere",
       "englishName": "Dock of the Mirror Makers",
       "historicalDescription": "Venice was famous for its mirror-making industry during the Renaissance. This dock was where materials for mirrors arrived and finished products were exported. The prestigious mirror craftsmen had workshops near Santa Maria Formosa, contributing to Venice's reputation for luxury goods.",
-      "id": "dock_45.431139_12.317924"
+      "id": "canal_45.431139_12.317924"
     },
     {
       "edge": {
@@ -121,7 +121,7 @@
       "historicalName": "Riva dei Querini",
       "englishName": "Landing of the Querini Family",
       "historicalDescription": "Named after the noble Querini family who had a palazzo near Santa Maria Formosa. This influential nobili family played significant roles in Venetian politics and commerce during the Renaissance, and maintained this private dock for their household and business affairs.",
-      "id": "dock_45.430996_12.318707"
+      "id": "canal_45.430996_12.318707"
     },
     {
       "edge": {
@@ -135,7 +135,7 @@
       "historicalName": "Fondamenta dei Librai",
       "englishName": "Dock of the Booksellers",
       "historicalDescription": "This dock served the printers and booksellers who operated in the vicinity of Santa Maria Formosa. Venice was a major center for printing and publishing during the Renaissance, and this landing was where paper shipments arrived and printed books were distributed throughout the Mediterranean.",
-      "id": "dock_45.430792_12.319501"
+      "id": "canal_45.430792_12.319501"
     }
   ],
   "bridgePoints": [

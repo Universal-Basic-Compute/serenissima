@@ -79,7 +79,7 @@
       "historicalName": "Fondamenta dei Mascari",
       "englishName": "Foundation of the Perfumers",
       "historicalDescription": "This dock was named after the perfumers' guild which had several shops near the Calle de la Madona in San Marco. Venice was a major center for the perfume trade during the Renaissance, importing exotic ingredients from the East and developing unique scents that were sought after throughout Europe.",
-      "id": "dock_45.440195_12.335036"
+      "id": "canal_45.440195_12.335036"
     },
     {
       "edge": {
@@ -93,7 +93,7 @@
       "historicalName": "Riva di San Moisè",
       "englishName": "Bank of Saint Moses",
       "historicalDescription": "Located near the Church of San Moisè in the San Marco district, this landing would have served visitors to the church and the surrounding area. The church of San Moisè dates back to the 8th century and was an important religious landmark in Renaissance Venice, particularly after its reconstruction in the 15th century.",
-      "id": "dock_45.440429_12.334435"
+      "id": "canal_45.440429_12.334435"
     },
     {
       "edge": {
@@ -107,7 +107,7 @@
       "historicalName": "Fondamenta della Fenice",
       "englishName": "Foundation of the Phoenix",
       "historicalDescription": "This dock would have been named in reference to an area where Venetian artisans created fine glassware and other luxury items that were 'reborn' through fire, much like the mythical phoenix. The area near Calle de la Madona was known for luxury crafts and this dock would have received materials and shipped finished goods throughout the Mediterranean.",
-      "id": "dock_45.440779_12.333762"
+      "id": "canal_45.440779_12.333762"
     }
   ],
   "bridgePoints": [

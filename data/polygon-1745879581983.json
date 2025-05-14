@@ -83,7 +83,7 @@
       "historicalName": "Fondamenta dei Carmelitani",
       "englishName": "Wharf of the Carmelites",
       "historicalDescription": "Named after the Carmelite monks who established their convent in Dorsoduro during the 14th century. This fondamenta would have been the main landing dock for supplies and visitors to the Carmelite monastery.",
-      "id": "dock_45.443137_12.315726"
+      "id": "canal_45.443137_12.315726"
     },
     {
       "edge": {
@@ -97,7 +97,7 @@
       "historicalName": "Riva di San Barnaba",
       "englishName": "Shore of Saint Barnabas",
       "historicalDescription": "Named after the nearby Church of San Barnaba in Dorsoduro, founded in the 9th century. This dock would have served parishioners and clergy attending services and religious festivals.",
-      "id": "dock_45.443509_12.316123"
+      "id": "canal_45.443509_12.316123"
     },
     {
       "edge": {
@@ -111,7 +111,7 @@
       "historicalName": "Fondamenta degli Scultori",
       "englishName": "Wharf of the Sculptors",
       "historicalDescription": "Dorsoduro was home to many artisan workshops, including sculptors who would receive marble and stone deliveries via this dock for their commissions in churches and palazzi throughout Venice.",
-      "id": "dock_45.443882_12.316520"
+      "id": "canal_45.443882_12.316520"
     },
     {
       "edge": {
@@ -125,7 +125,7 @@
       "historicalName": "Riva della Malvasia",
       "englishName": "Shore of the Malvasia Wine",
       "historicalDescription": "Named after the popular sweet wine imported from Greece. This dock would have been used by merchants selling this coveted beverage, which was particularly popular among Venetian nobility in the Renaissance period.",
-      "id": "dock_45.442294_12.325382"
+      "id": "canal_45.442294_12.325382"
     },
     {
       "edge": {
@@ -139,7 +139,7 @@
       "historicalName": "Fondamenta dei Barcaroli",
       "englishName": "Wharf of the Boatmen",
       "historicalDescription": "A landing place for the barcaroli, professional boatmen who operated small vessels for hire. Near Calle dei Carmelitani, this dock would have been a gathering point for gondoliers and other small boat operators.",
-      "id": "dock_45.442109_12.324792"
+      "id": "canal_45.442109_12.324792"
     },
     {
       "edge": {
@@ -153,7 +153,7 @@
       "historicalName": "Riva dei Carmini",
       "englishName": "Shore of the Carmini",
       "historicalDescription": "Named after the prominent Santa Maria dei Carmini church in Dorsoduro, built by Carmelite friars. This dock would have been used for processions and for bringing religious artifacts and materials to the church.",
-      "id": "dock_45.441925_12.324201"
+      "id": "canal_45.441925_12.324201"
     },
     {
       "edge": {
@@ -167,7 +167,7 @@
       "historicalName": "Fondamenta delle Procuratie",
       "englishName": "Wharf of the Procurators",
       "historicalDescription": "Named for the Procurators of St. Mark, high-ranking Venetian officials who may have maintained property in this area. This dock would have served administrative functions for the Republic's officials.",
-      "id": "dock_45.441740_12.323611"
+      "id": "canal_45.441740_12.323611"
     },
     {
       "edge": {
@@ -181,7 +181,7 @@
       "historicalName": "Riva dei Catecumeni",
       "englishName": "Shore of the Catechumens",
       "historicalDescription": "Near an institution established in 1557 for housing and converting Jews and Muslims to Christianity. This dock would have been the arrival point for those entering the catechumenate in Dorsoduro.",
-      "id": "dock_45.441484_12.323039"
+      "id": "canal_45.441484_12.323039"
     },
     {
       "edge": {
@@ -195,7 +195,7 @@
       "historicalName": "Fondamenta del Squero",
       "englishName": "Wharf of the Boatyard",
       "historicalDescription": "Named after a nearby squero (traditional Venetian boatyard) where gondolas were built and repaired. This dock would have received timber and other materials for boat construction.",
-      "id": "dock_45.441228_12.322467"
+      "id": "canal_45.441228_12.322467"
     },
     {
       "edge": {
@@ -209,7 +209,7 @@
       "historicalName": "Riva dei Corteleri",
       "englishName": "Shore of the Knife Makers",
       "historicalDescription": "Named for the guild of knife makers who had workshops in this area of Dorsoduro. This dock would have been used for receiving metal shipments and for distributing their finished products.",
-      "id": "dock_45.440972_12.321895"
+      "id": "canal_45.440972_12.321895"
     },
     {
       "edge": {
@@ -223,7 +223,7 @@
       "historicalName": "Fondamenta degli Intagliatori",
       "englishName": "Wharf of the Wood Carvers",
       "historicalDescription": "Dedicated to the skilled artisans who carved decorative elements for furniture, gondolas, and architectural features. This dock would have been used for transporting valuable woods and finished pieces.",
-      "id": "dock_45.440596_12.321487"
+      "id": "canal_45.440596_12.321487"
     },
     {
       "edge": {
@@ -237,7 +237,7 @@
       "historicalName": "Riva dei Frari",
       "englishName": "Shore of the Friars",
       "historicalDescription": "Though the Frari church is in San Polo, this dock in Dorsoduro could have served as a connection point for Franciscan friars traveling between monasteries, reflecting the religious network that existed in Renaissance Venice.",
-      "id": "dock_45.440220_12.321079"
+      "id": "canal_45.440220_12.321079"
     },
     {
       "edge": {
@@ -251,7 +251,7 @@
       "historicalName": "Fondamenta dei Dorsoduranti",
       "englishName": "Wharf of the Dorsoduro Residents",
       "historicalDescription": "Named simply for the residents of the Dorsoduro district, this communal dock would have been used by locals for daily transportation and receiving household goods.",
-      "id": "dock_45.439843_12.320672"
+      "id": "canal_45.439843_12.320672"
     },
     {
       "edge": {
@@ -265,7 +265,7 @@
       "historicalName": "Riva della Toletta",
       "englishName": "Shore of the Tollbooth",
       "historicalDescription": "Named after a small customs point where goods entering this part of Dorsoduro would be inspected and taxed. The term 'toletta' refers to the small toll or tax collected here.",
-      "id": "dock_45.439955_12.319032"
+      "id": "canal_45.439955_12.319032"
     },
     {
       "edge": {
@@ -279,7 +279,7 @@
       "historicalName": "Fondamenta dei Linaroli",
       "englishName": "Wharf of the Linen Merchants",
       "historicalDescription": "Dedicated to traders in linen and flax products who operated in this area of Dorsoduro. This dock would have received raw materials and exported finished textiles.",
-      "id": "dock_45.440352_12.318723"
+      "id": "canal_45.440352_12.318723"
     },
     {
       "edge": {
@@ -293,7 +293,7 @@
       "historicalName": "Riva dei Tedeschi",
       "englishName": "Shore of the Germans",
       "historicalDescription": "Named for German merchants who had established a presence in this part of Venice. This dock would have facilitated trade between Venice and German-speaking territories.",
-      "id": "dock_45.440750_12.318414"
+      "id": "canal_45.440750_12.318414"
     },
     {
       "edge": {
@@ -307,7 +307,7 @@
       "historicalName": "Fondamenta della Scuola Grande",
       "englishName": "Wharf of the Great Confraternity",
       "historicalDescription": "Referencing one of Venice's important confraternities that may have owned property near Calle dei Carmelitani. These charitable organizations played a crucial role in Renaissance Venetian social welfare.",
-      "id": "dock_45.441147_12.318105"
+      "id": "canal_45.441147_12.318105"
     },
     {
       "edge": {
@@ -321,7 +321,7 @@
       "historicalName": "Riva di Sant'Agnese",
       "englishName": "Shore of Saint Agnes",
       "historicalDescription": "Named after the Church of Sant'Agnese that once stood in Dorsoduro. This dock would have served the parish and visitors to religious celebrations honoring the saint.",
-      "id": "dock_45.441545_12.317796"
+      "id": "canal_45.441545_12.317796"
     },
     {
       "edge": {
@@ -335,7 +335,7 @@
       "historicalName": "Fondamenta dei Trovasi",
       "englishName": "Wharf of the Trovasi Family",
       "historicalDescription": "Named after a nobili family that owned property in Dorsoduro during the Renaissance. Family-named docks were common in Venice, indicating ownership or patronage of that waterfront area.",
-      "id": "dock_45.441849_12.317179"
+      "id": "canal_45.441849_12.317179"
     },
     {
       "edge": {
@@ -349,7 +349,7 @@
       "historicalName": "Riva dei Biscottai",
       "englishName": "Shore of the Biscuit Makers",
       "historicalDescription": "Named for bakers specializing in biscotti and hardtack, essential provisions for Venetian ships on long voyages. This dock would have been used to load these durable foodstuffs onto vessels departing Venice.",
-      "id": "dock_45.442154_12.316563"
+      "id": "canal_45.442154_12.316563"
     },
     {
       "edge": {
@@ -363,7 +363,7 @@
       "historicalName": "Fondamenta delle Torreselle",
       "englishName": "Wharf of the Small Towers",
       "historicalDescription": "Named after decorative small towers that may have characterized buildings in this part of Dorsoduro. Architectural features often provided inspiration for place names in Renaissance Venice.",
-      "id": "dock_45.442459_12.315946"
+      "id": "canal_45.442459_12.315946"
     }
   ],
   "bridgePoints": [

@@ -119,7 +119,7 @@
       "historicalName": "Riva di San Polo",
       "englishName": "St. Paul's Landing",
       "historicalDescription": "The main dock serving Campo San Polo, named after the parish church that dominates the campo. This would have been one of the busiest landings in this commercial district.",
-      "id": "dock_45.443212_12.358220"
+      "id": "canal_45.443212_12.358220"
     },
     {
       "edge": {
@@ -133,7 +133,7 @@
       "historicalName": "Fondamenta dei Frari",
       "englishName": "Foundation of the Friars",
       "historicalDescription": "Named for its proximity to the Franciscan Friary (Santa Maria Gloriosa dei Frari) near Campo San Polo. This dock would have served the religious community and visitors to the important basilica.",
-      "id": "dock_45.443069_12.358488"
+      "id": "canal_45.443069_12.358488"
     },
     {
       "edge": {
@@ -147,7 +147,7 @@
       "historicalName": "Riva dei Mercanti di Lana",
       "englishName": "Wool Merchants' Landing",
       "historicalDescription": "The San Polo district was known for textile production and trade. This dock would have served wool merchants bringing their goods to the workshops and markets of the area.",
-      "id": "dock_45.442460_12.358757"
+      "id": "canal_45.442460_12.358757"
     },
     {
       "edge": {
@@ -161,7 +161,7 @@
       "historicalName": "Fondamenta del Magistrato",
       "englishName": "Magistrate's Foundation",
       "historicalDescription": "San Polo contained administrative buildings, and this dock would have served officials of the Venetian Republic who worked in the area's governmental offices.",
-      "id": "dock_45.441948_12.359003"
+      "id": "canal_45.441948_12.359003"
     },
     {
       "edge": {
@@ -175,7 +175,7 @@
       "historicalName": "Riva della Scuola Grande",
       "englishName": "Landing of the Great School",
       "historicalDescription": "Named for its proximity to the Scuola Grande di San Rocco, one of Venice's most important confraternities. This landing would have served members and visitors to this prestigious institution.",
-      "id": "dock_45.441579_12.358510"
+      "id": "canal_45.441579_12.358510"
     },
     {
       "edge": {
@@ -189,7 +189,7 @@
       "historicalName": "Fondamenta dei Toscani",
       "englishName": "Foundation of the Tuscans",
       "historicalDescription": "San Polo attracted merchants from various Italian regions. This dock was likely used by Tuscan traders who had established businesses or residences in the area.",
-      "id": "dock_45.441007_12.357523"
+      "id": "canal_45.441007_12.357523"
     },
     {
       "edge": {
@@ -203,7 +203,7 @@
       "historicalName": "Riva dei Bernardo",
       "englishName": "Bernardo Family Landing",
       "historicalDescription": "Named after the prominent Bernardo noble family who owned properties in the San Polo district. Nobili families often had their own private docks near their palaces.",
-      "id": "dock_45.440725_12.356941"
+      "id": "canal_45.440725_12.356941"
     },
     {
       "edge": {
@@ -217,7 +217,7 @@
       "historicalName": "Fondamenta dei Ricamatori",
       "englishName": "Embroiderers' Foundation",
       "historicalDescription": "The textile arts flourished in San Polo. This dock would have served the guild of embroiderers who had workshops in the area, receiving materials and shipping finished goods.",
-      "id": "dock_45.440442_12.356358"
+      "id": "canal_45.440442_12.356358"
     },
     {
       "edge": {
@@ -231,7 +231,7 @@
       "historicalName": "Riva di Sant'Aponal",
       "englishName": "St. Apollinaris' Landing",
       "historicalDescription": "Named after the Church of Sant'Aponal (St. Apollinaris) in the San Polo district. Parish churches often had associated docks for parishioners arriving by boat.",
-      "id": "dock_45.440228_12.355570"
+      "id": "canal_45.440228_12.355570"
     },
     {
       "edge": {
@@ -245,7 +245,7 @@
       "historicalName": "Fondamenta del Teatro",
       "englishName": "Theater Foundation",
       "historicalDescription": "Campo San Polo hosted theatrical performances during carnival season. This dock would have served performers and spectators coming to enjoy the dramatic arts.",
-      "id": "dock_45.440013_12.354781"
+      "id": "canal_45.440013_12.354781"
     },
     {
       "edge": {
@@ -259,7 +259,7 @@
       "historicalName": "Riva dei Sarti",
       "englishName": "Tailors' Landing",
       "historicalDescription": "The tailors' guild had a significant presence in San Polo. This dock would have been used for receiving fabrics and shipping finished garments throughout the city and beyond.",
-      "id": "dock_45.440081_12.354138"
+      "id": "canal_45.440081_12.354138"
     },
     {
       "edge": {
@@ -273,7 +273,7 @@
       "historicalName": "Fondamenta dei Cognati",
       "englishName": "Foundation of the Brothers-in-law",
       "historicalDescription": "Likely named after a family business operated by brothers-in-law in the San Polo area, possibly textile merchants or artisans who shared ownership of properties along this waterfront.",
-      "id": "dock_45.440352_12.353794"
+      "id": "canal_45.440352_12.353794"
     },
     {
       "edge": {
@@ -287,7 +287,7 @@
       "historicalName": "Riva del Tribunale",
       "englishName": "Court Landing",
       "historicalDescription": "San Polo contained legal offices and courts. This dock would have served lawyers, judges, and clients coming to conduct legal business in the district.",
-      "id": "dock_45.440924_12.353397"
+      "id": "canal_45.440924_12.353397"
     },
     {
       "edge": {
@@ -301,7 +301,7 @@
       "historicalName": "Fondamenta delle Maschere",
       "englishName": "Foundation of the Masks",
       "historicalDescription": "Campo San Polo was a center for carnival celebrations. This dock may have been associated with mask-makers or costume artists who supplied the festival revelry.",
-      "id": "dock_45.441188_12.353655"
+      "id": "canal_45.441188_12.353655"
     },
     {
       "edge": {
@@ -315,7 +315,7 @@
       "historicalName": "Riva dei Pittori",
       "englishName": "Painters' Landing",
       "historicalDescription": "The San Polo district attracted many artists who established studios in the area. This dock would have served painters receiving supplies and shipping completed works.",
-      "id": "dock_45.441534_12.356337"
+      "id": "canal_45.441534_12.356337"
     },
     {
       "edge": {
@@ -329,7 +329,7 @@
       "historicalName": "Fondamenta del Traghetto San Polo",
       "englishName": "San Polo Ferry Foundation",
       "historicalDescription": "This dock would have served as a gondola ferry (traghetto) crossing point on the Grand Canal, connecting San Polo to San Marco district, essential for the commercial life of the area.",
-      "id": "dock_45.442821_12.357785"
+      "id": "canal_45.442821_12.357785"
     }
   ],
   "bridgePoints": [],

@@ -55,7 +55,7 @@
       "historicalName": "Riva di San Lio",
       "englishName": "Shore of Saint Leo",
       "historicalDescription": "Named after the nearby church of San Lio (Saint Leo), which dates back to the 9th century. This dock would have served the parish of San Lio, just a short distance from Calle de la Fava. The church was an important landmark in the Castello district and the riva would have been a vital landing point for goods and passengers serving this parish.",
-      "id": "dock_45.428556_12.330437"
+      "id": "canal_45.428556_12.330437"
     },
     {
       "edge": {
@@ -69,7 +69,7 @@
       "historicalName": "Fondamenta dei Orafi",
       "englishName": "Foundation of the Goldsmiths",
       "historicalDescription": "During the Renaissance, the area near Calle de la Fava was known for its craftsmen, particularly goldsmiths and jewelers. This dock would have been used by these artisans to receive precious metals and export their finished works. The Goldsmiths' Guild (Arte degli Orafi) was among Venice's most prestigious guilds, and would have maintained specialized landing areas for their trade.",
-      "id": "dock_45.428463_12.331152"
+      "id": "canal_45.428463_12.331152"
     },
     {
       "edge": {
@@ -83,7 +83,7 @@
       "historicalName": "Riva delle Fave",
       "englishName": "Shore of the Beans",
       "historicalDescription": "Directly connected to 'Calle de la Fava' (Street of the Bean), this dock likely served as a landing point for bean imports, a staple food in Renaissance Venice. The name 'Fava' suggests this area was historically associated with the trade or storage of beans. Many Venetian locations were named after the goods traded there, and this dock would have been where merchants unloaded this important food commodity.",
-      "id": "dock_45.428370_12.331867"
+      "id": "canal_45.428370_12.331867"
     }
   ],
   "bridgePoints": [

@@ -203,7 +203,7 @@
       "historicalName": "Fondamenta dei Dai",
       "englishName": "Foundation of the Dice",
       "historicalDescription": "This dock takes its name from the adjacent Ponte dei Dai (Bridge of Dice) in Cannaregio. The area was historically associated with gambling activities, particularly dice games, which were popular despite periodic attempts by Venetian authorities to regulate them. Merchants and gondoliers would gather here, making it a bustling commercial landing point.",
-      "id": "dock_45.432263_12.337001"
+      "id": "canal_45.432263_12.337001"
     },
     {
       "edge": {
@@ -217,7 +217,7 @@
       "historicalName": "Riva dei Giocatori",
       "englishName": "Bank of the Gamblers",
       "historicalDescription": "Located near Ponte dei Dai, this dock served as a gathering point for professional gamblers and nobles seeking entertainment in the 16th century. The name reflects the gambling culture that flourished in this part of Cannaregio, where wealthy Venetians and visitors would arrive by boat to participate in games of chance in nearby establishments.",
-      "id": "dock_45.432920_12.339157"
+      "id": "canal_45.432920_12.339157"
     },
     {
       "edge": {
@@ -231,7 +231,7 @@
       "historicalName": "Fondamenta della Scommessa",
       "englishName": "Foundation of the Wager",
       "historicalDescription": "This dock earned its name from the betting activities that took place in the vicinity of Ponte dei Dai. During the Renaissance, it was common for Venetian nobles and merchants to place wagers on various events, from regattas to political outcomes. This fondamenta would have served local residents and visitors coming to engage in both legitimate and illicit betting.",
-      "id": "dock_45.433092_12.339765"
+      "id": "canal_45.433092_12.339765"
     },
     {
       "edge": {
@@ -245,7 +245,7 @@
       "historicalName": "Riva dei Tessitori Cannaregiani",
       "englishName": "Bank of the Cannaregio Weavers",
       "historicalDescription": "This dock served the textile workers who lived and worked in this section of Cannaregio during the 15th-16th centuries. Textile production was a major industry in Venice, and many skilled weavers established workshops in this area. The dock would have been used for receiving raw materials and shipping finished textiles, providing an important economic function for the local artisan community.",
-      "id": "dock_45.433265_12.340372"
+      "id": "canal_45.433265_12.340372"
     }
   ],
   "bridgePoints": [

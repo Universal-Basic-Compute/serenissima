@@ -51,7 +51,7 @@
       "historicalName": "Fondamenta della Scuola Vecchia",
       "englishName": "Dock of the Old School",
       "historicalDescription": "This dock served the Scuola Vecchia della Misericordia, one of Venice's important confraternities. The fondamenta would have been used for the delivery of supplies and materials for the school's charitable activities, as well as for dignitaries and members arriving by water. The Scuola Vecchia (Old School) was established before the larger Scuola Grande della Misericordia was built nearby, making this landing historically significant to the neighborhood's development.",
-      "id": "dock_45.444904_12.334681"
+      "id": "canal_45.444904_12.334681"
     },
     {
       "edge": {
@@ -65,7 +65,7 @@
       "historicalName": "Riva dei Confratelli della Misericordia",
       "englishName": "Landing of the Misericordia Brotherhood",
       "historicalDescription": "This dock was primarily used by the brothers of the Misericordia confraternity when traveling to and from their meetings and charitable works. The confratelli (brotherhood members) would have arrived by gondola or other small boats to this landing point near their meeting place. The Misericordia brotherhood was known for their charitable works, particularly caring for the sick and burying the dead, and this dock would have facilitated their movement throughout the city when responding to calls for assistance.",
-      "id": "dock_45.444607_12.335303"
+      "id": "canal_45.444607_12.335303"
     }
   ],
   "bridgePoints": [

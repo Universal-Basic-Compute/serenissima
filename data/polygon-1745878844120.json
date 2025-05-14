@@ -59,7 +59,7 @@
       "historicalName": "Riva dei Saloni",
       "englishName": "Dock of the Great Halls",
       "historicalDescription": "This dock along the Zattere was historically used by merchants who traded luxury goods displayed in the grand exhibition halls nearby. During the Renaissance, Venetian merchants would showcase fine textiles, spices, and exotic goods from the East in these 'saloni' to attract wealthy buyers.",
-      "id": "dock_45.431076_12.334867"
+      "id": "canal_45.431076_12.334867"
     },
     {
       "edge": {
@@ -73,7 +73,7 @@
       "historicalName": "Fondamenta della Dogana",
       "englishName": "Foundation of the Customs House",
       "historicalDescription": "Named for its proximity to Venice's historic customs house (Dogana da Mar), where goods entering the city by sea were inspected and taxed. This dock served as an official entry point for merchants arriving along the Zattere, who would register their cargoes before being permitted to trade in the city.",
-      "id": "dock_45.431092_12.335511"
+      "id": "canal_45.431092_12.335511"
     },
     {
       "edge": {
@@ -87,7 +87,7 @@
       "historicalName": "Riva dei Gesuati",
       "englishName": "Dock of the Jesuates",
       "historicalDescription": "Named after the Church of Santa Maria del Rosario (commonly called I Gesuati) which faces the Zattere waterfront. The Jesuate order established their presence here in the 15th century, and this dock served as the landing for those visiting the church and monastery, which became particularly important after its reconstruction by Giorgio Massari in the 18th century.",
-      "id": "dock_45.430074_12.335589"
+      "id": "canal_45.430074_12.335589"
     }
   ],
   "bridgePoints": [

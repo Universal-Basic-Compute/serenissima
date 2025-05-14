@@ -75,7 +75,7 @@
       "historicalName": "Riva della Testa",
       "englishName": "Dock of the Head",
       "historicalDescription": "Named after the adjacent Calle de la Testa (Street of the Head), this dock would have been the main water landing for the neighborhood. The name likely refers to a shop sign or family emblem featuring a head that was once prominent in the area.",
-      "id": "dock_45.441401_12.324098"
+      "id": "canal_45.441401_12.324098"
     },
     {
       "edge": {
@@ -89,7 +89,7 @@
       "historicalName": "Fondamenta dei Cappellai",
       "englishName": "Foundation of the Hatmakers",
       "historicalDescription": "This dock served the hatmakers' workshops that were historically concentrated near Calle de la Testa. Venice was known for its millinery trade, and this fondamenta would have been used to receive raw materials and ship finished hats throughout the Mediterranean.",
-      "id": "dock_45.441620_12.324784"
+      "id": "canal_45.441620_12.324784"
     },
     {
       "edge": {
@@ -103,7 +103,7 @@
       "historicalName": "Riva dei Maschereri",
       "englishName": "Dock of the Mask Makers",
       "historicalDescription": "Located near the traditional workshops of Venice's famous mask makers, this dock would have been crucial for the carnival trade. Artisans would receive materials and ship their elaborate masks from this landing, particularly important given Venice's renowned carnival traditions.",
-      "id": "dock_45.441838_12.325471"
+      "id": "canal_45.441838_12.325471"
     },
     {
       "edge": {
@@ -117,7 +117,7 @@
       "historicalName": "Fondamenta San Canzian",
       "englishName": "Foundation of Saint Cantian",
       "historicalDescription": "Named after the nearby Church of San Canzian, this dock would have served both the church and surrounding parish. The church dates to medieval times and was an important religious center in this district of Venice, making its namesake dock significant for local commerce.",
-      "id": "dock_45.441953_12.326111"
+      "id": "canal_45.441953_12.326111"
     },
     {
       "edge": {
@@ -131,7 +131,7 @@
       "historicalName": "Riva dei Filatoi",
       "englishName": "Dock of the Spinners",
       "historicalDescription": "This dock served the textile workers who operated spinning wheels (filatoi) in workshops near Calle de la Testa. Venice's textile industry was vital to its economy during the Renaissance, and this dock would have been used to transport raw silk and cotton as well as finished threads.",
-      "id": "dock_45.442069_12.326751"
+      "id": "canal_45.442069_12.326751"
     }
   ],
   "bridgePoints": [

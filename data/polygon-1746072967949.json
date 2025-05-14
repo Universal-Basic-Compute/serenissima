@@ -107,7 +107,7 @@
       "historicalName": "Fondamenta dei Rialto",
       "englishName": "Foundation of Rialto",
       "historicalDescription": "Named for its proximity to the Rialto markets, this dock served merchants bringing goods to Venice's commercial center in San Polo. It was a bustling landing point for traders from across the Mediterranean.",
-      "id": "dock_45.439766_12.334573"
+      "id": "canal_45.439766_12.334573"
     },
     {
       "edge": {
@@ -121,7 +121,7 @@
       "historicalName": "Riva dei Melangoli",
       "englishName": "Dock of the Bitter Oranges",
       "historicalDescription": "This dock in San Polo was where citrus fruits, particularly bitter oranges used in medicines and cooking, would arrive. The area was known for specialty food merchants who sold exotic fruits to wealthy Venetian households.",
-      "id": "dock_45.439459_12.335166"
+      "id": "canal_45.439459_12.335166"
     },
     {
       "edge": {
@@ -135,7 +135,7 @@
       "historicalName": "Fondamenta della Scuola di San Giovanni",
       "englishName": "Foundation of the School of St. John",
       "historicalDescription": "Named after one of the confraternities (scuole) that was active in the San Polo district, this dock served as a landing point for members and benefactors of the religious brotherhood dedicated to St. John.",
-      "id": "dock_45.438940_12.335756"
+      "id": "canal_45.438940_12.335756"
     },
     {
       "edge": {
@@ -149,7 +149,7 @@
       "historicalName": "Riva dei Casaroli",
       "englishName": "Dock of the Cheesemakers",
       "historicalDescription": "This landing in San Polo served the guild of cheesemakers who had workshops in the area. Fresh cheeses would arrive here from the mainland and nearby islands before being distributed throughout the city.",
-      "id": "dock_45.438612_12.335965"
+      "id": "canal_45.438612_12.335965"
     },
     {
       "edge": {
@@ -163,7 +163,7 @@
       "historicalName": "Fondamenta dei Cavagnin",
       "englishName": "Foundation of the Basket Weavers",
       "historicalDescription": "Named for the basket weaving artisans who had workshops nearby in San Polo, this dock was where materials for their craft would arrive, including reeds and grasses from the lagoon islands.",
-      "id": "dock_45.438074_12.335573"
+      "id": "canal_45.438074_12.335573"
     },
     {
       "edge": {
@@ -177,7 +177,7 @@
       "historicalName": "Riva della Marangona",
       "englishName": "Dock of the Carpenter's Bell",
       "historicalDescription": "Named after the bell (marangona) that signaled the beginning and end of the workday for carpenters and shipbuilders. This dock in San Polo was associated with the woodworking trades that were essential to Venetian shipbuilding.",
-      "id": "dock_45.437607_12.334876"
+      "id": "canal_45.437607_12.334876"
     },
     {
       "edge": {
@@ -191,7 +191,7 @@
       "historicalName": "Fondamenta dei Tagliapietra",
       "englishName": "Foundation of the Stonemasons",
       "historicalDescription": "This dock served the prestigious guild of stonemasons (tagliapietra) who had workshops in San Polo. Marble and stone from quarries on the mainland would arrive here to be worked into architectural elements for Venetian palaces and churches.",
-      "id": "dock_45.437182_12.333889"
+      "id": "canal_45.437182_12.333889"
     },
     {
       "edge": {
@@ -205,7 +205,7 @@
       "historicalName": "Riva del Gambaro",
       "englishName": "Dock of the Crayfish",
       "historicalDescription": "Named for a popular tavern or osteria in San Polo that served freshwater crayfish, this dock was where local fishermen would deliver their catch to nearby establishments, making it a lively spot for both commerce and socializing.",
-      "id": "dock_45.436930_12.333117"
+      "id": "canal_45.436930_12.333117"
     }
   ],
   "bridgePoints": [

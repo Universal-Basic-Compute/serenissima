@@ -83,7 +83,7 @@
       "historicalName": "Riva degli Ognissanti",
       "englishName": "Landing of All Saints",
       "historicalDescription": "Named after the nearby church of Ognissanti (All Saints). During the Renaissance, this dock would have served as a primary landing point for visitors to the church, particularly during religious festivals.",
-      "id": "dock_45.430655_12.321194"
+      "id": "canal_45.430655_12.321194"
     },
     {
       "edge": {
@@ -97,7 +97,7 @@
       "historicalName": "Fondamenta dei Tintori",
       "englishName": "Foundation of the Dyers",
       "historicalDescription": "This dock was historically used by fabric dyers who needed access to water for their craft. The area around Fondamenta degli Ognissanti was known for textile production, and dyers would have been a crucial part of this industry in Renaissance Venice.",
-      "id": "dock_45.430512_12.321807"
+      "id": "canal_45.430512_12.321807"
     },
     {
       "edge": {
@@ -111,7 +111,7 @@
       "historicalName": "Riva delle Gondole",
       "englishName": "Landing of the Gondolas",
       "historicalDescription": "A common docking area for gondoliers waiting to transport passengers. This would have been a bustling point in Renaissance Venice where nobles and merchants could hire transportation to other parts of the city.",
-      "id": "dock_45.430369_12.322420"
+      "id": "canal_45.430369_12.322420"
     },
     {
       "edge": {
@@ -125,7 +125,7 @@
       "historicalName": "Fondamenta dei Pescatori",
       "englishName": "Foundation of the Fishermen",
       "historicalDescription": "Located near the Fondamenta degli Ognissanti, this dock served local fishermen who would bring their daily catch to sell to nearby households and markets. Fishing was vital to Venice's economy and food supply during the Renaissance.",
-      "id": "dock_45.430226_12.323033"
+      "id": "canal_45.430226_12.323033"
     },
     {
       "edge": {
@@ -139,7 +139,7 @@
       "historicalName": "Riva della Fornace",
       "englishName": "Landing of the Kiln",
       "historicalDescription": "Named for a nearby glass or brick furnace. Venice's glass production was legendary during the Renaissance, and kilns were situated in specific areas due to fire concerns. This dock would have received raw materials and dispatched finished products.",
-      "id": "dock_45.430083_12.323646"
+      "id": "canal_45.430083_12.323646"
     },
     {
       "edge": {
@@ -153,7 +153,7 @@
       "historicalName": "Fondamenta dei Cordai",
       "englishName": "Foundation of the Ropemakers",
       "historicalDescription": "Ropemaking was essential for Venice's maritime industry. This dock near the Fondamenta degli Ognissanti would have specialized in loading and unloading materials for ropemakers, and possibly in shipping the finished ropes to the Arsenal or other shipyards.",
-      "id": "dock_45.429940_12.324258"
+      "id": "canal_45.429940_12.324258"
     },
     {
       "edge": {
@@ -167,7 +167,7 @@
       "historicalName": "Riva dei Traghetti",
       "englishName": "Landing of the Ferries",
       "historicalDescription": "Before Venice had as many bridges as today, ferry crossings (traghetti) were essential. This dock would have been an official crossing point where gondoliers would transport people from one side of a canal to another, serving as a vital point in Renaissance Venice's transportation network.",
-      "id": "dock_45.429797_12.324871"
+      "id": "canal_45.429797_12.324871"
     }
   ],
   "bridgePoints": [

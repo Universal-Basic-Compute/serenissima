@@ -127,7 +127,7 @@
       "historicalName": "Fondamenta dei Panificatori",
       "englishName": "Foundation of the Breadmakers",
       "historicalDescription": "Named for the bakeries near Calle del Forno ('Oven Street') in San Polo, this dock served the guild of breadmakers who received grain deliveries and distributed their products throughout Venice by boat.",
-      "id": "dock_45.447731_12.318978"
+      "id": "canal_45.447731_12.318978"
     },
     {
       "edge": {
@@ -141,7 +141,7 @@
       "historicalName": "Riva di San Boldo",
       "englishName": "Bank of Saint Boldo",
       "historicalDescription": "Located near the Church of San Boldo in San Polo, this landing served local parishioners and merchants. The church was an important religious landmark in this district during the Renaissance period.",
-      "id": "dock_45.447759_12.319659"
+      "id": "canal_45.447759_12.319659"
     },
     {
       "edge": {
@@ -155,7 +155,7 @@
       "historicalName": "Fondamenta della Farina",
       "englishName": "Foundation of the Flour",
       "historicalDescription": "This dock was where flour shipments arrived to supply the bakeries of Calle del Forno. It played a crucial role in Venice's food supply chain, as bread was a staple food for all social classes.",
-      "id": "dock_45.447787_12.320340"
+      "id": "canal_45.447787_12.320340"
     },
     {
       "edge": {
@@ -169,7 +169,7 @@
       "historicalName": "Riva dei Meloni",
       "englishName": "Bank of the Melons",
       "historicalDescription": "A small dock where fruit vendors, particularly those selling melons, would receive their goods. Located near San Polo, it served the local market that would have operated in the vicinity of Calle del Forno.",
-      "id": "dock_45.447816_12.321022"
+      "id": "canal_45.447816_12.321022"
     },
     {
       "edge": {
@@ -183,7 +183,7 @@
       "historicalName": "Fondamenta dei Fruttaroli",
       "englishName": "Foundation of the Fruiterers",
       "historicalDescription": "This landing served the fruit and vegetable vendors who operated in the San Polo district. These merchants formed a significant guild in Renaissance Venice and needed water access for fresh produce deliveries.",
-      "id": "dock_45.442553_12.328355"
+      "id": "canal_45.442553_12.328355"
     },
     {
       "edge": {
@@ -197,7 +197,7 @@
       "historicalName": "Riva del Traghetto San Silvestro",
       "englishName": "Bank of the San Silvestro Ferry",
       "historicalDescription": "A dock that served as a gondola ferry crossing point near the Church of San Silvestro, connecting San Polo with other districts. These traghetto services were vital for transportation across the Grand Canal.",
-      "id": "dock_45.442583_12.327668"
+      "id": "canal_45.442583_12.327668"
     },
     {
       "edge": {
@@ -211,7 +211,7 @@
       "historicalName": "Fondamenta dei Pistori",
       "englishName": "Foundation of the Bakers",
       "historicalDescription": "Named for the pistori (bakers) guild, this dock was directly associated with Calle del Forno. Bakers would receive deliveries here and distribute their finished bread products to vendors throughout the city.",
-      "id": "dock_45.442613_12.326981"
+      "id": "canal_45.442613_12.326981"
     }
   ],
   "bridgePoints": [

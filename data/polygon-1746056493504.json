@@ -91,7 +91,7 @@
       "historicalName": "Riva della Fava",
       "englishName": "Dock of the Bean",
       "historicalDescription": "Named for its proximity to Calle Seconda de la Fava in San Marco, where bean merchants would bring their goods. Beans were an important staple food in Renaissance Venice, and merchants selling them clustered in this area near the church of San Zulian.",
-      "id": "dock_45.439380_12.347195"
+      "id": "canal_45.439380_12.347195"
     },
     {
       "edge": {
@@ -105,7 +105,7 @@
       "historicalName": "Fondamenta dei Orefici",
       "englishName": "Foundation of the Goldsmiths",
       "historicalDescription": "Located near the San Marco district, this dock served the many goldsmiths and jewelers who had workshops in the area. The proximity to the wealthy patrons of San Marco made this an ideal location for luxury crafts, and the dock would have received shipments of precious metals and gems.",
-      "id": "dock_45.439252_12.347853"
+      "id": "canal_45.439252_12.347853"
     },
     {
       "edge": {
@@ -119,7 +119,7 @@
       "historicalName": "Riva del Collegio",
       "englishName": "Dock of the College",
       "historicalDescription": "This landing was used by officials of the Collegio, an important governing body of the Venetian Republic that prepared matters for the Senate. Located in San Marco near government buildings, it would have seen frequent traffic from dignitaries and state officials traveling to and from meetings.",
-      "id": "dock_45.439124_12.348512"
+      "id": "canal_45.439124_12.348512"
     },
     {
       "edge": {
@@ -133,7 +133,7 @@
       "historicalName": "Fondamenta dei Camerlenghi",
       "englishName": "Foundation of the Treasurers",
       "historicalDescription": "Named after the Camerlenghi, the treasury officials of the Republic who managed public finances. This dock in San Marco would have been used to transport tax collections, financial documents, and officials responsible for the city's economy, reflecting Venice's sophisticated financial administration.",
-      "id": "dock_45.438996_12.349170"
+      "id": "canal_45.438996_12.349170"
     },
     {
       "edge": {
@@ -147,7 +147,7 @@
       "historicalName": "Riva dei Paramenti",
       "englishName": "Dock of the Vestments",
       "historicalDescription": "Near the churches in San Marco, this dock was where ecclesiastical textiles and ceremonial vestments would be loaded and unloaded. Religious processions were an important part of Venetian public life, and this dock would support the elaborate ceremonies that took place regularly in the nearby Basilica di San Marco.",
-      "id": "dock_45.438753_12.350706"
+      "id": "canal_45.438753_12.350706"
     }
   ],
   "bridgePoints": [

@@ -51,7 +51,7 @@
       "historicalName": "Riva dei Santi Apostoli",
       "englishName": "Dock of the Holy Apostles",
       "historicalDescription": "Named after the nearby Church of Santi Apostoli, this dock served as an important landing point for religious processions during feast days of the apostles in Renaissance Venice. It was frequently used by clerics traveling between parishes in the northern districts.",
-      "id": "dock_45.448322_12.330070"
+      "id": "canal_45.448322_12.330070"
     },
     {
       "edge": {
@@ -65,7 +65,7 @@
       "historicalName": "Fondamenta degli Abbondanzieri",
       "englishName": "Foundation of the Grain Suppliers",
       "historicalDescription": "This dock was primarily used by merchants who supplied grain to the Misericordia district. The Abbondanzieri were officials responsible for maintaining adequate food supplies in the Republic, and this landing point was crucial for distributing grain to the northern parts of the city.",
-      "id": "dock_45.448528_12.329352"
+      "id": "canal_45.448528_12.329352"
     },
     {
       "edge": {
@@ -79,7 +79,7 @@
       "historicalName": "Riva della Madonna dell'Orto",
       "englishName": "Dock of Madonna of the Garden",
       "historicalDescription": "Named after the iconic Madonna dell'Orto church near the Misericordia area, this dock served pilgrims and visitors to the church which housed important works by Tintoretto. The church gained prominence in the 15th century, making this dock increasingly important for religious visitors.",
-      "id": "dock_45.448734_12.328633"
+      "id": "canal_45.448734_12.328633"
     },
     {
       "edge": {
@@ -93,7 +93,7 @@
       "historicalName": "Fondamenta dei Miracoli",
       "englishName": "Foundation of Miracles",
       "historicalDescription": "Located near the Santa Maria dei Miracoli church, this dock served the marble-clad Renaissance jewel completed in the late 15th century. The name references the miraculous icon of the Virgin Mary housed in the church, and the dock was used to transport the precious marbles used in the church's construction.",
-      "id": "dock_45.448927_12.327828"
+      "id": "canal_45.448927_12.327828"
     },
     {
       "edge": {
@@ -107,7 +107,7 @@
       "historicalName": "Riva dei Mori",
       "englishName": "Dock of the Moors",
       "historicalDescription": "This dock near Misericordia was named for the Moorish merchants who frequently used it for trade. Venice had significant trade relations with North Africa and the Middle East, and this dock specifically served merchants bringing exotic goods and spices from these regions to the northern districts.",
-      "id": "dock_45.449120_12.327023"
+      "id": "canal_45.449120_12.327023"
     },
     {
       "edge": {
@@ -121,7 +121,7 @@
       "historicalName": "Fondamenta degli Ospedalieri",
       "englishName": "Foundation of the Hospitallers",
       "historicalDescription": "This dock served the hospital and charitable facilities in the Misericordia area. The Ospedalieri were members of the religious orders dedicated to caring for the sick and poor. This landing was used to transport supplies, medicines, and sometimes patients to the charitable institutions in the district.",
-      "id": "dock_45.449073_12.325639"
+      "id": "canal_45.449073_12.325639"
     },
     {
       "edge": {
@@ -135,7 +135,7 @@
       "historicalName": "Riva dei Servi di Maria",
       "englishName": "Dock of the Servants of Mary",
       "historicalDescription": "Named after the Servite Order who maintained a monastery in the area, this dock near Misericordia was primarily used by the religious brothers of the order. The Servites (Servants of Mary) were established in Venice in the 13th century, and this dock facilitated their movement between their monastery and other religious houses in Renaissance Venice.",
-      "id": "dock_45.448832_12.325060"
+      "id": "canal_45.448832_12.325060"
     }
   ],
   "bridgePoints": [

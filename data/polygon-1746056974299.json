@@ -127,7 +127,7 @@
       "historicalName": "Riva di San Provolo",
       "englishName": "Saint Provolus' Shore",
       "historicalDescription": "This dock was named after the contrada (district) of San Provolo where it was located. San Provolo was a Byzantine saint venerated in Venice, and the area contained a church dedicated to him. The dock would have served local residents and visitors to the nearby Fontana (fountain) which was an important water source in the area during the Renaissance period.",
-      "id": "dock_45.433547_12.347129"
+      "id": "canal_45.433547_12.347129"
     },
     {
       "edge": {
@@ -141,7 +141,7 @@
       "historicalName": "Fondamenta della Fontana",
       "englishName": "Foundation of the Fountain",
       "historicalDescription": "This landing takes its name directly from the fountain (fontana) located in the Calle de la Fontana. Public fountains were crucial infrastructure in Renaissance Venice, providing fresh water to residents. This fondamenta would have been a practical landing point for boats delivering goods to the neighborhood, and the name references the most notable landmark in the immediate vicinity that would have been recognized by gondoliers and merchants alike.",
-      "id": "dock_45.433664_12.346357"
+      "id": "canal_45.433664_12.346357"
     }
   ],
   "bridgePoints": [

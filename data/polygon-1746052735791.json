@@ -75,7 +75,7 @@
       "historicalName": "Fondamenta dei Cristallai",
       "englishName": "Foundation of the Crystal Makers",
       "historicalDescription": "Named after the skilled artisans who crafted fine crystal glassware. Santa Croce had several workshops of specialized glassmakers who created high-quality crystal pieces for wealthy Venetian families and export.",
-      "id": "dock_45.425759_12.329776"
+      "id": "canal_45.425759_12.329776"
     },
     {
       "edge": {
@@ -89,7 +89,7 @@
       "historicalName": "Riva di San Giacomo",
       "englishName": "Saint James' Shore",
       "historicalDescription": "Directly named after the nearby Calle San Giacomo, this dock would have served as the main water access point for the church of San Giacomo and surrounding neighborhood in Santa Croce.",
-      "id": "dock_45.425700_12.330415"
+      "id": "canal_45.425700_12.330415"
     },
     {
       "edge": {
@@ -103,7 +103,7 @@
       "historicalName": "Fondamenta dei Tolentini",
       "englishName": "Foundation of the Tolentines",
       "historicalDescription": "Named after the Theatine Order who established the Church of San Nicolò da Tolentino in Santa Croce during the 16th century. This dock would have served the religious community and visitors to the church.",
-      "id": "dock_45.425641_12.331054"
+      "id": "canal_45.425641_12.331054"
     },
     {
       "edge": {
@@ -117,7 +117,7 @@
       "historicalName": "Riva dei Tessitori",
       "englishName": "Shore of the Weavers",
       "historicalDescription": "Santa Croce was home to numerous textile workshops, and this dock would have been used by weavers to receive raw materials and ship finished textiles, a crucial industry in Renaissance Venice's economy.",
-      "id": "dock_45.425582_12.331693"
+      "id": "canal_45.425582_12.331693"
     },
     {
       "edge": {
@@ -131,7 +131,7 @@
       "historicalName": "Fondamenta della Croce",
       "englishName": "Foundation of the Cross",
       "historicalDescription": "Referencing the name of the sestiere itself (Santa Croce - Holy Cross), this dock would have been an important landing point for the district, possibly near a prominent cross marker or a church dedicated to the Holy Cross.",
-      "id": "dock_45.425523_12.332333"
+      "id": "canal_45.425523_12.332333"
     },
     {
       "edge": {
@@ -145,7 +145,7 @@
       "historicalName": "Riva dei Conciatori",
       "englishName": "Shore of the Tanners",
       "historicalDescription": "The leather tanning industry was typically located in peripheral areas due to its odors. This area of Santa Croce, being somewhat removed from the city center, would have been suitable for leather processing workshops.",
-      "id": "dock_45.425464_12.332972"
+      "id": "canal_45.425464_12.332972"
     },
     {
       "edge": {
@@ -159,7 +159,7 @@
       "historicalName": "Fondamenta dei Giardini",
       "englishName": "Foundation of the Gardens",
       "historicalDescription": "Unlike most of Venice, parts of Santa Croce had space for gardens and orchards. This dock might have been near notable gardens or served for transporting produce grown in the district's green spaces.",
-      "id": "dock_45.423170_12.332452"
+      "id": "canal_45.423170_12.332452"
     },
     {
       "edge": {
@@ -173,7 +173,7 @@
       "historicalName": "Riva degli Scalpellini",
       "englishName": "Shore of the Stonemasons",
       "historicalDescription": "Stonemasons were vital to Venice's construction industry. This dock in Santa Croce would have been used for unloading stone materials brought in from the mainland and islands for building projects throughout the city.",
-      "id": "dock_45.423157_12.331755"
+      "id": "canal_45.423157_12.331755"
     },
     {
       "edge": {
@@ -187,7 +187,7 @@
       "historicalName": "Fondamenta dei Frati Minori",
       "englishName": "Foundation of the Minor Friars",
       "historicalDescription": "Named after the Franciscan friars (Frati Minori) who had a presence in Santa Croce. This dock would have served their monastery and facilitated their charitable work in the community.",
-      "id": "dock_45.423144_12.331057"
+      "id": "canal_45.423144_12.331057"
     },
     {
       "edge": {
@@ -201,7 +201,7 @@
       "historicalName": "Riva delle Beccarie",
       "englishName": "Shore of the Butchers",
       "historicalDescription": "Butcher shops (beccarie) needed water access for waste disposal and receiving livestock. This dock in Santa Croce would have served the local meat market, positioned away from more prestigious residential areas due to its nature.",
-      "id": "dock_45.423130_12.330360"
+      "id": "canal_45.423130_12.330360"
     }
   ],
   "bridgePoints": [

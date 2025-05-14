@@ -79,7 +79,7 @@
       "historicalName": "Riva di San Moisè",
       "englishName": "St. Moses Waterfront",
       "historicalDescription": "Named after the nearby Church of San Moisè, this dock would have served visitors to this prominent church in the San Marco district. The church dates back to the 8th century and was an important religious landmark near Calle de le Lezze.",
-      "id": "dock_45.435124_12.328828"
+      "id": "canal_45.435124_12.328828"
     },
     {
       "edge": {
@@ -93,7 +93,7 @@
       "historicalName": "Fondamenta Lezze",
       "englishName": "Lezze Foundation",
       "historicalDescription": "Named after the prominent Lezze family who had their residence along Calle de le Lezze. The Lezze were a noble Venetian family who contributed several important figures to the Republic's government during the Renaissance period.",
-      "id": "dock_45.434714_12.327755"
+      "id": "canal_45.434714_12.327755"
     },
     {
       "edge": {
@@ -107,7 +107,7 @@
       "historicalName": "Riva dei Gioiellieri",
       "englishName": "Jewelers' Landing",
       "historicalDescription": "The San Marco area near Piazza San Marco was known for luxury trades. This dock would have served the jewelry workshops that existed in this affluent area, where artisans crafted pieces for wealthy Venetian nobles and foreign visitors.",
-      "id": "dock_45.434367_12.327487"
+      "id": "canal_45.434367_12.327487"
     },
     {
       "edge": {
@@ -121,7 +121,7 @@
       "historicalName": "Fondamenta dei Maschereri",
       "englishName": "Mask Makers' Foundation",
       "historicalDescription": "The San Marco district housed many artisans who created masks for Venice's famous carnival celebrations. This dock would have been used by these craftsmen to receive materials and ship finished products, particularly significant given the area's proximity to the entertainment districts.",
-      "id": "dock_45.433599_12.327664"
+      "id": "canal_45.433599_12.327664"
     },
     {
       "edge": {
@@ -135,7 +135,7 @@
       "historicalName": "Riva della Dogana Piccola",
       "englishName": "Small Customs House Landing",
       "historicalDescription": "This dock would have served as a secondary customs checkpoint for goods entering the wealthy San Marco district. While the main Dogana was located at the entrance to the Grand Canal, smaller customs stations existed throughout Venice to monitor and tax goods being transported within the city.",
-      "id": "dock_45.433266_12.327766"
+      "id": "canal_45.433266_12.327766"
     }
   ],
   "bridgePoints": [

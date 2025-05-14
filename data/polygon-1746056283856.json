@@ -79,7 +79,7 @@
       "historicalName": "Fondamenta del Paradiso",
       "englishName": "Foundation of Paradise",
       "historicalDescription": "This dock was named after the nearby Church of Santa Maria del Paradiso, which existed in the San Marco district during the Renaissance period. Merchants bringing religious goods and artisans crafting church ornaments often used this landing near Calle de la Fava.",
-      "id": "dock_45.437609_12.335762"
+      "id": "canal_45.437609_12.335762"
     },
     {
       "edge": {
@@ -93,7 +93,7 @@
       "historicalName": "Riva dei Cambiavalute",
       "englishName": "Bank of the Money Changers",
       "historicalDescription": "Located close to Calle de la Fava in the commercial heart of San Marco, this dock served the many money changers and bankers who operated in this area. Renaissance Venice was a financial center, and foreign merchants would arrive at this dock to exchange currencies before conducting business in the nearby markets.",
-      "id": "dock_45.438036_12.336301"
+      "id": "canal_45.438036_12.336301"
     }
   ],
   "bridgePoints": [

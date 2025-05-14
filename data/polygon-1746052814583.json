@@ -59,7 +59,7 @@
       "historicalName": "Fondamenta dei Lavraneri",
       "englishName": "Foundation of the Laurel Makers",
       "historicalDescription": "Named after the Lavraneri district in Dorsoduro, this dock served the artisans who specialized in crafting laurel wreaths and decorations, which were used in Venetian ceremonies and celebrations. The laurel craftsmen had workshops along this canal during the Renaissance period.",
-      "id": "dock_45.427504_12.312250"
+      "id": "canal_45.427504_12.312250"
     },
     {
       "edge": {
@@ -73,7 +73,7 @@
       "historicalName": "Riva della Calcina",
       "englishName": "Shore of the Lime Kiln",
       "historicalDescription": "This dock in Dorsoduro was historically associated with lime kilns that operated nearby, providing essential materials for Venetian construction. Lime was crucial for creating mortar used in building the city's foundations and structures, making this an important industrial landing in Renaissance Venice.",
-      "id": "dock_45.427928_12.312518"
+      "id": "canal_45.427928_12.312518"
     },
     {
       "edge": {
@@ -87,7 +87,7 @@
       "historicalName": "Fondamenta degli Avogadori",
       "englishName": "Foundation of the Advocates",
       "historicalDescription": "Named after the Avogadori di Comun, important judicial magistrates in the Venetian Republic who acted as public prosecutors. This dock near Dorsoduro would have been used by these officials and their staff when traveling to hearings and investigations in this part of the city.",
-      "id": "dock_45.428352_12.312786"
+      "id": "canal_45.428352_12.312786"
     },
     {
       "edge": {
@@ -101,7 +101,7 @@
       "historicalName": "Riva dei Tintori di Seta",
       "englishName": "Shore of the Silk Dyers",
       "historicalDescription": "This landing served the workshops of silk dyers who operated in the Dorsoduro district. Venice was renowned for its silk industry during the Renaissance, and specific areas were designated for dyeing these luxury textiles. The proximity to water was essential for their craft.",
-      "id": "dock_45.428941_12.314149"
+      "id": "canal_45.428941_12.314149"
     },
     {
       "edge": {
@@ -115,7 +115,7 @@
       "historicalName": "Fondamenta San Trovaso",
       "englishName": "Foundation of Saint Gervasius and Protasius",
       "historicalDescription": "Named after the nearby Church of San Trovaso (dedicated to Saints Gervasius and Protasius), this dock in Dorsoduro served both religious and commercial purposes. It was particularly important for bringing supplies to the church and the surrounding parish during Renaissance times.",
-      "id": "dock_45.428971_12.315050"
+      "id": "canal_45.428971_12.315050"
     },
     {
       "edge": {
@@ -129,7 +129,7 @@
       "historicalName": "Riva dei Varoteri",
       "englishName": "Shore of the Furriers",
       "historicalDescription": "This dock was named for the furriers' guild whose members worked nearby in Dorsoduro. Fur was a valuable commodity in Renaissance Venice, and specific areas were designated for its processing and trading. The guild maintained workshops in this area where they prepared and sold luxury furs.",
-      "id": "dock_45.428905_12.315777"
+      "id": "canal_45.428905_12.315777"
     },
     {
       "edge": {
@@ -143,7 +143,7 @@
       "historicalName": "Fondamenta delle Maravegie",
       "englishName": "Foundation of Wonders",
       "historicalDescription": "This poetically named dock in Dorsoduro was where exotic goods and curiosities from distant lands were often unloaded. 'Maravegie' is Venetian dialect for 'meraviglie' (wonders), reflecting Venice's position as a gateway for rare and unusual items from the East during the Renaissance period.",
-      "id": "dock_45.428839_12.316503"
+      "id": "canal_45.428839_12.316503"
     }
   ],
   "bridgePoints": [

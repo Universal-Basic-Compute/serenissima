@@ -87,7 +87,7 @@ export class DockService {
     try {
       const newDock: DockData = {
         ...dockData,
-        id: `dock_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: `canal_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         createdAt: new Date().toISOString()
       };
       

@@ -107,7 +107,7 @@
       "historicalName": "Fondamenta dei Greci",
       "englishName": "Quay of the Greeks",
       "historicalDescription": "Named for its proximity to the Greek Orthodox community that settled in this area of Venice in the Renaissance period. The Salizada dei Greci led to the Greek Orthodox church of San Giorgio dei Greci, making this a logical name for a nearby water landing used by members of this important Byzantine-Venetian community.",
-      "id": "dock_45.429091_12.327941"
+      "id": "canal_45.429091_12.327941"
     },
     {
       "edge": {
@@ -121,7 +121,7 @@
       "historicalName": "Riva degli Armeni",
       "englishName": "Bank of the Armenians",
       "historicalDescription": "This dock would serve the Armenian merchant community who had a presence near the Greek quarter in Renaissance Venice. Armenian traders were important in Venice's commerce with the East, and would likely have had a designated landing area near their community buildings, not far from Salizada dei Greci.",
-      "id": "dock_45.429270_12.327190"
+      "id": "canal_45.429270_12.327190"
     },
     {
       "edge": {
@@ -135,7 +135,7 @@
       "historicalName": "Fondamenta dei Vetrai",
       "englishName": "Foundation of the Glassmakers",
       "historicalDescription": "While most glass production was centered in Murano, some glass merchants and artisans had workshops in the city proper. This dock would have served as a loading point for glass goods or materials being transported to and from the eastern parts of Venice, connecting to the Greek quarter and the broader commercial network of the Serenissima.",
-      "id": "dock_45.429449_12.326439"
+      "id": "canal_45.429449_12.326439"
     }
   ],
   "bridgePoints": [

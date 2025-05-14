@@ -43,7 +43,7 @@
       "historicalName": "Fondamenta dei Corameri",
       "englishName": "Foundation of the Leather Workers",
       "historicalDescription": "This dock served leather craftsmen workshops in Giudecca. During the Renaissance, Venetian leather production was renowned throughout Europe, and Giudecca housed numerous workshops processing leather imported through Venice's maritime trade routes. The craftsmen here specialized in decorative leather goods, saddles, and luxury items for both local nobles and export.",
-      "id": "dock_45.428433_12.319631"
+      "id": "canal_45.428433_12.319631"
     },
     {
       "edge": {
@@ -57,7 +57,7 @@
       "historicalName": "Riva del Redentore",
       "englishName": "Bank of the Redeemer",
       "historicalDescription": "Named after the Church of the Redentore (Redeemer), one of Giudecca's most prominent landmarks. The church was commissioned by the Venetian Senate following the plague of 1575-1576 as a votive offering for the city's deliverance. This dock would have served pilgrims and worshippers arriving by boat to the church, particularly during the annual Festa del Redentore celebration when a temporary bridge of boats connected Giudecca to the main islands.",
-      "id": "dock_45.425571_12.318016"
+      "id": "canal_45.425571_12.318016"
     }
   ],
   "bridgePoints": [],

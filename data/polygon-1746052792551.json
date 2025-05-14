@@ -47,7 +47,7 @@
       "historicalName": "Fondamenta dei Conversi",
       "englishName": "Foundation of the Converts",
       "historicalDescription": "This dock takes its name from its proximity to Calle de le Convertite in Dorsoduro, where there was historically a house for converted women (often former prostitutes who had 'converted' to a religious life). The dock would have served as a landing point for supplies and visitors to this religious institution.",
-      "id": "dock_45.424257_12.320940"
+      "id": "canal_45.424257_12.320940"
     },
     {
       "edge": {
@@ -61,7 +61,7 @@
       "historicalName": "Riva di San Trovaso",
       "englishName": "Bank of Saint Gervasius and Protasius",
       "historicalDescription": "Named after the nearby Chiesa di San Trovaso (a Venetian contraction of Saints Gervasius and Protasius), one of the important churches in Dorsoduro. This dock would have served the parish and the surrounding area, located not far from Calle de le Convertite, and would have been used by parishioners and clergy.",
-      "id": "dock_45.424561_12.320217"
+      "id": "canal_45.424561_12.320217"
     },
     {
       "edge": {
@@ -75,7 +75,7 @@
       "historicalName": "Fondamenta dei Penitori",
       "englishName": "Foundation of the Penitents",
       "historicalDescription": "This name references the penitent women who resided in the religious house near Calle de le Convertite. During the Renaissance, Venice had several institutions for women who sought to leave their previous life and do penance. The dock would have been used for bringing supplies to these religious communities and was likely maintained by charitable donations from noble Venetian families.",
-      "id": "dock_45.424865_12.319495"
+      "id": "canal_45.424865_12.319495"
     }
   ],
   "bridgePoints": [

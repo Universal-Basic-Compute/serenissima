@@ -63,7 +63,7 @@
       "historicalName": "Riva di Santa Elena",
       "englishName": "Saint Helen's Shore",
       "historicalDescription": "Named after Saint Helen, mother of Emperor Constantine, whose relics were housed in the nearby church. This was the main landing point for visitors to the Campo and church of Santa Elena.",
-      "id": "dock_45.428796_12.363885"
+      "id": "canal_45.428796_12.363885"
     },
     {
       "edge": {
@@ -77,7 +77,7 @@
       "historicalName": "Fondamenta degli Agostiniani",
       "englishName": "Foundation of the Augustinians",
       "historicalDescription": "Named for the Augustinian monks who maintained a monastery near Campo Santa Elena from the 12th century. They were responsible for much of the early development of this area of Venice.",
-      "id": "dock_45.428766_12.364736"
+      "id": "canal_45.428766_12.364736"
     },
     {
       "edge": {
@@ -91,7 +91,7 @@
       "historicalName": "Riva dei Ciprioti",
       "englishName": "Shore of the Cypriots",
       "historicalDescription": "This dock was frequented by Cypriot merchants who traded with Venice, particularly after Venice gained control of Cyprus in the late 15th century. It would have seen goods like sugar, cotton, and salt arriving from the eastern Mediterranean.",
-      "id": "dock_45.428714_12.366655"
+      "id": "canal_45.428714_12.366655"
     },
     {
       "edge": {
@@ -105,7 +105,7 @@
       "historicalName": "Fondamenta della Croce Antica",
       "englishName": "Foundation of the Ancient Cross",
       "historicalDescription": "Named for an old stone cross that stood in the Campo de Santa Elena, marking the site of religious processions and ceremonies. Such crosses were important landmarks in Renaissance Venice.",
-      "id": "dock_45.427364_12.366117"
+      "id": "canal_45.427364_12.366117"
     },
     {
       "edge": {
@@ -119,7 +119,7 @@
       "historicalName": "Riva dei Legnamari",
       "englishName": "Shore of the Timber Merchants",
       "historicalDescription": "This dock served timber merchants who supplied wood for shipbuilding at the nearby Arsenal. The eastern location of Santa Elena made it convenient for receiving timber that arrived from the forests of the Veneto mainland.",
-      "id": "dock_45.426866_12.366283"
+      "id": "canal_45.426866_12.366283"
     },
     {
       "edge": {
@@ -133,7 +133,7 @@
       "historicalName": "Fondamenta dei Giardinieri",
       "englishName": "Foundation of the Gardeners",
       "historicalDescription": "Campo Santa Elena was known for having more green space than many areas of Venice. This dock served gardeners who maintained the monastery gardens and supplied produce to this part of the city.",
-      "id": "dock_45.426367_12.366448"
+      "id": "canal_45.426367_12.366448"
     },
     {
       "edge": {
@@ -147,7 +147,7 @@
       "historicalName": "Riva del Naviglio Piccolo",
       "englishName": "Shore of the Small Ship",
       "historicalDescription": "A smaller dock used primarily by local fishermen and small craft. Its name references the smaller vessels that would dock here, as opposed to the larger merchant ships that required deeper harbors.",
-      "id": "dock_45.425869_12.366613"
+      "id": "canal_45.425869_12.366613"
     },
     {
       "edge": {
@@ -161,7 +161,7 @@
       "historicalName": "Fondamenta dei Reliquiari",
       "englishName": "Foundation of the Reliquaries",
       "historicalDescription": "Named for its connection to the relics of Saint Helen housed in the church. Pilgrims and those bringing offerings or reliquaries would often arrive at this dock when visiting the sacred site.",
-      "id": "dock_45.425145_12.365909"
+      "id": "canal_45.425145_12.365909"
     },
     {
       "edge": {
@@ -175,7 +175,7 @@
       "historicalName": "Riva dei Patrizi Orientali",
       "englishName": "Shore of the Eastern Nobili",
       "historicalDescription": "A dock used by noble Venetian families with interests in the eastern territories of the Republic. Santa Elena's position on the eastern edge of Venice made it symbolically connected to Venice's eastern maritime empire.",
-      "id": "dock_45.424892_12.365083"
+      "id": "canal_45.424892_12.365083"
     }
   ],
   "bridgePoints": [],

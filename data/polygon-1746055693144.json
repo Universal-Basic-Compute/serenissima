@@ -55,7 +55,7 @@
       "historicalName": "Fondamenta dei Loredan",
       "englishName": "Loredan Foundation",
       "historicalDescription": "Named after the prominent Loredan family who owned palaces in this area of Cannaregio. The Loredan family produced several doges of Venice, including Leonardo Loredan (1501-1521), who ruled during the War of the League of Cambrai.",
-      "id": "dock_45.447864_12.331579"
+      "id": "canal_45.447864_12.331579"
     },
     {
       "edge": {
@@ -69,7 +69,7 @@
       "historicalName": "Riva dei Setaioli",
       "englishName": "Silk Merchants' Shore",
       "historicalDescription": "Cannaregio was home to many textile workshops, including silk merchants. This dock would have served as a loading point for valuable silk products, which were a crucial part of Venice's luxury trade with the East during the Renaissance.",
-      "id": "dock_45.447636_12.332235"
+      "id": "canal_45.447636_12.332235"
     },
     {
       "edge": {
@@ -83,7 +83,7 @@
       "historicalName": "Fondamenta della Madonna dei Miracoli",
       "englishName": "Foundation of the Madonna of Miracles",
       "historicalDescription": "Named for its proximity to the Church of Santa Maria dei Miracoli, one of Venice's most elegant Renaissance churches. This dock would have served pilgrims and worshippers coming to visit this important religious site in the nearby area.",
-      "id": "dock_45.447408_12.332891"
+      "id": "canal_45.447408_12.332891"
     },
     {
       "edge": {
@@ -97,7 +97,7 @@
       "historicalName": "Riva degli Ebrei",
       "englishName": "Shore of the Jews",
       "historicalDescription": "Located near Venice's Jewish Ghetto, established in 1516 in Cannaregio. This dock would have been an important access point for Jewish merchants and residents, as the ghetto was surrounded by canals and access was strictly controlled.",
-      "id": "dock_45.447181_12.333548"
+      "id": "canal_45.447181_12.333548"
     },
     {
       "edge": {
@@ -111,7 +111,7 @@
       "historicalName": "Fondamenta dei Riformati",
       "englishName": "Foundation of the Reformed",
       "historicalDescription": "Named after the nearby Monastery of Reformed Franciscans that existed in Cannaregio during the Renaissance. The dock would have served the monastery for supplies and transportation of clergy members.",
-      "id": "dock_45.446953_12.334204"
+      "id": "canal_45.446953_12.334204"
     },
     {
       "edge": {
@@ -125,7 +125,7 @@
       "historicalName": "Riva dei Lombardi",
       "englishName": "Shore of the Lombards",
       "historicalDescription": "Named for the Lombard merchants and bankers who established businesses in this area of Cannaregio. Immigrants from Lombardy formed a significant foreign community in Renaissance Venice, contributing to its commercial prosperity.",
-      "id": "dock_45.446725_12.334860"
+      "id": "canal_45.446725_12.334860"
     },
     {
       "edge": {
@@ -139,7 +139,7 @@
       "historicalName": "Fondamenta delle Contesse",
       "englishName": "Foundation of the Countesses",
       "historicalDescription": "Named for the noble women who resided in the elegant palaces along this waterway. In Renaissance Venice, nobili families often had their palaces built with water gates, and this dock would have served the female members of these households.",
-      "id": "dock_45.445947_12.335153"
+      "id": "canal_45.445947_12.335153"
     },
     {
       "edge": {
@@ -153,7 +153,7 @@
       "historicalName": "Riva dei Vinattieri",
       "englishName": "Wine Merchants' Shore",
       "historicalDescription": "Wine was a significant import to Venice, especially from mainland territories and Greece. This dock in Cannaregio would have specialized in the unloading and storage of wine barrels, serving the numerous taverns and households in the area.",
-      "id": "dock_45.445546_12.334765"
+      "id": "canal_45.445546_12.334765"
     }
   ],
   "bridgePoints": [

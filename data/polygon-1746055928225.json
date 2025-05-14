@@ -47,7 +47,7 @@
       "historicalName": "Riva di San Rocco",
       "englishName": "Saint Roch's Bank",
       "historicalDescription": "Named after the Scuola Grande di San Rocco, this landing would have served visitors to the important confraternity dedicated to Saint Roch, patron saint of plague victims. The Scuola, founded in 1478, became one of Venice's most prestigious confraternities, making this dock a significant access point for members and visitors.",
-      "id": "dock_45.444848_12.337373"
+      "id": "canal_45.444848_12.337373"
     },
     {
       "edge": {
@@ -61,7 +61,7 @@
       "historicalName": "Fondamenta dei Confratelli",
       "englishName": "Foundation of the Confraternity Members",
       "historicalDescription": "This dock would have served the brothers of the Scuola Grande di San Rocco. 'Confratelli' refers to the brotherhood members who managed charitable works and religious activities. The confraternity grew wealthy in the 16th century, attracting nobility and wealthy merchants who would have used this landing when attending meetings.",
-      "id": "dock_45.444533_12.337941"
+      "id": "canal_45.444533_12.337941"
     },
     {
       "edge": {
@@ -75,7 +75,7 @@
       "historicalName": "Riva dei Tintoretto",
       "englishName": "Tintoretto's Bank",
       "historicalDescription": "Named after Jacopo Tintoretto, the renowned Venetian painter who created numerous masterpieces for the Scuola Grande di San Rocco between 1564 and 1587. This dock would commemorate the artist who spent decades decorating the interior of the Scuola with over 60 paintings, making it appropriate for a landing near the building.",
-      "id": "dock_45.444217_12.338509"
+      "id": "canal_45.444217_12.338509"
     },
     {
       "edge": {
@@ -89,7 +89,7 @@
       "historicalName": "Fondamenta della Carità",
       "englishName": "Foundation of Charity",
       "historicalDescription": "This name reflects the charitable works performed by the Scuola Grande di San Rocco, which was known for distributing alms to the poor, especially during plague outbreaks. The brotherhood provided medical care, food, and financial assistance to those in need, making 'Carità' (charity) an appropriate name for a dock near their headquarters.",
-      "id": "dock_45.443902_12.339076"
+      "id": "canal_45.443902_12.339076"
     },
     {
       "edge": {
@@ -103,7 +103,7 @@
       "historicalName": "Riva dei Guaritori",
       "englishName": "Bank of the Healers",
       "historicalDescription": "This dock name references the healing association of Saint Roch, the patron saint of the Scuola. During plague epidemics that frequently struck Venice, physicians and healers would have arrived via this dock to tend to the sick. The Scuola Grande di San Rocco gained particular prominence during the plague of 1576, making this name historically significant for the area.",
-      "id": "dock_45.444689_12.336473"
+      "id": "canal_45.444689_12.336473"
     }
   ],
   "bridgePoints": [

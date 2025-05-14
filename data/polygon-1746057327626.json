@@ -95,7 +95,7 @@
       "historicalName": "Fondamenta dei Dominicani",
       "englishName": "Foundation of the Dominicans",
       "historicalDescription": "Named after the Dominican friars who maintained the Basilica di San Giovanni e Paolo (San Zanipolo). The Dominican Order had significant influence in this area since the 13th century, and this dock would have served their monastery and basilica directly.",
-      "id": "dock_45.435232_12.360786"
+      "id": "canal_45.435232_12.360786"
     },
     {
       "edge": {
@@ -109,7 +109,7 @@
       "historicalName": "Riva dei Condottieri",
       "englishName": "Bank of the Condottieri",
       "historicalDescription": "Named in reference to the many military commanders (condottieri) whose funeral monuments are housed in the Basilica di San Zanipolo. The basilica became the traditional burial place for Venice's doges and military heroes, making this name historically appropriate for a dock serving visitors to these grand tombs.",
-      "id": "dock_45.434547_12.361376"
+      "id": "canal_45.434547_12.361376"
     },
     {
       "edge": {
@@ -123,7 +123,7 @@
       "historicalName": "Fondamenta della Scuola Grande di San Marco",
       "englishName": "Foundation of the Great School of Saint Mark",
       "historicalDescription": "Named after the prestigious Scuola Grande di San Marco, which stands on the Campo San Zanipolo. This confraternity building, with its magnificent Renaissance façade, was one of Venice's most important charitable institutions and would have had its own water access for officials and visitors.",
-      "id": "dock_45.434170_12.361494"
+      "id": "canal_45.434170_12.361494"
     },
     {
       "edge": {
@@ -137,7 +137,7 @@
       "historicalName": "Riva dell'Ospedale",
       "englishName": "Bank of the Hospital",
       "historicalDescription": "Named for the historic hospital that occupied the Scuola Grande di San Marco building from the early 19th century (though the association began earlier). Even during Renaissance times, the area had connections to medical care and healing, making this a plausible name for a dock serving this function.",
-      "id": "dock_45.433696_12.361398"
+      "id": "canal_45.433696_12.361398"
     },
     {
       "edge": {
@@ -151,7 +151,7 @@
       "historicalName": "Fondamenta del Colleoni",
       "englishName": "Foundation of Colleoni",
       "historicalDescription": "Named after the famous bronze equestrian statue of condottiero Bartolomeo Colleoni that stands in the campo. Created by Andrea del Verrocchio in the 1480s, this monument became an important landmark in the area, and a nearby dock might well have been named in reference to this celebrated military leader and his impressive monument.",
-      "id": "dock_45.433199_12.361140"
+      "id": "canal_45.433199_12.361140"
     }
   ],
   "bridgePoints": [],

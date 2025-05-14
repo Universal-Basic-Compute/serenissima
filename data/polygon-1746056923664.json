@@ -63,7 +63,7 @@
       "historicalName": "Riva di San Zaccaria",
       "englishName": "Saint Zacharias Waterfront",
       "historicalDescription": "Named after the adjacent 9th-century church of San Zaccaria, this dock served as the main landing point for visitors to the church and monastery. The church housed important relics and was traditionally visited by the Doge during Easter celebrations, making this dock significant for both religious processions and daily commerce in the area.",
-      "id": "dock_45.433772_12.343586"
+      "id": "canal_45.433772_12.343586"
     },
     {
       "edge": {
@@ -77,7 +77,7 @@
       "historicalName": "Fondamenta delle Monache Benedettine",
       "englishName": "Foundation of the Benedictine Nuns",
       "historicalDescription": "This dock was connected to the Benedictine convent attached to San Zaccaria church, where daughters of noble Venetian families resided. The nuns of San Zaccaria were renowned for their fine needlework and the production of ecclesiastical vestments, making this dock an important point for the delivery of materials and the shipment of their completed works to churches throughout Venice and beyond.",
-      "id": "dock_45.433729_12.342848"
+      "id": "canal_45.433729_12.342848"
     }
   ],
   "bridgePoints": [

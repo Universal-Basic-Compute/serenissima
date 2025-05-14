@@ -87,7 +87,7 @@
       "historicalName": "Fondamenta della Maddalena",
       "englishName": "Foundation of the Magdalene",
       "historicalDescription": "This dock takes its name from the Church of Santa Maria Maddalena that historically stood in this area of Cannaregio. The church was a significant landmark from the 13th century until it was demolished in the early 19th century. The fondamenta would have served merchants and residents visiting the church and the surrounding parish.",
-      "id": "dock_45.442213_12.330828"
+      "id": "canal_45.442213_12.330828"
     },
     {
       "edge": {
@@ -101,7 +101,7 @@
       "historicalName": "Riva dei Linaioli",
       "englishName": "Shore of the Linen Workers",
       "historicalDescription": "Cannaregio was home to many textile artisans during the Renaissance period, including those who worked with linen. This dock would have served as a loading and unloading point for raw materials and finished goods related to the linen trade. The area around Calle de la Maddalena had numerous workshops dedicated to textile production, making this name historically appropriate for a local water landing.",
-      "id": "dock_45.442374_12.329994"
+      "id": "canal_45.442374_12.329994"
     }
   ],
   "bridgePoints": [

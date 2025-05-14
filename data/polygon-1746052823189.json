@@ -47,7 +47,7 @@
       "historicalName": "Fondamenta dei Galeotti",
       "englishName": "Foundation of the Galley Slaves",
       "historicalDescription": "This dock near Sacca della Misericordia would have been where galley slaves were brought to work on Venetian ships. The nearby Arsenal employed countless forced laborers, and this landing would have served as a point of embarkation for these unfortunate souls heading to the galleys that made Venice's naval power possible.",
-      "id": "dock_45.425404_12.314433"
+      "id": "canal_45.425404_12.314433"
     },
     {
       "edge": {
@@ -61,7 +61,7 @@
       "historicalName": "Riva dei Cappuccini",
       "englishName": "Shore of the Capuchins",
       "historicalDescription": "This dock in Sacca della Misericordia would be named after the Capuchin friars who established a monastery in this northern area of Cannaregio during the 16th century. The Capuchins were known for their charitable work with the poor, which aligns with the 'Misericordia' (mercy) theme of this area. Ships bringing supplies to the monastery would have docked here.",
-      "id": "dock_45.425571_12.315103"
+      "id": "canal_45.425571_12.315103"
     }
   ],
   "bridgePoints": [

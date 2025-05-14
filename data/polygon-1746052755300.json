@@ -51,7 +51,7 @@
       "historicalName": "Riva di San Rocco",
       "englishName": "Dock of Saint Roch",
       "historicalDescription": "This landing point would naturally be named after the nearby Scuola Grande di San Rocco, one of Venice's most important confraternities dedicated to Saint Roch, patron saint of plague victims. During the Renaissance period, this dock would have been used by members of the confraternity and visitors coming to the prestigious building with its Tintoretto paintings.",
-      "id": "dock_45.423519_12.326637"
+      "id": "canal_45.423519_12.326637"
     },
     {
       "edge": {
@@ -65,7 +65,7 @@
       "historicalName": "Fondamenta dei Confratelli",
       "englishName": "Foundation of the Confraternity Brothers",
       "historicalDescription": "This dock name references the brotherhood members (confratelli) who would have used this landing when attending functions at the Scuola Grande di San Rocco. The confraternity was founded in 1478 during a plague epidemic, and this dock would have served the officials and wealthy merchants who were members of this prestigious charitable organization in Renaissance Venice.",
-      "id": "dock_45.423589_12.325821"
+      "id": "canal_45.423589_12.325821"
     }
   ],
   "bridgePoints": [
