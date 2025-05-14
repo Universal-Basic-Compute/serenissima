@@ -8,7 +8,7 @@ import { FaHome, FaBuilding, FaRoad, FaTree, FaStore, FaLandmark, FaBook } from 
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 import WalletButton from '@/components/UI/WalletButton';
 import ResourceDropdowns from '@/components/UI/ResourceDropdowns';
-import SettingsModal from '@/components/UI/SettingsModal';
+import Settings from '@/components/UI/Settings';
 
 // Import the 2D viewer component with no SSR
 const IsometricViewer = dynamic(() => import('@/components/PolygonViewer/IsometricViewer'), {
@@ -326,14 +326,11 @@ export default function TwoDPage() {
       {/* Wallet Button */}
       <WalletButton 
         className="absolute top-4 right-4 z-10" 
-        onSettingsClick={() => setShowSettingsModal(true)}
+        onSettingsClick={() => setShowSettings(true)}
       />
       
-      {/* Settings Modal */}
-      <SettingsModal 
-        isOpen={showSettingsModal} 
-        onClose={handleSettingsClose} 
-      />
+      {/* Settings */}
+      {showSettings && <Settings onClose={handleSettingsClose} />}
       
       {/* Information Panel */}
       {showInfo && (
