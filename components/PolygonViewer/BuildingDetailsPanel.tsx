@@ -562,6 +562,23 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                       {showFullDescription && (
                         <div className="mt-3 text-gray-700 border-t border-amber-200 pt-3">
                           <p className="whitespace-pre-line">{buildingDefinition.fullDescription}</p>
+                        
+                          {/* Creation details added here */}
+                          <div className="mt-4 pt-3 border-t border-amber-100">
+                            <h4 className="font-medium text-amber-700 mb-2">Creation Details</h4>
+                            <div className="text-sm">
+                              <p className="text-gray-700">
+                                Created: <span className="font-medium">
+                                  {adjustDate(building.created_at)}
+                                </span>
+                              </p>
+                              {building.created_by && (
+                                <p className="text-gray-700 mt-1">
+                                  Created by: <span className="font-medium">{building.created_by}</span>
+                                </p>
+                              )}
+                            </div>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -639,22 +656,7 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                 </div>
               )}
               
-              {/* Creation Information with adjusted date */}
-              <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-                <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Creation Details</h3>
-                <div className="text-sm">
-                  <p className="text-gray-700">
-                    Created: <span className="font-medium">
-                      {adjustDate(building.created_at)}
-                    </span>
-                  </p>
-                  {building.created_by && (
-                    <p className="text-gray-700 mt-1">
-                      Created by: <span className="font-medium">{building.created_by}</span>
-                    </p>
-                  )}
-                </div>
-              </div>
+              {/* Creation Information removed from here and moved to detailed information section */}
             </div>
             
             {/* Right column - Owner, Occupant, Resources */}
