@@ -5,7 +5,7 @@ import Image from 'next/image';
 // Declare the window interface extension for __polygonData
 declare global {
   interface Window {
-    __polygonData: any[];
+    __polygonData?: any[];
   }
 }
 
