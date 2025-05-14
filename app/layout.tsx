@@ -4,6 +4,7 @@ import ClientWalletProvider from "@/components/UI/ClientWalletProvider";
 import Compagno from "@/components/UI/Compagno";
 import ClientSideEffects from "./client-effects";
 import ContextMenuPreventer from "@/components/UI/ContextMenuPreventer";
+import BuildingPointsPreloader from "@/components/BuildingsView/BuildingPointsPreloader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,6 +29,7 @@ export default function RootLayout({
           <Compagno />
           <ClientSideEffects />
           <ContextMenuPreventer />
+          <BuildingPointsPreloader />
         </ClientWalletProvider>
       </body>
     </html>

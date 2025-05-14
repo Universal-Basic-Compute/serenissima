@@ -196,6 +196,16 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
   try {
+    // Ensure building points are loaded
+    if (!buildingPointsService.isPointsLoaded()) {
+      console.log('Loading building points service from API...');
+      await buildingPointsService.loadBuildingPoints();
+      console.log('Building points service loaded successfully');
+    }
+    
+    // Debug the building points status
+    buildingPointsService.debugPointsStatus();
+    
     const url = new URL(request.url);
     const type = url.searchParams.get('type');
     const limit = url.searchParams.get('limit') ? parseInt(url.searchParams.get('limit')) : 1000; // Increased from 100 to 1000 buildings

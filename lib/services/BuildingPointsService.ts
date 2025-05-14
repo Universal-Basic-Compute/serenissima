@@ -134,6 +134,26 @@ export class BuildingPointsService {
   public isPointsLoaded(): boolean {
     return this.isLoaded;
   }
+  
+  /**
+   * Debug function to help diagnose issues with building points
+   */
+  public debugPointsStatus(): void {
+    console.log('BuildingPointsService Debug Info:');
+    console.log(`- Is Loaded: ${this.isLoaded}`);
+    console.log(`- Is Loading: ${this.isLoading}`);
+    console.log(`- Building Points Count: ${Object.keys(this.buildingPoints).length}`);
+    console.log(`- Canal Points Count: ${Object.keys(this.canalPoints).length}`);
+    console.log(`- Bridge Points Count: ${Object.keys(this.bridgePoints).length}`);
+    
+    // Log a few sample points for debugging
+    const buildingPointKeys = Object.keys(this.buildingPoints);
+    if (buildingPointKeys.length > 0) {
+      console.log('Sample building point:');
+      console.log(`- Key: ${buildingPointKeys[0]}`);
+      console.log(`- Value: ${JSON.stringify(this.buildingPoints[buildingPointKeys[0]])}`);
+    }
+  }
 }
 
 // Export singleton instance

@@ -584,7 +584,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         try {
           // First, ensure building points are loaded
           if (!buildingPointsService.isPointsLoaded()) {
+            console.log('IsometricViewer: Loading building points service...');
             await buildingPointsService.loadBuildingPoints();
+            console.log('IsometricViewer: Building points service loaded successfully');
           }
           
           const response = await fetch('/api/buildings');
@@ -602,10 +604,13 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
                 if (building.point_id) {
                   const position = buildingPointsService.getPositionForPoint(building.point_id);
                   if (position) {
+                    console.log(`Resolved position for building ${building.id} with point_id ${building.point_id}:`, position);
                     return {
                       ...building,
                       position
                     };
+                  } else {
+                    console.warn(`Could not resolve position for building ${building.id} with point_id ${building.point_id}`);
                   }
                 }
                 
@@ -614,6 +619,15 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
               });
               
               setBuildings(processedBuildings);
+              console.log(`Processed ${processedBuildings.length} buildings, checking for position data...`);
+              
+              // Log how many buildings have valid position data
+              const buildingsWithPosition = processedBuildings.filter(b => 
+                b.position && 
+                ((typeof b.position === 'object' && 'lat' in b.position && 'lng' in b.position) || 
+                 (typeof b.position === 'string' && b.position.includes('lat')))
+              );
+              console.log(`${buildingsWithPosition.length} of ${processedBuildings.length} buildings have valid position data`);
             }
           }
         } catch (error) {
