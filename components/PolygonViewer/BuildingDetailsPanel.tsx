@@ -1,4 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
+import { FaWarehouse, FaStore, FaBox } from 'react-icons/fa';
+import Image from 'next/image';
 
 // Declare the window interface extension for __polygonData
 declare global {
@@ -10,6 +12,15 @@ declare global {
 // Access the global variable through window
 import { getBackendBaseUrl } from '@/lib/utils/apiUtils';
 import PlayerProfile from '../UI/PlayerProfile';
+
+// Helper function to get resource icon path
+const getResourceIconPath = (resourceId: string): string => {
+  // Convert the resource name to lowercase, replace spaces with underscores
+  const formattedName = resourceId.toLowerCase().replace(/\s+/g, '_');
+  
+  // Return the formatted name with .png extension
+  return `/images/resources/${formattedName}.png`;
+};
 
 // Add this function to dynamically find the building image path
 const getBuildingImagePath = async (type: string, variant?: string): Promise<string> => {
@@ -650,6 +661,69 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                     size="medium"
                     className="mx-auto"
                   />
+                </div>
+              </div>
+            )}
+            
+            {/* Resources Storage */}
+            {buildingDefinition?.productionInformation?.stores && buildingDefinition.productionInformation.stores.length > 0 && (
+              <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+                <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
+                  <FaWarehouse className="mr-2" /> Storage Capacity
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {buildingDefinition.productionInformation.stores.map((resource: string) => (
+                    <div key={`store-${resource}`} className="flex flex-col items-center bg-amber-50 p-2 rounded-md" title={resource.replace(/_/g, ' ')}>
+                      <div className="relative w-8 h-8 mb-1">
+                        <Image 
+                          src={getResourceIconPath(resource)}
+                          alt={resource}
+                          width={32}
+                          height={32}
+                          className="object-contain"
+                          onError={(e) => {
+                            // Fallback to a default icon if the image fails to load
+                            (e.target as HTMLImageElement).src = '/images/resources/default.png';
+                          }}
+                        />
+                      </div>
+                      <span className="text-xs text-gray-700 capitalize">{resource.replace(/_/g, ' ')}</span>
+                    </div>
+                  ))}
+                </div>
+                {buildingDefinition.productionInformation.storageCapacity && (
+                  <div className="mt-2 text-sm text-gray-700">
+                    <span className="font-medium">Total Capacity:</span> {buildingDefinition.productionInformation.storageCapacity} units
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Resources Selling */}
+            {buildingDefinition?.productionInformation?.sells && buildingDefinition.productionInformation.sells.length > 0 && (
+              <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+                <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
+                  <FaStore className="mr-2" /> Sells Resources
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {buildingDefinition.productionInformation.sells.map((resource: string) => (
+                    <div key={`sell-${resource}`} className="flex flex-col items-center bg-green-50 p-2 rounded-md" title={resource.replace(/_/g, ' ')}>
+                      <div className="relative w-8 h-8 mb-1">
+                        <Image 
+                          src={getResourceIconPath(resource)}
+                          alt={resource}
+                          width={32}
+                          height={32}
+                          className="object-contain"
+                          onError={(e) => {
+                            // Fallback to a default icon if the image fails to load
+                            (e.target as HTMLImageElement).src = '/images/resources/default.png';
+                          }}
+                        />
+                      </div>
+                      <span className="text-xs text-gray-700 capitalize">{resource.replace(/_/g, ' ')}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
