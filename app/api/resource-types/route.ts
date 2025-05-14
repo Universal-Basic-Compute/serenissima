@@ -1,0 +1,161 @@
+import { NextResponse } from 'next/server';
+import fs from 'fs';
+import path from 'path';
+import { existsSync } from 'fs';
+
+// Function to recursively find all JSON files in a directory
+function findResourceJsonFiles(dir: string): string[] {
+  let results: string[] = [];
+  
+  try {
+    console.log(`Scanning directory: ${dir}`);
+    const items = fs.readdirSync(dir);
+    console.log(`Found ${items.length} items in ${dir}`);
+    
+    for (const item of items) {
+      const itemPath = path.join(dir, item);
+      const stat = fs.statSync(itemPath);
+      
+      if (stat.isDirectory()) {
+        // Recursively search subdirectories
+        console.log(`Found subdirectory: ${itemPath}`);
+        const subResults = findResourceJsonFiles(itemPath);
+        console.log(`Found ${subResults.length} resource files in subdirectory ${itemPath}`);
+        results = results.concat(subResults);
+      } else if (item.endsWith('.json')) {
+        // Add JSON files to results
+        console.log(`Found JSON file: ${itemPath}`);
+        results.push(itemPath);
+      }
+    }
+  } catch (error) {
+    console.error(`Error reading directory ${dir}:`, error);
+  }
+  
+  return results;
+}
+
+// Function to load and parse a resource JSON file
+function loadResourceData(filePath: string): any {
+  try {
+    const data = fs.readFileSync(filePath, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    console.error(`Error loading resource data from ${filePath}:`, error);
+    return null;
+  }
+}
+
+export async function GET(request: Request) {
+  try {
+    // Parse query parameters
+    const url = new URL(request.url);
+    const category = url.searchParams.get('category');
+    
+    // Get the resources directory path
+    const resourcesDir = path.join(process.cwd(), 'data', 'resources');
+    
+    // Check if the directory exists
+    if (!existsSync(resourcesDir)) {
+      console.error(`Resources directory does not exist: ${resourcesDir}`);
+      return NextResponse.json(
+        { success: false, error: 'Resources directory not found' },
+        { status: 500 }
+      );
+    }
+    
+    console.log(`Searching for resource types in directory: ${resourcesDir}`);
+    
+    // Find all JSON files in the resources directory and its subdirectories
+    const resourceFiles = findResourceJsonFiles(resourcesDir);
+    console.log(`Found ${resourceFiles.length} resource JSON files`);
+    
+    // Log the first few files for debugging
+    if (resourceFiles.length > 0) {
+      console.log("Sample resource files found:");
+      resourceFiles.slice(0, 5).forEach(file => console.log(` - ${file}`));
+    } else {
+      console.log("No resource files found. Checking directory contents:");
+      try {
+        const topLevelItems = fs.readdirSync(resourcesDir);
+        console.log(`Top level items in ${resourcesDir}:`, topLevelItems);
+        
+        // Check the first subdirectory if any exist
+        if (topLevelItems.length > 0) {
+          const firstItem = path.join(resourcesDir, topLevelItems[0]);
+          if (fs.statSync(firstItem).isDirectory()) {
+            console.log(`Items in ${firstItem}:`, fs.readdirSync(firstItem));
+          }
+        }
+      } catch (error) {
+        console.error(`Error reading directory contents: ${error}`);
+      }
+    }
+    
+    // Load and parse each resource file
+    let resources = resourceFiles.map(filePath => {
+      const resourceData = loadResourceData(filePath);
+      
+      if (!resourceData) {
+        return null;
+      }
+      
+      // Extract the relative path from the resources directory
+      const relativePath = path.relative(resourcesDir, filePath);
+      // Remove the .json extension
+      const id = path.basename(relativePath, '.json');
+      // Get the directory structure as categories
+      const pathParts = path.dirname(relativePath).split(path.sep);
+      
+      return {
+        id,
+        name: resourceData.name || id,
+        category: resourceData.category || pathParts[0] || 'Uncategorized',
+        producedFrom: resourceData.producedFrom || [],
+        usedIn: resourceData.usedIn || [],
+        description: resourceData.description || '',
+        icon: resourceData.icon || `${id.toLowerCase()}.png`,
+        path: relativePath
+      };
+    }).filter(Boolean); // Remove null entries
+    
+    // Apply filters if provided
+    if (category) {
+      resources = resources.filter(resource => 
+        resource.category.toLowerCase() === category.toLowerCase()
+      );
+    }
+    
+    // Group resources by category
+    const resourcesByCategory: Record<string, any> = {};
+    
+    resources.forEach(resource => {
+      const { category } = resource;
+      
+      if (!resourcesByCategory[category]) {
+        resourcesByCategory[category] = {
+          name: category,
+          resources: []
+        };
+      }
+      
+      resourcesByCategory[category].resources.push(resource);
+    });
+    
+    // Convert to array format
+    const categoriesArray = Object.values(resourcesByCategory);
+    
+    return NextResponse.json({
+      success: true,
+      resourceTypes: resources,
+      categories: categoriesArray,
+      filters: { category }
+    });
+  } catch (error) {
+    console.error('Error fetching resource types:', error);
+    return NextResponse.json(
+      { success: false, error: 'Failed to fetch resource types' },
+      { status: 500 }
+    );
+  }
+}
