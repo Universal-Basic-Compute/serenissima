@@ -845,7 +845,7 @@ function findShortestPath(graph: Graph, startNodeId: string, endNodeId: string):
 }
 
 // Function to find a water-only path between two points
-async function findWaterOnlyPath(startPoint: Point, endPoint: Point): Promise<any> {
+export async function findWaterOnlyPath(startPoint: Point, endPoint: Point): Promise<any> {
   try {
     console.log('Starting water-only path calculation from', startPoint, 'to', endPoint);
     
