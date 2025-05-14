@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { FaHome, FaBuilding, FaRoad, FaTree, FaStore, FaLandmark, FaBook } from 'react-icons/fa';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
-import { sceneLayerManager } from '@/lib/services/SceneLayerManager';
 import BuildingsToolbar from '@/components/BuildingsView/BuildingsToolbar';
 import WalletButton from '@/components/UI/WalletButton';
 import ResourceDropdowns from '@/components/UI/ResourceDropdowns';
@@ -44,22 +43,7 @@ export default function TwoDPage() {
 
   // Update view when activeView changes
   useEffect(() => {
-    // Use SceneLayerManager to switch views if it's initialized
-    if (sceneLayerManager.isBaseLayerInitialized()) {
-      console.log(`2D Page: Switching to ${activeView} view using SceneLayerManager`);
-      
-      // Instead of completely switching views, we'll add the new view while preserving buildings
-      if (activeView !== 'buildings') {
-        // First ensure buildings are visible (if they weren't already)
-        sceneLayerManager.ensureLayerVisible('buildings');
-        
-        // Then switch to the new view, but keep buildings visible
-        sceneLayerManager.switchToView(activeView, { preserveLayers: ['buildings'] });
-      } else {
-        // If we're switching to buildings view, just make it the primary view
-        sceneLayerManager.switchToView('buildings');
-      }
-    }
+    console.log(`2D Page: Switching to ${activeView} view`);
     
     // Dispatch events for specific views
     if (activeView === 'buildings') {
