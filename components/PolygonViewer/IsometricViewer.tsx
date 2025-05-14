@@ -41,6 +41,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(null);
   const [showBuildingDetailsPanel, setShowBuildingDetailsPanel] = useState<boolean>(false);
   const [mousePosition, setMousePosition] = useState<{x: number, y: number}>({ x: 0, y: 0 });
+  const [hoveredBuildingName, setHoveredBuildingName] = useState<string | null>(null);
+  const [hoveredBuildingPosition, setHoveredBuildingPosition] = useState<{x: number, y: number} | null>(null);
   const [polygonsToRender, setPolygonsToRender] = useState<{
     polygon: any;
     coords: {x: number, y: number}[];
@@ -988,6 +990,10 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
               setHoveredBuildingId(building.id);
               canvas.style.cursor = 'pointer';
               console.log('Hovering over building:', building.id, building.type);
+              
+              // Add these lines to store the building name and position
+              setHoveredBuildingName(building.name || formatBuildingType(building.type));
+              setHoveredBuildingPosition({ x: mouseX, y: mouseY });
             }
             break; // Break after finding the first hovered building
           }
@@ -1024,6 +1030,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         if (!foundHoveredBuilding && hoveredBuildingId !== null) {
           console.log('No building hovered, clearing hoveredBuildingId');
           setHoveredBuildingId(null);
+          setHoveredBuildingName(null); // Clear the building name
+          setHoveredBuildingPosition(null); // Clear the position
           canvas.style.cursor = isDragging ? 'grabbing' : 'grab';
         }
       
@@ -3438,6 +3446,21 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     return result;
   }
 
+  // Helper function to format building types for display
+  function formatBuildingType(type: string): string {
+    if (!type) return 'Building';
+    
+    // Replace underscores and hyphens with spaces
+    let formatted = type.replace(/[_-]/g, ' ');
+    
+    // Capitalize each word
+    formatted = formatted.split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+    
+    return formatted;
+  }
+
   // Helper function to darken a color
   function darkenColor(color: string, percent: number): string {
     const num = parseInt(color.replace('#', ''), 16);
@@ -3461,6 +3484,22 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         className="w-full h-full"
         style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
       />
+      
+      {hoveredBuildingName && hoveredBuildingPosition && (
+        <div 
+          className="absolute bg-black/80 text-white px-2 py-1 rounded text-sm pointer-events-none z-50"
+          style={{
+            left: hoveredBuildingPosition.x + 15, // Offset from cursor
+            top: hoveredBuildingPosition.y - 10,
+            maxWidth: '200px',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
+          }}
+        >
+          {hoveredBuildingName}
+        </div>
+      )}
       
       {/* Land Details Panel */}
       {showLandDetailsPanel && selectedPolygonId && (
