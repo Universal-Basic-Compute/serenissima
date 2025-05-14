@@ -1,16 +1,15 @@
 import { eventBus, EventTypes } from '../utils/eventBus';
 
-// Extend EventTypes to include building points events
+// Define the event type
+// We need to properly extend the EventTypes interface
 declare module '../utils/eventBus' {
   interface EventTypes {
     BUILDING_POINTS_LOADED: string;
   }
 }
 
-// Define the event type
-if (!EventTypes.BUILDING_POINTS_LOADED) {
-  EventTypes.BUILDING_POINTS_LOADED = 'BUILDING_POINTS_LOADED';
-}
+// Set the event type constant if it doesn't exist
+EventTypes.BUILDING_POINTS_LOADED = EventTypes.BUILDING_POINTS_LOADED || 'BUILDING_POINTS_LOADED';
 
 export class BuildingPointsService {
   private static instance: BuildingPointsService;
