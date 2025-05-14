@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import Airtable from 'airtable';
+import { buildingPointsService } from '@/lib/services/BuildingPointsService';
 
 // Configure Airtable
 const apiKey = process.env.AIRTABLE_API_KEY;
@@ -370,6 +371,26 @@ export async function GET(request: Request) {
           }
         } else if (typeof fields.Position === 'object') {
           position = fields.Position as { lat?: number; lng?: number; x?: number; y?: number; z?: number; };
+        }
+      }
+      
+      // If we still don't have a position but we have a Point field, try to resolve it
+      if ((!position || Object.keys(position).length === 0) && fields.Point) {
+        const pointId = fields.Point;
+        console.log(`[API] Building ${fields.BuildingId || record.id} has Point ID: ${pointId}, attempting to resolve position`);
+        
+        // Try to resolve the position from the point ID
+        const resolvedPosition = buildingPointsService.getPositionForPoint(pointId);
+        
+        if (resolvedPosition) {
+          position = resolvedPosition;
+          console.log(`[API] Resolved position for Point ID ${pointId}:`, position);
+        } else {
+          console.warn(`[API] Could not resolve position for Point ID ${pointId}, generating random position`);
+          position = { 
+            lat: 45.4371 + (Math.random() * 0.01 - 0.005),
+            lng: 12.3358 + (Math.random() * 0.01 - 0.005)
+          };
         }
       }
       

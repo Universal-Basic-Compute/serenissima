@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { debounce } from 'lodash';
 import { eventBus, EventTypes } from '@/lib/eventBus';
 import { fetchCoatOfArmsImage } from '@/app/utils/coatOfArmsUtils';
+import { buildingPointsService } from '@/lib/services/BuildingPointsService';
 import LandDetailsPanel from './LandDetailsPanel';
 import BuildingDetailsPanel from './BuildingDetailsPanel';
 import CitizenDetailsPanel from '../UI/CitizenDetailsPanel';
@@ -572,11 +573,38 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     if (activeView === 'buildings') {
       const fetchBuildings = async () => {
         try {
+          // First, ensure building points are loaded
+          if (!buildingPointsService.isPointsLoaded()) {
+            await buildingPointsService.loadBuildingPoints();
+          }
+          
           const response = await fetch('/api/buildings');
           if (response.ok) {
             const data = await response.json();
             if (data.buildings) {
-              setBuildings(data.buildings);
+              // Process buildings to ensure they all have position data
+              const processedBuildings = data.buildings.map((building: any) => {
+                // If building already has a position, use it
+                if (building.position && building.position.lat && building.position.lng) {
+                  return building;
+                }
+                
+                // If building has a point_id but no position, try to get position from the service
+                if (building.point_id) {
+                  const position = buildingPointsService.getPositionForPoint(building.point_id);
+                  if (position) {
+                    return {
+                      ...building,
+                      position
+                    };
+                  }
+                }
+                
+                // If we couldn't resolve a position, return the building as is
+                return building;
+              });
+              
+              setBuildings(processedBuildings);
             }
           }
         } catch (error) {
