@@ -2523,6 +2523,27 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
               
           // Gondola animations have been removed for simplicity
             
+          // Add a water-only indicator if applicable
+          if (waterOnlyMode) {
+            const labelX = canvas.width - 200;
+            const labelY = canvas.height - 200;
+            
+            // Draw background
+            ctx.fillStyle = 'rgba(0, 102, 153, 0.8)'; // Venetian blue
+            ctx.fillRect(labelX - 10, labelY - 10, 220, 40);
+            
+            // Draw border
+            ctx.strokeStyle = 'rgba(218, 165, 32, 0.8)'; // Gold
+            ctx.lineWidth = 2;
+            ctx.strokeRect(labelX - 10, labelY - 10, 220, 40);
+            
+            // Draw text
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = '16px "Times New Roman", serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Percorso Solo Acqua', labelX + 100, labelY + 15);
+          }
+          
           // Update the legend to include canal points and transport modes
           if (transportMode && transportPath.length > 0) {
             const legendX = 20;
