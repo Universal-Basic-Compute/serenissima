@@ -7,8 +7,7 @@ declare global {
   }
 }
 
-// Ensure consistent declaration of __polygonData
-declare var __polygonData: any[];
+// Access the global variable through window
 import { getBackendBaseUrl } from '@/lib/utils/apiUtils';
 import PlayerProfile from '../UI/PlayerProfile';
 
