@@ -2247,13 +2247,27 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           y: calculateIsoY(x, y, scale, offset, canvas.height)
         };
         
-        // Draw building based on type
+        // Get building size based on type
         const size = getBuildingSize(building.type);
         const color = getBuildingColor(building.type);
         
         // Determine if this building is hovered or selected with more explicit check
         const isHovered = hoveredBuildingId !== null && hoveredBuildingId === building.id;
         const isSelected = selectedBuildingId !== null && selectedBuildingId === building.id;
+        
+        // Determine the shape based on point_id or Point field
+        const pointId = building.point_id || building.Point;
+        let buildingShape = 'square'; // Default shape
+        
+        if (pointId) {
+          if (typeof pointId === 'string') {
+            if (pointId.startsWith('canal-') || pointId.includes('canal_')) {
+              buildingShape = 'circle';
+            } else if (pointId.startsWith('bridge-') || pointId.includes('bridge_')) {
+              buildingShape = 'triangle';
+            }
+          }
+        }
         
         // Debug logging for hover state
         if (isHovered) {
@@ -2281,13 +2295,29 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           ctx.lineWidth = 1;
         }
         
+        // Draw the appropriate shape based on the building's point type
         ctx.beginPath();
-        ctx.rect(
-          isoPos.x - squareSize/2, 
-          isoPos.y - squareSize/2, 
-          squareSize, 
-          squareSize
-        );
+        
+        if (buildingShape === 'circle') {
+          // Draw circle for canal points
+          ctx.arc(isoPos.x, isoPos.y, squareSize/2, 0, Math.PI * 2);
+        } else if (buildingShape === 'triangle') {
+          // Draw triangle for bridge points
+          const halfSize = squareSize/2;
+          ctx.moveTo(isoPos.x, isoPos.y - halfSize);
+          ctx.lineTo(isoPos.x - halfSize, isoPos.y + halfSize);
+          ctx.lineTo(isoPos.x + halfSize, isoPos.y + halfSize);
+          ctx.closePath();
+        } else {
+          // Draw square for regular building points (default)
+          ctx.rect(
+            isoPos.x - squareSize/2, 
+            isoPos.y - squareSize/2, 
+            squareSize, 
+            squareSize
+          );
+        }
+        
         ctx.fill();
         ctx.stroke();
         
