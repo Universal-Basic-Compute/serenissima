@@ -36,16 +36,3 @@ export interface Citizen {
   NeedsCompletionScore: number;
   CreatedAt: string;
 }
-
-// Add this to the existing types
-export interface Bridge {
-  id: string;
-  startPoint: Coordinate;
-  endPoint: Coordinate;
-  startLandId: string;
-  endLandId: string;
-  name?: string;
-  englishName?: string;
-  description?: string;
-  nameConfidence?: string;
-}
