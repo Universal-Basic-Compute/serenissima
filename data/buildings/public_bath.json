@@ -38,5 +38,27 @@
     "Resting benches",
     "Refreshment corner",
     "Medicinal herb station"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "water": 100,
+      "soap": 20,
+      "fuel": 40
+    },
+    "outputResources": {
+      "criminal_contacts": 2,
+      "blackmail_evidence": 1
+    },
+    "storageCapacity": 500,
+    "stores": [
+      "water",
+      "soap",
+      "fuel",
+      "criminal_contacts",
+      "blackmail_evidence"
+    ],
+    "sells": [
+      "soap"
+    ]
+  }
 }

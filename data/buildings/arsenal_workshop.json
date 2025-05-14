@@ -39,5 +39,44 @@
     "Security checkpoint",
     "Naval design area",
     "Quality inspection station"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "timber": 30,
+      "processed_iron": 15,
+      "rope": 12,
+      "pitch": 8,
+      "sailcloth": 10,
+      "tools": 5
+    },
+    "outputResources": {
+      "ship_components": 25,
+      "small_boats": 1,
+      "merchant_galley": 0.05,
+      "war_galley": 0.02
+    },
+    "storageCapacity": 2000,
+    "stores": [
+      "timber",
+      "processed_iron",
+      "rope",
+      "pitch",
+      "sailcloth",
+      "tools",
+      "ship_components",
+      "small_boats",
+      "merchant_galley",
+      "war_galley",
+      "gondola",
+      "weapons"
+    ],
+    "sells": [
+      "ship_components",
+      "small_boats",
+      "merchant_galley",
+      "war_galley",
+      "gondola",
+      "weapons"
+    ]
+  }
 }

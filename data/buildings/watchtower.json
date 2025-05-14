@@ -36,5 +36,33 @@
     "Communication desk",
     "Entry checkpoint",
     "Equipment storage"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "fuel": 3,
+      "tools": 1,
+      "water": 2
+    },
+    "outputResources": {
+      "criminal_contacts": 1,
+      "smuggler_maps": 1,
+      "blackmail_evidence": 1
+    },
+    "storageCapacity": 75,
+    "stores": [
+      "fuel",
+      "tools",
+      "water",
+      "weapons",
+      "criminal_contacts",
+      "smuggler_maps",
+      "blackmail_evidence",
+      "maps"
+    ],
+    "sells": [
+      "criminal_contacts",
+      "smuggler_maps",
+      "blackmail_evidence"
+    ]
+  }
 }

@@ -36,5 +36,16 @@
     "Community gathering space",
     "Maintenance access",
     "Rainwater collection surface"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {},
+    "outputResources": {
+      "water": 20
+    },
+    "storageCapacity": 500,
+    "stores": [
+      "water"
+    ],
+    "sells": []
+  }
 }

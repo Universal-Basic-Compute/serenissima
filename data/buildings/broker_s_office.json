@@ -21,14 +21,28 @@
   "constructionTime": 172800000,
   "productionInformation": {
     "inputResources": {
-      "Market Information": "Constantly updated",
-      "Client Connections": "Network-based resource"
+      "paper": 3
     },
     "outputResources": {
-      "Brokerage Commissions": "30-60 ducats per day",
-      "Completed Transactions": "5-15 per day of varying sizes"
+      "criminal_contacts": 1,
+      "smuggler_maps": 0.5,
+      "blackmail_evidence": 0.3
     },
-    "storageCapacity": "Minimal physical storage, extensive document storage"
+    "storageCapacity": 50,
+    "stores": [
+      "paper",
+      "criminal_contacts",
+      "smuggler_maps",
+      "blackmail_evidence",
+      "maps",
+      "gold"
+    ],
+    "sells": [
+      "criminal_contacts",
+      "smuggler_maps",
+      "blackmail_evidence",
+      "maps"
+    ]
   },
   "soundDesign": {
     "ambientSound": "Quill scratching, muted business discussions, paper handling",

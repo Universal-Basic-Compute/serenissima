@@ -21,22 +21,43 @@
   "constructionTime": 1209600000,
   "productionInformation": {
     "inputResources": {
-      "Timber": 80,
-      "Pitch": 30,
-      "Iron": 20,
-      "Canvas": 40,
-      "Rope": 30
+      "timber": 25,
+      "rope": 15,
+      "processed_iron": 10,
+      "sailcloth": 12,
+      "pitch": 8,
+      "iron_fittings": 5,
+      "tools": 2
     },
     "outputResources": {
-      "Small Boats": 0.2,
-      "Medium Vessels": 0.05,
-      "Commercial Ships": 0.02
+      "ship_components": 4,
+      "small_boats": 0.5,
+      "gondola": 0.2,
+      "merchant_galley": 0.05,
+      "war_galley": 0.02
     },
-    "productionRate": "Varies by vessel size",
-    "storageCapacity": {
-      "rawMaterials": 500,
-      "componentsInProgress": 200
-    }
+    "storageCapacity": 1000,
+    "stores": [
+      "timber",
+      "rope",
+      "processed_iron",
+      "sailcloth",
+      "pitch",
+      "iron_fittings",
+      "tools",
+      "ship_components",
+      "small_boats",
+      "gondola",
+      "merchant_galley",
+      "war_galley"
+    ],
+    "sells": [
+      "ship_components",
+      "small_boats",
+      "gondola",
+      "merchant_galley",
+      "war_galley"
+    ]
   },
   "soundDesign": {
     "ambientSound": "Hammering, sawing, creaking timber, water lapping",

@@ -19,12 +19,23 @@
   "constructionTime": 259200000,
   "productionInformation": {
     "inputResources": {
-      "Olives": 20
+      "olives": 10,
+      "water": 3,
+      "fuel": 1
     },
     "outputResources": {
-      "Olive Oil": 5
+      "olive_oil": 5
     },
-    "storageCapacity": 100
+    "storageCapacity": 150,
+    "stores": [
+      "olives",
+      "water",
+      "fuel",
+      "olive_oil"
+    ],
+    "sells": [
+      "olive_oil"
+    ]
   },
   "soundDesign": {
     "ambientSound": "Grinding stones, wooden mechanisms creaking",

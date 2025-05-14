@@ -39,5 +39,27 @@
     "Medicinal garden",
     "Chapel",
     "Charitable ward"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "water": 12,
+      "wine": 5,
+      "tools": 2
+    },
+    "outputResources": {
+      "poison_components": 1
+    },
+    "storageCapacity": 250,
+    "stores": [
+      "water",
+      "wine",
+      "tools",
+      "poison_components",
+      "bread",
+      "olive_oil"
+    ],
+    "sells": [
+      "poison_components"
+    ]
+  }
 }

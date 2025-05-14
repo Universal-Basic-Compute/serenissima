@@ -21,20 +21,28 @@
   "constructionTime": 604800000,
   "productionInformation": {
     "inputResources": {
-      "Murano Sand": 10,
-      "Soda Ash": 5,
-      "Minerals/Colorants": 2,
-      "Fuel": 20
+      "sand": 10,
+      "soda_ash": 8,
+      "fuel": 15,
+      "pine_resin": 3
     },
     "outputResources": {
-      "Molten Glass": 15,
-      "Glass Waste": 2
+      "molten_glass": 12,
+      "glass": 10
     },
-    "productionRate": "15 units of molten glass per day",
-    "storageCapacity": {
-      "rawMaterials": 100,
-      "moltenGlass": 45
-    }
+    "storageCapacity": 200,
+    "stores": [
+      "sand",
+      "soda_ash",
+      "fuel",
+      "pine_resin",
+      "molten_glass",
+      "glass"
+    ],
+    "sells": [
+      "glass",
+      "molten_glass"
+    ]
   },
   "soundDesign": {
     "ambientSound": "Roaring furnace, crackling fire, occasional steam hiss",

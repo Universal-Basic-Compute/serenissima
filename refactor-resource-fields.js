@@ -11,12 +11,9 @@ const fieldsToKeep = [
   'category',
   'subcategory',
   'description',
-  'productionProperties',
   'varieties',
-  'historicalNotes', // We'll merge lore into this
-  'soundEffect',
-  'variants',
-  'sources'
+  'historicalNotes',
+  'variants'
 ];
 
 // Function to process a single resource file

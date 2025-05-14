@@ -21,16 +21,32 @@
   "maintenanceCost": 3000,
   "constructionTime": 864000000,
   "productionInformation": {
-    "inputResources": {
-      "Eastern Luxury Goods": "20-40 units per day",
-      "Spices": "30-50 units per day",
-      "Silk": "15-30 units per day"
-    },
-    "outputResources": {
-      "Processed Eastern Goods": "50-90 units per day",
-      "Trade Revenue": "120-200 ducats per day"
-    },
-    "storageCapacity": 300
+    "inputResources": {},
+    "outputResources": {},
+    "storageCapacity": 2000,
+    "stores": [
+      "paper",
+      "maps",
+      "raw_silk",
+      "dyestuffs",
+      "spiced_wine",
+      "luxury_silk_garments",
+      "gold",
+      "silk_fabric",
+      "prepared_silk",
+      "jewelry",
+      "wine"
+    ],
+    "sells": [
+      "raw_silk",
+      "dyestuffs",
+      "spiced_wine",
+      "luxury_silk_garments",
+      "gold",
+      "silk_fabric",
+      "prepared_silk",
+      "jewelry"
+    ]
   },
   "soundDesign": {
     "ambientSound": "Multiple languages, eastern musical elements, spice grinding",

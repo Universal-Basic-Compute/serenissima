@@ -38,5 +38,30 @@
     "Judicial chambers",
     "Public gallery",
     "Holding cells"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "paper": 6,
+      "books": 2
+    },
+    "outputResources": {
+      "blackmail_evidence": 2,
+      "criminal_contacts": 1,
+      "forgery_tools": 1
+    },
+    "storageCapacity": 200,
+    "stores": [
+      "paper",
+      "books",
+      "blackmail_evidence",
+      "criminal_contacts",
+      "forgery_tools",
+      "smuggler_maps"
+    ],
+    "sells": [
+      "blackmail_evidence",
+      "criminal_contacts",
+      "forgery_tools"
+    ]
+  }
 }

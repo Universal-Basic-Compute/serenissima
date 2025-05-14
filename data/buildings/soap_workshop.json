@@ -19,15 +19,25 @@
   "constructionTime": 345600000,
   "productionInformation": {
     "inputResources": {
-      "Olive Oil": 5,
-      "Wood Ash": 3,
-      "Water": 10,
-      "Scented Herbs": 2
+      "olive_oil": 12,
+      "soda_ash": 8,
+      "fuel": 6,
+      "water": 15
     },
     "outputResources": {
-      "Soap": 8
+      "soap": 20
     },
-    "storageCapacity": 120
+    "storageCapacity": 250,
+    "stores": [
+      "olive_oil",
+      "soda_ash",
+      "fuel",
+      "water",
+      "soap"
+    ],
+    "sells": [
+      "soap"
+    ]
   },
   "soundDesign": {
     "ambientSound": "Bubbling cauldrons, stirring, workers chatting",

@@ -21,21 +21,26 @@
   "constructionTime": 172800000,
   "productionInformation": {
     "inputResources": {
-      "Flour": 15,
-      "Fuel": 10,
-      "Water": 20,
-      "Salt": 1,
-      "Sugar": 2
+      "flour": 12,
+      "water": 6,
+      "salt": 1,
+      "fuel": 4
     },
     "outputResources": {
-      "Bread": 300,
-      "Pastries": 100
+      "bread": 15
     },
-    "productionRate": "Daily production cycle",
-    "storageCapacity": {
-      "rawMaterials": 50,
-      "finishedGoods": 400
-    }
+    "storageCapacity": 150,
+    "stores": [
+      "flour",
+      "water",
+      "salt",
+      "fuel",
+      "bread",
+      "grain"
+    ],
+    "sells": [
+      "bread"
+    ]
   },
   "soundDesign": {
     "ambientSound": "Oven crackling, dough being kneaded, wood splitting",

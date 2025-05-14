@@ -36,5 +36,23 @@
     "Cellar master's inspection area",
     "Receiving area for new wines",
     "Security entrance"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "wine": 10
+    },
+    "outputResources": {
+      "spiced_wine": 4
+    },
+    "storageCapacity": 500,
+    "stores": [
+      "wine",
+      "spiced_wine",
+      "olive_oil"
+    ],
+    "sells": [
+      "wine",
+      "spiced_wine"
+    ]
+  }
 }

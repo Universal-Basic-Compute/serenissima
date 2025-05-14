@@ -38,5 +38,34 @@
     "Defensive positions",
     "Waiting area",
     "Document verification station"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "tools": 1,
+      "water": 2
+    },
+    "outputResources": {
+      "criminal_contacts": 1,
+      "blackmail_evidence": 1,
+      "smuggler_maps": 1
+    },
+    "storageCapacity": 150,
+    "stores": [
+      "tools",
+      "water",
+      "criminal_contacts",
+      "blackmail_evidence",
+      "smuggler_maps",
+      "weapons",
+      "porter_equipment",
+      "disguise_materials"
+    ],
+    "sells": [
+      "criminal_contacts",
+      "blackmail_evidence",
+      "smuggler_maps",
+      "weapons",
+      "porter_equipment"
+    ]
+  }
 }

@@ -21,14 +21,28 @@
   "constructionTime": 259200000,
   "productionInformation": {
     "inputResources": {
-      "Various Textiles": "30-50 units per day",
-      "Imported Fabrics": "10-20 units per day"
+      "silk_fabric": 3,
+      "dyed_textiles": 4,
+      "venetian_lace": 1,
+      "luxury_silk_garments": 1
     },
-    "outputResources": {
-      "Retail Fabric Sales": "25-40 units per day",
-      "Sales Revenue": "30-60 ducats per day"
-    },
-    "storageCapacity": 80
+    "outputResources": {},
+    "storageCapacity": 150,
+    "stores": [
+      "silk_fabric",
+      "dyed_textiles",
+      "venetian_lace",
+      "luxury_silk_garments",
+      "raw_silk",
+      "prepared_silk"
+    ],
+    "sells": [
+      "silk_fabric",
+      "dyed_textiles",
+      "venetian_lace",
+      "luxury_silk_garments",
+      "prepared_silk"
+    ]
   },
   "soundDesign": {
     "ambientSound": "Soft conversation, fabric being unfolded",

@@ -37,5 +37,29 @@
     "Devotional artwork",
     "Prayer stations",
     "Memorial area"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "gold": 2,
+      "wine": 1,
+      "bread": 1,
+      "gold_leaf": 1
+    },
+    "outputResources": {
+      "blackmail_evidence": 1
+    },
+    "storageCapacity": 50,
+    "stores": [
+      "gold",
+      "wine",
+      "bread",
+      "gold_leaf",
+      "blackmail_evidence",
+      "books"
+    ],
+    "sells": [
+      "books",
+      "blackmail_evidence"
+    ]
+  }
 }

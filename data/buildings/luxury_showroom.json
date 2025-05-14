@@ -22,14 +22,34 @@
   "constructionTime": 432000000,
   "productionInformation": {
     "inputResources": {
-      "Luxury Goods": "5-10 units per day (high value)",
-      "Imported Rarities": "1-3 units per day (very high value)"
+      "luxury_silk_garments": 2,
+      "fine_glassware": 3,
+      "jewelry": 2,
+      "venetian_lace": 1
     },
-    "outputResources": {
-      "Luxury Sales": "3-8 units per day",
-      "Custom Commissions": "1-2 per week (extremely high value)"
-    },
-    "storageCapacity": 40
+    "outputResources": {},
+    "storageCapacity": 60,
+    "stores": [
+      "luxury_silk_garments",
+      "fine_glassware",
+      "jewelry",
+      "venetian_lace",
+      "books",
+      "maps",
+      "spiced_wine",
+      "gold",
+      "prepared_silk",
+      "gold_leaf"
+    ],
+    "sells": [
+      "luxury_silk_garments",
+      "fine_glassware",
+      "jewelry",
+      "venetian_lace",
+      "books",
+      "maps",
+      "spiced_wine"
+    ]
   },
   "soundDesign": {
     "ambientSound": "Hushed conversation, subtle ambient music",

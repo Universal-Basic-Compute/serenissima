@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Boat Workshop represents specialized maritime production with modest returns. The construction cost of 2,000,000 ducats reflects the specialized equipment and waterfront facilities required, while the income of 25,000 ducats (1.25% return) represents sales of various watercraft. The maintenance cost of 20,000 ducats (80% of income) creates a modest profit margin appropriate for specialized production. The employment capacity of 8 represents the boat builders, apprentices, and assistants needed. The construction time of 5 days (432000000ms) reflects the specialized construction requirements. This building creates a strategic investment in transportation infrastructure that supports Venice's unique water-based mobility needs.",
   "shortDescription": "Specialized workshop for building and repairing small watercraft for Venice's canals and lagoon.",
   "fullDescription": "Essential to Venice's water-based transportation system, boat workshops construct and maintain the diverse fleet of small vessels that navigate the city's canals. Featuring covered construction areas, specialized tools, wood steaming equipment, and direct water access, these facilities combine traditional craftsmanship with practical functionality. From simple sandoli to elegant gondolas, these workshops produce the watercraft that define Venetian mobility.",
-  "flavorText": "In a city where streets are made of water, the boat builder is as essential as the baker—for while one feeds the body, the other enables every aspect of Venetian life to flow.",
+  "flavorText": "In a city where streets are made of water, the boat builder is as essential as the baker\u2014for while one feeds the body, the other enables every aspect of Venetian life to flow.",
   "constructionCosts": {
     "ducats": 2000000,
     "timber": 150,
@@ -21,21 +21,32 @@
   "constructionTime": 432000000,
   "productionInformation": {
     "inputResources": {
-      "Timber": 10,
-      "Pitch": 3,
-      "Iron Fittings": 2,
-      "Tools": 1
+      "timber": 12,
+      "rope": 5,
+      "tools": 3,
+      "pitch": 2,
+      "iron_fittings": 4
     },
     "outputResources": {
-      "Small Boats": 1,
-      "Gondola": 0.5,
-      "Boat Repairs": 5
+      "small_boats": 1,
+      "gondola": 0.2
     },
-    "productionRate": "Varies by vessel type",
-    "storageCapacity": {
-      "rawMaterials": 100,
-      "finishedGoods": 10
-    }
+    "storageCapacity": 200,
+    "stores": [
+      "timber",
+      "rope",
+      "tools",
+      "pitch",
+      "iron_fittings",
+      "small_boats",
+      "gondola",
+      "ship_components"
+    ],
+    "sells": [
+      "small_boats",
+      "gondola",
+      "ship_components"
+    ]
   },
   "soundDesign": {
     "ambientSound": "Wood being worked, hammering, water lapping against hulls",

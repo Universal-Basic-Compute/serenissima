@@ -37,5 +37,32 @@
     "Maintenance area",
     "Chain anchor point",
     "Coordination office"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "iron": 2,
+      "timber": 3,
+      "fuel": 1
+    },
+    "outputResources": {
+      "criminal_contacts": 1,
+      "smuggler_maps": 1
+    },
+    "storageCapacity": 150,
+    "stores": [
+      "iron",
+      "timber",
+      "fuel",
+      "criminal_contacts",
+      "smuggler_maps",
+      "weapons",
+      "rope",
+      "tools"
+    ],
+    "sells": [
+      "criminal_contacts",
+      "smuggler_maps",
+      "maps"
+    ]
+  }
 }

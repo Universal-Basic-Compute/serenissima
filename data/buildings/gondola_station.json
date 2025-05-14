@@ -34,5 +34,31 @@
     "Gondola boarding points",
     "Information board",
     "Gondolier rest area"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "gondola": 1,
+      "water": 2,
+      "rope": 1
+    },
+    "outputResources": {
+      "porter_equipment": 3,
+      "smuggler_maps": 1
+    },
+    "storageCapacity": 50,
+    "stores": [
+      "gondola",
+      "water",
+      "rope",
+      "porter_equipment",
+      "smuggler_maps",
+      "maps",
+      "small_boats"
+    ],
+    "sells": [
+      "porter_equipment",
+      "smuggler_maps",
+      "maps"
+    ]
+  }
 }

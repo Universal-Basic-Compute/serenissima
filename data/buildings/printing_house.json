@@ -21,23 +21,26 @@
   "constructionTime": 604800000,
   "productionInformation": {
     "inputResources": {
-      "Paper": 100,
-      "Ink": 10,
-      "Type Metal": 1,
-      "Leather": 5,
-      "Thread": 2
+      "paper": 12,
+      "tools": 1,
+      "rags": 3
     },
     "outputResources": {
-      "Books": 20,
-      "Pamphlets": 100,
-      "Maps": 10,
-      "Documents": 50
+      "books": 3,
+      "maps": 2
     },
-    "productionRate": "Varies by product complexity",
-    "storageCapacity": {
-      "rawMaterials": 250,
-      "finishedGoods": 500
-    }
+    "storageCapacity": 200,
+    "stores": [
+      "paper",
+      "tools",
+      "rags",
+      "books",
+      "maps"
+    ],
+    "sells": [
+      "books",
+      "maps"
+    ]
   },
   "soundDesign": {
     "ambientSound": "Press mechanisms squeaking, paper shuffling, type being sorted",

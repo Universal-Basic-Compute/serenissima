@@ -38,5 +38,36 @@
     "Cell blocks",
     "Exercise yard",
     "Isolation cells"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "bread": 15,
+      "water": 20,
+      "tools": 2
+    },
+    "outputResources": {
+      "blackmail_evidence": 3,
+      "criminal_contacts": 4,
+      "rags": 8
+    },
+    "storageCapacity": 200,
+    "stores": [
+      "bread",
+      "water",
+      "tools",
+      "blackmail_evidence",
+      "criminal_contacts",
+      "rags",
+      "weapons",
+      "poison_components",
+      "forgery_tools",
+      "smuggler_maps"
+    ],
+    "sells": [
+      "blackmail_evidence",
+      "criminal_contacts",
+      "rags",
+      "smuggler_maps"
+    ]
+  }
 }

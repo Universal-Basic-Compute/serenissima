@@ -18,12 +18,36 @@
   "constructionTime": 86400000,
   "productionInformation": {
     "inputResources": {
-      "Various Trade Goods": "5-10 units per day depending on type"
+      "porter_equipment": 1
     },
-    "outputResources": {
-      "Sales Revenue": "8-15 ducats per day depending on location and goods"
-    },
-    "storageCapacity": 20
+    "outputResources": {},
+    "storageCapacity": 50,
+    "stores": [
+      "fish",
+      "bread",
+      "grain",
+      "olives",
+      "olive_oil",
+      "wine",
+      "tools",
+      "spiced_wine",
+      "soap",
+      "salt",
+      "preserved_fish"
+    ],
+    "sells": [
+      "fish",
+      "bread",
+      "grain",
+      "olives",
+      "olive_oil",
+      "wine",
+      "tools",
+      "spiced_wine",
+      "soap",
+      "salt",
+      "preserved_fish"
+    ]
   },
   "soundDesign": {
     "ambientSound": "Market chatter, occasional vendor calls",

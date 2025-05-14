@@ -34,5 +34,29 @@
     "Goods transfer platform",
     "Steps to water",
     "Dockmaster's position"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "timber": 2,
+      "rope": 1,
+      "water": 10
+    },
+    "outputResources": {
+      "porter_equipment": 2
+    },
+    "storageCapacity": 200,
+    "stores": [
+      "timber",
+      "rope",
+      "water",
+      "porter_equipment",
+      "small_boats",
+      "fish"
+    ],
+    "sells": [
+      "porter_equipment",
+      "fish",
+      "small_boats"
+    ]
+  }
 }

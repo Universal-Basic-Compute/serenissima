@@ -22,15 +22,25 @@
   "constructionTime": 259200000,
   "productionInformation": {
     "inputResources": {
-      "Goods for Weighing": "100-200 transactions per day",
-      "Calibration Standards": "Maintained by government"
+      "tools": 1
     },
-    "outputResources": {
-      "Official Certificates": "100-200 per day",
-      "Measurement Fees": "40-80 ducats per day",
-      "Commercial Dispute Resolution": "5-10 cases per day"
-    },
-    "storageCapacity": "Minimal, primarily equipment storage"
+    "outputResources": {},
+    "storageCapacity": 50,
+    "stores": [
+      "tools",
+      "grain",
+      "flour",
+      "spiced_wine",
+      "wine",
+      "silk_fabric",
+      "jewelry",
+      "dyed_textiles",
+      "salt",
+      "fish"
+    ],
+    "sells": [
+      "porter_equipment"
+    ]
   },
   "soundDesign": {
     "ambientSound": "Scale mechanisms, official stamps, merchant discussions",

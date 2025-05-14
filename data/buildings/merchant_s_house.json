@@ -34,5 +34,39 @@
     "Family entrance",
     "Second floor windows",
     "Rooftop terrace"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "water": 5,
+      "fuel": 3,
+      "paper": 1,
+      "wine": 2
+    },
+    "outputResources": {
+      "maps": 1
+    },
+    "storageCapacity": 150,
+    "stores": [
+      "water",
+      "fuel",
+      "paper",
+      "wine",
+      "maps",
+      "gold",
+      "books",
+      "spiced_wine",
+      "jewelry",
+      "silk_fabric",
+      "luxury_silk_garments",
+      "tools"
+    ],
+    "sells": [
+      "maps",
+      "books",
+      "silk_fabric",
+      "luxury_silk_garments",
+      "spiced_wine",
+      "jewelry"
+    ]
+  }
 }

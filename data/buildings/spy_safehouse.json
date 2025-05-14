@@ -21,20 +21,37 @@
   "constructionTime": 864000000,
   "productionInformation": {
     "inputResources": {
-      "Criminal Contacts": 3,
-      "Bribes": 15,
-      "Surveillance Time": 20
+      "paper": 5,
+      "wine": 2,
+      "tools": 1,
+      "fuel": 3
     },
     "outputResources": {
-      "Intelligence Reports": 5,
-      "Blackmail Evidence": 2,
-      "Coded Messages": 10
+      "blackmail_evidence": 2,
+      "criminal_contacts": 1,
+      "smuggler_maps": 1,
+      "disguise_materials": 3
     },
-    "productionRate": "Based on agent activity",
-    "storageCapacity": {
-      "intelligence materials": 50,
-      "agent equipment": 30
-    }
+    "storageCapacity": 50,
+    "stores": [
+      "paper",
+      "wine",
+      "tools",
+      "fuel",
+      "blackmail_evidence",
+      "criminal_contacts",
+      "smuggler_maps",
+      "disguise_materials",
+      "poison_components",
+      "forgery_tools"
+    ],
+    "sells": [
+      "blackmail_evidence",
+      "criminal_contacts",
+      "smuggler_maps",
+      "disguise_materials",
+      "forgery_tools"
+    ]
   },
   "soundDesign": {
     "ambientSound": "Quiet household sounds as cover, hushed conversations",

@@ -38,5 +38,33 @@
     "Community gathering space",
     "Confessionals",
     "Parish office"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "wine": 3,
+      "bread": 4,
+      "books": 1,
+      "gold": 1,
+      "water": 2
+    },
+    "outputResources": {
+      "books": 1,
+      "paper": 2
+    },
+    "storageCapacity": 200,
+    "stores": [
+      "wine",
+      "bread",
+      "books",
+      "gold",
+      "water",
+      "paper",
+      "tools",
+      "gold_leaf"
+    ],
+    "sells": [
+      "books",
+      "paper"
+    ]
+  }
 }

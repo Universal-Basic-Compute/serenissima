@@ -21,16 +21,32 @@
   "constructionTime": 259200000,
   "productionInformation": {
     "inputResources": {
-      "Herbs": "10-15 units per day",
-      "Exotic Ingredients": "5-10 units per day",
-      "Alcohol Base": "3-5 units per day"
+      "water": 5,
+      "olive_oil": 3,
+      "spiced_wine": 2,
+      "clay": 1,
+      "paper": 1
     },
     "outputResources": {
-      "Medicines": "8-12 units per day",
-      "Cosmetics": "5-8 units per day",
-      "Spice Packets": "10-15 units per day"
+      "poison_components": 1
     },
-    "storageCapacity": 60
+    "storageCapacity": 180,
+    "stores": [
+      "water",
+      "olive_oil",
+      "spiced_wine",
+      "clay",
+      "paper",
+      "poison_components",
+      "dyestuffs",
+      "salt",
+      "gold"
+    ],
+    "sells": [
+      "poison_components",
+      "dyestuffs",
+      "salt"
+    ]
   },
   "soundDesign": {
     "ambientSound": "Glass bottles clinking, quiet consultation",

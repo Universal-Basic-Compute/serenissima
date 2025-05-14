@@ -21,21 +21,27 @@
   "constructionTime": 518400000,
   "productionInformation": {
     "inputResources": {
-      "Rags": 80,
-      "Plant Fibers": 40,
-      "Water": 200,
-      "Sizing Materials": 10
+      "rags": 12,
+      "fuel": 6,
+      "hemp": 3,
+      "flax": 2
     },
     "outputResources": {
-      "Writing Paper": 100,
-      "Printing Paper": 150,
-      "Packaging Paper": 50
+      "paper": 20,
+      "water": 5
     },
-    "productionRate": "300 sheets per day at various qualities",
-    "storageCapacity": {
-      "rawMaterials": 300,
-      "finishedGoods": 1000
-    }
+    "storageCapacity": 500,
+    "stores": [
+      "rags",
+      "fuel",
+      "hemp",
+      "flax",
+      "paper",
+      "water"
+    ],
+    "sells": [
+      "paper"
+    ]
   },
   "soundDesign": {
     "ambientSound": "Water wheel turning, stamping hammers pounding, water flowing",

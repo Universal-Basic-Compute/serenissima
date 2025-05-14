@@ -3,166 +3,12 @@
   "name": "Murano Sand",
   "category": "raw_materials",
   "subcategory": "mineral",
-  "icon": "/assets/icons/resources/murano_sand.png",
-  "baseProperties": {
-    "baseValue": 5,
-    "weight": 2.5,
-    "volume": 1,
-    "stackSize": 50,
-    "perishable": false
-  },
   "description": {
     "short": "Fine sand from Murano island.",
     "full": "Exceptionally pure silica sand harvested from specific locations on Murano island. Its unique composition makes it essential for Venice's legendary glass production.",
     "flavor": "Beneath your feet lies the foundation of Venice's crystalline reputation—mere grains to some, but to the glass masters, these sands are more precious than gold."
   },
-  "sourceProperties": {
-    "source": "natural",
-    "harvestMethod": "mining",
-    "locations": [
-      "murano_island"
-    ],
-    "availability": "common",
-    "seasonality": "year_round"
-  },
-  "qualityVariations": {
-    "availableQualities": [
-      "common",
-      "fine",
-      "superior",
-      "masterwork"
-    ],
-    "defaultQuality": "common",
-    "qualityMultipliers": {
-      "common": {
-        "value": 0.7,
-        "productionEfficiency": 0.8
-      },
-      "fine": {
-        "value": 1,
-        "productionEfficiency": 1
-      },
-      "superior": {
-        "value": 1.5,
-        "productionEfficiency": 1.3
-      },
-      "masterwork": {
-        "value": 2,
-        "productionEfficiency": 1.6
-      }
-    }
-  },
-  "productionProperties": {
-    "processorBuilding": "glass_foundry",
-    "processingComplexity": 4,
-    "requiredSkill": "glassmaking:3",
-    "processingTime": 240,
-    "outputs": [
-      {
-        "resource": "molten_glass",
-        "amount": 1,
-        "requires": [
-          "soda_ash"
-        ]
-      }
-    ]
-  },
-  "productionChains": [
-    {
-      "process": "glassmaking",
-      "chain": "Murano Sand + Soda Ash → Glass Foundry → Molten Glass → Fine Glassware"
-    }
-  ],
-  "substitutes": [
-    {
-      "resourceId": "standard_sand",
-      "efficiency": 0.6,
-      "qualityPenalty": 1,
-      "context": "glassmaking"
-    }
-  ],
-  "complements": [
-    {
-      "resourceId": "soda_ash",
-      "context": "glassmaking",
-      "relationship": "required"
-    },
-    {
-      "resourceId": "minerals_colorants",
-      "context": "glassmaking",
-      "relationship": "optional"
-    }
-  ],
-  "transportProperties": {
-    "transportMethods": {
-      "largeShip": {
-        "capacity": 1000,
-        "efficiency": 1,
-        "risk": 0.1
-      },
-      "barge": {
-        "capacity": 300,
-        "efficiency": 0.9,
-        "risk": 0.15
-      },
-      "handcart": {
-        "capacity": 8,
-        "efficiency": 0.7,
-        "risk": 0.25
-      },
-      "porter": {
-        "capacity": 2,
-        "efficiency": 0.5,
-        "risk": 0.3
-      }
-    },
-    "specialRequirements": [
-      "dry_storage"
-    ],
-    "loadingTime": 5,
-    "routeRestrictions": []
-  },
-  "storageProperties": {
-    "storageFacilities": {
-      "smallWarehouse": {
-        "capacityMultiplier": 1,
-        "preservation": 1
-      },
-      "bulkMaterialsYard": {
-        "capacityMultiplier": 1.5,
-        "preservation": 0.9
-      }
-    },
-    "storageRequirements": [
-      "dry"
-    ],
-    "specialRisks": [
-      "moisture"
-    ],
-    "maxStorageTime": "unlimited"
-  },
-  "marketDynamics": {
-    "baseAvailability": 0.8,
-    "demandLevel": "steady",
-    "priceVolatility": 0.2,
-    "regionalFactors": [
-      {
-        "region": "murano",
-        "availabilityModifier": 1.5,
-        "priceModifier": 0.8
-      }
-    ],
-    "seasonalFactors": []
-  },
-  "productionChainPosition": {
-    "predecessors": [],
-    "successors": [
-      {
-        "resource": "molten_glass",
-        "facility": "glass_foundry"
-      }
-    ]
-  },
+  "varieties": [],
   "historicalNotes": {
     "introductionYear": "ancient",
     "notableProducers": [
@@ -174,6 +20,5 @@
       "Venetian glass industry"
     ],
     "culturalContext": ""
-  },
-  "varieties": []
+  }
 }

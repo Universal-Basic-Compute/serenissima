@@ -36,5 +36,44 @@
     "Inventory management area",
     "Security checkpoint",
     "Goods organization system"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {},
+    "outputResources": {
+      "porter_equipment": 2
+    },
+    "storageCapacity": 500,
+    "stores": [
+      "books",
+      "bricks",
+      "clay",
+      "dyed_textiles",
+      "dyestuffs",
+      "fish",
+      "flour",
+      "grain",
+      "iron",
+      "luxury_silk_garments",
+      "olive_oil",
+      "paper",
+      "porter_equipment",
+      "preserved_fish",
+      "processed_iron",
+      "rope",
+      "salt",
+      "silk_fabric",
+      "soap",
+      "spiced_wine",
+      "timber",
+      "tools",
+      "venetian_lace",
+      "weapons",
+      "wine"
+    ],
+    "sells": [
+      "porter_equipment",
+      "rope",
+      "tools"
+    ]
+  }
 }

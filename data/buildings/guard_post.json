@@ -36,5 +36,30 @@
     "Detention area",
     "Document inspection station",
     "Weapons rack"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "weapons": 1,
+      "tools": 2,
+      "wine": 1
+    },
+    "outputResources": {
+      "blackmail_evidence": 2,
+      "criminal_contacts": 1
+    },
+    "storageCapacity": 50,
+    "stores": [
+      "weapons",
+      "tools",
+      "blackmail_evidence",
+      "criminal_contacts",
+      "disguise_materials",
+      "forgery_tools"
+    ],
+    "sells": [
+      "blackmail_evidence",
+      "criminal_contacts",
+      "smuggler_maps"
+    ]
+  }
 }

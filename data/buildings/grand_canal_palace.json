@@ -41,5 +41,46 @@
     "Garden terraces",
     "Ballrooms",
     "Private chapel"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "water": 3,
+      "wine": 2,
+      "spiced_wine": 1,
+      "bread": 2,
+      "olive_oil": 1,
+      "fish": 2,
+      "fuel": 3
+    },
+    "outputResources": {
+      "blackmail_evidence": 1,
+      "criminal_contacts": 1
+    },
+    "storageCapacity": 300,
+    "stores": [
+      "water",
+      "wine",
+      "spiced_wine",
+      "bread",
+      "olive_oil",
+      "fish",
+      "fuel",
+      "gold",
+      "jewelry",
+      "luxury_silk_garments",
+      "venetian_lace",
+      "fine_glassware",
+      "books",
+      "maps",
+      "blackmail_evidence",
+      "criminal_contacts"
+    ],
+    "sells": [
+      "blackmail_evidence",
+      "criminal_contacts",
+      "books",
+      "maps",
+      "jewelry"
+    ]
+  }
 }

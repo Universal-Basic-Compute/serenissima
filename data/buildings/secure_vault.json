@@ -36,5 +36,31 @@
     "Guard station",
     "Record keeping office",
     "Private viewing booths"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "tools": 1
+    },
+    "outputResources": {
+      "criminal_contacts": 1
+    },
+    "storageCapacity": 5000,
+    "stores": [
+      "gold",
+      "jewelry",
+      "books",
+      "maps",
+      "blackmail_evidence",
+      "weapons",
+      "forgery_tools",
+      "gold_leaf",
+      "marble",
+      "luxury_silk_garments",
+      "venetian_lace",
+      "fine_glassware"
+    ],
+    "sells": [
+      "criminal_contacts"
+    ]
+  }
 }

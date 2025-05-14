@@ -21,19 +21,42 @@
   "constructionTime": 432000000,
   "productionInformation": {
     "inputResources": {
-      "Contraband": "varies",
-      "Bribes": 10,
-      "Criminal Contacts": 2
+      "fuel": 2,
+      "tools": 1,
+      "rope": 2,
+      "water": 1
     },
     "outputResources": {
-      "Smuggled Goods": "varies",
-      "Smuggling Services": 5
+      "smuggler_maps": 1,
+      "criminal_contacts": 2,
+      "blackmail_evidence": 1,
+      "porter_equipment": 2,
+      "disguise_materials": 1
     },
-    "productionRate": "Based on contraband volume",
-    "storageCapacity": {
-      "contraband": 100,
-      "smuggling equipment": 50
-    }
+    "storageCapacity": 150,
+    "stores": [
+      "weapons",
+      "wine",
+      "spiced_wine",
+      "gold",
+      "jewelry",
+      "poison_components",
+      "disguise_materials",
+      "criminal_contacts",
+      "blackmail_evidence",
+      "smuggler_maps",
+      "forgery_tools",
+      "porter_equipment"
+    ],
+    "sells": [
+      "smuggler_maps",
+      "criminal_contacts",
+      "blackmail_evidence",
+      "disguise_materials",
+      "forgery_tools",
+      "porter_equipment",
+      "poison_components"
+    ]
   },
   "soundDesign": {
     "ambientSound": "Water lapping, quiet boat movements, hushed conversations",

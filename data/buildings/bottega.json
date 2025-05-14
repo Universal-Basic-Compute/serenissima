@@ -21,14 +21,35 @@
   "constructionTime": 172800000,
   "productionInformation": {
     "inputResources": {
-      "Raw Materials": "15-25 units per day depending on specialization",
-      "Labor": "2-3 workers"
+      "raw_silk": 4,
+      "dyestuffs": 2,
+      "fuel": 3,
+      "tools": 1
     },
     "outputResources": {
-      "Finished Goods": "12-20 units per day",
-      "Sales Revenue": "20-35 ducats per day"
+      "luxury_silk_garments": 2,
+      "dyed_textiles": 3,
+      "venetian_lace": 1
     },
-    "storageCapacity": 50
+    "storageCapacity": 80,
+    "stores": [
+      "raw_silk",
+      "dyestuffs",
+      "fuel",
+      "tools",
+      "luxury_silk_garments",
+      "dyed_textiles",
+      "venetian_lace",
+      "silk_fabric",
+      "prepared_silk"
+    ],
+    "sells": [
+      "luxury_silk_garments",
+      "dyed_textiles",
+      "venetian_lace",
+      "silk_fabric",
+      "prepared_silk"
+    ]
   },
   "soundDesign": {
     "ambientSound": "Workshop sounds specific to craft, customer conversations",

@@ -21,21 +21,30 @@
   "constructionTime": 345600000,
   "productionInformation": {
     "inputResources": {
-      "Molten Glass": 15,
-      "Colorants": 3,
-      "Fuel": 10,
-      "Gold Leaf": 0.5
+      "molten_glass": 8,
+      "fuel": 4,
+      "gold": 1,
+      "tools": 2
     },
     "outputResources": {
-      "Fine Glassware": 20,
-      "Decorative Glass": 10,
-      "Specialty Glass": 5
+      "fine_glassware": 5,
+      "jewelry": 1
     },
-    "productionRate": "Daily production with cooling time",
-    "storageCapacity": {
-      "moltenGlass": 30,
-      "finishedGoods": 100
-    }
+    "storageCapacity": 150,
+    "stores": [
+      "molten_glass",
+      "fuel",
+      "gold",
+      "tools",
+      "fine_glassware",
+      "jewelry",
+      "sand",
+      "soda_ash"
+    ],
+    "sells": [
+      "fine_glassware",
+      "jewelry"
+    ]
   },
   "soundDesign": {
     "ambientSound": "Glass being heated, gentle blowing, tools on hot glass",

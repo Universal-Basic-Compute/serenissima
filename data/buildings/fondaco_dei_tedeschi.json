@@ -20,17 +20,6 @@
   },
   "maintenanceCost": 3500,
   "constructionTime": 1296000000,
-  "productionInformation": {
-    "inputResources": {
-      "Northern European Goods": "100-200 units per day",
-      "Venetian Export Goods": "80-150 units per day"
-    },
-    "outputResources": {
-      "Trade Revenue": "150-300 ducats per day",
-      "Tax Revenue": "30-60 ducats per day to state"
-    },
-    "storageCapacity": 500
-  },
   "soundDesign": {
     "ambientSound": "Multiple languages being spoken, trading negotiations, cargo movement",
     "activitySounds": "Goods being inspected, coins counting, ships docking, cargo loading",

@@ -40,5 +40,33 @@
     "Doge's Ceremonial Area",
     "Prayer Spaces",
     "Tourist Viewing Areas"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "gold": 3,
+      "gold_leaf": 2,
+      "marble": 1,
+      "fuel": 5
+    },
+    "outputResources": {
+      "books": 1,
+      "maps": 1
+    },
+    "storageCapacity": 200,
+    "stores": [
+      "gold",
+      "gold_leaf",
+      "marble",
+      "fuel",
+      "books",
+      "maps",
+      "jewelry",
+      "luxury_silk_garments"
+    ],
+    "sells": [
+      "books",
+      "maps",
+      "jewelry"
+    ]
+  }
 }

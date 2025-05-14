@@ -22,21 +22,23 @@
   "constructionTime": 2592000000,
   "productionInformation": {
     "inputResources": {
-      "Gold": 10,
-      "Silver": 30,
-      "Copper": 15,
-      "Fuel": 40
+      "gold": 10,
+      "tools": 2,
+      "fuel": 3
     },
     "outputResources": {
-      "Gold Ducats": 1000,
-      "Silver Grosso": 3000,
-      "Copper Soldino": 10000
+      "forgery_tools": 1
     },
-    "productionRate": "Controlled by Treasury needs",
-    "storageCapacity": {
-      "preciousMetals": 100,
-      "coinage": 50000
-    }
+    "storageCapacity": 500,
+    "stores": [
+      "gold",
+      "tools",
+      "fuel",
+      "forgery_tools"
+    ],
+    "sells": [
+      "gold"
+    ]
   },
   "soundDesign": {
     "ambientSound": "Metal striking, coin counting, secure locks operating",

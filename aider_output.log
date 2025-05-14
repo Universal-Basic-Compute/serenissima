@@ -1213,7 +1213,7 @@ Weak model: anthropic/claude-3-5-haiku-20241022
 Git repo: .git with 590 files
 Repo-map: using 4096 tokens, auto refresh
 Added data\resources\raw_materials\marble.json to the chat.
-Added data\resources\raw_materials\murano_sand.json to the chat.
+Added data\resources\raw_materials\sand.json to the chat.
 Added data\resources\raw_materials\raw_silk.json to the chat.
 Added data\resources\raw_materials\salt.json to the chat.
 Added data\resources\raw_materials\soda_ash.json to the chat.
@@ -1228,12 +1228,12 @@ I'll standardize the resource file structure across all the provided files. Afte
 
 Here are the necessary changes:
 
-data\resources\raw_materials\murano_sand.json
+data\resources\raw_materials\sand.json
 ```json
 <<<<<<< SEARCH
     "flavor": "Beneath your feet lies the foundation of Venice's crystalline reputation\u00e2\u20ac\u201dmere grains to some, but to the glass masters, these sands are more precious than gold."
 =======
-    "flavor": "Beneath your feet lies the foundation of Venice's crystalline reputation—mere grains to some, but to the glass masters, these sands are more precious than gold."
+    "flavor": "Beneath your feet lies the foundation of Venice's crystalline reputationï¿½mere grains to some, but to the glass masters, these sands are more precious than gold."
 >>>>>>> REPLACE
 ```
 
@@ -1242,7 +1242,7 @@ data\resources\raw_materials\salt.json
 <<<<<<< SEARCH
     "flavor": "The humble salt crystal\u00e2\u20ac\u201dVenice's first treasure. Before spices and silk, before gold and glass, there was salt. The invisible empire upon which all else was built."
 =======
-    "flavor": "The humble salt crystal—Venice's first treasure. Before spices and silk, before gold and glass, there was salt. The invisible empire upon which all else was built."
+    "flavor": "The humble salt crystalï¿½Venice's first treasure. Before spices and silk, before gold and glass, there was salt. The invisible empire upon which all else was built."
 >>>>>>> REPLACE
 ```
 
@@ -1258,7 +1258,7 @@ data\resources\raw_materials\soda_ash.json
       {
         "resource": "molten_glass",
         "amount": 1,
-        "requires": ["murano_sand"]
+        "requires": ["sand"]
       },
       {
         "resource": "soap",
@@ -1288,7 +1288,7 @@ data\resources\raw_materials\soda_ash.json
       {
         "resource": "molten_glass",
         "amount": 1,
-        "requires": ["murano_sand"]
+        "requires": ["sand"]
       },
       {
         "resource": "soap",
@@ -1311,7 +1311,7 @@ data\resources\raw_materials\soda_ash.json
 >>>>>>> REPLACE
 ```
 
-data\resources\raw_materials\murano_sand.json
+data\resources\raw_materials\sand.json
 ```json
 <<<<<<< SEARCH
   "production_properties": {
@@ -1572,7 +1572,7 @@ data\resources\raw_materials\soda_ash.json
 >>>>>>> REPLACE
 ```
 
-data\resources\raw_materials\murano_sand.json
+data\resources\raw_materials\sand.json
 ```json
 <<<<<<< SEARCH
   "historical_notes": {
@@ -1756,7 +1756,7 @@ data\resources\raw_materials\marble.json
 >>>>>>> REPLACE
 ```
 Tokens: 14k sent, 4.1k received. Cost: $0.10 message, $0.10 session.
-Applied edit to data\resources\raw_materials\murano_sand.json
+Applied edit to data\resources\raw_materials\sand.json
 Applied edit to data\resources\raw_materials\soda_ash.json
 Applied edit to data\resources\raw_materials\salt.json
 Applied edit to data\resources\raw_materials\raw_silk.json
@@ -1867,7 +1867,7 @@ Weak model: anthropic/claude-3-5-haiku-20241022
 Git repo: .git with 591 files
 Repo-map: using 4096 tokens, auto refresh
 Added data\resources\raw_materials\marble.json to the chat.
-Added data\resources\raw_materials\murano_sand.json to the chat.
+Added data\resources\raw_materials\sand.json to the chat.
 Added data\resources\raw_materials\raw_silk.json to the chat.
 Added data\resources\raw_materials\salt.json to the chat.
 Added data\resources\raw_materials\soda_ash.json to the chat.
@@ -1913,7 +1913,7 @@ data\resources\raw_materials\salt.json
   "description": {
     "short": "Essential mineral for food preservation and trade.",
     "full": "White crystalline mineral harvested from the Venetian lagoon's salt pans. A strategic resource that formed the foundation of Venice's early wealth and remains a state monopoly.",
-    "flavor": "The humble salt crystal—Venice's first treasure. Before spices and silk, before gold and glass, there was salt. The invisible empire upon which all else was built."
+    "flavor": "The humble salt crystalï¿½Venice's first treasure. Before spices and silk, before gold and glass, there was salt. The invisible empire upon which all else was built."
   },
   "source_properties": {
     "source": "local",
@@ -1957,7 +1957,7 @@ data\resources\raw_materials\salt.json
   "description": {
     "short": "Essential mineral for food preservation and trade.",
     "full": "White crystalline mineral harvested from the Venetian lagoon's salt pans. A strategic resource that formed the foundation of Venice's early wealth and remains a state monopoly.",
-    "flavor": "The humble salt crystal—Venice's first treasure. Before spices and silk, before gold and glass, there was salt. The invisible empire upon which all else was built."
+    "flavor": "The humble salt crystalï¿½Venice's first treasure. Before spices and silk, before gold and glass, there was salt. The invisible empire upon which all else was built."
   },
   "sourceProperties": {
     "source": "local",
@@ -2523,7 +2523,7 @@ data\resources\raw_materials\raw_silk.json
 >>>>>>> REPLACE
 ```
 
-data\resources\raw_materials\murano_sand.json
+data\resources\raw_materials\sand.json
 ```json
 <<<<<<< SEARCH
   "productionProperties": {
@@ -2562,7 +2562,7 @@ data\resources\raw_materials\murano_sand.json
 Tokens: 14k sent, 4.6k received. Cost: $0.11 message, $0.11 session.
 Committing data\resources\raw_materials\marble.json before applying edits.
 Committing data\resources\raw_materials\raw_silk.json before applying edits.
-Committing data\resources\raw_materials\murano_sand.json before applying edits.
+Committing data\resources\raw_materials\sand.json before applying edits.
 Commit 0c0b80e refactor: Normalize JSON structure with camelCase and remove 
 unnecessary decimal points
 The LLM did not conform to the edit format.
@@ -2631,7 +2631,7 @@ Weak model: anthropic/claude-3-5-haiku-20241022
 Git repo: .git with 591 files
 Repo-map: using 4096 tokens, auto refresh
 Added data\resources\raw_materials\marble.json to the chat.
-Added data\resources\raw_materials\murano_sand.json to the chat.
+Added data\resources\raw_materials\sand.json to the chat.
 Added data\resources\raw_materials\raw_silk.json to the chat.
 Added data\resources\raw_materials\salt.json to the chat.
 Added data\resources\raw_materials\soda_ash.json to the chat.
@@ -3046,7 +3046,7 @@ data\resources\raw_materials\raw_silk.json
 >>>>>>> REPLACE
 ```
 
-data\resources\raw_materials\murano_sand.json
+data\resources\raw_materials\sand.json
 ```json
 <<<<<<< SEARCH
   "productionProperties": {
@@ -3065,7 +3065,7 @@ data\resources\raw_materials\murano_sand.json
 >>>>>>> REPLACE
 ```
 
-data\resources\raw_materials\murano_sand.json
+data\resources\raw_materials\sand.json
 ```json
 <<<<<<< SEARCH
   "productionChains": [
@@ -3084,7 +3084,7 @@ data\resources\raw_materials\murano_sand.json
 >>>>>>> REPLACE
 ```
 
-data\resources\raw_materials\murano_sand.json
+data\resources\raw_materials\sand.json
 ```json
 <<<<<<< SEARCH
   "productionChainPosition": {
@@ -3191,7 +3191,7 @@ Tokens: 14k sent, 3.3k received. Cost: $0.09 message, $0.09 session.
 Committing data\resources\raw_materials\salt.json before applying edits.
 Committing data\resources\raw_materials\marble.json before applying edits.
 Committing data\resources\raw_materials\raw_silk.json before applying edits.
-Committing data\resources\raw_materials\murano_sand.json before applying edits.
+Committing data\resources\raw_materials\sand.json before applying edits.
 Committing data\resources\raw_materials\soda_ash.json before applying edits.
 Commit c45a7b8 refactor: standardize JSON structure and naming conventions 
 across resource files

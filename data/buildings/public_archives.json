@@ -38,5 +38,32 @@
     "New submissions office",
     "Archivist's consultation table",
     "Security checkpoint"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "paper": 15,
+      "rags": 5,
+      "books": 2
+    },
+    "outputResources": {
+      "maps": 2,
+      "forgery_tools": 1,
+      "smuggler_maps": 1
+    },
+    "storageCapacity": 500,
+    "stores": [
+      "paper",
+      "books",
+      "rags",
+      "maps",
+      "smuggler_maps",
+      "forgery_tools",
+      "blackmail_evidence"
+    ],
+    "sells": [
+      "maps",
+      "forgery_tools",
+      "smuggler_maps"
+    ]
+  }
 }

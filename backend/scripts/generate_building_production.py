@@ -57,7 +57,76 @@ The production information should include:
 4. List of resources the building can store
 5. List of resources the building can sell
 
-Use realistic resource names that would exist in Renaissance Venice.
+Use  ONLYthe following resources:
+banking_services
+blackmail_evidence
+books
+bread
+bricks
+building_materials
+clay
+clean-water
+criminal_contacts
+cut_stone
+disguise_materials
+dyed_textiles
+dyestuffs
+fine_glassware
+fish
+flax
+flour
+forgery_tools
+fuel
+glass
+gold
+gold_leaf
+gondola
+grain
+hemp
+iron
+iron_fittings
+iron_ore
+jewelry
+labor
+limestone
+luxury_silk_garments
+maps
+marble
+merchant_galley
+molten_glass
+mortar
+sand
+olives
+olive_oil
+paper
+pine_resin
+pitch
+poison_components
+porter_equipment
+prepared_silk
+preserved_fish
+processed_iron
+rags
+raw_silk
+rope
+sailcloth
+salt
+sand
+ship_components
+silk_fabric
+small_boats
+smuggler_maps
+soap
+soda_ash
+spiced_wine
+stone
+timber
+tools
+venetian_lace
+war_galley
+water
+weapons
+wine
 """
 
         # Create a user prompt with building details and expected format
@@ -99,7 +168,7 @@ Please create a JSON object with the following structure:
 
 The numbers in inputResources and outputResources represent daily production/consumption rates.
 Use resource IDs in snake_case (like "olive_oil" not "Olive Oil").
-Make sure the resources are historically accurate for Renaissance Venice.
+Make sure the resources are from the provided list
 Return ONLY the JSON object with no additional text.
 """
         

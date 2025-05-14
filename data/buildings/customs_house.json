@@ -22,15 +22,34 @@
   "constructionTime": 604800000,
   "productionInformation": {
     "inputResources": {
-      "Imported Goods": "200-500 units per day for inspection",
-      "Exported Goods": "150-400 units per day for inspection"
+      "paper": 5,
+      "water": 2
     },
     "outputResources": {
-      "Tax Revenue": "150-300 ducats per day to state treasury",
-      "Inspection Certificates": "100-200 per day",
-      "Trade Data": "Valuable market intelligence"
+      "smuggler_maps": 1
     },
-    "storageCapacity": 400
+    "storageCapacity": 1000,
+    "stores": [
+      "paper",
+      "water",
+      "smuggler_maps",
+      "gold",
+      "silk_fabric",
+      "luxury_silk_garments",
+      "spiced_wine",
+      "fine_glassware",
+      "jewelry",
+      "venetian_lace",
+      "weapons",
+      "books",
+      "maps",
+      "tools"
+    ],
+    "sells": [
+      "smuggler_maps",
+      "paper",
+      "tools"
+    ]
   },
   "soundDesign": {
     "ambientSound": "Official stamps and seals, clerks calling next in line, harbor sounds",

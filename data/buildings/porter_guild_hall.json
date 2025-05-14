@@ -21,17 +21,29 @@
   "constructionTime": 345600000,
   "productionInformation": {
     "inputResources": {
-      "Porter Equipment": 5,
-      "Labor": 20
+      "porter_equipment": 3,
+      "rope": 2,
+      "water": 8
     },
     "outputResources": {
-      "Transportation Services": 100
+      "porter_equipment": 3
     },
-    "productionRate": "Continuous service provision",
-    "storageCapacity": {
-      "equipment": 50,
-      "goods in transit": 200
-    }
+    "storageCapacity": 300,
+    "stores": [
+      "porter_equipment",
+      "rope",
+      "tools",
+      "water",
+      "grain",
+      "bread",
+      "wine",
+      "fish"
+    ],
+    "sells": [
+      "porter_equipment",
+      "rope",
+      "tools"
+    ]
   },
   "soundDesign": {
     "ambientSound": "Porters discussing routes, equipment being moved, assignment calls",

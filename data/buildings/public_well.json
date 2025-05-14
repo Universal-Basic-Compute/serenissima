@@ -34,5 +34,21 @@
     "Waiting area",
     "Small plaza",
     "Bench seating"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "water": 15
+    },
+    "outputResources": {
+      "water": 12
+    },
+    "storageCapacity": 350,
+    "stores": [
+      "water",
+      "water"
+    ],
+    "sells": [
+      "water"
+    ]
+  }
 }

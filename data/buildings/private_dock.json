@@ -35,5 +35,38 @@
     "Family waiting area",
     "Boatman's station",
     "Security gate"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "building_materials": 1,
+      "timber": 2,
+      "rope": 1
+    },
+    "outputResources": {
+      "small_boats": 0.2,
+      "porter_equipment": 1,
+      "smuggler_maps": 0.1
+    },
+    "storageCapacity": 500,
+    "stores": [
+      "building_materials",
+      "timber",
+      "rope",
+      "small_boats",
+      "porter_equipment",
+      "smuggler_maps",
+      "fish",
+      "wine",
+      "salt",
+      "weapons",
+      "olive_oil",
+      "preserved_fish"
+    ],
+    "sells": [
+      "small_boats",
+      "porter_equipment",
+      "smuggler_maps",
+      "gondola"
+    ]
+  }
 }

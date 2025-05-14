@@ -36,5 +36,33 @@
     "Maintenance boat dock",
     "Dredging operation staging area",
     "Water quality testing station"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "tools": 4,
+      "rope": 3,
+      "timber": 2,
+      "fuel": 2
+    },
+    "outputResources": {
+      "porter_equipment": 1,
+      "maps": 1
+    },
+    "storageCapacity": 200,
+    "stores": [
+      "tools",
+      "rope",
+      "timber",
+      "fuel",
+      "porter_equipment",
+      "maps",
+      "sand",
+      "water",
+      "small_boats"
+    ],
+    "sells": [
+      "porter_equipment",
+      "maps"
+    ]
+  }
 }

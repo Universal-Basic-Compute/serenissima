@@ -38,5 +38,38 @@
     "Receiving rooms",
     "Garden",
     "Roof loggia"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "gold": 5,
+      "fine_glassware": 1,
+      "wine": 2,
+      "books": 1,
+      "bread": 2,
+      "olive_oil": 1
+    },
+    "outputResources": {
+      "blackmail_evidence": 1,
+      "criminal_contacts": 2
+    },
+    "storageCapacity": 150,
+    "stores": [
+      "gold",
+      "fine_glassware",
+      "books",
+      "blackmail_evidence",
+      "criminal_contacts",
+      "wine",
+      "jewelry",
+      "luxury_silk_garments",
+      "spiced_wine"
+    ],
+    "sells": [
+      "blackmail_evidence",
+      "criminal_contacts",
+      "fine_glassware",
+      "jewelry",
+      "luxury_silk_garments"
+    ]
+  }
 }

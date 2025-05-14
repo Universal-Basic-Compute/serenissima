@@ -21,21 +21,29 @@
   "constructionTime": 259200000,
   "productionInformation": {
     "inputResources": {
-      "Undyed Textiles": 30,
-      "Dyestuffs": 15,
-      "Mordants": 10,
-      "Water": 100,
-      "Fuel": 20
+      "raw_silk": 5,
+      "dyestuffs": 8,
+      "water": 15,
+      "fuel": 3
     },
     "outputResources": {
-      "Dyed Textiles": 28,
-      "Dye Waste": 2
+      "dyed_textiles": 5,
+      "prepared_silk": 4
     },
-    "productionRate": "28 units of dyed fabric per day",
-    "storageCapacity": {
-      "rawMaterials": 150,
-      "finishedGoods": 100
-    }
+    "storageCapacity": 200,
+    "stores": [
+      "raw_silk",
+      "dyestuffs",
+      "water",
+      "fuel",
+      "dyed_textiles",
+      "prepared_silk",
+      "silk_fabric"
+    ],
+    "sells": [
+      "dyed_textiles",
+      "prepared_silk"
+    ]
   },
   "soundDesign": {
     "ambientSound": "Bubbling vats, fabric splashing, steam venting",

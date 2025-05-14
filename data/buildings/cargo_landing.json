@@ -35,5 +35,44 @@
     "Crane operation area",
     "Cargo sorting zone",
     "Ship mooring area"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "tools": 2,
+      "rope": 3,
+      "porter_equipment": 1
+    },
+    "outputResources": {
+      "smuggler_maps": 1
+    },
+    "storageCapacity": 500,
+    "stores": [
+      "grain",
+      "wine",
+      "spiced_wine",
+      "olive_oil",
+      "salt",
+      "timber",
+      "stone",
+      "marble",
+      "iron",
+      "gold",
+      "silk_fabric",
+      "dyed_textiles",
+      "glass",
+      "fine_glassware",
+      "weapons",
+      "books",
+      "paper",
+      "rope",
+      "fish",
+      "preserved_fish",
+      "tools"
+    ],
+    "sells": [
+      "smuggler_maps",
+      "porter_equipment",
+      "rope"
+    ]
+  }
 }

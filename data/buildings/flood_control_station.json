@@ -36,5 +36,34 @@
     "Emergency response dock",
     "Warning bell tower",
     "Canal gate mechanism"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "tools": 3,
+      "timber": 2,
+      "rope": 4
+    },
+    "outputResources": {
+      "water": 10,
+      "maps": 1,
+      "building_materials": 1
+    },
+    "storageCapacity": 250,
+    "stores": [
+      "tools",
+      "timber",
+      "rope",
+      "water",
+      "maps",
+      "building_materials",
+      "stone",
+      "iron_fittings",
+      "sand"
+    ],
+    "sells": [
+      "water",
+      "maps",
+      "building_materials"
+    ]
+  }
 }

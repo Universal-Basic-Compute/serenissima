@@ -36,5 +36,35 @@
     "Weighing station",
     "Distribution area",
     "Inventory management office"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "grain": 120,
+      "flour": 60,
+      "salt": 10
+    },
+    "outputResources": {
+      "grain": 115,
+      "flour": 57,
+      "preserved_fish": 5
+    },
+    "storageCapacity": 5000,
+    "stores": [
+      "grain",
+      "flour",
+      "bread",
+      "salt",
+      "preserved_fish",
+      "fish",
+      "olives",
+      "olive_oil"
+    ],
+    "sells": [
+      "grain",
+      "flour",
+      "bread",
+      "salt",
+      "preserved_fish"
+    ]
+  }
 }

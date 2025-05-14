@@ -38,5 +38,29 @@
     "Model ship demonstration",
     "Instructor's podium",
     "Practical examination area"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "paper": 3,
+      "tools": 1,
+      "books": 2
+    },
+    "outputResources": {
+      "maps": 1,
+      "smuggler_maps": 0.2
+    },
+    "storageCapacity": 150,
+    "stores": [
+      "paper",
+      "tools",
+      "books",
+      "maps",
+      "smuggler_maps",
+      "wine"
+    ],
+    "sells": [
+      "maps",
+      "smuggler_maps"
+    ]
+  }
 }

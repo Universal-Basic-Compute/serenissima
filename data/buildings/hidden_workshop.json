@@ -21,18 +21,41 @@
   "constructionTime": 604800000,
   "productionInformation": {
     "inputResources": {
-      "varies by product": "varies"
+      "poison_components": 3,
+      "paper": 5,
+      "iron": 2,
+      "tools": 1,
+      "fuel": 2
     },
     "outputResources": {
-      "Forgery Tools": 5,
-      "Poison Components": 3,
-      "Contraband Goods": 10
+      "forgery_tools": 4,
+      "blackmail_evidence": 5,
+      "weapons": 2,
+      "disguise_materials": 3
     },
-    "productionRate": "Varies by product type",
-    "storageCapacity": {
-      "rawMaterials": 50,
-      "finishedGoods": 30
-    }
+    "storageCapacity": 75,
+    "stores": [
+      "poison_components",
+      "paper",
+      "gold",
+      "iron",
+      "tools",
+      "fuel",
+      "forgery_tools",
+      "blackmail_evidence",
+      "weapons",
+      "disguise_materials",
+      "criminal_contacts",
+      "smuggler_maps"
+    ],
+    "sells": [
+      "forgery_tools",
+      "blackmail_evidence",
+      "weapons",
+      "disguise_materials",
+      "criminal_contacts",
+      "smuggler_maps"
+    ]
   },
   "soundDesign": {
     "ambientSound": "Muffled work sounds, quiet conversations, occasional lookout signals",

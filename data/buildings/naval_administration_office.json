@@ -39,5 +39,33 @@
     "Diplomatic reception area",
     "Intelligence briefing room",
     "Officer's mess"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "paper": 5,
+      "maps": 1
+    },
+    "outputResources": {
+      "smuggler_maps": 1
+    },
+    "storageCapacity": 250,
+    "stores": [
+      "paper",
+      "maps",
+      "smuggler_maps",
+      "weapons",
+      "tools",
+      "ship_components",
+      "rope",
+      "sailcloth"
+    ],
+    "sells": [
+      "smuggler_maps",
+      "maps",
+      "weapons",
+      "ship_components",
+      "merchant_galley",
+      "war_galley"
+    ]
+  }
 }

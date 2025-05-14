@@ -39,5 +39,32 @@
     "Ceremonial Hall",
     "Administrative Offices",
     "Master Consultation Rooms"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "books": 1,
+      "tools": 2,
+      "sand": 4
+    },
+    "outputResources": {
+      "fine_glassware": 1,
+      "glass": 3,
+      "maps": 1
+    },
+    "storageCapacity": 150,
+    "stores": [
+      "fine_glassware",
+      "glass",
+      "sand",
+      "tools",
+      "books",
+      "maps",
+      "gold"
+    ],
+    "sells": [
+      "fine_glassware",
+      "glass",
+      "maps"
+    ]
+  }
 }

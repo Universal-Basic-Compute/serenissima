@@ -41,5 +41,30 @@
     "Production - Transportation Industry": 1,
     "Infrastructure - Transportation Services": 1
   },
-  "processedAt": "2025-05-06T22:32:12.117Z"
+  "processedAt": "2025-05-06T22:32:12.117Z",
+  "productionInformation": {
+    "inputResources": {
+      "raw_silk": 3,
+      "dyestuffs": 2,
+      "water": 1
+    },
+    "outputResources": {
+      "prepared_silk": 2,
+      "dyed_textiles": 1
+    },
+    "storageCapacity": 100,
+    "stores": [
+      "raw_silk",
+      "dyestuffs",
+      "water",
+      "prepared_silk",
+      "dyed_textiles",
+      "silk_fabric"
+    ],
+    "sells": [
+      "prepared_silk",
+      "dyed_textiles",
+      "silk_fabric"
+    ]
+  }
 }

@@ -39,5 +39,41 @@
     "Administration building",
     "Security checkpoint",
     "Observation tower"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "water": 20,
+      "water": 15,
+      "wine": 5,
+      "tools": 2,
+      "soap": 8,
+      "fuel": 6
+    },
+    "outputResources": {
+      "blackmail_evidence": 1,
+      "criminal_contacts": 2,
+      "smuggler_maps": 1
+    },
+    "storageCapacity": 150,
+    "stores": [
+      "water",
+      "water",
+      "wine",
+      "tools",
+      "soap",
+      "fuel",
+      "blackmail_evidence",
+      "criminal_contacts",
+      "smuggler_maps",
+      "bread",
+      "fish",
+      "spiced_wine",
+      "preserved_fish"
+    ],
+    "sells": [
+      "blackmail_evidence",
+      "criminal_contacts",
+      "smuggler_maps"
+    ]
+  }
 }

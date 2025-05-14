@@ -38,5 +38,31 @@
     "Security checkpoint",
     "Distribution counter",
     "Testing range"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "iron": 10,
+      "processed_iron": 15,
+      "timber": 8,
+      "tools": 5
+    },
+    "outputResources": {
+      "weapons": 10,
+      "tools": 3
+    },
+    "storageCapacity": 500,
+    "stores": [
+      "iron",
+      "processed_iron",
+      "timber",
+      "tools",
+      "weapons",
+      "iron_fittings"
+    ],
+    "sells": [
+      "weapons",
+      "tools",
+      "iron_fittings"
+    ]
+  }
 }

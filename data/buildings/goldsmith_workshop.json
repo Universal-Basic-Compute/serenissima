@@ -22,21 +22,30 @@
   "constructionTime": 432000000,
   "productionInformation": {
     "inputResources": {
-      "Gold": 5,
-      "Silver": 10,
-      "Gems": 20,
-      "Fuel": 10
+      "gold": 4,
+      "tools": 2,
+      "fuel": 3,
+      "marble": 1,
+      "glass": 2
     },
     "outputResources": {
-      "Jewelry": 15,
-      "Religious Objects": 3,
-      "Luxury Table Items": 5
+      "jewelry": 3,
+      "gold_leaf": 2
     },
-    "productionRate": "Limited by material and commission",
-    "storageCapacity": {
-      "preciousMetals": 30,
-      "finishedGoods": 50
-    }
+    "storageCapacity": 100,
+    "stores": [
+      "gold",
+      "tools",
+      "fuel",
+      "marble",
+      "glass",
+      "jewelry",
+      "gold_leaf"
+    ],
+    "sells": [
+      "jewelry",
+      "gold_leaf"
+    ]
   },
   "soundDesign": {
     "ambientSound": "Gentle metalworking, quiet precision tools, soft conversation",

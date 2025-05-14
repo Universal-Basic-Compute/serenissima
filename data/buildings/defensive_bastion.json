@@ -38,5 +38,32 @@
     "Signal station",
     "Supply depot",
     "Training area"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "stone": 20,
+      "timber": 15,
+      "iron": 10,
+      "tools": 5
+    },
+    "outputResources": {
+      "weapons": 3,
+      "building_materials": 2
+    },
+    "storageCapacity": 1000,
+    "stores": [
+      "stone",
+      "timber",
+      "iron",
+      "tools",
+      "weapons",
+      "building_materials",
+      "water",
+      "fuel"
+    ],
+    "sells": [
+      "weapons",
+      "building_materials"
+    ]
+  }
 }

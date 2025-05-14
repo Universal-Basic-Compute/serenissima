@@ -38,5 +38,29 @@
     "Model rooms",
     "Material preparation area",
     "Student critique space"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "paper": 8,
+      "tools": 2,
+      "gold_leaf": 1,
+      "marble": 3,
+      "timber": 5
+    },
+    "outputResources": {
+      "books": 1
+    },
+    "storageCapacity": 500,
+    "stores": [
+      "paper",
+      "tools",
+      "gold_leaf",
+      "marble",
+      "timber",
+      "books"
+    ],
+    "sells": [
+      "books"
+    ]
+  }
 }

@@ -38,5 +38,38 @@
     "Merchant Stalls",
     "Bridge Crossroads",
     "Architectural Details"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "tools": 2
+    },
+    "outputResources": {
+      "porter_equipment": 2,
+      "tools": 2
+    },
+    "storageCapacity": 200,
+    "stores": [
+      "tools",
+      "luxury_silk_garments",
+      "jewelry",
+      "books",
+      "maps",
+      "wine",
+      "spiced_wine",
+      "fine_glassware",
+      "venetian_lace",
+      "porter_equipment"
+    ],
+    "sells": [
+      "luxury_silk_garments",
+      "jewelry",
+      "books",
+      "maps",
+      "wine",
+      "spiced_wine",
+      "fine_glassware",
+      "venetian_lace",
+      "porter_equipment"
+    ]
+  }
 }

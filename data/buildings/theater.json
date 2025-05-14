@@ -39,5 +39,36 @@
     "Refreshment salon",
     "Ticket booth",
     "Performer dressing rooms"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "timber": 2,
+      "paper": 3,
+      "tools": 1,
+      "wine": 3,
+      "dyed_textiles": 1
+    },
+    "outputResources": {
+      "books": 1,
+      "criminal_contacts": 1,
+      "blackmail_evidence": 1
+    },
+    "storageCapacity": 150,
+    "stores": [
+      "timber",
+      "paper",
+      "tools",
+      "wine",
+      "dyed_textiles",
+      "books",
+      "disguise_materials",
+      "blackmail_evidence",
+      "criminal_contacts"
+    ],
+    "sells": [
+      "books",
+      "wine",
+      "spiced_wine"
+    ]
+  }
 }

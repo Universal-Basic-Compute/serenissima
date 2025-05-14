@@ -21,19 +21,25 @@
   "constructionTime": 432000000,
   "productionInformation": {
     "inputResources": {
-      "Raw Silk": 20,
-      "Clean Water": 40,
-      "Fuel": 10
+      "raw_silk": 20,
+      "water": 15,
+      "fuel": 5,
+      "soap": 2
     },
     "outputResources": {
-      "Prepared Silk": 18,
-      "Silk Waste": 2
+      "prepared_silk": 18
     },
-    "productionRate": "18 units of prepared silk per day",
-    "storageCapacity": {
-      "rawMaterials": 100,
-      "preparedSilk": 50
-    }
+    "storageCapacity": 200,
+    "stores": [
+      "raw_silk",
+      "prepared_silk",
+      "water",
+      "soap",
+      "fuel"
+    ],
+    "sells": [
+      "prepared_silk"
+    ]
   },
   "soundDesign": {
     "ambientSound": "Water flowing, steam venting, silk being stretched",

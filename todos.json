@@ -103,7 +103,7 @@
       "data/resources/raw_materials/raw_silk.json",
       "data/resources/raw_materials/salt.json",
       "data/resources/raw_materials/marble.json",
-      "data/resources/raw_materials/murano_sand.json",
+      "data/resources/raw_materials/sand.json",
       "data/resources/raw_materials/soda_ash.json"
     ],
     "details": "Ensure all resource files use consistent property names (source_properties instead of sourceInfo, production_chain_position instead of productionChain) and have the same overall structure."

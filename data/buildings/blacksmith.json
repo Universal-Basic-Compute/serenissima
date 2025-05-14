@@ -21,21 +21,30 @@
   "constructionTime": 172800000,
   "productionInformation": {
     "inputResources": {
-      "Iron": 15,
-      "Fuel": 25,
-      "Water": 20
+      "processed_iron": 10,
+      "fuel": 6,
+      "water": 4
     },
     "outputResources": {
-      "Tools": 10,
-      "Building Hardware": 20,
-      "Ship Fittings": 5,
-      "Decorative Ironwork": 3
+      "tools": 5,
+      "iron_fittings": 15,
+      "weapons": 2
     },
-    "productionRate": "Daily production cycle",
-    "storageCapacity": {
-      "rawMaterials": 100,
-      "finishedGoods": 150
-    }
+    "storageCapacity": 120,
+    "stores": [
+      "processed_iron",
+      "fuel",
+      "water",
+      "tools",
+      "iron_fittings",
+      "weapons",
+      "iron"
+    ],
+    "sells": [
+      "tools",
+      "iron_fittings",
+      "weapons"
+    ]
   },
   "soundDesign": {
     "ambientSound": "Hammering on anvil, bellows pumping, forge roaring",

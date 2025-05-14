@@ -21,21 +21,32 @@
   "constructionTime": 345600000,
   "productionInformation": {
     "inputResources": {
-      "Processed Iron": 15,
-      "Tools": 2,
-      "Fuel": 30,
-      "Timber": 10
+      "processed_iron": 8,
+      "iron": 5,
+      "timber": 2,
+      "fuel": 6,
+      "tools": 1
     },
     "outputResources": {
-      "Weapons": 5,
-      "Military Equipment": 3,
-      "Ceremonial Arms": 1
+      "weapons": 6,
+      "ship_components": 2
     },
-    "productionRate": "5 units of weapons per day",
-    "storageCapacity": {
-      "rawMaterials": 100,
-      "finishedGoods": 50
-    }
+    "storageCapacity": 120,
+    "stores": [
+      "processed_iron",
+      "iron",
+      "timber",
+      "fuel",
+      "tools",
+      "weapons",
+      "ship_components",
+      "iron_fittings"
+    ],
+    "sells": [
+      "weapons",
+      "ship_components",
+      "iron_fittings"
+    ]
   },
   "soundDesign": {
     "ambientSound": "Multiple hammers on anvils, grinding wheels, metal being quenched",

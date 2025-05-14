@@ -38,5 +38,30 @@
     "Courtroom",
     "Waiting area",
     "Announcement board"
-  ]
+  ],
+  "productionInformation": {
+    "inputResources": {
+      "paper": 8,
+      "water": 5
+    },
+    "outputResources": {
+      "maps": 2,
+      "blackmail_evidence": 1
+    },
+    "storageCapacity": 300,
+    "stores": [
+      "paper",
+      "water",
+      "maps",
+      "blackmail_evidence",
+      "books",
+      "smuggler_maps",
+      "criminal_contacts",
+      "forgery_tools"
+    ],
+    "sells": [
+      "maps",
+      "smuggler_maps"
+    ]
+  }
 }
