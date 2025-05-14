@@ -38,7 +38,8 @@ const getBuildingImagePath = (type: string, variant?: string): string => {
     return `/images/buildings/${normalizedType}.jpg`;
   } catch (error) {
     console.error('Error getting building image path:', error);
-    return '/images/buildings/default_building.jpg';
+    // Use a known existing image as fallback
+    return '/images/buildings/commercial/markets/market_stall.jpg';
   }
 };
 
@@ -431,7 +432,8 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         console.error('Error loading building image:', e);
-                        e.currentTarget.src = '/images/buildings/default_building.jpg';
+                        // Use a known existing image as fallback
+                        e.currentTarget.src = '/images/buildings/commercial/markets/market_stall.jpg';
                       }}
                     />
                   </div>
