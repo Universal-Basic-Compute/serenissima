@@ -31,6 +31,8 @@ interface ExtendedListing {
 
 // Extend the Offer interface to include metadata
 interface ExtendedOffer extends Offer {
+  id: string;
+  buyer: string;
   metadata?: {
     historicalName?: string;
     englishName?: string;
@@ -872,10 +874,10 @@ export class TransactionService {
       }
       
       // Invalidate cache
-      this.invalidateTransactionsCache({ id: offerId });
+      this.invalidateTransactionsCache({ offerId });
       
       // Emit event
-      eventBus.emit(TransactionEventTypes.LISTING_CANCELLED, { id: offerId });
+      eventBus.emit(TransactionEventTypes.LISTING_CANCELLED, { offerId });
       
       return true;
     } catch (error) {
@@ -956,7 +958,7 @@ export class TransactionService {
       
       // Invalidate cache
       this.invalidateTransactionsCache({
-        id: transaction.id,
+        transactionId: transaction.id,
         assetId: transaction.assetId,
         seller: transaction.seller,
         buyer: transaction.buyer
