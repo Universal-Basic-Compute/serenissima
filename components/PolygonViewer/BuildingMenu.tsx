@@ -9,7 +9,7 @@ import { log } from '@/lib/logUtils';
 import { Building as ImportedBuilding } from '@/lib/models/BuildingModels';
 import PlaceableObjectManager from '@/lib/components/PlaceableObjectManager';
 import { BuildingService } from '@/lib/services/BuildingService';
-import { getWalletAddress } from '@/lib/walletUtils';
+import { getWalletAddress } from '../../lib/utils/walletUtils';
 import { eventBus, EventTypes } from '@/lib/eventBus';
 
 // Add global type declaration for the selected building point
