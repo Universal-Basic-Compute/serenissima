@@ -211,6 +211,13 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
     }
   }, [buildingDefinition]);
   
+  // Declare the window interface extension for __polygonData
+  declare global {
+    interface Window {
+      __polygonData: any[];
+    }
+  }
+
   // Function to fetch land data
   const fetchLandData = async (landId: string) => {
     try {
