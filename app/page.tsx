@@ -10,7 +10,6 @@ import { sceneLayerManager } from '@/lib/services/SceneLayerManager';
 import BuildingsToolbar from '@/components/BuildingsView/BuildingsToolbar';
 import WalletButton from '@/components/UI/WalletButton';
 import ResourceDropdowns from '@/components/UI/ResourceDropdowns';
-import BuildingRendererManager from '@/components/BuildingsView/BuildingRendererManager';
 import BuildingMenu from '@/components/PolygonViewer/BuildingMenu';
 import SettingsModal from '@/components/UI/SettingsModal';
 
@@ -77,9 +76,6 @@ export default function TwoDPage() {
     <div className="relative w-full h-screen">
       {/* Main 2D Isometric Viewer */}
       <IsometricViewer activeView={activeView} />
-      
-      {/* Building Renderer Manager - ensures buildings are rendered properly */}
-      <BuildingRendererManager active={activeView === 'buildings'} debug={true} />
       
       {/* Building Menu - needed for 2D view as well */}
       <BuildingMenu 
