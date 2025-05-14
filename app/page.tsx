@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { FaHome, FaBuilding, FaRoad, FaTree, FaStore, FaLandmark, FaBook } from 'react-icons/fa';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
-import BuildingsToolbar from '@/components/BuildingsView/BuildingsToolbar';
 import WalletButton from '@/components/UI/WalletButton';
 import ResourceDropdowns from '@/components/UI/ResourceDropdowns';
 import BuildingMenu from '@/components/PolygonViewer/BuildingMenu';
@@ -74,19 +73,6 @@ export default function TwoDPage() {
           }, 500);
         }}
       />
-      
-      {/* Buildings Toolbar - only visible in buildings view */}
-      {activeView === 'buildings' && (
-        <BuildingsToolbar 
-          polygons={typeof window !== 'undefined' ? window.__polygonData || [] : []}
-          onRefreshBuildings={() => {
-            eventBus.emit(EventTypes.BUILDING_PLACED, { refresh: true });
-            setTimeout(() => {
-              window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
-            }, 1000);
-          }}
-        />
-      )}
       
       {/* Top Navigation Bar */}
       <div className="absolute top-0 left-0 right-0 bg-black/50 text-white p-4 flex justify-between items-center">
