@@ -314,13 +314,14 @@ export async function GET(request: Request) {
         LeaseAmount?: number;
         Variant?: string;
         User: string;
-        Position: string | {
+        Position?: string | {
           lat?: number;
           lng?: number;
           x?: number;
           y?: number;
           z?: number;
         };
+        Point?: string;
         Rotation?: number;
         CreatedAt: string;
         RentAmount?: number;
@@ -329,8 +330,15 @@ export async function GET(request: Request) {
       };
     }
     
+    // Create a type-safe wrapper for Airtable records
+    interface TypedAirtableRecord {
+      id: string;
+      fields: Record<string, string | number | boolean | object | null | undefined>;
+      get(columnName: string): any;
+    }
+    
     // Ensure records is properly typed
-    const typedRecords = records as unknown as Airtable.Record<Airtable.FieldSet>[];
+    const typedRecords = records as unknown as TypedAirtableRecord[];
 
     // Define the Building interface for consistent typing
     interface Building {
@@ -349,7 +357,8 @@ export async function GET(request: Request) {
 
     // Transform Airtable records to our format
     const buildings = typedRecords.map(record => {
-      const fields = record.fields;
+      // Access fields in a type-safe way
+      const fields = record.fields as Record<string, any>;
       
       // Initialize position object
       let position: { lat?: number; lng?: number; x?: number; y?: number; z?: number; } = {};
