@@ -29,7 +29,7 @@ claude = anthropic.Anthropic(api_key=CLAUDE_API_KEY)
 
 # Directory paths
 RESOURCES_DIR = Path("data/resources")
-ICONS_DIR = Path("public/assets/icons/resources")
+ICONS_DIR = Path("public/images/resources")
 PROGRESS_FILE = Path("data/resource_icon_generation_progress.json")
 ERROR_LOG = Path("data/resource_icon_generation_errors.json")
 
@@ -81,15 +81,18 @@ def log_error(resource_id, stage, error):
         json.dump(errors, f, indent=2)
     print(f"Error logged for {resource_id} at {stage} stage")
 
-# Get all resource files recursively
+# Get all resource files from flat structure
 def get_all_resource_files():
     resource_files = []
     
-    # Walk through all subdirectories
-    for root, dirs, files in os.walk(RESOURCES_DIR):
-        for file in files:
-            if file.endswith('.json'):
-                resource_files.append(os.path.join(root, file))
+    # Check if the directory exists
+    if not RESOURCES_DIR.exists():
+        print(f"Resources directory not found at {RESOURCES_DIR}")
+        return resource_files
+    
+    # In a flat structure, just get all JSON files directly
+    for file in RESOURCES_DIR.glob('*.json'):
+        resource_files.append(str(file))
     
     print(f"Found {len(resource_files)} resource files")
     return resource_files
@@ -105,6 +108,13 @@ def load_all_resources():
                 resource = json.load(f)
                 # Add file path for later reference
                 resource['file_path'] = file
+                
+                # If id is not present, use the filename without extension
+                if 'id' not in resource:
+                    filename = Path(file).stem
+                    resource['id'] = filename
+                    print(f"No id found in {file}, using filename: {filename}")
+                
                 all_resources.append(resource)
                 print(f"Loaded resource: {resource.get('id', 'unknown')} from {file}")
         except Exception as error:
@@ -261,8 +271,8 @@ def update_resource_file(resource, icon_path):
         with open(file_path, 'r') as f:
             resource_data = json.load(f)
         
-        # Update the icon path
-        relative_path = f"/assets/icons/resources/{resource_id}.png"
+        # Update the icon path - use the new path format
+        relative_path = f"/images/resources/{resource_id}.png"
         resource_data['icon'] = relative_path
         
         # Write back to the file
