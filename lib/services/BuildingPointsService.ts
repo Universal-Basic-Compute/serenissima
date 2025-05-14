@@ -108,7 +108,7 @@ export class BuildingPointsService {
           console.log(`Server-side: Loaded ${Object.keys(buildingPoints).length} building points, ${Object.keys(canalPoints).length} canal points, and ${Object.keys(bridgePoints).length} bridge points`);
           
           // Emit event to notify other components
-          eventBus.emit(EventTypes.BUILDING_POINTS_LOADED as string, {
+          eventBus.emit(EventTypes.BUILDING_POINTS_LOADED, {
             buildingPointsCount: Object.keys(buildingPoints).length,
             canalPointsCount: Object.keys(canalPoints).length,
             bridgePointsCount: Object.keys(bridgePoints).length
@@ -147,7 +147,7 @@ export class BuildingPointsService {
         console.log(`Loaded ${Object.keys(this.buildingPoints).length} building points, ${Object.keys(this.canalPoints).length} canal points, and ${Object.keys(this.bridgePoints).length} bridge points`);
         
         // Emit event to notify other components
-        eventBus.emit(EventTypes.BUILDING_POINTS_LOADED as string, {
+        eventBus.emit(EventTypes.BUILDING_POINTS_LOADED, {
           buildingPointsCount: Object.keys(this.buildingPoints).length,
           canalPointsCount: Object.keys(this.canalPoints).length,
           bridgePointsCount: Object.keys(this.bridgePoints).length
@@ -203,7 +203,7 @@ export class BuildingPointsService {
         this.isLoaded = true;
         
         // Emit event to notify other components
-        eventBus.emit(EventTypes.BUILDING_POINTS_LOADED as string, {
+        eventBus.emit(EventTypes.BUILDING_POINTS_LOADED, {
           buildingPointsCount: Object.keys(this.buildingPoints).length,
           canalPointsCount: Object.keys(this.canalPoints).length,
           bridgePointsCount: Object.keys(this.bridgePoints).length,
