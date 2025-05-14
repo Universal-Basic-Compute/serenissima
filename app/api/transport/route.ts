@@ -1095,6 +1095,12 @@ async function findPath(startPoint: Point, endPoint: Point): Promise<any> {
     const startPolygon = findPolygonContainingPoint(startPoint, polygons);
     const endPolygon = findPolygonContainingPoint(endPoint, polygons);
     
+    // If either point is not within a polygon but both are near water, use water-only pathfinding
+    if ((!startPolygon || !endPolygon) && isStartNearWater && isEndNearWater) {
+      debugLog('Points not within polygons but both near water, using water-only pathfinding');
+      return findWaterOnlyPath(startPoint, endPoint);
+    }
+    
     if (!startPolygon || !endPolygon) {
       return {
         success: false,
