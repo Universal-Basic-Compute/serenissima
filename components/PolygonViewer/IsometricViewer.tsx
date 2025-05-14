@@ -172,6 +172,15 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     };
   }, [activeView]);
   
+  // Dispatch event when transport mode changes
+  useEffect(() => {
+    // Dispatch event when transport mode changes
+    if (transportMode !== undefined) {
+      window.__transportModeActive = transportMode;
+      window.dispatchEvent(new CustomEvent('transportModeChanged'));
+    }
+  }, [transportMode]);
+  
   // Add useEffect to animate gondolas
   useEffect(() => {
     if (transportPath.length > 0 && transportMode) {
@@ -1549,8 +1558,96 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   // Function to calculate the transport route
   const calculateTransportRoute = async (start: {lat: number, lng: number}, end: {lat: number, lng: number}) => {
     try {
+      // Set calculating state to true to show loading indicator
       setCalculatingPath(true);
       console.log('Calculating transport route from', start, 'to', end);
+      
+      // Add this code to render a loading animation on the canvas
+      const renderLoadingAnimation = () => {
+        if (!canvasRef.current || !calculatingPath) return;
+        
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        
+        // Draw a semi-transparent overlay
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw a Venetian-styled loading message
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        
+        // Draw ornate frame
+        ctx.fillStyle = 'rgba(30, 30, 50, 0.85)';
+        ctx.fillRect(centerX - 200, centerY - 100, 400, 200);
+        
+        // Gold border
+        ctx.strokeStyle = 'rgba(218, 165, 32, 0.9)';
+        ctx.lineWidth = 4;
+        ctx.strokeRect(centerX - 200, centerY - 100, 400, 200);
+        
+        // Inner border
+        ctx.strokeStyle = 'rgba(218, 165, 32, 0.6)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(centerX - 190, centerY - 90, 380, 180);
+        
+        // Title
+        ctx.font = '24px "Times New Roman", serif';
+        ctx.fillStyle = 'rgba(218, 165, 32, 0.9)';
+        ctx.textAlign = 'center';
+        ctx.fillText('Calcolando il Percorso', centerX, centerY - 50);
+        
+        // Subtitle
+        ctx.font = '16px "Times New Roman", serif';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillText('Trovando la via migliore attraverso i canali...', centerX, centerY - 10);
+        
+        // Animated dots
+        const dots = Math.floor((Date.now() / 500) % 4);
+        let dotsText = '';
+        for (let i = 0; i < dots; i++) dotsText += '.';
+        ctx.fillText(dotsText, centerX, centerY + 30);
+        
+        // Draw gondola icon
+        const gondolaSize = 40;
+        const gondolaX = centerX;
+        const gondolaY = centerY + 60;
+        
+        // Animate gondola position
+        const oscillation = Math.sin(Date.now() / 300) * 5;
+        
+        // Draw gondola silhouette
+        ctx.fillStyle = '#000000';
+        ctx.beginPath();
+        ctx.ellipse(
+          gondolaX + oscillation, 
+          gondolaY, 
+          gondolaSize, 
+          gondolaSize/4, 
+          0, 0, Math.PI * 2
+        );
+        ctx.fill();
+        
+        // Draw gondolier
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.arc(
+          gondolaX + oscillation + gondolaSize/3, 
+          gondolaY - gondolaSize/8, 
+          gondolaSize/6, 
+          0, Math.PI * 2
+        );
+        ctx.fill();
+        
+        // Request next animation frame if still calculating
+        if (calculatingPath) {
+          requestAnimationFrame(renderLoadingAnimation);
+        }
+      };
+      
+      // Start the loading animation
+      renderLoadingAnimation();
       
       const response = await fetch('/api/transport', {
         method: 'POST',
@@ -1586,6 +1683,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       alert('Error calculating route. Please try again.');
       setTransportEndPoint(null);
     } finally {
+      // Set calculating state to false to hide loading indicator
       setCalculatingPath(false);
     }
   };
