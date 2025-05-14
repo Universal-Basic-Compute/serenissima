@@ -1292,7 +1292,13 @@ export async function POST(request: Request) {
     }
     
     // Find the path
-    const result = await findPath(startPoint, endPoint);
+    let result = await findPath(startPoint, endPoint);
+    
+    // If regular pathfinding failed with "not within any polygon" error, try water-only pathfinding
+    if (!result.success && result.error === 'Start or end point is not within any polygon') {
+      console.log('Regular pathfinding failed, attempting water-only pathfinding as fallback');
+      result = await findWaterOnlyPath(startPoint, endPoint);
+    }
     
     return NextResponse.json(result);
   } catch (error) {

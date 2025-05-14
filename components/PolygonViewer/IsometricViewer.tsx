@@ -1614,7 +1614,38 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           setWaterOnlyMode(!!data.waterOnly);
         } else {
           console.error('Failed to calculate route:', data.error);
-          // Show error to user
+          
+          // If the error is about points not being within polygons, try to use water-only pathfinding
+          if (data.error === 'Start or end point is not within any polygon') {
+            console.log('Points not within polygons, attempting water-only pathfinding');
+            
+            // Show a message to the user
+            alert('Points are not on land. Attempting to find a water route...');
+            
+            // Make a direct request to the water-only pathfinding endpoint
+            const waterResponse = await fetch('/api/transport/water-only', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                startPoint: start,
+                endPoint: end
+              }),
+            });
+            
+            if (waterResponse.ok) {
+              const waterData = await waterResponse.json();
+              
+              if (waterData.success && waterData.path) {
+                setTransportPath(waterData.path);
+                setWaterOnlyMode(true);
+                return;
+              }
+            }
+          }
+          
+          // If we get here, both regular and water-only pathfinding failed
           alert(`Could not find a route: ${data.error || 'Unknown error'}`);
           // Reset end point to allow trying again
           setTransportEndPoint(null);
