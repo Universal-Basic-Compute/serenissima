@@ -8,10 +8,8 @@ declare module '../utils/eventBus' {
   }
 }
 
-// Set the event type constant if it doesn't exist
-if (!EventTypes.BUILDING_POINTS_LOADED) {
-  EventTypes.BUILDING_POINTS_LOADED = 'BUILDING_POINTS_LOADED';
-}
+// Set the event type constant
+EventTypes.BUILDING_POINTS_LOADED = 'BUILDING_POINTS_LOADED';
 
 export class BuildingPointsService {
   private static instance: BuildingPointsService;
@@ -110,7 +108,7 @@ export class BuildingPointsService {
           console.log(`Server-side: Loaded ${Object.keys(buildingPoints).length} building points, ${Object.keys(canalPoints).length} canal points, and ${Object.keys(bridgePoints).length} bridge points`);
           
           // Emit event to notify other components
-          eventBus.emit(EventTypes.BUILDING_POINTS_LOADED, {
+          eventBus.emit(EventTypes.BUILDING_POINTS_LOADED as string, {
             buildingPointsCount: Object.keys(buildingPoints).length,
             canalPointsCount: Object.keys(canalPoints).length,
             bridgePointsCount: Object.keys(bridgePoints).length
@@ -149,7 +147,7 @@ export class BuildingPointsService {
         console.log(`Loaded ${Object.keys(this.buildingPoints).length} building points, ${Object.keys(this.canalPoints).length} canal points, and ${Object.keys(this.bridgePoints).length} bridge points`);
         
         // Emit event to notify other components
-        eventBus.emit(EventTypes.BUILDING_POINTS_LOADED, {
+        eventBus.emit(EventTypes.BUILDING_POINTS_LOADED as string, {
           buildingPointsCount: Object.keys(this.buildingPoints).length,
           canalPointsCount: Object.keys(this.canalPoints).length,
           bridgePointsCount: Object.keys(this.bridgePoints).length
@@ -205,7 +203,7 @@ export class BuildingPointsService {
         this.isLoaded = true;
         
         // Emit event to notify other components
-        eventBus.emit(EventTypes.BUILDING_POINTS_LOADED, {
+        eventBus.emit(EventTypes.BUILDING_POINTS_LOADED as string, {
           buildingPointsCount: Object.keys(this.buildingPoints).length,
           canalPointsCount: Object.keys(this.canalPoints).length,
           bridgePointsCount: Object.keys(this.bridgePoints).length,
