@@ -862,6 +862,8 @@ Your response must be a JSON object with:
                                     "Variant": "model",
                                     "Owner": ai_username,
                                     "Point": point_id,
+                                    # Store position data in Notes field instead
+                                    "Notes": json.dumps({"position": {"lat": selected_point["lat"], "lng": selected_point["lng"]}}),
                                     "RentAmount": 0,
                                     "CreatedAt": datetime.now().isoformat()
                                 }
