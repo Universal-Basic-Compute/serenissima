@@ -74,7 +74,7 @@ export default function TwoDPage() {
       <div className="absolute top-0 left-0 right-0 bg-black/50 text-white p-4 flex justify-between items-center">
         <div className="flex items-center space-x-4">
           <Link href="/" className="text-xl font-serif font-bold hover:text-amber-400 transition-colors">
-            La Serenissima 2D
+            La Serenissima
           </Link>
               
           <div className="ml-6">
