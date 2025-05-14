@@ -31,7 +31,7 @@ const useBuildingStore = create<BuildingState & BuildingActions>((set, get) => (
   loading: false,
   error: null,
   selectedBuilding: null,
-  selectedVariant: 'model',
+  selectedVariant: 'image',
   availableVariants: [],
   placeableBuilding: null,
 
@@ -206,14 +206,14 @@ const useBuildingStore = create<BuildingState & BuildingActions>((set, get) => (
         }
       }
       
-      const defaultVariants = ['model'];
+      const defaultVariants = ['image', 'flat'];
       set({ availableVariants: defaultVariants });
-      return defaultVariants; // Default to just 'model' if no variants found
+      return defaultVariants; // Default to image variants if no variants found
     } catch (error) {
       console.error('Error fetching variants:', error);
-      const defaultVariants = ['model'];
+      const defaultVariants = ['image'];
       set({ availableVariants: defaultVariants });
-      return defaultVariants; // Default to just 'model' on error
+      return defaultVariants; // Default to image on error
     }
   },
 
