@@ -18,39 +18,6 @@
   },
   "maintenanceCost": 1500,
   "constructionTime": 259200000,
-  "incomeGeneration": 12000,
-  "employmentCapacity": 2,
-  "locationRequirements": {
-    "districtRestrictions": "Must be built on canal or lagoon frontage",
-    "adjacentRequirements": "Water depth sufficient for boat access",
-    "environmentalEffects": "Increases foot traffic, moderate noise, water traffic congregation"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian public dock under construction, wooden and stone structure extending into canal, foundation pilings being driven into lagoon floor, stone steps leading to water partially completed, mooring posts (paline) being installed with distinctive spiral paint pattern, loading platform taking shape, simple roof structure for waiting area, workers carefully fitting stone blocks at water level, specialized marine construction techniques, building materials arriving by boat, isometric game perspective, stylized but detailed, focus on the intersection of land and water infrastructure",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian public dock, functional waterfront infrastructure featuring wide stone steps descending to water level, wooden landing platform extending into canal, multiple mooring posts (paline) with traditional striped spiral patterns, small covered waiting area with bench, pulley system for unloading heavier goods, stone bollards for securing boats, mild wear from regular use, historically accurate but slightly stylized for game aesthetic, isometric game perspective, gondolas and small boats moored at different heights depending on tide, people waiting for water transport, porters moving goods, sense of bustling water-based transportation hub, modest but essential infrastructure with well-worn stone showing regular use, water lapping against structure",
-  "gameplayInformation": {
-    "unlocks": [
-      "Water Transportation Network",
-      "Goods Transfer Point"
-    ],
-    "specialAbilities": [
-      "Public transportation access",
-      "Loading/unloading point for goods",
-      "Neighborhood connectivity"
-    ],
-    "upgradePath": [
-      "Expanded Public Dock with additional services"
-    ],
-    "reputationEffects": {
-      "Local Neighborhood": 10,
-      "Transportation Guild": 8,
-      "Merchants": 10
-    },
-    "riskFactors": {
-      "floodRisk": "High (direct water exposure)",
-      "maintenanceRisk": "High (water damage)",
-      "congestionRisk": "Medium (potential bottlenecks)"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Water lapping against stone, boats knocking against moorings",
     "activitySounds": "Boat arrivals and departures, loading/unloading, passenger conversations",

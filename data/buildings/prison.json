@@ -19,41 +19,6 @@
   },
   "maintenanceCost": 5000,
   "constructionTime": 1728000000,
-  "incomeGeneration": 55000,
-  "employmentCapacity": 35,
-  "locationRequirements": {
-    "districtRestrictions": "Government district, often near judicial facilities",
-    "adjacentRequirements": "Secure location, limited access, isolation",
-    "environmentalEffects": "Creates security presence, deters crime, somber atmosphere"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian prison under construction, imposing detention facility, substantial security features being incorporated from foundation up, thick walls with minimal windows, complex locking systems being installed, cell blocks of varying security levels, guard stations at strategic points, administrative areas for prison management, separate processing zone for new prisoners, security measures preventing escape including water-facing considerations unique to Venice, isometric game perspective, stylized but detailed, focus on creating secure detention facility balancing punishment with Renaissance concepts of justice",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian prison, formidable detention facility featuring intimidating stone exterior with minimal windows, heavily secured entrance with multiple checkpoints, various security level zones from minimum to maximum, individual cells with appropriate furnishing based on prisoner status, common areas for permitted activities, guard stations positioned for maximum visibility, administration offices where records are maintained, visitor area with security features, exercise yard with surveillance, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of grim justice and containment, guards in Venetian security uniforms maintaining order, prisoner processing area, atmosphere of punishment and state authority, connection to wider justice system through secure transport to courts, balance of humane conditions with necessary security appropriate to Renaissance era",
-  "gameplayInformation": {
-    "unlocks": [
-      "Criminal Detention",
-      "Justice System Completion",
-      "State Security"
-    ],
-    "specialAbilities": [
-      "Criminal containment",
-      "Punishment enforcement",
-      "Security threat neutralization"
-    ],
-    "upgradePath": [
-      "Reform Prison (improved conditions, rehabilitation)"
-    ],
-    "reputationEffects": {
-      "Security Forces": 25,
-      "Judiciary": 20,
-      "Government": 20,
-      "Criminals": -30
-    },
-    "riskFactors": {
-      "escapeRisk": "Low (high security)",
-      "publicReputationRisk": "Medium (treatment concerns)",
-      "corruptionRisk": "Medium (guard integrity)"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Cell doors, guard movements, distant prisoner sounds",
     "activitySounds": "Lock mechanisms, prisoner processing, security checks",

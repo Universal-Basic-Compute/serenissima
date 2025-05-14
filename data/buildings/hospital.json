@@ -20,41 +20,6 @@
   },
   "maintenanceCost": 6000,
   "constructionTime": 2592000000,
-  "incomeGeneration": 75000,
-  "employmentCapacity": 50,
-  "locationRequirements": {
-    "districtRestrictions": "Some distance from dense residential, fresh air access",
-    "adjacentRequirements": "Water access for cleanliness, garden space",
-    "environmentalEffects": "Improves health in surrounding area, slight medical aromas"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian hospital under construction, major medical facility, large-scale construction with multiple wings, specialized ventilation systems being installed, patient ward areas taking shape with consideration for air flow, treatment rooms with specific medical requirements, apothecary laboratory space, surgical area with optimal lighting design, isolation rooms for contagious diseases, herb garden being planted, water purification system, charitable ward for the poor, religious chapel integration, isometric game perspective, stylized but detailed, focus on Renaissance medical understanding reflected in architectural design",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian hospital, extensive medical facility featuring multiple patient wards with organized beds, dedicated treatment rooms with period medical instruments, apothecary laboratory with herbs and medicines, surgical area with specialized equipment, recovery spaces with fresh air access, physician consultation rooms, medicinal herb garden, small chapel for spiritual needs, isolation ward for contagious cases, separate entrance for different conditions, medical staff in distinctive uniforms, nuns assisting with care, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of medical care combining Renaissance understanding with practical treatment, balance of scientific and religious approaches to healing, charitable ward for poor patients, medical texts visible in physician areas, system for separating different types of patients",
-  "gameplayInformation": {
-    "unlocks": [
-      "Medical Care",
-      "Disease Control",
-      "Recovery Services"
-    ],
-    "specialAbilities": [
-      "Population health improvement",
-      "Disease outbreak management",
-      "Workforce recovery acceleration"
-    ],
-    "upgradePath": [
-      "Advanced Medical Center (improved techniques, research)"
-    ],
-    "reputationEffects": {
-      "Medical Guild": 30,
-      "General Population": 25,
-      "Religious Orders": 20,
-      "Government": 20
-    },
-    "riskFactors": {
-      "diseaseRisk": "High (concentration of ill people)",
-      "resourceRisk": "Medium (constant supply needs)",
-      "staffRisk": "Medium (specialized personnel requirements)"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Quiet voices, occasional patient sounds, herbal preparation",
     "activitySounds": "Physician consultations, treatment procedures, prayers for healing",

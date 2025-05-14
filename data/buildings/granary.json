@@ -19,41 +19,6 @@
   },
   "maintenanceCost": 2500,
   "constructionTime": 604800000,
-  "incomeGeneration": 20000,
-  "employmentCapacity": 10,
-  "locationRequirements": {
-    "districtRestrictions": "Access to transportation, often near ports or canals",
-    "adjacentRequirements": "Loading facilities, elevation from flood risk",
-    "environmentalEffects": "Attracts grain transportation, occasional odors and pests"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian granary under construction, specialized food storage facility, raised foundation to protect against moisture and pests, massive storage chambers being constructed with ventilation systems, grain elevator mechanisms, pest control features being integrated, loading dock with measurement station, official inspection office, humidity control systems, specially constructed storage containers, security features to prevent theft of essential food supplies, government oversight of construction standards, isometric game perspective, stylized but detailed, focus on specialized food preservation technology of the Renaissance era",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian granary, critical food security infrastructure featuring elevated main structure protecting against flooding and pests, large internal chambers storing grain in massive wooden containers, loading area where grain sacks are weighed and recorded, inspection office with government official verifying quality, ventilation systems to prevent spoilage, cat guardians patrolling for rodents, inventory management system with detailed records, workers moving grain with specialized tools, distribution area where bakers collect allotments, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of essential food security infrastructure, impressive scale of storage capacity, subtle security features protecting vital food supply, elevation from ground level to protect against moisture, official government seal indicating regulatory oversight",
-  "gameplayInformation": {
-    "unlocks": [
-      "Food Security",
-      "Price Stabilization",
-      "Population Growth Support"
-    ],
-    "specialAbilities": [
-      "Protects against famine",
-      "Buffers price fluctuations",
-      "Enables consistent food supply"
-    ],
-    "upgradePath": [
-      "State Granary System (larger capacity, government management)"
-    ],
-    "reputationEffects": {
-      "Baker's Guild": 20,
-      "Senate": 25,
-      "General Population": 20,
-      "Grain Merchants": 15
-    },
-    "riskFactors": {
-      "spoilageRisk": "Medium (despite preventive measures)",
-      "pestRisk": "Medium (constant threat)",
-      "supplyChainRisk": "High (dependent on imports)"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Grain being moved, wooden containers creaking, inventory counting",
     "activitySounds": "Weighing operations, quality inspections, delivery arrivals",

@@ -20,42 +20,6 @@
   },
   "maintenanceCost": 6000,
   "constructionTime": 1728000000,
-  "incomeGeneration": 75000,
-  "employmentCapacity": 20,
-  "locationRequirements": {
-    "districtRestrictions": "Murano Island only, prominent location",
-    "adjacentRequirements": "Proximity to glassworks, water access",
-    "environmentalEffects": "Increases glass industry prestige, creates regulatory center"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian Glass Guild Hall under construction on Murano island, prestigious institutional building, formal meeting chamber taking shape with hierarchical seating for masters and apprentices, demonstration area with small furnace for technique teaching, archive room with secure storage for secret formula documents, quality control facilities, exhibition space for masterworks, ceremonial room for guild initiations and awards, master glassblower consultation rooms, administrative offices, decorative glass elements being installed throughout, elaborate exterior showing guild symbols and historical glass achievements, isometric game perspective, stylized but detailed, focus on creating institutional headquarters that governs prestigious craft",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian Glass Guild Hall, impressive institutional building featuring grand entrance with glass guild symbol prominently displayed, formal meeting chamber where masters debate regulations and standards, demonstration area with small furnace where techniques are taught and tested, secure archive room containing closely guarded formulas and patterns, quality assessment area where glass pieces are certified, exhibition gallery displaying masterworks from top artisans, ceremonial space for guild rituals and master certifications, administrative offices managing guild affairs, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of prestigious craft governance, elaborate glass decorative elements throughout showing Murano expertise, guild masters in formal attire conducting official business, atmosphere of tradition and innovation carefully balanced, institutional authority over world-famous craft",
-  "gameplayInformation": {
-    "unlocks": [
-      "Glass Guild Membership",
-      "Technique Access",
-      "Quality Certification"
-    ],
-    "specialAbilities": [
-      "Industry regulation",
-      "Technique protection",
-      "Market control",
-      "Export authorization"
-    ],
-    "upgradePath": [
-      "International Glass Authority (expanded global influence)"
-    ],
-    "reputationEffects": {
-      "Glass Guild": 40,
-      "Luxury Merchants": 30,
-      "Government": 20,
-      "Foreign Craftsmen": 25
-    },
-    "riskFactors": {
-      "industrialEspionageRisk": "Very High (valuable secrets)",
-      "monopolyBustingRisk": "Medium (regulatory challenges)",
-      "innovationResistanceRisk": "Medium (traditional methods)"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Formal discussions, glass demonstrations, administrative activity",
     "activitySounds": "Guild ceremonies, quality testing, technique instruction",

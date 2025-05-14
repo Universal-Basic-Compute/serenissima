@@ -19,41 +19,6 @@
   },
   "maintenanceCost": 3000,
   "constructionTime": 864000000,
-  "incomeGeneration": 0,
-  "employmentCapacity": 10,
-  "locationRequirements": {
-    "districtRestrictions": "Harbor entrances, strategic canal access points",
-    "adjacentRequirements": "Requires corresponding tower across waterway",
-    "environmentalEffects": "Controls water access, creates naval defensive point"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian harbor chain tower under construction, specialized defensive structure, substantial foundation reaching deep underwater, massive chain mechanism being installed with winch system, counterweights for easier operation, guard station with defensive capabilities, harbor observation platform, signal system for coordination with paired tower across waterway, defensive armaments being mounted, underwater chain anchor points, mechanism housing with security features, isometric game perspective, stylized but detailed, focus on the impressive engineering solution for physical water access control",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian harbor chain tower, impressive defensive facility featuring substantial stone tower positioned at strategic waterway entrance, massive iron chain visible either deployed across waterway or wound around large winch mechanism, corresponding tower visible on opposite shore, operating team ready to deploy or retract chain on command, defensive positions with armaments to protect mechanism, observation platform with clear harbor views, signal system for communicating with naval forces, chain mechanism housing with security features, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of physical control over water access, engineering sophistication evident in mechanism design, strategic positioning showing defensive mindset, operators maintaining readiness, guards protecting vital defensive asset",
-  "gameplayInformation": {
-    "unlocks": [
-      "Waterway Control",
-      "Harbor Defense",
-      "Naval Access Regulation"
-    ],
-    "specialAbilities": [
-      "Physical ship passage prevention",
-      "Harbor security",
-      "Selective access control"
-    ],
-    "upgradePath": [
-      "Advanced Barrier System (faster operation, stronger chain)"
-    ],
-    "reputationEffects": {
-      "Naval Forces": 20,
-      "Security Forces": 20,
-      "Government": 25,
-      "Foreign Ships": -10
-    },
-    "riskFactors": {
-      "mechanicalRisk": "Medium (complex mechanism)",
-      "targetRisk": "Very High (critical defensive infrastructure)",
-      "maintenanceRisk": "Medium (water exposure, heavy chains)"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Chain mechanism creaking, water lapping, metal on metal",
     "activitySounds": "Winch operation, alert signals, chain deployment splash",

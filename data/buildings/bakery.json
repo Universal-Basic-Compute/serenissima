@@ -19,8 +19,6 @@
   },
   "maintenanceCost": 500,
   "constructionTime": 172800000,
-  "incomeGeneration": 7000,
-  "employmentCapacity": 4,
   "productionInformation": {
     "inputResources": {
       "Flour": 15,
@@ -37,37 +35,6 @@
     "storageCapacity": {
       "rawMaterials": 50,
       "finishedGoods": 400
-    }
-  },
-  "locationRequirements": {
-    "districtRestrictions": "All residential districts",
-    "adjacentRequirements": "Water access, residential proximity",
-    "environmentalEffects": "Pleasant aroma in vicinity, slight warmth, minor smoke"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian bakery under construction, small production facility with retail front, main feature is large brick oven being built with specialized heat distribution system, baking stone installation, wood storage area, flour storage with moisture protection, kneading tables being constructed, retail counter taking shape, small chimney for oven ventilation, water access point for dough making, isometric game perspective, stylized but detailed, focus on the massive brick oven as central element",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian bakery, charming small building with stone oven as central feature, glowing fire visible in massive brick oven, wooden preparation tables dusted with flour, dough being kneaded by bakers, fresh bread cooling on racks, small retail area with display counter, bread varieties arranged for sale, early morning customers waiting for fresh loaves, bakers working with long wooden paddles to retrieve bread from oven, water barrel for dough preparation, flour sacks in storage area, historically accurate but slightly stylized for game aesthetic, isometric game perspective, warm inviting atmosphere with golden-brown bread colors, steam rising from fresh loaves, sense of neighborhood essential service, small sign with baker's guild symbol",
-  "gameplayInformation": {
-    "unlocks": [
-      "Basic Food Production",
-      "Neighborhood Services"
-    ],
-    "specialAbilities": [
-      "Feeds nearby residents",
-      "Community gathering point",
-      "Price-controlled essential service"
-    ],
-    "upgradePath": [
-      "Expanded Bakery with specialty goods"
-    ],
-    "reputationEffects": {
-      "Baker's Guild": 10,
-      "Local Neighborhood": 15,
-      "Common Citizens": 10
-    },
-    "riskFactors": {
-      "fireRisk": "High (constant oven operation)",
-      "grainShortage": "High (dependent on flour supply)",
-      "priceControlRisk": "Medium (government regulated prices)"
     }
   },
   "soundDesign": {

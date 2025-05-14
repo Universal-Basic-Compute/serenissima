@@ -19,38 +19,7 @@
   },
   "maintenanceCost": 750,
   "constructionTime": 345600000,
-  "incomeGeneration": 30000,
   "residentsCapacity": 7,
-  "locationRequirements": {
-    "districtRestrictions": "Best suited to Cannaregio, Castello, or Dorsoduro",
-    "adjacentRequirements": "Preferably near commercial area or canal",
-    "environmentalEffects": "Increases property value of adjacent buildings by 5%"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian merchant's house under construction, three-story structure, substantial stone foundation visible, brick walls partially constructed, wooden scaffolding surrounding building, dignified facade taking shape with arched entryway, workers installing decorative stone window frames, ground floor office area with secure features being built, separate entrance for residential portion, construction materials of higher quality than basic residences, period-appropriate construction techniques, isometric game perspective, stylized but detailed, sophisticated architectural elements emerging",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian merchant's house, elegant three-story structure, dignified plastered facade in warm ochre with stone trim, Gothic Venetian arched windows on piano nobile (second floor), ground floor with secure office featuring decorative iron window guards, separate entrance for business and family, small private courtyard at rear, terracotta roof with small rooftop terrace, decorative chimney pots, quality wooden shutters, small ornamental balcony on main floor, historically accurate but slightly stylized for game aesthetic, isometric game perspective, subtle architectural flourishes showing prosperity without ostentation, business sign mounted beside office entrance",
-  "gameplayInformation": {
-    "unlocks": [
-      "Trading Company operations",
-      "Investment opportunities"
-    ],
-    "specialAbilities": [
-      "Business meeting location",
-      "Trade document storage"
-    ],
-    "upgradePath": [
-      "Nobili Palazzo"
-    ],
-    "reputationEffects": {
-      "Merchant Guild": 10,
-      "Nobility": 3,
-      "Commoners": -2
-    },
-    "riskFactors": {
-      "fireRisk": "Medium",
-      "floodRisk": "Medium",
-      "crimeRisk": "Medium (due to valuable contents)"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Quill scratching on paper, quiet business discussions",
     "activitySounds": "Coins counting, document shuffling, door knocking",

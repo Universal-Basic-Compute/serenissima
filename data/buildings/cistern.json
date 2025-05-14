@@ -20,40 +20,6 @@
   },
   "maintenanceCost": 1250,
   "constructionTime": 518400000,
-  "incomeGeneration": 5000,
-  "employmentCapacity": 1,
-  "locationRequirements": {
-    "districtRestrictions": "All districts, often in campos or courtyards",
-    "adjacentRequirements": "Open space for rainwater collection",
-    "environmentalEffects": "Provides fresh water to surrounding buildings"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian cistern under construction, sophisticated water collection system, deep excavation for underground storage chamber, clay lining being installed for waterproofing, sand filtration layers being carefully placed, brick domed ceiling under construction, stone collection channels leading to central point, decorative wellhead components waiting for installation, workers compacting sand filtration layer, specialized water management construction techniques, surface rainwater collection area being graded, isometric game perspective, stylized but detailed, cross-section showing underground components, focus on the technical sophistication of this essential infrastructure",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian cistern, essential water infrastructure with decorated stone wellhead as visible component, surrounding pavement subtly sloped to direct rainwater toward collection points, underground system hidden from view (shown in partial cross-section), ornate bronze bucket and pulley system for drawing water, carved stone wellhead with historical or lion motifs, small access point for maintenance, women gathering to collect water and socialize, historically accurate but slightly stylized for game aesthetic, isometric game perspective, perfect integration with campo or courtyard, weathered stone showing age and importance, sense of essential infrastructure beautified, underground chamber shown in partial cutaway revealing sand filtration system and clay lined reservoir",
-  "gameplayInformation": {
-    "unlocks": [
-      "Fresh Water Supply",
-      "Residential Development",
-      "Health Improvements"
-    ],
-    "specialAbilities": [
-      "Water security during droughts",
-      "Improves health of nearby residents",
-      "Essential service provision"
-    ],
-    "upgradePath": [
-      "Expanded Cistern System (larger capacity, better filtration)"
-    ],
-    "reputationEffects": {
-      "Local Neighborhood": 20,
-      "Health Officials": 15,
-      "Residential Tenants": 25
-    },
-    "riskFactors": {
-      "droughtRisk": "Medium (dependent on rainfall)",
-      "contaminationRisk": "Medium (requires careful maintenance)",
-      "accessRisk": "Low (potential crowding during shortages)"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Water dripping, bucket and chain, quiet conversation",
     "activitySounds": "Water drawing, bucket splashing, community gathering",

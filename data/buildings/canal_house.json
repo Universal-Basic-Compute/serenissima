@@ -20,39 +20,7 @@
   },
   "maintenanceCost": 1100,
   "constructionTime": 432000000,
-  "incomeGeneration": 35000,
   "residentsCapacity": 8,
-  "locationRequirements": {
-    "districtRestrictions": "Must be built directly on a canal",
-    "adjacentRequirements": "Requires direct canal frontage, private mooring",
-    "environmentalEffects": "Water quality directly impacts property value, increases value of nearby buildings by 8%, improves area prestige rating by 5%"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian canal house under construction, three-story structure being built directly on canal edge, foundation reinforcement visible at water level, water entrance taking shape with dock area, stone arched water gate under construction, brick walls rising on upper floors, wooden scaffolding with workers, ornate window frames being installed, boat delivering construction materials, temporary wooden walkways over water for construction access, isometric game perspective, stylized but detailed, combination of stone and brick textures, typical Venetian construction techniques",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian canal house, elegant three-story structure rising directly from canal water, ornate water entrance with arched stone porta d'acqua (water door), small private dock with mooring poles (pali da ormeggio) painted with spiral stripes, gondola moored at entrance, second and third floors feature Gothic Venetian windows, warm terracotta plastered exterior with exposed stone trim, decorative water-level stonework showing water marks, flower boxes on upper windows, small rooftop altana (wooden roof terrace), street-side entrance with stone steps, historically accurate but slightly stylized for game aesthetic, isometric game perspective, weathered waterline details, ornamental iron tie-rods visible on facade",
-  "gameplayInformation": {
-    "unlocks": [
-      "Private Water Transport",
-      "Water Delivery Access"
-    ],
-    "specialAbilities": [
-      "Direct goods delivery",
-      "Efficient transportation",
-      "Flooding resilience features"
-    ],
-    "upgradePath": [
-      "Nobili Palazzo"
-    ],
-    "reputationEffects": {
-      "Merchant Guild": 8,
-      "Water Transport Guild": 15,
-      "Nobility": 5
-    },
-    "riskFactors": {
-      "fireRisk": "Medium",
-      "floodRisk": "High (direct water exposure)",
-      "crimeRisk": "Medium (water access creates security challenges)"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Water lapping against foundation, boat traffic",
     "activitySounds": "Boat docking, goods being unloaded, water gate opening",

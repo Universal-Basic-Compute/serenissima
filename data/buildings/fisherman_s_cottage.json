@@ -17,36 +17,7 @@
   },
   "maintenanceCost": 800,
   "constructionTime": 172800000,
-  "incomeGeneration": 8000,
   "residentsCapacity": 4,
-  "locationRequirements": {
-    "districtRestrictions": "Cannot be built in San Marco or Rialto",
-    "adjacentRequirements": "Must be within 3 tiles of water",
-    "environmentalEffects": "No effect on surrounding buildings"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian fisherman's cottage under construction, simple wooden frame structure being built, partial timber walls, thatched roof partially completed, small construction site with basic tools, wooden ladder, timber piles nearby, modest size, located near water edge, small dock being constructed, workers installing window frames, historically accurate but simply designed, isometric game perspective, stylized but detailed, weathered wood textures",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian fisherman's cottage, small wooden structure with stone foundation, weathered wooden exterior, red tile roof with slight moss, small windows with wooden shutters, modest fishing dock attached, fishing nets hanging to dry, simple wooden door, smoke from small chimney, elevated first floor with storage space beneath, historically accurate but slightly stylized for game aesthetic, isometric game perspective, warm weathered wood textures, small boat tied nearby, humble but charming",
-  "gameplayInformation": {
-    "unlocks": [
-      "Basic Fishing Operations"
-    ],
-    "specialAbilities": [
-      "Provides modest housing for working class",
-      "Can serve as small fishing operation base"
-    ],
-    "upgradePath": [
-      "Artisan's House"
-    ],
-    "reputationEffects": {
-      "Fisher's Guild": 5,
-      "Nobility": -2
-    },
-    "riskFactors": {
-      "fireRisk": "High (wooden structure)",
-      "floodRisk": "High (near water)",
-      "crimeRisk": "Low"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Gentle water lapping, occasional seagulls",
     "activitySounds": "Net mending, wood creaking",

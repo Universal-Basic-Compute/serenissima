@@ -21,41 +21,6 @@
   },
   "maintenanceCost": 15000,
   "constructionTime": 7776000000,
-  "incomeGeneration": 175000,
-  "employmentCapacity": 150,
-  "locationRequirements": {
-    "districtRestrictions": "San Marco district only, waterfront facing Basin",
-    "adjacentRequirements": "St. Mark's Basilica adjacency, grand piazza frontage",
-    "environmentalEffects": "Center of political power, creates governmental district"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian Doge's Palace under construction, monumental seat of government, exceptional foundation work supporting massive structure, distinctive Gothic-Byzantine-Renaissance fusion architecture taking shape, grand council chamber with enormous ceiling spans, ornate facades with complex stone patterns, master craftsmen creating artistic elements, gold leaf application, marble column installation, colored stone patterns being laid, connection to St. Mark's Basilica, water entrance with ceremonial docking, security features being integrated despite ornate appearance, governmental chambers designed for various councils, state-commissioned artists painting ceremonial spaces, isometric game perspective, stylized but detailed, sense of creating architectural masterpiece that embodies Venetian governmental principles",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian Doge's Palace, magnificent seat of government featuring distinctive Gothic-Byzantine fusion architecture, iconic diamond pattern stonework on facades, grand portico with ornate columns, enormous Great Council chamber where hundreds of nobles govern, Doge's private apartments, Senate meeting hall, various council rooms for specific governmental functions, Bridge of Sighs connecting to prisons, ceremonial water entrance where ambassadors arrive by gondola, grand staircase (Scala dei Giganti) with Neptune and Mars statues, ornate interior with masterpiece paintings by Venetian artists, gold detailing throughout, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of governmental power balanced through architectural sophistication, perfect expression of Venice's unique republican system, dignitaries in official robes moving between chambers, guards in state uniforms, governmental activities visible in various chambers, combination of practical administration and symbolic authority",
-  "gameplayInformation": {
-    "unlocks": [
-      "Venetian Government System",
-      "Diplomatic Relations",
-      "State Authority"
-    ],
-    "specialAbilities": [
-      "Central governance",
-      "Diplomatic center",
-      "Symbolic power projection"
-    ],
-    "upgradePath": [
-      "None - unique historical structure"
-    ],
-    "reputationEffects": {
-      "Government": 50,
-      "Nobility": 40,
-      "Foreign Powers": 40,
-      "Citizens": 30
-    },
-    "riskFactors": {
-      "fireRisk": "Medium (despite protections)",
-      "politicalRisk": "High (center of power struggles)",
-      "symbolRisk": "Very High (primary target in conflicts)"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Echoing chambers, distant debates, ceremonial announcements",
     "activitySounds": "Council voting, diplomatic receptions, governmental proclamations",

@@ -20,41 +20,7 @@
   },
   "maintenanceCost": 3000,
   "constructionTime": 864000000,
-  "incomeGeneration": 80000,
   "residentsCapacity": 15,
-  "locationRequirements": {
-    "districtRestrictions": "Preferred in San Marco, Cannaregio, or Castello",
-    "adjacentRequirements": "Requires large plot, preferably with canal access",
-    "environmentalEffects": "Significantly increases property value of surrounding buildings by 15%"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian nobili palazzo under construction, grand multi-story structure, imposing stone foundation, central courtyard layout visible, substantial scaffolding surrounding entire building, stonemasons working on ornate window frames and doorways, partial marble facade elements being installed, craftsmen creating decorative ceiling inside protected areas, teams of workers organized by specialty, construction cranes lifting stone blocks, architectural plans being consulted by master builder, temporary workshops set up around site, higher quality materials than typical residences, isometric game perspective, stylized but detailed, sense of grand scale and ambition",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian nobili palazzo, imposing U-shaped structure around central courtyard, grand three-story facade with Byzantine-Gothic elements, first floor in rusticated stone, piano nobile with ornate Gothic windows and small balconies, upper floor with smaller elegant windows, central water entrance with family coat of arms in carved stone, private courtyard with decorative well, small private garden visible, warm Venetian pink plastered exterior with white stone trim, marble accents on main doorways, multiple chimneys with decorative caps, roof loggia for entertaining, mooring poles for family gondolas, historically accurate but slightly stylized for game aesthetic, isometric game perspective, dignified grandeur without excessive ornamentation in Venetian style, wrought iron balconies with subtle gold accents",
-  "gameplayInformation": {
-    "unlocks": [
-      "Noble Entertainments",
-      "Political Connections",
-      "Family Art Collection"
-    ],
-    "specialAbilities": [
-      "Political meeting venue",
-      "Enhances family reputation",
-      "Can host diplomatic events"
-    ],
-    "upgradePath": [
-      "Grand Canal Palace"
-    ],
-    "reputationEffects": {
-      "Nobility": 20,
-      "Great Council": 10,
-      "Commoners": -5,
-      "Foreign Diplomats": 8
-    },
-    "riskFactors": {
-      "fireRisk": "Low (stone construction)",
-      "floodRisk": "Medium",
-      "crimeRisk": "Low (private guards)"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Fountain in courtyard, distant string instruments",
     "activitySounds": "Servants moving about, carriage arrivals, dignified conversations",

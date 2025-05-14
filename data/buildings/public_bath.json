@@ -19,40 +19,6 @@
   },
   "maintenanceCost": 1250,
   "constructionTime": 432000000,
-  "incomeGeneration": 15000,
-  "employmentCapacity": 10,
-  "locationRequirements": {
-    "districtRestrictions": "Residential districts, community centers",
-    "adjacentRequirements": "Fresh water access, heating capability",
-    "environmentalEffects": "Improves public health, creates social gathering point"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian public bath under construction, community hygiene facility, bathing pools of different sizes being installed with waterproofing, heating system with furnace and water pipes, steam room with specialized ventilation, changing areas with privacy considerations, separate sections for men and women, water supply and drainage systems being carefully engineered, medicinal herb steeping area, massage tables, resting benches, maintenance access for cleaning, isometric game perspective, stylized but detailed, focus on practical public health infrastructure with social amenities",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian public bath, community hygiene facility featuring multiple bathing pools at different temperatures, steam room with aromatic herbs, separate sections for men and women with appropriate modesty features, changing areas with benches and clothing storage, attendants providing towels and assistance, heating system keeping water warm, herb-infused water for medicinal properties, massage area for additional services, resting benches for relaxation after bathing, small refreshment area, historically accurate but slightly stylized for game aesthetic, isometric game perspective, atmosphere of cleanliness and rejuvenation, social interaction among patrons, balance of practical hygiene and community gathering, steam rising from warm pools, smooth stone surfaces showing quality construction focused on cleanliness",
-  "gameplayInformation": {
-    "unlocks": [
-      "Public Hygiene",
-      "Health Services",
-      "Social Gathering"
-    ],
-    "specialAbilities": [
-      "Disease prevention",
-      "Public health improvement",
-      "Community building"
-    ],
-    "upgradePath": [
-      "Luxury Bath House (enhanced services, higher class)"
-    ],
-    "reputationEffects": {
-      "Common Citizens": 20,
-      "Health Officials": 15,
-      "Neighborhood Community": 20
-    },
-    "riskFactors": {
-      "sanitationRisk": "Medium (requires careful maintenance)",
-      "fireRisk": "Medium (constant heating needed)",
-      "reputationRisk": "Low (potential moral concerns)"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Water splashing, quiet conversations, steam hissing",
     "activitySounds": "Bathing activities, attendant instructions, relaxation sighs",

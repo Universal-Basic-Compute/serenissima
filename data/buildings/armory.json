@@ -19,41 +19,6 @@
   },
   "maintenanceCost": 4000,
   "constructionTime": 864000000,
-  "incomeGeneration": 0,
-  "employmentCapacity": 25,
-  "locationRequirements": {
-    "districtRestrictions": "Secure areas, often near government centers",
-    "adjacentRequirements": "Defensive position, restricted access",
-    "environmentalEffects": "Increases security presence, creates strategic asset"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian armory under construction, specialized military facility, substantial security features including reinforced walls and limited access points, main storage halls with specific weapon type considerations, secure vaults for valuable equipment, maintenance workshops with specialized tools, weapon testing area, distribution processing center, training space for proper usage, administrative offices for inventory control, multiple security checkpoints, official military construction standards, isometric game perspective, stylized but detailed, focus on security and functionality over exterior appearance",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian armory, impressive military storage facility featuring heavily secured entrance with guards and multiple locks, main hall containing organized racks of weapons by type (swords, pikes, halberds, crossbows), separate secure room for firearms and powder, armor storage with various protection types, maintenance workshop where armorers repair and maintain equipment, quality testing area, administrative office with detailed inventory records, training space for proper weapon usage, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of military order and readiness, meticulous organization showing Venetian administrative efficiency, security features visible throughout, proper handling protocols in evidence, officials conducting inventory checks, craftsmen maintaining weapons",
-  "gameplayInformation": {
-    "unlocks": [
-      "Military Equipment Access",
-      "Security Force Arming",
-      "Defense Readiness"
-    ],
-    "specialAbilities": [
-      "Weapon maintenance",
-      "Force equipment improvement",
-      "Military training support"
-    ],
-    "upgradePath": [
-      "Naval Armament Depot (specialized maritime weapons)"
-    ],
-    "reputationEffects": {
-      "Military Forces": 25,
-      "Security Guild": 20,
-      "Government": 20,
-      "Potential Enemies": -20
-    },
-    "riskFactors": {
-      "targetRisk": "Very High (strategic military asset)",
-      "securityRisk": "Medium (despite precautions)",
-      "explosionRisk": "Medium (powder storage)"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Metal on metal, weapon maintenance, guard movements",
     "activitySounds": "Weapon testing, inventory checks, training sessions",

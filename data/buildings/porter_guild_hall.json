@@ -19,8 +19,6 @@
   },
   "maintenanceCost": 1500,
   "constructionTime": 345600000,
-  "incomeGeneration": 18000,
-  "employmentCapacity": 25,
   "productionInformation": {
     "inputResources": {
       "Porter Equipment": 5,
@@ -33,39 +31,6 @@
     "storageCapacity": {
       "equipment": 50,
       "goods in transit": 200
-    }
-  },
-  "locationRequirements": {
-    "districtRestrictions": "Commercial districts, near markets or cargo landings",
-    "adjacentRequirements": "Access to main pedestrian routes, proximity to goods sources",
-    "environmentalEffects": "Increased foot traffic, temporary goods storage, activity hub"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian porter guild hall under construction, transportation service facility, main dispatch hall taking shape, equipment storage areas, rest facilities for porters between assignments, administrative offices for coordinating deliveries, cargo staging area, specialized equipment racks for carrying devices, guild record keeping area, route planning station, isometric game perspective, stylized but detailed, focus on creating functional transportation hub for the human-powered logistics of Venice",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian porter guild hall, bustling transportation hub featuring central dispatch area where assignments are distributed, porters with specialized carrying equipment coming and going with goods, equipment storage with various carrying poles and harnesses, administrative office with delivery records and pricing charts, rest area where off-duty porters wait for assignments, cargo staging zone where goods are organized by destination, guild officials supervising operations, porter's guild emblem prominently displayed, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of organized logistics activity, porters carrying diverse loads from barrels to furniture, atmosphere of constant movement and coordination, route maps on walls showing city districts",
-  "gameplayInformation": {
-    "unlocks": [
-      "Land Transportation Network",
-      "Delivery Services",
-      "Moving Services"
-    ],
-    "specialAbilities": [
-      "Coordinate goods movement",
-      "Bridge canal barriers",
-      "Access pedestrian-only areas"
-    ],
-    "upgradePath": [
-      "Expanded Porter Network (faster service, higher capacity)"
-    ],
-    "reputationEffects": {
-      "Transportation Guild": 20,
-      "Merchants": 15,
-      "Market Vendors": 20,
-      "Households": 10
-    },
-    "riskFactors": {
-      "laborShortageRisk": "Medium (physically demanding work)",
-      "competitionRisk": "Low (guild-regulated monopoly)",
-      "congestionRisk": "Medium (narrow streets, bridges)"
     }
   },
   "soundDesign": {

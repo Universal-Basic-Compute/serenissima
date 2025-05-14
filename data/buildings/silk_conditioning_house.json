@@ -19,8 +19,6 @@
   },
   "maintenanceCost": 3000,
   "constructionTime": 432000000,
-  "incomeGeneration": 22000,
-  "employmentCapacity": 12,
   "productionInformation": {
     "inputResources": {
       "Raw Silk": 20,
@@ -35,36 +33,6 @@
     "storageCapacity": {
       "rawMaterials": 100,
       "preparedSilk": 50
-    }
-  },
-  "locationRequirements": {
-    "districtRestrictions": "Water-rich districts preferred (Cannaregio, Castello)",
-    "adjacentRequirements": "Requires fresh water access",
-    "environmentalEffects": "Slight water pollution, increased humidity in vicinity"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian silk conditioning house under construction, specialized textile facility, large water cisterns being installed, soaking tanks taking shape, steam ventilation systems, specialized drying racks, stretching mechanisms being assembled, temperature control features, water supply channels, humidity-controlled rooms partially built, workers installing specialized equipment from the East, technically complex structure, isometric game perspective, stylized but detailed, combination of Venetian exterior with technical interior features",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian silk conditioning house, specialized textile preparation facility, elegant but practical facade, multiple chimneys for steam ventilation, large water cisterns visible, interior showing series of washing vats and soaking tanks, specialized silk stretching frames, carefully controlled drying areas with precise humidity monitoring, workers in protective garments handling delicate fibers, imported Eastern equipment, quality control area with perfect light conditions, water channels and drainage systems, historically accurate but slightly stylized for game aesthetic, isometric game perspective, steam rising from processing areas, gleaming wet silk being carefully handled, technical artistry of silk preparation visible, warm colors with water reflections",
-  "gameplayInformation": {
-    "unlocks": [
-      "Silk Weaving",
-      "Luxury Textile Production"
-    ],
-    "specialAbilities": [
-      "Quality enhancement for all silk products",
-      "Eastern production techniques"
-    ],
-    "upgradePath": [
-      "Advanced Conditioning House (higher quality, special treatments)"
-    ],
-    "reputationEffects": {
-      "Textile Guild": 15,
-      "Eastern Traders": 10,
-      "Luxury Merchants": 12
-    },
-    "riskFactors": {
-      "waterRisk": "Medium (depends on clean water supply)",
-      "qualityRisk": "High (sensitive processes)",
-      "moistureRisk": "Medium (potential for mold and damage)"
     }
   },
   "soundDesign": {

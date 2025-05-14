@@ -20,41 +20,6 @@
   },
   "maintenanceCost": 4500,
   "constructionTime": 1209600000,
-  "incomeGeneration": 60000,
-  "employmentCapacity": 25,
-  "locationRequirements": {
-    "districtRestrictions": "Entertainment districts, cultural centers",
-    "adjacentRequirements": "Public accessibility, suitable acoustics",
-    "environmentalEffects": "Increases cultural activity, creates evening entertainment hub"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian theater under construction, cultural entertainment venue, stage area taking shape with performance considerations, tiered seating being constructed in horseshoe arrangement, boxes for nobility being ornately decorated, backstage areas with technical requirements, acoustic design elements being implemented, decorative ceiling with mythological theme in progress, ornate facade showing cultural significance, grand entrance foyer, special effects machinery installation, dressing rooms and preparation areas, isometric game perspective, stylized but detailed, focus on creating space that combines artistic performance with social stratification",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian theater, elegant cultural venue featuring horseshoe-shaped audience arrangement with multiple tiers, ornate boxes for nobility with privacy curtains, main stage with elaborate backdrop system for scene changes, orchestra area, backstage with scene changing machinery and special effects equipment, richly decorated ceiling with mythological scenes, crystal chandeliers, performance in progress with actors in period costumes, audience of mixed social classes in appropriate sections, refreshment area for intermission, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of cultural importance with social stratification visible in seating arrangements, elaborate architectural details showing artistic investment, atmosphere of Renaissance entertainment combining intellectual and spectacular elements",
-  "gameplayInformation": {
-    "unlocks": [
-      "Cultural Entertainment",
-      "Social Events",
-      "Artistic Performances"
-    ],
-    "specialAbilities": [
-      "Population happiness increase",
-      "Social networking venue",
-      "Cultural advancement"
-    ],
-    "upgradePath": [
-      "Opera House (musical theater integration)"
-    ],
-    "reputationEffects": {
-      "Cultural Elite": 25,
-      "Nobility": 20,
-      "Common Citizens": 15,
-      "Foreign Visitors": 20
-    },
-    "riskFactors": {
-      "fireRisk": "High (candles, fabric scenery)",
-      "reputationRisk": "Medium (controversial performances)",
-      "financialRisk": "Medium (production costs)"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Audience murmurs, distant music, seat creaking",
     "activitySounds": "Dramatic dialogue, applause, scene changes, musical accompaniment",

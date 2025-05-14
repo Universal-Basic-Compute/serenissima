@@ -19,39 +19,6 @@
   },
   "maintenanceCost": 1250,
   "constructionTime": 259200000,
-  "incomeGeneration": 15000,
-  "employmentCapacity": 5,
-  "locationRequirements": {
-    "districtRestrictions": "Commercial districts, near transportation",
-    "adjacentRequirements": "Access for goods movement, loading area",
-    "environmentalEffects": "Increases commercial activity, moderate noise from operations"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian small warehouse under construction, commercial storage facility, sturdy foundation accounting for heavy goods weight, wooden shelving systems being installed, loading area with double-width doors, basic security features including locks and shuttered windows, inventory management area taking shape, multiple levels for different types of storage, goods organization system, reinforced flooring, clerk's office with record keeping space, simple hoisting mechanism, isometric game perspective, stylized but detailed, focus on practical commercial infrastructure with emphasis on organization and security",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian small warehouse, practical commercial storage facility featuring main storage hall with organized shelving and storage areas, goods of various types visible in organized sections, loading area with wide doors for moving merchandise, clerk's desk with inventory ledgers and quills, simple pulley system for moving heavier items between floors, basic security measures including sturdy locks and shuttered windows, weather protection features, warehouse workers moving crates and barrels, quality wooden shelving, division between different merchant goods, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of organized commercial activity, different types of merchandise organized by section, warehouse manager overseeing operations, efficient commercial infrastructure designed for practical functionality rather than appearance",
-  "gameplayInformation": {
-    "unlocks": [
-      "Basic Goods Storage",
-      "Commercial Operations"
-    ],
-    "specialAbilities": [
-      "Secure merchandise storage",
-      "Inventory management",
-      "Trade buffer capacity"
-    ],
-    "upgradePath": [
-      "Specialized Warehouse (climate control, enhanced security)"
-    ],
-    "reputationEffects": {
-      "Merchant Guild": 15,
-      "Local Businesses": 20,
-      "Customs Office": 10
-    },
-    "riskFactors": {
-      "fireRisk": "Medium (stored goods)",
-      "theftRisk": "Medium (valuable merchandise)",
-      "floodRisk": "Medium (ground level storage issue)"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Crates being moved, inventory counting, shelving creaking",
     "activitySounds": "Goods being loaded/unloaded, inventory discussions, security locks",

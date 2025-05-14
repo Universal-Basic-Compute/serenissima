@@ -20,13 +20,6 @@
   },
   "maintenanceCost": 3000,
   "constructionTime": 864000000,
-  "incomeGeneration": 60000,
-  "employmentCapacity": 20,
-  "locationRequirements": {
-    "districtRestrictions": "Waterfront locations, particularly in Castello or Cannaregio",
-    "adjacentRequirements": "Requires dock access, benefits from proximity to spice markets",
-    "environmentalEffects": "Creates exotic atmosphere, slightly increases crime risk but significantly increases commercial activity"
-  },
   "productionInformation": {
     "inputResources": {
       "Eastern Luxury Goods": "20-40 units per day",
@@ -38,34 +31,6 @@
       "Trade Revenue": "120-200 ducats per day"
     },
     "storageCapacity": 300
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian Eastern Merchant House under construction, distinctive trading complex with Eastern architectural influences, mashrabiya-style window screens being installed, specialized warehouse areas for spices and silks taking shape, small mosque or prayer room included in design, secure vaults for high-value goods being reinforced, decorative Eastern tilework being applied to certain areas, translation and negotiation spaces under construction, spice-processing ventilation systems, specialized storage areas with climate considerations for delicate Eastern goods, culturally hybrid design elements, isometric game perspective, stylized but detailed, blend of Venetian and Ottoman architectural elements",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian Eastern Merchant House, elegant trading complex combining Venetian structure with Eastern decorative elements, pointed arches, geometric patterns, specialized dock for Eastern ships, distinct warehouse sections for different categories of Eastern goods (spices, textiles, ceramics), secure counting rooms, translation offices with multilingual documents visible, meeting chambers designed for cross-cultural negotiation with both Western chairs and Eastern floor cushions, small prayer space for Muslim merchants, spice processing and quality control areas, silk assessment room with specific lighting, courtyard with small fountain, subtle Islamic architectural influences integrated into Venetian framework, historically accurate but slightly stylized for game aesthetic, isometric game perspective, exotic goods visible in various states of processing, merchants in both Venetian and Eastern attire, spice displays creating colorful accents, subtle incense smoke for appropriate atmosphere",
-  "gameplayInformation": {
-    "unlocks": [
-      "Eastern Trade Routes",
-      "Exotic Goods Market",
-      "Cultural Diplomacy"
-    ],
-    "specialAbilities": [
-      "Spice processing expertise",
-      "Eastern language translation",
-      "Cultural knowledge advantages"
-    ],
-    "upgradePath": [
-      "Levantine Trade Network"
-    ],
-    "reputationEffects": {
-      "Eastern Merchants": 25,
-      "Spice Guild": 20,
-      "Silk Guild": 15,
-      "Senate": 10
-    },
-    "riskFactors": {
-      "fireRisk": "High (flammable spices and oils)",
-      "political risk": "High (subject to Ottoman relations)",
-      "theftRisk": "Very High (extremely valuable goods)"
-    }
   },
   "soundDesign": {
     "ambientSound": "Multiple languages, eastern musical elements, spice grinding",

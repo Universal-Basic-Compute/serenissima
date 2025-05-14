@@ -19,41 +19,6 @@
   },
   "maintenanceCost": 1750,
   "constructionTime": 432000000,
-  "incomeGeneration": 25000,
-  "employmentCapacity": 5,
-  "locationRequirements": {
-    "districtRestrictions": "All districts, often beneath existing buildings",
-    "adjacentRequirements": "Temperature stability, minimal vibration",
-    "environmentalEffects": "Slight wine aroma, attracts connoisseurs and merchants"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian wine cellar under construction, specialized storage facility, below-ground excavation, stone arch construction techniques for stability, temperature control features being installed, ventilation systems for optimal humidity, specialized wine rack construction with perfect bottle positioning, secure access stairway, tasting area with proper lighting, inventory system implementation, water drainage to prevent flooding damage, natural temperature regulation design using earth's insulation, isometric game perspective, stylized but detailed, focus on creating optimal environment for wine storage through Renaissance engineering solutions",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian wine cellar, sophisticated wine storage facility featuring underground stone-lined chambers with arched ceilings, carefully organized wooden wine racks filled with bottles and casks of different vintages, perfect temperature and humidity control through passive systems, cellar master carefully examining bottles by candlelight, tasting area with small table and quality glassware, inventory ledger system tracking each bottle's origin and age, secure iron gate entry, small drainage system to prevent flooding, merchants examining potential purchases, historically accurate but slightly stylized for game aesthetic, isometric game perspective, atmospheric lighting from wall-mounted lanterns and candles, sense of valuable merchandise carefully preserved, bottles showing different ages and origins, subtle differences in storage conditions for different wine types",
-  "gameplayInformation": {
-    "unlocks": [
-      "Wine Trading",
-      "Luxury Hospitality",
-      "Investment Appreciation"
-    ],
-    "specialAbilities": [
-      "Wine quality enhancement over time",
-      "Vintage development",
-      "Specialized storage service"
-    ],
-    "upgradePath": [
-      "Master Wine Cellar (advanced aging techniques, rare vintages)"
-    ],
-    "reputationEffects": {
-      "Wine Guild": 20,
-      "Nobility": 15,
-      "Luxury Merchants": 15,
-      "Foreign Visitors": 10
-    },
-    "riskFactors": {
-      "floodRisk": "High (below ground, despite precautions)",
-      "theftRisk": "Medium (valuable merchandise)",
-      "qualityRisk": "Medium (requires careful management)"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Subtle dripping water, glass bottles occasionally shifting, quiet",
     "activitySounds": "Wine being decanted, bottles being carefully moved, tasting discussions",

@@ -19,13 +19,6 @@
   },
   "maintenanceCost": 800,
   "constructionTime": 172800000,
-  "incomeGeneration": 22000,
-  "employmentCapacity": 4,
-  "locationRequirements": {
-    "districtRestrictions": "Commercial districts, particularly near Rialto",
-    "adjacentRequirements": "Benefits from proximity to related industry offices",
-    "environmentalEffects": "Increases efficiency of nearby commercial buildings by 5%"
-  },
   "productionInformation": {
     "inputResources": {
       "Market Information": "Constantly updated",
@@ -36,33 +29,6 @@
       "Completed Transactions": "5-15 per day of varying sizes"
     },
     "storageCapacity": "Minimal physical storage, extensive document storage"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian broker's office under construction, dignified commercial space taking shape, secure document storage areas being built with special attention to security, private meeting room with sound isolation features, public reception area, specialized desk and counter installations for document review and signing, quality materials but understated aesthetic, strategic window placement for light but maintaining privacy, lockable cabinets and document storage being installed, discreet side entrance for private clients, isometric game perspective, stylized but detailed, focus on practical business functionality with subtle status markers",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian broker's office, refined commercial space with understated elegant facade, discrete business signage, main room with large transaction desk featuring document reviewing space, walls lined with securely locked document cabinets, private meeting room with door closed for confidential negotiations, small waiting area for clients, quality furnishings that convey stability without ostentation, mercantile maps on walls showing trade routes, secure strongbox visible, writing equipment and legal seals arranged precisely, multiple ledgers and contract books, clerk's desk separate from broker's main position, historically accurate but slightly stylized for game aesthetic, isometric game perspective, atmospheric lighting emphasizing the serious business environment, subtle wealth indicators through quality materials rather than decoration, sense of discreet commercial activity",
-  "gameplayInformation": {
-    "unlocks": [
-      "Trade Commissions",
-      "Market Information Network",
-      "Commercial Partnerships"
-    ],
-    "specialAbilities": [
-      "Connection bonus to related industries",
-      "Market price information",
-      "Transaction facilitation without inventory"
-    ],
-    "upgradePath": [
-      "Trading House"
-    ],
-    "reputationEffects": {
-      "Merchant Guild": 15,
-      "Specific Industry Guilds": 10,
-      "Banking Houses": 8
-    },
-    "riskFactors": {
-      "market risk": "Medium (commission-based income fluctuates)",
-      "reputation risk": "High (business relies on trust)",
-      "information security": "Medium (valuable market data)"
-    }
   },
   "soundDesign": {
     "ambientSound": "Quill scratching, muted business discussions, paper handling",

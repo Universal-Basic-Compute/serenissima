@@ -19,41 +19,6 @@
   },
   "maintenanceCost": 6000,
   "constructionTime": 1209600000,
-  "incomeGeneration": 15000,
-  "employmentCapacity": 15,
-  "locationRequirements": {
-    "districtRestrictions": "Low-lying districts prone to flooding, canal entrances",
-    "adjacentRequirements": "Strategic water control points, vulnerable areas",
-    "environmentalEffects": "Significantly reduces flood damage, controls water levels"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian flood control station under construction, sophisticated water management facility, foundation being reinforced against water pressure, mechanical pump systems installation, barrier storage structures, water level monitoring equipment, emergency response boat dock, control room taking shape with visibility over vulnerable area, strategic positioning at canal entrance or low-lying area, specialized water engineering construction techniques, advanced (for period) mechanical systems, isometric game perspective, stylized but detailed, focus on Renaissance engineering solutions to Venice's fundamental existential challenge",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian flood control station, critical protective infrastructure featuring mechanical pump systems with elaborate gear mechanisms, wooden and metal water barriers stored ready for deployment, water level measurement tools, warning bell tower, canal gate system that can be closed during extreme events, teams of workers monitoring water levels, mobile barrier parts on specially designed carts, engineering diagrams on walls showing deployment protocols, emergency response boats moored ready, historically accurate but slightly stylized for game aesthetic, isometric game perspective, combination of Renaissance engineering and practical Venetian adaptation to water environment, sense of constant vigilance against the sea, atmospheric perspective showing potential flood area being protected, workers ready to deploy systems at first warning",
-  "gameplayInformation": {
-    "unlocks": [
-      "Flood Protection",
-      "Development in Low Areas",
-      "Property Value Stabilization"
-    ],
-    "specialAbilities": [
-      "Prevents flood damage",
-      "Enables usage of low-lying areas",
-      "Emergency response coordination"
-    ],
-    "upgradePath": [
-      "Advanced Flood Control System (larger area, faster response)"
-    ],
-    "reputationEffects": {
-      "Senate": 25,
-      "Engineers Guild": 20,
-      "Property Owners": 30,
-      "Citizens": 20
-    },
-    "riskFactors": {
-      "mechanicalFailureRisk": "Medium (complex systems for the era)",
-      "extremeEventRisk": "High (some floods exceed capabilities)",
-      "maintenanceRisk": "High (constant water exposure)"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Water flow, mechanical systems creaking, measurement tools",
     "activitySounds": "Barrier deployment, pumps operating, warning bells during events",

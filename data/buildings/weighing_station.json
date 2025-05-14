@@ -20,13 +20,6 @@
   },
   "maintenanceCost": 1350,
   "constructionTime": 259200000,
-  "incomeGeneration": 25000,
-  "employmentCapacity": 8,
-  "locationRequirements": {
-    "districtRestrictions": "Commercial zones, particularly near markets",
-    "adjacentRequirements": "Requires good access for carts and porters",
-    "environmentalEffects": "Increases efficiency and trust in local commercial transactions"
-  },
   "productionInformation": {
     "inputResources": {
       "Goods for Weighing": "100-200 transactions per day",
@@ -38,33 +31,6 @@
       "Commercial Dispute Resolution": "5-10 cases per day"
     },
     "storageCapacity": "Minimal, primarily equipment storage"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian weighing station under construction, official measurement facility, foundation being reinforced for stability and accuracy of scales, specialized equipment installation areas, precision stone platform for large scale being laid perfectly level, separate areas for different measurement types (weight, volume, length), official's office and document area, security features to prevent tampering, equipment calibration area, official symbols of weights and measures being installed, isometric game perspective, stylized but detailed, focus on precision and permanence of construction",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian weighing station, official measurement facility featuring large central hall with massive precision scale on perfectly level stone platform, smaller scales of various sizes for different goods, standardized volume measures in copper and brass, official length measures inlaid in stone floor, separate booths for specific commodities, official's desk with stamps and certification documents, Republic's seal prominently displayed, weights and measures symbols on exterior, carts and goods waiting to be weighed, clerks recording measurements, bronze standard weights in secure display, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of precision and official authority, activity showing commercial goods being carefully measured, certificate being issued to merchant",
-  "gameplayInformation": {
-    "unlocks": [
-      "Certified Trade Operations",
-      "Dispute Resolution",
-      "Standard Measurement Reference"
-    ],
-    "specialAbilities": [
-      "Fraud prevention",
-      "Commercial dispute resolution",
-      "Quality certification"
-    ],
-    "upgradePath": [
-      "Commercial Regulatory Office"
-    ],
-    "reputationEffects": {
-      "Merchant Guild": 15,
-      "Treasury": 10,
-      "Consumer Trust": 20
-    },
-    "riskFactors": {
-      "corruption risk": "Medium (opportunities for falsification)",
-      "maintenance risk": "High (requires precise calibration)",
-      "throughput risk": "Medium (bottlenecks during busy periods)"
-    }
   },
   "soundDesign": {
     "ambientSound": "Scale mechanisms, official stamps, merchant discussions",

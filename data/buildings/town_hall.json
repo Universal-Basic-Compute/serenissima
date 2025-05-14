@@ -20,41 +20,6 @@
   },
   "maintenanceCost": 2500,
   "constructionTime": 1209600000,
-  "incomeGeneration": 30000,
-  "employmentCapacity": 20,
-  "locationRequirements": {
-    "districtRestrictions": "Central district location, often on secondary campo",
-    "adjacentRequirements": "Public accessibility, visibility",
-    "environmentalEffects": "Increases civic activity, creates administrative center"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian town hall under construction, district government building, substantial civic structure taking shape, administrative offices being partitioned, public meeting hall with raised dais for officials, document storage vaults with security features, district symbols being carved into facade, official architectural style following government regulations, quality construction showing civic importance, public counter areas for citizen services, separate entrance for officials, dedicated clerk spaces, isometric game perspective, stylized but detailed, balance of authority and accessibility in design",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian town hall, dignified district government building featuring official architecture with Venetian Gothic elements, central public hall for community meetings, administrative offices visible with clerks at work, document archives with organized scrolls and ledgers, small courtroom for local cases, public service counters where citizens queue for assistance, district symbols prominently displayed including Lion of St. Mark, district flags and banners, separate official entrance, security features for valuable records, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of orderly local government, citizens conducting official business, district officials in formal robes, balance of authority symbolism and practical service functions, atmosphere of civic organization",
-  "gameplayInformation": {
-    "unlocks": [
-      "Local Government Functions",
-      "Document Services",
-      "Community Management"
-    ],
-    "specialAbilities": [
-      "Administrative center",
-      "Local dispute resolution",
-      "Public records access"
-    ],
-    "upgradePath": [
-      "District Government Center (expanded services)"
-    ],
-    "reputationEffects": {
-      "Local Citizens": 20,
-      "Central Government": 15,
-      "Merchants": 15,
-      "Nobility": 10
-    },
-    "riskFactors": {
-      "corruptionRisk": "Medium (administrative power)",
-      "bureaucracyRisk": "Medium (administrative inefficiencies)",
-      "fireRisk": "Medium (document storage)"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Quill scratching, official stamps, muted conversations",
     "activitySounds": "Public announcements, dispute resolutions, citizen petitions",

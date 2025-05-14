@@ -19,8 +19,6 @@
   },
   "maintenanceCost": 6000,
   "constructionTime": 604800000,
-  "incomeGeneration": 38000,
-  "employmentCapacity": 8,
   "productionInformation": {
     "inputResources": {
       "Murano Sand": 10,
@@ -36,36 +34,6 @@
     "storageCapacity": {
       "rawMaterials": 100,
       "moltenGlass": 45
-    }
-  },
-  "locationRequirements": {
-    "districtRestrictions": "Must be built on Murano Island only",
-    "adjacentRequirements": "Requires water access for fuel delivery",
-    "environmentalEffects": "Decreases property value of adjacent residential buildings, increases fire risk in a small radius"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian glass foundry under construction on Murano island, wooden scaffolding around brick furnace structure, partial stone walls, massive chimney partially built, workers laying fire-resistant materials, clay crucibles waiting to be installed, construction materials piled nearby, wooden roof beams exposed, canal-side loading area partially completed, historically accurate glassmaking facility, isometric game perspective, stylized but detailed, warm terracotta and brick textures",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian glass foundry on Murano island, large brick structure with massive central chimney billowing light smoke, multiple furnace openings glowing orange, stone foundation, red tile roof with ventilation openings, weathered brick exterior, canal-side loading dock with supply crates, small windows set high in walls, wooden double doors for fuel delivery, metal reinforcements around furnace openings, historically accurate but slightly stylized for game aesthetic, isometric game perspective, warm color palette with glowing furnace accents, workers visible near intense heat",
-  "gameplayInformation": {
-    "unlocks": [
-      "All advanced glass production buildings",
-      "Venetian Glass Trade"
-    ],
-    "specialAbilities": [
-      "Can create custom glass colors with special mineral combinations",
-      "State-protected monopoly"
-    ],
-    "upgradePath": [
-      "Advanced Foundry (higher output, more efficient fuel use)"
-    ],
-    "reputationEffects": {
-      "Glass Guild": 20,
-      "Environmental Faction": -10,
-      "Luxury Traders": 15
-    },
-    "riskFactors": {
-      "fireRisk": "Very High (40% higher than average building)",
-      "pollutionRisk": "High (smoke and emissions)",
-      "workHazard": "High (extreme temperatures)"
     }
   },
   "soundDesign": {

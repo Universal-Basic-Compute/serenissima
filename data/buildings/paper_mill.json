@@ -19,8 +19,6 @@
   },
   "maintenanceCost": 2000,
   "constructionTime": 518400000,
-  "incomeGeneration": 25000,
-  "employmentCapacity": 20,
   "productionInformation": {
     "inputResources": {
       "Rags": 80,
@@ -37,39 +35,6 @@
     "storageCapacity": {
       "rawMaterials": 300,
       "finishedGoods": 1000
-    }
-  },
-  "locationRequirements": {
-    "districtRestrictions": "Requires flowing water, often outside city proper",
-    "adjacentRequirements": "Must have water wheel access, substantial water supply",
-    "environmentalEffects": "Water pollution downstream, fiber dust in vicinity"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian paper mill under construction, industrial facility with water power focus, water wheel mechanism being installed, stamping hammer system taking shape, large vats for pulp preparation, drainage systems and water channels, rag storage and processing area, drying loft with ventilation, sizing bath installation, cutting and finishing room, mechanical systems for pulp processing, substantial foundation work for water-powered machinery, isometric game perspective, stylized but detailed, focus on water management systems and industrial machinery",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian paper mill, substantial industrial facility with large water wheel powering mechanical hammers, workers processing rags into fiber, massive vats where pulp is mixed and prepared, couching area where sheets are formed using wooden frames and wire screens, pressing mechanism removing excess water from newly formed sheets, drying loft with hundreds of sheets hanging to dry, sizing bath for treating finished paper, cutting and sorting room for final processing, stacks of finished paper in different grades and sizes, historically accurate but slightly stylized for game aesthetic, isometric game perspective, water flowing through various stages of the process, sense of continuous production flow, workers specialized in different stages from rag selection to final quality control, water-powered mechanical elements creating an early industrial atmosphere",
-  "gameplayInformation": {
-    "unlocks": [
-      "Publishing Industry",
-      "Document Services",
-      "Book Production"
-    ],
-    "specialAbilities": [
-      "Watermark creation",
-      "Custom paper formulation",
-      "Specialty papers for art"
-    ],
-    "upgradePath": [
-      "Advanced Paper Mill (finer papers, special formulations)"
-    ],
-    "reputationEffects": {
-      "Printing Guild": 20,
-      "Merchant Guild": 15,
-      "Government Offices": 15,
-      "Environmental Factions": -10
-    },
-    "riskFactors": {
-      "waterSupplyRisk": "High (dependent on water flow)",
-      "fireRisk": "Medium (dry paper storage)",
-      "pollutionRisk": "Medium (process chemicals)"
     }
   },
   "soundDesign": {

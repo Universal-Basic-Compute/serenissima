@@ -20,41 +20,6 @@
   },
   "maintenanceCost": 2500,
   "constructionTime": 604800000,
-  "incomeGeneration": 22500,
-  "employmentCapacity": 15,
-  "locationRequirements": {
-    "districtRestrictions": "Government district, often near administrative centers",
-    "adjacentRequirements": "Security considerations, fire protection",
-    "environmentalEffects": "Creates scholarly atmosphere, increases official activity"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian public archives under construction, specialized document repository, moisture control systems being installed, fire protection features including isolated construction, document storage rooms with custom shelving, specialized reading rooms with optimal lighting design, document receiving and processing areas, restoration workshop space, security features to protect valuable records, catalog systems for retrieval, isometric game perspective, stylized but detailed, focus on document preservation technology of the Renaissance era, sense of creating permanent repository for vital information",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian public archives, sophisticated document repository featuring secure stone building with limited windows for preservation, main hall with catalog system and retrieval desk, rows of shelving containing categorized documents, scrolls, and ledgers, separate reading room with tables designed for document examination, scribes' area for creating copies of records, restoration workshop with specialized tools, clerks organizing new submissions, document retrieval system with tracking, scholars studying historical records, historically accurate but slightly stylized for game aesthetic, isometric game perspective, hushed atmosphere of serious record keeping, perfect organization system revealing Venetian bureaucratic sophistication, security features protecting valuable information, subtle details showing document preservation methods of the era",
-  "gameplayInformation": {
-    "unlocks": [
-      "Historical Research",
-      "Legal Documentation",
-      "Property Verification"
-    ],
-    "specialAbilities": [
-      "Record preservation",
-      "Information retrieval",
-      "Official documentation"
-    ],
-    "upgradePath": [
-      "State Archives (highest level records, restricted access)"
-    ],
-    "reputationEffects": {
-      "Government Officials": 20,
-      "Legal Profession": 20,
-      "Scholars": 25,
-      "Merchants": 15
-    },
-    "riskFactors": {
-      "fireRisk": "High (despite precautions, paper storage)",
-      "moistureRisk": "Medium (document damage threat)",
-      "securityRisk": "Medium (valuable information)"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Paper handling, quiet research, quill scratching",
     "activitySounds": "Document retrieval, scrolls unrolling, catalog searches",

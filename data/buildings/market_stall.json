@@ -16,13 +16,6 @@
   },
   "maintenanceCost": 100,
   "constructionTime": 86400000,
-  "incomeGeneration": 8000,
-  "employmentCapacity": 1,
-  "locationRequirements": {
-    "districtRestrictions": "Must be placed in designated market areas or along commercial streets",
-    "adjacentRequirements": "Requires open plaza or street access",
-    "environmentalEffects": "Increases foot traffic in immediate area"
-  },
   "productionInformation": {
     "inputResources": {
       "Various Trade Goods": "5-10 units per day depending on type"
@@ -31,30 +24,6 @@
       "Sales Revenue": "8-15 ducats per day depending on location and goods"
     },
     "storageCapacity": 20
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian market stall under construction, simple wooden framework being assembled in town square, partial awning of striped fabric, small counter being built, basic wooden structure, crates ready to display goods, simple tools for assembly, very quick construction process, workers securing support posts, historically accurate but simple design, isometric game perspective, stylized but detailed, warm wood textures",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian market stall, simple wooden structure with striped fabric awning in red and white, sturdy wooden counter for displaying goods, small storage space beneath counter, hanging scale for weighing goods, various produce or goods displayed according to stall type, small signage indicating merchant's specialty, oil lamp for evening operation, basket for transactions, historically accurate but slightly stylized for game aesthetic, isometric game perspective, colorful goods creating visual interest, weathered wood textures, bustling activity around stall",
-  "gameplayInformation": {
-    "unlocks": [
-      "Basic Retail Operations"
-    ],
-    "specialAbilities": [
-      "Flexible location - can be moved for a fee",
-      "Low startup costs",
-      "Quick to establish"
-    ],
-    "upgradePath": [
-      "Bottega"
-    ],
-    "reputationEffects": {
-      "Merchant Guild": 2,
-      "Local Neighborhood": 3
-    },
-    "riskFactors": {
-      "fireRisk": "Medium",
-      "weatherRisk": "High (exposed to elements)",
-      "theftRisk": "High (limited security)"
-    }
   },
   "soundDesign": {
     "ambientSound": "Market chatter, occasional vendor calls",

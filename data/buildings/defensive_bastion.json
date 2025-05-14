@@ -19,41 +19,6 @@
   },
   "maintenanceCost": 7500,
   "constructionTime": 2592000000,
-  "incomeGeneration": 20000,
-  "employmentCapacity": 40,
-  "locationRequirements": {
-    "districtRestrictions": "Strategic defensive positions, vulnerable approaches",
-    "adjacentRequirements": "Commanding position, field of fire, supply access",
-    "environmentalEffects": "Creates military presence, security enhancement, strategic control"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian defensive bastion under construction, substantial military fortification, massive earthworks and foundation creating angled walls optimized for artillery, cannon platforms taking shape with geometric precision for maximum firing arcs, ammunition magazines with safety features, garrison quarters, command post with strategic visibility, reinforced construction designed to withstand bombardment, supply access routes, strategic positioning showing defensive mindset, military engineers supervising precise angles and measurements, isometric game perspective, stylized but detailed, focus on Renaissance military engineering principles applied to Venice's unique defensive needs",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian defensive bastion, imposing military fortification featuring geometric angled walls designed to deflect incoming fire while supporting artillery, multiple cannon positions on elevated platforms with optimal firing arcs over approaches, ammunition magazines built into structure with safety features, garrison quarters for permanent defensive force, command post with maps and firing tables, signal station for communication with other defenses, Venetian military standards flying, artillery crews maintaining cannons, officers observing approaches, thick walls capable of absorbing bombardment, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of formidable defensive position, mathematical precision of Renaissance military engineering, strategic positioning demonstrating defensive control of vital approach, combination of defensive architecture and offensive firepower, soldiers conducting drills, gunners calculating range to targets",
-  "gameplayInformation": {
-    "unlocks": [
-      "Artillery Defense",
-      "Strategic Control",
-      "Military Presence"
-    ],
-    "specialAbilities": [
-      "Approach denial",
-      "Area defense",
-      "Military control zone"
-    ],
-    "upgradePath": [
-      "Advanced Star Fort (improved artillery placement, enhanced defense)"
-    ],
-    "reputationEffects": {
-      "Military": 30,
-      "Government": 25,
-      "Foreign Powers": 20,
-      "Potential Enemies": -30
-    },
-    "riskFactors": {
-      "targetRisk": "Very High (primary military target)",
-      "explosionRisk": "High (ammunition storage)",
-      "obsolescenceRisk": "Medium (evolving military technology)"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Flag flapping, distant cannon practice, garrison activity",
     "activitySounds": "Artillery drills, military commands, defensive preparations",

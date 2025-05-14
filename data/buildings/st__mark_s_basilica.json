@@ -21,41 +21,6 @@
   },
   "maintenanceCost": 12500,
   "constructionTime": 10368000000,
-  "incomeGeneration": 150000,
-  "employmentCapacity": 60,
-  "locationRequirements": {
-    "districtRestrictions": "San Marco district only, adjacent to Doge's Palace",
-    "adjacentRequirements": "Piazza frontage, campanile proximity",
-    "environmentalEffects": "Religious center, creates spiritual focal point, pilgrimage destination"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian St. Mark's Basilica under construction, magnificent religious structure, Byzantine-influenced architecture taking shape, multiple domes with supporting structures, ornate facade design with marble inlay work, interior scaffolding where master craftsmen apply gold mosaics, marble column installation from Eastern sources, reliquary areas being prepared with security features, baptistery construction, connection to Doge's Palace, specially reinforced areas for golden altarpiece (Pala d'Oro), skilled artisans creating intricate decorative elements, isometric game perspective, stylized but detailed, sense of creating otherworldly spiritual space that also projects Venetian state power",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian St. Mark's Basilica, breathtaking cathedral featuring distinctive Byzantine-influenced architecture with five domes, ornate facade with marble, columns, and sculptures, famous quadriga horses above entrance, interior glowing with golden mosaics depicting biblical and Venetian scenes, central area where St. Mark's relics are housed, Pala d'Oro golden altarpiece studded with gems, baptistery with ancient decoration, treasury filled with Venetian plunder from Constantinople, connection to Doge's Palace symbolizing church-state relationship, priests conducting services, pilgrims visiting sacred relics, state ceremonies with Doge participating, historically accurate but slightly stylized for game aesthetic, isometric game perspective, atmosphere of divine splendor combined with state power, perfect fusion of Eastern and Western traditions, golden light filtering through windows, sense of spiritual authority and material magnificence supporting each other",
-  "gameplayInformation": {
-    "unlocks": [
-      "State Religion",
-      "Pilgrimage Destination",
-      "Ceremonial Center"
-    ],
-    "specialAbilities": [
-      "Religious authority",
-      "State ceremonies",
-      "Divine protection"
-    ],
-    "upgradePath": [
-      "None - unique historical structure"
-    ],
-    "reputationEffects": {
-      "Church": 50,
-      "Government": 40,
-      "Citizens": 40,
-      "Foreign Visitors": 40
-    },
-    "riskFactors": {
-      "fireRisk": "Medium (despite sacred protection)",
-      "theftRisk": "High (valuable treasures)",
-      "floodRisk": "High (ground level, despite precautions)"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Gregorian chants, echoing prayers, reverent whispers",
     "activitySounds": "Religious ceremonies, choir performances, state processions",

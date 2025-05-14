@@ -19,13 +19,6 @@
   },
   "maintenanceCost": 750,
   "constructionTime": 259200000,
-  "incomeGeneration": 14000,
-  "employmentCapacity": 3,
-  "locationRequirements": {
-    "districtRestrictions": "All districts, particularly near residential areas",
-    "adjacentRequirements": "Benefits from proximity to physicians",
-    "environmentalEffects": "Increases health of nearby citizens, slight exotic aroma in vicinity"
-  },
   "productionInformation": {
     "inputResources": {
       "Herbs": "10-15 units per day",
@@ -38,33 +31,6 @@
       "Spice Packets": "10-15 units per day"
     },
     "storageCapacity": 60
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian apothecary under construction, specialized shop with medicine focus, walls being lined with custom shelving for ingredient jars, preparation counter being installed with marble top, small distillation area taking shape with ventilation, secure storage areas for valuable ingredients, specialized grinding station, herb-drying rack installation, small side garden being planted, higher quality finishes than standard shop, isometric game perspective, stylized but detailed, combination of scientific and commercial design elements",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian apothecary, distinctive medical shop, elegant facade with medical symbol sign, interior lined with blue and white ceramic jars labeled in Latin script, central marble-topped preparation counter with mortar and pestle, brass scales for precise measurements, glass-fronted cabinets with exotic ingredients, dried herbs hanging from ceiling, small distillation apparatus, rack of prepared medicines in bottles, separate cosmetic preparation area, small garden visible through back window with medicinal plants, warm wooden interior with medical illustrations on walls, historically accurate but slightly stylized for game aesthetic, isometric game perspective, atmospheric lighting highlighting colorful jars and bottles, apothecary in distinctive robe weighing ingredients, subtle smoke from distillation process",
-  "gameplayInformation": {
-    "unlocks": [
-      "Medicine Production",
-      "Plague Treatment",
-      "Cosmetics Trade"
-    ],
-    "specialAbilities": [
-      "Disease prevention for nearby buildings",
-      "Beauty treatments",
-      "Exotic ingredient knowledge"
-    ],
-    "upgradePath": [
-      "Medical Academy partnership"
-    ],
-    "reputationEffects": {
-      "Medical Guild": 12,
-      "Spice Merchants": 10,
-      "Nobility": 5
-    },
-    "riskFactors": {
-      "fireRisk": "Medium-High (distillation processes)",
-      "health hazard": "Low-Medium (toxic ingredients)",
-      "theftRisk": "High (valuable exotic ingredients)"
-    }
   },
   "soundDesign": {
     "ambientSound": "Glass bottles clinking, quiet consultation",

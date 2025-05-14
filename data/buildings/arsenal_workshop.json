@@ -20,41 +20,6 @@
   },
   "maintenanceCost": 6000,
   "constructionTime": 3456000000,
-  "incomeGeneration": 0,
-  "employmentCapacity": 80,
-  "locationRequirements": {
-    "districtRestrictions": "Arsenal district only, government authorization required",
-    "adjacentRequirements": "Deep water access, Arsenal complex integration",
-    "environmentalEffects": "Industrial activity, strategic importance, restricted access"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian Arsenal workshop under construction, massive naval industrial facility, part of the larger Arsenal complex, huge construction hall taking shape with overhead gantry system, specialized work zones for different ship components, material processing areas, strict security measures during construction, direct canal access being created for launched vessels, enormous roof trusses spanning wide production space, state engineers supervising all details, advanced construction techniques, scale dwarfing normal buildings, government oversight evident, isometric game perspective, stylized but detailed, sense of industrial-scale naval construction capabilities being created",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian Arsenal workshop, impressive naval industrial facility featuring enormous construction hall where multiple warships are simultaneously being built in various stages, standardized workstations for different ship components, overhead gantry system for moving heavy parts, specialized craftsmen working on specific tasks, timber processing zone, sail fabrication area, cannon mounting station, rope-making section, strict organization with military efficiency, ships moving through progressive assembly stages, launching channel to waters, armed guards restricting access, state officials supervising operations, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of revolutionary industrial capacity, workers moving with practiced efficiency showing the world's first assembly-line production, scale and organization that made Venice's naval dominance possible, atmosphere of disciplined manufacturing combined with craftsmanship, state symbols prominently displayed showing government ownership",
-  "gameplayInformation": {
-    "unlocks": [
-      "Naval Ship Production",
-      "State Military Contracts",
-      "Arsenal System"
-    ],
-    "specialAbilities": [
-      "Rapid warship construction",
-      "Standardized naval production",
-      "Military technology development"
-    ],
-    "upgradePath": [
-      "Advanced Arsenal Facility (cutting-edge naval technology)"
-    ],
-    "reputationEffects": {
-      "Military": 30,
-      "Senate": 25,
-      "Arsenal Workers Guild": 25,
-      "Foreign Powers": 20
-    },
-    "riskFactors": {
-      "securityRisk": "Medium (strategic target)",
-      "industrial risk": "High (dangerous processes)",
-      "fireRisk": "Very High (wood, pitch, open flames)"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Intense industrial activity, hammering, sawing, orders being shouted",
     "activitySounds": "Ship hull construction, material processing, coordinated team work",

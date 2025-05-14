@@ -20,8 +20,6 @@
   },
   "maintenanceCost": 3500,
   "constructionTime": 432000000,
-  "incomeGeneration": 45000,
-  "employmentCapacity": 6,
   "productionInformation": {
     "inputResources": {
       "Gold": 5,
@@ -38,39 +36,6 @@
     "storageCapacity": {
       "preciousMetals": 30,
       "finishedGoods": 50
-    }
-  },
-  "locationRequirements": {
-    "districtRestrictions": "Premium locations in San Marco, Rialto",
-    "adjacentRequirements": "Security considerations, proximity to wealthy clients",
-    "environmentalEffects": "Increases area prestige, heightened security presence"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian goldsmith workshop under construction, high-end luxury crafting space, secure vault being installed with multiple locks, specialized workbenches with precision tools, jeweler's stations with perfect lighting design, gem-setting areas, small but powerful forges for precious metals, polishing and finishing stations, discreet but elegant client reception area, display cases with security features, quality materials throughout construction, security measures being integrated into structure, isometric game perspective, stylized but detailed, combination of workshop functionality and high-end aesthetics",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian goldsmith workshop, refined luxury production facility, master goldsmith working at central bench with magnifying apparatus examining intricate piece, apprentices at secondary stations performing detailed work, tiny precision tools arranged perfectly, small specialized furnace for melting precious metals, gem-setting station with perfect lighting, secure vault with substantial door visible, elegant but discreet client reception area with display cases showing exquisite finished pieces, scales for weighing precious materials, sketches of commissioned designs, security features subtly integrated throughout, historically accurate but slightly stylized for game aesthetic, isometric game perspective, atmospheric lighting highlighting gold and gems, sense of artistic precision combined with luxury, wealthy clients being shown custom designs, secure transaction area",
-  "gameplayInformation": {
-    "unlocks": [
-      "Luxury Jewelry Production",
-      "Noble Commissions",
-      "Ecclesiastical Objects"
-    ],
-    "specialAbilities": [
-      "Create signature pieces",
-      "Set precious gems",
-      "Currency exchange services"
-    ],
-    "upgradePath": [
-      "Master Jeweler Workshop (highest prestige, ducal commissions)"
-    ],
-    "reputationEffects": {
-      "Goldsmith Guild": 25,
-      "Nobility": 20,
-      "Church": 15,
-      "Wealthy Merchants": 20
-    },
-    "riskFactors": {
-      "theftRisk": "Very High (extremely valuable materials)",
-      "qualityRisk": "High (exacting standards)",
-      "reputationRisk": "High (mistakes very costly)"
     }
   },
   "soundDesign": {

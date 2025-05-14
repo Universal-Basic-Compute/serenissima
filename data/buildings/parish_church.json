@@ -20,41 +20,6 @@
   },
   "maintenanceCost": 4000,
   "constructionTime": 2592000000,
-  "incomeGeneration": 45000,
-  "employmentCapacity": 10,
-  "locationRequirements": {
-    "districtRestrictions": "Central location in neighborhood, often facing campo",
-    "adjacentRequirements": "Open space for gatherings, visibility",
-    "environmentalEffects": "Creates community focal point, bell sounds at regular intervals"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian parish church under construction, religious building becoming neighborhood centerpiece, stone foundation with detailed masonry work in progress, walls rising with brick and stone, wooden scaffolding surrounding structure, bell tower partially completed, craftsmen installing stained glass windows, marble columns being positioned, roof trusses visible awaiting tiles, side chapels taking shape, workmen consulting architectural plans, stone carvers creating decorative elements, building materials blessed before installation, temporary altar for continued worship during construction, community involvement in building process, isometric game perspective, stylized but detailed, blend of religious significance and community investment in construction",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian parish church, neighborhood religious center featuring Venetian Gothic facade with rose window, elegant bell tower (campanile) with regular bells marking time, main entrance with carved stone details, interior visible showing central nave with side chapels, altar area with devotional artwork, baptismal font, confessionals along walls, colorful frescoes depicting saints, wooden pews for worshippers, small piazza in front for community gatherings, modest yet beautiful stained glass, distinctly Venetian architectural elements including Byzantine influences, historically accurate but slightly stylized for game aesthetic, isometric game perspective, warm stone colors, sense of spiritual center with neighborhood identity, parishioners entering for services, priest greeting community members, subtle religious symbols integrated throughout architecture",
-  "gameplayInformation": {
-    "unlocks": [
-      "Religious Services",
-      "Community Events",
-      "Charitable Activities"
-    ],
-    "specialAbilities": [
-      "Increases local happiness",
-      "Community focal point",
-      "Life event ceremonies"
-    ],
-    "upgradePath": [
-      "Expanded Parish Church with additional chapels and services"
-    ],
-    "reputationEffects": {
-      "Local Community": 25,
-      "Church Hierarchy": 20,
-      "Nobility": 10,
-      "Common Citizens": 20
-    },
-    "riskFactors": {
-      "fireRisk": "Medium (candles, wooden elements)",
-      "maintenanceRisk": "Medium (complex building)",
-      "sectarianRisk": "Low (established religion)"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Church bells at regular intervals, quiet prayers, echoing spaces",
     "activitySounds": "Choir practice, Mass ceremonies, community gatherings",

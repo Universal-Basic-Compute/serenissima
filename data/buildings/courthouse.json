@@ -20,42 +20,6 @@
   },
   "maintenanceCost": 3500,
   "constructionTime": 1728000000,
-  "incomeGeneration": 40000,
-  "employmentCapacity": 30,
-  "locationRequirements": {
-    "districtRestrictions": "Government district, near other official buildings",
-    "adjacentRequirements": "Public accessibility, security considerations",
-    "environmentalEffects": "Increases order in surrounding area, creates serious atmosphere"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian courthouse under construction, imposing judicial building, substantial stone foundation for permanence and authority, multiple courtroom chambers taking shape with raised judicial benches, public seating areas, separate circulation paths for judges, holding cells with security features, legal archive vaults, judicial offices with privacy, official Venetian justice symbols being integrated into architecture, formal entrance with security provisions, quality construction emphasizing stability and permanence, isometric game perspective, stylized but detailed, sense of architectural authority and seriousness appropriate to judicial function",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian courthouse, impressive judicial facility featuring imposing stone facade with justice symbolism, grand entrance hall with statues of Justice and previous notable judges, multiple courtroom chambers with elevated judicial benches, public viewing areas, witness stands, advocates' positions, separate secure circulation for judiciary, extensive legal archives with meticulous record keeping, holding cells for accused, private deliberation chambers, offices for legal officials, historically accurate but slightly stylized for game aesthetic, isometric game perspective, atmosphere of solemnity and authority, sense of Venetian legal tradition, legal proceedings in progress, advocates in official robes, clerks recording testimonies, perfect balance of public accessibility and judicial security, emphasis on rule of law through architectural authority",
-  "gameplayInformation": {
-    "unlocks": [
-      "Legal System Access",
-      "Contract Enforcement",
-      "Justice Administration"
-    ],
-    "specialAbilities": [
-      "Dispute resolution",
-      "Legal documentation",
-      "Security enhancement",
-      "Crime suppression"
-    ],
-    "upgradePath": [
-      "High Court (highest judicial authority)"
-    ],
-    "reputationEffects": {
-      "Legal Authorities": 25,
-      "Government": 20,
-      "Merchants": 15,
-      "Criminals": -30
-    },
-    "riskFactors": {
-      "corruptionRisk": "Medium (influence on judgments)",
-      "securityRisk": "Medium (target for dissidents)",
-      "bureaucracyRisk": "High (complex legal procedures)"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Echoing halls, distant proceedings, hushed conversations",
     "activitySounds": "Gavel strikes, oath-taking, verdict announcements, case arguments",

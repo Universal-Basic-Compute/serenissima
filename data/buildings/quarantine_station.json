@@ -20,41 +20,6 @@
   },
   "maintenanceCost": 3500,
   "constructionTime": 1728000000,
-  "incomeGeneration": 40000,
-  "employmentCapacity": 30,
-  "locationRequirements": {
-    "districtRestrictions": "Isolated location, often on outer island or lagoon edge",
-    "adjacentRequirements": "Water access for ships, security perimeter",
-    "environmentalEffects": "Prevents disease spread, creates controlled isolation area"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian quarantine station under construction, specialized health security facility, isolated island or peninsula location, multiple accommodation blocks being built with complete separation between them, fumigation chambers for goods, inspection areas with safety features, secure perimeter taking shape, dedicated dock facilities for controlled access, administrative building for health officials, separated ventilation systems for each block, water purification system, specific medical design principles following Venetian Health Office requirements, isometric game perspective, stylized but detailed, focus on isolation and disease prevention through Renaissance understanding of contagion",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian quarantine station, sophisticated disease prevention facility featuring multiple isolated accommodation blocks with no connecting pathways, dedicated dock where ships are thoroughly inspected, fumigation chambers for treating suspicious goods, inspection halls where health officials examine travelers, separate facilities for different arrival dates preventing cross-contamination, administrative building where records are kept, boundary walls preventing unauthorized movement, guards ensuring isolation compliance, health officials in distinctive protective clothing, specialized goods handling equipment, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of methodical disease prevention through physical separation, innovative public health infrastructure that protected Venice from numerous plague outbreaks, systematic processing of arrivals visible, different zones showing varying stages of quarantine period",
-  "gameplayInformation": {
-    "unlocks": [
-      "Disease Prevention",
-      "Safe Trade Protocols",
-      "Public Health Measures"
-    ],
-    "specialAbilities": [
-      "Plague prevention",
-      "Safe processing of foreign goods",
-      "Health security enhancement"
-    ],
-    "upgradePath": [
-      "Advanced Quarantine Complex (improved methods, research)"
-    ],
-    "reputationEffects": {
-      "Health Office": 30,
-      "Government": 25,
-      "Foreign Traders": -10,
-      "General Population": 20
-    },
-    "riskFactors": {
-      "diseaseBreachRisk": "Medium (despite precautions)",
-      "diplomatic risk": "Medium (foreign resistance to procedures)",
-      "economic risk": "Medium (trade delays)"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Distant ship horns, water sounds, seagulls, isolation",
     "activitySounds": "Health inspections, fumigation processes, ships docking",

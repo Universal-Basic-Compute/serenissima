@@ -20,41 +20,6 @@
   },
   "maintenanceCost": 2000,
   "constructionTime": 604800000,
-  "incomeGeneration": 25000,
-  "employmentCapacity": 15,
-  "locationRequirements": {
-    "districtRestrictions": "Maritime districts, preferably with water view",
-    "adjacentRequirements": "Access to docks for practical training",
-    "environmentalEffects": "Increases maritime competence in area, attracts sailors"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian navigation school under construction, specialized maritime education facility, classrooms taking shape with specialized features for teaching navigation, chart room with large tables for map examination, small observatory platform for celestial navigation practice, model ship area for teaching shiphandling, instrument storage and training areas, nautical equipment displays, diorama of Venice's maritime network being constructed, specialized lighting for chart reading, workshop for maintaining instruments, isometric game perspective, stylized but detailed, focus on creating practical learning environment for crucial maritime skills",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian navigation school, sophisticated maritime education facility featuring large classrooms with nautical themes, extensive chart room with maps of Mediterranean and beyond, navigation instruments including astrolabes and compasses, scale model ships for demonstration, small observatory for celestial navigation training, simulators for shiphandling scenarios, collection of charts and portolans, instructor demonstrating navigation techniques to students, practical equipment for hands-on learning, naval officers consulting advanced charts, historically accurate but slightly stylized for game aesthetic, isometric game perspective, atmosphere of serious maritime study, visual aids showing ship types and sailing techniques, sense of technical expertise that powered Venice's maritime success, students of various ages learning crucial skills",
-  "gameplayInformation": {
-    "unlocks": [
-      "Maritime Education",
-      "Navigational Expertise",
-      "Ship Handling Training"
-    ],
-    "specialAbilities": [
-      "Crew skill improvement",
-      "Navigation error reduction",
-      "Maritime knowledge advancement"
-    ],
-    "upgradePath": [
-      "Advanced Naval Academy (highest maritime education)"
-    ],
-    "reputationEffects": {
-      "Maritime Guild": 25,
-      "Naval Officers": 20,
-      "Merchant Captains": 20,
-      "Shipowners": 15
-    },
-    "riskFactors": {
-      "obsolescenceRisk": "Medium (evolving techniques)",
-      "knowledgeLeakRisk": "High (valuable information)",
-      "recruitmentRisk": "Medium (competing for top instructors)"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Classroom discussions, chart paper rustling, instruments being demonstrated",
     "activitySounds": "Navigation calculations, instructor lectures, student questions",

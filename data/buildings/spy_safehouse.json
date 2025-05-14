@@ -19,8 +19,6 @@
   },
   "maintenanceCost": 3500,
   "constructionTime": 864000000,
-  "incomeGeneration": 25000,
-  "employmentCapacity": 4,
   "productionInformation": {
     "inputResources": {
       "Criminal Contacts": 3,
@@ -36,39 +34,6 @@
     "storageCapacity": {
       "intelligence materials": 50,
       "agent equipment": 30
-    }
-  },
-  "locationRequirements": {
-    "districtRestrictions": "Strategic observation points, multiple escape routes",
-    "adjacentRequirements": "Inconspicuous access, surveillance opportunities",
-    "environmentalEffects": "No visible changes, extremely discreet operation"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian spy safehouse under construction, intelligence facility disguised as ordinary residence, construction workers carefully vetted, secret rooms being built with hidden entrances, specialized security features including escape routes and document destruction facilities, observation points with views of strategic locations, secure meeting room with soundproofing measures, hidden compartments for document storage, specialized communication systems, multiple exit points, isometric game perspective, stylized but detailed, focus on perfect balance of ordinary appearance and extraordinary security",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian spy safehouse, clandestine intelligence facility perfectly disguised as ordinary Venetian residence, completely normal exterior hiding sophisticated interior, secret meeting room with soundproofed walls, document processing area with encryption/decryption tools, hidden compartments throughout for emergency document concealment, observation post with view of strategic location (government building, embassy, etc.), quick document destruction system, multiple escape routes, disguised communication methods, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of extreme discretion, agents meeting in secure room, intelligence materials being processed, atmosphere of tension and secrecy beneath calm exterior, nothing visible from outside to suggest unusual activity",
-  "gameplayInformation": {
-    "unlocks": [
-      "Intelligence Operations",
-      "Agent Network",
-      "Political Manipulation"
-    ],
-    "specialAbilities": [
-      "Gather sensitive information",
-      "Run agent networks",
-      "Influence political outcomes"
-    ],
-    "upgradePath": [
-      "Intelligence Headquarters (expanded operations, foreign networks)"
-    ],
-    "reputationEffects": {
-      "Foreign Powers": 25,
-      "Council of Ten": -30,
-      "Political Factions": 20,
-      "Criminal Underworld": 15
-    },
-    "riskFactors": {
-      "discoveryRisk": "Extreme (execution for treason)",
-      "counterintelligenceRisk": "High (Council of Ten surveillance)",
-      "doubleAgentRisk": "Medium (infiltration)"
     }
   },
   "soundDesign": {

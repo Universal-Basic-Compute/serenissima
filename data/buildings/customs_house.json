@@ -20,13 +20,6 @@
   },
   "maintenanceCost": 2500,
   "constructionTime": 604800000,
-  "incomeGeneration": 100000,
-  "employmentCapacity": 30,
-  "locationRequirements": {
-    "districtRestrictions": "Must be positioned at key harbor entrance points",
-    "adjacentRequirements": "Requires direct deep water access for ships",
-    "environmentalEffects": "Decreases illegal trade in area, increases formal commercial activity"
-  },
   "productionInformation": {
     "inputResources": {
       "Imported Goods": "200-500 units per day for inspection",
@@ -38,34 +31,6 @@
       "Trade Data": "Valuable market intelligence"
     },
     "storageCapacity": 400
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian customs house under construction, official government building with imposing facade, substantial harbor-side foundation work, large-scale secure warehousing areas being built, official inspection halls with specialized lighting, offices for customs officials, secure document repositories, strong room for tax collection, multiple inspection stations taking shape, official architectural elements including state symbols, government oversight of construction visible, higher construction standards than commercial buildings, fortified elements for security, deep water docking facilities under construction, isometric game perspective, stylized but detailed, sense of government authority and permanence",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian customs house, imposing official building at harbor entrance, grand stone facade featuring Lion of St. Mark and government symbols, multiple inspection halls with specialized tables for opening and examining crates, separate areas for different types of goods, official's offices with view of operations, secure counting rooms for tax collection, armed guards at strategic positions, large harbor-facing doors allowing direct unloading from ships, official scales and measuring equipment, document office with clerks recording all transactions, separate entrances for merchants and officials, inspection stamps and seals visible, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of official authority and oversight, uniformed customs officials examining goods, merchants waiting for clearance, activity showing the blend of bureaucracy and commerce",
-  "gameplayInformation": {
-    "unlocks": [
-      "Legal Import/Export Operations",
-      "Government Revenue Stream",
-      "Official Trade Data"
-    ],
-    "specialAbilities": [
-      "Tax collection",
-      "Contraband seizure",
-      "Market regulation enforcement"
-    ],
-    "upgradePath": [
-      "Commercial Magistracy"
-    ],
-    "reputationEffects": {
-      "Senate": 20,
-      "Treasury": 25,
-      "Merchant Guild": 10,
-      "Smugglers": -30
-    },
-    "riskFactors": {
-      "corruption risk": "Medium (valuable position for bribes)",
-      "security risk": "Low (well-guarded)",
-      "efficiency risk": "Medium (bureaucratic delays)"
-    }
   },
   "soundDesign": {
     "ambientSound": "Official stamps and seals, clerks calling next in line, harbor sounds",

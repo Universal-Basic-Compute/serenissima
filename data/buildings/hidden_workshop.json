@@ -19,8 +19,6 @@
   },
   "maintenanceCost": 3000,
   "constructionTime": 604800000,
-  "incomeGeneration": 45000,
-  "employmentCapacity": 5,
   "productionInformation": {
     "inputResources": {
       "varies by product": "varies"
@@ -34,39 +32,6 @@
     "storageCapacity": {
       "rawMaterials": 50,
       "finishedGoods": 30
-    }
-  },
-  "locationRequirements": {
-    "districtRestrictions": "Low guard presence, access to escape routes",
-    "adjacentRequirements": "Discreet access, minimal visibility",
-    "environmentalEffects": "Occasional suspicious activity, potential danger to neighbors"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian hidden workshop under construction, discreet criminal facility, construction happening primarily at night, false front being established as legitimate business, secret entrance mechanisms being installed, specialized equipment being brought in through back channels, security measures including escape routes and lookout points, specialized ventilation to prevent telltale smoke or odors, reinforced doors and shutters, hidden storage compartments built into walls, isometric game perspective, stylized but detailed, focus on secrecy and deception in construction",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian hidden workshop, clandestine criminal production facility featuring innocuous exterior disguised as ordinary building, secret entrance with complex mechanism, main workshop area with specialized equipment for illegal production (forgery tools, poison components, etc.), lookout post with view of approaching guards, escape route through concealed door, security measures throughout, specialized ventilation system, hidden storage compartments for contraband, sparse but functional furnishings, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of secretive operation, workers with suspicious demeanor, contrast between innocent exterior and criminal interior, dim lighting with strategic illumination of work areas, atmosphere of tension and vigilance",
-  "gameplayInformation": {
-    "unlocks": [
-      "Illegal Goods Production",
-      "Criminal Network Access",
-      "Black Market Trading"
-    ],
-    "specialAbilities": [
-      "Produce contraband",
-      "Launder money",
-      "Criminal connections"
-    ],
-    "upgradePath": [
-      "Syndicate Production Facility (larger scale, better security)"
-    ],
-    "reputationEffects": {
-      "Criminal Underworld": 25,
-      "City Guards": -30,
-      "Local Residents": -15,
-      "Black Market": 20
-    },
-    "riskFactors": {
-      "discoveryRisk": "Very High (imprisonment or execution)",
-      "betrayalRisk": "High (informants)",
-      "competitionRisk": "Medium (rival criminals)"
     }
   },
   "soundDesign": {

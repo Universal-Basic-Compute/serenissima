@@ -19,41 +19,6 @@
   },
   "maintenanceCost": 2500,
   "constructionTime": 1209600000,
-  "incomeGeneration": 10000,
-  "employmentCapacity": 2,
-  "locationRequirements": {
-    "districtRestrictions": "Requires Senate approval for location",
-    "adjacentRequirements": "Must connect land areas across canal",
-    "environmentalEffects": "Dramatically increases pedestrian flow, creates connection point"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian bridge under construction, stone arch structure spanning canal, temporary wooden scaffolding supporting partially completed arch, wooden construction platforms on boats below, stone blocks being hoisted into position, engineers checking geometry with measuring tools, foundations reinforced on both banks, step formwork taking shape, balustrade elements waiting for installation, workers carefully fitting precisely cut stones, construction causing temporary canal closure, isometric game perspective, stylized but detailed, focus on engineering precision and architectural beauty combined, important civic project with government oversight",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian bridge, elegant stone arch structure spanning canal, graceful humpback design allowing boats to pass underneath, wide steps on both sides accommodating pedestrian flow, ornate stone balustrades with detailed carvings, small seating areas at apex, decorative elements including carved keystones and corner embellishments, historically accurate but slightly stylized for game aesthetic, isometric game perspective, pedestrians crossing in both directions, boats passing underneath, sense of important civic infrastructure that's also beautiful, joining two previously separate areas of the city, weathered stone showing age and character, small lion of St. Mark carving indicating official approval, well-worn steps from centuries of foot traffic",
-  "gameplayInformation": {
-    "unlocks": [
-      "Pedestrian Connectivity",
-      "District Unification",
-      "New Development Areas"
-    ],
-    "specialAbilities": [
-      "Creates direct pedestrian routes",
-      "Increases property values on both sides",
-      "Potential for bridge shops"
-    ],
-    "upgradePath": [
-      "Merchant Bridge (with built-in shops)"
-    ],
-    "reputationEffects": {
-      "Local Districts": 30,
-      "Senate": 20,
-      "Merchants": 25,
-      "Citizens": 20
-    },
-    "riskFactors": {
-      "floodRisk": "Low (designed for water environment)",
-      "maintenanceRisk": "Medium (weather exposure)",
-      "trafficCongestionRisk": "High (popular crossing point)"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Footsteps on stone, conversation echoes, water sounds below",
     "activitySounds": "People greeting each other, boats passing underneath, shoes on steps",

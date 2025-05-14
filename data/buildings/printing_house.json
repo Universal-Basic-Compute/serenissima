@@ -19,8 +19,6 @@
   },
   "maintenanceCost": 3500,
   "constructionTime": 604800000,
-  "incomeGeneration": 50000,
-  "employmentCapacity": 15,
   "productionInformation": {
     "inputResources": {
       "Paper": 100,
@@ -39,39 +37,6 @@
     "storageCapacity": {
       "rawMaterials": 250,
       "finishedGoods": 500
-    }
-  },
-  "locationRequirements": {
-    "districtRestrictions": "Intellectual districts, near government centers",
-    "adjacentRequirements": "Good transport access, some distance from residences (noise)",
-    "environmentalEffects": "Ink smell, noise pollution, intellectual atmosphere"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian printing house under construction, specialized publishing facility, press foundation being reinforced for stability, type-setting area with specialized furniture, ink preparation area with safety features, paper storage with humidity control, press mechanisms being assembled with precision components, drying racks installation, bindery area taking shape, proof-reading tables with good lighting design, censorship inspection area (required by Venetian law), isometric game perspective, stylized but detailed, focus on the mechanical printing presses as central elements, specialized work areas for each phase of book production",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian printing house, busy publishing facility centered around large wooden printing presses, typesetters arranging individual metal letters into frames, press operators inking type blocks and positioning paper, apprentices operating press levers, freshly printed sheets hanging on drying lines, proof-readers at tables checking for errors, binding area where books are sewn and covered, stacks of completed books and pamphlets, walls lined with cases of different typefaces, ink preparation area with various colors, censor's desk where official checks content before publication (Venetian requirement), historically accurate but slightly stylized for game aesthetic, isometric game perspective, atmosphere of intellectual production combined with mechanical craft, different specialized workstations showing the complete book production process, sense of revolutionary technology at work",
-  "gameplayInformation": {
-    "unlocks": [
-      "Book Publishing",
-      "Map Production",
-      "Information Distribution"
-    ],
-    "specialAbilities": [
-      "Spread ideas quickly",
-      "Produce multiple copies",
-      "Create illustrated works"
-    ],
-    "upgradePath": [
-      "Advanced Press (faster production, finer detail)"
-    ],
-    "reputationEffects": {
-      "Printer's Guild": 20,
-      "Intellectuals": 25,
-      "Senate": 10,
-      "Church": 5
-    },
-    "riskFactors": {
-      "censorshipRisk": "High (government oversight)",
-      "qualityRisk": "Medium (errors can multiply quickly)",
-      "fireRisk": "Medium (paper storage, oil-based inks)"
     }
   },
   "soundDesign": {

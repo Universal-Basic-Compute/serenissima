@@ -20,41 +20,6 @@
   },
   "maintenanceCost": 6000,
   "constructionTime": 1209600000,
-  "incomeGeneration": 65000,
-  "employmentCapacity": 40,
-  "locationRequirements": {
-    "districtRestrictions": "Near Arsenal or government center, naval visibility",
-    "adjacentRequirements": "View of harbor, secure access, communication links",
-    "environmentalEffects": "Creates naval command presence, strategic coordination point"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian naval administration office under construction, military command facility, strategic location with harbor visibility, large map rooms taking shape, secure document storage for naval charts and orders, fleet coordination center, personnel management offices, signal station for ship communication, naval officer quarters, docking facilities for command vessels, diplomatic reception areas, naval archive with specialized storage, isometric game perspective, stylized but detailed, focus on creating effective command and control center for maritime operations",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian naval administration office, impressive maritime command facility featuring grand strategy room with large table maps of Mediterranean, secure document room with naval charts and classified orders, admiral's office with view of harbor, personnel management section with crew manifests and assignments, signals office for ship communications using flags and messengers, naval archive containing historical campaigns and intelligence, formal reception area for diplomatic naval functions, dock for official vessels, uniformed naval officers consulting over charts, messengers coming and going with dispatches, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of naval command authority, organized naval administration, balance of military precision and strategic thinking, naval symbols and battle maps, atmosphere of maritime power coordination",
-  "gameplayInformation": {
-    "unlocks": [
-      "Naval Command",
-      "Fleet Coordination",
-      "Maritime Strategy"
-    ],
-    "specialAbilities": [
-      "Naval mission planning",
-      "Fleet personnel management",
-      "Maritime diplomatic functions"
-    ],
-    "upgradePath": [
-      "Admiralty Headquarters (highest naval command)"
-    ],
-    "reputationEffects": {
-      "Naval Officers": 30,
-      "Government": 25,
-      "Maritime Guild": 20,
-      "Foreign Powers": 15
-    },
-    "riskFactors": {
-      "espionageRisk": "High (valuable intelligence)",
-      "corruptionRisk": "Medium (powerful positions)",
-      "communicationRisk": "Medium (command breakdowns)"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Maps being moved, quiet strategic discussions, naval terminology",
     "activitySounds": "Orders being dispatched, reports delivered, navigational calculations",

@@ -20,8 +20,6 @@
   },
   "maintenanceCost": 10000,
   "constructionTime": 2592000000,
-  "incomeGeneration": 0,
-  "employmentCapacity": 50,
   "productionInformation": {
     "inputResources": {
       "Gold": 10,
@@ -38,39 +36,6 @@
     "storageCapacity": {
       "preciousMetals": 100,
       "coinage": 50000
-    }
-  },
-  "locationRequirements": {
-    "districtRestrictions": "San Marco district only, near government center",
-    "adjacentRequirements": "Requires heavy security, proximity to Treasury",
-    "environmentalEffects": "Increases security in surrounding area, creates high-value target"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian mint under construction, heavily secured government facility, substantial stone foundation with reinforced vaults being built, specialized metalworking areas taking shape, coin striking equipment being installed, assay furnaces for metal testing, secure bullion storage vaults with multiple locks, guard stations at all access points, private canal access for secure deliveries, heavy iron gates and security measures, government officials supervising every aspect of construction, artisans installing precision equipment for coin production, isometric game perspective, stylized but detailed, emphasis on security features and precision construction",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian mint (Zecca), imposing official building with fortress-like security features, heavy stone construction with minimal windows, multiple guard posts with armed personnel, secure bullion delivery entrance with canal access, main production hall with coin striking presses in operation, assay office with precision scales and testing equipment, die-cutting workshop where master engravers create coin designs, enormous vault with multiple locks for finished currency, official state symbols prominently displayed, quality control stations, ducal inspectors in official robes, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of absolute precision and security, workers in specialized roles striking coins, melting precious metals, and performing quality checks, treasure chests being prepared for transport",
-  "gameplayInformation": {
-    "unlocks": [
-      "Financial District Development",
-      "Banking System",
-      "International Exchange"
-    ],
-    "specialAbilities": [
-      "Currency production",
-      "Metal purity verification",
-      "Economic stability maintenance"
-    ],
-    "upgradePath": [
-      "None - unique government building"
-    ],
-    "reputationEffects": {
-      "Treasury": 30,
-      "Senate": 25,
-      "Banking Houses": 20,
-      "International Traders": 15
-    },
-    "riskFactors": {
-      "securityRisk": "Medium (despite heavy security, high-value target)",
-      "corruptionRisk": "Medium (temptation of valuable materials)",
-      "qualityRisk": "Low (multiple verification processes)"
     }
   },
   "soundDesign": {

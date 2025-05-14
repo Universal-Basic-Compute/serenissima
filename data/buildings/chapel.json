@@ -20,40 +20,6 @@
   },
   "maintenanceCost": 1000,
   "constructionTime": 432000000,
-  "incomeGeneration": 5000,
-  "employmentCapacity": 2,
-  "locationRequirements": {
-    "districtRestrictions": "Often within private palazzos or institutions",
-    "adjacentRequirements": "Connection to main building, some privacy",
-    "environmentalEffects": "Creates sense of sanctity, slight incense aroma"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian chapel under construction, small private religious space, fine stonework being installed with particular attention to detail, small altar area taking shape, space for devotional artwork being prepared, high-quality but intimate proportions, specialized craftsmen working on religious elements, private funding evident in quality of materials, ornate ceiling work in progress, space for family memorials or crypts, integration with connected palazzo or institution, isometric game perspective, stylized but detailed, sense of private devotion balanced with status display",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian chapel, intimate private religious space featuring small but exquisite altar with marble details, family crest integrated into design, devotional paintings of family patron saints, small stained glass window providing colored light, elegant pews for family and guests, private confessional, space for family memorials or burial crypts, quality materials throughout showing private wealth, incense holders and religious implements, ornate ceiling with religious motifs, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of private devotion combined with family status, warm intimate lighting, perfect balance of religious function and family identity, chaplain preparing for private service, subtle architectural connection to main palazzo or institution",
-  "gameplayInformation": {
-    "unlocks": [
-      "Private Religious Services",
-      "Family Memorials",
-      "Status Enhancement"
-    ],
-    "specialAbilities": [
-      "Personal spiritual space",
-      "Family prestige increase",
-      "Private ceremonies"
-    ],
-    "upgradePath": [
-      "Family Memorial Chapel (with crypts and expanded memorials)"
-    ],
-    "reputationEffects": {
-      "Church Hierarchy": 10,
-      "Family Status": 15,
-      "Piety Reputation": 20
-    },
-    "riskFactors": {
-      "fireRisk": "Medium (candles, wooden elements)",
-      "maintenanceRisk": "Low (small, well-built)",
-      "obsolescenceRisk": "Low (timeless purpose)"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Quiet prayers, subtle echoes, occasional small bell",
     "activitySounds": "Private Mass, family prayers, soft organ music",

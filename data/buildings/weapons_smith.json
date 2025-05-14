@@ -19,8 +19,6 @@
   },
   "maintenanceCost": 3000,
   "constructionTime": 345600000,
-  "incomeGeneration": 25000,
-  "employmentCapacity": 8,
   "productionInformation": {
     "inputResources": {
       "Processed Iron": 15,
@@ -37,39 +35,6 @@
     "storageCapacity": {
       "rawMaterials": 100,
       "finishedGoods": 50
-    }
-  },
-  "locationRequirements": {
-    "districtRestrictions": "Industrial zones, Arsenal district preferred",
-    "adjacentRequirements": "Water access for cooling, separation from residential due to noise",
-    "environmentalEffects": "Noise pollution, smoke, occasional sparks"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian weapons smith under construction, specialized military production facility, reinforced forge area being built with multiple hearths, hardening tanks installation, grinding and polishing stations taking shape, blade testing area, secure storage for finished weapons, quality control station, decorative elements workshop for ceremonial pieces, heavy anvils being positioned, specialized tool racks, security features including strong locks and limited access points, isometric game perspective, stylized but detailed, focus on the specialized military production aspects",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian weapons smith, working military production facility with multiple specialized forges glowing at different temperatures, master smith working red-hot steel on large anvil, apprentices grinding and polishing blades, finished weapons displayed on racks (swords, pikes, naval cutlasses, crossbows), hardening tanks steaming as hot metal is quenched, testing area where blades are checked for strength and balance, decorative workshop where ceremonial weapons receive artistic embellishments, security features including guards and secure storage, historically accurate but slightly stylized for game aesthetic, isometric game perspective, dramatic lighting from forge fires, sense of precision craftsmanship combined with military purpose, Republic authorization documents prominently displayed, weapons organized by type and purpose",
-  "gameplayInformation": {
-    "unlocks": [
-      "Military Equipment Production",
-      "Naval Armaments",
-      "Export Weapons"
-    ],
-    "specialAbilities": [
-      "Create specialized weapons",
-      "Fulfill military contracts",
-      "Produce ceremonial arms"
-    ],
-    "upgradePath": [
-      "Advanced Armory (higher quality, specialized weapons)"
-    ],
-    "reputationEffects": {
-      "Metal Workers Guild": 15,
-      "Military Forces": 20,
-      "Security Guild": 15,
-      "Residential Neighbors": -10
-    },
-    "riskFactors": {
-      "fireRisk": "Very High (multiple forges)",
-      "securityRisk": "High (valuable and restricted goods)",
-      "injuryRisk": "High (dangerous work)"
     }
   },
   "soundDesign": {

@@ -19,13 +19,6 @@
   },
   "maintenanceCost": 600,
   "constructionTime": 259200000,
-  "incomeGeneration": 15000,
-  "employmentCapacity": 4,
-  "locationRequirements": {
-    "districtRestrictions": "Premium locations in San Marco, Rialto, or Castello",
-    "adjacentRequirements": "Preferably near other luxury retailers",
-    "environmentalEffects": "Increases property value of adjacent buildings by 8%, attracts wealthy clientele (5% higher chance of noble visitors), improves area commerce rating by 10%"
-  },
   "productionInformation": {
     "inputResources": {
       "Various Textiles": "30-50 units per day",
@@ -36,33 +29,6 @@
       "Sales Revenue": "30-60 ducats per day"
     },
     "storageCapacity": 80
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian merceria under construction, textile shop with specialized features, large retail space taking shape, fabric display areas being built, custom shelving for fabric bolts, special north-facing windows for true color assessment, separate fitting area, elaborate counter being crafted, refined architectural elements, quality construction materials, workers installing specialized cabinet work, isometric game perspective, stylized but detailed, warm wood and plaster textures, attention to lighting considerations for fabric display",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian merceria, elegant textile shop with refined facade, large display windows with fabric samples visible, interior showing wooden shelves with colorful fabric bolts arranged by type and quality, long measuring counter of polished wood, separate area with privacy screens for noble customers, fabric samples draped artfully, specialized lighting to show true colors, small scissor and thread display, glass-front cabinets with exotic textiles, hanging sign showing measuring tools and fabric, historically accurate but slightly stylized for game aesthetic, isometric game perspective, color-coordinated textile displays creating vibrant interior, elegant customers examining fabrics, merchant showing silks to client, Persian carpet on floor",
-  "gameplayInformation": {
-    "unlocks": [
-      "Textile Trade",
-      "Fashion Industry Connections",
-      "Noble Client List"
-    ],
-    "specialAbilities": [
-      "Access to imported fabrics",
-      "Can fulfill noble commissions",
-      "Fashion trend information"
-    ],
-    "upgradePath": [
-      "Luxury Showroom"
-    ],
-    "reputationEffects": {
-      "Textile Guild": 15,
-      "Merchant Guild": 10,
-      "Nobility": 8
-    },
-    "riskFactors": {
-      "fireRisk": "High (flammable textiles)",
-      "theftRisk": "High (valuable merchandise)",
-      "fashionRisk": "Medium (affected by changing tastes)"
-    }
   },
   "soundDesign": {
     "ambientSound": "Soft conversation, fabric being unfolded",

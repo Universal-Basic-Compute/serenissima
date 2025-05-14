@@ -20,13 +20,6 @@
   },
   "maintenanceCost": 3500,
   "constructionTime": 1296000000,
-  "incomeGeneration": 75000,
-  "employmentCapacity": 40,
-  "locationRequirements": {
-    "districtRestrictions": "Grand Canal frontage near Rialto",
-    "adjacentRequirements": "Requires major canal access, proximity to commercial district",
-    "environmentalEffects": "Creates international commercial zone, increases nearby property values by 20%"
-  },
   "productionInformation": {
     "inputResources": {
       "Northern European Goods": "100-200 units per day",
@@ -37,33 +30,6 @@
       "Tax Revenue": "30-60 ducats per day to state"
     },
     "storageCapacity": 500
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian Fondaco dei Tedeschi under construction, massive trading complex on Grand Canal, multi-story structure with central courtyard layout, large-scale foundation work visible, canal-side loading docks being built, huge warehouse spaces taking shape, multiple cranes and construction equipment, offices and accommodation areas on upper floors under construction, hundreds of workers on scaffolding, distinct German architectural influences being incorporated alongside Venetian elements, government officials overseeing certain aspects, massive stone blocks being positioned, scale dwarfing nearby buildings, isometric game perspective, stylized but detailed, sense of architectural and commercial importance",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian Fondaco dei Tedeschi, imposing trading complex directly on Grand Canal, massive multi-story structure surrounding central courtyard, distinctive architecture blending Venetian and Northern European styles, impressive canal frontage with multiple loading docks active with boats, ground floor featuring vast warehouse spaces and customs inspection areas, upper floors with trading offices and accommodation for German merchants, rows of elegant arched windows, central stone courtyard with well and commercial activity, German cultural symbols and Venetian regulations displayed side-by-side, watchtower with customs officials, red exterior typical of Venetian commercial buildings, historically accurate but slightly stylized for game aesthetic, isometric game perspective, bustling activity with merchants from different regions recognizable by dress, scaled to dwarf surrounding buildings, multiple entrances with different levels of access restriction",
-  "gameplayInformation": {
-    "unlocks": [
-      "Northern European Trade Routes",
-      "German Merchant Connections",
-      "Access to Northern Technologies"
-    ],
-    "specialAbilities": [
-      "International trading hub",
-      "Cross-cultural exchange",
-      "Tax and customs collection point"
-    ],
-    "upgradePath": [
-      "International Trade Network expansion"
-    ],
-    "reputationEffects": {
-      "German Merchants": 25,
-      "Venetian Senate": 15,
-      "Merchant Guild": 20
-    },
-    "riskFactors": {
-      "fireRisk": "Medium (despite size, good regulations)",
-      "political risk": "Medium (subject to diplomatic relations)",
-      "espionage risk": "High (valuable trade information)"
-    }
   },
   "soundDesign": {
     "ambientSound": "Multiple languages being spoken, trading negotiations, cargo movement",

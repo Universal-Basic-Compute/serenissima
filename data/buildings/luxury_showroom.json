@@ -20,13 +20,6 @@
   },
   "maintenanceCost": 2000,
   "constructionTime": 432000000,
-  "incomeGeneration": 35000,
-  "employmentCapacity": 5,
-  "locationRequirements": {
-    "districtRestrictions": "Premium locations only: San Marco, Grand Canal frontage, or Rialto",
-    "adjacentRequirements": "Benefits from proximity to other luxury establishments",
-    "environmentalEffects": "Increases property value of surrounding buildings by 15%, attracts wealthy visitors (10% higher chance of noble visitors), improves area prestige rating by 12%"
-  },
   "productionInformation": {
     "inputResources": {
       "Luxury Goods": "5-10 units per day (high value)",
@@ -37,34 +30,6 @@
       "Custom Commissions": "1-2 per week (extremely high value)"
     },
     "storageCapacity": 40
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian luxury showroom under construction, high-end retail space in premium location, finest materials being used including marble columns and gold leaf accents, large display windows being installed with special security features, custom display cases under construction, private consultation room taking shape with elegant finishes, specialized lighting considerations, security features being integrated discreetly, master craftsmen working on architectural details, higher level of finish than standard buildings, isometric game perspective, stylized but detailed, refined architectural elements",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian luxury showroom, aristocratic retail establishment, refined classical facade with subtle luxury signifiers, large glass display windows with discreet iron guards, interior featuring marble floors with geometric patterns, custom-built display cases of polished wood and glass, individual item spotlighting, private consultation area with velvet seating, separate entrance for noble clients, specialized lighting highlighting merchandise, minimal but exceptional product display, uniformed attendants, silk wall coverings, subtle security features, historically accurate but slightly stylized for game aesthetic, isometric game perspective, atmospheric lighting creating dramatic product highlights, gold and marble accents, sensation of exclusivity and refinement, small coat of arms indicating possible noble patronage",
-  "gameplayInformation": {
-    "unlocks": [
-      "Noble Clientele",
-      "Custom Commissions",
-      "Foreign Diplomatic Gifts"
-    ],
-    "specialAbilities": [
-      "Extremely high margins",
-      "Reputation enhancement",
-      "International connections"
-    ],
-    "upgradePath": [
-      "International Luxury Brand"
-    ],
-    "reputationEffects": {
-      "Nobility": 20,
-      "Merchant Guild": 15,
-      "Foreign Diplomats": 10,
-      "Commoners": -5
-    },
-    "riskFactors": {
-      "theftRisk": "Very High (extremely valuable merchandise)",
-      "fashionRisk": "High (elite tastes change quickly)",
-      "competitionRisk": "Medium (exclusivity provides buffer)"
-    }
   },
   "soundDesign": {
     "ambientSound": "Hushed conversation, subtle ambient music",

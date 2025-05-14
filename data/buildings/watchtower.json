@@ -19,42 +19,6 @@
   },
   "maintenanceCost": 1750,
   "constructionTime": 432000000,
-  "incomeGeneration": 0,
-  "employmentCapacity": 8,
-  "locationRequirements": {
-    "districtRestrictions": "High points, strategic observation locations, approaches",
-    "adjacentRequirements": "Unobstructed views, supportive foundation",
-    "environmentalEffects": "Increased security visibility, surveillance presence"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian watchtower under construction, strategic observation structure, tall design prioritizing height for maximum visibility, substantial foundation ensuring stability, spiral staircase installation, elevated observation platform with views in all directions, signal fire brazier being positioned, weather protection features, secure entry point, quarters for watch personnel, security features to prevent unauthorized access, communication systems like bell or signal flags, isometric game perspective, stylized but detailed, focus on creating optimal visibility combined with practical functionality",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian watchtower, impressive observation facility featuring tall stone structure with commanding views, elevated observation platform with protective railings, weather protection features including roof and windscreens, signal equipment including fire brazier for night signaling, flag system for coded communication, telescope or spyglass for distance viewing, watch captain's quarters, duty roster for continuous manning, logbook of observations, bell for alerting, narrow defensive windows on ascent, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of vigilant observation, strategic positioning showing clear views of important approaches, guards scanning horizon, signal flags ready, atmosphere of constant watchfulness",
-  "gameplayInformation": {
-    "unlocks": [
-      "Extended Surveillance",
-      "Early Warning System",
-      "Navigation Assistance"
-    ],
-    "specialAbilities": [
-      "Threat detection",
-      "Ship identification",
-      "Weather monitoring",
-      "Territory control"
-    ],
-    "upgradePath": [
-      "Signal Tower (enhanced communication capabilities)"
-    ],
-    "reputationEffects": {
-      "Security Forces": 20,
-      "Maritime Guild": 15,
-      "Government": 20,
-      "Foreign Visitors": 10
-    },
-    "riskFactors": {
-      "targetRisk": "High (strategic infrastructure)",
-      "weatherRisk": "Medium (exposure, lightning)",
-      "visibilityRisk": "Medium (fog, conditions)"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Wind at height, flag flapping, distant city sounds",
     "activitySounds": "Alerting bell, observation reports, signal operations",

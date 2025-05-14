@@ -19,8 +19,6 @@
   },
   "maintenanceCost": 2000,
   "constructionTime": 345600000,
-  "incomeGeneration": 30000,
-  "employmentCapacity": 6,
   "productionInformation": {
     "inputResources": {
       "Molten Glass": 15,
@@ -37,39 +35,6 @@
     "storageCapacity": {
       "moltenGlass": 30,
       "finishedGoods": 100
-    }
-  },
-  "locationRequirements": {
-    "districtRestrictions": "Must be built on Murano Island only",
-    "adjacentRequirements": "Benefits from proximity to Glass Foundry",
-    "environmentalEffects": "Increases area prestige rating by 10%, generates moderate heat pollution (5m radius), increases fire risk of adjacent buildings by 8%, attracts artisan visitors"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian glassblower workshop under construction on Murano, specialized artisan facility, workstations being installed with glassblowing benches, glory holes (reheating openings) being constructed, annealing ovens for controlled cooling taking shape, tool storage and specialized equipment areas, master's demonstration platform, apprentice stations, marver tables for shaping glass, design area with pattern books, ventilation systems for worker comfort, preparing display area for finished works, isometric game perspective, stylized but detailed, focus on specialized equipment for this prestigious craft",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian glassblower workshop on Murano, specialized artistic production facility, central area features master glassblower working with molten gather on blowpipe, skilled manipulation of glowing orange glass visible, multiple workstations with glory holes for reheating, marver tables for rolling glass, wooden shaping tools, apprentices assisting or working on simpler pieces, finished works cooling slowly in annealing ovens, display area showing exquisite completed pieces, pattern books and design sketches, specialized tools hung precisely, historically accurate but slightly stylized for game aesthetic, isometric game perspective, dramatic lighting from molten glass and glory holes, sense of artistic precision and ancient craft, quality finished pieces catching light, atmosphere combining intense heat and artistic refinement",
-  "gameplayInformation": {
-    "unlocks": [
-      "Luxury Glass Production",
-      "Artistic Commissions",
-      "Export-Quality Goods"
-    ],
-    "specialAbilities": [
-      "Create custom designs",
-      "Fulfill noble commissions",
-      "Train master glassblowers"
-    ],
-    "upgradePath": [
-      "Master Glassblower Studio (highest quality, signature pieces)"
-    ],
-    "reputationEffects": {
-      "Glass Guild": 20,
-      "Nobility": 15,
-      "Luxury Merchants": 20,
-      "Foreign Traders": 15
-    },
-    "riskFactors": {
-      "fireRisk": "High (constant high heat)",
-      "injuryRisk": "High (dangerous materials)",
-      "secretRisk": "High (industrial espionage for techniques)"
     }
   },
   "soundDesign": {

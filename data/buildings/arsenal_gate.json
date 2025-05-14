@@ -20,41 +20,6 @@
   },
   "maintenanceCost": 5000,
   "constructionTime": 2592000000,
-  "incomeGeneration": 0,
-  "employmentCapacity": 30,
-  "locationRequirements": {
-    "districtRestrictions": "Arsenal district entrance only, unique structure",
-    "adjacentRequirements": "Connection to Arsenal complex, defensive position",
-    "environmentalEffects": "Restricts access, creates military zone boundary, projects power"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian Arsenal Gate under construction, monumental military entrance, massive foundation for imposing structure, grand central arch taking shape, flanking towers with defensive positions, elaborate decorative elements including Lion of St. Mark being carved, substantial doors with reinforcement, security checkpoints and guard stations, administrator offices, military symbols and images of naval power, highest quality materials showing state importance, isometric game perspective, stylized but detailed, focus on creating impressive but functional military entrance combining security with symbolic projection of naval power",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian Arsenal Gate, iconic military entrance featuring monumental stone structure with imposing central arch, famous Lion of St. Mark sculpture prominently displayed, twin defensive towers flanking entrance, massive reinforced wooden doors capable of sealing the complex, armed guards in Venetian naval uniforms maintaining strict access control, security checkpoint where credentials are verified, relief carvings showing Venetian naval prowess, administrator office managing authorized access, military banners and symbols of naval authority, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of boundary between civilian Venice and restricted military zone, perfect balance of practical security and symbolic power projection, atmosphere of military discipline and naval pride, officials checking authorization documents, arsenal workers queuing for entry verification",
-  "gameplayInformation": {
-    "unlocks": [
-      "Arsenal Access",
-      "Naval Manufacturing",
-      "Military Zone"
-    ],
-    "specialAbilities": [
-      "Strict access control",
-      "Military zone boundary",
-      "Naval power symbol"
-    ],
-    "upgradePath": [
-      "None - unique historical structure"
-    ],
-    "reputationEffects": {
-      "Military": 30,
-      "Government": 30,
-      "Foreign Visitors": 25,
-      "Citizens": 20
-    },
-    "riskFactors": {
-      "targetRisk": "Very High (symbolic and strategic target)",
-      "securityRisk": "Low (heavily guarded)",
-      "espionageRisk": "Medium (industrial secrets within)"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Naval commands, marching guards, massive doors operating",
     "activitySounds": "Access verification, shift changes, official announcements",

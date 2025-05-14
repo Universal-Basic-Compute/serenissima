@@ -19,8 +19,6 @@
   },
   "maintenanceCost": 1000,
   "constructionTime": 172800000,
-  "incomeGeneration": 12000,
-  "employmentCapacity": 5,
   "productionInformation": {
     "inputResources": {
       "Iron": 15,
@@ -37,39 +35,6 @@
     "storageCapacity": {
       "rawMaterials": 100,
       "finishedGoods": 150
-    }
-  },
-  "locationRequirements": {
-    "districtRestrictions": "All districts, often in industrial zones",
-    "adjacentRequirements": "Water access for cooling, separation from residential due to noise",
-    "environmentalEffects": "Noise pollution, smoke, occasional sparks"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian blacksmith shop under construction, industrial workshop with central forge area being built, chimney and ventilation system taking shape, anvil mounting blocks being set, water quenching tanks being installed, fuel storage area, tool wall framework, workbenches for detailed metal finishing, customer transaction area, metal storage with security features, heavy foundational work to support weighty equipment, isometric game perspective, stylized but detailed, focus on the forge as central feature",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian blacksmith shop, working industrial facility with glowing forge at center, blacksmith working red-hot iron on large anvil, sparks flying, apprentices pumping bellows and assisting with larger pieces, various tools hanging on walls (hammers, tongs, punches, chisels), quenching tank steaming as hot metal is cooled, finished products displayed (hinges, locks, tools, nails, decorative items), order slips from shipwrights and builders, smoke rising from chimney, small retail area for direct sales, historically accurate but slightly stylized for game aesthetic, isometric game perspective, dramatic lighting from forge fire, sense of essential industry, contrast between dark workshop and glowing metal, sturdy practical construction built to withstand intense heat and heavy work",
-  "gameplayInformation": {
-    "unlocks": [
-      "Basic Metal Production",
-      "Tool Making",
-      "Building Components"
-    ],
-    "specialAbilities": [
-      "Repair metal items",
-      "Custom hardware production",
-      "Support for construction"
-    ],
-    "upgradePath": [
-      "Specialized Metalworks (weapons, fine hardware, etc.)"
-    ],
-    "reputationEffects": {
-      "Metal Workers Guild": 10,
-      "Construction Guild": 15,
-      "Shipwright Guild": 10,
-      "Residential Neighbors": -5
-    },
-    "riskFactors": {
-      "fireRisk": "Very High (open forge)",
-      "injuryRisk": "High (dangerous work)",
-      "pollutionRisk": "Medium (smoke and waste)"
     }
   },
   "soundDesign": {

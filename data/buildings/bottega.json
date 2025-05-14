@@ -19,13 +19,6 @@
   },
   "maintenanceCost": 600,
   "constructionTime": 172800000,
-  "incomeGeneration": 11000,
-  "employmentCapacity": 3,
-  "locationRequirements": {
-    "districtRestrictions": "Best suited to commercial streets in any district",
-    "adjacentRequirements": "Must have street access",
-    "environmentalEffects": "Increases property value of adjacent buildings by 5%, creates steady foot traffic"
-  },
   "productionInformation": {
     "inputResources": {
       "Raw Materials": "15-25 units per day depending on specialization",
@@ -36,33 +29,6 @@
       "Sales Revenue": "20-35 ducats per day"
     },
     "storageCapacity": 50
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian bottega under construction, shop-workshop combination, brick and timber structure, front retail area taking shape with large openable shutters to street, workshop area in rear with specialized construction for craft type (woodworking, glass, textiles, etc.), workers installing distinctive wooden counter, specialized storage areas being built, front entrance with stepped access, space for business signage, isometric game perspective, stylized but detailed, historically accurate construction methods, warm brick and timber textures",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian bottega, charming shop-workshop combination, front area with large wooden shutters opened to street creating inviting retail space, decorated wooden counter with goods displayed, hanging shop sign with merchant's craft symbol, rear workshop visible with craft-specific tools and equipment, warm plastered exterior in Venetian yellow or terracotta, small glass windows with iron guards, quality wooden door, specialized display elements based on shop type (fabric bolts, glass shelves, etc.), historically accurate but slightly stylized for game aesthetic, isometric game perspective, active workshop scene with apprentices or workers, detailed craft-specific elements, well-worn threshold indicating established business",
-  "gameplayInformation": {
-    "unlocks": [
-      "Craft Production",
-      "Retail Operations",
-      "Apprentice Training"
-    ],
-    "specialAbilities": [
-      "Produces and sells specialized goods",
-      "Can fulfill custom orders",
-      "Trains new craftspeople"
-    ],
-    "upgradePath": [
-      "Luxury Showroom"
-    ],
-    "reputationEffects": {
-      "Craft-Specific Guild": 10,
-      "Merchant Guild": 8,
-      "Local Neighborhood": 5
-    },
-    "riskFactors": {
-      "fireRisk": "Medium-High (workshop materials)",
-      "theftRisk": "Medium",
-      "competitionRisk": "Medium (affected by nearby similar shops)"
-    }
   },
   "soundDesign": {
     "ambientSound": "Workshop sounds specific to craft, customer conversations",

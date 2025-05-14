@@ -19,8 +19,6 @@
   },
   "maintenanceCost": 2500,
   "constructionTime": 432000000,
-  "incomeGeneration": 35000,
-  "employmentCapacity": 8,
   "productionInformation": {
     "inputResources": {
       "Contraband": "varies",
@@ -35,39 +33,6 @@
     "storageCapacity": {
       "contraband": 100,
       "smuggling equipment": 50
-    }
-  },
-  "locationRequirements": {
-    "districtRestrictions": "Must have water access, low guard presence",
-    "adjacentRequirements": "Discreet boat access, escape routes",
-    "environmentalEffects": "Suspicious boat traffic, occasional night activity"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian smuggler's den under construction, criminal waterfront facility, hidden dock being built below street level, concealed water entrance taking shape, false front establishment being created, secret storage areas with water access, lookout points with good visibility, escape route planning, reinforced security features, hidden compartments in walls and floors, specialized loading equipment for quick transfers, isometric game perspective, stylized but detailed, focus on creating concealed water access combined with security features",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian smuggler's den, clandestine waterfront facility featuring hidden dock beneath street-level building, concealed water entrance disguised as ordinary canal frontage, innocent-looking facade hiding illegal operation, main storage area with contraband goods organized by type, lookout post with view of approaching guard boats, quick-loading equipment for rapid transfers, hidden compartments throughout, small boats modified for smuggling with concealed storage, night lanterns with shutters for signaling, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of secretive operation, contrast between innocent exterior and criminal interior, smugglers moving contraband under cover of darkness, atmosphere of vigilance and quick escapes",
-  "gameplayInformation": {
-    "unlocks": [
-      "Contraband Movement",
-      "Customs Evasion",
-      "Black Market Access"
-    ],
-    "specialAbilities": [
-      "Move illegal goods",
-      "Avoid tariffs",
-      "Secret transportation"
-    ],
-    "upgradePath": [
-      "Smuggling Network Hub (larger operation, international connections)"
-    ],
-    "reputationEffects": {
-      "Criminal Underworld": 20,
-      "Customs Officials": -25,
-      "City Guards": -20,
-      "Merchants": 10
-    },
-    "riskFactors": {
-      "discoveryRisk": "High (imprisonment, heavy fines)",
-      "betrayalRisk": "Medium (informants)",
-      "seizureRisk": "High (contraband confiscation)"
     }
   },
   "soundDesign": {

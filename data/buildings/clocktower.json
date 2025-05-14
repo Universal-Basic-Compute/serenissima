@@ -20,41 +20,6 @@
   },
   "maintenanceCost": 7500,
   "constructionTime": 3456000000,
-  "incomeGeneration": 0,
-  "employmentCapacity": 5,
-  "locationRequirements": {
-    "districtRestrictions": "San Marco district, entrance to Mercerie from piazza",
-    "adjacentRequirements": "Visibility from main square, prominent position",
-    "environmentalEffects": "Creates public time reference, architectural focal point"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian Clocktower under construction, specialized public timepiece, tower structure rising from arch over street, precision clockwork mechanism being assembled by master horologists, astronomical dial installation with zodiac symbols, automated striking figures being installed on platform, golden detailing and blue enamel work, bell housing at top taking shape, archway underneath maintaining street access during construction, specialized craftsmen focusing on technical precision and artistic detail simultaneously, clockface being calibrated, isometric game perspective, stylized but detailed, focus on creating public chronometer that demonstrates Venetian technical skill and artistic refinement",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian Clocktower, impressive public timepiece featuring ornate tower rising from arch spanning street entrance to Mercerie, large blue and gold clockface with astronomical indicators showing zodiac signs and lunar phases, famous Moors statues on top platform striking bell to mark hours, winged lion of St. Mark displayed prominently, intricate mechanical elements including procession of Wise Men on certain festivals, precision clockwork mechanism maintained by specialist technicians, archway below allowing pedestrian traffic between Piazza San Marco and shopping streets, historically accurate but slightly stylized for game aesthetic, isometric game perspective, sense of technological achievement combined with public practicality, perfect expression of Venetian appreciation for both art and science, citizens checking time as they pass, tourists admiring mechanical marvel, atmosphere of orderly civic life regulated by mechanical precision",
-  "gameplayInformation": {
-    "unlocks": [
-      "Public Timekeeping",
-      "Astronomical Display",
-      "City Regulation"
-    ],
-    "specialAbilities": [
-      "Time standardization",
-      "Civic pride enhancement",
-      "Technological demonstration"
-    ],
-    "upgradePath": [
-      "None - unique historical structure"
-    ],
-    "reputationEffects": {
-      "Government": 25,
-      "Citizens": 30,
-      "Engineers": 35,
-      "Foreign Visitors": 30
-    },
-    "riskFactors": {
-      "mechanicalRisk": "Medium (complex mechanisms)",
-      "maintenanceRisk": "High (precision requirements)",
-      "lightningRisk": "Medium (elevated structure)"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Clockwork mechanisms, gentle ticking, pedestrians below",
     "activitySounds": "Bell striking hours, automated figures moving, crowd reactions",

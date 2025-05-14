@@ -18,36 +18,7 @@
   },
   "maintenanceCost": 1000,
   "constructionTime": 259200000,
-  "incomeGeneration": 12000,
   "residentsCapacity": 5,
-  "locationRequirements": {
-    "districtRestrictions": "Cannot be built in San Marco",
-    "adjacentRequirements": "Must be adjacent to street or small plaza",
-    "environmentalEffects": "Small increase in property value for nearby Basic Residences"
-  },
-  "constructionPhase3DPrompt": "Renaissance Venetian artisan's house under construction, two-story structure, brick and timber frame, ground floor workshop area taking shape with large front opening, separate residential upper floor, wooden scaffolding, workers installing roof tiles, window frames being fitted, tools and construction materials organized neatly, period-appropriate construction techniques, partial plaster covering on some walls, isometric game perspective, stylized but detailed, warm brick and timber textures",
-  "completedBuilding3DPrompt": "Completed Renaissance Venetian artisan's house, two-story structure with workshop on ground floor, large front opening with wooden shutters that open to street, residential upper floor with small balcony, plastered exterior in warm Venetian red with exposed timber framing, terracotta roof tiles, workshop signage hanging from decorative iron bracket, small side courtyard, historically accurate but slightly stylized for game aesthetic, isometric game perspective, detailed craft-specific elements visible in workshop, well-worn entrance threshold, chimney with thin smoke",
-  "gameplayInformation": {
-    "unlocks": [
-      "Basic Craft Workshop operations"
-    ],
-    "specialAbilities": [
-      "Can house artisan family",
-      "Provides space for small craft business"
-    ],
-    "upgradePath": [
-      "Merchant's House"
-    ],
-    "reputationEffects": {
-      "Artisan's Guild": 8,
-      "Merchant Guild": 3
-    },
-    "riskFactors": {
-      "fireRisk": "Medium-High (workshop materials)",
-      "floodRisk": "Medium",
-      "crimeRisk": "Low"
-    }
-  },
   "soundDesign": {
     "ambientSound": "Tool working sounds, street chatter",
     "activitySounds": "Hammering, sawing, customer interactions",
