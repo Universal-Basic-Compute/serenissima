@@ -38,7 +38,10 @@ export class BuildingPointsService {
     
     try {
       console.log('Loading building points from API...');
-      const response = await fetch('/api/building-points');
+      
+      // Use an absolute URL for server-side fetching
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+      const response = await fetch(`${apiBaseUrl}/api/building-points`);
       
       if (!response.ok) {
         throw new Error(`Failed to fetch building points: ${response.status} ${response.statusText}`);
@@ -66,10 +69,9 @@ export class BuildingPointsService {
     } catch (error) {
       console.error('Error loading building points:', error);
       
-      // If we failed to load points, try to regenerate them
-      if (confirm('Failed to load building points. Would you like to regenerate them?')) {
-        await this.regenerateBuildingPoints();
-      }
+      // Remove browser-only confirm dialog
+      console.warn('Failed to load building points. Continuing without them.');
+      // Don't try to regenerate automatically on the server
     } finally {
       this.isLoading = false;
     }
@@ -82,7 +84,9 @@ export class BuildingPointsService {
     try {
       console.log('Requesting building points regeneration...');
       
-      const response = await fetch('/api/building-points', {
+      // Use an absolute URL for server-side fetching
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+      const response = await fetch(`${apiBaseUrl}/api/building-points`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
