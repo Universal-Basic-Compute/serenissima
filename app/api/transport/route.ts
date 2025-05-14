@@ -751,6 +751,26 @@ function isPointInPolygon(point: Point, polygon: Point[]): boolean {
   return inside;
 }
 
+// Helper function to check if a point is near water
+function isPointNearWater(point: Point, polygons: Polygon[]): boolean {
+  const WATER_PROXIMITY_THRESHOLD = 30; // meters
+  
+  for (const polygon of polygons) {
+    if (polygon.canalPoints && Array.isArray(polygon.canalPoints)) {
+      for (const canalPoint of polygon.canalPoints) {
+        if (canalPoint.edge) {
+          const distance = calculateDistance(point, canalPoint.edge);
+          if (distance < WATER_PROXIMITY_THRESHOLD) {
+            return true;
+          }
+        }
+      }
+    }
+  }
+  
+  return false;
+}
+
 // Dijkstra's algorithm to find the shortest path
 function findShortestPath(graph: Graph, startNodeId: string, endNodeId: string): { path: string[], distance: number } | null {
   // Initialize distances with Infinity
@@ -824,11 +844,245 @@ function findShortestPath(graph: Graph, startNodeId: string, endNodeId: string):
   };
 }
 
+// Function to find a water-only path between two points
+async function findWaterOnlyPath(startPoint: Point, endPoint: Point): Promise<any> {
+  try {
+    // Load polygons and navigation graph
+    const polygons = await loadPolygons();
+    
+    // Build a specialized water-only graph
+    const waterGraph: Graph = {
+      nodes: {},
+      edges: {}
+    };
+    
+    // Extract all canal points for the water network
+    const allCanalPoints: {point: Point, id: string, polygonId: string}[] = [];
+    for (const polygon of polygons) {
+      if (polygon.canalPoints) {
+        for (const point of polygon.canalPoints) {
+          if (point.edge) {
+            const pointId = point.id || `canal-${point.edge.lat}-${point.edge.lng}`;
+            allCanalPoints.push({
+              point: point.edge,
+              id: pointId,
+              polygonId: polygon.id
+            });
+          }
+        }
+      }
+    }
+    
+    // Add nodes for all canal points
+    for (const canalPoint of allCanalPoints) {
+      waterGraph.nodes[canalPoint.id] = {
+        id: canalPoint.id,
+        position: canalPoint.point,
+        type: 'canal',
+        polygonId: canalPoint.polygonId
+      };
+      waterGraph.edges[canalPoint.id] = [];
+    }
+    
+    // Create a function to check if a line between two points intersects any land polygon
+    const doesLineIntersectLand = (point1: Point, point2: Point): boolean => {
+      // For each polygon, check if the line intersects any of its edges
+      for (const polygon of polygons) {
+        const coords = polygon.coordinates;
+        if (!coords || coords.length < 3) continue;
+
+        // Check if the line intersects any polygon edge
+        for (let i = 0, j = coords.length - 1; i < coords.length; j = i++) {
+          const intersects = doLineSegmentsIntersect(
+            point1.lng, point1.lat, 
+            point2.lng, point2.lat,
+            coords[j].lng, coords[j].lat, 
+            coords[i].lng, coords[i].lat
+          );
+          
+          if (intersects) {
+            return true;
+          }
+        }
+      }
+      return false;
+    };
+    
+    // Connect canal points if they don't cross land
+    for (let i = 0; i < allCanalPoints.length; i++) {
+      const canalPoint1 = allCanalPoints[i];
+      
+      for (let j = 0; j < allCanalPoints.length; j++) {
+        if (i === j) continue; // Skip self-connections
+        
+        const canalPoint2 = allCanalPoints[j];
+        
+        // Calculate distance between canal points
+        const distance = calculateDistance(canalPoint1.point, canalPoint2.point);
+        
+        // Only connect points within a reasonable distance (5-500 meters)
+        if (distance > 5 && distance < 500) {
+          // Skip if the line between these points would cross land
+          if (doesLineIntersectLand(canalPoint1.point, canalPoint2.point)) {
+            continue;
+          }
+          
+          // Add bidirectional edges
+          waterGraph.edges[canalPoint1.id].push({
+            from: canalPoint1.id,
+            to: canalPoint2.id,
+            weight: distance / 2 // Water travel is twice as fast
+          });
+        }
+      }
+    }
+    
+    // Find the closest canal points to the start and end points
+    const startNodeIds = findCloseNodes(startPoint, waterGraph, undefined, 10)
+      .filter(id => waterGraph.nodes[id].type === 'canal');
+    const endNodeIds = findCloseNodes(endPoint, waterGraph, undefined, 10)
+      .filter(id => waterGraph.nodes[id].type === 'canal');
+    
+    if (startNodeIds.length === 0 || endNodeIds.length === 0) {
+      return {
+        success: false,
+        error: 'Could not find suitable canal points near the start or end points'
+      };
+    }
+    
+    // Try different combinations of start and end nodes
+    let bestResult = null;
+    let shortestDistance = Infinity;
+    
+    for (const startNodeId of startNodeIds) {
+      for (const endNodeId of endNodeIds) {
+        const result = findShortestPath(waterGraph, startNodeId, endNodeId);
+        
+        if (result && result.distance < shortestDistance) {
+          bestResult = result;
+          shortestDistance = result.distance;
+        }
+      }
+    }
+    
+    if (!bestResult) {
+      return {
+        success: false,
+        error: 'No water path found between the points',
+        debug: {
+          startNodeIds,
+          endNodeIds,
+          totalNodes: Object.keys(waterGraph.nodes).length,
+          totalEdges: Object.values(waterGraph.edges).flat().length
+        }
+      };
+    }
+    
+    // Convert node IDs to actual points for the response
+    const pathPoints = bestResult.path.map(nodeId => {
+      const node = waterGraph.nodes[nodeId];
+      
+      return {
+        ...node.position,
+        nodeId,
+        type: node.type,
+        polygonId: node.polygonId,
+        transportMode: 'gondola' // All points are water transport
+      };
+    });
+    
+    // Enhance the path with intermediate points for smoother curves
+    const enhancedPath = enhanceWaterPath(pathPoints);
+    
+    // Calculate the actual travel time based on distance
+    let totalWaterDistance = 0;
+    
+    for (let i = 0; i < enhancedPath.length - 1; i++) {
+      const point1 = enhancedPath[i];
+      const point2 = enhancedPath[i + 1];
+      const distance = calculateDistance(point1, point2);
+      totalWaterDistance += distance;
+    }
+    
+    // Assuming gondola speed of 10 km/h
+    const waterTimeHours = totalWaterDistance / 1000 / 10;
+    const totalTimeMinutes = Math.round(waterTimeHours * 60);
+    
+    return {
+      success: true,
+      path: enhancedPath,
+      distance: totalWaterDistance,
+      walkingDistance: 0,
+      waterDistance: totalWaterDistance,
+      estimatedTimeMinutes: totalTimeMinutes,
+      waterOnly: true
+    };
+  } catch (error) {
+    console.error('Error finding water-only path:', error);
+    return {
+      success: false,
+      error: 'An error occurred while finding the water-only path'
+    };
+  }
+}
+
+// Function to enhance water paths with intermediate points
+function enhanceWaterPath(pathPoints: any[]): any[] {
+  const enhancedPath: any[] = [];
+  
+  // Add the starting point
+  if (pathPoints.length > 0) {
+    enhancedPath.push(pathPoints[0]);
+  }
+  
+  // Process each segment of the path
+  for (let i = 0; i < pathPoints.length - 1; i++) {
+    const point1 = pathPoints[i];
+    const point2 = pathPoints[i + 1];
+    
+    // Calculate distance between points
+    const distance = calculateDistance(point1, point2);
+    
+    // Add more intermediate points for longer segments
+    const numPoints = distance > 50 ? 3 : 2;
+    
+    for (let j = 1; j <= numPoints; j++) {
+      const fraction = j / (numPoints + 1);
+      // Add some randomness to create natural curves
+      const jitter = 0.00005 * (Math.random() * 2 - 1);
+      const midpoint = {
+        lat: point1.lat + (point2.lat - point1.lat) * fraction + jitter,
+        lng: point1.lng + (point2.lng - point1.lng) * fraction + jitter,
+        type: 'canal',
+        transportMode: 'gondola',
+        isIntermediatePoint: true
+      };
+      enhancedPath.push(midpoint);
+    }
+    
+    // Add the endpoint of this segment
+    enhancedPath.push(point2);
+  }
+  
+  return enhancedPath;
+}
+
 // Main function to find the path between two points
 async function findPath(startPoint: Point, endPoint: Point): Promise<any> {
   try {
     // Load polygons and navigation graph
     const polygons = await loadPolygons();
+    
+    // Check if both points are near canal points (water)
+    const isStartNearWater = isPointNearWater(startPoint, polygons);
+    const isEndNearWater = isPointNearWater(endPoint, polygons);
+    
+    // If both points are near water, use water-only pathfinding
+    if (isStartNearWater && isEndNearWater) {
+      debugLog('Both start and end points are near water, using water-only pathfinding');
+      return findWaterOnlyPath(startPoint, endPoint);
+    }
+    
     const navGraph = await loadNavigationGraph();
     
     // Build the graph

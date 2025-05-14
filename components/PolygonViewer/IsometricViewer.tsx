@@ -120,6 +120,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [transportEndPoint, setTransportEndPoint] = useState<{lat: number, lng: number} | null>(null);
   const [transportPath, setTransportPath] = useState<any[]>([]);
   const [calculatingPath, setCalculatingPath] = useState<boolean>(false);
+  const [waterOnlyMode, setWaterOnlyMode] = useState<boolean>(false);
 
   // Load polygons
   useEffect(() => {
@@ -1609,6 +1610,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         
         if (data.success && data.path) {
           setTransportPath(data.path);
+          // Set water-only mode if the API indicates it's a water-only route
+          setWaterOnlyMode(!!data.waterOnly);
         } else {
           console.error('Failed to calculate route:', data.error);
           // Show error to user
