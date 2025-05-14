@@ -22,7 +22,7 @@ export default function TwoDPage() {
   const [showInfo, setShowInfo] = useState(false);
   type ViewType = 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
   const [activeView, setActiveView] = useState<ViewType>('buildings');
-  const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
+  const [showSettings, setShowSettings] = useState<boolean>(false);
   
   // Data state
   const [polygons, setPolygons] = useState<any[]>([]);
@@ -31,7 +31,7 @@ export default function TwoDPage() {
   
   // Handle settings modal
   const handleSettingsClose = () => {
-    setShowSettingsModal(false);
+    setShowSettings(false);
   };
   
   // Load polygons and buildings data
