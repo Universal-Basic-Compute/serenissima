@@ -406,18 +406,18 @@ export async function GET(request: Request) {
       
       // If we still don't have a position but we have a Point field, try to resolve it
       if ((!position || Object.keys(position).length === 0) && fields.Point) {
-        const pointId = fields.Point;
+        const pointId = String(fields.Point);
         console.log(`[API] Building ${fields.BuildingId || record.id} has Point ID: ${pointId}, attempting to resolve position`);
             
         // First try to resolve using the buildingPointsService
-        const resolvedPosition = buildingPointsService.getPositionForPoint(pointId);
+        const resolvedPosition = buildingPointsService.getPositionForPoint(String(pointId));
             
         if (resolvedPosition) {
           position = resolvedPosition;
           console.log(`[API] Resolved position for Point ID ${pointId} using service:`, position);
         } else {
           // If service couldn't resolve, try to extract coordinates from the point ID directly
-          const extractedPosition = extractCoordinatesFromPointId(pointId);
+          const extractedPosition = extractCoordinatesFromPointId(String(pointId));
               
           if (extractedPosition) {
             position = extractedPosition;
