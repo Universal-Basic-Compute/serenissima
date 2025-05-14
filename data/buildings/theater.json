@@ -1,5 +1,6 @@
 {
   "name": "Theater",
+  "pointType": "building",
   "category": "Public & Government",
   "subcategory": "Educational & Cultural",
   "tier": 2,

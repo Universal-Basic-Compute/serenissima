@@ -1,4 +1,4 @@
-import { getBackendBaseUrl } from '../../lib/utils/apiUtils';
+import { getBackendBaseUrl } from '@/lib/utils/apiUtils';
 import { eventBus } from '../utils/eventBus';
 import { log } from '../utils/logUtils';
 import { 

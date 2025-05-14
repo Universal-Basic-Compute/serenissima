@@ -1,5 +1,6 @@
 {
   "name": "Paper Mill",
+  "pointType": "building",
   "category": "Production",
   "subcategory": "Publishing Industry",
   "tier": 2,

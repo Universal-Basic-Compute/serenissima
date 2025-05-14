@@ -1,5 +1,6 @@
 {
   "name": "Public Well",
+  "pointType": "building",
   "category": "Infrastructure",
   "subcategory": "Water Management",
   "tier": 1,

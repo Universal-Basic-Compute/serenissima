@@ -1,6 +1,6 @@
 import { Connection, PublicKey, Transaction } from '@solana/web3.js';
 import { getAssociatedTokenAddress, createTransferInstruction } from '@solana/spl-token';
-import { getBackendBaseUrl } from '../../lib/utils/apiUtils';
+import { getBackendBaseUrl } from '@/lib/utils/apiUtils';
 
 // Constants for token decimal handling
 const COMPUTE_DECIMALS = 6;
@@ -221,7 +221,7 @@ export async function transferCompute(walletAddress: string, amount: number) {
     
     // Now update the backend database with the completed transaction
     console.log('Updating backend database...');
-    const { getBackendBaseUrl } = await import('@/lib/apiUtils');
+    const { getBackendBaseUrl } = await import('@/lib/utils/apiUtils');
     const response = await fetch(`${getBackendBaseUrl()}/api/inject-compute-complete`, {
       method: 'POST',
       headers: {

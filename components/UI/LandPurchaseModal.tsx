@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getBackendBaseUrl } from '../../lib/utils/apiUtils';
+import { getBackendBaseUrl } from '@/lib/utils/apiUtils';
 
 interface LandPurchaseModalProps {
   visible: boolean;

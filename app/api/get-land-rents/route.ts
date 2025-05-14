@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { airtableUtils } from '@/lib/airtableUtils';
-import { LandRent } from '@/lib/airtableUtils';
+import { airtableUtils } from '@/lib/utils/airtableUtils';
+import { LandRent } from '@/lib/utils/airtableUtils';
 
 export async function GET(request: Request) {
   try {

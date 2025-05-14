@@ -1,5 +1,6 @@
 {
   "name": "Wine Cellar",
+  "pointType": "building",
   "category": "Infrastructure",
   "subcategory": "Storage Facilities",
   "tier": 2,

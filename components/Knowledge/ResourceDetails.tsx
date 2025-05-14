@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaTimes, FaWeight, FaCube, FaCoins, FaHistory, FaBuilding, FaShip, FaWarehouse, FaExchangeAlt, FaChartLine, FaCalendarAlt } from 'react-icons/fa';
-import { ResourceNode } from '../../lib/resourceUtils';
+import { ResourceNode } from '@/lib/utils/resourceUtils';
 
 // Étendre l'interface ResourceNode pour inclure les propriétés spécifiques
 interface ExtendedResourceNode extends ResourceNode {

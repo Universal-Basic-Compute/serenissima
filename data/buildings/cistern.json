@@ -1,5 +1,6 @@
 {
   "name": "Cistern",
+  "pointType": "building",
   "category": "Infrastructure",
   "subcategory": "Water Management",
   "tier": 2,

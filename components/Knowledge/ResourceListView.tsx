@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaProjectDiagram, FaChevronRight, FaChevronDown, FaLeaf, FaIndustry, FaGem } from 'react-icons/fa';
-import { ResourceNode } from '../../lib/resourceUtils';
+import { ResourceNode } from '@/lib/utils/resourceUtils';
 
 interface ResourceListViewProps {
   resources?: ResourceNode[];

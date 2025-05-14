@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ResourceNode } from '../../lib/resourceUtils';
+import { ResourceNode } from '@/lib/utils/resourceUtils';
 import { FaProjectDiagram, FaChevronRight, FaChevronDown, FaLeaf, FaIndustry, FaGem, FaArrowRight } from 'react-icons/fa';
 
 interface ResourceTreeViewProps {

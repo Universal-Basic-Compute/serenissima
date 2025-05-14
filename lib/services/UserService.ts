@@ -4,7 +4,7 @@
  * - Add unit tests for service methods
  */
 import { eventBus, EventTypes } from '../utils/eventBus';
-import { getBackendBaseUrl } from '../../lib/utils/apiUtils';
+import { getBackendBaseUrl } from '@/lib/utils/apiUtils';
 import { log } from '../utils/logUtils';
 import { 
   ApiError, 

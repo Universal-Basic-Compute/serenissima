@@ -1,5 +1,6 @@
 {
   "name": "Smuggler's Den",
+  "pointType": "building",
   "category": "Criminal",
   "subcategory": "Illicit Operations",
   "tier": 2,

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { serverUtils, calculateCentroid } from '@/lib/utils/fileUtils';
-import { airtableUtils } from '@/lib/airtableUtils';
+import { airtableUtils } from '@/lib/utils/airtableUtils';
 
 // Venice center coordinates
 const VENICE_CENTER = {

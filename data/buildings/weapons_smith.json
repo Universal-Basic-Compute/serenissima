@@ -1,5 +1,6 @@
 {
   "name": "Weapons Smith",
+  "pointType": "building",
   "category": "Production",
   "subcategory": "Metal Industry",
   "tier": 2,

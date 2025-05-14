@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import * as THREE from 'three';
-import { getBackendBaseUrl } from '../../lib/utils/apiUtils';
+import { getBackendBaseUrl } from '@/lib/utils/apiUtils';
 import { useRouter } from 'next/navigation';
 import ActionButton from '../UI/ActionButton';
 import WalletStatus from '../UI/WalletStatus';

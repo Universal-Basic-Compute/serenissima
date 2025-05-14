@@ -1,5 +1,6 @@
 {
   "name": "Hospital",
+  "pointType": "building",
   "category": "Public & Government",
   "subcategory": "Health & Safety",
   "tier": 3,

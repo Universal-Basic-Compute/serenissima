@@ -1,5 +1,6 @@
 {
   "name": "Luxury Showroom",
+  "pointType": "building",
   "category": "Commercial",
   "subcategory": "Retail Shops",
   "tier": 3,

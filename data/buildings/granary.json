@@ -1,5 +1,6 @@
 {
   "name": "Granary",
+  "pointType": "building",
   "category": "Infrastructure",
   "subcategory": "Storage Facilities",
   "tier": 2,

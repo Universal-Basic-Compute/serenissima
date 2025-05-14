@@ -1,5 +1,6 @@
 {
   "name": "Eastern Merchant House",
+  "pointType": "building",
   "category": "Commercial",
   "subcategory": "Trade Facilities",
   "tier": 3,

@@ -1,5 +1,6 @@
 {
   "name": "Guild Hall",
+  "pointType": "building",
   "category": "Special Buildings",
   "subcategory": "Guild Headquarters",
   "tier": 3,

@@ -1,5 +1,6 @@
 {
   "name": "Defensive Bastion",
+  "pointType": "building",
   "category": "Military & Defense",
   "subcategory": "Defensive Structures",
   "tier": 4,

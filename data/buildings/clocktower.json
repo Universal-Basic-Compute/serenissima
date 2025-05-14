@@ -1,5 +1,6 @@
 {
   "name": "Clocktower",
+  "pointType": "building",
   "category": "Special Buildings",
   "subcategory": "Unique Structures",
   "tier": 3,

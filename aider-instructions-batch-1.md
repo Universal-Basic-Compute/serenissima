@@ -1,0 +1,9 @@
+# TypeScript Errors to Fix
+
+Please fix the following TypeScript errors in batch 1:
+
+```
+app/api/buildings/route.ts:374:36 - TS2345: Argument of type 'string | number | true | readonly string[] | Collaborator | readonly Collaborator[] | readonly Attachment[]' is not assignable to parameter of type 'string'.
+```
+
+Focus on adding proper type annotations and fixing type-related issues.

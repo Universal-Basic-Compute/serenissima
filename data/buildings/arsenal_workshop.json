@@ -1,5 +1,6 @@
 {
   "name": "Arsenal Workshop",
+  "pointType": "building",
   "category": "Military & Defense",
   "subcategory": "Naval Facilities",
   "tier": 4,

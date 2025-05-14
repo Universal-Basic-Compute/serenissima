@@ -1,5 +1,6 @@
 {
   "name": "Mint",
+  "pointType": "building",
   "category": "Production",
   "subcategory": "Metallurgy Industry",
   "tier": 4,

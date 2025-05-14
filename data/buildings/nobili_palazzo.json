@@ -1,5 +1,6 @@
 {
   "name": "Nobili Palazzo",
+  "pointType": "building",
   "category": "Residential",
   "subcategory": "Noble Residences",
   "tier": 3,

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { getWalletAddress, setWalletAddress, clearWalletAddress, connectAndPersistWallet, storeWalletInAirtable } from '../../lib/utils/walletUtils';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
 import { WalletReadyState } from '@solana/wallet-adapter-base';
-import { getBackendBaseUrl } from '../../lib/utils/apiUtils';
+import { getBackendBaseUrl } from '@/lib/utils/apiUtils';
 
 export function useWallet() {
   const [walletAddress, setWalletAddressState] = useState<string | null>(null);

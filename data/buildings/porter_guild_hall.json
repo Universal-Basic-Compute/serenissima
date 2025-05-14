@@ -1,5 +1,6 @@
 {
   "name": "Porter Guild Hall",
+  "pointType": "building",
   "category": "Infrastructure",
   "subcategory": "Transportation Services",
   "tier": 2,

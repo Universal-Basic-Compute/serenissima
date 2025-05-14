@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import Airtable from 'airtable';
-import { getComputeBalance, deductCompute } from '@/lib/computeUtils';
+import { getComputeBalance, deductCompute } from '@/lib/utils/computeUtils';
 
 // Configure Airtable
 const apiKey = process.env.AIRTABLE_API_KEY;

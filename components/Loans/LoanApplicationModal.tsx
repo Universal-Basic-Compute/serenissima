@@ -11,7 +11,7 @@ import ErrorBoundary from '@/components/UI/ErrorBoundary';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 
 // Ensure EventTypes has LOAN_APPROVED
-declare module '@/lib/eventBus' {
+declare module '@/lib/utils/eventBus' {
   interface EventTypes {
     LOAN_APPROVED: string;
   }

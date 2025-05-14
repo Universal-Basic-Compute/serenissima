@@ -1,5 +1,6 @@
 {
   "name": "Doge's Palace",
+  "pointType": "building",
   "category": "Special Buildings",
   "subcategory": "Unique Structures",
   "tier": 5,

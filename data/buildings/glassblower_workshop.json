@@ -1,5 +1,6 @@
 {
   "name": "Glassblower Workshop",
+  "pointType": "building",
   "category": "Production",
   "subcategory": "Glass Industry",
   "tier": 2,

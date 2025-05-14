@@ -1,5 +1,6 @@
 {
   "name": "Dye Works",
+  "pointType": "building",
   "category": "Production",
   "subcategory": "Textile Industry",
   "tier": 2,

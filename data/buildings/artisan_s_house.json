@@ -1,5 +1,6 @@
 {
   "name": "Artisan's House",
+  "pointType": "building",
   "category": "Residential",
   "subcategory": "Basic Residences",
   "tier": 1,

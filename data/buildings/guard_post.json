@@ -1,5 +1,6 @@
 {
   "name": "Guard Post",
+  "pointType": "building",
   "category": "Military & Defense",
   "subcategory": "Security Facilities",
   "tier": 1,

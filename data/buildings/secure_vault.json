@@ -1,5 +1,6 @@
 {
   "name": "Secure Vault",
+  "pointType": "building",
   "category": "Infrastructure",
   "subcategory": "Storage Facilities",
   "tier": 3,

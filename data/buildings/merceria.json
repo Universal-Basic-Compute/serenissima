@@ -1,5 +1,6 @@
 {
   "name": "Merceria",
+  "pointType": "building",
   "category": "Commercial",
   "subcategory": "Retail Shops",
   "tier": 2,

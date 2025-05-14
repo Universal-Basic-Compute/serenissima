@@ -1,5 +1,6 @@
 {
   "name": "Small Warehouse",
+  "pointType": "building",
   "category": "Infrastructure",
   "subcategory": "Storage Facilities",
   "tier": 1,

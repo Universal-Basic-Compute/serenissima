@@ -1,5 +1,6 @@
 {
   "name": "City Gate",
+  "pointType": "building",
   "category": "Military & Defense",
   "subcategory": "Defensive Structures",
   "tier": 3,

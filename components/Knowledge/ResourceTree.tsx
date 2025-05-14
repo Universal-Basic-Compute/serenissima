@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { fetchResources, ResourceNode } from '../../lib/resourceUtils';
+import { fetchResources, ResourceNode } from '@/lib/utils/resourceUtils';
 import ResourceHeader from './ResourceHeader';
 import ResourceSearchBar from './ResourceSearchBar';
 import ResourceGrid from './ResourceGrid';

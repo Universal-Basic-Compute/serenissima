@@ -11,7 +11,7 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import ThreeDErrorBoundary, { ThreeDErrorBoundaryProps } from '../ErrorBoundary/ThreeDErrorBoundary';
 import { log } from '@/lib/utils/logUtils';
-import { getBackendBaseUrl } from '../../lib/utils/apiUtils';
+import { getBackendBaseUrl } from '@/lib/utils/apiUtils';
 import * as THREE from 'three';
 import { calculateBounds } from './utils';
 import SceneSetup from './SceneSetup';

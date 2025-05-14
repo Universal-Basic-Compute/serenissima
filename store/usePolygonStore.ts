@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { getBackendBaseUrl } from '../../lib/utils/apiUtils';
+import { getBackendBaseUrl } from '@/lib/utils/apiUtils';
 import { ViewMode, Polygon } from '@/components/PolygonViewer/types';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 

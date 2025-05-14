@@ -3,8 +3,7 @@
 Please fix the following TypeScript errors in batch 2:
 
 ```
-components/PolygonViewer/IsometricViewer.tsx:934:11 - TS2367: This comparison appears to be unintentional because the types '"buildings" | "land"' and '"citizens"' have no overlap.
-components/PolygonViewer/IsometricViewer.tsx:2015:38 - TS2367: This comparison appears to be unintentional because the types '"citizens"' and '"buildings"' have no overlap.
+app/api/calculate-land-rent/route.ts:3:31 - TS2307: Cannot find module '@/lib/utils/airtableUtils' or its corresponding type declarations.
 ```
 
 Focus on adding proper type annotations and fixing type-related issues.

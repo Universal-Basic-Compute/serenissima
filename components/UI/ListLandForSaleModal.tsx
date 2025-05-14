@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { getBackendBaseUrl } from '../../lib/utils/apiUtils';
+import { getBackendBaseUrl } from '@/lib/utils/apiUtils';
 import { getWalletAddress } from '../../lib/utils/walletUtils';
 import NextImage from 'next/image';
 

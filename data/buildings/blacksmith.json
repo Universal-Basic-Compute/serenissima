@@ -1,5 +1,6 @@
 {
   "name": "Blacksmith",
+  "pointType": "building",
   "category": "Production",
   "subcategory": "Metal Industry",
   "tier": 1,

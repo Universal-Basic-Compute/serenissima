@@ -1,5 +1,6 @@
 {
   "name": "Glass Foundry",
+  "pointType": "building",
   "category": "Production",
   "subcategory": "Glass Industry",
   "tier": 2,

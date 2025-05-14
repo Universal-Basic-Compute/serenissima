@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchGuilds, Guild } from '@/lib/airtableUtils';
+import { fetchGuilds, Guild } from '@/lib/utils/airtableUtils';
 import ReactMarkdown from 'react-markdown';
 import { FaTimes } from 'react-icons/fa';
 

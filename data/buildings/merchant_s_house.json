@@ -1,5 +1,6 @@
 {
   "name": "Merchant's House",
+  "pointType": "building",
   "category": "Residential",
   "subcategory": "Basic Residences",
   "tier": 2,

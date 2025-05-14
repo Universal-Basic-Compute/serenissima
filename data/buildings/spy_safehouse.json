@@ -1,5 +1,6 @@
 {
   "name": "Spy Safehouse",
+  "pointType": "building",
   "category": "Criminal",
   "subcategory": "Intelligence Operations",
   "tier": 3,

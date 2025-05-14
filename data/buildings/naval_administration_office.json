@@ -1,5 +1,6 @@
 {
   "name": "Naval Administration Office",
+  "pointType": "building",
   "category": "Military & Defense",
   "subcategory": "Naval Facilities",
   "tier": 3,

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { loadAllResources } from '@/lib/serverResourceUtils';
+import { loadAllResources } from '@/lib/utils/serverResourceUtils';
 import Airtable from 'airtable';
 
 // Configure Airtable

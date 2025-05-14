@@ -1,5 +1,5 @@
 import React from 'react';
-import { ResourceNode } from '../../lib/resourceUtils';
+import { ResourceNode } from '@/lib/utils/resourceUtils';
 
 interface ResourceGridProps {
   resources: ResourceNode[];

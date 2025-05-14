@@ -1,5 +1,6 @@
 {
   "name": "Broker's Office",
+  "pointType": "building",
   "category": "Commercial",
   "subcategory": "Trade Facilities",
   "tier": 2,

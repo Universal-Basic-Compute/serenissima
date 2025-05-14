@@ -1,5 +1,6 @@
 {
   "name": "St. Mark's Basilica",
+  "pointType": "building",
   "category": "Special Buildings",
   "subcategory": "Unique Structures",
   "tier": 5,

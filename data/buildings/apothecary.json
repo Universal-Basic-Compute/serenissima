@@ -1,5 +1,6 @@
 {
   "name": "Apothecary",
+  "pointType": "building",
   "category": "Commercial",
   "subcategory": "Retail Shops",
   "tier": 2,

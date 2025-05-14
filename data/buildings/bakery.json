@@ -1,5 +1,6 @@
 {
   "name": "Bakery",
+  "pointType": "building",
   "category": "Production",
   "subcategory": "Food Industry",
   "tier": 1,
