@@ -2244,7 +2244,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         }
       });
       
-      // Draw transport route planning UI if in transport mode
+      // Draw transport mode UI when active
       if (activeView === 'transport' && transportMode) {
         console.log('Drawing transport mode UI', { 
           transportStartPoint, 
@@ -2253,6 +2253,38 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           activeView,
           transportMode
         });
+        
+        // Add a prominent header to indicate transport mode is active
+        const headerHeight = 40;
+        const headerPadding = 20;
+        
+        // Draw header background
+        ctx.fillStyle = 'rgba(30, 30, 50, 0.85)';
+        ctx.fillRect(0, 0, canvas.width, headerHeight);
+        
+        // Draw gold border
+        ctx.strokeStyle = 'rgba(218, 165, 32, 0.9)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(0, 0, canvas.width, headerHeight);
+        
+        // Draw header text
+        ctx.font = '18px "Times New Roman", serif';
+        ctx.fillStyle = 'rgba(218, 165, 32, 0.9)';
+        ctx.textAlign = 'center';
+        
+        const headerText = !transportStartPoint 
+          ? 'Modalità Trasporto: Seleziona punto di partenza' 
+          : !transportEndPoint 
+            ? 'Modalità Trasporto: Seleziona destinazione'
+            : 'Modalità Trasporto: Percorso trovato';
+        
+        ctx.fillText(headerText, canvas.width / 2, headerHeight / 2 + 6);
+        
+        // If calculating, show the loading indicator
+        if (calculatingPath) {
+          // The loading animation is handled by the renderLoadingAnimation function
+          // which is called in the calculateTransportRoute function
+        }
         
         // Add a legend for path types
         if (transportMode && transportPath.length > 0) {
