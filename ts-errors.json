@@ -1,15 +1,103 @@
 {
-  "totalErrors": 63,
+  "totalErrors": 74,
   "totalWarnings": 0,
   "exitCode": 2,
-  "timestamp": "2025-05-14T19:50:17.814Z",
+  "timestamp": "2025-05-14T20:30:19.893Z",
   "errors": [
     {
       "filePath": "app/api/buildings/route.ts",
-      "line": 374,
-      "column": 36,
-      "code": "TS2345",
-      "message": "Argument of type 'string | number | true | readonly string[] | Collaborator | readonly Collaborator[] | readonly Attachment[]' is not assignable to parameter of type 'string'.",
+      "line": 520,
+      "column": 11,
+      "code": "TS2538",
+      "message": "Type 'Collaborator' cannot be used as an index type.",
+      "type": "error"
+    },
+    {
+      "filePath": "app/api/buildings/route.ts",
+      "line": 520,
+      "column": 11,
+      "code": "TS2538",
+      "message": "Type 'false' cannot be used as an index type.",
+      "type": "error"
+    },
+    {
+      "filePath": "app/api/buildings/route.ts",
+      "line": 520,
+      "column": 11,
+      "code": "TS2538",
+      "message": "Type 'readonly Attachment[]' cannot be used as an index type.",
+      "type": "error"
+    },
+    {
+      "filePath": "app/api/buildings/route.ts",
+      "line": 520,
+      "column": 11,
+      "code": "TS2538",
+      "message": "Type 'readonly Collaborator[]' cannot be used as an index type.",
+      "type": "error"
+    },
+    {
+      "filePath": "app/api/buildings/route.ts",
+      "line": 520,
+      "column": 11,
+      "code": "TS2538",
+      "message": "Type 'readonly string[]' cannot be used as an index type.",
+      "type": "error"
+    },
+    {
+      "filePath": "app/api/buildings/route.ts",
+      "line": 520,
+      "column": 11,
+      "code": "TS2538",
+      "message": "Type 'true' cannot be used as an index type.",
+      "type": "error"
+    },
+    {
+      "filePath": "app/api/buildings/route.ts",
+      "line": 520,
+      "column": 33,
+      "code": "TS2538",
+      "message": "Type 'Collaborator' cannot be used as an index type.",
+      "type": "error"
+    },
+    {
+      "filePath": "app/api/buildings/route.ts",
+      "line": 520,
+      "column": 33,
+      "code": "TS2538",
+      "message": "Type 'false' cannot be used as an index type.",
+      "type": "error"
+    },
+    {
+      "filePath": "app/api/buildings/route.ts",
+      "line": 520,
+      "column": 33,
+      "code": "TS2538",
+      "message": "Type 'readonly Attachment[]' cannot be used as an index type.",
+      "type": "error"
+    },
+    {
+      "filePath": "app/api/buildings/route.ts",
+      "line": 520,
+      "column": 33,
+      "code": "TS2538",
+      "message": "Type 'readonly Collaborator[]' cannot be used as an index type.",
+      "type": "error"
+    },
+    {
+      "filePath": "app/api/buildings/route.ts",
+      "line": 520,
+      "column": 33,
+      "code": "TS2538",
+      "message": "Type 'readonly string[]' cannot be used as an index type.",
+      "type": "error"
+    },
+    {
+      "filePath": "app/api/buildings/route.ts",
+      "line": 520,
+      "column": 33,
+      "code": "TS2538",
+      "message": "Type 'true' cannot be used as an index type.",
       "type": "error"
     },
     {
@@ -18,30 +106,6 @@
       "column": 30,
       "code": "TS2304",
       "message": "Cannot find name 'doLineSegmentsIntersect'.",
-      "type": "error"
-    },
-    {
-      "filePath": "app/api/transport/water-only/route.ts",
-      "line": 2,
-      "column": 10,
-      "code": "TS2459",
-      "message": "Module '\"../route\"' declares 'findWaterOnlyPath' locally, but it is not exported.",
-      "type": "error"
-    },
-    {
-      "filePath": "app/page.tsx",
-      "line": 9,
-      "column": 30,
-      "code": "TS2307",
-      "message": "Cannot find module '@/components/BuildingsView/BuildingsToolbar' or its corresponding type declarations.",
-      "type": "error"
-    },
-    {
-      "filePath": "app/page.tsx",
-      "line": 81,
-      "column": 60,
-      "code": "TS2339",
-      "message": "Property '__polygonData' does not exist on type 'Window & typeof globalThis'.",
       "type": "error"
     },
     {
@@ -62,7 +126,7 @@
     },
     {
       "filePath": "components/PolygonViewer/BaseSceneLayer.tsx",
-      "line": 176,
+      "line": 179,
       "column": 16,
       "code": "TS2341",
       "message": "Property 'unsubscribe' is private and only accessible within class 'EventBus'.",
@@ -85,22 +149,6 @@
       "type": "error"
     },
     {
-      "filePath": "components/PolygonViewer/BuildingMenu.tsx",
-      "line": 7,
-      "column": 33,
-      "code": "TS2307",
-      "message": "Cannot find module '@/hooks/useBuildingMenu' or its corresponding type declarations.",
-      "type": "error"
-    },
-    {
-      "filePath": "components/PolygonViewer/BuildingMenu.tsx",
-      "line": 9,
-      "column": 46,
-      "code": "TS2307",
-      "message": "Cannot find module '@/lib/models/BuildingModels' or its corresponding type declarations.",
-      "type": "error"
-    },
-    {
       "filePath": "components/PolygonViewer/IsometricViewer.tsx",
       "line": 180,
       "column": 20,
@@ -114,6 +162,30 @@
       "column": 14,
       "code": "TS2339",
       "message": "Property '__transportModeActive' does not exist on type 'Window & typeof globalThis'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/IsometricViewer.tsx",
+      "line": 1354,
+      "column": 20,
+      "code": "TS2339",
+      "message": "Property '__selectedBuildingPoint' does not exist on type 'Window & typeof globalThis'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/IsometricViewer.tsx",
+      "line": 1412,
+      "column": 24,
+      "code": "TS2339",
+      "message": "Property '__selectedBuildingPoint' does not exist on type 'Window & typeof globalThis'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/IsometricViewer.tsx",
+      "line": 1469,
+      "column": 24,
+      "code": "TS2339",
+      "message": "Property '__selectedBuildingPoint' does not exist on type 'Window & typeof globalThis'.",
       "type": "error"
     },
     {
@@ -198,6 +270,14 @@
     },
     {
       "filePath": "components/PolygonViewer/PolygonViewer.tsx",
+      "line": 27,
+      "column": 26,
+      "code": "TS2307",
+      "message": "Cannot find module './BuildingMenu' or its corresponding type declarations.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/PolygonViewer.tsx",
       "line": 32,
       "column": 28,
       "code": "TS2307",
@@ -242,6 +322,22 @@
       "column": 40,
       "code": "TS2307",
       "message": "Cannot find module '../../lib/services/NavigationGraphService' or its corresponding type declarations.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 9,
+      "column": 38,
+      "code": "TS2307",
+      "message": "Cannot find module '../../lib/components/BuildingPointManager' or its corresponding type declarations.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/SimplePolygonRenderer.ts",
+      "line": 10,
+      "column": 39,
+      "code": "TS2307",
+      "message": "Cannot find module '../../lib/components/TransportPointManager' or its corresponding type declarations.",
       "type": "error"
     },
     {
@@ -389,14 +485,6 @@
       "type": "error"
     },
     {
-      "filePath": "lib/components/TransportPointManager.ts",
-      "line": 4,
-      "column": 35,
-      "code": "TS2307",
-      "message": "Cannot find module '../../lib/services/NavigationService' or its corresponding type declarations.",
-      "type": "error"
-    },
-    {
       "filePath": "lib/services/BuildingCacheService.ts",
       "line": 4,
       "column": 30,
@@ -422,7 +510,7 @@
     },
     {
       "filePath": "lib/services/BuildingPointsService.ts",
-      "line": 58,
+      "line": 61,
       "column": 34,
       "code": "TS2339",
       "message": "Property 'BUILDING_POINTS_LOADED' does not exist on type '{ POLYGON_SELECTED: string; POLYGON_HOVER: string; LAND_OWNERSHIP_CHANGED: string; COMPUTE_BALANCE_CHANGED: string; LAND_PURCHASED: string; SHOW_LAND_PURCHASE_MODAL: string; KEEP_LAND_DETAILS_PANEL_OPEN: string; ... 45 more ...; BUILDING_POINTS_GENERATED: string; }'.",
@@ -430,7 +518,7 @@
     },
     {
       "filePath": "lib/services/BuildingPointsService.ts",
-      "line": 109,
+      "line": 113,
       "column": 34,
       "code": "TS2339",
       "message": "Property 'BUILDING_POINTS_LOADED' does not exist on type '{ POLYGON_SELECTED: string; POLYGON_HOVER: string; LAND_OWNERSHIP_CHANGED: string; COMPUTE_BALANCE_CHANGED: string; LAND_PURCHASED: string; SHOW_LAND_PURCHASE_MODAL: string; KEEP_LAND_DETAILS_PANEL_OPEN: string; ... 45 more ...; BUILDING_POINTS_GENERATED: string; }'.",
@@ -509,13 +597,13 @@
       "type": "error"
     }
   ],
-  "rawOutputLines": 67,
+  "rawOutputLines": 77,
   "firstFewLines": [
-    "app/api/buildings/route.ts(374,36): error TS2345: Argument of type 'string | number | true | readonly string[] | Collaborator | readonly Collaborator[] | readonly Attachment[]' is not assignable to parameter of type 'string'.\r",
-    "  Type 'number' is not assignable to type 'string'.\r",
-    "app/api/transport/route.ts(903,30): error TS2304: Cannot find name 'doLineSegmentsIntersect'.\r",
-    "app/api/transport/water-only/route.ts(2,10): error TS2459: Module '\"../route\"' declares 'findWaterOnlyPath' locally, but it is not exported.\r",
-    "app/page.tsx(9,30): error TS2307: Cannot find module '@/components/BuildingsView/BuildingsToolbar' or its corresponding type declarations.\r"
+    "app/api/buildings/route.ts(520,11): error TS2538: Type 'Collaborator' cannot be used as an index type.\r",
+    "app/api/buildings/route.ts(520,11): error TS2538: Type 'false' cannot be used as an index type.\r",
+    "app/api/buildings/route.ts(520,11): error TS2538: Type 'readonly Attachment[]' cannot be used as an index type.\r",
+    "app/api/buildings/route.ts(520,11): error TS2538: Type 'readonly Collaborator[]' cannot be used as an index type.\r",
+    "app/api/buildings/route.ts(520,11): error TS2538: Type 'readonly string[]' cannot be used as an index type.\r"
   ],
   "compilerExitCode": 2
 }

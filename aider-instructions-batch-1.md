@@ -3,7 +3,14 @@
 Please fix the following TypeScript errors in batch 1:
 
 ```
-app/api/buildings/route.ts:374:36 - TS2345: Argument of type 'string | number | true | readonly string[] | Collaborator | readonly Collaborator[] | readonly Attachment[]' is not assignable to parameter of type 'string'.
+app/api/buildings/route.ts:520:11 - TS2538: Type 'Collaborator' cannot be used as an index type.
+app/api/buildings/route.ts:520:11 - TS2538: Type 'false' cannot be used as an index type.
+app/api/buildings/route.ts:520:11 - TS2538: Type 'readonly Attachment[]' cannot be used as an index type.
+app/api/buildings/route.ts:520:11 - TS2538: Type 'readonly Collaborator[]' cannot be used as an index type.
+app/api/buildings/route.ts:520:11 - TS2538: Type 'readonly string[]' cannot be used as an index type.
+app/api/buildings/route.ts:520:11 - TS2538: Type 'true' cannot be used as an index type.
+app/api/buildings/route.ts:520:33 - TS2538: Type 'Collaborator' cannot be used as an index type.
+app/api/buildings/route.ts:520:33 - TS2538: Type 'false' cannot be used as an index type.
 ```
 
 Focus on adding proper type annotations and fixing type-related issues.
