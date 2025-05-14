@@ -1,4 +1,11 @@
 import { useEffect, useState, useRef } from 'react';
+
+// Declare the window interface extension for __polygonData
+declare global {
+  interface Window {
+    __polygonData: any[];
+  }
+}
 import { getBackendBaseUrl } from '@/lib/utils/apiUtils';
 import PlayerProfile from '../UI/PlayerProfile';
 
@@ -211,20 +218,13 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
     }
   }, [buildingDefinition]);
   
-  // Declare the window interface extension for __polygonData
-  declare global {
-    interface Window {
-      __polygonData: any[];
-    }
-  }
-
   // Function to fetch land data
   const fetchLandData = async (landId: string) => {
     try {
       console.log(`Fetching land data for ID: ${landId}`);
       
       // First try to get land data from window.__polygonData if available
-      if (typeof window !== 'undefined' && window.__polygonData) {
+      if (typeof window !== 'undefined' && '__polygonData' in window && window.__polygonData) {
         const polygon = window.__polygonData.find((p: any) => p.id === landId);
         if (polygon) {
           console.log(`Found land data in window.__polygonData for ID: ${landId}`, polygon);
