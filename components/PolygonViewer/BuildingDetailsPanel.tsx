@@ -439,7 +439,7 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
               <>
                 {/* Building Image - Add this at the top of the building information section */}
                 <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200 mb-4">
-                  <div className="relative w-full h-48 overflow-hidden rounded-lg mb-3">
+                  <div className="relative w-48 h-48 mx-auto overflow-hidden rounded-lg mb-3">
                     <img 
                       src={buildingImagePath}
                       alt={buildingDefinition.name || formatBuildingType(building.type)}
