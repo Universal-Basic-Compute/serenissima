@@ -1,7 +1,7 @@
 import { eventBus, EventTypes } from '../utils/eventBus';
 
 // Add the missing event type if it doesn't exist in EventTypes
-declare module '../eventBus' {
+declare module '../utils/eventBus' {
   interface EventTypes {
     INCOME_DATA_SIMULATED: string;
   }
