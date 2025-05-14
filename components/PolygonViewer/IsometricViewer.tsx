@@ -1313,12 +1313,18 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             // Set the selected building and show details panel
             setSelectedBuildingId(building.id);
             setShowBuildingDetailsPanel(true);
-            
+        
+            // Clear hover state when clicking on a building
+            setHoveredBuildingId(null);
+            setHoveredBuildingName(null);
+            setHoveredBuildingPosition(null);
+            setHoveredBuildingImagePath(null);
+        
             // Dispatch an event for other components to respond to
             window.dispatchEvent(new CustomEvent('showBuildingDetailsPanel', {
               detail: { buildingId: building.id }
             }));
-            
+        
             return;
           }
         }
