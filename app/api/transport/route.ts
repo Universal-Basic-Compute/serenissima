@@ -389,23 +389,23 @@ function buildGraph(polygons: Polygon[]): Graph {
       // Calculate distance between canal points
       const distance = calculateDistance(canalNode1.position, canalNode2.position);
       
-      // Only connect points that are reasonably close
-      if (distance > 10 && distance < 100) {
+      // Only connect points that are reasonably close - INCREASE MAX DISTANCE
+      if (distance > 10 && distance < 300) {
         // Skip if the line between these points would cross land
         if (doesLineIntersectLand(canalNode1.position, canalNode2.position)) {
           continue;
         }
-        
+      
         // Water travel is twice as fast, so divide the weight by 2
         const weight = distance / 2;
-        
+      
         // Add bidirectional edges
         graph.edges[canalNode1.id].push({
           from: canalNode1.id,
           to: canalNode2.id,
           weight: weight
         });
-        
+      
         graph.edges[canalNode2.id].push({
           from: canalNode2.id,
           to: canalNode1.id,
@@ -552,13 +552,13 @@ function buildCanalNetwork(polygons: Polygon[]): Record<string, Point[]> {
       // Calculate distance
       const distance = calculateDistance(point1.point, point2.point);
       
-      // Only connect points that are reasonably close
-      if (distance > 10 && distance < 100) {
+      // Only connect points that are reasonably close - INCREASE MAX DISTANCE
+      if (distance > 10 && distance < 300) {
         // Skip if the line between these points would cross land
         if (doesLineIntersectLand(point1.point, point2.point)) {
           continue;
         }
-        
+      
         const segmentId = `canal-segment-cross-${point1.id}-${point2.id}`;
         canalNetwork[segmentId] = [point1.point, point2.point];
       }
@@ -694,6 +694,25 @@ function findClosestNode(point: Point, graph: Graph, polygonId?: string): string
   return closestNode;
 }
 
+// Function to find multiple close nodes to a given point
+function findCloseNodes(point: Point, graph: Graph, polygonId?: string, limit: number = 3): string[] {
+  const nodes: {id: string, distance: number}[] = [];
+  
+  for (const [nodeId, node] of Object.entries(graph.nodes)) {
+    // If polygonId is specified, only consider nodes in that polygon
+    if (polygonId && node.polygonId !== polygonId) {
+      continue;
+    }
+    
+    const distance = calculateDistance(point, node.position);
+    nodes.push({ id: nodeId, distance });
+  }
+  
+  // Sort by distance and return the closest ones
+  nodes.sort((a, b) => a.distance - b.distance);
+  return nodes.slice(0, limit).map(node => node.id);
+}
+
 // Function to find the polygon containing a point
 function findPolygonContainingPoint(point: Point, polygons: Polygon[]): Polygon | null {
   for (const polygon of polygons) {
@@ -816,25 +835,47 @@ async function findPath(startPoint: Point, endPoint: Point): Promise<any> {
     }
     
     // Find the closest nodes to the start and end points
-    const startNodeId = findClosestNode(startPoint, graph, startPolygon.id);
-    const endNodeId = findClosestNode(endPoint, graph, endPolygon.id);
+    const startNodeIds = findCloseNodes(startPoint, graph, startPolygon.id);
+    const endNodeIds = findCloseNodes(endPoint, graph, endPolygon.id);
     
-    if (!startNodeId || !endNodeId) {
+    if (startNodeIds.length === 0 || endNodeIds.length === 0) {
       return {
         success: false,
         error: 'Could not find suitable nodes near the start or end points'
       };
     }
     
-    // Find the shortest path
-    const result = findShortestPath(graph, startNodeId, endNodeId);
+    // Try different combinations of start and end nodes
+    let bestResult = null;
+    let shortestDistance = Infinity;
     
-    if (!result) {
+    for (const startNodeId of startNodeIds) {
+      for (const endNodeId of endNodeIds) {
+        const result = findShortestPath(graph, startNodeId, endNodeId);
+        
+        if (result && result.distance < shortestDistance) {
+          bestResult = result;
+          shortestDistance = result.distance;
+        }
+      }
+    }
+    
+    if (!bestResult) {
+      console.log('No path found between any combination of nodes:', {
+        startNodeIds,
+        endNodeIds,
+        startPolygon: startPolygon.id,
+        endPolygon: endPolygon.id
+      });
+      
       return {
         success: false,
         error: 'No path found between the points'
       };
     }
+    
+    // Use bestResult instead of result for the rest of the function
+    const result = bestResult;
     
     // Convert node IDs to actual points for the response
     const pathPoints = result.path.map((nodeId, index) => {
