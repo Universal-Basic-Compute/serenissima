@@ -6,7 +6,7 @@ import { calculateBounds } from './utils';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 
 // Extend EventTypes to include SCENE_BASE_RENDERED
-declare module '@/lib/eventBus' {
+declare module '@/lib/utils/eventBus' {
   interface EventTypes {
     SCENE_BASE_RENDERED: string;
   }
