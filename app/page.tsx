@@ -29,24 +29,35 @@ export default function TwoDPage() {
     setShowSettingsModal(false);
   };
   
-  // Handle initial view loading
+  // Handle initial view loading and ensure buildings are always visible
   useEffect(() => {
-    if (activeView === 'buildings') {
-      console.log('Initial load with buildings view, ensuring buildings are visible...');
-      
-      // Dispatch an event to ensure buildings are visible
-      window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
-    }
+    console.log('Initial page load, ensuring buildings are always visible...');
+    
+    // Dispatch an event to ensure buildings are visible regardless of view
+    window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+    
+    // Also listen for the event to ensure buildings stay visible
+    const ensureBuildingsVisible = () => {
+      console.log('Ensuring buildings are visible in all views');
+      // This event will be handled by the building renderer
+    };
+    
+    window.addEventListener('ensureBuildingsVisible', ensureBuildingsVisible);
+    
+    return () => {
+      window.removeEventListener('ensureBuildingsVisible', ensureBuildingsVisible);
+    };
   }, []); // Empty dependency array means this runs once on mount
 
   // Update view when activeView changes
   useEffect(() => {
     console.log(`2D Page: Switching to ${activeView} view`);
     
-    // Dispatch events for specific views
-    if (activeView === 'buildings') {
-      window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
-    } else if (activeView === 'land') {
+    // Always ensure buildings are visible regardless of view
+    window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+    
+    // Dispatch additional events for specific views
+    if (activeView === 'land') {
       window.dispatchEvent(new CustomEvent('fetchIncomeData'));
       window.dispatchEvent(new CustomEvent('showIncomeVisualization'));
     } else if (activeView === 'citizens') {

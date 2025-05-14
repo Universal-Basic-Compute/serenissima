@@ -4,6 +4,7 @@ import ClientWalletProvider from "@/components/UI/ClientWalletProvider";
 import Compagno from "@/components/UI/Compagno";
 import ClientSideEffects from "./client-effects";
 import ContextMenuPreventer from "@/components/UI/ContextMenuPreventer";
+// Add this to ensure buildings are always visible
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,6 +29,20 @@ export default function RootLayout({
           <Compagno />
           <ClientSideEffects />
           <ContextMenuPreventer />
+          <script dangerouslySetInnerHTML={{
+            __html: `
+              // Ensure buildings are always visible
+              window.addEventListener('load', function() {
+                console.log('Layout: Dispatching ensureBuildingsVisible event on page load');
+                window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+                
+                // Also set up a periodic check to ensure buildings stay visible
+                setInterval(function() {
+                  window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+                }, 10000);
+              });
+            `
+          }} />
         </ClientWalletProvider>
       </body>
     </html>

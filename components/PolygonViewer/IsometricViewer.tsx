@@ -546,72 +546,71 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     loadUsers();
   }, []);
 
-  // Load buildings if in buildings view
+  // Load buildings regardless of active view
   useEffect(() => {
-    if (activeView === 'buildings') {
-      const fetchBuildings = async () => {
-        try {
-          // First, ensure building points are loaded
-          if (!buildingPointsService.isPointsLoaded()) {
-            console.log('IsometricViewer: Loading building points service...');
-            await buildingPointsService.loadBuildingPoints();
-            console.log('IsometricViewer: Building points service loaded successfully');
-          }
-          
-          const response = await fetch('/api/buildings');
-          if (response.ok) {
-            const data = await response.json();
-            if (data.buildings) {
-              // Process buildings to ensure they all have position data
-              const processedBuildings = data.buildings.map((building: any) => {
-                // If building already has a position, use it
-                if (building.position && building.position.lat && building.position.lng) {
-                  return building;
-                }
-                
-                // If building has a point_id but no position, try to get position from the service
-                if (building.point_id) {
-                  const position = buildingPointsService.getPositionForPoint(building.point_id);
-                  if (position) {
-                    console.log(`Resolved position for building ${building.id} with point_id ${building.point_id}:`, position);
-                    return {
-                      ...building,
-                      position
-                    };
-                  } else {
-                    console.warn(`Could not resolve position for building ${building.id} with point_id ${building.point_id}`);
-                  }
-                }
-                
-                // If we couldn't resolve a position, return the building as is
-                return building;
-              });
-              
-              setBuildings(processedBuildings);
-              console.log(`Processed ${processedBuildings.length} buildings, checking for position data...`);
-              
-              // Log how many buildings have valid position data
-              const buildingsWithPosition = processedBuildings.filter(b => 
-                b.position && 
-                ((typeof b.position === 'object' && 'lat' in b.position && 'lng' in b.position) || 
-                 (typeof b.position === 'string' && b.position.includes('lat')))
-              );
-              console.log(`${buildingsWithPosition.length} of ${processedBuildings.length} buildings have valid position data`);
-            }
-          }
-        } catch (error) {
-          console.error('Error fetching buildings:', error);
+    const fetchBuildings = async () => {
+      try {
+        // First, ensure building points are loaded
+        if (!buildingPointsService.isPointsLoaded()) {
+          console.log('IsometricViewer: Loading building points service...');
+          await buildingPointsService.loadBuildingPoints();
+          console.log('IsometricViewer: Building points service loaded successfully');
         }
-      };
-      
-      fetchBuildings();
-      
-      // Set up interval to refresh buildings
-      const interval = setInterval(fetchBuildings, 30000);
-      
-      return () => clearInterval(interval);
-    }
-  }, [activeView]);
+        
+        const response = await fetch('/api/buildings');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.buildings) {
+            // Process buildings to ensure they all have position data
+            const processedBuildings = data.buildings.map((building: any) => {
+              // If building already has a position, use it
+              if (building.position && building.position.lat && building.position.lng) {
+                return building;
+              }
+              
+              // If building has a point_id but no position, try to get position from the service
+              if (building.point_id) {
+                const position = buildingPointsService.getPositionForPoint(building.point_id);
+                if (position) {
+                  console.log(`Resolved position for building ${building.id} with point_id ${building.point_id}:`, position);
+                  return {
+                    ...building,
+                    position
+                  };
+                } else {
+                  console.warn(`Could not resolve position for building ${building.id} with point_id ${building.point_id}`);
+                }
+              }
+              
+              // If we couldn't resolve a position, return the building as is
+              return building;
+            });
+            
+            setBuildings(processedBuildings);
+            console.log(`Processed ${processedBuildings.length} buildings, checking for position data...`);
+            
+            // Log how many buildings have valid position data
+            const buildingsWithPosition = processedBuildings.filter(b => 
+              b.position && 
+              ((typeof b.position === 'object' && 'lat' in b.position && 'lng' in b.position) || 
+               (typeof b.position === 'string' && b.position.includes('lat')))
+            );
+            console.log(`${buildingsWithPosition.length} of ${processedBuildings.length} buildings have valid position data`);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching buildings:', error);
+      }
+    };
+    
+    // Load buildings on mount, regardless of active view
+    fetchBuildings();
+    
+    // Set up interval to refresh buildings
+    const interval = setInterval(fetchBuildings, 30000);
+    
+    return () => clearInterval(interval);
+  }, []); // Empty dependency array to run only on mount
   
   
   
@@ -2122,8 +2121,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         });
     }
     
-    // Draw buildings if in buildings view
-    if (activeView === 'buildings' && buildings.length > 0) {
+    // Draw buildings in all views, not just buildings view
+    if (buildings.length > 0) {
       buildings.forEach(building => {
         if (!building.position) return;
             

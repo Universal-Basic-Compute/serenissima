@@ -123,8 +123,9 @@ const BaseSceneLayer: React.FC<BaseSceneLayerProps> = ({
                 buildingsInitialized: true
               });
               
-              // Ensure buildings are visible by default
+              // IMPORTANT: Always make buildings visible
               window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+              console.log('BaseSceneLayer: Dispatched ensureBuildingsVisible event');
               
               // Check if buildings are visible after a delay
               setTimeout(() => {
@@ -134,6 +135,8 @@ const BaseSceneLayer: React.FC<BaseSceneLayerProps> = ({
                   loadBuildings(retryCount + 1);
                 } else {
                   console.log(`BaseSceneLayer: ${buildingCount} buildings visible after initialization`);
+                  // Dispatch another ensure buildings visible event for good measure
+                  window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
                 }
               }, 3000); // Increased from 2000ms to 3000ms
             })
