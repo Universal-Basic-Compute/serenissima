@@ -7,10 +7,9 @@ import ErrorBoundary from '../ErrorBoundary/ErrorBoundary';
 import { useBuildingMenu } from '@/hooks/useBuildingMenu';
 import { log } from '@/lib/logUtils';
 import { Building as ImportedBuilding } from '@/lib/models/BuildingModels';
-import PlaceableObjectManager from '@/lib/components/PlaceableObjectManager';
 import { BuildingService } from '@/lib/services/BuildingService';
 import { getWalletAddress } from '../../lib/utils/walletUtils';
-import { eventBus, EventTypes } from '@/lib/eventBus';
+import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 
 // Add global type declaration for the selected building point
 declare global {
@@ -252,12 +251,8 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
     selectedBuilding: Building | null;
     selectedVariant: string | null;
     availableVariants: string[];
-    placeableBuilding: { name: string; variant: string; } | null;
     handleSelectBuilding: (building: Building) => void;
     handleSelectVariant: (variant: string) => void;
-    handlePlaceBuilding: () => void;
-    handlePlacementComplete: () => void;
-    handleCancelPlacement: () => void;
     handleCloseDetailModal: () => void;
     handlePreviousVariant: () => void;
     handleNextVariant: () => void;
@@ -273,12 +268,8 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
     selectedBuilding,
     selectedVariant,
     availableVariants,
-    placeableBuilding,
     handleSelectBuilding,
     handleSelectVariant,
-    handlePlaceBuilding,
-    handlePlacementComplete,
-    handleCancelPlacement,
     handleCloseDetailModal,
     handlePreviousVariant,
     handleNextVariant,
@@ -711,19 +702,6 @@ export default function BuildingMenu({ visible, onClose, onBuildingSelect, onBui
           </div>
         )}
         
-        {/* Placeable Building */}
-        {placeableBuilding && (
-          <PlaceableObjectManager
-            active={true}
-            type="building"
-            objectData={placeableBuilding}
-            constraints={{
-              requireLandOwnership: true
-            }}
-            onComplete={handlePlacementComplete}
-            onCancel={handleCancelPlacement}
-          />
-        )}
       </div>
     </ErrorBoundary>
   );
