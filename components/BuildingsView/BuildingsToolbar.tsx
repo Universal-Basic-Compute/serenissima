@@ -5,7 +5,6 @@ import { useBuildingMenu } from '@/hooks/useBuildingMenu';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 import { FaWater, FaRoad, FaBuilding, FaShip } from 'react-icons/fa';
 import { normalizeCoordinates } from '@/components/PolygonViewer/utils';
-import { useSceneReady } from '@/lib/components/SceneReadyProvider';
 
 interface BuildingsToolbarProps {
   scene?: THREE.Scene;
@@ -27,12 +26,7 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
   const [buildings, setBuildings] = useState<any[]>([]);
   const [forceUpdate, setForceUpdate] = useState(false);
 
-  // Use the scene ready hook instead of trying to find the scene directly
-  const { isSceneReady, scene: readyScene, camera: readyCamera } = useSceneReady();
-  
-  // Use the scene from the hook
-  const actualScene = readyScene || scene;
-  const actualCamera = readyCamera || camera;
+  // Use the scene and camera props directly
 
   // Use the building menu hook to access building data
   const { 
