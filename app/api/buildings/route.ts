@@ -99,10 +99,10 @@ export async function POST(request: Request) {
     const buildingData: any = {
       BuildingId: data.id || `building-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
       Type: normalizedType,
-      Land: data.land_id,
+      LandId: data.land_id,
       Variant: data.variant || 'model',
       Rotation: data.rotation || 0,
-      User: data.owner || data.created_by || 'system',
+      Owner: data.owner || data.created_by || 'system',
       CreatedAt: data.created_at || new Date().toISOString(),
       LeaseAmount: data.lease_amount || 0,
       RentAmount: data.rent_amount || 0,
@@ -166,12 +166,12 @@ export async function POST(request: Request) {
     const building = {
       id: typedRecord.fields.BuildingId,
       type: typedRecord.fields.Type,
-      land_id: typedRecord.fields.Land,
+      land_id: typedRecord.fields.LandId,
       variant: typedRecord.fields.Variant || 'model',
       position: recordPosition,
       point_id: typedRecord.fields.Point || null, // Include point_id in response
       rotation: typedRecord.fields.Rotation || 0,
-      owner: typedRecord.fields.User,
+      owner: typedRecord.fields.Owner,
       created_at: typedRecord.fields.CreatedAt,
       lease_amount: typedRecord.fields.LeaseAmount,
       rent_amount: typedRecord.fields.RentAmount,
@@ -498,12 +498,12 @@ export async function GET(request: Request) {
       return {
         id: fields.BuildingId || record.id,
         type: fields.Type,
-        land_id: fields.Land,
+        land_id: fields.LandId,
         variant: fields.Variant || 'model',
         position: position,
         point_id: fields.Point || null, // Include point_id in response
         rotation: fields.Rotation || 0,
-        owner: fields.User,
+        owner: fields.Owner,
         created_at: fields.CreatedAt,
         lease_amount: fields.LeaseAmount,
         rent_amount: fields.RentAmount,
