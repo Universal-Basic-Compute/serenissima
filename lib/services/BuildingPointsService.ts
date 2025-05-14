@@ -1,7 +1,7 @@
-import { eventBus, EventTypes } from '../eventBus';
+import { eventBus, EventTypes } from '../utils/eventBus';
 
 // Extend EventTypes to include building points events
-declare module '../eventBus' {
+declare module '../utils/eventBus' {
   interface EventTypes {
     BUILDING_POINTS_LOADED: string;
   }
