@@ -2,6 +2,31 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 
+// Helper function to check if two line segments intersect
+function doLineSegmentsIntersect(
+  x1: number, y1: number, x2: number, y2: number,
+  x3: number, y3: number, x4: number, y4: number
+): boolean {
+  // Calculate the direction of the lines
+  const d1x = x2 - x1;
+  const d1y = y2 - y1;
+  const d2x = x4 - x3;
+  const d2y = y4 - y3;
+
+  // Calculate the determinant
+  const det = d1x * d2y - d1y * d2x;
+  
+  // If determinant is zero, lines are parallel
+  if (det === 0) return false;
+
+  // Calculate the parameters for the intersection point
+  const s = (d1x * (y1 - y3) - d1y * (x1 - x3)) / det;
+  const t = (d2x * (y1 - y3) - d2y * (x1 - x3)) / det;
+
+  // Check if the intersection point is within both line segments
+  return s >= 0 && s <= 1 && t >= 0 && t <= 1;
+}
+
 // Debug logging function
 function debugLog(message: string, ...args: any[]) {
   const DEBUG = true; // Set to false in production
@@ -164,30 +189,6 @@ function buildGraph(polygons: Polygon[]): Graph {
   
 
 
-  // Helper function to check if two line segments intersect
-  function doLineSegmentsIntersect(
-    x1: number, y1: number, x2: number, y2: number,
-    x3: number, y3: number, x4: number, y4: number
-  ): boolean {
-    // Calculate the direction of the lines
-    const d1x = x2 - x1;
-    const d1y = y2 - y1;
-    const d2x = x4 - x3;
-    const d2y = y4 - y3;
-
-    // Calculate the determinant
-    const det = d1x * d2y - d1y * d2x;
-    
-    // If determinant is zero, lines are parallel
-    if (det === 0) return false;
-
-    // Calculate the parameters for the intersection point
-    const s = (d1x * (y1 - y3) - d1y * (x1 - x3)) / det;
-    const t = (d2x * (y1 - y3) - d2y * (x1 - x3)) / det;
-
-    // Check if the intersection point is within both line segments
-    return s >= 0 && s <= 1 && t >= 0 && t <= 1;
-  }
 
   // Create a function to check if a line between two points intersects any land polygon
   const doesLineIntersectLand = (point1: Point, point2: Point): boolean => {
