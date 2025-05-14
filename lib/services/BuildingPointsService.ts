@@ -4,10 +4,12 @@ import { eventBus, EventTypes } from '../utils/eventBus';
 // Extend the EventTypes interface
 interface ExtendedEventTypes extends EventTypes {
   BUILDING_POINTS_LOADED: string;
+  BUILDING_POINTS_GENERATED: string;
 }
 
-// Cast EventTypes to our extended interface to add the new property
-(EventTypes as ExtendedEventTypes).BUILDING_POINTS_LOADED = 'BUILDING_POINTS_LOADED';
+// Add the new properties to EventTypes
+EventTypes.BUILDING_POINTS_LOADED = 'BUILDING_POINTS_LOADED';
+EventTypes.BUILDING_POINTS_GENERATED = 'BUILDING_POINTS_GENERATED';
 
 export class BuildingPointsService {
   private static instance: BuildingPointsService;
@@ -106,7 +108,7 @@ export class BuildingPointsService {
           console.log(`Server-side: Loaded ${Object.keys(buildingPoints).length} building points, ${Object.keys(canalPoints).length} canal points, and ${Object.keys(bridgePoints).length} bridge points`);
           
           // Emit event to notify other components
-          eventBus.emit((EventTypes as ExtendedEventTypes).BUILDING_POINTS_LOADED, {
+          eventBus.emit(EventTypes.BUILDING_POINTS_LOADED, {
             buildingPointsCount: Object.keys(buildingPoints).length,
             canalPointsCount: Object.keys(canalPoints).length,
             bridgePointsCount: Object.keys(bridgePoints).length
@@ -145,7 +147,7 @@ export class BuildingPointsService {
         console.log(`Loaded ${Object.keys(this.buildingPoints).length} building points, ${Object.keys(this.canalPoints).length} canal points, and ${Object.keys(this.bridgePoints).length} bridge points`);
         
         // Emit event to notify other components
-        eventBus.emit((EventTypes as ExtendedEventTypes).BUILDING_POINTS_LOADED, {
+        eventBus.emit(EventTypes.BUILDING_POINTS_LOADED, {
           buildingPointsCount: Object.keys(this.buildingPoints).length,
           canalPointsCount: Object.keys(this.canalPoints).length,
           bridgePointsCount: Object.keys(this.bridgePoints).length
@@ -201,7 +203,7 @@ export class BuildingPointsService {
         this.isLoaded = true;
         
         // Emit event to notify other components
-        eventBus.emit((EventTypes as ExtendedEventTypes).BUILDING_POINTS_LOADED, {
+        eventBus.emit(EventTypes.BUILDING_POINTS_LOADED, {
           buildingPointsCount: Object.keys(this.buildingPoints).length,
           canalPointsCount: Object.keys(this.canalPoints).length,
           bridgePointsCount: Object.keys(this.bridgePoints).length,
