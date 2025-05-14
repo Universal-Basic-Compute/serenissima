@@ -3,6 +3,13 @@ import { fetchGuilds, Guild } from '@/lib/utils/airtableUtils';
 import ReactMarkdown from 'react-markdown';
 import { FaTimes } from 'react-icons/fa';
 
+// Extend the Window interface to include the __polygonData property
+declare global {
+  interface Window {
+    __polygonData?: any[];
+  }
+}
+
 interface GuildsPanelProps {
   onClose: () => void;
   standalone?: boolean;
@@ -68,7 +75,7 @@ export default function GuildsPanel({ onClose, standalone = false }: GuildsPanel
     try {
       // First try to get land data from window.__polygonData
       if (typeof window !== 'undefined' && window.__polygonData) {
-        const polygon = window.__polygonData.find(p => p.id === locationId);
+        const polygon = window.__polygonData.find((p: any) => p.id === locationId);
         if (polygon) {
           // If both historical and English names exist, show both
           if (polygon.historicalName && polygon.englishName) {
