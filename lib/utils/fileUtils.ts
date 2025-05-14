@@ -1,6 +1,6 @@
 import path from 'path';
 
-export const DATA_DIR = path.join(process.cwd(), 'data');
+export const DATA_DIR = path.join(process.cwd(), 'data', 'polygons');
 
 // Helper function to calculate distance between two coordinates
 export function calculateDistance(coord1: any, coord2: any) {
