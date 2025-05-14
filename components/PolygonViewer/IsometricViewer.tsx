@@ -120,8 +120,6 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [transportEndPoint, setTransportEndPoint] = useState<{lat: number, lng: number} | null>(null);
   const [transportPath, setTransportPath] = useState<any[]>([]);
   const [calculatingPath, setCalculatingPath] = useState<boolean>(false);
-  const [gondolaPositions, setGondolaPositions] = useState<{x: number, y: number, angle: number}[]>([]);
-  const gondolaAnimationRef = useRef<number | null>(null);
 
   // Load polygons
   useEffect(() => {
@@ -183,84 +181,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     }
   }, [transportMode]);
   
-  // Add useEffect to animate gondolas
-  useEffect(() => {
-    if (transportPath.length > 0 && transportMode) {
-      // Find all gondola segments
-      const gondolaSegments: {start: any, end: any}[] = [];
-
-      for (let i = 0; i < transportPath.length - 1; i++) {
-        if (transportPath[i].transportMode === 'gondola') {
-          gondolaSegments.push({
-            start: transportPath[i],
-            end: transportPath[i + 1]
-          });
-        }
-      }
-
-      if (gondolaSegments.length > 0) {
-        // Initialize gondola positions
-        const initialPositions = gondolaSegments.map(segment => {
-          const x1 = (segment.start.lng - 12.3326) * 20000;
-          const y1 = (segment.start.lat - 45.4371) * 20000;
-          const x2 = (segment.end.lng - 12.3326) * 20000;
-          const y2 = (segment.end.lat - 45.4371) * 20000;
-
-          // Calculate angle
-          const angle = Math.atan2(y2 - y1, x2 - x1);
-
-          return {
-            x: x1,
-            y: y1,
-            targetX: x2,
-            targetY: y2,
-            progress: Math.random(), // Start at random positions along the path
-            speed: 0.0001 + (Math.random() * 0.00005), // Slightly different speeds
-            angle
-          };
-        });
-
-        // Start animation
-        let lastTime = performance.now();
-        
-        const animateGondolas = (time: number) => {
-          const deltaTime = time - lastTime;
-          lastTime = time;
-
-          // Update gondola positions
-          const newPositions = initialPositions.map(gondola => {
-            // Update progress based on individual gondola speed
-            gondola.progress += deltaTime * gondola.speed;
-
-            if (gondola.progress > 1) {
-              gondola.progress = 0;
-            }
-
-            // Calculate new position
-            const x = gondola.x + (gondola.targetX - gondola.x) * gondola.progress;
-            const y = gondola.y + (gondola.targetY - gondola.y) * gondola.progress;
-
-            return {
-              x,
-              y,
-              angle: gondola.angle
-            };
-          });
-
-          setGondolaPositions(newPositions);
-          gondolaAnimationRef.current = requestAnimationFrame(animateGondolas);
-        };
-
-        gondolaAnimationRef.current = requestAnimationFrame(animateGondolas);
-
-        return () => {
-          if (gondolaAnimationRef.current) {
-            cancelAnimationFrame(gondolaAnimationRef.current);
-          }
-        };
-      }
-    }
-  }, [transportPath, transportMode]);
+  // Transport path rendering is now handled directly in the drawing code
   
   // Fetch income data
   const fetchIncomeData = useCallback(async () => {
@@ -2520,78 +2441,17 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             const x2 = (point2.lng - 12.3326) * 20000;
             const y2 = (point2.lat - 45.4371) * 20000;
 
-            // For gondola paths, draw curved lines
+            // For gondola paths, draw simple lines with distinctive color
             if (point1.transportMode === 'gondola') {
-              // Draw a curved path for gondolas
+              // Draw a simple path for gondolas
               ctx.beginPath();
-
-              // Start point
-              const startX = isoX(x1, y1);
-              const startY = isoY(x1, y1);
-              ctx.moveTo(startX, startY);
-
-              // End point
-              const endX = isoX(x2, y2);
-              const endY = isoY(x2, y2);
-
-              // If this is an intermediate point, draw a curved line
-              if (point1.isIntermediatePoint || point2.isIntermediatePoint) {
-                // Draw a simple curve
-                ctx.quadraticCurveTo(
-                  (startX + endX) / 2 + (Math.random() * 10 - 5) * scale,
-                  (startY + endY) / 2 + (Math.random() * 10 - 5) * scale,
-                  endX,
-                  endY
-                );
-              } else {
-                // Draw a straight line
-                ctx.lineTo(endX, endY);
-              }
-
+              ctx.moveTo(isoX(x1, y1), isoY(x1, y1));
+              ctx.lineTo(isoX(x2, y2), isoY(x2, y2));
+              
               // Venetian blue for water transport
               ctx.strokeStyle = 'rgba(0, 102, 153, 0.8)';
               ctx.lineWidth = 4 * scale;
               ctx.stroke();
-
-              // Add a wavy effect for water
-              ctx.beginPath();
-              ctx.moveTo(startX, startY);
-
-              // Add a slight wave effect
-              const waveOffset = Math.sin(i * 0.5) * 0.5 * scale;
-
-              // If this is an intermediate point, draw a curved line with wave effect
-              if (point1.isIntermediatePoint || point2.isIntermediatePoint) {
-                ctx.quadraticCurveTo(
-                  (startX + endX) / 2 + (Math.random() * 10 - 5) * scale + waveOffset,
-                  (startY + endY) / 2 + (Math.random() * 10 - 5) * scale + waveOffset,
-                  endX + waveOffset,
-                  endY + waveOffset
-                );
-              } else {
-                ctx.lineTo(endX + waveOffset, endY + waveOffset);
-              }
-
-              // Style the water effect
-              ctx.strokeStyle = 'rgba(135, 206, 235, 0.6)'; // Light blue
-              ctx.lineWidth = 2 * scale;
-              ctx.stroke();
-
-              // Add ripple effects along the path
-              const segments = 5;
-              for (let s = 1; s < segments; s++) {
-                const segX = startX + (endX - startX) * (s / segments);
-                const segY = startY + (endY - startY) * (s / segments);
-                  
-                // Draw small ripple circles
-                ctx.beginPath();
-                const rippleSize = 1 * scale * Math.random();
-                ctx.arc(segX + (Math.random() * 6 - 3) * scale, 
-                        segY + (Math.random() * 6 - 3) * scale, 
-                        rippleSize, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-                ctx.fill();
-              }
             } else {
               // For walking paths, draw straight lines with texture
               ctx.beginPath();
@@ -2658,33 +2518,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             ctx.stroke();
           }
               
-          // Draw gondolas
-          gondolaPositions.forEach(gondola => {
-            const screenX = isoX(gondola.x, gondola.y);
-            const screenY = isoY(gondola.x, gondola.y);
-
-            // Draw gondola
-            ctx.save();
-            ctx.translate(screenX, screenY);
-            ctx.rotate(gondola.angle);
-
-            // Draw gondola body (elongated ellipse)
-            const gondolaLength = 6 * scale;
-            const gondolaWidth = 2 * scale;
-
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-            ctx.beginPath();
-            ctx.ellipse(0, 0, gondolaLength, gondolaWidth, 0, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Draw gondolier
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-            ctx.beginPath();
-            ctx.arc(gondolaLength * 0.3, 0, gondolaWidth * 0.6, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.restore();
-          });
+          // Gondola animations have been removed for simplicity
             
           // Update the legend to include canal points and transport modes
           if (transportMode && transportPath.length > 0) {
