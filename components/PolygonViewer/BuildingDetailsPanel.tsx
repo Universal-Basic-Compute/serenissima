@@ -451,7 +451,7 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
   
   return (
     <div 
-      className={`fixed top-0 right-0 h-full w-120 bg-amber-50 shadow-xl transform transition-transform duration-300 ease-in-out z-20 border-l-4 border-amber-600 ${
+      className={`fixed top-0 right-0 h-full w-3/4 max-w-5xl bg-amber-50 shadow-xl transform transition-transform duration-300 ease-in-out z-20 border-l-4 border-amber-600 ${
         isVisible ? 'translate-x-0' : 'translate-x-full'
       }`}
     >
