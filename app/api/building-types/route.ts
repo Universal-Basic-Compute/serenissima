@@ -161,7 +161,6 @@ export async function GET(request: Request) {
     return NextResponse.json({
       success: true,
       buildingTypes: buildings,
-      categories: categoriesArray,
       filters: { pointType }
     });
   } catch (error) {
