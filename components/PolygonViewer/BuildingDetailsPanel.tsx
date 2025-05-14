@@ -9,6 +9,9 @@ declare global {
   }
 }
 
+// Ensure the global declaration is properly exported
+export {};
+
 // Access the global variable through window
 import { getBackendBaseUrl } from '@/lib/utils/apiUtils';
 import PlayerProfile from '../UI/PlayerProfile';
