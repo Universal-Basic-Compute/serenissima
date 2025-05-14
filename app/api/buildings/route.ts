@@ -112,13 +112,10 @@ export async function POST(request: Request) {
     // If point_id is provided, store it in the Point field
     if (pointId) {
       buildingData.Point = pointId;
-      
-      // Store position in Notes as JSON if available
-      if (position) {
-        buildingData.Notes = JSON.stringify({ position });
-      }
-    } else {
-      // If no point_id, store position in Position field (legacy format)
+    }
+    
+    // Always store position in Position field
+    if (position) {
       buildingData.Position = JSON.stringify(position);
     }
     
@@ -156,21 +153,9 @@ export async function POST(request: Request) {
     // Transform the Airtable record to our format
     const typedRecord = record as AirtableRecord;
     
-    // Try to get position from Notes field first (new format)
+    // Get position from Position field
     let recordPosition = null;
-    if (typedRecord.fields.Notes) {
-      try {
-        const notes = JSON.parse(typedRecord.fields.Notes);
-        if (notes.position) {
-          recordPosition = notes.position;
-        }
-      } catch (e) {
-        // If Notes isn't valid JSON, continue to next method
-      }
-    }
-    
-    // If position not found in Notes, try Position field (old format)
-    if (!recordPosition && typedRecord.fields.Position) {
+    if (typedRecord.fields.Position) {
       try {
         recordPosition = JSON.parse(typedRecord.fields.Position);
       } catch (e) {
@@ -366,62 +351,55 @@ export async function GET(request: Request) {
     const buildings = typedRecords.map(record => {
       const fields = record.fields;
       
-      // Try to get position from Notes field first (new format)
+      // Initialize position object
       let position: { lat?: number; lng?: number; x?: number; y?: number; z?: number; } = {};
       
-      if (fields.Notes) {
-        try {
-          const notes = JSON.parse(fields.Notes);
-          if (notes.position) {
-            position = notes.position;
-            console.log(`[API] Building ${fields.BuildingId || record.id} has position in Notes:`, position);
-          }
-        } catch (e) {
-          // If Notes isn't valid JSON, continue to next method
-        }
-      }
-      
-      // If position not found in Notes, try Position field (old format)
-      if ((!position || Object.keys(position).length === 0) && fields.Position) {
-        if (typeof fields.Position === 'string') {
-          try {
-            position = JSON.parse(fields.Position);
-            console.log(`[API] Building ${fields.BuildingId || record.id} parsed position:`, position);
-          } catch (error) {
-            console.error('[API] Error parsing position JSON:', error);
-            console.error('[API] Original position string:', fields.Position);
-            
-            // Instead of using a default position, generate a random lat/lng position
-            // This ensures each building has unique coordinates
-            position = { 
-              lat: 45.4371 + (Math.random() * 0.01 - 0.005), // Random lat near Venice center
-              lng: 12.3358 + (Math.random() * 0.01 - 0.005)  // Random lng near Venice center
-            };
-            console.log(`[API] Generated random position for ${fields.BuildingId || record.id}:`, position);
-          }
-        } else if (typeof fields.Position === 'object') {
-          position = fields.Position as { lat?: number; lng?: number; x?: number; y?: number; z?: number; };
-        }
-      }
-      
-      // If we still don't have a position but we have a Point field, try to resolve it
-      if ((!position || Object.keys(position).length === 0) && fields.Point) {
+      // If we have a Point field, try to extract coordinates from it
+      if (fields.Point) {
         const pointId = String(fields.Point);
-        console.log(`[API] Building ${fields.BuildingId || record.id} has Point ID: ${pointId}, attempting to resolve position`);
+        console.log(`[API] Building ${fields.BuildingId || record.id} has Point ID: ${pointId}, attempting to extract position`);
+        
+        // Try to extract coordinates from the Point field (format: type_lat_lng)
+        const parts = pointId.split('_');
+        if (parts.length >= 3) {
+          const lat = parseFloat(parts[1]);
+          const lng = parseFloat(parts[2]);
+          
+          if (!isNaN(lat) && !isNaN(lng)) {
+            position = { lat, lng };
+            console.log(`[API] Extracted coordinates from Point field for building ${fields.BuildingId || record.id}: lat=${lat}, lng=${lng}`);
+          } else {
+            console.warn(`[API] Could not parse coordinates from Point field: ${pointId}`);
             
-        // First try to resolve using the buildingPointsService
-        const resolvedPosition = buildingPointsService.getPositionForPoint(String(pointId));
+            // Try to resolve using the buildingPointsService
+            const resolvedPosition = buildingPointsService.getPositionForPoint(String(pointId));
             
-        if (resolvedPosition) {
-          position = resolvedPosition;
-          console.log(`[API] Resolved position for Point ID ${pointId} using service:`, position);
+            if (resolvedPosition) {
+              position = resolvedPosition;
+              console.log(`[API] Resolved position for Point ID ${pointId} using service:`, position);
+            } else {
+              // If service couldn't resolve, try to extract coordinates from the point ID directly
+              const extractedPosition = extractCoordinatesFromPointId(String(pointId));
+                  
+              if (extractedPosition) {
+                position = extractedPosition;
+                console.log(`[API] Extracted position from Point ID ${pointId}:`, position);
+              } else {
+                console.warn(`[API] Could not resolve position for Point ID ${pointId}, generating random position`);
+                position = { 
+                  lat: 45.4371 + (Math.random() * 0.01 - 0.005),
+                  lng: 12.3358 + (Math.random() * 0.01 - 0.005)
+                };
+              }
+            }
+          }
         } else {
-          // If service couldn't resolve, try to extract coordinates from the point ID directly
-          const extractedPosition = extractCoordinatesFromPointId(String(pointId));
-              
-          if (extractedPosition) {
-            position = extractedPosition;
-            console.log(`[API] Extracted position from Point ID ${pointId}:`, position);
+          // If not in type_lat_lng format, try using the buildingPointsService
+          const resolvedPosition = buildingPointsService.getPositionForPoint(String(pointId));
+          
+          if (resolvedPosition) {
+            position = resolvedPosition;
+            console.log(`[API] Resolved position for Point ID ${pointId} using service:`, position);
           } else {
             console.warn(`[API] Could not resolve position for Point ID ${pointId}, generating random position`);
             position = { 
@@ -430,6 +408,33 @@ export async function GET(request: Request) {
             };
           }
         }
+      } else if (fields.Position) {
+        // If we have a Position field (legacy), use that
+        if (typeof fields.Position === 'string') {
+          try {
+            position = JSON.parse(fields.Position);
+            console.log(`[API] Building ${fields.BuildingId || record.id} parsed position:`, position);
+          } catch (error) {
+            console.error('[API] Error parsing position JSON:', error);
+            console.error('[API] Original position string:', fields.Position);
+            
+            // Generate a random position as fallback
+            position = { 
+              lat: 45.4371 + (Math.random() * 0.01 - 0.005),
+              lng: 12.3358 + (Math.random() * 0.01 - 0.005)
+            };
+            console.log(`[API] Generated random position for ${fields.BuildingId || record.id}:`, position);
+          }
+        } else if (typeof fields.Position === 'object') {
+          position = fields.Position as { lat?: number; lng?: number; x?: number; y?: number; z?: number; };
+        }
+      } else {
+        // If we don't have any position information, generate a random position
+        position = { 
+          lat: 45.4371 + (Math.random() * 0.01 - 0.005),
+          lng: 12.3358 + (Math.random() * 0.01 - 0.005)
+        };
+        console.log(`[API] No position information for building ${fields.BuildingId || record.id}, generated random position:`, position);
       }
       
       // Check if position has lat/lng format
