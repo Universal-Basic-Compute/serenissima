@@ -3443,7 +3443,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
                 className="w-full h-full object-cover"
                 onError={(e) => {
                   console.error('Error loading building image in hover tooltip:', e);
-                  e.currentTarget.src = '/images/buildings/commercial/retail_shops/market_stall.jpg';
+                  e.currentTarget.src = '/images/buildings/market_stall.jpg';
                 }}
               />
             </div>
