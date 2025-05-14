@@ -160,21 +160,23 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
         onClick={() => {
           console.log('Transport Routes button clicked');
           // Toggle transport mode state
-          const isActive = window.__transportModeActive || false;
-          window.__transportModeActive = !isActive;
-          
-          const event = new CustomEvent('showTransportRoutes');
-          window.dispatchEvent(event);
-          console.log('showTransportRoutes event dispatched');
+          if (typeof window !== 'undefined') {
+            const isActive = window.__transportModeActive || false;
+            window.__transportModeActive = !isActive;
+            
+            const event = new CustomEvent('showTransportRoutes');
+            window.dispatchEvent(event);
+            console.log('showTransportRoutes event dispatched');
+          }
           
           // Force re-render
           setForceUpdate(prev => !prev);
         }}
-        className={`px-4 py-2 ${window.__transportModeActive ? 'bg-purple-800 border-2 border-yellow-400' : 'bg-purple-600'} text-white rounded-md shadow-md hover:bg-purple-700 transition-colors flex items-center space-x-2`}
+        className={`px-4 py-2 ${typeof window !== 'undefined' && window.__transportModeActive ? 'bg-purple-800 border-2 border-yellow-400' : 'bg-purple-600'} text-white rounded-md shadow-md hover:bg-purple-700 transition-colors flex items-center space-x-2`}
         title="Find transport routes between locations"
       >
         <FaShip className="h-5 w-5" />
-        <span>{window.__transportModeActive ? 'Transport Mode Active' : 'Transport Routes'}</span>
+        <span>{typeof window !== 'undefined' && window.__transportModeActive ? 'Transport Mode Active' : 'Transport Routes'}</span>
       </button>
       
       {/* Placeholder for object placement */}
