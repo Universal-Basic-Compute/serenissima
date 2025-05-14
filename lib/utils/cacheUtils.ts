@@ -1,3 +1,13 @@
+// Extend the Window interface to include our custom property
+declare global {
+  interface Window {
+    _polygonSnapshotCache?: {
+      result: any | null;
+      deps: any | null;
+    };
+  }
+}
+
 /**
  * Clears all caches related to land ownership
  */
