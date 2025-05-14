@@ -2,6 +2,46 @@ import { useEffect, useState, useRef } from 'react';
 import { getBackendBaseUrl } from '@/lib/apiUtils';
 import PlayerProfile from '../UI/PlayerProfile';
 
+// Add this function to get the building image path based on type
+const getBuildingImagePath = (type: string, variant?: string): string => {
+  try {
+    // Normalize the type by removing spaces and converting to lowercase
+    const normalizedType = type.toLowerCase().replace(/\s+/g, '_').replace(/-/g, '_');
+    
+    // Check for specific building types first
+    if (normalizedType.includes('market_stall') || normalizedType.includes('market')) {
+      return '/images/buildings/commercial/markets/market_stall.jpg';
+    } else if (normalizedType.includes('dock') || normalizedType.includes('pier')) {
+      return '/images/buildings/infrastructure/transportation_services/dock.jpg';
+    } else if (normalizedType.includes('bridge')) {
+      return '/images/buildings/infrastructure/transportation_services/bridge.jpg';
+    } else if (normalizedType.includes('gondola') || normalizedType.includes('boat')) {
+      return '/images/buildings/infrastructure/transportation_services/gondola_station.jpg';
+    } else if (normalizedType.includes('warehouse') || normalizedType.includes('storage')) {
+      return '/images/buildings/infrastructure/storage_facilities/warehouse.jpg';
+    } else if (normalizedType.includes('workshop')) {
+      return '/images/buildings/commercial/workshops/workshop.jpg';
+    } else if (normalizedType.includes('tavern') || normalizedType.includes('inn')) {
+      return '/images/buildings/commercial/hospitality/tavern.jpg';
+    } else if (normalizedType.includes('house') || normalizedType.includes('residence')) {
+      return '/images/buildings/residential/houses/house.jpg';
+    } else if (normalizedType.includes('palace')) {
+      return '/images/buildings/residential/palaces/palace.jpg';
+    } else if (normalizedType.includes('church') || normalizedType.includes('chapel')) {
+      return '/images/buildings/religious/churches/church.jpg';
+    } else if (normalizedType.includes('porter') || normalizedType.includes('guild_hall')) {
+      return '/images/buildings/infrastructure/transportation_services/porter_guild_hall.jpg';
+    }
+    
+    // If no specific match, try to construct a path based on the type
+    // This is a fallback that might work if the file structure follows conventions
+    return `/images/buildings/${normalizedType}.jpg`;
+  } catch (error) {
+    console.error('Error getting building image path:', error);
+    return '/images/buildings/default_building.jpg';
+  }
+};
+
 // Add this helper function to find and load the building definition file
 const loadBuildingDefinition = async (type: string, variant?: string, buildingData?: any): Promise<any> => {
   try {
@@ -319,6 +359,21 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
     }
   };
   
+  // Helper function to format building types for display
+  const formatBuildingType = (type: string): string => {
+    if (!type) return 'Building';
+    
+    // Replace underscores and hyphens with spaces
+    let formatted = type.replace(/[_-]/g, ' ');
+    
+    // Capitalize each word
+    formatted = formatted.split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+    
+    return formatted;
+  };
+  
   // Early return if not visible or no selected building
   if (!visible || !selectedBuildingId) return null;
   
@@ -367,55 +422,45 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
             {/* Building Definition Information - MOVED TO TOP */}
             {buildingDefinition && (
               <>
-                {/* Name and Category */}
-                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Building Information</h3>
-                  
-                  {buildingDefinition.name && (
-                    <div className="mb-2">
-                      <span className="text-gray-700 font-medium">Name:</span>
-                      <span className="ml-2 font-serif text-lg font-semibold text-amber-800">{buildingDefinition.name}</span>
-                    </div>
-                  )}
-                  
-                  <div className="grid grid-cols-2 gap-2 mt-3">
-                    {buildingDefinition.category && (
-                      <div className="mb-2">
-                        <span className="text-gray-700 font-medium">Category:</span>
-                        <span className="ml-2 text-amber-700">{buildingDefinition.category}</span>
-                      </div>
-                    )}
-                    
-                    {buildingDefinition.subcategory && (
-                      <div className="mb-2">
-                        <span className="text-gray-700 font-medium">Subcategory:</span>
-                        <span className="ml-2 text-amber-700">{buildingDefinition.subcategory}</span>
-                      </div>
-                    )}
+                {/* Building Image - Add this at the top of the building information section */}
+                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200 mb-4">
+                  <div className="relative w-full h-48 overflow-hidden rounded-lg mb-3">
+                    <img 
+                      src={getBuildingImagePath(building.type, building.variant)}
+                      alt={buildingDefinition.name || formatBuildingType(building.type)}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        console.error('Error loading building image:', e);
+                        e.currentTarget.src = '/images/buildings/default_building.jpg';
+                      }}
+                    />
                   </div>
                   
-                  {buildingDefinition.maintenanceCost !== undefined && (
-                    <div className="mt-3 flex justify-between items-center bg-amber-50 p-2 rounded-lg">
-                      <span className="text-gray-700 font-medium">Maintenance Cost:</span>
-                      <span className="font-semibold text-amber-800">
-                        {buildingDefinition.maintenanceCost.toLocaleString()} ⚜️ ducats/day
-                      </span>
-                    </div>
+                  <h3 className="text-xl font-serif font-semibold text-amber-800 mb-2">
+                    {buildingDefinition.name || formatBuildingType(building.type)}
+                  </h3>
+                  
+                  {buildingDefinition.shortDescription && (
+                    <p className="text-gray-700 mb-3">{buildingDefinition.shortDescription}</p>
+                  )}
+                  
+                  {buildingDefinition.flavorText && (
+                    <p className="italic text-gray-600 border-l-4 border-amber-200 pl-3 py-1">
+                      "{buildingDefinition.flavorText}"
+                    </p>
                   )}
                 </div>
                 
-                {/* Short Description */}
-                {buildingDefinition.shortDescription && (
-                  <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-                    <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Description</h3>
-                    <p className="text-gray-700">{buildingDefinition.shortDescription}</p>
-                    
-                    {/* Flavor Text */}
-                    {buildingDefinition.flavorText && (
-                      <p className="mt-3 text-gray-600 italic border-l-4 border-amber-200 pl-3 py-1">
-                        "{buildingDefinition.flavorText}"
-                      </p>
-                    )}
+                {/* Maintenance Cost */}
+                {buildingDefinition.maintenanceCost !== undefined && (
+                  <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200 mb-4">
+                    <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Maintenance</h3>
+                    <div className="flex justify-between items-center bg-amber-50 p-2 rounded-lg">
+                      <span className="text-gray-700 font-medium">Daily Cost:</span>
+                      <span className="font-semibold text-amber-800">
+                        {buildingDefinition.maintenanceCost.toLocaleString()} ⚜️ ducats
+                      </span>
+                    </div>
                   </div>
                 )}
                 
