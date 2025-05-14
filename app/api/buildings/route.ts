@@ -511,6 +511,46 @@ export async function GET(request: Request) {
     
     // Always add debug buildings to ensure we have something visible
     console.log('%c Adding debug buildings regardless of Airtable data', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
+    
+    // Add more detailed logging about the buildings being returned
+    console.log(`%c BUILDINGS API: Returning ${buildings.length} total buildings to client`, 'background: #FF5500; color: white; padding: 4px 8px; font-weight: bold; border-radius: 4px;');
+
+    // Log a breakdown of building types
+    const buildingTypeCount = buildings.reduce((acc, building) => {
+      acc[building.type] = (acc[building.type] || 0) + 1;
+      return acc;
+    }, {});
+    console.log('%c BUILDINGS API: Building types breakdown:', 'background: #FF5500; color: white; padding: 4px 8px; font-weight: bold; border-radius: 4px;');
+    console.table(buildingTypeCount);
+
+    // Log position format statistics
+    const positionStats = {
+      total: buildings.length,
+      withPosition: 0,
+      withLatLng: 0,
+      withXYZ: 0,
+      withoutPosition: 0
+    };
+
+    buildings.forEach(building => {
+      if (!building.position) {
+        positionStats.withoutPosition++;
+        return;
+      }
+      
+      positionStats.withPosition++;
+      
+      if (typeof building.position === 'object') {
+        if ('lat' in building.position && 'lng' in building.position) {
+          positionStats.withLatLng++;
+        } else if ('x' in building.position) {
+          positionStats.withXYZ++;
+        }
+      }
+    });
+
+    console.log('%c BUILDINGS API: Position format statistics:', 'background: #FF5500; color: white; padding: 4px 8px; font-weight: bold; border-radius: 4px;');
+    console.table(positionStats);
       
     // Add your specific building for debugging - add multiple copies at different positions
     const debugBuilding1: Building = {

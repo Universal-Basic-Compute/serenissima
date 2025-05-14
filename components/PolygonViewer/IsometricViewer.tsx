@@ -557,12 +557,12 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           console.log('IsometricViewer: Building points service loaded successfully');
         }
         
-        console.log('Fetching buildings from API...');
+        console.log('%c FETCHING BUILDINGS: Starting API request', 'background: #4CAF50; color: white; padding: 4px 8px; font-weight: bold; border-radius: 4px;');
         const response = await fetch('/api/buildings');
         if (response.ok) {
           const data = await response.json();
           if (data.buildings) {
-            console.log(`Received ${data.buildings.length} buildings from API`);
+            console.log(`%c BUILDINGS RECEIVED: ${data.buildings.length} buildings from API`, 'background: #4CAF50; color: white; padding: 4px 8px; font-weight: bold; border-radius: 4px;');
             
             // Process buildings to ensure they all have position data
             const processedBuildings = data.buildings.map((building: any) => {
@@ -625,7 +625,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             });
             
             setBuildings(processedBuildings);
-            console.log(`Processed ${processedBuildings.length} buildings, checking for position data...`);
+            console.log(`%c BUILDINGS PROCESSED: ${processedBuildings.length} buildings`, 'background: #4CAF50; color: white; padding: 4px 8px; font-weight: bold; border-radius: 4px;');
             
             // Log how many buildings have valid position data
             const buildingsWithPosition = processedBuildings.filter(b => 
@@ -634,6 +634,23 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
                (typeof b.position === 'string' && b.position.includes('lat')))
             );
             console.log(`${buildingsWithPosition.length} of ${processedBuildings.length} buildings have valid position data`);
+            
+            // Add a breakdown of building types
+            const buildingTypeCount = processedBuildings.reduce((acc, building) => {
+              acc[building.type] = (acc[building.type] || 0) + 1;
+              return acc;
+            }, {});
+            console.log('%c BUILDINGS TYPES:', 'background: #4CAF50; color: white; padding: 4px 8px; font-weight: bold; border-radius: 4px;');
+            console.table(buildingTypeCount);
+
+            // Add position format statistics
+            const positionStats = {
+              total: processedBuildings.length,
+              withValidPosition: buildingsWithPosition.length,
+              withoutValidPosition: processedBuildings.length - buildingsWithPosition.length
+            };
+            console.log('%c BUILDINGS POSITION STATS:', 'background: #4CAF50; color: white; padding: 4px 8px; font-weight: bold; border-radius: 4px;');
+            console.table(positionStats);
             
             // Dispatch event to ensure buildings are visible
             window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
@@ -2168,6 +2185,29 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     
     // Draw buildings in all views, not just buildings view
     if (buildings.length > 0) {
+      // Count how many buildings will be drawn
+      const buildingsWithValidPosition = buildings.filter(building => {
+        if (!building.position) return false;
+        
+        let position;
+        if (typeof building.position === 'string') {
+          try {
+            position = JSON.parse(building.position);
+          } catch (e) {
+            return false;
+          }
+        } else {
+          position = building.position;
+        }
+        
+        return (
+          ('lat' in position && 'lng' in position) || 
+          ('x' in position && 'z' in position)
+        );
+      });
+
+      console.log(`%c DRAWING BUILDINGS: ${buildingsWithValidPosition.length} of ${buildings.length} buildings have valid positions for drawing`, 'background: #9C27B0; color: white; padding: 4px 8px; font-weight: bold; border-radius: 4px;');
+      
       buildings.forEach(building => {
         if (!building.position) return;
             
@@ -2258,6 +2298,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           isoPos.y
         );
       });
+      
+      console.log(`%c BUILDINGS DRAWN: Completed drawing ${buildingsWithValidPosition.length} buildings`, 'background: #9C27B0; color: white; padding: 4px 8px; font-weight: bold; border-radius: 4px;');
     }
     
     // Draw transport points if in transport view
