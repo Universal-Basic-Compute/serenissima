@@ -4,10 +4,11 @@ Script to bootstrap Venice's economy by placing ~50 buildings at random building
 All buildings will be owned by ConsiglioDeiDieci.
 
 Usage:
-    python bootstrapBuildings.py [--dry-run]
+    python bootstrapBuildings.py [--dry-run] [--public]
 
 Options:
     --dry-run    Show what would be created without actually creating buildings
+    --public     Create only public infrastructure (bridges, docks, cisterns)
 """
 
 import os
@@ -302,9 +303,9 @@ def create_building(tables, building_type: str, point: Dict, owner: str, dry_run
         print(f"Error creating building {building_type}: {str(e)}")
         return None
 
-def bootstrap_buildings(dry_run: bool = False):
+def bootstrap_buildings(dry_run: bool = False, public_mode: bool = False):
     """Main function to bootstrap Venice with buildings."""
-    print(f"Starting building bootstrap process (dry_run={dry_run})")
+    print(f"Starting building bootstrap process (dry_run={dry_run}, public_mode={public_mode})")
     
     # Initialize Airtable
     tables = initialize_airtable()
@@ -330,30 +331,6 @@ def bootstrap_buildings(dry_run: bool = False):
         print("No available building points found, exiting")
         return
     
-    # Get building types
-    building_types = get_building_types()
-    
-    # Get bootstrap buildings
-    bootstrap_buildings = get_bootstrap_buildings()
-    
-    # Calculate total buildings to create
-    total_buildings = sum(building["count"] for building in bootstrap_buildings)
-    print(f"Planning to create {total_buildings} buildings")
-    
-    # Check if we have enough points
-    null_points_needed = sum(b["count"] for b in bootstrap_buildings if b["pointType"] is None)
-    canal_points_needed = sum(b["count"] for b in bootstrap_buildings if b["pointType"] == "canal")
-    bridge_points_needed = sum(b["count"] for b in bootstrap_buildings if b["pointType"] == "bridge")
-    
-    if len(available_points["null"]) < null_points_needed:
-        print(f"Warning: Not enough regular building points. Need {null_points_needed}, have {len(available_points['null'])}")
-    
-    if len(available_points["canal"]) < canal_points_needed:
-        print(f"Warning: Not enough canal points. Need {canal_points_needed}, have {len(available_points['canal'])}")
-    
-    if len(available_points["bridge"]) < bridge_points_needed:
-        print(f"Warning: Not enough bridge points. Need {bridge_points_needed}, have {len(available_points['bridge'])}")
-    
     # Set the owner to ConsiglioDeiDieci
     owner = "ConsiglioDeiDieci"
     
@@ -361,38 +338,103 @@ def bootstrap_buildings(dry_run: bool = False):
     created_buildings = []
     failed_buildings = []
     
-    for building in bootstrap_buildings:
-        building_type = building["type"]
-        point_type = "null" if building["pointType"] is None else building["pointType"]
-        count = building["count"]
+    if public_mode:
+        # In public mode, create only public infrastructure
+        public_buildings = [
+            {"type": "bridge", "pointType": "bridge", "count": 10},
+            {"type": "public_dock", "pointType": "canal", "count": 10},
+            {"type": "public_well", "pointType": None, "count": 10}  # Cisterns/wells
+        ]
         
-        print(f"Creating {count} {building_type} buildings (point type: {point_type})")
+        print(f"Public mode: Creating public infrastructure only")
         
-        # Check if we have enough points of this type
-        if len(available_points[point_type]) < count:
-            print(f"Warning: Not enough {point_type} points for {building_type}. Need {count}, have {len(available_points[point_type])}")
-            count = len(available_points[point_type])
+        for building in public_buildings:
+            building_type = building["type"]
+            point_type = "null" if building["pointType"] is None else building["pointType"]
+            count = building["count"]
+            
+            print(f"Creating {count} {building_type} buildings (point type: {point_type})")
+            
+            # Check if we have enough points of this type
+            if len(available_points[point_type]) < count:
+                print(f"Warning: Not enough {point_type} points for {building_type}. Need {count}, have {len(available_points[point_type])}")
+                count = len(available_points[point_type])
+            
+            # Create the buildings
+            for i in range(count):
+                if not available_points[point_type]:
+                    print(f"Ran out of {point_type} points, skipping remaining {building_type} buildings")
+                    break
+                
+                # Get a random point
+                point_index = random.randint(0, len(available_points[point_type]) - 1)
+                point = available_points[point_type].pop(point_index)
+                
+                # Create the building
+                new_building = create_building(tables, building_type, point, owner, dry_run)
+                
+                if new_building:
+                    created_buildings.append(new_building)
+                else:
+                    failed_buildings.append({
+                        "type": building_type,
+                        "point": point
+                    })
+    else:
+        # In normal mode, use the bootstrap buildings list
+        bootstrap_buildings = get_bootstrap_buildings()
         
-        # Create the buildings
-        for i in range(count):
-            if not available_points[point_type]:
-                print(f"Ran out of {point_type} points, skipping remaining {building_type} buildings")
-                break
+        # Calculate total buildings to create
+        total_buildings = sum(building["count"] for building in bootstrap_buildings)
+        print(f"Planning to create {total_buildings} buildings")
+        
+        # Check if we have enough points
+        null_points_needed = sum(b["count"] for b in bootstrap_buildings if b["pointType"] is None)
+        canal_points_needed = sum(b["count"] for b in bootstrap_buildings if b["pointType"] == "canal")
+        bridge_points_needed = sum(b["count"] for b in bootstrap_buildings if b["pointType"] == "bridge")
+        
+        if len(available_points["null"]) < null_points_needed:
+            print(f"Warning: Not enough regular building points. Need {null_points_needed}, have {len(available_points['null'])}")
+        
+        if len(available_points["canal"]) < canal_points_needed:
+            print(f"Warning: Not enough canal points. Need {canal_points_needed}, have {len(available_points['canal'])}")
+        
+        if len(available_points["bridge"]) < bridge_points_needed:
+            print(f"Warning: Not enough bridge points. Need {bridge_points_needed}, have {len(available_points['bridge'])}")
+        
+        # Create buildings
+        for building in bootstrap_buildings:
+            building_type = building["type"]
+            point_type = "null" if building["pointType"] is None else building["pointType"]
+            count = building["count"]
             
-            # Get a random point
-            point_index = random.randint(0, len(available_points[point_type]) - 1)
-            point = available_points[point_type].pop(point_index)
+            print(f"Creating {count} {building_type} buildings (point type: {point_type})")
             
-            # Create the building
-            new_building = create_building(tables, building_type, point, owner, dry_run)
+            # Check if we have enough points of this type
+            if len(available_points[point_type]) < count:
+                print(f"Warning: Not enough {point_type} points for {building_type}. Need {count}, have {len(available_points[point_type])}")
+                count = len(available_points[point_type])
             
-            if new_building:
-                created_buildings.append(new_building)
-            else:
-                failed_buildings.append({
-                    "type": building_type,
-                    "point": point
-                })
+            # Create the buildings
+            for i in range(count):
+                if not available_points[point_type]:
+                    print(f"Ran out of {point_type} points, skipping remaining {building_type} buildings")
+                    break
+                
+                # Get a random point
+                point_index = random.randint(0, len(available_points[point_type]) - 1)
+                point = available_points[point_type].pop(point_index)
+                
+                # Create the building
+                new_building = create_building(tables, building_type, point, owner, dry_run)
+                
+                if new_building:
+                    created_buildings.append(new_building)
+                else:
+                    failed_buildings.append({
+                        "type": building_type,
+                        "point": point
+                    })
     
     # Print summary
     print("\nBootstrap Summary:")
@@ -421,7 +463,8 @@ def bootstrap_buildings(dry_run: bool = False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Bootstrap Venice with buildings")
     parser.add_argument("--dry-run", action="store_true", help="Show what would be created without actually creating buildings")
+    parser.add_argument("--public", action="store_true", help="Create only public infrastructure (bridges, docks, cisterns)")
     
     args = parser.parse_args()
     
-    bootstrap_buildings(args.dry_run)
+    bootstrap_buildings(args.dry_run, args.public)
