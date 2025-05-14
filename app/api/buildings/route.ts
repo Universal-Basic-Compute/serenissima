@@ -27,13 +27,16 @@ export async function POST(request: Request) {
       );
     }
     
-    // Ensure position is properly formatted
+    // Check if point_id is provided
+    const pointId = data.point_id;
+    
+    // Ensure position is properly formatted if provided
     let position = data.position;
     
-    // If position is missing, return an error
-    if (!position) {
+    // If neither position nor point_id is provided, return an error
+    if (!position && !pointId) {
       return NextResponse.json(
-        { success: false, error: 'Position is required' },
+        { success: false, error: 'Either position or point_id is required' },
         { status: 400 }
       );
     }
@@ -71,21 +74,35 @@ export async function POST(request: Request) {
       .replace(/'/g, '-') // Replace apostrophes with hyphens
       .replace(/\s+/g, '-'); // Replace spaces with hyphens
     
-    // Create a record in Airtable - ensure position is stored as a string
+    // Create a record in Airtable
+    const buildingData: any = {
+      BuildingId: data.id || `building-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+      Type: normalizedType,
+      Land: data.land_id,
+      Variant: data.variant || 'model',
+      Rotation: data.rotation || 0,
+      User: data.owner || data.created_by || 'system',
+      CreatedAt: data.created_at || new Date().toISOString(),
+      LeaseAmount: data.lease_amount || 0,
+      RentAmount: data.rent_amount || 0,
+      Occupant: data.occupant || ''
+    };
+    
+    // If point_id is provided, store it in the Point field
+    if (pointId) {
+      buildingData.Point = pointId;
+      
+      // Store position in Notes as JSON if available
+      if (position) {
+        buildingData.Notes = JSON.stringify({ position });
+      }
+    } else {
+      // If no point_id, store position in Position field (legacy format)
+      buildingData.Position = JSON.stringify(position);
+    }
+    
     const record = await new Promise((resolve, reject) => {
-      base('BUILDINGS').create({
-        BuildingId: data.id || `building-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
-        Type: normalizedType,
-        Land: data.land_id,
-        Variant: data.variant || 'model',
-        Position: JSON.stringify(position), // Always stringify to ensure consistent format
-        Rotation: data.rotation || 0,
-        User: data.owner || data.created_by || 'system',
-        CreatedAt: data.created_at || new Date().toISOString(),
-        LeaseAmount: data.lease_amount || 0,
-        RentAmount: data.rent_amount || 0,
-        Occupant: data.occupant || ''
-      }, function(err, record) {
+      base('BUILDINGS').create(buildingData, function(err, record) {
         if (err) {
           console.error('Error creating record in Airtable:', err);
           reject(err);
@@ -103,7 +120,9 @@ export async function POST(request: Request) {
         Type: string;
         Land: string;
         Variant?: string;
-        Position: string;
+        Position?: string;
+        Point?: string;
+        Notes?: string;
         Rotation?: number;
         User: string;
         CreatedAt: string;
@@ -115,12 +134,36 @@ export async function POST(request: Request) {
 
     // Transform the Airtable record to our format
     const typedRecord = record as AirtableRecord;
+    
+    // Try to get position from Notes field first (new format)
+    let position = null;
+    if (typedRecord.fields.Notes) {
+      try {
+        const notes = JSON.parse(typedRecord.fields.Notes);
+        if (notes.position) {
+          position = notes.position;
+        }
+      } catch (e) {
+        // If Notes isn't valid JSON, continue to next method
+      }
+    }
+    
+    // If position not found in Notes, try Position field (old format)
+    if (!position && typedRecord.fields.Position) {
+      try {
+        position = JSON.parse(typedRecord.fields.Position);
+      } catch (e) {
+        console.error('Error parsing Position JSON:', e);
+      }
+    }
+    
     const building = {
       id: typedRecord.fields.BuildingId,
       type: typedRecord.fields.Type,
       land_id: typedRecord.fields.Land,
       variant: typedRecord.fields.Variant || 'model',
-      position: JSON.parse(typedRecord.fields.Position), // Parse back to object
+      position: position,
+      point_id: typedRecord.fields.Point || null, // Include point_id in response
       rotation: typedRecord.fields.Rotation || 0,
       owner: typedRecord.fields.User,
       created_at: typedRecord.fields.CreatedAt,
@@ -292,27 +335,41 @@ export async function GET(request: Request) {
     const buildings = typedRecords.map(record => {
       const fields = record.fields;
       
-      // Parse position JSON if it's a string
-      let position: { lat?: number; lng?: number; x?: number; y?: number; z?: number; } = 
-        typeof fields.Position === 'string' 
-          ? {} 
-          : fields.Position as { lat?: number; lng?: number; x?: number; y?: number; z?: number; };
-          
-      if (typeof fields.Position === 'string') {
+      // Try to get position from Notes field first (new format)
+      let position: { lat?: number; lng?: number; x?: number; y?: number; z?: number; } = {};
+      
+      if (fields.Notes) {
         try {
-          position = JSON.parse(fields.Position);
-          console.log(`[API] Building ${fields.BuildingId || record.id} parsed position:`, position);
-        } catch (error) {
-          console.error('[API] Error parsing position JSON:', error);
-          console.error('[API] Original position string:', fields.Position);
-          
-          // Instead of using a default position, generate a random lat/lng position
-          // This ensures each building has unique coordinates
-          position = { 
-            lat: 45.4371 + (Math.random() * 0.01 - 0.005), // Random lat near Venice center
-            lng: 12.3358 + (Math.random() * 0.01 - 0.005)  // Random lng near Venice center
-          };
-          console.log(`[API] Generated random position for ${fields.BuildingId || record.id}:`, position);
+          const notes = JSON.parse(fields.Notes);
+          if (notes.position) {
+            position = notes.position;
+            console.log(`[API] Building ${fields.BuildingId || record.id} has position in Notes:`, position);
+          }
+        } catch (e) {
+          // If Notes isn't valid JSON, continue to next method
+        }
+      }
+      
+      // If position not found in Notes, try Position field (old format)
+      if ((!position || Object.keys(position).length === 0) && fields.Position) {
+        if (typeof fields.Position === 'string') {
+          try {
+            position = JSON.parse(fields.Position);
+            console.log(`[API] Building ${fields.BuildingId || record.id} parsed position:`, position);
+          } catch (error) {
+            console.error('[API] Error parsing position JSON:', error);
+            console.error('[API] Original position string:', fields.Position);
+            
+            // Instead of using a default position, generate a random lat/lng position
+            // This ensures each building has unique coordinates
+            position = { 
+              lat: 45.4371 + (Math.random() * 0.01 - 0.005), // Random lat near Venice center
+              lng: 12.3358 + (Math.random() * 0.01 - 0.005)  // Random lng near Venice center
+            };
+            console.log(`[API] Generated random position for ${fields.BuildingId || record.id}:`, position);
+          }
+        } else if (typeof fields.Position === 'object') {
+          position = fields.Position as { lat?: number; lng?: number; x?: number; y?: number; z?: number; };
         }
       }
       
@@ -371,6 +428,7 @@ export async function GET(request: Request) {
         land_id: fields.Land,
         variant: fields.Variant || 'model',
         position: position,
+        point_id: fields.Point || null, // Include point_id in response
         rotation: fields.Rotation || 0,
         owner: fields.User,
         created_at: fields.CreatedAt,

@@ -1,0 +1,140 @@
+import { eventBus, EventTypes } from '../eventBus';
+
+// Extend EventTypes to include building points events
+declare module '../eventBus' {
+  interface EventTypes {
+    BUILDING_POINTS_LOADED: string;
+  }
+}
+
+// Define the event type
+EventTypes.BUILDING_POINTS_LOADED = 'BUILDING_POINTS_LOADED';
+
+export class BuildingPointsService {
+  private static instance: BuildingPointsService;
+  private buildingPoints: Record<string, { lat: number, lng: number }> = {};
+  private canalPoints: Record<string, { lat: number, lng: number }> = {};
+  private bridgePoints: Record<string, { lat: number, lng: number }> = {};
+  private isLoaded: boolean = false;
+  private isLoading: boolean = false;
+  
+  /**
+   * Get the singleton instance
+   */
+  public static getInstance(): BuildingPointsService {
+    if (!BuildingPointsService.instance) {
+      BuildingPointsService.instance = new BuildingPointsService();
+    }
+    return BuildingPointsService.instance;
+  }
+  
+  /**
+   * Load all building points from the API
+   */
+  public async loadBuildingPoints(): Promise<void> {
+    if (this.isLoaded || this.isLoading) return;
+    
+    this.isLoading = true;
+    
+    try {
+      console.log('Loading building points from API...');
+      const response = await fetch('/api/building-points');
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch building points: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        this.buildingPoints = data.buildingPoints || {};
+        this.canalPoints = data.canalPoints || {};
+        this.bridgePoints = data.bridgePoints || {};
+        this.isLoaded = true;
+        
+        console.log(`Loaded ${Object.keys(this.buildingPoints).length} building points, ${Object.keys(this.canalPoints).length} canal points, and ${Object.keys(this.bridgePoints).length} bridge points`);
+        
+        // Emit event to notify other components
+        eventBus.emit(EventTypes.BUILDING_POINTS_LOADED, {
+          buildingPointsCount: Object.keys(this.buildingPoints).length,
+          canalPointsCount: Object.keys(this.canalPoints).length,
+          bridgePointsCount: Object.keys(this.bridgePoints).length
+        });
+      } else {
+        throw new Error(data.error || 'Unknown error loading building points');
+      }
+    } catch (error) {
+      console.error('Error loading building points:', error);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+  
+  /**
+   * Get position for a point ID
+   */
+  public getPositionForPoint(pointId: string): { lat: number, lng: number } | null {
+    if (!pointId) return null;
+    
+    // Check all point collections
+    if (this.buildingPoints[pointId]) {
+      return this.buildingPoints[pointId];
+    }
+    
+    if (this.canalPoints[pointId]) {
+      return this.canalPoints[pointId];
+    }
+    
+    if (this.bridgePoints[pointId]) {
+      return this.bridgePoints[pointId];
+    }
+    
+    // If point ID not found, try to parse it as a point-{lat}-{lng} format
+    if (pointId.startsWith('point-')) {
+      const parts = pointId.split('-');
+      if (parts.length >= 3) {
+        const lat = parseFloat(parts[1]);
+        const lng = parseFloat(parts[2]);
+        if (!isNaN(lat) && !isNaN(lng)) {
+          return { lat, lng };
+        }
+      }
+    }
+    
+    // If point ID not found, try to parse it as a canal-{lat}-{lng} format
+    if (pointId.startsWith('canal-')) {
+      const parts = pointId.split('-');
+      if (parts.length >= 3) {
+        const lat = parseFloat(parts[1]);
+        const lng = parseFloat(parts[2]);
+        if (!isNaN(lat) && !isNaN(lng)) {
+          return { lat, lng };
+        }
+      }
+    }
+    
+    // If point ID not found, try to parse it as a bridge-{lat}-{lng} format
+    if (pointId.startsWith('bridge-')) {
+      const parts = pointId.split('-');
+      if (parts.length >= 3) {
+        const lat = parseFloat(parts[1]);
+        const lng = parseFloat(parts[2]);
+        if (!isNaN(lat) && !isNaN(lng)) {
+          return { lat, lng };
+        }
+      }
+    }
+    
+    return null;
+  }
+  
+  /**
+   * Check if building points are loaded
+   */
+  public isPointsLoaded(): boolean {
+    return this.isLoaded;
+  }
+}
+
+// Export singleton instance
+export const buildingPointsService = BuildingPointsService.getInstance();
