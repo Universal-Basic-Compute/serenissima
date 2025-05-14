@@ -96,6 +96,43 @@ The AI land bidding system:
 - Provides competition for human players in the land market
 - Ensures that valuable lands receive appropriate bids reflecting their economic value
 
+### Building Construction
+
+**Implementation**: `backend/ais/buildbuildings.py`  
+**Schedule**: Daily at 8:00 PM UTC
+
+AI users actively develop lands they own by constructing buildings:
+
+#### Process:
+
+1. The script identifies all users marked as AI in the system
+2. For each AI user, it checks:
+   - Their current compute balance
+   - Lands they own
+   - Existing buildings on those lands
+   - Available building points on each land
+
+3. For each land with available building points, AI users will:
+   - Evaluate which building types can fit within the remaining points
+   - Prioritize buildings with higher income potential
+   - Construct buildings if they have sufficient compute (at least twice the building cost)
+
+4. When a building is constructed:
+   - The AI user's compute balance is reduced by the building cost
+   - A transaction record is created for the building purchase
+   - The land owner (if different from the AI) receives a notification
+
+5. An admin notification is created with statistics about all building activity, showing the number of buildings constructed by each AI user
+
+#### Economic Impact:
+
+The AI building construction system:
+- Encourages land development and efficient use of building points
+- Creates a more dynamic and visually interesting game world
+- Generates income for AI users through building operations
+- Provides lease income to land owners (including other players)
+- Reduces the Vigesima Variabilis tax rate on developed lands
+
 ## AI User Management
 
 AI users are created and managed through the Airtable database:
