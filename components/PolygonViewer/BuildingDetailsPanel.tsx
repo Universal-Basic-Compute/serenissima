@@ -58,44 +58,6 @@ const getBuildingImagePath = async (type: string, variant?: string): Promise<str
       }
     }
     
-    // If flat path fails, try the API search
-    try {
-      console.log(`Trying API search for building type: ${type}`);
-      const response = await fetch(`/api/search-building-image?type=${encodeURIComponent(type)}`);
-      if (response.ok) {
-        const data = await response.json();
-        if (data && data.imagePath) {
-          console.log(`Found image path via API search: ${data.imagePath}`);
-          return data.imagePath;
-        } else {
-          console.log(`API search returned no results for type: ${type}`);
-        }
-      } else {
-        console.log(`API search failed with status: ${response.status}`);
-      }
-    } catch (error) {
-      console.log('Error searching for building image via API:', error);
-    }
-    
-    // Try hierarchical paths based on common categories
-    const categories = ['commercial', 'residential', 'industrial', 'public', 'military', 'religious'];
-    for (const category of categories) {
-      for (const normalizedType of normalizedTypes) {
-        const hierarchicalPath = `/images/buildings/${category}/${normalizedType}.jpg`;
-        console.log(`Trying hierarchical path: ${hierarchicalPath}`);
-        
-        try {
-          const response = await fetch(hierarchicalPath, { method: 'HEAD' });
-          if (response.ok) {
-            console.log(`Found image at hierarchical path: ${hierarchicalPath}`);
-            return hierarchicalPath;
-          }
-        } catch (error) {
-          // Continue to next path
-        }
-      }
-    }
-    
     // If all else fails, use a default image
     console.log(`No image found for building type: ${type}, using default market_stall.jpg`);
     return '/images/buildings/market_stall.jpg';
