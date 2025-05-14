@@ -30,32 +30,22 @@ const getBuildingImagePath = async (type: string, variant?: string): Promise<str
   try {
     console.log(`Looking for image for building type: ${type}, variant: ${variant || 'none'}`);
     
-    // Create an array of possible normalized types
-    const normalizedTypes = [
-      type.toLowerCase().replace(/[\s-_]+/g, ''),                // Remove all spaces, hyphens, underscores
-      type.toLowerCase().replace(/\s+/g, '_'),                   // Replace spaces with underscores
-      type.toLowerCase().replace(/\s+/g, '-'),                   // Replace spaces with hyphens
-      type.toLowerCase().replace(/['\s]+/g, '_'),                // Replace apostrophes and spaces with underscores
-      type.toLowerCase().replace(/['\s]+/g, '')                  // Remove apostrophes and spaces
-    ];
+    // Use the type directly since it's already normalized
+    const normalizedType = type.toLowerCase().replace(/[\s-_]+/g, '');
+    console.log(`Using normalized type: ${normalizedType}`);
     
-    // Log all the normalized types we're going to try
-    console.log('Trying normalized types:', normalizedTypes);
+    // Try the direct flat path first
+    const flatImagePath = `/images/buildings/${normalizedType}.jpg`;
+    console.log(`Trying flat path: ${flatImagePath}`);
     
-    // Try each normalized type with the flat structure
-    for (const normalizedType of normalizedTypes) {
-      const flatImagePath = `/images/buildings/${normalizedType}.jpg`;
-      console.log(`Trying flat path: ${flatImagePath}`);
-      
-      try {
-        const response = await fetch(flatImagePath, { method: 'HEAD' });
-        if (response.ok) {
-          console.log(`Found image at flat path: ${flatImagePath}`);
-          return flatImagePath;
-        }
-      } catch (error) {
-        console.log(`Image not found at ${flatImagePath}`);
+    try {
+      const response = await fetch(flatImagePath, { method: 'HEAD' });
+      if (response.ok) {
+        console.log(`Found image at flat path: ${flatImagePath}`);
+        return flatImagePath;
       }
+    } catch (error) {
+      console.log(`Image not found at ${flatImagePath}`);
     }
     
     // If all else fails, use a default image
