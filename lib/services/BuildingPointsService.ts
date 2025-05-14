@@ -65,8 +65,61 @@ export class BuildingPointsService {
       }
     } catch (error) {
       console.error('Error loading building points:', error);
+      
+      // If we failed to load points, try to regenerate them
+      if (confirm('Failed to load building points. Would you like to regenerate them?')) {
+        await this.regenerateBuildingPoints();
+      }
     } finally {
       this.isLoading = false;
+    }
+  }
+  
+  /**
+   * Regenerate building points by calling the API
+   */
+  public async regenerateBuildingPoints(): Promise<boolean> {
+    try {
+      console.log('Requesting building points regeneration...');
+      
+      const response = await fetch('/api/building-points', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ regenerate: true }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to regenerate building points: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        console.log('Building points regenerated successfully');
+        
+        // Update our local cache with the new points
+        this.buildingPoints = data.buildingPoints || {};
+        this.canalPoints = data.canalPoints || {};
+        this.bridgePoints = data.bridgePoints || {};
+        this.isLoaded = true;
+        
+        // Emit event to notify other components
+        eventBus.emit(EventTypes.BUILDING_POINTS_LOADED, {
+          buildingPointsCount: Object.keys(this.buildingPoints).length,
+          canalPointsCount: Object.keys(this.canalPoints).length,
+          bridgePointsCount: Object.keys(this.bridgePoints).length,
+          regenerated: true
+        });
+        
+        return true;
+      } else {
+        throw new Error(data.error || 'Unknown error regenerating building points');
+      }
+    } catch (error) {
+      console.error('Error regenerating building points:', error);
+      return false;
     }
   }
   

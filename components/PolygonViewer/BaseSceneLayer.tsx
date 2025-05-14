@@ -9,13 +9,15 @@ import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 declare module '@/lib/utils/eventBus' {
   interface EventTypes {
     SCENE_BASE_RENDERED: string;
+    BUILDING_POINTS_GENERATED: string;
   }
 }
 
 // Ensure TypeScript recognizes the extended EventTypes
 const ExtendedEventTypes = {
   ...EventTypes,
-  SCENE_BASE_RENDERED: 'SCENE_BASE_RENDERED'
+  SCENE_BASE_RENDERED: 'SCENE_BASE_RENDERED',
+  BUILDING_POINTS_GENERATED: 'BUILDING_POINTS_GENERATED'
 };
 import { buildingRendererManager } from '@/lib/services/BuildingRendererManager';
 
@@ -151,7 +153,28 @@ const BaseSceneLayer: React.FC<BaseSceneLayerProps> = ({
       }, 2000); // Increase from 1000ms to 2000ms
     }, 3000); // Increase from 1000ms to 3000ms
 
+    // Listen for building points generation events
+    const handleBuildingPointsGenerated = (data: any) => {
+      console.log('BaseSceneLayer: Building points regenerated, refreshing buildings');
+      if (buildingRendererManager && buildingsInitializedRef.current) {
+        buildingRendererManager.refreshBuildings()
+          .then(() => {
+            console.log('BaseSceneLayer: Buildings refreshed after point regeneration');
+            // Ensure buildings are visible
+            window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+          })
+          .catch(error => {
+            console.error('BaseSceneLayer: Error refreshing buildings after point regeneration:', error);
+          });
+      }
+    };
+    
+    eventBus.subscribe(ExtendedEventTypes.BUILDING_POINTS_GENERATED, handleBuildingPointsGenerated);
+
     // No cleanup needed here - buildings will be cleaned up with the scene
+    return () => {
+      eventBus.unsubscribe(ExtendedEventTypes.BUILDING_POINTS_GENERATED, handleBuildingPointsGenerated);
+    };
   }, [scene, isInitializedRef.current]);
 
   // Update water quality when it changes

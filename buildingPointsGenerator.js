@@ -208,9 +208,85 @@ function generateBuildingPoints(polygon, spacing = SPACING) {
   const area = calculatePolygonArea(coordinates);
   const expectedPoints = area / (spacing * spacing);
   
+  // Generate canal points along water edges if they don't already exist
+  if (!updatedPolygon.canalPoints) {
+    updatedPolygon.canalPoints = generateCanalPoints(coordinates, spacing);
+  }
+  
+  // Generate bridge points if they don't already exist
+  if (!updatedPolygon.bridgePoints) {
+    updatedPolygon.bridgePoints = generateBridgePoints(coordinates, spacing);
+  }
+  
   console.log(`Polygon ${polygon.historicalName || 'Unknown'}: Generated ${updatedPolygon.buildingPoints.length} points (expected ~${Math.floor(expectedPoints)})`);
+  console.log(`Canal points: ${updatedPolygon.canalPoints.length}, Bridge points: ${updatedPolygon.bridgePoints.length}`);
   
   return updatedPolygon;
+}
+
+/**
+ * Generate canal points along water edges
+ */
+function generateCanalPoints(coordinates, spacing = SPACING) {
+  const canalPoints = [];
+  
+  // For each edge of the polygon
+  for (let i = 0; i < coordinates.length; i++) {
+    const j = (i + 1) % coordinates.length;
+    const start = coordinates[i];
+    const end = coordinates[j];
+    
+    // Calculate distance between vertices
+    const distance = calculateDistance(start, end);
+    
+    // Calculate number of points to place on this edge
+    const numPoints = Math.floor(distance / spacing);
+    
+    if (numPoints > 0) {
+      // Place points along the edge
+      for (let k = 1; k < numPoints; k++) {
+        const fraction = k / numPoints;
+        
+        // Interpolate point along edge
+        const point = {
+          edge: {
+            lat: start.lat + (end.lat - start.lat) * fraction,
+            lng: start.lng + (end.lng - start.lng) * fraction
+          },
+          type: 'canal'
+        };
+        
+        canalPoints.push(point);
+      }
+    }
+  }
+  
+  return canalPoints;
+}
+
+/**
+ * Generate bridge points at strategic locations
+ */
+function generateBridgePoints(coordinates, spacing = SPACING * 2) {
+  const bridgePoints = [];
+  
+  // For now, place bridge points at vertices with some probability
+  for (let i = 0; i < coordinates.length; i++) {
+    // Only place bridge points at some vertices (every 3rd vertex)
+    if (i % 3 === 0) {
+      const point = {
+        edge: {
+          lat: coordinates[i].lat,
+          lng: coordinates[i].lng
+        },
+        type: 'bridge'
+      };
+      
+      bridgePoints.push(point);
+    }
+  }
+  
+  return bridgePoints;
 }
 
 /**
@@ -218,6 +294,9 @@ function generateBuildingPoints(polygon, spacing = SPACING) {
  */
 function processPolygonFiles(directoryPath) {
   const files = fs.readdirSync(directoryPath);
+  let totalPoints = 0;
+  let totalCanals = 0;
+  let totalBridges = 0;
   
   for (const file of files) {
     if (file.endsWith('.json') && file.includes('polygon')) {
@@ -234,12 +313,18 @@ function processPolygonFiles(directoryPath) {
         // Write updated data back to file
         fs.writeFileSync(filePath, JSON.stringify(updatedPolygon, null, 2));
         
+        totalPoints += updatedPolygon.buildingPoints?.length || 0;
+        totalCanals += updatedPolygon.canalPoints?.length || 0;
+        totalBridges += updatedPolygon.bridgePoints?.length || 0;
+        
         console.log(`Updated ${file} with ${updatedPolygon.buildingPoints?.length || 0} building points`);
       } catch (error) {
         console.error(`Error processing ${file}:`, error);
       }
     }
   }
+  
+  console.log(`Generation complete! Total: ${totalPoints} building points, ${totalCanals} canal points, ${totalBridges} bridge points`);
 }
 
 // Main execution
@@ -247,3 +332,11 @@ const dataDirectory = process.argv[2] || './data';
 console.log(`Processing polygon files in ${dataDirectory}...`);
 processPolygonFiles(dataDirectory);
 console.log('Building points generation complete!');
+
+// If running in a Node.js environment with process.send, send a completion message
+if (typeof process !== 'undefined' && process.send) {
+  process.send({ 
+    status: 'complete',
+    message: 'Building points generation complete!'
+  });
+}
