@@ -2,10 +2,8 @@ import React, { useState, useEffect } from 'react';
 import * as THREE from 'three';
 import BuildingRenderer from './BuildingRenderer';
 import BuildingRendererManager from './BuildingRendererManager';
-import PlaceableObjectManager from '@/lib/components/PlaceableObjectManager';
 import { useBuildingMenu } from '@/hooks/useBuildingMenu';
-import { eventBus } from '@/lib/eventBus';
-import { EventTypes } from '@/lib/eventTypes';
+import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 import { FaWater, FaRoad, FaBuilding, FaShip } from 'react-icons/fa';
 import { normalizeCoordinates } from '@/components/PolygonViewer/utils';
 import { useSceneReady } from '@/lib/components/SceneReadyProvider';
@@ -187,32 +185,17 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
         <span>{window.__transportModeActive ? 'Transport Mode Active' : 'Transport Routes'}</span>
       </button>
       
-      {/* Placeable Object Manager - handles all object types */}
+      {/* Placeholder for object placement */}
       {placeableObjectType && (
-        <PlaceableObjectManager
-          scene={actualScene}
-          camera={actualCamera}
-          polygons={polygons}
-          active={true}
-          type={placeableObjectType}
-          objectData={{
-            name: placeableObjectType === 'building' ? selectedBuildingType : placeableObjectType,
-            variant: placeableObjectType === 'building' ? selectedVariant : 'default'
-          }}
-          constraints={{
-            requireLandOwnership: placeableObjectType === 'building'
-          }}
-          onComplete={(objectData) => {
-            console.log(`${placeableObjectType} created:`, objectData);
-            setPlaceableObjectType(null);
-            if (onRefreshBuildings) {
-              onRefreshBuildings();
-            }
-          }}
-          onCancel={() => {
-            setPlaceableObjectType(null);
-          }}
-        />
+        <div className="px-4 py-2 bg-amber-100 text-amber-800 rounded-md shadow-md">
+          <p>Placing {placeableObjectType} mode active. Click to place or press ESC to cancel.</p>
+          <button 
+            onClick={() => setPlaceableObjectType(null)}
+            className="mt-2 px-3 py-1 bg-amber-600 text-white rounded-md hover:bg-amber-700"
+          >
+            Cancel
+          </button>
+        </div>
       )}
       
       {/* Only render the BuildingRendererManager to show existing buildings */}
