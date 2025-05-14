@@ -557,19 +557,26 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           console.log('IsometricViewer: Building points service loaded successfully');
         }
         
+        console.log('Fetching buildings from API...');
         const response = await fetch('/api/buildings');
         if (response.ok) {
           const data = await response.json();
           if (data.buildings) {
+            console.log(`Received ${data.buildings.length} buildings from API`);
+            
             // Process buildings to ensure they all have position data
             const processedBuildings = data.buildings.map((building: any) => {
               // If building already has a position, use it
-              if (building.position && building.position.lat && building.position.lng) {
+              if (building.position && 
+                  ((typeof building.position === 'object' && 'lat' in building.position && 'lng' in building.position) || 
+                   (typeof building.position === 'string' && building.position.includes('lat')))) {
+                console.log(`Building ${building.id} already has position:`, building.position);
                 return building;
               }
               
-              // If building has a point_id but no position, try to get position from the service
+              // If building has a point_id, try to get position from the service
               if (building.point_id) {
+                console.log(`Building ${building.id} has point_id: ${building.point_id}`);
                 const position = buildingPointsService.getPositionForPoint(building.point_id);
                 if (position) {
                   console.log(`Resolved position for building ${building.id} with point_id ${building.point_id}:`, position);
@@ -579,6 +586,37 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
                   };
                 } else {
                   console.warn(`Could not resolve position for building ${building.id} with point_id ${building.point_id}`);
+                }
+              }
+              
+              // If building has a Point field (new format), try to extract coordinates
+              if (building.Point) {
+                console.log(`Building ${building.id} has Point field: ${building.Point}`);
+                // Try to extract coordinates from the Point field (format: type_lat_lng)
+                const parts = String(building.Point).split('_');
+                if (parts.length >= 3) {
+                  const lat = parseFloat(parts[1]);
+                  const lng = parseFloat(parts[2]);
+                  
+                  if (!isNaN(lat) && !isNaN(lng)) {
+                    console.log(`Extracted coordinates from Point field for building ${building.id}: lat=${lat}, lng=${lng}`);
+                    return {
+                      ...building,
+                      position: { lat, lng }
+                    };
+                  }
+                }
+                
+                // If we couldn't extract coordinates directly, try using the service
+                const position = buildingPointsService.getPositionForPoint(String(building.Point));
+                if (position) {
+                  console.log(`Resolved position for building ${building.id} with Point ${building.Point}:`, position);
+                  return {
+                    ...building,
+                    position
+                  };
+                } else {
+                  console.warn(`Could not resolve position for building ${building.id} with Point ${building.Point}`);
                 }
               }
               
@@ -596,7 +634,14 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
                (typeof b.position === 'string' && b.position.includes('lat')))
             );
             console.log(`${buildingsWithPosition.length} of ${processedBuildings.length} buildings have valid position data`);
+            
+            // Dispatch event to ensure buildings are visible
+            window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+          } else {
+            console.warn('No buildings data in API response');
           }
+        } else {
+          console.error(`Failed to fetch buildings: ${response.status} ${response.statusText}`);
         }
       } catch (error) {
         console.error('Error fetching buildings:', error);

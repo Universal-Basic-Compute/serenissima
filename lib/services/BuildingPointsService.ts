@@ -129,21 +129,26 @@ export class BuildingPointsService {
   public getPositionForPoint(pointId: string): { lat: number, lng: number } | null {
     if (!pointId) return null;
     
+    console.log(`Attempting to resolve position for point ID: ${pointId}`);
+    
     // Check all point collections
     if (this.buildingPoints[pointId]) {
+      console.log(`Found point in buildingPoints: ${pointId}`);
       return this.buildingPoints[pointId];
     }
     
     if (this.canalPoints[pointId]) {
+      console.log(`Found point in canalPoints: ${pointId}`);
       return this.canalPoints[pointId];
     }
     
     if (this.bridgePoints[pointId]) {
+      console.log(`Found point in bridgePoints: ${pointId}`);
       return this.bridgePoints[pointId];
     }
     
     // If point ID not found, try to parse it as a type_lat_lng format
-    // Examples: building_45.440864_12.335067, dock_45.428839_12.316503
+    // Examples: building_45.440864_12.335067, bridge_45.428839_12.316503
     const parts = pointId.split('_');
     if (parts.length >= 3) {
       // The format should be: [type, lat, lng]
@@ -163,6 +168,7 @@ export class BuildingPointsService {
         const lat = parseFloat(parts[1]);
         const lng = parseFloat(parts[2]);
         if (!isNaN(lat) && !isNaN(lng)) {
+          console.log(`Extracted coordinates from point-lat-lng format: ${pointId}`);
           return { lat, lng };
         }
       }
@@ -175,6 +181,7 @@ export class BuildingPointsService {
         const lat = parseFloat(parts[1]);
         const lng = parseFloat(parts[2]);
         if (!isNaN(lat) && !isNaN(lng)) {
+          console.log(`Extracted coordinates from canal-lat-lng format: ${pointId}`);
           return { lat, lng };
         }
       }
@@ -187,11 +194,13 @@ export class BuildingPointsService {
         const lat = parseFloat(parts[1]);
         const lng = parseFloat(parts[2]);
         if (!isNaN(lat) && !isNaN(lng)) {
+          console.log(`Extracted coordinates from bridge-lat-lng format: ${pointId}`);
           return { lat, lng };
         }
       }
     }
     
+    console.warn(`Could not resolve position for point ID: ${pointId}`);
     return null;
   }
   
