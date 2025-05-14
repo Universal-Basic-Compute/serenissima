@@ -753,6 +753,70 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                   </div>
                 </div>
               )}
+              
+              {/* Resources Production */}
+              {buildingDefinition?.productionInformation?.produces && Object.keys(buildingDefinition.productionInformation.produces).length > 0 && (
+                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
+                    <FaBox className="mr-2" /> Produces Resources
+                  </h3>
+                  <div className="space-y-3">
+                    {Object.entries(buildingDefinition.productionInformation.produces).map(([output, inputs]: [string, any]) => (
+                      <div key={`production-${output}`} className="bg-amber-50 p-3 rounded-md">
+                        {/* Output resource */}
+                        <div className="flex items-center mb-2">
+                          <div className="relative w-8 h-8 mr-2">
+                            <Image 
+                              src={getResourceIconPath(output)}
+                              alt={output}
+                              width={32}
+                              height={32}
+                              className="object-contain"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = '/images/resources/default.png';
+                              }}
+                            />
+                          </div>
+                          <span className="font-medium capitalize">{output.replace(/_/g, ' ')}</span>
+                        </div>
+                        
+                        {/* Input resources */}
+                        {Array.isArray(inputs) && inputs.length > 0 && (
+                          <div className="ml-4">
+                            <div className="text-xs text-gray-500 mb-1">From:</div>
+                            <div className="flex flex-wrap gap-2">
+                              {inputs.map((input: string) => (
+                                <div key={`input-${input}`} className="flex items-center bg-white p-1 rounded border border-amber-100">
+                                  <div className="relative w-6 h-6 mr-1">
+                                    <Image 
+                                      src={getResourceIconPath(input)}
+                                      alt={input}
+                                      width={24}
+                                      height={24}
+                                      className="object-contain"
+                                      onError={(e) => {
+                                        (e.target as HTMLImageElement).src = '/images/resources/default.png';
+                                      }}
+                                    />
+                                  </div>
+                                  <span className="text-xs capitalize">{input.replace(/_/g, ' ')}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Production rate if available */}
+                        {buildingDefinition.productionInformation.productionRate && (
+                          <div className="text-xs text-gray-600 mt-1">
+                            Rate: {buildingDefinition.productionInformation.productionRate} units/day
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         ) : (
