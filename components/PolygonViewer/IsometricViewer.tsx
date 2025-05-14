@@ -61,7 +61,24 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     try {
       setIsLoadingBuildingImage(true);
       
-      // Use the same function as in BuildingDetailsPanel to get the image path
+      // Normalize the building type to match the flat file structure
+      const normalizedType = buildingType.toLowerCase().replace(/[_\s-]+/g, '');
+      
+      // Try the direct flat path first
+      const flatImagePath = `/images/buildings/${normalizedType}.jpg`;
+      
+      // Check if the image exists
+      try {
+        const response = await fetch(flatImagePath, { method: 'HEAD' });
+        if (response.ok) {
+          setHoveredBuildingImagePath(flatImagePath);
+          return;
+        }
+      } catch (error) {
+        console.log(`Image not found at ${flatImagePath}, trying alternative paths`);
+      }
+      
+      // If direct path fails, try the API
       const response = await fetch(`/api/search-building-image?type=${encodeURIComponent(buildingType)}`);
       if (response.ok) {
         const data = await response.json();
@@ -69,14 +86,14 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           setHoveredBuildingImagePath(data.imagePath);
         } else {
           // Use fallback image if no specific image found
-          setHoveredBuildingImagePath('/images/buildings/commercial/retail_shops/market_stall.jpg');
+          setHoveredBuildingImagePath('/images/buildings/market_stall.jpg');
         }
       } else {
-        setHoveredBuildingImagePath('/images/buildings/commercial/retail_shops/market_stall.jpg');
+        setHoveredBuildingImagePath('/images/buildings/market_stall.jpg');
       }
     } catch (error) {
       console.error('Error fetching building image path:', error);
-      setHoveredBuildingImagePath('/images/buildings/commercial/retail_shops/market_stall.jpg');
+      setHoveredBuildingImagePath('/images/buildings/market_stall.jpg');
     } finally {
       setIsLoadingBuildingImage(false);
     }
