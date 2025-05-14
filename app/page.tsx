@@ -15,7 +15,7 @@ import BuildingMenu from '@/components/PolygonViewer/BuildingMenu';
 import SettingsModal from '@/components/UI/SettingsModal';
 
 // Import the 2D viewer component with no SSR
-const IsometricViewer = dynamic(() => import('../../components/PolygonViewer/IsometricViewer'), {
+const IsometricViewer = dynamic(() => import('@/components/PolygonViewer/IsometricViewer'), {
   ssr: false
 });
 
