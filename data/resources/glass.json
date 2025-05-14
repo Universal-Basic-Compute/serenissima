@@ -1,0 +1,28 @@
+{
+  "id": "glass",
+  "name": "Glass",
+  "category": "processed_materials",
+  "subcategory": "crafted",
+  "description": "Transparent material produced in Murano, used for windows, mirrors, and decorative items.",
+  "varieties": [
+    {
+      "type": "clear_glass",
+      "productionDifficulty": "medium",
+      "popularity": "high",
+      "valueMultiplier": 1.0
+    },
+    {
+      "type": "colored_glass",
+      "productionDifficulty": "high",
+      "popularity": "medium",
+      "valueMultiplier": 1.5
+    },
+    {
+      "type": "cristallo",
+      "productionDifficulty": "very_high",
+      "popularity": "high",
+      "valueMultiplier": 2.0
+    }
+  ],
+  "historicalNotes": "Venetian glass production was centered on the island of Murano, where glassmakers were both privileged and confined to protect trade secrets. The cristallo technique, producing exceptionally clear glass, was a closely guarded Venetian innovation that brought wealth and prestige to the Republic."
+}
