@@ -10,6 +10,11 @@ declare global {
   }
 }
 
+// Ensure the property is properly declared with consistent modifiers
+interface Window {
+  __polygonData?: any[];
+}
+
 interface GuildsPanelProps {
   onClose: () => void;
   standalone?: boolean;
