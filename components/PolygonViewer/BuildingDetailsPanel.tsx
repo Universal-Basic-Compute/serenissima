@@ -2,44 +2,47 @@ import { useEffect, useState, useRef } from 'react';
 import { getBackendBaseUrl } from '@/lib/apiUtils';
 import PlayerProfile from '../UI/PlayerProfile';
 
-// Add this function to get the building image path based on type
-const getBuildingImagePath = (type: string, variant?: string): string => {
+// Add this function to dynamically find the building image path
+const getBuildingImagePath = async (type: string, variant?: string): Promise<string> => {
   try {
     // Normalize the type by removing spaces and converting to lowercase
     const normalizedType = type.toLowerCase().replace(/\s+/g, '_').replace(/-/g, '_');
     
-    // Check for specific building types first
-    if (normalizedType.includes('market_stall') || normalizedType.includes('market')) {
-      return '/images/buildings/commercial/markets/market_stall.jpg';
-    } else if (normalizedType.includes('dock') || normalizedType.includes('pier')) {
-      return '/images/buildings/infrastructure/transportation_services/dock.jpg';
-    } else if (normalizedType.includes('bridge')) {
-      return '/images/buildings/infrastructure/transportation_services/bridge.jpg';
-    } else if (normalizedType.includes('gondola') || normalizedType.includes('boat')) {
-      return '/images/buildings/infrastructure/transportation_services/gondola_station.jpg';
-    } else if (normalizedType.includes('warehouse') || normalizedType.includes('storage')) {
-      return '/images/buildings/infrastructure/storage_facilities/warehouse.jpg';
-    } else if (normalizedType.includes('workshop')) {
-      return '/images/buildings/commercial/workshops/workshop.jpg';
-    } else if (normalizedType.includes('tavern') || normalizedType.includes('inn')) {
-      return '/images/buildings/commercial/hospitality/tavern.jpg';
-    } else if (normalizedType.includes('house') || normalizedType.includes('residence')) {
-      return '/images/buildings/residential/houses/house.jpg';
-    } else if (normalizedType.includes('palace')) {
-      return '/images/buildings/residential/palaces/palace.jpg';
-    } else if (normalizedType.includes('church') || normalizedType.includes('chapel')) {
-      return '/images/buildings/religious/churches/church.jpg';
-    } else if (normalizedType.includes('porter') || normalizedType.includes('guild_hall')) {
-      return '/images/buildings/infrastructure/transportation_services/porter_guild_hall.jpg';
+    // First try to get the building definition to find the correct category/subcategory
+    try {
+      const response = await fetch(`/api/building-definition?type=${encodeURIComponent(normalizedType)}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.category && data.subcategory) {
+          // Construct path using the category and subcategory from the definition
+          const imagePath = `/images/buildings/${data.category}/${data.subcategory}/${normalizedType}.jpg`;
+          console.log(`Using path from building definition: ${imagePath}`);
+          return imagePath;
+        }
+      }
+    } catch (error) {
+      console.log('Error fetching building definition:', error);
     }
     
-    // If no specific match, try to construct a path based on the type
-    // This is a fallback that might work if the file structure follows conventions
-    return `/images/buildings/${normalizedType}.jpg`;
+    // If we couldn't get the definition, try to search for the building in all categories
+    try {
+      const response = await fetch(`/api/search-building-image?type=${encodeURIComponent(normalizedType)}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.imagePath) {
+          console.log(`Found image path via search: ${data.imagePath}`);
+          return data.imagePath;
+        }
+      }
+    } catch (error) {
+      console.log('Error searching for building image:', error);
+    }
+    
+    // If all else fails, use a default image that we know exists
+    return '/images/buildings/commercial/retail_shops/market_stall.jpg';
   } catch (error) {
     console.error('Error getting building image path:', error);
-    // Use a known existing image as fallback
-    return '/images/buildings/commercial/markets/market_stall.jpg';
+    return '/images/buildings/commercial/retail_shops/market_stall.jpg';
   }
 };
 
@@ -129,6 +132,7 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
   const [landRendered, setLandRendered] = useState<boolean>(false);
   const [buildingDefinition, setBuildingDefinition] = useState<any>(null);
   const [showFullDescription, setShowFullDescription] = useState<boolean>(false);
+  const [buildingImagePath, setBuildingImagePath] = useState<string>('/images/buildings/commercial/retail_shops/market_stall.jpg');
   
   // Fetch building details when a building is selected
   useEffect(() => {
@@ -184,6 +188,16 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
         .catch(error => {
           console.error('Error loading building definition:', error);
           setBuildingDefinition(null);
+        });
+      
+      // Resolve the image path
+      getBuildingImagePath(building.type, building.variant)
+        .then(path => {
+          setBuildingImagePath(path);
+        })
+        .catch(error => {
+          console.error('Error resolving building image path:', error);
+          setBuildingImagePath('/images/buildings/commercial/retail_shops/market_stall.jpg');
         });
     } else {
       setBuildingDefinition(null);
@@ -427,13 +441,13 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                 <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200 mb-4">
                   <div className="relative w-full h-48 overflow-hidden rounded-lg mb-3">
                     <img 
-                      src={getBuildingImagePath(building.type, building.variant)}
+                      src={buildingImagePath}
                       alt={buildingDefinition.name || formatBuildingType(building.type)}
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         console.error('Error loading building image:', e);
                         // Use a known existing image as fallback
-                        e.currentTarget.src = '/images/buildings/commercial/markets/market_stall.jpg';
+                        e.currentTarget.src = '/images/buildings/commercial/retail_shops/market_stall.jpg';
                       }}
                     />
                   </div>
