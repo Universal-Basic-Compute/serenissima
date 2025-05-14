@@ -71,17 +71,9 @@ def scan_building_files() -> List[Dict[str, Any]]:
                     building_data['_relative_path'] = relative_path
                     building_data['_file_name'] = file
                     
-                    # Extract category and subcategory from path
-                    path_parts = relative_path.split(os.sep)
-                    
-                    # Only process files that are in a category directory
-                    if len(path_parts) >= 2:
-                        building_data['_category_dir'] = path_parts[0]
-                        building_data['_subcategory_dir'] = path_parts[1] if len(path_parts) > 2 else None
-                    else:
-                        # Skip files in the root directory - they're not properly categorized buildings
-                        log.warning(f"Skipping {file_path}: Not in a category directory")
-                        continue
+                    # Extract type from filename if not present
+                    if 'type' not in building_data:
+                        building_data['type'] = os.path.splitext(file)[0]
                     
                     # Ensure the building has at least a name
                     if 'name' not in building_data:
@@ -208,29 +200,19 @@ def process_building(building: Dict[str, Any], force_regenerate: bool = False) -
     """Process a single building to generate its image."""
     # Extract building information
     name = building.get('name', 'unknown')
-    category = building.get('category', building.get('_category_dir', 'unknown')).lower()
-    subcategory = building.get('subcategory', building.get('_subcategory_dir', '')).lower()
+    building_type = building.get('type', name)
     
     # Create a safe filename from the building name
     safe_name = name.lower().replace(' ', '_').replace("'", '').replace('"', '')
     
-    # Convert category and subcategory to safe directory names (replace spaces with underscores)
-    safe_category = category.replace(' ', '_')
-    safe_subcategory = subcategory.replace(' ', '_')
+    # Create a safe filename from the building type as fallback
+    safe_type = building_type.lower().replace(' ', '_').replace("'", '').replace('"', '')
     
-    # Determine the output directory structure
-    # Always use category/subcategory structure with safe directory names
-    if safe_subcategory:
-        output_dir = os.path.join(BUILDINGS_IMAGE_DIR, safe_category, safe_subcategory)
-    else:
-        # If no subcategory, use just the category
-        output_dir = os.path.join(BUILDINGS_IMAGE_DIR, safe_category)
+    # Use the building ID if available, otherwise use the safe name
+    building_id = building.get('id', safe_name)
     
-    # Create the output directory if it doesn't exist
-    os.makedirs(output_dir, exist_ok=True)
-    
-    # Determine the output file path
-    output_path = os.path.join(output_dir, f"{safe_name}.jpg")
+    # Determine the output file path - use flat structure
+    output_path = os.path.join(BUILDINGS_IMAGE_DIR, f"{safe_name}.jpg")
     
     # Check if the image already exists
     if os.path.exists(output_path) and not force_regenerate:
@@ -244,7 +226,6 @@ def process_building(building: Dict[str, Any], force_regenerate: bool = False) -
     success = generate_image(prompt, output_path)
     
     # Also save a copy with the building ID if available
-    building_id = building.get('id')
     if building_id and success:
         id_output_path = os.path.join(BUILDINGS_IMAGE_DIR, f"{building_id}.jpg")
         try:
@@ -255,6 +236,17 @@ def process_building(building: Dict[str, Any], force_regenerate: bool = False) -
         except Exception as e:
             log.error(f"Error creating ID-based copy: {e}")
     
+    # Also save a copy with the building type if different from name
+    if safe_type != safe_name and success:
+        type_output_path = os.path.join(BUILDINGS_IMAGE_DIR, f"{safe_type}.jpg")
+        try:
+            # Copy the file
+            with open(output_path, 'rb') as src, open(type_output_path, 'wb') as dst:
+                dst.write(src.read())
+            log.info(f"Created type-based copy at {type_output_path}")
+        except Exception as e:
+            log.error(f"Error creating type-based copy: {e}")
+    
     return success
 
 def main():
@@ -262,9 +254,7 @@ def main():
     parser = argparse.ArgumentParser(description="Generate images for buildings")
     parser.add_argument("--limit", type=int, default=0, help="Maximum number of images to generate (0 for unlimited)")
     parser.add_argument("--force", action="store_true", help="Force regeneration of existing images")
-    parser.add_argument("--category", help="Only process buildings in this category")
-    parser.add_argument("--subcategory", help="Only process buildings in this subcategory")
-    parser.add_argument("--building", help="Only process a specific building by name")
+    parser.add_argument("--building", help="Only process a specific building by name or type")
     
     args = parser.parse_args()
     
@@ -279,24 +269,12 @@ def main():
         return
     
     # Filter buildings based on command-line arguments
-    if args.category:
-        category_lower = args.category.lower()
-        buildings = [b for b in buildings if 
-                    b.get('category', '').lower() == category_lower or 
-                    b.get('_category_dir', '').lower() == category_lower]
-        log.info(f"Filtered to {len(buildings)} buildings in category '{args.category}'")
-    
-    if args.subcategory:
-        subcategory_lower = args.subcategory.lower()
-        buildings = [b for b in buildings if 
-                    b.get('subcategory', '').lower() == subcategory_lower or 
-                    b.get('_subcategory_dir', '').lower() == subcategory_lower]
-        log.info(f"Filtered to {len(buildings)} buildings in subcategory '{args.subcategory}'")
-    
     if args.building:
         building_name_lower = args.building.lower()
-        buildings = [b for b in buildings if b.get('name', '').lower() == building_name_lower]
-        log.info(f"Filtered to {len(buildings)} buildings with name '{args.building}'")
+        buildings = [b for b in buildings if 
+                    b.get('name', '').lower() == building_name_lower or
+                    b.get('type', '').lower() == building_name_lower]
+        log.info(f"Filtered to {len(buildings)} buildings with name or type '{args.building}'")
     
     if not buildings:
         log.error("No buildings match the specified filters. Exiting.")
