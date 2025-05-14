@@ -8,7 +8,6 @@ import { FaHome, FaBuilding, FaRoad, FaTree, FaStore, FaLandmark, FaBook } from 
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 import WalletButton from '@/components/UI/WalletButton';
 import ResourceDropdowns from '@/components/UI/ResourceDropdowns';
-import BuildingMenu from '@/components/PolygonViewer/BuildingMenu';
 import SettingsModal from '@/components/UI/SettingsModal';
 
 // Import the 2D viewer component with no SSR
@@ -59,20 +58,6 @@ export default function TwoDPage() {
     <div className="relative w-full h-screen">
       {/* Main 2D Isometric Viewer */}
       <IsometricViewer activeView={activeView} />
-      
-      {/* Building Menu - needed for 2D view as well */}
-      <BuildingMenu 
-        visible={false} 
-        onClose={() => {
-          // Keep the buildings view active, just close the menu
-          setActiveView('buildings');
-          
-          // Ensure buildings are visible after closing menu
-          setTimeout(() => {
-            window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
-          }, 500);
-        }}
-      />
       
       {/* Top Navigation Bar */}
       <div className="absolute top-0 left-0 right-0 bg-black/50 text-white p-4 flex justify-between items-center">
