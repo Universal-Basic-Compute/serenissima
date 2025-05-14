@@ -39,7 +39,51 @@ export default function TwoDPage() {
     // Also listen for the event to ensure buildings stay visible
     const ensureBuildingsVisible = () => {
       console.log('Ensuring buildings are visible in all views');
-      // This event will be handled by the building renderer
+      // Make sure empty building points are calculated
+      if (polygons.length > 0 && buildings.length > 0) {
+        // Force recalculation of empty building points
+        const allBuildingPoints: {lat: number, lng: number}[] = [];
+        
+        polygons.forEach(polygon => {
+          if (polygon.buildingPoints && Array.isArray(polygon.buildingPoints)) {
+            polygon.buildingPoints.forEach(point => {
+              if (point && typeof point === 'object' && 'lat' in point && 'lng' in point) {
+                allBuildingPoints.push({
+                  lat: point.lat,
+                  lng: point.lng
+                });
+              }
+            });
+          }
+        });
+        
+        // Check which building points don't have buildings on them
+        const emptyPoints = allBuildingPoints.filter(point => {
+          return !buildings.some(building => {
+            if (!building.position) return false;
+            
+            let position;
+            if (typeof building.position === 'string') {
+              try {
+                position = JSON.parse(building.position);
+              } catch (e) {
+                return false;
+              }
+            } else {
+              position = building.position;
+            }
+            
+            const threshold = 0.0001;
+            if ('lat' in position && 'lng' in position) {
+              return Math.abs(position.lat - point.lat) < threshold && 
+                     Math.abs(position.lng - point.lng) < threshold;
+            }
+            return false;
+          });
+        });
+        
+        setEmptyBuildingPoints(emptyPoints);
+      }
     };
     
     window.addEventListener('ensureBuildingsVisible', ensureBuildingsVisible);
@@ -47,7 +91,7 @@ export default function TwoDPage() {
     return () => {
       window.removeEventListener('ensureBuildingsVisible', ensureBuildingsVisible);
     };
-  }, []); // Empty dependency array means this runs once on mount
+  }, [polygons, buildings]); // Add dependencies to ensure the callback has access to latest state
 
   // Update view when activeView changes
   useEffect(() => {
@@ -55,6 +99,11 @@ export default function TwoDPage() {
     
     // Always ensure buildings are visible regardless of view
     window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+    
+    // Dispatch a viewChanged event to notify other components
+    window.dispatchEvent(new CustomEvent('viewChanged', { 
+      detail: { view: activeView }
+    }));
     
     // Dispatch additional events for specific views
     if (activeView === 'land') {

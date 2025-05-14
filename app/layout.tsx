@@ -39,7 +39,13 @@ export default function RootLayout({
                 // Also set up a periodic check to ensure buildings stay visible
                 setInterval(function() {
                   window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
-                }, 10000);
+                }, 5000); // Increased frequency to 5 seconds
+                
+                // Also dispatch the event when switching views
+                window.addEventListener('viewChanged', function(e) {
+                  console.log('View changed, ensuring buildings are visible');
+                  window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+                });
               });
             `
           }} />

@@ -745,9 +745,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     };
   }, [loadCitizens]);
   
-  // Identify empty building points when in buildings view
+  // Identify empty building points - now works in all views, not just buildings view
   useEffect(() => {
-    if (activeView === 'buildings' && polygons.length > 0 && buildings.length > 0) {
+    if (polygons.length > 0 && buildings.length > 0) {
       // Collect all building points from all polygons
       const allBuildingPoints: {lat: number, lng: number}[] = [];
       
@@ -796,7 +796,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     } else {
       setEmptyBuildingPoints([]);
     }
-  }, [activeView, polygons, buildings]);
+  }, [polygons, buildings]); // Removed activeView dependency so it runs in all views
 
   // Handle mouse wheel for zooming
   useEffect(() => {
@@ -2962,8 +2962,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       }
     }
     
-    // Draw empty building points if in buildings view
-    if (activeView === 'buildings' && emptyBuildingPoints.length > 0) {
+    // Draw empty building points in all views, not just buildings view
+    // But make them even more subtle in non-buildings views
+    if (emptyBuildingPoints.length > 0) {
       emptyBuildingPoints.forEach(point => {
         // Convert lat/lng to isometric coordinates
         const x = (point.lng - 12.3326) * 20000;
@@ -2975,7 +2976,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         };
         
         // Check if mouse is over this building point
-        const pointSize = 2.2 * scale; // Even smaller (was 2.5)
+        const pointSize = activeView === 'buildings' ? 2.2 * scale : 1.8 * scale; // Smaller in non-buildings views
         const isHovered = 
           mousePosition.x >= isoPos.x - pointSize && 
           mousePosition.x <= isoPos.x + pointSize && 
@@ -2986,19 +2987,22 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         ctx.beginPath();
         ctx.arc(isoPos.x, isoPos.y, pointSize, 0, Math.PI * 2);
     
-        // Apply different opacity and color based on hover state
+        // Apply different opacity and color based on hover state and active view
         // Use an even more muted, earthy color that better blends with the map
-        // Normal: very low opacity, Hovered: slightly higher opacity
+        // Make points more visible in buildings view, more subtle in other views
+        const baseOpacity = activeView === 'buildings' ? 0.15 : 0.08;
+        const hoverOpacity = activeView === 'buildings' ? 0.3 : 0.2;
+        
         ctx.fillStyle = isHovered 
-          ? 'rgba(160, 140, 120, 0.3)' // Hovered: muted sand/earth tone with 30% opacity (was 40%)
-          : 'rgba(160, 140, 120, 0.15)'; // Normal: muted sand/earth tone with 15% opacity (was 20%)
+          ? `rgba(160, 140, 120, ${hoverOpacity})` // Hovered state
+          : `rgba(160, 140, 120, ${baseOpacity})`; // Normal state
         
         ctx.fill();
         
-        // Add a subtle border when hovered
-        if (isHovered) {
-          ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; // Less opaque white (was 0.6)
-          ctx.lineWidth = 0.8; // Thinner line (was 1)
+        // Add a subtle border when hovered, but only in buildings view
+        if (isHovered && activeView === 'buildings') {
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; // Less opaque white
+          ctx.lineWidth = 0.8; // Thinner line
           ctx.stroke();
           
           // Update cursor to pointer when hovering over a building point
@@ -3007,8 +3011,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       });
     }
     
-    // Draw dock points and bridge points if in buildings view, but more discreet
-    if (activeView === 'buildings' && polygons.length > 0) {
+    // Draw dock points and bridge points in all views, but more discreet in non-buildings view
+    if (polygons.length > 0) {
       // Draw dock points with subtle styling
       polygons.forEach(polygon => {
         if (polygon.canalPoints && Array.isArray(polygon.canalPoints)) {
@@ -3034,9 +3038,13 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             ctx.arc(isoPos.x, isoPos.y, 2 * scale, 0, Math.PI * 2);
             
             // Use a subtle blue color with low opacity, brighter when hovered
+            // Make points more visible in buildings view, more subtle in other views
+            const baseOpacity = activeView === 'buildings' ? 0.3 : 0.15;
+            const hoverOpacity = activeView === 'buildings' ? 0.7 : 0.4;
+            
             ctx.fillStyle = isHovered 
-              ? 'rgba(0, 120, 215, 0.7)' // Brighter and more opaque when hovered
-              : 'rgba(0, 120, 215, 0.3)';
+              ? `rgba(0, 120, 215, ${hoverOpacity})` // Brighter and more opaque when hovered
+              : `rgba(0, 120, 215, ${baseOpacity})`;
             ctx.fill();
             
             // Add a border, more visible when hovered
@@ -3071,9 +3079,13 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             const pointSize = 2 * scale;
             
             // Use a subtle orange/brown color with low opacity, brighter when hovered
+            // Make points more visible in buildings view, more subtle in other views
+            const baseOpacity = activeView === 'buildings' ? 0.3 : 0.15;
+            const hoverOpacity = activeView === 'buildings' ? 0.7 : 0.4;
+            
             ctx.fillStyle = isHovered
-              ? 'rgba(180, 120, 60, 0.7)' // Brighter and more opaque when hovered
-              : 'rgba(180, 120, 60, 0.3)';
+              ? `rgba(180, 120, 60, ${hoverOpacity})` // Brighter and more opaque when hovered
+              : `rgba(180, 120, 60, ${baseOpacity})`;
             ctx.beginPath();
             ctx.rect(
               isoPos.x - pointSize/2, 
