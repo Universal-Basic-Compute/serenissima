@@ -43,6 +43,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [mousePosition, setMousePosition] = useState<{x: number, y: number}>({ x: 0, y: 0 });
   const [hoveredBuildingName, setHoveredBuildingName] = useState<string | null>(null);
   const [hoveredBuildingPosition, setHoveredBuildingPosition] = useState<{x: number, y: number} | null>(null);
+  const [hoveredBuildingImagePath, setHoveredBuildingImagePath] = useState<string | null>(null);
+  const [isLoadingBuildingImage, setIsLoadingBuildingImage] = useState<boolean>(false);
   const [polygonsToRender, setPolygonsToRender] = useState<{
     polygon: any;
     coords: {x: number, y: number}[];
@@ -54,6 +56,32 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   }[]>([]);
   const [emptyBuildingPoints, setEmptyBuildingPoints] = useState<{lat: number, lng: number}[]>([]);
   
+  // Function to fetch the building image path when hovering over a building
+  const fetchBuildingImagePath = async (buildingType: string, variant?: string) => {
+    try {
+      setIsLoadingBuildingImage(true);
+      
+      // Use the same function as in BuildingDetailsPanel to get the image path
+      const response = await fetch(`/api/search-building-image?type=${encodeURIComponent(buildingType)}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.imagePath) {
+          setHoveredBuildingImagePath(data.imagePath);
+        } else {
+          // Use fallback image if no specific image found
+          setHoveredBuildingImagePath('/images/buildings/commercial/retail_shops/market_stall.jpg');
+        }
+      } else {
+        setHoveredBuildingImagePath('/images/buildings/commercial/retail_shops/market_stall.jpg');
+      }
+    } catch (error) {
+      console.error('Error fetching building image path:', error);
+      setHoveredBuildingImagePath('/images/buildings/commercial/retail_shops/market_stall.jpg');
+    } finally {
+      setIsLoadingBuildingImage(false);
+    }
+  };
+
   // Function to load citizens data - declared early to avoid reference before declaration
   const loadCitizens = useCallback(async () => {
     try {
@@ -912,10 +940,13 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
               setHoveredBuildingId(building.id);
               canvas.style.cursor = 'pointer';
               console.log('Hovering over building:', building.id, building.type);
-              
+                
               // Add these lines to store the building name and position
               setHoveredBuildingName(building.name || formatBuildingType(building.type));
               setHoveredBuildingPosition({ x: mouseX, y: mouseY });
+                
+              // Add this new code to fetch the building image
+              fetchBuildingImagePath(building.type, building.variant);
             }
             break; // Break after finding the first hovered building
           }
@@ -954,6 +985,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           setHoveredBuildingId(null);
           setHoveredBuildingName(null); // Clear the building name
           setHoveredBuildingPosition(null); // Clear the position
+          setHoveredBuildingImagePath(null); // Clear the building image
           canvas.style.cursor = isDragging ? 'grabbing' : 'grab';
         }
       
@@ -3376,17 +3408,41 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       
       {hoveredBuildingName && hoveredBuildingPosition && (
         <div 
-          className="absolute bg-black/80 text-white px-2 py-1 rounded text-sm pointer-events-none z-50"
+          className="absolute bg-black/80 text-white rounded text-sm pointer-events-none z-50 overflow-hidden"
           style={{
             left: hoveredBuildingPosition.x + 15, // Offset from cursor
             top: hoveredBuildingPosition.y - 10,
             maxWidth: '200px',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis'
+            width: '200px',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
           }}
         >
-          {hoveredBuildingName}
+          {/* Building image */}
+          {hoveredBuildingImagePath && (
+            <div className="w-full aspect-square overflow-hidden">
+              <img 
+                src={hoveredBuildingImagePath}
+                alt={hoveredBuildingName}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  console.error('Error loading building image in hover tooltip:', e);
+                  e.currentTarget.src = '/images/buildings/commercial/retail_shops/market_stall.jpg';
+                }}
+              />
+            </div>
+          )}
+          
+          {/* Building name */}
+          <div className="px-2 py-1 text-center font-medium">
+            {hoveredBuildingName}
+          </div>
+          
+          {/* Loading indicator */}
+          {isLoadingBuildingImage && !hoveredBuildingImagePath && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+              <div className="w-6 h-6 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
+            </div>
+          )}
         </div>
       )}
       
