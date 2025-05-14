@@ -137,12 +137,12 @@ export async function POST(request: Request) {
     const typedRecord = record as AirtableRecord;
     
     // Try to get position from Notes field first (new format)
-    let position = null;
+    let recordPosition = null;
     if (typedRecord.fields.Notes) {
       try {
         const notes = JSON.parse(typedRecord.fields.Notes);
         if (notes.position) {
-          position = notes.position;
+          recordPosition = notes.position;
         }
       } catch (e) {
         // If Notes isn't valid JSON, continue to next method
@@ -150,9 +150,9 @@ export async function POST(request: Request) {
     }
     
     // If position not found in Notes, try Position field (old format)
-    if (!position && typedRecord.fields.Position) {
+    if (!recordPosition && typedRecord.fields.Position) {
       try {
-        position = JSON.parse(typedRecord.fields.Position);
+        recordPosition = JSON.parse(typedRecord.fields.Position);
       } catch (e) {
         console.error('Error parsing Position JSON:', e);
       }
@@ -163,7 +163,7 @@ export async function POST(request: Request) {
       type: typedRecord.fields.Type,
       land_id: typedRecord.fields.Land,
       variant: typedRecord.fields.Variant || 'model',
-      position: position,
+      position: recordPosition,
       point_id: typedRecord.fields.Point || null, // Include point_id in response
       rotation: typedRecord.fields.Rotation || 0,
       owner: typedRecord.fields.User,
