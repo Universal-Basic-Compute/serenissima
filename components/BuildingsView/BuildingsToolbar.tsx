@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import * as THREE from 'three';
 import BuildingRenderer from './BuildingRenderer';
-import BuildingRendererManager from './BuildingRendererManager';
 import { useBuildingMenu } from '@/hooks/useBuildingMenu';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 import { FaWater, FaRoad, FaBuilding, FaShip } from 'react-icons/fa';
@@ -23,7 +22,6 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
 }) => {
   // State for different creation tools
   const [placeableObjectType, setPlaceableObjectType] = useState<'building' | 'road' | null>(null);
-  const [showBuildingRenderer, setShowBuildingRenderer] = useState(true);
   const [selectedBuildingType, setSelectedBuildingType] = useState<string>('');
   const [selectedVariant, setSelectedVariant] = useState<string>('model');
   const [buildings, setBuildings] = useState<any[]>([]);
@@ -198,10 +196,6 @@ const BuildingsToolbar: React.FC<BuildingsToolbarProps> = ({
         </div>
       )}
       
-      {/* Only render the BuildingRendererManager to show existing buildings */}
-      {showBuildingRenderer && (
-        <BuildingRendererManager active={true} debug={true} />
-      )}
     </div>
   );
 };
