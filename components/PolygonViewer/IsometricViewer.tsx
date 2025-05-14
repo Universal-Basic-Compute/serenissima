@@ -177,7 +177,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           
           // Store in window for other components
           if (typeof window !== 'undefined') {
-            window.__polygonData = data.polygons;
+            (window as any).__polygonData = data.polygons;
           }
         }
         setLoading(false);
@@ -222,7 +222,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   useEffect(() => {
     // Dispatch event when transport mode changes
     if (transportMode !== undefined) {
-      window.__transportModeActive = transportMode;
+      (window as any).__transportModeActive = transportMode;
       window.dispatchEvent(new CustomEvent('transportModeChanged'));
     }
   }, [transportMode]);
@@ -1351,7 +1351,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             console.log('Building point clicked at position:', point);
                 
             // Store the selected building point in window for the BuildingMenu to use
-            window.__selectedBuildingPoint = {
+            (window as any).__selectedBuildingPoint = {
               pointId: `point-${point.lat}-${point.lng}`,
               polygonId: findPolygonIdForPoint(point),
               position: point
@@ -1409,7 +1409,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
                 console.log('Dock point clicked at position:', point.edge);
                 
                 // Store the selected point in window for the BuildingMenu to use
-                window.__selectedBuildingPoint = {
+                (window as any).__selectedBuildingPoint = {
                   pointId: `dock-${point.edge.lat}-${point.edge.lng}`,
                   polygonId: findPolygonIdForPoint(point.edge),
                   position: point.edge,
@@ -1466,7 +1466,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
                 console.log('Bridge point clicked at position:', point.edge);
                 
                 // Store the selected point in window for the BuildingMenu to use
-                window.__selectedBuildingPoint = {
+                (window as any).__selectedBuildingPoint = {
                   pointId: `bridge-${point.edge.lat}-${point.edge.lng}`,
                   polygonId: findPolygonIdForPoint(point.edge),
                   position: point.edge,
