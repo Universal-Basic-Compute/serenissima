@@ -39,8 +39,96 @@ export class BuildingPointsService {
     try {
       console.log('Loading building points from API...');
       
-      // Use an absolute URL for server-side fetching
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+      // Check if we're running on the server
+      if (typeof window === 'undefined') {
+        // Server-side: Try to load directly from the file system
+        try {
+          // Import fs and path modules only on server side
+          const fs = require('fs');
+          const path = require('path');
+          const dataDir = path.join(process.cwd(), 'data');
+          
+          console.log('Server-side: Loading building points directly from data directory...');
+          
+          // Process each polygon file to extract building points
+          const files = fs.readdirSync(dataDir).filter(file => 
+            file.endsWith('.json') && !file.startsWith('index')
+          );
+          
+          const buildingPoints: Record<string, { lat: number, lng: number }> = {};
+          const canalPoints: Record<string, { lat: number, lng: number }> = {};
+          const bridgePoints: Record<string, { lat: number, lng: number }> = {};
+          
+          for (const file of files) {
+            try {
+              const filePath = path.join(dataDir, file);
+              const fileContent = fs.readFileSync(filePath, 'utf8');
+              const polygon = JSON.parse(fileContent);
+              
+              // Process building points
+              if (polygon.buildingPoints && Array.isArray(polygon.buildingPoints)) {
+                polygon.buildingPoints.forEach((point: any) => {
+                  if (point && point.lat && point.lng) {
+                    const pointId = point.id || `point-${point.lat}-${point.lng}`;
+                    buildingPoints[pointId] = { lat: point.lat, lng: point.lng };
+                  }
+                });
+              }
+              
+              // Process canal points
+              if (polygon.canalPoints && Array.isArray(polygon.canalPoints)) {
+                polygon.canalPoints.forEach((point: any) => {
+                  if (point && point.edge && point.edge.lat && point.edge.lng) {
+                    const pointId = point.id || `canal-${point.edge.lat}-${point.edge.lng}`;
+                    canalPoints[pointId] = { lat: point.edge.lat, lng: point.edge.lng };
+                  }
+                });
+              }
+              
+              // Process bridge points
+              if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints)) {
+                polygon.bridgePoints.forEach((point: any) => {
+                  if (point && point.edge && point.edge.lat && point.edge.lng) {
+                    const pointId = point.id || `bridge-${point.edge.lat}-${point.edge.lng}`;
+                    bridgePoints[pointId] = { lat: point.edge.lat, lng: point.edge.lng };
+                  }
+                });
+              }
+            } catch (error) {
+              console.error(`Error processing polygon file ${file}:`, error);
+            }
+          }
+          
+          this.buildingPoints = buildingPoints;
+          this.canalPoints = canalPoints;
+          this.bridgePoints = bridgePoints;
+          this.isLoaded = true;
+          
+          console.log(`Server-side: Loaded ${Object.keys(buildingPoints).length} building points, ${Object.keys(canalPoints).length} canal points, and ${Object.keys(bridgePoints).length} bridge points`);
+          
+          // Emit event to notify other components
+          eventBus.emit(EventTypes.BUILDING_POINTS_LOADED, {
+            buildingPointsCount: Object.keys(buildingPoints).length,
+            canalPointsCount: Object.keys(canalPoints).length,
+            bridgePointsCount: Object.keys(bridgePoints).length
+          });
+          
+          return;
+        } catch (serverError) {
+          console.error('Server-side loading of building points failed:', serverError);
+          console.log('Falling back to empty building points set');
+          
+          // Initialize with empty sets
+          this.buildingPoints = {};
+          this.canalPoints = {};
+          this.bridgePoints = {};
+          this.isLoaded = true;
+          return;
+        }
+      }
+      
+      // Client-side: Use fetch API
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || '';
       const response = await fetch(`${apiBaseUrl}/api/building-points`);
       
       if (!response.ok) {
@@ -69,9 +157,13 @@ export class BuildingPointsService {
     } catch (error) {
       console.error('Error loading building points:', error);
       
-      // Remove browser-only confirm dialog
-      console.warn('Failed to load building points. Continuing without them.');
-      // Don't try to regenerate automatically on the server
+      // Initialize with empty sets to prevent further errors
+      this.buildingPoints = {};
+      this.canalPoints = {};
+      this.bridgePoints = {};
+      this.isLoaded = true;
+      
+      console.warn('Failed to load building points. Continuing with empty set.');
     } finally {
       this.isLoading = false;
     }
