@@ -2,6 +2,14 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 
+// Debug logging function
+function debugLog(message: string, ...args: any[]) {
+  const DEBUG = true; // Set to false in production
+  if (DEBUG) {
+    console.log(`[TRANSPORT] ${message}`, ...args);
+  }
+}
+
 // Simple priority queue implementation
 class PriorityQueue<T> {
   private items: { element: T, priority: number }[] = [];
@@ -378,7 +386,10 @@ function buildGraph(polygons: Polygon[]): Graph {
   for (let i = 0; i < canalNodes.length; i++) {
     const canalNode1 = canalNodes[i];
     
-    for (let j = i + 1; j < canalNodes.length; j++) {
+    for (let j = 0; j < canalNodes.length; j++) {
+      // Allow connections to all canal nodes, not just those with higher indices
+      if (i === j) continue; // Skip self-connections
+      
       const canalNode2 = canalNodes[j];
       
       // Skip if they're in the same polygon (already connected above)
@@ -389,23 +400,23 @@ function buildGraph(polygons: Polygon[]): Graph {
       // Calculate distance between canal points
       const distance = calculateDistance(canalNode1.position, canalNode2.position);
       
-      // Only connect points that are reasonably close - INCREASE MAX DISTANCE
-      if (distance > 10 && distance < 300) {
+      // Increase maximum distance further and reduce minimum distance
+      if (distance > 5 && distance < 500) {
         // Skip if the line between these points would cross land
         if (doesLineIntersectLand(canalNode1.position, canalNode2.position)) {
           continue;
         }
-      
+        
         // Water travel is twice as fast, so divide the weight by 2
         const weight = distance / 2;
-      
+        
         // Add bidirectional edges
         graph.edges[canalNode1.id].push({
           from: canalNode1.id,
           to: canalNode2.id,
           weight: weight
         });
-      
+        
         graph.edges[canalNode2.id].push({
           from: canalNode2.id,
           to: canalNode1.id,
@@ -543,7 +554,10 @@ function buildCanalNetwork(polygons: Polygon[]): Record<string, Point[]> {
   for (let i = 0; i < allCanalPoints.length; i++) {
     const point1 = allCanalPoints[i];
     
-    for (let j = i + 1; j < allCanalPoints.length; j++) {
+    for (let j = 0; j < allCanalPoints.length; j++) {
+      // Allow connections to all canal points, not just those with higher indices
+      if (i === j) continue; // Skip self-connections
+      
       const point2 = allCanalPoints[j];
       
       // Skip if they're in the same polygon (already handled above)
@@ -552,13 +566,13 @@ function buildCanalNetwork(polygons: Polygon[]): Record<string, Point[]> {
       // Calculate distance
       const distance = calculateDistance(point1.point, point2.point);
       
-      // Only connect points that are reasonably close - INCREASE MAX DISTANCE
-      if (distance > 10 && distance < 300) {
+      // Increase maximum distance further and reduce minimum distance
+      if (distance > 5 && distance < 500) {
         // Skip if the line between these points would cross land
         if (doesLineIntersectLand(point1.point, point2.point)) {
           continue;
         }
-      
+        
         const segmentId = `canal-segment-cross-${point1.id}-${point2.id}`;
         canalNetwork[segmentId] = [point1.point, point2.point];
       }
@@ -695,7 +709,7 @@ function findClosestNode(point: Point, graph: Graph, polygonId?: string): string
 }
 
 // Function to find multiple close nodes to a given point
-function findCloseNodes(point: Point, graph: Graph, polygonId?: string, limit: number = 3): string[] {
+function findCloseNodes(point: Point, graph: Graph, polygonId?: string, limit: number = 10): string[] {
   const nodes: {id: string, distance: number}[] = [];
   
   for (const [nodeId, node] of Object.entries(graph.nodes)) {
@@ -835,8 +849,11 @@ async function findPath(startPoint: Point, endPoint: Point): Promise<any> {
     }
     
     // Find the closest nodes to the start and end points
-    const startNodeIds = findCloseNodes(startPoint, graph, startPolygon.id);
-    const endNodeIds = findCloseNodes(endPoint, graph, endPolygon.id);
+    debugLog(`Starting path finding from ${startPoint.lat},${startPoint.lng} to ${endPoint.lat},${endPoint.lng}`);
+    debugLog(`Found ${Object.keys(graph.nodes).length} nodes and ${Object.values(graph.edges).flat().length} edges`);
+    
+    const startNodeIds = findCloseNodes(startPoint, graph, startPolygon.id, 10);
+    const endNodeIds = findCloseNodes(endPoint, graph, endPolygon.id, 10);
     
     if (startNodeIds.length === 0 || endNodeIds.length === 0) {
       return {
@@ -861,16 +878,41 @@ async function findPath(startPoint: Point, endPoint: Point): Promise<any> {
     }
     
     if (!bestResult) {
-      console.log('No path found between any combination of nodes:', {
+      debugLog('No path found with nodes in the same polygon, trying nodes from nearby polygons');
+      
+      // Try nodes from any polygon
+      const startNodeIdsAny = findCloseNodes(startPoint, graph, undefined, 15);
+      const endNodeIdsAny = findCloseNodes(endPoint, graph, undefined, 15);
+      
+      for (const startNodeId of startNodeIdsAny) {
+        for (const endNodeId of endNodeIdsAny) {
+          const result = findShortestPath(graph, startNodeId, endNodeId);
+          
+          if (result && result.distance < shortestDistance) {
+            bestResult = result;
+            shortestDistance = result.distance;
+          }
+        }
+      }
+    }
+    
+    if (!bestResult) {
+      const nodeInfo = {
         startNodeIds,
         endNodeIds,
         startPolygon: startPolygon.id,
-        endPolygon: endPolygon.id
-      });
+        endPolygon: endPolygon.id,
+        totalNodes: Object.keys(graph.nodes).length,
+        totalEdges: Object.values(graph.edges).flat().length,
+        canalNodes: Object.values(graph.nodes).filter(n => n.type === 'canal').length
+      };
+      
+      debugLog('No path found between any combination of nodes:', nodeInfo);
       
       return {
         success: false,
-        error: 'No path found between the points'
+        error: 'No path found between the points',
+        debug: nodeInfo
       };
     }
     
