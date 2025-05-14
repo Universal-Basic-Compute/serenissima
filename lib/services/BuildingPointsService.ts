@@ -89,6 +89,20 @@ export class BuildingPointsService {
       return this.bridgePoints[pointId];
     }
     
+    // If point ID not found, try to parse it as a type_lat_lng format
+    // Examples: building_45.440864_12.335067, dock_45.428839_12.316503
+    const parts = pointId.split('_');
+    if (parts.length >= 3) {
+      // The format should be: [type, lat, lng]
+      const lat = parseFloat(parts[1]);
+      const lng = parseFloat(parts[2]);
+      
+      if (!isNaN(lat) && !isNaN(lng)) {
+        console.log(`Extracted coordinates from point ID ${pointId}: lat=${lat}, lng=${lng}`);
+        return { lat, lng };
+      }
+    }
+    
     // If point ID not found, try to parse it as a point-{lat}-{lng} format
     if (pointId.startsWith('point-')) {
       const parts = pointId.split('-');

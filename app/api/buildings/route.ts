@@ -2,6 +2,26 @@ import { NextResponse } from 'next/server';
 import Airtable from 'airtable';
 import { buildingPointsService } from '@/lib/services/BuildingPointsService';
 
+// Helper function to extract coordinates from point IDs with the format type_lat_lng
+const extractCoordinatesFromPointId = (pointId: string): { lat: number, lng: number } | null => {
+  if (!pointId) return null;
+  
+  // Check for the pattern: type_lat_lng (building_45.440864_12.335067, dock_45.428839_12.316503, etc.)
+  const parts = pointId.split('_');
+  if (parts.length >= 3) {
+    // The format should be: [type, lat, lng]
+    const lat = parseFloat(parts[1]);
+    const lng = parseFloat(parts[2]);
+    
+    if (!isNaN(lat) && !isNaN(lng)) {
+      console.log(`Extracted coordinates from point ID ${pointId}: lat=${lat}, lng=${lng}`);
+      return { lat, lng };
+    }
+  }
+  
+  return null;
+};
+
 // Configure Airtable
 const apiKey = process.env.AIRTABLE_API_KEY;
 const baseId = process.env.AIRTABLE_BASE_ID;
@@ -388,19 +408,27 @@ export async function GET(request: Request) {
       if ((!position || Object.keys(position).length === 0) && fields.Point) {
         const pointId = fields.Point;
         console.log(`[API] Building ${fields.BuildingId || record.id} has Point ID: ${pointId}, attempting to resolve position`);
-        
-        // Try to resolve the position from the point ID
+            
+        // First try to resolve using the buildingPointsService
         const resolvedPosition = buildingPointsService.getPositionForPoint(pointId);
-        
+            
         if (resolvedPosition) {
           position = resolvedPosition;
-          console.log(`[API] Resolved position for Point ID ${pointId}:`, position);
+          console.log(`[API] Resolved position for Point ID ${pointId} using service:`, position);
         } else {
-          console.warn(`[API] Could not resolve position for Point ID ${pointId}, generating random position`);
-          position = { 
-            lat: 45.4371 + (Math.random() * 0.01 - 0.005),
-            lng: 12.3358 + (Math.random() * 0.01 - 0.005)
-          };
+          // If service couldn't resolve, try to extract coordinates from the point ID directly
+          const extractedPosition = extractCoordinatesFromPointId(pointId);
+              
+          if (extractedPosition) {
+            position = extractedPosition;
+            console.log(`[API] Extracted position from Point ID ${pointId}:`, position);
+          } else {
+            console.warn(`[API] Could not resolve position for Point ID ${pointId}, generating random position`);
+            position = { 
+              lat: 45.4371 + (Math.random() * 0.01 - 0.005),
+              lng: 12.3358 + (Math.random() * 0.01 - 0.005)
+            };
+          }
         }
       }
       
