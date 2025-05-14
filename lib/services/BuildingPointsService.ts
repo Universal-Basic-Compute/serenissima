@@ -9,7 +9,9 @@ declare module '../utils/eventBus' {
 }
 
 // Set the event type constant if it doesn't exist
-EventTypes.BUILDING_POINTS_LOADED = EventTypes.BUILDING_POINTS_LOADED || 'BUILDING_POINTS_LOADED';
+if (!EventTypes.BUILDING_POINTS_LOADED) {
+  EventTypes.BUILDING_POINTS_LOADED = 'BUILDING_POINTS_LOADED';
+}
 
 export class BuildingPointsService {
   private static instance: BuildingPointsService;
