@@ -286,7 +286,9 @@ def create_building(tables, building_type: str, point: Dict, owner: str, dry_run
             "Variant": "model",
             "Owner": owner,
             "Point": point["id"],
-            "Position": json.dumps({"lat": point["lat"], "lng": point["lng"]}),
+            # Remove Position field as it doesn't exist in the schema
+            # Store position data in Notes field instead
+            "Notes": json.dumps({"position": {"lat": point["lat"], "lng": point["lng"]}}),
             "RentAmount": 0,
             "CreatedAt": datetime.now().isoformat()
         }
