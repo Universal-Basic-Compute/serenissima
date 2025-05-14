@@ -333,7 +333,7 @@ export async function GET(request: Request) {
     // Create a type-safe wrapper for Airtable records
     interface TypedAirtableRecord {
       id: string;
-      fields: Record<string, string | number | boolean | object | null | undefined>;
+      fields: Record<string, any>; // Use 'any' to avoid index type errors
       get(columnName: string): any;
     }
     
@@ -358,7 +358,7 @@ export async function GET(request: Request) {
     // Transform Airtable records to our format
     const buildings = typedRecords.map(record => {
       // Access fields in a type-safe way
-      const fields = record.fields as Record<string, any>;
+      const fields = record.fields;
       
       // Initialize position object
       let position: { lat?: number; lng?: number; x?: number; y?: number; z?: number; } = {};
