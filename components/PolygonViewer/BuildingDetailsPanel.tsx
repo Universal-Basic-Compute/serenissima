@@ -216,11 +216,19 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
   // Function to fetch land data
   const fetchLandData = async (landId: string) => {
     try {
+      console.log(`Fetching land data for ID: ${landId}`);
+      
       // First try to get land data from window.__polygonData if available
       if (typeof window !== 'undefined' && window.__polygonData) {
         const polygon = window.__polygonData.find((p: any) => p.id === landId);
         if (polygon) {
+          console.log(`Found land data in window.__polygonData for ID: ${landId}`, polygon);
           setLandData(polygon);
+          
+          // Also fetch owner information if not already included
+          if (!polygon.owner) {
+            fetchLandOwner(landId);
+          }
           return;
         }
       }
@@ -233,10 +241,41 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
       
       const data = await response.json();
       if (data && data.polygon) {
+        console.log(`Fetched land data from API for ID: ${landId}`, data.polygon);
         setLandData(data.polygon);
+        
+        // Also fetch owner information if not already included
+        if (!data.polygon.owner) {
+          fetchLandOwner(landId);
+        }
+      } else {
+        console.error(`No polygon data returned for ID: ${landId}`);
       }
     } catch (error) {
       console.error('Error fetching land data:', error);
+    }
+  };
+  
+  // Add a new function to fetch land owner information
+  const fetchLandOwner = async (landId: string) => {
+    try {
+      console.log(`Fetching owner for land ID: ${landId}`);
+      const response = await fetch(`/api/get-land-owner/${landId}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch land owner: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      if (data && data.owner) {
+        console.log(`Fetched owner for land ID: ${landId}:`, data.owner);
+        // Update the land data with the owner information
+        setLandData(prevData => ({
+          ...prevData,
+          owner: data.owner
+        }));
+      }
+    } catch (error) {
+      console.error('Error fetching land owner:', error);
     }
   };
   
@@ -544,6 +583,23 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                   <p className="font-serif text-lg font-semibold text-amber-800 mb-2">
                     {landData.historicalName || landData.englishName || 'Land Plot'}
                   </p>
+                  
+                  {/* Land owner */}
+                  {landData.owner && (
+                    <p className="text-gray-700 mb-2">
+                      <span className="font-medium">Owner:</span> {landData.owner}
+                    </p>
+                  )}
+                  
+                  {/* Land coordinates */}
+                  {building?.position && (
+                    <p className="text-xs text-gray-500 mb-2">
+                      {typeof building.position === 'string' 
+                        ? building.position 
+                        : `Lat: ${building.position.lat?.toFixed(6)}, Lng: ${building.position.lng?.toFixed(6)}`
+                      }
+                    </p>
+                  )}
                   
                   {/* Canvas for land visualization */}
                   <canvas 
