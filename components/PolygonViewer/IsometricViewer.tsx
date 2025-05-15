@@ -156,7 +156,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     loadData();
   }, [activeView]);
   
-  // Transport mode activation is now handled by TransportService
+  // Transport mode activation and events
   useEffect(() => {
     const handleShowTransportRoutes = () => {
       console.log('Activating transport route planning mode');
@@ -172,76 +172,59 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       // Reset transport service state
       transportService.reset();
       
-      // Set transport mode to true
-      setTransportMode(true);
-      
-      // Emit event for other components
-      eventBus.emit(EventTypes.TRANSPORT_MODE_CHANGED, { active: true });
+      // Set transport mode through the service
+      transportService.setTransportMode(true);
     };
     
-    const eventListener = () => handleShowTransportRoutes();
-    window.addEventListener('showTransportRoutes', eventListener);
-    
-    return () => {
-      window.removeEventListener('showTransportRoutes', eventListener);
+    const handleTransportModeChanged = (data: any) => {
+      setTransportMode(data.active);
     };
-  }, [activeView]);
-  
-  // Subscribe to transport service events
-  useEffect(() => {
+    
+    const handleTransportPathChanged = (data: any) => {
+      setTransportPath(data.path || []);
+    };
+    
     const handleTransportCalculationCompleted = (data: any) => {
       setTransportPath(data.path);
     };
     
-    const handleTransportReset = () => {
-      setTransportPath([]);
-      setTransportMode(false);
+    // Subscribe to events
+    eventBus.subscribe(EventTypes.TRANSPORT_MODE_CHANGED, handleTransportModeChanged);
+    eventBus.subscribe(EventTypes.TRANSPORT_PATH_CHANGED, handleTransportPathChanged);
+    eventBus.subscribe(EventTypes.TRANSPORT_CALCULATION_COMPLETED, handleTransportCalculationCompleted);
+    window.addEventListener('showTransportRoutes', handleShowTransportRoutes);
+    
+    return () => {
+      // Unsubscribe from events
+      eventBus.unsubscribe(EventTypes.TRANSPORT_MODE_CHANGED, handleTransportModeChanged);
+      eventBus.unsubscribe(EventTypes.TRANSPORT_PATH_CHANGED, handleTransportPathChanged);
+      eventBus.unsubscribe(EventTypes.TRANSPORT_CALCULATION_COMPLETED, handleTransportCalculationCompleted);
+      window.removeEventListener('showTransportRoutes', handleShowTransportRoutes);
+    };
+  }, [activeView]);
+  
+  // Subscribe to income data events
+  useEffect(() => {
+    const handleIncomeDataLoaded = (data: any) => {
+      setIncomeData(data.incomeData);
+      setMinIncome(data.minIncome);
+      setMaxIncome(data.maxIncome);
+      setIncomeDataLoaded(true);
+    };
+    
+    const handleIncomeDataError = () => {
+      setIncomeDataLoaded(false);
     };
     
     // Subscribe to events
-    window.addEventListener('TRANSPORT_CALCULATION_COMPLETED', handleTransportCalculationCompleted as EventListener);
-    window.addEventListener('TRANSPORT_RESET', handleTransportReset as EventListener);
+    eventBus.subscribe(EventTypes.INCOME_DATA_LOADED, handleIncomeDataLoaded);
+    eventBus.subscribe(EventTypes.INCOME_DATA_LOADING_ERROR, handleIncomeDataError);
     
     return () => {
-      window.removeEventListener('TRANSPORT_CALCULATION_COMPLETED', handleTransportCalculationCompleted as EventListener);
-      window.removeEventListener('TRANSPORT_RESET', handleTransportReset as EventListener);
+      // Unsubscribe from events
+      eventBus.unsubscribe(EventTypes.INCOME_DATA_LOADED, handleIncomeDataLoaded);
+      eventBus.unsubscribe(EventTypes.INCOME_DATA_LOADING_ERROR, handleIncomeDataError);
     };
-  }, []);
-  
-  // Fetch income data
-  const fetchIncomeData = useCallback(async () => {
-    try {
-      console.log('Fetching income data...');
-      setIncomeDataLoaded(false); // Reset to false when starting to fetch
-      
-      const response = await fetch('/api/get-income-data');
-      if (response.ok) {
-        const data = await response.json();
-        if (data.incomeData && Array.isArray(data.incomeData)) {
-          // Create a map of polygon ID to income
-          const incomeMap: Record<string, number> = {};
-          let min = Infinity;
-          let max = -Infinity;
-          
-          data.incomeData.forEach((item: any) => {
-            if (item.polygonId && typeof item.income === 'number') {
-              incomeMap[item.polygonId] = item.income;
-              min = Math.min(min, item.income);
-              max = Math.max(max, item.income);
-            }
-          });
-          
-          // Set min/max income values (with reasonable defaults if needed)
-          setMinIncome(min !== Infinity ? min : 0);
-          setMaxIncome(max !== -Infinity ? max : 1000);
-          setIncomeData(incomeMap);
-          setIncomeDataLoaded(true); // Set to true when data is loaded
-          console.log(`Income data loaded: ${Object.keys(incomeMap).length} entries, min=${min}, max=${max}`);
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching income data:', error);
-    }
   }, []);
   
   // Load coat of arms
@@ -270,7 +253,10 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   // Fetch income data when in land view
   useEffect(() => {
     if (activeView === 'land') {
-      incomeService.loadIncomeData();
+      // Load income data through the service
+      incomeService.loadIncomeData().catch(error => {
+        console.error('Error loading income data:', error);
+      });
     }
   }, [activeView]);
 
@@ -1156,7 +1142,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       if (activeView === 'transport' && transportMode) {
         console.log('Transport mode click detected');
         // Convert screen coordinates to lat/lng
-        const point = screenToLatLng(mouseX, mouseY, scale, offset, canvas.width, canvas.height);
+        const point = CoordinateService.screenToLatLng(
+          mouseX, mouseY, scale, offset, canvas.width, canvas.height
+        );
         
         // Let the transport service handle the point selection
         transportService.handlePointSelected(point);
@@ -1518,25 +1506,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     return { lat, lng };
   };
   
-  // Transport route calculation is now handled by TransportService
-  useEffect(() => {
-    const handleTransportCalculationCompleted = (data: any) => {
-      setTransportPath(data.path);
-    };
-    
-    const handleTransportReset = () => {
-      setTransportPath([]);
-    };
-    
-    // Subscribe to events
-    window.addEventListener('TRANSPORT_CALCULATION_COMPLETED', handleTransportCalculationCompleted as EventListener);
-    window.addEventListener('TRANSPORT_RESET', handleTransportReset as EventListener);
-    
-    return () => {
-      window.removeEventListener('TRANSPORT_CALCULATION_COMPLETED', handleTransportCalculationCompleted as EventListener);
-      window.removeEventListener('TRANSPORT_RESET', handleTransportReset as EventListener);
-    };
-  }, []);
+  // This section is now handled by the TransportService and the earlier useEffect
   
   // Function to find building position
   const findBuildingPosition = (buildingId: string): {x: number, y: number} | null => {
@@ -3155,10 +3125,11 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       </div>
       
       {/* Exit Transport Mode button */}
-      {activeView === 'transport' && transportService.getState().startPoint !== null && (
+      {activeView === 'transport' && transportMode && (
         <button
           onClick={() => {
             transportService.reset();
+            transportService.setTransportMode(false);
             // Dispatch event to notify components that transport mode has been exited
             window.dispatchEvent(new CustomEvent('transportModeExited'));
           }}

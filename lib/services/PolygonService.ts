@@ -1,19 +1,20 @@
-import { Polygon, Coordinate } from '../../components/PolygonViewer/types';
 import { eventBus, EventTypes } from '../utils/eventBus';
+import { calculateCentroid, validateAndRepairCoordinates } from '../utils/fileUtils';
 
 /**
  * Service for handling polygon data
  */
 export class PolygonService {
-  private polygons: Polygon[] = [];
+  private polygons: any[] = [];
   private landOwners: Record<string, string> = {};
   private loading: boolean = false;
   private error: string | null = null;
+  private isLoaded: boolean = false;
   
   /**
    * Load polygons from the API
    */
-  public async loadPolygons(): Promise<Polygon[]> {
+  public async loadPolygons(): Promise<any[]> {
     try {
       this.loading = true;
       this.error = null;
@@ -32,16 +33,13 @@ export class PolygonService {
       }
       
       this.polygons = data.polygons;
+      this.isLoaded = true;
       
-      // Debug: Check if any polygons have coatOfArmsCenter
-      const polygonsWithCoatOfArmsCenter = this.polygons.filter(p => p.coatOfArmsCenter);
-      console.log(`Found ${polygonsWithCoatOfArmsCenter.length} polygons with coatOfArmsCenter`);
-      if (polygonsWithCoatOfArmsCenter.length > 0) {
-        console.log('Example polygon with coatOfArmsCenter:', polygonsWithCoatOfArmsCenter[0]);
-      }
+      // Process polygons to ensure they have centroids
+      this.processPolygons();
       
       // Notify listeners that polygons have been loaded
-      eventBus.emit(EventTypes.POLYGONS_LOADED);
+      eventBus.emit(EventTypes.POLYGONS_LOADED, this.polygons);
       
       return this.polygons;
     } catch (error) {
@@ -80,16 +78,45 @@ export class PolygonService {
   }
   
   /**
+   * Process polygons to ensure they have centroids and valid coordinates
+   */
+  private processPolygons(): void {
+    this.polygons = this.polygons.map(polygon => {
+      // Skip if polygon doesn't have coordinates
+      if (!polygon.coordinates || polygon.coordinates.length < 3) {
+        return polygon;
+      }
+      
+      // Validate and repair coordinates if needed
+      const validCoordinates = validateAndRepairCoordinates(polygon.coordinates);
+      if (!validCoordinates) {
+        console.warn(`Invalid coordinates for polygon ${polygon.id}`);
+        return polygon;
+      }
+      
+      // Calculate centroid if not already present
+      if (!polygon.center) {
+        const centroid = calculateCentroid(validCoordinates);
+        if (centroid) {
+          polygon.center = centroid;
+        }
+      }
+      
+      return polygon;
+    });
+  }
+
+  /**
    * Get all polygons
    */
-  public getPolygons(): Polygon[] {
+  public getPolygons(): any[] {
     return this.polygons;
   }
   
   /**
    * Get a polygon by ID
    */
-  public getPolygonById(id: string): Polygon | undefined {
+  public getPolygonById(id: string): any | undefined {
     return this.polygons.find(p => p.id === id);
   }
   
@@ -140,6 +167,60 @@ export class PolygonService {
    */
   public getError(): string | null {
     return this.error;
+  }
+  
+  /**
+   * Check if polygons are loaded
+   */
+  public isDataLoaded(): boolean {
+    return this.isLoaded;
+  }
+  
+  /**
+   * Find polygon that contains a point
+   */
+  public findPolygonContainingPoint(point: {lat: number, lng: number}): any | null {
+    for (const polygon of this.polygons) {
+      if (polygon.coordinates && polygon.coordinates.length > 2) {
+        if (this.isPointInPolygon(point, polygon.coordinates)) {
+          return polygon;
+        }
+      }
+    }
+    return null;
+  }
+  
+  /**
+   * Check if a point is inside a polygon
+   */
+  private isPointInPolygon(point: {lat: number, lng: number}, coordinates: {lat: number, lng: number}[]): boolean {
+    let inside = false;
+    for (let i = 0, j = coordinates.length - 1; i < coordinates.length; j = i++) {
+      const xi = coordinates[i].lng, yi = coordinates[i].lat;
+      const xj = coordinates[j].lng, yj = coordinates[j].lat;
+      
+      const intersect = ((yi > point.lat) !== (yj > point.lat))
+          && (point.lng < (xj - xi) * (point.lat - yi) / (yj - yi) + xi);
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  }
+  
+  /**
+   * Calculate distance between two points
+   */
+  public calculateDistance(point1: {lat: number, lng: number}, point2: {lat: number, lng: number}): number {
+    const R = 6371000; // Earth radius in meters
+    const lat1 = point1.lat * Math.PI / 180;
+    const lat2 = point2.lat * Math.PI / 180;
+    const deltaLat = (point2.lat - point1.lat) * Math.PI / 180;
+    const deltaLng = (point2.lng - point1.lng) * Math.PI / 180;
+
+    const a = Math.sin(deltaLat/2) * Math.sin(deltaLat/2) +
+            Math.cos(lat1) * Math.cos(lat2) *
+            Math.sin(deltaLng/2) * Math.sin(deltaLng/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
   }
 }
 

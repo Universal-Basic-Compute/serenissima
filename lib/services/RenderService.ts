@@ -485,6 +485,8 @@ export class RenderService {
     coatOfArmsImages: Record<string, HTMLImageElement>,
     renderedCoatOfArmsCache: Record<string, {image: HTMLImageElement | null, x: number, y: number, size: number}>
   ): void {
+    // Performance measurement
+    const startTime = performance.now();
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
@@ -517,6 +519,15 @@ export class RenderService {
     // Draw citizen markers if in citizens view
     if (activeView === 'citizens' && citizensLoaded) {
       this.drawCitizenMarkers(ctx, citizensByBuilding, buildings, scale, offset, canvas.width, canvas.height, interactionState);
+    }
+    
+    // Log performance metrics for debugging
+    const endTime = performance.now();
+    const renderTime = endTime - startTime;
+    
+    // Only log if rendering takes more than 16ms (60fps threshold)
+    if (renderTime > 16) {
+      console.debug(`Scene rendering took ${renderTime.toFixed(2)}ms (${(1000/renderTime).toFixed(1)} fps)`);
     }
   }
 

@@ -270,6 +270,16 @@ export default function ViewportCanvas({
       coatOfArmsImages,
       renderedCoatOfArmsCache.current
     );
+    
+    // Request animation frame for smooth rendering
+    const animationId = requestAnimationFrame(() => {
+      // This empty requestAnimationFrame helps with smoother rendering
+      // by ensuring the browser has time to process the previous frame
+    });
+    
+    return () => {
+      cancelAnimationFrame(animationId);
+    };
   }, [polygonsToRender, buildings, emptyBuildingPoints, activeView, scale, offset, citizensByBuilding, citizensLoaded, transportPath, polygons, incomeData, loading, coatOfArmsImages]);
 
   return (
