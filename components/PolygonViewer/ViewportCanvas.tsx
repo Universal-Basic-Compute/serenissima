@@ -206,8 +206,8 @@ export default function ViewportCanvas({
       emptyBuildingPoints,
       polygons,
       citizensByBuilding,
-      transportStartPoint: transportService.getStartPoint?.() || null,
-      transportEndPoint: transportService.getEndPoint?.() || null
+      transportStartPoint: transportService.getStartPoint?.() || transportService.getTransportStartPoint?.() || null,
+      transportEndPoint: transportService.getEndPoint?.() || transportService.getTransportEndPoint?.() || null
     });
     
     // Set up interaction service with all required dependencies
@@ -349,9 +349,9 @@ export default function ViewportCanvas({
       emptyBuildingPoints,
       interactionState,
       transportPath,
-      transportService.getStartPoint?.() || null,
-      transportService.getEndPoint?.() || null,
-      polygons,
+      transportService.getStartPoint?.() || transportService.getTransportStartPoint?.() || null,
+      transportService.getEndPoint?.() || transportService.getTransportEndPoint?.() || null,
+      polygons as Record<string, any[]>,
       incomeData,
       minIncome,
       maxIncome
@@ -359,7 +359,7 @@ export default function ViewportCanvas({
     
     // Handle citizens and coat of arms separately if needed
     if (citizensLoaded && activeView === 'citizens') {
-      renderService.renderCitizens(
+      (renderService as any).renderCitizens(
         ctx,
         scale,
         offset,
@@ -401,9 +401,9 @@ export default function ViewportCanvas({
           emptyBuildingPoints,
           interactionService.getState(),
           transportPath,
-          transportService.getTransportStartPoint(),
-          transportService.getTransportEndPoint(),
-          polygons,
+          transportService.getTransportStartPoint?.() || transportService.getStartPoint?.() || null,
+          transportService.getTransportEndPoint?.() || transportService.getEndPoint?.() || null,
+          polygons as Record<string, any[]>,
           incomeData,
           minIncome,
           maxIncome
@@ -411,7 +411,7 @@ export default function ViewportCanvas({
       
         // Handle citizens and coat of arms separately if needed
         if (citizensLoaded && activeView === 'citizens') {
-          renderService.renderCitizens(
+          (renderService as any).renderCitizens(
             ctx,
             scale,
             offset,
