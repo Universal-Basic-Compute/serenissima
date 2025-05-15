@@ -121,7 +121,13 @@ export default function TwoDPage() {
         });
       });
       
-      setEmptyBuildingPoints(emptyPoints);
+      // Compare new points with current state to avoid unnecessary updates
+      const currentPointsJson = JSON.stringify(emptyBuildingPoints);
+      const newPointsJson = JSON.stringify(emptyPoints);
+      
+      if (currentPointsJson !== newPointsJson) {
+        setEmptyBuildingPoints(emptyPoints);
+      }
     };
     
     // Event handler that uses the calculation function
@@ -130,8 +136,11 @@ export default function TwoDPage() {
       calculateEmptyBuildingPoints();
     };
     
-    // Calculate empty building points when polygons or buildings change
-    calculateEmptyBuildingPoints();
+    // Only calculate empty building points when polygons or buildings change
+    // NOT on every render or event
+    if (polygons.length > 0 && buildings.length > 0) {
+      calculateEmptyBuildingPoints();
+    }
     
     // Set up event listener
     window.addEventListener('ensureBuildingsVisible', ensureBuildingsVisible);
@@ -139,7 +148,7 @@ export default function TwoDPage() {
     return () => {
       window.removeEventListener('ensureBuildingsVisible', ensureBuildingsVisible);
     };
-  }, [polygons, buildings]); // Dependencies for the effect
+  }, [polygons, buildings, emptyBuildingPoints]); // Added emptyBuildingPoints to dependencies
 
   // Update view when activeView changes
   useEffect(() => {

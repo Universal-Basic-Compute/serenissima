@@ -37,18 +37,29 @@ export default function RootLayout({
                 window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
                 
                 // Also set up a periodic check to ensure buildings stay visible
+                // Use a debounced version to prevent too many updates
+                let lastDispatchTime = 0;
                 setInterval(function() {
                   // Only dispatch if the page has been loaded for more than 5 seconds
-                  if (document.readyState === 'complete' && performance.now() > 5000) {
+                  // And at least 30 seconds since last dispatch
+                  const now = performance.now();
+                  if (document.readyState === 'complete' && 
+                      now > 5000 && 
+                      now - lastDispatchTime > 30000) {
                     console.log('Layout: Periodic ensureBuildingsVisible check');
                     window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+                    lastDispatchTime = now;
                   }
                 }, 30000); // Keep at 30 seconds
                 
-                // Also dispatch the event when switching views
+                // Also dispatch the event when switching views, but with debounce
+                let viewChangeTimeout;
                 window.addEventListener('viewChanged', function(e) {
-                  console.log('View changed, ensuring buildings are visible');
-                  window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+                  clearTimeout(viewChangeTimeout);
+                  viewChangeTimeout = setTimeout(function() {
+                    console.log('View changed, ensuring buildings are visible');
+                    window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+                  }, 300); // Debounce for 300ms
                 });
               });
             `
