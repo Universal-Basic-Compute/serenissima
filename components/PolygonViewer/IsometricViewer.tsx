@@ -2859,8 +2859,13 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         }
       }
       
-      // If no username in profile, fall back to wallet address
-      return getWalletAddress();
+      // If no username in profile, fall back to wallet address from localStorage
+      const walletAddress = localStorage.getItem('walletAddress');
+      if (walletAddress) {
+        return walletAddress;
+      }
+      
+      return null;
     } catch (error) {
       console.error('Error getting current user identifier:', error);
       return null;
