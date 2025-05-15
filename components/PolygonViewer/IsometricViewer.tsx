@@ -1903,7 +1903,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         ctx.stroke();
         
         // Add a small indicator for the building type with fixed font size
-        ctx.fillStyle = '#000'; // Black text for visibility
+        // Determine text color based on building color darkness
+        const isDark = isColorDark(color);
+        ctx.fillStyle = isDark ? '#FFFFFF' : '#000000'; // White text for dark backgrounds, black for light
         ctx.font = `10px Arial`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -2960,6 +2962,50 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     console.log(`Lightened color: ${result}`);
     return result;
   };
+  
+  // Helper function to determine if a color is dark
+  function isColorDark(color: string): boolean {
+    // For HSL colors
+    if (color.startsWith('hsl')) {
+      // Extract the lightness value from the HSL color
+      const match = color.match(/hsl\(\s*\d+\s*,\s*\d+%\s*,\s*(\d+)%\s*\)/);
+      if (match && match[1]) {
+        const lightness = parseInt(match[1], 10);
+        return lightness < 50; // If lightness is less than 50%, consider it dark
+      }
+    }
+    
+    // For hex colors
+    if (color.startsWith('#')) {
+      const hex = color.substring(1);
+      const rgb = parseInt(hex, 16);
+      const r = (rgb >> 16) & 0xff;
+      const g = (rgb >> 8) & 0xff;
+      const b = (rgb >> 0) & 0xff;
+      
+      // Calculate perceived brightness using the formula
+      // (0.299*R + 0.587*G + 0.114*B)
+      const brightness = (0.299 * r + 0.587 * g + 0.114 * b);
+      return brightness < 128; // If brightness is less than 128, consider it dark
+    }
+    
+    // For RGB colors
+    if (color.startsWith('rgb')) {
+      const match = color.match(/rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/);
+      if (match) {
+        const r = parseInt(match[1], 10);
+        const g = parseInt(match[2], 10);
+        const b = parseInt(match[3], 10);
+        
+        // Calculate perceived brightness
+        const brightness = (0.299 * r + 0.587 * g + 0.114 * b);
+        return brightness < 128;
+      }
+    }
+    
+    // Default to false if we can't determine
+    return false;
+  }
 
   // Helper function to format building types for display
   function formatBuildingType(type: string): string {
