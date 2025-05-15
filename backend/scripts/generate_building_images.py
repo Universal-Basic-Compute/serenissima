@@ -141,7 +141,9 @@ def create_image_prompt(building: Dict[str, Any]) -> str:
 def generate_image(prompt: str, output_path: str) -> bool:
     """Generate image using Ideogram API and save to the specified path."""
     log.info(f"Generating image for: {output_path}")
-    log.debug(f"Using prompt: {prompt[:100]}...")
+    
+    # Log the full prompt to the console
+    log.info(f"PROMPT: {prompt}")
     
     # Get Ideogram API key from environment
     ideogram_api_key = os.environ.get('IDEOGRAM_API_KEY')
