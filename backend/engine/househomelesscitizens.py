@@ -158,15 +158,20 @@ def assign_citizen_to_business(tables, citizen: Dict, business: Dict) -> bool:
         
         # Create a notification for the business owner
         if business_owner:
+            # Get the building type and format it nicely for display
+            building_type = business['fields'].get('Type', 'building')
+            building_type_display = building_type.replace('_', ' ').title()
+            
             create_notification(
                 tables,
                 business_owner,
-                f"{citizen_name} now works in your business {business_name}",
+                f"{citizen_name} now works in your {building_type_display}",
                 {
                     "citizen_id": citizen_id,
                     "citizen_name": citizen_name,
                     "business_id": business_id,
                     "business_name": business_name,
+                    "building_type": building_type,
                     "event_type": "job_assignment"
                 }
             )
