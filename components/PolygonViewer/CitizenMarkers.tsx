@@ -108,7 +108,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   return (
     <>
       {/* Citizen Markers */}
-      <div className="absolute inset-0 pointer-events-none">
+      <div className="absolute inset-0 pointer-events-none overflow-visible">
         {citizens.filter(citizen => citizen.position).map((citizen) => {
           // Log the original position and the transformed screen coordinates
           const originalPos = citizen.position;
@@ -142,7 +142,8 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                 left: `${position.x}px`,
                 top: `${position.y}px`,
                 transform: 'translate(-50%, -50%)',
-                zIndex: 1000
+                zIndex: 1000,
+                position: 'absolute' // Ensure absolute positioning works
               }}
               onClick={() => handleCitizenClick(citizen)}
             >
