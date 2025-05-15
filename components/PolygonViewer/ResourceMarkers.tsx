@@ -128,7 +128,7 @@ export default function ResourceMarkers({
   return (
     <div className="absolute inset-0 pointer-events-none">
       {/* Filter controls - make this part pointer-events-auto */}
-      <div className="absolute top-4 left-20 bg-black/70 rounded-lg p-2 pointer-events-auto z-50">
+      <div className="absolute bottom-4 left-20 bg-black/70 rounded-lg p-2 pointer-events-auto z-50">
         <div className="flex justify-between items-center mb-2">
           <div className="text-white text-sm">Filter by Category:</div>
           <button 
