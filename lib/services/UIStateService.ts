@@ -31,6 +31,24 @@ export class UIStateService {
     position: {x: number, y: number} | null,
     imagePath: string | null
   ): void {
+    // Skip the update entirely if all values are null
+    if (buildingName === null && position === null && imagePath === null) {
+      // Only emit an event if we're clearing a previous non-null state
+      if (this.hoveredBuildingName !== null || this.hoveredBuildingPosition !== null || this.hoveredBuildingImagePath !== null) {
+        this.hoveredBuildingName = null;
+        this.hoveredBuildingPosition = null;
+        this.hoveredBuildingImagePath = null;
+        
+        // Emit event with null values
+        eventBus.emit(EventTypes.BUILDING_HOVER_STATE_CHANGED, {
+          buildingName: null,
+          position: null,
+          imagePath: null
+        });
+      }
+      return;
+    }
+    
     // Use simple equality checks to avoid deep comparisons that might cause issues
     const nameChanged = this.hoveredBuildingName !== buildingName;
     const positionChanged = 
@@ -145,14 +163,33 @@ export class UIStateService {
    * Handle building hover
    */
   public handleBuildingHover(buildingId: string | null, building: any | null, position: {x: number, y: number} | null): void {
-    if (buildingId && building) {
-      this.hoveredBuildingName = building.name || building.type;
-      this.hoveredBuildingPosition = position;
-      
-      // Fetch the building image
-      this.fetchBuildingImagePath(building.type, building.variant);
-    } else {
+    // If clearing hover state, just call setBuildingHover with null values
+    if (!buildingId || !building) {
       this.setBuildingHover(null, null, null);
+      return;
+    }
+    
+    // Only update the name and position, but don't fetch the image here
+    // This prevents circular updates when the image path changes
+    const buildingName = building.name || building.type;
+    
+    // Check if the name or position has changed before updating
+    if (this.hoveredBuildingName !== buildingName || 
+        !this.hoveredBuildingPosition || 
+        position.x !== this.hoveredBuildingPosition.x || 
+        position.y !== this.hoveredBuildingPosition.y) {
+      
+      // Update the name and position, but keep the existing image path
+      this.setBuildingHover(
+        buildingName,
+        position,
+        this.hoveredBuildingImagePath // Keep existing image path
+      );
+      
+      // Fetch the image separately, but only if we don't already have one
+      if (!this.hoveredBuildingImagePath && !this.isLoadingBuildingImage) {
+        this.fetchBuildingImagePath(building.type, building.variant);
+      }
     }
   }
   

@@ -87,9 +87,14 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const isDraggingRef = useRef<boolean>(false);
   
   // Add a separate useEffect for fetching building images that won't cause an infinite loop
+  const buildingImageFetchingRef = useRef(false);
+  
   useEffect(() => {
     // Only fetch the image if we have a hovered building with a name but no image path yet
-    if (hoveredBuildingId && hoveredBuildingName && !hoveredBuildingImagePath && !isLoadingBuildingImage) {
+    // Use a ref to track if we're already fetching to prevent multiple fetches
+    if (hoveredBuildingId && hoveredBuildingName && !hoveredBuildingImagePath && !isLoadingBuildingImage && !buildingImageFetchingRef.current) {
+      buildingImageFetchingRef.current = true;
+      
       const building = buildings.find(b => b.id === hoveredBuildingId);
       if (building) {
         // Set loading state
@@ -114,19 +119,28 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           })
           .finally(() => {
             setIsLoadingBuildingImage(false);
+            buildingImageFetchingRef.current = false;
           });
+      } else {
+        buildingImageFetchingRef.current = false;
       }
     }
-  }, [hoveredBuildingId, hoveredBuildingName, hoveredBuildingImagePath, isLoadingBuildingImage, buildings]);
+  }, [hoveredBuildingId, hoveredBuildingName]); // Remove hoveredBuildingImagePath and isLoadingBuildingImage from dependencies
   
   // Minimal debugging effect that won't cause infinite updates
   useEffect(() => {
-    // Only log critical changes to avoid causing updates
-    if (process.env.NODE_ENV === 'development' && hoveredBuildingId !== prevStateRef.current.hoveredBuildingId) {
-      console.log(`Building hover state changed from ${prevStateRef.current.hoveredBuildingId} to ${hoveredBuildingId}`);
-      // Only update the hoveredBuildingId in the ref
+    // Use a ref to track previous value without causing re-renders
+    const prevHoveredBuildingId = prevStateRef.current.hoveredBuildingId;
+    
+    // Only log if the value actually changed
+    if (process.env.NODE_ENV === 'development' && hoveredBuildingId !== prevHoveredBuildingId) {
+      console.log(`Building hover state changed from ${prevHoveredBuildingId} to ${hoveredBuildingId}`);
+      // Update the ref
       prevStateRef.current.hoveredBuildingId = hoveredBuildingId;
     }
+    
+    // This effect should only run when hoveredBuildingId changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hoveredBuildingId]);
 
   // Function to load citizens data - declared early to avoid reference before declaration
@@ -1136,11 +1150,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   };
   
   // Add this useEffect for mouse interactions with throttling
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const handleMouseMove = throttle((e: MouseEvent) => {
+  const handleMouseMove = useCallback(
+    throttle((e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
@@ -1154,7 +1165,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       }
       
       // Skip hover detection while dragging
-      if (isDragging) {
+      if (isDraggingRef.current) {
         canvas.style.cursor = 'grabbing';
         return;
       }
@@ -1172,7 +1183,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         }
         
         if (!newHoveredPolygonId) {
-          canvas.style.cursor = isDragging ? 'grabbing' : 'grab';
+          canvas.style.cursor = isDraggingRef.current ? 'grabbing' : 'grab';
         }
         
         // Only update state if the hovered polygon has changed
@@ -1256,7 +1267,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         }
       } else {
         // For all other views, just set a default cursor
-        canvas.style.cursor = isDragging ? 'grabbing' : 'grab';
+        canvas.style.cursor = isDraggingRef.current ? 'grabbing' : 'grab';
         
         // Clear hover states if they were set
         if (hoveredBuildingIdRef.current) {
@@ -1272,10 +1283,12 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           setHoveredPolygonId(null);
         }
       }
-    }, 50); // Throttle to 50ms
+    }, 50),
+    [activeView, scale, offset, buildings, polygonsToRender]
+  ); // Memoize the handler with useCallback
     
     const handleClick = (e: MouseEvent) => {
-      if (isDragging) return; // Skip click handling while dragging
+      if (isDraggingRef.current) return; // Skip click handling while dragging
       
       const rect = canvas.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
@@ -1624,6 +1637,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       }
     };
     
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
     canvas.addEventListener('mousemove', handleMouseMove);
     canvas.addEventListener('click', handleClick);
     
@@ -1632,7 +1648,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       canvas.removeEventListener('click', handleClick);
       handleMouseMove.cancel(); // Clean up the throttled function
     };
-  }, [activeView, isDragging, scale, offset, buildings, polygonsToRender, transportMode]);
+  }, [handleMouseMove, handleClick]);
 
   // Helper function to check if a point is inside a polygon
   function isPointInPolygon(x: number, y: number, polygon: {x: number, y: number}[]): boolean {
