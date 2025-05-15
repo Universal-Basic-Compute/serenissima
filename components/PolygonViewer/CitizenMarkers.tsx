@@ -39,12 +39,23 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     // Load citizens when the component mounts
     const loadCitizensData = async () => {
       setIsLoading(true);
-      
+    
       if (!citizenService.isDataLoaded()) {
         await citizenService.loadCitizens();
       }
-      
-      setCitizens(citizenService.getCitizens());
+    
+      const loadedCitizens = citizenService.getCitizens();
+      setCitizens(loadedCitizens);
+    
+      // Add debug logging
+      console.log(`CitizenMarkers: Loaded ${loadedCitizens.length} citizens`);
+      console.log(`CitizenMarkers: Citizens with positions: ${loadedCitizens.filter(c => c.position).length}`);
+    
+      // Log a sample citizen to check position format
+      if (loadedCitizens.length > 0) {
+        console.log('CitizenMarkers: Sample citizen position:', loadedCitizens[0].position);
+      }
+    
       setIsLoading(false);
     };
     
