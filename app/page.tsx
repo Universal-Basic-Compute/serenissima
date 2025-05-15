@@ -97,8 +97,9 @@ export default function TwoDPage() {
             (window as any).__polygonData = data.polygons;
             
             // Initialize the transport service with the polygon data
-            transportService.setPolygonsData(data.polygons);
-            console.log('Transport service initialized with polygon data from API');
+            console.log(`Setting ${data.polygons.length} polygons to transport service`);
+            const success = transportService.setPolygonsData(data.polygons);
+            console.log(`Transport service initialization ${success ? 'succeeded' : 'failed'}`);
           }
         }
       })

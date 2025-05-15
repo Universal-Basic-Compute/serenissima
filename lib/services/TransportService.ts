@@ -136,9 +136,19 @@ export class TransportService {
       
       console.log('Calculating transport route from', start, 'to', end);
       
-      // Try to find a path locally first
-      if (!this.polygonsLoaded) {
-        await this.loadPolygons();
+      // Try to ensure polygons are loaded
+      if (!this.polygonsLoaded || this.polygons.length === 0) {
+        console.log('Polygons not loaded yet, initializing service...');
+        const success = await this.initializeService();
+        
+        if (!success) {
+          console.error('Failed to initialize transport service for route calculation');
+          // Emit error event
+          eventBus.emit(EventTypes.TRANSPORT_ROUTE_ERROR, 'Failed to load polygon data');
+          
+          // Try API as fallback
+          console.log('Trying API as fallback...');
+        }
       }
       
       if (this.polygons.length > 0) {
@@ -521,10 +531,26 @@ export class TransportService {
       console.log('Initializing transport service...');
       
       // If polygons are already loaded, we're done
-      if (this.polygonsLoaded) {
+      if (this.polygonsLoaded && this.polygons.length > 0) {
         console.log('Polygons already loaded, initialization complete');
         resolve(true);
         return;
+      }
+      
+      // First, try to get polygons from window.__polygonData
+      if (typeof window !== 'undefined' && (window as any).__polygonData) {
+        console.log('Attempting to load polygons from window.__polygonData');
+        const windowPolygons = (window as any).__polygonData;
+        
+        if (Array.isArray(windowPolygons) && windowPolygons.length > 0) {
+          console.log(`Found ${windowPolygons.length} polygons in window.__polygonData`);
+          const success = this.setPolygonsData(windowPolygons);
+          if (success) {
+            console.log('Successfully loaded polygons from window.__polygonData');
+            resolve(true);
+            return;
+          }
+        }
       }
       
       // Try to load polygons with exponential backoff
@@ -549,17 +575,6 @@ export class TransportService {
         
         console.log(`Polygon loading failed, waiting ${backoffTime}ms before retry...`);
         await new Promise(r => setTimeout(r, backoffTime));
-      }
-      
-      // If we still failed after all retries, try to get polygons from window.__polygonData
-      if (!success && typeof window !== 'undefined' && (window as any).__polygonData) {
-        console.log('Attempting to load polygons from window.__polygonData after all API retries failed');
-        const windowPolygons = (window as any).__polygonData;
-        
-        if (Array.isArray(windowPolygons) && windowPolygons.length > 0) {
-          console.log(`Found ${windowPolygons.length} polygons in window.__polygonData`);
-          success = this.setPolygonsData(windowPolygons);
-        }
       }
       
       resolve(success);
