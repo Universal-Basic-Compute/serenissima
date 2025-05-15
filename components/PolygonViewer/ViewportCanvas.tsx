@@ -76,10 +76,12 @@ export default function ViewportCanvas({
         // Load income data if in land view
         if (activeView === 'land') {
           const incomeResult = await incomeService.loadIncomeData();
-          setIncomeData(incomeResult.incomeData);
-          setMinIncome(incomeResult.minIncome);
-          setMaxIncome(incomeResult.maxIncome);
-          setIncomeDataLoaded(true);
+          if (incomeResult) {
+            setIncomeData(incomeResult.incomeData || {});
+            setMinIncome(incomeResult.minIncome || 0);
+            setMaxIncome(incomeResult.maxIncome || 1000);
+            setIncomeDataLoaded(true);
+          }
         }
         
         // Load citizens if in citizens view
@@ -114,9 +116,12 @@ export default function ViewportCanvas({
     eventBus.subscribe(EventTypes.TRANSPORT_MODE_CHANGED, handleTransportModeChange);
     eventBus.subscribe(EventTypes.TRANSPORT_PATH_CHANGED, handleTransportPathChange);
     
+    const transportModeSubscription = eventBus.subscribe(EventTypes.TRANSPORT_MODE_CHANGED, handleTransportModeChange);
+    const transportPathSubscription = eventBus.subscribe(EventTypes.TRANSPORT_PATH_CHANGED, handleTransportPathChange);
+    
     return () => {
-      eventBus.unsubscribe(EventTypes.TRANSPORT_MODE_CHANGED, handleTransportModeChange);
-      eventBus.unsubscribe(EventTypes.TRANSPORT_PATH_CHANGED, handleTransportPathChange);
+      transportModeSubscription.unsubscribe();
+      transportPathSubscription.unsubscribe();
     };
   }, [activeView]);
   
@@ -195,13 +200,15 @@ export default function ViewportCanvas({
     interactionService.updateCitizensByBuilding(citizensByBuilding);
     interactionService.updatePolygonsData(polygons);
     
-    // Set up interaction service with reduced dependencies
+    // Set up interaction service with all required dependencies
     const cleanup = interactionService.initializeInteractions(
       canvas,
       activeView,
       scale,
       offset,
-      transportMode
+      transportMode,
+      polygonsToRender,
+      buildings
     );
     
     // Subscribe to events from InteractionService
@@ -245,7 +252,11 @@ export default function ViewportCanvas({
     
     return () => {
       // Clean up all event subscriptions
-      subscriptions.forEach(sub => sub.unsubscribe());
+      subscriptions.forEach(sub => {
+        if (sub && typeof sub.unsubscribe === 'function') {
+          sub.unsubscribe();
+        }
+      });
       
       // Clean up interaction handlers
       cleanup();
@@ -360,7 +371,7 @@ export default function ViewportCanvas({
     if (!ctx) return;
     
     let animationId: number;
-    let isAnimating = isDragging;
+    let isAnimating = interactionService.getState().isDragging;
     
     const animate = () => {
       // Only redraw if something has changed
