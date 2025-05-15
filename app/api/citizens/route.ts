@@ -7,7 +7,7 @@ const base = new Airtable({
   apiKey: process.env.AIRTABLE_API_KEY
 }).base(process.env.AIRTABLE_BASE_ID || '');
 
-const BUILDINGS_TABLE = 'Buildings';
+const BUILDINGS_TABLE = 'BUILDINGS';
 const CITIZENS_TABLE = 'CITIZENS';
 
 // Helper function to format image URLs
@@ -87,49 +87,7 @@ export async function GET(request: Request) {
     }
     
     // Map citizens to the expected format
-    const citizens = citizenRecords.map(record => {
-      // Initialize position as null
-      let position = null;
-      
-      // Try to find the building for this citizen
-      if (record.fields.Home && buildingRecords.length > 0) {
-        const homeBuilding = buildingRecords.find(b => 
-          b.fields.BuildingId === record.fields.Home
-        );
-        
-        if (homeBuilding && homeBuilding.fields.Position) {
-          try {
-            // Parse position if it's a string
-            if (typeof homeBuilding.fields.Position === 'string') {
-              const parsedPosition = JSON.parse(homeBuilding.fields.Position);
-              // Ensure the parsed position has the correct structure
-              if (parsedPosition && typeof parsedPosition.lat === 'number' && typeof parsedPosition.lng === 'number') {
-                position = parsedPosition;
-              }
-            } else if (typeof homeBuilding.fields.Position === 'object' && 
-                      homeBuilding.fields.Position !== null &&
-                      'lat' in homeBuilding.fields.Position && 
-                      'lng' in homeBuilding.fields.Position &&
-                      typeof homeBuilding.fields.Position.lat === 'number' &&
-                      typeof homeBuilding.fields.Position.lng === 'number') {
-              // Ensure the object has the correct structure
-              position = {
-                lat: homeBuilding.fields.Position.lat,
-                lng: homeBuilding.fields.Position.lng
-              };
-            }
-            console.log(`Found position for citizen ${record.fields.CitizenId}'s home:`, position);
-          } catch (error) {
-            console.warn(`Error parsing position for building ${record.fields.Home}:`, error);
-          }
-        }
-      }
-      
-      // If no position was found, log a warning
-      if (!position) {
-        console.warn(`No valid position found for citizen ${record.fields.CitizenId}`);
-      }
-      
+    const citizens = citizenRecords.map(record => {     
       // Ensure the citizen ID is a string
       const citizenId = record.fields.CitizenId ? String(record.fields.CitizenId) : `ctz_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
       
@@ -148,12 +106,10 @@ export async function GET(request: Request) {
         profileImage: formatImageUrl(record.fields.ImageUrl?.toString(), citizenId),
         ImageUrl: formatImageUrl(record.fields.ImageUrl?.toString(), citizenId),
         // Ensure position is included and properly formatted
-        position: position || { lat: 45.4371 + Math.random() * 0.01, lng: 12.3326 + Math.random() * 0.01 },
+        position: record.fields.Position || { lat: 45.4371 + Math.random() * 0.01, lng: 12.3326 + Math.random() * 0.01 },
         occupation: record.fields.Occupation || 'Citizen',
-        wealth: record.fields.Wealth || 'Average',
-        Wealth: record.fields.Wealth || 'Average',
-        landId: record.fields.Land || 'polygon-1',
-        NeedsCompletionScore: 0.75,
+        wealth: record.fields.Wealth || 0,
+        Wealth: record.fields.Wealth || 0,
         CreatedAt: record.fields.CreatedAt || new Date().toISOString()
         // Home and Work fields removed
       };
