@@ -955,42 +955,7 @@ export class TransportService {
 
     // Create a function to check if a line between two points intersects any land polygon
     const doesLineIntersectLand = (point1: Point, point2: Point): boolean => {
-      // For each polygon, check if the line intersects any of its edges
-      for (const polygon of polygons) {
-        const coords = polygon.coordinates;
-        if (!coords || coords.length < 3) continue;
-
-        // Check if either point is inside the polygon (except for canal points)
-        const isPoint1Canal = allCanalPoints.some(cp => 
-          Math.abs(cp.point.lat - point1.lat) < 0.0001 && 
-          Math.abs(cp.point.lng - point1.lng) < 0.0001
-        );
-        
-        const isPoint2Canal = allCanalPoints.some(cp => 
-          Math.abs(cp.point.lat - point2.lat) < 0.0001 && 
-          Math.abs(cp.point.lng - point2.lng) < 0.0001
-        );
-
-        // If both points are canal points, they're valid connections
-        if (isPoint1Canal && isPoint2Canal) {
-          continue;
-        }
-
-        // Check if the line intersects any polygon edge
-        for (let i = 0, j = coords.length - 1; i < coords.length; j = i++) {
-          const intersects = this.doLineSegmentsIntersect(
-            point1.lng, point1.lat, 
-            point2.lng, point2.lat,
-            coords[j].lng, coords[j].lat, 
-            coords[i].lng, coords[i].lat
-          );
-          
-          if (intersects) {
-            return true;
-          }
-        }
-      }
-      return false;
+      return this.doesLineIntersectLand(point1, point2, polygons);
     };
 
     // Add nodes for each polygon's centroid, building points, bridge points, and canal points
@@ -1071,37 +1036,47 @@ export class TransportService {
     // Connect nodes within each polygon
     for (const polygon of polygons) {
       const polygonNodes = Object.values(graph.nodes).filter(node => node.polygonId === polygon.id);
-      
+    
       // Connect each node to every other node in the same polygon
       for (let i = 0; i < polygonNodes.length; i++) {
         const node1 = polygonNodes[i];
-        
+      
+        // Ensure node1 has an edges array
+        if (!graph.edges[node1.id]) {
+          graph.edges[node1.id] = [];
+        }
+      
         for (let j = i + 1; j < polygonNodes.length; j++) {
           const node2 = polygonNodes[j];
-          
+        
+          // Ensure node2 has an edges array
+          if (!graph.edges[node2.id]) {
+            graph.edges[node2.id] = [];
+          }
+        
           // Skip canal-to-non-canal connections (canal points should only connect to other canal points)
           if ((node1.type === 'canal' && node2.type !== 'canal') || 
               (node1.type !== 'canal' && node2.type === 'canal')) {
             continue;
           }
-          
+        
           const distance = this.calculateDistance(node1.position, node2.position);
-          
+        
           // Calculate weight based on node types - water travel is twice as fast
           let weight = distance;
-          
+        
           // If both nodes are canal points, reduce the weight by half (making water travel twice as fast)
           if (node1.type === 'canal' && node2.type === 'canal') {
             weight = distance / 2;
           }
-          
+        
           // Add bidirectional edges
           graph.edges[node1.id].push({
             from: node1.id,
             to: node2.id,
             weight: weight
           });
-          
+        
           graph.edges[node2.id].push({
             from: node2.id,
             to: node1.id,
@@ -1117,10 +1092,15 @@ export class TransportService {
         for (const bridgePoint of polygon.bridgePoints) {
           if (bridgePoint.connection && bridgePoint.edge) {
             const sourcePointId = bridgePoint.id || `bridge-${bridgePoint.edge.lat}-${bridgePoint.edge.lng}`;
-            
+          
+            // Ensure the source point has an edges array
+            if (!graph.edges[sourcePointId]) {
+              graph.edges[sourcePointId] = [];
+            }
+          
             // Find the target polygon
             const targetPolygon = polygons.find(p => p.id === bridgePoint.connection?.targetPolygonId);
-            
+          
             if (targetPolygon) {
               // Find the corresponding bridge point in the target polygon
               const targetBridgePoint = targetPolygon.bridgePoints.find(bp => 
@@ -1129,25 +1109,25 @@ export class TransportService {
                 Math.abs(bp.edge.lat - bridgePoint.connection.targetPoint.lat) < 0.0001 &&
                 Math.abs(bp.edge.lng - bridgePoint.connection.targetPoint.lng) < 0.0001
               );
-              
+            
               if (targetBridgePoint && targetBridgePoint.edge) {
                 const targetPointId = targetBridgePoint.id || `bridge-${targetBridgePoint.edge.lat}-${targetBridgePoint.edge.lng}`;
-                
+              
+                // Ensure the target point has an edges array
+                if (!graph.edges[targetPointId]) {
+                  graph.edges[targetPointId] = [];
+                }
+              
                 // Add bidirectional edges between the bridge points
                 const distance = bridgePoint.connection.distance || 
                   this.calculateDistance(bridgePoint.edge, bridgePoint.connection.targetPoint);
-                
+              
                 graph.edges[sourcePointId].push({
                   from: sourcePointId,
                   to: targetPointId,
                   weight: distance
                 });
-                
-                // Ensure the target point has an edges array
-                if (!graph.edges[targetPointId]) {
-                  graph.edges[targetPointId] = [];
-                }
-                
+              
                 graph.edges[targetPointId].push({
                   from: targetPointId,
                   to: sourcePointId,
@@ -1162,41 +1142,51 @@ export class TransportService {
     
     // Connect canal points across polygons, but only if they don't cross land
     const canalNodes = Object.values(graph.nodes).filter(node => node.type === 'canal');
-    
+  
     for (let i = 0; i < canalNodes.length; i++) {
       const canalNode1 = canalNodes[i];
-      
+    
+      // Ensure canalNode1 has an edges array
+      if (!graph.edges[canalNode1.id]) {
+        graph.edges[canalNode1.id] = [];
+      }
+    
       for (let j = 0; j < canalNodes.length; j++) {
         // Allow connections to all canal nodes, not just those with higher indices
         if (i === j) continue; // Skip self-connections
-        
+      
         const canalNode2 = canalNodes[j];
-        
+      
+        // Ensure canalNode2 has an edges array
+        if (!graph.edges[canalNode2.id]) {
+          graph.edges[canalNode2.id] = [];
+        }
+      
         // Skip if they're in the same polygon (already connected above)
         if (canalNode1.polygonId === canalNode2.polygonId) {
           continue;
         }
-        
+      
         // Calculate distance between canal points
         const distance = this.calculateDistance(canalNode1.position, canalNode2.position);
-        
+      
         // Increase maximum distance further and reduce minimum distance
         if (distance > 5 && distance < 500) {
           // Skip if the line between these points would cross land
-          if (doesLineIntersectLand(canalNode1.position, canalNode2.position)) {
+          if (this.doesLineIntersectLand(canalNode1.position, canalNode2.position, polygons)) {
             continue;
           }
-          
+        
           // Water travel is twice as fast, so divide the weight by 2
           const weight = distance / 2;
-          
+        
           // Add bidirectional edges
           graph.edges[canalNode1.id].push({
             from: canalNode1.id,
             to: canalNode2.id,
             weight: weight
           });
-          
+        
           graph.edges[canalNode2.id].push({
             from: canalNode2.id,
             to: canalNode1.id,
@@ -2252,3 +2242,26 @@ export class TransportService {
 
 // Export a singleton instance
 export const transportService = new TransportService();
+// Helper method to check if a line intersects land
+private doesLineIntersectLand(point1: Point, point2: Point, polygons: Polygon[]): boolean {
+  // For each polygon, check if the line intersects any of its edges
+  for (const polygon of polygons) {
+    const coords = polygon.coordinates;
+    if (!coords || coords.length < 3) continue;
+
+    // Check if the line intersects any polygon edge
+    for (let i = 0, j = coords.length - 1; i < coords.length; j = i++) {
+      const intersects = this.doLineSegmentsIntersect(
+        point1.lng, point1.lat, 
+        point2.lng, point2.lat,
+        coords[j].lng, coords[j].lat, 
+        coords[i].lng, coords[i].lat
+      );
+      
+      if (intersects) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
