@@ -89,7 +89,7 @@ export async function GET(request: Request) {
       const buildingType = building.fields.Type;
       // Convert Occupant to string to use as an index
       const occupant = building.fields.Occupant ? 
-        String(building.fields.Occupant) : undefined;
+        airtableValueToString(building.fields.Occupant) : undefined;
       
       // Skip buildings without occupants or with non-string occupants
       if (!occupant) return;
@@ -152,11 +152,11 @@ export async function GET(request: Request) {
         socialclass: safeString(record.fields.SocialClass, 'Popolani'),
         description: safeString(record.fields.Description, 'A citizen of Venice.'),
         profileimage: formatImageUrl(
-          record.fields.ImageUrl ? String(record.fields.ImageUrl) : undefined, 
+          record.fields.ImageUrl ? airtableValueToString(record.fields.ImageUrl) : undefined, 
           citizenId
         ),
         imageurl: formatImageUrl(
-          record.fields.ImageUrl ? String(record.fields.ImageUrl) : undefined, 
+          record.fields.ImageUrl ? airtableValueToString(record.fields.ImageUrl) : undefined, 
           citizenId
         ),
         // Ensure position is included and properly formatted
