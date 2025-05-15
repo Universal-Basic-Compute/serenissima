@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 def run_scheduled_tasks():
     """Run scheduled tasks at specific times."""
     while True:
-        now = datetime.now().utc
+        now = datetime.utcnow()
         current_hour = now.hour
         current_minute = now.minute
         
