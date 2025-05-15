@@ -3032,53 +3032,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     ctx.fillText(typeIndicator, x, y);
   }
 
-  // Polygon utility functions are now fully delegated to DataService
-
-  // Helper function to lighten a color
-  function lightenColor(color: string, percent: number): string {
-    // For debugging
-    console.log(`Lightening color ${color} by ${percent}%`);
-    
-    // If color doesn't start with #, return a default color
-    if (!color.startsWith('#')) {
-      console.warn(`Invalid color format: ${color}, using default`);
-      return '#FF00FF'; // Bright magenta as fallback
-    }
-    
-    const num = parseInt(color.replace('#', ''), 16);
-    const amt = Math.round(2.55 * percent);
-    const R = (num >> 16) + amt;
-    const G = (num >> 8 & 0x00FF) + amt;
-    const B = (num & 0x0000FF) + amt;
-    
-    const result = '#' + (
-      0x1000000 +
-      (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 +
-      (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
-      (B < 255 ? (B < 1 ? 0 : B) : 255)
-    ).toString(16).slice(1);
-    
-    console.log(`Lightened color: ${result}`);
-    return result;
-  }
-
-  // Building type formatting is now fully delegated to BuildingService
-
-  // Helper function to darken a color
-  function darkenColor(color: string, percent: number): string {
-    const num = parseInt(color.replace('#', ''), 16);
-    const amt = Math.round(2.55 * percent);
-    const R = (num >> 16) - amt;
-    const G = (num >> 8 & 0x00FF) - amt;
-    const B = (num & 0x0000FF) - amt;
-    
-    return '#' + (
-      0x1000000 +
-      (R > 0 ? (R < 255 ? R : 255) : 0) * 0x10000 +
-      (G > 0 ? (G < 255 ? G : 255) : 0) * 0x100 +
-      (B > 0 ? (B < 255 ? B : 255) : 0)
-    ).toString(16).slice(1);
-  }
+  // Color utility functions are now fully delegated to RenderService
 
   return (
     <div className="w-screen h-screen">
