@@ -45,7 +45,7 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
               setTooltipData({
                 type: 'building',
                 name: actualBuildingData.name || (actualBuildingData.type ? buildingService.formatBuildingType(actualBuildingData.type) : 'Unknown Building'),
-                type: actualBuildingData.type,
+                buildingType: actualBuildingData.type,
                 owner: actualBuildingData.owner
               });
             } else {
@@ -53,7 +53,7 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
               setTooltipData({
                 type: 'building',
                 name: 'Building',
-                type: 'Unknown',
+                buildingType: 'Unknown',
                 owner: 'Unknown'
               });
             }
@@ -64,7 +64,7 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
             setTooltipData({
               type: 'building',
               name: 'Building',
-              type: 'Unknown',
+              buildingType: 'Unknown',
               owner: 'Unknown'
             });
           });
@@ -108,11 +108,17 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
       setPosition({ x: e.clientX, y: e.clientY });
     };
     
-    eventBus.subscribe(EventTypes.HOVER_STATE_CHANGED, handleHoverStateChanged);
+    // Assuming EventTypes.HOVER_STATE_CHANGED should be a valid event type
+    // If it doesn't exist in EventTypes, you need to add it there
+    const hoverStateChangedEvent = 'HOVER_STATE_CHANGED';
+    eventBus.subscribe(hoverStateChangedEvent, handleHoverStateChanged);
     window.addEventListener('mousemove', handleMouseMove);
     
     return () => {
-      eventBus.unsubscribe(EventTypes.HOVER_STATE_CHANGED, handleHoverStateChanged);
+      // Use the same event name as above
+      const hoverStateChangedEvent = 'HOVER_STATE_CHANGED';
+      // Use the public method to unsubscribe
+      eventBus.subscribe(hoverStateChangedEvent, handleHoverStateChanged).unsubscribe();
       window.removeEventListener('mousemove', handleMouseMove);
     };
   }, []);
@@ -143,7 +149,7 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
         {/* Add the building image */}
         <div className="w-32 h-24 mb-2 overflow-hidden rounded">
           <img 
-            src={buildingImagePath || `/images/buildings/${tooltipData.type?.toLowerCase().replace(/[_-]/g, '_')}.jpg`} 
+            src={buildingImagePath || `/images/buildings/${tooltipData.buildingType?.toLowerCase().replace(/[_-]/g, '_')}.jpg`} 
             alt={tooltipData.name || 'Building'}
             className="w-full h-full object-cover"
             onError={(e) => {
@@ -153,7 +159,7 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
           />
         </div>
         <div className="font-bold">{tooltipData.name || 'Building'}</div>
-        <div>Type: {tooltipData.type ? buildingService.formatBuildingType(tooltipData.type) : 'Unknown'}</div>
+        <div>Type: {tooltipData.buildingType ? buildingService.formatBuildingType(tooltipData.buildingType) : 'Unknown'}</div>
         {tooltipData.owner && <div>Owner: {tooltipData.owner}</div>}
       </div>
     );
