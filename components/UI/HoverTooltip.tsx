@@ -159,7 +159,6 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
           />
         </div>
         <div className="font-bold">{tooltipData.name || 'Building'}</div>
-        <div>Type: {tooltipData.buildingType ? buildingService.formatBuildingType(tooltipData.buildingType) : 'Unknown'}</div>
         {tooltipData.owner && <div>Owner: {tooltipData.owner}</div>}
       </div>
     );
