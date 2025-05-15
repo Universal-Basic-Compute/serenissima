@@ -289,6 +289,13 @@ If you decide not to adjust any leases at this time, return an empty array.
                 
                 # The response content is in the response field of response_data
                 content = response_data.get('response', '')
+                
+                # Log the entire response for debugging
+                print(f"FULL AI RESPONSE FROM {ai_username}:")
+                print("="*80)
+                print(content)
+                print("="*80)
+                
                 print(f"AI {ai_username} response length: {len(content)} characters")
                 print(f"AI {ai_username} response preview: {content[:200]}...")
                 
