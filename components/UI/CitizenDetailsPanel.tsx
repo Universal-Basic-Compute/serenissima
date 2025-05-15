@@ -12,15 +12,42 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
   const [homeBuilding, setHomeBuilding] = useState<any>(null);
   const [workBuilding, setWorkBuilding] = useState<any>(null);
   const [isLoadingBuildings, setIsLoadingBuildings] = useState(false);
+  // Add new state for activities
+  const [activities, setActivities] = useState<any[]>([]);
+  const [isLoadingActivities, setIsLoadingActivities] = useState(false);
+  
+  // Add function to fetch citizen activities
+  const fetchCitizenActivities = async (citizenId: string) => {
+    if (!citizenId) return;
+    
+    setIsLoadingActivities(true);
+    try {
+      const response = await fetch(`/api/citizens/${citizenId}/activities?limit=10`);
+      if (response.ok) {
+        const data = await response.json();
+        setActivities(data.activities || []);
+        console.log(`Loaded ${data.activities?.length || 0} activities for citizen ${citizenId}`);
+      } else {
+        console.error(`Failed to fetch activities for citizen ${citizenId}: ${response.status} ${response.statusText}`);
+        setActivities([]);
+      }
+    } catch (error) {
+      console.error('Error fetching citizen activities:', error);
+      setActivities([]);
+    } finally {
+      setIsLoadingActivities(false);
+    }
+  };
   
   useEffect(() => {
     // Animate in when component mounts
     setIsVisible(true);
     
-    // Reset building states when citizen changes
+    // Reset states when citizen changes
     setHomeBuilding(null);
     setWorkBuilding(null);
     setIsLoadingBuildings(false);
+    setActivities([]);
     
     // Add escape key handler
     const handleEscKey = (event: KeyboardEvent) => {
@@ -69,6 +96,11 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     };
     
     fetchBuildingDetails();
+    
+    // Fetch citizen activities
+    if (citizen && (citizen.citizenid || citizen.id)) {
+      fetchCitizenActivities(citizen.citizenid || citizen.id);
+    }
     
     return () => {
       window.removeEventListener('keydown', handleEscKey);
@@ -124,6 +156,79 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
       .join(' ');
     
     return formatted;
+  };
+  
+  // Add a helper function to format activity type
+  const formatActivityType = (type: string): string => {
+    if (!type) return 'Unknown';
+    
+    // Replace underscores and hyphens with spaces
+    let formatted = type.replace(/[_-]/g, ' ');
+    
+    // Capitalize each word
+    formatted = formatted.split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+    
+    return formatted;
+  };
+  
+  // Add a helper function to format date in a readable way
+  const formatActivityDate = (dateString: string): string => {
+    if (!dateString) return 'Unknown';
+    
+    try {
+      const date = new Date(dateString);
+      
+      // Format as "Month Day, Year at HH:MM"
+      return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (e) {
+      return 'Invalid date';
+    }
+  };
+  
+  // Add a helper function to get activity icon based on type
+  const getActivityIcon = (type: string): JSX.Element => {
+    const lowerType = type?.toLowerCase() || '';
+    
+    if (lowerType.includes('transport') || lowerType.includes('move')) {
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+        </svg>
+      );
+    } else if (lowerType.includes('trade') || lowerType.includes('buy') || lowerType.includes('sell')) {
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+      );
+    } else if (lowerType.includes('work') || lowerType.includes('labor')) {
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+      );
+    } else if (lowerType.includes('craft') || lowerType.includes('create') || lowerType.includes('produce')) {
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+        </svg>
+      );
+    }
+    
+    // Default icon
+    return (
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    );
   };
   
   if (!citizen) return null;
@@ -279,6 +384,59 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
       <div className="mb-6">
         <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">About</h3>
         <p className="text-amber-700 italic">{citizen.description || 'No description available.'}</p>
+      </div>
+      
+      {/* Recent Activities Section */}
+      <div className="mb-6">
+        <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Recent Activities</h3>
+        
+        {isLoadingActivities ? (
+          <div className="flex justify-center py-4">
+            <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : activities.length > 0 ? (
+          <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+            {activities.map((activity, index) => (
+              <div key={activity.ActivityId || index} className="bg-amber-100 rounded-lg p-2 text-sm">
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="text-amber-700">
+                    {getActivityIcon(activity.Type)}
+                  </div>
+                  <div className="font-medium text-amber-800">
+                    {formatActivityType(activity.Type)}
+                  </div>
+                  <div className="ml-auto text-xs text-amber-600">
+                    {formatActivityDate(activity.EndDate || activity.StartDate || activity.CreatedAt)}
+                  </div>
+                </div>
+                
+                {activity.FromBuilding && activity.ToBuilding && (
+                  <div className="flex items-center text-xs text-amber-700 mb-1">
+                    <span className="font-medium">{activity.FromBuilding}</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mx-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                    <span className="font-medium">{activity.ToBuilding}</span>
+                  </div>
+                )}
+                
+                {activity.ResourceId && activity.Amount && (
+                  <div className="text-xs text-amber-700 mb-1">
+                    <span className="font-medium">{activity.Amount}</span> units of <span className="font-medium">{activity.ResourceId}</span>
+                  </div>
+                )}
+                
+                {activity.Notes && (
+                  <div className="text-xs italic text-amber-600 mt-1">
+                    {activity.Notes}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-amber-700 italic">No recent activities found.</p>
+        )}
       </div>
       
       <div className="mt-4 text-xs text-amber-500 italic text-center">
