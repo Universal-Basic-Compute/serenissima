@@ -837,7 +837,7 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                     <span className="font-semibold text-amber-800">
                       {typeof buildingDefinition.maintenanceCost === 'number' 
                         ? `${buildingDefinition.maintenanceCost.toLocaleString()} ⚜️ ducats`
-                        : `${String(buildingDefinition.maintenanceCost)} ⚜️ ducats`}
+                        : `${String(buildingDefinition.maintenanceCost as any)} ⚜️ ducats`}
                     </span>
                   </div>
                 </div>
@@ -922,7 +922,7 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                     <div className="flex justify-between items-center">
                       <span className="text-gray-700">Rent Amount:</span>
                       <span className="font-semibold text-amber-800">
-                        {String(building.rent_amount.toLocaleString())} ⚜️ ducats
+                        {String((building.rent_amount as number).toLocaleString())} ⚜️ ducats
                       </span>
                     </div>
                   )}
