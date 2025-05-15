@@ -354,14 +354,20 @@ export default function ViewportCanvas({
       polygons,
       incomeData,
       minIncome,
-      maxIncome,
-      {
-        citizensByBuilding,
-        citizensLoaded,
-        coatOfArmsImages,
-        renderedCoatOfArmsCache: renderedCoatOfArmsCache.current
-      }
+      maxIncome
     );
+    
+    // Handle citizens and coat of arms separately if needed
+    if (citizensLoaded && activeView === 'citizens') {
+      renderService.renderCitizens(
+        ctx,
+        scale,
+        offset,
+        citizensByBuilding,
+        coatOfArmsImages,
+        renderedCoatOfArmsCache.current
+      );
+    }
     
     // Log performance metrics for debugging (only if rendering takes more than 16ms)
     const renderTime = performance.now() - startTime;
@@ -400,14 +406,20 @@ export default function ViewportCanvas({
           polygons,
           incomeData,
           minIncome,
-          maxIncome,
-          {
-            citizensByBuilding,
-            citizensLoaded,
-            coatOfArmsImages,
-            renderedCoatOfArmsCache: renderedCoatOfArmsCache.current
-          }
+          maxIncome
         );
+      
+        // Handle citizens and coat of arms separately if needed
+        if (citizensLoaded && activeView === 'citizens') {
+          renderService.renderCitizens(
+            ctx,
+            scale,
+            offset,
+            citizensByBuilding,
+            coatOfArmsImages,
+            renderedCoatOfArmsCache.current
+          );
+        }
       }
       
       animationId = requestAnimationFrame(animate);
