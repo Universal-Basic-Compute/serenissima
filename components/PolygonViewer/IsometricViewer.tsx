@@ -180,64 +180,6 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   // This function is already defined earlier in the file, so we're removing the duplicate
   
   
-  // Function to find building position
-  const findBuildingPosition = (buildingId: string): {x: number, y: number} | null => {
-    // First check if any building in the buildings array matches
-    const building = buildings.find(b => b.id === buildingId);
-    if (building && building.position) {
-      let position;
-      if (typeof building.position === 'string') {
-        try {
-          position = JSON.parse(building.position);
-        } catch (e) {
-          return null;
-        }
-      } else {
-        position = building.position;
-      }
-      
-      // Convert lat/lng to isometric coordinates
-      let x, y;
-      if ('lat' in position && 'lng' in position) {
-        x = (position.lng - 12.3326) * 20000;
-        y = (position.lat - 45.4371) * 20000;
-      } else if ('x' in position && 'z' in position) {
-        x = position.x;
-        y = position.z;
-      } else {
-        return null;
-      }
-      
-      return {
-        x: calculateIsoX(x, y, scale, offset, canvasRef.current?.width || 0),
-        y: calculateIsoY(x, y, scale, offset, canvasRef.current?.height || 0)
-      };
-    }
-    
-    // If not found in buildings, check building points in polygons
-    for (const polygon of polygons) {
-      if (polygon.buildingPoints && Array.isArray(polygon.buildingPoints)) {
-        const buildingPoint = polygon.buildingPoints.find((bp: any) => 
-          bp.BuildingId === buildingId || 
-          bp.buildingId === buildingId || 
-          bp.id === buildingId
-        );
-        
-        if (buildingPoint) {
-          // Convert lat/lng to isometric coordinates
-          const x = (buildingPoint.lng - 12.3326) * 20000;
-          const y = (buildingPoint.lat - 45.4371) * 20000;
-          
-          return {
-            x: calculateIsoX(x, y, scale, offset, canvasRef.current?.width || 0),
-            y: calculateIsoY(x, y, scale, offset, canvasRef.current?.height || 0)
-          };
-        }
-      }
-    }
-    
-    return null;
-  };
   
   // Helper function to find which polygon contains this building point
   function findPolygonIdForPoint(point: {lat: number, lng: number}): string {
