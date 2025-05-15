@@ -54,6 +54,17 @@ interface InteractionServiceDependencies {
   screenToLatLng: (screenX: number, screenY: number, scale: number, offset: { x: number, y: number }, canvasWidth: number, canvasHeight: number) => { lat: number, lng: number };
 }
 
+// Define the type for the initializeInteractions method parameters
+interface InitializeInteractionsParams {
+  polygonsToRender: any[];
+  buildings: BuildingData[];
+  emptyBuildingPoints: PointData[];
+  polygons: PolygonData[];
+  citizensByBuilding: Record<string, any[]>;
+  transportStartPoint: PointData | null;
+  transportEndPoint: PointData | null;
+}
+
 // Define the interaction state interface
 interface InteractionState {
   isDragging: boolean;
@@ -257,14 +268,14 @@ export default function ViewportCanvas({
     
     // Update the interaction service with current data
     interactionService.updatePolygons({
-      polygonsToRender: polygonsToRender,
-      buildings: buildings,
-      emptyBuildingPoints: emptyBuildingPoints,
-      polygons: polygons,
-      citizensByBuilding: citizensByBuilding,
+      polygonsToRender,
+      buildings,
+      emptyBuildingPoints,
+      polygons,
+      citizensByBuilding,
       transportStartPoint: transportService.getStartPoint() || null,
       transportEndPoint: transportService.getEndPoint() || null
-    } as InteractionData);
+    });
     
     // Set up interaction service with all required dependencies
     const cleanup = interactionService.initializeInteractions(
@@ -274,15 +285,15 @@ export default function ViewportCanvas({
       offset,
       transportMode,
       {
-        polygonsToRender: polygonsToRender,
-        buildings: buildings,
-        emptyBuildingPoints: emptyBuildingPoints,
-        polygons: polygons,
-        citizensByBuilding: citizensByBuilding,
+        polygonsToRender,
+        buildings,
+        emptyBuildingPoints,
+        polygons,
+        citizensByBuilding,
         transportStartPoint: transportService.getStartPoint() || null,
         transportEndPoint: transportService.getEndPoint() || null
-      } as InteractionData,
-      coatOfArmsImages as unknown as InteractionServiceDependencies
+      } as InitializeInteractionsParams,
+      coatOfArmsImages
     );
     
     // Subscribe to events from InteractionService
@@ -316,7 +327,7 @@ export default function ViewportCanvas({
         if (point) {
           console.log(`Transport point selected at: ${point.lat}, ${point.lng}`);
           // Pass the point correctly
-          transportService.handlePointSelected(point as any);
+          transportService.handlePointSelected(point);
         }
       })
     ];
@@ -344,14 +355,14 @@ export default function ViewportCanvas({
   // Add this effect to update the interaction service when data changes
   useEffect(() => {
     interactionService.updatePolygons({
-      polygonsToRender: polygonsToRender,
-      buildings: buildings,
-      emptyBuildingPoints: emptyBuildingPoints,
-      polygons: polygons,
-      citizensByBuilding: citizensByBuilding,
+      polygonsToRender,
+      buildings,
+      emptyBuildingPoints,
+      polygons,
+      citizensByBuilding,
       transportStartPoint: transportService.getStartPoint() || null,
       transportEndPoint: transportService.getEndPoint() || null
-    } as InteractionData);
+    });
   }, [polygonsToRender, buildings, emptyBuildingPoints, citizensByBuilding, polygons]);
   
   // Remove debugging for hover state changes
