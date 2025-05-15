@@ -1773,9 +1773,9 @@ export class TransportService {
       console.log(`Found closest canal points: start=${startCanalPoint.id}, end=${endCanalPoint.id}`);
       
       // Create a path with 3 segments:
-      // 1. From start point to nearest canal point
-      // 2. From start canal point to end canal point
-      // 3. From end canal point to end point
+      // 1. From start point to nearest canal point (walking)
+      // 2. From start canal point to end canal point (gondola)
+      // 3. From end canal point to end point (walking)
       
       // Calculate distances for each segment
       const startToCanal = this.calculateDistance(startPoint, startCanalPoint.point);
@@ -1788,15 +1788,15 @@ export class TransportService {
       // Create the path
       const path = [];
       
-      // Add start point
+      // Add start point (walking mode)
       path.push({
         ...startPoint,
-        type: 'canal',
+        type: 'centroid',
         polygonId: 'virtual',
-        transportMode: 'gondola'
+        transportMode: 'walking'
       });
       
-      // Add intermediate points for the first segment if it's long enough
+      // Add intermediate points for the first segment if it's long enough (walking)
       if (startToCanal > 20) {
         const numPoints = Math.max(1, Math.floor(startToCanal / 100));
         for (let i = 1; i <= numPoints; i++) {
@@ -1806,15 +1806,15 @@ export class TransportService {
           path.push({
             lat: startPoint.lat + (startCanalPoint.point.lat - startPoint.lat) * fraction + jitter,
             lng: startPoint.lng + (startCanalPoint.point.lng - startPoint.lng) * fraction + jitter,
-            type: 'canal',
+            type: 'centroid',
             polygonId: 'virtual',
-            transportMode: 'gondola',
+            transportMode: 'walking',
             isIntermediatePoint: true
           });
         }
       }
       
-      // Add start canal point
+      // Add start canal point (transition from walking to gondola)
       path.push({
         ...startCanalPoint.point,
         type: 'canal',
@@ -1822,7 +1822,7 @@ export class TransportService {
         transportMode: 'gondola'
       });
       
-      // Add intermediate points for the canal-to-canal segment
+      // Add intermediate points for the canal-to-canal segment (gondola)
       const numCanalPoints = Math.max(2, Math.floor(canalToCanal / 200));
       for (let i = 1; i <= numCanalPoints; i++) {
         const fraction = i / (numCanalPoints + 1);
@@ -1838,7 +1838,7 @@ export class TransportService {
         });
       }
       
-      // Add end canal point
+      // Add end canal point (still gondola)
       path.push({
         ...endCanalPoint.point,
         type: 'canal',
@@ -1846,7 +1846,7 @@ export class TransportService {
         transportMode: 'gondola'
       });
       
-      // Add intermediate points for the last segment if it's long enough
+      // Add intermediate points for the last segment if it's long enough (walking)
       if (canalToEnd > 20) {
         const numPoints = Math.max(1, Math.floor(canalToEnd / 100));
         for (let i = 1; i <= numPoints; i++) {
@@ -1856,36 +1856,37 @@ export class TransportService {
           path.push({
             lat: endCanalPoint.point.lat + (endPoint.lat - endCanalPoint.point.lat) * fraction + jitter,
             lng: endCanalPoint.point.lng + (endPoint.lng - endCanalPoint.point.lng) * fraction + jitter,
-            type: 'canal',
+            type: 'centroid',
             polygonId: 'virtual',
-            transportMode: 'gondola',
+            transportMode: 'walking',
             isIntermediatePoint: true
           });
         }
       }
       
-      // Add end point
+      // Add end point (walking)
       path.push({
         ...endPoint,
-        type: 'canal',
+        type: 'centroid',
         polygonId: 'virtual',
-        transportMode: 'gondola'
+        transportMode: 'walking'
       });
       
-      // Calculate time based on distance (gondola speed of 10 km/h)
-      const timeHours = totalDistance / 1000 / 10;
-      const timeMinutes = Math.round(timeHours * 60);
+      // Calculate time based on distance (walking at 5 km/h, gondola at 10 km/h)
+      const walkingTimeHours = (startToCanal + canalToEnd) / 1000 / 5;
+      const waterTimeHours = canalToCanal / 1000 / 10;
+      const totalTimeMinutes = Math.round((walkingTimeHours + waterTimeHours) * 60);
       
-      console.log(`Created water path with ${path.length} points, distance: ${totalDistance}m, time: ${timeMinutes} minutes`);
+      console.log(`Created water path with ${path.length} points, distance: ${totalDistance}m, time: ${totalTimeMinutes} minutes`);
       
       return {
         success: true,
         path: path,
         distance: totalDistance,
-        walkingDistance: 0,
-        waterDistance: totalDistance,
-        estimatedTimeMinutes: timeMinutes,
-        waterOnly: true
+        walkingDistance: startToCanal + canalToEnd,
+        waterDistance: canalToCanal,
+        estimatedTimeMinutes: totalTimeMinutes,
+        waterOnly: false
       };
     } catch (error) {
       console.error('Error finding water-only path:', error);
