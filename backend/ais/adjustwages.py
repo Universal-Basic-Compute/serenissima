@@ -63,22 +63,40 @@ def get_building_employees(tables, building_ids: List[str]) -> Dict[str, List[Di
     try:
         if not building_ids:
             return {}
-            
-        # Create a formula to query citizens working at these buildings
-        building_conditions = [f"{{Work}}='{building_id}'" for building_id in building_ids]
-        formula = f"OR({', '.join(building_conditions)})"
         
-        citizens = tables["citizens"].all(formula=formula)
-        print(f"Found {len(citizens)} citizens working at {len(building_ids)} buildings")
+        # Instead of querying citizens by Work field, we'll get all citizens
+        # and then match them to buildings later
+        citizens = tables["citizens"].all()
+        print(f"Retrieved {len(citizens)} citizens in total")
         
-        # Index citizens by building ID
+        # Initialize the result dictionary
         employees_by_building = {}
-        for citizen in citizens:
-            building_id = citizen["fields"].get("Work")
-            if building_id:
-                if building_id not in employees_by_building:
-                    employees_by_building[building_id] = []
-                employees_by_building[building_id].append(citizen)
+        
+        # For each building, check if it has an occupant who is a citizen
+        for building_id in building_ids:
+            # Find the building record
+            building_formula = f"{{BuildingId}}='{building_id}'"
+            buildings = tables["buildings"].all(formula=building_formula)
+            
+            if not buildings:
+                continue
+                
+            building = buildings[0]
+            occupant_id = building["fields"].get("Occupant", "")
+            
+            # If there's an occupant, add them to the employees list for this building
+            if occupant_id:
+                # Find the citizen record
+                matching_citizens = [c for c in citizens if c["id"] == occupant_id]
+                
+                if matching_citizens:
+                    if building_id not in employees_by_building:
+                        employees_by_building[building_id] = []
+                    employees_by_building[building_id].append(matching_citizens[0])
+        
+        # Log the results
+        total_employees = sum(len(emps) for emps in employees_by_building.values())
+        print(f"Found {total_employees} citizens working at {len(building_ids)} buildings")
         
         return employees_by_building
     except Exception as e:
@@ -110,19 +128,19 @@ def prepare_wage_analysis_data(ai_user: Dict, user_business_buildings: List[Dict
         wages = building["fields"].get("Wages", 0)
         income = building["fields"].get("Income", 0)
         rent_amount = building["fields"].get("RentAmount", 0)
+        occupant_id = building["fields"].get("Occupant", "")
         
         # Get employee information if available
         employees_data = []
-        # We'll get employees from citizens who work at this building
-        for citizen_id, citizen in citizens_info.items():
-            if citizen["fields"].get("Work") == building_id:
-                employee_data = {
-                    "id": citizen_id,
-                    "name": f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}",
-                    "social_class": citizen["fields"].get("SocialClass", ""),
-                    "wealth": citizen["fields"].get("Wealth", 0)
-                }
-                employees_data.append(employee_data)
+        if occupant_id and occupant_id in citizens_info:
+            citizen = citizens_info[occupant_id]
+            employee_data = {
+                "id": occupant_id,
+                "name": f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}",
+                "social_class": citizen["fields"].get("SocialClass", ""),
+                "wealth": citizen["fields"].get("Wealth", 0)
+            }
+            employees_data.append(employee_data)
         
         business_info = {
             "id": building_id,
@@ -143,7 +161,7 @@ def prepare_wage_analysis_data(ai_user: Dict, user_business_buildings: List[Dict
     # Calculate financial metrics
     total_income = sum(building["fields"].get("Income", 0) for building in user_business_buildings)
     total_wages_paid = sum(
-        building["fields"].get("Wages", 0) * len([c for c in citizens_info.values() if c["fields"].get("Work") == building["fields"].get("BuildingId")])
+        building["fields"].get("Wages", 0) * (1 if building["fields"].get("Occupant", "") else 0)
         for building in user_business_buildings
     )
     total_rent_paid = sum(building["fields"].get("RentAmount", 0) for building in user_business_buildings)
@@ -538,6 +556,14 @@ def process_ai_wage_adjustments(dry_run: bool = False):
         except Exception as e:
             print(f"Error getting all citizens: {str(e)}")
         
+        # Get all citizens for reference
+        all_citizens = {}
+        try:
+            citizens = tables["citizens"].all()
+            all_citizens = {citizen["id"]: citizen for citizen in citizens}
+        except Exception as e:
+            print(f"Error getting all citizens: {str(e)}")
+        
         # Prepare the data package for the AI
         data_package = prepare_wage_analysis_data(ai_user, user_business_buildings, all_citizens)
         
@@ -579,12 +605,12 @@ def process_ai_wage_adjustments(dry_run: bool = False):
                     
                     if success:
                         # Create notifications for employees
-                        if building_id in building_employees:
-                            for employee in building_employees[building_id]:
-                                create_notification_for_business_employee(
-                                    tables, building_id, employee["id"], ai_username, 
-                                    current_wage, new_wage_amount, reason
-                                )
+                        occupant_id = building["fields"].get("Occupant", "")
+                        if occupant_id and occupant_id in all_citizens:
+                            create_notification_for_business_employee(
+                                tables, building_id, occupant_id, ai_username, 
+                                current_wage, new_wage_amount, reason
+                            )
                         
                         # Add to the list of adjustments for this AI
                         ai_wage_adjustments[ai_username].append({
