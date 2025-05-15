@@ -29,7 +29,6 @@ def initialize_airtable():
         "users": Table(airtable_api_key, airtable_base_id, "Users"),
         "buildings": Table(airtable_api_key, airtable_base_id, "BUILDINGS"),
         "citizens": Table(airtable_api_key, airtable_base_id, "CITIZENS"),
-        "businesses": Table(airtable_api_key, airtable_base_id, "BUSINESSES"),
         "notifications": Table(airtable_api_key, airtable_base_id, "NOTIFICATIONS")
     }
     
@@ -47,69 +46,45 @@ def get_ai_users(tables) -> List[Dict]:
         print(f"Error getting AI users: {str(e)}")
         return []
 
-def get_user_businesses(tables, username: str) -> List[Dict]:
-    """Get all businesses owned by a specific user."""
+def get_user_business_buildings(tables, username: str) -> List[Dict]:
+    """Get all buildings with businesses run by a specific user."""
     try:
-        # Query businesses where the user is the owner
-        formula = f"{{Owner}}='{username}'"
-        businesses = tables["businesses"].all(formula=formula)
-        print(f"Found {len(businesses)} businesses owned by {username}")
-        return businesses
+        # Query buildings where the RanBy field is the username
+        formula = f"{{RanBy}}='{username}'"
+        buildings = tables["buildings"].all(formula=formula)
+        print(f"Found {len(buildings)} buildings with businesses run by {username}")
+        return buildings
     except Exception as e:
-        print(f"Error getting businesses for user {username}: {str(e)}")
+        print(f"Error getting business buildings for user {username}: {str(e)}")
         return []
 
-def get_business_buildings(tables, business_ids: List[str]) -> Dict[str, Dict]:
-    """Get buildings associated with businesses, indexed by business ID."""
+def get_building_employees(tables, building_ids: List[str]) -> Dict[str, List[Dict]]:
+    """Get employees (citizens) working at buildings, indexed by building ID."""
     try:
-        if not business_ids:
+        if not building_ids:
             return {}
             
-        # Create a formula to query buildings that have these businesses
-        business_conditions = [f"{{Business}}='{business_id}'" for business_id in business_ids]
-        formula = f"OR({', '.join(business_conditions)})"
-        
-        buildings = tables["buildings"].all(formula=formula)
-        print(f"Found {len(buildings)} buildings for {len(business_ids)} businesses")
-        
-        # Index buildings by business ID
-        buildings_by_business = {}
-        for building in buildings:
-            business_id = building["fields"].get("Business")
-            if business_id:
-                buildings_by_business[business_id] = building
-        
-        return buildings_by_business
-    except Exception as e:
-        print(f"Error getting buildings for businesses: {str(e)}")
-        return {}
-
-def get_business_employees(tables, business_ids: List[str]) -> Dict[str, List[Dict]]:
-    """Get employees (citizens) working at businesses, indexed by business ID."""
-    try:
-        if not business_ids:
-            return {}
-            
-        # Create a formula to query citizens working at these businesses
-        business_conditions = [f"{{Work}}='{business_id}'" for business_id in business_ids]
-        formula = f"OR({', '.join(business_conditions)})"
+        # Create a formula to query citizens working at these buildings
+        building_conditions = [f"{{Work}}='{building_id}'" for building_id in building_ids]
+        formula = f"OR({', '.join(building_conditions)})"
         
         citizens = tables["citizens"].all(formula=formula)
-        print(f"Found {len(citizens)} citizens working at {len(business_ids)} businesses")
+        print(f"Found {len(citizens)} citizens working at {len(building_ids)} buildings")
         
-        # Index citizens by business ID
-        employees_by_business = {}
+        # Index citizens by building ID
+        employees_by_building = {}
         for citizen in citizens:
-            business_id = citizen["fields"].get("Work")
-            if business_id:
-                if business_id not in employees_by_business:
-                    employees_by_business[business_id] = []
-                employees_by_business[business_id].append(citizen)
+            building_id = citizen["fields"].get("Work")
+            if building_id:
+                if building_id not in employees_by_building:
+                    employees_by_building[building_id] = []
+                employees_by_building[building_id].append(citizen)
         
-        return employees_by_business
+        return employees_by_building
     except Exception as e:
-        print(f"Error getting employees for businesses: {str(e)}")
+        print(f"Error getting employees for buildings: {str(e)}")
         return {}
+
 
 def get_kinos_api_key() -> str:
     """Get the Kinos API key from environment variables."""
@@ -120,69 +95,58 @@ def get_kinos_api_key() -> str:
         sys.exit(1)
     return api_key
 
-def prepare_wage_analysis_data(ai_user: Dict, user_businesses: List[Dict], 
-                              business_buildings: Dict[str, Dict], 
-                              business_employees: Dict[str, List[Dict]]) -> Dict:
+def prepare_wage_analysis_data(ai_user: Dict, user_business_buildings: List[Dict], citizens_info: Dict[str, Dict]) -> Dict:
     """Prepare a comprehensive data package for the AI to analyze wage situations."""
     
     # Extract user information
     username = ai_user["fields"].get("Username", "")
     ducats = ai_user["fields"].get("Ducats", 0)
     
-    # Process businesses data
+    # Process business buildings data
     businesses_data = []
-    for business in user_businesses:
-        business_id = business["fields"].get("BusinessId", "")
-        business_type = business["fields"].get("Type", "")
-        business_name = business["fields"].get("Name", "")
-        wages = business["fields"].get("Wages", 0)
-        income = business["fields"].get("Income", 0)
-        
-        # Get building information if available
-        building_data = None
-        if business_id in business_buildings:
-            building = business_buildings[business_id]
-            building_data = {
-                "id": building["fields"].get("BuildingId", ""),
-                "type": building["fields"].get("Type", ""),
-                "rent_amount": building["fields"].get("RentAmount", 0)
-            }
+    for building in user_business_buildings:
+        building_id = building["fields"].get("BuildingId", "")
+        building_type = building["fields"].get("Type", "")
+        wages = building["fields"].get("Wages", 0)
+        income = building["fields"].get("Income", 0)
+        rent_amount = building["fields"].get("RentAmount", 0)
         
         # Get employee information if available
         employees_data = []
-        if business_id in business_employees:
-            for employee in business_employees[business_id]:
+        # We'll get employees from citizens who work at this building
+        for citizen_id, citizen in citizens_info.items():
+            if citizen["fields"].get("Work") == building_id:
                 employee_data = {
-                    "id": employee["id"],
-                    "name": f"{employee['fields'].get('FirstName', '')} {employee['fields'].get('LastName', '')}",
-                    "social_class": employee["fields"].get("SocialClass", ""),
-                    "wealth": employee["fields"].get("Wealth", 0)
+                    "id": citizen_id,
+                    "name": f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}",
+                    "social_class": citizen["fields"].get("SocialClass", ""),
+                    "wealth": citizen["fields"].get("Wealth", 0)
                 }
                 employees_data.append(employee_data)
         
         business_info = {
-            "id": business_id,
-            "type": business_type,
-            "name": business_name,
+            "id": building_id,
+            "type": building_type,
+            "name": f"{building_type} at {building_id}",
             "wages": wages,
             "income": income,
-            "building": building_data,
+            "building": {
+                "id": building_id,
+                "type": building_type,
+                "rent_amount": rent_amount
+            },
             "employees": employees_data,
             "employee_count": len(employees_data)
         }
         businesses_data.append(business_info)
     
     # Calculate financial metrics
-    total_income = sum(business["fields"].get("Income", 0) for business in user_businesses)
+    total_income = sum(building["fields"].get("Income", 0) for building in user_business_buildings)
     total_wages_paid = sum(
-        business["fields"].get("Wages", 0) * len(business_employees.get(business["fields"].get("BusinessId", ""), []))
-        for business in user_businesses
+        building["fields"].get("Wages", 0) * len([c for c in citizens_info.values() if c["fields"].get("Work") == building["fields"].get("BuildingId")])
+        for building in user_business_buildings
     )
-    total_rent_paid = sum(
-        business_buildings.get(business["fields"].get("BusinessId", ""), {}).get("fields", {}).get("RentAmount", 0)
-        for business in user_businesses
-        if business["fields"].get("BusinessId", "") in business_buildings
-    )
+    total_rent_paid = sum(building["fields"].get("RentAmount", 0) for building in user_business_buildings)
     net_income = total_income - total_wages_paid - total_rent_paid
     
     # Prepare the complete data package
@@ -418,32 +382,32 @@ If you decide not to adjust any wages at this time, return an empty array.
         print(f"Exception traceback: {traceback.format_exc()}")
         return None
 
-def update_business_wage_amount(tables, business_id: str, new_wage_amount: float) -> bool:
-    """Update the wage amount for a business."""
+def update_building_wage_amount(tables, building_id: str, new_wage_amount: float) -> bool:
+    """Update the wage amount for a building."""
     try:
-        # Find the business record
-        formula = f"{{BusinessId}}='{business_id}'"
-        businesses = tables["businesses"].all(formula=formula)
+        # Find the building record
+        formula = f"{{BuildingId}}='{building_id}'"
+        buildings = tables["buildings"].all(formula=formula)
         
-        if not businesses:
-            print(f"Business {business_id} not found")
+        if not buildings:
+            print(f"Building {building_id} not found")
             return False
         
-        business = businesses[0]
-        current_wage = business["fields"].get("Wages", 0)
+        building = buildings[0]
+        current_wage = building["fields"].get("Wages", 0)
         
         # Update the wage amount
-        tables["businesses"].update(business["id"], {
+        tables["buildings"].update(building["id"], {
             "Wages": new_wage_amount
         })
         
-        print(f"Updated wage amount for business {business_id} from {current_wage} to {new_wage_amount}")
+        print(f"Updated wage amount for building {building_id} from {current_wage} to {new_wage_amount}")
         return True
     except Exception as e:
-        print(f"Error updating wage amount for business {business_id}: {str(e)}")
+        print(f"Error updating wage amount for building {building_id}: {str(e)}")
         return False
 
-def create_notification_for_business_employee(tables, business_id: str, employee_id: str, ai_username: str, 
+def create_notification_for_business_employee(tables, building_id: str, employee_id: str, ai_username: str, 
                                              old_wage: float, new_wage: float, reason: str) -> bool:
     """Create a notification for a business employee about the wage adjustment."""
     try:
@@ -464,23 +428,23 @@ def create_notification_for_business_employee(tables, business_id: str, employee
         
         now = datetime.now().isoformat()
         
-        # Get business name
-        business_name = "your workplace"
-        formula = f"{{BusinessId}}='{business_id}'"
-        businesses = tables["businesses"].all(formula=formula)
-        if businesses:
-            business_name = businesses[0]["fields"].get("Name", "your workplace")
+        # Get building name/type for better notification
+        building_type = "your workplace"
+        formula = f"{{BuildingId}}='{building_id}'"
+        buildings = tables["buildings"].all(formula=formula)
+        if buildings:
+            building_type = buildings[0]["fields"].get("Type", "your workplace")
         
         # Create the notification
         notification = {
             "User": user_id,
             "Type": "wage_adjustment",
-            "Content": f"Your wage at {business_name} has been adjusted from {old_wage} to {new_wage} ducats by the business owner {ai_username}. Reason: {reason}",
+            "Content": f"Your wage at {building_type} has been adjusted from {old_wage} to {new_wage} ducats by the business owner {ai_username}. Reason: {reason}",
             "CreatedAt": now,
             "ReadAt": None,
             "Details": json.dumps({
-                "business_id": business_id,
-                "business_name": business_name,
+                "building_id": building_id,
+                "building_type": building_type,
                 "old_wage_amount": old_wage,
                 "new_wage_amount": new_wage,
                 "business_owner": ai_username,
@@ -552,25 +516,30 @@ def process_ai_wage_adjustments(dry_run: bool = False):
         print(f"Processing AI user: {ai_username}")
         ai_wage_adjustments[ai_username] = []
         
-        # Get businesses owned by this AI
-        user_businesses = get_user_businesses(tables, ai_username)
+        # Get buildings with businesses run by this AI
+        user_business_buildings = get_user_business_buildings(tables, ai_username)
         
-        if not user_businesses:
+        if not user_business_buildings:
             print(f"AI user {ai_username} has no businesses, skipping")
             continue
         
-        # Get business IDs
-        business_ids = [business["fields"].get("BusinessId") for business in user_businesses 
-                       if business["fields"].get("BusinessId")]
+        # Get building IDs
+        building_ids = [building["fields"].get("BuildingId") for building in user_business_buildings 
+                       if building["fields"].get("BuildingId")]
         
-        # Get buildings associated with these businesses
-        business_buildings = get_business_buildings(tables, business_ids)
+        # Get employees working at these buildings
+        building_employees = get_building_employees(tables, building_ids)
         
-        # Get employees working at these businesses
-        business_employees = get_business_employees(tables, business_ids)
+        # Get all citizens for reference
+        all_citizens = {}
+        try:
+            citizens = tables["citizens"].all()
+            all_citizens = {citizen["id"]: citizen for citizen in citizens}
+        except Exception as e:
+            print(f"Error getting all citizens: {str(e)}")
         
         # Prepare the data package for the AI
-        data_package = prepare_wage_analysis_data(ai_user, user_businesses, business_buildings, business_employees)
+        data_package = prepare_wage_analysis_data(ai_user, user_business_buildings, all_citizens)
         
         # Send the wage adjustment request to the AI
         if not dry_run:
@@ -580,46 +549,46 @@ def process_ai_wage_adjustments(dry_run: bool = False):
                 wage_adjustments = decisions["wage_adjustments"]
                 
                 for adjustment in wage_adjustments:
-                    business_id = adjustment.get("business_id")
+                    building_id = adjustment.get("building_id")
                     new_wage_amount = adjustment.get("new_wage_amount")
                     reason = adjustment.get("reason", "No reason provided")
                     
-                    if not business_id or new_wage_amount is None:
+                    if not building_id or new_wage_amount is None:
                         print(f"Invalid wage adjustment: {adjustment}")
                         continue
                     
-                    # Find the business to get current wage amount
-                    business_formula = f"{{BusinessId}}='{business_id}'"
-                    businesses = tables["businesses"].all(formula=business_formula)
+                    # Find the building to get current wage amount
+                    building_formula = f"{{BuildingId}}='{building_id}'"
+                    buildings = tables["buildings"].all(formula=building_formula)
                     
-                    if not businesses:
-                        print(f"Business {business_id} not found")
+                    if not buildings:
+                        print(f"Building {building_id} not found")
                         continue
                     
-                    business = businesses[0]
-                    current_wage = business["fields"].get("Wages", 0)
+                    building = buildings[0]
+                    current_wage = building["fields"].get("Wages", 0)
                     
-                    # Check if the AI owns this business - if not, skip it
-                    business_owner = business["fields"].get("Owner", "")
-                    if business_owner != ai_username:
-                        print(f"Skipping business {business_id} - AI {ai_username} does not own this business (owned by {business_owner})")
+                    # Check if the AI runs this business - if not, skip it
+                    business_runner = building["fields"].get("RanBy", "")
+                    if business_runner != ai_username:
+                        print(f"Skipping building {building_id} - AI {ai_username} does not run this business (run by {business_runner})")
                         continue
                     
                     # Update the wage amount
-                    success = update_business_wage_amount(tables, business_id, new_wage_amount)
+                    success = update_building_wage_amount(tables, building_id, new_wage_amount)
                     
                     if success:
                         # Create notifications for employees
-                        if business_id in business_employees:
-                            for employee in business_employees[business_id]:
+                        if building_id in building_employees:
+                            for employee in building_employees[building_id]:
                                 create_notification_for_business_employee(
-                                    tables, business_id, employee["id"], ai_username, 
+                                    tables, building_id, employee["id"], ai_username, 
                                     current_wage, new_wage_amount, reason
                                 )
                         
                         # Add to the list of adjustments for this AI
                         ai_wage_adjustments[ai_username].append({
-                            "business_id": business_id,
+                            "building_id": building_id,
                             "old_wage": current_wage,
                             "new_wage": new_wage_amount,
                             "reason": reason
