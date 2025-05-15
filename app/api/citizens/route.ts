@@ -129,7 +129,7 @@ export async function GET(request: Request) {
       const citizenId = record.fields.CitizenId ? 
         (typeof record.fields.CitizenId === 'string' ? 
           record.fields.CitizenId as string : 
-          String(record.fields.CitizenId as AirtableValue)) 
+          String(record.fields.CitizenId)) 
         : `ctz_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
       
       // Get home and work assignments for this citizen
@@ -153,7 +153,7 @@ export async function GET(request: Request) {
           record.fields.ImageUrl ? 
             (typeof record.fields.ImageUrl === 'string' ? 
               record.fields.ImageUrl as string : 
-              String(record.fields.ImageUrl as AirtableValue)) : 
+              String(record.fields.ImageUrl)) : 
             undefined, 
           citizenId
         ),
@@ -161,7 +161,7 @@ export async function GET(request: Request) {
           record.fields.ImageUrl ? 
             (typeof record.fields.ImageUrl === 'string' ? 
               record.fields.ImageUrl as string : 
-              String(record.fields.ImageUrl as AirtableValue)) : 
+              String(record.fields.ImageUrl)) : 
             undefined, 
           citizenId
         ),
