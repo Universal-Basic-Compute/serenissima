@@ -82,7 +82,7 @@ export async function GET(request: Request) {
       const occupant = building.fields.Occupant ? 
         (typeof building.fields.Occupant === 'string' ? 
           building.fields.Occupant : 
-          String(building.fields.Occupant)) : undefined;
+          String(building.fields.Occupant as any)) : undefined;
       
       // Skip buildings without occupants
       if (!occupant) return;
@@ -139,19 +139,19 @@ export async function GET(request: Request) {
         firstname: record.fields.FirstName ? 
           (typeof record.fields.FirstName === 'string' ? 
             record.fields.FirstName : 
-            String(record.fields.FirstName)) : 'Unknown',
+            String(record.fields.FirstName as any)) : 'Unknown',
         lastname: record.fields.LastName ? 
           (typeof record.fields.LastName === 'string' ? 
             record.fields.LastName : 
-            String(record.fields.LastName)) : 'Citizen',
+            String(record.fields.LastName as any)) : 'Citizen',
         socialclass: String(record.fields.SocialClass || 'Popolani'),
         description: String(record.fields.Description || 'A citizen of Venice.'),
         profileimage: formatImageUrl(
-          record.fields.ImageUrl ? String(record.fields.ImageUrl) : undefined, 
+          record.fields.ImageUrl ? String(record.fields.ImageUrl as any) : undefined, 
           citizenId
         ),
         imageurl: formatImageUrl(
-          record.fields.ImageUrl ? String(record.fields.ImageUrl) : undefined, 
+          record.fields.ImageUrl ? String(record.fields.ImageUrl as any) : undefined, 
           citizenId
         ),
         // Ensure position is included and properly formatted
