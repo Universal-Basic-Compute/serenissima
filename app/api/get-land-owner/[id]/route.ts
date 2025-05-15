@@ -17,7 +17,7 @@ export async function GET(
     console.log(`Fetching owner for land ID: ${landId}`);
     
     // Fetch all land owners
-    const ownersResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/get-land-owners`);
+    const ownersResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/get-land-owners`);
     
     if (!ownersResponse.ok) {
       throw new Error(`Failed to fetch land owners: ${ownersResponse.status}`);
