@@ -109,9 +109,6 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
       {/* Citizen Markers */}
       <div className="absolute inset-0 pointer-events-none">
         {citizens.filter(citizen => citizen.position).map((citizen) => {
-          // Log the full citizen object for debugging
-          console.log('Citizen in CitizenMarkers component:', citizen);
-          
           // Convert lat/lng to screen coordinates
           const position = latLngToScreen(citizen.position.lat, citizen.position.lng);
           
