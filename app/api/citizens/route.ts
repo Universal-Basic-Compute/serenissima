@@ -82,7 +82,10 @@ export async function GET(request: Request) {
       const buildingId = building.fields.BuildingId || building.id;
       const buildingType = building.fields.Type;
       // Convert Occupant to string to use as an index
-      const occupant = building.fields.Occupant ? String(building.fields.Occupant) : undefined;
+      const occupant = building.fields.Occupant ? 
+        (typeof building.fields.Occupant === 'string' ? 
+          building.fields.Occupant as string : 
+          String(building.fields.Occupant)) : undefined;
       
       // Skip buildings without occupants
       if (!occupant) return;
@@ -147,11 +150,19 @@ export async function GET(request: Request) {
         socialclass: safeString(record.fields.SocialClass, 'Popolani'),
         description: safeString(record.fields.Description, 'A citizen of Venice.'),
         profileimage: formatImageUrl(
-          record.fields.ImageUrl ? String(record.fields.ImageUrl) : undefined, 
+          record.fields.ImageUrl ? 
+            (typeof record.fields.ImageUrl === 'string' ? 
+              record.fields.ImageUrl as string : 
+              String(record.fields.ImageUrl)) : 
+            undefined, 
           citizenId
         ),
         imageurl: formatImageUrl(
-          record.fields.ImageUrl ? String(record.fields.ImageUrl) : undefined, 
+          record.fields.ImageUrl ? 
+            (typeof record.fields.ImageUrl === 'string' ? 
+              record.fields.ImageUrl as string : 
+              String(record.fields.ImageUrl)) : 
+            undefined, 
           citizenId
         ),
         // Ensure position is included and properly formatted
