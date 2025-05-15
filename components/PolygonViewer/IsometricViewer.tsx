@@ -2142,6 +2142,10 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           const startScreenX = localIsoX(startX, startY);
           const startScreenY = localIsoY(startX, startY);
           
+          // Create local shorthand functions that use the current state values
+          const isoX = (x: number, y: number) => calculateIsoX(x, y, scale, offset, canvas.width);
+          const isoY = (x: number, y: number) => calculateIsoY(x, y, scale, offset, canvas.height);
+          
           // Draw a gold circle for start point with Venetian styling
           ctx.beginPath();
           ctx.arc(startScreenX, startScreenY, 8 * scale, 0, Math.PI * 2);
