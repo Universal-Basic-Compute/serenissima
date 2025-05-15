@@ -18,11 +18,9 @@ def run_scheduled_tasks():
             
             # Map of hours (UTC) to tasks
             tasks = {
-                0: ("engine/processimports.py", "Process resource imports"),
-                1: ("engine/processimports.py", "Process resource imports"),
-                2: ("engine/processimports.py", "Process resource imports"),
-                3: ("engine/processimports.py", "Process resource imports"),
-                4: ("engine/processimports.py", "Process resource imports"),
+                # Process imports only during dock working hours (6 AM to 6 PM Venice time)
+                # Venice is UTC+1 (or UTC+2 during daylight saving time)
+                # So we'll schedule for 5-17 UTC to be safe (6-18 Venice time)
                 5: ("engine/processimports.py", "Process resource imports"),
                 6: ("engine/processimports.py", "Process resource imports"),
                 7: ("engine/processimports.py", "Process resource imports"),
@@ -36,12 +34,6 @@ def run_scheduled_tasks():
                 15: ("engine/processimports.py", "Process resource imports"),
                 16: ("engine/processimports.py", "Process resource imports"),
                 17: ("engine/processimports.py", "Process resource imports"),
-                18: ("engine/processimports.py", "Process resource imports"),
-                19: ("engine/processimports.py", "Process resource imports"),
-                20: ("engine/processimports.py", "Process resource imports"),
-                21: ("engine/processimports.py", "Process resource imports"),
-                22: ("engine/processimports.py", "Process resource imports"),
-                23: ("engine/processimports.py", "Process resource imports"),
                 # Other tasks at specific hours
                 7: ("engine/pay_building_maintenance.py", "Building maintenance collection"),
                 8: ("engine/treasuryRedistribution.py", "Treasury redistribution"),

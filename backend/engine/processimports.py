@@ -19,7 +19,8 @@ import json
 import logging
 import argparse
 import requests
-from datetime import datetime
+import pytz
+from datetime import datetime, time
 from typing import Dict, List, Optional, Any
 from pyairtable import Api, Table
 from dotenv import load_dotenv
@@ -33,6 +34,24 @@ log = logging.getLogger("process_imports")
 
 # Load environment variables
 load_dotenv()
+
+def is_dock_working_hours() -> bool:
+    """Check if it's currently within dock working hours (typically 6 AM to 6 PM)."""
+    try:
+        # Get current time in Venice timezone
+        venice_tz = pytz.timezone('Europe/Rome')
+        now = datetime.now(venice_tz)
+        hour = now.hour
+        
+        # Define dock working hours (6 AM to 6 PM)
+        DOCK_OPEN_HOUR = 6  # 6 AM
+        DOCK_CLOSE_HOUR = 18  # 6 PM
+        
+        return DOCK_OPEN_HOUR <= hour < DOCK_CLOSE_HOUR
+    except Exception as e:
+        log.error(f"Error checking dock working hours: {e}")
+        # Default to True in case of error to ensure imports still happen
+        return True
 
 def initialize_airtable():
     """Initialize Airtable connection."""
@@ -361,6 +380,11 @@ def process_import_contract(tables, contract: Dict, building_types: Dict, resour
 def process_imports(dry_run: bool = False):
     """Main function to process import contracts."""
     log.info(f"Starting import processing (dry_run={dry_run})")
+    
+    # Check if it's within dock working hours
+    if not is_dock_working_hours():
+        log.info("Outside of dock working hours (6 AM - 6 PM Venice time). Skipping import processing.")
+        return
     
     # Initialize Airtable connection
     tables = initialize_airtable()
