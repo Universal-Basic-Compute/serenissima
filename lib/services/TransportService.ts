@@ -1700,12 +1700,51 @@ export class TransportService {
     return inside;
   }
 
+  // Add a helper method to check if a point is a special point (canal or bridge)
+  private isSpecialPoint(point: Point, polygons: Polygon[]): boolean {
+    // Check if this point is a canal point or bridge point
+    for (const polygon of polygons) {
+      // Check canal points
+      if (polygon.canalPoints) {
+        for (const canalPoint of polygon.canalPoints) {
+          if (canalPoint.edge && 
+              Math.abs(canalPoint.edge.lat - point.lat) < 0.0001 && 
+              Math.abs(canalPoint.edge.lng - point.lng) < 0.0001) {
+            return true;
+          }
+        }
+      }
+      
+      // Check bridge points
+      if (polygon.bridgePoints) {
+        for (const bridgePoint of polygon.bridgePoints) {
+          if (bridgePoint.edge && 
+              Math.abs(bridgePoint.edge.lat - point.lat) < 0.0001 && 
+              Math.abs(bridgePoint.edge.lng - point.lng) < 0.0001) {
+            return true;
+          }
+        }
+      }
+    }
+    
+    return false;
+  }
+
   // Helper method to check if a line intersects land
   private doesLineIntersectLand(point1: Point, point2: Point, polygons: Polygon[]): boolean {
     // For each polygon, check if the line intersects any of its edges
     for (const polygon of polygons) {
       const coords = polygon.coordinates;
       if (!coords || coords.length < 3) continue;
+
+      // Check if either point is inside the polygon (except for canal points or bridge points)
+      const isPoint1Special = this.isSpecialPoint(point1, polygons);
+      const isPoint2Special = this.isSpecialPoint(point2, polygons);
+
+      // If both points are special points (canal or bridge), they're valid connections
+      if (isPoint1Special && isPoint2Special) {
+        continue;
+      }
 
       // Check if the line intersects any polygon edge
       for (let i = 0, j = coords.length - 1; i < coords.length; j = i++) {
