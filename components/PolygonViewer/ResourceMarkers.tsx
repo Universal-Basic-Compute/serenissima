@@ -53,13 +53,6 @@ export default function ResourceMarkers({
     }
   }, [isVisible]);
   
-  // Handle mouse leave for a resource location
-  const handleMouseLeave = () => {
-    setHoveredLocation(null);
-    
-    // Clear resource hover state
-    hoverStateService.clearHoveredResource();
-  };
   
   // Function to load resources
   const loadResources = async () => {
