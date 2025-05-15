@@ -135,35 +135,35 @@ export async function GET(request: Request) {
       // Get home and work assignments for this citizen
       const buildings = occupantToBuildings[citizenId] || {};
       
+      // Safely convert Airtable values to strings
+      const safeString = (value: AirtableValue | undefined, defaultValue: string = ''): string => {
+        if (value === undefined || value === null) return defaultValue;
+        return String(value);
+      };
+      
       return {
         id: citizenId,
         citizenid: citizenId,
-        name: `${record.fields.FirstName ? String(record.fields.FirstName) : 'Unknown'} ${record.fields.LastName ? String(record.fields.LastName) : 'Citizen'}`,
-        firstname: record.fields.FirstName ? 
-          (typeof record.fields.FirstName === 'string' ? 
-            record.fields.FirstName : 
-            String(record.fields.FirstName)) : 'Unknown',
-        lastname: record.fields.LastName ? 
-          (typeof record.fields.LastName === 'string' ? 
-            record.fields.LastName : 
-            String(record.fields.LastName)) : 'Citizen',
-        socialclass: String(record.fields.SocialClass || 'Popolani'),
-        description: String(record.fields.Description || 'A citizen of Venice.'),
+        name: `${safeString(record.fields.FirstName, 'Unknown')} ${safeString(record.fields.LastName, 'Citizen')}`,
+        firstname: safeString(record.fields.FirstName, 'Unknown'),
+        lastname: safeString(record.fields.LastName, 'Citizen'),
+        socialclass: safeString(record.fields.SocialClass, 'Popolani'),
+        description: safeString(record.fields.Description, 'A citizen of Venice.'),
         profileimage: formatImageUrl(
-          record.fields.ImageUrl ? String(record.fields.ImageUrl) : undefined, 
+          record.fields.ImageUrl ? safeString(record.fields.ImageUrl) : undefined, 
           citizenId
         ),
         imageurl: formatImageUrl(
-          record.fields.ImageUrl ? String(record.fields.ImageUrl) : undefined, 
+          record.fields.ImageUrl ? safeString(record.fields.ImageUrl) : undefined, 
           citizenId
         ),
         // Ensure position is included and properly formatted
         position: typeof record.fields.Position === 'string' 
-          ? JSON.parse(record.fields.Position) 
+          ? JSON.parse(record.fields.Position as string) 
           : record.fields.Position || { lat: 45.4371 + Math.random() * 0.01, lng: 12.3326 + Math.random() * 0.01 },
-        occupation: String(record.fields.Occupation || 'Citizen'),
+        occupation: safeString(record.fields.Occupation, 'Citizen'),
         wealth: record.fields.Wealth || 0,
-        createdat: String(record.fields.CreatedAt || new Date().toISOString()),
+        createdat: safeString(record.fields.CreatedAt, new Date().toISOString()),
         // Add home and work assignments
         home: buildings.home || null,
         work: buildings.work || null
