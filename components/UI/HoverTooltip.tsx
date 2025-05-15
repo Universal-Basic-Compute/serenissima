@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { hoverStateService, HoverState } from '@/lib/services/HoverStateService';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
-import { BuildingService } from '@/lib/services/BuildingService';
+import { BuildingService, buildingService } from '@/lib/services/BuildingService';
 import { assetService } from '@/lib/services/AssetService';
 
 interface HoverTooltipProps {
