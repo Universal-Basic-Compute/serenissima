@@ -57,11 +57,53 @@ export async function GET(request: Request) {
   try {
     console.log('Fetching citizens from Airtable...');
     
+    // First, fetch all buildings to get occupant information
+    console.log('Fetching buildings to determine home and work locations...');
+    const buildingRecords = await base(BUILDINGS_TABLE)
+      .select({
+        view: 'Grid view',
+        fields: ['BuildingId', 'Type', 'Occupant']
+      })
+      .firstPage();
+    
+    console.log(`Retrieved ${buildingRecords.length} buildings from Airtable`);
+    
+    // Create a map of occupants to buildings
+    const occupantToBuildings: Record<string, {home?: string, work?: string}> = {};
+    
+    // Define residential building types
+    const residentialTypes = ['canal_house', 'merchant_s_house', 'artisan_s_house', 'fisherman_s_cottage'];
+    
+    // Process buildings to determine home and work assignments
+    buildingRecords.forEach(building => {
+      const buildingId = building.fields.BuildingId || building.id;
+      const buildingType = building.fields.Type;
+      const occupant = building.fields.Occupant;
+      
+      // Skip buildings without occupants
+      if (!occupant) return;
+      
+      // Initialize the occupant entry if it doesn't exist
+      if (!occupantToBuildings[occupant]) {
+        occupantToBuildings[occupant] = {};
+      }
+      
+      // Determine if this is a home or work building
+      if (residentialTypes.includes(buildingType)) {
+        // This is a residential building, set as home
+        occupantToBuildings[occupant].home = buildingId;
+      } else {
+        // This is a non-residential building, set as work
+        occupantToBuildings[occupant].work = buildingId;
+      }
+    });
+    
+    console.log(`Processed occupant assignments for ${Object.keys(occupantToBuildings).length} citizens`);
+    
     // Get all citizens directly without filtering for buildings
     const citizenRecords = await base(CITIZENS_TABLE)
       .select({
         view: 'Grid view',
-        // Don't filter by Home field - get all citizens
       })
       .firstPage();
     
@@ -72,24 +114,13 @@ export async function GET(request: Request) {
       return NextResponse.json(getDebugCitizens());
     }
     
-    // Try to fetch buildings to get their positions
-    let buildingRecords: readonly AirtableRecord<FieldSet>[] = [];
-    try {
-      buildingRecords = await base(BUILDINGS_TABLE)
-        .select({
-          view: 'Grid view',
-        })
-        .firstPage();
-      
-      console.log(`Retrieved ${buildingRecords.length} buildings from Airtable`);
-    } catch (buildingError) {
-      console.warn('Error fetching buildings, will use fallback positions:', buildingError);
-    }
-    
     // Map citizens to the expected format
     const citizens = citizenRecords.map(record => {     
       // Ensure the citizen ID is a string
       const citizenId = record.fields.CitizenId ? String(record.fields.CitizenId) : `ctz_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+      
+      // Get home and work assignments for this citizen
+      const buildings = occupantToBuildings[citizenId] || {};
       
       return {
         id: citizenId,
@@ -107,20 +138,24 @@ export async function GET(request: Request) {
           : record.fields.Position || { lat: 45.4371 + Math.random() * 0.01, lng: 12.3326 + Math.random() * 0.01 },
         occupation: record.fields.Occupation || 'Citizen',
         wealth: record.fields.Wealth || 0,
-        createdat: record.fields.CreatedAt || new Date().toISOString()
-        // Home and Work fields removed
+        createdat: record.fields.CreatedAt || new Date().toISOString(),
+        // Add home and work assignments
+        home: buildings.home || null,
+        work: buildings.work || null
       };
     });
     
-    console.log(`Returning ${citizens.length} citizens with positions`);
+    console.log(`Returning ${citizens.length} citizens with home and work assignments`);
     
     // Log a sample of the citizens data
     if (citizens.length > 0) {
       console.log('Sample citizen data:', {
-        id: citizens[0].CitizenId,
+        id: citizens[0].citizenid,
         name: citizens[0].name,
-        imageUrl: citizens[0].ImageUrl,
-        position: citizens[0].position
+        imageUrl: citizens[0].imageurl,
+        position: citizens[0].position,
+        home: citizens[0].home,
+        work: citizens[0].work
       });
     }
     
@@ -165,13 +200,8 @@ function getDebugCitizens() {
       wealth: socialClass === 'Nobili' ? 'Wealthy' : 
               socialClass === 'Cittadini' ? 'Comfortable' : 
               socialClass === 'Popolani' ? 'Modest' : 'Poor',
-      landId: `polygon-${i+1}`,
-      buildingId: `building-${i+1}`,
-      buildingType: socialClass === 'Nobili' ? 'Palazzo' : 
-                   socialClass === 'Cittadini' ? 'Merchant House' : 
-                   socialClass === 'Popolani' ? 'Townhouse' : 'Cottage',
-      isHome: true,
-      isWork: false,
+      home: `building-home-${i+1}`,
+      work: `building-work-${i+1}`,
       needscompletionscore: 0.75,
       createdat: new Date().toISOString()
     });
