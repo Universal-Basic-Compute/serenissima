@@ -1927,7 +1927,9 @@ export class TransportService {
           waterDistance: directDistance,
           estimatedTimeMinutes: timeMinutes,
           waterOnly: true,
-          isDirectFallback: true
+          isDirectFallback: true,
+          // Add the roundTrip path
+          roundTrip: [...directPath, ...directPath.slice().reverse().slice(1)]
         };
       }
       
@@ -2047,7 +2049,9 @@ export class TransportService {
         walkingDistance: startToCanal + canalToEnd,
         waterDistance: canalToCanal,
         estimatedTimeMinutes: totalTimeMinutes,
-        waterOnly: false
+        waterOnly: false,
+        // Add the roundTrip path by reversing the path and combining
+        roundTrip: [...path, ...path.slice().reverse().slice(1)]
       };
     } catch (error) {
       console.error('Error finding water-only path:', error);
@@ -2237,7 +2241,9 @@ export class TransportService {
           walkingDistance: directDistance,
           waterDistance: 0,
           estimatedTimeMinutes: timeMinutes,
-          isFallbackPath: true
+          isFallbackPath: true,
+          // Add the roundTrip path
+          roundTrip: [...directPath, ...directPath.slice().reverse().slice(1)]
         };
       }
       
@@ -2379,7 +2385,9 @@ export class TransportService {
         waterDistance: totalWaterDistance,
         estimatedTimeMinutes: Math.round(totalTimeMinutes),
         startPolygon: startPolygon.id,
-        endPolygon: endPolygon.id
+        endPolygon: endPolygon.id,
+        // Add the roundTrip path by reversing the path and combining
+        roundTrip: [...enhancedPath, ...enhancedPath.slice().reverse().slice(1)]
       };
     } catch (error) {
       console.error('Error finding path:', error);
