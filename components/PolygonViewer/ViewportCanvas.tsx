@@ -201,7 +201,7 @@ export default function ViewportCanvas({
     
     // Update the interaction service with current data
     interactionService.updatePolygons({
-      polygons: polygonsToRender,
+      polygonsToRender,
       buildings,
       emptyBuildingPoints,
       allPolygons: polygons,
@@ -218,14 +218,15 @@ export default function ViewportCanvas({
       offset,
       transportMode,
       {
-        polygons: polygonsToRender,
+        polygonsToRender,
         buildings,
         emptyBuildingPoints,
         allPolygons: polygons,
         citizensByBuilding,
         transportStartPoint: transportService.getStartPoint() || null,
         transportEndPoint: transportService.getEndPoint() || null
-      }
+      },
+      coatOfArmsImages
     );
     
     // Subscribe to events from InteractionService
@@ -259,7 +260,7 @@ export default function ViewportCanvas({
         if (point) {
           console.log(`Transport point selected at: ${point.lat}, ${point.lng}`);
           // Pass the point as is, not as an array
-          transportService.handlePointSelected(point);
+          transportService.handlePointSelected([point]);
         }
       })
     ];
@@ -287,7 +288,7 @@ export default function ViewportCanvas({
   // Add this effect to update the interaction service when data changes
   useEffect(() => {
     interactionService.updatePolygons({
-      polygons: polygonsToRender,
+      polygonsToRender,
       buildings,
       emptyBuildingPoints,
       allPolygons: polygons,
