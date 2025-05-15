@@ -79,7 +79,10 @@ export async function GET(request: Request) {
       const buildingId = building.fields.BuildingId || building.id;
       const buildingType = building.fields.Type;
       // Convert Occupant to string to use as an index
-      const occupant = building.fields.Occupant ? String(building.fields.Occupant) : undefined;
+      const occupant = building.fields.Occupant ? 
+        (typeof building.fields.Occupant === 'string' ? 
+          building.fields.Occupant : 
+          String(building.fields.Occupant)) : undefined;
       
       // Skip buildings without occupants
       if (!occupant) return;
@@ -131,8 +134,14 @@ export async function GET(request: Request) {
         id: citizenId,
         citizenid: citizenId,
         name: `${record.fields.FirstName ? String(record.fields.FirstName) : 'Unknown'} ${record.fields.LastName ? String(record.fields.LastName) : 'Citizen'}`,
-        firstname: record.fields.FirstName ? String(record.fields.FirstName) : 'Unknown',
-        lastname: record.fields.LastName ? String(record.fields.LastName) : 'Citizen',
+        firstname: record.fields.FirstName ? 
+          (typeof record.fields.FirstName === 'string' ? 
+            record.fields.FirstName : 
+            String(record.fields.FirstName)) : 'Unknown',
+        lastname: record.fields.LastName ? 
+          (typeof record.fields.LastName === 'string' ? 
+            record.fields.LastName : 
+            String(record.fields.LastName)) : 'Citizen',
         socialclass: record.fields.SocialClass || 'Popolani',
         description: record.fields.Description || 'A citizen of Venice.',
         profileimage: formatImageUrl(record.fields.ImageUrl?.toString(), citizenId),
