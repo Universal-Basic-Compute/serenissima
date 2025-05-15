@@ -77,7 +77,7 @@ export default function ViewportCanvas({
         if (activeView === 'land') {
           const incomeResult = await incomeService.loadIncomeData();
           // Check if incomeResult exists and is not null before accessing properties
-          if (incomeResult && typeof incomeResult === 'object') {
+          if (incomeResult) {
             const typedResult = incomeResult as {
               incomeData: Record<string, number>;
               minIncome: number;
@@ -200,11 +200,15 @@ export default function ViewportCanvas({
     };
     
     // Update the interaction service with current data
-    interactionService.updatePolygons(polygonsToRender);
-    interactionService.updateBuildings(buildings);
-    interactionService.updateEmptyBuildingPoints(emptyBuildingPoints);
-    interactionService.updateCitizensByBuilding(citizensByBuilding);
-    interactionService.updatePolygonsData(polygons);
+    interactionService.updatePolygons({
+      polygonsToRender,
+      buildings,
+      emptyBuildingPoints,
+      polygons,
+      citizensByBuilding,
+      transportStartPoint: transportService.getTransportStartPoint(),
+      transportEndPoint: transportService.getTransportEndPoint()
+    });
     
     // Set up interaction service with all required dependencies
     const cleanup = interactionService.initializeInteractions(
@@ -272,26 +276,18 @@ export default function ViewportCanvas({
     };
   }, [activeView, scale, offset, transportMode, onOffsetChange]);
   
-  // Add these effects to update the interaction service when data changes
+  // Add this effect to update the interaction service when data changes
   useEffect(() => {
-    interactionService.updatePolygons(polygonsToRender);
-  }, [polygonsToRender]);
-
-  useEffect(() => {
-    interactionService.updateBuildings(buildings);
-  }, [buildings]);
-
-  useEffect(() => {
-    interactionService.updateEmptyBuildingPoints(emptyBuildingPoints);
-  }, [emptyBuildingPoints]);
-
-  useEffect(() => {
-    interactionService.updateCitizensByBuilding(citizensByBuilding);
-  }, [citizensByBuilding]);
-
-  useEffect(() => {
-    interactionService.updatePolygonsData(polygons);
-  }, [polygons]);
+    interactionService.updatePolygons({
+      polygonsToRender,
+      buildings,
+      emptyBuildingPoints,
+      polygons,
+      citizensByBuilding,
+      transportStartPoint: transportService.getTransportStartPoint(),
+      transportEndPoint: transportService.getTransportEndPoint()
+    });
+  }, [polygonsToRender, buildings, emptyBuildingPoints, citizensByBuilding, polygons]);
   
   // Remove debugging for hover state changes
   
@@ -353,8 +349,8 @@ export default function ViewportCanvas({
       emptyBuildingPoints,
       interactionState,
       transportPath,
-      transportService.getStartPoint(),
-      transportService.getEndPoint(),
+      transportService.getTransportStartPoint(),
+      transportService.getTransportEndPoint(),
       polygons,
       incomeData,
       minIncome,
@@ -399,8 +395,8 @@ export default function ViewportCanvas({
           emptyBuildingPoints,
           interactionService.getState(),
           transportPath,
-          transportService.getStartPoint(),
-          transportService.getEndPoint(),
+          transportService.getTransportStartPoint(),
+          transportService.getTransportEndPoint(),
           polygons,
           incomeData,
           minIncome,
