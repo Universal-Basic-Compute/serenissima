@@ -106,7 +106,9 @@ export async function GET(request: Request) {
         profileImage: formatImageUrl(record.fields.ImageUrl?.toString(), citizenId),
         ImageUrl: formatImageUrl(record.fields.ImageUrl?.toString(), citizenId),
         // Ensure position is included and properly formatted
-        position: record.fields.Position || { lat: 45.4371 + Math.random() * 0.01, lng: 12.3326 + Math.random() * 0.01 },
+        position: typeof record.fields.Position === 'string' 
+          ? JSON.parse(record.fields.Position) 
+          : record.fields.Position || { lat: 45.4371 + Math.random() * 0.01, lng: 12.3326 + Math.random() * 0.01 },
         occupation: record.fields.Occupation || 'Citizen',
         wealth: record.fields.Wealth || 0,
         Wealth: record.fields.Wealth || 0,
