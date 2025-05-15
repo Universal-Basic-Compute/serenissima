@@ -1,7 +1,7 @@
 import { eventBus, EventTypes } from '../utils/eventBus';
 
-// Add these to EventTypes
-EventTypes.HOVER_STATE_CHANGED = 'HOVER_STATE_CHANGED';
+// Define the hover state changed event type
+const HOVER_STATE_CHANGED = 'HOVER_STATE_CHANGED';
 
 export interface HoverState {
   hoveredPolygonId: string | null;
@@ -48,7 +48,7 @@ export class HoverStateService {
       this.state.hoveredPolygonId = polygonId;
       
       // Emit event with only the changed property
-      eventBus.emit(EventTypes.HOVER_STATE_CHANGED, {
+      eventBus.emit(HOVER_STATE_CHANGED, {
         type: 'polygon',
         id: polygonId
       });
@@ -65,7 +65,7 @@ export class HoverStateService {
       this.state.hoveredBuildingId = buildingId;
       
       // Emit event with only the changed property
-      eventBus.emit(EventTypes.HOVER_STATE_CHANGED, {
+      eventBus.emit(HOVER_STATE_CHANGED, {
         type: 'building',
         id: buildingId
       });
@@ -82,7 +82,7 @@ export class HoverStateService {
       this.state.hoveredCanalPointId = pointId;
       
       // Emit event with only the changed property
-      eventBus.emit(EventTypes.HOVER_STATE_CHANGED, {
+      eventBus.emit(HOVER_STATE_CHANGED, {
         type: 'canalPoint',
         id: pointId
       });
@@ -99,7 +99,7 @@ export class HoverStateService {
       this.state.hoveredBridgePointId = pointId;
       
       // Emit event with only the changed property
-      eventBus.emit(EventTypes.HOVER_STATE_CHANGED, {
+      eventBus.emit(HOVER_STATE_CHANGED, {
         type: 'bridgePoint',
         id: pointId
       });
@@ -118,7 +118,7 @@ export class HoverStateService {
       this.state.hoveredCitizenType = type;
       
       // Emit event with only the changed property
-      eventBus.emit(EventTypes.HOVER_STATE_CHANGED, {
+      eventBus.emit(HOVER_STATE_CHANGED, {
         type: 'citizen',
         buildingId,
         citizenType: type
@@ -157,7 +157,7 @@ export class HoverStateService {
     
     // Only emit if there was something to clear
     if (hadHoverStates) {
-      eventBus.emit(EventTypes.HOVER_STATE_CHANGED, {
+      eventBus.emit(HOVER_STATE_CHANGED, {
         type: 'clear'
       });
     }
