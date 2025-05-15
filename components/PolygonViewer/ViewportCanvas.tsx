@@ -284,8 +284,8 @@ export default function ViewportCanvas({
       emptyBuildingPoints,
       polygons,
       citizensByBuilding,
-      transportService.getTransportStartPoint() || null,
-      transportService.getTransportEndPoint() || null
+      transportService.getStartPoint() || null,
+      transportService.getEndPoint() || null
     );
   }, [polygonsToRender, buildings, emptyBuildingPoints, citizensByBuilding, polygons]);
   
@@ -401,10 +401,10 @@ export default function ViewportCanvas({
           emptyBuildingPoints,
           interactionService.getState(),
           transportPath,
-          transportService.getTransportStartPoint() || null,
-          transportService.getTransportEndPoint() || null,
-          polygons as Record<string, any[]>,
-          incomeData,
+          transportService.getStartPoint() || null,
+          transportService.getEndPoint() || null,
+          polygons,
+          incomeDataLoaded ? incomeData : {},
           minIncome,
           maxIncome
         );
