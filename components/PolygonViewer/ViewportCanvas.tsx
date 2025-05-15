@@ -364,18 +364,18 @@ export default function ViewportCanvas({
           console.log(`Citizen selected: ${citizen.FirstName} ${citizen.LastName}`);
         }
       }),
-      eventBus.subscribe(EventTypes.BUILDING_POINT_SELECTED, (data: { position: PointData }) => {
+      eventBus.subscribe(EventTypes.BUILDING_POINT_SELECTED, (data: any) => {
         // Handle building point selection
         if (data && data.position) {
           console.log(`Building point selected at: ${data.position.lat}, ${data.position.lng}`);
         }
       }),
-      eventBus.subscribe(EventTypes.TRANSPORT_POINT_SELECTED, (point: PointData) => {
+      eventBus.subscribe(EventTypes.TRANSPORT_POINT_SELECTED, (point: any) => {
         // Handle transport point selection
         if (point) {
           console.log(`Transport point selected at: ${point.lat}, ${point.lng}`);
           // Pass the point correctly
-          transportService.handlePointSelected(point);
+          transportService.handlePointSelected(point as PointData);
         }
       })
     ];
