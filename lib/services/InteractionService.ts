@@ -156,6 +156,8 @@ export class InteractionService {
     transportMode: boolean,
     polygons: any[]
   ): () => void {
+    // Import uiStateService here to avoid circular dependency
+    const { uiStateService } = require('./UIStateService');
     // Handle mouse move
     const handleMouseMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
@@ -291,6 +293,7 @@ export class InteractionService {
             const building = buildings.find(b => b.id === newHoveredBuildingId);
             if (building) {
               // Use UIStateService to handle building hover
+              const { uiStateService } = require('./UIStateService');
               uiStateService.handleBuildingHover(
                 newHoveredBuildingId,
                 building,
@@ -298,6 +301,7 @@ export class InteractionService {
               );
             }
           } else {
+            const { uiStateService } = require('./UIStateService');
             uiStateService.handleBuildingHover(null, null, null);
           }
         }

@@ -319,11 +319,36 @@ export default function ViewportCanvas({
       console.debug(`Scene rendering took ${renderTime.toFixed(2)}ms (${(1000/renderTime).toFixed(1)} fps)`);
     }
     
-    // Use requestAnimationFrame for smoother rendering
-    const animationId = requestAnimationFrame(() => {
-      // This empty requestAnimationFrame helps with smoother rendering
-      // by ensuring the browser has time to process the previous frame
-    });
+    // Set up animation frame for continuous rendering
+    const animate = () => {
+      const animationId = requestAnimationFrame(animate);
+      
+      // Only redraw if something has changed
+      if (interactionService.getState().isDragging) {
+        renderService.drawScene(
+          ctx,
+          canvas,
+          activeView,
+          scale,
+          offset,
+          polygonsToRender,
+          buildings,
+          emptyBuildingPoints,
+          interactionService.getState(),
+          transportPath,
+          polygons,
+          incomeData,
+          citizensByBuilding,
+          citizensLoaded,
+          coatOfArmsImages,
+          renderedCoatOfArmsCache.current
+        );
+      }
+      
+      return animationId;
+    };
+    
+    const animationId = animate();
     
     return () => {
       cancelAnimationFrame(animationId);

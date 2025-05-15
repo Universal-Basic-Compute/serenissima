@@ -7,6 +7,7 @@ export class TransportService {
   private transportPath: any[] = [];
   private calculatingPath: boolean = false;
   private waterOnlyMode: boolean = false;
+  private transportMode: boolean = false;
 
   /**
    * Set transport start point
@@ -140,6 +141,36 @@ export class TransportService {
     
     // Emit reset event
     eventBus.emit(EventTypes.TRANSPORT_RESET, null);
+  }
+  
+  /**
+   * Set transport mode
+   */
+  public setTransportMode(active: boolean): void {
+    this.transportMode = active;
+    
+    // Emit event
+    eventBus.emit(EventTypes.TRANSPORT_MODE_CHANGED, { active });
+  }
+  
+  /**
+   * Get transport mode
+   */
+  public getTransportMode(): boolean {
+    return this.transportMode;
+  }
+  
+  /**
+   * Handle point selection for transport
+   */
+  public handlePointSelected(point: {lat: number, lng: number}): void {
+    if (!this.transportMode) return;
+    
+    if (!this.transportStartPoint) {
+      this.setStartPoint(point);
+    } else {
+      this.setEndPoint(point);
+    }
   }
 
   /**

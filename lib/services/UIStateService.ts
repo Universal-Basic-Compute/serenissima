@@ -65,19 +65,24 @@ export class UIStateService {
       // Use AssetService to get the building image path
       const imagePath = await assetService.getBuildingImagePath(buildingType, variant);
       
-      // Update UI state with the image path
-      this.setBuildingHover(
-        this.hoveredBuildingName,
-        this.hoveredBuildingPosition,
-        imagePath
-      );
+      // Only update if we're still hovering over the same building
+      if (this.hoveredBuildingName) {
+        // Update UI state with the image path
+        this.setBuildingHover(
+          this.hoveredBuildingName,
+          this.hoveredBuildingPosition,
+          imagePath
+        );
+      }
     } catch (error) {
       console.error('Error fetching building image path:', error);
-      this.setBuildingHover(
-        this.hoveredBuildingName,
-        this.hoveredBuildingPosition,
-        '/images/buildings/market_stall.jpg'
-      );
+      if (this.hoveredBuildingName) {
+        this.setBuildingHover(
+          this.hoveredBuildingName,
+          this.hoveredBuildingPosition,
+          '/images/buildings/market_stall.jpg'
+        );
+      }
     } finally {
       this.setLoadingBuildingImage(false);
     }

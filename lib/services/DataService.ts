@@ -84,10 +84,6 @@ export class DataService {
    * Load buildings data
    */
   public async loadBuildings(): Promise<any[]> {
-    if (this.buildingsLoaded) {
-      return this.buildingsCache;
-    }
-    
     if (this.isLoadingBuildings) {
       // Wait for the current loading to complete
       return new Promise((resolve) => {
@@ -164,14 +160,29 @@ export class DataService {
         
         this.buildingsLoaded = true;
         
+        // Emit event to notify other components
+        eventBus.emit(EventTypes.DATA_LOADED, {
+          type: 'buildings',
+          count: this.buildingsCache.length
+        });
+        
         // Dispatch event to ensure buildings are visible
-        window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+        }
       }
       
       return this.buildingsCache;
     } catch (error) {
       console.error('Error fetching buildings:', error);
-      return [];
+      
+      // Emit error event
+      eventBus.emit(EventTypes.DATA_LOADING_ERROR, {
+        type: 'buildings',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+      
+      return this.buildingsCache;
     } finally {
       this.isLoadingBuildings = false;
     }

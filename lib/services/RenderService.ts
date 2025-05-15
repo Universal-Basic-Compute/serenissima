@@ -485,6 +485,10 @@ export class RenderService {
     coatOfArmsImages: Record<string, HTMLImageElement>,
     renderedCoatOfArmsCache: Record<string, {image: HTMLImageElement | null, x: number, y: number, size: number}>
   ): void {
+    // Skip rendering if canvas is not visible
+    if (!canvas.offsetParent) {
+      return;
+    }
     // Performance measurement
     const startTime = performance.now();
     // Clear canvas

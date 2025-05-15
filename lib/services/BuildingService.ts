@@ -56,7 +56,7 @@ export class BuildingService {
   public ensureBuildingsVisible = (): void => {
     const buildings = dataService.getBuildings();
     
-    if (buildings.length === 0 || this.initialPositionCalculated) return;
+    if (buildings.length === 0) return;
     
     console.log('Ensuring buildings are visible by calculating positions...');
     

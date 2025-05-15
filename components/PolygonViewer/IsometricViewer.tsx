@@ -117,9 +117,6 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     window.addEventListener('showTransportRoutes', handleShowTransportRoutes);
     window.addEventListener('ensureBuildingsVisible', buildingService.ensureBuildingsVisible);
     
-    // Dispatch initial event to ensure buildings are visible
-    window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
-    
     return () => {
       window.removeEventListener('showTransportRoutes', handleShowTransportRoutes);
       window.removeEventListener('ensureBuildingsVisible', buildingService.ensureBuildingsVisible);
