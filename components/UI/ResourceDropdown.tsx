@@ -321,11 +321,11 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({
                         >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-2">
-                              <div className="w-4 h-4 flex-shrink-0">
+                              <div className="w-8 h-8 flex-shrink-0">
                                 <img 
                                   src={getIconPath(resource.icon)} 
                                   alt={resource.name} 
-                                  className="w-4 h-4 object-contain"
+                                  className="w-8 h-8 object-contain"
                                   onError={(e) => {
                                     // Log the error
                                     console.log(`%c[ResourceDropdown] Error loading icon: ${(e.target as HTMLImageElement).src}`, 'color: #ef4444; font-weight: bold;');
@@ -339,7 +339,7 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({
                                       // If that fails too, use a placeholder
                                       (e.target as HTMLImageElement).onerror = () => {
                                         console.log(`%c[ResourceDropdown] Fallback also failed, using placeholder`, 'color: #ef4444;');
-                                        (e.target as HTMLImageElement).src = `https://via.placeholder.com/16?text=${resource.name.charAt(0).toUpperCase()}`;
+                                        (e.target as HTMLImageElement).src = `https://via.placeholder.com/32?text=${resource.name.charAt(0).toUpperCase()}`;
                                         (e.target as HTMLImageElement).onerror = null; // Prevent infinite loop
                                       };
                                     }
