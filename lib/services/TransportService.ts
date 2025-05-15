@@ -1148,9 +1148,17 @@ export class TransportService {
           if (bridgePoint.connection && bridgePoint.edge) {
             const sourcePointId = bridgePoint.id || `bridge-${bridgePoint.edge.lat}-${bridgePoint.edge.lng}`;
           
+            // Skip if this bridge is not constructed in 'real' mode
+            const isConstructed = !!bridgePoint.isConstructed || 
+                                 (sourcePointId.includes('bridge-constructed') || sourcePointId.includes('public_bridge'));
+            
+            if (this.pathfindingMode === 'real' && !isConstructed) {
+              continue;
+            }
+            
             // Ensure the source point has an edges array
             if (!graph.edges[sourcePointId]) {
-              graph.edges[sourcePointId] = [];
+              continue; // Skip if the node doesn't exist in the graph
             }
           
             // Find the target polygon
@@ -1168,25 +1176,28 @@ export class TransportService {
               if (targetBridgePoint && targetBridgePoint.edge) {
                 const targetPointId = targetBridgePoint.id || `bridge-${targetBridgePoint.edge.lat}-${targetBridgePoint.edge.lng}`;
               
-                // Ensure the target point has an edges array
+                // Skip if the target node doesn't exist in the graph
                 if (!graph.edges[targetPointId]) {
-                  graph.edges[targetPointId] = [];
+                  continue;
                 }
               
-                // Add bidirectional edges between the bridge points
+                // Add bidirectional edges between the bridge points with lower weight to prioritize bridges
                 const distance = bridgePoint.connection.distance || 
                   this.calculateDistance(bridgePoint.edge, bridgePoint.connection.targetPoint);
+              
+                // Use a lower weight for bridges to prioritize them in pathfinding
+                const weight = distance * 0.5; // Make bridges more attractive for pathfinding
               
                 graph.edges[sourcePointId].push({
                   from: sourcePointId,
                   to: targetPointId,
-                  weight: distance
+                  weight: weight
                 });
               
                 graph.edges[targetPointId].push({
                   from: targetPointId,
                   to: sourcePointId,
-                  weight: distance
+                  weight: weight
                 });
               }
             }
@@ -1246,6 +1257,55 @@ export class TransportService {
             from: canalNode2.id,
             to: canalNode1.id,
             weight: weight
+          });
+        }
+      }
+    }
+    
+    // Improve connections between canal points and other nodes
+    // Connect canal points to nearby building points and bridge points
+    const nonCanalNodes = Object.values(graph.nodes).filter(node => node.type !== 'canal');
+    
+    for (const canalNode of canalNodes) {
+      // Ensure the canal node has an edges array
+      if (!graph.edges[canalNode.id]) {
+        graph.edges[canalNode.id] = [];
+      }
+      
+      // Find nearby non-canal nodes (buildings, bridges, centroids)
+      for (const nonCanalNode of nonCanalNodes) {
+        // Skip if they're in the same polygon (already connected above)
+        if (canalNode.polygonId === nonCanalNode.polygonId) {
+          continue;
+        }
+        
+        // Calculate distance
+        const distance = this.calculateDistance(canalNode.position, nonCanalNode.position);
+        
+        // Connect if they're close enough (30 meters)
+        if (distance < 30) {
+          // Skip if the line between these points would cross land
+          if (this.doesLineIntersectLand(canalNode.position, nonCanalNode.position, polygons)) {
+            continue;
+          }
+          
+          // Add bidirectional edges with appropriate weights
+          // Walking from canal to land should have normal weight
+          graph.edges[canalNode.id].push({
+            from: canalNode.id,
+            to: nonCanalNode.id,
+            weight: distance
+          });
+          
+          // Ensure the non-canal node has an edges array
+          if (!graph.edges[nonCanalNode.id]) {
+            graph.edges[nonCanalNode.id] = [];
+          }
+          
+          graph.edges[nonCanalNode.id].push({
+            from: nonCanalNode.id,
+            to: canalNode.id,
+            weight: distance
           });
         }
       }
@@ -1684,6 +1744,26 @@ export class TransportService {
     return false;
   }
 
+  // Add a helper method to check if a point is near a bridge
+  private isPointNearBridge(point: Point, polygons: Polygon[]): boolean {
+    const BRIDGE_PROXIMITY_THRESHOLD = 30; // meters
+    
+    for (const polygon of polygons) {
+      if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints)) {
+        for (const bridgePoint of polygon.bridgePoints) {
+          if (bridgePoint.edge) {
+            const distance = this.calculateDistance(point, bridgePoint.edge);
+            if (distance < BRIDGE_PROXIMITY_THRESHOLD) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+    
+    return false;
+  }
+
   // Dijkstra's algorithm to find the shortest path
   private findShortestPath(graph: Graph, startNodeId: string, endNodeId: string): { path: string[], distance: number } | null {
     // Initialize distances with Infinity
@@ -1725,8 +1805,29 @@ export class TransportService {
         const neighbor = edge.to;
         const weight = edge.weight;
         
+        // Apply heuristic weights based on node types to prioritize infrastructure
+        let adjustedWeight = weight;
+        
+        // Get node types
+        const currentNode = graph.nodes[nodeId];
+        const neighborNode = graph.nodes[neighbor];
+        
+        if (currentNode && neighborNode) {
+          // Prioritize bridge connections
+          if ((currentNode.type === 'bridge' && neighborNode.type === 'bridge') ||
+              (currentNode.type === 'bridge' && neighborNode.type === 'centroid') ||
+              (currentNode.type === 'centroid' && neighborNode.type === 'bridge')) {
+            adjustedWeight *= 0.7; // Reduce weight to prioritize bridges
+          }
+          
+          // Prioritize canal connections for water travel
+          if (currentNode.type === 'canal' && neighborNode.type === 'canal') {
+            adjustedWeight *= 0.5; // Reduce weight to prioritize water travel
+          }
+        }
+        
         // Calculate new distance
-        const distance = distances[nodeId] + weight;
+        const distance = distances[nodeId] + adjustedWeight;
         
         // If we found a better path, update it
         if (distance < distances[neighbor]) {
@@ -2091,14 +2192,29 @@ export class TransportService {
         };
       }
       
-      // Check if both points are near canal points (water)
+      // Check if both points are near water or bridges
       const isStartNearWater = this.isPointNearWater(startPoint, this.polygons);
       const isEndNearWater = this.isPointNearWater(endPoint, this.polygons);
+      const isStartNearBridge = this.isPointNearBridge(startPoint, this.polygons);
+      const isEndNearBridge = this.isPointNearBridge(endPoint, this.polygons);
       
-      // If both points are near water, use water-only pathfinding
+      console.log(`Start point near water: ${isStartNearWater}, near bridge: ${isStartNearBridge}`);
+      console.log(`End point near water: ${isEndNearWater}, near bridge: ${isEndNearBridge}`);
+      
+      // If both points are near water, prioritize water routes
       if (isStartNearWater && isEndNearWater) {
-        console.log('Both start and end points are near water, using water-only pathfinding');
-        return this.findWaterOnlyPath(startPoint, endPoint);
+        console.log('Both points are near water, prioritizing water routes');
+        // Try to find a water-based route first
+        const waterResult = await this.findWaterOnlyPath(startPoint, endPoint);
+        if (waterResult.success) {
+          return waterResult;
+        }
+      }
+      
+      // If both points are near bridges, prioritize bridge routes
+      if (isStartNearBridge && isEndNearBridge) {
+        console.log('Both points are near bridges, prioritizing bridge routes');
+        // The existing pathfinding will handle this with our improved weights
       }
       
       // Ensure graph is built
