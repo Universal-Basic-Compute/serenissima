@@ -527,41 +527,9 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-600"></div>
           </div>
         ) : !error && building ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto flex-grow">
-            {/* Column 1: BUYS, SELLS */}
-            <div className="col-span-1 space-y-4">
-              {/* Resources Buying */}
-              {buildingDefinition?.productionInformation?.inputResources && Object.keys(buildingDefinition.productionInformation.inputResources).length > 0 && (
-                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
-                    <FaBox className="mr-2 transform rotate-180" /> BUYS
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {Object.entries(buildingDefinition.productionInformation.inputResources).map(([resource, amount]) => (
-                      <div key={`input-${resource}`} className="flex flex-col items-center bg-blue-50 p-2 rounded-md" title={resource.replace(/_/g, ' ')}>
-                        <div className="relative w-8 h-8 mb-1">
-                          <Image 
-                            src={getResourceIconPath(resource)}
-                            alt={resource}
-                            width={32}
-                            height={32}
-                            className="object-contain"
-                            loading="lazy"
-                            unoptimized={true}
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = '/images/resources/default.png';
-                              resourceIconCache.set(resource, '/images/resources/default.png');
-                            }}
-                          />
-                        </div>
-                        <span className="text-xs text-gray-700 capitalize">{resource.replace(/_/g, ' ')}</span>
-                        {amount && <span className="text-xs text-gray-500">{amount}</span>}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4 overflow-y-auto flex-grow">
+            {/* Column 1: SELLS, RECIPES (wider column) */}
+            <div className="col-span-1 md:col-span-1 lg:col-span-1 space-y-4">
               {/* Resources Selling */}
               {buildingDefinition?.productionInformation?.sells && buildingDefinition.productionInformation.sells.length > 0 && (
                 <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
@@ -590,48 +558,7 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                   </div>
                 </div>
               )}
-            </div>
-            
-            {/* Column 2: STORES, PRODUCES */}
-            <div className="col-span-1 space-y-4">
-              {/* Resources Storage */}
-              {buildingDefinition?.productionInformation?.stores && buildingDefinition.productionInformation.stores.length > 0 && (
-                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
-                    <FaWarehouse className="mr-2" /> STORES
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {buildingDefinition.productionInformation.stores.map((resource: string) => (
-                      <div key={`store-${resource}`} className="flex flex-col items-center bg-amber-50 p-2 rounded-md" title={resource.replace(/_/g, ' ')}>
-                        <div className="relative w-8 h-8 mb-1">
-                          <Image 
-                            src={getResourceIconPath(resource)}
-                            alt={resource}
-                            width={32}
-                            height={32}
-                            className="object-contain"
-                            loading="lazy" // Add lazy loading
-                            unoptimized={true} // Disable Next.js image optimization for these small icons
-                            onError={(e) => {
-                              // Fallback to a default icon if the image fails to load
-                              (e.target as HTMLImageElement).src = '/images/resources/default.png';
-                              // Also update the cache to prevent future attempts
-                              resourceIconCache.set(resource, '/images/resources/default.png');
-                            }}
-                          />
-                        </div>
-                        <span className="text-xs text-gray-700 capitalize">{resource.replace(/_/g, ' ')}</span>
-                      </div>
-                    ))}
-                  </div>
-                  {buildingDefinition.productionInformation.storageCapacity && (
-                    <div className="mt-2 text-sm text-gray-700">
-                      <span className="font-medium">Total Capacity:</span> {buildingDefinition.productionInformation.storageCapacity} units
-                    </div>
-                  )}
-                </div>
-              )}
-              
+
               {/* Recipes */}
               {buildingDefinition?.productionInformation?.Arti && buildingDefinition.productionInformation.Arti.length > 0 && (
                 <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
@@ -728,6 +655,79 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                       </div>
                     ))}
                   </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Column 2: BUYS, STORES */}
+            <div className="col-span-1 md:col-span-1 lg:col-span-1 space-y-4">
+              {/* Resources Buying */}
+              {buildingDefinition?.productionInformation?.inputResources && Object.keys(buildingDefinition.productionInformation.inputResources).length > 0 && (
+                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
+                    <FaBox className="mr-2 transform rotate-180" /> BUYS
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {Object.entries(buildingDefinition.productionInformation.inputResources).map(([resource, amount]) => (
+                      <div key={`input-${resource}`} className="flex flex-col items-center bg-blue-50 p-2 rounded-md" title={resource.replace(/_/g, ' ')}>
+                        <div className="relative w-8 h-8 mb-1">
+                          <Image 
+                            src={getResourceIconPath(resource)}
+                            alt={resource}
+                            width={32}
+                            height={32}
+                            className="object-contain"
+                            loading="lazy"
+                            unoptimized={true}
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/images/resources/default.png';
+                              resourceIconCache.set(resource, '/images/resources/default.png');
+                            }}
+                          />
+                        </div>
+                        <span className="text-xs text-gray-700 capitalize">{resource.replace(/_/g, ' ')}</span>
+                        {amount && <span className="text-xs text-gray-500">{amount}</span>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Resources Storage */}
+              {buildingDefinition?.productionInformation?.stores && buildingDefinition.productionInformation.stores.length > 0 && (
+                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
+                    <FaWarehouse className="mr-2" /> STORES
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {buildingDefinition.productionInformation.stores.map((resource: string) => (
+                      <div key={`store-${resource}`} className="flex flex-col items-center bg-amber-50 p-2 rounded-md" title={resource.replace(/_/g, ' ')}>
+                        <div className="relative w-8 h-8 mb-1">
+                          <Image 
+                            src={getResourceIconPath(resource)}
+                            alt={resource}
+                            width={32}
+                            height={32}
+                            className="object-contain"
+                            loading="lazy" // Add lazy loading
+                            unoptimized={true} // Disable Next.js image optimization for these small icons
+                            onError={(e) => {
+                              // Fallback to a default icon if the image fails to load
+                              (e.target as HTMLImageElement).src = '/images/resources/default.png';
+                              // Also update the cache to prevent future attempts
+                              resourceIconCache.set(resource, '/images/resources/default.png');
+                            }}
+                          />
+                        </div>
+                        <span className="text-xs text-gray-700 capitalize">{resource.replace(/_/g, ' ')}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {buildingDefinition.productionInformation.storageCapacity && (
+                    <div className="mt-2 text-sm text-gray-700">
+                      <span className="font-medium">Total Capacity:</span> {buildingDefinition.productionInformation.storageCapacity} units
+                    </div>
+                  )}
                 </div>
               )}
             </div>
