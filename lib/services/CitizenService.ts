@@ -44,18 +44,22 @@ export class CitizenService {
             if (position && typeof position === 'object' && 
                 'lat' in position && 'lng' in position &&
                 typeof position.lat === 'number' && typeof position.lng === 'number') {
-              // Position is valid
+              console.log(`Valid position for citizen ${citizen.id || citizen.CitizenId}:`, position);
             } else {
-              console.error(`Invalid position for citizen ${citizen.id || citizen.CitizenId}:`, position);
+              console.warn(`Invalid position for citizen ${citizen.id || citizen.CitizenId}:`, position);
               
               // Try to use the position from the API response directly
               if (citizen.position && typeof citizen.position === 'object' &&
                   'lat' in citizen.position && 'lng' in citizen.position) {
                 position = citizen.position;
+                console.log(`Using direct position object for ${citizen.id || citizen.CitizenId}:`, position);
               } else {
-                // Instead of creating a random position, leave it as null
-                // This will allow filtering out citizens without positions
-                position = null;
+                // Create a random position in Venice
+                position = {
+                  lat: 45.4371 + (Math.random() * 0.01),
+                  lng: 12.3326 + (Math.random() * 0.01)
+                };
+                console.log(`Created fallback position for ${citizen.id || citizen.CitizenId}:`, position);
                 
                 // Log detailed debug information
                 console.error(`Citizen without valid position:`, {
