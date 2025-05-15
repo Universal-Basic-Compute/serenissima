@@ -77,7 +77,7 @@ export default function ViewportCanvas({
         if (activeView === 'land') {
           const incomeResult = await incomeService.loadIncomeData();
           // Check if incomeResult exists and is not null before accessing properties
-          if (incomeResult) {
+          if (incomeResult !== undefined && incomeResult !== null) {
             const typedResult = incomeResult as {
               incomeData: Record<string, number>;
               minIncome: number;
@@ -206,12 +206,12 @@ export default function ViewportCanvas({
       emptyBuildingPoints,
       polygons,
       citizensByBuilding,
-      transportStartPoint: transportService.getTransportStartPoint(),
-      transportEndPoint: transportService.getTransportEndPoint()
+      transportStartPoint: transportService.getStartPoint?.() || null,
+      transportEndPoint: transportService.getEndPoint?.() || null
     });
     
     // Set up interaction service with all required dependencies
-    const cleanup = interactionService.initializeInteractions(
+    const cleanup = interactionService.initializeInteractions({
       canvas,
       activeView,
       scale,
@@ -219,7 +219,7 @@ export default function ViewportCanvas({
       transportMode,
       polygonsToRender,
       buildings
-    );
+    });
     
     // Subscribe to events from InteractionService
     const subscriptions = [
@@ -284,8 +284,8 @@ export default function ViewportCanvas({
       emptyBuildingPoints,
       polygons,
       citizensByBuilding,
-      transportStartPoint: transportService.getTransportStartPoint(),
-      transportEndPoint: transportService.getTransportEndPoint()
+      transportStartPoint: transportService.getStartPoint?.() || null,
+      transportEndPoint: transportService.getEndPoint?.() || null
     });
   }, [polygonsToRender, buildings, emptyBuildingPoints, citizensByBuilding, polygons]);
   
@@ -349,8 +349,8 @@ export default function ViewportCanvas({
       emptyBuildingPoints,
       interactionState,
       transportPath,
-      transportService.getTransportStartPoint(),
-      transportService.getTransportEndPoint(),
+      transportService.getStartPoint?.() || null,
+      transportService.getEndPoint?.() || null,
       polygons,
       incomeData,
       minIncome,
