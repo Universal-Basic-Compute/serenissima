@@ -73,7 +73,7 @@ export class BuildingService {
    * Get building position from cache or calculate it
    */
   public getBuildingPosition(building: any): {x: number, y: number} | null {
-    if (!building || !building.position) return null;
+    if (!building) return null;
     
     // Check if building has an ID before trying to access the cache
     if (!building.id) {
@@ -94,15 +94,37 @@ export class BuildingService {
     // Calculate position if not in cache
     let position;
     try {
-      if (typeof building.position === 'string') {
-        try {
-          position = JSON.parse(building.position);
-        } catch (e) {
-          console.warn(`Failed to parse position string for building ${building.id}:`, e);
-          return null;
+      // First check if building has a position property
+      if (building.position) {
+        if (typeof building.position === 'string') {
+          try {
+            position = JSON.parse(building.position);
+          } catch (e) {
+            console.warn(`Failed to parse position string for building ${building.id}:`, e);
+          }
+        } else {
+          position = building.position;
         }
-      } else {
-        position = building.position;
+      } 
+      // If no position property, check for Point property
+      else if (building.Point) {
+        // Try to extract coordinates from the Point field (format: type_lat_lng)
+        const pointStr = String(building.Point);
+        const parts = pointStr.split('_');
+        if (parts.length >= 3) {
+          const lat = parseFloat(parts[1]);
+          const lng = parseFloat(parts[2]);
+          
+          if (!isNaN(lat) && !isNaN(lng)) {
+            position = { lat, lng };
+          }
+        }
+      }
+      
+      // If we couldn't get a position, return null
+      if (!position) {
+        console.warn(`No valid position found for building ${building.id}`);
+        return null;
       }
       
       // Convert lat/lng to world coordinates
