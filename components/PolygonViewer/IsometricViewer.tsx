@@ -132,26 +132,47 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
 
   // Load polygons
   useEffect(() => {
+    console.log('IsometricViewer: Starting to fetch polygons from API...');
     fetch('/api/get-polygons')
-      .then(response => response.json())
+      .then(response => {
+        console.log(`IsometricViewer: API response status: ${response.status} ${response.statusText}`);
+        return response.json();
+      })
       .then(data => {
+        console.log(`IsometricViewer: API data received, polygons property exists: ${!!data.polygons}`);
         if (data.polygons) {
+          console.log(`IsometricViewer: Setting ${data.polygons.length} polygons to state`);
           setPolygons(data.polygons);
           
           // Store in window for other components
           if (typeof window !== 'undefined') {
+            console.log(`IsometricViewer: Setting window.__polygonData with ${data.polygons.length} polygons`);
             (window as any).__polygonData = data.polygons;
+            
+            // Explicitly initialize the transport service with the polygon data
+            console.log(`IsometricViewer: Initializing transport service with ${data.polygons.length} polygons`);
+            const { transportService } = require('@/lib/services/TransportService');
+            
+            // Check if transportService is properly imported
+            console.log(`IsometricViewer: transportService exists: ${!!transportService}`);
+            console.log(`IsometricViewer: transportService type: ${typeof transportService}`);
+            
+            if (transportService && typeof transportService.setPolygonsData === 'function') {
+              const success = transportService.setPolygonsData(data.polygons);
+              console.log(`IsometricViewer: Transport service initialization ${success ? 'succeeded' : 'failed'}`);
+            } else {
+              console.error('IsometricViewer: transportService or setPolygonsData method is not available');
+            }
+          } else {
+            console.warn('IsometricViewer: window is not defined, running in non-browser environment');
           }
-          
-          // Explicitly initialize the transport service with the polygon data
-          console.log(`Initializing transport service with ${data.polygons.length} polygons`);
-          const { transportService } = require('@/lib/services/TransportService');
-          transportService.setPolygonsData(data.polygons);
+        } else {
+          console.error('IsometricViewer: No polygons found in API response');
         }
         setLoading(false);
       })
       .catch(error => {
-        console.error('Error loading polygons:', error);
+        console.error('IsometricViewer: Error loading polygons:', error);
         setLoading(false);
       });
   }, []);

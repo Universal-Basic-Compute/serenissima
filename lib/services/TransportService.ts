@@ -143,6 +143,19 @@ export class TransportService {
         
         if (!success) {
           console.error('Failed to initialize transport service for route calculation');
+          console.error(`polygonsLoaded: ${this.polygonsLoaded}, polygons.length: ${this.polygons.length}`);
+          console.error(`initializationAttempts: ${this.initializationAttempts}`);
+          
+          // Check if window.__polygonData exists
+          if (typeof window !== 'undefined') {
+            const windowPolygons = (window as any).__polygonData;
+            console.log(`window.__polygonData exists: ${!!windowPolygons}`);
+            if (windowPolygons) {
+              console.log(`window.__polygonData is array: ${Array.isArray(windowPolygons)}`);
+              console.log(`window.__polygonData length: ${Array.isArray(windowPolygons) ? windowPolygons.length : 'N/A'}`);
+            }
+          }
+          
           // Emit error event
           eventBus.emit(EventTypes.TRANSPORT_ROUTE_ERROR, 'Failed to load polygon data');
           
@@ -355,95 +368,117 @@ export class TransportService {
    */
   private async loadPolygons(): Promise<boolean> {
     try {
-      console.log('Loading polygons for pathfinding...');
+      console.log('Starting loadPolygons()...');
       
       // In browser environment, fetch polygons from API
       console.log('Fetching polygons from API endpoint: /api/get-polygons');
-      const response = await fetch('/api/get-polygons');
       
-      console.log(`API response status: ${response.status} ${response.statusText}`);
+      // Add timeout handling
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => {
+        console.error('Fetch timeout after 10 seconds');
+        controller.abort();
+      }, 10000);
       
-      if (!response.ok) {
-        console.error(`Failed to load polygons: HTTP ${response.status}`);
-        return false;
-      }
-      
-      const data = await response.json();
-      console.log(`API response data received, polygons property exists: ${!!data.polygons}`);
-      
-      // Log the first polygon to see its structure
-      if (data.polygons && data.polygons.length > 0) {
-        console.log('First polygon structure:', JSON.stringify(data.polygons[0]).substring(0, 200) + '...');
-      }
-      
-      if (!data.polygons) {
-        console.error('No polygons array in API response');
-        return false;
-      }
-      
-      if (!Array.isArray(data.polygons)) {
-        console.error('Polygons is not an array in API response');
-        return false;
-      }
-      
-      if (data.polygons.length === 0) {
-        console.error('Polygons array is empty in API response');
-        return false;
-      }
-      
-      console.log(`Successfully received ${data.polygons.length} polygons from API`);
-      
-      // Process the polygons to ensure they have the required properties
-      const processedPolygons = data.polygons.map((polygon: any) => {
-        // Ensure the polygon has coordinates
-        if (!polygon.coordinates || !Array.isArray(polygon.coordinates) || polygon.coordinates.length < 3) {
-          console.warn(`Polygon ${polygon.id} has invalid coordinates, skipping`);
-          return null;
+      try {
+        const response = await fetch('/api/get-polygons', {
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        console.log(`API response status: ${response.status} ${response.statusText}`);
+        
+        if (!response.ok) {
+          console.error(`Failed to load polygons: HTTP ${response.status}`);
+          return false;
         }
         
-        // Ensure each coordinate has lat and lng properties
-        const validCoordinates = polygon.coordinates.filter((coord: any) => 
-          coord && typeof coord.lat === 'number' && typeof coord.lng === 'number'
-        );
+        const data = await response.json();
+        console.log(`API response data received, polygons property exists: ${!!data.polygons}`);
         
-        if (validCoordinates.length < 3) {
-          console.warn(`Polygon ${polygon.id} has insufficient valid coordinates, skipping`);
-          return null;
+        // Log the first polygon to see its structure
+        if (data.polygons && data.polygons.length > 0) {
+          console.log('First polygon structure:', JSON.stringify(data.polygons[0]).substring(0, 200) + '...');
         }
         
-        // Create a processed polygon with all required properties
-        return {
-          id: polygon.id,
-          coordinates: validCoordinates,
-          centroid: polygon.centroid || null,
-          bridgePoints: Array.isArray(polygon.bridgePoints) ? polygon.bridgePoints : [],
-          buildingPoints: Array.isArray(polygon.buildingPoints) ? polygon.buildingPoints : [],
-          canalPoints: Array.isArray(polygon.canalPoints) ? polygon.canalPoints : []
-        };
-      }).filter(Boolean); // Remove null entries
-      
-      console.log(`Processed ${processedPolygons.length} valid polygons out of ${data.polygons.length} total`);
-      
-      if (processedPolygons.length === 0) {
-        console.error('No valid polygons after processing');
+        if (!data.polygons) {
+          console.error('No polygons array in API response');
+          return false;
+        }
+        
+        if (!Array.isArray(data.polygons)) {
+          console.error('Polygons is not an array in API response');
+          return false;
+        }
+        
+        if (data.polygons.length === 0) {
+          console.error('Polygons array is empty in API response');
+          return false;
+        }
+        
+        console.log(`Successfully received ${data.polygons.length} polygons from API`);
+        
+        // Process the polygons to ensure they have the required properties
+        const processedPolygons = data.polygons.map((polygon: any) => {
+          // Ensure the polygon has coordinates
+          if (!polygon.coordinates || !Array.isArray(polygon.coordinates) || polygon.coordinates.length < 3) {
+            console.warn(`Polygon ${polygon.id} has invalid coordinates, skipping`);
+            return null;
+          }
+          
+          // Ensure each coordinate has lat and lng properties
+          const validCoordinates = polygon.coordinates.filter((coord: any) => 
+            coord && typeof coord.lat === 'number' && typeof coord.lng === 'number'
+          );
+          
+          if (validCoordinates.length < 3) {
+            console.warn(`Polygon ${polygon.id} has insufficient valid coordinates, skipping`);
+            return null;
+          }
+          
+          // Create a processed polygon with all required properties
+          return {
+            id: polygon.id,
+            coordinates: validCoordinates,
+            centroid: polygon.centroid || null,
+            bridgePoints: Array.isArray(polygon.bridgePoints) ? polygon.bridgePoints : [],
+            buildingPoints: Array.isArray(polygon.buildingPoints) ? polygon.buildingPoints : [],
+            canalPoints: Array.isArray(polygon.canalPoints) ? polygon.canalPoints : []
+          };
+        }).filter(Boolean); // Remove null entries
+        
+        console.log(`Processed ${processedPolygons.length} valid polygons out of ${data.polygons.length} total`);
+        
+        if (processedPolygons.length === 0) {
+          console.error('No valid polygons after processing');
+          return false;
+        }
+        
+        // Store the processed polygons
+        this.polygons = processedPolygons;
+        this.polygonsLoaded = true;
+        
+        // Build the graph and canal network
+        console.log('Building graph from polygons...');
+        this.graph = this.buildGraph(this.polygons);
+        console.log(`Graph built with ${Object.keys(this.graph.nodes).length} nodes and ${Object.values(this.graph.edges).flat().length} edges`);
+        
+        console.log('Building canal network from polygons...');
+        this.canalNetwork = this.buildCanalNetwork(this.polygons);
+        console.log(`Canal network built with ${Object.keys(this.canalNetwork).length} segments`);
+        
+        console.log(`Successfully loaded ${this.polygons.length} polygons for pathfinding`);
+        return true;
+      } catch (error) {
+        clearTimeout(timeoutId);
+        if (error.name === 'AbortError') {
+          console.error('Fetch aborted due to timeout');
+        } else {
+          console.error('Fetch error:', error);
+        }
         return false;
       }
-      
-      // Store the processed polygons
-      this.polygons = processedPolygons;
-      this.polygonsLoaded = true;
-      
-      // Build the graph and canal network
-      console.log('Building graph from polygons...');
-      this.graph = this.buildGraph(this.polygons);
-      console.log(`Graph built with ${Object.keys(this.graph.nodes).length} nodes and ${Object.values(this.graph.edges).flat().length} edges`);
-      
-      console.log('Building canal network from polygons...');
-      this.canalNetwork = this.buildCanalNetwork(this.polygons);
-      console.log(`Canal network built with ${Object.keys(this.canalNetwork).length} segments`);
-      
-      console.log(`Successfully loaded ${this.polygons.length} polygons for pathfinding`);
-      return true;
     } catch (error) {
       console.error('Error loading polygons for pathfinding:', error);
       // Add more detailed error information
@@ -580,41 +615,55 @@ export class TransportService {
   private async initializeService(): Promise<boolean> {
     // If we're already initializing, return the existing promise
     if (this.initializationPromise) {
+      console.log('Transport service initialization already in progress, returning existing promise');
       return this.initializationPromise;
     }
     
     // Create a new initialization promise
+    console.log('Creating new transport service initialization promise');
     this.initializationPromise = new Promise<boolean>(async (resolve) => {
       console.log('Initializing transport service...');
       
       // If polygons are already loaded, we're done
       if (this.polygonsLoaded && this.polygons.length > 0) {
-        console.log('Polygons already loaded, initialization complete');
+        console.log(`Polygons already loaded (${this.polygons.length}), initialization complete`);
         resolve(true);
         return;
       }
       
       // First, try to get polygons from window.__polygonData
-      if (typeof window !== 'undefined' && (window as any).__polygonData) {
-        console.log('Attempting to load polygons from window.__polygonData');
+      if (typeof window !== 'undefined') {
+        console.log('Checking for window.__polygonData...');
         const windowPolygons = (window as any).__polygonData;
         
-        if (Array.isArray(windowPolygons) && windowPolygons.length > 0) {
-          console.log(`Found ${windowPolygons.length} polygons in window.__polygonData`);
-          const success = this.setPolygonsData(windowPolygons);
-          if (success) {
-            console.log('Successfully loaded polygons from window.__polygonData');
-            this.polygonsLoaded = true;
-            resolve(true);
-            return;
+        if (windowPolygons) {
+          console.log(`Found window.__polygonData with type: ${typeof windowPolygons}`);
+          if (Array.isArray(windowPolygons)) {
+            console.log(`window.__polygonData is an array with ${windowPolygons.length} items`);
+            
+            if (windowPolygons.length > 0) {
+              console.log('First polygon in window.__polygonData:', JSON.stringify(windowPolygons[0]).substring(0, 200) + '...');
+              const success = this.setPolygonsData(windowPolygons);
+              console.log(`Setting polygons data from window.__polygonData ${success ? 'succeeded' : 'failed'}`);
+              if (success) {
+                console.log('Successfully loaded polygons from window.__polygonData');
+                this.polygonsLoaded = true;
+                resolve(true);
+                return;
+              } else {
+                console.error('Failed to set polygons data from window.__polygonData');
+              }
+            } else {
+              console.warn('window.__polygonData exists but is empty');
+            }
           } else {
-            console.error('Failed to set polygons data from window.__polygonData');
+            console.warn(`window.__polygonData exists but is not an array: ${typeof windowPolygons}`);
           }
         } else {
-          console.warn('window.__polygonData exists but is empty or not an array');
+          console.warn('window.__polygonData is not available');
         }
       } else {
-        console.warn('window.__polygonData is not available');
+        console.warn('window is not defined, running in non-browser environment');
       }
       
       // Try to load polygons with exponential backoff
@@ -630,15 +679,21 @@ export class TransportService {
         console.log(`Initialization attempt ${this.initializationAttempts} of ${this.MAX_INITIALIZATION_ATTEMPTS}`);
         
         // Try to load polygons
+        console.log('Calling loadPolygons()...');
         success = await this.loadPolygons();
+        console.log(`loadPolygons() returned ${success}`);
         
         if (success) {
-          console.log('Polygon loading succeeded, initialization complete');
+          console.log(`Polygon loading succeeded with ${this.polygons.length} polygons, initialization complete`);
           break;
         }
         
         console.log(`Polygon loading failed, waiting ${backoffTime}ms before retry...`);
         await new Promise(r => setTimeout(r, backoffTime));
+      }
+      
+      if (!success) {
+        console.error(`Failed to load polygons after ${this.MAX_INITIALIZATION_ATTEMPTS} attempts`);
       }
       
       resolve(success);
