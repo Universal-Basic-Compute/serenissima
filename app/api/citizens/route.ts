@@ -85,7 +85,7 @@ export async function GET(request: Request) {
       const occupant = building.fields.Occupant ? 
         (typeof building.fields.Occupant === 'string' ? 
           building.fields.Occupant : 
-          String(building.fields.Occupant as string | number | boolean | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[])) : undefined;
+          String(building.fields.Occupant as AirtableValue)) : undefined;
       
       // Skip buildings without occupants
       if (!occupant) return;
@@ -142,11 +142,11 @@ export async function GET(request: Request) {
         firstname: record.fields.FirstName ? 
           (typeof record.fields.FirstName === 'string' ? 
             record.fields.FirstName : 
-            String(record.fields.FirstName)) : 'Unknown',
+            String(record.fields.FirstName as AirtableValue)) : 'Unknown',
         lastname: record.fields.LastName ? 
           (typeof record.fields.LastName === 'string' ? 
             record.fields.LastName : 
-            String(record.fields.LastName)) : 'Citizen',
+            String(record.fields.LastName as AirtableValue)) : 'Citizen',
         socialclass: String(record.fields.SocialClass || 'Popolani'),
         description: String(record.fields.Description || 'A citizen of Venice.'),
         profileimage: formatImageUrl(
