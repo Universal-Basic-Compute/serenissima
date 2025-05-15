@@ -3,7 +3,7 @@
  * Handles canvas drawing operations for the isometric view
  */
 import { CoordinateService } from './CoordinateService';
-import { BuildingService } from './BuildingService';
+import { buildingService } from './BuildingService';
 import { CitizenService } from './CitizenService';
 import { incomeService } from './IncomeService';
 import { hoverStateService } from './HoverStateService';
