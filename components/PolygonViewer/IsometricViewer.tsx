@@ -1612,87 +1612,92 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Create local shorthand functions that use the current state values
-    const isoX = (x: number, y: number) => calculateIsoX(x, y, scale, offset, canvas.width);
-    const isoY = (x: number, y: number) => calculateIsoY(x, y, scale, offset, canvas.height);
-    
     // Draw water background
     ctx.fillStyle = '#87CEEB';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // Only recalculate polygonsToRender when necessary components change
-    const newPolygonsToRender = polygons.map(polygon => {
-      if (!polygon.coordinates || polygon.coordinates.length < 3) return null;
+    // Create a memoized function to calculate polygonsToRender
+    const calculatePolygonsToRender = useCallback(() => {
+      return polygons.map(polygon => {
+        if (!polygon.coordinates || polygon.coordinates.length < 3) return null;
       
-      // Get polygon owner color or income-based color
-      let fillColor = '#FFF5D0'; // Default sand color
-      if (activeView === 'land') {
-        if (incomeDataLoaded && polygon.id && incomeData[polygon.id] !== undefined) {
-          // Use income-based color in land view ONLY if income data is loaded
-          fillColor = getIncomeColor(incomeData[polygon.id]);
-        } else if (polygon.id && landOwners[polygon.id]) {
-          // Use owner color in land view
-          const owner = landOwners[polygon.id];
-          const user = users[owner];
-          if (user && user.color) {
-            fillColor = user.color;
+        // Get polygon owner color or income-based color
+        let fillColor = '#FFF5D0'; // Default sand color
+        if (activeView === 'land') {
+          if (incomeDataLoaded && polygon.id && incomeData[polygon.id] !== undefined) {
+            // Use income-based color in land view ONLY if income data is loaded
+            fillColor = getIncomeColor(incomeData[polygon.id]);
+          } else if (polygon.id && landOwners[polygon.id]) {
+            // Use owner color in land view
+            const owner = landOwners[polygon.id];
+            const user = users[owner];
+            if (user && user.color) {
+              fillColor = user.color;
+            }
           }
         }
-      }
-      // For other views, keep the default yellow color
+        // For other views, keep the default yellow color
       
-      // Convert lat/lng to isometric coordinates
-      const coords = polygon.coordinates.map((coord: {lat: number, lng: number}) => {
-        // Normalize coordinates relative to center of Venice
-        // Scale factor adjusted to make the map more readable
-        const x = (coord.lng - 12.3326) * 20000;
-        const y = (coord.lat - 45.4371) * 20000; // Remove the 0.7 factor here since we're applying it in the projection
-        
-        return {
-          x: isoX(x, y),
-          y: isoY(x, y)
-        };
-      });
+        // Create local shorthand functions that use the current state values
+        const isoX = (x: number, y: number) => calculateIsoX(x, y, scale, offset, canvasRef.current?.width || 0);
+        const isoY = (x: number, y: number) => calculateIsoY(x, y, scale, offset, canvasRef.current?.height || 0);
       
-      // Use the polygon's center property if available, otherwise calculate centroid
-      let centerX, centerY;
-      
-      if (polygon.center && polygon.center.lat && polygon.center.lng) {
-        // Use the provided center
-        const centerLat = polygon.center.lat;
-        const centerLng = polygon.center.lng;
+        // Convert lat/lng to isometric coordinates
+        const coords = polygon.coordinates.map((coord: {lat: number, lng: number}) => {
+          // Normalize coordinates relative to center of Venice
+          // Scale factor adjusted to make the map more readable
+          const x = (coord.lng - 12.3326) * 20000;
+          const y = (coord.lat - 45.4371) * 20000; // Remove the 0.7 factor here since we're applying it in the projection
         
-        // Convert center to isometric coordinates
-        const x = (centerLng - 12.3326) * 20000;
-        const y = (centerLat - 45.4371) * 20000;
-        
-        centerX = isoX(x, y);
-        centerY = isoY(x, y);
-      } else {
-        // Calculate centroid as fallback
-        centerX = 0;
-        centerY = 0;
-        coords.forEach(coord => {
-          centerX += coord.x;
-          centerY += coord.y;
+          return {
+            x: isoX(x, y),
+            y: isoY(x, y)
+          };
         });
-        centerX /= coords.length;
-        centerY /= coords.length;
-      }
       
-      return {
-        polygon,
-        coords,
-        fillColor,
-        centroidX: centerX, // Store both for compatibility
-        centroidY: centerY,
-        centerX: centerX,    // Add these explicitly
-        centerY: centerY
-      };
-    }).filter(Boolean);
+        // Use the polygon's center property if available, otherwise calculate centroid
+        let centerX, centerY;
+      
+        if (polygon.center && polygon.center.lat && polygon.center.lng) {
+          // Use the provided center
+          const centerLat = polygon.center.lat;
+          const centerLng = polygon.center.lng;
+        
+          // Convert center to isometric coordinates
+          const x = (centerLng - 12.3326) * 20000;
+          const y = (centerLat - 45.4371) * 20000;
+        
+          centerX = isoX(x, y);
+          centerY = isoY(x, y);
+        } else {
+          // Calculate centroid as fallback
+          centerX = 0;
+          centerY = 0;
+          coords.forEach(coord => {
+            centerX += coord.x;
+            centerY += coord.y;
+          });
+          centerX /= coords.length;
+          centerY /= coords.length;
+        }
+      
+        return {
+          polygon,
+          coords,
+          fillColor,
+          centroidX: centerX, // Store both for compatibility
+          centroidY: centerY,
+          centerX: centerX,    // Add these explicitly
+          centerY: centerY
+        };
+      }).filter(Boolean);
+    }, [polygons, landOwners, users, activeView, scale, offset, incomeData, incomeDataLoaded]);
 
-    // Update the polygonsToRender state
-    setPolygonsToRender(newPolygonsToRender);
+    // Update polygonsToRender only when the dependencies of calculatePolygonsToRender change
+    useEffect(() => {
+      const newPolygonsToRender = calculatePolygonsToRender();
+      setPolygonsToRender(newPolygonsToRender);
+    }, [calculatePolygonsToRender]);
 
     // Now render in two passes: first the polygons, then the text
     // First pass: Draw all polygon shapes
@@ -2889,7 +2894,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       ctx.fillText('Work', legendX + 40, legendY + 40);
     }
     
-  }, [loading, polygons, landOwners, users, activeView, buildings, scale, offset, incomeData, minIncome, maxIncome, selectedPolygonId, selectedBuildingId, emptyBuildingPoints, mousePosition, citizensLoaded, citizensByBuilding, incomeDataLoaded, polygonsToRender]);
+  }, [loading, polygons, landOwners, users, activeView, buildings, scale, offset, incomeData, minIncome, maxIncome, selectedPolygonId, selectedBuildingId, emptyBuildingPoints, mousePosition, citizensLoaded, citizensByBuilding, incomeDataLoaded, polygonsToRender, getIncomeColor]);
   
 
   // Handle window resize
