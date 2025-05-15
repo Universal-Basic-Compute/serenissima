@@ -1566,6 +1566,30 @@ export class TransportService {
     return inside;
   }
 
+  // Helper method to check if a line intersects land
+  private doesLineIntersectLand(point1: Point, point2: Point, polygons: Polygon[]): boolean {
+    // For each polygon, check if the line intersects any of its edges
+    for (const polygon of polygons) {
+      const coords = polygon.coordinates;
+      if (!coords || coords.length < 3) continue;
+
+      // Check if the line intersects any polygon edge
+      for (let i = 0, j = coords.length - 1; i < coords.length; j = i++) {
+        const intersects = this.doLineSegmentsIntersect(
+          point1.lng, point1.lat, 
+          point2.lng, point2.lat,
+          coords[j].lng, coords[j].lat, 
+          coords[i].lng, coords[i].lat
+        );
+        
+        if (intersects) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   // Helper function to check if a point is near water
   private isPointNearWater(point: Point, polygons: Polygon[]): boolean {
     const WATER_PROXIMITY_THRESHOLD = 30; // meters
@@ -2247,26 +2271,3 @@ export class TransportService {
 
 // Export a singleton instance
 export const transportService = new TransportService();
-// Helper method to check if a line intersects land
-private doesLineIntersectLand(point1: Point, point2: Point, polygons: Polygon[]): boolean {
-  // For each polygon, check if the line intersects any of its edges
-  for (const polygon of polygons) {
-    const coords = polygon.coordinates;
-    if (!coords || coords.length < 3) continue;
-
-    // Check if the line intersects any polygon edge
-    for (let i = 0, j = coords.length - 1; i < coords.length; j = i++) {
-      const intersects = this.doLineSegmentsIntersect(
-        point1.lng, point1.lat, 
-        point2.lng, point2.lat,
-        coords[j].lng, coords[j].lat, 
-        coords[i].lng, coords[i].lat
-      );
-      
-      if (intersects) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
