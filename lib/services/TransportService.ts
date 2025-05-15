@@ -73,6 +73,7 @@ interface Graph {
 }
 
 export class TransportService {
+  private static instance: TransportService | null = null;
   private transportStartPoint: {lat: number, lng: number} | null = null;
   private transportEndPoint: {lat: number, lng: number} | null = null;
   private transportPath: any[] = [];
@@ -83,6 +84,25 @@ export class TransportService {
   private graph: Graph | null = null;
   private canalNetwork: Record<string, Point[]> = {};
   private polygonsLoaded: boolean = false;
+  private initializationPromise: Promise<boolean> | null = null;
+  private initializationAttempts: number = 0;
+  private readonly MAX_INITIALIZATION_ATTEMPTS = 5;
+  
+  // Static method for initialization
+  public static initialize(): Promise<boolean> {
+    if (!TransportService.instance) {
+      TransportService.instance = new TransportService();
+    }
+    return TransportService.instance.initializeService();
+  }
+
+  // Method to get the singleton instance
+  public static getInstance(): TransportService {
+    if (!TransportService.instance) {
+      TransportService.instance = new TransportService();
+    }
+    return TransportService.instance;
+  }
 
   /**
    * Set transport start point
@@ -424,18 +444,137 @@ export class TransportService {
   }
 
   /**
+   * Method to directly set polygons data
+   */
+  public setPolygonsData(polygons: any[]): boolean {
+    try {
+      console.log(`Setting polygons data directly with ${polygons.length} polygons`);
+      
+      // Process the polygons to ensure they have the required properties
+      const processedPolygons = polygons.map((polygon: any) => {
+        // Ensure the polygon has coordinates
+        if (!polygon.coordinates || !Array.isArray(polygon.coordinates) || polygon.coordinates.length < 3) {
+          console.warn(`Polygon ${polygon.id} has invalid coordinates, skipping`);
+          return null;
+        }
+        
+        // Ensure each coordinate has lat and lng properties
+        const validCoordinates = polygon.coordinates.filter((coord: any) => 
+          coord && typeof coord.lat === 'number' && typeof coord.lng === 'number'
+        );
+        
+        if (validCoordinates.length < 3) {
+          console.warn(`Polygon ${polygon.id} has insufficient valid coordinates, skipping`);
+          return null;
+        }
+        
+        // Create a processed polygon with all required properties
+        return {
+          id: polygon.id,
+          coordinates: validCoordinates,
+          centroid: polygon.centroid || null,
+          bridgePoints: Array.isArray(polygon.bridgePoints) ? polygon.bridgePoints : [],
+          buildingPoints: Array.isArray(polygon.buildingPoints) ? polygon.buildingPoints : [],
+          canalPoints: Array.isArray(polygon.canalPoints) ? polygon.canalPoints : []
+        };
+      }).filter(Boolean); // Remove null entries
+      
+      console.log(`Processed ${processedPolygons.length} valid polygons out of ${polygons.length} total`);
+      
+      if (processedPolygons.length === 0) {
+        console.error('No valid polygons after processing');
+        return false;
+      }
+      
+      // Store the processed polygons
+      this.polygons = processedPolygons;
+      this.polygonsLoaded = true;
+      
+      // Build the graph and canal network
+      console.log('Building graph from polygons...');
+      this.graph = this.buildGraph(this.polygons);
+      console.log(`Graph built with ${Object.keys(this.graph.nodes).length} nodes and ${Object.values(this.graph.edges).flat().length} edges`);
+      
+      console.log('Building canal network from polygons...');
+      this.canalNetwork = this.buildCanalNetwork(this.polygons);
+      console.log(`Canal network built with ${Object.keys(this.canalNetwork).length} segments`);
+      
+      console.log(`Successfully loaded ${this.polygons.length} polygons for pathfinding`);
+      return true;
+    } catch (error) {
+      console.error('Error setting polygons data:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Service initialization with retry logic
+   */
+  private async initializeService(): Promise<boolean> {
+    // If we're already initializing, return the existing promise
+    if (this.initializationPromise) {
+      return this.initializationPromise;
+    }
+    
+    // Create a new initialization promise
+    this.initializationPromise = new Promise<boolean>(async (resolve) => {
+      console.log('Initializing transport service...');
+      
+      // If polygons are already loaded, we're done
+      if (this.polygonsLoaded) {
+        console.log('Polygons already loaded, initialization complete');
+        resolve(true);
+        return;
+      }
+      
+      // Try to load polygons with exponential backoff
+      let success = false;
+      this.initializationAttempts = 0;
+      
+      while (!success && this.initializationAttempts < this.MAX_INITIALIZATION_ATTEMPTS) {
+        this.initializationAttempts++;
+        
+        // Calculate backoff time (100ms, 200ms, 400ms, 800ms, 1600ms)
+        const backoffTime = Math.min(100 * Math.pow(2, this.initializationAttempts - 1), 5000);
+        
+        console.log(`Initialization attempt ${this.initializationAttempts} of ${this.MAX_INITIALIZATION_ATTEMPTS}`);
+        
+        // Try to load polygons
+        success = await this.loadPolygons();
+        
+        if (success) {
+          console.log('Polygon loading succeeded, initialization complete');
+          break;
+        }
+        
+        console.log(`Polygon loading failed, waiting ${backoffTime}ms before retry...`);
+        await new Promise(r => setTimeout(r, backoffTime));
+      }
+      
+      // If we still failed after all retries, try to get polygons from window.__polygonData
+      if (!success && typeof window !== 'undefined' && (window as any).__polygonData) {
+        console.log('Attempting to load polygons from window.__polygonData after all API retries failed');
+        const windowPolygons = (window as any).__polygonData;
+        
+        if (Array.isArray(windowPolygons) && windowPolygons.length > 0) {
+          console.log(`Found ${windowPolygons.length} polygons in window.__polygonData`);
+          success = this.setPolygonsData(windowPolygons);
+        }
+      }
+      
+      resolve(success);
+    });
+    
+    return this.initializationPromise;
+  }
+
+  /**
    * Preload polygons for pathfinding
    * This can be called during app initialization to ensure polygons are loaded
    */
   public async preloadPolygons(): Promise<boolean> {
     console.log('Preloading polygons for transport service...');
-    
-    if (this.polygonsLoaded) {
-      console.log('Polygons already loaded, skipping preload');
-      return true;
-    }
-    
-    return this.loadPolygons();
+    return this.initializeService();
   }
 
   // Helper function to check if two line segments intersect
@@ -1203,45 +1342,18 @@ export class TransportService {
     try {
       console.log('Starting water-only path calculation from', startPoint, 'to', endPoint);
       
-      // Ensure polygons are loaded with retry logic
+      // Ensure polygons are loaded using the initialization service
       if (!this.polygonsLoaded) {
-        console.log('Polygons not loaded yet, loading now for water-only path...');
-        const loadSuccess = await this.loadPolygons();
+        console.log('Polygons not loaded yet, initializing service for water-only path...');
+        const success = await this.initializeService();
         
-        // Try to get polygons from window.__polygonData if API loading failed
-        if (!loadSuccess && typeof window !== 'undefined' && (window as any).__polygonData) {
-          console.log('Attempting to load polygons from window.__polygonData');
-          const windowPolygons = (window as any).__polygonData;
-          
-          if (Array.isArray(windowPolygons) && windowPolygons.length > 0) {
-            console.log(`Found ${windowPolygons.length} polygons in window.__polygonData`);
-            this.polygons = windowPolygons;
-            this.polygonsLoaded = true;
-            
-            // Build the graph and canal network
-            this.graph = this.buildGraph(this.polygons);
-            this.canalNetwork = this.buildCanalNetwork(this.polygons);
-            
-            console.log('Successfully loaded polygons from window.__polygonData');
-          } else {
-            console.error('window.__polygonData exists but is not a valid array or is empty');
-          }
-        }
-        
-        // If first attempt fails and window data isn't available, retry once
-        if (!this.polygonsLoaded) {
-          console.log('First attempt to load polygons failed, retrying...');
-          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
-          const retrySuccess = await this.loadPolygons();
-          
-          if (!retrySuccess) {
-            console.error('Failed to load polygons after retry');
-            return {
-              success: false,
-              error: 'No polygon data available for water-only pathfinding',
-              details: 'Failed to load polygon data after multiple attempts'
-            };
-          }
+        if (!success) {
+          console.error('Failed to initialize transport service for water-only path');
+          return {
+            success: false,
+            error: 'No polygon data available for water-only pathfinding',
+            details: 'Failed to initialize transport service'
+          };
         }
       }
       
@@ -1503,45 +1615,18 @@ export class TransportService {
   // Main function to find the path between two points
   public async findPath(startPoint: Point, endPoint: Point): Promise<any> {
     try {
-      // Ensure polygons are loaded with retry logic
+      // Ensure polygons are loaded using the initialization service
       if (!this.polygonsLoaded) {
-        console.log('Polygons not loaded yet, loading now...');
-        const loadSuccess = await this.loadPolygons();
+        console.log('Polygons not loaded yet, initializing service...');
+        const success = await this.initializeService();
         
-        // Try to get polygons from window.__polygonData if API loading failed
-        if (!loadSuccess && typeof window !== 'undefined' && (window as any).__polygonData) {
-          console.log('Attempting to load polygons from window.__polygonData');
-          const windowPolygons = (window as any).__polygonData;
-          
-          if (Array.isArray(windowPolygons) && windowPolygons.length > 0) {
-            console.log(`Found ${windowPolygons.length} polygons in window.__polygonData`);
-            this.polygons = windowPolygons;
-            this.polygonsLoaded = true;
-            
-            // Build the graph and canal network
-            this.graph = this.buildGraph(this.polygons);
-            this.canalNetwork = this.buildCanalNetwork(this.polygons);
-            
-            console.log('Successfully loaded polygons from window.__polygonData');
-          } else {
-            console.error('window.__polygonData exists but is not a valid array or is empty');
-          }
-        }
-        
-        // If first attempt fails and window data isn't available, retry once
-        if (!this.polygonsLoaded) {
-          console.log('First attempt to load polygons failed, retrying...');
-          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
-          const retrySuccess = await this.loadPolygons();
-          
-          if (!retrySuccess) {
-            console.error('Failed to load polygons after retry');
-            return {
-              success: false,
-              error: 'No polygon data available for pathfinding',
-              details: 'Failed to load polygon data after multiple attempts'
-            };
-          }
+        if (!success) {
+          console.error('Failed to initialize transport service');
+          return {
+            success: false,
+            error: 'No polygon data available for pathfinding',
+            details: 'Failed to initialize transport service'
+          };
         }
       }
       

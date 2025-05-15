@@ -96,10 +96,9 @@ export default function TwoDPage() {
           if (typeof window !== 'undefined') {
             (window as any).__polygonData = data.polygons;
             
-            // Preload polygons in the transport service
-            transportService.preloadPolygons().then(success => {
-              console.log(`Transport service polygon preload ${success ? 'succeeded' : 'failed'}`);
-            });
+            // Initialize the transport service with the polygon data
+            transportService.setPolygonsData(data.polygons);
+            console.log('Transport service initialized with polygon data from API');
           }
         }
       })
@@ -118,6 +117,11 @@ export default function TwoDPage() {
       .catch(error => {
         console.error('Error loading buildings:', error);
       });
+      
+    // Initialize the transport service
+    transportService.initializeService().then(success => {
+      console.log(`Transport service initialization ${success ? 'succeeded' : 'failed'}`);
+    });
   }, []);
 
   // Initial dispatch of ensureBuildingsVisible event - only runs once on mount
