@@ -85,7 +85,7 @@ export async function GET(request: Request) {
       const occupant = building.fields.Occupant ? 
         (typeof building.fields.Occupant === 'string' ? 
           building.fields.Occupant : 
-          String(building.fields.Occupant as AirtableValue)) : undefined;
+          String(building.fields.Occupant)) : undefined;
       
       // Skip buildings without occupants
       if (!occupant) return;
@@ -129,7 +129,7 @@ export async function GET(request: Request) {
       const citizenId = record.fields.CitizenId ? 
         (typeof record.fields.CitizenId === 'string' ? 
           record.fields.CitizenId : 
-          String(record.fields.CitizenId)) 
+          String(record.fields.CitizenId as string)) 
         : `ctz_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
       
       // Get home and work assignments for this citizen
@@ -142,11 +142,11 @@ export async function GET(request: Request) {
         firstname: record.fields.FirstName ? 
           (typeof record.fields.FirstName === 'string' ? 
             record.fields.FirstName : 
-            String(record.fields.FirstName as AirtableValue)) : 'Unknown',
+            String(record.fields.FirstName as string)) : 'Unknown',
         lastname: record.fields.LastName ? 
           (typeof record.fields.LastName === 'string' ? 
             record.fields.LastName : 
-            String(record.fields.LastName as AirtableValue)) : 'Citizen',
+            String(record.fields.LastName as string)) : 'Citizen',
         socialclass: String(record.fields.SocialClass || 'Popolani'),
         description: String(record.fields.Description || 'A citizen of Venice.'),
         profileimage: formatImageUrl(
