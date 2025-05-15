@@ -123,41 +123,41 @@ def get_available_businesses(tables) -> List[Dict]:
 def assign_citizen_to_business(tables, citizen: Dict, business: Dict) -> bool:
     """Assign a citizen to a business and update both records."""
     citizen_id = citizen['id']
-    business_id = business['id']
+    building_id = business['id']
     citizen_name = f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}"
-    business_name = business['fields'].get('Name', business_id)
+    building_name = business['fields'].get('Name', building_id)
     
-    log.info(f"Assigning {citizen_name} to {business_name}")
+    log.info(f"Assigning {citizen_name} to {building_name}")
     
     try:
-        # Update business record with new occupant
-        tables['buildings'].update(business_id, {
+        # Update building record with new occupant
+        tables['buildings'].update(building_id, {
             'Occupant': citizen_id,
             'Status': 'active'
         })
         
-        # Get business owner
-        business_owner = business['fields'].get('Owner', '')
+        # Get building owner
+        building_owner = business['fields'].get('Owner', '')
         
-        # Create a notification for the business owner
-        if business_owner:
+        # Create a notification for the building owner
+        if building_owner:
             create_notification(
                 tables,
-                business_owner,
-                f"{citizen_name} now works in your business {business_name}",
+                building_owner,
+                f"{citizen_name} now works in your building {building_name}",
                 {
                     "citizen_id": citizen_id,
                     "citizen_name": citizen_name,
-                    "business_id": business_id,
-                    "business_name": business_name,
+                    "building_id": building_id,
+                    "building_name": building_name,
                     "event_type": "job_assignment"
                 }
             )
         
-        log.info(f"Successfully assigned {citizen_name} to {business_name}")
+        log.info(f"Successfully assigned {citizen_name} to {building_name}")
         return True
     except Exception as e:
-        log.error(f"Error assigning citizen to business: {e}")
+        log.error(f"Error assigning citizen to building: {e}")
         return False
 
 def create_notification(tables, user: str, content: str, details: Dict) -> Optional[Dict]:
