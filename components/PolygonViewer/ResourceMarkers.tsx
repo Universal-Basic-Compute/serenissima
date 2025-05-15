@@ -175,16 +175,16 @@ export default function ResourceMarkers({
                     key={resource.id}
                     className="absolute bg-amber-800 border-2 border-amber-600 rounded-lg overflow-hidden flex flex-col items-center justify-center shadow-lg"
                     style={{ 
-                      width: '192px', // Increased from 64px to 192px (x3)
-                      height: '240px', // Increased from 80px to 240px (x3)
-                      left: `${Math.cos(2 * Math.PI * index / locationResources.length) * 240}px`, // Increased radius to accommodate larger icons
-                      top: `${Math.sin(2 * Math.PI * index / locationResources.length) * 240}px`, // Increased radius to accommodate larger icons
+                      width: '96px', // Decreased from 192px to 96px (2x smaller)
+                      height: '120px', // Decreased from 240px to 120px (2x smaller)
+                      left: `${Math.cos(2 * Math.PI * index / locationResources.length) * 120}px`, // Decreased radius to accommodate smaller icons
+                      top: `${Math.sin(2 * Math.PI * index / locationResources.length) * 120}px`, // Decreased radius to accommodate smaller icons
                       transition: 'all 0.3s ease-out'
                     }}
                   >
                     <div className="relative w-full h-full group">
-                      {/* Image container with rounded corners - make 3x bigger */}
-                      <div className="w-full h-[192px] flex items-center justify-center p-2">
+                      {/* Image container with rounded corners - make 2x smaller */}
+                      <div className="w-full h-[96px] flex items-center justify-center p-2">
                         <img 
                           src={`/images/resources/${resource.icon}`}
                           alt={resource.name}
@@ -195,28 +195,28 @@ export default function ResourceMarkers({
                         />
                       </div>
                         
-                      {/* Resource name below the image - make font bigger */}
-                      <div className="w-full h-[48px] flex items-center justify-center bg-amber-900/80 text-white text-[16px] px-2 truncate">
+                      {/* Resource name below the image - adjust font size */}
+                      <div className="w-full h-[24px] flex items-center justify-center bg-amber-900/80 text-white text-[12px] px-2 truncate">
                         {resource.name}
                       </div>
                         
-                      {/* Count badge - make bigger */}
-                      <div className="absolute -bottom-1 -right-1 bg-amber-600 text-white text-lg rounded-full w-12 h-12 flex items-center justify-center">
+                      {/* Count badge - make smaller */}
+                      <div className="absolute -bottom-1 -right-1 bg-amber-600 text-white text-base rounded-full w-6 h-6 flex items-center justify-center">
                         {resource.amount}
                       </div>
                         
-                      {/* Detailed tooltip - make bigger */}
-                      <div className="absolute opacity-0 group-hover:opacity-100 bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-4 bg-black/90 text-white text-sm rounded w-64 pointer-events-none transition-opacity z-50">
-                        <div className="font-bold text-amber-300 text-lg">{resource.name}</div>
+                      {/* Detailed tooltip - adjust size */}
+                      <div className="absolute opacity-0 group-hover:opacity-100 bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-3 bg-black/90 text-white text-xs rounded w-56 pointer-events-none transition-opacity z-50">
+                        <div className="font-bold text-amber-300 text-base">{resource.name}</div>
                         {resource.description && (
-                          <div className="mt-2 text-sm">{resource.description.substring(0, 100)}{resource.description.length > 100 ? '...' : ''}</div>
+                          <div className="mt-1 text-xs">{resource.description.substring(0, 100)}{resource.description.length > 100 ? '...' : ''}</div>
                         )}
-                        <div className="mt-2 flex justify-between">
+                        <div className="mt-1 flex justify-between">
                           <span>Quantity: {resource.amount}</span>
                           {resource.rarity && <span className="capitalize">{resource.rarity}</span>}
                         </div>
                         {resource.buildingId && (
-                          <div className="mt-2 text-amber-200">Building: {resource.buildingId}</div>
+                          <div className="mt-1 text-amber-200">Building: {resource.buildingId}</div>
                         )}
                       </div>
                     </div>
@@ -224,7 +224,7 @@ export default function ResourceMarkers({
                 ))}
                 
                 {/* Center indicator */}
-                <div className="w-16 h-16 bg-amber-700 border-2 border-amber-500 rounded-full flex items-center justify-center text-white text-lg font-bold">
+                <div className="w-8 h-8 bg-amber-700 border-2 border-amber-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
                   {locationResources.length}
                 </div>
               </div>
@@ -239,10 +239,10 @@ export default function ResourceMarkers({
                       key={resource.id}
                       className="absolute bg-amber-800 border border-amber-600 rounded-lg overflow-hidden"
                       style={{ 
-                        width: '108px', // Increased from 36px to 108px (x3)
-                        height: '108px', // Increased from 36px to 108px (x3)
-                        left: `${index * 18}px`, // Adjust offset for larger icons
-                        top: `${-index * 18}px`, // Adjust offset for larger icons
+                        width: '54px', // Decreased from 108px to 54px (2x smaller)
+                        height: '54px', // Decreased from 108px to 54px (2x smaller)
+                        left: `${index * 9}px`, // Adjust offset for smaller icons
+                        top: `${-index * 9}px`, // Adjust offset for smaller icons
                         zIndex: 40 - index,
                         boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
                       }}
@@ -250,7 +250,7 @@ export default function ResourceMarkers({
                       <img 
                         src={`/images/resources/${resource.icon}`}
                         alt={resource.name}
-                        className="w-full h-full object-contain p-3" // Increased padding
+                        className="w-full h-full object-contain p-2" // Decreased padding
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = '/images/resources/default.png';
                         }}
