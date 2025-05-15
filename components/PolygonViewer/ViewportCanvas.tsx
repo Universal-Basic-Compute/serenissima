@@ -65,17 +65,6 @@ interface UpdatePolygonsParams {
   transportEndPoint: PointData | null;
 }
 
-// Define the parameters for the updatePolygons method
-interface UpdatePolygonsMethodParams {
-  polygonsToRender: any[];
-  buildings: BuildingData[];
-  emptyBuildingPoints: PointData[];
-  polygons: PolygonData[];
-  citizensByBuilding: Record<string, any[]>;
-  transportStartPoint: PointData | null;
-  transportEndPoint: PointData | null;
-}
-
 // Define the type for the initializeInteractions method parameters
 interface InitializeInteractionsParams {
   polygonsToRender: any[];
@@ -297,7 +286,7 @@ export default function ViewportCanvas({
       citizensByBuilding,
       transportStartPoint: transportService.getStartPoint() || null,
       transportEndPoint: transportService.getEndPoint() || null
-    } as UpdatePolygonsMethodParams);
+    } as UpdatePolygonsParams);
     
     // Set up interaction service with all required dependencies
     const cleanup = interactionService.initializeInteractions(
@@ -315,7 +304,7 @@ export default function ViewportCanvas({
         transportStartPoint: transportService.getStartPoint() || null,
         transportEndPoint: transportService.getEndPoint() || null
       } as InitializeInteractionsParams,
-      coatOfArmsImages
+      coatOfArmsImages as unknown as InteractionServiceDependencies
     );
     
     // Subscribe to events from InteractionService
@@ -349,7 +338,7 @@ export default function ViewportCanvas({
         if (point) {
           console.log(`Transport point selected at: ${point.lat}, ${point.lng}`);
           // Pass the point correctly
-          transportService.handlePointSelected(point as any);
+          transportService.handlePointSelected(point);
         }
       })
     ];
@@ -384,7 +373,7 @@ export default function ViewportCanvas({
       citizensByBuilding,
       transportStartPoint: transportService.getStartPoint() || null,
       transportEndPoint: transportService.getEndPoint() || null
-    } as UpdatePolygonsMethodParams);
+    } as UpdatePolygonsParams);
   }, [polygonsToRender, buildings, emptyBuildingPoints, citizensByBuilding, polygons]);
   
   // Remove debugging for hover state changes
