@@ -266,7 +266,7 @@ export class InteractionService {
       
       // Log mouse position when in transport mode
       if (transportMode) {
-        console.log('Mouse position in transport mode:', { x: mouseX, y: mouseY });
+        //console.log('Mouse position in transport mode:', { x: mouseX, y: mouseY });
       }
       
       // Set cursor based on dragging state
