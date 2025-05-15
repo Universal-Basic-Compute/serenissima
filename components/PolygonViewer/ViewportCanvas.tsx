@@ -186,7 +186,7 @@ export default function ViewportCanvas({
       }
     };
     
-    // Set up interaction service
+    // Set up interaction service with all required dependencies
     const cleanup = interactionService.initializeInteractions(
       canvas,
       activeView,
@@ -200,11 +200,50 @@ export default function ViewportCanvas({
       polygons
     );
     
+    // Subscribe to events from InteractionService
+    const subscriptions = [
+      eventBus.subscribe(EventTypes.POLYGON_SELECTED, (data) => {
+        // Handle polygon selection
+        if (data && data.polygonId) {
+          console.log(`Polygon selected: ${data.polygonId}`);
+        }
+      }),
+      eventBus.subscribe(EventTypes.BUILDING_SELECTED, (data) => {
+        // Handle building selection
+        if (data && data.buildingId) {
+          console.log(`Building selected: ${data.buildingId}`);
+        }
+      }),
+      eventBus.subscribe(EventTypes.CITIZEN_SELECTED, (citizen) => {
+        // Handle citizen selection
+        if (citizen) {
+          console.log(`Citizen selected: ${citizen.FirstName} ${citizen.LastName}`);
+        }
+      }),
+      eventBus.subscribe(EventTypes.BUILDING_POINT_SELECTED, (data) => {
+        // Handle building point selection
+        if (data && data.position) {
+          console.log(`Building point selected at: ${data.position.lat}, ${data.position.lng}`);
+        }
+      }),
+      eventBus.subscribe(EventTypes.TRANSPORT_POINT_SELECTED, (point) => {
+        // Handle transport point selection
+        if (point) {
+          console.log(`Transport point selected at: ${point.lat}, ${point.lng}`);
+          transportService.handlePointSelected(point);
+        }
+      })
+    ];
+    
     canvas.addEventListener('mousedown', handleMouseDown);
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
     
     return () => {
+      // Clean up all event subscriptions
+      subscriptions.forEach(sub => sub.unsubscribe());
+      
+      // Clean up interaction handlers
       cleanup();
       canvas.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('mousemove', handleMouseMove);
@@ -251,6 +290,9 @@ export default function ViewportCanvas({
     // Get interaction state
     const interactionState = interactionService.getState();
     
+    // Performance measurement
+    const startTime = performance.now();
+    
     // Draw the scene using RenderService
     renderService.drawScene(
       ctx,
@@ -271,7 +313,13 @@ export default function ViewportCanvas({
       renderedCoatOfArmsCache.current
     );
     
-    // Request animation frame for smooth rendering
+    // Log performance metrics for debugging (only if rendering takes more than 16ms)
+    const renderTime = performance.now() - startTime;
+    if (renderTime > 16) {
+      console.debug(`Scene rendering took ${renderTime.toFixed(2)}ms (${(1000/renderTime).toFixed(1)} fps)`);
+    }
+    
+    // Use requestAnimationFrame for smoother rendering
     const animationId = requestAnimationFrame(() => {
       // This empty requestAnimationFrame helps with smoother rendering
       // by ensuring the browser has time to process the previous frame
