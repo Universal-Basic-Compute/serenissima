@@ -61,10 +61,21 @@ export class UIStateService {
     
     // Only update and emit if something actually changed
     if (nameChanged || positionChanged || imagePathChanged) {
+      // Create a copy of the current state for comparison
+      const prevName = this.hoveredBuildingName;
+      const prevPosition = this.hoveredBuildingPosition;
+      const prevImagePath = this.hoveredBuildingImagePath;
+      
       // Update state first
       this.hoveredBuildingName = buildingName;
       this.hoveredBuildingPosition = position;
       this.hoveredBuildingImagePath = imagePath;
+      
+      // Log the state change for debugging
+      console.log('UIStateService: Building hover state changed', {
+        from: { name: prevName, position: prevPosition, imagePath: prevImagePath },
+        to: { name: buildingName, position, imagePath }
+      });
       
       // Then emit event
       eventBus.emit(EventTypes.BUILDING_HOVER_STATE_CHANGED, {
@@ -163,9 +174,12 @@ export class UIStateService {
    * Handle building hover
    */
   public handleBuildingHover(buildingId: string | null, building: any | null, position: {x: number, y: number} | null): void {
+    // Import uiStateService here to avoid circular dependency
+    const { uiStateService } = require('./UIStateService');
+    
     // If clearing hover state, just call setBuildingHover with null values
     if (!buildingId || !building) {
-      this.setBuildingHover(null, null, null);
+      uiStateService.setBuildingHover(null, null, null);
       return;
     }
     
@@ -180,15 +194,19 @@ export class UIStateService {
         position.y !== this.hoveredBuildingPosition.y) {
       
       // Update the name and position, but keep the existing image path
-      this.setBuildingHover(
+      uiStateService.setBuildingHover(
         buildingName,
         position,
         this.hoveredBuildingImagePath // Keep existing image path
       );
       
+      // Store the values locally too
+      this.hoveredBuildingName = buildingName;
+      this.hoveredBuildingPosition = position;
+      
       // Fetch the image separately, but only if we don't already have one
       if (!this.hoveredBuildingImagePath && !this.isLoadingBuildingImage) {
-        this.fetchBuildingImagePath(building.type, building.variant);
+        uiStateService.fetchBuildingImagePath(building.type, building.variant);
       }
     }
   }

@@ -287,7 +287,7 @@ export default function ViewportCanvas({
       // Update the ref
       prevHoveredBuildingId.current = hoveredBuildingId;
     }
-  }, []);  // Empty dependency array to run only once on mount
+  }, [hoveredBuildingId]);  // Add hoveredBuildingId as a dependency
   
   // Calculate polygons to render
   useEffect(() => {

@@ -126,7 +126,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         buildingImageFetchingRef.current = false;
       }
     }
-  }, [hoveredBuildingId, hoveredBuildingName, buildings]); // Only depend on these three props
+  }, [hoveredBuildingId, hoveredBuildingName, hoveredBuildingImagePath, isLoadingBuildingImage, buildings]); // Include all dependencies
   
   // Minimal debugging effect that won't cause infinite updates
   useEffect(() => {
@@ -139,10 +139,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       // Update the ref
       prevStateRef.current.hoveredBuildingId = hoveredBuildingId;
     }
-    
-    // This effect should only run when hoveredBuildingId changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hoveredBuildingId]);
+  }, [hoveredBuildingId]); // Only depend on hoveredBuildingId
 
   // Helper function to check if a point is inside a polygon
   function isPointInPolygon(x: number, y: number, polygon: {x: number, y: number}[]): boolean {
@@ -394,9 +391,19 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   
   // Fetch coat of arms data
   useEffect(() => {
+    // Use a ref to track if the effect is already running to prevent re-entrancy
+    const isRunningRef = useRef(false);
+    
     const fetchCoatOfArms = async () => {
+      // Prevent concurrent executions of this effect
+      if (isRunningRef.current) return;
+      isRunningRef.current = true;
+      
       try {
-        setLoadingCoatOfArms(true);
+        if (!loadingCoatOfArms) {
+          setLoadingCoatOfArms(true);
+        }
+        
         const response = await fetch('/api/get-coat-of-arms');
         if (response.ok) {
           const data = await response.json();
@@ -408,122 +415,90 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
               setOwnerCoatOfArmsMap(newOwnerCoatOfArmsMap);
             }
             
-            // Preload images
-            const imagePromises: Promise<void>[] = [];
-            const newImages: Record<string, HTMLImageElement> = {};
-            
-            // Target size for coat of arms images (50px is our display size)
-            const targetSize = 100; // Slightly larger than display size for better quality
-            
-            // Create a copy of the current images to avoid modifying state directly
+            // Process images sequentially to avoid too many parallel requests
             const updatedImages = {...coatOfArmsImages};
             let hasNewImages = false;
             
-            Object.entries(data.coatOfArms).forEach(([owner, url]) => {
+            for (const [owner, url] of Object.entries(data.coatOfArms)) {
               // Skip if we already have this image loaded
               if (updatedImages[owner]) {
-                return;
+                continue;
               }
               
               if (url) {
-                // Create an array of URLs to try in order
-                const urlsToTry = [
-                  // 1. Use the URL from the API directly
-                  url as string,
-                  
-                  // 2. Try with serenissima.ai domain
-                  `https://serenissima.ai/coat-of-arms/${owner}.png`,
-                  
-                  // 3. Try with current origin as fallback
-                  `${window.location.origin}/coat-of-arms/${owner}.png`
-                ];
-                
-                // Create a promise that tries each URL in sequence
-                const tryLoadImage = async (): Promise<HTMLImageElement> => {
-                  // Add default fallback URL to the array of URLs to try
-                  const allUrlsToTry = [
-                    ...urlsToTry,
-                    // Add a default fallback image as the last resort
+                try {
+                  // Create an array of URLs to try in order
+                  const urlsToTry = [
+                    // 1. Use the URL from the API directly
+                    url as string,
+                    
+                    // 2. Try with serenissima.ai domain
+                    `https://serenissima.ai/coat-of-arms/${owner}.png`,
+                    
+                    // 3. Try with current origin as fallback
+                    `${window.location.origin}/coat-of-arms/${owner}.png`,
+                    
+                    // 4. Default fallback
                     `${window.location.origin}/coat-of-arms/default.png`
                   ];
-              
-                  for (let i = 0; i < allUrlsToTry.length; i++) {
-                    try {
-                      const currentUrl = allUrlsToTry[i];
                   
+                  // Try each URL in sequence
+                  let imageLoaded = false;
+                  for (const currentUrl of urlsToTry) {
+                    if (imageLoaded) break;
+                    
+                    try {
                       const img = new Image();
                       img.crossOrigin = "anonymous"; // Important for CORS
-                  
+                      
                       // Create a promise for this specific URL
-                      const loadPromise = new Promise<HTMLImageElement>((resolve, reject) => {
+                      await new Promise<void>((resolve, reject) => {
+                        const timeoutId = setTimeout(() => {
+                          reject(new Error(`Timeout loading image from ${currentUrl}`));
+                        }, 5000); // 5 second timeout
+                        
                         img.onload = () => {
+                          clearTimeout(timeoutId);
                           // Resize the image using canvas before storing
-                          const resizedImg = resizeImageToCanvas(img, targetSize);
-                          resolve(resizedImg);
+                          const resizedImg = resizeImageToCanvas(img, 100);
+                          updatedImages[owner] = resizedImg;
+                          hasNewImages = true;
+                          imageLoaded = true;
+                          resolve();
                         };
                         img.onerror = () => {
-                          // Don't throw an error on the last attempt (default image)
-                          if (i === allUrlsToTry.length - 1) {
-                            console.warn(`All image URLs failed for ${owner}, using generated avatar`);
-                            // Return a generated avatar instead
-                            const canvas = document.createElement('canvas');
-                            canvas.width = targetSize;
-                            canvas.height = targetSize;
-                            const ctx = canvas.getContext('2d');
-                            if (ctx) {
-                              // Draw a colored circle with the owner's initial
-                              createDefaultCircularAvatar(ctx, owner, targetSize/2, targetSize/2, targetSize);
-                              const generatedImg = new Image();
-                              generatedImg.src = canvas.toDataURL('image/png');
-                              resolve(generatedImg);
-                            } else {
-                              reject(new Error(`Failed to create canvas context for ${owner}`));
-                            }
-                          } else {
-                            reject(new Error(`Failed to load image from ${currentUrl}`));
-                          }
+                          clearTimeout(timeoutId);
+                          reject(new Error(`Failed to load image from ${currentUrl}`));
                         };
                         img.src = currentUrl;
                       });
-                  
-                      // Wait for this URL to load or fail
-                      return await loadPromise;
                     } catch (error) {
-                      // If we're at the last URL and it failed, we'll handle it in the onerror handler above
-                      if (i === allUrlsToTry.length - 1) {
-                        console.error(`All URLs failed for ${owner}:`, error);
-                        throw error;
-                      }
-                      // Otherwise continue to the next URL
+                      // Continue to next URL on error
+                      console.warn(`Error loading coat of arms from ${currentUrl} for ${owner}:`, error);
                     }
                   }
-              
-                  // This should never be reached due to the throw above, but TypeScript needs it
-                  throw new Error("All URLs failed to load");
-                };
-                
-                // Add the promise to our array
-                const imagePromise = tryLoadImage()
-                  .then(img => {
-                    newImages[owner] = img;
-                    updatedImages[owner] = img;
-                    hasNewImages = true;
-                  })
-                  .catch(error => {
-                    console.error(`All URLs failed for ${owner}:`, error);
-                    // We'll handle this case in the createDefaultCircularAvatar function
-                  });
-                
-                imagePromises.push(imagePromise.catch(error => {
-                  console.warn(`Error loading coat of arms for ${owner}:`, error);
-                  // Return null to prevent the Promise.allSettled from failing
-                  return null;
-                }));
+                  
+                  // If all URLs failed, create a default avatar
+                  if (!imageLoaded) {
+                    console.warn(`All image URLs failed for ${owner}, using generated avatar`);
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 100;
+                    canvas.height = 100;
+                    const ctx = canvas.getContext('2d');
+                    if (ctx) {
+                      // Draw a colored circle with the owner's initial
+                      createDefaultCircularAvatar(ctx, owner, 50, 50, 100);
+                      const generatedImg = new Image();
+                      generatedImg.src = canvas.toDataURL('image/png');
+                      updatedImages[owner] = generatedImg;
+                      hasNewImages = true;
+                    }
+                  }
+                } catch (error) {
+                  console.error(`Error processing coat of arms for ${owner}:`, error);
+                }
               }
-            });
-            
-            // Wait for all images to either load or fail
-            await Promise.allSettled(imagePromises);
+            }
             
             // Only update state if we have new images
             if (hasNewImages) {
@@ -535,6 +510,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         console.error('Error fetching coat of arms:', error);
       } finally {
         setLoadingCoatOfArms(false);
+        isRunningRef.current = false;
       }
     };
     
