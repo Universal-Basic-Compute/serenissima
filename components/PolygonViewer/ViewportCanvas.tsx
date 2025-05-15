@@ -77,7 +77,7 @@ export default function ViewportCanvas({
         if (activeView === 'land') {
           try {
             await incomeService.loadIncomeData();
-            const incomeData = incomeService.getIncome() || {};
+            const incomeData = incomeService.getIncome('all') || {};
             const minIncome = incomeService.getIncome('min') || 0;
             const maxIncome = incomeService.getIncome('max') || 1000;
             
@@ -201,11 +201,11 @@ export default function ViewportCanvas({
     
     // Update the interaction service with current data
     interactionService.updatePolygons({
-      polygonsToRender,
-      buildings,
-      emptyBuildingPoints,
-      polygons,
-      citizensByBuilding,
+      polygonsToRender: polygonsToRender,
+      buildings: buildings,
+      emptyBuildingPoints: emptyBuildingPoints,
+      polygons: polygons,
+      citizensByBuilding: citizensByBuilding,
       transportStartPoint: transportService.getStartPoint() || null,
       transportEndPoint: transportService.getEndPoint() || null
     });
@@ -217,8 +217,15 @@ export default function ViewportCanvas({
       scale,
       offset,
       transportMode,
-      polygonsToRender,
-      buildings
+      {
+        polygonsToRender: polygonsToRender,
+        buildings: buildings,
+        emptyBuildingPoints: emptyBuildingPoints,
+        polygons: polygons,
+        citizensByBuilding: citizensByBuilding,
+        transportStartPoint: transportService.getStartPoint() || null,
+        transportEndPoint: transportService.getEndPoint() || null
+      }
     );
     
     // Subscribe to events from InteractionService
@@ -251,7 +258,9 @@ export default function ViewportCanvas({
         // Handle transport point selection
         if (point) {
           console.log(`Transport point selected at: ${point.lat}, ${point.lng}`);
-          transportService.handlePointSelected(point);
+          // Convert point to expected format if needed
+          const pointData = Array.isArray(point) ? point : [point];
+          transportService.handlePointSelected(pointData);
         }
       })
     ];
@@ -279,11 +288,11 @@ export default function ViewportCanvas({
   // Add this effect to update the interaction service when data changes
   useEffect(() => {
     interactionService.updatePolygons({
-      polygonsToRender,
-      buildings,
-      emptyBuildingPoints,
-      polygons,
-      citizensByBuilding,
+      polygonsToRender: polygonsToRender,
+      buildings: buildings,
+      emptyBuildingPoints: emptyBuildingPoints,
+      polygons: polygons,
+      citizensByBuilding: citizensByBuilding,
       transportStartPoint: transportService.getStartPoint() || null,
       transportEndPoint: transportService.getEndPoint() || null
     });
