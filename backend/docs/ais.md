@@ -244,6 +244,43 @@ The AI wage adjustment system:
 - Affects citizen wealth and their ability to pay rent
 - Simulates the economic negotiations that would occur in a real labor market
 
+### Resource Import Management
+
+**Implementation**: `backend/ais/importresources.py`  
+**Schedule**: Daily at 1:00 AM UTC
+
+AI users strategically set up resource imports for their buildings:
+
+#### Process:
+
+1. The script identifies all users marked as AI in the system
+2. For each AI user, it analyzes:
+   - Buildings they own that can import resources
+   - Current resource stockpiles
+   - Existing import contracts
+   - Available resource types and their import prices
+
+3. For each AI user, the system:
+   - Prepares a comprehensive data package with resource and building information
+   - Sends this data to the Kinos Engine API for analysis
+   - Receives import strategy decisions from the AI
+
+4. When import decisions are made:
+   - New import contracts are created or existing ones are updated
+   - Contract details include resource type, hourly amount, and price
+   - Each contract is set with appropriate parameters (seller: "Italia", transporter: "Italia")
+
+5. An admin notification is created with statistics about all import decisions, showing the resources being imported by each AI user
+
+#### Economic Impact:
+
+The AI resource import system:
+- Ensures AI-owned buildings have necessary resources for production
+- Creates a more realistic economy with active resource flows
+- Allows AI users to participate fully in the production chain
+- Simulates the international trade that was vital to Venice's economy
+- Provides market demand for various resource types
+
 ## AI User Management
 
 AI users are created and managed through the Airtable database:
