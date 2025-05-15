@@ -236,15 +236,28 @@ If it does not make sense for the building to store/transform/sell resources, wr
         # Find the last closing brace
         last_brace_index = json_str.rindex('}')
         json_str = json_str[:last_brace_index+1]
+        
+        # Remove any comments (// style)
+        json_str = re.sub(r'//.*?(\n|$)', '', json_str)
 
         try:
             production_info = json.loads(json_str)
             log.info(f"Successfully generated production information for {building_name}")
             return production_info
         except json.JSONDecodeError as e:
-            log.error(f"Error parsing JSON: {e}")
-            log.error(f"JSON string: {json_str}")
-            return None
+            # Try a more aggressive approach to clean the JSON if first attempt fails
+            try:
+                # Remove all comments and normalize the JSON
+                clean_json_str = re.sub(r'//.*?(\n|$)', '', json_str)
+                # Remove any trailing commas before closing brackets or braces
+                clean_json_str = re.sub(r',(\s*[\]}])', r'\1', clean_json_str)
+                production_info = json.loads(clean_json_str)
+                log.info(f"Successfully parsed JSON after cleaning")
+                return production_info
+            except json.JSONDecodeError as e2:
+                log.error(f"Error parsing JSON even after cleaning: {e2}")
+                log.error(f"JSON string: {json_str}")
+                return None
     except Exception as e:
         log.error(f"Error generating production information: {e}")
         return None
