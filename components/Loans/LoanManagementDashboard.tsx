@@ -34,6 +34,23 @@ const LoanManagementDashboard: React.FC = () => {
       console.warn("LoanManagementDashboard: No wallet address found, cannot load loans");
     }
     
+    // Add event listener for refreshing loans
+    const handleRefreshLoans = () => {
+      if (walletAddress) {
+        console.log("LoanManagementDashboard: Refreshing user loans");
+        loadUserLoans(walletAddress)
+          .catch(error => {
+            console.error("LoanManagementDashboard: Error refreshing user loans:", error);
+          });
+      }
+    };
+    
+    window.addEventListener('refreshLoans', handleRefreshLoans);
+    
+    return () => {
+      window.removeEventListener('refreshLoans', handleRefreshLoans);
+    };
+    
     // Subscribe to loan-related events to update the dashboard in real-time
     const loanPaymentMadeSubscription = eventBus.subscribe(
       EventTypes.LOAN_PAYMENT_MADE, 

@@ -12,6 +12,8 @@ import Settings from '@/components/UI/Settings';
 import GovernancePanel from '@/components/UI/GovernancePanel';
 import GuildsPanel from '@/components/UI/GuildsPanel';
 import KnowledgeRepository from '@/components/Knowledge/KnowledgeRepository';
+import LoanMarketplace from '@/components/Loans/LoanMarketplace';
+import LoanManagementDashboard from '@/components/Loans/LoanManagementDashboard';
 
 // Import the 2D viewer component with no SSR
 const IsometricViewer = dynamic(() => import('@/components/PolygonViewer/IsometricViewer'), {
@@ -126,28 +128,43 @@ export default function TwoDPage() {
     const handleOpenGovernancePanel = () => setShowGovernancePanel(true);
     const handleOpenGuildsPanel = () => setShowGuildsPanel(true);
     const handleOpenKnowledgePanel = () => setShowKnowledgePanel(true);
+    const handleOpenLoanPanel = () => setShowLoanPanel(true);
     
     // Event handlers for closing panels
     const handleCloseGovernancePanel = () => setShowGovernancePanel(false);
     const handleCloseGuildsPanel = () => setShowGuildsPanel(false);
     const handleCloseKnowledgePanel = () => setShowKnowledgePanel(false);
+    const handleCloseLoanPanel = () => setShowLoanPanel(false);
+    
+    // Event handler for loading loans
+    const handleLoadLoans = () => {
+      console.log("Loading loans data...");
+      // This event will be caught by the loan components
+      window.dispatchEvent(new CustomEvent('refreshLoans'));
+    };
     
     // Add event listeners
     window.addEventListener('openGovernancePanel', handleOpenGovernancePanel);
     window.addEventListener('openGuildsPanel', handleOpenGuildsPanel);
     window.addEventListener('openKnowledgePanel', handleOpenKnowledgePanel);
+    window.addEventListener('openLoanPanel', handleOpenLoanPanel);
     window.addEventListener('closeGovernancePanel', handleCloseGovernancePanel);
     window.addEventListener('closeGuildsPanel', handleCloseGuildsPanel);
     window.addEventListener('closeKnowledgePanel', handleCloseKnowledgePanel);
+    window.addEventListener('closeLoanPanel', handleCloseLoanPanel);
+    window.addEventListener('loadLoans', handleLoadLoans);
     
     // Clean up event listeners
     return () => {
       window.removeEventListener('openGovernancePanel', handleOpenGovernancePanel);
       window.removeEventListener('openGuildsPanel', handleOpenGuildsPanel);
       window.removeEventListener('openKnowledgePanel', handleOpenKnowledgePanel);
+      window.removeEventListener('openLoanPanel', handleOpenLoanPanel);
       window.removeEventListener('closeGovernancePanel', handleCloseGovernancePanel);
       window.removeEventListener('closeGuildsPanel', handleCloseGuildsPanel);
       window.removeEventListener('closeKnowledgePanel', handleCloseKnowledgePanel);
+      window.removeEventListener('closeLoanPanel', handleCloseLoanPanel);
+      window.removeEventListener('loadLoans', handleLoadLoans);
     };
   }, []);
   
@@ -223,6 +240,16 @@ export default function TwoDPage() {
     };
   }, [polygons, buildings]); // Remove emptyBuildingPoints from dependencies
 
+  // State for loan panel
+  const [showLoanPanel, setShowLoanPanel] = useState<boolean>(false);
+  
+  // Handle loan panel closing
+  const handleLoanPanelClose = () => {
+    setShowLoanPanel(false);
+    // Reset the active view to buildings when closing the panel
+    setActiveView('buildings');
+  };
+  
   // Update view when activeView changes
   useEffect(() => {
     console.log(`2D Page: Switching to ${activeView} view`);
@@ -247,6 +274,8 @@ export default function TwoDPage() {
       setShowGuildsPanel(true);
     } else if (activeView === 'knowledge') {
       setShowKnowledgePanel(true);
+    } else if (activeView === 'loans') {
+      setShowLoanPanel(true);
     }
   }, [activeView]);
 
@@ -353,7 +382,11 @@ export default function TwoDPage() {
             </li>
             <li>
               <button
-                onClick={() => setActiveView('loans')}
+                onClick={() => {
+                  setActiveView('loans');
+                  // Dispatch event to load loans data
+                  window.dispatchEvent(new CustomEvent('loadLoans'));
+                }}
                 className={`w-full flex items-center p-2 rounded-lg transition-colors ${
                   activeView === 'loans' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
                 }`}
@@ -484,6 +517,33 @@ export default function TwoDPage() {
           onShowResourceTree={handleShowResourceTree}
           onSelectArticle={handleSelectArticle}
         />
+      )}
+      
+      {/* Loan Panel */}
+      {showLoanPanel && (
+        <div className="absolute top-20 left-20 right-4 bottom-4 bg-black/30 z-40 rounded-lg p-4 overflow-auto">
+          <div className="bg-amber-50 border-2 border-amber-700 rounded-lg p-6 max-w-6xl mx-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-3xl font-serif text-amber-800">
+                Venetian Banking & Finance
+              </h2>
+              <button 
+                onClick={handleLoanPanelClose}
+                className="text-amber-600 hover:text-amber-800 p-2"
+                aria-label="Close loan panel"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-1 gap-8">
+              <LoanMarketplace />
+              <LoanManagementDashboard />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -32,6 +32,18 @@ const LoanMarketplace: React.FC = () => {
     
     fetchLoans();
     
+    // Add event listener for refreshing loans
+    const handleRefreshLoans = () => {
+      console.log("LoanMarketplace: Refreshing available loans");
+      fetchLoans();
+    };
+    
+    window.addEventListener('refreshLoans', handleRefreshLoans);
+    
+    return () => {
+      window.removeEventListener('refreshLoans', handleRefreshLoans);
+    };
+    
     // Subscribe to loan-related events to update the marketplace in real-time
     const loanOfferCreatedSubscription = eventBus.subscribe(
       EventTypes.OFFER_CREATED, 

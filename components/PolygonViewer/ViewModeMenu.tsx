@@ -44,7 +44,8 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
     'buildings': 'Explore the architectural marvels, palaces, and structures of Venezia in detail',
     'land': 'View land ownership, property boundaries, and territorial divisions of the Republic',
     'citizens': 'Meet the citizens of Venice, see where they live and work, and learn about their lives',
-    'guilds': 'Discover the powerful trade guilds that control commerce and crafts in the Venetian Republic'
+    'guilds': 'Discover the powerful trade guilds that control commerce and crafts in the Venetian Republic',
+    'loans': 'Access banking services, apply for loans, and manage your financial obligations'
   };
 
   return (
@@ -116,6 +117,21 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
           <circle cx="12" cy="7" r="4"></circle>
         </svg>
         <span className="text-[10px] mt-1">Citizens</span>
+      </IconButton>
+      
+      {/* Loans View */}
+      <IconButton 
+        onClick={() => activeView !== 'loans' ? handleViewModeChange('loans') : null}
+        active={activeView === 'loans'}
+        title="Manage your loans and explore financing options"
+        activeColor="amber"
+        compact={true}
+        disabled={false}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12a8 8 0 01-8 8m0 0a8 8 0 01-8-8m8 8a8 8 0 018-8m-8 0a8 8 0 00-8 8m8-8v14m0-14v14" />
+        </svg>
+        <span className="text-[10px] mt-1">Loans</span>
       </IconButton>
       
       {/* Markets View - Now Enabled */}
