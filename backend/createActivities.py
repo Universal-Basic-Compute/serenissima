@@ -337,6 +337,14 @@ def get_citizen_home(tables, citizen_id: str) -> Optional[Dict]:
     log.info(f"Finding home for citizen {citizen_id}")
     
     try:
+        # Get the CitizenId from the citizen record if we're passed a record ID
+        if citizen_id.startswith('rec'):
+            # This appears to be an Airtable record ID, so we need to get the CitizenId
+            citizen_record = tables['citizens'].get(citizen_id)
+            if citizen_record:
+                citizen_id = citizen_record['fields'].get('CitizenId', citizen_id)
+                log.info(f"Converted record ID to CitizenId: {citizen_id}")
+        
         # Get buildings where this citizen is the occupant and the type is a housing type
         housing_types = ['canal_house', 'merchant_s_house', 'artisan_s_house', 'fisherman_s_cottage']
         type_conditions = [f"{{Type}}='{housing_type}'" for housing_type in housing_types]
