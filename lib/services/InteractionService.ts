@@ -6,6 +6,7 @@
 import { CoordinateService } from './CoordinateService';
 import { RenderService } from './RenderService';
 import { eventBus, EventTypes } from '../utils/eventBus';
+import { throttle } from '../utils/performanceUtils';
 
 export interface InteractionState {
   isDragging: boolean;
@@ -46,6 +47,93 @@ export class InteractionService {
   private isDraggingRef: boolean = false;
 
   /**
+   * Handle mouse wheel for zooming
+   */
+  public handleWheel(
+    e: WheelEvent,
+    scale: number,
+    onScaleChange: (newScale: number) => void
+  ): void {
+    e.preventDefault();
+    const delta = e.deltaY * -0.01;
+    // Change the minimum zoom to 1.0 to allow one more level of unzoom
+    // Keep the maximum zoom at 10.8
+    const newScale = Math.max(1.0, Math.min(10.8, scale + delta));
+    
+    // Only trigger a redraw if the scale changed significantly
+    if (Math.abs(newScale - scale) > 0.05) {
+      onScaleChange(newScale);
+      
+      // Force a redraw with the new scale
+      requestAnimationFrame(() => {
+        window.dispatchEvent(new CustomEvent('scaleChanged', { 
+          detail: { scale: newScale } 
+        }));
+      });
+    }
+  }
+
+  /**
+   * Handle mouse down for panning
+   */
+  public handleMouseDown(
+    e: MouseEvent,
+    setIsDragging: (isDragging: boolean) => void,
+    setDragStart: (dragStart: { x: number, y: number }) => void
+  ): void {
+    setIsDragging(true);
+    this.isDraggingRef = true;
+    setDragStart({ x: e.clientX, y: e.clientY });
+    
+    // Emit event
+    eventBus.emit(EventTypes.INTERACTION_MOUSE_DOWN, {
+      x: e.clientX,
+      y: e.clientY
+    });
+  }
+
+  /**
+   * Handle mouse move for panning
+   */
+  public handleMouseMove(
+    e: MouseEvent,
+    isDragging: boolean,
+    dragStart: { x: number, y: number },
+    offset: { x: number, y: number },
+    setOffset: (offset: { x: number, y: number }) => void,
+    setDragStart: (dragStart: { x: number, y: number }) => void
+  ): void {
+    if (!isDragging) return;
+    
+    const dx = e.clientX - dragStart.x;
+    const dy = e.clientY - dragStart.y;
+    
+    setOffset({ x: offset.x + dx, y: offset.y + dy });
+    setDragStart({ x: e.clientX, y: e.clientY });
+    
+    // Emit drag event
+    eventBus.emit(EventTypes.INTERACTION_DRAG, {
+      x: e.clientX,
+      y: e.clientY
+    });
+  }
+
+  /**
+   * Handle mouse up for panning
+   */
+  public handleMouseUp(
+    setIsDragging: (isDragging: boolean) => void
+  ): void {
+    if (this.isDraggingRef) {
+      setIsDragging(false);
+      this.isDraggingRef = false;
+      
+      // Emit event
+      eventBus.emit(EventTypes.INTERACTION_DRAG_END, null);
+    }
+  }
+
+  /**
    * Initialize interaction handlers for a canvas
    */
   public initializeInteractions(
@@ -59,7 +147,7 @@ export class InteractionService {
     citizensByBuilding: Record<string, any[]>,
     transportMode: boolean,
     polygons: any[]
-  ): void {
+  ): () => void {
     // Handle mouse move
     const handleMouseMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();

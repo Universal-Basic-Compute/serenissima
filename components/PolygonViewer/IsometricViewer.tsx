@@ -14,6 +14,10 @@ import { transportService } from '@/lib/services/TransportService';
 import { citizenService } from '@/lib/services/CitizenService';
 import { incomeService } from '@/lib/services/IncomeService';
 import { buildingPointsService } from '@/lib/services/BuildingPointsService';
+import { viewportService } from '@/lib/services/ViewportService';
+import { uiStateService } from '@/lib/services/UIStateService';
+import { assetService } from '@/lib/services/AssetService';
+import { dataService } from '@/lib/services/DataService';
 
 interface IsometricViewerProps {
   activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
@@ -23,158 +27,76 @@ interface IsometricViewerProps {
 type ViewType = 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
 
 export default function IsometricViewer({ activeView }: IsometricViewerProps) {
-  // Viewport state is now managed by ViewportController
+  // Get UI state from service
+  const [uiState, setUiState] = useState(uiStateService.getState());
   
-  // UI state
-  const [hoveredBuildingName, setHoveredBuildingName] = useState<string | null>(null);
-  const [hoveredBuildingPosition, setHoveredBuildingPosition] = useState<{x: number, y: number} | null>(null);
-  const [hoveredBuildingImagePath, setHoveredBuildingImagePath] = useState<string | null>(null);
-  const [isLoadingBuildingImage, setIsLoadingBuildingImage] = useState<boolean>(false);
-  
-  // Panel visibility state
-  const [selectedPolygonId, setSelectedPolygonId] = useState<string | null>(null);
-  const [showLandDetailsPanel, setShowLandDetailsPanel] = useState<boolean>(false);
-  const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(null);
-  const [showBuildingDetailsPanel, setShowBuildingDetailsPanel] = useState<boolean>(false);
-  const [selectedCitizen, setSelectedCitizen] = useState<any>(null);
-  const [showCitizenDetailsPanel, setShowCitizenDetailsPanel] = useState<boolean>(false);
+  // Get viewport state from service
+  const [scale, setScale] = useState(viewportService.getScale());
+  const [offset, setOffset] = useState(viewportService.getOffset());
   
   // Data state
   const [polygons, setPolygons] = useState<any[]>([]);
   const [buildings, setBuildings] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [emptyBuildingPoints, setEmptyBuildingPoints] = useState<{lat: number, lng: number}[]>([]);
-  const [incomeData, setIncomeData] = useState<Record<string, number>>({});
-  const [minIncome, setMinIncome] = useState<number>(0);
-  const [maxIncome, setMaxIncome] = useState<number>(1000);
-  const [incomeDataLoaded, setIncomeDataLoaded] = useState<boolean>(false);
-  const [landOwners, setLandOwners] = useState<Record<string, string>>({});
-  const [users, setUsers] = useState<Record<string, any>>({});
-  const [buildingPositionsCache, setBuildingPositionsCache] = useState<Record<string, {x: number, y: number}>>({});
-  const [initialPositionCalculated, setInitialPositionCalculated] = useState<boolean>(false);
   const [polygonsToRender, setPolygonsToRender] = useState<any[]>([]);
   
   // Transport state is now managed by TransportService
   const [transportMode, setTransportMode] = useState<boolean>(false);
-  const transportState = transportService.getState();
-  const [transportPath, setTransportPath] = useState<any[]>(transportState.path);
+  const [transportPath, setTransportPath] = useState<any[]>([]);
   const [mousePosition, setMousePosition] = useState<{x: number, y: number}>({x: 0, y: 0});
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [dragStart, setDragStart] = useState<{x: number, y: number}>({x: 0, y: 0});
-  const [offset, setOffset] = useState<{x: number, y: number}>({x: 0, y: 0});
-  const [scale, setScale] = useState<number>(3);
-  const [hoveredPolygonId, setHoveredPolygonId] = useState<string | null>(null);
-  const [hoveredBuildingId, setHoveredBuildingId] = useState<string | null>(null);
-  const [hoveredCanalPoint, setHoveredCanalPoint] = useState<{lat: number, lng: number} | null>(null);
-  const [hoveredBridgePoint, setHoveredBridgePoint] = useState<{lat: number, lng: number} | null>(null);
-  const [hoveredCitizenBuilding, setHoveredCitizenBuilding] = useState<string | null>(null);
-  const [hoveredCitizenType, setHoveredCitizenType] = useState<'home' | 'work' | null>(null);
   
   // Coat of arms state
   const [ownerCoatOfArmsMap, setOwnerCoatOfArmsMap] = useState<Record<string, string>>({});
   const [coatOfArmsImages, setCoatOfArmsImages] = useState<Record<string, HTMLImageElement>>({});
-  const [loadingCoatOfArms, setLoadingCoatOfArms] = useState<boolean>(false);
   const [citizens, setCitizens] = useState<any[]>([]);
   const [citizensLoaded, setCitizensLoaded] = useState<boolean>(false);
   const [citizensByBuilding, setCitizensByBuilding] = useState<Record<string, any[]>>({});
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const isDraggingRef = useRef<boolean>(false);
-  const hoveredPolygonIdRef = useRef<string | null>(null);
-  const hoveredBuildingIdRef = useRef<string | null>(null);
-  const hoveredCanalPointRef = useRef<{lat: number, lng: number} | null>(null);
-  const hoveredBridgePointRef = useRef<{lat: number, lng: number} | null>(null);
-  const hoveredCitizenBuildingRef = useRef<string | null>(null);
-  const hoveredCitizenTypeRef = useRef<'home' | 'work' | null>(null);
   const renderedCoatOfArmsCache = useRef<Record<string, {image: HTMLImageElement | null, x: number, y: number, size: number}>>({});
-  const prevActiveView = useRef<string>('');
-  const prevScale = useRef<number>(0);
   
   // Function to fetch the building image path when hovering over a building
   const fetchBuildingImagePath = async (buildingType: string, variant?: string) => {
     try {
-      setIsLoadingBuildingImage(true);
+      uiStateService.setLoadingBuildingImage(true);
       
-      // Try the direct flat path first
-      const flatImagePath = `/images/buildings/${buildingType}.jpg`;
+      // Use AssetService to get the building image path
+      const imagePath = await assetService.getBuildingImagePath(buildingType, variant);
       
-      // Check if the image exists
-      try {
-        const response = await fetch(flatImagePath, { method: 'HEAD' });
-        if (response.ok) {
-          setHoveredBuildingImagePath(flatImagePath);
-          return;
-        }
-      } catch (error) {
-        console.log(`Image not found at ${flatImagePath}, trying alternative paths`);
-      }
-      
-      // If direct path fails, try the API
-      const response = await fetch(`/api/search-building-image?type=${encodeURIComponent(buildingType)}`);
-      if (response.ok) {
-        const data = await response.json();
-        if (data && data.imagePath) {
-          setHoveredBuildingImagePath(data.imagePath);
-        } else {
-          // Use fallback image if no specific image found
-          setHoveredBuildingImagePath('/images/buildings/market_stall.jpg');
-        }
-      } else {
-        setHoveredBuildingImagePath('/images/buildings/market_stall.jpg');
-      }
+      // Update UI state with the image path
+      uiStateService.setBuildingHover(
+        uiState.hoveredBuildingName,
+        uiState.hoveredBuildingPosition,
+        imagePath
+      );
     } catch (error) {
       console.error('Error fetching building image path:', error);
-      setHoveredBuildingImagePath('/images/buildings/market_stall.jpg');
+      uiStateService.setBuildingHover(
+        uiState.hoveredBuildingName,
+        uiState.hoveredBuildingPosition,
+        '/images/buildings/market_stall.jpg'
+      );
     } finally {
-      setIsLoadingBuildingImage(false);
+      uiStateService.setLoadingBuildingImage(false);
     }
   };
 
   // Set up event listeners
   useEffect(() => {
-    // Handle building hover events
-    const handleBuildingHover = (data: any) => {
-      if (data) {
-        setHoveredBuildingName(data.buildingName);
-        setHoveredBuildingPosition(data.position);
-        fetchBuildingImagePath(data.buildingType, data.variant);
-      } else {
-        setHoveredBuildingName(null);
-        setHoveredBuildingPosition(null);
-        setHoveredBuildingImagePath(null);
-      }
+    // Handle UI state changes
+    const handleUIStateChange = () => {
+      setUiState(uiStateService.getState());
     };
     
-    // Handle polygon selection events
-    const handlePolygonSelected = (data: any) => {
-      if (data && data.polygonId) {
-        setSelectedPolygonId(data.polygonId);
-        setShowLandDetailsPanel(true);
-      } else {
-        setSelectedPolygonId(null);
-        setShowLandDetailsPanel(false);
-      }
+    // Handle viewport state changes
+    const handleViewportScaleChanged = (data: any) => {
+      setScale(data.scale);
     };
     
-    // Handle building selection events
-    const handleBuildingSelected = (data: any) => {
-      if (data && data.buildingId) {
-        setSelectedBuildingId(data.buildingId);
-        setShowBuildingDetailsPanel(true);
-      } else {
-        setSelectedBuildingId(null);
-        setShowBuildingDetailsPanel(false);
-      }
-    };
-    
-    // Handle citizen selection events
-    const handleCitizenSelected = (citizen: any) => {
-      if (citizen) {
-        setSelectedCitizen(citizen);
-        setShowCitizenDetailsPanel(true);
-      } else {
-        setSelectedCitizen(null);
-        setShowCitizenDetailsPanel(false);
-      }
+    const handleViewportOffsetChanged = (data: any) => {
+      setOffset(data.offset);
     };
     
     // Handle transport mode events
@@ -198,10 +120,13 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     
     // Subscribe to events
     const subscriptions = [
-      eventBus.subscribe(EventTypes.BUILDING_HOVER, handleBuildingHover),
-      eventBus.subscribe(EventTypes.POLYGON_SELECTED, handlePolygonSelected),
-      eventBus.subscribe(EventTypes.BUILDING_SELECTED, handleBuildingSelected),
-      eventBus.subscribe(EventTypes.CITIZEN_SELECTED, handleCitizenSelected)
+      eventBus.subscribe(EventTypes.BUILDING_HOVER_STATE_CHANGED, handleUIStateChange),
+      eventBus.subscribe(EventTypes.BUILDING_IMAGE_LOADING_STATE_CHANGED, handleUIStateChange),
+      eventBus.subscribe(EventTypes.POLYGON_SELECTED, handleUIStateChange),
+      eventBus.subscribe(EventTypes.BUILDING_SELECTED, handleUIStateChange),
+      eventBus.subscribe(EventTypes.CITIZEN_SELECTED, handleUIStateChange),
+      eventBus.subscribe(EventTypes.VIEWPORT_SCALE_CHANGED, handleViewportScaleChanged),
+      eventBus.subscribe(EventTypes.VIEWPORT_OFFSET_CHANGED, handleViewportOffsetChanged)
     ];
     
     // Add window event listeners
@@ -217,26 +142,41 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     };
   }, [activeView]);
 
-  // Load polygons
+  // Load data
   useEffect(() => {
-    fetch('/api/get-polygons')
-      .then(response => response.json())
-      .then(data => {
-        if (data.polygons) {
-          setPolygons(data.polygons);
-          
-          // Store in window for other components
-          if (typeof window !== 'undefined') {
-            (window as any).__polygonData = data.polygons;
-          }
+    const loadData = async () => {
+      setLoading(true);
+      
+      try {
+        // Load polygons
+        const polygonsData = await dataService.loadPolygons();
+        setPolygons(polygonsData);
+        
+        // Load buildings
+        const buildingsData = await dataService.loadBuildings();
+        setBuildings(buildingsData);
+        
+        // Calculate empty building points
+        const emptyPoints = dataService.getEmptyBuildingPoints(polygonsData, buildingsData);
+        setEmptyBuildingPoints(emptyPoints);
+        
+        // Load citizens if in citizens view
+        if (activeView === 'citizens') {
+          const citizensData = await dataService.loadCitizens();
+          setCitizens(citizensData.citizens);
+          setCitizensByBuilding(citizensData.citizensByBuilding);
+          setCitizensLoaded(true);
         }
+        
         setLoading(false);
-      })
-      .catch(error => {
-        console.error('Error loading polygons:', error);
+      } catch (error) {
+        console.error('Error loading data:', error);
         setLoading(false);
-      });
-  }, []);
+      }
+    };
+    
+    loadData();
+  }, [activeView]);
   
   // Transport mode activation is now handled by TransportService
   useEffect(() => {
@@ -323,313 +263,28 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     }
   }, []);
   
-  // Fetch coat of arms data
+  // Load coat of arms
   useEffect(() => {
-    const fetchCoatOfArms = async () => {
+    const loadCoatOfArms = async () => {
       try {
-        setLoadingCoatOfArms(true);
         const response = await fetch('/api/get-coat-of-arms');
         if (response.ok) {
           const data = await response.json();
           if (data.coatOfArms && typeof data.coatOfArms === 'object') {
-            // Store the coat of arms map without triggering a re-render if it's the same
-            const newOwnerCoatOfArmsMap = data.coatOfArms;
-            // Only update state if the map has actually changed
-            if (JSON.stringify(newOwnerCoatOfArmsMap) !== JSON.stringify(ownerCoatOfArmsMap)) {
-              setOwnerCoatOfArmsMap(newOwnerCoatOfArmsMap);
-            }
+            setOwnerCoatOfArmsMap(data.coatOfArms);
             
-            // Preload images
-            const imagePromises: Promise<void>[] = [];
-            const newImages: Record<string, HTMLImageElement> = {};
-            
-            // Target size for coat of arms images (50px is our display size)
-            const targetSize = 100; // Slightly larger than display size for better quality
-            
-            // Create a copy of the current images to avoid modifying state directly
-            const updatedImages = {...coatOfArmsImages};
-            let hasNewImages = false;
-            
-            Object.entries(data.coatOfArms).forEach(([owner, url]) => {
-              // Skip if we already have this image loaded
-              if (updatedImages[owner]) {
-                return;
-              }
-              
-              if (url) {
-                // Create an array of URLs to try in order
-                const urlsToTry = [
-                  // 1. Use the URL from the API directly
-                  url as string,
-                  
-                  // 2. Try with serenissima.ai domain
-                  `https://serenissima.ai/coat-of-arms/${owner}.png`,
-                  
-                  // 3. Try with current origin as fallback
-                  `${window.location.origin}/coat-of-arms/${owner}.png`
-                ];
-                
-                // Create a promise that tries each URL in sequence
-                const tryLoadImage = async (): Promise<HTMLImageElement> => {
-                  // Add default fallback URL to the array of URLs to try
-                  const allUrlsToTry = [
-                    ...urlsToTry,
-                    // Add a default fallback image as the last resort
-                    `${window.location.origin}/coat-of-arms/default.png`
-                  ];
-              
-                  for (let i = 0; i < allUrlsToTry.length; i++) {
-                    try {
-                      const currentUrl = allUrlsToTry[i];
-                  
-                      const img = new Image();
-                      img.crossOrigin = "anonymous"; // Important for CORS
-                  
-                      // Create a promise for this specific URL
-                      const loadPromise = new Promise<HTMLImageElement>((resolve, reject) => {
-                        img.onload = () => {
-                          // Resize the image using canvas before storing
-                          const resizedImg = resizeImageToCanvas(img, targetSize);
-                          resolve(resizedImg);
-                        };
-                        img.onerror = () => {
-                          // Don't throw an error on the last attempt (default image)
-                          if (i === allUrlsToTry.length - 1) {
-                            console.warn(`All image URLs failed for ${owner}, using generated avatar`);
-                            // Return a generated avatar instead
-                            const canvas = document.createElement('canvas');
-                            canvas.width = targetSize;
-                            canvas.height = targetSize;
-                            const ctx = canvas.getContext('2d');
-                            if (ctx) {
-                              // Draw a colored circle with the owner's initial
-                              createDefaultCircularAvatar(ctx, owner, targetSize/2, targetSize/2, targetSize);
-                              const generatedImg = new Image();
-                              generatedImg.src = canvas.toDataURL('image/png');
-                              resolve(generatedImg);
-                            } else {
-                              reject(new Error(`Failed to create canvas context for ${owner}`));
-                            }
-                          } else {
-                            reject(new Error(`Failed to load image from ${currentUrl}`));
-                          }
-                        };
-                        img.src = currentUrl;
-                      });
-                  
-                      // Wait for this URL to load or fail
-                      return await loadPromise;
-                    } catch (error) {
-                      // If we're at the last URL and it failed, we'll handle it in the onerror handler above
-                      if (i === allUrlsToTry.length - 1) {
-                        console.error(`All URLs failed for ${owner}:`, error);
-                        throw error;
-                      }
-                      // Otherwise continue to the next URL
-                    }
-                  }
-              
-                  // This should never be reached due to the throw above, but TypeScript needs it
-                  throw new Error("All URLs failed to load");
-                };
-                
-                // Add the promise to our array
-                const imagePromise = tryLoadImage()
-                  .then(img => {
-                    newImages[owner] = img;
-                    updatedImages[owner] = img;
-                    hasNewImages = true;
-                  })
-                  .catch(error => {
-                    console.error(`All URLs failed for ${owner}:`, error);
-                    // We'll handle this case in the createDefaultCircularAvatar function
-                  });
-                
-                imagePromises.push(imagePromise.catch(error => {
-                  console.warn(`Error loading coat of arms for ${owner}:`, error);
-                  // Return null to prevent the Promise.allSettled from failing
-                  return null;
-                }));
-              }
-            });
-            
-            // Wait for all images to either load or fail
-            await Promise.allSettled(imagePromises);
-            
-            // Only update state if we have new images
-            if (hasNewImages) {
-              setCoatOfArmsImages(updatedImages);
-            }
+            // Load coat of arms images through AssetService
+            const images = await assetService.loadCoatOfArmsImages(data.coatOfArms);
+            setCoatOfArmsImages(images);
           }
         }
       } catch (error) {
         console.error('Error fetching coat of arms:', error);
-      } finally {
-        setLoadingCoatOfArms(false);
       }
     };
     
-    fetchCoatOfArms();
-    
-    // Return a cleanup function
-    return () => {
-      // Cancel any pending image loads if component unmounts
-    };
-  }, []); // Empty dependency array - only run once on mount
-  
-  // Helper function to resize an image using canvas
-  const resizeImageToCanvas = (img: HTMLImageElement, targetSize: number): HTMLImageElement => {
-    // Create a canvas element
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    
-    if (!ctx) {
-      console.warn('Could not get canvas context for image resizing');
-      return img; // Return original if canvas context not available
-    }
-    
-    // Determine dimensions while maintaining aspect ratio
-    let width = targetSize;
-    let height = targetSize;
-    
-    if (img.width > img.height) {
-      // Landscape image
-      height = (img.height / img.width) * targetSize;
-    } else if (img.height > img.width) {
-      // Portrait image
-      width = (img.width / img.height) * targetSize;
-    }
-    
-    // Set canvas size
-    canvas.width = width;
-    canvas.height = height;
-    
-    // Draw the image on the canvas, resized
-    ctx.drawImage(img, 0, 0, width, height);
-    
-    // Create a new image from the canvas
-    const resizedImg = new Image();
-    resizedImg.src = canvas.toDataURL('image/png');
-    
-    return resizedImg;
-  };
-  
-  // Function to create a circular clipping of an image
-  const createCircularImage = (ctx: CanvasRenderingContext2D, img: HTMLImageElement, x: number, y: number, size: number) => {
-    try {
-      // Check if the image has loaded successfully
-      if (!img || !img.complete || img.naturalWidth === 0 || img.naturalHeight === 0) {
-        console.warn(`Image not loaded properly, using default avatar instead`);
-        // Use the default avatar as fallback
-        createDefaultCircularAvatar(ctx, "Unknown", x, y, size);
-        return;
-      }
-      
-      // Save the current context state
-      ctx.save();
-      
-      // Create a circular clipping path
-      ctx.beginPath();
-      ctx.arc(x, y, size / 2, 0, Math.PI * 2);
-      ctx.closePath();
-      
-      // Add a white border around the circle
-      ctx.strokeStyle = 'white';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      
-      // Clip to the circle
-      ctx.clip();
-      
-      // Since we've already resized the image to maintain aspect ratio,
-      // we can draw it directly centered in the circle
-      const drawX = x - img.width / 2;
-      const drawY = y - img.height / 2;
-      
-      // Draw the pre-resized image
-      ctx.drawImage(img, drawX, drawY);
-      
-      // Restore the context state
-      ctx.restore();
-    } catch (error) {
-      console.error('Error drawing circular image:', error);
-      // If drawing fails, use default avatar
-      ctx.restore(); // Restore context before trying again
-      createDefaultCircularAvatar(ctx, "Error", x, y, size);
-    }
-  };
-  
-  // Function to create a default circular avatar for owners without coat of arms
-  const createDefaultCircularAvatar = (ctx: CanvasRenderingContext2D, owner: string, x: number, y: number, size: number) => {
-    try {
-      // Save the current context state
-      ctx.save();
-      
-      // Generate a deterministic color based on the owner name
-      const getColorFromString = (str: string): string => {
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) {
-          hash = str.charCodeAt(i) + ((hash << 5) - hash);
-        }
-        
-        // Generate a hue between 0 and 360
-        const hue = Math.abs(hash) % 360;
-        
-        // Use a fixed saturation and lightness for better visibility
-        return `hsl(${hue}, 70%, 60%)`;
-      };
-      
-      // Get a color based on the owner name
-      const baseColor = getColorFromString(owner);
-      
-      // Draw a circular background
-      ctx.beginPath();
-      ctx.arc(x, y, size / 2, 0, Math.PI * 2);
-      ctx.fillStyle = baseColor;
-      ctx.fill();
-      
-      // Add a white border
-      ctx.strokeStyle = 'white';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      
-      // Add the owner's initials
-      ctx.font = `bold ${size * 0.4}px Arial`;
-      ctx.fillStyle = 'white';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      
-      // Get the first letter of the owner name, handle empty strings
-      const initial = owner && owner.length > 0 ? owner.charAt(0).toUpperCase() : '?';
-      ctx.fillText(initial, x, y);
-      
-      // Restore the context state
-      ctx.restore();
-    } catch (error) {
-      console.error('Error creating default avatar:', error);
-      
-      // Absolute fallback - just draw a gray circle with a question mark
-      try {
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(x, y, size / 2, 0, Math.PI * 2);
-        ctx.fillStyle = '#888888';
-        ctx.fill();
-        ctx.strokeStyle = 'white';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        ctx.font = `bold ${size * 0.4}px Arial`;
-        ctx.fillStyle = 'white';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('?', x, y);
-        ctx.restore();
-      } catch (e) {
-        // If even this fails, just silently continue
-        console.error('Critical error in fallback avatar rendering:', e);
-      }
-    }
-  };
+    loadCoatOfArms();
+  }, []);
   
   // Fetch income data when in land view
   useEffect(() => {
@@ -3646,35 +3301,31 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
 
   return (
     <div className="w-screen h-screen">
-      <ViewportController>
-        {(scale, offset, setScale, setOffset) => (
-          <ViewportCanvas 
-            activeView={activeView}
-            scale={scale}
-            offset={offset}
-            onScaleChange={setScale}
-            onOffsetChange={setOffset}
-          />
-        )}
-      </ViewportController>
+      <ViewportCanvas 
+        activeView={activeView}
+        scale={scale}
+        offset={offset}
+        onScaleChange={(newScale) => viewportService.setScale(newScale)}
+        onOffsetChange={(newOffset) => viewportService.setOffset(newOffset)}
+      />
       
-      {hoveredBuildingName && hoveredBuildingPosition && (
+      {uiState.hoveredBuildingName && uiState.hoveredBuildingPosition && (
         <div 
           className="absolute bg-black/80 text-white rounded text-sm pointer-events-none z-50 overflow-hidden"
           style={{
-            left: hoveredBuildingPosition.x + 15, // Offset from cursor
-            top: hoveredBuildingPosition.y - 10,
+            left: uiState.hoveredBuildingPosition.x + 15, // Offset from cursor
+            top: uiState.hoveredBuildingPosition.y - 10,
             maxWidth: '200px',
             width: '200px',
             boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
           }}
         >
           {/* Building image */}
-          {hoveredBuildingImagePath && (
+          {uiState.hoveredBuildingImagePath && (
             <div className="w-full aspect-square overflow-hidden">
               <img 
-                src={hoveredBuildingImagePath}
-                alt={hoveredBuildingName}
+                src={uiState.hoveredBuildingImagePath}
+                alt={uiState.hoveredBuildingName}
                 className="w-full h-full object-cover"
                 onError={(e) => {
                   console.error('Error loading building image in hover tooltip:', e);
@@ -3686,11 +3337,11 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           
           {/* Building name */}
           <div className="px-2 py-1 text-center font-medium">
-            {hoveredBuildingName}
+            {uiState.hoveredBuildingName}
           </div>
           
           {/* Loading indicator */}
-          {isLoadingBuildingImage && !hoveredBuildingImagePath && (
+          {uiState.isLoadingBuildingImage && !uiState.hoveredBuildingImagePath && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/50">
               <div className="w-6 h-6 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
             </div>
@@ -3699,37 +3350,28 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       )}
       
       {/* Land Details Panel */}
-      {showLandDetailsPanel && selectedPolygonId && (
+      {uiState.showLandDetailsPanel && uiState.selectedPolygonId && (
         <LandDetailsPanel
-          selectedPolygonId={selectedPolygonId}
-          onClose={() => {
-            setShowLandDetailsPanel(false);
-            setSelectedPolygonId(null);
-          }}
-          visible={showLandDetailsPanel}
+          selectedPolygonId={uiState.selectedPolygonId}
+          onClose={() => uiStateService.setSelectedPolygon(null, false)}
+          visible={uiState.showLandDetailsPanel}
         />
       )}
       
       {/* Building Details Panel */}
-      {showBuildingDetailsPanel && selectedBuildingId && (activeView === 'buildings' || activeView === 'land' || activeView === 'citizens') && (
+      {uiState.showBuildingDetailsPanel && uiState.selectedBuildingId && (activeView === 'buildings' || activeView === 'land' || activeView === 'citizens') && (
         <BuildingDetailsPanel
-          selectedBuildingId={selectedBuildingId}
-          onClose={() => {
-            setShowBuildingDetailsPanel(false);
-            setSelectedBuildingId(null);
-          }}
-          visible={showBuildingDetailsPanel}
+          selectedBuildingId={uiState.selectedBuildingId}
+          onClose={() => uiStateService.setSelectedBuilding(null, false)}
+          visible={uiState.showBuildingDetailsPanel}
         />
       )}
       
       {/* Citizen Details Panel */}
-      {showCitizenDetailsPanel && selectedCitizen && (
+      {uiState.showCitizenDetailsPanel && uiState.selectedCitizen && (
         <CitizenDetailsPanel
-          citizen={selectedCitizen}
-          onClose={() => {
-            setShowCitizenDetailsPanel(false);
-            setSelectedCitizen(null);
-          }}
+          citizen={uiState.selectedCitizen}
+          onClose={() => uiStateService.setSelectedCitizen(null, false)}
         />
       )}
       
@@ -3751,10 +3393,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         <div className="flex items-center space-x-2">
           <span className="text-sm">{Math.round(scale * 100)}%</span>
           <button 
-            onClick={() => {
-              setScale(3); // Reset to 3x zoom instead of 1x
-              setOffset({ x: 0, y: 0 });
-            }}
+            onClick={() => viewportService.resetViewport()}
             className="px-3 py-1 bg-blue-600 hover:bg-blue-500 rounded text-white ml-2"
           >
             Reset
