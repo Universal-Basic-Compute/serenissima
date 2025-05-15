@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { hoverStateService, HoverState } from '@/lib/services/HoverStateService';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
-import { BuildingService, buildingService } from '@/lib/services/BuildingService';
+import { buildingService } from '@/lib/services/BuildingService';
 import { assetService } from '@/lib/services/AssetService';
 
 interface HoverTooltipProps {
@@ -31,7 +31,7 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
               
               setTooltipData({
                 type: 'building',
-                name: buildingData.name || buildingService.formatBuildingType(buildingData.type),
+                name: buildingData.name || (buildingData.type ? buildingService.formatBuildingType(buildingData.type) : 'Unknown Building'),
                 type: buildingData.type,
                 owner: buildingData.owner
               });
@@ -123,7 +123,7 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
           />
         </div>
         <div className="font-bold">{tooltipData.name}</div>
-        <div>Type: {BuildingService.prototype.formatBuildingType(tooltipData.type)}</div>
+        <div>Type: {buildingService.formatBuildingType(tooltipData.type)}</div>
         {tooltipData.owner && <div>Owner: {tooltipData.owner}</div>}
       </div>
     );
