@@ -246,7 +246,8 @@ export class RenderService {
     y: number, 
     citizen: any, 
     markerType: 'home' | 'work',
-    size: number = 20
+    size: number = 20,
+    isHovered: boolean = false
   ): void {
     // Determine color based on social class
     const getSocialClassColor = (socialClass: string): string => {
@@ -1093,14 +1094,14 @@ export class RenderService {
     const legendY = canvasHeight - 100;
     
     // Home marker legend
-    this.createCitizenMarker(ctx, legendX + 15, legendY, { FirstName: 'H', LastName: 'M' }, 'home', 15);
+    this.createCitizenMarker(ctx, legendX + 15, legendY, { FirstName: 'H', LastName: 'M' }, 'home', 15, false);
     ctx.fillStyle = '#FFFFFF';
     ctx.font = '14px Arial';
     ctx.textAlign = 'left';
     ctx.fillText('Home', legendX + 40, legendY);
     
     // Work marker legend
-    this.createCitizenMarker(ctx, legendX + 15, legendY + 40, { FirstName: 'W', LastName: 'K' }, 'work', 15);
+    this.createCitizenMarker(ctx, legendX + 15, legendY + 40, { FirstName: 'W', LastName: 'K' }, 'work', 15, false);
     ctx.fillStyle = '#FFFFFF';
     ctx.font = '14px Arial';
     ctx.textAlign = 'left';
