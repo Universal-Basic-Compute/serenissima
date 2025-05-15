@@ -369,7 +369,7 @@ def process_housing_mobility(dry_run: bool = False):
         # Get current rent
         current_rent = float(current_building['fields'].get('RentAmount', 0) or 0)
         if current_rent <= 0:
-            log.warning(f"Current building {current_home_id} has invalid rent: {current_rent}")
+            log.warning(f"Current building {current_building['id']} has invalid rent: {current_rent}")
             continue
         
         # Calculate maximum rent for new housing
