@@ -85,7 +85,7 @@ export async function GET(request: Request) {
       const occupant = building.fields.Occupant ? 
         (typeof building.fields.Occupant === 'string' ? 
           building.fields.Occupant : 
-          String(building.fields.Occupant)) : undefined;
+          String(building.fields.Occupant as string)) : undefined;
       
       // Skip buildings without occupants
       if (!occupant) return;
@@ -150,11 +150,11 @@ export async function GET(request: Request) {
         socialclass: String(record.fields.SocialClass || 'Popolani'),
         description: String(record.fields.Description || 'A citizen of Venice.'),
         profileimage: formatImageUrl(
-          record.fields.ImageUrl ? String(record.fields.ImageUrl) : undefined, 
+          record.fields.ImageUrl ? String(record.fields.ImageUrl as string) : undefined, 
           citizenId
         ),
         imageurl: formatImageUrl(
-          record.fields.ImageUrl ? String(record.fields.ImageUrl) : undefined, 
+          record.fields.ImageUrl ? String(record.fields.ImageUrl as string) : undefined, 
           citizenId
         ),
         // Ensure position is included and properly formatted
