@@ -413,8 +413,8 @@ If you decide not to adjust any wages at this time, return an empty array.
         print(f"Exception traceback: {traceback.format_exc()}")
         return None
 
-def update_building_wage_amount(tables, building_id: str, new_wage_amount: float) -> bool:
-    """Update the wage amount for a building."""
+def update_building_wage_amount(tables, building_id: str, new_wage_amount: float, reason: str) -> bool:
+    """Update the wage amount for a building and store the reasoning."""
     try:
         # Find the building record
         formula = f"{{BuildingId}}='{building_id}'"
@@ -438,12 +438,28 @@ def update_building_wage_amount(tables, building_id: str, new_wage_amount: float
             print(f"Invalid wage amount for building {building_id}: {new_wage_amount}, error: {str(e)}")
             return False
         
-        # Update the wage amount
+        # Get existing Notes if any
+        existing_notes = {}
+        if "Notes" in building["fields"]:
+            try:
+                existing_notes = json.loads(building["fields"]["Notes"])
+                if not isinstance(existing_notes, dict):
+                    existing_notes = {}
+            except json.JSONDecodeError:
+                # If Notes isn't valid JSON, start with an empty dict
+                existing_notes = {}
+        
+        # Add or update the WagesReasoning field in the Notes
+        existing_notes["WagesReasoning"] = reason
+        
+        # Update the wage amount and Notes
         tables["buildings"].update(building["id"], {
-            "Wages": new_wage_float
+            "Wages": new_wage_float,
+            "Notes": json.dumps(existing_notes)
         })
         
         print(f"Updated wage amount for building {building_id} from {current_wage} to {new_wage_float}")
+        print(f"Added wage reasoning to Notes: {reason}")
         return True
     except Exception as e:
         print(f"Error updating wage amount for building {building_id}: {str(e)}")
@@ -622,7 +638,7 @@ def process_ai_wage_adjustments(dry_run: bool = False):
                     print(f"Processing wage adjustment for building {building_id}: {current_wage} -> {new_wage_amount}")
                     
                     # Update the wage amount
-                    success = update_building_wage_amount(tables, building_id, new_wage_amount)
+                    success = update_building_wage_amount(tables, building_id, new_wage_amount, reason)
                     
                     if success:
                         print(f"Successfully updated wage for building {building_id}")
