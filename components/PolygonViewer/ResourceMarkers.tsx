@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ResourceService } from '@/lib/services/ResourceService';
 import { hoverStateService } from '@/lib/services/HoverStateService';
+import { getWalletAddress } from '@/lib/utils/walletUtils';
 
 interface ResourceMarkersProps {
   isVisible: boolean;
@@ -23,6 +24,26 @@ export default function ResourceMarkers({
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   
+  // Function to get the current user's identifier
+  const getCurrentUserIdentifier = useCallback(() => {
+    try {
+      // Try to get username from profile
+      const profileStr = localStorage.getItem('userProfile');
+      if (profileStr) {
+        const profile = JSON.parse(profileStr);
+        if (profile && profile.username) {
+          return profile.username;
+        }
+      }
+      
+      // If no username in profile, fall back to wallet address
+      return getWalletAddress();
+    } catch (error) {
+      console.error('Error getting current user identifier:', error);
+      return null;
+    }
+  }, []);
+
   // Handle mouse enter for resource location
   const handleMouseEnter = useCallback((locationKey: string, locationResources: any[]) => {
     setHoveredLocation(locationKey);
@@ -205,7 +226,8 @@ export default function ResourceMarkers({
                       left: `${Math.cos(2 * Math.PI * index / locationResources.length) * 120}px`, // Decreased radius to accommodate smaller icons
                       top: `${Math.sin(2 * Math.PI * index / locationResources.length) * 120}px`, // Decreased radius to accommodate smaller icons
                       transition: 'all 0.3s ease-out',
-                      borderWidth: '1px' // Make border slimmer
+                      borderWidth: '1px', // Make border slimmer
+                      borderColor: resource.owner === getCurrentUserIdentifier() ? '#FFD700' : '#d97706' // Gold border for user's resources
                     }}
                   >
                     <div className="relative w-full h-full group">
@@ -271,7 +293,8 @@ export default function ResourceMarkers({
                         top: `${-index * 9}px`, // Adjust offset for smaller icons
                         zIndex: 40 - index,
                         boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
-                        borderWidth: '1px' // Make border slimmer
+                        borderWidth: '1px', // Make border slimmer
+                        borderColor: resource.owner === getCurrentUserIdentifier() ? '#FFD700' : '#d97706' // Gold border for user's resources
                       }}
                     >
                       <img 
