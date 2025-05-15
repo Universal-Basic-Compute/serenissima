@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { debounce } from 'lodash';
+import { debounce, throttle } from 'lodash';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 import { fetchCoatOfArmsImage } from '@/app/utils/coatOfArmsUtils';
 import { buildingPointsService } from '@/lib/services/BuildingPointsService';
@@ -24,6 +24,16 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [users, setUsers] = useState<Record<string, any>>({});
   const [scale, setScale] = useState(3); // Start with a 3x zoom for a closer view
   const [offset, setOffset] = useState({ x: 0, y: 0 });
+  // Add refs to track previous state
+  const prevActiveView = useRef<ViewType | null>(null);
+  const prevScale = useRef<number>(3);
+  // Cache for rendered coat of arms to avoid redrawing
+  const renderedCoatOfArmsCache = useRef<Record<string, {
+    image: HTMLImageElement | null,
+    x: number,
+    y: number,
+    size: number
+  }>>({});
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [buildings, setBuildings] = useState<any[]>([]);
@@ -715,20 +725,17 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     if (buildings.length > 0 && !initialPositionCalculated) {
       console.log('Pre-calculating building positions for all buildings...');
       
-      const newPositionsCache: Record<string, {x: number, y: number}> = {};
-      
-      buildings.forEach(building => {
-        if (!building.position) return;
+      // Use a more efficient approach with a single pass
+      const newPositionsCache = buildings.reduce((cache, building) => {
+        if (!building.position) return cache;
         
         let position;
-        if (typeof building.position === 'string') {
-          try {
-            position = JSON.parse(building.position);
-          } catch (e) {
-            return;
-          }
-        } else {
-          position = building.position;
+        try {
+          position = typeof building.position === 'string' 
+            ? JSON.parse(building.position) 
+            : building.position;
+        } catch (e) {
+          return cache;
         }
         
         // Convert lat/lng to isometric coordinates
@@ -740,12 +747,13 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           x = position.x;
           y = position.z;
         } else {
-          return;
+          return cache;
         }
         
         // Store the calculated position in the cache
-        newPositionsCache[building.id] = { x, y };
-      });
+        cache[building.id] = { x, y };
+        return cache;
+      }, {});
       
       setBuildingPositionsCache(newPositionsCache);
       setInitialPositionCalculated(true);
@@ -926,13 +934,28 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
 
   // Handle mouse wheel for zooming
   useEffect(() => {
-    const handleWheel = (e: WheelEvent) => {
+    // Create a throttled version of the zoom handler
+    const handleWheel = throttle((e: WheelEvent) => {
       e.preventDefault();
       const delta = e.deltaY * -0.01;
       // Change the minimum zoom to 1.0 to allow one more level of unzoom
       // Keep the maximum zoom at 10.8
-      setScale(prevScale => Math.max(1.0, Math.min(10.8, prevScale + delta)));
-    };
+      setScale(prevScale => {
+        const newScale = Math.max(1.0, Math.min(10.8, prevScale + delta));
+        
+        // Only trigger a redraw if the scale changed significantly
+        if (Math.abs(newScale - prevScale) > 0.05) {
+          // Force a redraw with the new scale
+          requestAnimationFrame(() => {
+            window.dispatchEvent(new CustomEvent('scaleChanged', { 
+              detail: { scale: newScale } 
+            }));
+          });
+        }
+        
+        return newScale;
+      });
+    }, 50); // Throttle to 50ms (20 updates per second max)
     
     const canvas = canvasRef.current;
     if (canvas) {
@@ -943,6 +966,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       if (canvas) {
         canvas.removeEventListener('wheel', handleWheel);
       }
+      // Clean up the throttled function
+      handleWheel.cancel();
     };
   }, []);
 
@@ -2145,12 +2170,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     ctx.fillStyle = '#87CEEB';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // Collect all polygons and their data for rendering
-    const newPolygonsToRender = [];
-
-    // Process all polygons first
-    polygons.forEach(polygon => {
-      if (!polygon.coordinates || polygon.coordinates.length < 3) return;
+    // Only recalculate polygonsToRender when necessary components change
+    const newPolygonsToRender = polygons.map(polygon => {
+      if (!polygon.coordinates || polygon.coordinates.length < 3) return null;
       
       // Get polygon owner color or income-based color
       let fillColor = '#FFF5D0'; // Default sand color
@@ -2208,8 +2230,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         centerY /= coords.length;
       }
       
-      // Store polygon data for rendering
-      newPolygonsToRender.push({
+      return {
         polygon,
         coords,
         fillColor,
@@ -2217,8 +2238,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         centroidY: centerY,
         centerX: centerX,    // Add these explicitly
         centerY: centerY
-      });
-    });
+      };
+    }).filter(Boolean);
 
     // Update the polygonsToRender state
     setPolygonsToRender(newPolygonsToRender);
@@ -3457,7 +3478,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       ctx.fillText('Work', legendX + 40, legendY + 40);
     }
     
-  }, [loading, polygons, landOwners, users, activeView, buildings, scale, offset, incomeData, minIncome, maxIncome, hoveredPolygonId, selectedPolygonId, hoveredBuildingId, selectedBuildingId, emptyBuildingPoints, mousePosition, citizensLoaded, citizensByBuilding, hoveredCitizenBuilding, hoveredCitizenType]);
+  }, [loading, polygons, landOwners, users, activeView, buildings, scale, offset, incomeData, minIncome, maxIncome, hoveredPolygonId, selectedPolygonId, hoveredBuildingId, selectedBuildingId, emptyBuildingPoints, mousePosition, citizensLoaded, citizensByBuilding, hoveredCitizenBuilding, hoveredCitizenType, incomeDataLoaded, polygonsToRender]);
   
 
   // Handle window resize
@@ -3466,6 +3487,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       if (canvasRef.current) {
         canvasRef.current.width = window.innerWidth;
         canvasRef.current.height = window.innerHeight;
+        
+        // Clear the coat of arms cache when resizing
+        renderedCoatOfArmsCache.current = {};
         
         // Redraw everything
         const event = new Event('redraw');
