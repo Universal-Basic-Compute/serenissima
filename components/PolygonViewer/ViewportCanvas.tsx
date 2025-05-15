@@ -76,7 +76,8 @@ export default function ViewportCanvas({
         // Load income data if in land view
         if (activeView === 'land') {
           const incomeResult = await incomeService.loadIncomeData();
-          if (incomeResult) {
+          // Check if incomeResult exists and is not null before accessing properties
+          if (incomeResult && typeof incomeResult === 'object') {
             setIncomeData(incomeResult.incomeData || {});
             setMinIncome(incomeResult.minIncome || 0);
             setMaxIncome(incomeResult.maxIncome || 1000);
@@ -336,7 +337,7 @@ export default function ViewportCanvas({
     const startTime = performance.now();
     
     // Draw the scene using RenderService
-    renderService.drawScene(
+    renderService.drawScene({
       ctx,
       canvas,
       activeView,
@@ -352,8 +353,8 @@ export default function ViewportCanvas({
       citizensByBuilding,
       citizensLoaded,
       coatOfArmsImages,
-      renderedCoatOfArmsCache.current
-    );
+      renderedCoatOfArmsCache: renderedCoatOfArmsCache.current
+    });
     
     // Log performance metrics for debugging (only if rendering takes more than 16ms)
     const renderTime = performance.now() - startTime;
@@ -376,7 +377,7 @@ export default function ViewportCanvas({
     const animate = () => {
       // Only redraw if something has changed
       if (interactionService.getState().isDragging) {
-        renderService.drawScene(
+        renderService.drawScene({
           ctx,
           canvas,
           activeView,
@@ -385,15 +386,15 @@ export default function ViewportCanvas({
           polygonsToRender,
           buildings,
           emptyBuildingPoints,
-          interactionService.getState(),
+          interactionState: interactionService.getState(),
           transportPath,
           polygons,
           incomeData,
           citizensByBuilding,
           citizensLoaded,
           coatOfArmsImages,
-          renderedCoatOfArmsCache.current
-        );
+          renderedCoatOfArmsCache: renderedCoatOfArmsCache.current
+        });
       }
       
       animationId = requestAnimationFrame(animate);
