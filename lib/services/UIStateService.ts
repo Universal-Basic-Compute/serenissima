@@ -31,33 +31,29 @@ export class UIStateService {
     position: {x: number, y: number} | null,
     imagePath: string | null
   ): void {
-    // Only emit the event if the state actually changed
-    if (
-      this.hoveredBuildingName !== buildingName ||
-      JSON.stringify(this.hoveredBuildingPosition) !== JSON.stringify(position) ||
-      this.hoveredBuildingImagePath !== imagePath
-    ) {
-      // Add debug logging
-      console.log('%c UIStateService.setBuildingHover: State changed, emitting event', 'background: #4CAF50; color: white;', {
-        buildingName,
-        position,
-        imagePath,
-        stack: new Error().stack
-      });
-      
-      // Update the state
+    // Use simple equality checks to avoid deep comparisons that might cause issues
+    const nameChanged = this.hoveredBuildingName !== buildingName;
+    const positionChanged = 
+      (!this.hoveredBuildingPosition && position) || 
+      (this.hoveredBuildingPosition && !position) ||
+      (this.hoveredBuildingPosition && position && 
+       (this.hoveredBuildingPosition.x !== position.x || 
+        this.hoveredBuildingPosition.y !== position.y));
+    const imagePathChanged = this.hoveredBuildingImagePath !== imagePath;
+    
+    // Only update and emit if something actually changed
+    if (nameChanged || positionChanged || imagePathChanged) {
+      // Update state first
       this.hoveredBuildingName = buildingName;
       this.hoveredBuildingPosition = position;
       this.hoveredBuildingImagePath = imagePath;
       
-      // Emit event
+      // Then emit event
       eventBus.emit(EventTypes.BUILDING_HOVER_STATE_CHANGED, {
         buildingName,
         position,
         imagePath
       });
-    } else {
-      console.log('%c UIStateService.setBuildingHover: No state change, skipping event', 'background: #FFC107; color: black;');
     }
   }
   

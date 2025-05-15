@@ -86,36 +86,48 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   });
   const isDraggingRef = useRef<boolean>(false);
   
-  // We no longer need this function as it's now handled by UIStateService
-  // The fetchBuildingImagePath function has been moved to UIStateService
-  
-  // Add a debugging effect to track state changes that might cause infinite loops
+  // Add a separate useEffect for fetching building images that won't cause an infinite loop
   useEffect(() => {
-    const currentState = {
-      hoveredBuildingId,
-      hoveredBuildingName,
-      hoveredBuildingPosition,
-      hoveredBuildingImagePath,
-      isLoadingBuildingImage
-    };
-    
-    // Compare with previous state
-    const prevState = prevStateRef.current;
-    
-    // Log any changes
-    Object.keys(currentState).forEach(key => {
-      if (currentState[key] !== prevState[key]) {
-        console.log(`%c State change detected in ${key}:`, 'background: #ff0000; color: white; padding: 2px 5px; border-radius: 3px;', {
-          from: prevState[key],
-          to: currentState[key],
-          stack: new Error().stack
-        });
+    // Only fetch the image if we have a hovered building with a name but no image path yet
+    if (hoveredBuildingId && hoveredBuildingName && !hoveredBuildingImagePath && !isLoadingBuildingImage) {
+      const building = buildings.find(b => b.id === hoveredBuildingId);
+      if (building) {
+        // Set loading state
+        setIsLoadingBuildingImage(true);
+        
+        // Use a simple approach to get the image path
+        const imagePath = `/images/buildings/${building.type}.jpg`;
+        
+        // Check if the image exists
+        fetch(imagePath, { method: 'HEAD' })
+          .then(response => {
+            if (response.ok) {
+              setHoveredBuildingImagePath(imagePath);
+            } else {
+              // Use default image if not found
+              setHoveredBuildingImagePath('/images/buildings/market_stall.jpg');
+            }
+          })
+          .catch(() => {
+            // Use default image on error
+            setHoveredBuildingImagePath('/images/buildings/market_stall.jpg');
+          })
+          .finally(() => {
+            setIsLoadingBuildingImage(false);
+          });
       }
-    });
-    
-    // Update the ref with current state
-    prevStateRef.current = { ...currentState as any };
-  }, [hoveredBuildingId, hoveredBuildingName, hoveredBuildingPosition, hoveredBuildingImagePath, isLoadingBuildingImage]);
+    }
+  }, [hoveredBuildingId, hoveredBuildingName, hoveredBuildingImagePath, isLoadingBuildingImage, buildings]);
+  
+  // Minimal debugging effect that won't cause infinite updates
+  useEffect(() => {
+    // Only log critical changes to avoid causing updates
+    if (process.env.NODE_ENV === 'development' && hoveredBuildingId !== prevStateRef.current.hoveredBuildingId) {
+      console.log(`Building hover state changed from ${prevStateRef.current.hoveredBuildingId} to ${hoveredBuildingId}`);
+      // Only update the hoveredBuildingId in the ref
+      prevStateRef.current.hoveredBuildingId = hoveredBuildingId;
+    }
+  }, [hoveredBuildingId]);
 
   // Function to load citizens data - declared early to avoid reference before declaration
   const loadCitizens = useCallback(async () => {
@@ -1123,12 +1135,12 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     }
   };
   
-  // Add this useEffect for mouse interactions
+  // Add this useEffect for mouse interactions with throttling
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
-    const handleMouseMove = (e: MouseEvent) => {
+    const handleMouseMove = throttle((e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
@@ -1164,17 +1176,103 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         }
         
         // Only update state if the hovered polygon has changed
-        if (newHoveredPolygonId !== hoveredPolygonId) {
-          console.log('Setting hoveredPolygonId:', newHoveredPolygonId);
+        if (newHoveredPolygonId !== hoveredPolygonIdRef.current) {
+          hoveredPolygonIdRef.current = newHoveredPolygonId;
           setHoveredPolygonId(newHoveredPolygonId);
+        }
+      } else if (activeView === 'buildings') {
+        // For buildings view, handle building hover but with caution
+        let newHoveredBuildingId = null;
+        
+        // Check if mouse is over any building
+        for (const building of buildings) {
+          if (!building.position) continue;
+          
+          // Get building position
+          let position;
+          try {
+            position = typeof building.position === 'string' 
+              ? JSON.parse(building.position) 
+              : building.position;
+          } catch (e) {
+            continue;
+          }
+          
+          // Convert lat/lng to isometric coordinates
+          let x, y;
+          if ('lat' in position && 'lng' in position) {
+            x = (position.lng - 12.3326) * 20000;
+            y = (position.lat - 45.4371) * 20000;
+          } else if ('x' in position && 'z' in position) {
+            x = position.x;
+            y = position.z;
+          } else {
+            continue;
+          }
+          
+          const isoPos = {
+            x: calculateIsoX(x, y, scale, offset, canvas.width),
+            y: calculateIsoY(x, y, scale, offset, canvas.height)
+          };
+          
+          // Get building size
+          const size = getBuildingSize(building.type);
+          const squareSize = Math.max(size.width, size.depth) * scale * 0.6;
+          
+          // Check if mouse is over this building
+          if (
+            mouseX >= isoPos.x - squareSize/2 &&
+            mouseX <= isoPos.x + squareSize/2 &&
+            mouseY >= isoPos.y - squareSize/2 &&
+            mouseY <= isoPos.y + squareSize/2
+          ) {
+            newHoveredBuildingId = building.id;
+            canvas.style.cursor = 'pointer';
+            break;
+          }
+        }
+        
+        // Only update state if the hovered building has changed
+        if (newHoveredBuildingId !== hoveredBuildingIdRef.current) {
+          hoveredBuildingIdRef.current = newHoveredBuildingId;
+          
+          // IMPORTANT: Don't call uiStateService directly here
+          // Just update the local state
+          setHoveredBuildingId(newHoveredBuildingId);
+          
+          // If we need to update the building name and image, do it separately
+          // without causing a circular dependency
+          if (newHoveredBuildingId) {
+            const building = buildings.find(b => b.id === newHoveredBuildingId);
+            if (building) {
+              setHoveredBuildingName(building.name || building.type);
+              // Don't fetch the image path here - that should be done in a separate effect
+            }
+          } else {
+            setHoveredBuildingName(null);
+            setHoveredBuildingPosition(null);
+            setHoveredBuildingImagePath(null);
+          }
         }
       } else {
         // For all other views, just set a default cursor
         canvas.style.cursor = isDragging ? 'grabbing' : 'grab';
+        
+        // Clear hover states if they were set
+        if (hoveredBuildingIdRef.current) {
+          hoveredBuildingIdRef.current = null;
+          setHoveredBuildingId(null);
+          setHoveredBuildingName(null);
+          setHoveredBuildingPosition(null);
+          setHoveredBuildingImagePath(null);
+        }
+        
+        if (hoveredPolygonIdRef.current) {
+          hoveredPolygonIdRef.current = null;
+          setHoveredPolygonId(null);
+        }
       }
-    };
-    
-    // No longer subscribing to building hover events
+    }, 50); // Throttle to 50ms
     
     const handleClick = (e: MouseEvent) => {
       if (isDragging) return; // Skip click handling while dragging
@@ -1532,8 +1630,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     return () => {
       canvas.removeEventListener('mousemove', handleMouseMove);
       canvas.removeEventListener('click', handleClick);
+      handleMouseMove.cancel(); // Clean up the throttled function
     };
-  }, [activeView, isDragging, scale, offset, emptyBuildingPoints, buildings, polygonsToRender, citizensByBuilding, transportMode, polygons]);
+  }, [activeView, isDragging, scale, offset, buildings, polygonsToRender, transportMode]);
 
   // Helper function to check if a point is inside a polygon
   function isPointInPolygon(x: number, y: number, polygon: {x: number, y: number}[]): boolean {
