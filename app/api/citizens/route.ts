@@ -142,11 +142,11 @@ export async function GET(request: Request) {
         firstname: record.fields.FirstName ? 
           (typeof record.fields.FirstName === 'string' ? 
             record.fields.FirstName : 
-            String(record.fields.FirstName)) : 'Unknown',
+            String(record.fields.FirstName as AirtableValue)) : 'Unknown',
         lastname: record.fields.LastName ? 
           (typeof record.fields.LastName === 'string' ? 
             record.fields.LastName : 
-            String(record.fields.LastName)) : 'Citizen',
+            String(record.fields.LastName as AirtableValue)) : 'Citizen',
         socialclass: String(record.fields.SocialClass as AirtableValue || 'Popolani'),
         description: String(record.fields.Description as AirtableValue || 'A citizen of Venice.'),
         profileimage: formatImageUrl(
@@ -163,7 +163,7 @@ export async function GET(request: Request) {
           : record.fields.Position || { lat: 45.4371 + Math.random() * 0.01, lng: 12.3326 + Math.random() * 0.01 },
         occupation: String(record.fields.Occupation as AirtableValue || 'Citizen'),
         wealth: record.fields.Wealth || 0,
-        createdat: String(record.fields.CreatedAt || new Date().toISOString()),
+        createdat: String(record.fields.CreatedAt as AirtableValue || new Date().toISOString()),
         // Add home and work assignments
         home: buildings.home || null,
         work: buildings.work || null
