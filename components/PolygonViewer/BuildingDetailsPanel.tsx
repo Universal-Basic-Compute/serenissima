@@ -157,6 +157,8 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
   
   // Fetch building details when a building is selected
   useEffect(() => {
+    let isMounted = true;
+    
     if (selectedBuildingId) {
       setIsLoading(true);
       setError(null);
@@ -172,6 +174,8 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
           return response.json();
         })
         .then(data => {
+          if (!isMounted) return;
+          
           console.log('Building data:', data);
           if (data && data.building) {
             setBuilding(data.building);
@@ -185,44 +189,66 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
           }
         })
         .catch(error => {
+          if (!isMounted) return;
+          
           console.error('Error fetching building details:', error);
           setError(error.message || 'Failed to load building details');
           setBuilding(null);
         })
         .finally(() => {
-          setIsLoading(false);
+          if (isMounted) {
+            setIsLoading(false);
+          }
         });
     } else {
       setBuilding(null);
       setError(null);
     }
+    
+    return () => {
+      isMounted = false;
+    };
   }, [selectedBuildingId]);
   
   // Add this effect to load the building definition when a building is selected
   useEffect(() => {
+    let isMounted = true;
+    
     if (building?.type) {
       loadBuildingDefinition(building.type, building.variant, building)
         .then(definition => {
-          console.log('Loaded building definition:', definition);
-          setBuildingDefinition(definition);
+          if (isMounted) {
+            console.log('Loaded building definition:', definition);
+            setBuildingDefinition(definition);
+          }
         })
         .catch(error => {
-          console.error('Error loading building definition:', error);
-          setBuildingDefinition(null);
+          if (isMounted) {
+            console.error('Error loading building definition:', error);
+            setBuildingDefinition(null);
+          }
         });
       
       // Resolve the image path
       getBuildingImagePath(building.type, building.variant)
         .then(path => {
-          setBuildingImagePath(path);
+          if (isMounted) {
+            setBuildingImagePath(path);
+          }
         })
         .catch(error => {
-          console.error('Error resolving building image path:', error);
-          setBuildingImagePath('/images/buildings/market_stall.jpg');
+          if (isMounted) {
+            console.error('Error resolving building image path:', error);
+            setBuildingImagePath('/images/buildings/market_stall.jpg');
+          }
         });
     } else {
       setBuildingDefinition(null);
     }
+    
+    return () => {
+      isMounted = false;
+    };
   }, [building]);
   
   // Add refs to track current state without causing re-renders

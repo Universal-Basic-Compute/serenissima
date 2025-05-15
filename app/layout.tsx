@@ -97,6 +97,12 @@ export default function RootLayout({
                     }
                   }, 300); // Debounce for 300ms
                 });
+                
+                // Fix for React 18 double-rendering in development mode
+                // This helps prevent invalid hook call errors
+                window.__REACT_DEVTOOLS_APPEND_COMPONENT_STACK__ = false;
+                window.__REACT_DEVTOOLS_BREAK_ON_CONSOLE_ERRORS__ = false;
+                window.__REACT_DEVTOOLS_SHOW_INLINE_WARNINGS_AND_ERRORS__ = false;
               });
             `
           }} />

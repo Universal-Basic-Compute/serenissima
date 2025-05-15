@@ -228,10 +228,11 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       }, 100);
     };
     
-    window.addEventListener('showTransportRoutes', handleShowTransportRoutes);
+    const eventListener = () => handleShowTransportRoutes();
+    window.addEventListener('showTransportRoutes', eventListener);
     
     return () => {
-      window.removeEventListener('showTransportRoutes', handleShowTransportRoutes);
+      window.removeEventListener('showTransportRoutes', eventListener);
     };
   }, [activeView]);
   
