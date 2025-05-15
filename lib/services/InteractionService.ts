@@ -14,6 +14,12 @@ export interface InteractionState {
   selectedPolygonId: string | null;
   selectedBuildingId: string | null;
   mousePosition: { x: number, y: number };
+  hoveredPolygonId?: string | null;
+  hoveredBuildingId?: string | null;
+  hoveredCanalPoint?: any;
+  hoveredBridgePoint?: any;
+  hoveredCitizenBuilding?: string | null;
+  hoveredCitizenType?: string | null;
 }
 
 export class InteractionService {
@@ -27,6 +33,12 @@ export class InteractionService {
   
   // Refs to track current state without causing re-renders
   private isDraggingRef: boolean = false;
+  private hoveredPolygonIdRef: string | null = null;
+  private hoveredBuildingIdRef: string | null = null;
+  private hoveredCanalPointRef: any = null;
+  private hoveredBridgePointRef: any = null;
+  private hoveredCitizenBuildingRef: string | null = null;
+  private hoveredCitizenTypeRef: string | null = null;
   
   // Add these private properties to store data references
   private _polygonsToRender: any[] = [];
@@ -370,8 +382,8 @@ export class InteractionService {
           }
           
           const isoPos = {
-            x: CoordinateService.calculateIsoX(x, y, scale, offset, canvas.width),
-            y: CoordinateService.calculateIsoY(x, y, scale, offset, canvas.height)
+            x: CoordinateService.worldToScreen(x, y, scale, offset, canvas.width, canvas.height).x,
+            y: CoordinateService.worldToScreen(x, y, scale, offset, canvas.width, canvas.height).y
           };
           
           // Get building size
@@ -534,8 +546,8 @@ export class InteractionService {
               const y = (point.edge.lat - 45.4371) * 20000;
               
               const isoPos = {
-                x: CoordinateService.calculateIsoX(x, y, scale, offset, canvas.width),
-                y: CoordinateService.calculateIsoY(x, y, scale, offset, canvas.height)
+                x: CoordinateService.worldToScreen(x, y, scale, offset, canvas.width, canvas.height).x,
+                y: CoordinateService.worldToScreen(x, y, scale, offset, canvas.width, canvas.height).y
               };
               
               // Check if click is on this bridge point
