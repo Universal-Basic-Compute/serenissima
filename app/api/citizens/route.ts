@@ -89,9 +89,10 @@ export async function GET(request: Request) {
       const buildingType = building.fields.Type;
       // Convert Occupant to string to use as an index
       const occupant = building.fields.Occupant ? 
-        (typeof building.fields.Occupant === 'string' ? 
-          building.fields.Occupant as string : 
-          String(building.fields.Occupant)) : undefined;
+        airtableValueToString(building.fields.Occupant) : undefined;
+      
+      // Skip buildings without occupants or with non-string occupants
+      if (!occupant || typeof occupant !== 'string') return;
       
       // Skip buildings without occupants
       if (!occupant) return;
@@ -133,9 +134,7 @@ export async function GET(request: Request) {
     const citizens = citizenRecords.map(record => {     
       // Ensure the citizen ID is a string
       const citizenId = record.fields.CitizenId ? 
-        (typeof record.fields.CitizenId === 'string' ? 
-          record.fields.CitizenId as string : 
-          String(record.fields.CitizenId)) 
+        airtableValueToString(record.fields.CitizenId)
         : `ctz_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
       
       // Get home and work assignments for this citizen
@@ -156,11 +155,11 @@ export async function GET(request: Request) {
         socialclass: safeString(record.fields.SocialClass, 'Popolani'),
         description: safeString(record.fields.Description, 'A citizen of Venice.'),
         profileimage: formatImageUrl(
-          record.fields.ImageUrl ? String(record.fields.ImageUrl) : undefined, 
+          record.fields.ImageUrl ? airtableValueToString(record.fields.ImageUrl) : undefined, 
           citizenId
         ),
         imageurl: formatImageUrl(
-          record.fields.ImageUrl ? String(record.fields.ImageUrl) : undefined, 
+          record.fields.ImageUrl ? airtableValueToString(record.fields.ImageUrl) : undefined, 
           citizenId
         ),
         // Ensure position is included and properly formatted
