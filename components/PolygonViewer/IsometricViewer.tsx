@@ -651,6 +651,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             console.log('%c BUILDINGS POSITION STATS:', 'background: #4CAF50; color: white; padding: 4px 8px; font-weight: bold; border-radius: 4px;');
             console.table(positionStats);
             
+            // Reset position calculation flag when new buildings are loaded
+            setInitialPositionCalculated(false);
+            
             // Dispatch event to ensure buildings are visible
             window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
           } else {
