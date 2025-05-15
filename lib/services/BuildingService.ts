@@ -15,9 +15,14 @@ export class BuildingService {
     
     console.log('Pre-calculating building positions for all buildings...');
     
+    // Initialize the cache if it doesn't exist
+    if (!this.buildingPositionsCache) {
+      this.buildingPositionsCache = {};
+    }
+    
     // Use a more efficient approach with a single pass
     const newPositionsCache = buildings.reduce((cache, building) => {
-      if (!building.position) return cache;
+      if (!building || !building.id || !building.position) return cache;
       
       let position;
       try {
@@ -82,7 +87,8 @@ export class BuildingService {
     }
     
     // Use cached position if available
-    if (this.buildingPositionsCache[building.id]) {
+    // Make sure this.buildingPositionsCache exists and has the building ID as a property
+    if (this.buildingPositionsCache && this.buildingPositionsCache[building.id]) {
       return this.buildingPositionsCache[building.id];
     }
     
@@ -139,6 +145,11 @@ export class BuildingService {
       } else {
         console.warn(`Invalid position format for building ${building.id}`);
         return null;
+      }
+      
+      // Initialize the cache if it doesn't exist
+      if (!this.buildingPositionsCache) {
+        this.buildingPositionsCache = {};
       }
       
       // Store in cache for future use
@@ -262,6 +273,7 @@ export class BuildingService {
   public resetPositionCache(): void {
     this.buildingPositionsCache = {};
     this.initialPositionCalculated = false;
+    console.log('Building position cache has been reset');
   }
 
   /**
