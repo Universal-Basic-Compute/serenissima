@@ -82,10 +82,7 @@ export async function GET(request: Request) {
       const buildingId = building.fields.BuildingId || building.id;
       const buildingType = building.fields.Type;
       // Convert Occupant to string to use as an index
-      const occupant = building.fields.Occupant ? 
-        (typeof building.fields.Occupant === 'string' ? 
-          building.fields.Occupant : 
-          String(building.fields.Occupant)) : undefined;
+      const occupant = building.fields.Occupant ? String(building.fields.Occupant) : undefined;
       
       // Skip buildings without occupants
       if (!occupant) return;
@@ -150,20 +147,16 @@ export async function GET(request: Request) {
         socialclass: safeString(record.fields.SocialClass, 'Popolani'),
         description: safeString(record.fields.Description, 'A citizen of Venice.'),
         profileimage: formatImageUrl(
-          record.fields.ImageUrl ? 
-            (typeof record.fields.ImageUrl === 'string' ? record.fields.ImageUrl : String(record.fields.ImageUrl)) : 
-            undefined, 
+          record.fields.ImageUrl ? String(record.fields.ImageUrl) : undefined, 
           citizenId
         ),
         imageurl: formatImageUrl(
-          record.fields.ImageUrl ? 
-            (typeof record.fields.ImageUrl === 'string' ? record.fields.ImageUrl : String(record.fields.ImageUrl)) : 
-            undefined, 
+          record.fields.ImageUrl ? String(record.fields.ImageUrl) : undefined, 
           citizenId
         ),
         // Ensure position is included and properly formatted
         position: typeof record.fields.Position === 'string' 
-          ? JSON.parse(record.fields.Position) 
+          ? JSON.parse(record.fields.Position as string) 
           : record.fields.Position || { lat: 45.4371 + Math.random() * 0.01, lng: 12.3326 + Math.random() * 0.01 },
         occupation: safeString(record.fields.Occupation, 'Citizen'),
         wealth: record.fields.Wealth !== undefined ? record.fields.Wealth : 0,
