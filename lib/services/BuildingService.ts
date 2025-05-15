@@ -49,6 +49,24 @@ export class BuildingService {
     this.initialPositionCalculated = true;
     console.log(`Pre-calculated positions for ${Object.keys(newPositionsCache).length} buildings`);
   }
+  
+  /**
+   * Ensure buildings are visible by calculating positions if needed
+   */
+  public ensureBuildingsVisible = (): void => {
+    const buildings = dataService.getBuildings();
+    
+    if (buildings.length === 0 || this.initialPositionCalculated) return;
+    
+    console.log('Ensuring buildings are visible by calculating positions...');
+    
+    this.calculateBuildingPositions(buildings);
+    
+    // Emit event to notify that building positions have been calculated
+    eventBus.emit(EventTypes.BUILDING_POSITIONS_CALCULATED, {
+      count: Object.keys(this.buildingPositionsCache).length
+    });
+  }
 
   /**
    * Get building position from cache or calculate it

@@ -520,6 +520,48 @@ export class DataService {
       });
     });
   }
+  
+  /**
+   * Get buildings
+   */
+  public getBuildings(): any[] {
+    return this.buildingsCache;
+  }
+  
+  /**
+   * Get polygons
+   */
+  public getPolygons(): any[] {
+    return this.polygonsCache;
+  }
+  
+  /**
+   * Get land owners
+   */
+  public getLandOwners(): Record<string, string> {
+    return this.landOwnersCache;
+  }
+  
+  /**
+   * Get users
+   */
+  public getUsers(): Record<string, any> {
+    return this.usersCache;
+  }
+  
+  /**
+   * Get citizens
+   */
+  public getCitizens(): any[] {
+    return this.citizensCache;
+  }
+  
+  /**
+   * Get citizens by building
+   */
+  public getCitizensByBuilding(): Record<string, any[]> {
+    return this.citizensByBuildingCache;
+  }
 
   /**
    * Find polygon ID for a point

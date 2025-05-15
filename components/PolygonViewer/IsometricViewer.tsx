@@ -1,14 +1,11 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
-import { throttle, debounce } from '@/lib/utils/performanceUtils';
 import ViewportCanvas from './ViewportCanvas';
 import LandDetailsPanel from './LandDetailsPanel';
 import BuildingDetailsPanel from './BuildingDetailsPanel';
 import CitizenDetailsPanel from '../UI/CitizenDetailsPanel';
-import ViewController from './ViewController';
-import ViewportController from './ViewportController';
 import { buildingService } from '@/lib/services/BuildingService';
 import { transportService } from '@/lib/services/TransportService';
 import { citizenService } from '@/lib/services/CitizenService';
@@ -16,15 +13,13 @@ import { incomeService } from '@/lib/services/IncomeService';
 import { buildingPointsService } from '@/lib/services/BuildingPointsService';
 import { viewportService } from '@/lib/services/ViewportService';
 import { uiStateService } from '@/lib/services/UIStateService';
-import { assetService } from '@/lib/services/AssetService';
 import { dataService } from '@/lib/services/DataService';
+import { renderService } from '@/lib/services/RenderService';
+import { interactionService } from '@/lib/services/InteractionService';
 
 interface IsometricViewerProps {
   activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
 }
-
-// Define a type for all possible view types to use throughout the component
-type ViewType = 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
 
 export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   // Get UI state from service
@@ -34,28 +29,11 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [scale, setScale] = useState(viewportService.getScale());
   const [offset, setOffset] = useState(viewportService.getOffset());
   
-  // Data state
-  const [polygons, setPolygons] = useState<any[]>([]);
-  const [buildings, setBuildings] = useState<any[]>([]);
+  // Data state - managed by DataService
   const [loading, setLoading] = useState<boolean>(true);
-  const [emptyBuildingPoints, setEmptyBuildingPoints] = useState<{lat: number, lng: number}[]>([]);
-  const [polygonsToRender, setPolygonsToRender] = useState<any[]>([]);
   
-  // Transport state is now managed by TransportService
-  const [transportMode, setTransportMode] = useState<boolean>(false);
-  const [transportPath, setTransportPath] = useState<any[]>([]);
-  const [mousePosition, setMousePosition] = useState<{x: number, y: number}>({x: 0, y: 0});
-  const [isDragging, setIsDragging] = useState<boolean>(false);
-  const [dragStart, setDragStart] = useState<{x: number, y: number}>({x: 0, y: 0});
-  
-  // Coat of arms state
-  const [ownerCoatOfArmsMap, setOwnerCoatOfArmsMap] = useState<Record<string, string>>({});
-  const [coatOfArmsImages, setCoatOfArmsImages] = useState<Record<string, HTMLImageElement>>({});
-  const [citizens, setCitizens] = useState<any[]>([]);
-  const [citizensLoaded, setCitizensLoaded] = useState<boolean>(false);
-  const [citizensByBuilding, setCitizensByBuilding] = useState<Record<string, any[]>>({});
+  // Canvas ref for direct DOM access when needed
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const renderedCoatOfArmsCache = useRef<Record<string, {image: HTMLImageElement | null, x: number, y: number, size: number}>>({});
   
   // Building image path fetching is now handled by the UIStateService
 
@@ -75,27 +53,6 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       setOffset(data.offset);
     };
     
-    // Handle transport mode events
-    const handleShowTransportRoutes = () => {
-      console.log('Activating transport route planning mode');
-      
-      // Force the active view to be 'transport' first
-      if (activeView !== 'transport') {
-        console.log('Switching to transport view');
-        window.dispatchEvent(new CustomEvent('switchToTransportView', {
-          detail: { view: 'transport' }
-        }));
-      }
-      
-      // Set a small timeout to ensure view has changed before activating transport mode
-      setTimeout(() => {
-        setTransportMode(true);
-        // Notify other components about transport mode change
-        eventBus.emit(EventTypes.TRANSPORT_MODE_CHANGED, { active: true });
-        console.log('Transport mode state set to:', true);
-      }, 100);
-    };
-    
     // Subscribe to events
     const subscriptions = [
       eventBus.subscribe(EventTypes.BUILDING_HOVER_STATE_CHANGED, handleUIStateChange),
@@ -107,687 +64,109 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       eventBus.subscribe(EventTypes.VIEWPORT_OFFSET_CHANGED, handleViewportOffsetChanged)
     ];
     
-    // Add window event listeners
-    window.addEventListener('showTransportRoutes', handleShowTransportRoutes);
-    
     // Cleanup function
     return () => {
       // Unsubscribe from all events
       subscriptions.forEach(sub => sub.unsubscribe());
-      
-      // Remove window event listeners
-      window.removeEventListener('showTransportRoutes', handleShowTransportRoutes);
     };
-  }, [activeView]);
+  }, []);
 
-  // Load data
+  // Load initial data
   useEffect(() => {
-    const loadData = async () => {
+    const loadInitialData = async () => {
       setLoading(true);
       
       try {
-        // Load polygons
-        const polygonsData = await dataService.loadPolygons();
-        setPolygons(polygonsData);
+        // Initialize all required services
+        await buildingPointsService.loadBuildingPoints();
+        await dataService.loadPolygons();
+        await dataService.loadBuildings();
         
-        // Load buildings
-        const buildingsData = await dataService.loadBuildings();
-        setBuildings(buildingsData);
-        
-        // Calculate empty building points
-        const emptyPoints = dataService.getEmptyBuildingPoints(polygonsData, buildingsData);
-        setEmptyBuildingPoints(emptyPoints);
-        
-        // Load citizens if in citizens view
-        if (activeView === 'citizens') {
-          const citizensData = await dataService.loadCitizens();
-          setCitizens(citizensData.citizens);
-          setCitizensByBuilding(citizensData.citizensByBuilding);
-          setCitizensLoaded(true);
+        // Load view-specific data
+        if (activeView === 'land') {
+          await incomeService.loadIncomeData();
+        } else if (activeView === 'citizens') {
+          await citizenService.loadCitizens();
         }
         
         setLoading(false);
       } catch (error) {
-        console.error('Error loading data:', error);
+        console.error('Error loading initial data:', error);
         setLoading(false);
       }
     };
     
-    loadData();
-  }, [activeView]);
-  
-  // Transport mode activation and events
-  useEffect(() => {
+    loadInitialData();
+    
+    // Handle transport routes activation
     const handleShowTransportRoutes = () => {
-      console.log('Activating transport route planning mode');
-      
       // Force the active view to be 'transport' first
       if (activeView !== 'transport') {
-        console.log('Switching to transport view');
         window.dispatchEvent(new CustomEvent('switchToTransportView', {
           detail: { view: 'transport' }
         }));
       }
       
-      // Reset transport service state
-      transportService.reset();
-      
-      // Set transport mode through the service
-      transportService.setTransportMode(true);
+      // Set a small timeout to ensure view has changed before activating transport mode
+      setTimeout(() => {
+        transportService.setTransportMode(true);
+      }, 100);
     };
     
-    const handleTransportModeChanged = (data: any) => {
-      setTransportMode(data.active);
-    };
-    
-    const handleTransportPathChanged = (data: any) => {
-      setTransportPath(data.path || []);
-    };
-    
-    const handleTransportCalculationCompleted = (data: any) => {
-      setTransportPath(data.path);
-    };
-    
-    // Subscribe to events
-    eventBus.subscribe(EventTypes.TRANSPORT_MODE_CHANGED, handleTransportModeChanged);
-    eventBus.subscribe(EventTypes.TRANSPORT_PATH_CHANGED, handleTransportPathChanged);
-    eventBus.subscribe(EventTypes.TRANSPORT_CALCULATION_COMPLETED, handleTransportCalculationCompleted);
+    // Add window event listeners
     window.addEventListener('showTransportRoutes', handleShowTransportRoutes);
+    window.addEventListener('ensureBuildingsVisible', buildingService.ensureBuildingsVisible);
+    
+    // Dispatch initial event to ensure buildings are visible
+    window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
     
     return () => {
-      // Unsubscribe from events
-      eventBus.unsubscribe(EventTypes.TRANSPORT_MODE_CHANGED, handleTransportModeChanged);
-      eventBus.unsubscribe(EventTypes.TRANSPORT_PATH_CHANGED, handleTransportPathChanged);
-      eventBus.unsubscribe(EventTypes.TRANSPORT_CALCULATION_COMPLETED, handleTransportCalculationCompleted);
       window.removeEventListener('showTransportRoutes', handleShowTransportRoutes);
+      window.removeEventListener('ensureBuildingsVisible', buildingService.ensureBuildingsVisible);
     };
   }, [activeView]);
   
-  // Subscribe to income data events
+  // Load view-specific data when activeView changes
   useEffect(() => {
-    const handleIncomeDataLoaded = (data: any) => {
-      setIncomeData(data.incomeData);
-      setMinIncome(data.minIncome);
-      setMaxIncome(data.maxIncome);
-      setIncomeDataLoaded(true);
-    };
-    
-    const handleIncomeDataError = () => {
-      setIncomeDataLoaded(false);
-    };
-    
-    // Subscribe to events
-    eventBus.subscribe(EventTypes.INCOME_DATA_LOADED, handleIncomeDataLoaded);
-    eventBus.subscribe(EventTypes.INCOME_DATA_LOADING_ERROR, handleIncomeDataError);
-    
-    return () => {
-      // Unsubscribe from events
-      eventBus.unsubscribe(EventTypes.INCOME_DATA_LOADED, handleIncomeDataLoaded);
-      eventBus.unsubscribe(EventTypes.INCOME_DATA_LOADING_ERROR, handleIncomeDataError);
-    };
-  }, []);
-  
-  // Load coat of arms
-  useEffect(() => {
-    const loadCoatOfArms = async () => {
-      try {
-        const response = await fetch('/api/get-coat-of-arms');
-        if (response.ok) {
-          const data = await response.json();
-          if (data.coatOfArms && typeof data.coatOfArms === 'object') {
-            setOwnerCoatOfArmsMap(data.coatOfArms);
-            
-            // Load coat of arms images through AssetService
-            const images = await assetService.loadCoatOfArmsImages(data.coatOfArms);
-            setCoatOfArmsImages(images);
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching coat of arms:', error);
+    const loadViewData = async () => {
+      if (activeView === 'land') {
+        await incomeService.loadIncomeData();
+      } else if (activeView === 'citizens') {
+        await citizenService.loadCitizens();
       }
-    };
-    
-    loadCoatOfArms();
-  }, []);
-  
-  // Fetch income data when in land view
-  useEffect(() => {
-    if (activeView === 'land') {
-      // Load income data through the service
-      incomeService.loadIncomeData().catch(error => {
-        console.error('Error loading income data:', error);
-      });
-    }
-  }, [activeView]);
-
-  // Fetch land owners
-  useEffect(() => {
-    const fetchLandOwners = async () => {
-      try {
-        const response = await fetch('/api/get-land-owners');
-        if (response.ok) {
-          const data = await response.json();
-          if (data.lands && Array.isArray(data.lands)) {
-            const ownersMap: Record<string, string> = {};
-            data.lands.forEach((land: any) => {
-              if (land.id && land.owner) {
-                ownersMap[land.id] = land.owner;
-              }
-            });
-            setLandOwners(ownersMap);
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching land owners:', error);
-      }
-    };
-    
-    fetchLandOwners();
-  }, []);
-
-  // Load users data
-  useEffect(() => {
-    const loadUsers = async () => {
-      try {
-        const apiUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-        const response = await fetch(`${apiUrl}/api/users`);
-        
-        if (response.ok) {
-          const data = await response.json();
-          if (data && Array.isArray(data)) {
-            const usersMap: Record<string, any> = {};
-            data.forEach(user => {
-              if (user.user_name) {
-                usersMap[user.user_name] = user;
-              }
-            });
-            
-            // Ensure ConsiglioDeiDieci is always present
-            if (!usersMap['ConsiglioDeiDieci']) {
-              usersMap['ConsiglioDeiDieci'] = {
-                user_name: 'ConsiglioDeiDieci',
-                color: '#8B0000', // Dark red
-                coat_of_arms_image: null
-              }
-            }
-            
-            setUsers(usersMap);
-          }
-        }
-      } catch (error) {
-        console.warn('Error loading users data:', error);
-        
-        // Create a default ConsiglioDeiDieci user as fallback
-        const fallbackUsers = {
-          'ConsiglioDeiDieci': {
-            user_name: 'ConsiglioDeiDieci',
-            color: '#8B0000', // Dark red
-            coat_of_arms_image: null
-          }
-        };
-        
-        setUsers(fallbackUsers);
-      }
-    };
-    
-    loadUsers();
-  }, []);
-
-  // Load buildings regardless of active view
-  useEffect(() => {
-    const fetchBuildings = async () => {
-      try {
-        // First, ensure building points are loaded
-        if (!buildingPointsService.isPointsLoaded()) {
-          console.log('IsometricViewer: Loading building points service...');
-          await buildingPointsService.loadBuildingPoints();
-          console.log('IsometricViewer: Building points service loaded successfully');
-        }
-        
-        console.log('%c FETCHING BUILDINGS: Starting API request', 'background: #4CAF50; color: white; padding: 4px 8px; font-weight: bold; border-radius: 4px;');
-        const response = await fetch('/api/buildings');
-        if (response.ok) {
-          const data = await response.json();
-          if (data.buildings) {
-            console.log(`%c BUILDINGS RECEIVED: ${data.buildings.length} buildings from API`, 'background: #4CAF50; color: white; padding: 4px 8px; font-weight: bold; border-radius: 4px;');
-            
-            // Process buildings to ensure they all have position data
-            const processedBuildings = data.buildings.map((building: any) => {
-              // If building already has a position, use it
-              if (building.position && 
-                  ((typeof building.position === 'object' && 'lat' in building.position && 'lng' in building.position) || 
-                   (typeof building.position === 'string' && building.position.includes('lat')))) {
-                return building;
-              }
-              
-              // If building has a point_id, try to get position from the service
-              if (building.point_id) {
-                const position = buildingPointsService.getPositionForPoint(building.point_id);
-                if (position) {
-                  return {
-                    ...building,
-                    position
-                  };
-                }
-              }
-              
-              // If building has a Point field (new format), try to extract coordinates
-              if (building.Point) {
-                // Try to extract coordinates from the Point field (format: type_lat_lng)
-                const parts = String(building.Point).split('_');
-                if (parts.length >= 3) {
-                  const lat = parseFloat(parts[1]);
-                  const lng = parseFloat(parts[2]);
-                  
-                  if (!isNaN(lat) && !isNaN(lng)) {
-                    return {
-                      ...building,
-                      position: { lat, lng }
-                    };
-                  }
-                }
-                
-                // If we couldn't extract coordinates directly, try using the service
-                const position = buildingPointsService.getPositionForPoint(String(building.Point));
-                if (position) {
-                  return {
-                    ...building,
-                    position
-                  };
-                }
-              }
-              
-              // If we couldn't resolve a position, return the building as is
-              return building;
-            });
-            
-            setBuildings(processedBuildings);
-            
-            // Reset position calculation flag when new buildings are loaded
-            setInitialPositionCalculated(false);
-            
-            // Dispatch event to ensure buildings are visible
-            window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching buildings:', error);
-      }
-    };
-    
-    // Call fetchBuildings once when the component mounts
-    fetchBuildings();
-    
-    // Set up interval to refresh buildings
-    const interval = setInterval(fetchBuildings, 30000);
-    
-    return () => clearInterval(interval);
-  }, []); // Empty dependency array to run only on mount
-  
-  // Pre-calculate building positions when buildings are loaded
-  useEffect(() => {
-    if (buildings.length > 0 && !initialPositionCalculated) {
-      console.log('Pre-calculating building positions for all buildings...');
       
-      // Use a more efficient approach with a single pass
-      const newPositionsCache = buildings.reduce((cache, building) => {
-        if (!building.position) return cache;
-        
-        let position;
-        try {
-          position = typeof building.position === 'string' 
-            ? JSON.parse(building.position) 
-            : building.position;
-        } catch (e) {
-          return cache;
-        }
-        
-        // Convert lat/lng to isometric coordinates
-        let x, y;
-        if ('lat' in position && 'lng' in position) {
-          x = (position.lng - 12.3326) * 20000;
-          y = (position.lat - 45.4371) * 20000;
-        } else if ('x' in position && 'z' in position) {
-          x = position.x;
-          y = position.z;
-        } else {
-          return cache;
-        }
-        
-        // Store the calculated position in the cache
-        cache[building.id] = { x, y };
-        return cache;
-      }, {});
-      
-      setBuildingPositionsCache(newPositionsCache);
-      setInitialPositionCalculated(true);
-      console.log(`Pre-calculated positions for ${Object.keys(newPositionsCache).length} buildings`);
-    }
-  }, [buildings, initialPositionCalculated]);
-  
-  // Handle the ensureBuildingsVisible event
-  useEffect(() => {
-    const handleEnsureBuildingsVisible = () => {
-      if (!initialPositionCalculated && buildings.length > 0) {
-        console.log('Ensuring buildings are visible by calculating positions...');
-        
-        const newPositionsCache: Record<string, {x: number, y: number}> = {};
-        
-        buildings.forEach(building => {
-          if (!building.position) return;
-          
-          let position;
-          if (typeof building.position === 'string') {
-            try {
-              position = JSON.parse(building.position);
-            } catch (e) {
-              return;
-            }
-          } else {
-            position = building.position;
-          }
-          
-          // Convert lat/lng to isometric coordinates
-          let x, y;
-          if ('lat' in position && 'lng' in position) {
-            x = (position.lng - 12.3326) * 20000;
-            y = (position.lat - 45.4371) * 20000;
-          } else if ('x' in position && 'z' in position) {
-            x = position.x;
-            y = position.z;
-          } else {
-            return;
-          }
-          
-          // Store the calculated position in the cache
-          newPositionsCache[building.id] = { x, y };
-        });
-        
-        setBuildingPositionsCache(newPositionsCache);
-        setInitialPositionCalculated(true);
-      }
-    };
-    
-    window.addEventListener('ensureBuildingsVisible', handleEnsureBuildingsVisible);
-    
-    return () => {
-      window.removeEventListener('ensureBuildingsVisible', handleEnsureBuildingsVisible);
-    };
-  }, [buildings, initialPositionCalculated]);
-  
-  // Load citizens if in citizens view
-  useEffect(() => {
-    if (activeView === 'citizens') {
-      loadCitizens();
-    }
-  }, [activeView]);
-  
-  // Define loadCitizens function
-  const loadCitizens = useCallback(async () => {
-    try {
-      console.log('Loading citizens data...');
-      setCitizensLoaded(false);
-      
-      const response = await fetch('/api/citizens');
-      if (response.ok) {
-        const data = await response.json();
-        if (data.citizens && Array.isArray(data.citizens)) {
-          setCitizens(data.citizens);
-          
-          // Group citizens by building
-          const byBuilding: Record<string, any[]> = {};
-          
-          data.citizens.forEach((citizen: any) => {
-            // Process home location
-            if (citizen.HomeBuilding) {
-              if (!byBuilding[citizen.HomeBuilding]) {
-                byBuilding[citizen.HomeBuilding] = [];
-              }
-              
-              byBuilding[citizen.HomeBuilding].push({
-                ...citizen,
-                markerType: 'home'
-              });
-            }
-            
-            // Process work location
-            if (citizen.WorkBuilding && citizen.WorkBuilding !== citizen.HomeBuilding) {
-              if (!byBuilding[citizen.WorkBuilding]) {
-                byBuilding[citizen.WorkBuilding] = [];
-              }
-              
-              byBuilding[citizen.WorkBuilding].push({
-                ...citizen,
-                markerType: 'work'
-              });
-            }
-          });
-          
-          setCitizensByBuilding(byBuilding);
-          setCitizensLoaded(true);
-          console.log(`Loaded ${data.citizens.length} citizens`);
-        }
-      }
-    } catch (error) {
-      console.error('Error loading citizens:', error);
-    }
-  }, []);
-  
-  // Check image paths when citizens are loaded
-  const checkImagePaths = async () => {
-    console.log('Checking image paths...');
-    
-    // Check if the citizens directory exists
-    try {
-      const response = await fetch('/images/citizens/default.jpg', { method: 'HEAD' });
-      console.log(`Default image check: ${response.ok ? 'EXISTS' : 'NOT FOUND'} (${response.status})`);
-    } catch (error) {
-      console.error('Error checking default image:', error);
-    }
-    
-    // Check a few citizen images
-    if (citizens.length > 0) {
-      for (let i = 0; i < Math.min(5, citizens.length); i++) {
-        const citizen = citizens[i];
-        const imageUrl = citizen.ImageUrl || `/images/citizens/${citizen.CitizenId}.jpg`;
-        
-        // Try multiple possible paths for each citizen
-        const urlsToTry = [
-          imageUrl,
-          `/images/citizens/${citizen.CitizenId}.jpg`,
-          `/images/citizens/${citizen.CitizenId}.png`,
-          `/images/citizens/default.jpg`
-        ];
-        
-        for (const url of urlsToTry) {
-          try {
-            const response = await fetch(url, { method: 'HEAD' });
-            console.log(`Citizen ${citizen.CitizenId} image check: ${url} - ${response.ok ? 'EXISTS' : 'NOT FOUND'} (${response.status})`);
-            if (response.ok) break; // Stop checking if we found a working URL
-          } catch (error) {
-            console.error(`Error checking image for citizen ${citizen.CitizenId} at ${url}:`, error);
-          }
-        }
-      }
-    }
-  };
-  
-  // Call image path check when citizens are loaded
-  useEffect(() => {
-    if (activeView === 'citizens' && citizensLoaded) {
-      checkImagePaths();
-    }
-  }, [activeView, citizensLoaded, citizens]);
-  
-  
-  // Listen for loadCitizens event
-  useEffect(() => {
-    const handleLoadCitizens = () => {
-      console.log('Received loadCitizens event in IsometricViewer');
-      loadCitizens();
-    };
-    
-    window.addEventListener('loadCitizens', handleLoadCitizens);
-    
-    return () => {
-      window.removeEventListener('loadCitizens', handleLoadCitizens);
-    };
-  }, [loadCitizens]);
-  
-  // Identify empty building points - now works in all views, not just buildings view
-  useEffect(() => {
-    if (polygons.length > 0 && buildings.length > 0) {
-      // Collect all building points from all polygons
-      const allBuildingPoints: {lat: number, lng: number}[] = [];
-      
-      polygons.forEach(polygon => {
-        if (polygon.buildingPoints && Array.isArray(polygon.buildingPoints)) {
-          polygon.buildingPoints.forEach(point => {
-            if (point && typeof point === 'object' && 'lat' in point && 'lng' in point) {
-              allBuildingPoints.push({
-                lat: point.lat,
-                lng: point.lng
-              });
-            }
-          });
-        }
-      });
-      
-      // Check which building points don't have buildings on them
-      const emptyPoints = allBuildingPoints.filter(point => {
-        // Check if there's no building at this point
-        return !buildings.some(building => {
-          if (!building.position) return false;
-          
-          let position;
-          if (typeof building.position === 'string') {
-            try {
-              position = JSON.parse(building.position);
-            } catch (e) {
-              return false;
-            }
-          } else {
-            position = building.position;
-          }
-          
-          // Check if position matches the building point
-          // Use a small threshold for floating point comparison
-          const threshold = 0.0001;
-          if ('lat' in position && 'lng' in position) {
-            return Math.abs(position.lat - point.lat) < threshold && 
-                   Math.abs(position.lng - point.lng) < threshold;
-          }
-          return false;
-        });
-      });
-      
-      setEmptyBuildingPoints(emptyPoints);
-    } else {
-      setEmptyBuildingPoints([]);
-    }
-  }, [polygons, buildings]); // Removed activeView dependency so it runs in all views
-
-  // Handle mouse wheel for zooming - now delegated to ViewportService
-  useEffect(() => {
-    const handleWheel = throttle((e: WheelEvent) => {
-      e.preventDefault();
-      const newScale = viewportService.handleZoom(e.deltaY * -0.01);
-      setScale(newScale);
-    }, 50); // Throttle to 50ms (20 updates per second max)
-    
-    const canvas = canvasRef.current;
-    if (canvas) {
-      canvas.addEventListener('wheel', handleWheel);
-    }
-    
-    return () => {
-      if (canvas) {
-        canvas.removeEventListener('wheel', handleWheel);
-      }
-      // Clean up the throttled function
-      handleWheel.cancel();
-    };
-  }, []);
-
-  // Handle mouse events for panning - now delegated to ViewportService
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const handleMouseDown = (e: MouseEvent) => {
-      viewportService.startPan(e.clientX, e.clientY);
-      setIsDragging(true);
-      isDraggingRef.current = true;
-      
-      // Update interaction service state
-      interactionService.setState({ isDragging: true });
-    };
-    
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isDraggingRef.current) return;
-      
-      const newOffset = viewportService.updatePan(e.clientX, e.clientY);
-      setOffset(newOffset);
-    };
-    
-    const handleMouseUp = () => {
-      if (isDraggingRef.current) {
-        viewportService.endPan();
-        setIsDragging(false);
-        isDraggingRef.current = false;
-        
-        // Update interaction service state
-        interactionService.setState({ isDragging: false });
-      }
-    };
-    
-    canvas.addEventListener('mousedown', handleMouseDown);
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-    
-    return () => {
-      canvas.removeEventListener('mousedown', handleMouseDown);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, []);
-
-  // Emit map transformation events for other components to sync with - now using ViewportService
-  useEffect(() => {
-    // Create a function to emit the current map transformation state
-    const emitMapTransform = () => {
-      window.dispatchEvent(new CustomEvent('mapTransformed', {
-        detail: {
-          offset: viewportService.getOffset(),
-          scale: viewportService.getScale(),
-          rotation: 0, // Add rotation if implemented
-          tilt: 0 // Add tilt if implemented
-        }
+      // Notify other components about the view change
+      window.dispatchEvent(new CustomEvent('viewChanged', { 
+        detail: { view: activeView }
       }));
     };
     
-    // Emit on any transformation change
-    emitMapTransform();
+    loadViewData();
+  }, [activeView]);
+
+  // Set up periodic refresh of buildings data
+  useEffect(() => {
+    // Set up interval to refresh buildings every 30 seconds
+    const interval = setInterval(() => {
+      dataService.loadBuildings().catch(error => {
+        console.error('Error refreshing buildings data:', error);
+      });
+    }, 30000);
     
-    // Listen for viewport changes
-    const handleScaleChanged = () => emitMapTransform();
-    const handleOffsetChanged = () => emitMapTransform();
-    
-    // Also listen for requests for the current transformation
-    const handleRequestTransform = () => {
-      emitMapTransform();
-    };
-    
-    eventBus.subscribe(EventTypes.VIEWPORT_SCALE_CHANGED, handleScaleChanged);
-    eventBus.subscribe(EventTypes.VIEWPORT_OFFSET_CHANGED, handleOffsetChanged);
-    window.addEventListener('requestMapTransform', handleRequestTransform);
-    
-    return () => {
-      eventBus.unsubscribe(EventTypes.VIEWPORT_SCALE_CHANGED, handleScaleChanged);
-      eventBus.unsubscribe(EventTypes.VIEWPORT_OFFSET_CHANGED, handleOffsetChanged);
-      window.removeEventListener('requestMapTransform', handleRequestTransform);
-    };
+    return () => clearInterval(interval);
   }, []);
+  
+  // This functionality is now handled by BuildingService
+  
+  // This functionality is now handled by CitizenService
+  
+  // This functionality is now handled by CitizenService
+  
+  // This functionality is now handled by DataService
+
+  // Mouse handling is now delegated to ViewportService and InteractionService
+
+  // Map transformation events are now handled by ViewportService
 
   // Income color calculation is now fully delegated to IncomeService
   
@@ -2962,29 +2341,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   }, [loading, polygons, landOwners, users, activeView, buildings, scale, offset, incomeData, minIncome, maxIncome, hoveredPolygonId, selectedPolygonId, hoveredBuildingId, selectedBuildingId, emptyBuildingPoints, mousePosition, citizensLoaded, citizensByBuilding, hoveredCitizenBuilding, hoveredCitizenType, incomeDataLoaded, polygonsToRender]);
   
 
-  // Handle window resize
-  useEffect(() => {
-    const handleResize = debounce(() => {
-      if (canvasRef.current) {
-        canvasRef.current.width = window.innerWidth;
-        canvasRef.current.height = window.innerHeight;
-        
-        // Clear the coat of arms cache when resizing
-        renderedCoatOfArmsCache.current = {};
-        
-        // Redraw everything
-        const event = new Event('redraw');
-        window.dispatchEvent(event);
-      }
-    }, 200);
-    
-    window.addEventListener('resize', handleResize);
-    
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      handleResize.cancel(); // Clean up the debounced function
-    };
-  }, []);
+  // Window resize handling is now in ViewportCanvas
 
   // Building size and color functions are now fully delegated to BuildingService
 
@@ -3032,6 +2389,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         }}
       />
       
+      {/* Building Hover Tooltip */}
       {uiState.hoveredBuildingName && uiState.hoveredBuildingPosition && (
         <div 
           className="absolute bg-black/80 text-white rounded text-sm pointer-events-none z-50 overflow-hidden"
@@ -3125,7 +2483,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       </div>
       
       {/* Exit Transport Mode button */}
-      {activeView === 'transport' && transportMode && (
+      {activeView === 'transport' && transportService.getTransportMode() && (
         <button
           onClick={() => {
             transportService.reset();
