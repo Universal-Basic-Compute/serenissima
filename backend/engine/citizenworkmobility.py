@@ -82,9 +82,33 @@ def get_employed_citizens(tables) -> List[Dict]:
     log.info("Fetching employed citizens...")
     
     try:
-        # Get citizens with a non-empty Work field
-        formula = "NOT(OR({Work} = '', {Work} = BLANK()))"
+        # Get buildings with non-empty Occupant field that are businesses (not housing)
+        # We'll need to filter for business-type buildings
+        formula = "NOT(OR({Occupant} = '', {Occupant} = BLANK()))"
+        occupied_buildings = tables['buildings'].all(formula=formula)
+        
+        # Extract the occupant IDs
+        citizen_ids = [building['fields'].get('Occupant') for building in occupied_buildings if building['fields'].get('Occupant')]
+        
+        # If no citizens are employed, return empty list
+        if not citizen_ids:
+            log.info("No employed citizens found")
+            return []
+        
+        # Create a formula to get these citizens
+        citizen_conditions = [f"RECORD_ID()='{citizen_id}'" for citizen_id in citizen_ids]
+        formula = f"OR({', '.join(citizen_conditions)})"
+        
         employed_citizens = tables['citizens'].all(formula=formula)
+        
+        # Add the building information to each citizen for easier processing
+        for citizen in employed_citizens:
+            # Find the building this citizen works at
+            for building in occupied_buildings:
+                if building['fields'].get('Occupant') == citizen['id']:
+                    # Add building info to the citizen record
+                    citizen['current_business'] = building
+                    break
         
         log.info(f"Found {len(employed_citizens)} employed citizens")
         return employed_citizens
@@ -95,7 +119,7 @@ def get_employed_citizens(tables) -> List[Dict]:
 def get_business_details(tables, business_id: str) -> Optional[Dict]:
     """Get details of a specific business."""
     try:
-        business = tables['businesses'].get(business_id)
+        business = tables['buildings'].get(business_id)
         return business
     except Exception as e:
         log.error(f"Error fetching business {business_id}: {e}")
@@ -106,24 +130,17 @@ def get_available_businesses(tables) -> List[Dict]:
     log.info("Fetching available businesses...")
     
     try:
-        # First, get all businesses
-        all_businesses = tables['businesses'].all()
+        # Get all buildings that are businesses (not housing)
+        # This would need to be adjusted based on how you identify business buildings
+        business_types = ['workshop', 'market-stall', 'tavern', 'warehouse', 'dock']
+        type_conditions = [f"{{Type}}='{business_type}'" for business_type in business_types]
+        formula = f"OR({', '.join(type_conditions)})"
+        
+        all_businesses = tables['buildings'].all(formula=formula)
         log.info(f"Fetched {len(all_businesses)} total businesses")
         
-        # Then, get all citizens with jobs
-        employed_citizens = tables['citizens'].all(formula="NOT(OR({Work} = '', {Work} = BLANK()))")
-        log.info(f"Found {len(employed_citizens)} employed citizens")
-        
-        # Extract the business IDs that are already taken
-        taken_business_ids = set()
-        for citizen in employed_citizens:
-            if 'Work' in citizen['fields'] and citizen['fields']['Work']:
-                taken_business_ids.add(citizen['fields']['Work'])
-        
-        log.info(f"Found {len(taken_business_ids)} businesses that are already taken")
-        
-        # Filter out businesses that are already taken
-        available_businesses = [b for b in all_businesses if b['id'] not in taken_business_ids]
+        # Filter out businesses that already have occupants
+        available_businesses = [b for b in all_businesses if not b['fields'].get('Occupant')]
         
         # Sort by Wages in descending order
         available_businesses.sort(key=lambda b: float(b['fields'].get('Wages', 0) or 0), reverse=True)
@@ -147,19 +164,14 @@ def move_citizen_to_new_job(tables, citizen: Dict, old_business: Dict, new_busin
     log.info(f"Moving {citizen_name} from {old_business_name} to {new_business_name}")
     
     try:
-        # Update citizen record with new job
-        tables['citizens'].update(citizen_id, {
-            'Work': new_business_id
+        # Update old business record to remove occupant
+        tables['buildings'].update(old_business_id, {
+            'Occupant': ""
         })
         
-        # Update old business record to inactive if needed
-        tables['businesses'].update(old_business_id, {
-            'Status': 'inactive'
-        })
-        
-        # Update new business record to active
-        tables['businesses'].update(new_business_id, {
-            'Status': 'active'
+        # Update new business record with new occupant
+        tables['buildings'].update(new_business_id, {
+            'Occupant': citizen_id
         })
         
         log.info(f"Successfully moved {citizen_name} to {new_business_name}")
@@ -329,24 +341,19 @@ def process_work_mobility(dry_run: bool = False):
     for citizen in employed_citizens:
         citizen_id = citizen['id']
         social_class = citizen['fields'].get('SocialClass', '')
-        current_job_id = citizen['fields'].get('Work', '')
+        
+        # Get current business from the attached building info
+        current_business = citizen.get('current_business')
+        if not current_business:
+            citizen_name = f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}"
+            log.warning(f"Citizen {citizen_name} has no current business information despite being in employed list")
+            continue
         
         citizen_name = f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}"
         
         # Skip if social class is unknown or not in our mobility table
         if not social_class or social_class not in MOBILITY_CHANCE:
             log.warning(f"Citizen {citizen_name} has unknown social class: {social_class}")
-            continue
-        
-        # Skip if job is not set
-        if not current_job_id:
-            log.warning(f"Citizen {citizen_name} has empty job field despite being in employed list")
-            continue
-        
-        # Get current business details
-        current_business = get_business_details(tables, current_job_id)
-        if not current_business:
-            log.warning(f"Could not find current business {current_job_id} for citizen {citizen_name}")
             continue
         
         # Track that we checked this citizen
