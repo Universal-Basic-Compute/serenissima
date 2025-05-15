@@ -128,7 +128,7 @@ export async function GET(request: Request) {
       // Ensure the citizen ID is a string
       const citizenId = record.fields.CitizenId ? 
         (typeof record.fields.CitizenId === 'string' ? 
-          record.fields.CitizenId : 
+          record.fields.CitizenId as string : 
           String(record.fields.CitizenId)) 
         : `ctz_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
       
@@ -153,7 +153,7 @@ export async function GET(request: Request) {
           record.fields.ImageUrl ? 
             (typeof record.fields.ImageUrl === 'string' ? 
               record.fields.ImageUrl as string : 
-              String(record.fields.ImageUrl)) : 
+              String(record.fields.ImageUrl as AirtableValue)) : 
             undefined, 
           citizenId
         ),
@@ -161,7 +161,7 @@ export async function GET(request: Request) {
           record.fields.ImageUrl ? 
             (typeof record.fields.ImageUrl === 'string' ? 
               record.fields.ImageUrl as string : 
-              String(record.fields.ImageUrl)) : 
+              String(record.fields.ImageUrl as AirtableValue)) : 
             undefined, 
           citizenId
         ),
