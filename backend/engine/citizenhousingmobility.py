@@ -75,11 +75,15 @@ def initialize_airtable():
         sys.exit(1)
     
     try:
+        # Use the new recommended way to initialize tables
+        api = Api(api_key)
+        base = api.base(base_id)
+        
         # Return a dictionary of table objects using pyairtable
         return {
-            'citizens': Table(api_key, base_id, 'CITIZENS'),
-            'buildings': Table(api_key, base_id, 'BUILDINGS'),
-            'notifications': Table(api_key, base_id, 'NOTIFICATIONS')
+            'citizens': base.table('CITIZENS'),
+            'buildings': base.table('BUILDINGS'),
+            'notifications': base.table('NOTIFICATIONS')
         }
     except Exception as e:
         log.error(f"Failed to initialize Airtable: {e}")

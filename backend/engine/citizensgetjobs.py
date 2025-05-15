@@ -61,10 +61,12 @@ def get_unemployed_citizens(tables) -> List[Dict]:
         # Get all citizens
         all_citizens = tables['citizens'].all()
         
-        # Get all buildings with occupants that are businesses (not housing)
-        business_types = ['workshop', 'market-stall', 'tavern', 'warehouse', 'dock']
-        type_conditions = [f"{{Type}}='{business_type}'" for business_type in business_types]
-        business_formula = f"AND(OR({', '.join(type_conditions)}), NOT(OR({{Occupant}} = '', {{Occupant}} = BLANK())))"
+        # Define housing types to exclude
+        housing_types = ['canal_house', 'merchant_s_house', 'artisan_s_house', 'fisherman_s_cottage']
+        
+        # Create a formula to exclude housing types and find buildings with occupants
+        housing_conditions = [f"{{Type}}='{housing_type}'" for housing_type in housing_types]
+        business_formula = f"AND(NOT(OR({', '.join(housing_conditions)})), NOT(OR({{Occupant}} = '', {{Occupant}} = BLANK())))"
         
         occupied_businesses = tables['buildings'].all(formula=business_formula)
         

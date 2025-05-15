@@ -102,10 +102,12 @@ def get_available_businesses(tables) -> List[Dict]:
     log.info("Fetching available businesses...")
     
     try:
-        # Get business-type buildings without occupants
-        business_types = ['workshop', 'market-stall', 'tavern', 'warehouse', 'dock']
-        type_conditions = [f"{{Type}}='{business_type}'" for business_type in business_types]
-        formula = f"AND(OR({', '.join(type_conditions)}), OR({{Occupant}} = '', {{Occupant}} = BLANK()))"
+        # Define housing types to exclude
+        housing_types = ['canal_house', 'merchant_s_house', 'artisan_s_house', 'fisherman_s_cottage']
+        
+        # Create a formula to exclude housing types and find buildings without occupants
+        housing_conditions = [f"{{Type}}='{housing_type}'" for housing_type in housing_types]
+        formula = f"AND(NOT(OR({', '.join(housing_conditions)})), OR({{Occupant}} = '', {{Occupant}} = BLANK()))"
         
         available_businesses = tables['buildings'].all(formula=formula)
         log.info(f"Found {len(available_businesses)} available businesses")
