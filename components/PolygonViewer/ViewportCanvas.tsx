@@ -275,6 +275,13 @@ export default function ViewportCanvas({
     interactionService.updatePolygonsData(polygons);
   }, [polygons]);
   
+  // Add debugging for hover state changes
+  useEffect(() => {
+    if (hoveredBuildingId !== null) {
+      console.log('%c ViewportCanvas: hoveredBuildingId changed:', 'background: #4CAF50; color: white;', hoveredBuildingId);
+    }
+  }, [hoveredBuildingId]);
+  
   // Calculate polygons to render
   useEffect(() => {
     if (loading || !canvasRef.current || polygons.length === 0) return;
