@@ -66,69 +66,80 @@ export default function TwoDPage() {
       });
   }, []);
 
-  // Handle initial view loading and ensure buildings are always visible
+  // Initial dispatch of ensureBuildingsVisible event - only runs once on mount
   useEffect(() => {
     console.log('Initial page load, ensuring buildings are always visible...');
     
     // Dispatch an event to ensure buildings are visible regardless of view
     window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
-    
-    // Also listen for the event to ensure buildings stay visible
-    const ensureBuildingsVisible = () => {
-      console.log('Ensuring buildings are visible in all views');
-      // Make sure empty building points are calculated
-      if (polygons.length > 0 && buildings.length > 0) {
-        // Force recalculation of empty building points
-        const allBuildingPoints: {lat: number, lng: number}[] = [];
-        
-        polygons.forEach(polygon => {
-          if (polygon.buildingPoints && Array.isArray(polygon.buildingPoints)) {
-            polygon.buildingPoints.forEach(point => {
-              if (point && typeof point === 'object' && 'lat' in point && 'lng' in point) {
-                allBuildingPoints.push({
-                  lat: point.lat,
-                  lng: point.lng
-                });
-              }
-            });
-          }
-        });
-        
-        // Check which building points don't have buildings on them
-        const emptyPoints = allBuildingPoints.filter(point => {
-          return !buildings.some(building => {
-            if (!building.position) return false;
-            
-            let position;
-            if (typeof building.position === 'string') {
-              try {
-                position = JSON.parse(building.position);
-              } catch (e) {
-                return false;
-              }
-            } else {
-              position = building.position;
+  }, []); // Empty dependency array means this runs only once on mount
+  
+  // Set up event listener for ensureBuildingsVisible
+  useEffect(() => {
+    // Create a function to calculate empty building points
+    const calculateEmptyBuildingPoints = () => {
+      if (polygons.length === 0 || buildings.length === 0) return;
+      
+      // Force recalculation of empty building points
+      const allBuildingPoints: {lat: number, lng: number}[] = [];
+      
+      polygons.forEach(polygon => {
+        if (polygon.buildingPoints && Array.isArray(polygon.buildingPoints)) {
+          polygon.buildingPoints.forEach(point => {
+            if (point && typeof point === 'object' && 'lat' in point && 'lng' in point) {
+              allBuildingPoints.push({
+                lat: point.lat,
+                lng: point.lng
+              });
             }
-            
-            const threshold = 0.0001;
-            if ('lat' in position && 'lng' in position) {
-              return Math.abs(position.lat - point.lat) < threshold && 
-                     Math.abs(position.lng - point.lng) < threshold;
-            }
-            return false;
           });
+        }
+      });
+      
+      // Check which building points don't have buildings on them
+      const emptyPoints = allBuildingPoints.filter(point => {
+        return !buildings.some(building => {
+          if (!building.position) return false;
+          
+          let position;
+          if (typeof building.position === 'string') {
+            try {
+              position = JSON.parse(building.position);
+            } catch (e) {
+              return false;
+            }
+          } else {
+            position = building.position;
+          }
+          
+          const threshold = 0.0001;
+          if ('lat' in position && 'lng' in position) {
+            return Math.abs(position.lat - point.lat) < threshold && 
+                   Math.abs(position.lng - point.lng) < threshold;
+          }
+          return false;
         });
-        
-        setEmptyBuildingPoints(emptyPoints);
-      }
+      });
+      
+      setEmptyBuildingPoints(emptyPoints);
     };
     
+    // Event handler that uses the calculation function
+    const ensureBuildingsVisible = () => {
+      console.log('Ensuring buildings are visible in all views');
+      calculateEmptyBuildingPoints();
+    };
+    
+    // Calculate empty building points when polygons or buildings change
+    calculateEmptyBuildingPoints();
+    
+    // Set up event listener
     window.addEventListener('ensureBuildingsVisible', ensureBuildingsVisible);
     
     return () => {
       window.removeEventListener('ensureBuildingsVisible', ensureBuildingsVisible);
     };
-  }, [polygons, buildings]); // Add dependencies to ensure the callback has access to latest state
+  }, [polygons, buildings]); // Dependencies for the effect
 
   // Update view when activeView changes
   useEffect(() => {

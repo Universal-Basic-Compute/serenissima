@@ -38,8 +38,12 @@ export default function RootLayout({
                 
                 // Also set up a periodic check to ensure buildings stay visible
                 setInterval(function() {
-                  window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
-                }, 30000); // Reduced from 5 seconds to 30 seconds
+                  // Only dispatch if the page has been loaded for more than 5 seconds
+                  if (document.readyState === 'complete' && performance.now() > 5000) {
+                    console.log('Layout: Periodic ensureBuildingsVisible check');
+                    window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+                  }
+                }, 30000); // Keep at 30 seconds
                 
                 // Also dispatch the event when switching views
                 window.addEventListener('viewChanged', function(e) {
