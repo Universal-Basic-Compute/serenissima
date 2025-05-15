@@ -291,8 +291,8 @@ export class InteractionService {
       // Handle hover detection
       let hoverDetected = false;
       
-      // Check for polygon hover
-      if (data.polygonsToRender) {
+      // Check for polygon hover - ONLY in land view
+      if (data.polygonsToRender && activeView === 'land') {
         for (const { polygon, coords } of data.polygonsToRender) {
           if (RenderService.prototype.isPointInPolygon(mouseX, mouseY, coords)) {
             hoverStateService.setHoveredPolygon(polygon.id);
