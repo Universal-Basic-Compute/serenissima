@@ -478,7 +478,7 @@ export default function ViewportCanvas({
       { polygonData: polygons } as Record<string, any[]>,
       incomeDataLoaded as unknown as boolean,
       {} as unknown as Record<string, HTMLImageElement>,
-      maxIncome
+      renderedCoatOfArmsCache.current
     );
     
     // Handle citizens and coat of arms separately if needed
@@ -530,7 +530,7 @@ export default function ViewportCanvas({
           { polygonData: polygons } as Record<string, any[]>,
           incomeDataLoaded as unknown as boolean,
           {} as unknown as Record<string, HTMLImageElement>,
-          maxIncome
+          renderedCoatOfArmsCache.current
         );
       
         // Handle citizens and coat of arms separately if needed
