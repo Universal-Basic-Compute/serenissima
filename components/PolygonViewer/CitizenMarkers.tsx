@@ -66,6 +66,16 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     const homeCoords = parseBuildingCoordinates(citizen.home);
     const workCoords = parseBuildingCoordinates(citizen.work);
     
+    // Log more detailed information for debugging
+    console.log('Citizen hover:', {
+      citizen: citizen.firstname + ' ' + citizen.lastname,
+      home: citizen.home,
+      work: citizen.work,
+      homeCoords,
+      workCoords,
+      position: citizen.position
+    });
+    
     // Calculate connections
     const connections = {
       citizen,
@@ -73,15 +83,16 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
       workPosition: workCoords ? latLngToScreen(workCoords.lat, workCoords.lng) : undefined
     };
     
-    console.log('Citizen hover:', {
-      citizen: citizen.firstname + ' ' + citizen.lastname,
-      home: citizen.home,
-      work: citizen.work,
-      homeCoords,
-      workCoords
-    });
+    // Log the calculated screen positions
+    if (homeCoords || workCoords) {
+      console.log('Connection screen positions:', {
+        homePosition: connections.homePosition,
+        workPosition: connections.workPosition,
+        citizenScreenPos: latLngToScreen(citizen.position.lat, citizen.position.lng)
+      });
+    }
     
-    // Only set connections if we have at least one valid position
+    // Set connections even if we only have one valid position
     if (connections.homePosition || connections.workPosition) {
       setHoveredConnections(connections);
     }
@@ -248,6 +259,11 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
       {/* Connection lines to home and work when hovering */}
       {hoveredConnections && hoveredConnections.citizen && hoveredConnections.citizen.position && (
         <svg className="absolute inset-0 pointer-events-none" style={{ zIndex: 990 }}>
+          {/* Debug info - add this to see if the SVG is rendering */}
+          <text x="20" y="20" fill="red" fontSize="12">
+            Hover connections active: {hoveredConnections.homePosition ? 'Home' : ''} {hoveredConnections.workPosition ? 'Work' : ''}
+          </text>
+          
           {/* Home connection line */}
           {hoveredConnections.homePosition && (
             <>
