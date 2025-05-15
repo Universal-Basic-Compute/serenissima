@@ -48,7 +48,7 @@ async function fetchUsersData(base: any) {
     const records = await new Promise((resolve, reject) => {
       const allRecords: any[] = [];
       usersTable.select({
-        fields: ['Username', 'CoatOfArmsImage'] // Only select the fields we need
+        fields: ['Username', 'CoatOfArmsImage', 'Ducats', 'FirstName', 'LastName', 'FamilyMotto'] // Added new fields
       }).eachPage(
         function page(records, fetchNextPage) {
           allRecords.push(...records);
@@ -69,7 +69,11 @@ async function fetchUsersData(base: any) {
     (records as any[]).forEach(record => {
       if (record.fields.Username) {
         usersMap.set(record.fields.Username, {
-          coat_of_arms_image: record.fields.CoatOfArmsImage || null
+          coat_of_arms_image: record.fields.CoatOfArmsImage || null,
+          ducats: record.fields.Ducats || 0,
+          first_name: record.fields.FirstName || null,
+          last_name: record.fields.LastName || null,
+          family_motto: record.fields.FamilyMotto || null
         });
       }
     });
@@ -162,6 +166,10 @@ export async function GET(request: Request) {
         owner: string | null;
         coat_of_arms_image?: string;
         _coat_of_arms_source?: string;
+        ducats?: number;
+        first_name?: string;
+        last_name?: string;
+        family_motto?: string;
       }
 
       // Transform records to the expected format
@@ -173,7 +181,12 @@ export async function GET(request: Request) {
           id: record.fields.LandId || record.id,
           owner: owner,
           // Use coat of arms from user data if available, otherwise use from land record
-          coat_of_arms_image: userData?.coat_of_arms_image || record.fields.CoatOfArmsImage || null
+          coat_of_arms_image: userData?.coat_of_arms_image || record.fields.CoatOfArmsImage || null,
+          // Add the new fields from user data
+          ducats: userData?.ducats || 0,
+          first_name: userData?.first_name || null,
+          last_name: userData?.last_name || null,
+          family_motto: userData?.family_motto || null
         } as LandData;
       });
       
