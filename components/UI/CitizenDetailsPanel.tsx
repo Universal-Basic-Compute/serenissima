@@ -145,7 +145,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     }
   };
   
-  const socialClassStyle = getSocialClassColor(citizen.SocialClass);
+  const socialClassStyle = getSocialClassColor(citizen.socialclass);
   
   return (
     <div 
@@ -155,7 +155,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     >
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-serif text-amber-800">
-          {citizen.firstname || citizen.FirstName} {citizen.lastname || citizen.LastName}
+          {citizen.firstname} {citizen.lastname}
         </h2>
         <button 
           onClick={handleClose}
@@ -171,10 +171,10 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
       <div className="flex flex-col items-center mb-6">
         {/* Much larger image */}
         <div className="w-48 h-48 mb-4 relative">
-          {citizen.imageurl || citizen.ImageUrl ? (
+          {citizen.imageurl ? (
             <img 
-              src={(citizen.imageurl || citizen.ImageUrl).endsWith('.jpg') ? (citizen.imageurl || citizen.ImageUrl) : `/images/citizens/${citizen.citizenid || citizen.CitizenId}.jpg`} 
-              alt={`${citizen.firstname || citizen.FirstName} ${citizen.lastname || citizen.LastName}`} 
+              src={citizen.imageurl.endsWith('.jpg') ? citizen.imageurl : `/images/citizens/${citizen.citizenid}.jpg`} 
+              alt={`${citizen.firstname} ${citizen.lastname}`} 
               className="w-full h-full object-cover rounded-lg border-2 border-amber-600 shadow-lg"
               onLoad={(e) => {
                 console.log(`Successfully loaded citizen image: ${(e.target as HTMLImageElement).src}`);
@@ -205,8 +205,8 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
             />
           ) : (
             <img 
-              src={`/images/citizens/${citizen.citizenid || citizen.CitizenId}.jpg`}
-              alt={`${citizen.firstname || citizen.FirstName} ${citizen.lastname || citizen.LastName}`} 
+              src={`/images/citizens/${citizen.citizenid}.jpg`}
+              alt={`${citizen.firstname} ${citizen.lastname}`} 
               className="w-full h-full object-cover rounded-lg border-2 border-amber-600 shadow-lg"
               onLoad={(e) => {
                 console.log(`Successfully loaded citizen image: ${(e.target as HTMLImageElement).src}`);
@@ -232,11 +232,11 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
         {/* Social class and wealth info */}
         <div className="text-center">
           <div className={`px-3 py-1.5 rounded-full text-sm font-medium inline-block mb-2 ${socialClassStyle}`}>
-            {citizen.socialclass || citizen.SocialClass}
+            {citizen.socialclass}
           </div>
           
           <div className="text-amber-700 text-sm font-medium">
-            Wealth: {formatDucats(citizen.wealth || citizen.Wealth)}
+            Wealth: {formatDucats(citizen.wealth)}
           </div>
         </div>
       </div>
@@ -278,11 +278,11 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
       
       <div className="mb-6">
         <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">About</h3>
-        <p className="text-amber-700 italic">{citizen.description || citizen.Description || 'No description available.'}</p>
+        <p className="text-amber-700 italic">{citizen.description || 'No description available.'}</p>
       </div>
       
       <div className="mt-4 text-xs text-amber-500 italic text-center">
-        Citizen of Venice since {formatDate(citizen.createdat || citizen.CreatedAt)}
+        Citizen of Venice since {formatDate(citizen.createdat)}
       </div>
     </div>
   );
