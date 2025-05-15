@@ -129,6 +129,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [transportPath, setTransportPath] = useState<any[]>([]);
   const [calculatingPath, setCalculatingPath] = useState<boolean>(false);
   const [waterOnlyMode, setWaterOnlyMode] = useState<boolean>(false);
+  const [pathfindingMode, setPathfindingMode] = useState<'all' | 'real'>('all');
 
   // Load polygons
   useEffect(() => {
@@ -1177,8 +1178,22 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     return R * c;
   };
   
+  // Function to toggle pathfinding mode
+  const togglePathfindingMode = () => {
+    const newMode = pathfindingMode === 'all' ? 'real' : 'all';
+    setPathfindingMode(newMode);
+    
+    // Update the transport service
+    transportService.setPathfindingMode(newMode);
+    
+    // If there's an active route, recalculate it
+    if (transportStartPoint && transportEndPoint) {
+      calculateTransportRoute(transportStartPoint, transportEndPoint, newMode);
+    }
+  };
+
   // Function to calculate the transport route
-  const calculateTransportRoute = async (start: {lat: number, lng: number}, end: {lat: number, lng: number}) => {
+  const calculateTransportRoute = async (start: {lat: number, lng: number}, end: {lat: number, lng: number}, mode?: 'all' | 'real') => {
     try {
       // Set calculating state to true to show loading indicator
       setCalculatingPath(true);
@@ -1299,7 +1314,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         },
         body: JSON.stringify({
           startPoint: start,
-          endPoint: end
+          endPoint: end,
+          pathfindingMode: mode || pathfindingMode
         }),
       });
       

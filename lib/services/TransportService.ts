@@ -87,6 +87,7 @@ export class TransportService {
   private initializationPromise: Promise<boolean> | null = null;
   private initializationAttempts: number = 0;
   private readonly MAX_INITIALIZATION_ATTEMPTS = 5;
+  private pathfindingMode: 'all' | 'real' = 'all'; // Default to 'all' for backward compatibility
   
   // Static method for initialization
   public static initialize(): Promise<boolean> {
@@ -126,9 +127,38 @@ export class TransportService {
   }
 
   /**
+   * Set pathfinding mode
+   * @param mode 'all' to use all potential points, 'real' to only use constructed infrastructure
+   */
+  public setPathfindingMode(mode: 'all' | 'real'): void {
+    this.pathfindingMode = mode;
+    console.log(`Pathfinding mode set to: ${mode}`);
+    
+    // Rebuild the graph with the new mode
+    if (this.polygonsLoaded && this.polygons.length > 0) {
+      this.buildGraphAndNetwork();
+    }
+  }
+
+  /**
+   * Get current pathfinding mode
+   */
+  public getPathfindingMode(): 'all' | 'real' {
+    return this.pathfindingMode;
+  }
+
+  /**
    * Calculate transport route
    */
-  public async calculateRoute(start: {lat: number, lng: number}, end: {lat: number, lng: number}): Promise<void> {
+  public async calculateRoute(
+    start: {lat: number, lng: number}, 
+    end: {lat: number, lng: number},
+    mode?: 'all' | 'real'
+  ): Promise<void> {
+    // If mode is provided, update the pathfinding mode
+    if (mode) {
+      this.setPathfindingMode(mode);
+    }
     try {
       // Set calculating state to true to show loading indicator
       this.calculatingPath = true;
@@ -899,17 +929,25 @@ export class TransportService {
     };
     
     // Extract all canal points for later use
-    const allCanalPoints: {point: Point, id: string, polygonId: string}[] = [];
+    const allCanalPoints: {point: Point, id: string, polygonId: string, isConstructed: boolean}[] = [];
     for (const polygon of polygons) {
       if (polygon.canalPoints) {
         for (const point of polygon.canalPoints) {
           if (point.edge) {
             const pointId = point.id || `canal-${point.edge.lat}-${point.edge.lng}`;
-            allCanalPoints.push({
-              point: point.edge,
-              id: pointId,
-              polygonId: polygon.id
-            });
+            // Check if this is a constructed dock
+            const isConstructed = !!point.isConstructed || 
+                                 (pointId.includes('public_dock') || pointId.includes('dock-constructed'));
+            
+            // In 'real' mode, only include constructed docks
+            if (this.pathfindingMode === 'all' || isConstructed) {
+              allCanalPoints.push({
+                point: point.edge,
+                id: pointId,
+                polygonId: polygon.id,
+                isConstructed
+              });
+            }
           }
         }
       }
@@ -983,34 +1021,48 @@ export class TransportService {
         }
       }
       
-      // Add bridge point nodes
+      // Add bridge point nodes - in 'real' mode, only include constructed bridges
       if (polygon.bridgePoints) {
         for (const point of polygon.bridgePoints) {
           if (point.edge) {
             const pointId = point.id || `bridge-${point.edge.lat}-${point.edge.lng}`;
-            graph.nodes[pointId] = {
-              id: pointId,
-              position: point.edge,
-              type: 'bridge',
-              polygonId: polygon.id
-            };
-            graph.edges[pointId] = [];
+            // Check if this is a constructed bridge
+            const isConstructed = !!point.isConstructed || 
+                                 (pointId.includes('bridge-constructed') || pointId.includes('public_bridge'));
+            
+            // In 'real' mode, only include constructed bridges
+            if (this.pathfindingMode === 'all' || isConstructed) {
+              graph.nodes[pointId] = {
+                id: pointId,
+                position: point.edge,
+                type: 'bridge',
+                polygonId: polygon.id
+              };
+              graph.edges[pointId] = [];
+            }
           }
         }
       }
       
-      // Add canal point nodes
+      // Add canal point nodes - in 'real' mode, only include constructed docks
       if (polygon.canalPoints) {
         for (const point of polygon.canalPoints) {
           if (point.edge) {
             const pointId = point.id || `canal-${point.edge.lat}-${point.edge.lng}`;
-            graph.nodes[pointId] = {
-              id: pointId,
-              position: point.edge,
-              type: 'canal',
-              polygonId: polygon.id
-            };
-            graph.edges[pointId] = [];
+            // Check if this is a constructed dock
+            const isConstructed = !!point.isConstructed || 
+                                 (pointId.includes('public_dock') || pointId.includes('dock-constructed'));
+            
+            // In 'real' mode, only include constructed docks
+            if (this.pathfindingMode === 'all' || isConstructed) {
+              graph.nodes[pointId] = {
+                id: pointId,
+                position: point.edge,
+                type: 'canal',
+                polygonId: polygon.id
+              };
+              graph.edges[pointId] = [];
+            }
           }
         }
       }
@@ -1163,7 +1215,7 @@ export class TransportService {
     const canalNetwork: Record<string, Point[]> = {};
 
     // Extract all canal points
-    const allCanalPoints: {point: Point, id: string, polygonId: string}[] = [];
+    const allCanalPoints: {point: Point, id: string, polygonId: string, isConstructed: boolean}[] = [];
 
     // First, collect all canal points
     for (const polygon of polygons) {
@@ -1171,11 +1223,19 @@ export class TransportService {
         for (const point of polygon.canalPoints) {
           if (point.edge) {
             const pointId = point.id || `canal-${point.edge.lat}-${point.edge.lng}`;
-            allCanalPoints.push({
-              point: point.edge,
-              id: pointId,
-              polygonId: polygon.id
-            });
+            // Check if this is a constructed dock
+            const isConstructed = !!point.isConstructed || 
+                                 (pointId.includes('public_dock') || pointId.includes('dock-constructed'));
+            
+            // In 'real' mode, only include constructed docks
+            if (this.pathfindingMode === 'all' || isConstructed) {
+              allCanalPoints.push({
+                point: point.edge,
+                id: pointId,
+                polygonId: polygon.id,
+                isConstructed
+              });
+            }
           }
         }
       }
@@ -1645,7 +1705,7 @@ export class TransportService {
   // Function to find a water-only path between two points
   public async findWaterOnlyPath(startPoint: Point, endPoint: Point): Promise<any> {
     try {
-      console.log('Starting water-only path calculation from', startPoint, 'to', endPoint);
+      console.log(`Starting water-only path calculation from ${startPoint.lat},${startPoint.lng} to ${endPoint.lat},${endPoint.lng} (mode: ${this.pathfindingMode})`);
       
       // Ensure polygons are loaded using the initialization service
       if (!this.polygonsLoaded) {
@@ -1674,23 +1734,31 @@ export class TransportService {
       console.log(`Loaded ${this.polygons.length} polygons for water-only pathfinding`);
       
       // Extract all canal points for the water network
-      const allCanalPoints: {point: Point, id: string, polygonId: string}[] = [];
+      const allCanalPoints: {point: Point, id: string, polygonId: string, isConstructed: boolean}[] = [];
       for (const polygon of this.polygons) {
         if (polygon.canalPoints) {
           for (const point of polygon.canalPoints) {
             if (point.edge) {
               const pointId = point.id || `canal-${point.edge.lat}-${point.edge.lng}`;
-              allCanalPoints.push({
-                point: point.edge,
-                id: pointId,
-                polygonId: polygon.id
-              });
+              // Check if this is a constructed dock
+              const isConstructed = !!point.isConstructed || 
+                                   (pointId.includes('public_dock') || pointId.includes('dock-constructed'));
+              
+              // In 'real' mode, only include constructed docks
+              if (this.pathfindingMode === 'all' || isConstructed) {
+                allCanalPoints.push({
+                  point: point.edge,
+                  id: pointId,
+                  polygonId: polygon.id,
+                  isConstructed
+                });
+              }
             }
           }
         }
       }
       
-      console.log(`Found ${allCanalPoints.length} canal points across all polygons`);
+      console.log(`Found ${allCanalPoints.length} canal points across all polygons (mode: ${this.pathfindingMode})`);
       
       // Find the closest canal points to the start and end points
       let startCanalPoint = null;
