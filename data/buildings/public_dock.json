@@ -6,6 +6,7 @@
   "tier": 1,
   "size": "Medium",
   "unlockCondition": "Waterfront property, 2,000,000 ducats capital",
+  "canImport": true,
   "calculationsAnalysis": "The Public Dock's economic values balance infrastructure investment with modest returns. The construction cost of 1,000,000 ducats represents the substantial stonework required for water-resistant structures, while the income of 12,000 ducats (1.2% return) reflects the small fees collected from users. The maintenance cost of 15,000 ducats exceeds income, creating a realistic scenario where essential infrastructure requires subsidy but provides indirect benefits through increased connectivity and property values. This encourages players to build docks strategically rather than as direct revenue sources, mirroring Venice's historical approach to public infrastructure.",
   "shortDescription": "Common-use water access point for boats, goods transfer, and public transportation.",
   "fullDescription": "Essential to city mobility, public docks provide communal water access points throughout Venice's extensive canal system. Featuring mooring posts, loading areas, and often covered waiting spaces, these facilities form the backbone of the city's transportation network. Regular maintenance is required due to water damage and heavy usage from boats, goods, and pedestrian traffic.",
