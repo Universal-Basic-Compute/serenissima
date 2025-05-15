@@ -42,9 +42,9 @@ export async function GET(request: Request) {
       // Calculate the distance of the path
       const distance = calculatePathDistance(result.path);
       
-      // Calculate travel time based on distance (assume average speed of 5 km/h)
-      // 5 km/h = 5000 m/h = 1.39 m/s
-      const averageSpeedMetersPerSecond = 1.39;
+      // Calculate travel time based on distance (assume average speed of 108 km/h)
+      // 108 km/h = 108000 m/h = 30 m/s
+      const averageSpeedMetersPerSecond = 30;
       const travelTimeSeconds = distance / averageSpeedMetersPerSecond;
       
       // Calculate endDate by adding travel time to startDate
@@ -143,9 +143,9 @@ export async function POST(request: Request) {
       // Calculate the distance of the path
       const distance = calculatePathDistance(result.path);
       
-      // Calculate travel time based on distance (assume average speed of 5 km/h)
-      // 5 km/h = 5000 m/h = 1.39 m/s
-      const averageSpeedMetersPerSecond = 1.39;
+      // Calculate travel time based on distance (assume average speed of 108 km/h)
+      // 108 km/h = 108000 m/h = 30 m/s
+      const averageSpeedMetersPerSecond = 30;
       const travelTimeSeconds = distance / averageSpeedMetersPerSecond;
       
       // Calculate endDate by adding travel time to startDate
