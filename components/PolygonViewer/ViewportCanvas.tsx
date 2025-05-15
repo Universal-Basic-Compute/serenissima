@@ -8,6 +8,7 @@ import { interactionService } from '@/lib/services/InteractionService';
 import { incomeService } from '@/lib/services/IncomeService';
 import { transportService } from '@/lib/services/TransportService';
 import { assetService } from '@/lib/services/AssetService';
+import { uiStateService } from '@/lib/services/UIStateService';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 
 interface ViewportCanvasProps {

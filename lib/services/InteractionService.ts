@@ -231,18 +231,62 @@ export class InteractionService {
     activeView: string,
     scale: number,
     offset: { x: number, y: number },
-    transportMode: boolean
+    transportMode: boolean,
+    data: {
+      polygonsToRender: any[];
+      buildings: any[];
+      emptyBuildingPoints: any[];
+      polygons: any[];
+      citizensByBuilding: Record<string, any[]>;
+      transportStartPoint: any;
+      transportEndPoint: any;
+    },
+    setters: {
+      setMousePosition: (position: { x: number, y: number }) => void;
+      setHoveredPolygonId: (id: string | null) => void;
+      setSelectedPolygonId: (id: string | null) => void;
+      setShowLandDetailsPanel: (show: boolean) => void;
+      setHoveredBuildingId: (id: string | null) => void;
+      setHoveredBuildingName: (name: string | null) => void;
+      setHoveredBuildingPosition: (position: { x: number, y: number } | null) => void;
+      setHoveredBuildingImagePath: (path: string | null) => void;
+      setSelectedBuildingId: (id: string | null) => void;
+      setShowBuildingDetailsPanel: (show: boolean) => void;
+      setTransportStartPoint: (point: any) => void;
+      setTransportEndPoint: (point: any) => void;
+      setTransportPath: (path: any[]) => void;
+      setSelectedCitizen: (citizen: any) => void;
+      setShowCitizenDetailsPanel: (show: boolean) => void;
+      calculateTransportRoute: (start: any, end: any) => void;
+      findBuildingPosition: (buildingId: string) => {x: number, y: number} | null;
+      findPolygonIdForPoint: (point: any) => string;
+      screenToLatLng: (screenX: number, screenY: number, scale: number, offset: {x: number, y: number}, canvasWidth: number, canvasHeight: number) => {lat: number, lng: number};
+    }
   ): () => void {
     // Import uiStateService here to avoid circular dependency
     const { uiStateService } = require('./UIStateService');
-    // Handle mouse move
-    const handleMouseMove = (e: MouseEvent) => {
+    
+    // Store references to data
+    this._polygonsToRender = data.polygonsToRender;
+    this._buildings = data.buildings;
+    this._emptyBuildingPoints = data.emptyBuildingPoints;
+    this._polygons = data.polygons;
+    this._citizensByBuilding = data.citizensByBuilding;
+    
+    // Create throttled mouse move handler
+    const handleMouseMove = throttle((e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
       
       // Always update mouse position regardless of other hover states
+      setters.setMousePosition({ x: mouseX, y: mouseY });
       this.state.mousePosition = { x: mouseX, y: mouseY };
+      
+      // Log mouse position when in transport mode
+      if (transportMode) {
+        console.log('Mouse position in transport mode:', { x: mouseX, y: mouseY });
+      }
       
       // Skip hover detection while dragging
       if (this.isDraggingRef) {
@@ -250,44 +294,11 @@ export class InteractionService {
         return;
       }
       
-      // Use refs to track the current hover state to avoid dependency issues
-      const currentHoveredPolygonId = this.hoveredPolygonIdRef;
-      const currentHoveredBuildingId = this.hoveredBuildingIdRef;
-      const currentHoveredCanalPoint = this.hoveredCanalPointRef;
-      const currentHoveredBridgePoint = this.hoveredBridgePointRef;
-      const currentHoveredCitizenBuilding = this.hoveredCitizenBuildingRef;
-      const currentHoveredCitizenType = this.hoveredCitizenTypeRef;
-      
-      // Create local variables to track new hover states
-      let newHoveredPolygonId = null;
-      let newHoveredBuildingId = null;
-      let foundHoveredBuilding = false;
-      let foundHoveredCanalPoint = false;
-      let newHoveredCanalPoint = null;
-      let foundHoveredBridgePoint = false;
-      let newHoveredBridgePoint = null;
-      let foundHoveredCitizen = false;
-      let newHoveredCitizenBuilding = null;
-      let newHoveredCitizenType = null;
-      
-      // Only process hover detection in land view or buildings view
-      if (activeView !== 'land' && activeView !== 'buildings') {
-        // Reset hover states if not in land or buildings view
-        if (currentHoveredPolygonId) {
-          this.hoveredPolygonIdRef = null;
-          this.state.hoveredPolygonId = null;
-        }
-        if (currentHoveredBuildingId) {
-          this.hoveredBuildingIdRef = null;
-          this.state.hoveredBuildingId = null;
-        }
-        canvas.style.cursor = this.isDraggingRef ? 'grabbing' : 'grab';
-        return;
-      }
-      
-      // Check if mouse is over any polygon (for land view)
+      // ONLY handle polygon hover in land view, disable building hover completely
       if (activeView === 'land') {
-        for (const { polygon, coords } of this._polygonsToRender) {
+        let newHoveredPolygonId = null;
+        
+        for (const { polygon, coords } of data.polygonsToRender) {
           if (RenderService.prototype.isPointInPolygon(mouseX, mouseY, coords)) {
             newHoveredPolygonId = polygon.id;
             canvas.style.cursor = 'pointer';
@@ -300,309 +311,107 @@ export class InteractionService {
         }
         
         // Only update state if the hovered polygon has changed
-        if (newHoveredPolygonId !== currentHoveredPolygonId) {
+        if (newHoveredPolygonId !== this.hoveredPolygonIdRef) {
           this.hoveredPolygonIdRef = newHoveredPolygonId;
           this.state.hoveredPolygonId = newHoveredPolygonId;
+          setters.setHoveredPolygonId(newHoveredPolygonId);
         }
-      }
-      
-      // Check if mouse is over any building (for buildings view)
-      if (activeView === 'buildings') {
-        // Calculate building positions and check if mouse is over any
-        for (const building of this._buildings) {
+      } else if (activeView === 'buildings') {
+        // For buildings view, handle building hover but with caution
+        let newHoveredBuildingId = null;
+        
+        // Check if mouse is over any building
+        for (const building of data.buildings) {
           if (!building.position) continue;
-      
+          
+          // Get building position
           let position;
-          if (typeof building.position === 'string') {
-            try {
-              position = JSON.parse(building.position);
-            } catch (e) {
-              continue;
-            }
-          } else {
-            position = building.position;
+          try {
+            position = typeof building.position === 'string' 
+              ? JSON.parse(building.position) 
+              : building.position;
+          } catch (e) {
+            continue;
           }
-      
+          
           // Convert lat/lng to isometric coordinates
           let x, y;
           if ('lat' in position && 'lng' in position) {
-            const world = CoordinateService.latLngToWorld(position.lat, position.lng);
-            const screen = CoordinateService.worldToScreen(
-              world.x, world.y, scale, offset, canvas.width, canvas.height
-            );
-            x = screen.x;
-            y = screen.y;
+            x = (position.lng - 12.3326) * 20000;
+            y = (position.lat - 45.4371) * 20000;
           } else if ('x' in position && 'z' in position) {
-            const screen = CoordinateService.worldToScreen(
-              position.x, position.z, scale, offset, canvas.width, canvas.height
-            );
-            x = screen.x;
-            y = screen.y;
+            x = position.x;
+            y = position.z;
           } else {
             continue;
           }
-      
+          
+          const isoPos = {
+            x: CoordinateService.calculateIsoX(x, y, scale, offset, canvas.width),
+            y: CoordinateService.calculateIsoY(x, y, scale, offset, canvas.height)
+          };
+          
           // Get building size
           const size = this.getBuildingSize(building.type);
-          // Increase the hit area by 20% to make it easier to hover
-          const squareSize = Math.max(size.width, size.depth) * scale * 0.6 * 1.2;
-      
-          // Check if mouse is over this building using a more generous hit area
+          const squareSize = Math.max(size.width, size.depth) * scale * 0.6;
+          
+          // Check if mouse is over this building
           if (
-            mouseX >= x - squareSize/2 &&
-            mouseX <= x + squareSize/2 &&
-            mouseY >= y - squareSize/2 &&
-            mouseY <= y + squareSize/2
+            mouseX >= isoPos.x - squareSize/2 &&
+            mouseX <= isoPos.x + squareSize/2 &&
+            mouseY >= isoPos.y - squareSize/2 &&
+            mouseY <= isoPos.y + squareSize/2
           ) {
-            foundHoveredBuilding = true;
             newHoveredBuildingId = building.id;
             canvas.style.cursor = 'pointer';
-            break; // Break after finding the first hovered building
+            break;
           }
         }
         
         // Only update state if the hovered building has changed
-        if (newHoveredBuildingId !== currentHoveredBuildingId) {
+        if (newHoveredBuildingId !== this.hoveredBuildingIdRef) {
           console.log('%c InteractionService: hoveredBuildingId changing from', 'background: #FF9800; color: white;', 
-            currentHoveredBuildingId, 'to', newHoveredBuildingId);
+            this.hoveredBuildingIdRef, 'to', newHoveredBuildingId);
             
           this.hoveredBuildingIdRef = newHoveredBuildingId;
           this.state.hoveredBuildingId = newHoveredBuildingId;
-              
-          // TEMPORARILY DISABLE BUILDING HOVER HANDLING
-          // This is to debug the infinite update loop
-          /*
+          setters.setHoveredBuildingId(newHoveredBuildingId);
+          
+          // If we need to update the building name and image, do it separately
+          // without causing a circular dependency
           if (newHoveredBuildingId) {
-            const building = buildings.find(b => b.id === newHoveredBuildingId);
+            const building = data.buildings.find(b => b.id === newHoveredBuildingId);
             if (building) {
-              // Use UIStateService to handle building hover
-              const { uiStateService } = require('./UIStateService');
-              uiStateService.handleBuildingHover(
-                newHoveredBuildingId,
-                building,
-                { x: mouseX, y: mouseY }
-              );
+              setters.setHoveredBuildingName(building.name || building.type);
+              // Don't fetch the image path here - that should be done in a separate effect
             }
           } else {
-            const { uiStateService } = require('./UIStateService');
-            uiStateService.handleBuildingHover(null, null, null);
+            setters.setHoveredBuildingName(null);
+            setters.setHoveredBuildingPosition(null);
+            setters.setHoveredBuildingImagePath(null);
           }
-          */
         }
+      } else {
+        // For all other views, just set a default cursor
+        canvas.style.cursor = this.isDraggingRef ? 'grabbing' : 'grab';
         
-        // Check if mouse is over any empty building point
-        if (!foundHoveredBuilding) {
-          for (const point of this._emptyBuildingPoints) {
-            // Convert lat/lng to isometric coordinates
-            const world = CoordinateService.latLngToWorld(point.lat, point.lng);
-            const screen = CoordinateService.worldToScreen(
-              world.x, world.y, scale, offset, canvas.width, canvas.height
-            );
-          
-            // Check if mouse is over this building point
-            const pointSize = 2.8 * scale;
-            if (
-              mouseX >= screen.x - pointSize && 
-              mouseX <= screen.x + pointSize && 
-              mouseY >= screen.y - pointSize && 
-              mouseY <= screen.y + pointSize
-            ) {
-              foundHoveredBuilding = true;
-              canvas.style.cursor = 'pointer';
-              break;
-            }
-          }
-        }
-  
-        // If no building is hovered, clear the hover state
-        if (!foundHoveredBuilding && currentHoveredBuildingId !== null) {
+        // Clear hover states if they were set
+        if (this.hoveredBuildingIdRef) {
           this.hoveredBuildingIdRef = null;
           this.state.hoveredBuildingId = null;
-          eventBus.emit(EventTypes.BUILDING_HOVER, null);
-          canvas.style.cursor = this.isDraggingRef ? 'grabbing' : 'grab';
-        }
-      
-        // Check if mouse is over any dock point
-        for (const polygon of this._polygons) {
-          if (foundHoveredCanalPoint) break;
-        
-          if (polygon.canalPoints && Array.isArray(polygon.canalPoints)) {
-            for (const point of polygon.canalPoints) {
-              if (!point.edge) continue;
-            
-              // Convert lat/lng to isometric coordinates
-              const world = CoordinateService.latLngToWorld(point.edge.lat, point.edge.lng);
-              const screen = CoordinateService.worldToScreen(
-                world.x, world.y, scale, offset, canvas.width, canvas.height
-              );
-            
-              // Check if mouse is over this dock point
-              const pointSize = 2 * scale;
-              if (
-                mouseX >= screen.x - pointSize && 
-                mouseX <= screen.x + pointSize && 
-                mouseY >= screen.y - pointSize && 
-                mouseY <= screen.y + pointSize
-              ) {
-                foundHoveredCanalPoint = true;
-                newHoveredCanalPoint = point.edge;
-                canvas.style.cursor = 'pointer';
-                break;
-              }
-            }
-          }
-        }
-      
-        // Only update if the hovered canal point has changed
-        if (!foundHoveredCanalPoint && currentHoveredCanalPoint !== null) {
-          this.hoveredCanalPointRef = null;
-          this.state.hoveredCanalPoint = null;
-        } else if (foundHoveredCanalPoint && 
-                  (currentHoveredCanalPoint === null || 
-                   currentHoveredCanalPoint.lat !== newHoveredCanalPoint.lat || 
-                   currentHoveredCanalPoint.lng !== newHoveredCanalPoint.lng)) {
-          this.hoveredCanalPointRef = newHoveredCanalPoint;
-          this.state.hoveredCanalPoint = newHoveredCanalPoint;
-        }
-      
-        // Check if mouse is over any bridge point
-        for (const polygon of this._polygons) {
-          if (foundHoveredBridgePoint) break;
-        
-          if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints)) {
-            for (const point of polygon.bridgePoints) {
-              if (!point.edge) continue;
-            
-              // Convert lat/lng to isometric coordinates
-              const world = CoordinateService.latLngToWorld(point.edge.lat, point.edge.lng);
-              const screen = CoordinateService.worldToScreen(
-                world.x, world.y, scale, offset, canvas.width, canvas.height
-              );
-            
-              // Check if mouse is over this bridge point
-              const pointSize = 2 * scale;
-              if (
-                mouseX >= screen.x - pointSize && 
-                mouseX <= screen.x + pointSize && 
-                mouseY >= screen.y - pointSize && 
-                mouseY <= screen.y + pointSize
-              ) {
-                foundHoveredBridgePoint = true;
-                newHoveredBridgePoint = point.edge;
-                canvas.style.cursor = 'pointer';
-                break;
-              }
-            }
-          }
-        }
-      
-        // Only update if the hovered bridge point has changed
-        if (!foundHoveredBridgePoint && currentHoveredBridgePoint !== null) {
-          this.hoveredBridgePointRef = null;
-          this.state.hoveredBridgePoint = null;
-        } else if (foundHoveredBridgePoint && 
-                  (currentHoveredBridgePoint === null || 
-                   currentHoveredBridgePoint.lat !== newHoveredBridgePoint.lat || 
-                   currentHoveredBridgePoint.lng !== newHoveredBridgePoint.lng)) {
-          this.hoveredBridgePointRef = newHoveredBridgePoint;
-          this.state.hoveredBridgePoint = newHoveredBridgePoint;
-        }
-      } else if (currentHoveredBuildingId !== null) {
-        // If not in buildings view, ensure building hover state is cleared
-        this.hoveredBuildingIdRef = null;
-        this.state.hoveredBuildingId = null;
-      }
-      
-      // Check if mouse is over any citizen marker (for citizens view)
-      if (activeView === 'citizens') {
-        // Check each building with citizens
-        for (const [buildingId, buildingCitizens] of Object.entries(this._citizensByBuilding)) {
-          // Find the building position
-          const building = this._buildings.find(b => b.id === buildingId);
-          if (!building || !building.position) continue;
-          
-          let position;
-          if (typeof building.position === 'string') {
-            try {
-              position = JSON.parse(building.position);
-            } catch (e) {
-              continue;
-            }
-          } else {
-            position = building.position;
-          }
-          
-          // Convert lat/lng to isometric coordinates
-          let x, y;
-          if ('lat' in position && 'lng' in position) {
-            const world = CoordinateService.latLngToWorld(position.lat, position.lng);
-            const screen = CoordinateService.worldToScreen(
-              world.x, world.y, scale, offset, canvas.width, canvas.height
-            );
-            x = screen.x;
-            y = screen.y;
-          } else if ('x' in position && 'z' in position) {
-            const screen = CoordinateService.worldToScreen(
-              position.x, position.z, scale, offset, canvas.width, canvas.height
-            );
-            x = screen.x;
-            y = screen.y;
-          } else {
-            continue;
-          }
-          
-          // Check home citizens
-          const homeCitizens = buildingCitizens.filter(c => c.markerType === 'home');
-          if (homeCitizens.length > 0) {
-            // Check if mouse is over the home marker
-            const homeX = x - 15;
-            const homeY = y;
-            const homeRadius = homeCitizens.length > 1 ? 25 : 20;
-            
-            if (Math.sqrt(Math.pow(mouseX - homeX, 2) + Math.pow(mouseY - homeY, 2)) <= homeRadius) {
-              foundHoveredCitizen = true;
-              newHoveredCitizenBuilding = buildingId;
-              newHoveredCitizenType = 'home';
-              canvas.style.cursor = 'pointer';
-              break;
-            }
-          }
-          
-          // Check work citizens
-          const workCitizens = buildingCitizens.filter(c => c.markerType === 'work');
-          if (workCitizens.length > 0) {
-            // Check if mouse is over the work marker
-            const workX = x + 15;
-            const workY = y;
-            const workRadius = workCitizens.length > 1 ? 25 : 20;
-            
-            if (Math.sqrt(Math.pow(mouseX - workX, 2) + Math.pow(mouseY - workY, 2)) <= workRadius) {
-              foundHoveredCitizen = true;
-              newHoveredCitizenBuilding = buildingId;
-              newHoveredCitizenType = 'work';
-              canvas.style.cursor = 'pointer';
-              break;
-            }
-          }
+          setters.setHoveredBuildingId(null);
+          setters.setHoveredBuildingName(null);
+          setters.setHoveredBuildingPosition(null);
+          setters.setHoveredBuildingImagePath(null);
         }
         
-        // Only update if the hovered citizen has changed
-        if (!foundHoveredCitizen && (currentHoveredCitizenBuilding !== null || currentHoveredCitizenType !== null)) {
-          this.hoveredCitizenBuildingRef = null;
-          this.hoveredCitizenTypeRef = null;
-          this.state.hoveredCitizenBuilding = null;
-          this.state.hoveredCitizenType = null;
-          canvas.style.cursor = this.isDraggingRef ? 'grabbing' : 'grab';
-        } else if (foundHoveredCitizen && 
-                  (currentHoveredCitizenBuilding !== newHoveredCitizenBuilding || 
-                   currentHoveredCitizenType !== newHoveredCitizenType)) {
-          this.hoveredCitizenBuildingRef = newHoveredCitizenBuilding;
-          this.hoveredCitizenTypeRef = newHoveredCitizenType;
-          this.state.hoveredCitizenBuilding = newHoveredCitizenBuilding;
-          this.state.hoveredCitizenType = newHoveredCitizenType;
+        if (this.hoveredPolygonIdRef) {
+          this.hoveredPolygonIdRef = null;
+          this.state.hoveredPolygonId = null;
+          setters.setHoveredPolygonId(null);
         }
       }
-    };
+    }, 50);
     
     // Handle mouse click
     const handleClick = (e: MouseEvent) => {
@@ -612,28 +421,51 @@ export class InteractionService {
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
       
+      console.log('Click detected at:', { x: mouseX, y: mouseY });
+      console.log('Current mode:', { activeView, transportMode });
+      
       // Handle transport mode clicks - make sure this is the first condition checked
       if (activeView === 'transport' && transportMode) {
+        console.log('Transport mode click detected');
         // Convert screen coordinates to lat/lng
-        const latLng = CoordinateService.screenToLatLng(
-          mouseX, mouseY, scale, offset, canvas.width, canvas.height
-        );
+        const point = setters.screenToLatLng(mouseX, mouseY, scale, offset, canvas.width, canvas.height);
         
-        // Emit transport click event
-        eventBus.emit(EventTypes.TRANSPORT_POINT_SELECTED, latLng);
+        if (!data.transportStartPoint) {
+          // First click - set start point
+          setters.setTransportStartPoint(point);
+          console.log('Transport start point set:', point);
+        } else if (!data.transportEndPoint) {
+          // Second click - set end point and calculate route
+          setters.setTransportEndPoint(point);
+          console.log('Transport end point set:', point);
+          
+          // Calculate route
+          setters.calculateTransportRoute(data.transportStartPoint, point);
+        } else {
+          // Third click - reset and start over
+          setters.setTransportStartPoint(point);
+          setters.setTransportEndPoint(null);
+          setters.setTransportPath([]);
+          console.log('Transport route reset, new start point:', point);
+        }
+        
         return; // Skip other click handling when in transport mode
       }
       
       // Handle clicks in land view
       if (activeView === 'land') {
         // Check if click is on any polygon
-        for (const { polygon, coords } of this._polygonsToRender) {
+        for (const { polygon, coords } of data.polygonsToRender) {
           if (RenderService.prototype.isPointInPolygon(mouseX, mouseY, coords)) {
             // Set the selected polygon and show details panel
             this.state.selectedPolygonId = polygon.id;
+            setters.setSelectedPolygonId(polygon.id);
+            setters.setShowLandDetailsPanel(true);
             
             // Dispatch an event for other components to respond to
-            eventBus.emit(EventTypes.POLYGON_SELECTED, { polygonId: polygon.id });
+            window.dispatchEvent(new CustomEvent('showLandDetailsPanel', {
+              detail: { polygonId: polygon.id }
+            }));
             
             return;
           }
@@ -641,13 +473,13 @@ export class InteractionService {
         
         // If click is not on any polygon, deselect
         this.state.selectedPolygonId = null;
-        eventBus.emit(EventTypes.POLYGON_SELECTED, null);
+        setters.setSelectedPolygonId(null);
       }
       
       // Handle clicks in buildings view
       if (activeView === 'buildings') {
         // Check if click is on any building
-        for (const building of this._buildings) {
+        for (const building of data.buildings) {
           if (!building.position) continue;
           
           let position;
@@ -664,21 +496,19 @@ export class InteractionService {
           // Convert lat/lng to isometric coordinates
           let x, y;
           if ('lat' in position && 'lng' in position) {
-            const world = CoordinateService.latLngToWorld(position.lat, position.lng);
-            const screen = CoordinateService.worldToScreen(
-              world.x, world.y, scale, offset, canvas.width, canvas.height
-            );
-            x = screen.x;
-            y = screen.y;
+            x = (position.lng - 12.3326) * 20000;
+            y = (position.lat - 45.4371) * 20000;
           } else if ('x' in position && 'z' in position) {
-            const screen = CoordinateService.worldToScreen(
-              position.x, position.z, scale, offset, canvas.width, canvas.height
-            );
-            x = screen.x;
-            y = screen.y;
+            x = position.x;
+            y = position.z;
           } else {
             continue;
           }
+          
+          const isoPos = {
+            x: CoordinateService.calculateIsoX(x, y, scale, offset, canvas.width),
+            y: CoordinateService.calculateIsoY(x, y, scale, offset, canvas.height)
+          };
           
           // Get building size
           const size = this.getBuildingSize(building.type);
@@ -686,209 +516,227 @@ export class InteractionService {
           
           // Check if click is on this building
           if (
-            mouseX >= x - squareSize/2 &&
-            mouseX <= x + squareSize/2 &&
-            mouseY >= y - squareSize/2 &&
-            mouseY <= y + squareSize/2
+            mouseX >= isoPos.x - squareSize/2 &&
+            mouseX <= isoPos.x + squareSize/2 &&
+            mouseY >= isoPos.y - squareSize/2 &&
+            mouseY <= isoPos.y + squareSize/2
           ) {
             // Set the selected building and show details panel
             this.state.selectedBuildingId = building.id;
+            setters.setSelectedBuildingId(building.id);
+            setters.setShowBuildingDetailsPanel(true);
         
             // Clear hover state when clicking on a building
             this.hoveredBuildingIdRef = null;
             this.state.hoveredBuildingId = null;
+            setters.setHoveredBuildingId(null);
+            uiStateService.setBuildingHover(null, null, null);
         
             // Dispatch an event for other components to respond to
-            eventBus.emit(EventTypes.BUILDING_SELECTED, { buildingId: building.id });
+            window.dispatchEvent(new CustomEvent('showBuildingDetailsPanel', {
+              detail: { buildingId: building.id }
+            }));
         
             return;
           }
         }
         
         // Check if click is on any empty building point
-        for (const point of this._emptyBuildingPoints) {
+        for (const point of data.emptyBuildingPoints) {
           // Convert lat/lng to isometric coordinates
-          const world = CoordinateService.latLngToWorld(point.lat, point.lng);
-          const screen = CoordinateService.worldToScreen(
-            world.x, world.y, scale, offset, canvas.width, canvas.height
-          );
+          const x = (point.lng - 12.3326) * 20000;
+          const y = (point.lat - 45.4371) * 20000;
+          
+          const isoPos = {
+            x: CoordinateService.calculateIsoX(x, y, scale, offset, canvas.width),
+            y: CoordinateService.calculateIsoY(x, y, scale, offset, canvas.height)
+          };
           
           // Check if click is on this building point
           const pointSize = 2.8 * scale;
           if (
-            mouseX >= screen.x - pointSize && 
-            mouseX <= screen.x + pointSize && 
-            mouseY >= screen.y - pointSize && 
-            mouseY <= screen.y + pointSize
+            mouseX >= isoPos.x - pointSize && 
+            mouseX <= isoPos.x + pointSize && 
+            mouseY >= isoPos.y - pointSize && 
+            mouseY <= isoPos.y + pointSize
           ) {
+            console.log('Building point clicked at position:', point);
+                
             // Store the selected building point in window for the BuildingMenu to use
             (window as any).__selectedBuildingPoint = {
               pointId: `point-${point.lat}-${point.lng}`,
-              polygonId: this.findPolygonIdForPoint(point, polygons),
+              polygonId: setters.findPolygonIdForPoint(point),
               position: point
             };
                 
+            console.log('Dispatching buildingPointClick event with data:', { position: point });
+                
             // Dispatch an event to open the building menu at this position
-            eventBus.emit(EventTypes.BUILDING_POINT_SELECTED, { 
-              position: point 
+            const event = new CustomEvent('buildingPointClick', {
+              detail: { position: point }
             });
+            window.dispatchEvent(event);
+                
+            console.log('buildingPointClick event dispatched');
                 
             // Deselect any selected building
             this.state.selectedBuildingId = null;
-            eventBus.emit(EventTypes.BUILDING_SELECTED, null);
+            setters.setSelectedBuildingId(null);
                 
             return;
           }
         }
         
-        // Check if click is on any dock point
-        for (const polygon of this._polygons) {
+        // If click is not on any building, deselect
+        this.state.selectedBuildingId = null;
+        setters.setSelectedBuildingId(null);
+      }
+      
+      // Check if click is on any dock point
+      if (activeView === 'buildings') {
+        let canalPointClicked = false;
+        
+        for (const polygon of data.polygons) {
+          if (canalPointClicked) break;
+          
           if (polygon.canalPoints && Array.isArray(polygon.canalPoints)) {
             for (const point of polygon.canalPoints) {
               if (!point.edge) continue;
               
               // Convert lat/lng to isometric coordinates
-              const world = CoordinateService.latLngToWorld(point.edge.lat, point.edge.lng);
-              const screen = CoordinateService.worldToScreen(
-                world.x, world.y, scale, offset, canvas.width, canvas.height
-              );
+              const x = (point.edge.lng - 12.3326) * 20000;
+              const y = (point.edge.lat - 45.4371) * 20000;
+              
+              const isoPos = {
+                x: CoordinateService.calculateIsoX(x, y, scale, offset, canvas.width),
+                y: CoordinateService.calculateIsoY(x, y, scale, offset, canvas.height)
+              };
               
               // Check if click is on this dock point
               const pointSize = 2 * scale;
               if (
-                mouseX >= screen.x - pointSize && 
-                mouseX <= screen.x + pointSize && 
-                mouseY >= screen.y - pointSize && 
-                mouseY <= screen.y + pointSize
+                mouseX >= isoPos.x - pointSize && 
+                mouseX <= isoPos.x + pointSize && 
+                mouseY >= isoPos.y - pointSize && 
+                mouseY <= isoPos.y + pointSize
               ) {
+                console.log('Dock point clicked at position:', point.edge);
+                
                 // Store the selected point in window for the BuildingMenu to use
                 (window as any).__selectedBuildingPoint = {
                   pointId: `dock-${point.edge.lat}-${point.edge.lng}`,
-                  polygonId: this.findPolygonIdForPoint(point.edge, polygons),
+                  polygonId: setters.findPolygonIdForPoint(point.edge),
                   position: point.edge,
                   pointType: 'canal'
                 };
                 
                 // Dispatch an event to open the building menu at this position
-                eventBus.emit(EventTypes.BUILDING_POINT_SELECTED, { 
-                  position: point.edge,
-                  pointType: 'canal'
-                });
+                window.dispatchEvent(new CustomEvent('buildingPointClick', {
+                  detail: { 
+                    position: point.edge,
+                    pointType: 'canal'
+                  }
+                }));
                 
                 // Deselect any selected building
                 this.state.selectedBuildingId = null;
-                eventBus.emit(EventTypes.BUILDING_SELECTED, null);
+                setters.setSelectedBuildingId(null);
                 
-                return;
+                canalPointClicked = true;
+                break;
               }
             }
           }
         }
         
+        if (canalPointClicked) return;
+        
         // Check if click is on any bridge point
-        for (const polygon of this._polygons) {
+        let bridgePointClicked = false;
+        
+        for (const polygon of data.polygons) {
+          if (bridgePointClicked) break;
+          
           if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints)) {
             for (const point of polygon.bridgePoints) {
               if (!point.edge) continue;
               
               // Convert lat/lng to isometric coordinates
-              const world = CoordinateService.latLngToWorld(point.edge.lat, point.edge.lng);
-              const screen = CoordinateService.worldToScreen(
-                world.x, world.y, scale, offset, canvas.width, canvas.height
-              );
+              const x = (point.edge.lng - 12.3326) * 20000;
+              const y = (point.edge.lat - 45.4371) * 20000;
+              
+              const isoPos = {
+                x: CoordinateService.calculateIsoX(x, y, scale, offset, canvas.width),
+                y: CoordinateService.calculateIsoY(x, y, scale, offset, canvas.height)
+              };
               
               // Check if click is on this bridge point
               const pointSize = 2 * scale;
               if (
-                mouseX >= screen.x - pointSize && 
-                mouseX <= screen.x + pointSize && 
-                mouseY >= screen.y - pointSize && 
-                mouseY <= screen.y + pointSize
+                mouseX >= isoPos.x - pointSize && 
+                mouseX <= isoPos.x + pointSize && 
+                mouseY >= isoPos.y - pointSize && 
+                mouseY <= isoPos.y + pointSize
               ) {
+                console.log('Bridge point clicked at position:', point.edge);
+                
                 // Store the selected point in window for the BuildingMenu to use
                 (window as any).__selectedBuildingPoint = {
                   pointId: `bridge-${point.edge.lat}-${point.edge.lng}`,
-                  polygonId: this.findPolygonIdForPoint(point.edge, polygons),
+                  polygonId: setters.findPolygonIdForPoint(point.edge),
                   position: point.edge,
                   pointType: 'bridge'
                 };
                 
                 // Dispatch an event to open the building menu at this position
-                eventBus.emit(EventTypes.BUILDING_POINT_SELECTED, { 
-                  position: point.edge,
-                  pointType: 'bridge'
-                });
+                window.dispatchEvent(new CustomEvent('buildingPointClick', {
+                  detail: { 
+                    position: point.edge,
+                    pointType: 'bridge'
+                  }
+                }));
                 
                 // Deselect any selected building
                 this.state.selectedBuildingId = null;
-                eventBus.emit(EventTypes.BUILDING_SELECTED, null);
+                setters.setSelectedBuildingId(null);
                 
-                return;
+                bridgePointClicked = true;
+                break;
               }
             }
           }
         }
         
-        // If click is not on any building or point, deselect
-        this.state.selectedBuildingId = null;
-        eventBus.emit(EventTypes.BUILDING_SELECTED, null);
+        if (bridgePointClicked) return;
       }
       
       // Handle clicks in citizens view
       if (activeView === 'citizens') {
         // Check each building with citizens
-        for (const [buildingId, buildingCitizens] of Object.entries(this._citizensByBuilding)) {
+        for (const [buildingId, buildingCitizens] of Object.entries(data.citizensByBuilding)) {
           // Find the building position
-          const building = this._buildings.find(b => b.id === buildingId);
-          if (!building || !building.position) continue;
-          
-          let position;
-          if (typeof building.position === 'string') {
-            try {
-              position = JSON.parse(building.position);
-            } catch (e) {
-              continue;
-            }
-          } else {
-            position = building.position;
-          }
-          
-          // Convert lat/lng to isometric coordinates
-          let x, y;
-          if ('lat' in position && 'lng' in position) {
-            const world = CoordinateService.latLngToWorld(position.lat, position.lng);
-            const screen = CoordinateService.worldToScreen(
-              world.x, world.y, scale, offset, canvas.width, canvas.height
-            );
-            x = screen.x;
-            y = screen.y;
-          } else if ('x' in position && 'z' in position) {
-            const screen = CoordinateService.worldToScreen(
-              position.x, position.z, scale, offset, canvas.width, canvas.height
-            );
-            x = screen.x;
-            y = screen.y;
-          } else {
-            continue;
-          }
+          const position = setters.findBuildingPosition(buildingId);
+          if (!position) continue;
           
           // Check home citizens
           const homeCitizens = buildingCitizens.filter(c => c.markerType === 'home');
           if (homeCitizens.length > 0) {
             // Check if click is on the home marker
-            const homeX = x - 15;
-            const homeY = y;
+            const homeX = position.x - 15;
+            const homeY = position.y;
             const homeRadius = homeCitizens.length > 1 ? 25 : 20;
             
             if (Math.sqrt(Math.pow(mouseX - homeX, 2) + Math.pow(mouseY - homeY, 2)) <= homeRadius) {
               // If there's only one citizen, show details
               if (homeCitizens.length === 1) {
-                eventBus.emit(EventTypes.CITIZEN_SELECTED, homeCitizens[0]);
+                setters.setSelectedCitizen(homeCitizens[0]);
+                setters.setShowCitizenDetailsPanel(true);
               } else {
                 // For multiple citizens, show a selection dialog
                 console.log(`${homeCitizens.length} residents at building ${buildingId}`);
                 // For now, just show the first citizen
-                eventBus.emit(EventTypes.CITIZEN_SELECTED, homeCitizens[0]);
+                setters.setSelectedCitizen(homeCitizens[0]);
+                setters.setShowCitizenDetailsPanel(true);
               }
               return;
             }
@@ -898,19 +746,21 @@ export class InteractionService {
           const workCitizens = buildingCitizens.filter(c => c.markerType === 'work');
           if (workCitizens.length > 0) {
             // Check if click is on the work marker
-            const workX = x + 15;
-            const workY = y;
+            const workX = position.x + 15;
+            const workY = position.y;
             const workRadius = workCitizens.length > 1 ? 25 : 20;
             
             if (Math.sqrt(Math.pow(mouseX - workX, 2) + Math.pow(mouseY - workY, 2)) <= workRadius) {
               // If there's only one citizen, show details
               if (workCitizens.length === 1) {
-                eventBus.emit(EventTypes.CITIZEN_SELECTED, workCitizens[0]);
+                setters.setSelectedCitizen(workCitizens[0]);
+                setters.setShowCitizenDetailsPanel(true);
               } else {
                 // For multiple citizens, show a selection dialog
                 console.log(`${workCitizens.length} workers at building ${buildingId}`);
                 // For now, just show the first citizen
-                eventBus.emit(EventTypes.CITIZEN_SELECTED, workCitizens[0]);
+                setters.setSelectedCitizen(workCitizens[0]);
+                setters.setShowCitizenDetailsPanel(true);
               }
               return;
             }
@@ -918,7 +768,8 @@ export class InteractionService {
         }
         
         // If click is not on any citizen marker, deselect
-        eventBus.emit(EventTypes.CITIZEN_SELECTED, null);
+        setters.setSelectedCitizen(null);
+        setters.setShowCitizenDetailsPanel(false);
       }
     };
     
@@ -959,6 +810,11 @@ export class InteractionService {
       canvas.removeEventListener('click', handleClick);
       canvas.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('mouseup', handleMouseUp);
+      
+      // Clean up the throttled function if it has a cancel method
+      if (typeof handleMouseMove.cancel === 'function') {
+        handleMouseMove.cancel();
+      }
     };
   }
 

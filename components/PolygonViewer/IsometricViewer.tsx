@@ -1149,511 +1149,69 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     }
   };
   
-  // Add this useEffect for mouse interactions with throttling
-  const handleMouseMove = useCallback(
-    throttle((e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-      
-      // Always update mouse position regardless of other hover states
-      setMousePosition({ x: mouseX, y: mouseY });
-      
-      // Log mouse position when in transport mode
-      if (transportMode) {
-        console.log('Mouse position in transport mode:', { x: mouseX, y: mouseY });
-      }
-      
-      // Skip hover detection while dragging
-      if (isDraggingRef.current) {
-        canvas.style.cursor = 'grabbing';
-        return;
-      }
-      
-      // ONLY handle polygon hover in land view, disable building hover completely
-      if (activeView === 'land') {
-        let newHoveredPolygonId = null;
-        
-        for (const { polygon, coords } of polygonsToRender) {
-          if (isPointInPolygon(mouseX, mouseY, coords)) {
-            newHoveredPolygonId = polygon.id;
-            canvas.style.cursor = 'pointer';
-            break;
-          }
-        }
-        
-        if (!newHoveredPolygonId) {
-          canvas.style.cursor = isDraggingRef.current ? 'grabbing' : 'grab';
-        }
-        
-        // Only update state if the hovered polygon has changed
-        if (newHoveredPolygonId !== hoveredPolygonIdRef.current) {
-          hoveredPolygonIdRef.current = newHoveredPolygonId;
-          setHoveredPolygonId(newHoveredPolygonId);
-        }
-      } else if (activeView === 'buildings') {
-        // For buildings view, handle building hover but with caution
-        let newHoveredBuildingId = null;
-        
-        // Check if mouse is over any building
-        for (const building of buildings) {
-          if (!building.position) continue;
-          
-          // Get building position
-          let position;
-          try {
-            position = typeof building.position === 'string' 
-              ? JSON.parse(building.position) 
-              : building.position;
-          } catch (e) {
-            continue;
-          }
-          
-          // Convert lat/lng to isometric coordinates
-          let x, y;
-          if ('lat' in position && 'lng' in position) {
-            x = (position.lng - 12.3326) * 20000;
-            y = (position.lat - 45.4371) * 20000;
-          } else if ('x' in position && 'z' in position) {
-            x = position.x;
-            y = position.z;
-          } else {
-            continue;
-          }
-          
-          const isoPos = {
-            x: calculateIsoX(x, y, scale, offset, canvas.width),
-            y: calculateIsoY(x, y, scale, offset, canvas.height)
-          };
-          
-          // Get building size
-          const size = getBuildingSize(building.type);
-          const squareSize = Math.max(size.width, size.depth) * scale * 0.6;
-          
-          // Check if mouse is over this building
-          if (
-            mouseX >= isoPos.x - squareSize/2 &&
-            mouseX <= isoPos.x + squareSize/2 &&
-            mouseY >= isoPos.y - squareSize/2 &&
-            mouseY <= isoPos.y + squareSize/2
-          ) {
-            newHoveredBuildingId = building.id;
-            canvas.style.cursor = 'pointer';
-            break;
-          }
-        }
-        
-        // Only update state if the hovered building has changed
-        if (newHoveredBuildingId !== hoveredBuildingIdRef.current) {
-          hoveredBuildingIdRef.current = newHoveredBuildingId;
-          
-          // IMPORTANT: Don't call uiStateService directly here
-          // Just update the local state
-          setHoveredBuildingId(newHoveredBuildingId);
-          
-          // If we need to update the building name and image, do it separately
-          // without causing a circular dependency
-          if (newHoveredBuildingId) {
-            const building = buildings.find(b => b.id === newHoveredBuildingId);
-            if (building) {
-              setHoveredBuildingName(building.name || building.type);
-              // Don't fetch the image path here - that should be done in a separate effect
-            }
-          } else {
-            setHoveredBuildingName(null);
-            setHoveredBuildingPosition(null);
-            setHoveredBuildingImagePath(null);
-          }
-        }
-      } else {
-        // For all other views, just set a default cursor
-        canvas.style.cursor = isDraggingRef.current ? 'grabbing' : 'grab';
-        
-        // Clear hover states if they were set
-        if (hoveredBuildingIdRef.current) {
-          hoveredBuildingIdRef.current = null;
-          setHoveredBuildingId(null);
-          setHoveredBuildingName(null);
-          setHoveredBuildingPosition(null);
-          setHoveredBuildingImagePath(null);
-        }
-        
-        if (hoveredPolygonIdRef.current) {
-          hoveredPolygonIdRef.current = null;
-          setHoveredPolygonId(null);
-        }
-      }
-    }, 50),
-    [activeView, scale, offset, buildings, polygonsToRender]
-  ); // Memoize the handler with useCallback
-  
-  // Add handleClick with useCallback to prevent infinite re-renders
-  const handleClick = useCallback((e: MouseEvent) => {
-      if (isDraggingRef.current) return; // Skip click handling while dragging
-      
-      const rect = canvas.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-      
-      console.log('Click detected at:', { x: mouseX, y: mouseY });
-      console.log('Current mode:', { activeView, transportMode });
-      
-      // Handle transport mode clicks - make sure this is the first condition checked
-      if (activeView === 'transport' && transportMode) {
-        console.log('Transport mode click detected');
-        // Convert screen coordinates to lat/lng
-        const point = screenToLatLng(mouseX, mouseY, scale, offset, canvas.width, canvas.height);
-        
-        if (!transportStartPoint) {
-          // First click - set start point
-          setTransportStartPoint(point);
-          console.log('Transport start point set:', point);
-        } else if (!transportEndPoint) {
-          // Second click - set end point and calculate route
-          setTransportEndPoint(point);
-          console.log('Transport end point set:', point);
-          
-          // Calculate route
-          calculateTransportRoute(transportStartPoint, point);
-        } else {
-          // Third click - reset and start over
-          setTransportStartPoint(point);
-          setTransportEndPoint(null);
-          setTransportPath([]);
-          console.log('Transport route reset, new start point:', point);
-        }
-        
-        return; // Skip other click handling when in transport mode
-      }
-      
-      // Handle clicks in land view
-      if (activeView === 'land') {
-        // Check if click is on any polygon
-        for (const { polygon, coords } of polygonsToRender) {
-          if (isPointInPolygon(mouseX, mouseY, coords)) {
-            // Set the selected polygon and show details panel
-            setSelectedPolygonId(polygon.id);
-            setShowLandDetailsPanel(true);
-            
-            // Dispatch an event for other components to respond to
-            window.dispatchEvent(new CustomEvent('showLandDetailsPanel', {
-              detail: { polygonId: polygon.id }
-            }));
-            
-            return;
-          }
-        }
-        
-        // If click is not on any polygon, deselect
-        setSelectedPolygonId(null);
-      }
-      
-      // Handle clicks in buildings view
-      if (activeView === 'buildings') {
-        // Check if click is on any building
-        for (const building of buildings) {
-          if (!building.position) continue;
-          
-          let position;
-          if (typeof building.position === 'string') {
-            try {
-              position = JSON.parse(building.position);
-            } catch (e) {
-              continue;
-            }
-          } else {
-            position = building.position;
-          }
-          
-          // Convert lat/lng to isometric coordinates
-          let x, y;
-          if ('lat' in position && 'lng' in position) {
-            x = (position.lng - 12.3326) * 20000;
-            y = (position.lat - 45.4371) * 20000;
-          } else if ('x' in position && 'z' in position) {
-            x = position.x;
-            y = position.z;
-          } else {
-            continue;
-          }
-          
-          const isoPos = {
-            x: calculateIsoX(x, y, scale, offset, canvas.width),
-            y: calculateIsoY(x, y, scale, offset, canvas.height)
-          };
-          
-          // Get building size
-          const size = getBuildingSize(building.type);
-          const squareSize = Math.max(size.width, size.depth) * scale * 0.6;
-          
-          // Check if click is on this building
-          if (
-            mouseX >= isoPos.x - squareSize/2 &&
-            mouseX <= isoPos.x + squareSize/2 &&
-            mouseY >= isoPos.y - squareSize/2 &&
-            mouseY <= isoPos.y + squareSize/2
-          ) {
-            // Set the selected building and show details panel
-            setSelectedBuildingId(building.id);
-            setShowBuildingDetailsPanel(true);
-        
-            // Clear hover state when clicking on a building
-            setHoveredBuildingId(null);
-            uiStateService.setBuildingHover(null, null, null);
-        
-            // Dispatch an event for other components to respond to
-            window.dispatchEvent(new CustomEvent('showBuildingDetailsPanel', {
-              detail: { buildingId: building.id }
-            }));
-        
-            return;
-          }
-        }
-        
-        // Check if click is on any empty building point
-        for (const point of emptyBuildingPoints) {
-          // Convert lat/lng to isometric coordinates
-          const x = (point.lng - 12.3326) * 20000;
-          const y = (point.lat - 45.4371) * 20000;
-          
-          const isoPos = {
-            x: calculateIsoX(x, y, scale, offset, canvas.width),
-            y: calculateIsoY(x, y, scale, offset, canvas.height)
-          };
-          
-          // Check if click is on this building point
-          const pointSize = 2.8 * scale;
-          if (
-            mouseX >= isoPos.x - pointSize && 
-            mouseX <= isoPos.x + pointSize && 
-            mouseY >= isoPos.y - pointSize && 
-            mouseY <= isoPos.y + pointSize
-          ) {
-            console.log('Building point clicked at position:', point);
-                
-            // Store the selected building point in window for the BuildingMenu to use
-            (window as any).__selectedBuildingPoint = {
-              pointId: `point-${point.lat}-${point.lng}`,
-              polygonId: findPolygonIdForPoint(point),
-              position: point
-            };
-                
-            console.log('Dispatching buildingPointClick event with data:', { position: point });
-                
-            // Dispatch an event to open the building menu at this position
-            const event = new CustomEvent('buildingPointClick', {
-              detail: { position: point }
-            });
-            window.dispatchEvent(event);
-                
-            console.log('buildingPointClick event dispatched');
-                
-            // Deselect any selected building
-            setSelectedBuildingId(null);
-                
-            return;
-          }
-        }
-        
-        // If click is not on any building, deselect
-        setSelectedBuildingId(null);
-      }
-      
-      // Check if click is on any dock point
-      if (activeView === 'buildings') {
-        let canalPointClicked = false;
-        
-        for (const polygon of polygons) {
-          if (canalPointClicked) break;
-          
-          if (polygon.canalPoints && Array.isArray(polygon.canalPoints)) {
-            for (const point of polygon.canalPoints) {
-              if (!point.edge) continue;
-              
-              // Convert lat/lng to isometric coordinates
-              const x = (point.edge.lng - 12.3326) * 20000;
-              const y = (point.edge.lat - 45.4371) * 20000;
-              
-              const isoPos = {
-                x: calculateIsoX(x, y, scale, offset, canvas.width),
-                y: calculateIsoY(x, y, scale, offset, canvas.height)
-              };
-              
-              // Check if click is on this dock point
-              const pointSize = 2 * scale;
-              if (
-                mouseX >= isoPos.x - pointSize && 
-                mouseX <= isoPos.x + pointSize && 
-                mouseY >= isoPos.y - pointSize && 
-                mouseY <= isoPos.y + pointSize
-              ) {
-                console.log('Dock point clicked at position:', point.edge);
-                
-                // Store the selected point in window for the BuildingMenu to use
-                (window as any).__selectedBuildingPoint = {
-                  pointId: `dock-${point.edge.lat}-${point.edge.lng}`,
-                  polygonId: findPolygonIdForPoint(point.edge),
-                  position: point.edge,
-                  pointType: 'canal'
-                };
-                
-                // Dispatch an event to open the building menu at this position
-                window.dispatchEvent(new CustomEvent('buildingPointClick', {
-                  detail: { 
-                    position: point.edge,
-                    pointType: 'canal'
-                  }
-                }));
-                
-                // Deselect any selected building
-                setSelectedBuildingId(null);
-                
-                canalPointClicked = true;
-                break;
-              }
-            }
-          }
-        }
-        
-        if (canalPointClicked) return;
-        
-        // Check if click is on any bridge point
-        let bridgePointClicked = false;
-        
-        for (const polygon of polygons) {
-          if (bridgePointClicked) break;
-          
-          if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints)) {
-            for (const point of polygon.bridgePoints) {
-              if (!point.edge) continue;
-              
-              // Convert lat/lng to isometric coordinates
-              const x = (point.edge.lng - 12.3326) * 20000;
-              const y = (point.edge.lat - 45.4371) * 20000;
-              
-              const isoPos = {
-                x: calculateIsoX(x, y, scale, offset, canvas.width),
-                y: calculateIsoY(x, y, scale, offset, canvas.height)
-              };
-              
-              // Check if click is on this bridge point
-              const pointSize = 2 * scale;
-              if (
-                mouseX >= isoPos.x - pointSize && 
-                mouseX <= isoPos.x + pointSize && 
-                mouseY >= isoPos.y - pointSize && 
-                mouseY <= isoPos.y + pointSize
-              ) {
-                console.log('Bridge point clicked at position:', point.edge);
-                
-                // Store the selected point in window for the BuildingMenu to use
-                (window as any).__selectedBuildingPoint = {
-                  pointId: `bridge-${point.edge.lat}-${point.edge.lng}`,
-                  polygonId: findPolygonIdForPoint(point.edge),
-                  position: point.edge,
-                  pointType: 'bridge'
-                };
-                
-                // Dispatch an event to open the building menu at this position
-                window.dispatchEvent(new CustomEvent('buildingPointClick', {
-                  detail: { 
-                    position: point.edge,
-                    pointType: 'bridge'
-                  }
-                }));
-                
-                // Deselect any selected building
-                setSelectedBuildingId(null);
-                
-                bridgePointClicked = true;
-                break;
-              }
-            }
-          }
-        }
-        
-        if (bridgePointClicked) return;
-      }
-      
-      // Handle clicks in citizens view
-      if (activeView === 'citizens') {
-        // Check each building with citizens
-        for (const [buildingId, buildingCitizens] of Object.entries(citizensByBuilding)) {
-          // Find the building position
-          const position = findBuildingPosition(buildingId);
-          if (!position) continue;
-          
-          // Check home citizens
-          const homeCitizens = buildingCitizens.filter(c => c.markerType === 'home');
-          if (homeCitizens.length > 0) {
-            // Check if click is on the home marker
-            const homeX = position.x - 15;
-            const homeY = position.y;
-            const homeRadius = homeCitizens.length > 1 ? 25 : 20;
-            
-            if (Math.sqrt(Math.pow(mouseX - homeX, 2) + Math.pow(mouseY - homeY, 2)) <= homeRadius) {
-              // If there's only one citizen, show details
-              if (homeCitizens.length === 1) {
-                setSelectedCitizen(homeCitizens[0]);
-                setShowCitizenDetailsPanel(true);
-              } else {
-                // For multiple citizens, show a selection dialog
-                console.log(`${homeCitizens.length} residents at building ${buildingId}`);
-                // For now, just show the first citizen
-                setSelectedCitizen(homeCitizens[0]);
-                setShowCitizenDetailsPanel(true);
-              }
-              return;
-            }
-          }
-          
-          // Check work citizens
-          const workCitizens = buildingCitizens.filter(c => c.markerType === 'work');
-          if (workCitizens.length > 0) {
-            // Check if click is on the work marker
-            const workX = position.x + 15;
-            const workY = position.y;
-            const workRadius = workCitizens.length > 1 ? 25 : 20;
-            
-            if (Math.sqrt(Math.pow(mouseX - workX, 2) + Math.pow(mouseY - workY, 2)) <= workRadius) {
-              // If there's only one citizen, show details
-              if (workCitizens.length === 1) {
-                setSelectedCitizen(workCitizens[0]);
-                setShowCitizenDetailsPanel(true);
-              } else {
-                // For multiple citizens, show a selection dialog
-                console.log(`${workCitizens.length} workers at building ${buildingId}`);
-                // For now, just show the first citizen
-                setSelectedCitizen(workCitizens[0]);
-                setShowCitizenDetailsPanel(true);
-              }
-              return;
-            }
-          }
-        }
-        
-        // If click is not on any citizen marker, deselect
-        setSelectedCitizen(null);
-        setShowCitizenDetailsPanel(false);
-      }
-    }, [activeView, transportMode, transportStartPoint, transportEndPoint, polygonsToRender, buildings, emptyBuildingPoints, polygons, citizensByBuilding, scale, offset, findBuildingPosition, calculateTransportRoute, screenToLatLng]);
-    
+  // Use the InteractionService to handle mouse interactions
+  useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
-    canvas.addEventListener('mousemove', handleMouseMove);
-    canvas.addEventListener('click', handleClick);
-    
-    return () => {
-      canvas.removeEventListener('mousemove', handleMouseMove);
-      canvas.removeEventListener('click', handleClick);
-      
-      // Clean up the throttled function if it has a cancel method
-      if (typeof handleMouseMove.cancel === 'function') {
-        handleMouseMove.cancel();
+    // Initialize interaction handlers with the canvas
+    const cleanup = interactionService.initializeInteractions(
+      canvas,
+      activeView,
+      scale,
+      offset,
+      transportMode,
+      {
+        polygonsToRender,
+        buildings,
+        emptyBuildingPoints,
+        polygons,
+        citizensByBuilding,
+        transportStartPoint,
+        transportEndPoint
+      },
+      {
+        setMousePosition,
+        setHoveredPolygonId,
+        setSelectedPolygonId,
+        setShowLandDetailsPanel,
+        setHoveredBuildingId,
+        setHoveredBuildingName,
+        setHoveredBuildingPosition,
+        setHoveredBuildingImagePath,
+        setSelectedBuildingId,
+        setShowBuildingDetailsPanel,
+        setTransportStartPoint,
+        setTransportEndPoint,
+        setTransportPath,
+        setSelectedCitizen,
+        setShowCitizenDetailsPanel,
+        calculateTransportRoute,
+        findBuildingPosition,
+        findPolygonIdForPoint,
+        screenToLatLng
       }
-    };
-  }, [handleMouseMove, handleClick]);
+    );
+    
+    // Return the cleanup function
+    return cleanup;
+  }, [
+    activeView, 
+    scale, 
+    offset, 
+    transportMode, 
+    polygonsToRender, 
+    buildings, 
+    emptyBuildingPoints, 
+    polygons, 
+    citizensByBuilding,
+    transportStartPoint,
+    transportEndPoint,
+    calculateTransportRoute,
+    findBuildingPosition,
+    findPolygonIdForPoint,
+    screenToLatLng
+  ]);
 
   // Helper function to check if a point is inside a polygon
   function isPointInPolygon(x: number, y: number, polygon: {x: number, y: number}[]): boolean {
