@@ -295,8 +295,10 @@ export default function ViewportCanvas({
       incomeDataLoaded
     );
 
-    // Update the polygonsToRender state
-    setPolygonsToRender(newPolygonsToRender);
+    // Use deep comparison to avoid unnecessary state updates
+    if (JSON.stringify(newPolygonsToRender) !== JSON.stringify(polygonsToRender)) {
+      setPolygonsToRender(newPolygonsToRender);
+    }
   }, [polygons, landOwners, users, scale, offset, activeView, incomeData, incomeDataLoaded, loading]);
   
   // Draw the canvas
@@ -307,9 +309,11 @@ export default function ViewportCanvas({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
-    // Set canvas size
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    // Set canvas size only if it has changed
+    if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
     
     // Get interaction state
     const interactionState = interactionService.getState();
@@ -342,11 +346,20 @@ export default function ViewportCanvas({
     if (renderTime > 16) {
       console.debug(`Scene rendering took ${renderTime.toFixed(2)}ms (${(1000/renderTime).toFixed(1)} fps)`);
     }
+  }, [polygonsToRender, buildings, emptyBuildingPoints, activeView, scale, offset, citizensByBuilding, citizensLoaded, transportPath, polygons, incomeData, loading, coatOfArmsImages]);
+  
+  // Separate animation logic to prevent continuous re-renders
+  useEffect(() => {
+    if (!canvasRef.current) return;
     
-    // Set up animation frame for continuous rendering
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    let animationId: number;
+    let isAnimating = isDragging;
+    
     const animate = () => {
-      const animationId = requestAnimationFrame(animate);
-      
       // Only redraw if something has changed
       if (interactionService.getState().isDragging) {
         renderService.drawScene(
@@ -369,15 +382,15 @@ export default function ViewportCanvas({
         );
       }
       
-      return animationId;
+      animationId = requestAnimationFrame(animate);
     };
     
-    const animationId = animate();
+    animationId = requestAnimationFrame(animate);
     
     return () => {
       cancelAnimationFrame(animationId);
     };
-  }, [polygonsToRender, buildings, emptyBuildingPoints, activeView, scale, offset, citizensByBuilding, citizensLoaded, transportPath, polygons, incomeData, loading, coatOfArmsImages]);
+  }, [activeView]); // Only depend on activeView to avoid frequent re-creation
 
   return (
     <canvas 

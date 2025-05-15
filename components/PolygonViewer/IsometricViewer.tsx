@@ -925,51 +925,63 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   // Identify empty building points - now works in all views, not just buildings view
   useEffect(() => {
     if (polygons.length > 0 && buildings.length > 0) {
-      // Collect all building points from all polygons
-      const allBuildingPoints: {lat: number, lng: number}[] = [];
-      
-      polygons.forEach(polygon => {
-        if (polygon.buildingPoints && Array.isArray(polygon.buildingPoints)) {
-          polygon.buildingPoints.forEach(point => {
-            if (point && typeof point === 'object' && 'lat' in point && 'lng' in point) {
-              allBuildingPoints.push({
-                lat: point.lat,
-                lng: point.lng
-              });
-            }
-          });
-        }
-      });
-      
-      // Check which building points don't have buildings on them
-      const emptyPoints = allBuildingPoints.filter(point => {
-        // Check if there's no building at this point
-        return !buildings.some(building => {
-          if (!building.position) return false;
-          
-          let position;
-          if (typeof building.position === 'string') {
-            try {
-              position = JSON.parse(building.position);
-            } catch (e) {
-              return false;
-            }
-          } else {
-            position = building.position;
+      // Use a debounced function to prevent too frequent updates
+      const calculateEmptyPoints = debounce(() => {
+        // Collect all building points from all polygons
+        const allBuildingPoints: {lat: number, lng: number}[] = [];
+        
+        polygons.forEach(polygon => {
+          if (polygon.buildingPoints && Array.isArray(polygon.buildingPoints)) {
+            polygon.buildingPoints.forEach(point => {
+              if (point && typeof point === 'object' && 'lat' in point && 'lng' in point) {
+                allBuildingPoints.push({
+                  lat: point.lat,
+                  lng: point.lng
+                });
+              }
+            });
           }
-          
-          // Check if position matches the building point
-          // Use a small threshold for floating point comparison
-          const threshold = 0.0001;
-          if ('lat' in position && 'lng' in position) {
-            return Math.abs(position.lat - point.lat) < threshold && 
-                   Math.abs(position.lng - point.lng) < threshold;
-          }
-          return false;
         });
-      });
+        
+        // Check which building points don't have buildings on them
+        const emptyPoints = allBuildingPoints.filter(point => {
+          // Check if there's no building at this point
+          return !buildings.some(building => {
+            if (!building.position) return false;
+            
+            let position;
+            if (typeof building.position === 'string') {
+              try {
+                position = JSON.parse(building.position);
+              } catch (e) {
+                return false;
+              }
+            } else {
+              position = building.position;
+            }
+            
+            // Check if position matches the building point
+            // Use a small threshold for floating point comparison
+            const threshold = 0.0001;
+            if ('lat' in position && 'lng' in position) {
+              return Math.abs(position.lat - point.lat) < threshold && 
+                     Math.abs(position.lng - point.lng) < threshold;
+            }
+            return false;
+          });
+        });
+        
+        // Use a deep comparison to avoid unnecessary state updates
+        if (JSON.stringify(emptyPoints) !== JSON.stringify(emptyBuildingPoints)) {
+          setEmptyBuildingPoints(emptyPoints);
+        }
+      }, 500); // Debounce for 500ms
       
-      setEmptyBuildingPoints(emptyPoints);
+      calculateEmptyPoints();
+      
+      return () => {
+        calculateEmptyPoints.cancel(); // Cancel any pending debounced calls
+      };
     } else {
       setEmptyBuildingPoints([]);
     }
