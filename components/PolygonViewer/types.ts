@@ -1,5 +1,5 @@
-export type ViewMode = 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'citizens';
-export type ActiveViewMode = 'buildings' | 'land' | 'markets' | 'citizens' | 'transport' | 'resources' | 'guilds'; // Added transport, resources and guilds to active views
+export type ViewMode = 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'citizens' | 'guilds' | 'loans' | 'knowledge';
+export type ActiveViewMode = 'buildings' | 'land' | 'markets' | 'citizens' | 'transport' | 'resources' | 'guilds' | 'governance' | 'loans' | 'knowledge';
 
 export interface Coordinate {
   lat: number;

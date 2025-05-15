@@ -53,12 +53,12 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
       {/* Governance View - Now Enabled */}
       <IconButton 
         onClick={() => {
-          if (activeView !== 'governance' as any) {
+          if (activeView !== 'governance') {
             console.log('ViewModeMenu: Switching to governance view');
-            handleViewModeChange('governance' as any);
+            handleViewModeChange('governance');
           }
         }}
-        active={activeView === ('governance' as any)}
+        active={activeView === 'governance'}
         title={viewDescriptions.governance}
         activeColor="amber"
         compact={true}
@@ -73,14 +73,14 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
       {/* Guilds View */}
       <IconButton 
         onClick={() => {
-          if (activeView !== 'guilds' as any) {
+          if (activeView !== 'guilds') {
             console.log('ViewModeMenu: Switching to guilds view');
             // Dispatch a custom event to ensure guilds are loaded
             window.dispatchEvent(new CustomEvent('loadGuilds'));
-            handleViewModeChange('guilds' as any);
+            handleViewModeChange('guilds');
           }
         }}
-        active={activeView === ('guilds' as any)}
+        active={activeView === 'guilds'}
         title={viewDescriptions.guilds}
         activeColor="amber"
         compact={true}
@@ -151,8 +151,8 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
       
       {/* Resources View - Now Enabled */}
       <IconButton 
-        onClick={() => activeView !== ('resources' as any) ? handleViewModeChange('resources' as any) : null}
-        active={activeView === ('resources' as any)}
+        onClick={() => activeView !== 'resources' ? handleViewModeChange('resources') : null}
+        active={activeView === 'resources'}
         title={viewDescriptions.resources}
         activeColor="amber"
         compact={true}
