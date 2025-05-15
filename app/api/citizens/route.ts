@@ -5,6 +5,12 @@ import { FieldSet, Record as AirtableRecord, Collaborator, Attachment } from 'ai
 // Define types for Airtable fields
 type AirtableValue = string | number | boolean | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[];
 
+// Helper function to safely convert Airtable values to strings
+function airtableValueToString(value: AirtableValue | undefined | null): string {
+  if (value === undefined || value === null) return '';
+  return String(value);
+}
+
 // Initialize Airtable
 const base = new Airtable({
   apiKey: process.env.AIRTABLE_API_KEY
@@ -152,7 +158,7 @@ export async function GET(request: Request) {
         profileimage: formatImageUrl(
           record.fields.ImageUrl ? 
             (typeof record.fields.ImageUrl === 'string' ? 
-              record.fields.ImageUrl as string : 
+              record.fields.ImageUrl : 
               String(record.fields.ImageUrl)) : 
             undefined, 
           citizenId
@@ -160,7 +166,7 @@ export async function GET(request: Request) {
         imageurl: formatImageUrl(
           record.fields.ImageUrl ? 
             (typeof record.fields.ImageUrl === 'string' ? 
-              record.fields.ImageUrl as string : 
+              record.fields.ImageUrl : 
               String(record.fields.ImageUrl)) : 
             undefined, 
           citizenId
