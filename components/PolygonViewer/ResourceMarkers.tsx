@@ -238,11 +238,11 @@ export default function ResourceMarkers({
                       }}
                     >
                       <img 
-                        src={`/assets/icons/resources/${resource.icon}`}
+                        src={`/images/resources/${resource.icon}`}
                         alt={resource.name}
                         className="w-full h-full object-contain p-1"
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = '/assets/icons/resources/default.png';
+                          (e.target as HTMLImageElement).src = '/images/resources/default.png';
                         }}
                       />
                     </div>
