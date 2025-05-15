@@ -1647,7 +1647,11 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     return () => {
       canvas.removeEventListener('mousemove', handleMouseMove);
       canvas.removeEventListener('click', handleClick);
-      handleMouseMove.cancel(); // Clean up the throttled function
+      
+      // Clean up the throttled function if it has a cancel method
+      if (typeof handleMouseMove.cancel === 'function') {
+        handleMouseMove.cancel();
+      }
     };
   }, [handleMouseMove, handleClick]);
 
