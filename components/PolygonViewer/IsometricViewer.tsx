@@ -57,6 +57,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [buildingPositionsCache, setBuildingPositionsCache] = useState<Record<string, {x: number, y: number}>>({});
   const [initialPositionCalculated, setInitialPositionCalculated] = useState<boolean>(false);
   const [buildingColorMode, setBuildingColorMode] = useState<'type' | 'owner'>('type');
+  const [showOnlyMyBuildings, setShowOnlyMyBuildings] = useState<boolean>(false);
   const [polygonsToRender, setPolygonsToRender] = useState<{
     polygon: any;
     coords: {x: number, y: number}[];
@@ -1768,9 +1769,10 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     }
     
     // Draw buildings in all views, not just buildings view
-    if (buildings.length > 0) {
+    const filteredBuildings = filterBuildings();
+    if (filteredBuildings.length > 0) {
       // Count how many buildings will be drawn
-      const buildingsWithValidPosition = buildings.filter(building => {
+      const buildingsWithValidPosition = filteredBuildings.filter(building => {
         if (!building.position) return false;
         
         let position;
@@ -1790,12 +1792,12 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         );
       });
 
-      //console.log(`%c DRAWING BUILDINGS: ${buildingsWithValidPosition.length} of ${buildings.length} buildings have valid positions for drawing`, 'background: #9C27B0; color: white; padding: 4px 8px; font-weight: bold; border-radius: 4px;');
+      //console.log(`%c DRAWING BUILDINGS: ${buildingsWithValidPosition.length} of ${filteredBuildings.length} buildings have valid positions for drawing`, 'background: #9C27B0; color: white; padding: 4px 8px; font-weight: bold; border-radius: 4px;');
       
       // Get current user identifier
       const currentUser = getCurrentUserIdentifier();
       
-      buildings.forEach(building => {
+      filteredBuildings.forEach(building => {
         if (!building.position) return;
         
         // Use cached position if available
@@ -2864,6 +2866,19 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       return null;
     }
   }, []);
+  
+  // Function to filter buildings based on ownership
+  const filterBuildings = useCallback(() => {
+    if (!showOnlyMyBuildings) {
+      return buildings; // Return all buildings if filter is off
+    }
+    
+    // Get current user identifier
+    const currentUser = getCurrentUserIdentifier();
+    
+    // Filter buildings to only show those owned by the current user
+    return buildings.filter(building => building.owner === currentUser);
+  }, [buildings, showOnlyMyBuildings, getCurrentUserIdentifier]);
 
   // Helper function to draw a building (simplified for 2D view)
   // This function is not currently used but kept for future reference
@@ -3133,16 +3148,30 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         </div>
       </div>
       
-      {/* Building Color Mode Toggle */}
+      {/* Building Color Mode Toggle and My Buildings Filter */}
       <div className="absolute bottom-4 left-4 bg-black/70 text-white p-3 rounded-lg shadow-lg">
-        <div className="flex items-center space-x-2">
-          <span className="text-sm">Building Color:</span>
-          <button 
-            onClick={() => setBuildingColorMode(buildingColorMode === 'type' ? 'owner' : 'type')}
-            className="px-3 py-1 bg-blue-600 hover:bg-blue-500 rounded text-white"
-          >
-            {buildingColorMode === 'type' ? 'Type' : 'Owner'}
-          </button>
+        <div className="flex flex-col space-y-2">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm">Building Color:</span>
+            <button 
+              onClick={() => setBuildingColorMode(buildingColorMode === 'type' ? 'owner' : 'type')}
+              className="px-3 py-1 bg-blue-600 hover:bg-blue-500 rounded text-white"
+            >
+              {buildingColorMode === 'type' ? 'Type' : 'Owner'}
+            </button>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <span className="text-sm">Filter:</span>
+            <button 
+              onClick={() => setShowOnlyMyBuildings(!showOnlyMyBuildings)}
+              className={`px-3 py-1 rounded text-white ${
+                showOnlyMyBuildings ? 'bg-orange-600 hover:bg-orange-500' : 'bg-blue-600 hover:bg-blue-500'
+              }`}
+            >
+              {showOnlyMyBuildings ? 'My Buildings' : 'All Buildings'}
+            </button>
+          </div>
         </div>
       </div>
       
