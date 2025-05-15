@@ -375,7 +375,7 @@ export default function ViewportCanvas({
         if (point) {
           console.log(`Transport point selected at: ${point.lat}, ${point.lng}`);
           // Pass the point correctly
-          transportService.handlePointSelected(point);
+          transportService.handlePointSelected(point as PointData);
         }
       })
     ];
@@ -473,8 +473,8 @@ export default function ViewportCanvas({
       emptyBuildingPoints,
       interactionState as InteractionState,
       transportPath,
-      transportService.getStartPoint(),
-      transportService.getEndPoint(),
+      transportService.getStartPoint() as any[],
+      transportService.getEndPoint() as any[],
       polygons,
       incomeDataLoaded ? (incomeData as unknown as Record<string, number>) : {},
       minIncome,
@@ -525,8 +525,8 @@ export default function ViewportCanvas({
           emptyBuildingPoints,
           interactionService.getState() as InteractionState,
           transportPath,
-          transportService.getStartPoint(),
-          transportService.getEndPoint(),
+          transportService.getStartPoint() as any[],
+          transportService.getEndPoint() as any[],
           polygons,
           incomeDataLoaded ? (incomeData as unknown as Record<string, number>) : {},
           minIncome,
