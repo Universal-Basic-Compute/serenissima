@@ -90,6 +90,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       // Set a small timeout to ensure view has changed before activating transport mode
       setTimeout(() => {
         setTransportMode(true);
+        // Notify other components about transport mode change
+        eventBus.emit(EventTypes.TRANSPORT_MODE_CHANGED, { active: true });
         console.log('Transport mode state set to:', true);
       }, 100);
     };
@@ -172,6 +174,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       
       // Set transport mode to true
       setTransportMode(true);
+      
+      // Emit event for other components
+      eventBus.emit(EventTypes.TRANSPORT_MODE_CHANGED, { active: true });
     };
     
     const eventListener = () => handleShowTransportRoutes();
@@ -700,7 +705,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   useEffect(() => {
     const handleWheel = throttle((e: WheelEvent) => {
       e.preventDefault();
-      viewportService.handleZoom(e.deltaY * -0.01);
+      const newScale = viewportService.handleZoom(e.deltaY * -0.01);
+      setScale(newScale);
     }, 50); // Throttle to 50ms (20 updates per second max)
     
     const canvas = canvasRef.current;
@@ -726,6 +732,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       viewportService.startPan(e.clientX, e.clientY);
       setIsDragging(true);
       isDraggingRef.current = true;
+      
+      // Update interaction service state
+      interactionService.setState({ isDragging: true });
     };
     
     const handleMouseMove = (e: MouseEvent) => {
@@ -740,6 +749,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         viewportService.endPan();
         setIsDragging(false);
         isDraggingRef.current = false;
+        
+        // Update interaction service state
+        interactionService.setState({ isDragging: false });
       }
     };
     
@@ -3040,8 +3052,14 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         activeView={activeView}
         scale={scale}
         offset={offset}
-        onScaleChange={(newScale) => viewportService.setScale(newScale)}
-        onOffsetChange={(newOffset) => viewportService.setOffset(newOffset)}
+        onScaleChange={(newScale) => {
+          viewportService.setScale(newScale);
+          setScale(newScale);
+        }}
+        onOffsetChange={(newOffset) => {
+          viewportService.setOffset(newOffset);
+          setOffset(newOffset);
+        }}
       />
       
       {uiState.hoveredBuildingName && uiState.hoveredBuildingPosition && (

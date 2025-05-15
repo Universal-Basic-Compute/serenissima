@@ -83,7 +83,9 @@ export class InteractionService {
   ): void {
     setIsDragging(true);
     this.isDraggingRef = true;
+    this.state.isDragging = true;
     setDragStart({ x: e.clientX, y: e.clientY });
+    this.state.dragStart = { x: e.clientX, y: e.clientY };
     
     // Emit event
     eventBus.emit(EventTypes.INTERACTION_MOUSE_DOWN, {
@@ -108,13 +110,18 @@ export class InteractionService {
     const dx = e.clientX - dragStart.x;
     const dy = e.clientY - dragStart.y;
     
-    setOffset({ x: offset.x + dx, y: offset.y + dy });
+    const newOffset = { x: offset.x + dx, y: offset.y + dy };
+    setOffset(newOffset);
     setDragStart({ x: e.clientX, y: e.clientY });
+    
+    // Update state
+    this.state.dragStart = { x: e.clientX, y: e.clientY };
     
     // Emit drag event
     eventBus.emit(EventTypes.INTERACTION_DRAG, {
       x: e.clientX,
-      y: e.clientY
+      y: e.clientY,
+      offset: newOffset
     });
   }
 
@@ -127,6 +134,7 @@ export class InteractionService {
     if (this.isDraggingRef) {
       setIsDragging(false);
       this.isDraggingRef = false;
+      this.state.isDragging = false;
       
       // Emit event
       eventBus.emit(EventTypes.INTERACTION_DRAG_END, null);

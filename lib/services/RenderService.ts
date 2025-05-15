@@ -378,6 +378,93 @@ export class RenderService {
   }
 
   /**
+   * Calculate polygons to render
+   */
+  public calculatePolygonsToRender(
+    polygons: any[],
+    landOwners: Record<string, string>,
+    users: Record<string, any>,
+    scale: number,
+    offset: { x: number, y: number },
+    canvasWidth: number,
+    canvasHeight: number,
+    activeView: string,
+    incomeData: Record<string, number>,
+    incomeDataLoaded: boolean
+  ): any[] {
+    return polygons.map(polygon => {
+      if (!polygon.coordinates || polygon.coordinates.length < 3) return null;
+      
+      // Get polygon owner color or income-based color
+      let fillColor = '#FFF5D0'; // Default sand color
+      if (activeView === 'land') {
+        if (incomeDataLoaded && polygon.id && incomeData[polygon.id] !== undefined) {
+          // Use income-based color in land view ONLY if income data is loaded
+          fillColor = incomeService.getIncomeColor(incomeData[polygon.id]);
+        } else if (polygon.id && landOwners[polygon.id]) {
+          // Use owner color in land view
+          const owner = landOwners[polygon.id];
+          const user = users[owner];
+          if (user && user.color) {
+            fillColor = user.color;
+          }
+        }
+      }
+      // For other views, keep the default yellow color
+      
+      // Convert lat/lng to isometric coordinates
+      const coords = polygon.coordinates.map((coord: {lat: number, lng: number}) => {
+        // Convert to world coordinates
+        const world = CoordinateService.latLngToWorld(coord.lat, coord.lng);
+        
+        // Convert to screen coordinates
+        const screen = CoordinateService.worldToScreen(
+          world.x, world.y, scale, offset, canvasWidth, canvasHeight
+        );
+        
+        return {
+          x: screen.x,
+          y: screen.y
+        };
+      });
+      
+      // Use the polygon's center property if available, otherwise calculate centroid
+      let centerX, centerY;
+      
+      if (polygon.center && polygon.center.lat && polygon.center.lng) {
+        // Use the provided center
+        const world = CoordinateService.latLngToWorld(polygon.center.lat, polygon.center.lng);
+        const screen = CoordinateService.worldToScreen(
+          world.x, world.y, scale, offset, canvasWidth, canvasHeight
+        );
+        
+        centerX = screen.x;
+        centerY = screen.y;
+      } else {
+        // Calculate centroid as fallback
+        centerX = 0;
+        centerY = 0;
+        coords.forEach(coord => {
+          centerX += coord.x;
+          centerY += coord.y;
+        });
+        centerX /= coords.length;
+        centerY /= coords.length;
+      }
+      
+      return {
+        polygon,
+        coords,
+        fillColor,
+        centroidX: centerX, // Store both for compatibility
+        centroidY: centerY,
+        centerX: centerX,    // Add these explicitly
+        centerY: centerY
+      };
+    }).filter(Boolean);
+  }
+
+  /**
    * Draw the entire scene
    */
   public drawScene(

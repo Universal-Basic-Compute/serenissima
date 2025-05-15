@@ -1,19 +1,14 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { CoordinateService } from '@/lib/services/CoordinateService';
-import { RenderService } from '@/lib/services/RenderService';
-import { InteractionService } from '@/lib/services/InteractionService';
-import { DataService } from '@/lib/services/DataService';
-import { BuildingService } from '@/lib/services/BuildingService';
-import { TransportService } from '@/lib/services/TransportService';
-import { CitizenService } from '@/lib/services/CitizenService';
-import { IncomeService } from '@/lib/services/IncomeService';
-import { ViewportService } from '@/lib/services/ViewportService';
-import { UIStateService } from '@/lib/services/UIStateService';
-import { AssetService } from '@/lib/services/AssetService';
+import { dataService } from '@/lib/services/DataService';
+import { viewportService } from '@/lib/services/ViewportService';
+import { renderService } from '@/lib/services/RenderService';
+import { interactionService } from '@/lib/services/InteractionService';
+import { incomeService } from '@/lib/services/IncomeService';
+import { transportService } from '@/lib/services/TransportService';
+import { assetService } from '@/lib/services/AssetService';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
-import { throttle } from '@/lib/utils/performanceUtils';
 
 interface ViewportCanvasProps {
   activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
@@ -37,15 +32,7 @@ export default function ViewportCanvas({
   const [landOwners, setLandOwners] = useState<Record<string, string>>({});
   const [users, setUsers] = useState<Record<string, any>>({});
   const [emptyBuildingPoints, setEmptyBuildingPoints] = useState<{lat: number, lng: number}[]>([]);
-  const [polygonsToRender, setPolygonsToRender] = useState<{
-    polygon: any;
-    coords: {x: number, y: number}[];
-    fillColor: string;
-    centroidX: number;
-    centroidY: number;
-    centerX: number;
-    centerY: number;
-  }[]>([]);
+  const [polygonsToRender, setPolygonsToRender] = useState<any[]>([]);
   const [incomeData, setIncomeData] = useState<Record<string, number>>({});
   const [minIncome, setMinIncome] = useState<number>(0);
   const [maxIncome, setMaxIncome] = useState<number>(1000);
@@ -55,7 +42,8 @@ export default function ViewportCanvas({
   const [citizensLoaded, setCitizensLoaded] = useState<boolean>(false);
   const [transportMode, setTransportMode] = useState<boolean>(false);
   const [transportPath, setTransportPath] = useState<any[]>([]);
-  const [waterOnlyMode, setWaterOnlyMode] = useState<boolean>(false);
+  const [coatOfArmsImages, setCoatOfArmsImages] = useState<Record<string, HTMLImageElement>>({});
+  const renderedCoatOfArmsCache = useRef<Record<string, {image: HTMLImageElement | null, x: number, y: number, size: number}>>({});
   
   // Load data
   useEffect(() => {
@@ -64,28 +52,28 @@ export default function ViewportCanvas({
       
       try {
         // Load polygons
-        const polygonsData = await DataService.prototype.loadPolygons();
+        const polygonsData = await dataService.loadPolygons();
         setPolygons(polygonsData);
         
         // Load buildings
-        const buildingsData = await DataService.prototype.loadBuildings();
+        const buildingsData = await dataService.loadBuildings();
         setBuildings(buildingsData);
         
         // Load land owners
-        const landOwnersData = await DataService.prototype.loadLandOwners();
+        const landOwnersData = await dataService.loadLandOwners();
         setLandOwners(landOwnersData);
         
         // Load users
-        const usersData = await DataService.prototype.loadUsers();
+        const usersData = await dataService.loadUsers();
         setUsers(usersData);
         
         // Calculate empty building points
-        const emptyPoints = DataService.prototype.getEmptyBuildingPoints(polygonsData, buildingsData);
+        const emptyPoints = dataService.getEmptyBuildingPoints(polygonsData, buildingsData);
         setEmptyBuildingPoints(emptyPoints);
         
         // Load income data if in land view
         if (activeView === 'land') {
-          const incomeResult = await DataService.prototype.loadIncomeData();
+          const incomeResult = await incomeService.loadIncomeData();
           setIncomeData(incomeResult.incomeData);
           setMinIncome(incomeResult.minIncome);
           setMaxIncome(incomeResult.maxIncome);
@@ -94,11 +82,15 @@ export default function ViewportCanvas({
         
         // Load citizens if in citizens view
         if (activeView === 'citizens') {
-          const citizensResult = await DataService.prototype.loadCitizens();
+          const citizensResult = await dataService.loadCitizens();
           setCitizens(citizensResult.citizens);
           setCitizensByBuilding(citizensResult.citizensByBuilding);
           setCitizensLoaded(true);
         }
+        
+        // Load coat of arms images
+        const ownerCoatOfArmsMap = await assetService.loadCoatOfArmsImages(landOwnersData);
+        setCoatOfArmsImages(ownerCoatOfArmsMap);
       } catch (error) {
         console.error('Error loading data:', error);
       } finally {
@@ -107,6 +99,23 @@ export default function ViewportCanvas({
     };
     
     loadData();
+    
+    // Subscribe to transport events
+    const handleTransportModeChange = (data: any) => {
+      setTransportMode(data.active);
+    };
+    
+    const handleTransportPathChange = (data: any) => {
+      setTransportPath(data.path || []);
+    };
+    
+    eventBus.subscribe(EventTypes.TRANSPORT_MODE_CHANGED, handleTransportModeChange);
+    eventBus.subscribe(EventTypes.TRANSPORT_PATH_CHANGED, handleTransportPathChange);
+    
+    return () => {
+      eventBus.unsubscribe(EventTypes.TRANSPORT_MODE_CHANGED, handleTransportModeChange);
+      eventBus.unsubscribe(EventTypes.TRANSPORT_PATH_CHANGED, handleTransportPathChange);
+    };
   }, [activeView]);
   
   // Handle window resize
@@ -116,12 +125,16 @@ export default function ViewportCanvas({
         canvasRef.current.width = window.innerWidth;
         canvasRef.current.height = window.innerHeight;
         
+        // Clear the coat of arms cache when resizing
+        renderedCoatOfArmsCache.current = {};
+        
         // Redraw everything
         window.dispatchEvent(new Event('redraw'));
       }
     };
     
     window.addEventListener('resize', handleResize);
+    handleResize(); // Initial sizing
     
     return () => {
       window.removeEventListener('resize', handleResize);
@@ -131,7 +144,9 @@ export default function ViewportCanvas({
   // Handle mouse wheel for zooming
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
-      InteractionService.prototype.handleWheel(e, scale, onScaleChange);
+      e.preventDefault();
+      const newScale = viewportService.handleZoom(e.deltaY * -0.01);
+      onScaleChange(newScale);
     };
     
     const canvas = canvasRef.current;
@@ -144,15 +159,35 @@ export default function ViewportCanvas({
         canvas.removeEventListener('wheel', handleWheel);
       }
     };
-  }, [scale, onScaleChange]);
+  }, [onScaleChange]);
   
   // Handle mouse events for panning
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
-    // Initialize interaction service
-    const cleanup = InteractionService.prototype.initializeInteractions(
+    // Initialize interaction handlers
+    const handleMouseDown = (e: MouseEvent) => {
+      viewportService.startPan(e.clientX, e.clientY);
+      interactionService.setState({ isDragging: true });
+    };
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!interactionService.getState().isDragging) return;
+      
+      const newOffset = viewportService.updatePan(e.clientX, e.clientY);
+      onOffsetChange(newOffset);
+    };
+    
+    const handleMouseUp = () => {
+      if (interactionService.getState().isDragging) {
+        viewportService.endPan();
+        interactionService.setState({ isDragging: false });
+      }
+    };
+    
+    // Set up interaction service
+    const cleanup = interactionService.initializeInteractions(
       canvas,
       activeView,
       scale,
@@ -165,32 +200,6 @@ export default function ViewportCanvas({
       polygons
     );
     
-    // Handle mouse down for panning
-    const handleMouseDown = (e: MouseEvent) => {
-      InteractionService.prototype.handleMouseDown(
-        e, 
-        setIsDragging, 
-        setDragStart
-      );
-    };
-    
-    // Handle mouse move for panning
-    const handleMouseMove = (e: MouseEvent) => {
-      InteractionService.prototype.handleMouseMove(
-        e, 
-        isDragging, 
-        dragStart, 
-        offset, 
-        onOffsetChange, 
-        setDragStart
-      );
-    };
-    
-    // Handle mouse up for panning
-    const handleMouseUp = () => {
-      InteractionService.prototype.handleMouseUp(setIsDragging);
-    };
-    
     canvas.addEventListener('mousedown', handleMouseDown);
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
@@ -201,7 +210,7 @@ export default function ViewportCanvas({
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [activeView, scale, offset, polygonsToRender, buildings, emptyBuildingPoints, citizensByBuilding, transportMode, polygons, onOffsetChange, isDragging, dragStart]);
+  }, [activeView, scale, offset, polygonsToRender, buildings, emptyBuildingPoints, citizensByBuilding, transportMode, polygons, onOffsetChange]);
   
   // Calculate polygons to render
   useEffect(() => {
@@ -209,85 +218,19 @@ export default function ViewportCanvas({
     
     const canvas = canvasRef.current;
     
-    // Create local shorthand functions that use the current state values
-    const isoX = (x: number, y: number) => CoordinateService.worldToScreen(
-      x, y, scale, offset, canvas.width, canvas.height
-    ).x;
-    const isoY = (x: number, y: number) => CoordinateService.worldToScreen(
-      x, y, scale, offset, canvas.width, canvas.height
-    ).y;
-    
     // Only recalculate polygonsToRender when necessary components change
-    const newPolygonsToRender = polygons.map(polygon => {
-      if (!polygon.coordinates || polygon.coordinates.length < 3) return null;
-      
-      // Get polygon owner color or income-based color
-      let fillColor = '#FFF5D0'; // Default sand color
-      if (activeView === 'land') {
-        if (incomeDataLoaded && polygon.id && incomeData[polygon.id] !== undefined) {
-          // Use income-based color in land view ONLY if income data is loaded
-          fillColor = this.getIncomeColor(incomeData[polygon.id]);
-        } else if (polygon.id && landOwners[polygon.id]) {
-          // Use owner color in land view
-          const owner = landOwners[polygon.id];
-          const user = users[owner];
-          if (user && user.color) {
-            fillColor = user.color;
-          }
-        }
-      }
-      // For other views, keep the default yellow color
-      
-      // Convert lat/lng to isometric coordinates
-      const coords = polygon.coordinates.map((coord: {lat: number, lng: number}) => {
-        // Convert to world coordinates
-        const world = CoordinateService.latLngToWorld(coord.lat, coord.lng);
-        
-        // Convert to screen coordinates
-        const screen = CoordinateService.worldToScreen(
-          world.x, world.y, scale, offset, canvas.width, canvas.height
-        );
-        
-        return {
-          x: screen.x,
-          y: screen.y
-        };
-      });
-      
-      // Use the polygon's center property if available, otherwise calculate centroid
-      let centerX, centerY;
-      
-      if (polygon.center && polygon.center.lat && polygon.center.lng) {
-        // Use the provided center
-        const world = CoordinateService.latLngToWorld(polygon.center.lat, polygon.center.lng);
-        const screen = CoordinateService.worldToScreen(
-          world.x, world.y, scale, offset, canvas.width, canvas.height
-        );
-        
-        centerX = screen.x;
-        centerY = screen.y;
-      } else {
-        // Calculate centroid as fallback
-        centerX = 0;
-        centerY = 0;
-        coords.forEach(coord => {
-          centerX += coord.x;
-          centerY += coord.y;
-        });
-        centerX /= coords.length;
-        centerY /= coords.length;
-      }
-      
-      return {
-        polygon,
-        coords,
-        fillColor,
-        centroidX: centerX, // Store both for compatibility
-        centroidY: centerY,
-        centerX: centerX,    // Add these explicitly
-        centerY: centerY
-      };
-    }).filter(Boolean);
+    const newPolygonsToRender = renderService.calculatePolygonsToRender(
+      polygons,
+      landOwners,
+      users,
+      scale,
+      offset,
+      canvas.width,
+      canvas.height,
+      activeView,
+      incomeData,
+      incomeDataLoaded
+    );
 
     // Update the polygonsToRender state
     setPolygonsToRender(newPolygonsToRender);
@@ -306,10 +249,10 @@ export default function ViewportCanvas({
     canvas.height = window.innerHeight;
     
     // Get interaction state
-    const interactionState = InteractionService.prototype.getState();
+    const interactionState = interactionService.getState();
     
     // Draw the scene using RenderService
-    RenderService.prototype.drawScene(
+    renderService.drawScene(
       ctx,
       canvas,
       activeView,
@@ -328,101 +271,12 @@ export default function ViewportCanvas({
       renderedCoatOfArmsCache.current
     );
   }, [polygonsToRender, buildings, emptyBuildingPoints, activeView, scale, offset, citizensByBuilding, citizensLoaded, transportPath, polygons, incomeData, loading, coatOfArmsImages]);
-  
-  // Use IncomeService for income color calculation
-  const getIncomeColor = (income: number | undefined): string => {
-    return IncomeService.prototype.getIncomeColor(income);
-  };
-  
-  // Helper function to get building size based on type
-  const getBuildingSize = (type: string): {width: number, height: number, depth: number} => {
-    switch(type.toLowerCase()) {
-      case 'market-stall':
-        return {width: 15, height: 15, depth: 15};
-      case 'dock':
-        return {width: 30, height: 5, depth: 30};
-      case 'house':
-        return {width: 20, height: 25, depth: 20};
-      case 'workshop':
-        return {width: 25, height: 20, depth: 25};
-      case 'warehouse':
-        return {width: 30, height: 20, depth: 30};
-      case 'tavern':
-        return {width: 25, height: 25, depth: 25};
-      case 'church':
-        return {width: 30, height: 50, depth: 30};
-      case 'palace':
-        return {width: 40, height: 40, depth: 40};
-      default:
-        return {width: 20, height: 20, depth: 20};
-    }
-  };
-  
-  // Helper function to get building color based on type
-  const getBuildingColor = (type: string): string => {
-    // Generate a deterministic color based on the building type
-    const getColorFromType = (str: string): string => {
-      // Create a hash from the string
-      let hash = 0;
-      for (let i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
-      }
-      
-      // Use the hash to generate HSL values in appropriate ranges for Venetian architecture
-      // Hue: Limit to earthy/warm tones (20-50 for browns/oranges/reds, 180-220 for blues)
-      let hue = Math.abs(hash) % 360;
-      
-      // Adjust hue to be in appropriate ranges for Venetian architecture
-      if (hue > 50 && hue < 180) {
-        hue = 30 + (hue % 20); // Redirect to earthy tones
-      } else if (hue > 220 && hue < 350) {
-        hue = 200 + (hue % 20); // Redirect to Venetian blues
-      }
-      
-      // Saturation: Muted for period-appropriate look (30-60%)
-      const saturation = 30 + (Math.abs(hash >> 8) % 30);
-      
-      // Lightness: Medium to light for visibility (45-75%)
-      const lightness = 45 + (Math.abs(hash >> 16) % 30);
-      
-      return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-    };
-    
-    // Special cases for common building types
-    switch(type.toLowerCase()) {
-      case 'market-stall':
-        return '#E6C275'; // Warm gold/amber for market stalls
-      case 'house':
-        return '#E8D2B5'; // Venetian terracotta/sand for houses
-      case 'workshop':
-        return '#A67D5D'; // Rich wood brown for workshops
-      case 'warehouse':
-        return '#8C7B68'; // Darker earthy brown for warehouses
-      case 'tavern':
-        return '#B5835A'; // Warm oak brown for taverns
-      case 'church':
-        return '#E6E6D9'; // Off-white/ivory for churches
-      case 'palace':
-        return '#D9C7A7'; // Pale stone/marble for palaces
-      case 'dock':
-        return '#7D6C55'; // Dark wood brown for docks
-      case 'bridge':
-        return '#C9B18F'; // Stone bridge color
-      case 'gondola-station':
-        return '#5D7A8C'; // Blue-gray for gondola stations
-      case 'gondola_station':
-        return '#5D7A8C'; // Blue-gray for gondola stations
-      default:
-        // For any other building type, generate a deterministic color
-        return getColorFromType(type);
-    }
-  };
 
   return (
     <canvas 
       ref={canvasRef} 
       className="w-full h-full"
-      style={{ cursor: InteractionService.prototype.getState()?.isDragging ? 'grabbing' : 'grab' }}
+      style={{ cursor: interactionService.getState().isDragging ? 'grabbing' : 'grab' }}
     />
   );
 }

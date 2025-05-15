@@ -67,8 +67,9 @@ export class ViewportService {
   /**
    * Handle zoom operation
    * @param delta The zoom delta value
+   * @returns The new scale value
    */
-  public handleZoom(delta: number): void {
+  public handleZoom(delta: number): number {
     const prevScale = this.scale;
     const newScale = Math.max(1.0, Math.min(10.8, prevScale + delta));
     
@@ -83,6 +84,8 @@ export class ViewportService {
         }));
       });
     }
+    
+    return newScale;
   }
   
   /**
