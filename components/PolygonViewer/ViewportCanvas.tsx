@@ -868,30 +868,9 @@ export default function ViewportCanvas({
     }
   }, [polygonsToRender, buildings, emptyBuildingPoints, activeView, scale, offset, citizensByBuilding, citizensLoaded, transportPath, polygons, incomeData, loading]);
   
-  // Helper function to get income color
+  // Use IncomeService for income color calculation
   const getIncomeColor = (income: number | undefined): string => {
-    if (income === undefined) return '#E8DCC0'; // Softer parchment color for no data
-    
-    // Normalize income to a 0-1 scale
-    const normalizedIncome = Math.min(Math.max((income - minIncome) / (maxIncome - minIncome), 0), 1);
-    
-    // Create a gradient from soft blue (low) to muted gold (medium) to terracotta red (high)
-    // These colors are more appropriate for Renaissance Venice
-    if (normalizedIncome <= 0.5) {
-      // Soft blue to muted gold (0-0.5)
-      const t = normalizedIncome * 2; // Scale 0-0.5 to 0-1
-      const r = Math.floor(102 + t * (204 - 102)); // 102 to 204
-      const g = Math.floor(153 + t * (178 - 153)); // 153 to 178
-      const b = Math.floor(204 - t * (204 - 102)); // 204 to 102
-      return `rgb(${r}, ${g}, ${b})`;
-    } else {
-      // Muted gold to terracotta red (0.5-1)
-      const t = (normalizedIncome - 0.5) * 2; // Scale 0.5-1 to 0-1
-      const r = Math.floor(204 + t * (165 - 204)); // 204 to 165
-      const g = Math.floor(178 - t * (178 - 74)); // 178 to 74
-      const b = Math.floor(102 - t * (102 - 42)); // 102 to 42
-      return `rgb(${r}, ${g}, ${b})`;
-    }
+    return IncomeService.prototype.getIncomeColor(income);
   };
   
   // Helper function to get building size based on type
