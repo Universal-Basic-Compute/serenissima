@@ -364,7 +364,12 @@ def get_citizen_home(tables, citizen_id: str) -> Optional[Dict]:
         homes = tables['buildings'].all(formula=formula)
         
         if homes:
-            log.info(f"Found home for citizen {citizen_id}: {homes[0]['id']}")
+            # Check if the home has a BuildingId
+            building_id = homes[0]['fields'].get('BuildingId')
+            if not building_id:
+                log.warning(f"Home found for citizen {citizen_id} but missing BuildingId: {homes[0]['id']}")
+            else:
+                log.info(f"Found home for citizen {citizen_id}: {building_id}")
             return homes[0]
         else:
             log.warning(f"No home found for citizen {citizen_id}")
@@ -441,8 +446,8 @@ def create_rest_activity(tables, citizen_id: str, home_id: str) -> Optional[Dict
             "ActivityId": f"rest_{citizen_id}_{int(time.time())}",
             "Type": "rest",
             "CitizenId": citizen_id,
-            "FromBuilding": home_id,
-            "ToBuilding": home_id,
+            "FromBuilding": home_id,  # This should be BuildingId
+            "ToBuilding": home_id,    # This should be BuildingId
             "CreatedAt": now.isoformat(),
             "StartDate": now.isoformat(),
             "EndDate": end_time_utc.isoformat(),
@@ -481,7 +486,7 @@ def create_goto_home_activity(tables, citizen_id: str, home_id: str, path_data: 
             "ActivityId": f"goto_home_{citizen_id}_{int(time.time())}",
             "Type": "goto_home",
             "CitizenId": citizen_id,  # This should be the CitizenId, not the Airtable record ID
-            "ToBuilding": home_id,
+            "ToBuilding": home_id,  # This should be BuildingId
             "CreatedAt": now.isoformat(),
             "StartDate": start_date,
             "EndDate": end_date,
@@ -570,10 +575,10 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
             if position_str:
                 home_position = json.loads(position_str)
         except (json.JSONDecodeError, TypeError):
-            log.warning(f"Invalid position data for home {home['id']}: {home['fields'].get('Position')}")
+            log.warning(f"Invalid position data for home {home['fields'].get('BuildingId', home['id'])}: {home['fields'].get('Position')}")
         
         if not home_position:
-            log.warning(f"Home {home['id']} has no position data, creating idle activity")
+            log.warning(f"Home {home['fields'].get('BuildingId', home['id'])} has no position data, creating idle activity")
             create_idle_activity(tables, citizen_id)
             return True
         
@@ -595,14 +600,18 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
         
         if is_at_home:
             # Citizen is at home, create rest activity
-            create_rest_activity(tables, citizen_id, home['id'])
+            # Use BuildingId instead of Airtable record ID
+            home_building_id = home['fields'].get('BuildingId', home['id'])
+            create_rest_activity(tables, citizen_id, home_building_id)
         else:
             # Citizen needs to go home, get path
             path_data = get_path_to_home(citizen_position, home_position)
             
             if path_data and path_data.get('success'):
                 # Create goto_home activity
-                create_goto_home_activity(tables, citizen_id, home['id'], path_data)
+                # Use BuildingId instead of Airtable record ID
+                home_building_id = home['fields'].get('BuildingId', home['id'])
+                create_goto_home_activity(tables, citizen_id, home_building_id, path_data)
             else:
                 # Path finding failed, create idle activity
                 create_idle_activity(tables, citizen_id)
@@ -614,12 +623,23 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
         
         if work_building_id:
             # Get the work building
+            # First try to find by BuildingId
             formula = f"{{BuildingId}}='{work_building_id}'"
             work_buildings = tables['buildings'].all(formula=formula)
+            
+            # If not found, try by Airtable record ID as fallback
+            if not work_buildings:
+                formula = f"RECORD_ID()='{work_building_id}'"
+                work_buildings = tables['buildings'].all(formula=formula)
+                if work_buildings:
+                    log.warning(f"Found work building by record ID instead of BuildingId: {work_building_id}")
             
             if work_buildings:
                 work_building = work_buildings[0]
                 building_type = work_building['fields'].get('Type')
+                
+                # Use BuildingId for logging
+                building_id = work_building['fields'].get('BuildingId', work_building['id'])
                 
                 # Get building type information
                 building_type_info = get_building_type_info(building_type)
@@ -660,12 +680,25 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
                                     to_building_id = contract['fields'].get('BuyerBuilding')
                                     
                                     if from_building_id and to_building_id:
-                                        # Get building details
+                                        # Get building details - try by BuildingId first
                                         from_formula = f"{{BuildingId}}='{from_building_id}'"
                                         to_formula = f"{{BuildingId}}='{to_building_id}'"
                                         
                                         from_buildings = tables['buildings'].all(formula=from_formula)
                                         to_buildings = tables['buildings'].all(formula=to_formula)
+                                        
+                                        # If not found, try by Airtable record ID as fallback
+                                        if not from_buildings:
+                                            from_formula = f"RECORD_ID()='{from_building_id}'"
+                                            from_buildings = tables['buildings'].all(formula=from_formula)
+                                            if from_buildings:
+                                                log.warning(f"Found seller building by record ID instead of BuildingId: {from_building_id}")
+                                        
+                                        if not to_buildings:
+                                            to_formula = f"RECORD_ID()='{to_building_id}'"
+                                            to_buildings = tables['buildings'].all(formula=to_formula)
+                                            if to_buildings:
+                                                log.warning(f"Found buyer building by record ID instead of BuildingId: {to_building_id}")
                                         
                                         if from_buildings and to_buildings:
                                             from_building = from_buildings[0]
