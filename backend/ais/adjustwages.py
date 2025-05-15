@@ -624,7 +624,8 @@ def process_ai_wage_adjustments(dry_run: bool = False):
                 print(f"AI {ai_username} returned {len(wage_adjustments)} wage adjustments")
                 
                 for adjustment in wage_adjustments:
-                    building_id = adjustment.get("building_id")
+                    # Get the building_id, which might be called "business_id" in the AI's response
+                    building_id = adjustment.get("building_id") or adjustment.get("business_id")
                     new_wage_amount = adjustment.get("new_wage_amount")
                     reason = adjustment.get("reason", "No reason provided")
                     
