@@ -103,8 +103,8 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     fetchBuildingDetails();
     
     // Fetch citizen activities
-    if (citizen && (citizen.citizenid || citizen.id)) {
-      fetchCitizenActivities(citizen.citizenid || citizen.id);
+    if (citizen && citizen.citizenid) {
+      fetchCitizenActivities(citizen.citizenid);
     }
     
     return () => {
