@@ -2260,6 +2260,10 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         
         // Draw the calculated path if available
         if (transportPath.length > 0) {
+          // Create local shorthand functions that use the current state values
+          const isoX = (x: number, y: number) => calculateIsoX(x, y, scale, offset, canvas.width);
+          const isoY = (x: number, y: number) => calculateIsoY(x, y, scale, offset, canvas.height);
+          
           // First draw a subtle shadow/glow effect
           ctx.beginPath();
 
