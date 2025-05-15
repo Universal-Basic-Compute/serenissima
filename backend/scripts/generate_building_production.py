@@ -126,6 +126,13 @@ war_galley
 water
 weapons
 wine
+
+Production Tier Time
+(Tier 1) 5-30 minutes Simple food, basic cloth, common tools
+(Tier 2) 15-60 minutes Quality cloth, leather goods, standard glassware
+(Tier 3) 1-4 hours Fine textiles, quality furniture, intricate glassware
+(Tier 4) 3-12 hours Luxury silk, master-crafted glass, jewelry
+(Tier 5) 1-7 days Ships, elaborate art pieces, major construction
 """
 
         # Create a user prompt with building details and expected format
@@ -144,45 +151,45 @@ Please create a JSON object with the following structure:
   "Arti": [
     {{
       "inputs": {{
-        "ResourceName1": 10,
-        "ResourceName2": 5
+        "ResourceName1": 1, // try to keep the ratios simple
+        "ResourceName2": 2 // Keep the production lines simple (3 inputs max)
       }},
       "outputs": {{
-        "OutputResourceName1": 8
+        "OutputResourceName1": 1 // should be 1
       }},
-      "craftTime": 1
+      "craftMinutes": 20 // in minutes
     }},
     {{
       "inputs": {{
-        "ResourceName3": 3
+        "ResourceName3": 1 // comes from the list only
       }},
       "outputs": {{
-        "OutputResourceName2": 2
+        "OutputResourceName2": 1 // comes from the list only
       }},
-      "craftTime": 2
+      "craftMinutes": 20 
     }}
   ],
   "storageCapacity": 100,
   "stores": [
-    "ResourceName1",
-    "ResourceName2",
-    "OutputResourceName1",
-    "OutputResourceName2",
-    "OtherStorableResource"
+    "ResourceName1", // comes from the list only
+    "ResourceName2", // comes from the list only
+    "OutputResourceName1", // comes from the list only
+    "OutputResourceName2", // comes from the list only
+    "OtherStorableResource" // for input/storage buildings
   ],
   "sells": [
-    "OutputResourceName1",
-    "OutputResourceName2",
-    "OtherSellableResource"
+    "OutputResourceName1", // comes from the list only
+    "OutputResourceName2" // comes from the list only
+    "OtherSellableResource"// for commerces
   ]
 }}
 ```
 
 The numbers in inputs and outputs represent quantities needed/produced per craft.
-The craftTime is in days.
+The craftMinutes is in minutes.
 Use resource IDs in snake_case (like "olive_oil" not "Olive Oil").
-Make sure the resources are from the provided list.
-Return ONLY the JSON object with no additional text.
+Make sure the resources are ONLY from the provided list (important!).
+If it does not make sense for the building to store/transform/sell resources, write an empty JSON
 """
         
         # Call Claude API
