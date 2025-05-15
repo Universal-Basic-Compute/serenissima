@@ -11,6 +11,7 @@ import ViewportController from './ViewportController';
 import { buildingService } from '@/lib/services/BuildingService';
 import { transportService } from '@/lib/services/TransportService';
 import { citizenService } from '@/lib/services/CitizenService';
+import { buildingPointsService } from '@/lib/services/BuildingPointsService';
 
 interface IsometricViewerProps {
   activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
