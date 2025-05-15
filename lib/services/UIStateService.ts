@@ -4,6 +4,7 @@
  */
 
 import { eventBus, EventTypes } from '../utils/eventBus';
+import { assetService } from './AssetService';
 
 // Add these to EventTypes
 EventTypes.BUILDING_HOVER_STATE_CHANGED = 'BUILDING_HOVER_STATE_CHANGED';
@@ -55,6 +56,34 @@ export class UIStateService {
   }
   
   /**
+   * Fetch and set building image path
+   */
+  public async fetchBuildingImagePath(buildingType: string, variant?: string): Promise<void> {
+    try {
+      this.setLoadingBuildingImage(true);
+      
+      // Use AssetService to get the building image path
+      const imagePath = await assetService.getBuildingImagePath(buildingType, variant);
+      
+      // Update UI state with the image path
+      this.setBuildingHover(
+        this.hoveredBuildingName,
+        this.hoveredBuildingPosition,
+        imagePath
+      );
+    } catch (error) {
+      console.error('Error fetching building image path:', error);
+      this.setBuildingHover(
+        this.hoveredBuildingName,
+        this.hoveredBuildingPosition,
+        '/images/buildings/market_stall.jpg'
+      );
+    } finally {
+      this.setLoadingBuildingImage(false);
+    }
+  }
+  
+  /**
    * Set selected polygon state
    */
   public setSelectedPolygon(polygonId: string | null, showPanel: boolean = true): void {
@@ -91,6 +120,21 @@ export class UIStateService {
     
     // Emit event
     eventBus.emit(EventTypes.CITIZEN_SELECTED, citizen);
+  }
+  
+  /**
+   * Handle building hover
+   */
+  public handleBuildingHover(buildingId: string | null, building: any | null, position: {x: number, y: number} | null): void {
+    if (buildingId && building) {
+      this.hoveredBuildingName = building.name || building.type;
+      this.hoveredBuildingPosition = position;
+      
+      // Fetch the building image
+      this.fetchBuildingImagePath(building.type, building.variant);
+    } else {
+      this.setBuildingHover(null, null, null);
+    }
   }
   
   /**

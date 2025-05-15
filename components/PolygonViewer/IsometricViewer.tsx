@@ -57,31 +57,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const renderedCoatOfArmsCache = useRef<Record<string, {image: HTMLImageElement | null, x: number, y: number, size: number}>>({});
   
-  // Function to fetch the building image path when hovering over a building
-  const fetchBuildingImagePath = async (buildingType: string, variant?: string) => {
-    try {
-      uiStateService.setLoadingBuildingImage(true);
-      
-      // Use AssetService to get the building image path
-      const imagePath = await assetService.getBuildingImagePath(buildingType, variant);
-      
-      // Update UI state with the image path
-      uiStateService.setBuildingHover(
-        uiState.hoveredBuildingName,
-        uiState.hoveredBuildingPosition,
-        imagePath
-      );
-    } catch (error) {
-      console.error('Error fetching building image path:', error);
-      uiStateService.setBuildingHover(
-        uiState.hoveredBuildingName,
-        uiState.hoveredBuildingPosition,
-        '/images/buildings/market_stall.jpg'
-      );
-    } finally {
-      uiStateService.setLoadingBuildingImage(false);
-    }
-  };
+  // Building image path fetching is now handled by the UIStateService
 
   // Set up event listeners
   useEffect(() => {
@@ -720,29 +696,11 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     }
   }, [polygons, buildings]); // Removed activeView dependency so it runs in all views
 
-  // Handle mouse wheel for zooming
+  // Handle mouse wheel for zooming - now delegated to ViewportService
   useEffect(() => {
-    // Create a throttled version of the zoom handler
     const handleWheel = throttle((e: WheelEvent) => {
       e.preventDefault();
-      const delta = e.deltaY * -0.01;
-      // Change the minimum zoom to 1.0 to allow one more level of unzoom
-      // Keep the maximum zoom at 10.8
-      setScale(prevScale => {
-        const newScale = Math.max(1.0, Math.min(10.8, prevScale + delta));
-        
-        // Only trigger a redraw if the scale changed significantly
-        if (Math.abs(newScale - prevScale) > 0.05) {
-          // Force a redraw with the new scale
-          requestAnimationFrame(() => {
-            window.dispatchEvent(new CustomEvent('scaleChanged', { 
-              detail: { scale: newScale } 
-            }));
-          });
-        }
-        
-        return newScale;
-      });
+      viewportService.handleZoom(e.deltaY * -0.01);
     }, 50); // Throttle to 50ms (20 updates per second max)
     
     const canvas = canvasRef.current;
@@ -759,33 +717,29 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     };
   }, []);
 
-  // Handle mouse events for panning
+  // Handle mouse events for panning - now delegated to ViewportService
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
     const handleMouseDown = (e: MouseEvent) => {
+      viewportService.startPan(e.clientX, e.clientY);
       setIsDragging(true);
-      isDraggingRef.current = true; // Update the ref
-      setDragStart({ x: e.clientX, y: e.clientY });
+      isDraggingRef.current = true;
     };
     
     const handleMouseMove = (e: MouseEvent) => {
-      // Use the ref value instead of the state
       if (!isDraggingRef.current) return;
       
-      const dx = e.clientX - dragStart.x;
-      const dy = e.clientY - dragStart.y;
-      
-      setOffset(prev => ({ x: prev.x + dx, y: prev.y + dy }));
-      setDragStart({ x: e.clientX, y: e.clientY });
+      const newOffset = viewportService.updatePan(e.clientX, e.clientY);
+      setOffset(newOffset);
     };
     
     const handleMouseUp = () => {
-      // Only update state if we're actually dragging
       if (isDraggingRef.current) {
+        viewportService.endPan();
         setIsDragging(false);
-        isDraggingRef.current = false; // Update the ref
+        isDraggingRef.current = false;
       }
     };
     
@@ -798,16 +752,16 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [dragStart]); // Remove isDragging from dependencies
+  }, []);
 
-  // Emit map transformation events for other components to sync with
+  // Emit map transformation events for other components to sync with - now using ViewportService
   useEffect(() => {
     // Create a function to emit the current map transformation state
     const emitMapTransform = () => {
       window.dispatchEvent(new CustomEvent('mapTransformed', {
         detail: {
-          offset,
-          scale,
+          offset: viewportService.getOffset(),
+          scale: viewportService.getScale(),
           rotation: 0, // Add rotation if implemented
           tilt: 0 // Add tilt if implemented
         }
@@ -817,22 +771,27 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     // Emit on any transformation change
     emitMapTransform();
     
+    // Listen for viewport changes
+    const handleScaleChanged = () => emitMapTransform();
+    const handleOffsetChanged = () => emitMapTransform();
+    
     // Also listen for requests for the current transformation
     const handleRequestTransform = () => {
       emitMapTransform();
     };
     
+    eventBus.subscribe(EventTypes.VIEWPORT_SCALE_CHANGED, handleScaleChanged);
+    eventBus.subscribe(EventTypes.VIEWPORT_OFFSET_CHANGED, handleOffsetChanged);
     window.addEventListener('requestMapTransform', handleRequestTransform);
     
     return () => {
+      eventBus.unsubscribe(EventTypes.VIEWPORT_SCALE_CHANGED, handleScaleChanged);
+      eventBus.unsubscribe(EventTypes.VIEWPORT_OFFSET_CHANGED, handleOffsetChanged);
       window.removeEventListener('requestMapTransform', handleRequestTransform);
     };
-  }, [offset, scale]);
+  }, []);
 
-  // Use the IncomeService for income color calculation
-  const getIncomeColor = (income: number | undefined): string => {
-    return incomeService.getIncomeColor(income);
-  };
+  // Income color calculation is now fully delegated to IncomeService
   
   // Add this useEffect for mouse interactions
   useEffect(() => {
@@ -973,18 +932,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           hoveredBuildingIdRef.current = newHoveredBuildingId;
           setHoveredBuildingId(newHoveredBuildingId);
           
-          if (newHoveredBuildingId) {
-            const building = buildings.find(b => b.id === newHoveredBuildingId);
-            if (building) {
-              setHoveredBuildingName(building.name || formatBuildingType(building.type));
-              setHoveredBuildingPosition({ x: mouseX, y: mouseY });
-              fetchBuildingImagePath(building.type, building.variant);
-            }
-          } else {
-            setHoveredBuildingName(null);
-            setHoveredBuildingPosition(null);
-            setHoveredBuildingImagePath(null);
-          }
+          // Building hover state is now handled by UIStateService
         }
         
         // Check if mouse is over any empty building point
@@ -1275,11 +1223,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             setSelectedBuildingId(building.id);
             setShowBuildingDetailsPanel(true);
         
-            // Clear hover state when clicking on a building
-            setHoveredBuildingId(null);
-            setHoveredBuildingName(null);
-            setHoveredBuildingPosition(null);
-            setHoveredBuildingImagePath(null);
+            // Clear hover state when clicking on a building - now using UIStateService
+            uiStateService.handleBuildingHover(null, null, null);
         
             // Dispatch an event for other components to respond to
             window.dispatchEvent(new CustomEvent('showBuildingDetailsPanel', {
@@ -1640,37 +1585,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     return null;
   };
   
-  // Function to create a citizen marker - now using RenderService
-  const createCitizenMarker = (
-    ctx: CanvasRenderingContext2D, 
-    x: number, 
-    y: number, 
-    citizen: any, 
-    markerType: 'home' | 'work',
-    size: number = 20,
-    isHovered: boolean = false
-  ) => {
-    // Get color from CitizenService
-    const fillColor = CitizenService.prototype.getSocialClassColor(
-      citizen.SocialClass || citizen.socialClass,
-      markerType,
-      isHovered
-    );
-    
-    // Use RenderService to draw the marker
-    RenderService.prototype.createCitizenMarker(
-      ctx, x, y, citizen, markerType, size, isHovered
-    );
-  };
+  // Citizen marker creation is now fully delegated to RenderService
 
-  // Define isometric projection functions at the component level
-  const calculateIsoX = (x: number, y: number, currentScale: number, currentOffset: {x: number, y: number}, canvasWidth: number) => {
-    return x * currentScale + canvasWidth / 2 + currentOffset.x; // Correct east-west orientation
-  };
-  
-  const calculateIsoY = (x: number, y: number, currentScale: number, currentOffset: {x: number, y: number}, canvasHeight: number) => {
-    return (-y) * currentScale * 1.4 + canvasHeight / 2 + currentOffset.y; // Multiply by 1.4 to stretch vertically
-  };
+  // Isometric projection functions are now fully delegated to CoordinateService
 
   // Draw the isometric view
   useEffect(() => {
@@ -3087,89 +3004,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     };
   }, []);
 
-  // Helper function to get building size based on type
-  function getBuildingSize(type: string): {width: number, height: number, depth: number} {
-    switch(type.toLowerCase()) {
-      case 'market-stall':
-        return {width: 15, height: 15, depth: 15};
-      case 'dock':
-        return {width: 30, height: 5, depth: 30};
-      case 'house':
-        return {width: 20, height: 25, depth: 20};
-      case 'workshop':
-        return {width: 25, height: 20, depth: 25};
-      case 'warehouse':
-        return {width: 30, height: 20, depth: 30};
-      case 'tavern':
-        return {width: 25, height: 25, depth: 25};
-      case 'church':
-        return {width: 30, height: 50, depth: 30};
-      case 'palace':
-        return {width: 40, height: 40, depth: 40};
-      default:
-        return {width: 20, height: 20, depth: 20};
-    }
-  }
-
-  // Helper function to get building color based on type
-  function getBuildingColor(type: string): string {
-    // Generate a deterministic color based on the building type
-    const getColorFromType = (str: string): string => {
-      // Create a hash from the string
-      let hash = 0;
-      for (let i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
-      }
-      
-      // Use the hash to generate HSL values in appropriate ranges for Venetian architecture
-      // Hue: Limit to earthy/warm tones (20-50 for browns/oranges/reds, 180-220 for blues)
-      let hue = Math.abs(hash) % 360;
-      
-      // Adjust hue to be in appropriate ranges for Venetian architecture
-      if (hue > 50 && hue < 180) {
-        hue = 30 + (hue % 20); // Redirect to earthy tones
-      } else if (hue > 220 && hue < 350) {
-        hue = 200 + (hue % 20); // Redirect to Venetian blues
-      }
-      
-      // Saturation: Muted for period-appropriate look (30-60%)
-      const saturation = 30 + (Math.abs(hash >> 8) % 30);
-      
-      // Lightness: Medium to light for visibility (45-75%)
-      const lightness = 45 + (Math.abs(hash >> 16) % 30);
-      
-      return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-    };
-    
-    // Special cases for common building types
-    switch(type.toLowerCase()) {
-      case 'market-stall':
-        return '#E6C275'; // Warm gold/amber for market stalls
-      case 'house':
-        return '#E8D2B5'; // Venetian terracotta/sand for houses
-      case 'workshop':
-        return '#A67D5D'; // Rich wood brown for workshops
-      case 'warehouse':
-        return '#8C7B68'; // Darker earthy brown for warehouses
-      case 'tavern':
-        return '#B5835A'; // Warm oak brown for taverns
-      case 'church':
-        return '#E6E6D9'; // Off-white/ivory for churches
-      case 'palace':
-        return '#D9C7A7'; // Pale stone/marble for palaces
-      case 'dock':
-        return '#7D6C55'; // Dark wood brown for docks
-      case 'bridge':
-        return '#C9B18F'; // Stone bridge color
-      case 'gondola-station':
-        return '#5D7A8C'; // Blue-gray for gondola stations
-      case 'gondola_station':
-        return '#5D7A8C'; // Blue-gray for gondola stations
-      default:
-        // For any other building type, generate a deterministic color
-        return getColorFromType(type);
-    }
-  }
+  // Building size and color functions are now fully delegated to BuildingService
 
   // Helper function to draw a building (simplified for 2D view)
   function drawBuildingSquare(
@@ -3197,48 +3032,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     ctx.fillText(typeIndicator, x, y);
   }
 
-  // Helper function to find which polygon contains this building point
-  function findPolygonIdForPoint(point: {lat: number, lng: number}): string {
-    for (const polygon of polygons) {
-      if (polygon.buildingPoints && Array.isArray(polygon.buildingPoints)) {
-        // Check if this point is in the polygon's buildingPoints
-        const found = polygon.buildingPoints.some((bp: any) => {
-          const threshold = 0.0001; // Small threshold for floating point comparison
-          return Math.abs(bp.lat - point.lat) < threshold && 
-                 Math.abs(bp.lng - point.lng) < threshold;
-        });
-        
-        if (found) {
-          return polygon.id;
-        }
-      }
-    }
-    
-    // If we can't find the exact polygon, try to find which polygon contains this point
-    for (const polygon of polygons) {
-      if (polygon.coordinates && polygon.coordinates.length > 2) {
-        if (isPointInPolygonCoordinates(point, polygon.coordinates)) {
-          return polygon.id;
-        }
-      }
-    }
-    
-    return 'unknown';
-  }
-
-  // Helper function to check if a point is inside polygon coordinates
-  function isPointInPolygonCoordinates(point: {lat: number, lng: number}, coordinates: {lat: number, lng: number}[]): boolean {
-    let inside = false;
-    for (let i = 0, j = coordinates.length - 1; i < coordinates.length; j = i++) {
-      const xi = coordinates[i].lng, yi = coordinates[i].lat;
-      const xj = coordinates[j].lng, yj = coordinates[j].lat;
-      
-      const intersect = ((yi > point.lat) !== (yj > point.lat))
-          && (point.lng < (xj - xi) * (point.lat - yi) / (yj - yi) + xi);
-      if (intersect) inside = !inside;
-    }
-    return inside;
-  }
+  // Polygon utility functions are now fully delegated to DataService
 
   // Helper function to lighten a color
   function lightenColor(color: string, percent: number): string {
@@ -3268,20 +3062,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     return result;
   }
 
-  // Helper function to format building types for display
-  function formatBuildingType(type: string): string {
-    if (!type) return 'Building';
-    
-    // Replace underscores and hyphens with spaces
-    let formatted = type.replace(/[_-]/g, ' ');
-    
-    // Capitalize each word
-    formatted = formatted.split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-    
-    return formatted;
-  }
+  // Building type formatting is now fully delegated to BuildingService
 
   // Helper function to darken a color
   function darkenColor(color: string, percent: number): string {

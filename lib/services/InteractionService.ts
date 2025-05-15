@@ -278,18 +278,19 @@ export class InteractionService {
         if (newHoveredBuildingId !== currentHoveredBuildingId) {
           this.hoveredBuildingIdRef = newHoveredBuildingId;
           this.state.hoveredBuildingId = newHoveredBuildingId;
-          
+            
           if (newHoveredBuildingId) {
             const building = buildings.find(b => b.id === newHoveredBuildingId);
             if (building) {
-              eventBus.emit(EventTypes.BUILDING_HOVER, {
-                buildingId: newHoveredBuildingId,
-                buildingName: building.name || this.formatBuildingType(building.type),
-                position: { x: mouseX, y: mouseY },
-                buildingType: building.type,
-                variant: building.variant
-              });
+              // Use UIStateService to handle building hover
+              uiStateService.handleBuildingHover(
+                newHoveredBuildingId,
+                building,
+                { x: mouseX, y: mouseY }
+              );
             }
+          } else {
+            uiStateService.handleBuildingHover(null, null, null);
           }
         }
         
