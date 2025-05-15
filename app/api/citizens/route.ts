@@ -72,7 +72,7 @@ export async function GET(request: Request) {
     const occupantToBuildings: Record<string, {home?: string, work?: string}> = {};
     
     // Define residential building types
-    const residentialTypes = ['canal_house', 'merchant_s_house', 'artisan_s_house', 'fisherman_s_cottage'];
+    const residentialTypes = ['canal_house', 'merchant_s_house', 'artisan_s_house', 'fisherman_s_cottage', 'palazzo', 'house'];
     
     // Process buildings to determine home and work assignments
     buildingRecords.forEach(building => {
@@ -93,9 +93,11 @@ export async function GET(request: Request) {
       if (residentialTypes.includes(buildingType)) {
         // This is a residential building, set as home
         occupantToBuildings[occupant].home = buildingId;
+        console.log(`Assigned building ${buildingId} (${buildingType}) as HOME for ${occupant}`);
       } else {
-        // This is a non-residential building, set as work
+        // Any building that is not a residential type is a work building
         occupantToBuildings[occupant].work = buildingId;
+        console.log(`Assigned building ${buildingId} (${buildingType}) as WORK for ${occupant}`);
       }
     });
     
