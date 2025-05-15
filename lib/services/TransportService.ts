@@ -336,7 +336,12 @@ export class TransportService {
       }
       
       const data = await response.json();
-      console.log(`API response data received, polygons array exists: ${!!data.polygons}`);
+      console.log(`API response data received, polygons property exists: ${!!data.polygons}`);
+      
+      // Log the first polygon to see its structure
+      if (data.polygons && data.polygons.length > 0) {
+        console.log('First polygon structure:', JSON.stringify(data.polygons[0]).substring(0, 200) + '...');
+      }
       
       if (!data.polygons) {
         console.error('No polygons array in API response');
@@ -355,8 +360,44 @@ export class TransportService {
       
       console.log(`Successfully received ${data.polygons.length} polygons from API`);
       
-      // Store the polygons
-      this.polygons = data.polygons;
+      // Process the polygons to ensure they have the required properties
+      const processedPolygons = data.polygons.map((polygon: any) => {
+        // Ensure the polygon has coordinates
+        if (!polygon.coordinates || !Array.isArray(polygon.coordinates) || polygon.coordinates.length < 3) {
+          console.warn(`Polygon ${polygon.id} has invalid coordinates, skipping`);
+          return null;
+        }
+        
+        // Ensure each coordinate has lat and lng properties
+        const validCoordinates = polygon.coordinates.filter((coord: any) => 
+          coord && typeof coord.lat === 'number' && typeof coord.lng === 'number'
+        );
+        
+        if (validCoordinates.length < 3) {
+          console.warn(`Polygon ${polygon.id} has insufficient valid coordinates, skipping`);
+          return null;
+        }
+        
+        // Create a processed polygon with all required properties
+        return {
+          id: polygon.id,
+          coordinates: validCoordinates,
+          centroid: polygon.centroid || null,
+          bridgePoints: Array.isArray(polygon.bridgePoints) ? polygon.bridgePoints : [],
+          buildingPoints: Array.isArray(polygon.buildingPoints) ? polygon.buildingPoints : [],
+          canalPoints: Array.isArray(polygon.canalPoints) ? polygon.canalPoints : []
+        };
+      }).filter(Boolean); // Remove null entries
+      
+      console.log(`Processed ${processedPolygons.length} valid polygons out of ${data.polygons.length} total`);
+      
+      if (processedPolygons.length === 0) {
+        console.error('No valid polygons after processing');
+        return false;
+      }
+      
+      // Store the processed polygons
+      this.polygons = processedPolygons;
       this.polygonsLoaded = true;
       
       // Build the graph and canal network
