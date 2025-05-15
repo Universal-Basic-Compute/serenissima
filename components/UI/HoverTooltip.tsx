@@ -21,23 +21,53 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
       // Fetch additional data based on what's being hovered
       if (data.type === 'building' && data.id) {
         // Fetch building data
+        console.log('Fetching building data for:', data.id);
+        
         fetch(`/api/buildings/${data.id}`)
-          .then(res => res.ok ? res.json() : null)
+          .then(res => {
+            if (!res.ok) {
+              console.error(`Error fetching building data: HTTP ${res.status}`);
+              return null;
+            }
+            return res.json();
+          })
           .then(async buildingData => {
             if (buildingData) {
+              console.log('Building data received:', buildingData);
+              
+              // Handle different response formats
+              const actualBuildingData = buildingData.building || buildingData;
+              
               // Get building image path
-              const imagePath = await assetService.getBuildingImagePath(buildingData.type);
+              const imagePath = await assetService.getBuildingImagePath(actualBuildingData.type);
               setBuildingImagePath(imagePath);
               
               setTooltipData({
                 type: 'building',
-                name: buildingData.name || (buildingData.type ? buildingService.formatBuildingType(buildingData.type) : 'Unknown Building'),
-                type: buildingData.type,
-                owner: buildingData.owner
+                name: actualBuildingData.name || (actualBuildingData.type ? buildingService.formatBuildingType(actualBuildingData.type) : 'Unknown Building'),
+                type: actualBuildingData.type,
+                owner: actualBuildingData.owner
+              });
+            } else {
+              // Set default tooltip data if building data couldn't be fetched
+              setTooltipData({
+                type: 'building',
+                name: 'Building',
+                type: 'Unknown',
+                owner: 'Unknown'
               });
             }
           })
-          .catch(err => console.error('Error fetching building data:', err));
+          .catch(err => {
+            console.error('Error fetching building data:', err);
+            // Set default tooltip data on error
+            setTooltipData({
+              type: 'building',
+              name: 'Building',
+              type: 'Unknown',
+              owner: 'Unknown'
+            });
+          });
       } else if (data.type === 'polygon' && data.id) {
         // Fetch polygon data
         fetch(`/api/polygons/${data.id}`)
@@ -113,8 +143,8 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
         {/* Add the building image */}
         <div className="w-32 h-24 mb-2 overflow-hidden rounded">
           <img 
-            src={buildingImagePath || `/images/buildings/${tooltipData.type.toLowerCase().replace(/[_-]/g, '_')}.jpg`} 
-            alt={tooltipData.name}
+            src={buildingImagePath || `/images/buildings/${tooltipData.type?.toLowerCase().replace(/[_-]/g, '_')}.jpg`} 
+            alt={tooltipData.name || 'Building'}
             className="w-full h-full object-cover"
             onError={(e) => {
               // Fallback to default image if the specific one doesn't exist
@@ -122,8 +152,8 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
             }}
           />
         </div>
-        <div className="font-bold">{tooltipData.name}</div>
-        <div>Type: {buildingService.formatBuildingType(tooltipData.type)}</div>
+        <div className="font-bold">{tooltipData.name || 'Building'}</div>
+        <div>Type: {tooltipData.type ? buildingService.formatBuildingType(tooltipData.type) : 'Unknown'}</div>
         {tooltipData.owner && <div>Owner: {tooltipData.owner}</div>}
       </div>
     );
