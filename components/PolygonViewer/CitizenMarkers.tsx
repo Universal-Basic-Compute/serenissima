@@ -118,9 +118,14 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
             return null;
           }
           
+          // Ensure we have the required properties for display
+          const firstName = citizen.FirstName || citizen.firstName || '';
+          const lastName = citizen.LastName || citizen.lastName || '';
+          const socialClass = citizen.SocialClass || citizen.socialClass || '';
+          
           return (
             <div 
-              key={citizen.id || citizen.CitizenId}
+              key={citizen.CitizenId || citizen.id || `citizen-${Math.random()}`}
               className="absolute pointer-events-auto"
               style={{
                 left: `${position.x}px`,
@@ -133,14 +138,14 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
               <div 
                 className="w-6 h-6 rounded-full cursor-pointer hover:scale-125 transition-transform flex items-center justify-center"
                 style={{ 
-                  backgroundColor: citizenService.getSocialClassColor(citizen.SocialClass, 'home'),
+                  backgroundColor: citizenService.getSocialClassColor(socialClass, 'home'),
                   border: '2px solid white',
                   boxShadow: '0 0 0 1px rgba(0,0,0,0.2)'
                 }}
-                title={`${citizen.FirstName} ${citizen.LastName} (${citizen.SocialClass})`}
+                title={`${firstName} ${lastName} (${socialClass})`}
               >
                 <span className="text-white text-xs font-bold">
-                  {citizen.FirstName?.[0]}{citizen.LastName?.[0]}
+                  {firstName?.[0] || '?'}{lastName?.[0] || '?'}
                 </span>
               </div>
             </div>
