@@ -43,4 +43,6 @@ export interface Citizen {
   };
   needscompletionscore: number;
   createdat: string;
+  home?: string;
+  work?: string;
 }
