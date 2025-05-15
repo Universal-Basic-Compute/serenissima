@@ -562,7 +562,7 @@ def create_or_update_import_contract(
             
             updated_contract = tables["contracts"].update(contract_id, {
                 "hourlyAmount": hourly_amount,
-                "Price": import_price,
+                "PricePerResource": import_price,
                 "UpdatedAt": now,
                 "EndAt": end_date,
                 "Notes": json.dumps({
@@ -588,7 +588,7 @@ def create_or_update_import_contract(
                 "BuyerBuilding": building_id,
                 "SellerBuilding": None,
                 "hourlyAmount": hourly_amount,
-                "Price": import_price,
+                "PricePerResource": import_price,
                 "Priority": 1,  # Default priority
                 "CreatedAt": now,
                 "EndAt": end_date,
