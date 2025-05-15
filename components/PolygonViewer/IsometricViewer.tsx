@@ -1373,17 +1373,23 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     citizen: any,
     size: number = 20
   ) => {
+    // Log the full citizen object for debugging
+    console.log('Full citizen object in createCitizenMarker:', citizen);
+
     // Ensure we have the required properties for display
-    const firstName = citizen.FirstName || citizen.firstName || '?';
-    const lastName = citizen.LastName || citizen.lastName || '?';
+    // Try to extract data from various possible property names
+    const firstName = citizen.FirstName || citizen.firstName || '';
+    const lastName = citizen.LastName || citizen.lastName || '';
     const socialClass = citizen.SocialClass || citizen.socialClass || '';
+    const citizenId = citizen.CitizenId || citizen.id;
     
-    // Log citizen data for debugging
+    // Log citizen data for debugging with more details
     console.log(`Creating citizen marker for:`, {
-      citizenId: citizen.CitizenId || citizen.id,
+      citizenId,
       name: `${firstName} ${lastName}`,
       imageUrl: citizen.ImageUrl || citizen.profileImage,
-      socialClass: socialClass
+      socialClass,
+      rawCitizen: citizen // Include the raw citizen object for debugging
     });
 
     // Determine color based on social class
@@ -1430,8 +1436,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     ctx.textBaseline = 'middle';
     
     // Get the first letters of the first and last name
-    const firstInitial = firstName.charAt(0).toUpperCase();
-    const lastInitial = lastName.charAt(0).toUpperCase();
+    const firstInitial = firstName.charAt(0).toUpperCase() || '?';
+    const lastInitial = lastName.charAt(0).toUpperCase() || '?';
     ctx.fillText(firstInitial + lastInitial, x, y);
   };
 

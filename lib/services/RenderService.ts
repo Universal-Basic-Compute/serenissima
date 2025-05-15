@@ -263,6 +263,15 @@ export class RenderService {
     size: number = 20,
     isHovered: boolean = false
   ): void {
+    // Log the full citizen object for debugging
+    console.log('Full citizen object in RenderService.createCitizenMarker:', citizen);
+
+    // Ensure we have the required properties for display
+    const firstName = citizen.FirstName || citizen.firstName || '';
+    const lastName = citizen.LastName || citizen.lastName || '';
+    const socialClass = citizen.SocialClass || citizen.socialClass || '';
+    const citizenId = citizen.CitizenId || citizen.id;
+
     // Determine color based on social class
     const getSocialClassColor = (socialClass: string): string => {
       const baseClass = socialClass?.toLowerCase() || '';
@@ -297,7 +306,7 @@ export class RenderService {
     };
 
     // Get color based on social class
-    const fillColor = getSocialClassColor(citizen.SocialClass || citizen.socialClass);
+    const fillColor = getSocialClassColor(socialClass);
 
     // Draw a circular background with color based on social class
     ctx.beginPath();
@@ -317,8 +326,8 @@ export class RenderService {
     ctx.textBaseline = 'middle';
     
     // Get the first letters of the first and last name
-    const firstInitial = (citizen.FirstName || citizen.firstName || '').charAt(0).toUpperCase();
-    const lastInitial = (citizen.LastName || citizen.lastName || '').charAt(0).toUpperCase();
+    const firstInitial = firstName.charAt(0).toUpperCase() || '?';
+    const lastInitial = lastName.charAt(0).toUpperCase() || '?';
     ctx.fillText(firstInitial + lastInitial, x, y);
     
     // Add a small icon to indicate home or work

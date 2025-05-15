@@ -22,6 +22,9 @@ export class CitizenService {
       if (response.ok) {
         const data = await response.json();
         if (Array.isArray(data)) {
+          // Log the raw data from the API
+          console.log('Raw citizens data from API:', data);
+          
           // Process citizen positions
           this.citizens = data.map(citizen => {
             // Ensure position is properly formatted
@@ -50,13 +53,23 @@ export class CitizenService {
                   'lat' in citizen.position && 'lng' in citizen.position) {
                 position = citizen.position;
               } else {
-                position = null;
+                // If no valid position, create a random one near Venice
+                position = {
+                  lat: 45.4371 + Math.random() * 0.01,
+                  lng: 12.3326 + Math.random() * 0.01
+                };
+                console.log(`Created random position for citizen ${citizen.id || citizen.CitizenId}:`, position);
               }
             }
             
+            // Ensure all required fields are present
             return {
               ...citizen,
-              position
+              position,
+              CitizenId: citizen.CitizenId || citizen.id || `ctz_${Date.now()}_${Math.floor(Math.random() * 10000)}`,
+              FirstName: citizen.FirstName || citizen.firstName || 'Unknown',
+              LastName: citizen.LastName || citizen.lastName || 'Citizen',
+              SocialClass: citizen.SocialClass || citizen.socialClass || 'Popolani'
             };
           });
           

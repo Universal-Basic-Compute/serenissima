@@ -109,6 +109,9 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
       {/* Citizen Markers */}
       <div className="absolute inset-0 pointer-events-none">
         {citizens.filter(citizen => citizen.position).map((citizen) => {
+          // Log the full citizen object for debugging
+          console.log('Citizen in CitizenMarkers component:', citizen);
+          
           // Convert lat/lng to screen coordinates
           const position = latLngToScreen(citizen.position.lat, citizen.position.lng);
           
@@ -122,10 +125,11 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
           const firstName = citizen.FirstName || citizen.firstName || '';
           const lastName = citizen.LastName || citizen.lastName || '';
           const socialClass = citizen.SocialClass || citizen.socialClass || '';
+          const citizenId = citizen.CitizenId || citizen.id;
           
           return (
             <div 
-              key={citizen.CitizenId || citizen.id || `citizen-${Math.random()}`}
+              key={citizenId || `citizen-${Math.random()}`}
               className="absolute pointer-events-auto"
               style={{
                 left: `${position.x}px`,

@@ -125,27 +125,32 @@ export async function GET(request: Request) {
         }
       }
       
+      // Ensure the citizen ID is a string
+      const citizenId = record.fields.CitizenId ? String(record.fields.CitizenId) : `ctz_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+      
       return {
-        id: record.fields.CitizenId,
-        CitizenId: record.fields.CitizenId,
-        name: `${record.fields.FirstName} ${record.fields.LastName}`,
-        firstName: record.fields.FirstName,
-        lastName: record.fields.LastName,
-        FirstName: record.fields.FirstName,
-        LastName: record.fields.LastName,
-        socialClass: record.fields.SocialClass,
-        SocialClass: record.fields.SocialClass,
-        description: record.fields.Description,
-        Description: record.fields.Description,
-        profileImage: formatImageUrl(record.fields.ImageUrl?.toString(), record.fields.CitizenId?.toString()),
-        ImageUrl: formatImageUrl(record.fields.ImageUrl?.toString(), record.fields.CitizenId?.toString()),
+        id: citizenId,
+        CitizenId: citizenId,
+        name: `${record.fields.FirstName || 'Unknown'} ${record.fields.LastName || 'Citizen'}`,
+        firstName: record.fields.FirstName || 'Unknown',
+        lastName: record.fields.LastName || 'Citizen',
+        FirstName: record.fields.FirstName || 'Unknown',
+        LastName: record.fields.LastName || 'Citizen',
+        socialClass: record.fields.SocialClass || 'Popolani',
+        SocialClass: record.fields.SocialClass || 'Popolani',
+        description: record.fields.Description || 'A citizen of Venice.',
+        Description: record.fields.Description || 'A citizen of Venice.',
+        profileImage: formatImageUrl(record.fields.ImageUrl?.toString(), citizenId),
+        ImageUrl: formatImageUrl(record.fields.ImageUrl?.toString(), citizenId),
         position: position, // Use building position if found, otherwise random
         occupation: record.fields.Occupation || 'Citizen',
         wealth: record.fields.Wealth || 'Average',
         Wealth: record.fields.Wealth || 'Average',
         landId: record.fields.Land || 'polygon-1',
         NeedsCompletionScore: 0.75,
-        CreatedAt: record.fields.CreatedAt || new Date().toISOString()
+        CreatedAt: record.fields.CreatedAt || new Date().toISOString(),
+        Home: record.fields.Home || null,
+        Work: record.fields.Work || null
       };
     });
     
