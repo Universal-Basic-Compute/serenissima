@@ -111,6 +111,20 @@ export class TransportService {
   }
 
   /**
+   * Get the start point for transport
+   */
+  public getStartPoint(): {lat: number, lng: number} | null {
+    return this.transportStartPoint;
+  }
+
+  /**
+   * Get the end point for transport
+   */
+  public getEndPoint(): {lat: number, lng: number} | null {
+    return this.transportEndPoint;
+  }
+
+  /**
    * Set transport start point
    */
   public setStartPoint(point: {lat: number, lng: number} | null): void {

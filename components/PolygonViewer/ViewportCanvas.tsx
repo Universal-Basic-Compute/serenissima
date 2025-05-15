@@ -206,8 +206,8 @@ export default function ViewportCanvas({
       emptyBuildingPoints,
       polygons,
       citizensByBuilding,
-      transportService.getTransportStartPoint() || null,
-      transportService.getTransportEndPoint() || null
+      transportService.getStartPoint() || null,
+      transportService.getEndPoint() || null
     );
     
     // Set up interaction service with all required dependencies
@@ -349,10 +349,10 @@ export default function ViewportCanvas({
       emptyBuildingPoints,
       interactionState,
       transportPath,
-      transportService.getTransportStartPoint() || null,
-      transportService.getTransportEndPoint() || null,
-      polygons as Record<string, any[]>,
-      incomeData,
+      transportService.getStartPoint() || null,
+      transportService.getEndPoint() || null,
+      polygons as any,
+      incomeDataLoaded ? incomeData : {},
       minIncome,
       maxIncome
     );
