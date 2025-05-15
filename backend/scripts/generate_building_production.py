@@ -220,6 +220,9 @@ If it does not make sense for the building to store/transform/sell resources, wr
         # Extract the JSON from Claude's response
         content = response.json()["content"][0]["text"]
         
+        # Log the full response from Claude
+        log.info(f"Claude's raw response for {building_name}:\n{content}")
+        
         # Find the JSON object in the response
         json_match = re.search(r'```json\s*({[\s\S]*?})\s*```', content)
         
