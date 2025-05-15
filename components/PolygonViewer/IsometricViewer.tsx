@@ -330,13 +330,20 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
                 
                 // Create a promise that tries each URL in sequence
                 const tryLoadImage = async (): Promise<HTMLImageElement> => {
-                  for (let i = 0; i < urlsToTry.length; i++) {
+                  // Add default fallback URL to the array of URLs to try
+                  const allUrlsToTry = [
+                    ...urlsToTry,
+                    // Add a default fallback image as the last resort
+                    `${window.location.origin}/coat-of-arms/default.png`
+                  ];
+              
+                  for (let i = 0; i < allUrlsToTry.length; i++) {
                     try {
-                      const currentUrl = urlsToTry[i];
-                      
+                      const currentUrl = allUrlsToTry[i];
+                  
                       const img = new Image();
                       img.crossOrigin = "anonymous"; // Important for CORS
-                      
+                  
                       // Create a promise for this specific URL
                       const loadPromise = new Promise<HTMLImageElement>((resolve, reject) => {
                         img.onload = () => {
@@ -345,22 +352,42 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
                           resolve(resizedImg);
                         };
                         img.onerror = () => {
-                          reject(new Error(`Failed to load image from ${currentUrl}`));
+                          // Don't throw an error on the last attempt (default image)
+                          if (i === allUrlsToTry.length - 1) {
+                            console.warn(`All image URLs failed for ${owner}, using generated avatar`);
+                            // Return a generated avatar instead
+                            const canvas = document.createElement('canvas');
+                            canvas.width = targetSize;
+                            canvas.height = targetSize;
+                            const ctx = canvas.getContext('2d');
+                            if (ctx) {
+                              // Draw a colored circle with the owner's initial
+                              createDefaultCircularAvatar(ctx, owner, targetSize/2, targetSize/2, targetSize);
+                              const generatedImg = new Image();
+                              generatedImg.src = canvas.toDataURL('image/png');
+                              resolve(generatedImg);
+                            } else {
+                              reject(new Error(`Failed to create canvas context for ${owner}`));
+                            }
+                          } else {
+                            reject(new Error(`Failed to load image from ${currentUrl}`));
+                          }
                         };
                         img.src = currentUrl;
                       });
-                      
+                  
                       // Wait for this URL to load or fail
                       return await loadPromise;
                     } catch (error) {
-                      // If we're at the last URL and it failed, throw the error
-                      if (i === urlsToTry.length - 1) {
+                      // If we're at the last URL and it failed, we'll handle it in the onerror handler above
+                      if (i === allUrlsToTry.length - 1) {
+                        console.error(`All URLs failed for ${owner}:`, error);
                         throw error;
                       }
                       // Otherwise continue to the next URL
                     }
                   }
-                  
+              
                   // This should never be reached due to the throw above, but TypeScript needs it
                   throw new Error("All URLs failed to load");
                 };
@@ -377,7 +404,11 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
                     // We'll handle this case in the createDefaultCircularAvatar function
                   });
                 
-                imagePromises.push(imagePromise);
+                imagePromises.push(imagePromise.catch(error => {
+                  console.warn(`Error loading coat of arms for ${owner}:`, error);
+                  // Return null to prevent the Promise.allSettled from failing
+                  return null;
+                }));
               }
             });
             

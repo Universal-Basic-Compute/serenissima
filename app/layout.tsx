@@ -36,6 +36,26 @@ export default function RootLayout({
                 console.log('Layout: Dispatching ensureBuildingsVisible event on page load');
                 window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
                 
+                // Create coat of arms directory if needed
+                try {
+                  // Check if the coat of arms directory exists
+                  const checkCoatOfArmsDir = async () => {
+                    try {
+                      const response = await fetch('/coat-of-arms/default.png', { method: 'HEAD' });
+                      if (!response.ok) {
+                        console.warn('Default coat of arms image not found. Using generated avatars instead.');
+                      }
+                    } catch (e) {
+                      console.warn('Error checking coat of arms directory:', e);
+                    }
+                  };
+                  
+                  // Run the check
+                  checkCoatOfArmsDir();
+                } catch (e) {
+                  console.error('Error in coat of arms directory check:', e);
+                }
+                
                 // Also set up a periodic check to ensure buildings stay visible
                 // Use a debounced version to prevent too many updates
                 let lastDispatchTime = 0;
