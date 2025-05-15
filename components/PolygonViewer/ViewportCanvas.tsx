@@ -201,9 +201,10 @@ export default function ViewportCanvas({
     
     // Update the interaction service with current data
     interactionService.updatePolygons({
-      polygons,
+      polygonsToRender,
       buildings,
       emptyBuildingPoints,
+      polygons,
       citizensByBuilding,
       transportStartPoint: transportService.getStartPoint() || null,
       transportEndPoint: transportService.getEndPoint() || null
@@ -217,9 +218,10 @@ export default function ViewportCanvas({
       offset,
       transportMode,
       {
-        polygons,
+        polygonsToRender,
         buildings,
         emptyBuildingPoints,
+        polygons,
         citizensByBuilding,
         transportStartPoint: transportService.getStartPoint() || null,
         transportEndPoint: transportService.getEndPoint() || null
@@ -258,7 +260,7 @@ export default function ViewportCanvas({
         if (point) {
           console.log(`Transport point selected at: ${point.lat}, ${point.lng}`);
           // Convert point to expected format if needed
-          transportService.handlePointSelected(point);
+          transportService.handlePointSelected(point as any[]);
         }
       })
     ];
@@ -286,9 +288,10 @@ export default function ViewportCanvas({
   // Add this effect to update the interaction service when data changes
   useEffect(() => {
     interactionService.updatePolygons({
-      polygons,
+      polygonsToRender,
       buildings,
       emptyBuildingPoints,
+      polygons,
       citizensByBuilding,
       transportStartPoint: transportService.getStartPoint() || null,
       transportEndPoint: transportService.getEndPoint() || null
@@ -355,8 +358,8 @@ export default function ViewportCanvas({
       emptyBuildingPoints,
       interactionState,
       transportPath,
-      transportService.getStartPoint() || null,
-      transportService.getEndPoint() || null,
+      transportService.getStartPoint() as any,
+      transportService.getEndPoint() as any,
       polygons as any,
       incomeDataLoaded ? incomeData : {},
       minIncome,
