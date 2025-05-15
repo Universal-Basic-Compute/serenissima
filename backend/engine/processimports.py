@@ -336,7 +336,7 @@ def process_import_contract(tables, contract: Dict, building_types: Dict, resour
         # Check if resource already exists in the building
         existing_resource = None
         for resource in building_resources:
-            if resource['fields'].get('Type') == 'import' and resource['fields'].get('ResourceType') == resource_type:
+            if resource['fields'].get('Type') == resource_type:
                 existing_resource = resource
                 break
         
@@ -358,8 +358,7 @@ def process_import_contract(tables, contract: Dict, building_types: Dict, resour
             
             resource_data = {
                 "ResourceId": resource_id,
-                "Type": "import",
-                "ResourceType": resource_type,
+                "Type": resource_type,
                 "Name": resource_def.get('name', resource_type),
                 "Category": resource_def.get('category', 'Uncategorized'),
                 "Count": import_amount,
