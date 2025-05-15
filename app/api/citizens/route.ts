@@ -152,7 +152,7 @@ export async function GET(request: Request) {
         profileimage: formatImageUrl(
           record.fields.ImageUrl ? 
             (typeof record.fields.ImageUrl === 'string' ? 
-              record.fields.ImageUrl : 
+              record.fields.ImageUrl as string : 
               String(record.fields.ImageUrl)) : 
             undefined, 
           citizenId
@@ -160,7 +160,7 @@ export async function GET(request: Request) {
         imageurl: formatImageUrl(
           record.fields.ImageUrl ? 
             (typeof record.fields.ImageUrl === 'string' ? 
-              record.fields.ImageUrl : 
+              record.fields.ImageUrl as string : 
               String(record.fields.ImageUrl)) : 
             undefined, 
           citizenId
@@ -168,7 +168,7 @@ export async function GET(request: Request) {
         // Ensure position is included and properly formatted
         position: typeof record.fields.Position === 'string' 
           ? JSON.parse(record.fields.Position as string) 
-          : record.fields.Position || { lat: 45.4371 + Math.random() * 0.01, lng: 12.3326 + Math.random() * 0.01 },
+          : (record.fields.Position as any) || { lat: 45.4371 + Math.random() * 0.01, lng: 12.3326 + Math.random() * 0.01 },
         occupation: safeString(record.fields.Occupation, 'Citizen'),
         wealth: record.fields.Wealth !== undefined ? record.fields.Wealth : 0,
         createdat: safeString(record.fields.CreatedAt, new Date().toISOString()),
