@@ -5,6 +5,7 @@ import { debounce, throttle } from 'lodash';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 import { fetchCoatOfArmsImage } from '@/app/utils/coatOfArmsUtils';
 import { buildingPointsService } from '@/lib/services/BuildingPointsService';
+import { interactionService } from '@/lib/services/InteractionService';
 import LandDetailsPanel from './LandDetailsPanel';
 import BuildingDetailsPanel from './BuildingDetailsPanel';
 import CitizenDetailsPanel from '../UI/CitizenDetailsPanel';
