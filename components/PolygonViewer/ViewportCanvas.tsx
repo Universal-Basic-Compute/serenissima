@@ -321,8 +321,8 @@ export default function ViewportCanvas({
       emptyBuildingPoints,
       polygons,
       citizensByBuilding,
-      transportStartPoint: transportService.getStartPoint() || null,
-      transportEndPoint: transportService.getEndPoint() || null
+      transportStartPoint: transportService.getStartPoint(),
+      transportEndPoint: transportService.getEndPoint()
     });
     
     // Set up interaction service with all required dependencies
@@ -375,7 +375,7 @@ export default function ViewportCanvas({
         if (point) {
           console.log(`Transport point selected at: ${point.lat}, ${point.lng}`);
           // Pass the point correctly
-          transportService.handlePointSelected(point as PointData);
+          transportService.handlePointSelected(point);
         }
       })
     ];
