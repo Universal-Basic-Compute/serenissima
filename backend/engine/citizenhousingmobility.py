@@ -90,9 +90,32 @@ def get_housed_citizens(tables) -> List[Dict]:
     log.info("Fetching housed citizens...")
     
     try:
-        # Get citizens with a non-empty Home field
-        formula = "NOT(OR({Home} = '', {Home} = BLANK()))"
+        # Get buildings with non-empty Occupant field
+        formula = "NOT(OR({Occupant} = '', {Occupant} = BLANK()))"
+        occupied_buildings = tables['buildings'].all(formula=formula)
+        
+        # Extract the occupant IDs
+        citizen_ids = [building['fields'].get('Occupant') for building in occupied_buildings if building['fields'].get('Occupant')]
+        
+        # If no citizens are housed, return empty list
+        if not citizen_ids:
+            log.info("No housed citizens found")
+            return []
+        
+        # Create a formula to get these citizens
+        citizen_conditions = [f"RECORD_ID()='{citizen_id}'" for citizen_id in citizen_ids]
+        formula = f"OR({', '.join(citizen_conditions)})"
+        
         housed_citizens = tables['citizens'].all(formula=formula)
+        
+        # Add the building information to each citizen for easier processing
+        for citizen in housed_citizens:
+            # Find the building this citizen occupies
+            for building in occupied_buildings:
+                if building['fields'].get('Occupant') == citizen['id']:
+                    # Add building info to the citizen record
+                    citizen['current_building'] = building
+                    break
         
         log.info(f"Found {len(housed_citizens)} housed citizens")
         return housed_citizens
@@ -140,11 +163,6 @@ def move_citizen_to_new_building(tables, citizen: Dict, old_building: Dict, new_
     log.info(f"Moving {citizen_name} from {old_building_name} to {new_building_name}")
     
     try:
-        # Update citizen record with new home
-        tables['citizens'].update(citizen_id, {
-            'Home': new_building_id
-        })
-        
         # Update old building record to remove occupant
         tables['buildings'].update(old_building_id, {
             'Occupant': ""
@@ -315,24 +333,19 @@ def process_housing_mobility(dry_run: bool = False):
     for citizen in housed_citizens:
         citizen_id = citizen['id']
         social_class = citizen['fields'].get('SocialClass', '')
-        current_home_id = citizen['fields'].get('Home', '')
+        
+        # Get current building from the attached building info
+        current_building = citizen.get('current_building')
+        if not current_building:
+            citizen_name = f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}"
+            log.warning(f"Citizen {citizen_name} has no current building information despite being in housed list")
+            continue
         
         citizen_name = f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}"
         
         # Skip if social class is unknown or not in our mobility table
         if not social_class or social_class not in MOBILITY_CHANCE:
             log.warning(f"Citizen {citizen_name} has unknown social class: {social_class}")
-            continue
-        
-        # Skip if home is not set
-        if not current_home_id:
-            log.warning(f"Citizen {citizen_name} has empty home field despite being in housed list")
-            continue
-        
-        # Get current building details
-        current_building = get_building_details(tables, current_home_id)
-        if not current_building:
-            log.warning(f"Could not find current building {current_home_id} for citizen {citizen_name}")
             continue
         
         # Track that we checked this citizen
