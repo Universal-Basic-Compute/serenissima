@@ -835,7 +835,7 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                   <div className="flex justify-between items-center bg-amber-50 p-2 rounded-lg">
                     <span className="text-gray-700 font-medium">Daily Cost:</span>
                     <span className="font-semibold text-amber-800">
-                      {buildingDefinition.maintenanceCost.toLocaleString()} ⚜️ ducats
+                      {String(buildingDefinition.maintenanceCost.toLocaleString())} ⚜️ ducats
                     </span>
                   </div>
                 </div>
@@ -909,7 +909,7 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-gray-700">Lease Amount:</span>
                       <span className="font-semibold text-amber-800">
-                        {building.lease_amount.toLocaleString()} ⚜️ ducats
+                        {String(building.lease_amount.toLocaleString())} ⚜️ ducats
                       </span>
                     </div>
                   )}
@@ -918,7 +918,7 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                     <div className="flex justify-between items-center">
                       <span className="text-gray-700">Rent Amount:</span>
                       <span className="font-semibold text-amber-800">
-                        {building.rent_amount.toLocaleString()} ⚜️ ducats
+                        {String(building.rent_amount.toLocaleString())} ⚜️ ducats
                       </span>
                     </div>
                   )}
