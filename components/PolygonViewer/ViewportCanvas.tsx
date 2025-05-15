@@ -342,7 +342,7 @@ export default function ViewportCanvas({
     const startTime = performance.now();
     
     // Draw the scene using RenderService
-    renderService.drawScene({
+    renderService.drawScene(
       ctx,
       canvas,
       activeView,
@@ -353,17 +353,19 @@ export default function ViewportCanvas({
       emptyBuildingPoints,
       interactionState,
       transportPath,
-      transportStartPoint: transportService.getStartPoint(),
-      transportEndPoint: transportService.getEndPoint(),
+      transportService.getStartPoint(),
+      transportService.getEndPoint(),
       polygons,
       incomeData,
       minIncome,
       maxIncome,
-      citizensByBuilding,
-      citizensLoaded,
-      coatOfArmsImages,
-      renderedCoatOfArmsCache: renderedCoatOfArmsCache.current
-    });
+      {
+        citizensByBuilding,
+        citizensLoaded,
+        coatOfArmsImages,
+        renderedCoatOfArmsCache: renderedCoatOfArmsCache.current
+      }
+    );
     
     // Log performance metrics for debugging (only if rendering takes more than 16ms)
     const renderTime = performance.now() - startTime;
@@ -386,7 +388,7 @@ export default function ViewportCanvas({
     const animate = () => {
       // Only redraw if something has changed
       if (interactionService.getState().isDragging) {
-        renderService.drawScene({
+        renderService.drawScene(
           ctx,
           canvas,
           activeView,
@@ -395,19 +397,21 @@ export default function ViewportCanvas({
           polygonsToRender,
           buildings,
           emptyBuildingPoints,
-          interactionState: interactionService.getState(),
+          interactionService.getState(),
           transportPath,
-          transportStartPoint: transportService.getStartPoint(),
-          transportEndPoint: transportService.getEndPoint(),
+          transportService.getStartPoint(),
+          transportService.getEndPoint(),
           polygons,
           incomeData,
           minIncome,
           maxIncome,
-          citizensByBuilding,
-          citizensLoaded,
-          coatOfArmsImages,
-          renderedCoatOfArmsCache: renderedCoatOfArmsCache.current
-        });
+          {
+            citizensByBuilding,
+            citizensLoaded,
+            coatOfArmsImages,
+            renderedCoatOfArmsCache: renderedCoatOfArmsCache.current
+          }
+        );
       }
       
       animationId = requestAnimationFrame(animate);
