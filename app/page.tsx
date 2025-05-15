@@ -226,6 +226,21 @@ export default function TwoDPage() {
     const initializeTransportService = async () => {
       try {
         console.log('Initializing transport service...');
+        
+        // First check if we have polygon data in window.__polygonData
+        if (typeof window !== 'undefined' && (window as any).__polygonData) {
+          const windowPolygons = (window as any).__polygonData;
+          if (Array.isArray(windowPolygons) && windowPolygons.length > 0) {
+            console.log(`Found ${windowPolygons.length} polygons in window.__polygonData, using for transport service`);
+            const success = transportService.setPolygonsData(windowPolygons);
+            if (success) {
+              console.log('Successfully initialized transport service with window.__polygonData');
+              return;
+            }
+          }
+        }
+        
+        // If no window data or initialization failed, try preloading
         const success = await transportService.preloadPolygons();
         console.log(`Transport service initialization ${success ? 'succeeded' : 'failed'}`);
       } catch (error) {

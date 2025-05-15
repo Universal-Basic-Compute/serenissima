@@ -142,6 +142,11 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           if (typeof window !== 'undefined') {
             (window as any).__polygonData = data.polygons;
           }
+          
+          // Explicitly initialize the transport service with the polygon data
+          console.log(`Initializing transport service with ${data.polygons.length} polygons`);
+          const { transportService } = require('@/lib/services/TransportService');
+          transportService.setPolygonsData(data.polygons);
         }
         setLoading(false);
       })

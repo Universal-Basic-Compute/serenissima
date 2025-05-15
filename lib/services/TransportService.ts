@@ -151,6 +151,9 @@ export class TransportService {
         }
       }
       
+      // Add this check to verify polygon data is available
+      console.log(`Polygon data status: loaded=${this.polygonsLoaded}, count=${this.polygons.length}`);
+      
       if (this.polygons.length > 0) {
         // Try local pathfinding
         const localResult = await this.findPath(start, end);
@@ -601,10 +604,17 @@ export class TransportService {
           const success = this.setPolygonsData(windowPolygons);
           if (success) {
             console.log('Successfully loaded polygons from window.__polygonData');
+            this.polygonsLoaded = true;
             resolve(true);
             return;
+          } else {
+            console.error('Failed to set polygons data from window.__polygonData');
           }
+        } else {
+          console.warn('window.__polygonData exists but is empty or not an array');
         }
+      } else {
+        console.warn('window.__polygonData is not available');
       }
       
       // Try to load polygons with exponential backoff
