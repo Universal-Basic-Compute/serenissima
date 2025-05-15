@@ -61,11 +61,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     try {
       setIsLoadingBuildingImage(true);
       
-      // Normalize the building type to match the flat file structure
-      const normalizedType = buildingType.toLowerCase().replace(/[_\s-]+/g, '');
-      
       // Try the direct flat path first
-      const flatImagePath = `/images/buildings/${normalizedType}.jpg`;
+      const flatImagePath = `/images/buildings/${buildingType}.jpg`;
       
       // Check if the image exists
       try {
@@ -502,7 +499,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   useEffect(() => {
     const loadUsers = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const apiUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
         const response = await fetch(`${apiUrl}/api/users`);
         
         if (response.ok) {
@@ -570,7 +567,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
               if (building.position && 
                   ((typeof building.position === 'object' && 'lat' in building.position && 'lng' in building.position) || 
                    (typeof building.position === 'string' && building.position.includes('lat')))) {
-                console.log(`Building ${building.id} already has position:`, building.position);
+                //console.log(`Building ${building.id} already has position:`, building.position);
                 return building;
               }
               
@@ -1990,7 +1987,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     
     // Debug logging for hover state
     if (hoveredBuildingId) {
-      console.log('Drawing with hoveredBuildingId:', hoveredBuildingId);
+      //console.log('Drawing with hoveredBuildingId:', hoveredBuildingId);
     }
     
     // Reset hover and selection state when switching away from land view
@@ -2212,7 +2209,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         );
       });
 
-      console.log(`%c DRAWING BUILDINGS: ${buildingsWithValidPosition.length} of ${buildings.length} buildings have valid positions for drawing`, 'background: #9C27B0; color: white; padding: 4px 8px; font-weight: bold; border-radius: 4px;');
+      //console.log(`%c DRAWING BUILDINGS: ${buildingsWithValidPosition.length} of ${buildings.length} buildings have valid positions for drawing`, 'background: #9C27B0; color: white; padding: 4px 8px; font-weight: bold; border-radius: 4px;');
       
       buildings.forEach(building => {
         if (!building.position) return;
@@ -2335,7 +2332,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         );
       });
       
-      console.log(`%c BUILDINGS DRAWN: Completed drawing ${buildingsWithValidPosition.length} buildings`, 'background: #9C27B0; color: white; padding: 4px 8px; font-weight: bold; border-radius: 4px;');
+      //console.log(`%c BUILDINGS DRAWN: Completed drawing ${buildingsWithValidPosition.length} buildings`, 'background: #9C27B0; color: white; padding: 4px 8px; font-weight: bold; border-radius: 4px;');
     }
     
     // Draw transport points if in transport view
