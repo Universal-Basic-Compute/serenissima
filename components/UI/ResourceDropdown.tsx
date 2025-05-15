@@ -395,18 +395,6 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({
           }}
         >
           <p>{tooltipState.content}</p>
-          {tooltipState.visible && resource => resource.location && (
-            <>
-              <p className="mt-1 text-amber-300">
-                Located at: {resource.location.lat.toFixed(6)}, {resource.location.lng.toFixed(6)}
-              </p>
-              {resource.buildingId && (
-                <p className="mt-1 text-amber-300">
-                  Building: {resource.buildingId}
-                </p>
-              )}
-            </>
-          )}
         </div>
       )}
       
