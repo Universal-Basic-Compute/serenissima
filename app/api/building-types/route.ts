@@ -42,7 +42,8 @@ function loadBuildingData(filePath: string): any {
     const buildingData = JSON.parse(data);
     return {
       ...buildingData,
-      productionInformation: buildingData.productionInformation || null
+      productionInformation: buildingData.productionInformation || null,
+      canImport: buildingData.canImport || false  // Add canImport property with default false
     };
   } catch (error) {
     console.error(`Error loading building data from ${filePath}:`, error);
@@ -121,7 +122,8 @@ export async function GET(request: Request) {
         constructionCosts: buildingData.constructionCosts || null,
         maintenanceCost: buildingData.maintenanceCost || 0,
         shortDescription: buildingData.shortDescription || '',
-        productionInformation: buildingData.productionInformation || null
+        productionInformation: buildingData.productionInformation || null,
+        canImport: buildingData.canImport || false  // Add canImport property to the returned object
       };
     }).filter(Boolean); // Remove null entries
     
