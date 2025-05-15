@@ -35,7 +35,7 @@ interface InteractionData {
   polygonsToRender: PolygonRenderData[];
   buildings: BuildingData[];
   emptyBuildingPoints: PointData[];
-  allPolygons: PolygonData[];
+  polygons: PolygonData[];
   citizensByBuilding: Record<string, any[]>;
   transportStartPoint: PointData | null;
   transportEndPoint: PointData | null;
@@ -247,11 +247,11 @@ export default function ViewportCanvas({
       polygonsToRender: polygonsToRender,
       buildings: buildings,
       emptyBuildingPoints: emptyBuildingPoints,
-      allPolygons: polygons,
+      polygons: polygons,
       citizensByBuilding: citizensByBuilding,
       transportStartPoint: transportService.getStartPoint() || null,
       transportEndPoint: transportService.getEndPoint() || null
-    } as InteractionData);
+    });
     
     // Set up interaction service with all required dependencies
     const cleanup = interactionService.initializeInteractions(
@@ -264,11 +264,11 @@ export default function ViewportCanvas({
         polygonsToRender: polygonsToRender,
         buildings: buildings,
         emptyBuildingPoints: emptyBuildingPoints,
-        allPolygons: polygons,
+        polygons: polygons,
         citizensByBuilding: citizensByBuilding,
         transportStartPoint: transportService.getStartPoint() || null,
         transportEndPoint: transportService.getEndPoint() || null
-      } as InteractionData,
+      },
       coatOfArmsImages as any // Type assertion to bypass type checking temporarily
     );
     
@@ -303,7 +303,7 @@ export default function ViewportCanvas({
         if (point) {
           console.log(`Transport point selected at: ${point.lat}, ${point.lng}`);
           // Pass the point correctly
-          transportService.handlePointSelected(point as PointData);
+          transportService.handlePointSelected(point);
         }
       })
     ];
@@ -334,11 +334,11 @@ export default function ViewportCanvas({
       polygonsToRender: polygonsToRender,
       buildings: buildings,
       emptyBuildingPoints: emptyBuildingPoints,
-      allPolygons: polygons,
+      polygons: polygons,
       citizensByBuilding: citizensByBuilding,
       transportStartPoint: transportService.getStartPoint() || null,
       transportEndPoint: transportService.getEndPoint() || null
-    } as InteractionData);
+    });
   }, [polygonsToRender, buildings, emptyBuildingPoints, citizensByBuilding, polygons]);
   
   // Remove debugging for hover state changes
@@ -401,8 +401,8 @@ export default function ViewportCanvas({
       emptyBuildingPoints,
       interactionState as InteractionState,
       transportPath,
-      transportService.getStartPoint() as PointData | null,
-      transportService.getEndPoint() as PointData | null,
+      transportService.getStartPoint(),
+      transportService.getEndPoint(),
       polygons,
       incomeDataLoaded ? incomeData : {},
       minIncome,
@@ -453,8 +453,8 @@ export default function ViewportCanvas({
           emptyBuildingPoints,
           interactionService.getState() as InteractionState,
           transportPath,
-          transportService.getStartPoint() as PointData | null,
-          transportService.getEndPoint() as PointData | null,
+          transportService.getStartPoint(),
+          transportService.getEndPoint(),
           polygons,
           incomeDataLoaded ? incomeData : {},
           minIncome,
