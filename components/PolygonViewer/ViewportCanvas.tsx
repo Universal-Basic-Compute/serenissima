@@ -77,9 +77,9 @@ export default function ViewportCanvas({
         if (activeView === 'land') {
           try {
             await incomeService.loadIncomeData();
-            const incomeData = incomeService.getIncomeData() || {};
-            const minIncome = incomeService.getMinIncome() || 0;
-            const maxIncome = incomeService.getMaxIncome() || 1000;
+            const incomeData = incomeService.getIncome() || {};
+            const minIncome = incomeService.getIncome('min') || 0;
+            const maxIncome = incomeService.getIncome('max') || 1000;
             
             setIncomeData(incomeData);
             setMinIncome(minIncome);
@@ -200,15 +200,15 @@ export default function ViewportCanvas({
     };
     
     // Update the interaction service with current data
-    interactionService.updatePolygons(
+    interactionService.updatePolygons({
       polygonsToRender,
       buildings,
       emptyBuildingPoints,
       polygons,
       citizensByBuilding,
-      transportService.getStartPoint() || null,
-      transportService.getEndPoint() || null
-    );
+      transportStartPoint: transportService.getStartPoint() || null,
+      transportEndPoint: transportService.getEndPoint() || null
+    });
     
     // Set up interaction service with all required dependencies
     const cleanup = interactionService.initializeInteractions(
@@ -278,15 +278,15 @@ export default function ViewportCanvas({
   
   // Add this effect to update the interaction service when data changes
   useEffect(() => {
-    interactionService.updatePolygons(
+    interactionService.updatePolygons({
       polygonsToRender,
       buildings,
       emptyBuildingPoints,
       polygons,
       citizensByBuilding,
-      transportService.getStartPoint() || null,
-      transportService.getEndPoint() || null
-    );
+      transportStartPoint: transportService.getStartPoint() || null,
+      transportEndPoint: transportService.getEndPoint() || null
+    });
   }, [polygonsToRender, buildings, emptyBuildingPoints, citizensByBuilding, polygons]);
   
   // Remove debugging for hover state changes
@@ -349,8 +349,8 @@ export default function ViewportCanvas({
       emptyBuildingPoints,
       interactionState,
       transportPath,
-      transportService.getStartPoint() || null,
-      transportService.getEndPoint() || null,
+      transportService.getStartPoint(),
+      transportService.getEndPoint(),
       polygons as any,
       incomeDataLoaded ? incomeData : {},
       minIncome,
@@ -401,8 +401,8 @@ export default function ViewportCanvas({
           emptyBuildingPoints,
           interactionService.getState(),
           transportPath,
-          transportService.getStartPoint() || null,
-          transportService.getEndPoint() || null,
+          transportService.getStartPoint(),
+          transportService.getEndPoint(),
           polygons,
           incomeDataLoaded ? incomeData : {},
           minIncome,
