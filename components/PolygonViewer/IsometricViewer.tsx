@@ -1080,6 +1080,12 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         console.log('Mouse position in transport mode:', { x: mouseX, y: mouseY });
       }
       
+      // Skip hover detection while dragging
+      if (isDragging) {
+        canvas.style.cursor = 'grabbing';
+        return;
+      }
+      
       // Only process hover detection in land view or buildings view
       if (activeView !== 'land' && activeView !== 'buildings') {
         // Reset hover states if not in land or buildings view
@@ -1092,8 +1098,6 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         canvas.style.cursor = isDragging ? 'grabbing' : 'grab';
         return;
       }
-      
-      if (isDragging) return; // Skip hover detection while dragging
       
       // Check if mouse is over any polygon (for land view)
       if (activeView === 'land') {
@@ -1110,12 +1114,16 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           canvas.style.cursor = isDragging ? 'grabbing' : 'grab';
         }
         
-        setHoveredPolygonId(hoveredId);
+        // Only update state if the hovered polygon has changed
+        if (hoveredId !== hoveredPolygonId) {
+          setHoveredPolygonId(hoveredId);
+        }
       }
       
       // Check if mouse is over any building (for buildings view)
       if (activeView === 'buildings') {
         let foundHoveredBuilding = false;
+        let newHoveredBuildingId = null;
     
         // Calculate building positions and check if mouse is over any
         for (const building of buildings) {
@@ -1162,22 +1170,27 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             mouseY <= isoPos.y + squareSize/2
           ) {
             foundHoveredBuilding = true;
+            newHoveredBuildingId = building.id;
+            canvas.style.cursor = 'pointer';
+            break; // Break after finding the first hovered building
+          }
+        }
         
-            // Only update state if it's a different building
-            if (hoveredBuildingId !== building.id) {
-              console.log('HOVER DETECTED! Setting hoveredBuildingId to:', building.id);
-              setHoveredBuildingId(building.id);
-              canvas.style.cursor = 'pointer';
-              console.log('Hovering over building:', building.id, building.type);
-                
-              // Add these lines to store the building name and position
+        // Only update state if the hovered building has changed
+        if (newHoveredBuildingId !== hoveredBuildingId) {
+          setHoveredBuildingId(newHoveredBuildingId);
+          
+          if (newHoveredBuildingId) {
+            const building = buildings.find(b => b.id === newHoveredBuildingId);
+            if (building) {
               setHoveredBuildingName(building.name || formatBuildingType(building.type));
               setHoveredBuildingPosition({ x: mouseX, y: mouseY });
-                
-              // Add this new code to fetch the building image
               fetchBuildingImagePath(building.type, building.variant);
             }
-            break; // Break after finding the first hovered building
+          } else {
+            setHoveredBuildingName(null);
+            setHoveredBuildingPosition(null);
+            setHoveredBuildingImagePath(null);
           }
         }
         
@@ -1210,16 +1223,16 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   
         // If no building is hovered, clear the hover state
         if (!foundHoveredBuilding && hoveredBuildingId !== null) {
-          console.log('No building hovered, clearing hoveredBuildingId');
           setHoveredBuildingId(null);
-          setHoveredBuildingName(null); // Clear the building name
-          setHoveredBuildingPosition(null); // Clear the position
-          setHoveredBuildingImagePath(null); // Clear the building image
+          setHoveredBuildingName(null);
+          setHoveredBuildingPosition(null);
+          setHoveredBuildingImagePath(null);
           canvas.style.cursor = isDragging ? 'grabbing' : 'grab';
         }
       
         // Check if mouse is over any dock point
         let foundHoveredCanalPoint = false;
+        let newHoveredCanalPoint = null;
       
         for (const polygon of polygons) {
           if (foundHoveredCanalPoint) break;
@@ -1246,7 +1259,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
                 mouseY <= isoPos.y + pointSize
               ) {
                 foundHoveredCanalPoint = true;
-                setHoveredCanalPoint(point.edge);
+                newHoveredCanalPoint = point.edge;
                 canvas.style.cursor = 'pointer';
                 break;
               }
@@ -1254,12 +1267,19 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           }
         }
       
+        // Only update if the hovered canal point has changed
         if (!foundHoveredCanalPoint && hoveredCanalPoint !== null) {
           setHoveredCanalPoint(null);
+        } else if (foundHoveredCanalPoint && 
+                  (hoveredCanalPoint === null || 
+                   hoveredCanalPoint.lat !== newHoveredCanalPoint.lat || 
+                   hoveredCanalPoint.lng !== newHoveredCanalPoint.lng)) {
+          setHoveredCanalPoint(newHoveredCanalPoint);
         }
       
         // Check if mouse is over any bridge point
         let foundHoveredBridgePoint = false;
+        let newHoveredBridgePoint = null;
       
         for (const polygon of polygons) {
           if (foundHoveredBridgePoint) break;
@@ -1286,7 +1306,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
                 mouseY <= isoPos.y + pointSize
               ) {
                 foundHoveredBridgePoint = true;
-                setHoveredBridgePoint(point.edge);
+                newHoveredBridgePoint = point.edge;
                 canvas.style.cursor = 'pointer';
                 break;
               }
@@ -1294,8 +1314,14 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           }
         }
       
+        // Only update if the hovered bridge point has changed
         if (!foundHoveredBridgePoint && hoveredBridgePoint !== null) {
           setHoveredBridgePoint(null);
+        } else if (foundHoveredBridgePoint && 
+                  (hoveredBridgePoint === null || 
+                   hoveredBridgePoint.lat !== newHoveredBridgePoint.lat || 
+                   hoveredBridgePoint.lng !== newHoveredBridgePoint.lng)) {
+          setHoveredBridgePoint(newHoveredBridgePoint);
         }
       } else if (hoveredBuildingId !== null) {
         // If not in buildings view, ensure building hover state is cleared
@@ -1305,6 +1331,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       // Check if mouse is over any citizen marker (for citizens view)
       if (activeView === 'citizens' as ViewType) {
         let foundHoveredCitizen = false;
+        let newHoveredCitizenBuilding = null;
+        let newHoveredCitizenType = null;
         
         // Check each building with citizens
         for (const [buildingId, buildingCitizens] of Object.entries(citizensByBuilding)) {
@@ -1322,8 +1350,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             
             if (Math.sqrt(Math.pow(mouseX - homeX, 2) + Math.pow(mouseY - homeY, 2)) <= homeRadius) {
               foundHoveredCitizen = true;
-              setHoveredCitizenBuilding(buildingId);
-              setHoveredCitizenType('home');
+              newHoveredCitizenBuilding = buildingId;
+              newHoveredCitizenType = 'home';
               canvas.style.cursor = 'pointer';
               break;
             }
@@ -1339,19 +1367,24 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             
             if (Math.sqrt(Math.pow(mouseX - workX, 2) + Math.pow(mouseY - workY, 2)) <= workRadius) {
               foundHoveredCitizen = true;
-              setHoveredCitizenBuilding(buildingId);
-              setHoveredCitizenType('work');
+              newHoveredCitizenBuilding = buildingId;
+              newHoveredCitizenType = 'work';
               canvas.style.cursor = 'pointer';
               break;
             }
           }
         }
         
-        // If no citizen is hovered, reset the hover state
+        // Only update if the hovered citizen has changed
         if (!foundHoveredCitizen && (hoveredCitizenBuilding !== null || hoveredCitizenType !== null)) {
           setHoveredCitizenBuilding(null);
           setHoveredCitizenType(null);
           canvas.style.cursor = isDragging ? 'grabbing' : 'grab';
+        } else if (foundHoveredCitizen && 
+                  (hoveredCitizenBuilding !== newHoveredCitizenBuilding || 
+                   hoveredCitizenType !== newHoveredCitizenType)) {
+          setHoveredCitizenBuilding(newHoveredCitizenBuilding);
+          setHoveredCitizenType(newHoveredCitizenType);
         }
       }
     };
@@ -1715,7 +1748,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       canvas.removeEventListener('mousemove', handleMouseMove);
       canvas.removeEventListener('click', handleClick);
     };
-  }, [polygonsToRender, buildings, isDragging, activeView, hoveredPolygonId, hoveredBuildingId, scale]);
+  }, [polygonsToRender, buildings, isDragging, activeView, hoveredPolygonId, hoveredBuildingId, hoveredCanalPoint, hoveredBridgePoint, hoveredCitizenBuilding, hoveredCitizenType, scale, offset, emptyBuildingPoints, citizensByBuilding, transportMode]);
 
   // Helper function to check if a point is inside a polygon
   function isPointInPolygon(x: number, y: number, polygon: {x: number, y: number}[]): boolean {
