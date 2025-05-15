@@ -17,6 +17,11 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     // Animate in when component mounts
     setIsVisible(true);
     
+    // Reset building states when citizen changes
+    setHomeBuilding(null);
+    setWorkBuilding(null);
+    setIsLoadingBuildings(false);
+    
     // Add escape key handler
     const handleEscKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
