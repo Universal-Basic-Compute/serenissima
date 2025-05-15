@@ -325,31 +325,76 @@ export class TransportService {
       console.log('Loading polygons for pathfinding...');
       
       // In browser environment, fetch polygons from API
+      console.log('Fetching polygons from API endpoint: /api/get-polygons');
       const response = await fetch('/api/get-polygons');
+      
+      console.log(`API response status: ${response.status} ${response.statusText}`);
+      
       if (!response.ok) {
         console.error(`Failed to load polygons: HTTP ${response.status}`);
         return false;
       }
       
       const data = await response.json();
-      if (!data.polygons || !Array.isArray(data.polygons) || data.polygons.length === 0) {
-        console.error('No valid polygon data received from API');
+      console.log(`API response data received, polygons array exists: ${!!data.polygons}`);
+      
+      if (!data.polygons) {
+        console.error('No polygons array in API response');
         return false;
       }
       
+      if (!Array.isArray(data.polygons)) {
+        console.error('Polygons is not an array in API response');
+        return false;
+      }
+      
+      if (data.polygons.length === 0) {
+        console.error('Polygons array is empty in API response');
+        return false;
+      }
+      
+      console.log(`Successfully received ${data.polygons.length} polygons from API`);
+      
+      // Store the polygons
       this.polygons = data.polygons;
       this.polygonsLoaded = true;
       
       // Build the graph and canal network
+      console.log('Building graph from polygons...');
       this.graph = this.buildGraph(this.polygons);
+      console.log(`Graph built with ${Object.keys(this.graph.nodes).length} nodes and ${Object.values(this.graph.edges).flat().length} edges`);
+      
+      console.log('Building canal network from polygons...');
       this.canalNetwork = this.buildCanalNetwork(this.polygons);
+      console.log(`Canal network built with ${Object.keys(this.canalNetwork).length} segments`);
       
       console.log(`Successfully loaded ${this.polygons.length} polygons for pathfinding`);
       return true;
     } catch (error) {
       console.error('Error loading polygons for pathfinding:', error);
+      // Add more detailed error information
+      if (error instanceof Error) {
+        console.error('Error name:', error.name);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+      }
       return false;
     }
+  }
+
+  /**
+   * Preload polygons for pathfinding
+   * This can be called during app initialization to ensure polygons are loaded
+   */
+  public async preloadPolygons(): Promise<boolean> {
+    console.log('Preloading polygons for transport service...');
+    
+    if (this.polygonsLoaded) {
+      console.log('Polygons already loaded, skipping preload');
+      return true;
+    }
+    
+    return this.loadPolygons();
   }
 
   // Helper function to check if two line segments intersect
@@ -1122,8 +1167,28 @@ export class TransportService {
         console.log('Polygons not loaded yet, loading now for water-only path...');
         const loadSuccess = await this.loadPolygons();
         
-        // If first attempt fails, retry once
-        if (!loadSuccess) {
+        // Try to get polygons from window.__polygonData if API loading failed
+        if (!loadSuccess && typeof window !== 'undefined' && (window as any).__polygonData) {
+          console.log('Attempting to load polygons from window.__polygonData');
+          const windowPolygons = (window as any).__polygonData;
+          
+          if (Array.isArray(windowPolygons) && windowPolygons.length > 0) {
+            console.log(`Found ${windowPolygons.length} polygons in window.__polygonData`);
+            this.polygons = windowPolygons;
+            this.polygonsLoaded = true;
+            
+            // Build the graph and canal network
+            this.graph = this.buildGraph(this.polygons);
+            this.canalNetwork = this.buildCanalNetwork(this.polygons);
+            
+            console.log('Successfully loaded polygons from window.__polygonData');
+          } else {
+            console.error('window.__polygonData exists but is not a valid array or is empty');
+          }
+        }
+        
+        // If first attempt fails and window data isn't available, retry once
+        if (!this.polygonsLoaded) {
           console.log('First attempt to load polygons failed, retrying...');
           await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
           const retrySuccess = await this.loadPolygons();
@@ -1402,8 +1467,28 @@ export class TransportService {
         console.log('Polygons not loaded yet, loading now...');
         const loadSuccess = await this.loadPolygons();
         
-        // If first attempt fails, retry once
-        if (!loadSuccess) {
+        // Try to get polygons from window.__polygonData if API loading failed
+        if (!loadSuccess && typeof window !== 'undefined' && (window as any).__polygonData) {
+          console.log('Attempting to load polygons from window.__polygonData');
+          const windowPolygons = (window as any).__polygonData;
+          
+          if (Array.isArray(windowPolygons) && windowPolygons.length > 0) {
+            console.log(`Found ${windowPolygons.length} polygons in window.__polygonData`);
+            this.polygons = windowPolygons;
+            this.polygonsLoaded = true;
+            
+            // Build the graph and canal network
+            this.graph = this.buildGraph(this.polygons);
+            this.canalNetwork = this.buildCanalNetwork(this.polygons);
+            
+            console.log('Successfully loaded polygons from window.__polygonData');
+          } else {
+            console.error('window.__polygonData exists but is not a valid array or is empty');
+          }
+        }
+        
+        // If first attempt fails and window data isn't available, retry once
+        if (!this.polygonsLoaded) {
           console.log('First attempt to load polygons failed, retrying...');
           await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
           const retrySuccess = await this.loadPolygons();

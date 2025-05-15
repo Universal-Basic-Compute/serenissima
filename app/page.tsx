@@ -94,6 +94,11 @@ export default function TwoDPage() {
           // Store in window for other components
           if (typeof window !== 'undefined') {
             (window as any).__polygonData = data.polygons;
+            
+            // Preload polygons in the transport service
+            transportService.preloadPolygons().then(success => {
+              console.log(`Transport service polygon preload ${success ? 'succeeded' : 'failed'}`);
+            });
           }
         }
       })
