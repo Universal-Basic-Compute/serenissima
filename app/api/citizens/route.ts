@@ -142,7 +142,7 @@ export async function GET(request: Request) {
       const buildings = occupantToBuildings[citizenId] || {};
       
       // Safely convert Airtable values to strings
-      const safeString = (value: AirtableValue | undefined, defaultValue: string = ''): string => {
+      const safeString = (value: AirtableValue | undefined | null, defaultValue: string = ''): string => {
         if (value === undefined || value === null) return defaultValue;
         return String(value);
       };
@@ -156,11 +156,11 @@ export async function GET(request: Request) {
         socialclass: safeString(record.fields.SocialClass, 'Popolani'),
         description: safeString(record.fields.Description, 'A citizen of Venice.'),
         profileimage: formatImageUrl(
-          record.fields.ImageUrl ? airtableValueToString(record.fields.ImageUrl) : undefined, 
+          record.fields.ImageUrl ? String(record.fields.ImageUrl) : undefined, 
           citizenId
         ),
         imageurl: formatImageUrl(
-          record.fields.ImageUrl ? airtableValueToString(record.fields.ImageUrl) : undefined, 
+          record.fields.ImageUrl ? String(record.fields.ImageUrl) : undefined, 
           citizenId
         ),
         // Ensure position is included and properly formatted
