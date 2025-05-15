@@ -377,7 +377,7 @@ def process_work_mobility(dry_run: bool = False):
         # Get current wages
         current_wages = float(current_business['fields'].get('Wages', 0) or 0)
         if current_wages <= 0:
-            log.warning(f"Current business {current_job_id} has invalid wages: {current_wages}")
+            log.warning(f"Current business {current_business['id']} has invalid wages: {current_wages}")
             continue
         
         # Calculate minimum wages for new job
