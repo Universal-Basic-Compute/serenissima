@@ -2188,6 +2188,10 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         ctx.fillStyle = '#FFFFFF';
         ctx.fillText(instructionText, canvas.width / 2, 40);
         
+        // Create local shorthand functions that use the current state values
+        const isoX = (x: number, y: number) => calculateIsoX(x, y, scale, offset, canvas.width);
+        const isoY = (x: number, y: number) => calculateIsoY(x, y, scale, offset, canvas.height);
+        
         // Draw start point if set
         if (transportStartPoint) {
           const startX = (transportStartPoint.lng - 12.3326) * 20000;
