@@ -370,6 +370,9 @@ export class TransportService {
     try {
       console.log('Starting loadPolygons()...');
       
+      // Debug the current directory
+      console.log('Current working directory:', process.cwd());
+      
       // First try to load from the API endpoint
       try {
         console.log('Fetching polygons from API endpoint: /api/get-polygons');
@@ -391,10 +394,29 @@ export class TransportService {
         
         if (response.ok) {
           const data = await response.json();
-          console.log(`API response data received, polygons property exists: ${!!data.polygons}`);
+          console.log(`API response data received:`, data);
+          console.log(`Polygons property exists: ${!!data.polygons}, Type: ${typeof data.polygons}, Is Array: ${Array.isArray(data.polygons)}`);
           
-          if (data.polygons && Array.isArray(data.polygons) && data.polygons.length > 0) {
-            console.log(`Successfully received ${data.polygons.length} polygons from API`);
+          if (data.polygons && Array.isArray(data.polygons)) {
+            console.log(`Polygons array length: ${data.polygons.length}`);
+            
+            if (data.polygons.length > 0) {
+              console.log(`First polygon:`, data.polygons[0]);
+              
+              // Check if the first polygon has coordinates
+              if (data.polygons[0].coordinates) {
+                console.log(`First polygon coordinates:`, data.polygons[0].coordinates);
+                console.log(`First polygon coordinates type: ${typeof data.polygons[0].coordinates}, Is Array: ${Array.isArray(data.polygons[0].coordinates)}`);
+                
+                if (Array.isArray(data.polygons[0].coordinates) && data.polygons[0].coordinates.length > 0) {
+                  console.log(`First coordinate:`, data.polygons[0].coordinates[0]);
+                  console.log(`First coordinate has lat: ${data.polygons[0].coordinates[0].lat !== undefined}, lng: ${data.polygons[0].coordinates[0].lng !== undefined}`);
+                }
+              }
+            }
+            
+            if (data.polygons.length > 0) {
+              console.log(`Successfully received ${data.polygons.length} polygons from API`);
             
             // Process the polygons
             const processedPolygons = this.processPolygons(data.polygons);
