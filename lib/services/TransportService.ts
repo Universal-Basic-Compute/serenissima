@@ -1414,7 +1414,7 @@ export class TransportService {
             const fraction = j / (numPoints + 1);
             // Add some randomness to create natural curves
             const jitter = 0.00005 * (Math.random() * 2 - 1);
-            const midpoint = {
+            const midpoint: Point = {
               lat: point1.lat + (point2.lat - point1.lat) * fraction + jitter,
               lng: point1.lng + (point2.lng - point1.lng) * fraction + jitter,
               type: 'canal',
