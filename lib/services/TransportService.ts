@@ -370,17 +370,17 @@ export class TransportService {
     try {
       console.log('Starting loadPolygons()...');
       
-      // In browser environment, fetch polygons from API
-      console.log('Fetching polygons from API endpoint: /api/get-polygons');
-      
-      // Add timeout handling
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => {
-        console.error('Fetch timeout after 10 seconds');
-        controller.abort();
-      }, 10000);
-      
+      // First try to load from the API endpoint
       try {
+        console.log('Fetching polygons from API endpoint: /api/get-polygons');
+        
+        // Add timeout handling
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => {
+          console.error('Fetch timeout after 10 seconds');
+          controller.abort();
+        }, 10000);
+        
         const response = await fetch('/api/get-polygons', {
           signal: controller.signal
         });
@@ -389,99 +389,141 @@ export class TransportService {
         
         console.log(`API response status: ${response.status} ${response.statusText}`);
         
-        if (!response.ok) {
-          console.error(`Failed to load polygons: HTTP ${response.status}`);
-          return false;
-        }
-        
-        const data = await response.json();
-        console.log(`API response data received, polygons property exists: ${!!data.polygons}`);
-        
-        // Log the first polygon to see its structure
-        if (data.polygons && data.polygons.length > 0) {
-          console.log('First polygon structure:', JSON.stringify(data.polygons[0]).substring(0, 200) + '...');
-        }
-        
-        if (!data.polygons) {
-          console.error('No polygons array in API response');
-          return false;
-        }
-        
-        if (!Array.isArray(data.polygons)) {
-          console.error('Polygons is not an array in API response');
-          return false;
-        }
-        
-        if (data.polygons.length === 0) {
-          console.error('Polygons array is empty in API response');
-          return false;
-        }
-        
-        console.log(`Successfully received ${data.polygons.length} polygons from API`);
-        
-        // Process the polygons to ensure they have the required properties
-        const processedPolygons = data.polygons.map((polygon: any) => {
-          // Ensure the polygon has coordinates
-          if (!polygon.coordinates || !Array.isArray(polygon.coordinates) || polygon.coordinates.length < 3) {
-            console.warn(`Polygon ${polygon.id} has invalid coordinates, skipping`);
-            return null;
+        if (response.ok) {
+          const data = await response.json();
+          console.log(`API response data received, polygons property exists: ${!!data.polygons}`);
+          
+          if (data.polygons && Array.isArray(data.polygons) && data.polygons.length > 0) {
+            console.log(`Successfully received ${data.polygons.length} polygons from API`);
+            
+            // Process the polygons
+            const processedPolygons = this.processPolygons(data.polygons);
+            
+            if (processedPolygons.length > 0) {
+              // Store the processed polygons
+              this.polygons = processedPolygons;
+              this.polygonsLoaded = true;
+              
+              // Build the graph and canal network
+              this.buildGraphAndNetwork();
+              
+              return true;
+            }
           }
-          
-          // Ensure each coordinate has lat and lng properties
-          const validCoordinates = polygon.coordinates.filter((coord: any) => 
-            coord && typeof coord.lat === 'number' && typeof coord.lng === 'number'
-          );
-          
-          if (validCoordinates.length < 3) {
-            console.warn(`Polygon ${polygon.id} has insufficient valid coordinates, skipping`);
-            return null;
-          }
-          
-          // Create a processed polygon with all required properties
-          return {
-            id: polygon.id,
-            coordinates: validCoordinates,
-            centroid: polygon.centroid || null,
-            bridgePoints: Array.isArray(polygon.bridgePoints) ? polygon.bridgePoints : [],
-            buildingPoints: Array.isArray(polygon.buildingPoints) ? polygon.buildingPoints : [],
-            canalPoints: Array.isArray(polygon.canalPoints) ? polygon.canalPoints : []
-          };
-        }).filter(Boolean); // Remove null entries
-        
-        console.log(`Processed ${processedPolygons.length} valid polygons out of ${data.polygons.length} total`);
-        
-        if (processedPolygons.length === 0) {
-          console.error('No valid polygons after processing');
-          return false;
         }
-        
-        // Store the processed polygons
-        this.polygons = processedPolygons;
-        this.polygonsLoaded = true;
-        
-        // Build the graph and canal network
-        console.log('Building graph from polygons...');
-        this.graph = this.buildGraph(this.polygons);
-        console.log(`Graph built with ${Object.keys(this.graph.nodes).length} nodes and ${Object.values(this.graph.edges).flat().length} edges`);
-        
-        console.log('Building canal network from polygons...');
-        this.canalNetwork = this.buildCanalNetwork(this.polygons);
-        console.log(`Canal network built with ${Object.keys(this.canalNetwork).length} segments`);
-        
-        console.log(`Successfully loaded ${this.polygons.length} polygons for pathfinding`);
-        return true;
       } catch (error) {
-        clearTimeout(timeoutId);
-        if (error.name === 'AbortError') {
-          console.error('Fetch aborted due to timeout');
-        } else {
-          console.error('Fetch error:', error);
-        }
-        return false;
+        console.error('Error fetching from API endpoint:', error);
       }
+      
+      // If API endpoint failed, try to load directly from the data/polygons directory
+      console.log('API endpoint failed, trying to load directly from data/polygons directory');
+      
+      try {
+        // Fetch the list of polygon files
+        const filesResponse = await fetch('/api/list-polygon-files');
+        
+        if (filesResponse.ok) {
+          const filesData = await filesResponse.json();
+          
+          if (filesData.files && Array.isArray(filesData.files) && filesData.files.length > 0) {
+            console.log(`Found ${filesData.files.length} polygon files`);
+            
+            // Collect all polygons from all files
+            const allPolygons: any[] = [];
+            
+            for (const file of filesData.files) {
+              try {
+                const fileResponse = await fetch(`/data/polygons/${file}`);
+                
+                if (fileResponse.ok) {
+                  const fileData = await fileResponse.json();
+                  
+                  // Handle different file formats
+                  if (Array.isArray(fileData)) {
+                    // File contains an array of polygons
+                    allPolygons.push(...fileData);
+                  } else if (fileData.polygons && Array.isArray(fileData.polygons)) {
+                    // File contains an object with a polygons property
+                    allPolygons.push(...fileData.polygons);
+                  } else if (fileData.id) {
+                    // File contains a single polygon
+                    allPolygons.push(fileData);
+                  }
+                }
+              } catch (error) {
+                console.error(`Error loading polygon file ${file}:`, error);
+              }
+            }
+            
+            console.log(`Loaded ${allPolygons.length} polygons from files`);
+            
+            if (allPolygons.length > 0) {
+              // Process the polygons
+              const processedPolygons = this.processPolygons(allPolygons);
+              
+              if (processedPolygons.length > 0) {
+                // Store the processed polygons
+                this.polygons = processedPolygons;
+                this.polygonsLoaded = true;
+                
+                // Build the graph and canal network
+                this.buildGraphAndNetwork();
+                
+                return true;
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error loading polygon files:', error);
+      }
+      
+      // If all methods failed, try to load a specific polygon file directly
+      console.log('Trying to load polygons.json directly');
+      
+      try {
+        const directResponse = await fetch('/data/polygons/polygons.json');
+        
+        if (directResponse.ok) {
+          const directData = await directResponse.json();
+          
+          let polygonsArray: any[] = [];
+          
+          // Handle different file formats
+          if (Array.isArray(directData)) {
+            // File contains an array of polygons
+            polygonsArray = directData;
+          } else if (directData.polygons && Array.isArray(directData.polygons)) {
+            // File contains an object with a polygons property
+            polygonsArray = directData.polygons;
+          }
+          
+          console.log(`Loaded ${polygonsArray.length} polygons directly from polygons.json`);
+          
+          if (polygonsArray.length > 0) {
+            // Process the polygons
+            const processedPolygons = this.processPolygons(polygonsArray);
+            
+            if (processedPolygons.length > 0) {
+              // Store the processed polygons
+              this.polygons = processedPolygons;
+              this.polygonsLoaded = true;
+              
+              // Build the graph and canal network
+              this.buildGraphAndNetwork();
+              
+              return true;
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error loading polygons.json directly:', error);
+      }
+      
+      console.error('All methods to load polygons failed');
+      return false;
     } catch (error) {
       console.error('Error loading polygons for pathfinding:', error);
-      // Add more detailed error information
       if (error instanceof Error) {
         console.error('Error name:', error.name);
         console.error('Error message:', error.message);
@@ -489,6 +531,56 @@ export class TransportService {
       }
       return false;
     }
+  }
+
+  /**
+   * Process polygons to ensure they have the required properties
+   */
+  private processPolygons(polygons: any[]): Polygon[] {
+    const processedPolygons = polygons.map((polygon: any) => {
+      // Ensure the polygon has coordinates
+      if (!polygon.coordinates || !Array.isArray(polygon.coordinates) || polygon.coordinates.length < 3) {
+        console.warn(`Polygon ${polygon.id} has invalid coordinates, skipping`);
+        return null;
+      }
+      
+      // Ensure each coordinate has lat and lng properties
+      const validCoordinates = polygon.coordinates.filter((coord: any) => 
+        coord && typeof coord.lat === 'number' && typeof coord.lng === 'number'
+      );
+      
+      if (validCoordinates.length < 3) {
+        console.warn(`Polygon ${polygon.id} has insufficient valid coordinates, skipping`);
+        return null;
+      }
+      
+      // Create a processed polygon with all required properties
+      return {
+        id: polygon.id,
+        coordinates: validCoordinates,
+        centroid: polygon.centroid || null,
+        bridgePoints: Array.isArray(polygon.bridgePoints) ? polygon.bridgePoints : [],
+        buildingPoints: Array.isArray(polygon.buildingPoints) ? polygon.buildingPoints : [],
+        canalPoints: Array.isArray(polygon.canalPoints) ? polygon.canalPoints : []
+      };
+    }).filter(Boolean); // Remove null entries
+    
+    console.log(`Processed ${processedPolygons.length} valid polygons out of ${polygons.length} total`);
+    
+    return processedPolygons;
+  }
+
+  /**
+   * Build the graph and canal network
+   */
+  private buildGraphAndNetwork(): void {
+    console.log('Building graph from polygons...');
+    this.graph = this.buildGraph(this.polygons);
+    console.log(`Graph built with ${Object.keys(this.graph.nodes).length} nodes and ${Object.values(this.graph.edges).flat().length} edges`);
+    
+    console.log('Building canal network from polygons...');
+    this.canalNetwork = this.buildCanalNetwork(this.polygons);
+    console.log(`Canal network built with ${Object.keys(this.canalNetwork).length} segments`);
   }
 
   /**
