@@ -221,15 +221,30 @@ If it does not make sense for the building to store/transform/sell resources, wr
         content = response.json()["content"][0]["text"]
         
         # Find the JSON object in the response
-        json_match = re.search(r'({[\s\S]*})', content)
+        json_match = re.search(r'```json\s*({[\s\S]*?})\s*```', content)
+        
+        # If that doesn't find a match, try to find just a JSON object:
+        if not json_match:
+            json_match = re.search(r'({[\s\S]*?})', content)
+            
         if not json_match:
             log.error(f"Could not extract JSON from Claude response: {content}")
             return None
-        
-        production_info = json.loads(json_match.group(1))
-        
-        log.info(f"Successfully generated production information for {building_name}")
-        return production_info
+
+        # Clean the extracted JSON string to remove any trailing text
+        json_str = json_match.group(1).strip()
+        # Find the last closing brace
+        last_brace_index = json_str.rindex('}')
+        json_str = json_str[:last_brace_index+1]
+
+        try:
+            production_info = json.loads(json_str)
+            log.info(f"Successfully generated production information for {building_name}")
+            return production_info
+        except json.JSONDecodeError as e:
+            log.error(f"Error parsing JSON: {e}")
+            log.error(f"JSON string: {json_str}")
+            return None
     except Exception as e:
         log.error(f"Error generating production information: {e}")
         return None
