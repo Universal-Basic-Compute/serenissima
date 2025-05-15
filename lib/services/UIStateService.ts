@@ -61,26 +61,26 @@ export class UIStateService {
     
     // Only update and emit if something actually changed
     if (nameChanged || positionChanged || imagePathChanged) {
-      // Create a copy of the current state for comparison
+      // Store previous values for logging
       const prevName = this.hoveredBuildingName;
-      const prevPosition = this.hoveredBuildingPosition;
+      const prevPosition = this.hoveredBuildingPosition ? {...this.hoveredBuildingPosition} : null;
       const prevImagePath = this.hoveredBuildingImagePath;
       
       // Update state first
       this.hoveredBuildingName = buildingName;
-      this.hoveredBuildingPosition = position;
+      this.hoveredBuildingPosition = position ? {...position} : null;
       this.hoveredBuildingImagePath = imagePath;
       
       // Log the state change for debugging
       console.log('UIStateService: Building hover state changed', {
         from: { name: prevName, position: prevPosition, imagePath: prevImagePath },
-        to: { name: buildingName, position, imagePath }
+        to: { name: buildingName, position: position ? {...position} : null, imagePath }
       });
       
-      // Then emit event
+      // Then emit event with copies of objects to prevent reference issues
       eventBus.emit(EventTypes.BUILDING_HOVER_STATE_CHANGED, {
         buildingName,
-        position,
+        position: position ? {...position} : null,
         imagePath
       });
     }
@@ -190,8 +190,9 @@ export class UIStateService {
     // Check if the name or position has changed before updating
     if (this.hoveredBuildingName !== buildingName || 
         !this.hoveredBuildingPosition || 
-        position.x !== this.hoveredBuildingPosition.x || 
-        position.y !== this.hoveredBuildingPosition.y) {
+        (position && this.hoveredBuildingPosition && 
+         (position.x !== this.hoveredBuildingPosition.x || 
+          position.y !== this.hoveredBuildingPosition.y))) {
       
       // Update the name and position, but keep the existing image path
       uiStateService.setBuildingHover(

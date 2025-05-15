@@ -94,8 +94,10 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     // Only fetch the image if we have a hovered building with a name but no image path yet
     // Use a ref to track if we're already fetching to prevent multiple fetches
     if (hoveredBuildingId && hoveredBuildingName && !hoveredBuildingImagePath && !isLoadingBuildingImage && !buildingImageFetchingRef.current) {
+      // Set the ref immediately to prevent concurrent fetches
       buildingImageFetchingRef.current = true;
       
+      // Find the building data
       const building = buildings.find(b => b.id === hoveredBuildingId);
       if (building) {
         // Set loading state
@@ -107,6 +109,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         // Check if the image exists
         fetch(imagePath, { method: 'HEAD' })
           .then(response => {
+            // Only update state if we're still hovering over the same building
             if (response.ok) {
               setHoveredBuildingImagePath(imagePath);
             } else {
@@ -123,10 +126,11 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             buildingImageFetchingRef.current = false;
           });
       } else {
+        // Reset the ref if building not found
         buildingImageFetchingRef.current = false;
       }
     }
-  }, [hoveredBuildingId, hoveredBuildingName, hoveredBuildingImagePath, isLoadingBuildingImage, buildings]);
+  }, [hoveredBuildingId, hoveredBuildingName]);  // Remove hoveredBuildingImagePath and isLoadingBuildingImage from dependencies
   
   // Minimal debugging effect that won't cause infinite updates
   useEffect(() => {

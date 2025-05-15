@@ -379,17 +379,54 @@ export class InteractionService {
             
           this.hoveredBuildingIdRef = newHoveredBuildingId;
           this.state.hoveredBuildingId = newHoveredBuildingId;
-          setters.setHoveredBuildingId(newHoveredBuildingId);
           
           // If we need to update the building name and image, do it separately
           // without causing a circular dependency
           if (newHoveredBuildingId) {
             const building = data.buildings.find(b => b.id === newHoveredBuildingId);
             if (building) {
+              // Update the state in a single batch to prevent multiple re-renders
+              setters.setHoveredBuildingId(newHoveredBuildingId);
               setters.setHoveredBuildingName(building.name || building.type);
+              
+              // Calculate position for the building
+              let position = null;
+              if (building.position) {
+                try {
+                  const pos = typeof building.position === 'string' 
+                    ? JSON.parse(building.position) 
+                    : building.position;
+                  
+                  // Convert lat/lng to isometric coordinates
+                  let x, y;
+                  if ('lat' in pos && 'lng' in pos) {
+                    x = (pos.lng - 12.3326) * 20000;
+                    y = (pos.lat - 45.4371) * 20000;
+                  } else if ('x' in pos && 'z' in pos) {
+                    x = pos.x;
+                    y = pos.z;
+                  }
+                  
+                  if (x !== undefined && y !== undefined) {
+                    const screen = CoordinateService.worldToScreen(
+                      x, y, scale, offset, canvas.width, canvas.height
+                    );
+                    position = { x: screen.x, y: screen.y };
+                  }
+                } catch (e) {
+                  console.error('Error parsing building position:', e);
+                }
+              }
+              
+              if (position) {
+                setters.setHoveredBuildingPosition(position);
+              }
+              
               // Don't fetch the image path here - that should be done in a separate effect
             }
           } else {
+            // Clear all hover state at once
+            setters.setHoveredBuildingId(null);
             setters.setHoveredBuildingName(null);
             setters.setHoveredBuildingPosition(null);
             setters.setHoveredBuildingImagePath(null);
