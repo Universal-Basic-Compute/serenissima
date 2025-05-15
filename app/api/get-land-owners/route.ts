@@ -9,6 +9,7 @@ let cachedData: any = null;
 let cacheTimestamp: number = 0;
 const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
 const FETCH_TIMEOUT = 15000; // Reduce timeout to 15 seconds
+const AIRTABLE_USERS_TABLE = process.env.AIRTABLE_USERS_TABLE || 'USERS';
 
 // Path to the mapping file created by sync_coatofarms.py
 const MAPPING_FILE_PATH = path.join(process.cwd(), 'public', 'coat-of-arms', 'mapping.json');
@@ -35,6 +36,49 @@ async function loadMappingFile() {
   } catch (error) {
     console.warn(`Could not load coat of arms mapping file: ${error instanceof Error ? error.message : String(error)}`);
     return null;
+  }
+}
+
+// Function to fetch user data from the USERS table
+async function fetchUsersData(base: any) {
+  try {
+    const usersTable = base(AIRTABLE_USERS_TABLE);
+    
+    // Fetch all user records
+    const records = await new Promise((resolve, reject) => {
+      const allRecords: any[] = [];
+      usersTable.select({
+        fields: ['Username', 'CoatOfArmsImage'] // Only select the fields we need
+      }).eachPage(
+        function page(records, fetchNextPage) {
+          allRecords.push(...records);
+          fetchNextPage();
+        },
+        function done(err) {
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve(allRecords);
+        }
+      );
+    });
+    
+    // Transform to a map for easy lookup
+    const usersMap = new Map();
+    (records as any[]).forEach(record => {
+      if (record.fields.Username) {
+        usersMap.set(record.fields.Username, {
+          coat_of_arms_image: record.fields.CoatOfArmsImage || null
+        });
+      }
+    });
+    
+    console.log(`Retrieved ${usersMap.size} user records from Airtable`);
+    return usersMap;
+  } catch (error) {
+    console.error('Error fetching users data:', error);
+    return new Map();
   }
 }
 
@@ -91,23 +135,26 @@ export async function GET(request: Request) {
       const base = new Airtable({apiKey: AIRTABLE_API_KEY}).base(AIRTABLE_BASE_ID);
       const landsTable = base(AIRTABLE_LANDS_TABLE);
       
-      // Fetch all land records
-      const records = await new Promise((resolve, reject) => {
-        const allRecords: any[] = [];
-        landsTable.select().eachPage(
-          function page(records, fetchNextPage) {
-            allRecords.push(...records);
-            fetchNextPage();
-          },
-          function done(err) {
-            if (err) {
-              reject(err);
-              return;
+      // Fetch both land records and user data in parallel
+      const [records, usersMap] = await Promise.all([
+        new Promise((resolve, reject) => {
+          const allRecords: any[] = [];
+          landsTable.select().eachPage(
+            function page(records, fetchNextPage) {
+              allRecords.push(...records);
+              fetchNextPage();
+            },
+            function done(err) {
+              if (err) {
+                reject(err);
+                return;
+              }
+              resolve(allRecords);
             }
-            resolve(allRecords);
-          }
-        );
-      });
+          );
+        }),
+        fetchUsersData(base)
+      ]);
       
       // Define the land data interface
       interface LandData {
@@ -118,11 +165,17 @@ export async function GET(request: Request) {
       }
 
       // Transform records to the expected format
-      const data = (records as any[]).map(record => ({
-        id: record.fields.LandId || record.id,
-        owner: record.fields.User || record.fields.Wallet || null,
-        coat_of_arms_image: record.fields.CoatOfArmsImage || null
-      } as LandData));
+      const data = (records as any[]).map(record => {
+        const owner = record.fields.User || record.fields.Wallet || null;
+        const userData = owner ? usersMap.get(owner) : null;
+        
+        return {
+          id: record.fields.LandId || record.id,
+          owner: owner,
+          // Use coat of arms from user data if available, otherwise use from land record
+          coat_of_arms_image: userData?.coat_of_arms_image || record.fields.CoatOfArmsImage || null
+        } as LandData;
+      });
       
       console.log(`Retrieved ${data.length} land records directly from Airtable`);
       
