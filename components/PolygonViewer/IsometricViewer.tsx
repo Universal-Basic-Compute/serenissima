@@ -45,6 +45,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [hoveredBuildingPosition, setHoveredBuildingPosition] = useState<{x: number, y: number} | null>(null);
   const [hoveredBuildingImagePath, setHoveredBuildingImagePath] = useState<string | null>(null);
   const [isLoadingBuildingImage, setIsLoadingBuildingImage] = useState<boolean>(false);
+  const [buildingPositionsCache, setBuildingPositionsCache] = useState<Record<string, {x: number, y: number}>>({});
+  const [initialPositionCalculated, setInitialPositionCalculated] = useState<boolean>(false);
   const [polygonsToRender, setPolygonsToRender] = useState<{
     polygon: any;
     coords: {x: number, y: number}[];
@@ -671,8 +673,98 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     return () => clearInterval(interval);
   }, []); // Empty dependency array to run only on mount
   
+  // Pre-calculate building positions when buildings are loaded
+  useEffect(() => {
+    if (buildings.length > 0 && !initialPositionCalculated) {
+      console.log('Pre-calculating building positions for all buildings...');
+      
+      const newPositionsCache: Record<string, {x: number, y: number}> = {};
+      
+      buildings.forEach(building => {
+        if (!building.position) return;
+        
+        let position;
+        if (typeof building.position === 'string') {
+          try {
+            position = JSON.parse(building.position);
+          } catch (e) {
+            return;
+          }
+        } else {
+          position = building.position;
+        }
+        
+        // Convert lat/lng to isometric coordinates
+        let x, y;
+        if ('lat' in position && 'lng' in position) {
+          x = (position.lng - 12.3326) * 20000;
+          y = (position.lat - 45.4371) * 20000;
+        } else if ('x' in position && 'z' in position) {
+          x = position.x;
+          y = position.z;
+        } else {
+          return;
+        }
+        
+        // Store the calculated position in the cache
+        newPositionsCache[building.id] = { x, y };
+      });
+      
+      setBuildingPositionsCache(newPositionsCache);
+      setInitialPositionCalculated(true);
+      console.log(`Pre-calculated positions for ${Object.keys(newPositionsCache).length} buildings`);
+    }
+  }, [buildings, initialPositionCalculated]);
   
-  
+  // Handle the ensureBuildingsVisible event
+  useEffect(() => {
+    const handleEnsureBuildingsVisible = () => {
+      if (!initialPositionCalculated && buildings.length > 0) {
+        console.log('Ensuring buildings are visible by calculating positions...');
+        
+        const newPositionsCache: Record<string, {x: number, y: number}> = {};
+        
+        buildings.forEach(building => {
+          if (!building.position) return;
+          
+          let position;
+          if (typeof building.position === 'string') {
+            try {
+              position = JSON.parse(building.position);
+            } catch (e) {
+              return;
+            }
+          } else {
+            position = building.position;
+          }
+          
+          // Convert lat/lng to isometric coordinates
+          let x, y;
+          if ('lat' in position && 'lng' in position) {
+            x = (position.lng - 12.3326) * 20000;
+            y = (position.lat - 45.4371) * 20000;
+          } else if ('x' in position && 'z' in position) {
+            x = position.x;
+            y = position.z;
+          } else {
+            return;
+          }
+          
+          // Store the calculated position in the cache
+          newPositionsCache[building.id] = { x, y };
+        });
+        
+        setBuildingPositionsCache(newPositionsCache);
+        setInitialPositionCalculated(true);
+      }
+    };
+    
+    window.addEventListener('ensureBuildingsVisible', handleEnsureBuildingsVisible);
+    
+    return () => {
+      window.removeEventListener('ensureBuildingsVisible', handleEnsureBuildingsVisible);
+    };
+  }, [buildings, initialPositionCalculated]);
   
   // Load citizens if in citizens view
   useEffect(() => {
@@ -2214,32 +2306,48 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       
       buildings.forEach(building => {
         if (!building.position) return;
-            
-        let position;
-        if (typeof building.position === 'string') {
-          try {
-            position = JSON.parse(building.position);
-          } catch (e) {
+        
+        // Use cached position if available
+        let x, y;
+        if (buildingPositionsCache[building.id]) {
+          // Use the pre-calculated position from cache
+          x = buildingPositionsCache[building.id].x;
+          y = buildingPositionsCache[building.id].y;
+        } else {
+          // Fallback to calculating position if not in cache
+          let position;
+          if (typeof building.position === 'string') {
+            try {
+              position = JSON.parse(building.position);
+            } catch (e) {
+              return;
+            }
+          } else {
+            position = building.position;
+          }
+          
+          // Convert lat/lng to isometric coordinates
+          if ('lat' in position && 'lng' in position) {
+            // Normalize coordinates relative to center of Venice
+            // Scale factor adjusted to match the map
+            x = (position.lng - 12.3326) * 20000;
+            y = (position.lat - 45.4371) * 20000; // Remove the 0.7 factor
+          } else if ('x' in position && 'z' in position) {
+            x = position.x;
+            y = position.z;
+          } else {
             return;
           }
-        } else {
-          position = building.position;
+          
+          // Store in cache for future use
+          if (initialPositionCalculated) {
+            setBuildingPositionsCache(prev => ({
+              ...prev,
+              [building.id]: { x, y }
+            }));
+          }
         }
-            
-        // Convert lat/lng to isometric coordinates
-        let x, y;
-        if ('lat' in position && 'lng' in position) {
-          // Normalize coordinates relative to center of Venice
-          // Scale factor adjusted to match the map
-          x = (position.lng - 12.3326) * 20000;
-          y = (position.lat - 45.4371) * 20000; // Remove the 0.7 factor
-        } else if ('x' in position && 'z' in position) {
-          x = position.x;
-          y = position.z;
-        } else {
-          return;
-        }
-            
+        
         const isoPos = {
           x: calculateIsoX(x, y, scale, offset, canvas.width),
           y: calculateIsoY(x, y, scale, offset, canvas.height)
