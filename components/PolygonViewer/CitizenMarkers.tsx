@@ -22,6 +22,12 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   const [citizens, setCitizens] = useState<any[]>([]);
   const [selectedCitizen, setSelectedCitizen] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  // Add a new state to track the hovered citizen's connections
+  const [hoveredConnections, setHoveredConnections] = useState<{
+    citizen: any;
+    homePosition?: {x: number, y: number};
+    workPosition?: {x: number, y: number};
+  } | null>(null);
   
   // Helper function to convert lat/lng to screen coordinates
   const latLngToScreen = (lat: number, lng: number) => {
@@ -34,6 +40,56 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     );
     
     return screen;
+  };
+  
+  // Add a function to parse building coordinates from building ID
+  const parseBuildingCoordinates = (buildingId: string): {lat: number, lng: number} | null => {
+    if (!buildingId) return null;
+    
+    // Check if it's in the format "building_45.433265_12.340372"
+    const parts = buildingId.split('_');
+    if (parts.length >= 3 && parts[0] === 'building') {
+      const lat = parseFloat(parts[1]);
+      const lng = parseFloat(parts[2]);
+      
+      if (!isNaN(lat) && !isNaN(lng)) {
+        return { lat, lng };
+      }
+    }
+    
+    return null;
+  };
+  
+  // Add a function to handle citizen hover
+  const handleCitizenHover = (citizen: any) => {
+    // Parse home and work building coordinates
+    const homeCoords = parseBuildingCoordinates(citizen.home);
+    const workCoords = parseBuildingCoordinates(citizen.work);
+    
+    // Calculate connections
+    const connections = {
+      citizen,
+      homePosition: homeCoords ? latLngToScreen(homeCoords.lat, homeCoords.lng) : undefined,
+      workPosition: workCoords ? latLngToScreen(workCoords.lat, workCoords.lng) : undefined
+    };
+    
+    console.log('Citizen hover:', {
+      citizen: citizen.firstname + ' ' + citizen.lastname,
+      home: citizen.home,
+      work: citizen.work,
+      homeCoords,
+      workCoords
+    });
+    
+    // Only set connections if we have at least one valid position
+    if (connections.homePosition || connections.workPosition) {
+      setHoveredConnections(connections);
+    }
+  };
+  
+  // Add a function to handle mouse leave
+  const handleCitizenLeave = () => {
+    setHoveredConnections(null);
   };
   
   useEffect(() => {
@@ -168,6 +224,8 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                 position: 'absolute' // Ensure absolute positioning works
               }}
               onClick={() => handleCitizenClick(citizen)}
+              onMouseEnter={() => handleCitizenHover(citizen)}
+              onMouseLeave={handleCitizenLeave}
             >
               <div 
                 className="w-4 h-4 rounded-full cursor-pointer hover:scale-125 transition-transform flex items-center justify-center"
@@ -186,6 +244,75 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
           );
         })}
       </div>
+      
+      {/* Connection lines to home and work when hovering */}
+      {hoveredConnections && hoveredConnections.citizen && hoveredConnections.citizen.position && (
+        <svg className="absolute inset-0 pointer-events-none" style={{ zIndex: 990 }}>
+          {/* Home connection line */}
+          {hoveredConnections.homePosition && (
+            <>
+              <line 
+                x1={latLngToScreen(hoveredConnections.citizen.position.lat, hoveredConnections.citizen.position.lng).x}
+                y1={latLngToScreen(hoveredConnections.citizen.position.lat, hoveredConnections.citizen.position.lng).y}
+                x2={hoveredConnections.homePosition.x}
+                y2={hoveredConnections.homePosition.y}
+                stroke="#4b70e2" // Blue for home
+                strokeWidth="2"
+                strokeDasharray="5,5"
+              />
+              {/* Home icon */}
+              <circle 
+                cx={hoveredConnections.homePosition.x} 
+                cy={hoveredConnections.homePosition.y} 
+                r="6" 
+                fill="#4b70e2" 
+              />
+              <text 
+                x={hoveredConnections.homePosition.x} 
+                y={hoveredConnections.homePosition.y} 
+                textAnchor="middle" 
+                dominantBaseline="middle" 
+                fill="white" 
+                fontSize="8"
+              >
+                H
+              </text>
+            </>
+          )}
+          
+          {/* Work connection line */}
+          {hoveredConnections.workPosition && (
+            <>
+              <line 
+                x1={latLngToScreen(hoveredConnections.citizen.position.lat, hoveredConnections.citizen.position.lng).x}
+                y1={latLngToScreen(hoveredConnections.citizen.position.lat, hoveredConnections.citizen.position.lng).y}
+                x2={hoveredConnections.workPosition.x}
+                y2={hoveredConnections.workPosition.y}
+                stroke="#e27a4b" // Orange for work
+                strokeWidth="2"
+                strokeDasharray="5,5"
+              />
+              {/* Work icon */}
+              <circle 
+                cx={hoveredConnections.workPosition.x} 
+                cy={hoveredConnections.workPosition.y} 
+                r="6" 
+                fill="#e27a4b" 
+              />
+              <text 
+                x={hoveredConnections.workPosition.x} 
+                y={hoveredConnections.workPosition.y} 
+                textAnchor="middle" 
+                dominantBaseline="middle" 
+                fill="white" 
+                fontSize="8"
+              >
+                W
+              </text>
+            </>
+          )}
+        </svg>
+      )}
       
       {/* Loading Indicator */}
       {isLoading && (
