@@ -1874,7 +1874,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             squareSize + 6, 
             squareSize + 6
           );
-          ctx.fillStyle = '#FFD700'; // Gold halo
+          ctx.fillStyle = '#FF8C00'; // Orange halo instead of gold
           ctx.fill();
         }
         
