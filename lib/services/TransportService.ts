@@ -87,7 +87,7 @@ export class TransportService {
   private initializationPromise: Promise<boolean> | null = null;
   private initializationAttempts: number = 0;
   private readonly MAX_INITIALIZATION_ATTEMPTS = 5;
-  private pathfindingMode: 'all' | 'real' = 'all'; // Default to 'all' for backward compatibility
+  private pathfindingMode: 'all' | 'real' = 'real'; // Default to 'real' mode
   
   // Static method for initialization
   public static initialize(): Promise<boolean> {

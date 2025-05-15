@@ -443,12 +443,6 @@ export default function TwoDPage() {
         </div>
             
         <div className="flex space-x-4">
-          <button 
-            onClick={() => window.dispatchEvent(new CustomEvent('showTransportRoutes'))}
-            className="px-3 py-1 bg-purple-600 hover:bg-purple-500 rounded text-white transition-colors font-serif"
-          >
-            Transport Routes
-          </button>
           <Link 
             href="/"
             className="px-3 py-1 bg-green-600 hover:bg-green-500 rounded text-white transition-colors font-serif"
