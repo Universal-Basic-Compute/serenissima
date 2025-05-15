@@ -28,7 +28,13 @@ export class InteractionService {
     dragStart: { x: 0, y: 0 },
     selectedPolygonId: null,
     selectedBuildingId: null,
-    mousePosition: { x: 0, y: 0 }
+    mousePosition: { x: 0, y: 0 },
+    hoveredPolygonId: null,
+    hoveredBuildingId: null,
+    hoveredCanalPoint: null,
+    hoveredBridgePoint: null,
+    hoveredCitizenBuilding: null,
+    hoveredCitizenType: null
   };
   
   // Refs to track current state without causing re-renders
@@ -715,26 +721,26 @@ export class InteractionService {
     this.state = { ...this.state, ...newState };
     
     // Update refs
-    if (newState.hoveredPolygonId !== undefined) {
-      this.hoveredPolygonIdRef = newState.hoveredPolygonId;
+    if ('hoveredPolygonId' in newState) {
+      this.hoveredPolygonIdRef = newState.hoveredPolygonId ?? null;
     }
-    if (newState.hoveredBuildingId !== undefined) {
-      this.hoveredBuildingIdRef = newState.hoveredBuildingId;
+    if ('hoveredBuildingId' in newState) {
+      this.hoveredBuildingIdRef = newState.hoveredBuildingId ?? null;
     }
-    if (newState.hoveredCanalPoint !== undefined) {
-      this.hoveredCanalPointRef = newState.hoveredCanalPoint;
+    if ('hoveredCanalPoint' in newState) {
+      this.hoveredCanalPointRef = newState.hoveredCanalPoint ?? null;
     }
-    if (newState.hoveredBridgePoint !== undefined) {
-      this.hoveredBridgePointRef = newState.hoveredBridgePoint;
+    if ('hoveredBridgePoint' in newState) {
+      this.hoveredBridgePointRef = newState.hoveredBridgePoint ?? null;
     }
-    if (newState.hoveredCitizenBuilding !== undefined) {
-      this.hoveredCitizenBuildingRef = newState.hoveredCitizenBuilding;
+    if ('hoveredCitizenBuilding' in newState) {
+      this.hoveredCitizenBuildingRef = newState.hoveredCitizenBuilding ?? null;
     }
-    if (newState.hoveredCitizenType !== undefined) {
-      this.hoveredCitizenTypeRef = newState.hoveredCitizenType;
+    if ('hoveredCitizenType' in newState) {
+      this.hoveredCitizenTypeRef = newState.hoveredCitizenType ?? null;
     }
-    if (newState.isDragging !== undefined) {
-      this.isDraggingRef = newState.isDragging;
+    if ('isDragging' in newState) {
+      this.isDraggingRef = newState.isDragging ?? false;
     }
   }
 
