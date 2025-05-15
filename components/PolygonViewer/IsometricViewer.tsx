@@ -126,7 +126,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         buildingImageFetchingRef.current = false;
       }
     }
-  }, [hoveredBuildingId, hoveredBuildingName, hoveredBuildingImagePath, isLoadingBuildingImage, buildings]); // Include all dependencies
+  }, [hoveredBuildingId, hoveredBuildingName, hoveredBuildingImagePath, isLoadingBuildingImage, buildings]);
   
   // Minimal debugging effect that won't cause infinite updates
   useEffect(() => {
@@ -389,6 +389,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     }
   }, []);
   
+  // Add this ref to track image loading state
+  const loadingImagesRef = useRef(false);
+  
   // Fetch coat of arms data
   useEffect(() => {
     // Use a ref to track if the effect is already running to prevent re-entrancy
@@ -415,94 +418,102 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
               setOwnerCoatOfArmsMap(newOwnerCoatOfArmsMap);
             }
             
-            // Process images sequentially to avoid too many parallel requests
-            const updatedImages = {...coatOfArmsImages};
-            let hasNewImages = false;
-            
-            for (const [owner, url] of Object.entries(data.coatOfArms)) {
-              // Skip if we already have this image loaded
-              if (updatedImages[owner]) {
-                continue;
-              }
+            // Only proceed with image loading if we're not already doing it
+            if (!loadingImagesRef.current) {
+              loadingImagesRef.current = true;
               
-              if (url) {
-                try {
-                  // Create an array of URLs to try in order
-                  const urlsToTry = [
-                    // 1. Use the URL from the API directly
-                    url as string,
-                    
-                    // 2. Try with serenissima.ai domain
-                    `https://serenissima.ai/coat-of-arms/${owner}.png`,
-                    
-                    // 3. Try with current origin as fallback
-                    `${window.location.origin}/coat-of-arms/${owner}.png`,
-                    
-                    // 4. Default fallback
-                    `${window.location.origin}/coat-of-arms/default.png`
-                  ];
-                  
-                  // Try each URL in sequence
-                  let imageLoaded = false;
-                  for (const currentUrl of urlsToTry) {
-                    if (imageLoaded) break;
-                    
-                    try {
-                      const img = new Image();
-                      img.crossOrigin = "anonymous"; // Important for CORS
+              // Create a copy of the current images to avoid modifying state directly
+              const updatedImages = {...coatOfArmsImages};
+              let hasNewImages = false;
+              
+              // Process each coat of arms entry sequentially to avoid too many parallel requests
+              for (const [owner, url] of Object.entries(data.coatOfArms)) {
+                // Skip if we already have this image loaded
+                if (updatedImages[owner]) {
+                  continue;
+                }
+                
+                if (url) {
+                  try {
+                    // Create an array of URLs to try in order
+                    const urlsToTry = [
+                      // 1. Use the URL from the API directly
+                      url as string,
                       
-                      // Create a promise for this specific URL
-                      await new Promise<void>((resolve, reject) => {
-                        const timeoutId = setTimeout(() => {
-                          reject(new Error(`Timeout loading image from ${currentUrl}`));
-                        }, 5000); // 5 second timeout
+                      // 2. Try with serenissima.ai domain
+                      `https://serenissima.ai/coat-of-arms/${owner}.png`,
+                      
+                      // 3. Try with current origin as fallback
+                      `${window.location.origin}/coat-of-arms/${owner}.png`,
+                      
+                      // 4. Default fallback
+                      `${window.location.origin}/coat-of-arms/default.png`
+                    ];
+                    
+                    // Try each URL in sequence
+                    let imageLoaded = false;
+                    for (const currentUrl of urlsToTry) {
+                      if (imageLoaded) break;
+                      
+                      try {
+                        const img = new Image();
+                        img.crossOrigin = "anonymous"; // Important for CORS
                         
-                        img.onload = () => {
-                          clearTimeout(timeoutId);
-                          // Resize the image using canvas before storing
-                          const resizedImg = resizeImageToCanvas(img, 100);
-                          updatedImages[owner] = resizedImg;
-                          hasNewImages = true;
-                          imageLoaded = true;
-                          resolve();
-                        };
-                        img.onerror = () => {
-                          clearTimeout(timeoutId);
-                          reject(new Error(`Failed to load image from ${currentUrl}`));
-                        };
-                        img.src = currentUrl;
-                      });
-                    } catch (error) {
-                      // Continue to next URL on error
-                      console.warn(`Error loading coat of arms from ${currentUrl} for ${owner}:`, error);
+                        // Create a promise for this specific URL
+                        await new Promise<void>((resolve, reject) => {
+                          const timeoutId = setTimeout(() => {
+                            reject(new Error(`Timeout loading image from ${currentUrl}`));
+                          }, 5000); // 5 second timeout
+                          
+                          img.onload = () => {
+                            clearTimeout(timeoutId);
+                            // Resize the image using canvas before storing
+                            const resizedImg = resizeImageToCanvas(img, 100);
+                            updatedImages[owner] = resizedImg;
+                            hasNewImages = true;
+                            imageLoaded = true;
+                            resolve();
+                          };
+                          img.onerror = () => {
+                            clearTimeout(timeoutId);
+                            reject(new Error(`Failed to load image from ${currentUrl}`));
+                          };
+                          img.src = currentUrl;
+                        });
+                      } catch (error) {
+                        // Continue to next URL on error
+                        console.warn(`Error loading coat of arms from ${currentUrl} for ${owner}:`, error);
+                      }
                     }
-                  }
-                  
-                  // If all URLs failed, create a default avatar
-                  if (!imageLoaded) {
-                    console.warn(`All image URLs failed for ${owner}, using generated avatar`);
-                    const canvas = document.createElement('canvas');
-                    canvas.width = 100;
-                    canvas.height = 100;
-                    const ctx = canvas.getContext('2d');
-                    if (ctx) {
-                      // Draw a colored circle with the owner's initial
-                      createDefaultCircularAvatar(ctx, owner, 50, 50, 100);
-                      const generatedImg = new Image();
-                      generatedImg.src = canvas.toDataURL('image/png');
-                      updatedImages[owner] = generatedImg;
-                      hasNewImages = true;
+                    
+                    // If all URLs failed, create a default avatar
+                    if (!imageLoaded) {
+                      console.warn(`All image URLs failed for ${owner}, using generated avatar`);
+                      const canvas = document.createElement('canvas');
+                      canvas.width = 100;
+                      canvas.height = 100;
+                      const ctx = canvas.getContext('2d');
+                      if (ctx) {
+                        // Draw a colored circle with the owner's initial
+                        createDefaultCircularAvatar(ctx, owner, 50, 50, 100);
+                        const generatedImg = new Image();
+                        generatedImg.src = canvas.toDataURL('image/png');
+                        updatedImages[owner] = generatedImg;
+                        hasNewImages = true;
+                      }
                     }
+                  } catch (error) {
+                    console.error(`Error processing coat of arms for ${owner}:`, error);
                   }
-                } catch (error) {
-                  console.error(`Error processing coat of arms for ${owner}:`, error);
                 }
               }
-            }
-            
-            // Only update state if we have new images
-            if (hasNewImages) {
-              setCoatOfArmsImages(updatedImages);
+              
+              // Only update state if we have new images
+              if (hasNewImages) {
+                setCoatOfArmsImages(updatedImages);
+              }
+              
+              loadingImagesRef.current = false;
             }
           }
         }
