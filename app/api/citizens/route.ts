@@ -72,7 +72,7 @@ export async function GET(request: Request) {
     const occupantToBuildings: Record<string, {home?: string, work?: string}> = {};
     
     // Define residential building types
-    const residentialTypes = ['canal_house', 'merchant_s_house', 'artisan_s_house', 'fisherman_s_cottage', 'palazzo', 'house'];
+    const residentialTypes = ['canal_house', 'merchant_s_house', 'artisan_s_house', 'fisherman_s_cottage'];
     
     // Process buildings to determine home and work assignments
     buildingRecords.forEach(building => {
