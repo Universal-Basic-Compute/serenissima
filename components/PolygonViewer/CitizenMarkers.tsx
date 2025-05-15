@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { citizenService } from '@/lib/services/CitizenService';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
+import { CoordinateService } from '@/lib/services/CoordinateService';
 import CitizenDetailsPanel from '@/components/UI/CitizenDetailsPanel';
 
 interface CitizenMarkersProps {
@@ -24,15 +25,15 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   
   // Helper function to convert lat/lng to screen coordinates
   const latLngToScreen = (lat: number, lng: number) => {
-    // Convert lat/lng to isometric coordinates
-    const x = (lng - 12.3326) * 20000;
-    const y = (lat - 45.4371) * 20000;
+    // Convert lat/lng to world coordinates using CoordinateService
+    const world = CoordinateService.latLngToWorld(lat, lng);
     
-    // Apply isometric projection
-    const screenX = x * scale + canvasWidth / 2 + offset.x;
-    const screenY = (-y) * scale * 1.4 + canvasHeight / 2 + offset.y;
+    // Convert world coordinates to screen coordinates
+    const screen = CoordinateService.worldToScreen(
+      world.x, world.y, scale, offset, canvasWidth, canvasHeight
+    );
     
-    return { x: screenX, y: screenY };
+    return screen;
   };
   
   useEffect(() => {
@@ -109,8 +110,17 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
       {/* Citizen Markers */}
       <div className="absolute inset-0 pointer-events-none">
         {citizens.filter(citizen => citizen.position).map((citizen) => {
-          // Convert lat/lng to screen coordinates
+          // Log the original position and the transformed screen coordinates
+          const originalPos = citizen.position;
           const position = latLngToScreen(citizen.position.lat, citizen.position.lng);
+          
+          // Debug log to verify position transformation
+          if (Math.random() < 0.05) { // Only log ~5% of citizens to avoid console spam
+            console.log(`Citizen ${citizen.FirstName} ${citizen.LastName} position:`, {
+              original: originalPos,
+              screen: position
+            });
+          }
           
           // Skip if position is off-screen (with some margin)
           if (position.x < -100 || position.x > canvasWidth + 100 || 
