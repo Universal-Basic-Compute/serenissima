@@ -621,28 +621,22 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
               if (building.position && 
                   ((typeof building.position === 'object' && 'lat' in building.position && 'lng' in building.position) || 
                    (typeof building.position === 'string' && building.position.includes('lat')))) {
-                //console.log(`Building ${building.id} already has position:`, building.position);
                 return building;
               }
               
               // If building has a point_id, try to get position from the service
               if (building.point_id) {
-                console.log(`Building ${building.id} has point_id: ${building.point_id}`);
                 const position = buildingPointsService.getPositionForPoint(building.point_id);
                 if (position) {
-                  console.log(`Resolved position for building ${building.id} with point_id ${building.point_id}:`, position);
                   return {
                     ...building,
                     position
                   };
-                } else {
-                  console.warn(`Could not resolve position for building ${building.id} with point_id ${building.point_id}`);
                 }
               }
               
               // If building has a Point field (new format), try to extract coordinates
               if (building.Point) {
-                console.log(`Building ${building.id} has Point field: ${building.Point}`);
                 // Try to extract coordinates from the Point field (format: type_lat_lng)
                 const parts = String(building.Point).split('_');
                 if (parts.length >= 3) {
@@ -650,7 +644,6 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
                   const lng = parseFloat(parts[2]);
                   
                   if (!isNaN(lat) && !isNaN(lng)) {
-                    console.log(`Extracted coordinates from Point field for building ${building.id}: lat=${lat}, lng=${lng}`);
                     return {
                       ...building,
                       position: { lat, lng }
@@ -661,13 +654,10 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
                 // If we couldn't extract coordinates directly, try using the service
                 const position = buildingPointsService.getPositionForPoint(String(building.Point));
                 if (position) {
-                  console.log(`Resolved position for building ${building.id} with Point ${building.Point}:`, position);
                   return {
                     ...building,
                     position
                   };
-                } else {
-                  console.warn(`Could not resolve position for building ${building.id} with Point ${building.Point}`);
                 }
               }
               
@@ -676,50 +666,20 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             });
             
             setBuildings(processedBuildings);
-            console.log(`%c BUILDINGS PROCESSED: ${processedBuildings.length} buildings`, 'background: #4CAF50; color: white; padding: 4px 8px; font-weight: bold; border-radius: 4px;');
-            
-            // Log how many buildings have valid position data
-            const buildingsWithPosition = processedBuildings.filter(b => 
-              b.position && 
-              ((typeof b.position === 'object' && 'lat' in b.position && 'lng' in b.position) || 
-               (typeof b.position === 'string' && b.position.includes('lat')))
-            );
-            console.log(`${buildingsWithPosition.length} of ${processedBuildings.length} buildings have valid position data`);
-            
-            // Add a breakdown of building types
-            const buildingTypeCount = processedBuildings.reduce((acc, building) => {
-              acc[building.type] = (acc[building.type] || 0) + 1;
-              return acc;
-            }, {});
-            console.log('%c BUILDINGS TYPES:', 'background: #4CAF50; color: white; padding: 4px 8px; font-weight: bold; border-radius: 4px;');
-            console.table(buildingTypeCount);
-
-            // Add position format statistics
-            const positionStats = {
-              total: processedBuildings.length,
-              withValidPosition: buildingsWithPosition.length,
-              withoutValidPosition: processedBuildings.length - buildingsWithPosition.length
-            };
-            console.log('%c BUILDINGS POSITION STATS:', 'background: #4CAF50; color: white; padding: 4px 8px; font-weight: bold; border-radius: 4px;');
-            console.table(positionStats);
             
             // Reset position calculation flag when new buildings are loaded
             setInitialPositionCalculated(false);
             
             // Dispatch event to ensure buildings are visible
             window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
-          } else {
-            console.warn('No buildings data in API response');
           }
-        } else {
-          console.error(`Failed to fetch buildings: ${response.status} ${response.statusText}`);
         }
       } catch (error) {
         console.error('Error fetching buildings:', error);
       }
     };
     
-    // Load buildings on mount, regardless of active view
+    // Call fetchBuildings once when the component mounts
     fetchBuildings();
     
     // Set up interval to refresh buildings
