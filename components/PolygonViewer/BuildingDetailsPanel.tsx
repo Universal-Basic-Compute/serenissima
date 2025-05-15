@@ -30,12 +30,8 @@ const getBuildingImagePath = async (type: string, variant?: string): Promise<str
   try {
     console.log(`Looking for image for building type: ${type}, variant: ${variant || 'none'}`);
     
-    // Use the type directly since it's already normalized
-    const normalizedType = type.toLowerCase().replace(/[\s-_]+/g, '');
-    console.log(`Using normalized type: ${normalizedType}`);
-    
     // Try the direct flat path first
-    const flatImagePath = `/images/buildings/${normalizedType}.jpg`;
+    const flatImagePath = `/images/buildings/${type}.jpg`;
     console.log(`Trying flat path: ${flatImagePath}`);
     
     try {
