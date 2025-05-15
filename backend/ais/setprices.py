@@ -283,7 +283,7 @@ After your analysis, provide your price decisions in this JSON format:
     {{
       "building_id": "building-id-1",
       "resource_prices": {{
-        "resource1": 100,
+        "resource1": 10,
         "resource2": 200
       }},
       "reasoning": "brief explanation"
@@ -291,7 +291,7 @@ After your analysis, provide your price decisions in this JSON format:
     {{
       "building_id": "building-id-2",
       "resource_prices": {{
-        "resource3": 150,
+        "resource3": 15,
         "resource4": 250
       }},
       "reasoning": "brief explanation"
@@ -335,8 +335,9 @@ If you decide not to change any prices at this time, return an empty array.
         payload = {
             "message": prompt,
             "addSystem": system_instructions,
-            "min_files": 5,
-            "max_files": 15
+            "min_files": 4,
+            "max_files": 8,
+            "max_tokens": 25000  
         }
         
         # Make the API request

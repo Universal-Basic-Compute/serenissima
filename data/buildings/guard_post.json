@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Guard Post's economic profile balances security investment with revenue generation. The construction cost of 1,000,000 ducats represents the robust construction and official nature of security infrastructure, while the income of 12,000 ducats (1.2% return) represents fees and fines collected. The maintenance cost of 12,500 ducats exceeds income, reflecting how security was primarily a public good rather than profit center. This building provides essential security benefits that exceed its direct financial return, encouraging players to consider strategic placement for maximum effect rather than pure profit.",
   "shortDescription": "Security checkpoint monitoring access to specific areas and maintaining public order.",
   "fullDescription": "Maintaining Venice's legendary internal security, guard posts provide visible security presence at key locations. Featuring observation positions, small detention areas, patrol coordination, and often checkpoint facilities, these practical security installations support Venice's extensive police functions. Their strategic placement throughout the city created an effective security network despite the complex urban layout.",
-  "flavorText": "Venice's greatest defense is not her walls or ships, but her watchful eyes—for a crime prevented through vigilance requires neither judges nor prisons.",
+  "flavorText": "Venice's greatest defense is not her walls or ships, but her watchful eyes\u2014for a crime prevented through vigilance requires neither judges nor prisons.",
   "constructionCosts": {
     "ducats": 1000000,
     "timber": 40,
@@ -38,28 +38,39 @@
     "Weapons rack"
   ],
   "productionInformation": {
-    "inputResources": {
-      "weapons": 1,
-      "tools": 2,
-      "wine": 1
-    },
-    "outputResources": {
-      "blackmail_evidence": 2,
-      "criminal_contacts": 1
-    },
+    "Arti": [
+      {
+        "inputs": {
+          "criminal_contacts": 1,
+          "porter_equipment": 1
+        },
+        "outputs": {
+          "blackmail_evidence": 1
+        },
+        "craftMinutes": 30
+      },
+      {
+        "inputs": {
+          "smuggler_maps": 1,
+          "weapons": 1
+        },
+        "outputs": {
+          "criminal_contacts": 1
+        },
+        "craftMinutes": 60
+      }
+    ],
     "storageCapacity": 50,
     "stores": [
-      "weapons",
-      "tools",
-      "blackmail_evidence",
       "criminal_contacts",
-      "disguise_materials",
-      "forgery_tools"
+      "blackmail_evidence",
+      "smuggler_maps",
+      "weapons",
+      "porter_equipment"
     ],
     "sells": [
       "blackmail_evidence",
-      "criminal_contacts",
-      "smuggler_maps"
+      "criminal_contacts"
     ]
   }
 }

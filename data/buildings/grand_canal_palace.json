@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Grand Canal Palace represents the pinnacle of Venetian residential architecture and status. The construction cost of 15,000,000 ducats reflects the extraordinary materials, craftsmanship, and prime Grand Canal location, while the income of 180,000 ducats (1.2% return) represents the economic power wielded from this prestigious address. The maintenance cost of 75,000 ducats (41.7% of income) reflects the extensive staff and upkeep required for such a grand residence. The residentsCapacity of 25 represents the noble family with extensive household staff. The construction time of 20 days (1728000000ms) reflects the elaborate construction and artistic elements. This building creates an endgame residential option with appropriate wealth and political requirements reflecting the highest echelon of Venetian society.",
   "shortDescription": "Spectacular palace facing the Grand Canal, the ultimate statement of wealth and power in Venice.",
   "fullDescription": "The pinnacle of Venetian residential architecture, these magnificent palaces line the Grand Canal, their facades functioning as public displays of family power. Featuring enormous reception halls, multiple courtyards, private docks, and lavish decoration, these buildings combine Gothic, Byzantine, and Renaissance elements in a uniquely Venetian style. Only the wealthiest and most powerful families maintain such residences.",
-  "flavorText": "The facade speaks to the canal, the canal speaks to the world—and both pronounce the glory of your house for generations to come.",
+  "flavorText": "The facade speaks to the canal, the canal speaks to the world\u2014and both pronounce the glory of your house for generations to come.",
   "constructionCosts": {
     "ducats": 15000000,
     "timber": 400,
@@ -43,43 +43,56 @@
     "Private chapel"
   ],
   "productionInformation": {
-    "inputResources": {
-      "water": 3,
-      "wine": 2,
-      "spiced_wine": 1,
-      "bread": 2,
-      "olive_oil": 1,
-      "fish": 2,
-      "fuel": 3
-    },
-    "outputResources": {
-      "blackmail_evidence": 1,
-      "criminal_contacts": 1
-    },
-    "storageCapacity": 300,
+    "Arti": [
+      {
+        "inputs": {
+          "books": 1,
+          "paper": 1
+        },
+        "outputs": {
+          "maps": 1
+        },
+        "craftMinutes": 240
+      },
+      {
+        "inputs": {
+          "blackmail_evidence": 1,
+          "gold": 1
+        },
+        "outputs": {
+          "banking_services": 1
+        },
+        "craftMinutes": 180
+      },
+      {
+        "inputs": {
+          "wine": 1,
+          "spices": 1
+        },
+        "outputs": {
+          "spiced_wine": 1
+        },
+        "craftMinutes": 120
+      }
+    ],
+    "storageCapacity": 100,
     "stores": [
-      "water",
-      "wine",
-      "spiced_wine",
-      "bread",
-      "olive_oil",
-      "fish",
-      "fuel",
+      "banking_services",
+      "blackmail_evidence",
+      "books",
       "gold",
       "jewelry",
       "luxury_silk_garments",
-      "venetian_lace",
-      "fine_glassware",
-      "books",
       "maps",
-      "blackmail_evidence",
-      "criminal_contacts"
+      "paper",
+      "spiced_wine",
+      "wine"
     ],
     "sells": [
-      "blackmail_evidence",
-      "criminal_contacts",
-      "books",
+      "banking_services",
       "maps",
+      "spiced_wine",
+      "luxury_silk_garments",
       "jewelry"
     ]
   }

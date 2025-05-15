@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Granary balances food security infrastructure with modest service income. The construction cost of 3,000,000 ducats reflects the specialized storage and preservation systems required, while the income of 20,000 ducats (0.67% return) represents storage fees and grain handling charges. The maintenance cost of 25,000 ducats exceeds income, creating a realistic scenario where food security infrastructure required subsidy but provided essential services. The employment capacity of 10 represents the managers, clerks, and laborers needed. The construction time of 7 days (604800000ms) reflects the specialized construction requirements. This building creates a strategic investment in food security that stabilizes grain prices and prevents shortages, reflecting Venice's historical vulnerability as a city without agricultural land that depended entirely on imported food supplies.",
   "shortDescription": "Specialized facility for storing grain and other staple foods to ensure food security.",
   "fullDescription": "Essential to Venice's food security, granaries store the imported grain that feeds the city's population. Featuring specialized storage containers, pest control systems, inventory management, and often government oversight, these facilities protect against famine and price volatility. Venice's unique maritime position required substantial granary capacity to buffer against supply disruptions.",
-  "flavorText": "A city may survive without gold in its treasury, but never without grain in its granaries—Venice keeps her freedom by ensuring the fullness of both.",
+  "flavorText": "A city may survive without gold in its treasury, but never without grain in its granaries\u2014Venice keeps her freedom by ensuring the fullness of both.",
   "constructionCosts": {
     "ducats": 3000000,
     "timber": 150,
@@ -38,33 +38,46 @@
     "Inventory management office"
   ],
   "productionInformation": {
-    "inputResources": {
-      "grain": 120,
-      "flour": 60,
-      "salt": 10
-    },
-    "outputResources": {
-      "grain": 115,
-      "flour": 57,
-      "preserved_fish": 5
-    },
-    "storageCapacity": 5000,
+    "Arti": [
+      {
+        "inputs": {
+          "grain": 2,
+          "water": 1
+        },
+        "outputs": {
+          "flour": 1
+        },
+        "craftMinutes": 20
+      },
+      {
+        "inputs": {
+          "flour": 1,
+          "water": 1,
+          "fuel": 1
+        },
+        "outputs": {
+          "bread": 1
+        },
+        "craftMinutes": 30
+      }
+    ],
+    "storageCapacity": 500,
     "stores": [
       "grain",
       "flour",
       "bread",
+      "wine",
       "salt",
-      "preserved_fish",
-      "fish",
+      "olive_oil",
       "olives",
-      "olive_oil"
+      "preserved_fish",
+      "fish"
     ],
     "sells": [
       "grain",
       "flour",
       "bread",
-      "salt",
-      "preserved_fish"
+      "salt"
     ]
   }
 }

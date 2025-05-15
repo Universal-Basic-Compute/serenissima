@@ -20,29 +20,55 @@
   "maintenanceCost": 1750,
   "constructionTime": 259200000,
   "productionInformation": {
-    "inputResources": {
-      "raw_silk": 5,
-      "dyestuffs": 8,
-      "water": 15,
-      "fuel": 3
-    },
-    "outputResources": {
-      "dyed_textiles": 5,
-      "prepared_silk": 4
-    },
-    "storageCapacity": 200,
+    "Arti": [
+      {
+        "inputs": {
+          "dyestuffs": 2,
+          "silk_fabric": 1,
+          "water": 1
+        },
+        "outputs": {
+          "dyed_textiles": 1
+        },
+        "craftMinutes": 45
+      },
+      {
+        "inputs": {
+          "dyestuffs": 2,
+          "raw_silk": 2,
+          "water": 1
+        },
+        "outputs": {
+          "prepared_silk": 1
+        },
+        "craftMinutes": 60
+      },
+      {
+        "inputs": {
+          "prepared_silk": 1,
+          "gold": 1
+        },
+        "outputs": {
+          "luxury_silk_garments": 1
+        },
+        "craftMinutes": 180
+      }
+    ],
+    "storageCapacity": 150,
     "stores": [
-      "raw_silk",
       "dyestuffs",
+      "silk_fabric",
       "water",
-      "fuel",
-      "dyed_textiles",
+      "raw_silk",
       "prepared_silk",
-      "silk_fabric"
+      "dyed_textiles",
+      "luxury_silk_garments",
+      "gold"
     ],
     "sells": [
       "dyed_textiles",
-      "prepared_silk"
+      "prepared_silk",
+      "luxury_silk_garments"
     ]
   },
   "soundDesign": {

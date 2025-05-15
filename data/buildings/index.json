@@ -43,28 +43,51 @@
   },
   "processedAt": "2025-05-06T22:32:12.117Z",
   "productionInformation": {
-    "inputResources": {
-      "raw_silk": 3,
-      "dyestuffs": 2,
-      "water": 1
-    },
-    "outputResources": {
-      "prepared_silk": 2,
-      "dyed_textiles": 1
-    },
+    "Arti": [
+      {
+        "inputs": {
+          "sand": 2,
+          "soda_ash": 1
+        },
+        "outputs": {
+          "glass": 1
+        },
+        "craftMinutes": 45
+      },
+      {
+        "inputs": {
+          "glass": 1,
+          "fuel": 1
+        },
+        "outputs": {
+          "molten_glass": 1
+        },
+        "craftMinutes": 30
+      },
+      {
+        "inputs": {
+          "molten_glass": 1,
+          "tools": 1
+        },
+        "outputs": {
+          "fine_glassware": 1
+        },
+        "craftMinutes": 120
+      }
+    ],
     "storageCapacity": 100,
     "stores": [
-      "raw_silk",
-      "dyestuffs",
-      "water",
-      "prepared_silk",
-      "dyed_textiles",
-      "silk_fabric"
+      "sand",
+      "soda_ash",
+      "fuel",
+      "tools",
+      "glass",
+      "molten_glass",
+      "fine_glassware"
     ],
     "sells": [
-      "prepared_silk",
-      "dyed_textiles",
-      "silk_fabric"
+      "glass",
+      "fine_glassware"
     ]
   }
 }

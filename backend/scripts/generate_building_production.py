@@ -64,7 +64,6 @@ bread
 bricks
 building_materials
 clay
-clean-water
 criminal_contacts
 cut_stone
 disguise_materials
@@ -86,7 +85,6 @@ iron
 iron_fittings
 iron_ore
 jewelry
-labor
 limestone
 luxury_silk_garments
 maps

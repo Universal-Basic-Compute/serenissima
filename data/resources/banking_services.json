@@ -50,5 +50,6 @@
       "primaryUse": "government_financing",
       "riskLevel": "low"
     }
-  ]
+  ],
+  "importPrice": 60
 }

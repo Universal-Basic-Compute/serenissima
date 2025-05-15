@@ -2033,13 +2033,13 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       
       // Draw transport mode UI when active
       if (activeView === 'transport' && transportMode) {
-        console.log('Drawing transport mode UI', { 
+        /**console.log('Drawing transport mode UI', { 
           transportStartPoint, 
           transportEndPoint, 
           mousePosition,
           activeView,
           transportMode
-        });
+        });*/
         
         // Add a prominent header to indicate transport mode is active
         const headerHeight = 40;

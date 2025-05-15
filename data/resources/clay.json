@@ -3,5 +3,7 @@
   "name": "Clay",
   "category": "raw_materials",
   "subcategory": "mineral",
-  "description": "Malleable earth material used for bricks, tiles, and pottery."
+  "description": "Malleable earth material used for bricks, tiles, and pottery.",
+  "icon": "/images/resources/clay.png",
+  "importPrice": 4
 }

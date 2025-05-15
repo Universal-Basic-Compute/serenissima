@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Blacksmith represents basic metal production with modest but reliable returns. The construction cost of 750,000 ducats reflects the forge and specialized equipment required, while the income of 12,000 ducats (1.6% return) represents sales of metal goods and components. The maintenance cost of 20,000 ducats (167% of income) creates a negative profit margin reflecting the essential but resource-intensive nature of basic metalworking. The employment capacity of 5 represents the blacksmith, apprentices, and assistants needed. The construction time of 2 days (172800000ms) reflects the straightforward construction requirements. This building creates an accessible investment in metal production that supports numerous other industries, reflecting the historical importance of blacksmiths in Venice's industrial ecosystem, where metal components were essential for shipbuilding, construction, and daily life.",
   "shortDescription": "Workshop producing iron tools, fittings, and basic metal goods for everyday use.",
   "fullDescription": "An essential service in any district, blacksmiths craft the metal components needed for construction, shipping, and daily life. Featuring a forge, anvils, quenching tanks, and metalworking tools, these workshops combine practical craftsmanship with industrial production. From nails and hinges to tools and decorative ironwork, blacksmiths support nearly every other industry in Venice.",
-  "flavorText": "Without my hinges, your doors would not swing; without my nails, your ships would come apart; without my locks, your wealth would vanish—yet few think of the blacksmith until something breaks.",
+  "flavorText": "Without my hinges, your doors would not swing; without my nails, your ships would come apart; without my locks, your wealth would vanish\u2014yet few think of the blacksmith until something breaks.",
   "constructionCosts": {
     "ducats": 750000,
     "timber": 60,
@@ -20,30 +20,64 @@
   "maintenanceCost": 1000,
   "constructionTime": 172800000,
   "productionInformation": {
-    "inputResources": {
-      "processed_iron": 10,
-      "fuel": 6,
-      "water": 4
-    },
-    "outputResources": {
-      "tools": 5,
-      "iron_fittings": 15,
-      "weapons": 2
-    },
-    "storageCapacity": 120,
+    "Arti": [
+      {
+        "inputs": {
+          "processed_iron": 2,
+          "fuel": 1
+        },
+        "outputs": {
+          "tools": 1
+        },
+        "craftMinutes": 30
+      },
+      {
+        "inputs": {
+          "processed_iron": 1,
+          "fuel": 1
+        },
+        "outputs": {
+          "iron_fittings": 1
+        },
+        "craftMinutes": 20
+      },
+      {
+        "inputs": {
+          "iron": 1,
+          "fuel": 2
+        },
+        "outputs": {
+          "processed_iron": 1
+        },
+        "craftMinutes": 25
+      },
+      {
+        "inputs": {
+          "processed_iron": 3,
+          "timber": 1,
+          "fuel": 2
+        },
+        "outputs": {
+          "weapons": 1
+        },
+        "craftMinutes": 60
+      }
+    ],
+    "storageCapacity": 150,
     "stores": [
+      "iron",
       "processed_iron",
-      "fuel",
-      "water",
-      "tools",
       "iron_fittings",
+      "tools",
       "weapons",
-      "iron"
+      "fuel",
+      "timber"
     ],
     "sells": [
       "tools",
       "iron_fittings",
-      "weapons"
+      "weapons",
+      "processed_iron"
     ]
   },
   "soundDesign": {

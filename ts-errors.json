@@ -1,193 +1,39 @@
 {
-  "totalErrors": 22,
+  "totalErrors": 3,
   "totalWarnings": 0,
   "exitCode": 2,
-  "timestamp": "2025-05-14T20:41:26.063Z",
+  "timestamp": "2025-05-15T06:45:31.577Z",
   "errors": [
     {
-      "filePath": "app/api/transport/route.ts",
-      "line": 903,
-      "column": 30,
-      "code": "TS2304",
-      "message": "Cannot find name 'doLineSegmentsIntersect'.",
-      "type": "error"
-    },
-    {
-      "filePath": "components/PolygonViewer/BuildingDetailsPanel.tsx",
-      "line": 215,
-      "column": 3,
-      "code": "TS1234",
-      "message": "An ambient module declaration is only allowed at the top level in a file.",
-      "type": "error"
-    },
-    {
-      "filePath": "components/PolygonViewer/BuildingDetailsPanel.tsx",
-      "line": 227,
-      "column": 51,
-      "code": "TS2339",
-      "message": "Property '__polygonData' does not exist on type 'Window & typeof globalThis'.",
-      "type": "error"
-    },
-    {
-      "filePath": "components/PolygonViewer/BuildingDetailsPanel.tsx",
-      "line": 228,
-      "column": 32,
-      "code": "TS2339",
-      "message": "Property '__polygonData' does not exist on type 'Window & typeof globalThis'.",
+      "filePath": "components/PolygonViewer/IsometricViewer.tsx",
+      "line": 1656,
+      "column": 4,
+      "code": "TS1128",
+      "message": "Declaration or statement expected.",
       "type": "error"
     },
     {
       "filePath": "components/PolygonViewer/IsometricViewer.tsx",
-      "line": 180,
-      "column": 20,
-      "code": "TS2339",
-      "message": "Property '__polygonData' does not exist on type 'Window & typeof globalThis'.",
+      "line": 1656,
+      "column": 36,
+      "code": "TS1005",
+      "message": "';' expected.",
       "type": "error"
     },
     {
       "filePath": "components/PolygonViewer/IsometricViewer.tsx",
-      "line": 225,
-      "column": 14,
-      "code": "TS2339",
-      "message": "Property '__transportModeActive' does not exist on type 'Window & typeof globalThis'.",
-      "type": "error"
-    },
-    {
-      "filePath": "components/PolygonViewer/IsometricViewer.tsx",
-      "line": 1354,
-      "column": 20,
-      "code": "TS2339",
-      "message": "Property '__selectedBuildingPoint' does not exist on type 'Window & typeof globalThis'.",
-      "type": "error"
-    },
-    {
-      "filePath": "components/PolygonViewer/IsometricViewer.tsx",
-      "line": 1412,
-      "column": 24,
-      "code": "TS2339",
-      "message": "Property '__selectedBuildingPoint' does not exist on type 'Window & typeof globalThis'.",
-      "type": "error"
-    },
-    {
-      "filePath": "components/PolygonViewer/IsometricViewer.tsx",
-      "line": 1469,
-      "column": 24,
-      "code": "TS2339",
-      "message": "Property '__selectedBuildingPoint' does not exist on type 'Window & typeof globalThis'.",
-      "type": "error"
-    },
-    {
-      "filePath": "components/UI/GuildsPanel.tsx",
-      "line": 70,
-      "column": 51,
-      "code": "TS2339",
-      "message": "Property '__polygonData' does not exist on type 'Window & typeof globalThis'.",
-      "type": "error"
-    },
-    {
-      "filePath": "components/UI/GuildsPanel.tsx",
-      "line": 71,
-      "column": 32,
-      "code": "TS2339",
-      "message": "Property '__polygonData' does not exist on type 'Window & typeof globalThis'.",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/services/BuildingDataService.ts",
-      "line": 1,
-      "column": 79,
-      "code": "TS2307",
-      "message": "Cannot find module '../models/BuildingTypes' or its corresponding type declarations.",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/services/BuildingDataService.ts",
-      "line": 2,
-      "column": 37,
-      "code": "TS2307",
-      "message": "Cannot find module './BuildingPositionManager' or its corresponding type declarations.",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/services/BuildingPointsService.ts",
-      "line": 11,
-      "column": 12,
-      "code": "TS2339",
-      "message": "Property 'BUILDING_POINTS_LOADED' does not exist on type '{ POLYGON_SELECTED: string; POLYGON_HOVER: string; LAND_OWNERSHIP_CHANGED: string; COMPUTE_BALANCE_CHANGED: string; LAND_PURCHASED: string; SHOW_LAND_PURCHASE_MODAL: string; KEEP_LAND_DETAILS_PANEL_OPEN: string; ... 45 more ...; BUILDING_POINTS_GENERATED: string; }'.",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/services/BuildingPointsService.ts",
-      "line": 61,
-      "column": 34,
-      "code": "TS2339",
-      "message": "Property 'BUILDING_POINTS_LOADED' does not exist on type '{ POLYGON_SELECTED: string; POLYGON_HOVER: string; LAND_OWNERSHIP_CHANGED: string; COMPUTE_BALANCE_CHANGED: string; LAND_PURCHASED: string; SHOW_LAND_PURCHASE_MODAL: string; KEEP_LAND_DETAILS_PANEL_OPEN: string; ... 45 more ...; BUILDING_POINTS_GENERATED: string; }'.",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/services/BuildingPointsService.ts",
-      "line": 113,
-      "column": 34,
-      "code": "TS2339",
-      "message": "Property 'BUILDING_POINTS_LOADED' does not exist on type '{ POLYGON_SELECTED: string; POLYGON_HOVER: string; LAND_OWNERSHIP_CHANGED: string; COMPUTE_BALANCE_CHANGED: string; LAND_PURCHASED: string; SHOW_LAND_PURCHASE_MODAL: string; KEEP_LAND_DETAILS_PANEL_OPEN: string; ... 45 more ...; BUILDING_POINTS_GENERATED: string; }'.",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/services/IncomeDataService.ts",
-      "line": 4,
-      "column": 16,
-      "code": "TS2664",
-      "message": "Invalid module name in augmentation, module '../eventBus' cannot be found.",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/services/TransactionService.ts",
-      "line": 13,
-      "column": 45,
-      "code": "TS2307",
-      "message": "Cannot find module '../store/marketStore' or its corresponding type declarations.",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/services/TransactionService.ts",
-      "line": 789,
-      "column": 9,
-      "code": "TS2353",
-      "message": "Object literal may only specify known properties, and 'id' does not exist in type 'ExtendedOffer'.",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/services/TransactionService.ts",
-      "line": 806,
-      "column": 22,
-      "code": "TS2339",
-      "message": "Property 'buyer' does not exist on type 'ExtendedOffer'.",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/utils/cacheUtils.ts",
-      "line": 16,
-      "column": 47,
-      "code": "TS2339",
-      "message": "Property '_polygonSnapshotCache' does not exist on type 'Window & typeof globalThis'.",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/utils/cacheUtils.ts",
-      "line": 17,
-      "column": 12,
-      "code": "TS2339",
-      "message": "Property '_polygonSnapshotCache' does not exist on type 'Window & typeof globalThis'.",
+      "line": 3863,
+      "column": 1,
+      "code": "TS1128",
+      "message": "Declaration or statement expected.",
       "type": "error"
     }
   ],
-  "rawOutputLines": 23,
+  "rawOutputLines": 4,
   "firstFewLines": [
-    "app/api/transport/route.ts(903,30): error TS2304: Cannot find name 'doLineSegmentsIntersect'.\r",
-    "components/PolygonViewer/BuildingDetailsPanel.tsx(215,3): error TS1234: An ambient module declaration is only allowed at the top level in a file.\r",
-    "components/PolygonViewer/BuildingDetailsPanel.tsx(227,51): error TS2339: Property '__polygonData' does not exist on type 'Window & typeof globalThis'.\r",
-    "components/PolygonViewer/BuildingDetailsPanel.tsx(228,32): error TS2339: Property '__polygonData' does not exist on type 'Window & typeof globalThis'.\r",
-    "components/PolygonViewer/IsometricViewer.tsx(180,20): error TS2339: Property '__polygonData' does not exist on type 'Window & typeof globalThis'.\r"
+    "components/PolygonViewer/IsometricViewer.tsx(1656,4): error TS1128: Declaration or statement expected.\r",
+    "components/PolygonViewer/IsometricViewer.tsx(1656,36): error TS1005: ';' expected.\r",
+    "components/PolygonViewer/IsometricViewer.tsx(3863,1): error TS1128: Declaration or statement expected.\r"
   ],
   "compilerExitCode": 2
 }

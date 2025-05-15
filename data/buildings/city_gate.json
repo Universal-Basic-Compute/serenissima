@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The City Gate balances defensive infrastructure with modest revenue generation. The construction cost of 7,500,000 ducats reflects the massive fortified structure and defensive systems required, while the income of 30,000 ducats (0.4% return) represents tolls and entry fees collected. The maintenance cost of 35,000 ducats exceeds income, creating a realistic scenario where defensive infrastructure required public funding but provided essential security. The employment capacity of 20 represents the guards, administrators, and maintenance staff needed. The construction time of 20 days (1728000000ms) reflects the substantial defensive project. This building creates a strategic control point with appropriate government restrictions reflecting the historical importance of controlled access points in Venice's unique urban structure, where gates regulated movement between districts and to the mainland connections.",
   "shortDescription": "Fortified entrance point controlling access between districts or to the city itself.",
   "fullDescription": "Regulating movement while providing defensive capabilities, city gates control access to key areas through fortified entry points. Featuring defensive architecture, checkpoint functions, guard facilities, and often customs inspection areas, these impressive structures combine practical control with symbolic authority. Though Venice's island nature limited traditional walls, gates controlled key access points and bridge approaches.",
-  "flavorText": "The gate speaks two messages simultaneously: to citizens it says 'you are protected,' while to potential enemies it declares 'you shall not pass'—both essential to the security of any great city.",
+  "flavorText": "The gate speaks two messages simultaneously: to citizens it says 'you are protected,' while to potential enemies it declares 'you shall not pass'\u2014both essential to the security of any great city.",
   "constructionCosts": {
     "ducats": 7500000,
     "timber": 100,
@@ -40,32 +40,53 @@
     "Document verification station"
   ],
   "productionInformation": {
-    "inputResources": {
-      "tools": 1,
-      "water": 2
-    },
-    "outputResources": {
-      "criminal_contacts": 1,
-      "blackmail_evidence": 1,
-      "smuggler_maps": 1
-    },
-    "storageCapacity": 150,
+    "Arti": [
+      {
+        "inputs": {
+          "porter_equipment": 1,
+          "water": 1
+        },
+        "outputs": {
+          "criminal_contacts": 1
+        },
+        "craftMinutes": 30
+      },
+      {
+        "inputs": {
+          "weapons": 1,
+          "tools": 1
+        },
+        "outputs": {
+          "blackmail_evidence": 1
+        },
+        "craftMinutes": 60
+      },
+      {
+        "inputs": {
+          "wine": 2,
+          "food": 1
+        },
+        "outputs": {
+          "smuggler_maps": 1
+        },
+        "craftMinutes": 45
+      }
+    ],
+    "storageCapacity": 100,
     "stores": [
+      "porter_equipment",
+      "weapons",
       "tools",
-      "water",
+      "wine",
       "criminal_contacts",
       "blackmail_evidence",
       "smuggler_maps",
-      "weapons",
-      "porter_equipment",
-      "disguise_materials"
+      "salt"
     ],
     "sells": [
       "criminal_contacts",
       "blackmail_evidence",
-      "smuggler_maps",
-      "weapons",
-      "porter_equipment"
+      "smuggler_maps"
     ]
   }
 }

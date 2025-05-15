@@ -9,7 +9,7 @@
   "calculationsAnalysis": "St. Mark's Basilica represents the ultimate religious structure with extraordinary artistic and spiritual significance. The construction cost of 60,000,000 ducats reflects the unparalleled architectural complexity and precious materials, while the income of 150,000 ducats (0.25% return) represents donations, religious tourism, and ceremonial fees. The maintenance cost of 125,000 ducats (83.3% of income) creates a realistic scenario where the state's primary religious building required substantial ongoing support but generated significant income through donations and tourism. The employment capacity of 60 represents the clergy, guards, and maintenance staff. The construction time of 120 days (10368000000ms) reflects the monumental construction and artistic project. This unique building serves as the spiritual center of Venice with appropriate restrictions preventing private construction, reflecting the historical reality of this singular structure that embodied the Republic's religious identity.",
   "shortDescription": "Primary cathedral of Venice combining religious significance with state symbolism.",
   "fullDescription": "The spiritual center of Venice, St. Mark's Basilica (Basilica di San Marco) serves as both religious cathedral and state church. Featuring Byzantine-influenced architecture, spectacular golden mosaics, the famous quadriga horses, and St. Mark's relics, this magnificent structure blends Eastern and Western traditions. As the Doge's personal chapel and venue for state ceremonies, it represents the fusion of religious and political authority in Venetian governance.",
-  "flavorText": "Gold above, marble below, and centuries of prayer in between—this basilica stands not merely as a church, but as Venice's spiritual foundation and the treasure house of her most sacred relics and memories.",
+  "flavorText": "Gold above, marble below, and centuries of prayer in between\u2014this basilica stands not merely as a church, but as Venice's spiritual foundation and the treasure house of her most sacred relics and memories.",
   "constructionCosts": {
     "ducats": 60000000,
     "timber": 400,
@@ -42,31 +42,52 @@
     "Tourist Viewing Areas"
   ],
   "productionInformation": {
-    "inputResources": {
-      "gold": 3,
-      "gold_leaf": 2,
-      "marble": 1,
-      "fuel": 5
-    },
-    "outputResources": {
-      "books": 1,
-      "maps": 1
-    },
-    "storageCapacity": 200,
+    "Arti": [
+      {
+        "inputs": {
+          "gold": 1,
+          "gold_leaf": 2
+        },
+        "outputs": {
+          "books": 1
+        },
+        "craftMinutes": 240
+      },
+      {
+        "inputs": {
+          "wine": 1,
+          "spices": 1
+        },
+        "outputs": {
+          "spiced_wine": 1
+        },
+        "craftMinutes": 60
+      },
+      {
+        "inputs": {
+          "paper": 1,
+          "gold_leaf": 1
+        },
+        "outputs": {
+          "maps": 1
+        },
+        "craftMinutes": 180
+      }
+    ],
+    "storageCapacity": 50,
     "stores": [
       "gold",
       "gold_leaf",
-      "marble",
-      "fuel",
       "books",
-      "maps",
-      "jewelry",
-      "luxury_silk_garments"
+      "wine",
+      "spiced_wine",
+      "paper",
+      "maps"
     ],
     "sells": [
       "books",
-      "maps",
-      "jewelry"
+      "spiced_wine",
+      "maps"
     ]
   }
 }

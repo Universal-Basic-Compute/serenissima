@@ -20,32 +20,64 @@
   "maintenanceCost": 2000,
   "constructionTime": 432000000,
   "productionInformation": {
-    "inputResources": {
-      "timber": 12,
-      "rope": 5,
-      "tools": 3,
-      "pitch": 2,
-      "iron_fittings": 4
-    },
-    "outputResources": {
-      "small_boats": 1,
-      "gondola": 0.2
-    },
-    "storageCapacity": 200,
+    "Arti": [
+      {
+        "inputs": {
+          "timber": 3,
+          "tools": 1,
+          "pitch": 1
+        },
+        "outputs": {
+          "small_boats": 1
+        },
+        "craftMinutes": 120
+      },
+      {
+        "inputs": {
+          "timber": 5,
+          "tools": 1,
+          "iron_fittings": 2
+        },
+        "outputs": {
+          "gondola": 1
+        },
+        "craftMinutes": 240
+      },
+      {
+        "inputs": {
+          "small_boats": 1,
+          "timber": 1
+        },
+        "outputs": {
+          "small_boats": 1
+        },
+        "craftMinutes": 60
+      },
+      {
+        "inputs": {
+          "gondola": 1,
+          "timber": 2
+        },
+        "outputs": {
+          "gondola": 1
+        },
+        "craftMinutes": 90
+      }
+    ],
+    "storageCapacity": 50,
     "stores": [
       "timber",
-      "rope",
       "tools",
       "pitch",
       "iron_fittings",
       "small_boats",
       "gondola",
+      "rope",
       "ship_components"
     ],
     "sells": [
       "small_boats",
-      "gondola",
-      "ship_components"
+      "gondola"
     ]
   },
   "soundDesign": {

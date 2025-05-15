@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Navigation School balances educational investment with maritime industry support. The construction cost of 3,500,000 ducats reflects the specialized equipment and facilities required, while the income of 25,000 ducats (0.71% return) represents tuition and training fees. The maintenance cost of 30,000 ducats exceeds income, creating a realistic scenario where educational institutions required guild and public support but provided essential skills training. The employment capacity of 15 represents the instructors and staff needed. The construction time of 7 days (604800000ms) reflects the specialized construction requirements. This building creates a strategic investment in maritime expertise that indirectly benefits the entire naval and shipping industry, reflecting Venice's historical emphasis on maintaining maritime dominance through education.",
   "shortDescription": "Specialized educational facility teaching maritime skills, navigation, and shiphandling.",
   "fullDescription": "Training the sailors who power Venice's maritime empire, navigation schools teach crucial skills from basic seamanship to advanced celestial navigation. Featuring classrooms, navigation equipment, chart rooms, model ships, and often small observatories, these institutions ensure the continued excellence of Venetian maritime capabilities. Their specialized curriculum combines theoretical knowledge with practical experience.",
-  "flavorText": "A ship without a navigator is merely driftwood with pretensions—here we transform ordinary men into masters of the sea itself.",
+  "flavorText": "A ship without a navigator is merely driftwood with pretensions\u2014here we transform ordinary men into masters of the sea itself.",
   "constructionCosts": {
     "ducats": 3500000,
     "timber": 100,
@@ -40,23 +40,47 @@
     "Practical examination area"
   ],
   "productionInformation": {
-    "inputResources": {
-      "paper": 3,
-      "tools": 1,
-      "books": 2
-    },
-    "outputResources": {
-      "maps": 1,
-      "smuggler_maps": 0.2
-    },
-    "storageCapacity": 150,
+    "Arti": [
+      {
+        "inputs": {
+          "paper": 2,
+          "tools": 1
+        },
+        "outputs": {
+          "maps": 1
+        },
+        "craftMinutes": 120
+      },
+      {
+        "inputs": {
+          "books": 1,
+          "tools": 1,
+          "paper": 1
+        },
+        "outputs": {
+          "smuggler_maps": 1
+        },
+        "craftMinutes": 180
+      },
+      {
+        "inputs": {
+          "paper": 2,
+          "tools": 1,
+          "maritime_knowledge": 0
+        },
+        "outputs": {
+          "maritime_knowledge": 1
+        },
+        "craftMinutes": 240
+      }
+    ],
+    "storageCapacity": 50,
     "stores": [
       "paper",
       "tools",
       "books",
       "maps",
-      "smuggler_maps",
-      "wine"
+      "smuggler_maps"
     ],
     "sells": [
       "maps",

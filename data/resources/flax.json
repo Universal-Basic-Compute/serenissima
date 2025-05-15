@@ -3,5 +3,7 @@
   "name": "Flax",
   "category": "raw_materials",
   "subcategory": "textile",
-  "description": "Plant fiber used for producing linen textiles and rope."
+  "description": "Plant fiber used for producing linen textiles and rope.",
+  "icon": "/images/resources/flax.png",
+  "importPrice": 5
 }

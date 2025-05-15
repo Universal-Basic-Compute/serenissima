@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Printing House represents revolutionary information technology with substantial returns. The construction cost of 4,500,000 ducats reflects the specialized presses and equipment required, while the income of 50,000 ducats (1.11% return) represents the high-value books and documents produced. The maintenance cost of 35,000 ducats (70% of income) creates a modest profit margin appropriate for this specialized industry. The employment capacity of 15 represents the printers, typesetters, and binders needed. The construction time of 7 days (604800000ms) reflects the specialized construction requirements. This building creates a strategic investment in information technology with appropriate guild and government requirements reflecting the historical importance of printing to Venice's intellectual and commercial life, where the city became an early center of publishing due to its strategic position and trade networks.",
   "shortDescription": "Specialized workshop producing printed books, maps, and documents using mechanical presses.",
   "fullDescription": "At the forefront of Renaissance information technology, printing houses use mechanical presses to produce multiple copies of texts and images. Featuring type-setting areas, printing presses, drying racks, and bindery facilities, these workshops revolutionized the spread of knowledge. Venice became an early center of printing, with its strategic position and trade networks facilitating distribution throughout Europe.",
-  "flavorText": "What once required a monastery of scribes working for months can now be accomplished in days—we are not merely making books, but building a new age of knowledge itself.",
+  "flavorText": "What once required a monastery of scribes working for months can now be accomplished in days\u2014we are not merely making books, but building a new age of knowledge itself.",
   "constructionCosts": {
     "ducats": 4500000,
     "timber": 120,
@@ -20,26 +20,61 @@
   "maintenanceCost": 3500,
   "constructionTime": 604800000,
   "productionInformation": {
-    "inputResources": {
-      "paper": 12,
-      "tools": 1,
-      "rags": 3
-    },
-    "outputResources": {
-      "books": 3,
-      "maps": 2
-    },
-    "storageCapacity": 200,
+    "Arti": [
+      {
+        "inputs": {
+          "paper": 2,
+          "ink": 1
+        },
+        "outputs": {
+          "books": 1
+        },
+        "craftMinutes": 120
+      },
+      {
+        "inputs": {
+          "paper": 1,
+          "ink": 1
+        },
+        "outputs": {
+          "maps": 1
+        },
+        "craftMinutes": 90
+      },
+      {
+        "inputs": {
+          "rags": 3,
+          "water": 1
+        },
+        "outputs": {
+          "paper": 2
+        },
+        "craftMinutes": 60
+      },
+      {
+        "inputs": {
+          "books": 1,
+          "gold_leaf": 1
+        },
+        "outputs": {
+          "books": 1
+        },
+        "craftMinutes": 180
+      }
+    ],
+    "storageCapacity": 150,
     "stores": [
       "paper",
-      "tools",
       "rags",
       "books",
-      "maps"
+      "maps",
+      "gold_leaf",
+      "water"
     ],
     "sells": [
       "books",
-      "maps"
+      "maps",
+      "paper"
     ]
   },
   "soundDesign": {

@@ -3,5 +3,6 @@
   "name": "Silk Fabric",
   "category": "processed_materials",
   "subcategory": "textile",
-  "description": "Finely woven silk fabric ready for dyeing or garment making."
+  "description": "Finely woven silk fabric ready for dyeing or garment making.",
+  "importPrice": 300
 }

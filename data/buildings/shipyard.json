@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Shipyard represents major maritime industrial infrastructure with substantial returns. The construction cost of 6,000,000 ducats reflects the extensive facilities and specialized equipment required, while the income of 70,000 ducats (1.17% return) represents the high-value vessels produced. The maintenance cost of 75,000 ducats exceeds income, creating a realistic scenario where shipbuilding required substantial ongoing investment but provided strategic maritime capabilities. The employment capacity of 40 represents the shipwrights, carpenters, and laborers needed. The construction time of 14 days (1209600000ms) reflects the major industrial project. This building creates a strategic investment in maritime production with appropriate guild and location requirements reflecting the historical importance of shipbuilding to Venice's commercial and naval power, where private shipyards complemented the state-run Arsenal.",
   "shortDescription": "Facility for construction and repair of maritime vessels, from small boats to trading ships.",
   "fullDescription": "The backbone of Venice's maritime power, private shipyards construct and maintain the merchant fleet that drives the city's commerce. Featuring slipways for vessel construction, specialized workshops for component fabrication, and direct water access, these industrial facilities require substantial space and resources. While not as large as the state-run Arsenal, private shipyards are vital to maintaining Venice's commercial fleet.",
-  "flavorText": "From oak and pitch and canvas, we conjure vessels that will challenge the Mediterranean and return laden with the world's riches—or consign their investors to bankruptcy.",
+  "flavorText": "From oak and pitch and canvas, we conjure vessels that will challenge the Mediterranean and return laden with the world's riches\u2014or consign their investors to bankruptcy.",
   "constructionCosts": {
     "ducats": 6000000,
     "timber": 300,
@@ -20,43 +20,83 @@
   "maintenanceCost": 7500,
   "constructionTime": 1209600000,
   "productionInformation": {
-    "inputResources": {
-      "timber": 25,
-      "rope": 15,
-      "processed_iron": 10,
-      "sailcloth": 12,
-      "pitch": 8,
-      "iron_fittings": 5,
-      "tools": 2
-    },
-    "outputResources": {
-      "ship_components": 4,
-      "small_boats": 0.5,
-      "gondola": 0.2,
-      "merchant_galley": 0.05,
-      "war_galley": 0.02
-    },
-    "storageCapacity": 1000,
+    "Arti": [
+      {
+        "inputs": {
+          "timber": 3,
+          "rope": 2,
+          "sailcloth": 1
+        },
+        "outputs": {
+          "small_boats": 1
+        },
+        "craftMinutes": 240
+      },
+      {
+        "inputs": {
+          "timber": 5,
+          "rope": 3,
+          "pitch": 2
+        },
+        "outputs": {
+          "ship_components": 1
+        },
+        "craftMinutes": 180
+      },
+      {
+        "inputs": {
+          "timber": 8,
+          "ship_components": 3,
+          "sailcloth": 2
+        },
+        "outputs": {
+          "gondola": 1
+        },
+        "craftMinutes": 480
+      },
+      {
+        "inputs": {
+          "timber": 15,
+          "ship_components": 6,
+          "sailcloth": 4
+        },
+        "outputs": {
+          "merchant_galley": 1
+        },
+        "craftMinutes": 2160
+      },
+      {
+        "inputs": {
+          "timber": 18,
+          "ship_components": 8,
+          "weapons": 4
+        },
+        "outputs": {
+          "war_galley": 1
+        },
+        "craftMinutes": 4320
+      }
+    ],
+    "storageCapacity": 200,
     "stores": [
       "timber",
       "rope",
-      "processed_iron",
       "sailcloth",
       "pitch",
-      "iron_fittings",
-      "tools",
       "ship_components",
       "small_boats",
       "gondola",
       "merchant_galley",
-      "war_galley"
+      "war_galley",
+      "tools",
+      "weapons"
     ],
     "sells": [
-      "ship_components",
       "small_boats",
       "gondola",
       "merchant_galley",
-      "war_galley"
+      "war_galley",
+      "ship_components"
     ]
   },
   "soundDesign": {

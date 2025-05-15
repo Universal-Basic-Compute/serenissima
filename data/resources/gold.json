@@ -6,6 +6,7 @@
   "description": {
     "short": "Precious metal valued for its beauty and rarity.",
     "full": "Refined gold in ingot or powder form, used for creating jewelry, ornamentation, and gold leaf. Primarily imported from African and Eastern sources.",
-    "flavor": "In this metal we trust, trade, and transformâ€”the universal language of wealth that makes Venice's voice heard from Constantinople to London."
-  }
+    "flavor": "In this metal we trust, trade, and transform\u00e2\u20ac\u201dthe universal language of wealth that makes Venice's voice heard from Constantinople to London."
+  },
+  "importPrice": 360
 }

@@ -6,7 +6,7 @@
   "description": {
     "short": "Essential mineral for food preservation and trade.",
     "full": "White crystalline mineral harvested from the Venetian lagoon's salt pans. A strategic resource that formed the foundation of Venice's early wealth and remains a state monopoly.",
-    "flavor": "The humble salt crystal—Venice's first treasure. Before spices and silk, before gold and glass, there was salt. The invisible empire upon which all else was built."
+    "flavor": "The humble salt crystal\u2014Venice's first treasure. Before spices and silk, before gold and glass, there was salt. The invisible empire upon which all else was built."
   },
   "varieties": [
     {
@@ -40,5 +40,6 @@
       "European food preservation markets"
     ],
     "culturalContext": "Salt production was so vital to Venice that special laws protected salt workers and facilities, with severe penalties for interference with the salt trade."
-  }
+  },
+  "importPrice": 10
 }

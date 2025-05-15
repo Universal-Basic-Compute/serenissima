@@ -6,7 +6,7 @@
   "description": {
     "short": "Rare colorants for textile dyeing.",
     "full": "Precious natural substances imported from around the world that provide vibrant, lasting colors for Venetian textiles. These rare materials are a cornerstone of Venice's luxury textile industry.",
-    "flavor": "Each shade represents a journey across seas and continentsâ€”the crimson of kermes beetles, the purple of murex shells, the blue of distant indigo plants. In these tiny grains of color lies the secret to Venice's most splendid fabrics."
+    "flavor": "Each shade represents a journey across seas and continents\u00e2\u20ac\u201dthe crimson of kermes beetles, the purple of murex shells, the blue of distant indigo plants. In these tiny grains of color lies the secret to Venice's most splendid fabrics."
   },
   "varieties": [
     {
@@ -57,5 +57,6 @@
       "rarity": "low",
       "valueMultiplier": 0.9
     }
-  ]
+  ],
+  "importPrice": 96
 }

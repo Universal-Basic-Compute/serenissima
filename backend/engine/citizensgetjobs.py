@@ -46,7 +46,7 @@ def initialize_airtable():
         # Return a dictionary of table objects using pyairtable
         return {
             'citizens': Table(api_key, base_id, 'CITIZENS'),
-            'businesses': Table(api_key, base_id, 'BUSINESSES'),
+            'buildings': Table(api_key, base_id, 'BUILDINGS'),
             'notifications': Table(api_key, base_id, 'NOTIFICATIONS')
         }
     except Exception as e:
@@ -90,31 +90,21 @@ def get_unemployed_citizens(tables) -> List[Dict]:
 def get_available_businesses(tables) -> List[Dict]:
     """Fetch available businesses, sorted by wages in descending order."""
     log.info("Fetching available businesses...")
-    
+
     try:
-        # First, get all businesses
-        all_businesses = tables['businesses'].all()
-        log.info(f"Fetched {len(all_businesses)} total businesses")
-        
-        # Then, get all citizens with jobs
-        employed_citizens = tables['citizens'].all(formula="NOT(OR({Work} = '', {Work} = BLANK()))")
-        log.info(f"Found {len(employed_citizens)} employed citizens")
-        
-        # Extract the business IDs that are already taken
-        taken_business_ids = set()
-        for citizen in employed_citizens:
-            if 'Work' in citizen['fields'] and citizen['fields']['Work']:
-                taken_business_ids.add(citizen['fields']['Work'])
-        
-        log.info(f"Found {len(taken_business_ids)} businesses that are already taken")
-        
-        # Filter out businesses that are already taken
-        available_businesses = [b for b in all_businesses if b['id'] not in taken_business_ids]
-        
+        # Define housing types to exclude
+        housing_types = ['canal_house', 'merchant_s_house', 'artisan_s_house', 'fisherman_s_cottage']
+
+        # Create a formula to exclude housing types and find buildings without occupants
+        housing_conditions = [f"{{Type}}='{housing_type}'" for housing_type in housing_types]
+        formula = f"AND(NOT(OR({', '.join(housing_conditions)})), OR({{Occupant}} = '', {{Occupant}}= BLANK()))"
+
+        available_businesses = tables['buildings'].all(formula=formula)
+        log.info(f"Found {len(available_businesses)} available businesses")
+
         # Sort by Wages in descending order
         available_businesses.sort(key=lambda b: float(b['fields'].get('Wages', 0) or 0), reverse=True)
-        
-        log.info(f"Found {len(available_businesses)} available businesses")
+
         return available_businesses
     except Exception as e:
         log.error(f"Error fetching available businesses: {e}")
@@ -132,8 +122,7 @@ def assign_citizen_to_business(tables, citizen: Dict, business: Dict) -> bool:
     try:
         # Update building record with new occupant
         tables['buildings'].update(building_id, {
-            'Occupant': citizen_id,
-            'Status': 'active'
+            'Occupant': citizen_id
         })
         
         # Get building owner

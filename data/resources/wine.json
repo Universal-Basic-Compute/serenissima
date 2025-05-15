@@ -56,5 +56,6 @@
     "introductionYear": "ancient",
     "historicalSignificance": "Wine was a fundamental part of Venetian daily life, consumed by all social classes. The city's position as a trading hub meant it had access to wines from across the Mediterranean, though much of its supply came from vineyards in its mainland territories. Wine consumption was considered healthier than water, which was often of questionable quality.",
     "culturalContext": "Taverns serving wine were important social spaces in Venetian neighborhoods. The Republic strictly regulated wine prices and quality to ensure this essential commodity remained accessible to all citizens."
-  }
+  },
+  "importPrice": 10
 }

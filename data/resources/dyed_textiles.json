@@ -3,5 +3,6 @@
   "name": "Dyed Textiles",
   "category": "processed_materials",
   "subcategory": "textile",
-  "description": "Vibrant colored fabrics ready for tailoring into garments."
+  "description": "Vibrant colored fabrics ready for tailoring into garments.",
+  "importPrice": 54
 }

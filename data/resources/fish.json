@@ -6,7 +6,7 @@
   "description": {
     "short": "Fresh fish caught from the lagoon and Adriatic.",
     "full": "Various species of fish harvested from Venice's lagoon waters and nearby Adriatic Sea. A staple food for Venetians of all classes.",
-    "flavor": "The fishermen's nets haul in more than sustenanceâ€”they draw forth the very identity of Venice, a city as much of the water as beside it."
+    "flavor": "The fishermen's nets haul in more than sustenance\u00e2\u20ac\u201dthey draw forth the very identity of Venice, a city as much of the water as beside it."
   },
   "varieties": [
     {
@@ -24,5 +24,6 @@
       "valueMultiplier": 1.6,
       "availability": "uncommon"
     }
-  ]
+  ],
+  "importPrice": 4
 }

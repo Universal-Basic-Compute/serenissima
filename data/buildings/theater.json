@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Theater balances cultural investment with entertainment revenue. The construction cost of 7,500,000 ducats reflects the specialized architecture and facilities required, while the income of 60,000 ducats (0.8% return) represents ticket sales and patron contributions. The maintenance cost of 45,000 ducats (75% of income) creates a modest profit margin appropriate for a cultural institution with commercial aspects. The employment capacity of 25 represents the performers, stagehands, and administrative staff needed. The construction time of 14 days (1209600000ms) reflects the specialized construction requirements. This building creates a strategic investment in cultural entertainment that enhances city prestige while providing modest returns, reflecting Venice's historically vibrant theatrical tradition that served both artistic and social functions.",
   "shortDescription": "Entertainment venue for performances, including plays, music, and commedia dell'arte.",
   "fullDescription": "Enriching Venetian cultural life, theaters provide venues for various performances from sophisticated dramas to popular entertainment. Featuring a stage, audience seating often in multiple tiers, backstage facilities, and sometimes refreshment areas, these buildings serve as important social gathering spaces. Venice's theater tradition blended intellectual content with spectacular staging and music.",
-  "flavorText": "On this stage we hold a mirror to Venice herself—sometimes flattering, sometimes critical, but always revealing truths that might otherwise remain unspoken.",
+  "flavorText": "On this stage we hold a mirror to Venice herself\u2014sometimes flattering, sometimes critical, but always revealing truths that might otherwise remain unspoken.",
   "constructionCosts": {
     "ducats": 7500000,
     "timber": 250,
@@ -41,34 +41,55 @@
     "Performer dressing rooms"
   ],
   "productionInformation": {
-    "inputResources": {
-      "timber": 2,
-      "paper": 3,
-      "tools": 1,
-      "wine": 3,
-      "dyed_textiles": 1
-    },
-    "outputResources": {
-      "books": 1,
-      "criminal_contacts": 1,
-      "blackmail_evidence": 1
-    },
-    "storageCapacity": 150,
+    "Arti": [
+      {
+        "inputs": {
+          "books": 1,
+          "disguise_materials": 2
+        },
+        "outputs": {
+          "banking_services": 1
+        },
+        "craftMinutes": 180
+      },
+      {
+        "inputs": {
+          "wine": 2,
+          "luxury_silk_garments": 1
+        },
+        "outputs": {
+          "blackmail_evidence": 1
+        },
+        "craftMinutes": 120
+      },
+      {
+        "inputs": {
+          "paper": 1,
+          "venetian_lace": 1
+        },
+        "outputs": {
+          "spiced_wine": 1
+        },
+        "craftMinutes": 60
+      }
+    ],
+    "storageCapacity": 50,
     "stores": [
-      "timber",
-      "paper",
-      "tools",
-      "wine",
-      "dyed_textiles",
       "books",
       "disguise_materials",
+      "luxury_silk_garments",
+      "wine",
+      "paper",
+      "venetian_lace",
+      "banking_services",
       "blackmail_evidence",
-      "criminal_contacts"
+      "spiced_wine"
     ],
     "sells": [
-      "books",
-      "wine",
-      "spiced_wine"
+      "banking_services",
+      "blackmail_evidence",
+      "spiced_wine",
+      "wine"
     ]
   }
 }

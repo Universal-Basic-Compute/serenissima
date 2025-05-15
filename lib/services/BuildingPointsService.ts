@@ -129,7 +129,7 @@ export class BuildingPointsService {
       }
       
       // Client-side: Use fetch API
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      const apiBaseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
       const response = await fetch(`${apiBaseUrl}/api/building-points`);
       
       if (!response.ok) {

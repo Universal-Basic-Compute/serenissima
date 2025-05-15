@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Naval Administration Office represents specialized military command infrastructure with strategic rather than commercial value. The construction cost of 8,000,000 ducats reflects the secure facilities and specialized command systems required, while generating 65,000 ducats income reflects administrative fees, licensing revenue, and naval contract management. The maintenance cost of 60,000 ducats creates a substantial ongoing expense justified by the critical naval command capabilities provided. The employment capacity of 40 represents the officers, clerks, and support staff needed. The construction time of 14 days (1209600000ms) reflects the specialized construction requirements. This building creates a strategic military asset with appropriate government restrictions reflecting the historical importance of naval command in Venice's defensive strategy, where sophisticated fleet coordination was essential to maintaining control of trade routes and defending the lagoon approaches.",
   "shortDescription": "Command and control center for Venice's naval forces, coordinating fleet operations and maintenance.",
   "fullDescription": "Directing Venice's naval power, administration offices coordinate fleet operations, personnel, and logistics for the Republic's maritime forces. Featuring command centers, navigation archives, personnel management, and strategic planning facilities, these complex organizations managed Europe's most sophisticated naval operation. Their efficient administration enabled Venice to project power throughout the Mediterranean while defending the lagoon approaches.",
-  "flavorText": "Ships and sailors make a navy, but without the quill and ledger to direct them, they are merely wood and flesh without purpose—here we transform vessels and men into coordinated power.",
+  "flavorText": "Ships and sailors make a navy, but without the quill and ledger to direct them, they are merely wood and flesh without purpose\u2014here we transform vessels and men into coordinated power.",
   "constructionCosts": {
     "ducats": 8000000,
     "timber": 200,
@@ -41,31 +41,54 @@
     "Officer's mess"
   ],
   "productionInformation": {
-    "inputResources": {
-      "paper": 5,
-      "maps": 1
-    },
-    "outputResources": {
-      "smuggler_maps": 1
-    },
-    "storageCapacity": 250,
+    "Arti": [
+      {
+        "inputs": {
+          "paper": 2,
+          "maps": 1
+        },
+        "outputs": {
+          "smuggler_maps": 1
+        },
+        "craftMinutes": 180
+      },
+      {
+        "inputs": {
+          "maps": 1,
+          "banking_services": 1,
+          "criminal_contacts": 1
+        },
+        "outputs": {
+          "blackmail_evidence": 1
+        },
+        "craftMinutes": 240
+      },
+      {
+        "inputs": {
+          "paper": 3,
+          "tools": 1
+        },
+        "outputs": {
+          "forgery_tools": 1
+        },
+        "craftMinutes": 120
+      }
+    ],
+    "storageCapacity": 100,
     "stores": [
       "paper",
       "maps",
-      "smuggler_maps",
-      "weapons",
+      "banking_services",
+      "criminal_contacts",
       "tools",
-      "ship_components",
-      "rope",
-      "sailcloth"
+      "smuggler_maps",
+      "blackmail_evidence",
+      "forgery_tools",
+      "weapons"
     ],
     "sells": [
       "smuggler_maps",
-      "maps",
-      "weapons",
-      "ship_components",
-      "merchant_galley",
-      "war_galley"
+      "maps"
     ]
   }
 }

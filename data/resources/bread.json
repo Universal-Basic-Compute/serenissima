@@ -42,5 +42,6 @@
     "introductionYear": "ancient",
     "historicalSignificance": "Bread was so essential to Venetian life that the Republic maintained strict control over grain supplies and bread production. The Magistrate of Grain ensured stable prices and adequate supplies, while neighborhood bakeries were required to produce sufficient quantities at regulated prices. During times of shortage, the government would subsidize bread prices to prevent unrest.",
     "culturalContext": "Each Venetian neighborhood had its own bakery, creating a strong community connection. The smell of fresh bread was part of the daily rhythm of city life, and the quality of a neighborhood's bread was a point of local pride."
-  }
+  },
+  "importPrice": 24
 }

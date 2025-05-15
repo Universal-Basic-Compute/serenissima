@@ -38,40 +38,56 @@
     "Goods organization system"
   ],
   "productionInformation": {
-    "inputResources": {},
-    "outputResources": {
-      "porter_equipment": 2
-    },
+    "Arti": [
+      {
+        "inputs": {
+          "fish": 1,
+          "salt": 1
+        },
+        "outputs": {
+          "preserved_fish": 1
+        },
+        "craftMinutes": 30
+      },
+      {
+        "inputs": {
+          "grain": 1
+        },
+        "outputs": {
+          "flour": 1
+        },
+        "craftMinutes": 20
+      }
+    ],
     "storageCapacity": 500,
     "stores": [
       "books",
+      "bread",
       "bricks",
-      "clay",
+      "building_materials",
       "dyed_textiles",
-      "dyestuffs",
       "fish",
       "flour",
+      "fuel",
       "grain",
       "iron",
-      "luxury_silk_garments",
       "olive_oil",
       "paper",
-      "porter_equipment",
       "preserved_fish",
       "processed_iron",
       "rope",
       "salt",
       "silk_fabric",
-      "soap",
       "spiced_wine",
       "timber",
       "tools",
-      "venetian_lace",
       "weapons",
       "wine"
     ],
     "sells": [
-      "porter_equipment",
+      "preserved_fish",
+      "flour",
+      "building_materials",
       "rope",
       "tools"
     ]

@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Flood Control Station represents advanced water management infrastructure with modest revenue. The construction cost of 6,000,000 ducats reflects the specialized equipment and engineering systems required, while generating 15,000 ducats income reflects fees from protected properties and increased property values in secured areas. The maintenance cost of 60,000 ducats creates a substantial ongoing expense partially offset by this income. The employment capacity of 15 represents the engineers, operators, and maintenance staff needed. The construction time of 14 days (1209600000ms) reflects the complex engineering project. This building creates a strategic investment in flood protection that enables development in vulnerable low-lying areas, reflecting Venice's historical struggle against the sea and the sophisticated systems developed to protect the city from acqua alta (high water) events.",
   "shortDescription": "Specialized facility managing barriers and pumps to control acqua alta flooding events.",
   "fullDescription": "Venice's first line of defense against the sea, flood control stations manage the complex systems that protect the city during acqua alta (high water) events. Featuring monitoring equipment, barrier storage, pump systems, and emergency response capabilities, these facilities represent sophisticated engineering solutions to Venice's existential challenge. Their operators maintain constant vigilance against the lagoon's rising waters.",
-  "flavorText": "The sea gives Venice life, commerce, and beauty—but would also reclaim it in an instant if we relaxed our vigilance even for a season.",
+  "flavorText": "The sea gives Venice life, commerce, and beauty\u2014but would also reclaim it in an instant if we relaxed our vigilance even for a season.",
   "constructionCosts": {
     "ducats": 6000000,
     "timber": 200,
@@ -38,32 +38,55 @@
     "Canal gate mechanism"
   ],
   "productionInformation": {
-    "inputResources": {
-      "tools": 3,
-      "timber": 2,
-      "rope": 4
-    },
-    "outputResources": {
-      "water": 10,
-      "maps": 1,
-      "building_materials": 1
-    },
-    "storageCapacity": 250,
+    "Arti": [
+      {
+        "inputs": {
+          "timber": 2,
+          "rope": 1
+        },
+        "outputs": {
+          "small_boats": 1
+        },
+        "craftMinutes": 60
+      },
+      {
+        "inputs": {
+          "tools": 1,
+          "timber": 1
+        },
+        "outputs": {
+          "porter_equipment": 1
+        },
+        "craftMinutes": 30
+      },
+      {
+        "inputs": {
+          "sand": 2,
+          "limestone": 1
+        },
+        "outputs": {
+          "mortar": 1
+        },
+        "craftMinutes": 45
+      }
+    ],
+    "storageCapacity": 150,
     "stores": [
-      "tools",
       "timber",
       "rope",
+      "small_boats",
+      "tools",
+      "porter_equipment",
+      "sand",
+      "limestone",
+      "mortar",
       "water",
-      "maps",
-      "building_materials",
-      "stone",
-      "iron_fittings",
-      "sand"
+      "building_materials"
     ],
     "sells": [
-      "water",
-      "maps",
-      "building_materials"
+      "small_boats",
+      "porter_equipment",
+      "mortar"
     ]
   }
 }

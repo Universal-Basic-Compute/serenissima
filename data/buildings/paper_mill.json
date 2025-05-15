@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Paper Mill represents specialized industrial production with modest direct income but significant industry-enabling capabilities. The construction cost of 2,250,000 ducats reflects the water-powered machinery and specialized facilities required, while the income of 25,000 ducats (1.11% return) represents the value of paper production. The maintenance cost of 20,000 ducats (80% of income) creates a modest profit margin appropriate for this raw material production facility. The employment capacity of 20 represents the workers needed for this labor-intensive process. The construction time of 6 days (518400000ms) reflects the specialized construction requirements. This building creates a strategic investment in paper production that enables the lucrative publishing industry, reflecting Venice's historical position as an early center of printing that depended on reliable paper supplies.",
   "shortDescription": "Facility converting rags and fibers into paper sheets through mechanical processing.",
   "fullDescription": "Essential to Venice's intellectual and commercial life, paper mills transform rags and plant fibers into the paper used for books, documents, and correspondence. Featuring water-powered stamping hammers, drying facilities, and sizing baths, these industrial operations require significant water resources. Venice's early adoption of paper manufacturing supported its prominence in publishing and record-keeping.",
-  "flavorText": "From discarded rags we create the very foundation of knowledge, commerce, and governance—for without paper, thoughts remain ephemeral and agreements merely spoken.",
+  "flavorText": "From discarded rags we create the very foundation of knowledge, commerce, and governance\u2014for without paper, thoughts remain ephemeral and agreements merely spoken.",
   "constructionCosts": {
     "ducats": 2250000,
     "timber": 150,
@@ -20,27 +20,49 @@
   "maintenanceCost": 2000,
   "constructionTime": 518400000,
   "productionInformation": {
-    "inputResources": {
-      "rags": 12,
-      "fuel": 6,
-      "hemp": 3,
-      "flax": 2
-    },
-    "outputResources": {
-      "paper": 20,
-      "water": 5
-    },
-    "storageCapacity": 500,
+    "Arti": [
+      {
+        "inputs": {
+          "rags": 3,
+          "water": 2
+        },
+        "outputs": {
+          "paper": 1
+        },
+        "craftMinutes": 45
+      },
+      {
+        "inputs": {
+          "flax": 2,
+          "water": 1
+        },
+        "outputs": {
+          "paper": 1
+        },
+        "craftMinutes": 60
+      },
+      {
+        "inputs": {
+          "paper": 2,
+          "ink_components": 1
+        },
+        "outputs": {
+          "books": 1
+        },
+        "craftMinutes": 120
+      }
+    ],
+    "storageCapacity": 100,
     "stores": [
       "rags",
-      "fuel",
-      "hemp",
       "flax",
+      "water",
       "paper",
-      "water"
+      "books"
     ],
     "sells": [
-      "paper"
+      "paper",
+      "books"
     ]
   },
   "soundDesign": {

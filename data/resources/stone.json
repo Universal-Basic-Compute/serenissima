@@ -3,5 +3,7 @@
   "name": "Stone",
   "category": "raw_materials",
   "subcategory": "mineral",
-  "description": "Durable building material quarried from the mainland, essential for Venetian construction."
+  "description": "Durable building material quarried from the mainland, essential for Venetian construction.",
+  "icon": "/images/resources/stone.png",
+  "importPrice": 6
 }

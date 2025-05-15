@@ -3,5 +3,7 @@
   "name": "Limestone",
   "category": "raw_materials",
   "subcategory": "mineral",
-  "description": "Sedimentary rock used for building materials and when processed, creates lime for mortar and plaster."
+  "description": "Sedimentary rock used for building materials and when processed, creates lime for mortar and plaster.",
+  "icon": "/images/resources/limestone.png",
+  "importPrice": 5
 }

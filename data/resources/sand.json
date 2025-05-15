@@ -3,5 +3,7 @@
   "name": "Sand",
   "category": "raw_materials",
   "subcategory": "mineral",
-  "description": "Fine granular material essential for glass production and construction mortar."
+  "description": "Fine granular material essential for glass production and construction mortar.",
+  "icon": "/images/resources/sand.png",
+  "importPrice": 1
 }

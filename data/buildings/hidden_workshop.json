@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Hidden Workshop represents specialized illicit production with high risk and high reward. The construction cost of 3,000,000 ducats reflects the specialized equipment and secrecy measures required, while the income of 45,000 ducats (1.5% return) represents the premium prices commanded by illegal goods. The maintenance cost of 30,000 ducats (66.7% of income) creates a substantial profit margin appropriate for high-risk criminal enterprise. The employment capacity of 5 represents the minimal trusted staff needed for security. The construction time of 7 days (604800000ms) reflects the need for discreet construction. This building creates a strategic investment in criminal production with appropriate underworld requirements reflecting the historical reality of Venice's shadow economy.",
   "shortDescription": "Concealed facility for producing illegal goods and contraband, hidden from authorities.",
   "fullDescription": "Operating in the shadows of Venice's economy, hidden workshops produce a variety of illegal or restricted goods. Featuring specialized equipment, security measures, and discreet access, these facilities maintain a low profile while serving criminal networks. Their locations are carefully chosen to minimize detection, often disguised as legitimate businesses or tucked away in obscure locations.",
-  "flavorText": "The most profitable workshops in Venice are those that appear on no tax record and bear no guild sign—for what the law forbids, the market often desires most desperately.",
+  "flavorText": "The most profitable workshops in Venice are those that appear on no tax record and bear no guild sign\u2014for what the law forbids, the market often desires most desperately.",
   "constructionCosts": {
     "ducats": 3000000,
     "timber": 50,
@@ -20,41 +20,77 @@
   "maintenanceCost": 3000,
   "constructionTime": 604800000,
   "productionInformation": {
-    "inputResources": {
-      "poison_components": 3,
-      "paper": 5,
-      "iron": 2,
-      "tools": 1,
-      "fuel": 2
-    },
-    "outputResources": {
-      "forgery_tools": 4,
-      "blackmail_evidence": 5,
-      "weapons": 2,
-      "disguise_materials": 3
-    },
-    "storageCapacity": 75,
+    "Arti": [
+      {
+        "inputs": {
+          "rags": 2,
+          "paper": 1,
+          "tools": 1
+        },
+        "outputs": {
+          "forgery_tools": 1
+        },
+        "craftMinutes": 60
+      },
+      {
+        "inputs": {
+          "herbs": 2,
+          "water": 1
+        },
+        "outputs": {
+          "poison_components": 1
+        },
+        "craftMinutes": 45
+      },
+      {
+        "inputs": {
+          "cloth": 1,
+          "dyes": 1
+        },
+        "outputs": {
+          "disguise_materials": 1
+        },
+        "craftMinutes": 30
+      },
+      {
+        "inputs": {
+          "paper": 1,
+          "ink": 1
+        },
+        "outputs": {
+          "smuggler_maps": 1
+        },
+        "craftMinutes": 120
+      },
+      {
+        "inputs": {
+          "information": 1,
+          "paper": 1
+        },
+        "outputs": {
+          "blackmail_evidence": 1
+        },
+        "craftMinutes": 90
+      }
+    ],
+    "storageCapacity": 50,
     "stores": [
-      "poison_components",
       "paper",
-      "gold",
-      "iron",
       "tools",
-      "fuel",
+      "rags",
+      "poison_components",
       "forgery_tools",
-      "blackmail_evidence",
-      "weapons",
       "disguise_materials",
-      "criminal_contacts",
-      "smuggler_maps"
+      "smuggler_maps",
+      "blackmail_evidence",
+      "criminal_contacts"
     ],
     "sells": [
+      "poison_components",
       "forgery_tools",
-      "blackmail_evidence",
-      "weapons",
       "disguise_materials",
-      "criminal_contacts",
-      "smuggler_maps"
+      "smuggler_maps",
+      "blackmail_evidence"
     ]
   },
   "soundDesign": {

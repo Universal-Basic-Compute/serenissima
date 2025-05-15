@@ -59,5 +59,7 @@
       "Battle of Zonchio (1499)",
       "Battle of Lepanto (1571)"
     ]
-  }
+  },
+  "icon": "/images/resources/war_galley.png",
+  "importPrice": 30000
 }

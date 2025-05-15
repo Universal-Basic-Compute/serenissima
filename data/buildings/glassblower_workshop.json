@@ -20,30 +20,54 @@
   "maintenanceCost": 2000,
   "constructionTime": 345600000,
   "productionInformation": {
-    "inputResources": {
-      "molten_glass": 8,
-      "fuel": 4,
-      "gold": 1,
-      "tools": 2
-    },
-    "outputResources": {
-      "fine_glassware": 5,
-      "jewelry": 1
-    },
-    "storageCapacity": 150,
+    "Arti": [
+      {
+        "inputs": {
+          "molten_glass": 2,
+          "fuel": 1
+        },
+        "outputs": {
+          "glass": 1
+        },
+        "craftMinutes": 20
+      },
+      {
+        "inputs": {
+          "molten_glass": 3,
+          "fuel": 2,
+          "sand": 1
+        },
+        "outputs": {
+          "fine_glassware": 1
+        },
+        "craftMinutes": 120
+      },
+      {
+        "inputs": {
+          "glass": 2,
+          "gold": 1,
+          "gold_leaf": 1
+        },
+        "outputs": {
+          "fine_glassware": 1
+        },
+        "craftMinutes": 180
+      }
+    ],
+    "storageCapacity": 100,
     "stores": [
       "molten_glass",
-      "fuel",
-      "gold",
-      "tools",
+      "glass",
       "fine_glassware",
-      "jewelry",
+      "fuel",
       "sand",
-      "soda_ash"
+      "gold",
+      "gold_leaf",
+      "tools"
     ],
     "sells": [
-      "fine_glassware",
-      "jewelry"
+      "glass",
+      "fine_glassware"
     ]
   },
   "soundDesign": {

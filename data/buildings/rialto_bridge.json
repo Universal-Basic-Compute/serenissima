@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Rialto Bridge represents a unique infrastructure project with both practical and symbolic value. The construction cost of 35,000,000 ducats reflects the engineering challenges and architectural significance, while the income of 150,000 ducats (0.43% return) represents the rental fees from shops built on the bridge. The maintenance cost of 150,000 ducats (100% of income) creates a break-even financial profile appropriate for essential infrastructure with commercial elements. The employment capacity of 30 represents the shop operators and maintenance staff. The construction time of 60 days (5184000000ms) reflects the complex engineering project. This unique building serves as a critical connection between Venice's commercial and governmental districts with appropriate restrictions preventing private construction, reflecting the historical reality of this singular structure that combined infrastructure with commercial space.",
   "shortDescription": "Main bridge spanning the Grand Canal with shops, connecting San Marco and Rialto districts.",
   "fullDescription": "The commercial artery connecting Venice's governmental and financial centers, the Rialto Bridge spans the Grand Canal at its narrowest point. Featuring a single bold stone arch, rows of shops on either side of the central pathway, and distinctive architectural details, this engineering marvel combines practical transportation with commercial opportunity. As a symbol of Venice's commercial prowess and engineering skill, it remains one of the city's most recognizable landmarks.",
-  "flavorText": "Some bridges merely connect two shores, but the Rialto connects commerce with governance, tradition with innovation, and engineering with art—all in a single, perfect arch that seems to defy gravity while defining Venice.",
+  "flavorText": "Some bridges merely connect two shores, but the Rialto connects commerce with governance, tradition with innovation, and engineering with art\u2014all in a single, perfect arch that seems to defy gravity while defining Venice.",
   "constructionCosts": {
     "ducats": 35000000,
     "timber": 300,
@@ -40,36 +40,62 @@
     "Architectural Details"
   ],
   "productionInformation": {
-    "inputResources": {
-      "tools": 2
-    },
-    "outputResources": {
-      "porter_equipment": 2,
-      "tools": 2
-    },
-    "storageCapacity": 200,
+    "Arti": [
+      {
+        "inputs": {
+          "merchant_galley": 1,
+          "smuggler_maps": 1
+        },
+        "outputs": {
+          "banking_services": 1
+        },
+        "craftMinutes": 45
+      },
+      {
+        "inputs": {
+          "jewelry": 1,
+          "luxury_silk_garments": 1
+        },
+        "outputs": {
+          "blackmail_evidence": 1
+        },
+        "craftMinutes": 60
+      },
+      {
+        "inputs": {
+          "paper": 1,
+          "maps": 1
+        },
+        "outputs": {
+          "smuggler_maps": 1
+        },
+        "craftMinutes": 30
+      }
+    ],
+    "storageCapacity": 150,
     "stores": [
-      "tools",
-      "luxury_silk_garments",
-      "jewelry",
+      "banking_services",
+      "blackmail_evidence",
       "books",
+      "jewelry",
+      "luxury_silk_garments",
       "maps",
-      "wine",
+      "merchant_galley",
+      "paper",
+      "smuggler_maps",
       "spiced_wine",
-      "fine_glassware",
-      "venetian_lace",
-      "porter_equipment"
+      "venetian_lace"
     ],
     "sells": [
-      "luxury_silk_garments",
-      "jewelry",
+      "banking_services",
+      "blackmail_evidence",
       "books",
+      "jewelry",
+      "luxury_silk_garments",
       "maps",
-      "wine",
+      "smuggler_maps",
       "spiced_wine",
-      "fine_glassware",
-      "venetian_lace",
-      "porter_equipment"
+      "venetian_lace"
     ]
   }
 }

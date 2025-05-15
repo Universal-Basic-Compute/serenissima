@@ -3,5 +3,6 @@
   "name": "Paper",
   "category": "processed_materials",
   "subcategory": "publishing",
-  "description": "Processed sheets ready for printing, writing, and document creation."
+  "description": "Processed sheets ready for printing, writing, and document creation.",
+  "importPrice": 42
 }

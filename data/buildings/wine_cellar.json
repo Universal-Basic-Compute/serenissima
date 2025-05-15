@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Wine Cellar balances specialized storage infrastructure with premium service income. The construction cost of 2,000,000 ducats reflects the temperature-controlled environment and security features required, while the income of 25,000 ducats (1.25% return) represents storage fees and wine handling charges. The maintenance cost of 17,500 ducats (70% of income) creates a modest profit margin appropriate for specialized storage infrastructure. The employment capacity of 5 represents the cellar master, assistants, and security staff needed. The construction time of 5 days (432000000ms) reflects the specialized construction requirements. This building creates a strategic investment in wine storage that enhances value through proper aging, reflecting the historical importance of wine in Venetian culture and commerce, where proper storage was essential for this valuable commodity.",
   "shortDescription": "Specialized storage facility for aging and preserving wine under optimal conditions.",
   "fullDescription": "Supporting Venice's sophisticated wine trade, cellars provide the carefully controlled environment needed for proper aging and storage. Featuring temperature regulation, humidity control, specialized racks, inventory systems, and tasting areas, these facilities represent significant investment in quality preservation. Their specialized design preserves and enhances the value of wine holdings over time.",
-  "flavorText": "Unlike gold, which merely sits in vaults accumulating dust, wine transforms in the darkness of the cellar—gaining value not just through scarcity, but through the alchemy of patience.",
+  "flavorText": "Unlike gold, which merely sits in vaults accumulating dust, wine transforms in the darkness of the cellar\u2014gaining value not just through scarcity, but through the alchemy of patience.",
   "constructionCosts": {
     "ducats": 2000000,
     "timber": 80,
@@ -38,16 +38,23 @@
     "Security entrance"
   ],
   "productionInformation": {
-    "inputResources": {
-      "wine": 10
-    },
-    "outputResources": {
-      "spiced_wine": 4
-    },
-    "storageCapacity": 500,
+    "Arti": [
+      {
+        "inputs": {
+          "wine": 1
+        },
+        "outputs": {
+          "spiced_wine": 1
+        },
+        "craftMinutes": 240
+      }
+    ],
+    "storageCapacity": 300,
     "stores": [
       "wine",
       "spiced_wine",
+      "grapes",
+      "olives",
       "olive_oil"
     ],
     "sells": [

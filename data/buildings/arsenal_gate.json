@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Arsenal Gate represents iconic military infrastructure with symbolic rather than commercial value. The construction cost of 15,000,000 ducats reflects the monumental architecture and sophisticated security systems required, while generating no direct income reflects its military rather than commercial purpose. The maintenance cost of 50,000 ducats creates a substantial ongoing expense justified by the critical security and symbolic functions provided. The employment capacity of 30 represents the guards, administrators, and maintenance staff needed. The construction time of 30 days (2592000000ms) reflects the monumental construction project. This unique building serves as the symbolic and physical entrance to Venice's military-industrial complex with appropriate restrictions preventing private construction, reflecting the historical reality of this singular structure that represented the Republic's naval power and industrial capabilities.",
   "shortDescription": "Iconic fortified entrance to Venice's Arsenal naval complex, controlling access to restricted military zone.",
   "fullDescription": "Guarding Venice's most strategic military asset, the Arsenal Gate controls access to the massive naval manufacturing complex. Featuring monumental architecture, heavy fortifications, strict security protocols, and impressive symbolic elements, this iconic structure represents Venetian naval power while enforcing strict access control. As the boundary between civilian Venice and its military heart, the gate balanced imposing presence with artistic sophistication.",
-  "flavorText": "Behind these doors lies not merely a shipyard, but the very source of Venetian power—where timber and iron become the ships that secure our trade, enforce our interests, and guarantee our independence.",
+  "flavorText": "Behind these doors lies not merely a shipyard, but the very source of Venetian power\u2014where timber and iron become the ships that secure our trade, enforce our interests, and guarantee our independence.",
   "constructionCosts": {
     "ducats": 15000000,
     "timber": 150,
@@ -38,5 +38,56 @@
     "Worker verification area",
     "Official visitor reception",
     "Lion of St. Mark monument"
-  ]
+  ],
+  "productionInformation": {
+    "Arti": [
+      {
+        "inputs": {
+          "paper": 1,
+          "iron": 1
+        },
+        "outputs": {
+          "weapons": 1
+        },
+        "craftMinutes": 240
+      },
+      {
+        "inputs": {
+          "timber": 2,
+          "iron_fittings": 1,
+          "rope": 1
+        },
+        "outputs": {
+          "ship_components": 1
+        },
+        "craftMinutes": 180
+      },
+      {
+        "inputs": {
+          "paper": 1
+        },
+        "outputs": {
+          "smuggler_maps": 1
+        },
+        "craftMinutes": 60
+      }
+    ],
+    "storageCapacity": 200,
+    "stores": [
+      "paper",
+      "weapons",
+      "ship_components",
+      "smuggler_maps",
+      "iron",
+      "timber",
+      "iron_fittings",
+      "rope",
+      "criminal_contacts"
+    ],
+    "sells": [
+      "weapons",
+      "smuggler_maps",
+      "criminal_contacts"
+    ]
+  }
 }

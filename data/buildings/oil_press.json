@@ -8,7 +8,7 @@
   "unlockCondition": "3,000,000 ducats total wealth, access to olive supply",
   "shortDescription": "Facility for extracting oil from olives through pressing.",
   "fullDescription": "This specialized workshop houses large wooden or stone presses used to extract valuable oil from olives. The process involves crushing olives into a paste, then pressing them to separate the oil from the solids and water. The resulting olive oil is a staple of Venetian cuisine and an important trade commodity.",
-  "flavorText": "From humble fruit to liquid gold—the press transforms nature's bounty into Venice's culinary treasure.",
+  "flavorText": "From humble fruit to liquid gold\u2014the press transforms nature's bounty into Venice's culinary treasure.",
   "constructionCosts": {
     "ducats": 800000,
     "timber": 60,
@@ -18,23 +18,38 @@
   "maintenanceCost": 800,
   "constructionTime": 259200000,
   "productionInformation": {
-    "inputResources": {
-      "olives": 10,
-      "water": 3,
-      "fuel": 1
-    },
-    "outputResources": {
-      "olive_oil": 5
-    },
-    "storageCapacity": 150,
+    "Arti": [
+      {
+        "inputs": {
+          "olives": 3,
+          "water": 1
+        },
+        "outputs": {
+          "olive_oil": 1
+        },
+        "craftMinutes": 45
+      },
+      {
+        "inputs": {
+          "olive_oil": 2,
+          "herbs": 1
+        },
+        "outputs": {
+          "soap": 1
+        },
+        "craftMinutes": 60
+      }
+    ],
+    "storageCapacity": 120,
     "stores": [
       "olives",
+      "olive_oil",
       "water",
-      "fuel",
-      "olive_oil"
+      "soap"
     ],
     "sells": [
-      "olive_oil"
+      "olive_oil",
+      "soap"
     ]
   },
   "soundDesign": {

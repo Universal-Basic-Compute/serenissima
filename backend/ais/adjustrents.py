@@ -194,12 +194,12 @@ After your analysis, provide your rent adjustment decisions in this JSON format:
   "rent_adjustments": [
     {{
       "building_id": "building-id-1",
-      "new_rent_amount": 100,
+      "new_rent_amount": 1000,
       "reason": "brief explanation"
     }},
     {{
       "building_id": "building-id-2",
-      "new_rent_amount": 200,
+      "new_rent_amount": 2000,
       "reason": "brief explanation"
     }}
   ]

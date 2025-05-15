@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Canal Maintenance Office represents essential water management infrastructure with no direct revenue. The construction cost of 2,500,000 ducats reflects the specialized equipment and facilities required, while generating no direct income reflects its public service rather than commercial purpose. The maintenance cost of 40,000 ducats creates a substantial ongoing expense justified by the essential canal maintenance provided. The employment capacity of 20 represents the engineers, dredgers, and maintenance crews needed. The construction time of 7 days (604800000ms) reflects the specialized construction requirements. This building creates a strategic investment in waterway management that prevents sedimentation and maintains Venice's vital canal network, reflecting the historical reality that without constant maintenance, Venice's canals would quickly become unusable, threatening the city's very existence.",
   "shortDescription": "Administrative and operational center for maintaining Venice's vital canal network.",
   "fullDescription": "Critical to Venice's survival, canal maintenance offices coordinate the complex work of keeping the city's waterways navigable. Featuring administrative offices, equipment storage, specialized tools, and dredging boats, these facilities support the essential work of removing sediment, repairing canal walls, and maintaining water quality. Without this constant maintenance, Venice's canal network would quickly silt up and become unusable.",
-  "flavorText": "The canals are not merely our streets, but our very foundation—and like any foundation, they require constant attention lest our entire civilization sink into the mud from which it rose.",
+  "flavorText": "The canals are not merely our streets, but our very foundation\u2014and like any foundation, they require constant attention lest our entire civilization sink into the mud from which it rose.",
   "constructionCosts": {
     "ducats": 2500000,
     "timber": 100,
@@ -38,31 +38,69 @@
     "Water quality testing station"
   ],
   "productionInformation": {
-    "inputResources": {
-      "tools": 4,
-      "rope": 3,
-      "timber": 2,
-      "fuel": 2
-    },
-    "outputResources": {
-      "porter_equipment": 1,
-      "maps": 1
-    },
-    "storageCapacity": 200,
+    "Arti": [
+      {
+        "inputs": {
+          "tools": 1,
+          "small_boats": 1,
+          "porter_equipment": 1
+        },
+        "outputs": {
+          "water": 1
+        },
+        "craftMinutes": 60
+      },
+      {
+        "inputs": {
+          "timber": 2,
+          "bricks": 1,
+          "mortar": 1
+        },
+        "outputs": {
+          "building_materials": 1
+        },
+        "craftMinutes": 90
+      },
+      {
+        "inputs": {
+          "timber": 1,
+          "rope": 1,
+          "pitch": 1
+        },
+        "outputs": {
+          "small_boats": 1
+        },
+        "craftMinutes": 120
+      },
+      {
+        "inputs": {
+          "rags": 1,
+          "rope": 1
+        },
+        "outputs": {
+          "porter_equipment": 1
+        },
+        "craftMinutes": 30
+      }
+    ],
+    "storageCapacity": 150,
     "stores": [
       "tools",
-      "rope",
       "timber",
-      "fuel",
+      "bricks",
+      "mortar",
+      "rope",
+      "pitch",
+      "rags",
+      "small_boats",
+      "building_materials",
       "porter_equipment",
-      "maps",
-      "sand",
-      "water",
-      "small_boats"
+      "water"
     ],
     "sells": [
-      "porter_equipment",
-      "maps"
+      "small_boats",
+      "building_materials",
+      "porter_equipment"
     ]
   }
 }

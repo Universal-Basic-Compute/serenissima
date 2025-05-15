@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Arsenal Workshop represents Venice's revolutionary naval production system with strategic rather than commercial value. The construction cost of 12,500,000 ducats reflects the massive industrial facilities and specialized equipment required, while generating no direct income reflects its military rather than commercial purpose. The maintenance cost of 100,000 ducats creates a substantial ongoing expense justified by the critical naval production capabilities provided. The employment capacity of 80 represents the shipwrights, craftsmen, and laborers needed for industrial-scale production. The construction time of 40 days (3456000000ms) reflects the massive industrial project. This building creates a strategic military asset with appropriate government restrictions reflecting the historical Arsenal's status as a state-controlled facility that was the largest industrial complex in pre-industrial Europe and key to Venice's naval dominance.",
   "shortDescription": "Specialized production facility within the Arsenal complex for building naval vessels and equipment.",
   "fullDescription": "The industrial heart of Venice's naval power, Arsenal workshops represent the world's first standardized ship production facilities. Featuring specialized construction areas, material processing stations, equipment fabrication, and assembly zones, these massive structures enabled Venice to build ships at unprecedented speed and quality. Their advanced organization and scale astounded foreign visitors and projected Venetian power throughout the Mediterranean.",
-  "flavorText": "What other nations do in months, the Arsenal does in days; what they build individually, we create in series—for Venice's navy is not merely ships, but the perfected system that produces them.",
+  "flavorText": "What other nations do in months, the Arsenal does in days; what they build individually, we create in series\u2014for Venice's navy is not merely ships, but the perfected system that produces them.",
   "constructionCosts": {
     "ducats": 12500000,
     "timber": 500,
@@ -41,42 +41,82 @@
     "Quality inspection station"
   ],
   "productionInformation": {
-    "inputResources": {
-      "timber": 30,
-      "processed_iron": 15,
-      "rope": 12,
-      "pitch": 8,
-      "sailcloth": 10,
-      "tools": 5
-    },
-    "outputResources": {
-      "ship_components": 25,
-      "small_boats": 1,
-      "merchant_galley": 0.05,
-      "war_galley": 0.02
-    },
-    "storageCapacity": 2000,
+    "Arti": [
+      {
+        "inputs": {
+          "timber": 3,
+          "iron_fittings": 2,
+          "sailcloth": 1
+        },
+        "outputs": {
+          "small_boats": 1
+        },
+        "craftMinutes": 120
+      },
+      {
+        "inputs": {
+          "timber": 5,
+          "iron_fittings": 3,
+          "sailcloth": 2
+        },
+        "outputs": {
+          "merchant_galley": 1
+        },
+        "craftMinutes": 480
+      },
+      {
+        "inputs": {
+          "timber": 5,
+          "iron_fittings": 3,
+          "weapons": 2
+        },
+        "outputs": {
+          "war_galley": 1
+        },
+        "craftMinutes": 720
+      },
+      {
+        "inputs": {
+          "timber": 2,
+          "iron_fittings": 1
+        },
+        "outputs": {
+          "gondola": 1
+        },
+        "craftMinutes": 240
+      },
+      {
+        "inputs": {
+          "timber": 2,
+          "rope": 1,
+          "pitch": 1
+        },
+        "outputs": {
+          "ship_components": 1
+        },
+        "craftMinutes": 90
+      }
+    ],
+    "storageCapacity": 150,
     "stores": [
       "timber",
-      "processed_iron",
+      "iron_fittings",
+      "sailcloth",
       "rope",
       "pitch",
-      "sailcloth",
-      "tools",
-      "ship_components",
+      "weapons",
       "small_boats",
+      "gondola",
       "merchant_galley",
       "war_galley",
-      "gondola",
-      "weapons"
+      "ship_components"
     ],
     "sells": [
-      "ship_components",
       "small_boats",
+      "gondola",
       "merchant_galley",
       "war_galley",
-      "gondola",
-      "weapons"
+      "ship_components"
     ]
   }
 }

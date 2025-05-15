@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Merchant's House represents middle-class housing with business capabilities. The construction cost of 1,600,000 ducats reflects the quality construction and business facilities, while the income of 30,000 ducats (1.9% return) represents both residential rent and commercial activities. The maintenance cost of 7,500 ducats (25% of income) creates an appropriate maintenance ratio for this tier, reflecting the more complex structure and higher standards. The residentsCapacity of 7 represents the merchant family with servants. The construction time of 4 days (345600000ms) reflects the more sophisticated construction. This building creates a progression into middle-class housing with appropriate guild requirements reflecting the social organization of Renaissance Venice, where guild membership was essential for commercial activities.",
   "shortDescription": "Comfortable residence with dedicated office space for business dealings.",
   "fullDescription": "A respectable home for Venice's merchant class, featuring separate areas for business and family life. Typically includes a ground floor counting room or office, a piano nobile (noble floor) for family living, and often additional floors for storage or servants. Represents success in Venice's trading world.",
-  "flavorText": "Ledgers below, living above—the merchant's house is a perfect balance of commerce and comfort, just as the merchant balances risk and reward.",
+  "flavorText": "Ledgers below, living above\u2014the merchant's house is a perfect balance of commerce and comfort, just as the merchant balances risk and reward.",
   "constructionCosts": {
     "ducats": 1600000,
     "timber": 80,
@@ -36,35 +36,69 @@
     "Rooftop terrace"
   ],
   "productionInformation": {
-    "inputResources": {
-      "water": 5,
-      "fuel": 3,
-      "paper": 1,
-      "wine": 2
-    },
-    "outputResources": {
-      "maps": 1
-    },
-    "storageCapacity": 150,
+    "Arti": [
+      {
+        "inputs": {
+          "paper": 1,
+          "tools": 1
+        },
+        "outputs": {
+          "maps": 1
+        },
+        "craftMinutes": 60
+      },
+      {
+        "inputs": {
+          "paper": 2,
+          "tools": 1
+        },
+        "outputs": {
+          "books": 1
+        },
+        "craftMinutes": 120
+      },
+      {
+        "inputs": {
+          "paper": 1,
+          "gold": 1
+        },
+        "outputs": {
+          "banking_services": 1
+        },
+        "craftMinutes": 30
+      },
+      {
+        "inputs": {
+          "tools": 1,
+          "paper": 1,
+          "wine": 1
+        },
+        "outputs": {
+          "forgery_tools": 1
+        },
+        "craftMinutes": 90
+      }
+    ],
+    "storageCapacity": 100,
     "stores": [
-      "water",
-      "fuel",
       "paper",
+      "tools",
+      "gold",
       "wine",
       "maps",
-      "gold",
       "books",
-      "spiced_wine",
-      "jewelry",
+      "banking_services",
+      "forgery_tools",
       "silk_fabric",
-      "luxury_silk_garments",
-      "tools"
+      "spiced_wine",
+      "jewelry"
     ],
     "sells": [
       "maps",
       "books",
+      "banking_services",
+      "forgery_tools",
       "silk_fabric",
-      "luxury_silk_garments",
       "spiced_wine",
       "jewelry"
     ]

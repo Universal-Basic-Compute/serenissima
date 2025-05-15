@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Public Bath balances basic health infrastructure with modest service fees. The construction cost of 2,000,000 ducats reflects the specialized water and heating systems required, while the income of 15,000 ducats (0.75% return) represents modest usage fees. The maintenance cost of 17,500 ducats exceeds income, creating a realistic scenario where public hygiene facilities required subsidy but provided essential health benefits. The employment capacity of 10 represents the attendants and maintenance staff needed. The construction time of 5 days (432000000ms) reflects the specialized construction requirements. This building creates an accessible investment in public health that improves population wellbeing and disease resistance, reflecting Venice's historically advanced approach to public hygiene compared to other European cities of the era.",
   "shortDescription": "Hygiene facility providing bathing services to urban residents without private facilities.",
   "fullDescription": "Supporting public health through cleanliness, bath houses provide washing facilities for citizens without private baths. Featuring bathing pools of varying temperatures, steam rooms, changing areas, and often medicinal services, these establishments combine practical hygiene with social gathering. Venice's water-surrounded situation made public baths particularly important for controlling disease and maintaining cleanliness.",
-  "flavorText": "Cleanliness of body promotes health of body, and the shared conversation of the baths promotes health of mind—thus a city with good bath houses benefits twice over.",
+  "flavorText": "Cleanliness of body promotes health of body, and the shared conversation of the baths promotes health of mind\u2014thus a city with good bath houses benefits twice over.",
   "constructionCosts": {
     "ducats": 2000000,
     "timber": 80,
@@ -40,22 +40,35 @@
     "Medicinal herb station"
   ],
   "productionInformation": {
-    "inputResources": {
-      "water": 100,
-      "soap": 20,
-      "fuel": 40
-    },
-    "outputResources": {
-      "criminal_contacts": 2,
-      "blackmail_evidence": 1
-    },
-    "storageCapacity": 500,
+    "Arti": [
+      {
+        "inputs": {
+          "water": 2,
+          "fuel": 1
+        },
+        "outputs": {
+          "soap": 1
+        },
+        "craftMinutes": 30
+      },
+      {
+        "inputs": {
+          "water": 1,
+          "herbs": 1
+        },
+        "outputs": {
+          "medicine": 1
+        },
+        "craftMinutes": 45
+      }
+    ],
+    "storageCapacity": 40,
     "stores": [
       "water",
-      "soap",
       "fuel",
-      "criminal_contacts",
-      "blackmail_evidence"
+      "soap",
+      "herbs",
+      "medicine"
     ],
     "sells": [
       "soap"

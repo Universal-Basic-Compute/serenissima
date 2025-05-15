@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Parish Church's economic values reflect its dual spiritual and community roles. The high construction cost (7,500,000 ducats) represents the significant architectural investment and decorative elements required for religious buildings in Venice. The income of 45,000 ducats (0.6% return) represents donations, fees for services, and endowments, while the maintenance cost of 40,000 ducats creates a small but sustainable profit margin. This encourages players to build churches for their substantial reputation and community benefits while providing modest financial returns, mirroring the historical importance of parish churches as neighborhood centers.",
   "shortDescription": "Neighborhood worship center serving the spiritual needs of local residents.",
   "fullDescription": "The spiritual heart of each Venetian neighborhood, parish churches provide religious services, community gathering spaces, and social support. Featuring a main worship area, bell tower, side chapels, and often charitable facilities, these buildings serve as both religious centers and neighborhood focal points. Venice's distinctive layout resulted in an unusually high number of parish churches, each forming the center of a local community.",
-  "flavorText": "The parish church marks both the geographical center of the neighborhood and the spiritual center of its people's lives—from baptism to burial, all significant moments pass through these doors.",
+  "flavorText": "The parish church marks both the geographical center of the neighborhood and the spiritual center of its people's lives\u2014from baptism to burial, all significant moments pass through these doors.",
   "constructionCosts": {
     "ducats": 7500000,
     "timber": 200,
@@ -40,31 +40,51 @@
     "Parish office"
   ],
   "productionInformation": {
-    "inputResources": {
-      "wine": 3,
-      "bread": 4,
-      "books": 1,
-      "gold": 1,
-      "water": 2
-    },
-    "outputResources": {
-      "books": 1,
-      "paper": 2
-    },
-    "storageCapacity": 200,
+    "Arti": [
+      {
+        "inputs": {
+          "paper": 2,
+          "ink": 1
+        },
+        "outputs": {
+          "books": 1
+        },
+        "craftMinutes": 180
+      },
+      {
+        "inputs": {
+          "gold": 1,
+          "paper": 1
+        },
+        "outputs": {
+          "gold_leaf": 1
+        },
+        "craftMinutes": 120
+      },
+      {
+        "inputs": {
+          "wine": 2,
+          "spiced_wine": 1
+        },
+        "outputs": {
+          "books": 1
+        },
+        "craftMinutes": 60
+      }
+    ],
+    "storageCapacity": 150,
     "stores": [
-      "wine",
-      "bread",
-      "books",
-      "gold",
-      "water",
       "paper",
-      "tools",
-      "gold_leaf"
+      "gold",
+      "books",
+      "gold_leaf",
+      "wine",
+      "spiced_wine",
+      "bread"
     ],
     "sells": [
       "books",
-      "paper"
+      "gold_leaf"
     ]
   }
 }

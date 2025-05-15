@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Glass Guild Hall represents specialized institutional infrastructure with industry governance functions. The construction cost of 12,500,000 ducats reflects the prestigious architecture and specialized facilities required, while the income of 75,000 ducats (0.6% return) represents membership fees and regulatory charges. The maintenance cost of 60,000 ducats (80% of income) creates a modest surplus appropriate for a non-profit institution. The employment capacity of 20 represents the administrative staff and industry experts. The construction time of 20 days (1728000000ms) reflects the specialized construction requirements. This building creates a strategic investment in industry governance with appropriate guild requirements reflecting the historical importance of guild regulation in Venice's glass industry, which maintained quality standards and protected valuable trade secrets.",
   "shortDescription": "Headquarters of the Murano Glass Guild governing the prestigious Venetian glass industry.",
   "fullDescription": "Regulating Venice's world-renowned glass industry, the Glass Guild Hall serves as administrative center and knowledge repository for this crucial craft. Featuring meeting chambers, demonstration facilities, archives of designs and techniques, and ceremonial spaces, this distinguished institution maintains quality standards while protecting trade secrets. Located on Murano island, it governs every aspect of Venetian glassmaking from apprenticeships to export regulations.",
-  "flavorText": "Within these walls we preserve not merely the techniques of our craft, but its very soul—for while any furnace can melt sand, only the true traditions of Murano transform it into miracles of transparency and color.",
+  "flavorText": "Within these walls we preserve not merely the techniques of our craft, but its very soul\u2014for while any furnace can melt sand, only the true traditions of Murano transform it into miracles of transparency and color.",
   "constructionCosts": {
     "ducats": 12500000,
     "timber": 150,
@@ -41,29 +41,65 @@
     "Master Consultation Rooms"
   ],
   "productionInformation": {
-    "inputResources": {
-      "books": 1,
-      "tools": 2,
-      "sand": 4
-    },
-    "outputResources": {
-      "fine_glassware": 1,
-      "glass": 3,
-      "maps": 1
-    },
+    "Arti": [
+      {
+        "inputs": {
+          "sand": 2,
+          "soda_ash": 1,
+          "fuel": 1
+        },
+        "outputs": {
+          "glass": 1
+        },
+        "craftMinutes": 60
+      },
+      {
+        "inputs": {
+          "glass": 1,
+          "fuel": 1
+        },
+        "outputs": {
+          "molten_glass": 1
+        },
+        "craftMinutes": 30
+      },
+      {
+        "inputs": {
+          "molten_glass": 1,
+          "gold": 1
+        },
+        "outputs": {
+          "fine_glassware": 1
+        },
+        "craftMinutes": 180
+      },
+      {
+        "inputs": {
+          "paper": 1,
+          "tools": 1
+        },
+        "outputs": {
+          "maps": 1
+        },
+        "craftMinutes": 120
+      }
+    ],
     "storageCapacity": 150,
     "stores": [
-      "fine_glassware",
-      "glass",
       "sand",
+      "soda_ash",
+      "fuel",
+      "glass",
+      "molten_glass",
+      "fine_glassware",
+      "gold",
+      "paper",
       "tools",
-      "books",
-      "maps",
-      "gold"
+      "maps"
     ],
     "sells": [
-      "fine_glassware",
       "glass",
+      "fine_glassware",
       "maps"
     ]
   }

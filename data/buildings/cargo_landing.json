@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Cargo Landing represents substantial commercial infrastructure with significant returns. The construction cost of 5,000,000 ducats reflects the extensive docking, loading, and storage facilities required, while the income of 60,000 ducats (1.2% return) represents the fees collected from merchants for goods handling. The maintenance cost of 50,000 ducats (83.3% of income) creates a thin profit margin appropriate for essential commercial infrastructure. The employment capacity of 30 represents the stevedores, clerks, and managers needed. The construction time of 10 days (864000000ms) reflects the substantial construction requirements. This building creates a strategic investment in commercial logistics that enables large-scale trade, reflecting Venice's historical dependence on efficient cargo handling facilities to maintain its position as a trading power.",
   "shortDescription": "Large-scale commercial dock designed for efficient transfer of goods between ships and the city.",
   "fullDescription": "The commercial lifeblood of Venice, cargo landings enable the efficient movement of goods between maritime vessels and the city's internal transportation network. Featuring large unloading quays, multiple cranes, warehousing facilities, and customs checkpoints, these substantial infrastructure investments are critical to Venice's trading power. Their design allows for handling diverse cargoes from across the Mediterranean and beyond.",
-  "flavorText": "The wealth of Venice arrives not on golden platters but on rough wooden pallets, hoisted by calloused hands and sorted by shrewd eyes—for commerce is built not on luxury, but on logistics.",
+  "flavorText": "The wealth of Venice arrives not on golden platters but on rough wooden pallets, hoisted by calloused hands and sorted by shrewd eyes\u2014for commerce is built not on luxury, but on logistics.",
   "constructionCosts": {
     "ducats": 5000000,
     "timber": 300,
@@ -37,42 +37,61 @@
     "Ship mooring area"
   ],
   "productionInformation": {
-    "inputResources": {
-      "tools": 2,
-      "rope": 3,
-      "porter_equipment": 1
-    },
-    "outputResources": {
-      "smuggler_maps": 1
-    },
+    "Arti": [
+      {
+        "inputs": {
+          "merchant_galley": 1,
+          "porter_equipment": 1
+        },
+        "outputs": {
+          "smuggler_maps": 1
+        },
+        "craftMinutes": 45
+      },
+      {
+        "inputs": {
+          "small_boats": 1,
+          "rope": 1
+        },
+        "outputs": {
+          "gondola": 1
+        },
+        "craftMinutes": 60
+      },
+      {
+        "inputs": {
+          "ship_components": 1,
+          "timber": 2,
+          "sailcloth": 1
+        },
+        "outputs": {
+          "merchant_galley": 1
+        },
+        "craftMinutes": 480
+      }
+    ],
     "storageCapacity": 500,
     "stores": [
-      "grain",
-      "wine",
-      "spiced_wine",
-      "olive_oil",
-      "salt",
+      "merchant_galley",
+      "war_galley",
+      "small_boats",
+      "gondola",
+      "ship_components",
       "timber",
-      "stone",
-      "marble",
-      "iron",
-      "gold",
-      "silk_fabric",
-      "dyed_textiles",
-      "glass",
-      "fine_glassware",
-      "weapons",
-      "books",
-      "paper",
       "rope",
-      "fish",
-      "preserved_fish",
-      "tools"
-    ],
-    "sells": [
+      "sailcloth",
       "smuggler_maps",
       "porter_equipment",
-      "rope"
+      "salt",
+      "spiced_wine",
+      "wine",
+      "fish",
+      "preserved_fish"
+    ],
+    "sells": [
+      "porter_equipment",
+      "rope",
+      "smuggler_maps"
     ]
   }
 }

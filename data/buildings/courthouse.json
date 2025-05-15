@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Courthouse represents significant judicial infrastructure with modest revenue generation. The construction cost of 9,000,000 ducats reflects the imposing architecture and specialized facilities required, while the income of 40,000 ducats (0.44% return) represents court fees and fines collected. The maintenance cost of 50,000 ducats exceeds income, creating a realistic scenario where judicial buildings required public funding but provided essential legal services. The employment capacity of 30 represents the judges, clerks, and guards needed. The construction time of 20 days (1728000000ms) reflects the substantial public project. This building creates a strategic investment in legal infrastructure with appropriate high-level requirements reflecting the political nature of establishing judicial authority in Renaissance Venice.",
   "shortDescription": "Judicial facility for legal proceedings, records, and administration of justice.",
   "fullDescription": "The physical embodiment of Venetian justice, courthouses provide spaces for legal proceedings from simple disputes to complex trials. Featuring multiple courtrooms, judicial offices, legal archives, and holding cells, these imposing buildings represent the rule of law in the Republic. Venice's sophisticated legal system required substantial facilities to manage its complex commercial and criminal jurisprudence.",
-  "flavorText": "Between the stones of this building lie not just mortar, but the accumulated wisdom of centuries of law—for Venice conquers by trade, but endures by justice.",
+  "flavorText": "Between the stones of this building lie not just mortar, but the accumulated wisdom of centuries of law\u2014for Venice conquers by trade, but endures by justice.",
   "constructionCosts": {
     "ducats": 9000000,
     "timber": 200,
@@ -43,38 +43,46 @@
     "Arti": [
       {
         "inputs": {
-          "paper": 6,
-          "books": 2
+          "paper": 2,
+          "labor": 1
         },
         "outputs": {
-          "blackmail_evidence": 2,
-          "criminal_contacts": 1
+          "blackmail_evidence": 1
         },
-        "craftTime": 1
+        "craftMinutes": 60
       },
       {
         "inputs": {
-          "paper": 4,
+          "paper": 1,
           "criminal_contacts": 1
         },
         "outputs": {
-          "forgery_tools": 2
+          "smuggler_maps": 1
         },
-        "craftTime": 2
+        "craftMinutes": 120
+      },
+      {
+        "inputs": {
+          "labor": 2,
+          "paper": 1
+        },
+        "outputs": {
+          "forgery_tools": 1
+        },
+        "craftMinutes": 90
       }
     ],
-    "storageCapacity": 200,
+    "storageCapacity": 50,
     "stores": [
       "paper",
-      "books",
       "blackmail_evidence",
       "criminal_contacts",
-      "forgery_tools",
-      "smuggler_maps"
+      "smuggler_maps",
+      "forgery_tools"
     ],
     "sells": [
       "blackmail_evidence",
-      "criminal_contacts",
+      "smuggler_maps",
       "forgery_tools"
     ]
   }

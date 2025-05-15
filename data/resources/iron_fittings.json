@@ -3,5 +3,6 @@
   "name": "Iron Fittings",
   "category": "processed_materials",
   "subcategory": "metallurgy",
-  "description": "Forged iron hardware for construction and shipbuilding."
+  "description": "Forged iron hardware for construction and shipbuilding.",
+  "importPrice": 48
 }

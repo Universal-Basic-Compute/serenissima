@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Eastern Merchant House balances substantial investment with lucrative Eastern trade returns. The construction cost of 5,000,000 ducats reflects the specialized architecture and prestigious location required, while the income of 60,000 ducats (1.2% return) represents the high-value Eastern luxury goods trade. The maintenance cost of 30,000 ducats (50% of income) reflects the costs of maintaining cultural specialists and exotic goods handling. The employment capacity of 20 represents the staff needed to manage complex Eastern trade relationships. The construction time of 10 days (864000000ms) represents a significant project for advanced players. This building creates a strategic investment in the lucrative Eastern trade routes that were historically crucial to Venice's commercial dominance, with appropriate requirements reflecting the specialized knowledge and connections needed.",
   "shortDescription": "Trading post specialized in Eastern goods, combining warehouse, offices, and cultural showcase.",
   "fullDescription": "Venice's gateway to the riches of the East, these specialized trading houses focus on goods from the Ottoman Empire, Persia, and beyond. Featuring architecture and decoration influenced by Eastern styles, these buildings provide both commercial facilities and cultural spaces where Eastern and Western merchants can negotiate. Often housing translators and cultural experts, they facilitate the flow of exotic goods that made Venice wealthy.",
-  "flavorText": "Here the silk road reaches its final destination, as do the dreams of a thousand caravans—and the nightmares of Venice's competitors.",
+  "flavorText": "Here the silk road reaches its final destination, as do the dreams of a thousand caravans\u2014and the nightmares of Venice's competitors.",
   "constructionCosts": {
     "ducats": 5000000,
     "timber": 200,
@@ -24,48 +24,54 @@
     "Arti": [
       {
         "inputs": {
-          "raw_silk": 5,
-          "dyestuffs": 2
+          "raw_silk": 2,
+          "dyestuffs": 1
         },
         "outputs": {
           "luxury_silk_garments": 1
         },
-        "craftTime": 3
+        "craftMinutes": 240
       },
       {
         "inputs": {
-          "wine": 3,
-          "dyestuffs": 1
+          "wine": 2,
+          "spiced_wine": 1
         },
         "outputs": {
-          "spiced_wine": 3
+          "spiced_wine": 2
         },
-        "craftTime": 1
+        "craftMinutes": 120
+      },
+      {
+        "inputs": {
+          "paper": 1,
+          "merchant_contacts": 1
+        },
+        "outputs": {
+          "maps": 1
+        },
+        "craftMinutes": 60
       }
     ],
-    "storageCapacity": 2000,
+    "storageCapacity": 500,
     "stores": [
-      "paper",
-      "maps",
       "raw_silk",
-      "dyestuffs",
-      "spiced_wine",
-      "luxury_silk_garments",
-      "gold",
       "silk_fabric",
-      "prepared_silk",
+      "luxury_silk_garments",
+      "dyestuffs",
+      "wine",
+      "spiced_wine",
+      "gold",
       "jewelry",
-      "wine"
+      "maps",
+      "paper"
     ],
     "sells": [
-      "raw_silk",
-      "dyestuffs",
-      "spiced_wine",
       "luxury_silk_garments",
-      "gold",
       "silk_fabric",
-      "prepared_silk",
-      "jewelry"
+      "spiced_wine",
+      "jewelry",
+      "maps"
     ]
   },
   "soundDesign": {

@@ -4,7 +4,7 @@ import Airtable from 'airtable';
 // Configure Airtable
 const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
 const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
-const AIRTABLE_USERS_TABLE = process.env.AIRTABLE_USERS_TABLE || 'USERS';
+const AIRTABLE_USERS_TABLE = 'USERS';
 
 // Initialize Airtable
 const initAirtable = () => {

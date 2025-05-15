@@ -8,7 +8,7 @@ dotenv.config();
 // Get Airtable credentials
 const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
 const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
-const AIRTABLE_USERS_TABLE = process.env.AIRTABLE_USERS_TABLE || "USERS";
+const AIRTABLE_USERS_TABLE = "USERS";
 
 export async function GET() {
   try {
@@ -39,28 +39,15 @@ export async function GET() {
     const coatOfArms: Record<string, string> = {};
     
     records.forEach(record => {
-      const username = record.get('UserName');
+      const username = record.get('Username');
       const coatOfArmsImage = record.get('CoatOfArmsImage');
       
       if (username && coatOfArmsImage) {
         // Ensure the URL is properly formatted for production
         let imageUrl = coatOfArmsImage as string;
-        
-        // Always use the production URL for coat of arms images
-        if (!imageUrl.startsWith('http')) {
-          // If it doesn't have a specific path but just a username, construct the standard path
-          if (!imageUrl.includes('/')) {
-            imageUrl = `/coat-of-arms/${username}.png`;
-          }
           
-          // If it's a relative path, ensure it has a leading slash
-          if (!imageUrl.startsWith('/')) {
-            imageUrl = `/${imageUrl}`;
-          }
-          
-          // Add the production domain
-          imageUrl = `https://serenissima.ai${imageUrl}`;
-        }
+        // Add the production domain
+        imageUrl = `https://serenissima.ai${imageUrl}`;
         
         // Also add a local URL for fallback
         const localUrl = `/coat-of-arms/${username}.png`;

@@ -3,5 +3,6 @@
   "name": "Ship Components",
   "category": "processed_materials",
   "subcategory": "shipbuilding",
-  "description": "Prefabricated wooden parts ready for ship assembly."
+  "description": "Prefabricated wooden parts ready for ship assembly.",
+  "importPrice": 180
 }

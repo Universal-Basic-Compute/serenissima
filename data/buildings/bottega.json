@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Bottega represents a step up in commercial investment with a construction cost of 600,000 ducats and income of 11,000 ducats, providing a 1.8% return per cycle. The maintenance cost of 6,000 ducats (55% of income) reflects the more complex structure and workshop equipment. With an employment capacity of 3, it creates a significant jump in workforce requirements, representing the master craftsman and apprentices typical of Renaissance workshops. The construction time of 2 days (172800000ms) creates a meaningful progression from the Market Stall while remaining accessible to early-game players. This building serves as a bridge between simple retail and specialized production.",
   "shortDescription": "Specialized shop with workshop in back, common for artisans and merchants.",
   "fullDescription": "The backbone of Venetian retail, these versatile shops combine a front retail area with a rear workshop where goods are produced or customized. With large shutters that open to the street during business hours, botteghe create an inviting shopping environment while allowing craftspeople to work efficiently in the same location.",
-  "flavorText": "The hands create in the back, the voice sells in the front—the perfect marriage of craft and commerce.",
+  "flavorText": "The hands create in the back, the voice sells in the front\u2014the perfect marriage of craft and commerce.",
   "constructionCosts": {
     "ducats": 600000,
     "timber": 50,
@@ -20,35 +20,83 @@
   "maintenanceCost": 600,
   "constructionTime": 172800000,
   "productionInformation": {
-    "inputResources": {
-      "raw_silk": 4,
-      "dyestuffs": 2,
-      "fuel": 3,
-      "tools": 1
-    },
-    "outputResources": {
-      "luxury_silk_garments": 2,
-      "dyed_textiles": 3,
-      "venetian_lace": 1
-    },
-    "storageCapacity": 80,
+    "Arti": [
+      {
+        "inputs": {
+          "tools": 1,
+          "raw_silk": 2,
+          "dyestuffs": 1
+        },
+        "outputs": {
+          "silk_fabric": 1
+        },
+        "craftMinutes": 60
+      },
+      {
+        "inputs": {
+          "sand": 2,
+          "soda_ash": 1,
+          "fuel": 1
+        },
+        "outputs": {
+          "glass": 1
+        },
+        "craftMinutes": 45
+      },
+      {
+        "inputs": {
+          "glass": 1,
+          "tools": 1
+        },
+        "outputs": {
+          "fine_glassware": 1
+        },
+        "craftMinutes": 120
+      },
+      {
+        "inputs": {
+          "paper": 1,
+          "tools": 1
+        },
+        "outputs": {
+          "books": 1
+        },
+        "craftMinutes": 180
+      },
+      {
+        "inputs": {
+          "silk_fabric": 1,
+          "gold": 1
+        },
+        "outputs": {
+          "luxury_silk_garments": 1
+        },
+        "craftMinutes": 240
+      }
+    ],
+    "storageCapacity": 100,
     "stores": [
       "raw_silk",
-      "dyestuffs",
-      "fuel",
-      "tools",
-      "luxury_silk_garments",
-      "dyed_textiles",
-      "venetian_lace",
       "silk_fabric",
-      "prepared_silk"
+      "dyestuffs",
+      "tools",
+      "sand",
+      "soda_ash",
+      "fuel",
+      "glass",
+      "fine_glassware",
+      "gold",
+      "luxury_silk_garments",
+      "paper",
+      "books"
     ],
     "sells": [
-      "luxury_silk_garments",
-      "dyed_textiles",
-      "venetian_lace",
       "silk_fabric",
-      "prepared_silk"
+      "glass",
+      "fine_glassware",
+      "books",
+      "luxury_silk_garments",
+      "tools"
     ]
   },
   "soundDesign": {
