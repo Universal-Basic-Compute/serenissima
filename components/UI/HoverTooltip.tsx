@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { hoverStateService, HoverState } from '@/lib/services/HoverStateService';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 import { BuildingService } from '@/lib/services/BuildingService';
+import { assetService } from '@/lib/services/AssetService';
 
 interface HoverTooltipProps {
   // Any props you need
@@ -11,6 +12,7 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
   const [hoverState, setHoverState] = useState<HoverState>(hoverStateService.getState());
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [tooltipData, setTooltipData] = useState<any>(null);
+  const [buildingImagePath, setBuildingImagePath] = useState<string | null>(null);
   
   useEffect(() => {
     const handleHoverStateChanged = (data: any) => {
@@ -137,10 +139,11 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
   
   return (
     <div 
-      className="absolute z-50 bg-black/80 text-white px-3 py-2 rounded text-sm pointer-events-none"
+      className="absolute z-50 bg-black/80 text-white px-4 py-3 rounded text-sm pointer-events-none max-w-xs"
       style={{
         left: position.x + 15,
-        top: position.y + 15
+        top: position.y + 15,
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
       }}
     >
       {tooltipContent}
