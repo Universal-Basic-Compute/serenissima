@@ -2166,8 +2166,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         const owner = landOwners[polygon.id];
         if (!owner) return;
           
-        // Calculate size based on zoom level - INCREASED BY 60% (original + 40% + 20%)
-        const size = Math.min(71, Math.max(35, Math.floor(scale * 18.84))); // Increased by 60% total
+        // Use a fixed size for coat of arms instead of scaling with zoom
+        // This prevents recalculation on every zoom change
+        const size = 50; // Fixed size instead of scaling with zoom level
             
           // Check if we have a coat of arms image for this owner
           if (owner in coatOfArmsImages && coatOfArmsImages[owner]) {
