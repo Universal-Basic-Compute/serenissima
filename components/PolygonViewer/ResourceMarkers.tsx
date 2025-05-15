@@ -198,13 +198,14 @@ export default function ResourceMarkers({
                 {locationResources.map((resource, index) => (
                   <div 
                     key={resource.id}
-                    className="absolute bg-amber-800 border-2 border-amber-600 rounded-lg overflow-hidden flex flex-col items-center justify-center shadow-lg"
+                    className="absolute bg-amber-800 border border-amber-600 rounded-lg overflow-hidden flex flex-col items-center justify-center shadow-lg"
                     style={{ 
                       width: '96px', // Decreased from 192px to 96px (2x smaller)
                       height: '120px', // Decreased from 240px to 120px (2x smaller)
                       left: `${Math.cos(2 * Math.PI * index / locationResources.length) * 120}px`, // Decreased radius to accommodate smaller icons
                       top: `${Math.sin(2 * Math.PI * index / locationResources.length) * 120}px`, // Decreased radius to accommodate smaller icons
-                      transition: 'all 0.3s ease-out'
+                      transition: 'all 0.3s ease-out',
+                      borderWidth: '1px' // Make border slimmer
                     }}
                   >
                     <div className="relative w-full h-full group">
@@ -249,13 +250,13 @@ export default function ResourceMarkers({
                 ))}
                 
                 {/* Center indicator */}
-                <div className="w-8 h-8 bg-amber-700 border-2 border-amber-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                <div className="w-8 h-8 bg-amber-700 border border-amber-500 rounded-full flex items-center justify-center text-white text-sm font-bold" style={{ borderWidth: '1px' }}>
                   {locationResources.length}
                 </div>
               </div>
             ) : (
               // Collapsed view - show stack of resources
-              <div className="relative animate-pulse-subtle">
+              <div className="relative">
                 {/* Stacked resources indicator */}
                 <div className="relative">
                   {/* Show up to 3 stacked icons */}
@@ -269,7 +270,8 @@ export default function ResourceMarkers({
                         left: `${index * 9}px`, // Adjust offset for smaller icons
                         top: `${-index * 9}px`, // Adjust offset for smaller icons
                         zIndex: 40 - index,
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+                        borderWidth: '1px' // Make border slimmer
                       }}
                     >
                       <img 
