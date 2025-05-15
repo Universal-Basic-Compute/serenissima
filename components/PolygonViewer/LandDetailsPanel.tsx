@@ -120,6 +120,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   const [justCompletedTransaction, setJustCompletedTransaction] = useState<boolean>(false);
   const [landRendered, setLandRendered] = useState<boolean>(false);
   const [dynamicOwner, setDynamicOwner] = useState<string | null>(null);
+  const [ownerDetails, setOwnerDetails] = useState<any>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   
   // Find the selected polygon
@@ -136,6 +137,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
     if (selectedPolygonId) {
       // Reset owner when a new polygon is selected
       setDynamicOwner(null);
+      setOwnerDetails(null);
       
       // Fetch the owner from the API
       const fetchOwner = async () => {
@@ -152,6 +154,24 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
           
           if (data.success && data.owner) {
             setDynamicOwner(data.owner);
+            
+            // Now fetch the owner details
+            try {
+              const userResponse = await fetch(`${getBackendBaseUrl()}/api/users/${data.owner}`);
+              
+              if (userResponse.ok) {
+                const userData = await userResponse.json();
+                console.log('Fetched user details:', userData);
+                
+                if (userData.success && userData.user) {
+                  setOwnerDetails(userData.user);
+                }
+              } else {
+                console.error(`Failed to fetch user details: ${userResponse.status} ${userResponse.statusText}`);
+              }
+            } catch (userError) {
+              console.error('Error fetching user details:', userError);
+            }
           } else {
             console.log('No owner found for this land');
             setDynamicOwner(null);
@@ -714,8 +734,13 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
             {owner && owner !== "" ? (
               <div className="flex items-center justify-center">
                 <PlayerProfile 
-                  username={owner}
-                  walletAddress={owner}
+                  username={ownerDetails?.username || owner}
+                  firstName={ownerDetails?.firstName}
+                  lastName={ownerDetails?.lastName}
+                  coatOfArmsImage={ownerDetails?.coatOfArmsImage}
+                  familyMotto={ownerDetails?.familyMotto}
+                  walletAddress={ownerDetails?.walletAddress || owner}
+                  Ducats={ownerDetails?.ducats}
                   size="medium"
                   className="mx-auto"
                 />
