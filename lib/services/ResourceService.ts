@@ -19,6 +19,11 @@ export interface Resource {
   subcategory?: string;
   description?: string;
   rarity?: string;
+  buildingId?: string;
+  location?: {
+    lat: number;
+    lng: number;
+  };
   productionProperties?: {
     producerBuilding?: string;
     processorBuilding?: string;
@@ -264,7 +269,9 @@ export class ResourceService {
         description: resource.description,
         rarity: resource.rarity,
         icon: resource.icon || 'default.png',
-        amount: resource.count
+        amount: resource.count,
+        buildingId: resource.buildingId,
+        location: resource.location
       }));
       
       this.playerResources = (data.playerResourceCounts || []).map(resource => ({
@@ -275,7 +282,9 @@ export class ResourceService {
         description: resource.description,
         rarity: resource.rarity,
         icon: resource.icon || 'default.png',
-        amount: resource.count
+        amount: resource.count,
+        buildingId: resource.buildingId,
+        location: resource.location
       }));
       
       console.log(`%c[ResourceService] Received ${this.globalResources.length} global resources and ${this.playerResources.length} player resources`, 'color: #22c55e; font-weight: bold;');

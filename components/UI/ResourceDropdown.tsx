@@ -12,6 +12,11 @@ interface Resource {
   subcategory?: string;
   description?: string;
   rarity?: string;
+  buildingId?: string;
+  location?: {
+    lat: number;
+    lng: number;
+  };
   productionProperties?: {
     producerBuilding?: string;
     processorBuilding?: string;
@@ -347,6 +352,11 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({
                                   {resource.rarity.charAt(0).toUpperCase() + resource.rarity.slice(1)}
                                 </span>
                               )}
+                              {resource.location && (
+                                <span className="text-xs text-amber-400" title={`Located at ${resource.location.lat.toFixed(6)}, ${resource.location.lng.toFixed(6)}`}>
+                                  📍
+                                </span>
+                              )}
                             </div>
                             <div className="flex items-center space-x-2">
                               {/* Player count */}
@@ -385,6 +395,18 @@ const ResourceDropdown: React.FC<ResourceDropdownProps> = ({
           }}
         >
           <p>{tooltipState.content}</p>
+          {tooltipState.visible && resource => resource.location && (
+            <>
+              <p className="mt-1 text-amber-300">
+                Located at: {resource.location.lat.toFixed(6)}, {resource.location.lng.toFixed(6)}
+              </p>
+              {resource.buildingId && (
+                <p className="mt-1 text-amber-300">
+                  Building: {resource.buildingId}
+                </p>
+              )}
+            </>
+          )}
         </div>
       )}
       

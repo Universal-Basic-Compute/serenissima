@@ -8,6 +8,23 @@ const baseId = process.env.AIRTABLE_BASE_ID;
 // Initialize Airtable base
 const base = new Airtable({ apiKey }).base(baseId);
 
+// Function to parse BuildingId to extract location information
+function parseBuildingId(buildingId: string): { id: string, lat?: number, lng?: number } {
+  // Check if it follows the pattern building_LAT_LNG
+  const parts = buildingId.split('_');
+  if (parts.length >= 3) {
+    const lat = parseFloat(parts[1]);
+    const lng = parseFloat(parts[2]);
+    
+    if (!isNaN(lat) && !isNaN(lng)) {
+      return { id: buildingId, lat, lng };
+    }
+  }
+  
+  // Return just the ID if we couldn't parse coordinates
+  return { id: buildingId };
+}
+
 // Helper function to convert resource name to icon filename
 function getResourceIconFromName(resourceName: string): string {
   // Convert the resource name to lowercase, replace spaces with underscores
@@ -86,6 +103,10 @@ export async function GET(request: Request) {
       const resourceRarity = record.get('Rarity') || 'common';
       const resourceDescription = record.get('Description') || '';
       const resourceOwner = record.get('Owner') || '';
+      const buildingId = record.get('BuildingId') || '';
+      
+      // Parse building ID to extract location if available
+      const parsedBuildingId = buildingId ? parseBuildingId(buildingId) : { id: '' };
       
       // Generate icon filename from resource name
       const iconFromName = getResourceIconFromName(resourceName);
@@ -108,7 +129,9 @@ export async function GET(request: Request) {
           icon: iconFromName,
           count: resourceCount,
           rarity: resourceRarity,
-          description: resourceDescription
+          description: resourceDescription,
+          buildingId: parsedBuildingId.id,
+          location: parsedBuildingId.lat && parsedBuildingId.lng ? { lat: parsedBuildingId.lat, lng: parsedBuildingId.lng } : null
         });
       }
       
@@ -128,7 +151,9 @@ export async function GET(request: Request) {
             icon: iconFromName,
             count: resourceCount,
             rarity: resourceRarity,
-            description: resourceDescription
+            description: resourceDescription,
+            buildingId: parsedBuildingId.id,
+            location: parsedBuildingId.lat && parsedBuildingId.lng ? { lat: parsedBuildingId.lat, lng: parsedBuildingId.lng } : null
           });
         }
       }
