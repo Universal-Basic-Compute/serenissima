@@ -2295,14 +2295,14 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         const owner = landOwners[polygon.id];
         if (!owner) return;
           
-        // Use a fixed size for coat of arms instead of scaling with zoom
-        // This prevents recalculation on every zoom change
-        const size = 50; // Fixed size instead of scaling with zoom level
+        // Use a fixed size for coat of arms
+        const size = 50;
             
           // Check if we have a coat of arms image for this owner
           if (owner in coatOfArmsImages && coatOfArmsImages[owner]) {
             // Draw circular coat of arms with error handling
             try {
+              // Performance optimization: Draw the pre-resized image
               createCircularImage(ctx, coatOfArmsImages[owner], centerX, centerY, size);
             } catch (error) {
               console.error(`Error rendering coat of arms for ${owner}:`, error);
