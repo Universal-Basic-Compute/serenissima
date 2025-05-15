@@ -169,14 +169,43 @@ def find_path_between_buildings(from_building: Dict, to_building: Dict) -> Optio
         to_position = None
         
         try:
+            # First try to get position from the Position field
             from_position_str = from_building['fields'].get('Position')
             to_position_str = to_building['fields'].get('Position')
             
-            if from_position_str and to_position_str:
+            if from_position_str:
                 from_position = json.loads(from_position_str)
+            if to_position_str:
                 to_position = json.loads(to_position_str)
-        except (json.JSONDecodeError, TypeError):
-            log.warning(f"Invalid position data for buildings")
+            
+            # If Position is missing or invalid, try to extract from Point field
+            if not from_position:
+                from_point_str = from_building['fields'].get('Point')
+                if from_point_str and isinstance(from_point_str, str):
+                    parts = from_point_str.split('_')
+                    if len(parts) >= 3:
+                        try:
+                            lat = float(parts[1])
+                            lng = float(parts[2])
+                            from_position = {"lat": lat, "lng": lng}
+                            log.info(f"Extracted position from Point field for building {from_building['fields'].get('BuildingId', from_building['id'])}: {from_position}")
+                        except (ValueError, IndexError):
+                            log.warning(f"Failed to parse coordinates from Point field: {from_point_str}")
+            
+            if not to_position:
+                to_point_str = to_building['fields'].get('Point')
+                if to_point_str and isinstance(to_point_str, str):
+                    parts = to_point_str.split('_')
+                    if len(parts) >= 3:
+                        try:
+                            lat = float(parts[1])
+                            lng = float(parts[2])
+                            to_position = {"lat": lat, "lng": lng}
+                            log.info(f"Extracted position from Point field for building {to_building['fields'].get('BuildingId', to_building['id'])}: {to_position}")
+                        except (ValueError, IndexError):
+                            log.warning(f"Failed to parse coordinates from Point field: {to_point_str}")
+        except (json.JSONDecodeError, TypeError) as e:
+            log.warning(f"Invalid position data for buildings: {e}")
             return None
         
         if not from_position or not to_position:
@@ -547,11 +576,27 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
     # Get citizen's position
     citizen_position = None
     try:
+        # First try to get position from the Position field
         position_str = citizen['fields'].get('Position')
         if position_str:
             citizen_position = json.loads(position_str)
-    except (json.JSONDecodeError, TypeError):
-        log.warning(f"Invalid position data for citizen {citizen_id}: {citizen['fields'].get('Position')}")
+        
+        # If Position is missing or invalid, try to extract from Point field
+        if not citizen_position:
+            point_str = citizen['fields'].get('Point')
+            if point_str and isinstance(point_str, str):
+                # Parse the Point field which has format like "citizen_45.437908_12.337258"
+                parts = point_str.split('_')
+                if len(parts) >= 3:
+                    try:
+                        lat = float(parts[1])
+                        lng = float(parts[2])
+                        citizen_position = {"lat": lat, "lng": lng}
+                        log.info(f"Extracted position from Point field for citizen {citizen_id}: {citizen_position}")
+                    except (ValueError, IndexError):
+                        log.warning(f"Failed to parse coordinates from Point field: {point_str}")
+    except (json.JSONDecodeError, TypeError) as e:
+        log.warning(f"Invalid position data for citizen {citizen_id}: {citizen['fields'].get('Position')} - Error: {str(e)}")
     
     if not citizen_position:
         log.warning(f"Citizen {citizen_id} has no position data, creating idle activity")
@@ -571,11 +616,27 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
         # Get home position
         home_position = None
         try:
+            # First try to get position from the Position field
             position_str = home['fields'].get('Position')
             if position_str:
                 home_position = json.loads(position_str)
-        except (json.JSONDecodeError, TypeError):
-            log.warning(f"Invalid position data for home {home['fields'].get('BuildingId', home['id'])}: {home['fields'].get('Position')}")
+            
+            # If Position is missing or invalid, try to extract from Point field
+            if not home_position:
+                point_str = home['fields'].get('Point')
+                if point_str and isinstance(point_str, str):
+                    # Parse the Point field which has format like "building_45.437908_12.337258"
+                    parts = point_str.split('_')
+                    if len(parts) >= 3:
+                        try:
+                            lat = float(parts[1])
+                            lng = float(parts[2])
+                            home_position = {"lat": lat, "lng": lng}
+                            log.info(f"Extracted position from Point field for home {home['fields'].get('BuildingId', home['id'])}: {home_position}")
+                        except (ValueError, IndexError):
+                            log.warning(f"Failed to parse coordinates from Point field: {point_str}")
+        except (json.JSONDecodeError, TypeError) as e:
+            log.warning(f"Invalid position data for home {home['fields'].get('BuildingId', home['id'])}: {home['fields'].get('Position')} - Error: {str(e)}")
         
         if not home_position:
             log.warning(f"Home {home['fields'].get('BuildingId', home['id'])} has no position data, creating idle activity")
