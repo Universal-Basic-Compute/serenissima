@@ -22,7 +22,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     
     setIsLoadingActivities(true);
     try {
-      const response = await fetch(`/api/citizens/${citizenId}/activities?limit=10`);
+      const response = await fetch(`/api/activities?citizenId=${citizenId}&limit=10`);
       if (response.ok) {
         const data = await response.json();
         setActivities(data.activities || []);
