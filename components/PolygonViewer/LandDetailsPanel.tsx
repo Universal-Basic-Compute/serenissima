@@ -185,10 +185,14 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
       }
     });
     
+    // Apply the 0.7 factor to latitude range to correct the aspect ratio
+    const latRange = (maxLat - minLat) * 0.7;
+    const lngRange = maxLng - minLng;
+    
     // Add padding
     const padding = 20;
-    const scaleX = (canvas.width - padding * 2) / (maxLng - minLng);
-    const scaleY = (canvas.height - padding * 2) / (maxLat - minLat);
+    const scaleX = (canvas.width - padding * 2) / lngRange;
+    const scaleY = (canvas.height - padding * 2) / latRange; // Use adjusted latRange
     
     // Use the smaller scale to maintain aspect ratio
     const scale = Math.min(scaleX, scaleY);
@@ -200,8 +204,9 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
     // Draw the polygon
     ctx.beginPath();
     coords.forEach((coord, index) => {
+      // Apply the 0.7 factor to latitude when drawing
       const x = (coord.lng * scale) + centerX;
-      const y = centerY - (coord.lat * scale);
+      const y = centerY - (coord.lat * scale * 0.7); // Apply 0.7 factor here
         
       if (index === 0) {
         ctx.moveTo(x, y);
