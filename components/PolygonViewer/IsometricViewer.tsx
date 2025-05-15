@@ -66,19 +66,6 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   // Add refs to track current state without causing re-renders
   const isDraggingRef = useRef<boolean>(false);
 
-  // Helper function to check if a point is inside a polygon
-  function isPointInPolygon(x: number, y: number, polygon: {x: number, y: number}[]): boolean {
-    let inside = false;
-    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-      const xi = polygon[i].x, yi = polygon[i].y;
-      const xj = polygon[j].x, yj = polygon[j].y;
-      
-      const intersect = ((yi > y) !== (yj > y))
-          && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
-      if (intersect) inside = !inside;
-    }
-    return inside;
-  }
   
   // Helper function to convert screen coordinates to lat/lng
   const screenToLatLng = (
@@ -100,52 +87,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     return { lat, lng };
   };
   
-  // This function is already defined earlier in the file, so we're removing the duplicate
-  
-  
-  
-  // Helper function to find which polygon contains this building point
-  function findPolygonIdForPoint(point: {lat: number, lng: number}): string {
-    for (const polygon of polygons) {
-      if (polygon.buildingPoints && Array.isArray(polygon.buildingPoints)) {
-        // Check if this point is in the polygon's buildingPoints
-        const found = polygon.buildingPoints.some((bp: any) => {
-          const threshold = 0.0001; // Small threshold for floating point comparison
-          return Math.abs(bp.lat - point.lat) < threshold && 
-                 Math.abs(bp.lng - point.lng) < threshold;
-        });
-        
-        if (found) {
-          return polygon.id;
-        }
-      }
-    }
-    
-    // If we can't find the exact polygon, try to find which polygon contains this point
-    for (const polygon of polygons) {
-      if (polygon.coordinates && polygon.coordinates.length > 2) {
-        if (isPointInPolygonCoordinates(point, polygon.coordinates)) {
-          return polygon.id;
-        }
-      }
-    }
-    
-    return 'unknown';
-  }
 
-  // Helper function to check if a point is inside polygon coordinates
-  function isPointInPolygonCoordinates(point: {lat: number, lng: number}, coordinates: {lat: number, lng: number}[]): boolean {
-    let inside = false;
-    for (let i = 0, j = coordinates.length - 1; i < coordinates.length; j = i++) {
-      const xi = coordinates[i].lng, yi = coordinates[i].lat;
-      const xj = coordinates[j].lng, yj = coordinates[j].lat;
-      
-      const intersect = ((yi > point.lat) !== (yj > point.lat))
-          && (point.lng < (xj - xi) * (point.lat - yi) / (yj - yi) + xi);
-      if (intersect) inside = !inside;
-    }
-    return inside;
-  }
   
   // Function to load citizens data - declared early to avoid reference before declaration
   const loadCitizens = useCallback(async () => {
@@ -1612,8 +1554,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       // For other views, keep the default yellow color
     
       // Create local shorthand functions that use the current state values
-      const isoX = (x: number, y: number) => calculateIsoX(x, y, scale, offset, canvasRef.current?.width || 0);
-      const isoY = (x: number, y: number) => calculateIsoY(x, y, scale, offset, canvasRef.current?.height || 0);
+      const localIsoX = (x: number, y: number) => calculateIsoX(x, y, scale, offset, canvasRef.current?.width || 0);
+      const localIsoY = (x: number, y: number) => calculateIsoY(x, y, scale, offset, canvasRef.current?.height || 0);
     
       // Convert lat/lng to isometric coordinates
       const coords = polygon.coordinates.map((coord: {lat: number, lng: number}) => {
@@ -1623,8 +1565,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         const y = (coord.lat - 45.4371) * 20000; // Remove the 0.7 factor here since we're applying it in the projection
       
         return {
-          x: isoX(x, y),
-          y: isoY(x, y)
+          x: localIsoX(x, y),
+          y: localIsoY(x, y)
         };
       });
     
@@ -1640,8 +1582,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         const x = (centerLng - 12.3326) * 20000;
         const y = (centerLat - 45.4371) * 20000;
       
-        centerX = isoX(x, y);
-        centerY = isoY(x, y);
+        centerX = localIsoX(x, y);
+        centerY = localIsoY(x, y);
       } else {
         // Calculate centroid as fallback
         centerX = 0;
@@ -2189,16 +2131,16 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         ctx.fillText(instructionText, canvas.width / 2, 40);
         
         // Create local shorthand functions that use the current state values
-        const isoX = (x: number, y: number) => calculateIsoX(x, y, scale, offset, canvas.width);
-        const isoY = (x: number, y: number) => calculateIsoY(x, y, scale, offset, canvas.height);
+        const localIsoX = (x: number, y: number) => calculateIsoX(x, y, scale, offset, canvas.width);
+        const localIsoY = (x: number, y: number) => calculateIsoY(x, y, scale, offset, canvas.height);
         
         // Draw start point if set
         if (transportStartPoint) {
           const startX = (transportStartPoint.lng - 12.3326) * 20000;
           const startY = (transportStartPoint.lat - 45.4371) * 20000;
           
-          const startScreenX = isoX(startX, startY);
-          const startScreenY = isoY(startX, startY);
+          const startScreenX = localIsoX(startX, startY);
+          const startScreenY = localIsoY(startX, startY);
           
           // Draw a gold circle for start point with Venetian styling
           ctx.beginPath();
@@ -2230,8 +2172,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           const endX = (transportEndPoint.lng - 12.3326) * 20000;
           const endY = (transportEndPoint.lat - 45.4371) * 20000;
           
-          const endScreenX = isoX(endX, endY);
-          const endScreenY = isoY(endX, endY);
+          const endScreenX = localIsoX(endX, endY);
+          const endScreenY = localIsoY(endX, endY);
           
           // Draw a red circle for end point with Venetian styling
           ctx.beginPath();
@@ -2272,7 +2214,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           const firstX = (firstPoint.lng - 12.3326) * 20000;
           const firstY = (firstPoint.lat - 45.4371) * 20000;
 
-          ctx.moveTo(isoX(firstX, firstY), isoY(firstX, firstY));
+          ctx.moveTo(localIsoX(firstX, firstY), localIsoY(firstX, firstY));
 
           // Connect all points
           for (let i = 1; i < transportPath.length; i++) {
@@ -2280,7 +2222,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             const x = (point.lng - 12.3326) * 20000;
             const y = (point.lat - 45.4371) * 20000;
 
-            ctx.lineTo(isoX(x, y), isoY(x, y));
+            ctx.lineTo(localIsoX(x, y), localIsoY(x, y));
           }
 
           // Style the path shadow
@@ -2302,8 +2244,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             if (point1.transportMode === 'gondola') {
               // Draw a simple path for gondolas
               ctx.beginPath();
-              ctx.moveTo(isoX(x1, y1), isoY(x1, y1));
-              ctx.lineTo(isoX(x2, y2), isoY(x2, y2));
+              ctx.moveTo(localIsoX(x1, y1), localIsoY(x1, y1));
+              ctx.lineTo(localIsoX(x2, y2), localIsoY(x2, y2));
               
               // Venetian blue for water transport
               ctx.strokeStyle = 'rgba(0, 102, 153, 0.8)';
@@ -2312,8 +2254,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             } else {
               // For walking paths, draw straight lines with texture
               ctx.beginPath();
-              ctx.moveTo(isoX(x1, y1), isoY(x1, y1));
-              ctx.lineTo(isoX(x2, y2), isoY(x2, y2));
+              ctx.moveTo(localIsoX(x1, y1), localIsoY(x1, y1));
+              ctx.lineTo(localIsoX(x2, y2), localIsoY(x2, y2));
 
               // Terracotta for walking paths
               ctx.strokeStyle = 'rgba(204, 85, 0, 0.8)';
@@ -2323,8 +2265,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
               // Add a subtle texture for walking paths
               ctx.beginPath();
               ctx.setLineDash([2 * scale, 2 * scale]);
-              ctx.moveTo(isoX(x1, y1), isoY(x1, y1));
-              ctx.lineTo(isoX(x2, y2), isoY(x2, y2));
+              ctx.moveTo(localIsoX(x1, y1), localIsoY(x1, y1));
+              ctx.lineTo(localIsoX(x2, y2), localIsoY(x2, y2));
               ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
               ctx.lineWidth = 1 * scale;
               ctx.stroke();
@@ -2341,8 +2283,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             const x = (point.lng - 12.3326) * 20000;
             const y = (point.lat - 45.4371) * 20000;
 
-            const screenX = isoX(x, y);
-            const screenY = isoY(x, y);
+            const screenX = localIsoX(x, y);
+            const screenY = localIsoY(x, y);
 
             // Determine node size based on type
             let nodeSize = 2.5 * scale;
