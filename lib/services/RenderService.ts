@@ -526,10 +526,7 @@ export class RenderService {
       this.drawTransportPath(ctx, transportPath, scale, offset, canvas.width, canvas.height);
     }
     
-    // Draw citizen markers if in citizens view
-    if (activeView === 'citizens' && citizensLoaded) {
-      this.drawCitizenMarkers(ctx, citizensByBuilding, buildings, scale, offset, canvas.width, canvas.height, interactionState);
-    }
+    // Draw citizen markers if in citizens view - removed building-based rendering
     
     // Log performance metrics for debugging
     const endTime = performance.now();
