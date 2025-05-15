@@ -1032,8 +1032,16 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       setDragStart({ x: e.clientX, y: e.clientY });
     };
     
+    // Create a ref to track the current dragging state
+    const isDraggingRef = useRef(isDragging);
+    // Update the ref whenever isDragging changes
+    isDraggingRef.current = isDragging;
+    
     const handleMouseUp = () => {
-      setIsDragging(false);
+      // Only update state if we're actually dragging
+      if (isDraggingRef.current) {
+        setIsDragging(false);
+      }
     };
     
     canvas.addEventListener('mousedown', handleMouseDown);
