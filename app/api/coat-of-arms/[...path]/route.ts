@@ -13,6 +13,38 @@ export async function GET(
     // Get the path from the URL
     const filePath = resolvedParams.path.join('/');
     
+    // Check if this is an external URL request
+    if (filePath.startsWith('external/')) {
+      const externalUrl = decodeURIComponent(filePath.substring(9));
+      console.log(`Proxying request to external URL: ${externalUrl}`);
+      
+      try {
+        const response = await fetch(externalUrl, {
+          headers: {
+            'User-Agent': 'Serenissima-Proxy/1.0',
+          },
+        });
+        
+        if (!response.ok) {
+          throw new Error(`External resource returned ${response.status}`);
+        }
+        
+        const buffer = await response.arrayBuffer();
+        const contentType = response.headers.get('Content-Type') || 'image/png';
+        
+        return new NextResponse(buffer, {
+          status: 200,
+          headers: {
+            'Content-Type': contentType,
+            'Cache-Control': 'public, max-age=86400', // Cache for 24 hours
+          },
+        });
+      } catch (error) {
+        console.error('Error proxying external image:', error);
+        // Fall through to try local file
+      }
+    }
+    
     // Construct the full path to the file
     const fullPath = path.join(process.cwd(), 'public', 'coat-of-arms', filePath);
     
@@ -52,6 +84,21 @@ export async function GET(
     });
   } catch (error) {
     console.error('Error serving coat of arms image:', error);
-    return new NextResponse('Image not found', { status: 404 });
+    
+    // Try to serve the default image
+    try {
+      const defaultPath = path.join(process.cwd(), 'public', 'coat-of-arms', 'default.png');
+      const defaultBuffer = await readFile(defaultPath);
+      
+      return new NextResponse(defaultBuffer, {
+        status: 200,
+        headers: {
+          'Content-Type': 'image/png',
+          'Cache-Control': 'public, max-age=86400', // Cache for 24 hours
+        },
+      });
+    } catch (fallbackError) {
+      return new NextResponse('Image not found', { status: 404 });
+    }
   }
 }

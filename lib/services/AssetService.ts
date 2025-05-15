@@ -40,15 +40,15 @@ export class AssetService {
         if (url) {
           // Create an array of URLs to try in order
           const urlsToTry = [
-            // 1. Use the URL from the API directly
-            url as string,
+            // 1. Try with our proxy route first (avoids CORS issues)
+            `${window.location.origin}/coat-of-arms/${owner}.png`,
             
-            // 2. Try with serenissima.ai domain
-            `https://serenissima.ai/coat-of-arms/${owner}.png`,
+            // 2. Use the URL from the API if it's from our domain
+            url && url.startsWith(window.location.origin) ? url as string : null,
             
-            // 3. Try with current origin as fallback
-            `${window.location.origin}/coat-of-arms/${owner}.png`
-          ];
+            // 3. Try with serenissima.ai domain through our proxy
+            `/coat-of-arms/external/${encodeURIComponent(`https://serenissima.ai/coat-of-arms/${owner}.png`)}`
+          ].filter(Boolean); // Remove null entries
           
           // Create a promise that tries each URL in sequence
           const tryLoadImage = async (): Promise<HTMLImageElement> => {
