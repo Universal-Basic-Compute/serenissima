@@ -320,25 +320,35 @@ export class TransportService {
   /**
    * Load polygons for pathfinding
    */
-  private async loadPolygons(): Promise<void> {
+  private async loadPolygons(): Promise<boolean> {
     try {
+      console.log('Loading polygons for pathfinding...');
+      
       // In browser environment, fetch polygons from API
       const response = await fetch('/api/get-polygons');
-      if (response.ok) {
-        const data = await response.json();
-        if (data.polygons) {
-          this.polygons = data.polygons;
-          this.polygonsLoaded = true;
-          
-          // Build the graph and canal network
-          this.graph = this.buildGraph(this.polygons);
-          this.canalNetwork = this.buildCanalNetwork(this.polygons);
-          
-          console.log('Loaded polygons for pathfinding:', this.polygons.length);
-        }
+      if (!response.ok) {
+        console.error(`Failed to load polygons: HTTP ${response.status}`);
+        return false;
       }
+      
+      const data = await response.json();
+      if (!data.polygons || !Array.isArray(data.polygons) || data.polygons.length === 0) {
+        console.error('No valid polygon data received from API');
+        return false;
+      }
+      
+      this.polygons = data.polygons;
+      this.polygonsLoaded = true;
+      
+      // Build the graph and canal network
+      this.graph = this.buildGraph(this.polygons);
+      this.canalNetwork = this.buildCanalNetwork(this.polygons);
+      
+      console.log(`Successfully loaded ${this.polygons.length} polygons for pathfinding`);
+      return true;
     } catch (error) {
       console.error('Error loading polygons for pathfinding:', error);
+      return false;
     }
   }
 
@@ -1107,15 +1117,34 @@ export class TransportService {
     try {
       console.log('Starting water-only path calculation from', startPoint, 'to', endPoint);
       
-      // Ensure polygons are loaded
+      // Ensure polygons are loaded with retry logic
       if (!this.polygonsLoaded) {
-        await this.loadPolygons();
+        console.log('Polygons not loaded yet, loading now for water-only path...');
+        const loadSuccess = await this.loadPolygons();
+        
+        // If first attempt fails, retry once
+        if (!loadSuccess) {
+          console.log('First attempt to load polygons failed, retrying...');
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
+          const retrySuccess = await this.loadPolygons();
+          
+          if (!retrySuccess) {
+            console.error('Failed to load polygons after retry');
+            return {
+              success: false,
+              error: 'No polygon data available for water-only pathfinding',
+              details: 'Failed to load polygon data after multiple attempts'
+            };
+          }
+        }
       }
       
       if (this.polygons.length === 0) {
+        console.error('No polygons available for water-only pathfinding');
         return {
           success: false,
-          error: 'No polygon data available for pathfinding'
+          error: 'No polygon data available for water-only pathfinding',
+          details: 'Polygon array is empty'
         };
       }
       
@@ -1368,15 +1397,34 @@ export class TransportService {
   // Main function to find the path between two points
   public async findPath(startPoint: Point, endPoint: Point): Promise<any> {
     try {
-      // Ensure polygons are loaded
+      // Ensure polygons are loaded with retry logic
       if (!this.polygonsLoaded) {
-        await this.loadPolygons();
+        console.log('Polygons not loaded yet, loading now...');
+        const loadSuccess = await this.loadPolygons();
+        
+        // If first attempt fails, retry once
+        if (!loadSuccess) {
+          console.log('First attempt to load polygons failed, retrying...');
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
+          const retrySuccess = await this.loadPolygons();
+          
+          if (!retrySuccess) {
+            console.error('Failed to load polygons after retry');
+            return {
+              success: false,
+              error: 'No polygon data available for pathfinding',
+              details: 'Failed to load polygon data after multiple attempts'
+            };
+          }
+        }
       }
       
       if (this.polygons.length === 0) {
+        console.error('No polygons available for pathfinding');
         return {
           success: false,
-          error: 'No polygon data available for pathfinding'
+          error: 'No polygon data available for pathfinding',
+          details: 'Polygon array is empty'
         };
       }
       
