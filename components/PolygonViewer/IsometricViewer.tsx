@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
+import { throttle, debounce } from '@/lib/utils/performanceUtils';
 import ViewportCanvas from './ViewportCanvas';
 import LandDetailsPanel from './LandDetailsPanel';
 import BuildingDetailsPanel from './BuildingDetailsPanel';
@@ -11,6 +12,7 @@ import ViewportController from './ViewportController';
 import { buildingService } from '@/lib/services/BuildingService';
 import { transportService } from '@/lib/services/TransportService';
 import { citizenService } from '@/lib/services/CitizenService';
+import { incomeService } from '@/lib/services/IncomeService';
 import { buildingPointsService } from '@/lib/services/BuildingPointsService';
 
 interface IsometricViewerProps {
@@ -54,11 +56,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   
   // Transport state is now managed by TransportService
   const [transportMode, setTransportMode] = useState<boolean>(false);
-  const [transportStartPoint, setTransportStartPoint] = useState<{lat: number, lng: number} | null>(null);
-  const [transportEndPoint, setTransportEndPoint] = useState<{lat: number, lng: number} | null>(null);
-  const [transportPath, setTransportPath] = useState<any[]>([]);
-  const [calculatingPath, setCalculatingPath] = useState<boolean>(false);
-  const [waterOnlyMode, setWaterOnlyMode] = useState<boolean>(false);
+  const transportState = transportService.getState();
+  const [transportPath, setTransportPath] = useState<any[]>(transportState.path);
   const [mousePosition, setMousePosition] = useState<{x: number, y: number}>({x: 0, y: 0});
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [dragStart, setDragStart] = useState<{x: number, y: number}>({x: 0, y: 0});
@@ -254,6 +253,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       
       // Reset transport service state
       transportService.reset();
+      
+      // Set transport mode to true
+      setTransportMode(true);
     };
     
     const eventListener = () => handleShowTransportRoutes();
@@ -264,7 +266,26 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     };
   }, [activeView]);
   
-  // Transport path rendering is now handled directly in the drawing code
+  // Subscribe to transport service events
+  useEffect(() => {
+    const handleTransportCalculationCompleted = (data: any) => {
+      setTransportPath(data.path);
+    };
+    
+    const handleTransportReset = () => {
+      setTransportPath([]);
+      setTransportMode(false);
+    };
+    
+    // Subscribe to events
+    window.addEventListener('TRANSPORT_CALCULATION_COMPLETED', handleTransportCalculationCompleted as EventListener);
+    window.addEventListener('TRANSPORT_RESET', handleTransportReset as EventListener);
+    
+    return () => {
+      window.removeEventListener('TRANSPORT_CALCULATION_COMPLETED', handleTransportCalculationCompleted as EventListener);
+      window.removeEventListener('TRANSPORT_RESET', handleTransportReset as EventListener);
+    };
+  }, []);
   
   // Fetch income data
   const fetchIncomeData = useCallback(async () => {
@@ -613,9 +634,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   // Fetch income data when in land view
   useEffect(() => {
     if (activeView === 'land') {
-      fetchIncomeData();
+      incomeService.loadIncomeData();
     }
-  }, [activeView, fetchIncomeData]);
+  }, [activeView]);
 
   // Fetch land owners
   useEffect(() => {
@@ -1153,31 +1174,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     };
   }, [offset, scale]);
 
-  // Get color based on income using a gradient with softer, Renaissance-appropriate colors
-  // Income is normalized by building points count for better comparison
+  // Use the IncomeService for income color calculation
   const getIncomeColor = (income: number | undefined): string => {
-    if (income === undefined) return '#E8DCC0'; // Softer parchment color for no data
-    
-    // Normalize income to a 0-1 scale
-    const normalizedIncome = Math.min(Math.max((income - minIncome) / (maxIncome - minIncome), 0), 1);
-    
-    // Create a gradient from soft blue (low) to muted gold (medium) to terracotta red (high)
-    // These colors are more appropriate for Renaissance Venice
-    if (normalizedIncome <= 0.5) {
-      // Soft blue to muted gold (0-0.5)
-      const t = normalizedIncome * 2; // Scale 0-0.5 to 0-1
-      const r = Math.floor(102 + t * (204 - 102)); // 102 to 204
-      const g = Math.floor(153 + t * (178 - 153)); // 153 to 178
-      const b = Math.floor(204 - t * (204 - 102)); // 204 to 102
-      return `rgb(${r}, ${g}, ${b})`;
-    } else {
-      // Muted gold to terracotta red (0.5-1)
-      const t = (normalizedIncome - 0.5) * 2; // Scale 0.5-1 to 0-1
-      const r = Math.floor(204 + t * (165 - 204)); // 204 to 165
-      const g = Math.floor(178 - t * (178 - 74)); // 178 to 74
-      const b = Math.floor(102 - t * (102 - 42)); // 102 to 42
-      return `rgb(${r}, ${g}, ${b})`;
-    }
+    return incomeService.getIncomeColor(income);
   };
   
   // Add this useEffect for mouse interactions
@@ -1544,24 +1543,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         // Convert screen coordinates to lat/lng
         const point = screenToLatLng(mouseX, mouseY, scale, offset, canvas.width, canvas.height);
         
-        if (!transportStartPoint) {
-          // First click - set start point
-          setTransportStartPoint(point);
-          console.log('Transport start point set:', point);
-        } else if (!transportEndPoint) {
-          // Second click - set end point and calculate route
-          setTransportEndPoint(point);
-          console.log('Transport end point set:', point);
-          
-          // Calculate route
-          calculateTransportRoute(transportStartPoint, point);
-        } else {
-          // Third click - reset and start over
-          setTransportStartPoint(point);
-          setTransportEndPoint(null);
-          setTransportPath([]);
-          console.log('Transport route reset, new start point:', point);
-        }
+        // Let the transport service handle the point selection
+        transportService.handlePointSelected(point);
         
         return; // Skip other click handling when in transport mode
       }
@@ -1938,7 +1921,25 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     return R * c;
   };
   
-  // Transport route calculation is now handled by TransportService
+  // Subscribe to transport service events
+  useEffect(() => {
+    const handleTransportCalculationCompleted = (data: any) => {
+      setTransportPath(data.path);
+    };
+    
+    const handleTransportReset = () => {
+      setTransportPath([]);
+    };
+    
+    // Subscribe to events
+    window.addEventListener('TRANSPORT_CALCULATION_COMPLETED', handleTransportCalculationCompleted as EventListener);
+    window.addEventListener('TRANSPORT_RESET', handleTransportReset as EventListener);
+    
+    return () => {
+      window.removeEventListener('TRANSPORT_CALCULATION_COMPLETED', handleTransportCalculationCompleted as EventListener);
+      window.removeEventListener('TRANSPORT_RESET', handleTransportReset as EventListener);
+    };
+  }, []);
   
   // Function to find building position
   const findBuildingPosition = (buildingId: string): {x: number, y: number} | null => {
@@ -2648,9 +2649,10 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         ctx.fillText(instructionText, canvas.width / 2, 40);
         
         // Draw start point if set
-        if (transportStartPoint) {
-          const startX = (transportStartPoint.lng - 12.3326) * 20000;
-          const startY = (transportStartPoint.lat - 45.4371) * 20000;
+        const currentTransportState = transportService.getState();
+        if (currentTransportState.startPoint) {
+          const startX = (currentTransportState.startPoint.lng - 12.3326) * 20000;
+          const startY = (currentTransportState.startPoint.lat - 45.4371) * 20000;
           
           const startScreenX = isoX(startX, startY);
           const startScreenY = isoY(startX, startY);
@@ -2681,9 +2683,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         }
         
         // Draw end point if set
-        if (transportEndPoint) {
-          const endX = (transportEndPoint.lng - 12.3326) * 20000;
-          const endY = (transportEndPoint.lat - 45.4371) * 20000;
+        if (currentTransportState.endPoint) {
+          const endX = (currentTransportState.endPoint.lng - 12.3326) * 20000;
+          const endY = (currentTransportState.endPoint.lat - 45.4371) * 20000;
           
           const endScreenX = isoX(endX, endY);
           const endScreenY = isoY(endX, endY);
@@ -2829,7 +2831,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           // Gondola animations have been removed for simplicity
             
           // Add a water-only indicator if applicable
-          if (waterOnlyMode) {
+          if (transportService.getState().waterOnlyMode) {
             const labelX = canvas.width - 200;
             const labelY = canvas.height - 200;
             
@@ -3039,7 +3041,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           ctx.arc(mousePosition.x, mousePosition.y, 6 * scale, 0, Math.PI * 2);
           
           // Use Venetian colors - gold for start point, red for end point
-          const fillColor = transportStartPoint 
+          const transportState = transportService.getState();
+          const fillColor = transportState.startPoint 
             ? 'rgba(180, 30, 30, 0.6)'  // Red for end point
             : 'rgba(218, 165, 32, 0.6)'; // Gold for start point
           
@@ -3440,6 +3443,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     
     return () => {
       window.removeEventListener('resize', handleResize);
+      handleResize.cancel(); // Clean up the debounced function
     };
   }, []);
 
@@ -3776,7 +3780,11 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       {/* Exit Transport Mode button */}
       {activeView === 'transport' && transportService.getState().startPoint !== null && (
         <button
-          onClick={() => transportService.reset()}
+          onClick={() => {
+            transportService.reset();
+            // Dispatch event to notify components that transport mode has been exited
+            window.dispatchEvent(new CustomEvent('transportModeExited'));
+          }}
           className="absolute top-20 right-4 bg-red-600 text-white px-3 py-1 rounded text-sm"
         >
           Exit Transport Mode

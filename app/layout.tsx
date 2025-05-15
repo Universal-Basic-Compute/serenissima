@@ -61,7 +61,7 @@ export default function RootLayout({
                 let lastDispatchTime = 0;
                 let isDispatching = false; // Add a flag to prevent overlapping dispatches
                 
-                setInterval(function() {
+                const ensureBuildingsVisibleInterval = setInterval(function() {
                   // Only dispatch if the page has been loaded for more than 5 seconds
                   // And at least 30 seconds since last dispatch
                   // And not currently dispatching
@@ -80,6 +80,11 @@ export default function RootLayout({
                     }, 1000);
                   }
                 }, 30000); // Keep at 30 seconds
+                
+                // Clean up interval on page unload
+                window.addEventListener('beforeunload', function() {
+                  clearInterval(ensureBuildingsVisibleInterval);
+                });
                 
                 // Also dispatch the event when switching views, but with debounce
                 let viewChangeTimeout;

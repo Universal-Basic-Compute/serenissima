@@ -8,7 +8,9 @@ import { DataService } from '@/lib/services/DataService';
 import { BuildingService } from '@/lib/services/BuildingService';
 import { TransportService } from '@/lib/services/TransportService';
 import { CitizenService } from '@/lib/services/CitizenService';
+import { IncomeService } from '@/lib/services/IncomeService';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
+import { throttle } from '@/lib/utils/performanceUtils';
 
 interface ViewportCanvasProps {
   activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
