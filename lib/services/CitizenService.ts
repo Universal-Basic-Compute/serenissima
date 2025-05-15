@@ -91,36 +91,36 @@ export class CitizenService {
   /**
    * Get social class color for a citizen
    */
-  public getSocialClassColor(socialClass: string, markerType: 'home' | 'work', isHovered: boolean = false): string {
+  public getSocialClassColor(socialClass: string, markerType: 'home' | 'work'): string {
     const baseClass = socialClass?.toLowerCase() || '';
     
     // Base colors for different social classes
     if (baseClass.includes('nobili')) {
       // Gold/yellow for nobility
       return markerType === 'home' 
-        ? (isHovered ? 'rgba(255, 215, 0, 0.9)' : 'rgba(218, 165, 32, 0.8)')
-        : (isHovered ? 'rgba(255, 215, 0, 0.9)' : 'rgba(218, 165, 32, 0.8)');
+        ? 'rgba(218, 165, 32, 0.8)'
+        : 'rgba(218, 165, 32, 0.8)';
     } else if (baseClass.includes('cittadini')) {
       // Blue for citizens
       return markerType === 'home' 
-        ? (isHovered ? 'rgba(70, 130, 180, 0.9)' : 'rgba(70, 130, 180, 0.8)')
-        : (isHovered ? 'rgba(70, 130, 180, 0.9)' : 'rgba(70, 130, 180, 0.8)');
+        ? 'rgba(70, 130, 180, 0.8)'
+        : 'rgba(70, 130, 180, 0.8)';
     } else if (baseClass.includes('popolani')) {
       // Brown/amber for common people
       return markerType === 'home' 
-        ? (isHovered ? 'rgba(205, 133, 63, 0.9)' : 'rgba(205, 133, 63, 0.8)')
-        : (isHovered ? 'rgba(205, 133, 63, 0.9)' : 'rgba(205, 133, 63, 0.8)');
+        ? 'rgba(205, 133, 63, 0.8)'
+        : 'rgba(205, 133, 63, 0.8)';
     } else if (baseClass.includes('laborer') || baseClass.includes('facchini')) {
       // Gray for laborers
       return markerType === 'home' 
-        ? (isHovered ? 'rgba(128, 128, 128, 0.9)' : 'rgba(128, 128, 128, 0.8)')
-        : (isHovered ? 'rgba(128, 128, 128, 0.9)' : 'rgba(128, 128, 128, 0.8)');
+        ? 'rgba(128, 128, 128, 0.8)'
+        : 'rgba(128, 128, 128, 0.8)';
     }
     
     // Default colors if social class is unknown or not matched
     return markerType === 'home' 
-      ? (isHovered ? 'rgba(120, 170, 255, 0.9)' : 'rgba(100, 150, 255, 0.8)')
-      : (isHovered ? 'rgba(255, 170, 120, 0.9)' : 'rgba(255, 150, 100, 0.8)');
+      ? 'rgba(100, 150, 255, 0.8)'
+      : 'rgba(255, 150, 100, 0.8)';
   }
 }
 

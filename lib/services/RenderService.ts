@@ -15,7 +15,6 @@ export class RenderService {
     ctx: CanvasRenderingContext2D,
     coords: {x: number, y: number}[],
     fillColor: string,
-    isHovered: boolean = false,
     isSelected: boolean = false
   ): void {
     if (!coords || coords.length < 3) return;
@@ -27,19 +26,13 @@ export class RenderService {
     }
     ctx.closePath();
     
-    // Apply different styles for hover and selected states
+    // Apply different styles for selected state
     if (isSelected) {
       // Selected state: much brighter with a thicker border
       ctx.fillStyle = this.lightenColor(fillColor, 35); // Increased brightness for selection
       ctx.fill();
       ctx.strokeStyle = '#FF3300'; // Bright red-orange for selected
       ctx.lineWidth = 3.5;
-    } else if (isHovered) {
-      // Hover state: significantly brighter with a more vibrant border
-      ctx.fillStyle = this.lightenColor(fillColor, 25); // Increased brightness for hover
-      ctx.fill();
-      ctx.strokeStyle = '#FFCC00'; // Bright yellow for hover
-      ctx.lineWidth = 3; // Thicker border
     } else {
       // Normal state
       ctx.fillStyle = fillColor;
@@ -61,21 +54,15 @@ export class RenderService {
     size: number,
     color: string,
     typeIndicator: string,
-    isHovered: boolean = false,
     isSelected: boolean = false,
     shape: 'square' | 'circle' | 'triangle' = 'square'
   ): void {
-    // Apply different styles for hover and selected states
+    // Apply different styles for selected state
     if (isSelected) {
       // Selected state: much brighter with a thicker border
       ctx.fillStyle = this.lightenColor(color, 35); // Increased brightness for selection
       ctx.strokeStyle = '#FF3300'; // Bright red-orange for selected
       ctx.lineWidth = 3.5;
-    } else if (isHovered) {
-      // Make hover state MUCH more dramatic
-      ctx.fillStyle = '#FF00FF'; // Bright magenta for hover - very obvious
-      ctx.strokeStyle = '#FFFF00'; // Bright yellow border
-      ctx.lineWidth = 5; // Extra thick border
     } else {
       // Normal state
       ctx.fillStyle = color;
@@ -546,12 +533,11 @@ export class RenderService {
     interactionState: any
   ): void {
     polygonsToRender.forEach(({ polygon, coords, fillColor }) => {
-      // Determine if this polygon is hovered or selected
-      const isHovered = interactionState.hoveredPolygonId === polygon.id;
+      // Determine if this polygon is selected
       const isSelected = interactionState.selectedPolygonId === polygon.id;
       
       // Draw the polygon
-      this.drawPolygon(ctx, coords, fillColor, isHovered, isSelected);
+      this.drawPolygon(ctx, coords, fillColor, isSelected);
     });
   }
 
@@ -586,8 +572,7 @@ export class RenderService {
         const size = BuildingService.prototype.getBuildingSize(building.type);
         const color = BuildingService.prototype.getBuildingColor(building.type);
         
-        // Determine if this building is hovered or selected
-        const isHovered = interactionState.hoveredBuildingId === building.id;
+        // Determine if this building is selected
         const isSelected = interactionState.selectedBuildingId === building.id;
         
         // Determine the shape based on point_id or Point field
@@ -609,7 +594,7 @@ export class RenderService {
         const typeIndicator = building.type.charAt(0).toUpperCase();
           
         this.drawBuilding(
-          ctx, screen.x, screen.y, squareSize, color, typeIndicator, false, isSelected, buildingShape
+          ctx, screen.x, screen.y, squareSize, color, typeIndicator, isSelected, buildingShape
         );
       } catch (error) {
         console.error(`Error drawing building ${building?.id || 'unknown'}:`, error);
@@ -641,36 +626,17 @@ export class RenderService {
         world.x, world.y, scale, offset, canvasWidth, canvasHeight
       );
       
-      // Check if mouse is over this building point
+      // Draw a small circle for empty building points with subtle colors
       const pointSize = activeView === 'buildings' ? 2.2 * scale : 1.8 * scale; // Smaller in non-buildings views
-      const isHovered = 
-        interactionState.mousePosition.x >= screen.x - pointSize && 
-        interactionState.mousePosition.x <= screen.x + pointSize && 
-        interactionState.mousePosition.y >= screen.y - pointSize && 
-        interactionState.mousePosition.y <= screen.y + pointSize;
-      
-      // Draw a small circle for empty building points with even more subtle colors
       ctx.beginPath();
       ctx.arc(screen.x, screen.y, pointSize, 0, Math.PI * 2);
   
-      // Apply different opacity and color based on hover state and active view
-      // Use an even more muted, earthy color that better blends with the map
+      // Use a muted, earthy color that blends with the map
       // Make points more visible in buildings view, more subtle in other views
       const baseOpacity = activeView === 'buildings' ? 0.15 : 0.08;
-      const hoverOpacity = activeView === 'buildings' ? 0.3 : 0.2;
       
-      ctx.fillStyle = isHovered 
-        ? `rgba(160, 140, 120, ${hoverOpacity})` // Hovered state
-        : `rgba(160, 140, 120, ${baseOpacity})`; // Normal state
-      
+      ctx.fillStyle = `rgba(160, 140, 120, ${baseOpacity})`;
       ctx.fill();
-      
-      // Add a subtle border when hovered, but only in buildings view
-      if (isHovered && activeView === 'buildings') {
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; // Less opaque white
-        ctx.lineWidth = 0.8; // Thinner line
-        ctx.stroke();
-      }
     });
   }
 
@@ -703,30 +669,20 @@ export class RenderService {
             world.x, world.y, scale, offset, canvasWidth, canvasHeight
           );
           
-          // Check if this point is hovered
-          const isHovered = interactionState.hoveredCanalPoint && 
-            Math.abs(interactionState.hoveredCanalPoint.lat - point.edge.lat) < 0.0001 && 
-            Math.abs(interactionState.hoveredCanalPoint.lng - point.edge.lng) < 0.0001;
-          
           // Draw a small, semi-transparent circle for dock points
           ctx.beginPath();
           ctx.arc(screen.x, screen.y, 2 * scale, 0, Math.PI * 2);
           
-          // Use a subtle blue color with low opacity, brighter when hovered
+          // Use a subtle blue color with low opacity
           // Make points more visible in buildings view, more subtle in other views
           const baseOpacity = activeView === 'buildings' ? 0.3 : 0.15;
-          const hoverOpacity = activeView === 'buildings' ? 0.7 : 0.4;
           
-          ctx.fillStyle = isHovered 
-            ? `rgba(0, 120, 215, ${hoverOpacity})` // Brighter and more opaque when hovered
-            : `rgba(0, 120, 215, ${baseOpacity})`;
+          ctx.fillStyle = `rgba(0, 120, 215, ${baseOpacity})`;
           ctx.fill();
           
-          // Add a border, more visible when hovered
-          ctx.strokeStyle = isHovered
-            ? 'rgba(255, 255, 255, 0.8)' // White border when hovered
-            : 'rgba(0, 120, 215, 0.4)';
-          ctx.lineWidth = isHovered ? 1.5 : 0.5;
+          // Add a border
+          ctx.strokeStyle = 'rgba(0, 120, 215, 0.4)';
+          ctx.lineWidth = 0.5;
           ctx.stroke();
         });
       }
@@ -744,22 +700,14 @@ export class RenderService {
             world.x, world.y, scale, offset, canvasWidth, canvasHeight
           );
           
-          // Check if this point is hovered
-          const isHovered = interactionState.hoveredBridgePoint && 
-            Math.abs(interactionState.hoveredBridgePoint.lat - point.edge.lat) < 0.0001 && 
-            Math.abs(interactionState.hoveredBridgePoint.lng - point.edge.lng) < 0.0001;
-          
           // Draw a small, semi-transparent square for bridge points
           const pointSize = 2 * scale;
           
-          // Use a subtle orange/brown color with low opacity, brighter when hovered
+          // Use a subtle orange/brown color with low opacity
           // Make points more visible in buildings view, more subtle in other views
           const baseOpacity = activeView === 'buildings' ? 0.3 : 0.15;
-          const hoverOpacity = activeView === 'buildings' ? 0.7 : 0.4;
           
-          ctx.fillStyle = isHovered
-            ? `rgba(180, 120, 60, ${hoverOpacity})` // Brighter and more opaque when hovered
-            : `rgba(180, 120, 60, ${baseOpacity})`;
+          ctx.fillStyle = `rgba(180, 120, 60, ${baseOpacity})`;
           ctx.beginPath();
           ctx.rect(
             screen.x - pointSize/2, 
@@ -769,11 +717,9 @@ export class RenderService {
           );
           ctx.fill();
           
-          // Add a border, more visible when hovered
-          ctx.strokeStyle = isHovered
-            ? 'rgba(255, 255, 255, 0.8)' // White border when hovered
-            : 'rgba(180, 120, 60, 0.4)';
-          ctx.lineWidth = isHovered ? 1.5 : 0.5;
+          // Add a border
+          ctx.strokeStyle = 'rgba(180, 120, 60, 0.4)';
+          ctx.lineWidth = 0.5;
           ctx.stroke();
         });
       }

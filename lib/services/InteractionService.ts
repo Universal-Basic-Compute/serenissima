@@ -11,14 +11,8 @@ import { throttle } from '../utils/performanceUtils';
 export interface InteractionState {
   isDragging: boolean;
   dragStart: { x: number, y: number };
-  hoveredPolygonId: string | null;
   selectedPolygonId: string | null;
-  hoveredBuildingId: string | null;
   selectedBuildingId: string | null;
-  hoveredCanalPoint: { lat: number, lng: number } | null;
-  hoveredBridgePoint: { lat: number, lng: number } | null;
-  hoveredCitizenBuilding: string | null;
-  hoveredCitizenType: 'home' | 'work' | null;
   mousePosition: { x: number, y: number };
 }
 
@@ -26,24 +20,12 @@ export class InteractionService {
   private state: InteractionState = {
     isDragging: false,
     dragStart: { x: 0, y: 0 },
-    hoveredPolygonId: null,
     selectedPolygonId: null,
-    hoveredBuildingId: null,
     selectedBuildingId: null,
-    hoveredCanalPoint: null,
-    hoveredBridgePoint: null,
-    hoveredCitizenBuilding: null,
-    hoveredCitizenType: null,
     mousePosition: { x: 0, y: 0 }
   };
   
   // Refs to track current state without causing re-renders
-  private hoveredPolygonIdRef: string | null = null;
-  private hoveredBuildingIdRef: string | null = null;
-  private hoveredCanalPointRef: { lat: number, lng: number } | null = null;
-  private hoveredBridgePointRef: { lat: number, lng: number } | null = null;
-  private hoveredCitizenBuildingRef: string | null = null;
-  private hoveredCitizenTypeRef: 'home' | 'work' | null = null;
   private isDraggingRef: boolean = false;
   
   // Add these private properties to store data references
@@ -272,7 +254,7 @@ export class InteractionService {
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
       
-      // Always update mouse position regardless of other hover states
+      // Always update mouse position
       setters.setMousePosition({ x: mouseX, y: mouseY });
       this.state.mousePosition = { x: mouseX, y: mouseY };
       
@@ -281,81 +263,11 @@ export class InteractionService {
         console.log('Mouse position in transport mode:', { x: mouseX, y: mouseY });
       }
       
-      // Skip hover detection while dragging
+      // Set cursor based on dragging state
       if (this.isDraggingRef) {
         canvas.style.cursor = 'grabbing';
-        return;
-      }
-      
-      // Set default cursor
-      canvas.style.cursor = this.isDraggingRef ? 'grabbing' : 'grab';
-      
-      // Check if mouse is over any polygon or building for cursor change only
-      let isOverInteractiveElement = false;
-      
-      // Check polygons in land view
-      if (activeView === 'land') {
-        for (const { polygon, coords } of data.polygonsToRender) {
-          if (RenderService.prototype.isPointInPolygon(mouseX, mouseY, coords)) {
-            canvas.style.cursor = 'pointer';
-            isOverInteractiveElement = true;
-            break;
-          }
-        }
-      }
-      
-      // Check buildings in buildings view
-      if (activeView === 'buildings' && !isOverInteractiveElement) {
-        for (const building of data.buildings) {
-          if (!building.position) continue;
-          
-          // Get building position
-          let position;
-          try {
-            position = typeof building.position === 'string' 
-              ? JSON.parse(building.position) 
-              : building.position;
-          } catch (e) {
-            continue;
-          }
-          
-          // Convert lat/lng to isometric coordinates
-          let x, y;
-          if ('lat' in position && 'lng' in position) {
-            x = (position.lng - 12.3326) * 20000;
-            y = (position.lat - 45.4371) * 20000;
-          } else if ('x' in position && 'z' in position) {
-            x = position.x;
-            y = position.z;
-          } else {
-            continue;
-          }
-          
-          const world = { x, y };
-          const screen = CoordinateService.worldToScreen(
-            world.x, world.y, scale, offset, canvas.width, canvas.height
-          );
-          const isoPos = {
-            x: screen.x,
-            y: screen.y
-          };
-          
-          // Get building size
-          const size = this.getBuildingSize(building.type);
-          const squareSize = Math.max(size.width, size.depth) * scale * 0.6;
-          
-          // Check if mouse is over this building
-          if (
-            mouseX >= isoPos.x - squareSize/2 &&
-            mouseX <= isoPos.x + squareSize/2 &&
-            mouseY >= isoPos.y - squareSize/2 &&
-            mouseY <= isoPos.y + squareSize/2
-          ) {
-            canvas.style.cursor = 'pointer';
-            isOverInteractiveElement = true;
-            break;
-          }
-        }
+      } else {
+        canvas.style.cursor = 'grab';
       }
     }, 50);
     
