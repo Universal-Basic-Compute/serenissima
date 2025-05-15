@@ -326,46 +326,59 @@ export default function ViewportCanvas({
     
     // Draw buildings
     buildings.forEach(building => {
-      if (!building.position) return;
+      try {
+        if (!building || !building.id || !building.position) return;
         
-      // Get building position using BuildingService
-      const worldPos = BuildingService.prototype.getBuildingPosition(building);
-      if (!worldPos) return;
-        
-      // Convert world to screen coordinates
-      const screen = CoordinateService.worldToScreen(
-        worldPos.x, worldPos.y, scale, offset, canvas.width, canvas.height
-      );
-        
-      // Get building size and color using BuildingService
-      const size = BuildingService.prototype.getBuildingSize(building.type);
-      const color = BuildingService.prototype.getBuildingColor(building.type);
-        
-      // Determine if this building is hovered or selected
-      const isHovered = interactionState.hoveredBuildingId === building.id;
-      const isSelected = interactionState.selectedBuildingId === building.id;
-        
-      // Determine the shape based on point_id or Point field
-      const pointId = building.point_id || building.Point;
-      let buildingShape: 'square' | 'circle' | 'triangle' = 'square'; // Default shape
-        
-      if (pointId) {
-        if (typeof pointId === 'string') {
-          if (pointId.startsWith('canal-') || pointId.includes('canal_')) {
-            buildingShape = 'circle';
-          } else if (pointId.startsWith('bridge-') || pointId.includes('bridge_')) {
-            buildingShape = 'triangle';
-          }
+        // Get building position using BuildingService
+        const worldPos = BuildingService.prototype.getBuildingPosition(building);
+        if (!worldPos) {
+          console.warn(`Could not get position for building: ${building.id || 'unknown'}`);
+          return; // Skip this building if position can't be determined
         }
+        
+        // Convert world to screen coordinates
+        const screen = CoordinateService.worldToScreen(
+          worldPos.x, worldPos.y, scale, offset, canvas.width, canvas.height
+        );
+        
+        // Get building size and color using BuildingService
+        const size = BuildingService.prototype.getBuildingSize(building.type);
+        const color = BuildingService.prototype.getBuildingColor(building.type);
+        
+        // Determine if this building is hovered or selected
+        const isHovered = interactionState.hoveredBuildingId === building.id;
+        const isSelected = interactionState.selectedBuildingId === building.id;
+      } catch (error) {
+        console.error(`Error rendering building ${building?.id || 'unknown'}:`, error);
+        // Skip this building and continue with the next one
       }
         
-      // Draw the building
-      const squareSize = Math.max(size.width, size.depth) * scale * 0.6;
-      const typeIndicator = building.type.charAt(0).toUpperCase();
-        
-      RenderService.prototype.drawBuilding(
-        ctx, screen.x, screen.y, squareSize, color, typeIndicator, isHovered, isSelected, buildingShape
-      );
+      try {
+        // Determine the shape based on point_id or Point field
+        const pointId = building.point_id || building.Point;
+        let buildingShape: 'square' | 'circle' | 'triangle' = 'square'; // Default shape
+          
+        if (pointId) {
+          if (typeof pointId === 'string') {
+            if (pointId.startsWith('canal-') || pointId.includes('canal_')) {
+              buildingShape = 'circle';
+            } else if (pointId.startsWith('bridge-') || pointId.includes('bridge_')) {
+              buildingShape = 'triangle';
+            }
+          }
+        }
+          
+        // Draw the building
+        const squareSize = Math.max(size.width, size.depth) * scale * 0.6;
+        const typeIndicator = building.type.charAt(0).toUpperCase();
+          
+        RenderService.prototype.drawBuilding(
+          ctx, screen.x, screen.y, squareSize, color, typeIndicator, isHovered, isSelected, buildingShape
+        );
+      } catch (error) {
+        console.error(`Error drawing building ${building?.id || 'unknown'}:`, error);
+        // Skip this building and continue with the next one
+      }
     });
     
     // Draw empty building points

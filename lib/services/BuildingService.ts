@@ -67,6 +67,11 @@ export class BuildingService {
       return this.buildingPositionsCache[building.id];
     }
     
+    // Log a warning if the building ID is not in the cache
+    if (this.initialPositionCalculated) {
+      console.warn(`Building ID ${building.id} not found in position cache. Calculating position on-demand.`);
+    }
+    
     // Calculate position if not in cache
     let position;
     try {
