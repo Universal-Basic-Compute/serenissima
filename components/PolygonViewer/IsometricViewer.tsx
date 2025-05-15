@@ -45,17 +45,11 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [ownerCoatOfArmsMap, setOwnerCoatOfArmsMap] = useState<Record<string, string>>({});
   const [coatOfArmsImages, setCoatOfArmsImages] = useState<Record<string, HTMLImageElement>>({});
   const [loadingCoatOfArms, setLoadingCoatOfArms] = useState<boolean>(false);
-  const [hoveredPolygonId, setHoveredPolygonId] = useState<string | null>(null);
   const [selectedPolygonId, setSelectedPolygonId] = useState<string | null>(null);
   const [showLandDetailsPanel, setShowLandDetailsPanel] = useState<boolean>(false);
-  const [hoveredBuildingId, setHoveredBuildingId] = useState<string | null>(null);
   const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(null);
   const [showBuildingDetailsPanel, setShowBuildingDetailsPanel] = useState<boolean>(false);
   const [mousePosition, setMousePosition] = useState<{x: number, y: number}>({ x: 0, y: 0 });
-  const [hoveredBuildingName, setHoveredBuildingName] = useState<string | null>(null);
-  const [hoveredBuildingPosition, setHoveredBuildingPosition] = useState<{x: number, y: number} | null>(null);
-  const [hoveredBuildingImagePath, setHoveredBuildingImagePath] = useState<string | null>(null);
-  const [isLoadingBuildingImage, setIsLoadingBuildingImage] = useState<boolean>(false);
   const [buildingPositionsCache, setBuildingPositionsCache] = useState<Record<string, {x: number, y: number}>>({});
   const [initialPositionCalculated, setInitialPositionCalculated] = useState<boolean>(false);
   const [polygonsToRender, setPolygonsToRender] = useState<{
@@ -71,73 +65,6 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   
   // Add refs to track current state without causing re-renders
   const isDraggingRef = useRef<boolean>(false);
-  
-  useEffect(() => {
-    // Only fetch the image if we have a hovered building with a name but no image path yet
-    // Use a ref to track if we're already fetching to prevent multiple fetches
-    // Also check if the building ID or name has actually changed
-    if (hoveredBuildingId && 
-        hoveredBuildingName && 
-        !hoveredBuildingImagePath && 
-        !isLoadingBuildingImage && 
-        !buildingImageFetchingRef.current &&
-        (hoveredBuildingId !== prevHoveredBuildingIdRef.current || 
-         hoveredBuildingName !== prevHoveredBuildingNameRef.current)) {
-      
-      // Update refs to track current values
-      prevHoveredBuildingIdRef.current = hoveredBuildingId;
-      prevHoveredBuildingNameRef.current = hoveredBuildingName;
-      
-      // Set the ref immediately to prevent concurrent fetches
-      buildingImageFetchingRef.current = true;
-      
-      // Find the building data
-      const building = buildings.find(b => b.id === hoveredBuildingId);
-      if (building) {
-        // Set loading state
-        setIsLoadingBuildingImage(true);
-        
-        // Use a simple approach to get the image path
-        const imagePath = `/images/buildings/${building.type}.jpg`;
-        
-        // Check if the image exists
-        fetch(imagePath, { method: 'HEAD' })
-          .then(response => {
-            // Only update state if we're still hovering over the same building
-            if (response.ok) {
-              setHoveredBuildingImagePath(imagePath);
-            } else {
-              // Use default image if not found
-              setHoveredBuildingImagePath('/images/buildings/market_stall.jpg');
-            }
-          })
-          .catch(() => {
-            // Use default image on error
-            setHoveredBuildingImagePath('/images/buildings/market_stall.jpg');
-          })
-          .finally(() => {
-            setIsLoadingBuildingImage(false);
-            buildingImageFetchingRef.current = false;
-          });
-      } else {
-        // Reset the ref if building not found
-        buildingImageFetchingRef.current = false;
-      }
-    }
-  }, [hoveredBuildingId, hoveredBuildingName, hoveredBuildingImagePath, isLoadingBuildingImage, buildings]);
-  
-  // Minimal debugging effect that won't cause infinite updates
-  useEffect(() => {
-    // Use a ref to track previous value without causing re-renders
-    const prevHoveredBuildingId = prevStateRef.current.hoveredBuildingId;
-    
-    // Only log if the value actually changed
-    if (process.env.NODE_ENV === 'development' && hoveredBuildingId !== prevHoveredBuildingId) {
-      console.log(`Building hover state changed from ${prevHoveredBuildingId} to ${hoveredBuildingId}`);
-      // Update the ref
-      prevStateRef.current.hoveredBuildingId = hoveredBuildingId;
-    }
-  }, [hoveredBuildingId]); // Only depend on hoveredBuildingId
 
   // Helper function to check if a point is inside a polygon
   function isPointInPolygon(x: number, y: number, polygon: {x: number, y: number}[]): boolean {
@@ -1668,9 +1595,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     
     // Remove debug logging for hover state
     
-    // Reset hover and selection state when switching away from land view
+    // Reset selection state when switching away from land view
     if (activeView !== 'land') {
-      if (hoveredPolygonId) setHoveredPolygonId(null);
       if (selectedPolygonId) setSelectedPolygonId(null);
       if (showLandDetailsPanel) setShowLandDetailsPanel(false);
     }
@@ -2963,7 +2889,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       ctx.fillText('Work', legendX + 40, legendY + 40);
     }
     
-  }, [loading, polygons, landOwners, users, activeView, buildings, scale, offset, incomeData, minIncome, maxIncome, hoveredPolygonId, selectedPolygonId, hoveredBuildingId, selectedBuildingId, emptyBuildingPoints, mousePosition, citizensLoaded, citizensByBuilding, hoveredCitizenBuilding, hoveredCitizenType, incomeDataLoaded, polygonsToRender]);
+  }, [loading, polygons, landOwners, users, activeView, buildings, scale, offset, incomeData, minIncome, maxIncome, selectedPolygonId, selectedBuildingId, emptyBuildingPoints, mousePosition, citizensLoaded, citizensByBuilding, incomeDataLoaded, polygonsToRender]);
   
 
   // Handle window resize

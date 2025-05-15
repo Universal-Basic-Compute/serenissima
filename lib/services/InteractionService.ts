@@ -472,11 +472,7 @@ export class InteractionService {
             setters.setSelectedBuildingId(building.id);
             setters.setShowBuildingDetailsPanel(true);
         
-            // Clear hover state when clicking on a building
-            this.hoveredBuildingIdRef = null;
-            this.state.hoveredBuildingId = null;
-            setters.setHoveredBuildingId(null);
-            uiStateService.setBuildingHover(null, null, null);
+            // No hover state to clear
         
             // Dispatch an event for other components to respond to
             window.dispatchEvent(new CustomEvent('showBuildingDetailsPanel', {

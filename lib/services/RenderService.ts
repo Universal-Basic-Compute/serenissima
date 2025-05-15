@@ -609,7 +609,7 @@ export class RenderService {
         const typeIndicator = building.type.charAt(0).toUpperCase();
           
         this.drawBuilding(
-          ctx, screen.x, screen.y, squareSize, color, typeIndicator, isHovered, isSelected, buildingShape
+          ctx, screen.x, screen.y, squareSize, color, typeIndicator, false, isSelected, buildingShape
         );
       } catch (error) {
         console.error(`Error drawing building ${building?.id || 'unknown'}:`, error);
