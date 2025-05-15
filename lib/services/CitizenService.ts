@@ -104,36 +104,26 @@ export class CitizenService {
   /**
    * Get social class color for a citizen
    */
-  public getSocialClassColor(socialClass: string, markerType: 'home' | 'work'): string {
+  public getSocialClassColor(socialClass: string): string {
     const baseClass = socialClass?.toLowerCase() || '';
     
     // Base colors for different social classes
     if (baseClass.includes('nobili')) {
       // Gold/yellow for nobility
-      return markerType === 'home' 
-        ? 'rgba(218, 165, 32, 0.8)'
-        : 'rgba(218, 165, 32, 0.8)';
+      return 'rgba(218, 165, 32, 0.8)';
     } else if (baseClass.includes('cittadini')) {
       // Blue for citizens
-      return markerType === 'home' 
-        ? 'rgba(70, 130, 180, 0.8)'
-        : 'rgba(70, 130, 180, 0.8)';
+      return 'rgba(70, 130, 180, 0.8)';
     } else if (baseClass.includes('popolani')) {
       // Brown/amber for common people
-      return markerType === 'home' 
-        ? 'rgba(205, 133, 63, 0.8)'
-        : 'rgba(205, 133, 63, 0.8)';
+      return 'rgba(205, 133, 63, 0.8)';
     } else if (baseClass.includes('laborer') || baseClass.includes('facchini')) {
       // Gray for laborers
-      return markerType === 'home' 
-        ? 'rgba(128, 128, 128, 0.8)'
-        : 'rgba(128, 128, 128, 0.8)';
+      return 'rgba(128, 128, 128, 0.8)';
     }
     
-    // Default colors if social class is unknown or not matched
-    return markerType === 'home' 
-      ? 'rgba(100, 150, 255, 0.8)'
-      : 'rgba(255, 150, 100, 0.8)';
+    // Default color if social class is unknown or not matched
+    return 'rgba(100, 150, 255, 0.8)';
   }
 }
 

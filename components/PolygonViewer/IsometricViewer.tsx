@@ -1370,8 +1370,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     ctx: CanvasRenderingContext2D, 
     x: number, 
     y: number, 
-    citizen: any, 
-    markerType: 'home' | 'work',
+    citizen: any,
     size: number = 20
   ) => {
     // Ensure we have the required properties for display
@@ -1384,8 +1383,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       citizenId: citizen.CitizenId || citizen.id,
       name: `${firstName} ${lastName}`,
       imageUrl: citizen.ImageUrl || citizen.profileImage,
-      socialClass: socialClass,
-      markerType
+      socialClass: socialClass
     });
 
     // Determine color based on social class
@@ -1395,30 +1393,20 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       // Base colors for different social classes
       if (baseClass.includes('nobili')) {
         // Gold/yellow for nobility
-        return markerType === 'home' 
-          ? 'rgba(218, 165, 32, 0.8)'
-          : 'rgba(218, 165, 32, 0.8)';
+        return 'rgba(218, 165, 32, 0.8)';
       } else if (baseClass.includes('cittadini')) {
         // Blue for citizens
-        return markerType === 'home' 
-          ? 'rgba(70, 130, 180, 0.8)'
-          : 'rgba(70, 130, 180, 0.8)';
+        return 'rgba(70, 130, 180, 0.8)';
       } else if (baseClass.includes('popolani')) {
         // Brown/amber for common people
-        return markerType === 'home' 
-          ? 'rgba(205, 133, 63, 0.8)'
-          : 'rgba(205, 133, 63, 0.8)';
+        return 'rgba(205, 133, 63, 0.8)';
       } else if (baseClass.includes('laborer') || baseClass.includes('facchini')) {
         // Gray for laborers
-        return markerType === 'home' 
-          ? 'rgba(128, 128, 128, 0.8)'
-          : 'rgba(128, 128, 128, 0.8)';
+        return 'rgba(128, 128, 128, 0.8)';
       }
       
-      // Default colors if social class is unknown or not matched
-      return markerType === 'home' 
-        ? 'rgba(100, 150, 255, 0.8)'
-        : 'rgba(255, 150, 100, 0.8)';
+      // Default color if social class is unknown or not matched
+      return 'rgba(100, 150, 255, 0.8)';
     };
 
     // Get color based on social class
@@ -1445,63 +1433,6 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     const firstInitial = firstName.charAt(0).toUpperCase();
     const lastInitial = lastName.charAt(0).toUpperCase();
     ctx.fillText(firstInitial + lastInitial, x, y);
-    
-    // Add a small icon to indicate home or work
-    const iconSize = size / 2;
-    const iconX = x + size - iconSize / 2;
-    const iconY = y - size + iconSize / 2;
-  
-    // Draw the icon background
-    ctx.beginPath();
-    ctx.arc(iconX, iconY, iconSize, 0, Math.PI * 2);
-    ctx.fillStyle = markerType === 'home' ? '#4b70e2' : '#e27a4b';
-    ctx.fill();
-    ctx.strokeStyle = '#FFFFFF';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-  
-    // Draw icon symbol - house for home, tools for work
-    if (markerType === 'home') {
-      // Draw a house icon instead of just the letter 'H'
-      ctx.fillStyle = '#FFFFFF';
-    
-      // Calculate house dimensions based on icon size
-      const houseWidth = iconSize * 0.8;
-      const houseHeight = iconSize * 0.6;
-      const roofHeight = iconSize * 0.4;
-    
-      // Draw the roof (triangle)
-      ctx.beginPath();
-      ctx.moveTo(iconX - houseWidth/2, iconY - houseHeight/2 + roofHeight/2);
-      ctx.lineTo(iconX, iconY - houseHeight/2 - roofHeight/2);
-      ctx.lineTo(iconX + houseWidth/2, iconY - houseHeight/2 + roofHeight/2);
-      ctx.closePath();
-      ctx.fill();
-    
-      // Draw the house body (rectangle)
-      ctx.fillRect(
-        iconX - houseWidth/2, 
-        iconY - houseHeight/2 + roofHeight/2, 
-        houseWidth, 
-        houseHeight
-      );
-    
-      // Draw a small door
-      ctx.fillStyle = '#4b70e2'; // Same as background color
-      const doorWidth = houseWidth * 0.4;
-      const doorHeight = houseHeight * 0.6;
-      ctx.fillRect(
-        iconX - doorWidth/2,
-        iconY - houseHeight/2 + roofHeight/2 + houseHeight - doorHeight,
-        doorWidth,
-        doorHeight
-      );
-    } else {
-      // For work, keep the 'W' text
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = `bold ${iconSize * 0.8}px Arial`;
-      ctx.fillText('W', iconX, iconY);
-    }
   };
 
   // Define isometric projection functions at the component level
@@ -2736,7 +2667,6 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
               position.x - 15, 
               position.y, 
               homeCitizens[0], 
-              'home', 
               20
             );
           }
@@ -2796,7 +2726,6 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
               position.x + 15, 
               position.y, 
               workCitizens[0], 
-              'work', 
               20
             );
           }
@@ -2808,14 +2737,14 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       const legendY = canvas.height - 100;
       
       // Home marker legend
-      createCitizenMarker(ctx, legendX + 15, legendY, { FirstName: 'H', LastName: 'M' }, 'home', 15);
+      createCitizenMarker(ctx, legendX + 15, legendY, { FirstName: 'H', LastName: 'M' }, 15);
       ctx.fillStyle = '#FFFFFF';
       ctx.font = '14px Arial';
       ctx.textAlign = 'left';
       ctx.fillText('Home', legendX + 40, legendY);
       
       // Work marker legend
-      createCitizenMarker(ctx, legendX + 15, legendY + 40, { FirstName: 'W', LastName: 'K' }, 'work', 15);
+      createCitizenMarker(ctx, legendX + 15, legendY + 40, { FirstName: 'W', LastName: 'K' }, 15);
       ctx.fillStyle = '#FFFFFF';
       ctx.font = '14px Arial';
       ctx.textAlign = 'left';

@@ -138,7 +138,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
               <div 
                 className="w-6 h-6 rounded-full cursor-pointer hover:scale-125 transition-transform flex items-center justify-center"
                 style={{ 
-                  backgroundColor: citizenService.getSocialClassColor(socialClass, 'home'),
+                  backgroundColor: citizenService.getSocialClassColor(socialClass),
                   border: '2px solid white',
                   boxShadow: '0 0 0 1px rgba(0,0,0,0.2)'
                 }}
