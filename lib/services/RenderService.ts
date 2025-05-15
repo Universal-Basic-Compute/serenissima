@@ -6,6 +6,7 @@ import { CoordinateService } from './CoordinateService';
 import { BuildingService } from './BuildingService';
 import { CitizenService } from './CitizenService';
 import { incomeService } from './IncomeService';
+import { hoverStateService } from './HoverStateService';
 
 export class RenderService {
   /**
@@ -15,7 +16,8 @@ export class RenderService {
     ctx: CanvasRenderingContext2D,
     coords: {x: number, y: number}[],
     fillColor: string,
-    isSelected: boolean = false
+    isSelected: boolean = false,
+    isHovered: boolean = false
   ): void {
     if (!coords || coords.length < 3) return;
 
@@ -26,13 +28,19 @@ export class RenderService {
     }
     ctx.closePath();
     
-    // Apply different styles for selected state
+    // Apply different styles based on state
     if (isSelected) {
       // Selected state: much brighter with a thicker border
       ctx.fillStyle = this.lightenColor(fillColor, 35); // Increased brightness for selection
       ctx.fill();
       ctx.strokeStyle = '#FF3300'; // Bright red-orange for selected
       ctx.lineWidth = 3.5;
+    } else if (isHovered) {
+      // Hover state: slightly brighter with a medium border
+      ctx.fillStyle = this.lightenColor(fillColor, 20); // Medium brightness for hover
+      ctx.fill();
+      ctx.strokeStyle = '#FFA500'; // Orange for hover
+      ctx.lineWidth = 2;
     } else {
       // Normal state
       ctx.fillStyle = fillColor;
@@ -55,14 +63,20 @@ export class RenderService {
     color: string,
     typeIndicator: string,
     isSelected: boolean = false,
-    shape: 'square' | 'circle' | 'triangle' = 'square'
+    shape: 'square' | 'circle' | 'triangle' = 'square',
+    isHovered: boolean = false
   ): void {
-    // Apply different styles for selected state
+    // Apply different styles based on state
     if (isSelected) {
       // Selected state: much brighter with a thicker border
       ctx.fillStyle = this.lightenColor(color, 35); // Increased brightness for selection
       ctx.strokeStyle = '#FF3300'; // Bright red-orange for selected
       ctx.lineWidth = 3.5;
+    } else if (isHovered) {
+      // Hover state: slightly brighter with a medium border
+      ctx.fillStyle = this.lightenColor(color, 20); // Medium brightness for hover
+      ctx.strokeStyle = '#FFA500'; // Orange for hover
+      ctx.lineWidth = 2;
     } else {
       // Normal state
       ctx.fillStyle = color;
@@ -475,6 +489,8 @@ export class RenderService {
     coatOfArmsImages: Record<string, HTMLImageElement>,
     renderedCoatOfArmsCache: Record<string, {image: HTMLImageElement | null, x: number, y: number, size: number}>
   ): void {
+    // Get current hover state
+    const hoverState = hoverStateService.getState();
     // Skip rendering if canvas is not visible
     if (!canvas.offsetParent) {
       return;
@@ -533,12 +549,16 @@ export class RenderService {
     polygonsToRender: any[],
     interactionState: any
   ): void {
+    // Get current hover state
+    const hoverState = hoverStateService.getState();
+    
     polygonsToRender.forEach(({ polygon, coords, fillColor }) => {
-      // Determine if this polygon is selected
+      // Determine if this polygon is selected or hovered
       const isSelected = interactionState.selectedPolygonId === polygon.id;
+      const isHovered = hoverState.hoveredPolygonId === polygon.id;
       
       // Draw the polygon
-      this.drawPolygon(ctx, coords, fillColor, isSelected);
+      this.drawPolygon(ctx, coords, fillColor, isSelected, isHovered);
     });
   }
 
@@ -554,6 +574,9 @@ export class RenderService {
     canvasHeight: number,
     interactionState: any
   ): void {
+    // Get current hover state
+    const hoverState = hoverStateService.getState();
+    
     buildings.forEach(building => {
       try {
         if (!building || !building.id || !building.position) return;
@@ -573,8 +596,9 @@ export class RenderService {
         const size = BuildingService.prototype.getBuildingSize(building.type);
         const color = BuildingService.prototype.getBuildingColor(building.type);
         
-        // Determine if this building is selected
+        // Determine if this building is selected or hovered
         const isSelected = interactionState.selectedBuildingId === building.id;
+        const isHovered = hoverState.hoveredBuildingId === building.id;
         
         // Determine the shape based on point_id or Point field
         const pointId = building.point_id || building.Point;
@@ -595,7 +619,7 @@ export class RenderService {
         const typeIndicator = building.type.charAt(0).toUpperCase();
           
         this.drawBuilding(
-          ctx, screen.x, screen.y, squareSize, color, typeIndicator, isSelected, buildingShape
+          ctx, screen.x, screen.y, squareSize, color, typeIndicator, isSelected, buildingShape, isHovered
         );
       } catch (error) {
         console.error(`Error drawing building ${building?.id || 'unknown'}:`, error);
@@ -656,6 +680,9 @@ export class RenderService {
   ): void {
     if (polygons.length === 0) return;
     
+    // Get current hover state
+    const hoverState = hoverStateService.getState();
+    
     // Draw dock points with subtle styling
     polygons.forEach(polygon => {
       if (polygon.canalPoints && Array.isArray(polygon.canalPoints)) {
@@ -670,20 +697,38 @@ export class RenderService {
             world.x, world.y, scale, offset, canvasWidth, canvasHeight
           );
           
+          // Generate point ID
+          const pointId = point.id || `canal-${point.edge.lat}-${point.edge.lng}`;
+          
+          // Check if this point is hovered
+          const isHovered = hoverState.hoveredCanalPointId === pointId;
+          
           // Draw a small, semi-transparent circle for dock points
           ctx.beginPath();
           ctx.arc(screen.x, screen.y, 2 * scale, 0, Math.PI * 2);
           
           // Use a subtle blue color with low opacity
           // Make points more visible in buildings view, more subtle in other views
-          const baseOpacity = activeView === 'buildings' ? 0.3 : 0.15;
+          let baseOpacity = activeView === 'buildings' ? 0.3 : 0.15;
           
-          ctx.fillStyle = `rgba(0, 120, 215, ${baseOpacity})`;
+          // Increase opacity for hovered points
+          if (isHovered) {
+            baseOpacity = 0.8;
+            ctx.fillStyle = `rgba(0, 180, 255, ${baseOpacity})`;
+          } else {
+            ctx.fillStyle = `rgba(0, 120, 215, ${baseOpacity})`;
+          }
+          
           ctx.fill();
           
           // Add a border
-          ctx.strokeStyle = 'rgba(0, 120, 215, 0.4)';
-          ctx.lineWidth = 0.5;
+          if (isHovered) {
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.lineWidth = 1.5;
+          } else {
+            ctx.strokeStyle = 'rgba(0, 120, 215, 0.4)';
+            ctx.lineWidth = 0.5;
+          }
           ctx.stroke();
         });
       }
@@ -701,14 +746,27 @@ export class RenderService {
             world.x, world.y, scale, offset, canvasWidth, canvasHeight
           );
           
+          // Generate point ID
+          const pointId = point.id || `bridge-${point.edge.lat}-${point.edge.lng}`;
+          
+          // Check if this point is hovered
+          const isHovered = hoverState.hoveredBridgePointId === pointId;
+          
           // Draw a small, semi-transparent square for bridge points
           const pointSize = 2 * scale;
           
           // Use a subtle orange/brown color with low opacity
           // Make points more visible in buildings view, more subtle in other views
-          const baseOpacity = activeView === 'buildings' ? 0.3 : 0.15;
+          let baseOpacity = activeView === 'buildings' ? 0.3 : 0.15;
           
-          ctx.fillStyle = `rgba(180, 120, 60, ${baseOpacity})`;
+          // Increase opacity for hovered points
+          if (isHovered) {
+            baseOpacity = 0.8;
+            ctx.fillStyle = `rgba(220, 150, 80, ${baseOpacity})`;
+          } else {
+            ctx.fillStyle = `rgba(180, 120, 60, ${baseOpacity})`;
+          }
+          
           ctx.beginPath();
           ctx.rect(
             screen.x - pointSize/2, 
@@ -719,8 +777,13 @@ export class RenderService {
           ctx.fill();
           
           // Add a border
-          ctx.strokeStyle = 'rgba(180, 120, 60, 0.4)';
-          ctx.lineWidth = 0.5;
+          if (isHovered) {
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.lineWidth = 1.5;
+          } else {
+            ctx.strokeStyle = 'rgba(180, 120, 60, 0.4)';
+            ctx.lineWidth = 0.5;
+          }
           ctx.stroke();
         });
       }
@@ -873,6 +936,9 @@ export class RenderService {
     canvasHeight: number,
     interactionState: any
   ): void {
+    // Get current hover state
+    const hoverState = hoverStateService.getState();
+    
     // Draw citizens at their home and work locations
     Object.entries(citizensByBuilding).forEach(([buildingId, buildingCitizens]) => {
       // Find the building position
@@ -914,6 +980,10 @@ export class RenderService {
       
       // Draw home citizens
       if (homeCitizens.length > 0) {
+        // Check if this citizen group is hovered
+        const isHovered = hoverState.hoveredCitizenBuilding === buildingId && 
+                          hoverState.hoveredCitizenType === 'home';
+        
         // If multiple citizens, draw a group marker
         if (homeCitizens.length > 1) {
           // Determine color based on social class of the first citizen
@@ -923,19 +993,19 @@ export class RenderService {
           // Choose color based on social class
           let fillColor = 'rgba(100, 150, 255, 0.8)'; // Default blue
           if (baseClass.includes('nobili')) {
-            fillColor = interactionState.hoveredCitizenBuilding === buildingId && interactionState.hoveredCitizenType === 'home'
+            fillColor = isHovered
               ? 'rgba(255, 215, 0, 0.9)' // Gold for nobility (hovered)
               : 'rgba(218, 165, 32, 0.8)'; // Gold for nobility
           } else if (baseClass.includes('cittadini')) {
-            fillColor = interactionState.hoveredCitizenBuilding === buildingId && interactionState.hoveredCitizenType === 'home'
+            fillColor = isHovered
               ? 'rgba(70, 130, 180, 0.9)' // Blue for citizens (hovered)
               : 'rgba(70, 130, 180, 0.8)'; // Blue for citizens
           } else if (baseClass.includes('popolani')) {
-            fillColor = interactionState.hoveredCitizenBuilding === buildingId && interactionState.hoveredCitizenType === 'home'
+            fillColor = isHovered
               ? 'rgba(205, 133, 63, 0.9)' // Brown for common people (hovered)
               : 'rgba(205, 133, 63, 0.8)'; // Brown for common people
           } else if (baseClass.includes('laborer') || baseClass.includes('facchini')) {
-            fillColor = interactionState.hoveredCitizenBuilding === buildingId && interactionState.hoveredCitizenType === 'home'
+            fillColor = isHovered
               ? 'rgba(128, 128, 128, 0.9)' // Gray for laborers (hovered)
               : 'rgba(128, 128, 128, 0.8)'; // Gray for laborers
           }
@@ -945,10 +1015,10 @@ export class RenderService {
           ctx.arc(screen.x - 15, screen.y, 25, 0, Math.PI * 2);
           ctx.fillStyle = fillColor;
           ctx.fill();
-          ctx.strokeStyle = interactionState.hoveredCitizenBuilding === buildingId && interactionState.hoveredCitizenType === 'home'
+          ctx.strokeStyle = isHovered
             ? '#FFFF00'
             : '#FFFFFF';
-          ctx.lineWidth = interactionState.hoveredCitizenBuilding === buildingId && interactionState.hoveredCitizenType === 'home' ? 3 : 2;
+          ctx.lineWidth = isHovered ? 3 : 2;
           ctx.stroke();
           
           // Add count
@@ -1012,13 +1082,17 @@ export class RenderService {
             homeCitizens[0], 
             'home', 
             20, 
-            interactionState.hoveredCitizenBuilding === buildingId && interactionState.hoveredCitizenType === 'home'
+            isHovered
           );
         }
       }
       
       // Draw work citizens
       if (workCitizens.length > 0) {
+        // Check if this citizen group is hovered
+        const isHovered = hoverState.hoveredCitizenBuilding === buildingId && 
+                          hoverState.hoveredCitizenType === 'work';
+        
         // If multiple citizens, draw a group marker
         if (workCitizens.length > 1) {
           // Determine color based on social class of the first citizen
@@ -1028,19 +1102,19 @@ export class RenderService {
           // Choose color based on social class
           let fillColor = 'rgba(255, 150, 100, 0.8)'; // Default orange
           if (baseClass.includes('nobili')) {
-            fillColor = interactionState.hoveredCitizenBuilding === buildingId && interactionState.hoveredCitizenType === 'work'
+            fillColor = isHovered
               ? 'rgba(255, 215, 0, 0.9)' // Gold for nobility (hovered)
               : 'rgba(218, 165, 32, 0.8)'; // Gold for nobility
           } else if (baseClass.includes('cittadini')) {
-            fillColor = interactionState.hoveredCitizenBuilding === buildingId && interactionState.hoveredCitizenType === 'work'
+            fillColor = isHovered
               ? 'rgba(70, 130, 180, 0.9)' // Blue for citizens (hovered)
               : 'rgba(70, 130, 180, 0.8)'; // Blue for citizens
           } else if (baseClass.includes('popolani')) {
-            fillColor = interactionState.hoveredCitizenBuilding === buildingId && interactionState.hoveredCitizenType === 'work'
+            fillColor = isHovered
               ? 'rgba(205, 133, 63, 0.9)' // Brown for common people (hovered)
               : 'rgba(205, 133, 63, 0.8)'; // Brown for common people
           } else if (baseClass.includes('laborer') || baseClass.includes('facchini')) {
-            fillColor = interactionState.hoveredCitizenBuilding === buildingId && interactionState.hoveredCitizenType === 'work'
+            fillColor = isHovered
               ? 'rgba(128, 128, 128, 0.9)' // Gray for laborers (hovered)
               : 'rgba(128, 128, 128, 0.8)'; // Gray for laborers
           }
@@ -1050,10 +1124,10 @@ export class RenderService {
           ctx.arc(screen.x + 15, screen.y, 25, 0, Math.PI * 2);
           ctx.fillStyle = fillColor;
           ctx.fill();
-          ctx.strokeStyle = interactionState.hoveredCitizenBuilding === buildingId && interactionState.hoveredCitizenType === 'work'
+          ctx.strokeStyle = isHovered
             ? '#FFFF00'
             : '#FFFFFF';
-          ctx.lineWidth = interactionState.hoveredCitizenBuilding === buildingId && interactionState.hoveredCitizenType === 'work' ? 3 : 2;
+          ctx.lineWidth = isHovered ? 3 : 2;
           ctx.stroke();
           
           // Add count
@@ -1083,7 +1157,7 @@ export class RenderService {
             workCitizens[0], 
             'work', 
             20, 
-            interactionState.hoveredCitizenBuilding === buildingId && interactionState.hoveredCitizenType === 'work'
+            isHovered
           );
         }
       }

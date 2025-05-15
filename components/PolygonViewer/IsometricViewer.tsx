@@ -6,9 +6,11 @@ import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 import { fetchCoatOfArmsImage } from '@/app/utils/coatOfArmsUtils';
 import { buildingPointsService } from '@/lib/services/BuildingPointsService';
 import { interactionService } from '@/lib/services/InteractionService';
+import { hoverStateService } from '@/lib/services/HoverStateService';
 import LandDetailsPanel from './LandDetailsPanel';
 import BuildingDetailsPanel from './BuildingDetailsPanel';
 import CitizenDetailsPanel from '../UI/CitizenDetailsPanel';
+import { HoverTooltip } from '../UI/HoverTooltip';
 
 interface IsometricViewerProps {
   activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
@@ -2865,6 +2867,47 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       window.removeEventListener('resize', handleResize);
     };
   }, []);
+  
+  // Listen for hover state changes
+  useEffect(() => {
+    const handleHoverStateChanged = (data: any) => {
+      // Force a redraw of the canvas when hover state changes
+      if (canvasRef.current) {
+        const ctx = canvasRef.current.getContext('2d');
+        if (ctx) {
+          // Redraw the scene
+          // This will use the updated hover state from hoverStateService
+          const canvas = canvasRef.current;
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          
+          // Draw water background
+          ctx.fillStyle = '#87CEEB';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          
+          // Draw polygons
+          renderService.drawPolygons(ctx, polygonsToRender, {
+            selectedPolygonId,
+            hoveredPolygonId: data.type === 'polygon' ? data.id : null
+          });
+          
+          // Draw buildings and other elements
+          // This is a simplified version - in reality you'd call your full drawing logic
+          if (buildings.length > 0) {
+            renderService.drawBuildings(ctx, buildings, scale, offset, canvas.width, canvas.height, {
+              selectedBuildingId,
+              hoveredBuildingId: data.type === 'building' ? data.id : null
+            });
+          }
+        }
+      }
+    };
+    
+    eventBus.subscribe(EventTypes.HOVER_STATE_CHANGED, handleHoverStateChanged);
+    
+    return () => {
+      eventBus.unsubscribe(EventTypes.HOVER_STATE_CHANGED, handleHoverStateChanged);
+    };
+  }, [polygonsToRender, buildings, scale, offset, selectedPolygonId, selectedBuildingId]);
 
   // Helper function to get building size based on type
   function getBuildingSize(type: string): {width: number, height: number, depth: number} {
@@ -3087,7 +3130,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
       />
       
-      {/* Building hover tooltip removed to prevent infinite update loop */}
+      {/* Add the hover tooltip */}
+      <HoverTooltip />
       
       {/* Land Details Panel */}
       {showLandDetailsPanel && selectedPolygonId && (

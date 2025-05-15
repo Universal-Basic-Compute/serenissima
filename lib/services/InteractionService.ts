@@ -7,6 +7,7 @@ import { CoordinateService } from './CoordinateService';
 import { RenderService } from './RenderService';
 import { eventBus, EventTypes } from '../utils/eventBus';
 import { throttle, debounce } from '../utils/performanceUtils';
+import { hoverStateService } from './HoverStateService';
 
 export interface InteractionState {
   isDragging: boolean;
@@ -287,11 +288,196 @@ export class InteractionService {
         //console.log('Mouse position in transport mode:', { x: mouseX, y: mouseY });
       }
       
-      // Set cursor based on dragging state
-      if (this.isDraggingRef) {
-        canvas.style.cursor = 'grabbing';
-      } else {
-        canvas.style.cursor = 'grab';
+      // Handle hover detection
+      let hoverDetected = false;
+      
+      // Check for polygon hover
+      if (data.polygonsToRender) {
+        for (const { polygon, coords } of data.polygonsToRender) {
+          if (RenderService.prototype.isPointInPolygon(mouseX, mouseY, coords)) {
+            hoverStateService.setHoveredPolygon(polygon.id);
+            canvas.style.cursor = 'pointer';
+            hoverDetected = true;
+            break; // Exit loop once we found a hover
+          }
+        }
+      }
+      
+      // Check for building hover if no polygon is hovered
+      if (!hoverDetected && data.buildings) {
+        for (const building of data.buildings) {
+          if (!building.position) continue;
+          
+          let position;
+          if (typeof building.position === 'string') {
+            try {
+              position = JSON.parse(building.position);
+            } catch (e) {
+              continue;
+            }
+          } else {
+            position = building.position;
+          }
+          
+          // Convert lat/lng to isometric coordinates
+          let x, y;
+          if ('lat' in position && 'lng' in position) {
+            x = (position.lng - 12.3326) * 20000;
+            y = (position.lat - 45.4371) * 20000;
+          } else if ('x' in position && 'z' in position) {
+            x = position.x;
+            y = position.z;
+          } else {
+            continue;
+          }
+          
+          const isoPos = {
+            x: CoordinateService.worldToScreen(x, y, scale, offset, canvas.width, canvas.height).x,
+            y: CoordinateService.worldToScreen(x, y, scale, offset, canvas.width, canvas.height).y
+          };
+          
+          // Get building size
+          const size = this.getBuildingSize(building.type);
+          const squareSize = Math.max(size.width, size.depth) * scale * 0.6;
+          
+          // Check if mouse is over this building
+          if (
+            mouseX >= isoPos.x - squareSize/2 &&
+            mouseX <= isoPos.x + squareSize/2 &&
+            mouseY >= isoPos.y - squareSize/2 &&
+            mouseY <= isoPos.y + squareSize/2
+          ) {
+            hoverStateService.setHoveredBuilding(building.id);
+            canvas.style.cursor = 'pointer';
+            hoverDetected = true;
+            break;
+          }
+        }
+      }
+      
+      // Check for citizen hover if no building or polygon is hovered
+      if (!hoverDetected && data.citizensByBuilding && activeView === 'citizens') {
+        for (const [buildingId, buildingCitizens] of Object.entries(data.citizensByBuilding)) {
+          // Find the building position
+          const position = setters.findBuildingPosition(buildingId);
+          if (!position) continue;
+          
+          // Check home citizens
+          const homeCitizens = buildingCitizens.filter(c => c.markerType === 'home');
+          if (homeCitizens.length > 0) {
+            // Check if mouse is over the home marker
+            const homeX = position.x - 15;
+            const homeY = position.y;
+            const homeRadius = homeCitizens.length > 1 ? 25 : 20;
+            
+            if (Math.sqrt(Math.pow(mouseX - homeX, 2) + Math.pow(mouseY - homeY, 2)) <= homeRadius) {
+              hoverStateService.setHoveredCitizen(buildingId, 'home');
+              canvas.style.cursor = 'pointer';
+              hoverDetected = true;
+              break;
+            }
+          }
+          
+          // Check work citizens
+          const workCitizens = buildingCitizens.filter(c => c.markerType === 'work');
+          if (workCitizens.length > 0) {
+            // Check if mouse is over the work marker
+            const workX = position.x + 15;
+            const workY = position.y;
+            const workRadius = workCitizens.length > 1 ? 25 : 20;
+            
+            if (Math.sqrt(Math.pow(mouseX - workX, 2) + Math.pow(mouseY - workY, 2)) <= workRadius) {
+              hoverStateService.setHoveredCitizen(buildingId, 'work');
+              canvas.style.cursor = 'pointer';
+              hoverDetected = true;
+              break;
+            }
+          }
+        }
+      }
+      
+      // Check for canal point hover
+      if (!hoverDetected && data.polygons && activeView === 'buildings') {
+        for (const polygon of data.polygons) {
+          if (polygon.canalPoints && Array.isArray(polygon.canalPoints)) {
+            for (const point of polygon.canalPoints) {
+              if (!point.edge) continue;
+              
+              // Convert lat/lng to isometric coordinates
+              const x = (point.edge.lng - 12.3326) * 20000;
+              const y = (point.edge.lat - 45.4371) * 20000;
+              
+              const isoPos = {
+                x: CoordinateService.worldToScreen(x, y, scale, offset, canvas.width, canvas.height).x,
+                y: CoordinateService.worldToScreen(x, y, scale, offset, canvas.width, canvas.height).y
+              };
+              
+              // Check if mouse is over this canal point
+              const pointSize = 2 * scale;
+              if (
+                mouseX >= isoPos.x - pointSize * 2 && 
+                mouseX <= isoPos.x + pointSize * 2 && 
+                mouseY >= isoPos.y - pointSize * 2 && 
+                mouseY <= isoPos.y + pointSize * 2
+              ) {
+                const pointId = point.id || `canal-${point.edge.lat}-${point.edge.lng}`;
+                hoverStateService.setHoveredCanalPoint(pointId);
+                canvas.style.cursor = 'pointer';
+                hoverDetected = true;
+                break;
+              }
+            }
+            if (hoverDetected) break;
+          }
+        }
+      }
+      
+      // Check for bridge point hover
+      if (!hoverDetected && data.polygons && activeView === 'buildings') {
+        for (const polygon of data.polygons) {
+          if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints)) {
+            for (const point of polygon.bridgePoints) {
+              if (!point.edge) continue;
+              
+              // Convert lat/lng to isometric coordinates
+              const x = (point.edge.lng - 12.3326) * 20000;
+              const y = (point.edge.lat - 45.4371) * 20000;
+              
+              const isoPos = {
+                x: CoordinateService.worldToScreen(x, y, scale, offset, canvas.width, canvas.height).x,
+                y: CoordinateService.worldToScreen(x, y, scale, offset, canvas.width, canvas.height).y
+              };
+              
+              // Check if mouse is over this bridge point
+              const pointSize = 2 * scale;
+              if (
+                mouseX >= isoPos.x - pointSize * 2 && 
+                mouseX <= isoPos.x + pointSize * 2 && 
+                mouseY >= isoPos.y - pointSize * 2 && 
+                mouseY <= isoPos.y + pointSize * 2
+              ) {
+                const pointId = point.id || `bridge-${point.edge.lat}-${point.edge.lng}`;
+                hoverStateService.setHoveredBridgePoint(pointId);
+                canvas.style.cursor = 'pointer';
+                hoverDetected = true;
+                break;
+              }
+            }
+            if (hoverDetected) break;
+          }
+        }
+      }
+      
+      // If no hover was detected, clear all hover states
+      if (!hoverDetected) {
+        hoverStateService.clearAllHoverStates();
+        
+        // Set cursor based on dragging state
+        if (this.isDraggingRef) {
+          canvas.style.cursor = 'grabbing';
+        } else {
+          canvas.style.cursor = 'grab';
+        }
       }
     }, 50);
     
