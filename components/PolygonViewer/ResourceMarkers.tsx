@@ -23,6 +23,18 @@ export default function ResourceMarkers({
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   
+  // Handle mouse enter for resource location
+  const handleMouseEnter = useCallback((locationKey: string, resources: any[]) => {
+    setHoveredLocation(locationKey);
+    hoverStateService.setHoveredResources(resources);
+  }, []);
+  
+  // Handle mouse leave for resource location
+  const handleMouseLeave = useCallback(() => {
+    setHoveredLocation(null);
+    hoverStateService.clearHoveredResources();
+  }, []);
+  
   // Load resources when component becomes visible
   useEffect(() => {
     if (isVisible) {
@@ -191,7 +203,7 @@ export default function ResourceMarkers({
               zIndex: isHovered ? 50 : 40
             }}
             onMouseEnter={() => handleMouseEnter(locationKey, locationResources)}
-            onMouseLeave={handleMouseLeave}
+            onMouseLeave={() => handleMouseLeave()}
           >
             {isHovered ? (
               // Expanded view when hovered - show all resources
