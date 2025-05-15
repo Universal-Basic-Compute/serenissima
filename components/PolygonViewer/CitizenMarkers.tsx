@@ -176,10 +176,13 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     // Initial load
     loadCitizensData();
     
+    // Subscribe to events and store the subscription
+    const subscription = eventBus.subscribe(EventTypes.CITIZENS_LOADED, handleCitizensLoaded);
+    
     // Clean up event listeners
     return () => {
       window.removeEventListener('loadCitizens', handleLoadCitizens);
-      eventBus.unsubscribe(EventTypes.CITIZENS_LOADED, handleCitizensLoaded);
+      subscription.unsubscribe();
     };
   }, []);
   
