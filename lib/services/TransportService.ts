@@ -370,9 +370,6 @@ export class TransportService {
     try {
       console.log('Starting loadPolygons()...');
       
-      // Debug the current directory
-      console.log('Current working directory:', process.cwd());
-      
       // First try to load from the API endpoint
       try {
         console.log('Fetching polygons from API endpoint: /api/get-polygons');
@@ -401,35 +398,21 @@ export class TransportService {
             console.log(`Polygons array length: ${data.polygons.length}`);
             
             if (data.polygons.length > 0) {
-              console.log(`First polygon:`, data.polygons[0]);
-              
-              // Check if the first polygon has coordinates
-              if (data.polygons[0].coordinates) {
-                console.log(`First polygon coordinates:`, data.polygons[0].coordinates);
-                console.log(`First polygon coordinates type: ${typeof data.polygons[0].coordinates}, Is Array: ${Array.isArray(data.polygons[0].coordinates)}`);
-                
-                if (Array.isArray(data.polygons[0].coordinates) && data.polygons[0].coordinates.length > 0) {
-                  console.log(`First coordinate:`, data.polygons[0].coordinates[0]);
-                  console.log(`First coordinate has lat: ${data.polygons[0].coordinates[0].lat !== undefined}, lng: ${data.polygons[0].coordinates[0].lng !== undefined}`);
-                }
-              }
-            }
-            
-            if (data.polygons.length > 0) {
               console.log(`Successfully received ${data.polygons.length} polygons from API`);
             
-            // Process the polygons
-            const processedPolygons = this.processPolygons(data.polygons);
-            
-            if (processedPolygons.length > 0) {
-              // Store the processed polygons
-              this.polygons = processedPolygons;
-              this.polygonsLoaded = true;
+              // Process the polygons
+              const processedPolygons = this.processPolygons(data.polygons);
               
-              // Build the graph and canal network
-              this.buildGraphAndNetwork();
-              
-              return true;
+              if (processedPolygons.length > 0) {
+                // Store the processed polygons
+                this.polygons = processedPolygons;
+                this.polygonsLoaded = true;
+                
+                // Build the graph and canal network
+                this.buildGraphAndNetwork();
+                
+                return true;
+              }
             }
           }
         }
@@ -437,8 +420,8 @@ export class TransportService {
         console.error('Error fetching from API endpoint:', error);
       }
       
-      // If API endpoint failed, try to load directly from the data/polygons directory
-      console.log('API endpoint failed, trying to load directly from data/polygons directory');
+      // If API endpoint failed, try to load using list-polygon-files and individual polygon endpoints
+      console.log('API endpoint failed, trying to load using list-polygon-files endpoint');
       
       try {
         // Fetch the list of polygon files
@@ -450,26 +433,25 @@ export class TransportService {
           if (filesData.files && Array.isArray(filesData.files) && filesData.files.length > 0) {
             console.log(`Found ${filesData.files.length} polygon files`);
             
-            // Collect all polygons from all files
+            // Collect all polygons by fetching individual polygon data
             const allPolygons: any[] = [];
             
-            for (const file of filesData.files) {
+            // Only process a subset of files to avoid overwhelming the browser
+            const filesToProcess = filesData.files.slice(0, 100); // Process up to 100 files
+            
+            for (const file of filesToProcess) {
               try {
-                const fileResponse = await fetch(`/data/polygons/${file}`);
+                // Extract polygon ID from filename (remove .json extension)
+                const polygonId = file.replace('.json', '');
                 
-                if (fileResponse.ok) {
-                  const fileData = await fileResponse.json();
+                // Fetch individual polygon data
+                const polygonResponse = await fetch(`/api/polygons/${polygonId}`);
+                
+                if (polygonResponse.ok) {
+                  const polygonData = await polygonResponse.json();
                   
-                  // Handle different file formats
-                  if (Array.isArray(fileData)) {
-                    // File contains an array of polygons
-                    allPolygons.push(...fileData);
-                  } else if (fileData.polygons && Array.isArray(fileData.polygons)) {
-                    // File contains an object with a polygons property
-                    allPolygons.push(...fileData.polygons);
-                  } else if (fileData.id) {
-                    // File contains a single polygon
-                    allPolygons.push(fileData);
+                  if (polygonData) {
+                    allPolygons.push(polygonData);
                   }
                 }
               } catch (error) {
@@ -477,7 +459,7 @@ export class TransportService {
               }
             }
             
-            console.log(`Loaded ${allPolygons.length} polygons from files`);
+            console.log(`Loaded ${allPolygons.length} polygons from individual endpoints`);
             
             if (allPolygons.length > 0) {
               // Process the polygons
