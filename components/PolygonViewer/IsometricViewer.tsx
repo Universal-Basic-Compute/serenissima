@@ -2804,6 +2804,65 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     }
   }
 
+  // Get building color based on owner
+  function getBuildingOwnerColor(owner: string): string {
+    // Generate a deterministic color based on the owner name
+    const getColorFromString = (str: string): string => {
+      // Create a hash from the string
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      
+      // Use the hash to generate HSL values in appropriate ranges for Venetian architecture
+      // Hue: Limit to earthy/warm tones (20-50 for browns/oranges/reds, 180-220 for blues)
+      let hue = Math.abs(hash) % 360;
+      
+      // Adjust hue to be in appropriate ranges for Venetian architecture
+      if (hue > 50 && hue < 180) {
+        hue = 30 + (hue % 20); // Redirect to earthy tones
+      } else if (hue > 220 && hue < 350) {
+        hue = 200 + (hue % 20); // Redirect to Venetian blues
+      }
+      
+      // Saturation: Muted for period-appropriate look (30-60%)
+      const saturation = 30 + (Math.abs(hash >> 8) % 30);
+      
+      // Lightness: Medium to light for visibility (45-75%)
+      const lightness = 45 + (Math.abs(hash >> 16) % 30);
+      
+      return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    };
+    
+    // Special cases for common owners
+    if (owner === 'ConsiglioDeiDieci') {
+      return '#8B0000'; // Dark red for the Council of Ten
+    }
+    
+    // For any other owner, generate a deterministic color
+    return getColorFromString(owner);
+  }
+
+  // Function to get the current user's identifier
+  const getCurrentUserIdentifier = useCallback(() => {
+    try {
+      // Try to get username from profile
+      const profileStr = localStorage.getItem('userProfile');
+      if (profileStr) {
+        const profile = JSON.parse(profileStr);
+        if (profile && profile.username) {
+          return profile.username;
+        }
+      }
+      
+      // If no username in profile, fall back to wallet address
+      return getWalletAddress();
+    } catch (error) {
+      console.error('Error getting current user identifier:', error);
+      return null;
+    }
+  }, []);
+
   // Helper function to draw a building (simplified for 2D view)
   // This function is not currently used but kept for future reference
   const drawBuildingSquare = (
