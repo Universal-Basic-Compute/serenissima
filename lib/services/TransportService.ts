@@ -1897,7 +1897,7 @@ export class TransportService {
           console.error('Failed to initialize transport service');
           return {
             success: false,
-            error: 'No polygon data available for pathfinding',
+            error: 'Failed to initialize transport service',
             details: 'Failed to initialize transport service'
           };
         }
