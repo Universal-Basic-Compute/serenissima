@@ -78,7 +78,8 @@ export async function GET(request: Request) {
     buildingRecords.forEach(building => {
       const buildingId = building.fields.BuildingId || building.id;
       const buildingType = building.fields.Type;
-      const occupant = building.fields.Occupant;
+      // Convert Occupant to string to use as an index
+      const occupant = building.fields.Occupant ? String(building.fields.Occupant) : undefined;
       
       // Skip buildings without occupants
       if (!occupant) return;
