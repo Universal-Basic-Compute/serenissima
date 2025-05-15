@@ -294,17 +294,33 @@ If you decide not to adjust any leases at this time, return an empty array.
                 
                 # Try to extract the JSON decision from the response
                 try:
-                    # Look for JSON block in the response
+                    # Look for JSON block in the response - try multiple patterns
                     import re
-                    json_match = re.search(r'```json\s*(.*?)\s*```', content, re.DOTALL)
+                    
+                    # First try to find JSON in code blocks
+                    json_match = re.search(r'```(?:json)?\s*(.*?)\s*```', content, re.DOTALL)
                     
                     if json_match:
                         json_str = json_match.group(1)
-                        decisions = json.loads(json_str)
-                        
-                        if "lease_adjustments" in decisions:
-                            print(f"Found lease adjustments: {len(decisions['lease_adjustments'])}")
-                            return decisions
+                        try:
+                            decisions = json.loads(json_str)
+                            if "lease_adjustments" in decisions:
+                                print(f"Found lease adjustments in code block: {len(decisions['lease_adjustments'])}")
+                                return decisions
+                        except json.JSONDecodeError as e:
+                            print(f"Error parsing JSON from code block: {str(e)}")
+                    
+                    # Next, try to find JSON with curly braces pattern
+                    json_match = re.search(r'(\{[\s\S]*"lease_adjustments"[\s\S]*\})', content)
+                    if json_match:
+                        json_str = json_match.group(1)
+                        try:
+                            decisions = json.loads(json_str)
+                            if "lease_adjustments" in decisions:
+                                print(f"Found lease adjustments in curly braces pattern: {len(decisions['lease_adjustments'])}")
+                                return decisions
+                        except json.JSONDecodeError as e:
+                            print(f"Error parsing JSON from curly braces pattern: {str(e)}")
                     
                     # If we couldn't find a JSON block, try to parse the entire response
                     try:
@@ -312,8 +328,40 @@ If you decide not to adjust any leases at this time, return an empty array.
                         if "lease_adjustments" in decisions:
                             print(f"Found lease adjustments in full response: {len(decisions['lease_adjustments'])}")
                             return decisions
-                    except:
-                        pass
+                    except json.JSONDecodeError:
+                        print("Could not parse full response as JSON")
+                    
+                    # Last resort: try to extract just the array part
+                    array_match = re.search(r'"lease_adjustments"\s*:\s*(\[\s*\{.*?\}\s*\])', content, re.DOTALL)
+                    if array_match:
+                        array_str = array_match.group(1)
+                        try:
+                            array_data = json.loads(array_str)
+                            decisions = {"lease_adjustments": array_data}
+                            print(f"Found lease adjustments in array extraction: {len(decisions['lease_adjustments'])}")
+                            return decisions
+                        except json.JSONDecodeError as e:
+                            print(f"Error parsing JSON from array extraction: {str(e)}")
+                    
+                    # Manual extraction as last resort
+                    building_ids = re.findall(r'"building_id"\s*:\s*"([^"]+)"', content)
+                    lease_amounts = re.findall(r'"new_lease_amount"\s*:\s*(\d+)', content)
+                    reasons = re.findall(r'"reason"\s*:\s*"([^"]+)"', content)
+                    
+                    if building_ids and lease_amounts and len(building_ids) == len(lease_amounts):
+                        # Create a manually constructed decision object
+                        adjustments = []
+                        for i in range(len(building_ids)):
+                            reason = reasons[i] if i < len(reasons) else "No reason provided"
+                            adjustments.append({
+                                "building_id": building_ids[i],
+                                "new_lease_amount": int(lease_amounts[i]),
+                                "reason": reason
+                            })
+                        
+                        decisions = {"lease_adjustments": adjustments}
+                        print(f"Manually extracted lease adjustments: {len(decisions['lease_adjustments'])}")
+                        return decisions
                     
                     # If we get here, no valid decision was found
                     print(f"No valid lease adjustment decision found in AI response. Full response:")
