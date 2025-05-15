@@ -113,6 +113,32 @@ export class CoordinateService {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     return R * c;
   }
+
+  /**
+   * Calculate isometric X coordinate
+   */
+  public static calculateIsoX(
+    x: number, 
+    y: number, 
+    scale: number, 
+    offset: { x: number, y: number }, 
+    canvasWidth: number
+  ): number {
+    return x * scale + canvasWidth / 2 + offset.x;
+  }
+
+  /**
+   * Calculate isometric Y coordinate
+   */
+  public static calculateIsoY(
+    x: number, 
+    y: number, 
+    scale: number, 
+    offset: { x: number, y: number }, 
+    canvasHeight: number
+  ): number {
+    return (-y) * scale * this.VERTICAL_SCALE + canvasHeight / 2 + offset.y;
+  }
 }
 
 // Export a singleton instance
