@@ -5,6 +5,7 @@
 import { CoordinateService } from './CoordinateService';
 import { BuildingService } from './BuildingService';
 import { CitizenService } from './CitizenService';
+import { incomeService } from './IncomeService';
 
 export class RenderService {
   /**
@@ -400,6 +401,8 @@ export class RenderService {
       if (activeView === 'land') {
         if (incomeDataLoaded && polygon.id && incomeData[polygon.id] !== undefined) {
           // Use income-based color in land view ONLY if income data is loaded
+          // Import and use the incomeService instance
+          const { incomeService } = require('./IncomeService');
           fillColor = incomeService.getIncomeColor(incomeData[polygon.id]);
         } else if (polygon.id && landOwners[polygon.id]) {
           // Use owner color in land view
