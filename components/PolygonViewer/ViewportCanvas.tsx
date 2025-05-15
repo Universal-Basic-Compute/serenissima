@@ -75,8 +75,8 @@ interface UpdatePolygonsParams {
 // Define the type for the updatePolygons method parameters
 type UpdatePolygonsParamsType = UpdatePolygonsParams;
 
-// Define the interface for the InteractionService methods
-interface InteractionService {
+// Define the interface for the InteractionService methods that matches the imported type
+interface InteractionService extends InteractionServiceType {
   updatePolygons(params: UpdatePolygonsParams): void;
   initializeInteractions(
     canvas: HTMLCanvasElement,
@@ -476,7 +476,7 @@ export default function ViewportCanvas({
       transportService.getStartPoint() ? [transportService.getStartPoint()] : [],
       transportService.getEndPoint() ? [transportService.getEndPoint()] : [],
       polygons,
-      incomeDataLoaded ? incomeData : {},
+      incomeDataLoaded ? (incomeData as unknown as Record<string, number>) : {},
       minIncome,
       maxIncome
     );
@@ -528,7 +528,7 @@ export default function ViewportCanvas({
           transportService.getStartPoint() ? [transportService.getStartPoint()] : [],
           transportService.getEndPoint() ? [transportService.getEndPoint()] : [],
           polygons,
-          incomeDataLoaded ? incomeData : {},
+          incomeDataLoaded ? (incomeData as unknown as Record<string, number>) : {},
           minIncome,
           maxIncome
         );
