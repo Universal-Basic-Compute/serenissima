@@ -70,13 +70,13 @@ def get_unemployed_citizens(tables) -> List[Dict]:
         
         occupied_businesses = tables['buildings'].all(formula=business_formula)
         
-        # Extract the occupant IDs
+        # Extract the occupant IDs (which should be CitizenIds)
         employed_citizen_ids = [building['fields'].get('Occupant') for building in occupied_businesses 
                                if building['fields'].get('Occupant')]
         
-        # Filter citizens to find those who are not occupants of any business
+        # Filter citizens to find those whose CitizenId is not in the occupants list
         unemployed_citizens = [citizen for citizen in all_citizens 
-                              if citizen['id'] not in employed_citizen_ids]
+                              if citizen['fields'].get('CitizenId') not in employed_citizen_ids]
         
         # Sort by Wealth in descending order
         unemployed_citizens.sort(key=lambda c: float(c['fields'].get('Wealth', 0) or 0), reverse=True)
@@ -112,7 +112,8 @@ def get_available_businesses(tables) -> List[Dict]:
 
 def assign_citizen_to_business(tables, citizen: Dict, business: Dict) -> bool:
     """Assign a citizen to a business and update both records."""
-    citizen_id = citizen['id']
+    # Use the CitizenId field instead of the Airtable record ID
+    citizen_id = citizen['fields'].get('CitizenId', citizen['id'])
     building_id = business['id']
     citizen_name = f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}"
     building_name = business['fields'].get('Name', building_id)
@@ -120,7 +121,7 @@ def assign_citizen_to_business(tables, citizen: Dict, business: Dict) -> bool:
     log.info(f"Assigning {citizen_name} to {building_name}")
     
     try:
-        # Update building record with new occupant
+        # Update building record with CitizenId as the occupant
         tables['buildings'].update(building_id, {
             'Occupant': citizen_id
         })
@@ -135,7 +136,7 @@ def assign_citizen_to_business(tables, citizen: Dict, business: Dict) -> bool:
                 building_owner,
                 f"{citizen_name} now works in your building {building_name}",
                 {
-                    "citizen_id": citizen_id,
+                    "citizen_id": citizen_id,  # Use CitizenId here too
                     "citizen_name": citizen_name,
                     "building_id": building_id,
                     "building_name": building_name,
