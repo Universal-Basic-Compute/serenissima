@@ -840,23 +840,30 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     if (citizens.length > 0) {
       for (let i = 0; i < Math.min(5, citizens.length); i++) {
         const citizen = citizens[i];
-        const imageUrl = citizen.ImageUrl || `/images/citizens/${citizen.CitizenId}.jpg`;
+        // Skip citizens without valid IDs
+        if (!citizen || !citizen.citizenid) {
+          console.warn('Skipping citizen without valid ID:', citizen);
+          continue;
+        }
+        
+        const citizenId = citizen.citizenid;
+        const imageUrl = citizen.imageurl || `/images/citizens/${citizenId}.jpg`;
         
         // Try multiple possible paths for each citizen
         const urlsToTry = [
           imageUrl,
-          `/images/citizens/${citizen.CitizenId}.jpg`,
-          `/images/citizens/${citizen.CitizenId}.png`,
+          `/images/citizens/${citizenId}.jpg`,
+          `/images/citizens/${citizenId}.png`,
           `/images/citizens/default.jpg`
         ];
         
         for (const url of urlsToTry) {
           try {
             const response = await fetch(url, { method: 'HEAD' });
-            console.log(`Citizen ${citizen.CitizenId} image check: ${url} - ${response.ok ? 'EXISTS' : 'NOT FOUND'} (${response.status})`);
+            console.log(`Citizen ${citizenId} image check: ${url} - ${response.ok ? 'EXISTS' : 'NOT FOUND'} (${response.status})`);
             if (response.ok) break; // Stop checking if we found a working URL
           } catch (error) {
-            console.error(`Error checking image for citizen ${citizen.CitizenId} at ${url}:`, error);
+            console.error(`Error checking image for citizen ${citizenId} at ${url}:`, error);
           }
         }
       }

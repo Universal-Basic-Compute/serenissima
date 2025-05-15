@@ -62,6 +62,12 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   
   // Add a function to handle citizen hover
   const handleCitizenHover = (citizen: any) => {
+    // Skip if citizen doesn't have a position
+    if (!citizen || !citizen.position) {
+      console.warn('Citizen without position in handleCitizenHover:', citizen);
+      return;
+    }
+    
     // Parse home and work building coordinates
     const homeCoords = parseBuildingCoordinates(citizen.home);
     const workCoords = parseBuildingCoordinates(citizen.work);
@@ -95,6 +101,9 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     // Set connections even if we only have one valid position
     if (connections.homePosition || connections.workPosition) {
       setHoveredConnections(connections);
+      console.log('Set hovered connections:', connections);
+    } else {
+      console.log('No valid connections found for citizen:', citizen);
     }
   };
   
@@ -258,7 +267,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
       
       {/* Connection lines to home and work when hovering */}
       {hoveredConnections && hoveredConnections.citizen && hoveredConnections.citizen.position && (
-        <svg className="absolute inset-0 pointer-events-none" style={{ zIndex: 990 }}>
+        <svg className="absolute inset-0 pointer-events-none" style={{ zIndex: 990, width: canvasWidth, height: canvasHeight }}>
           {/* Debug info - add this to see if the SVG is rendering */}
           <text x="20" y="20" fill="red" fontSize="12">
             Hover connections active: {hoveredConnections.homePosition ? 'Home' : ''} {hoveredConnections.workPosition ? 'Work' : ''}
