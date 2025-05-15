@@ -458,29 +458,78 @@ export class TransportService {
    */
   public setPolygonsData(polygons: any[]): boolean {
     try {
-      console.log(`Setting polygons data directly with ${polygons.length} polygons`);
+      console.log(`Setting polygons data directly with ${polygons?.length || 0} polygons`);
+      
+      // Check if polygons is null or undefined
+      if (!polygons || !Array.isArray(polygons)) {
+        console.error('Polygons data is null, undefined, or not an array');
+        return false;
+      }
+      
+      // Log the first polygon to help with debugging
+      if (polygons.length > 0) {
+        console.log('First polygon structure:', JSON.stringify(polygons[0]).substring(0, 200) + '...');
+      } else {
+        console.error('Polygons array is empty');
+        return false;
+      }
       
       // Process the polygons to ensure they have the required properties
-      const processedPolygons = polygons.map((polygon: any) => {
+      const processedPolygons = polygons.map((polygon: any, index: number) => {
+        // Skip null or undefined polygons
+        if (!polygon) {
+          console.warn(`Skipping null or undefined polygon at index ${index}`);
+          return null;
+        }
+        
+        // Ensure the polygon has an ID
+        const polygonId = polygon.id || `polygon-${Date.now()}-${index}`;
+        
         // Ensure the polygon has coordinates
-        if (!polygon.coordinates || !Array.isArray(polygon.coordinates) || polygon.coordinates.length < 3) {
-          console.warn(`Polygon ${polygon.id} has invalid coordinates, skipping`);
+        if (!polygon.coordinates || !Array.isArray(polygon.coordinates)) {
+          console.warn(`Polygon ${polygonId} has missing or invalid coordinates array`);
+          return null;
+        }
+        
+        if (polygon.coordinates.length < 3) {
+          console.warn(`Polygon ${polygonId} has insufficient coordinates (${polygon.coordinates.length}), needs at least 3`);
           return null;
         }
         
         // Ensure each coordinate has lat and lng properties
-        const validCoordinates = polygon.coordinates.filter((coord: any) => 
-          coord && typeof coord.lat === 'number' && typeof coord.lng === 'number'
-        );
+        const validCoordinates = polygon.coordinates.filter((coord: any, coordIndex: number) => {
+          if (!coord) {
+            console.warn(`Null coordinate at index ${coordIndex} in polygon ${polygonId}`);
+            return false;
+          }
+          
+          // Check if lat and lng are valid numbers
+          const hasValidLat = coord.lat !== undefined && 
+                             typeof coord.lat === 'number' && 
+                             !isNaN(coord.lat) && 
+                             isFinite(coord.lat);
+                             
+          const hasValidLng = coord.lng !== undefined && 
+                             typeof coord.lng === 'number' && 
+                             !isNaN(coord.lng) && 
+                             isFinite(coord.lng);
+          
+          if (!hasValidLat || !hasValidLng) {
+            console.warn(`Invalid coordinate at index ${coordIndex} in polygon ${polygonId}:`, coord);
+            return false;
+          }
+          
+          return true;
+        });
         
         if (validCoordinates.length < 3) {
-          console.warn(`Polygon ${polygon.id} has insufficient valid coordinates, skipping`);
+          console.warn(`Polygon ${polygonId} has insufficient valid coordinates (${validCoordinates.length}), needs at least 3`);
           return null;
         }
         
         // Create a processed polygon with all required properties
         return {
-          id: polygon.id,
+          id: polygonId,
           coordinates: validCoordinates,
           centroid: polygon.centroid || null,
           bridgePoints: Array.isArray(polygon.bridgePoints) ? polygon.bridgePoints : [],
@@ -513,6 +562,11 @@ export class TransportService {
       return true;
     } catch (error) {
       console.error('Error setting polygons data:', error);
+      if (error instanceof Error) {
+        console.error('Error name:', error.name);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+      }
       return false;
     }
   }

@@ -85,11 +85,63 @@ export default function TwoDPage() {
   
   // Load polygons and buildings data
   useEffect(() => {
-    // Fetch polygons
-    fetch('/api/get-polygons')
-      .then(response => response.json())
-      .then(data => {
+    // Add a flag to track if the component is still mounted
+    let isMounted = true;
+    
+    // Fetch polygons with better error handling
+    const fetchPolygons = async () => {
+      try {
+        console.log('Fetching polygons from API...');
+        
+        // Add a timeout to the fetch request
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        
+        const response = await fetch('/api/get-polygons', {
+          signal: controller.signal
+        }).catch(error => {
+          console.error('Fetch error:', error);
+          return null;
+        });
+        
+        clearTimeout(timeoutId);
+        
+        // Check if component is still mounted before updating state
+        if (!isMounted) return;
+        
+        if (!response || !response.ok) {
+          console.error(`Failed to fetch polygons: ${response?.status} ${response?.statusText}`);
+          
+          // Try to use cached polygon data if available
+          if (typeof window !== 'undefined' && (window as any).__polygonData) {
+            console.log('Using cached polygon data from window.__polygonData');
+            const cachedPolygons = (window as any).__polygonData;
+            setPolygons(cachedPolygons);
+            
+            // Initialize the transport service with the cached polygon data
+            try {
+              const success = transportService.setPolygonsData(cachedPolygons);
+              console.log(`Transport service initialization with cached data ${success ? 'succeeded' : 'failed'}`);
+            } catch (error) {
+              console.error('Error initializing transport service with cached data:', error);
+            }
+          }
+          
+          return;
+        }
+        
+        const data = await response.json().catch(error => {
+          console.error('JSON parsing error:', error);
+          return null;
+        });
+        
+        if (!data) {
+          console.error('Failed to parse JSON response');
+          return;
+        }
+        
         if (data.polygons) {
+          console.log(`Successfully fetched ${data.polygons.length} polygons`);
           setPolygons(data.polygons);
           
           // Store in window for other components
@@ -98,31 +150,99 @@ export default function TwoDPage() {
             
             // Initialize the transport service with the polygon data
             console.log(`Setting ${data.polygons.length} polygons to transport service`);
-            const success = transportService.setPolygonsData(data.polygons);
-            console.log(`Transport service initialization ${success ? 'succeeded' : 'failed'}`);
+            try {
+              const success = transportService.setPolygonsData(data.polygons);
+              console.log(`Transport service initialization ${success ? 'succeeded' : 'failed'}`);
+            } catch (error) {
+              console.error('Error initializing transport service:', error);
+            }
           }
+        } else {
+          console.error('No polygons found in API response');
         }
-      })
-      .catch(error => {
+      } catch (error) {
+        // Check if component is still mounted before updating state
+        if (!isMounted) return;
+        
         console.error('Error loading polygons:', error);
-      });
-      
-    // Fetch buildings
-    fetch('/api/buildings')
-      .then(response => response.json())
-      .then(data => {
-        if (data.buildings) {
-          setBuildings(data.buildings);
+      }
+    };
+    
+    // Fetch buildings with better error handling
+    const fetchBuildings = async () => {
+      try {
+        console.log('Fetching buildings from API...');
+        
+        // Add a timeout to the fetch request
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        
+        const response = await fetch('/api/buildings', {
+          signal: controller.signal
+        }).catch(error => {
+          console.error('Fetch error:', error);
+          return null;
+        });
+        
+        clearTimeout(timeoutId);
+        
+        // Check if component is still mounted before updating state
+        if (!isMounted) return;
+        
+        if (!response || !response.ok) {
+          console.error(`Failed to fetch buildings: ${response?.status} ${response?.statusText}`);
+          return;
         }
-      })
-      .catch(error => {
+        
+        const data = await response.json().catch(error => {
+          console.error('JSON parsing error:', error);
+          return null;
+        });
+        
+        if (!data) {
+          console.error('Failed to parse JSON response');
+          return;
+        }
+        
+        if (data.buildings) {
+          console.log(`Successfully fetched ${data.buildings.length} buildings`);
+          setBuildings(data.buildings);
+        } else {
+          console.error('No buildings found in API response');
+        }
+      } catch (error) {
+        // Check if component is still mounted before updating state
+        if (!isMounted) return;
+        
         console.error('Error loading buildings:', error);
-      });
-      
-    // Initialize the transport service
-    // Using public methods instead of private initializeService
-    const success = transportService.setPolygonsData(polygons);
-    console.log(`Transport service initialization ${success ? 'succeeded' : 'failed'}`);
+      }
+    };
+    
+    // Execute the fetch functions
+    fetchPolygons();
+    fetchBuildings();
+    
+    // Initialize the transport service with retry logic
+    const initializeTransportService = async () => {
+      try {
+        console.log('Initializing transport service...');
+        const success = await transportService.preloadPolygons();
+        console.log(`Transport service initialization ${success ? 'succeeded' : 'failed'}`);
+      } catch (error) {
+        console.error('Error initializing transport service:', error);
+      }
+    };
+    
+    // Initialize transport service after a short delay to allow polygon data to load
+    const initTimeout = setTimeout(() => {
+      initializeTransportService();
+    }, 1000);
+    
+    // Clean up function
+    return () => {
+      isMounted = false;
+      clearTimeout(initTimeout);
+    };
   }, []);
 
   // Initial dispatch of ensureBuildingsVisible event - only runs once on mount

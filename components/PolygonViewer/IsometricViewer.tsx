@@ -2876,8 +2876,10 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       if (canvasRef.current) {
         const ctx = canvasRef.current.getContext('2d');
         if (ctx) {
-          // Redraw the scene
-          // This will use the updated hover state from hoverStateService
+          // Import renderService directly here to ensure it's defined
+          const { renderService } = require('@/lib/services/RenderService');
+          
+          // Get the current canvas dimensions
           const canvas = canvasRef.current;
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           
@@ -2885,14 +2887,13 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           ctx.fillStyle = '#87CEEB';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
           
-          // Draw polygons
+          // Draw polygons with updated hover state
           renderService.drawPolygons(ctx, polygonsToRender, {
             selectedPolygonId,
             hoveredPolygonId: data.type === 'polygon' ? data.id : null
           });
           
-          // Draw buildings and other elements
-          // This is a simplified version - in reality you'd call your full drawing logic
+          // Draw buildings with updated hover state
           if (buildings.length > 0) {
             renderService.drawBuildings(ctx, buildings, scale, offset, canvas.width, canvas.height, {
               selectedBuildingId,
