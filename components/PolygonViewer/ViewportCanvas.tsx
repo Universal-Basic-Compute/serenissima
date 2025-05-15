@@ -276,18 +276,7 @@ export default function ViewportCanvas({
     interactionService.updatePolygonsData(polygons);
   }, [polygons]);
   
-  // Add debugging for hover state changes
-  useEffect(() => {
-    // Use a ref to track previous value without causing re-renders
-    const prevHoveredBuildingIdRef = useRef<string | null>(null);
-    
-    // Only log if the value actually changed
-    if (hoveredBuildingId !== prevHoveredBuildingIdRef.current) {
-      console.log('%c ViewportCanvas: hoveredBuildingId changed:', 'background: #4CAF50; color: white;', hoveredBuildingId);
-      // Update the ref
-      prevHoveredBuildingIdRef.current = hoveredBuildingId;
-    }
-  }, [hoveredBuildingId]);  // Add hoveredBuildingId as a dependency
+  // Remove debugging for hover state changes
   
   // Calculate polygons to render
   useEffect(() => {

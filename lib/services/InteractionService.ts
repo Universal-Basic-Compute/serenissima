@@ -243,13 +243,8 @@ export class InteractionService {
     },
     setters: {
       setMousePosition: (position: { x: number, y: number }) => void;
-      setHoveredPolygonId: (id: string | null) => void;
       setSelectedPolygonId: (id: string | null) => void;
       setShowLandDetailsPanel: (show: boolean) => void;
-      setHoveredBuildingId: (id: string | null) => void;
-      setHoveredBuildingName: (name: string | null) => void;
-      setHoveredBuildingPosition: (position: { x: number, y: number } | null) => void;
-      setHoveredBuildingImagePath: (path: string | null) => void;
       setSelectedBuildingId: (id: string | null) => void;
       setShowBuildingDetailsPanel: (show: boolean) => void;
       setTransportStartPoint: (point: any) => void;
@@ -263,8 +258,6 @@ export class InteractionService {
       screenToLatLng: (screenX: number, screenY: number, scale: number, offset: {x: number, y: number}, canvasWidth: number, canvasHeight: number) => {lat: number, lng: number};
     }
   ): () => void {
-    // Import uiStateService here to avoid circular dependency
-    const { uiStateService } = require('./UIStateService');
     
     // Store references to data
     this._polygonsToRender = data.polygonsToRender;
@@ -294,34 +287,25 @@ export class InteractionService {
         return;
       }
       
-      // ONLY handle polygon hover in land view, disable building hover completely
+      // Set default cursor
+      canvas.style.cursor = this.isDraggingRef ? 'grabbing' : 'grab';
+      
+      // Check if mouse is over any polygon or building for cursor change only
+      let isOverInteractiveElement = false;
+      
+      // Check polygons in land view
       if (activeView === 'land') {
-        let newHoveredPolygonId = null;
-        
         for (const { polygon, coords } of data.polygonsToRender) {
           if (RenderService.prototype.isPointInPolygon(mouseX, mouseY, coords)) {
-            newHoveredPolygonId = polygon.id;
             canvas.style.cursor = 'pointer';
+            isOverInteractiveElement = true;
             break;
           }
         }
-        
-        if (!newHoveredPolygonId) {
-          canvas.style.cursor = this.isDraggingRef ? 'grabbing' : 'grab';
-        }
-        
-        // Only update state if the hovered polygon has changed AND is different from current state
-        if (newHoveredPolygonId !== this.hoveredPolygonIdRef && 
-            newHoveredPolygonId !== this.state.hoveredPolygonId) {
-          this.hoveredPolygonIdRef = newHoveredPolygonId;
-          this.state.hoveredPolygonId = newHoveredPolygonId;
-          setters.setHoveredPolygonId(newHoveredPolygonId);
-        }
-      } else if (activeView === 'buildings') {
-        // For buildings view, handle building hover but with caution
-        let newHoveredBuildingId = null;
-        
-        // Check if mouse is over any building
+      }
+      
+      // Check buildings in buildings view
+      if (activeView === 'buildings' && !isOverInteractiveElement) {
         for (const building of data.buildings) {
           if (!building.position) continue;
           
@@ -367,101 +351,10 @@ export class InteractionService {
             mouseY >= isoPos.y - squareSize/2 &&
             mouseY <= isoPos.y + squareSize/2
           ) {
-            newHoveredBuildingId = building.id;
             canvas.style.cursor = 'pointer';
+            isOverInteractiveElement = true;
             break;
           }
-        }
-        
-        // Only update state if the hovered building has changed AND is different from current state
-        if (newHoveredBuildingId !== this.hoveredBuildingIdRef && 
-            newHoveredBuildingId !== this.state.hoveredBuildingId) {
-          console.log('%c InteractionService: hoveredBuildingId changing from', 'background: #FF9800; color: white;', 
-            this.hoveredBuildingIdRef, 'to', newHoveredBuildingId);
-            
-          // Update refs first
-          this.hoveredBuildingIdRef = newHoveredBuildingId;
-          this.state.hoveredBuildingId = newHoveredBuildingId;
-          
-          // If we need to update the building name and image, do it separately
-          // without causing a circular dependency
-          if (newHoveredBuildingId) {
-            const building = data.buildings.find(b => b.id === newHoveredBuildingId);
-            if (building) {
-              // Update the state in a single batch to prevent multiple re-renders
-              setters.setHoveredBuildingId(newHoveredBuildingId);
-              
-              // Only update name if it's different from current
-              const buildingName = building.name || building.type;
-              if (buildingName !== uiStateService.getState().hoveredBuildingName) {
-                setters.setHoveredBuildingName(buildingName);
-              }
-              
-              // Calculate position for the building
-              let position = null;
-              if (building.position) {
-                try {
-                  const pos = typeof building.position === 'string' 
-                    ? JSON.parse(building.position) 
-                    : building.position;
-                  
-                  // Convert lat/lng to isometric coordinates
-                  let x, y;
-                  if ('lat' in pos && 'lng' in pos) {
-                    x = (pos.lng - 12.3326) * 20000;
-                    y = (pos.lat - 45.4371) * 20000;
-                  } else if ('x' in pos && 'z' in pos) {
-                    x = pos.x;
-                    y = pos.z;
-                  }
-                  
-                  if (x !== undefined && y !== undefined) {
-                    const screen = CoordinateService.worldToScreen(
-                      x, y, scale, offset, canvas.width, canvas.height
-                    );
-                    position = { x: screen.x, y: screen.y };
-                  }
-                } catch (e) {
-                  console.error('Error parsing building position:', e);
-                }
-              }
-              
-              // Only update position if it's different from current
-              const currentPosition = uiStateService.getState().hoveredBuildingPosition;
-              if (position && (!currentPosition || 
-                  position.x !== currentPosition.x || 
-                  position.y !== currentPosition.y)) {
-                setters.setHoveredBuildingPosition(position);
-              }
-              
-              // Don't fetch the image path here - that should be done in a separate effect
-            }
-          } else {
-            // Clear all hover state at once
-            setters.setHoveredBuildingId(null);
-            setters.setHoveredBuildingName(null);
-            setters.setHoveredBuildingPosition(null);
-            setters.setHoveredBuildingImagePath(null);
-          }
-        }
-      } else {
-        // For all other views, just set a default cursor
-        canvas.style.cursor = this.isDraggingRef ? 'grabbing' : 'grab';
-        
-        // Clear hover states if they were set
-        if (this.hoveredBuildingIdRef) {
-          this.hoveredBuildingIdRef = null;
-          this.state.hoveredBuildingId = null;
-          setters.setHoveredBuildingId(null);
-          setters.setHoveredBuildingName(null);
-          setters.setHoveredBuildingPosition(null);
-          setters.setHoveredBuildingImagePath(null);
-        }
-        
-        if (this.hoveredPolygonIdRef) {
-          this.hoveredPolygonIdRef = null;
-          this.state.hoveredPolygonId = null;
-          setters.setHoveredPolygonId(null);
         }
       }
     }, 50);

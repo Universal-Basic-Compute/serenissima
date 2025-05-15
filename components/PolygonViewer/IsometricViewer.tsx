@@ -70,27 +70,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [emptyBuildingPoints, setEmptyBuildingPoints] = useState<{lat: number, lng: number}[]>([]);
   
   // Add refs to track current state without causing re-renders
-  const hoveredPolygonIdRef = useRef<string | null>(null);
-  const hoveredBuildingIdRef = useRef<string | null>(null);
-  const hoveredCanalPointRef = useRef<{lat: number, lng: number} | null>(null);
-  const hoveredBridgePointRef = useRef<{lat: number, lng: number} | null>(null);
-  const hoveredCitizenBuildingRef = useRef<string | null>(null);
-  const hoveredCitizenTypeRef = useRef<'home' | 'work' | null>(null);
-  
-  // Add a ref to track previous state for debugging
-  const prevStateRef = useRef({
-    hoveredBuildingId: null as string | null,
-    hoveredBuildingName: null as string | null,
-    hoveredBuildingPosition: null as {x: number, y: number} | null,
-    hoveredBuildingImagePath: null as string | null,
-    isLoadingBuildingImage: false
-  });
   const isDraggingRef = useRef<boolean>(false);
-  
-  // Add a separate useEffect for fetching building images that won't cause an infinite loop
-  const buildingImageFetchingRef = useRef(false);
-  const prevHoveredBuildingIdRef = useRef<string | null>(null);
-  const prevHoveredBuildingNameRef = useRef<string | null>(null);
   
   useEffect(() => {
     // Only fetch the image if we have a hovered building with a name but no image path yet
@@ -291,14 +271,10 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [citizens, setCitizens] = useState<any[]>([]);
   const [citizensByBuilding, setCitizensByBuilding] = useState<Record<string, any[]>>({});
   const [citizensLoaded, setCitizensLoaded] = useState<boolean>(false);
-  const [hoveredCitizenBuilding, setHoveredCitizenBuilding] = useState<string | null>(null);
-  const [hoveredCitizenType, setHoveredCitizenType] = useState<'home' | 'work' | null>(null);
   const [selectedCitizen, setSelectedCitizen] = useState<any>(null);
   const [showCitizenDetailsPanel, setShowCitizenDetailsPanel] = useState<boolean>(false);
   
-  // State for dock and bridge points
-  const [hoveredCanalPoint, setHoveredCanalPoint] = useState<{lat: number, lng: number} | null>(null);
-  const [hoveredBridgePoint, setHoveredBridgePoint] = useState<{lat: number, lng: number} | null>(null);
+  // No replacement - removing hover state for dock and bridge points
   
   // Transport route planning state
   const [transportMode, setTransportMode] = useState<boolean>(false);
@@ -1257,13 +1233,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       },
       {
         setMousePosition,
-        setHoveredPolygonId,
         setSelectedPolygonId,
         setShowLandDetailsPanel,
-        setHoveredBuildingId,
-        setHoveredBuildingName,
-        setHoveredBuildingPosition,
-        setHoveredBuildingImagePath,
         setSelectedBuildingId,
         setShowBuildingDetailsPanel,
         setTransportStartPoint,
@@ -1555,8 +1526,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     y: number, 
     citizen: any, 
     markerType: 'home' | 'work',
-    size: number = 20,
-    isHovered: boolean = false
+    size: number = 20
   ) => {
     // Log citizen data for debugging
     console.log(`Creating citizen marker for:`, {
@@ -1575,29 +1545,29 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       if (baseClass.includes('nobili')) {
         // Gold/yellow for nobility
         return markerType === 'home' 
-          ? (isHovered ? 'rgba(255, 215, 0, 0.9)' : 'rgba(218, 165, 32, 0.8)')
-          : (isHovered ? 'rgba(255, 215, 0, 0.9)' : 'rgba(218, 165, 32, 0.8)');
+          ? 'rgba(218, 165, 32, 0.8)'
+          : 'rgba(218, 165, 32, 0.8)';
       } else if (baseClass.includes('cittadini')) {
         // Blue for citizens
         return markerType === 'home' 
-          ? (isHovered ? 'rgba(70, 130, 180, 0.9)' : 'rgba(70, 130, 180, 0.8)')
-          : (isHovered ? 'rgba(70, 130, 180, 0.9)' : 'rgba(70, 130, 180, 0.8)');
+          ? 'rgba(70, 130, 180, 0.8)'
+          : 'rgba(70, 130, 180, 0.8)';
       } else if (baseClass.includes('popolani')) {
         // Brown/amber for common people
         return markerType === 'home' 
-          ? (isHovered ? 'rgba(205, 133, 63, 0.9)' : 'rgba(205, 133, 63, 0.8)')
-          : (isHovered ? 'rgba(205, 133, 63, 0.9)' : 'rgba(205, 133, 63, 0.8)');
+          ? 'rgba(205, 133, 63, 0.8)'
+          : 'rgba(205, 133, 63, 0.8)';
       } else if (baseClass.includes('laborer') || baseClass.includes('facchini')) {
         // Gray for laborers
         return markerType === 'home' 
-          ? (isHovered ? 'rgba(128, 128, 128, 0.9)' : 'rgba(128, 128, 128, 0.8)')
-          : (isHovered ? 'rgba(128, 128, 128, 0.9)' : 'rgba(128, 128, 128, 0.8)');
+          ? 'rgba(128, 128, 128, 0.8)'
+          : 'rgba(128, 128, 128, 0.8)';
       }
       
       // Default colors if social class is unknown or not matched
       return markerType === 'home' 
-        ? (isHovered ? 'rgba(120, 170, 255, 0.9)' : 'rgba(100, 150, 255, 0.8)')
-        : (isHovered ? 'rgba(255, 170, 120, 0.9)' : 'rgba(255, 150, 100, 0.8)');
+        ? 'rgba(100, 150, 255, 0.8)'
+        : 'rgba(255, 150, 100, 0.8)';
     };
 
     // Get color based on social class
@@ -1605,13 +1575,13 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
 
     // Draw a circular background with color based on social class
     ctx.beginPath();
-    ctx.arc(x, y, size + (isHovered ? 2 : 0), 0, Math.PI * 2);
+    ctx.arc(x, y, size, 0, Math.PI * 2);
     ctx.fillStyle = fillColor;
     ctx.fill();
     
-    // Add a white border, thicker when hovered
-    ctx.strokeStyle = isHovered ? '#FFFF00' : '#FFFFFF';
-    ctx.lineWidth = isHovered ? 3 : 2;
+    // Add a white border
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 2;
     ctx.stroke();
     
     // Add the citizen's initials
@@ -1696,10 +1666,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   useEffect(() => {
     if (loading || !canvasRef.current || polygons.length === 0) return;
     
-    // Debug logging for hover state
-    if (hoveredBuildingId) {
-      //console.log('Drawing with hoveredBuildingId:', hoveredBuildingId);
-    }
+    // Remove debug logging for hover state
     
     // Reset hover and selection state when switching away from land view
     if (activeView !== 'land') {
@@ -1812,23 +1779,16 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       }
       ctx.closePath();
       
-      // Determine if this polygon is hovered or selected
-      const isHovered = hoveredPolygonId === polygon.id;
+      // Determine if this polygon is selected
       const isSelected = selectedPolygonId === polygon.id;
       
-      // Apply different styles for hover and selected states
+      // Apply different styles for selected state
       if (isSelected) {
         // Selected state: much brighter with a thicker border
         ctx.fillStyle = lightenColor(fillColor, 35); // Increased brightness for selection
         ctx.fill();
         ctx.strokeStyle = '#FF3300'; // Bright red-orange for selected
         ctx.lineWidth = 3.5;
-      } else if (isHovered) {
-        // Hover state: significantly brighter with a more vibrant border
-        ctx.fillStyle = lightenColor(fillColor, 25); // Increased brightness for hover
-        ctx.fill();
-        ctx.strokeStyle = '#FFCC00'; // Bright yellow for hover
-        ctx.lineWidth = 3; // Thicker border
       } else {
         // Normal state
         ctx.fillStyle = fillColor;
@@ -2015,8 +1975,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         const size = getBuildingSize(building.type);
         const color = getBuildingColor(building.type);
         
-        // Determine if this building is hovered or selected with more explicit check
-        const isHovered = hoveredBuildingId !== null && hoveredBuildingId === building.id;
+        // Determine if this building is selected
         const isSelected = selectedBuildingId !== null && selectedBuildingId === building.id;
         
         // Determine the shape based on point_id or Point field
@@ -2033,25 +1992,15 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           }
         }
         
-        // Debug logging for hover state
-        if (isHovered) {
-          console.log(`Building ${building.id} is hovered, applying hover style`);
-        }
-        
-        // Draw simple square for building with hover/select states
+        // Draw simple square for building with select state
         const squareSize = Math.max(size.width, size.depth) * scale * 0.6;
         
-        // Apply different styles for hover and selected states
+        // Apply different styles for selected state
         if (isSelected) {
           // Selected state: much brighter with a thicker border
           ctx.fillStyle = lightenColor(color, 35); // Increased brightness for selection
           ctx.strokeStyle = '#FF3300'; // Bright red-orange for selected
           ctx.lineWidth = 3.5;
-        } else if (isHovered) {
-          // Make hover state MUCH more dramatic for testing
-          ctx.fillStyle = '#FF00FF'; // Bright magenta for hover - very obvious
-          ctx.strokeStyle = '#FFFF00'; // Bright yellow border
-          ctx.lineWidth = 5; // Extra thick border
         } else {
           // Normal state
           ctx.fillStyle = color;
@@ -2086,7 +2035,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         ctx.stroke();
         
         // Add a small indicator for the building type with fixed font size
-        ctx.fillStyle = isHovered ? '#FFFFFF' : '#000'; // White text on hover for better visibility
+        ctx.fillStyle = '#000'; // Black text for visibility
         ctx.font = `10px Arial`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -2739,39 +2688,17 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           y: calculateIsoY(x, y, scale, offset, canvas.height)
         };
         
-        // Check if mouse is over this building point
+        // Draw a small circle for empty building points with subtle colors
         const pointSize = activeView === 'buildings' ? 2.2 * scale : 1.8 * scale; // Smaller in non-buildings views
-        const isHovered = 
-          mousePosition.x >= isoPos.x - pointSize && 
-          mousePosition.x <= isoPos.x + pointSize && 
-          mousePosition.y >= isoPos.y - pointSize && 
-          mousePosition.y <= isoPos.y + pointSize;
-        
-        // Draw a small circle for empty building points with even more subtle colors
         ctx.beginPath();
         ctx.arc(isoPos.x, isoPos.y, pointSize, 0, Math.PI * 2);
-    
-        // Apply different opacity and color based on hover state and active view
-        // Use an even more muted, earthy color that better blends with the map
+  
+        // Use a muted, earthy color that blends with the map
         // Make points more visible in buildings view, more subtle in other views
         const baseOpacity = activeView === 'buildings' ? 0.15 : 0.08;
-        const hoverOpacity = activeView === 'buildings' ? 0.3 : 0.2;
-        
-        ctx.fillStyle = isHovered 
-          ? `rgba(160, 140, 120, ${hoverOpacity})` // Hovered state
-          : `rgba(160, 140, 120, ${baseOpacity})`; // Normal state
-        
+      
+        ctx.fillStyle = `rgba(160, 140, 120, ${baseOpacity})`;
         ctx.fill();
-        
-        // Add a subtle border when hovered, but only in buildings view
-        if (isHovered && activeView === 'buildings') {
-          ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; // Less opaque white
-          ctx.lineWidth = 0.8; // Thinner line
-          ctx.stroke();
-          
-          // Update cursor to pointer when hovering over a building point
-          canvas.style.cursor = 'pointer';
-        }
       });
     }
     
@@ -2792,30 +2719,20 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
               y: calculateIsoY(x, y, scale, offset, canvas.height)
             };
             
-            // Check if this point is hovered
-            const isHovered = hoveredCanalPoint && 
-              Math.abs(hoveredCanalPoint.lat - point.edge.lat) < 0.0001 && 
-              Math.abs(hoveredCanalPoint.lng - point.edge.lng) < 0.0001;
-            
             // Draw a small, semi-transparent circle for dock points
             ctx.beginPath();
             ctx.arc(isoPos.x, isoPos.y, 2 * scale, 0, Math.PI * 2);
-            
-            // Use a subtle blue color with low opacity, brighter when hovered
+      
+            // Use a subtle blue color with low opacity
             // Make points more visible in buildings view, more subtle in other views
             const baseOpacity = activeView === 'buildings' ? 0.3 : 0.15;
-            const hoverOpacity = activeView === 'buildings' ? 0.7 : 0.4;
-            
-            ctx.fillStyle = isHovered 
-              ? `rgba(0, 120, 215, ${hoverOpacity})` // Brighter and more opaque when hovered
-              : `rgba(0, 120, 215, ${baseOpacity})`;
+      
+            ctx.fillStyle = `rgba(0, 120, 215, ${baseOpacity})`;
             ctx.fill();
-            
-            // Add a border, more visible when hovered
-            ctx.strokeStyle = isHovered
-              ? 'rgba(255, 255, 255, 0.8)' // White border when hovered
-              : 'rgba(0, 120, 215, 0.4)';
-            ctx.lineWidth = isHovered ? 1.5 : 0.5;
+      
+            // Add a border
+            ctx.strokeStyle = 'rgba(0, 120, 215, 0.4)';
+            ctx.lineWidth = 0.5;
             ctx.stroke();
           });
         }
@@ -2834,22 +2751,14 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
               y: calculateIsoY(x, y, scale, offset, canvas.height)
             };
             
-            // Check if this point is hovered
-            const isHovered = hoveredBridgePoint && 
-              Math.abs(hoveredBridgePoint.lat - point.edge.lat) < 0.0001 && 
-              Math.abs(hoveredBridgePoint.lng - point.edge.lng) < 0.0001;
-            
             // Draw a small, semi-transparent square for bridge points
             const pointSize = 2 * scale;
-            
-            // Use a subtle orange/brown color with low opacity, brighter when hovered
+      
+            // Use a subtle orange/brown color with low opacity
             // Make points more visible in buildings view, more subtle in other views
             const baseOpacity = activeView === 'buildings' ? 0.3 : 0.15;
-            const hoverOpacity = activeView === 'buildings' ? 0.7 : 0.4;
-            
-            ctx.fillStyle = isHovered
-              ? `rgba(180, 120, 60, ${hoverOpacity})` // Brighter and more opaque when hovered
-              : `rgba(180, 120, 60, ${baseOpacity})`;
+      
+            ctx.fillStyle = `rgba(180, 120, 60, ${baseOpacity})`;
             ctx.beginPath();
             ctx.rect(
               isoPos.x - pointSize/2, 
@@ -2858,12 +2767,10 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
               pointSize
             );
             ctx.fill();
-            
-            // Add a border, more visible when hovered
-            ctx.strokeStyle = isHovered
-              ? 'rgba(255, 255, 255, 0.8)' // White border when hovered
-              : 'rgba(180, 120, 60, 0.4)';
-            ctx.lineWidth = isHovered ? 1.5 : 0.5;
+      
+            // Add a border
+            ctx.strokeStyle = 'rgba(180, 120, 60, 0.4)';
+            ctx.lineWidth = 0.5;
             ctx.stroke();
           });
         }
@@ -2893,21 +2800,13 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             // Choose color based on social class
             let fillColor = 'rgba(100, 150, 255, 0.8)'; // Default blue
             if (baseClass.includes('nobili')) {
-              fillColor = hoveredCitizenBuilding === buildingId && hoveredCitizenType === 'home'
-                ? 'rgba(255, 215, 0, 0.9)' // Gold for nobility (hovered)
-                : 'rgba(218, 165, 32, 0.8)'; // Gold for nobility
+              fillColor = 'rgba(218, 165, 32, 0.8)'; // Gold for nobility
             } else if (baseClass.includes('cittadini')) {
-              fillColor = hoveredCitizenBuilding === buildingId && hoveredCitizenType === 'home'
-                ? 'rgba(70, 130, 180, 0.9)' // Blue for citizens (hovered)
-                : 'rgba(70, 130, 180, 0.8)'; // Blue for citizens
+              fillColor = 'rgba(70, 130, 180, 0.8)'; // Blue for citizens
             } else if (baseClass.includes('popolani')) {
-              fillColor = hoveredCitizenBuilding === buildingId && hoveredCitizenType === 'home'
-                ? 'rgba(205, 133, 63, 0.9)' // Brown for common people (hovered)
-                : 'rgba(205, 133, 63, 0.8)'; // Brown for common people
+              fillColor = 'rgba(205, 133, 63, 0.8)'; // Brown for common people
             } else if (baseClass.includes('laborer') || baseClass.includes('facchini')) {
-              fillColor = hoveredCitizenBuilding === buildingId && hoveredCitizenType === 'home'
-                ? 'rgba(128, 128, 128, 0.9)' // Gray for laborers (hovered)
-                : 'rgba(128, 128, 128, 0.8)'; // Gray for laborers
+              fillColor = 'rgba(128, 128, 128, 0.8)'; // Gray for laborers
             }
             
             // Draw a slightly larger marker with count
@@ -2915,10 +2814,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             ctx.arc(position.x - 15, position.y, 25, 0, Math.PI * 2);
             ctx.fillStyle = fillColor;
             ctx.fill();
-            ctx.strokeStyle = hoveredCitizenBuilding === buildingId && hoveredCitizenType === 'home'
-              ? '#FFFF00'
-              : '#FFFFFF';
-            ctx.lineWidth = hoveredCitizenBuilding === buildingId && hoveredCitizenType === 'home' ? 3 : 2;
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.lineWidth = 2;
             ctx.stroke();
             
             // Add count
@@ -2981,8 +2878,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
               position.y, 
               homeCitizens[0], 
               'home', 
-              20, 
-              hoveredCitizenBuilding === buildingId && hoveredCitizenType === 'home'
+              20
             );
           }
         }
@@ -2998,21 +2894,13 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             // Choose color based on social class
             let fillColor = 'rgba(255, 150, 100, 0.8)'; // Default orange
             if (baseClass.includes('nobili')) {
-              fillColor = hoveredCitizenBuilding === buildingId && hoveredCitizenType === 'work'
-                ? 'rgba(255, 215, 0, 0.9)' // Gold for nobility (hovered)
-                : 'rgba(218, 165, 32, 0.8)'; // Gold for nobility
+              fillColor = 'rgba(218, 165, 32, 0.8)'; // Gold for nobility
             } else if (baseClass.includes('cittadini')) {
-              fillColor = hoveredCitizenBuilding === buildingId && hoveredCitizenType === 'work'
-                ? 'rgba(70, 130, 180, 0.9)' // Blue for citizens (hovered)
-                : 'rgba(70, 130, 180, 0.8)'; // Blue for citizens
+              fillColor = 'rgba(70, 130, 180, 0.8)'; // Blue for citizens
             } else if (baseClass.includes('popolani')) {
-              fillColor = hoveredCitizenBuilding === buildingId && hoveredCitizenType === 'work'
-                ? 'rgba(205, 133, 63, 0.9)' // Brown for common people (hovered)
-                : 'rgba(205, 133, 63, 0.8)'; // Brown for common people
+              fillColor = 'rgba(205, 133, 63, 0.8)'; // Brown for common people
             } else if (baseClass.includes('laborer') || baseClass.includes('facchini')) {
-              fillColor = hoveredCitizenBuilding === buildingId && hoveredCitizenType === 'work'
-                ? 'rgba(128, 128, 128, 0.9)' // Gray for laborers (hovered)
-                : 'rgba(128, 128, 128, 0.8)'; // Gray for laborers
+              fillColor = 'rgba(128, 128, 128, 0.8)'; // Gray for laborers
             }
             
             // Draw a slightly larger marker with count
@@ -3020,10 +2908,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             ctx.arc(position.x + 15, position.y, 25, 0, Math.PI * 2);
             ctx.fillStyle = fillColor;
             ctx.fill();
-            ctx.strokeStyle = hoveredCitizenBuilding === buildingId && hoveredCitizenType === 'work'
-              ? '#FFFF00'
-              : '#FFFFFF';
-            ctx.lineWidth = hoveredCitizenBuilding === buildingId && hoveredCitizenType === 'work' ? 3 : 2;
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.lineWidth = 2;
             ctx.stroke();
             
             // Add count
@@ -3052,8 +2938,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
               position.y, 
               workCitizens[0], 
               'work', 
-              20, 
-              hoveredCitizenBuilding === buildingId && hoveredCitizenType === 'work'
+              20
             );
           }
         }

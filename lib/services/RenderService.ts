@@ -110,7 +110,7 @@ export class RenderService {
     ctx.stroke();
     
     // Add a small indicator for the building type with fixed font size
-    ctx.fillStyle = isHovered ? '#FFFFFF' : '#000'; // White text on hover for better visibility
+    ctx.fillStyle = '#000'; // Black text for visibility
     ctx.font = `10px Arial`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -259,8 +259,7 @@ export class RenderService {
     y: number, 
     citizen: any, 
     markerType: 'home' | 'work',
-    size: number = 20,
-    isHovered: boolean = false
+    size: number = 20
   ): void {
     // Determine color based on social class
     const getSocialClassColor = (socialClass: string): string => {
@@ -270,29 +269,29 @@ export class RenderService {
       if (baseClass.includes('nobili')) {
         // Gold/yellow for nobility
         return markerType === 'home' 
-          ? (isHovered ? 'rgba(255, 215, 0, 0.9)' : 'rgba(218, 165, 32, 0.8)')
-          : (isHovered ? 'rgba(255, 215, 0, 0.9)' : 'rgba(218, 165, 32, 0.8)');
+          ? 'rgba(218, 165, 32, 0.8)'
+          : 'rgba(218, 165, 32, 0.8)';
       } else if (baseClass.includes('cittadini')) {
         // Blue for citizens
         return markerType === 'home' 
-          ? (isHovered ? 'rgba(70, 130, 180, 0.9)' : 'rgba(70, 130, 180, 0.8)')
-          : (isHovered ? 'rgba(70, 130, 180, 0.9)' : 'rgba(70, 130, 180, 0.8)');
+          ? 'rgba(70, 130, 180, 0.8)'
+          : 'rgba(70, 130, 180, 0.8)';
       } else if (baseClass.includes('popolani')) {
         // Brown/amber for common people
         return markerType === 'home' 
-          ? (isHovered ? 'rgba(205, 133, 63, 0.9)' : 'rgba(205, 133, 63, 0.8)')
-          : (isHovered ? 'rgba(205, 133, 63, 0.9)' : 'rgba(205, 133, 63, 0.8)');
+          ? 'rgba(205, 133, 63, 0.8)'
+          : 'rgba(205, 133, 63, 0.8)';
       } else if (baseClass.includes('laborer') || baseClass.includes('facchini')) {
         // Gray for laborers
         return markerType === 'home' 
-          ? (isHovered ? 'rgba(128, 128, 128, 0.9)' : 'rgba(128, 128, 128, 0.8)')
-          : (isHovered ? 'rgba(128, 128, 128, 0.9)' : 'rgba(128, 128, 128, 0.8)');
+          ? 'rgba(128, 128, 128, 0.8)'
+          : 'rgba(128, 128, 128, 0.8)';
       }
       
       // Default colors if social class is unknown or not matched
       return markerType === 'home' 
-        ? (isHovered ? 'rgba(120, 170, 255, 0.9)' : 'rgba(100, 150, 255, 0.8)')
-        : (isHovered ? 'rgba(255, 170, 120, 0.9)' : 'rgba(255, 150, 100, 0.8)');
+        ? 'rgba(100, 150, 255, 0.8)'
+        : 'rgba(255, 150, 100, 0.8)';
     };
 
     // Get color based on social class
@@ -300,13 +299,13 @@ export class RenderService {
 
     // Draw a circular background with color based on social class
     ctx.beginPath();
-    ctx.arc(x, y, size + (isHovered ? 2 : 0), 0, Math.PI * 2);
+    ctx.arc(x, y, size, 0, Math.PI * 2);
     ctx.fillStyle = fillColor;
     ctx.fill();
     
-    // Add a white border, thicker when hovered
-    ctx.strokeStyle = isHovered ? '#FFFF00' : '#FFFFFF';
-    ctx.lineWidth = isHovered ? 3 : 2;
+    // Add a white border
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 2;
     ctx.stroke();
     
     // Add the citizen's initials
