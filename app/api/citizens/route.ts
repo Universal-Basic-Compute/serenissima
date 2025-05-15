@@ -8,6 +8,9 @@ type AirtableValue = string | number | boolean | Collaborator | readonly Collabo
 // Helper function to safely convert Airtable values to strings
 function airtableValueToString(value: AirtableValue | undefined | null): string {
   if (value === undefined || value === null) return '';
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  // Handle arrays and other complex types
   return String(value);
 }
 
@@ -140,6 +143,9 @@ export async function GET(request: Request) {
       // Safely convert Airtable values to strings
       const safeString = (value: AirtableValue | undefined | null, defaultValue: string = ''): string => {
         if (value === undefined || value === null) return defaultValue;
+        if (typeof value === 'string') return value;
+        if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+        // Handle arrays and other complex types
         return String(value);
       };
       
@@ -152,11 +158,11 @@ export async function GET(request: Request) {
         socialclass: safeString(record.fields.SocialClass, 'Popolani'),
         description: safeString(record.fields.Description, 'A citizen of Venice.'),
         profileimage: formatImageUrl(
-          record.fields.ImageUrl ? airtableValueToString(record.fields.ImageUrl) : undefined, 
+          record.fields.ImageUrl ? String(record.fields.ImageUrl) : undefined, 
           citizenId
         ),
         imageurl: formatImageUrl(
-          record.fields.ImageUrl ? airtableValueToString(record.fields.ImageUrl) : undefined, 
+          record.fields.ImageUrl ? String(record.fields.ImageUrl) : undefined, 
           citizenId
         ),
         // Ensure position is included and properly formatted
