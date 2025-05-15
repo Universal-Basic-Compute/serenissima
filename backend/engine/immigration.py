@@ -131,6 +131,13 @@ def save_citizen_to_airtable(tables, citizen: Dict, polygon_centers: list) -> Op
         if polygon_centers:
             position = random.choice(polygon_centers)
             log.info(f"Assigned position {position} to citizen {citizen['id']}")
+        else:
+            # If no polygon centers available, create a random position in Venice
+            position = {
+                "lat": 45.4371 + random.uniform(-0.01, 0.01),
+                "lng": 12.3326 + random.uniform(-0.01, 0.01)
+            }
+            log.info(f"Created random position for citizen {citizen['id']}: {position}")
         
         # Create the citizen record
         record = tables['citizens'].create({
@@ -142,7 +149,7 @@ def save_citizen_to_airtable(tables, citizen: Dict, polygon_centers: list) -> Op
             "ImagePrompt": citizen["ImagePrompt"],
             "Wealth": citizen["Wealth"],
             "CreatedAt": citizen["CreatedAt"],
-            "Position": json.dumps(position) if position else None  # Add position field
+            "Position": json.dumps(position)  # Ensure position is always provided as JSON string
         })
         
         log.info(f"Successfully saved citizen to Airtable with ID: {record['id']}")

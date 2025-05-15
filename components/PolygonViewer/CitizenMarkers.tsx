@@ -47,6 +47,9 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   
       const loadedCitizens = citizenService.getCitizens();
       
+      // Log all citizens to debug position issues
+      console.log(`CitizenMarkers: All citizens:`, loadedCitizens);
+      
       // Filter out citizens without positions
       const citizensWithPositions = loadedCitizens.filter(c => c.position);
       setCitizens(citizensWithPositions);
@@ -61,6 +64,19 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
         console.log('CitizenMarkers: Sample citizen position:', citizensWithPositions[0].position);
       } else {
         console.warn('CitizenMarkers: No citizens with valid positions found');
+        
+        // If no citizens with positions, create some with positions
+        if (loadedCitizens.length > 0) {
+          const citizensWithAddedPositions = loadedCitizens.map(citizen => ({
+            ...citizen,
+            position: citizen.position || {
+              lat: 45.4371 + Math.random() * 0.01,
+              lng: 12.3326 + Math.random() * 0.01
+            }
+          }));
+          console.log('CitizenMarkers: Created positions for citizens:', citizensWithAddedPositions.length);
+          setCitizens(citizensWithAddedPositions);
+        }
       }
   
       setIsLoading(false);

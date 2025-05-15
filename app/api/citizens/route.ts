@@ -147,7 +147,8 @@ export async function GET(request: Request) {
         Description: record.fields.Description || 'A citizen of Venice.',
         profileImage: formatImageUrl(record.fields.ImageUrl?.toString(), citizenId),
         ImageUrl: formatImageUrl(record.fields.ImageUrl?.toString(), citizenId),
-        position: position, // Use position directly
+        // Ensure position is included and properly formatted
+        position: position || { lat: 45.4371 + Math.random() * 0.01, lng: 12.3326 + Math.random() * 0.01 },
         occupation: record.fields.Occupation || 'Citizen',
         wealth: record.fields.Wealth || 'Average',
         Wealth: record.fields.Wealth || 'Average',
