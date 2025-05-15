@@ -340,6 +340,42 @@ export class TransportService {
       }
     } catch (error) {
       console.error('Error calculating transport route:', error);
+      
+      // Create a simple direct path as a last resort
+      try {
+        console.log('Attempting emergency direct path as last resort...');
+        
+        if (start && end) {
+          // Calculate direct distance
+          const directDistance = this.calculateDistance(start, end);
+          
+          // Create a simple direct path
+          const directPath = [
+            { ...start, type: 'centroid', transportMode: 'walking' },
+            { ...end, type: 'centroid', transportMode: 'walking' }
+          ];
+          
+          // Calculate time based on distance (walking at 5 km/h)
+          const timeMinutes = Math.round((directDistance / 1000 / 5) * 60);
+          
+          console.log(`Created emergency direct path, distance: ${directDistance}m`);
+          
+          this.transportPath = directPath;
+          
+          // Emit event with the calculated path
+          eventBus.emit(EventTypes.TRANSPORT_ROUTE_CALCULATED, {
+            path: directPath,
+            waterOnly: false,
+            isEmergencyPath: true
+          });
+          
+          return;
+        }
+      } catch (emergencyError) {
+        console.error('Even emergency path creation failed:', emergencyError);
+      }
+      
+      // If all else fails, show error and reset
       alert('Error calculating route. Please try again.');
       this.transportEndPoint = null;
       eventBus.emit(EventTypes.TRANSPORT_ROUTE_ERROR, error);
@@ -1521,17 +1557,41 @@ export class TransportService {
     let closestNode: string | null = null;
     let minDistance = Infinity;
     
-    for (const [nodeId, node] of Object.entries(graph.nodes)) {
-      // If polygonId is specified, only consider nodes in that polygon
-      if (polygonId && node.polygonId !== polygonId) {
-        continue;
+    // First try to find nodes in the specified polygon
+    if (polygonId) {
+      for (const [nodeId, node] of Object.entries(graph.nodes)) {
+        if (node.polygonId === polygonId) {
+          const distance = this.calculateDistance(point, node.position);
+          if (distance < minDistance) {
+            minDistance = distance;
+            closestNode = nodeId;
+          }
+        }
       }
       
+      // If we found a node in the specified polygon, return it
+      if (closestNode) {
+        return closestNode;
+      }
+      
+      // If not, log a warning and continue with all nodes
+      console.warn(`No nodes found in polygon ${polygonId}, searching all nodes`);
+    }
+    
+    // If no polygon specified or no nodes found in the specified polygon, search all nodes
+    for (const [nodeId, node] of Object.entries(graph.nodes)) {
       const distance = this.calculateDistance(point, node.position);
       if (distance < minDistance) {
         minDistance = distance;
         closestNode = nodeId;
       }
+    }
+    
+    // If we still didn't find any nodes, log an error
+    if (!closestNode) {
+      console.error('No nodes found in the graph!');
+    } else {
+      console.log(`Found closest node ${closestNode} at distance ${minDistance}m`);
     }
     
     return closestNode;
@@ -2125,10 +2185,59 @@ export class TransportService {
         
         console.log('No path found between any combination of nodes:', nodeInfo);
         
+        // Add this fallback code before returning the error:
+        console.log('Attempting direct path fallback...');
+        
+        // Calculate direct distance
+        const directDistance = this.calculateDistance(startPoint, endPoint);
+        
+        // Create a direct path with intermediate points
+        const numPoints = Math.max(2, Math.min(5, Math.floor(directDistance / 100)));
+        const directPath = [
+          {
+            ...startPoint,
+            type: 'centroid',
+            polygonId: startPolygon.id,
+            transportMode: 'walking'
+          }
+        ];
+        
+        // Add intermediate points
+        for (let i = 1; i <= numPoints; i++) {
+          const fraction = i / (numPoints + 1);
+          // Add some randomness to create natural curves
+          const jitter = 0.00002 * (Math.random() * 2 - 1);
+          directPath.push({
+            lat: startPoint.lat + (endPoint.lat - startPoint.lat) * fraction + jitter,
+            lng: startPoint.lng + (endPoint.lng - startPoint.lng) * fraction + jitter,
+            type: 'centroid',
+            polygonId: startPolygon.id,
+            transportMode: 'walking',
+            isIntermediatePoint: true
+          });
+        }
+        
+        // Add the end point
+        directPath.push({
+          ...endPoint,
+          type: 'centroid',
+          polygonId: endPolygon.id,
+          transportMode: 'walking'
+        });
+        
+        // Calculate time based on distance (walking at 5 km/h)
+        const timeMinutes = Math.round((directDistance / 1000 / 5) * 60);
+        
+        console.log(`Created direct fallback path with ${directPath.length} points, distance: ${directDistance}m`);
+        
         return {
-          success: false,
-          error: 'No path found between the points',
-          debug: nodeInfo
+          success: true,
+          path: directPath,
+          distance: directDistance,
+          walkingDistance: directDistance,
+          waterDistance: 0,
+          estimatedTimeMinutes: timeMinutes,
+          isFallbackPath: true
         };
       }
       
