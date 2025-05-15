@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { findWaterOnlyPath } from '../route'; // Import the function from the main transport route
+import { transportService } from '@/lib/services/TransportService';
 
 export async function POST(request: Request) {
   try {
@@ -20,8 +20,8 @@ export async function POST(request: Request) {
     
     console.log('Water-only route endpoint called directly with:', { startPoint, endPoint });
     
-    // Use water-only pathfinding directly
-    const result = await findWaterOnlyPath(startPoint, endPoint);
+    // Use water-only pathfinding directly from the transport service
+    const result = await transportService.findWaterOnlyPath(startPoint, endPoint);
     
     return NextResponse.json(result);
   } catch (error) {
