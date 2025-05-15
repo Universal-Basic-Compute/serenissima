@@ -1314,6 +1314,44 @@ export class TransportService {
     return graph;
   }
 
+  /**
+   * Debug function to get information about the graph
+   * This is used by the debug endpoint
+   */
+  public debugGraph(): any {
+    // Ensure graph is built
+    if (!this.graph) {
+      this.graph = this.buildGraph(this.polygons);
+    }
+    
+    // Count nodes by type
+    const nodesByType: Record<string, number> = {};
+    for (const node of Object.values(this.graph.nodes)) {
+      nodesByType[node.type] = (nodesByType[node.type] || 0) + 1;
+    }
+    
+    // Count edges
+    const totalEdges = Object.values(this.graph.edges).reduce(
+      (sum, edges) => sum + edges.length, 
+      0
+    );
+    
+    // Count connected components
+    const components = this.findConnectedComponents(this.graph);
+    
+    return {
+      totalNodes: Object.keys(this.graph.nodes).length,
+      totalEdges: totalEdges,
+      nodesByType: nodesByType,
+      connectedComponents: components.length,
+      componentSizes: components.map(c => c.length),
+      pathfindingMode: this.pathfindingMode,
+      polygonsLoaded: this.polygonsLoaded,
+      polygonCount: this.polygons.length,
+      canalNetworkSegments: Object.keys(this.canalNetwork).length
+    };
+  }
+
   // Function to build canal network
   private buildCanalNetwork(polygons: Polygon[]): Record<string, Point[]> {
     // Create a map of canal segments
