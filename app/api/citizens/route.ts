@@ -142,17 +142,17 @@ export async function GET(request: Request) {
           (typeof record.fields.LastName === 'string' ? 
             record.fields.LastName : 
             String(record.fields.LastName)) : 'Citizen',
-        socialclass: record.fields.SocialClass || 'Popolani',
-        description: record.fields.Description || 'A citizen of Venice.',
+        socialclass: String(record.fields.SocialClass || 'Popolani'),
+        description: String(record.fields.Description || 'A citizen of Venice.'),
         profileimage: formatImageUrl(record.fields.ImageUrl?.toString(), citizenId),
         imageurl: formatImageUrl(record.fields.ImageUrl?.toString(), citizenId),
         // Ensure position is included and properly formatted
         position: typeof record.fields.Position === 'string' 
           ? JSON.parse(record.fields.Position) 
           : record.fields.Position || { lat: 45.4371 + Math.random() * 0.01, lng: 12.3326 + Math.random() * 0.01 },
-        occupation: record.fields.Occupation || 'Citizen',
+        occupation: String(record.fields.Occupation || 'Citizen'),
         wealth: record.fields.Wealth || 0,
-        createdat: record.fields.CreatedAt || new Date().toISOString(),
+        createdat: String(record.fields.CreatedAt || new Date().toISOString()),
         // Add home and work assignments
         home: buildings.home || null,
         work: buildings.work || null
