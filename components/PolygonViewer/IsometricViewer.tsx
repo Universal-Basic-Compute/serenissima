@@ -1,10 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { debounce, throttle } from 'lodash';
+import { useEffect, useState } from 'react';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
-import { fetchCoatOfArmsImage } from '@/app/utils/coatOfArmsUtils';
-import { buildingPointsService } from '@/lib/services/BuildingPointsService';
+import ViewportCanvas from './ViewportCanvas';
 import LandDetailsPanel from './LandDetailsPanel';
 import BuildingDetailsPanel from './BuildingDetailsPanel';
 import CitizenDetailsPanel from '../UI/CitizenDetailsPanel';
@@ -17,65 +15,26 @@ interface IsometricViewerProps {
 type ViewType = 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
 
 export default function IsometricViewer({ activeView }: IsometricViewerProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [polygons, setPolygons] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [landOwners, setLandOwners] = useState<Record<string, string>>({});
-  const [users, setUsers] = useState<Record<string, any>>({});
+  // Viewport state
   const [scale, setScale] = useState(3); // Start with a 3x zoom for a closer view
   const [offset, setOffset] = useState({ x: 0, y: 0 });
-  // Add refs to track previous state
-  const prevActiveView = useRef<ViewType | null>(null);
-  const prevScale = useRef<number>(3);
-  // Cache for rendered coat of arms to avoid redrawing
-  const renderedCoatOfArmsCache = useRef<Record<string, {
-    image: HTMLImageElement | null,
-    x: number,
-    y: number,
-    size: number
-  }>>({});
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [buildings, setBuildings] = useState<any[]>([]);
-  const [incomeData, setIncomeData] = useState<Record<string, number>>({});
-  const [minIncome, setMinIncome] = useState<number>(0);
-  const [maxIncome, setMaxIncome] = useState<number>(1000);
-  const [incomeDataLoaded, setIncomeDataLoaded] = useState<boolean>(false);
-  const [ownerCoatOfArmsMap, setOwnerCoatOfArmsMap] = useState<Record<string, string>>({});
-  const [coatOfArmsImages, setCoatOfArmsImages] = useState<Record<string, HTMLImageElement>>({});
-  const [loadingCoatOfArms, setLoadingCoatOfArms] = useState<boolean>(false);
-  const [hoveredPolygonId, setHoveredPolygonId] = useState<string | null>(null);
-  const [selectedPolygonId, setSelectedPolygonId] = useState<string | null>(null);
-  const [showLandDetailsPanel, setShowLandDetailsPanel] = useState<boolean>(false);
-  const [hoveredBuildingId, setHoveredBuildingId] = useState<string | null>(null);
-  const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(null);
-  const [showBuildingDetailsPanel, setShowBuildingDetailsPanel] = useState<boolean>(false);
-  const [mousePosition, setMousePosition] = useState<{x: number, y: number}>({ x: 0, y: 0 });
+  
+  // UI state
   const [hoveredBuildingName, setHoveredBuildingName] = useState<string | null>(null);
   const [hoveredBuildingPosition, setHoveredBuildingPosition] = useState<{x: number, y: number} | null>(null);
   const [hoveredBuildingImagePath, setHoveredBuildingImagePath] = useState<string | null>(null);
   const [isLoadingBuildingImage, setIsLoadingBuildingImage] = useState<boolean>(false);
-  const [buildingPositionsCache, setBuildingPositionsCache] = useState<Record<string, {x: number, y: number}>>({});
-  const [initialPositionCalculated, setInitialPositionCalculated] = useState<boolean>(false);
-  const [polygonsToRender, setPolygonsToRender] = useState<{
-    polygon: any;
-    coords: {x: number, y: number}[];
-    fillColor: string;
-    centroidX: number;
-    centroidY: number;
-    centerX: number;
-    centerY: number;
-  }[]>([]);
-  const [emptyBuildingPoints, setEmptyBuildingPoints] = useState<{lat: number, lng: number}[]>([]);
   
-  // Add refs to track current state without causing re-renders
-  const hoveredPolygonIdRef = useRef<string | null>(null);
-  const hoveredBuildingIdRef = useRef<string | null>(null);
-  const hoveredCanalPointRef = useRef<{lat: number, lng: number} | null>(null);
-  const hoveredBridgePointRef = useRef<{lat: number, lng: number} | null>(null);
-  const hoveredCitizenBuildingRef = useRef<string | null>(null);
-  const hoveredCitizenTypeRef = useRef<'home' | 'work' | null>(null);
-  const isDraggingRef = useRef<boolean>(false);
+  // Panel visibility state
+  const [selectedPolygonId, setSelectedPolygonId] = useState<string | null>(null);
+  const [showLandDetailsPanel, setShowLandDetailsPanel] = useState<boolean>(false);
+  const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(null);
+  const [showBuildingDetailsPanel, setShowBuildingDetailsPanel] = useState<boolean>(false);
+  const [selectedCitizen, setSelectedCitizen] = useState<any>(null);
+  const [showCitizenDetailsPanel, setShowCitizenDetailsPanel] = useState<boolean>(false);
+  
+  // Transport state
+  const [transportMode, setTransportMode] = useState<boolean>(false);
   
   // Function to fetch the building image path when hovering over a building
   const fetchBuildingImagePath = async (buildingType: string, variant?: string) => {
@@ -117,73 +76,93 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     }
   };
 
-  // Function to load citizens data - declared early to avoid reference before declaration
-  const loadCitizens = useCallback(async () => {
-    try {
-      console.log('Loading citizens data...');
-      const response = await fetch('/api/citizens');
-      if (response.ok) {
-        const data = await response.json();
-        if (Array.isArray(data)) {
-          setCitizens(data);
-          
-          // Group citizens by building
-          const byBuilding: Record<string, any[]> = {};
-          
-          data.forEach(citizen => {
-            // Add to home building
-            if (citizen.Home) {
-              if (!byBuilding[citizen.Home]) {
-                byBuilding[citizen.Home] = [];
-              }
-              byBuilding[citizen.Home].push({
-                ...citizen,
-                markerType: 'home'
-              });
-            }
-            
-            // Add to work building
-            if (citizen.Work) {
-              if (!byBuilding[citizen.Work]) {
-                byBuilding[citizen.Work] = [];
-              }
-              byBuilding[citizen.Work].push({
-                ...citizen,
-                markerType: 'work'
-              });
-            }
-          });
-          
-          setCitizensByBuilding(byBuilding);
-          setCitizensLoaded(true);
-          console.log(`Loaded ${data.length} citizens in ${Object.keys(byBuilding).length} buildings`);
-        }
+  // Set up event listeners
+  useEffect(() => {
+    // Handle building hover events
+    const handleBuildingHover = (data: any) => {
+      if (data) {
+        setHoveredBuildingName(data.buildingName);
+        setHoveredBuildingPosition(data.position);
+        fetchBuildingImagePath(data.buildingType, data.variant);
+      } else {
+        setHoveredBuildingName(null);
+        setHoveredBuildingPosition(null);
+        setHoveredBuildingImagePath(null);
       }
-    } catch (error) {
-      console.error('Error loading citizens:', error);
-    }
-  }, []);
-  
-  // Citizen-related state
-  const [citizens, setCitizens] = useState<any[]>([]);
-  const [citizensByBuilding, setCitizensByBuilding] = useState<Record<string, any[]>>({});
-  const [citizensLoaded, setCitizensLoaded] = useState<boolean>(false);
-  const [hoveredCitizenBuilding, setHoveredCitizenBuilding] = useState<string | null>(null);
-  const [hoveredCitizenType, setHoveredCitizenType] = useState<'home' | 'work' | null>(null);
-  const [selectedCitizen, setSelectedCitizen] = useState<any>(null);
-  const [showCitizenDetailsPanel, setShowCitizenDetailsPanel] = useState<boolean>(false);
-  
-  // State for dock and bridge points
-  const [hoveredCanalPoint, setHoveredCanalPoint] = useState<{lat: number, lng: number} | null>(null);
-  const [hoveredBridgePoint, setHoveredBridgePoint] = useState<{lat: number, lng: number} | null>(null);
-  
-  // Transport route planning state
-  const [transportMode, setTransportMode] = useState<boolean>(false);
-  const [transportStartPoint, setTransportStartPoint] = useState<{lat: number, lng: number} | null>(null);
-  const [transportEndPoint, setTransportEndPoint] = useState<{lat: number, lng: number} | null>(null);
-  const [transportPath, setTransportPath] = useState<any[]>([]);
-  const [calculatingPath, setCalculatingPath] = useState<boolean>(false);
-  const [waterOnlyMode, setWaterOnlyMode] = useState<boolean>(false);
+    };
+    
+    // Handle polygon selection events
+    const handlePolygonSelected = (data: any) => {
+      if (data && data.polygonId) {
+        setSelectedPolygonId(data.polygonId);
+        setShowLandDetailsPanel(true);
+      } else {
+        setSelectedPolygonId(null);
+        setShowLandDetailsPanel(false);
+      }
+    };
+    
+    // Handle building selection events
+    const handleBuildingSelected = (data: any) => {
+      if (data && data.buildingId) {
+        setSelectedBuildingId(data.buildingId);
+        setShowBuildingDetailsPanel(true);
+      } else {
+        setSelectedBuildingId(null);
+        setShowBuildingDetailsPanel(false);
+      }
+    };
+    
+    // Handle citizen selection events
+    const handleCitizenSelected = (citizen: any) => {
+      if (citizen) {
+        setSelectedCitizen(citizen);
+        setShowCitizenDetailsPanel(true);
+      } else {
+        setSelectedCitizen(null);
+        setShowCitizenDetailsPanel(false);
+      }
+    };
+    
+    // Handle transport mode events
+    const handleShowTransportRoutes = () => {
+      console.log('Activating transport route planning mode');
+      
+      // Force the active view to be 'transport' first
+      if (activeView !== 'transport') {
+        console.log('Switching to transport view');
+        window.dispatchEvent(new CustomEvent('switchToTransportView', {
+          detail: { view: 'transport' }
+        }));
+      }
+      
+      // Set a small timeout to ensure view has changed before activating transport mode
+      setTimeout(() => {
+        setTransportMode(true);
+        console.log('Transport mode state set to:', true);
+      }, 100);
+    };
+    
+    // Subscribe to events
+    const subscriptions = [
+      eventBus.subscribe(EventTypes.BUILDING_HOVER, handleBuildingHover),
+      eventBus.subscribe(EventTypes.POLYGON_SELECTED, handlePolygonSelected),
+      eventBus.subscribe(EventTypes.BUILDING_SELECTED, handleBuildingSelected),
+      eventBus.subscribe(EventTypes.CITIZEN_SELECTED, handleCitizenSelected)
+    ];
+    
+    // Add window event listeners
+    window.addEventListener('showTransportRoutes', handleShowTransportRoutes);
+    
+    // Cleanup function
+    return () => {
+      // Unsubscribe from all events
+      subscriptions.forEach(sub => sub.unsubscribe());
+      
+      // Remove window event listeners
+      window.removeEventListener('showTransportRoutes', handleShowTransportRoutes);
+    };
+  }, [activeView]);
 
   // Load polygons
   useEffect(() => {
@@ -3864,10 +3843,12 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
 
   return (
     <div className="w-screen h-screen">
-      <canvas 
-        ref={canvasRef} 
-        className="w-full h-full"
-        style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+      <ViewportCanvas 
+        activeView={activeView}
+        scale={scale}
+        offset={offset}
+        onScaleChange={setScale}
+        onOffsetChange={setOffset}
       />
       
       {hoveredBuildingName && hoveredBuildingPosition && (
@@ -3918,8 +3899,6 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             setShowLandDetailsPanel(false);
             setSelectedPolygonId(null);
           }}
-          polygons={polygons}
-          landOwners={landOwners}
           visible={showLandDetailsPanel}
         />
       )}
@@ -3976,65 +3955,6 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         </div>
       </div>
       
-      {/* Loading indicator */}
-      {loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-          <div className="bg-white p-4 rounded-lg shadow-lg">
-            <p className="text-lg font-serif">Loading Venice...</p>
-          </div>
-        </div>
-      )}
-      
-      {/* Debug button for citizen images */}
-      {activeView === 'citizens' && (
-        <button
-          onClick={async () => {
-            console.log('Checking citizen images...');
-            try {
-              const response = await fetch('/api/check-citizen-images');
-              const data = await response.json();
-              console.log('Citizen images check result:', data);
-              
-              // Also check a few specific citizen images
-              if (citizens.length > 0) {
-                console.log('Checking specific citizen images...');
-                for (let i = 0; i < Math.min(3, citizens.length); i++) {
-                  const citizen = citizens[i];
-                  
-                  // Try multiple possible paths for each citizen
-                  const urlsToTry = [
-                    citizen.ImageUrl,
-                    `/images/citizens/${citizen.CitizenId}.jpg`,
-                    `/images/citizens/${citizen.CitizenId}.png`,
-                    `/images/citizens/default.jpg`
-                  ].filter(Boolean); // Remove any undefined/null values
-                  
-                  console.log(`URLs to try for citizen ${citizen.CitizenId}:`, urlsToTry);
-                  
-                  for (const url of urlsToTry) {
-                    try {
-                      const imgResponse = await fetch(url, { method: 'HEAD' });
-                      console.log(`Image check for ${citizen.CitizenId}: ${url} - ${imgResponse.ok ? 'EXISTS' : 'NOT FOUND'} (${imgResponse.status})`);
-                      if (imgResponse.ok) break; // Stop checking if we found a working URL
-                    } catch (error) {
-                      console.error(`Error checking image for ${citizen.CitizenId} at ${url}:`, error);
-                    }
-                  }
-                }
-              }
-              
-              alert(`Citizen images directory exists: ${data.directoryExists}\nTotal image files: ${data.imageFiles}\nDefault image exists: ${data.defaultImageExists}`);
-            } catch (error) {
-              console.error('Error checking citizen images:', error);
-              alert(`Error checking citizen images: ${error instanceof Error ? error.message : String(error)}`);
-            }
-          }}
-          className="absolute bottom-20 right-4 bg-red-600 text-white px-3 py-1 rounded text-sm"
-        >
-          Debug Images
-        </button>
-      )}
-      
       {/* Exit Transport Mode button */}
       {activeView === 'transport' && transportMode && (
         <button
@@ -4050,11 +3970,6 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         onClick={() => {
           console.log('Manually toggling transport mode from:', transportMode);
           setTransportMode(!transportMode);
-          if (!transportMode) {
-            setTransportStartPoint(null);
-            setTransportEndPoint(null);
-            setTransportPath([]);
-          }
           console.log('Transport mode toggled to:', !transportMode);
         }}
         className="absolute top-28 right-4 bg-blue-600 text-white px-3 py-1 rounded text-sm"
