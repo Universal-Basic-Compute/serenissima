@@ -114,6 +114,23 @@ def get_available_businesses(tables) -> List[Dict]:
         log.error(f"Error fetching available businesses: {e}")
         return []
 
+def create_notification(tables, user: str, content: str, details: Dict) -> None:
+    """Create a notification for a user."""
+    try:
+        # Create the notification record
+        tables['notifications'].create({
+            "Type": "housing_mobility",
+            "Content": content,
+            "Details": json.dumps(details),
+            "CreatedAt": datetime.datetime.now().isoformat(),
+            "ReadAt": None,
+            "User": user
+        })
+        
+        log.info(f"Created notification for user {user}")
+    except Exception as e:
+        log.error(f"Error creating notification: {e}")
+
 def assign_citizen_to_business(tables, citizen: Dict, business: Dict) -> bool:
     """Assign a citizen to a business and update both records."""
     citizen_id = citizen['id']
@@ -153,6 +170,24 @@ def assign_citizen_to_business(tables, citizen: Dict, business: Dict) -> bool:
     except Exception as e:
         log.error(f"Error assigning citizen to business: {e}")
         return False
+
+def get_available_buildings(tables, building_type: str) -> List[Dict]:
+    """Fetch available buildings of a specific type, sorted by rent in ascending order."""
+    log.info(f"Fetching available buildings of type: {building_type}")
+    
+    try:
+        # Get buildings of the specified type that are not already occupied
+        formula = f"AND({{Type}} = '{building_type}', OR({{Occupant}} = '', {{Occupant}} = BLANK()))"
+        buildings = tables['buildings'].all(formula=formula)
+        
+        # Sort by RentAmount in ascending order
+        buildings.sort(key=lambda b: float(b['fields'].get('RentAmount', 0) or 0))
+        
+        log.info(f"Found {len(buildings)} available buildings of type {building_type}")
+        return buildings
+    except Exception as e:
+        log.error(f"Error fetching buildings of type {building_type}: {e}")
+        return []
 
 def find_suitable_building(tables, citizen: Dict) -> Optional[Dict]:
     """Find a suitable building for a citizen based on their social class."""
@@ -216,6 +251,38 @@ def create_admin_notification(tables, housing_summary) -> None:
         log.info(f"Created admin notification for user NLR with housing summary")
     except Exception as e:
         log.error(f"Error creating admin notification: {e}")
+
+def get_unemployed_citizens(tables) -> List[Dict]:
+    """Fetch citizens without jobs, sorted by wealth in descending order."""
+    log.info("Fetching unemployed citizens...")
+    
+    try:
+        # Get all citizens
+        all_citizens = tables['citizens'].all()
+        
+        # Get all buildings with occupants that are businesses (not housing)
+        business_types = ['workshop', 'market-stall', 'tavern', 'warehouse', 'dock']
+        type_conditions = [f"{{Type}}='{business_type}'" for business_type in business_types]
+        business_formula = f"AND(OR({', '.join(type_conditions)}), NOT(OR({{Occupant}} = '', {{Occupant}} = BLANK())))"
+        
+        occupied_businesses = tables['buildings'].all(formula=business_formula)
+        
+        # Extract the occupant IDs
+        employed_citizen_ids = [building['fields'].get('Occupant') for building in occupied_businesses 
+                               if building['fields'].get('Occupant')]
+        
+        # Filter citizens to find those who are not occupants of any business
+        unemployed_citizens = [citizen for citizen in all_citizens 
+                              if citizen['id'] not in employed_citizen_ids]
+        
+        # Sort by Wealth in descending order
+        unemployed_citizens.sort(key=lambda c: float(c['fields'].get('Wealth', 0) or 0), reverse=True)
+        
+        log.info(f"Found {len(unemployed_citizens)} unemployed citizens")
+        return unemployed_citizens
+    except Exception as e:
+        log.error(f"Error fetching unemployed citizens: {e}")
+        return []
 
 def assign_jobs_to_citizens(dry_run: bool = False):
     """Main function to assign jobs to unemployed citizens."""
@@ -284,6 +351,35 @@ def assign_jobs_to_citizens(dry_run: bool = False):
     # Create a notification for the admin user with the assignment summary
     if assigned_count > 0 and not dry_run:
         create_admin_summary(tables, assignment_summary)
+
+def create_admin_summary(tables, assignment_summary) -> None:
+    """Create a summary notification for the admin."""
+    try:
+        # Create notification content
+        content = f"Job assignment report: {assignment_summary['total']} citizens assigned to businesses"
+        
+        # Create detailed information
+        details = {
+            "event_type": "job_assignment_summary",
+            "timestamp": datetime.datetime.now().isoformat(),
+            "total_assigned": assignment_summary['total'],
+            "by_business_type": assignment_summary.get('by_business_type', {}),
+            "message": f"Job assignment process complete. {assignment_summary['total']} citizens were assigned to businesses."
+        }
+        
+        # Create the notification record
+        tables['notifications'].create({
+            "Type": "job_assignment_summary",
+            "Content": content,
+            "Details": json.dumps(details),
+            "CreatedAt": datetime.datetime.now().isoformat(),
+            "ReadAt": None,
+            "User": "NLR"  # Admin user
+        })
+        
+        log.info(f"Created admin summary notification")
+    except Exception as e:
+        log.error(f"Error creating admin summary notification: {e}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Assign jobs to unemployed citizens.")
