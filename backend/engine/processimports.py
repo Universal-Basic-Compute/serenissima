@@ -377,12 +377,12 @@ def process_import_contract(tables, contract: Dict, building_types: Dict, resour
         log.error(f"Error processing import contract {contract.get('id', 'unknown')}: {e}")
         return False
 
-def process_imports(dry_run: bool = False):
+def process_imports(dry_run: bool = False, night_mode: bool = False):
     """Main function to process import contracts."""
-    log.info(f"Starting import processing (dry_run={dry_run})")
+    log.info(f"Starting import processing (dry_run={dry_run}, night_mode={night_mode})")
     
-    # Check if it's within dock working hours
-    if not is_dock_working_hours():
+    # Check if it's within dock working hours, unless night_mode is enabled
+    if not night_mode and not is_dock_working_hours():
         log.info("Outside of dock working hours (6 AM - 6 PM Venice time). Skipping import processing.")
         return
     
@@ -424,10 +424,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process import contracts.")
     parser.add_argument("--dry-run", action="store_true", help="Run without making changes")
     parser.add_argument("--verbose", action="store_true", help="Enable verbose logging")
+    parser.add_argument("--night", action="store_true", help="Process imports regardless of time of day")
     
     args = parser.parse_args()
     
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
     
-    process_imports(dry_run=args.dry_run)
+    process_imports(dry_run=args.dry_run, night_mode=args.night)
