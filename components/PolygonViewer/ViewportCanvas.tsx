@@ -187,18 +187,20 @@ export default function ViewportCanvas({
       }
     };
     
-    // Set up interaction service with all required dependencies
+    // Update the interaction service with current data
+    interactionService.updatePolygons(polygonsToRender);
+    interactionService.updateBuildings(buildings);
+    interactionService.updateEmptyBuildingPoints(emptyBuildingPoints);
+    interactionService.updateCitizensByBuilding(citizensByBuilding);
+    interactionService.updatePolygonsData(polygons);
+    
+    // Set up interaction service with reduced dependencies
     const cleanup = interactionService.initializeInteractions(
       canvas,
       activeView,
       scale,
       offset,
-      polygonsToRender,
-      buildings,
-      emptyBuildingPoints,
-      citizensByBuilding,
-      transportMode,
-      polygons
+      transportMode
     );
     
     // Subscribe to events from InteractionService
@@ -250,7 +252,28 @@ export default function ViewportCanvas({
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [activeView, scale, offset, polygonsToRender, buildings, emptyBuildingPoints, citizensByBuilding, transportMode, polygons, onOffsetChange]);
+  }, [activeView, scale, offset, transportMode, onOffsetChange]);
+  
+  // Add these effects to update the interaction service when data changes
+  useEffect(() => {
+    interactionService.updatePolygons(polygonsToRender);
+  }, [polygonsToRender]);
+
+  useEffect(() => {
+    interactionService.updateBuildings(buildings);
+  }, [buildings]);
+
+  useEffect(() => {
+    interactionService.updateEmptyBuildingPoints(emptyBuildingPoints);
+  }, [emptyBuildingPoints]);
+
+  useEffect(() => {
+    interactionService.updateCitizensByBuilding(citizensByBuilding);
+  }, [citizensByBuilding]);
+
+  useEffect(() => {
+    interactionService.updatePolygonsData(polygons);
+  }, [polygons]);
   
   // Calculate polygons to render
   useEffect(() => {

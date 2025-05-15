@@ -45,6 +45,13 @@ export class InteractionService {
   private hoveredCitizenBuildingRef: string | null = null;
   private hoveredCitizenTypeRef: 'home' | 'work' | null = null;
   private isDraggingRef: boolean = false;
+  
+  // Add these private properties to store data references
+  private _polygonsToRender: any[] = [];
+  private _buildings: any[] = [];
+  private _emptyBuildingPoints: any[] = [];
+  private _citizensByBuilding: Record<string, any[]> = {};
+  private _polygons: any[] = [];
 
   /**
    * Handle mouse wheel for zooming
@@ -142,6 +149,81 @@ export class InteractionService {
   }
 
   /**
+   * Update polygons to render
+   */
+  public updatePolygons(polygons: any[]): void {
+    // Store reference without triggering state updates
+    this._polygonsToRender = polygons;
+  }
+
+  /**
+   * Update buildings data
+   */
+  public updateBuildings(buildings: any[]): void {
+    // Store reference without triggering state updates
+    this._buildings = buildings;
+  }
+
+  /**
+   * Update empty building points
+   */
+  public updateEmptyBuildingPoints(points: any[]): void {
+    // Store reference without triggering state updates
+    this._emptyBuildingPoints = points;
+  }
+
+  /**
+   * Update citizens by building
+   */
+  public updateCitizensByBuilding(citizensByBuilding: Record<string, any[]>): void {
+    // Store reference without triggering state updates
+    this._citizensByBuilding = citizensByBuilding;
+  }
+
+  /**
+   * Update polygons data
+   */
+  public updatePolygonsData(polygons: any[]): void {
+    // Store reference without triggering state updates
+    this._polygons = polygons;
+  }
+
+  /**
+   * Get polygons to render
+   */
+  public getPolygonsToRender(): any[] {
+    return this._polygonsToRender;
+  }
+
+  /**
+   * Get buildings
+   */
+  public getBuildings(): any[] {
+    return this._buildings;
+  }
+
+  /**
+   * Get empty building points
+   */
+  public getEmptyBuildingPoints(): any[] {
+    return this._emptyBuildingPoints;
+  }
+
+  /**
+   * Get citizens by building
+   */
+  public getCitizensByBuilding(): Record<string, any[]> {
+    return this._citizensByBuilding;
+  }
+
+  /**
+   * Get polygons data
+   */
+  public getPolygonsData(): any[] {
+    return this._polygons;
+  }
+
+  /**
    * Initialize interaction handlers for a canvas
    */
   public initializeInteractions(
@@ -149,12 +231,7 @@ export class InteractionService {
     activeView: string,
     scale: number,
     offset: { x: number, y: number },
-    polygonsToRender: any[],
-    buildings: any[],
-    emptyBuildingPoints: any[],
-    citizensByBuilding: Record<string, any[]>,
-    transportMode: boolean,
-    polygons: any[]
+    transportMode: boolean
   ): () => void {
     // Import uiStateService here to avoid circular dependency
     const { uiStateService } = require('./UIStateService');
@@ -210,7 +287,7 @@ export class InteractionService {
       
       // Check if mouse is over any polygon (for land view)
       if (activeView === 'land') {
-        for (const { polygon, coords } of polygonsToRender) {
+        for (const { polygon, coords } of this._polygonsToRender) {
           if (RenderService.prototype.isPointInPolygon(mouseX, mouseY, coords)) {
             newHoveredPolygonId = polygon.id;
             canvas.style.cursor = 'pointer';
@@ -232,7 +309,7 @@ export class InteractionService {
       // Check if mouse is over any building (for buildings view)
       if (activeView === 'buildings') {
         // Calculate building positions and check if mouse is over any
-        for (const building of buildings) {
+        for (const building of this._buildings) {
           if (!building.position) continue;
       
           let position;
@@ -308,7 +385,7 @@ export class InteractionService {
         
         // Check if mouse is over any empty building point
         if (!foundHoveredBuilding) {
-          for (const point of emptyBuildingPoints) {
+          for (const point of this._emptyBuildingPoints) {
             // Convert lat/lng to isometric coordinates
             const world = CoordinateService.latLngToWorld(point.lat, point.lng);
             const screen = CoordinateService.worldToScreen(
@@ -339,7 +416,7 @@ export class InteractionService {
         }
       
         // Check if mouse is over any dock point
-        for (const polygon of polygons) {
+        for (const polygon of this._polygons) {
           if (foundHoveredCanalPoint) break;
         
           if (polygon.canalPoints && Array.isArray(polygon.canalPoints)) {
@@ -382,7 +459,7 @@ export class InteractionService {
         }
       
         // Check if mouse is over any bridge point
-        for (const polygon of polygons) {
+        for (const polygon of this._polygons) {
           if (foundHoveredBridgePoint) break;
         
           if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints)) {
@@ -432,9 +509,9 @@ export class InteractionService {
       // Check if mouse is over any citizen marker (for citizens view)
       if (activeView === 'citizens') {
         // Check each building with citizens
-        for (const [buildingId, buildingCitizens] of Object.entries(citizensByBuilding)) {
+        for (const [buildingId, buildingCitizens] of Object.entries(this._citizensByBuilding)) {
           // Find the building position
-          const building = buildings.find(b => b.id === buildingId);
+          const building = this._buildings.find(b => b.id === buildingId);
           if (!building || !building.position) continue;
           
           let position;
@@ -543,7 +620,7 @@ export class InteractionService {
       // Handle clicks in land view
       if (activeView === 'land') {
         // Check if click is on any polygon
-        for (const { polygon, coords } of polygonsToRender) {
+        for (const { polygon, coords } of this._polygonsToRender) {
           if (RenderService.prototype.isPointInPolygon(mouseX, mouseY, coords)) {
             // Set the selected polygon and show details panel
             this.state.selectedPolygonId = polygon.id;
@@ -563,7 +640,7 @@ export class InteractionService {
       // Handle clicks in buildings view
       if (activeView === 'buildings') {
         // Check if click is on any building
-        for (const building of buildings) {
+        for (const building of this._buildings) {
           if (!building.position) continue;
           
           let position;
@@ -622,7 +699,7 @@ export class InteractionService {
         }
         
         // Check if click is on any empty building point
-        for (const point of emptyBuildingPoints) {
+        for (const point of this._emptyBuildingPoints) {
           // Convert lat/lng to isometric coordinates
           const world = CoordinateService.latLngToWorld(point.lat, point.lng);
           const screen = CoordinateService.worldToScreen(
@@ -658,7 +735,7 @@ export class InteractionService {
         }
         
         // Check if click is on any dock point
-        for (const polygon of polygons) {
+        for (const polygon of this._polygons) {
           if (polygon.canalPoints && Array.isArray(polygon.canalPoints)) {
             for (const point of polygon.canalPoints) {
               if (!point.edge) continue;
@@ -702,7 +779,7 @@ export class InteractionService {
         }
         
         // Check if click is on any bridge point
-        for (const polygon of polygons) {
+        for (const polygon of this._polygons) {
           if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints)) {
             for (const point of polygon.bridgePoints) {
               if (!point.edge) continue;
@@ -753,9 +830,9 @@ export class InteractionService {
       // Handle clicks in citizens view
       if (activeView === 'citizens') {
         // Check each building with citizens
-        for (const [buildingId, buildingCitizens] of Object.entries(citizensByBuilding)) {
+        for (const [buildingId, buildingCitizens] of Object.entries(this._citizensByBuilding)) {
           // Find the building position
-          const building = buildings.find(b => b.id === buildingId);
+          const building = this._buildings.find(b => b.id === buildingId);
           if (!building || !building.position) continue;
           
           let position;
