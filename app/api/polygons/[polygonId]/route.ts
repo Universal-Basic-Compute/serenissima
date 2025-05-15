@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 
@@ -10,9 +10,9 @@ let cacheTimestamp: number = 0;
  * GET handler for fetching a specific polygon by ID
  */
 export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { polygonId: string } }
-) {
+): Promise<NextResponse> {
   try {
     const polygonId = params.polygonId;
     console.log(`Fetching polygon with ID: ${polygonId}`);
