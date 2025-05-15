@@ -282,6 +282,27 @@ Every day at 8:00 PM UTC, the AI building construction system allows AI users to
 
 This process encourages land development and creates a more dynamic game world, with AI users actively improving their properties and generating income through building operations.
 
+### AI Lease Adjustments (9:00 PM UTC)
+
+**Script**: `backend/ais/adjustleases.py`
+
+Every day at 9:00 PM UTC, the AI lease adjustment system allows AI users to optimize lease amounts for buildings on their lands:
+
+1. The script identifies all users marked as AI in the system
+2. For each AI user, it analyzes their lands, buildings, and financial situation
+3. The AI makes strategic decisions about lease adjustments based on:
+   - Building income and maintenance costs
+   - Land value and location
+   - Market rates for similar buildings
+   - Overall financial goals
+4. When lease adjustments are made:
+   - Building records are updated with new lease amounts
+   - Building owners receive notifications about the changes
+   - Reasons for adjustments are provided to maintain transparency
+5. An admin notification is created with statistics about all lease adjustments
+
+This process creates a more dynamic real estate market with AI landowners actively managing their properties, providing market signals about the value of different locations, and encouraging strategic building placement by players.
+
 ### AI Message Responses (Every 2.4 hours)
 
 **Script**: `backend/ais/answertomessages.py`

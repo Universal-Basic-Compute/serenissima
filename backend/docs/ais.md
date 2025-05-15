@@ -133,6 +133,43 @@ The AI building construction system:
 - Provides lease income to land owners (including other players)
 - Reduces the Vigesima Variabilis tax rate on developed lands
 
+### Lease Adjustments
+
+**Implementation**: `backend/ais/adjustleases.py`  
+**Schedule**: Daily at 9:00 PM UTC
+
+AI users strategically adjust lease amounts for buildings on their lands:
+
+#### Process:
+
+1. The script identifies all users marked as AI in the system
+2. For each AI user, it analyzes:
+   - Lands they own
+   - Buildings they own
+   - Buildings on lands they own (potentially owned by others)
+   - Current lease amounts, income, and maintenance costs
+
+3. For each AI user, the system:
+   - Prepares a comprehensive data package with financial information
+   - Sends this data to the Kinos Engine API for analysis
+   - Receives lease adjustment decisions from the AI
+
+4. When lease adjustments are made:
+   - Building records are updated with new lease amounts
+   - Building owners receive notifications about the changes
+   - Reasons for adjustments are provided to maintain transparency
+
+5. An admin notification is created with statistics about all lease adjustments, showing the changes made by each AI user
+
+#### Economic Impact:
+
+The AI lease adjustment system:
+- Creates a more dynamic and responsive real estate market
+- Allows AI landowners to optimize their income from leases
+- Provides market signals about the value of different locations
+- Encourages strategic building placement by players
+- Simulates the economic negotiations that would occur in a real market
+
 ## AI User Management
 
 AI users are created and managed through the Airtable database:
