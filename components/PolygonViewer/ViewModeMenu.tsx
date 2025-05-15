@@ -14,11 +14,19 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
     // Emit event to notify other components about the view mode change
     eventBus.emit(EventTypes.VIEW_MODE_CHANGED, { viewMode: view });
     
-    // Dispatch an event to close the GuildsPanel if it's open and we're not switching to guilds view
-    if (view !== 'guilds') {
+    // Dispatch events to open specific panels
+    if (view === 'governance') {
+      window.dispatchEvent(new CustomEvent('openGovernancePanel'));
+    } else if (view === 'guilds') {
+      window.dispatchEvent(new CustomEvent('openGuildsPanel'));
+    } else if (view === 'knowledge') {
+      window.dispatchEvent(new CustomEvent('openKnowledgePanel'));
+    } else {
+      // Close all panels if switching to other views
+      window.dispatchEvent(new CustomEvent('closeGovernancePanel'));
       window.dispatchEvent(new CustomEvent('closeGuildsPanel'));
+      window.dispatchEvent(new CustomEvent('closeKnowledgePanel'));
     }
-
   };
   // Helper function to check if a view is disabled
   const isDisabled = (view: ViewMode): boolean => {
@@ -41,14 +49,19 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
 
   return (
     <div className="absolute left-2 top-1/2 transform -translate-y-1/2 z-10 bg-amber-50 rounded-lg shadow-xl p-2 flex flex-col gap-2 border-2 border-amber-600">
-      {/* Governance View - Disabled */}
+      {/* Governance View - Now Enabled */}
       <IconButton 
-        onClick={() => {}}
-        active={false}
-        title={viewDescriptions.governance + " (Coming Soon)"}
+        onClick={() => {
+          if (activeView !== 'governance' as any) {
+            console.log('ViewModeMenu: Switching to governance view');
+            handleViewModeChange('governance' as any);
+          }
+        }}
+        active={activeView === ('governance' as any)}
+        title={viewDescriptions.governance}
         activeColor="amber"
         compact={true}
-        disabled={true}
+        disabled={false}
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M2 20h20M4 20V4h16v16M12 2v4M7 8h10M7 12h10M7 16h10"></path>

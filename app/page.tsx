@@ -9,6 +9,9 @@ import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 import WalletButton from '@/components/UI/WalletButton';
 import ResourceDropdowns from '@/components/UI/ResourceDropdowns';
 import Settings from '@/components/UI/Settings';
+import GovernancePanel from '@/components/UI/GovernancePanel';
+import GuildsPanel from '@/components/UI/GuildsPanel';
+import KnowledgeRepository from '@/components/Knowledge/KnowledgeRepository';
 
 // Import the 2D viewer component with no SSR
 const IsometricViewer = dynamic(() => import('@/components/PolygonViewer/IsometricViewer'), {
@@ -23,6 +26,9 @@ export default function TwoDPage() {
   type ViewType = 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
   const [activeView, setActiveView] = useState<ViewType>('buildings');
   const [showSettings, setShowSettings] = useState<boolean>(false);
+  const [showGovernancePanel, setShowGovernancePanel] = useState<boolean>(false);
+  const [showGuildsPanel, setShowGuildsPanel] = useState<boolean>(false);
+  const [showKnowledgePanel, setShowKnowledgePanel] = useState<boolean>(false);
   
   // Data state
   const [polygons, setPolygons] = useState<any[]>([]);
@@ -32,6 +38,46 @@ export default function TwoDPage() {
   // Handle settings modal
   const handleSettingsClose = () => {
     setShowSettings(false);
+  };
+  
+  // Handle panel closings
+  const handleGovernancePanelClose = () => {
+    setShowGovernancePanel(false);
+    // Reset the active view to buildings when closing the panel
+    setActiveView('buildings');
+  };
+  
+  const handleGuildsPanelClose = () => {
+    setShowGuildsPanel(false);
+    // Reset the active view to buildings when closing the panel
+    setActiveView('buildings');
+  };
+  
+  const handleKnowledgePanelClose = () => {
+    setShowKnowledgePanel(false);
+    // Reset the active view to buildings when closing the panel
+    setActiveView('buildings');
+  };
+  
+  // Knowledge panel functions
+  const handleShowTechTree = () => {
+    console.log('Showing tech tree');
+    // Implement tech tree display logic
+  };
+  
+  const handleShowPresentation = () => {
+    console.log('Showing presentation');
+    // Implement presentation display logic
+  };
+  
+  const handleShowResourceTree = () => {
+    console.log('Showing resource tree');
+    // Implement resource tree display logic
+  };
+  
+  const handleSelectArticle = (article: string) => {
+    console.log(`Selected article: ${article}`);
+    // Implement article selection logic
   };
   
   // Load polygons and buildings data
@@ -73,6 +119,37 @@ export default function TwoDPage() {
     // Dispatch an event to ensure buildings are visible regardless of view
     window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
   }, []); // Empty dependency array means this runs only once on mount
+  
+  // Set up event listeners for panel visibility
+  useEffect(() => {
+    // Event handlers for opening panels
+    const handleOpenGovernancePanel = () => setShowGovernancePanel(true);
+    const handleOpenGuildsPanel = () => setShowGuildsPanel(true);
+    const handleOpenKnowledgePanel = () => setShowKnowledgePanel(true);
+    
+    // Event handlers for closing panels
+    const handleCloseGovernancePanel = () => setShowGovernancePanel(false);
+    const handleCloseGuildsPanel = () => setShowGuildsPanel(false);
+    const handleCloseKnowledgePanel = () => setShowKnowledgePanel(false);
+    
+    // Add event listeners
+    window.addEventListener('openGovernancePanel', handleOpenGovernancePanel);
+    window.addEventListener('openGuildsPanel', handleOpenGuildsPanel);
+    window.addEventListener('openKnowledgePanel', handleOpenKnowledgePanel);
+    window.addEventListener('closeGovernancePanel', handleCloseGovernancePanel);
+    window.addEventListener('closeGuildsPanel', handleCloseGuildsPanel);
+    window.addEventListener('closeKnowledgePanel', handleCloseKnowledgePanel);
+    
+    // Clean up event listeners
+    return () => {
+      window.removeEventListener('openGovernancePanel', handleOpenGovernancePanel);
+      window.removeEventListener('openGuildsPanel', handleOpenGuildsPanel);
+      window.removeEventListener('openKnowledgePanel', handleOpenKnowledgePanel);
+      window.removeEventListener('closeGovernancePanel', handleCloseGovernancePanel);
+      window.removeEventListener('closeGuildsPanel', handleCloseGuildsPanel);
+      window.removeEventListener('closeKnowledgePanel', handleCloseKnowledgePanel);
+    };
+  }, []);
   
   // Set up event listener for ensureBuildingsVisible
   useEffect(() => {
@@ -164,6 +241,12 @@ export default function TwoDPage() {
       window.dispatchEvent(new CustomEvent('showIncomeVisualization'));
     } else if (activeView === 'citizens') {
       window.dispatchEvent(new CustomEvent('loadCitizens'));
+    } else if (activeView === 'governance') {
+      setShowGovernancePanel(true);
+    } else if (activeView === 'guilds') {
+      setShowGuildsPanel(true);
+    } else if (activeView === 'knowledge') {
+      setShowKnowledgePanel(true);
     }
   }, [activeView]);
 
@@ -212,7 +295,10 @@ export default function TwoDPage() {
           <ul className="space-y-2 px-2">
             <li>
               <button
-                onClick={() => setActiveView('governance')}
+                onClick={() => {
+                  setActiveView('governance');
+                  setShowGovernancePanel(true);
+                }}
                 className={`w-full flex items-center p-2 rounded-lg transition-colors ${
                   activeView === 'governance' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
                 }`}
@@ -223,7 +309,10 @@ export default function TwoDPage() {
             </li>
             <li>
               <button
-                onClick={() => setActiveView('guilds')}
+                onClick={() => {
+                  setActiveView('guilds');
+                  setShowGuildsPanel(true);
+                }}
                 className={`w-full flex items-center p-2 rounded-lg transition-colors ${
                   activeView === 'guilds' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
                 }`}
@@ -250,7 +339,10 @@ export default function TwoDPage() {
             </li>
             <li>
               <button
-                onClick={() => setActiveView('knowledge')}
+                onClick={() => {
+                  setActiveView('knowledge');
+                  setShowKnowledgePanel(true);
+                }}
                 className={`w-full flex items-center p-2 rounded-lg transition-colors ${
                   activeView === 'knowledge' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
                 }`}
@@ -371,6 +463,27 @@ export default function TwoDPage() {
             2D Isometric View v0.1.0
           </div>
         </div>
+      )}
+      
+      {/* Governance Panel */}
+      {showGovernancePanel && (
+        <GovernancePanel onClose={handleGovernancePanelClose} />
+      )}
+      
+      {/* Guilds Panel */}
+      {showGuildsPanel && (
+        <GuildsPanel onClose={handleGuildsPanelClose} />
+      )}
+      
+      {/* Knowledge Panel */}
+      {showKnowledgePanel && (
+        <KnowledgeRepository 
+          onClose={handleKnowledgePanelClose}
+          onShowTechTree={handleShowTechTree}
+          onShowPresentation={handleShowPresentation}
+          onShowResourceTree={handleShowResourceTree}
+          onSelectArticle={handleSelectArticle}
+        />
       )}
     </div>
   );
