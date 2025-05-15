@@ -291,7 +291,12 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         if (response.ok) {
           const data = await response.json();
           if (data.coatOfArms && typeof data.coatOfArms === 'object') {
-            setOwnerCoatOfArmsMap(data.coatOfArms);
+            // Store the coat of arms map without triggering a re-render if it's the same
+            const newOwnerCoatOfArmsMap = data.coatOfArms;
+            // Only update state if the map has actually changed
+            if (JSON.stringify(newOwnerCoatOfArmsMap) !== JSON.stringify(ownerCoatOfArmsMap)) {
+              setOwnerCoatOfArmsMap(newOwnerCoatOfArmsMap);
+            }
             
             // Preload images
             const imagePromises: Promise<void>[] = [];
@@ -300,7 +305,16 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             // Target size for coat of arms images (50px is our display size)
             const targetSize = 100; // Slightly larger than display size for better quality
             
+            // Create a copy of the current images to avoid modifying state directly
+            const updatedImages = {...coatOfArmsImages};
+            let hasNewImages = false;
+            
             Object.entries(data.coatOfArms).forEach(([owner, url]) => {
+              // Skip if we already have this image loaded
+              if (updatedImages[owner]) {
+                return;
+              }
+              
               if (url) {
                 // Create an array of URLs to try in order
                 const urlsToTry = [
@@ -314,14 +328,11 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
                   `${window.location.origin}/coat-of-arms/${owner}.png`
                 ];
                 
-                console.log(`Will try these URLs for ${owner}:`, urlsToTry);
-                
                 // Create a promise that tries each URL in sequence
                 const tryLoadImage = async (): Promise<HTMLImageElement> => {
                   for (let i = 0; i < urlsToTry.length; i++) {
                     try {
                       const currentUrl = urlsToTry[i];
-                      console.log(`Trying URL ${i + 1}/${urlsToTry.length} for ${owner}: ${currentUrl}`);
                       
                       const img = new Image();
                       img.crossOrigin = "anonymous"; // Important for CORS
@@ -329,16 +340,11 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
                       // Create a promise for this specific URL
                       const loadPromise = new Promise<HTMLImageElement>((resolve, reject) => {
                         img.onload = () => {
-                          console.log(`Successfully loaded coat of arms for ${owner} from ${currentUrl}`);
-                          
                           // Resize the image using canvas before storing
                           const resizedImg = resizeImageToCanvas(img, targetSize);
-                          console.log(`Resized coat of arms for ${owner} from ${img.width}x${img.height} to ${resizedImg.width}x${resizedImg.height}`);
-                          
                           resolve(resizedImg);
                         };
                         img.onerror = () => {
-                          console.warn(`Failed to load coat of arms for ${owner} from ${currentUrl}`);
                           reject(new Error(`Failed to load image from ${currentUrl}`));
                         };
                         img.src = currentUrl;
@@ -363,6 +369,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
                 const imagePromise = tryLoadImage()
                   .then(img => {
                     newImages[owner] = img;
+                    updatedImages[owner] = img;
+                    hasNewImages = true;
                   })
                   .catch(error => {
                     console.error(`All URLs failed for ${owner}:`, error);
@@ -375,7 +383,11 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             
             // Wait for all images to either load or fail
             await Promise.allSettled(imagePromises);
-            setCoatOfArmsImages(newImages);
+            
+            // Only update state if we have new images
+            if (hasNewImages) {
+              setCoatOfArmsImages(updatedImages);
+            }
           }
         }
       } catch (error) {
@@ -386,7 +398,12 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     };
     
     fetchCoatOfArms();
-  }, []);
+    
+    // Return a cleanup function
+    return () => {
+      // Cancel any pending image loads if component unmounts
+    };
+  }, []); // Empty dependency array - only run once on mount
   
   // Helper function to resize an image using canvas
   const resizeImageToCanvas = (img: HTMLImageElement, targetSize: number): HTMLImageElement => {
@@ -427,15 +444,15 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   
   // Function to create a circular clipping of an image
   const createCircularImage = (ctx: CanvasRenderingContext2D, img: HTMLImageElement, x: number, y: number, size: number) => {
-    // Check if the image has loaded successfully
-    if (!img.complete || img.naturalWidth === 0 || img.naturalHeight === 0) {
-      console.warn(`Image not loaded properly, using default avatar instead`);
-      // Use the default avatar as fallback
-      createDefaultCircularAvatar(ctx, "Unknown", x, y, size);
-      return;
-    }
-    
     try {
+      // Check if the image has loaded successfully
+      if (!img || !img.complete || img.naturalWidth === 0 || img.naturalHeight === 0) {
+        console.warn(`Image not loaded properly, using default avatar instead`);
+        // Use the default avatar as fallback
+        createDefaultCircularAvatar(ctx, "Unknown", x, y, size);
+        return;
+      }
+      
       // Save the current context state
       ctx.save();
       
@@ -472,49 +489,74 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   
   // Function to create a default circular avatar for owners without coat of arms
   const createDefaultCircularAvatar = (ctx: CanvasRenderingContext2D, owner: string, x: number, y: number, size: number) => {
-    // Save the current context state
-    ctx.save();
-    
-    // Generate a deterministic color based on the owner name
-    const getColorFromString = (str: string): string => {
-      let hash = 0;
-      for (let i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    try {
+      // Save the current context state
+      ctx.save();
+      
+      // Generate a deterministic color based on the owner name
+      const getColorFromString = (str: string): string => {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+          hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        
+        // Generate a hue between 0 and 360
+        const hue = Math.abs(hash) % 360;
+        
+        // Use a fixed saturation and lightness for better visibility
+        return `hsl(${hue}, 70%, 60%)`;
+      };
+      
+      // Get a color based on the owner name
+      const baseColor = getColorFromString(owner);
+      
+      // Draw a circular background
+      ctx.beginPath();
+      ctx.arc(x, y, size / 2, 0, Math.PI * 2);
+      ctx.fillStyle = baseColor;
+      ctx.fill();
+      
+      // Add a white border
+      ctx.strokeStyle = 'white';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      
+      // Add the owner's initials
+      ctx.font = `bold ${size * 0.4}px Arial`;
+      ctx.fillStyle = 'white';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      
+      // Get the first letter of the owner name, handle empty strings
+      const initial = owner && owner.length > 0 ? owner.charAt(0).toUpperCase() : '?';
+      ctx.fillText(initial, x, y);
+      
+      // Restore the context state
+      ctx.restore();
+    } catch (error) {
+      console.error('Error creating default avatar:', error);
+      
+      // Absolute fallback - just draw a gray circle with a question mark
+      try {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(x, y, size / 2, 0, Math.PI * 2);
+        ctx.fillStyle = '#888888';
+        ctx.fill();
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.font = `bold ${size * 0.4}px Arial`;
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('?', x, y);
+        ctx.restore();
+      } catch (e) {
+        // If even this fails, just silently continue
+        console.error('Critical error in fallback avatar rendering:', e);
       }
-      
-      // Generate a hue between 0 and 360
-      const hue = Math.abs(hash) % 360;
-      
-      // Use a fixed saturation and lightness for better visibility
-      return `hsl(${hue}, 70%, 60%)`;
-    };
-    
-    // Get a color based on the owner name
-    const baseColor = getColorFromString(owner);
-    
-    // Draw a circular background
-    ctx.beginPath();
-    ctx.arc(x, y, size / 2, 0, Math.PI * 2);
-    ctx.fillStyle = baseColor;
-    ctx.fill();
-    
-    // Add a white border
-    ctx.strokeStyle = 'white';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    
-    // Add the owner's initials
-    ctx.font = `bold ${size * 0.4}px Arial`;
-    ctx.fillStyle = 'white';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    
-    // Get the first letter of the owner name
-    const initial = owner.charAt(0).toUpperCase();
-    ctx.fillText(initial, x, y);
-    
-    // Restore the context state
-    ctx.restore();
+    }
   };
   
   // Fetch income data when in land view
