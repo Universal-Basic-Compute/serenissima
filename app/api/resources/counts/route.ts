@@ -69,7 +69,8 @@ export async function GET(request: Request) {
     });
     
     // Create maps to aggregate resources by type - one for player resources, one for global
-    const playerResourceMap = new Map<string, {
+    // Define a resource type interface to use throughout the file
+    interface ResourceType {
       id: string;
       name: string;
       category: string;
@@ -78,18 +79,12 @@ export async function GET(request: Request) {
       count: number;
       rarity: string;
       description: string;
-    }>();
-    
-    const globalResourceMap = new Map<string, {
-      id: string;
-      name: string;
-      category: string;
-      subcategory: string;
-      icon: string;
-      count: number;
-      rarity: string;
-      description: string;
-    }>();
+      buildingId?: string;
+      location?: { lat: number, lng: number } | null;
+    }
+
+    const playerResourceMap = new Map<string, ResourceType>();
+    const globalResourceMap = new Map<string, ResourceType>();
     
     // Process records to count resources by type
     (records as any[]).forEach(record => {
