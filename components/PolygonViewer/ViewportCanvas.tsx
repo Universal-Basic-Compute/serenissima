@@ -54,6 +54,17 @@ interface InteractionServiceDependencies {
   screenToLatLng: (screenX: number, screenY: number, scale: number, offset: { x: number, y: number }, canvasWidth: number, canvasHeight: number) => { lat: number, lng: number };
 }
 
+// Interface for updating polygon data in the interaction service
+interface UpdatePolygonsParams {
+  polygonsToRender: any[];
+  buildings: BuildingData[];
+  emptyBuildingPoints: PointData[];
+  polygons: PolygonData[];
+  citizensByBuilding: Record<string, any[]>;
+  transportStartPoint: PointData | null;
+  transportEndPoint: PointData | null;
+}
+
 // Define the type for the initializeInteractions method parameters
 interface InitializeInteractionsParams {
   polygonsToRender: any[];
@@ -275,7 +286,7 @@ export default function ViewportCanvas({
       citizensByBuilding,
       transportStartPoint: transportService.getStartPoint() || null,
       transportEndPoint: transportService.getEndPoint() || null
-    });
+    } as UpdatePolygonsParams);
     
     // Set up interaction service with all required dependencies
     const cleanup = interactionService.initializeInteractions(
@@ -292,8 +303,7 @@ export default function ViewportCanvas({
         citizensByBuilding,
         transportStartPoint: transportService.getStartPoint() || null,
         transportEndPoint: transportService.getEndPoint() || null
-      } as InitializeInteractionsParams,
-      coatOfArmsImages
+      } as InitializeInteractionsParams
     );
     
     // Subscribe to events from InteractionService
@@ -316,13 +326,13 @@ export default function ViewportCanvas({
           console.log(`Citizen selected: ${citizen.FirstName} ${citizen.LastName}`);
         }
       }),
-      eventBus.subscribe(EventTypes.BUILDING_POINT_SELECTED, (data) => {
+      eventBus.subscribe(EventTypes.BUILDING_POINT_SELECTED, (data: { position: PointData }) => {
         // Handle building point selection
         if (data && data.position) {
           console.log(`Building point selected at: ${data.position.lat}, ${data.position.lng}`);
         }
       }),
-      eventBus.subscribe(EventTypes.TRANSPORT_POINT_SELECTED, (point) => {
+      eventBus.subscribe(EventTypes.TRANSPORT_POINT_SELECTED, (point: PointData) => {
         // Handle transport point selection
         if (point) {
           console.log(`Transport point selected at: ${point.lat}, ${point.lng}`);
@@ -362,7 +372,7 @@ export default function ViewportCanvas({
       citizensByBuilding,
       transportStartPoint: transportService.getStartPoint() || null,
       transportEndPoint: transportService.getEndPoint() || null
-    });
+    } as UpdatePolygonsParams);
   }, [polygonsToRender, buildings, emptyBuildingPoints, citizensByBuilding, polygons]);
   
   // Remove debugging for hover state changes
