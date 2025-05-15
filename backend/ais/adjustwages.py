@@ -53,6 +53,12 @@ def get_user_business_buildings(tables, username: str) -> List[Dict]:
         formula = f"{{RanBy}}='{username}'"
         buildings = tables["buildings"].all(formula=formula)
         print(f"Found {len(buildings)} buildings with businesses run by {username}")
+        
+        # Log the building IDs for debugging
+        building_ids = [building["fields"].get("BuildingId") for building in buildings 
+                       if building["fields"].get("BuildingId")]
+        print(f"Building IDs run by {username}: {building_ids}")
+        
         return buildings
     except Exception as e:
         print(f"Error getting business buildings for user {username}: {str(e)}")
@@ -206,6 +212,10 @@ def send_wage_adjustment_request(ai_username: str, data_package: Dict) -> Option
         print(f"API URL: {url}")
         print(f"User has {data_package['user']['ducats']} ducats")
         print(f"User owns {len(data_package['businesses'])} businesses")
+        
+        # Log business IDs for debugging
+        business_ids = [business["id"] for business in data_package["businesses"]]
+        print(f"Business IDs in data package: {business_ids}")
         
         # Create a detailed prompt that addresses the AI directly as the decision-maker
         prompt = f"""
@@ -414,12 +424,23 @@ def update_building_wage_amount(tables, building_id: str, new_wage_amount: float
         building = buildings[0]
         current_wage = building["fields"].get("Wages", 0)
         
+        # Validate the new wage amount
+        try:
+            # Convert to float to ensure it's a valid number
+            new_wage_float = float(new_wage_amount)
+            if new_wage_float < 0:
+                print(f"Invalid negative wage amount for building {building_id}: {new_wage_float}")
+                return False
+        except (ValueError, TypeError) as e:
+            print(f"Invalid wage amount for building {building_id}: {new_wage_amount}, error: {str(e)}")
+            return False
+        
         # Update the wage amount
         tables["buildings"].update(building["id"], {
-            "Wages": new_wage_amount
+            "Wages": new_wage_float
         })
         
-        print(f"Updated wage amount for building {building_id} from {current_wage} to {new_wage_amount}")
+        print(f"Updated wage amount for building {building_id} from {current_wage} to {new_wage_float}")
         return True
     except Exception as e:
         print(f"Error updating wage amount for building {building_id}: {str(e)}")
@@ -541,20 +562,16 @@ def process_ai_wage_adjustments(dry_run: bool = False):
             print(f"AI user {ai_username} has no businesses, skipping")
             continue
         
+        # Create a map of building IDs for quick lookup
+        user_building_ids = {building["fields"].get("BuildingId"): building for building in user_business_buildings 
+                           if building["fields"].get("BuildingId")}
+        print(f"AI user {ai_username} runs these businesses: {list(user_building_ids.keys())}")
+        
         # Get building IDs
-        building_ids = [building["fields"].get("BuildingId") for building in user_business_buildings 
-                       if building["fields"].get("BuildingId")]
+        building_ids = list(user_building_ids.keys())
         
         # Get employees working at these buildings
         building_employees = get_building_employees(tables, building_ids)
-        
-        # Get all citizens for reference
-        all_citizens = {}
-        try:
-            citizens = tables["citizens"].all()
-            all_citizens = {citizen["id"]: citizen for citizen in citizens}
-        except Exception as e:
-            print(f"Error getting all citizens: {str(e)}")
         
         # Get all citizens for reference
         all_citizens = {}
@@ -573,6 +590,7 @@ def process_ai_wage_adjustments(dry_run: bool = False):
             
             if decisions and "wage_adjustments" in decisions:
                 wage_adjustments = decisions["wage_adjustments"]
+                print(f"AI {ai_username} returned {len(wage_adjustments)} wage adjustments")
                 
                 for adjustment in wage_adjustments:
                     building_id = adjustment.get("building_id")
@@ -583,15 +601,13 @@ def process_ai_wage_adjustments(dry_run: bool = False):
                         print(f"Invalid wage adjustment: {adjustment}")
                         continue
                     
-                    # Find the building to get current wage amount
-                    building_formula = f"{{BuildingId}}='{building_id}'"
-                    buildings = tables["buildings"].all(formula=building_formula)
-                    
-                    if not buildings:
-                        print(f"Building {building_id} not found")
+                    # Check if this building ID is in the user's businesses
+                    if building_id not in user_building_ids:
+                        print(f"Building {building_id} not run by {ai_username} or doesn't exist")
                         continue
                     
-                    building = buildings[0]
+                    # Get the building from our map
+                    building = user_building_ids[building_id]
                     current_wage = building["fields"].get("Wages", 0)
                     
                     # Check if the AI runs this business - if not, skip it
@@ -600,10 +616,13 @@ def process_ai_wage_adjustments(dry_run: bool = False):
                         print(f"Skipping building {building_id} - AI {ai_username} does not run this business (run by {business_runner})")
                         continue
                     
+                    print(f"Processing wage adjustment for building {building_id}: {current_wage} -> {new_wage_amount}")
+                    
                     # Update the wage amount
                     success = update_building_wage_amount(tables, building_id, new_wage_amount)
                     
                     if success:
+                        print(f"Successfully updated wage for building {building_id}")
                         # Create notifications for employees
                         occupant_id = building["fields"].get("Occupant", "")
                         if occupant_id and occupant_id in all_citizens:
@@ -611,6 +630,8 @@ def process_ai_wage_adjustments(dry_run: bool = False):
                                 tables, building_id, occupant_id, ai_username, 
                                 current_wage, new_wage_amount, reason
                             )
+                        else:
+                            print(f"Building {building_id} has no occupant or occupant not found in citizens")
                         
                         # Add to the list of adjustments for this AI
                         ai_wage_adjustments[ai_username].append({
@@ -619,6 +640,8 @@ def process_ai_wage_adjustments(dry_run: bool = False):
                             "new_wage": new_wage_amount,
                             "reason": reason
                         })
+                    else:
+                        print(f"Failed to update wage for building {building_id}")
             else:
                 print(f"No valid wage adjustment decisions received for {ai_username}")
         else:
