@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import path from 'path';
 import fs from 'fs';
 
-// Helper function to find a building definition file in the category structure
+// Helper function to find a building definition file in the flat directory structure
 async function findBuildingDefinition(buildingType: string): Promise<any> {
   const buildingsDir = path.join(process.cwd(), 'data', 'buildings');
   
@@ -14,74 +14,23 @@ async function findBuildingDefinition(buildingType: string): Promise<any> {
   // Normalize the building type for comparison
   const normalizedType = buildingType.toLowerCase().trim();
   
-  // Get all category directories
-  const categories = fs.readdirSync(buildingsDir, { withFileTypes: true })
-    .filter(dirent => dirent.isDirectory())
-    .map(dirent => dirent.name);
+  // Get all building definition files in the flat directory
+  const files = fs.readdirSync(buildingsDir)
+    .filter(file => file.endsWith('.json'));
   
-  // Search through each category
-  for (const category of categories) {
-    const categoryPath = path.join(buildingsDir, category);
-    
-    // Check if this is a subcategory structure
-    const hasSubcategories = fs.readdirSync(categoryPath, { withFileTypes: true })
-      .some(dirent => dirent.isDirectory());
-    
-    if (hasSubcategories) {
-      // Get all subcategory directories
-      const subcategories = fs.readdirSync(categoryPath, { withFileTypes: true })
-        .filter(dirent => dirent.isDirectory())
-        .map(dirent => dirent.name);
+  // Check each file
+  for (const file of files) {
+    const filePath = path.join(buildingsDir, file);
+    try {
+      const fileContent = fs.readFileSync(filePath, 'utf8');
+      const definition = JSON.parse(fileContent);
       
-      // Search through each subcategory
-      for (const subcategory of subcategories) {
-        const subcategoryPath = path.join(categoryPath, subcategory);
-        
-        // Get all building definition files in this subcategory
-        const files = fs.readdirSync(subcategoryPath)
-          .filter(file => file.endsWith('.json'));
-        
-        // Check each file
-        for (const file of files) {
-          const filePath = path.join(subcategoryPath, file);
-          try {
-            const fileContent = fs.readFileSync(filePath, 'utf8');
-            const definition = JSON.parse(fileContent);
-            
-            // Check if this is the building type we're looking for
-            if (definition.type && definition.type.toLowerCase().trim() === normalizedType) {
-              // Add category and subcategory to the definition
-              definition.category = category;
-              definition.subcategory = subcategory;
-              return definition;
-            }
-          } catch (error) {
-            console.error(`Error reading or parsing ${filePath}:`, error);
-          }
-        }
+      // Check if this is the building type we're looking for
+      if (definition.type && definition.type.toLowerCase().trim() === normalizedType) {
+        return definition;
       }
-    } else {
-      // No subcategories, check files directly in the category
-      const files = fs.readdirSync(categoryPath)
-        .filter(file => file.endsWith('.json'));
-      
-      // Check each file
-      for (const file of files) {
-        const filePath = path.join(categoryPath, file);
-        try {
-          const fileContent = fs.readFileSync(filePath, 'utf8');
-          const definition = JSON.parse(fileContent);
-          
-          // Check if this is the building type we're looking for
-          if (definition.type && definition.type.toLowerCase().trim() === normalizedType) {
-            // Add category to the definition
-            definition.category = category;
-            return definition;
-          }
-        } catch (error) {
-          console.error(`Error reading or parsing ${filePath}:`, error);
-        }
-      }
+    } catch (error) {
+      console.error(`Error reading or parsing ${filePath}:`, error);
     }
   }
   

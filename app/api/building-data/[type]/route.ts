@@ -8,40 +8,41 @@ const readFile = promisify(fs.readFile);
 const stat = promisify(fs.stat);
 const access = promisify(fs.access);
 
-// Helper function to recursively search for a file
-async function findBuildingFile(buildingType: string, dir: string): Promise<string | null> {
+// Helper function to search for a file in the flat directory structure
+async function findBuildingFile(buildingType: string): Promise<string | null> {
   try {
-    console.log(`Searching for building file ${buildingType} in directory ${dir}`);
+    const buildingsDir = path.join(process.cwd(), 'data', 'buildings');
+    console.log(`Searching for building file ${buildingType} in directory ${buildingsDir}`);
     
     // Check if directory exists
     try {
-      await access(dir, fs.constants.R_OK);
+      await access(buildingsDir, fs.constants.R_OK);
     } catch (error) {
-      console.log(`Directory ${dir} does not exist or is not readable`);
+      console.log(`Directory ${buildingsDir} does not exist or is not readable`);
       return null;
     }
     
-    const files = await readdir(dir);
+    const files = await readdir(buildingsDir);
+    
+    // Try different filename formats
+    const possibleNames = [
+      `${buildingType}.json`,
+      `${buildingType.toLowerCase()}.json`,
+      `${buildingType.replace(/\s+/g, '_').toLowerCase()}.json`,
+      `${buildingType.replace(/\s+/g, '-').toLowerCase()}.json`
+    ];
+    
     for (const file of files) {
-      const filePath = path.join(dir, file);
-      const stats = await stat(filePath);
-      
-      if (stats.isDirectory()) {
-        const result = await findBuildingFile(buildingType, filePath);
-        if (result) return result;
-      } else if (
-        file === `${buildingType}.json` || 
-        file.toLowerCase() === `${buildingType.toLowerCase()}.json` ||
-        file.toLowerCase() === `${buildingType.replace(/\s+/g, '_').toLowerCase()}.json` ||
-        file.toLowerCase() === `${buildingType.replace(/\s+/g, '-').toLowerCase()}.json`
-      ) {
+      if (possibleNames.includes(file.toLowerCase())) {
+        const filePath = path.join(buildingsDir, file);
         console.log(`Found matching file: ${filePath}`);
         return filePath;
       }
     }
+    
     return null;
   } catch (error) {
-    console.error(`Error searching directory ${dir}:`, error);
+    console.error(`Error searching directory:`, error);
     return null;
   }
 }
@@ -59,19 +60,8 @@ export async function GET(request: NextRequest) {
 
     console.log(`Searching for building data for type: ${type}`);
     
-    // Search in both data and public/data directories
-    const dataDirs = [
-      path.join(process.cwd(), 'data', 'buildings'),
-      path.join(process.cwd(), 'public', 'data', 'buildings')
-    ];
-    
-    let filePath = null;
-    
-    // Try each directory
-    for (const dir of dataDirs) {
-      filePath = await findBuildingFile(type, dir);
-      if (filePath) break;
-    }
+    // Only search in data/buildings directory
+    const filePath = await findBuildingFile(type);
 
     if (!filePath) {
       console.log(`Building data not found for ${type}`);
@@ -85,22 +75,6 @@ export async function GET(request: NextRequest) {
     const fileContent = await readFile(filePath, 'utf-8');
     const buildingData = JSON.parse(fileContent);
     
-    // Add category and subcategory based on file path
-    const pathParts = filePath.split(path.sep);
-    const buildingsIndex = pathParts.findIndex(part => part === 'buildings');
-    
-    if (buildingsIndex !== -1 && pathParts.length > buildingsIndex + 1) {
-      // Check if there's a category
-      if (pathParts.length > buildingsIndex + 1) {
-        buildingData.category = pathParts[buildingsIndex + 1];
-      }
-      
-      // Check if there's a subcategory
-      if (pathParts.length > buildingsIndex + 2) {
-        buildingData.subcategory = pathParts[buildingsIndex + 2];
-      }
-    }
-
     return NextResponse.json(buildingData);
   } catch (error) {
     console.error('Error fetching building data:', error);
