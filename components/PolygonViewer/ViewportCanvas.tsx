@@ -4,12 +4,16 @@ import { useEffect, useRef, useState } from 'react';
 import { dataService } from '@/lib/services/DataService';
 import { viewportService } from '@/lib/services/ViewportService';
 import { renderService } from '@/lib/services/RenderService';
-import { interactionService } from '@/lib/services/InteractionService';
 import { incomeService } from '@/lib/services/IncomeService';
-import { transportService } from '@/lib/services/TransportService';
 import { assetService } from '@/lib/services/AssetService';
 import { uiStateService } from '@/lib/services/UIStateService';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
+// Import services as types only to avoid conflicts with local declarations
+import type { InteractionService as InteractionServiceType } from '@/lib/services/InteractionService';
+import type { TransportService as TransportServiceType } from '@/lib/services/TransportService';
+// Import the actual service instances
+import { interactionService as interactionServiceInstance } from '@/lib/services/InteractionService';
+import { transportService as transportServiceInstance } from '@/lib/services/TransportService';
 
 // Define interfaces for the data structures
 interface PolygonData {
@@ -94,9 +98,9 @@ interface TransportService {
   handlePointSelected(point: PointData): void;
 }
 
-// Declare the services with their proper types
-declare const interactionService: InteractionService;
-declare const transportService: TransportService;
+// Use the imported service instances
+const interactionService: InteractionService = interactionServiceInstance;
+const transportService: TransportService = transportServiceInstance;
 
 // Define the type for the initializeInteractions method parameters
 interface InitializeInteractionsParams {
@@ -469,8 +473,8 @@ export default function ViewportCanvas({
       emptyBuildingPoints,
       interactionState as InteractionState,
       transportPath,
-      transportService.getStartPoint(),
-      transportService.getEndPoint(),
+      transportService.getStartPoint() ? [transportService.getStartPoint()] : [],
+      transportService.getEndPoint() ? [transportService.getEndPoint()] : [],
       polygons,
       incomeDataLoaded ? incomeData : {},
       minIncome,
@@ -521,8 +525,8 @@ export default function ViewportCanvas({
           emptyBuildingPoints,
           interactionService.getState() as InteractionState,
           transportPath,
-          transportService.getStartPoint(),
-          transportService.getEndPoint(),
+          transportService.getStartPoint() ? [transportService.getStartPoint()] : [],
+          transportService.getEndPoint() ? [transportService.getEndPoint()] : [],
           polygons,
           incomeDataLoaded ? incomeData : {},
           minIncome,
