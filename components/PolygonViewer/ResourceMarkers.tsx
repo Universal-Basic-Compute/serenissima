@@ -24,9 +24,20 @@ export default function ResourceMarkers({
   const [isLoading, setIsLoading] = useState(false);
   
   // Handle mouse enter for resource location
-  const handleMouseEnter = useCallback((locationKey: string, resources: any[]) => {
+  const handleMouseEnter = useCallback((locationKey: string, locationResources: any[]) => {
     setHoveredLocation(locationKey);
-    hoverStateService.setHoveredResources(resources);
+    
+    // Use HoverStateService to set resource hover state
+    // Create a unique ID for this resource group
+    const resourceIds = locationResources.map(r => r.id).join('_');
+    hoverStateService.setHoveredResource(resourceIds, {
+      locationKey,
+      resources: locationResources,
+      position: {
+        lat: parseFloat(locationKey.split('_')[0]),
+        lng: parseFloat(locationKey.split('_')[1])
+      }
+    });
   }, []);
   
   // Handle mouse leave for resource location
@@ -41,23 +52,6 @@ export default function ResourceMarkers({
       loadResources();
     }
   }, [isVisible]);
-  
-  // Handle mouse enter for a resource location
-  const handleMouseEnter = (locationKey: string, locationResources: any[]) => {
-    setHoveredLocation(locationKey);
-    
-    // Use HoverStateService to set resource hover state
-    // Create a unique ID for this resource group
-    const resourceIds = locationResources.map(r => r.id).join('_');
-    hoverStateService.setHoveredResource(resourceIds, {
-      locationKey,
-      resources: locationResources,
-      position: {
-        lat: parseFloat(locationKey.split('_')[0]),
-        lng: parseFloat(locationKey.split('_')[1])
-      }
-    });
-  };
   
   // Handle mouse leave for a resource location
   const handleMouseLeave = () => {
