@@ -11,6 +11,36 @@ import { assetService } from '@/lib/services/AssetService';
 import { uiStateService } from '@/lib/services/UIStateService';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 
+// Define interfaces for the data structures
+interface PolygonData {
+  id: string;
+  // Add other properties as needed
+}
+
+interface BuildingData {
+  id: string;
+  // Add other properties as needed
+}
+
+interface PointData {
+  lat: number;
+  lng: number;
+}
+
+interface PolygonRenderData {
+  // Properties needed for rendering
+}
+
+interface InteractionData {
+  polygonsToRender: PolygonRenderData[];
+  buildings: BuildingData[];
+  emptyBuildingPoints: PointData[];
+  allPolygons: PolygonData[];
+  citizensByBuilding: Record<string, any[]>;
+  transportStartPoint: PointData | null;
+  transportEndPoint: PointData | null;
+}
+
 interface ViewportCanvasProps {
   activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
   scale: number;
@@ -204,7 +234,7 @@ export default function ViewportCanvas({
       polygonsToRender,
       buildings,
       emptyBuildingPoints,
-      allPolygons: polygons,
+      polygons,
       citizensByBuilding,
       transportStartPoint: transportService.getStartPoint() || null,
       transportEndPoint: transportService.getEndPoint() || null
@@ -221,7 +251,7 @@ export default function ViewportCanvas({
         polygonsToRender,
         buildings,
         emptyBuildingPoints,
-        allPolygons: polygons,
+        polygons,
         citizensByBuilding,
         transportStartPoint: transportService.getStartPoint() || null,
         transportEndPoint: transportService.getEndPoint() || null
@@ -259,8 +289,8 @@ export default function ViewportCanvas({
         // Handle transport point selection
         if (point) {
           console.log(`Transport point selected at: ${point.lat}, ${point.lng}`);
-          // Pass the point as an array
-          transportService.handlePointSelected([point]);
+          // Pass the point correctly
+          transportService.handlePointSelected(point);
         }
       })
     ];
@@ -291,7 +321,7 @@ export default function ViewportCanvas({
       polygonsToRender,
       buildings,
       emptyBuildingPoints,
-      allPolygons: polygons,
+      polygons,
       citizensByBuilding,
       transportStartPoint: transportService.getStartPoint() || null,
       transportEndPoint: transportService.getEndPoint() || null
