@@ -68,6 +68,14 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   }[]>([]);
   const [emptyBuildingPoints, setEmptyBuildingPoints] = useState<{lat: number, lng: number}[]>([]);
   
+  // Add refs to track current state without causing re-renders
+  const hoveredPolygonIdRef = useRef<string | null>(null);
+  const hoveredBuildingIdRef = useRef<string | null>(null);
+  const hoveredCanalPointRef = useRef<{lat: number, lng: number} | null>(null);
+  const hoveredBridgePointRef = useRef<{lat: number, lng: number} | null>(null);
+  const hoveredCitizenBuildingRef = useRef<string | null>(null);
+  const hoveredCitizenTypeRef = useRef<'home' | 'work' | null>(null);
+  
   // Function to fetch the building image path when hovering over a building
   const fetchBuildingImagePath = async (buildingType: string, variant?: string) => {
     try {
