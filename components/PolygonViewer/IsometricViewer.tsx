@@ -156,6 +156,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
               console.log('IsometricViewer: Directly initializing transport service with polygon data');
               
               // Use the new direct initialization method
+              const { transportService } = require('@/lib/services/TransportService');
               const success = transportService.initializeWithPolygonData(data.polygons);
               console.log(`IsometricViewer: Direct transport service initialization ${success ? 'succeeded' : 'failed'}`);
               
