@@ -46,19 +46,24 @@ export class CitizenService {
                 typeof position.lat === 'number' && typeof position.lng === 'number') {
               // Position is valid
             } else {
-              console.warn(`Invalid position for citizen ${citizen.id || citizen.CitizenId}:`, position);
+              console.error(`Invalid position for citizen ${citizen.id || citizen.CitizenId}:`, position);
               
               // Try to use the position from the API response directly
               if (citizen.position && typeof citizen.position === 'object' &&
-                  'lat' in citizen.position && 'lng' in position) {
+                  'lat' in citizen.position && 'lng' in citizen.position) {
                 position = citizen.position;
               } else {
-                // If no valid position, create a random one near Venice
-                position = {
-                  lat: 45.4371 + Math.random() * 0.01,
-                  lng: 12.3326 + Math.random() * 0.01
-                };
-                console.log(`Created random position for citizen ${citizen.id || citizen.CitizenId}:`, position);
+                // Instead of creating a random position, leave it as null
+                // This will allow filtering out citizens without positions
+                position = null;
+                
+                // Log detailed debug information
+                console.error(`Citizen without valid position:`, {
+                  id: citizen.id || citizen.CitizenId,
+                  name: `${citizen.FirstName || citizen.firstName || ''} ${citizen.LastName || citizen.lastName || ''}`,
+                  rawPosition: citizen.position,
+                  citizenData: citizen
+                });
               }
             }
             
@@ -73,7 +78,9 @@ export class CitizenService {
             };
           });
           
-          console.log(`Loaded ${this.citizens.length} citizens, ${this.citizens.filter(c => c.position).length} with valid positions`);
+          // Log statistics about positions
+          const citizensWithPositions = this.citizens.filter(c => c.position);
+          console.log(`Loaded ${this.citizens.length} citizens, ${citizensWithPositions.length} with valid positions, ${this.citizens.length - citizensWithPositions.length} without positions`);
           
           // Clear the building associations completely
           this.citizensByBuilding = {};

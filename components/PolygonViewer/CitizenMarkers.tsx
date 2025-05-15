@@ -46,15 +46,21 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
       }
   
       const loadedCitizens = citizenService.getCitizens();
-      setCitizens(loadedCitizens);
+      
+      // Filter out citizens without positions
+      const citizensWithPositions = loadedCitizens.filter(c => c.position);
+      setCitizens(citizensWithPositions);
   
       // Add debug logging
       console.log(`CitizenMarkers: Loaded ${loadedCitizens.length} citizens`);
-      console.log(`CitizenMarkers: Citizens with positions: ${loadedCitizens.filter(c => c.position).length}`);
+      console.log(`CitizenMarkers: Citizens with positions: ${citizensWithPositions.length}`);
+      console.log(`CitizenMarkers: Citizens without positions: ${loadedCitizens.length - citizensWithPositions.length}`);
   
       // Log a sample citizen to check position format
-      if (loadedCitizens.length > 0) {
-        console.log('CitizenMarkers: Sample citizen position:', loadedCitizens[0].position);
+      if (citizensWithPositions.length > 0) {
+        console.log('CitizenMarkers: Sample citizen position:', citizensWithPositions[0].position);
+      } else {
+        console.warn('CitizenMarkers: No citizens with valid positions found');
       }
   
       setIsLoading(false);
@@ -109,7 +115,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     <>
       {/* Citizen Markers */}
       <div className="absolute inset-0 pointer-events-none overflow-visible">
-        {citizens.filter(citizen => citizen.position).map((citizen) => {
+        {citizens.map((citizen) => {
           // Log the original position and the transformed screen coordinates
           const originalPos = citizen.position;
           const position = latLngToScreen(citizen.position.lat, citizen.position.lng);
