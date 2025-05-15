@@ -51,7 +51,7 @@ def run_scheduled_tasks():
                 20: ("ais/buildbuildings.py", "AI building construction"),
                 21: ("ais/adjustleases.py", "AI lease adjustments"),
                 22: ("ais/adjustrents.py", "AI rent adjustments"),
-                23: ("ais/answertomessages.py", "AI message responses"),
+                23: ("ais/adjustwages.py", "AI wage adjustments"),
                 0: ("ais/processnotifications.py", "AI notification processing"),
                 1: ("ais/answertomessages.py", "AI message responses"),
                 3: ("ais/answertomessages.py", "AI message responses"),

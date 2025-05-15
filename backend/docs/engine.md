@@ -325,6 +325,28 @@ Every day at 10:00 PM UTC, the AI rent adjustment system allows AI users to opti
 
 This process creates a more dynamic housing market with AI building owners actively managing their properties, providing market signals about the value of different housing types, and encouraging citizens to seek affordable housing based on their wealth and social class.
 
+### AI Wage Adjustments (11:00 PM UTC)
+
+**Script**: `backend/ais/adjustwages.py`
+
+Every day at 11:00 PM UTC, the AI wage adjustment system allows AI users to optimize wage amounts for businesses they own:
+
+1. The script identifies all users marked as AI in the system
+2. For each AI user, it analyzes their businesses and employees
+3. The AI makes strategic decisions about wage adjustments based on:
+   - Business income and expenses
+   - Employee social class and wealth
+   - Labor market conditions
+   - Need to attract and retain quality workers
+   - Overall financial goals
+4. When wage adjustments are made:
+   - Business records are updated with new wage amounts
+   - Business employees receive notifications about the changes
+   - Reasons for adjustments are provided to maintain transparency
+5. An admin notification is created with statistics about all wage adjustments
+
+This process creates a more dynamic labor market with AI business owners actively managing their workforce, providing market signals about the value of different types of labor, and affecting citizen wealth which in turn impacts their ability to pay rent and potentially move to better housing.
+
 ### AI Message Responses (Every 2.4 hours)
 
 **Script**: `backend/ais/answertomessages.py`

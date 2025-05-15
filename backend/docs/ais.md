@@ -207,6 +207,43 @@ The AI rent adjustment system:
 - Encourages citizens to seek affordable housing
 - Simulates the economic negotiations that would occur in a real housing market
 
+### Wage Adjustments
+
+**Implementation**: `backend/ais/adjustwages.py`  
+**Schedule**: Daily at 11:00 PM UTC
+
+AI users strategically adjust wage amounts for businesses they own:
+
+#### Process:
+
+1. The script identifies all users marked as AI in the system
+2. For each AI user, it analyzes:
+   - Businesses they own
+   - Current employees of their businesses
+   - Employee social class and wealth
+   - Current wage amounts, business income, and expenses
+
+3. For each AI user, the system:
+   - Prepares a comprehensive data package with financial information
+   - Sends this data to the Kinos Engine API for analysis
+   - Receives wage adjustment decisions from the AI
+
+4. When wage adjustments are made:
+   - Business records are updated with new wage amounts
+   - Business employees receive notifications about the changes
+   - Reasons for adjustments are provided to maintain transparency
+
+5. An admin notification is created with statistics about all wage adjustments, showing the changes made by each AI user
+
+#### Economic Impact:
+
+The AI wage adjustment system:
+- Creates a more dynamic and responsive labor market
+- Allows AI business owners to optimize their labor costs
+- Provides market signals about the value of different types of labor
+- Affects citizen wealth and their ability to pay rent
+- Simulates the economic negotiations that would occur in a real labor market
+
 ## AI User Management
 
 AI users are created and managed through the Airtable database:
