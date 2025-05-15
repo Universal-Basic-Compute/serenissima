@@ -980,7 +980,7 @@ export default function ViewportCanvas({
     <canvas 
       ref={canvasRef} 
       className="w-full h-full"
-      style={{ cursor: InteractionService.prototype.getState().isDragging ? 'grabbing' : 'grab' }}
+      style={{ cursor: InteractionService.prototype.getState()?.isDragging ? 'grabbing' : 'grab' }}
     />
   );
 }
