@@ -144,12 +144,6 @@ export async function GET(request: Request) {
         wealth: record.fields.Wealth || 'Average',
         Wealth: record.fields.Wealth || 'Average',
         landId: record.fields.Land || 'polygon-1',
-        buildingId: record.fields.Home,
-        buildingType: 'Palazzo',
-        isHome: true,
-        isWork: false,
-        Home: record.fields.Home,
-        Work: record.fields.Work,
         NeedsCompletionScore: 0.75,
         CreatedAt: record.fields.CreatedAt || new Date().toISOString()
       };

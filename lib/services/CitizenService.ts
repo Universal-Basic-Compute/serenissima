@@ -62,37 +62,9 @@ export class CitizenService {
           
           console.log(`Loaded ${this.citizens.length} citizens, ${this.citizens.filter(c => c.position).length} with valid positions`);
           
-          // Group citizens by building
-          const byBuilding: Record<string, any[]> = {};
-          
-          this.citizens.forEach(citizen => {
-            // Add to home building if it exists
-            if (citizen.Home) {
-              if (!byBuilding[citizen.Home]) {
-                byBuilding[citizen.Home] = [];
-              }
-              byBuilding[citizen.Home].push({
-                ...citizen,
-                markerType: 'home'
-              });
-            }
-            
-            // Add to work building if it exists
-            if (citizen.Work) {
-              if (!byBuilding[citizen.Work]) {
-                byBuilding[citizen.Work] = [];
-              }
-              byBuilding[citizen.Work].push({
-                ...citizen,
-                markerType: 'work'
-              });
-            }
-          });
-          
-          this.citizensByBuilding = byBuilding;
+          // Remove building grouping
+          this.citizensByBuilding = {};
           this.isLoaded = true;
-          
-          console.log(`Citizens grouped by buildings: ${Object.keys(byBuilding).length} buildings have citizens`);
           
           // Emit event to notify other components
           eventBus.emit(EventTypes.CITIZENS_LOADED, {

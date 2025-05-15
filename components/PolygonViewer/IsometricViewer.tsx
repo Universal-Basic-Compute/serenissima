@@ -102,36 +102,10 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         if (Array.isArray(data)) {
           setCitizens(data);
           
-          // Group citizens by building
-          const byBuilding: Record<string, any[]> = {};
-          
-          data.forEach(citizen => {
-            // Add to home building
-            if (citizen.Home) {
-              if (!byBuilding[citizen.Home]) {
-                byBuilding[citizen.Home] = [];
-              }
-              byBuilding[citizen.Home].push({
-                ...citizen,
-                markerType: 'home'
-              });
-            }
-            
-            // Add to work building
-            if (citizen.Work) {
-              if (!byBuilding[citizen.Work]) {
-                byBuilding[citizen.Work] = [];
-              }
-              byBuilding[citizen.Work].push({
-                ...citizen,
-                markerType: 'work'
-              });
-            }
-          });
-          
-          setCitizensByBuilding(byBuilding);
+          // Remove building grouping
+          setCitizensByBuilding({});
           setCitizensLoaded(true);
-          console.log(`Loaded ${data.length} citizens in ${Object.keys(byBuilding).length} buildings`);
+          console.log(`Loaded ${data.length} citizens`);
         }
       }
     } catch (error) {

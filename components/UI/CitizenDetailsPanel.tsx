@@ -8,9 +8,6 @@ interface CitizenDetailsPanelProps {
 
 const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onClose }) => {
   const [isVisible, setIsVisible] = useState(false);
-  const [homeBuilding, setHomeBuilding] = useState<any>(null);
-  const [workBuilding, setWorkBuilding] = useState<any>(null);
-  const [isLoadingBuildings, setIsLoadingBuildings] = useState(false);
   
   useEffect(() => {
     // Animate in when component mounts
@@ -25,43 +22,10 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     
     window.addEventListener('keydown', handleEscKey);
     
-    // Fetch building details if we have building IDs
-    if (citizen.Home || citizen.Work) {
-      fetchBuildingDetails();
-    }
-    
     return () => {
       window.removeEventListener('keydown', handleEscKey);
     };
   }, [citizen]);
-  
-  const fetchBuildingDetails = async () => {
-    setIsLoadingBuildings(true);
-    
-    try {
-      // Fetch home building if available
-      if (citizen.Home) {
-        const homeResponse = await fetch(`/api/buildings/${citizen.Home}`);
-        if (homeResponse.ok) {
-          const homeData = await homeResponse.json();
-          setHomeBuilding(homeData);
-        }
-      }
-      
-      // Fetch work building if available
-      if (citizen.Work) {
-        const workResponse = await fetch(`/api/buildings/${citizen.Work}`);
-        if (workResponse.ok) {
-          const workData = await workResponse.json();
-          setWorkBuilding(workData);
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching building details:', error);
-    } finally {
-      setIsLoadingBuildings(false);
-    }
-  };
   
   const handleClose = () => {
     // Animate out before closing
@@ -219,39 +183,6 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
         <p className="text-amber-700 italic">{citizen.Description || 'No description available.'}</p>
       </div>
       
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <div>
-          <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Home</h3>
-          <div className="bg-amber-100 p-3 rounded-lg">
-            {isLoadingBuildings ? (
-              <p className="text-amber-700 italic">Loading...</p>
-            ) : homeBuilding ? (
-              <div>
-                <p className="text-amber-800 font-medium">{homeBuilding.name || homeBuilding.type}</p>
-                <p className="text-amber-700 text-sm">{homeBuilding.type}</p>
-              </div>
-            ) : (
-              <p className="text-amber-700">{citizen.Home || 'Unknown'}</p>
-            )}
-          </div>
-        </div>
-        
-        <div>
-          <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Work</h3>
-          <div className="bg-amber-100 p-3 rounded-lg">
-            {isLoadingBuildings ? (
-              <p className="text-amber-700 italic">Loading...</p>
-            ) : workBuilding ? (
-              <div>
-                <p className="text-amber-800 font-medium">{workBuilding.name || workBuilding.type}</p>
-                <p className="text-amber-700 text-sm">{workBuilding.type}</p>
-              </div>
-            ) : (
-              <p className="text-amber-700">{citizen.Work || 'Unemployed'}</p>
-            )}
-          </div>
-        </div>
-      </div>
       
       <div className="mt-4 text-xs text-amber-500 italic text-center">
         Citizen of Venice since {formatDate(citizen.CreatedAt)}
