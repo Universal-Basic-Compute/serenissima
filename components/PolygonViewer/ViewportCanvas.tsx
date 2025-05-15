@@ -475,7 +475,7 @@ export default function ViewportCanvas({
       transportPath,
       transportService.getStartPoint() as unknown as any[],
       transportService.getEndPoint() as unknown as Record<string, number>,
-      polygons,
+      polygons as unknown as Record<string, any[]>,
       incomeDataLoaded ? (incomeData as unknown as Record<string, number>) : {},
       minIncome,
       maxIncome
@@ -527,7 +527,7 @@ export default function ViewportCanvas({
           transportPath,
           transportService.getStartPoint() as unknown as any[],
           transportService.getEndPoint() as unknown as Record<string, number>,
-          polygons,
+          polygons as unknown as Record<string, any[]>,
           incomeDataLoaded ? (incomeData as unknown as Record<string, number>) : {},
           minIncome,
           maxIncome
