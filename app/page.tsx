@@ -121,9 +121,8 @@ export default function TwoDPage() {
       
     // Initialize the transport service
     // Using public methods instead of private initializeService
-    transportService.setPolygonsData(polygons).then(success => {
-      console.log(`Transport service initialization ${success ? 'succeeded' : 'failed'}`);
-    });
+    const success = transportService.setPolygonsData(polygons);
+    console.log(`Transport service initialization ${success ? 'succeeded' : 'failed'}`);
   }, []);
 
   // Initial dispatch of ensureBuildingsVisible event - only runs once on mount
