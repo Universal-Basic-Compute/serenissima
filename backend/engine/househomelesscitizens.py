@@ -69,9 +69,20 @@ def get_homeless_citizens(tables) -> List[Dict]:
     log.info("Fetching homeless citizens...")
     
     try:
-        # Get citizens without a Home field or with empty Home field
-        formula = "OR({Home} = '', {Home} = BLANK())"
-        homeless_citizens = tables['citizens'].all(formula=formula)
+        # Get all citizens
+        all_citizens = tables['citizens'].all()
+        
+        # Get all buildings with occupants
+        formula = "NOT(OR({Occupant} = '', {Occupant} = BLANK()))"
+        occupied_buildings = tables['buildings'].all(formula=formula)
+        
+        # Extract the occupant IDs
+        occupied_citizen_ids = [building['fields'].get('Occupant') for building in occupied_buildings 
+                               if building['fields'].get('Occupant')]
+        
+        # Filter citizens to find those who are not occupants of any building
+        homeless_citizens = [citizen for citizen in all_citizens 
+                            if citizen['id'] not in occupied_citizen_ids]
         
         # Sort by Wealth in descending order
         homeless_citizens.sort(key=lambda c: float(c['fields'].get('Wealth', 0) or 0), reverse=True)
@@ -110,11 +121,6 @@ def assign_citizen_to_building(tables, citizen: Dict, building: Dict) -> bool:
     log.info(f"Assigning {citizen_name} to {building_name}")
     
     try:
-        # Update citizen record with new home
-        tables['citizens'].update(citizen_id, {
-            'Home': building['fields']['BuildingId']  # Use BuildingId field instead of record id
-        })
-        
         # Update building record with new occupant
         tables['buildings'].update(building_id, {
             'Occupant': citizen['fields']['CitizenId']  # Use CitizenId field instead of record id
