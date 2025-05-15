@@ -39,7 +39,11 @@ function findBuildingJsonFiles(dir: string): string[] {
 function loadBuildingData(filePath: string): any {
   try {
     const data = fs.readFileSync(filePath, 'utf8');
-    return JSON.parse(data);
+    const buildingData = JSON.parse(data);
+    return {
+      ...buildingData,
+      productionInformation: buildingData.productionInformation || null
+    };
   } catch (error) {
     console.error(`Error loading building data from ${filePath}:`, error);
     return null;
