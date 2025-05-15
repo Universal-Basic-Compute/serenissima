@@ -201,11 +201,10 @@ export default function ViewportCanvas({
     
     // Update the interaction service with current data
     interactionService.updatePolygons({
-      polygonsToRender: polygonsToRender,
-      buildings: buildings,
-      emptyBuildingPoints: emptyBuildingPoints,
-      polygons: polygons,
-      citizensByBuilding: citizensByBuilding,
+      polygons,
+      buildings,
+      emptyBuildingPoints,
+      citizensByBuilding,
       transportStartPoint: transportService.getStartPoint() || null,
       transportEndPoint: transportService.getEndPoint() || null
     });
@@ -218,14 +217,14 @@ export default function ViewportCanvas({
       offset,
       transportMode,
       {
-        polygonsToRender: polygonsToRender,
-        buildings: buildings,
-        emptyBuildingPoints: emptyBuildingPoints,
-        polygons: polygons,
-        citizensByBuilding: citizensByBuilding,
+        polygons,
+        buildings,
+        emptyBuildingPoints,
+        citizensByBuilding,
         transportStartPoint: transportService.getStartPoint() || null,
         transportEndPoint: transportService.getEndPoint() || null
-      }
+      },
+      polygonsToRender
     );
     
     // Subscribe to events from InteractionService
@@ -259,8 +258,7 @@ export default function ViewportCanvas({
         if (point) {
           console.log(`Transport point selected at: ${point.lat}, ${point.lng}`);
           // Convert point to expected format if needed
-          const pointData = Array.isArray(point) ? point : [point];
-          transportService.handlePointSelected(pointData);
+          transportService.handlePointSelected(point);
         }
       })
     ];
@@ -288,11 +286,10 @@ export default function ViewportCanvas({
   // Add this effect to update the interaction service when data changes
   useEffect(() => {
     interactionService.updatePolygons({
-      polygonsToRender: polygonsToRender,
-      buildings: buildings,
-      emptyBuildingPoints: emptyBuildingPoints,
-      polygons: polygons,
-      citizensByBuilding: citizensByBuilding,
+      polygons,
+      buildings,
+      emptyBuildingPoints,
+      citizensByBuilding,
       transportStartPoint: transportService.getStartPoint() || null,
       transportEndPoint: transportService.getEndPoint() || null
     });
@@ -358,8 +355,8 @@ export default function ViewportCanvas({
       emptyBuildingPoints,
       interactionState,
       transportPath,
-      transportService.getStartPoint(),
-      transportService.getEndPoint(),
+      transportService.getStartPoint() || null,
+      transportService.getEndPoint() || null,
       polygons as any,
       incomeDataLoaded ? incomeData : {},
       minIncome,
