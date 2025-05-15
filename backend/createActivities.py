@@ -218,11 +218,13 @@ def find_path_between_buildings(from_building: Dict, to_building: Dict) -> Optio
 def create_resource_fetching_activity(tables, citizen: Dict, contract: Dict, from_building: Dict, to_building: Dict, path: Dict) -> Optional[Dict]:
     """Create a resource fetching activity based on a contract."""
     try:
-        # Get the Airtable record ID
-        record_id = citizen['id']
+        # Always use CitizenId from fields, not the Airtable record ID
+        citizen_id = citizen['fields'].get('CitizenId')
         
-        # Get the CitizenId from the fields
-        citizen_id = citizen['fields'].get('CitizenId', record_id)
+        # If CitizenId is missing, log an error and return
+        if not citizen_id:
+            log.error(f"Missing CitizenId in citizen record: {citizen['id']}")
+            return None
         
         contract_id = contract['id']
         from_building_id = from_building['id']
@@ -269,11 +271,13 @@ def create_resource_fetching_activity(tables, citizen: Dict, contract: Dict, fro
 def create_production_activity(tables, citizen: Dict, building: Dict, recipe: Dict) -> Optional[Dict]:
     """Create a production activity based on a recipe."""
     try:
-        # Get the Airtable record ID
-        record_id = citizen['id']
+        # Always use CitizenId from fields, not the Airtable record ID
+        citizen_id = citizen['fields'].get('CitizenId')
         
-        # Get the CitizenId from the fields
-        citizen_id = citizen['fields'].get('CitizenId', record_id)
+        # If CitizenId is missing, log an error and return
+        if not citizen_id:
+            log.error(f"Missing CitizenId in citizen record: {citizen['id']}")
+            return None
         
         building_id = building['id']
         
@@ -326,15 +330,19 @@ def get_idle_citizens(tables) -> List[Dict]:
         active_activities_formula = f"AND({{StartDate}} <= '{now}', {{EndDate}} >= '{now}')"
         active_activities = tables['activities'].all(formula=active_activities_formula)
         
-        # Extract citizen IDs with active activities
+        # Extract citizen IDs with active activities - use CitizenId field
         busy_citizen_ids = set()
         for activity in active_activities:
             citizen_id = activity['fields'].get('CitizenId')
             if citizen_id:
                 busy_citizen_ids.add(citizen_id)
         
-        # Filter out citizens with active activities
-        idle_citizens = [citizen for citizen in all_citizens if citizen['id'] not in busy_citizen_ids]
+        # Filter out citizens with active activities using CitizenId
+        idle_citizens = []
+        for citizen in all_citizens:
+            citizen_id = citizen['fields'].get('CitizenId')
+            if citizen_id and citizen_id not in busy_citizen_ids:
+                idle_citizens.append(citizen)
         
         log.info(f"Found {len(idle_citizens)} idle citizens")
         return idle_citizens
@@ -347,13 +355,6 @@ def get_citizen_home(tables, citizen_id: str) -> Optional[Dict]:
     log.info(f"Finding home for citizen {citizen_id}")
     
     try:
-        # Get the CitizenId from the citizen record if we're passed a record ID
-        if citizen_id.startswith('rec'):
-            # This appears to be an Airtable record ID, so we need to get the CitizenId
-            citizen_record = tables['citizens'].get(citizen_id)
-            if citizen_record:
-                citizen_id = citizen_record['fields'].get('CitizenId', citizen_id)
-                log.info(f"Converted record ID to CitizenId: {citizen_id}")
         
         # Get buildings where this citizen is the occupant and the type is a housing type
         housing_types = ['canal_house', 'merchant_s_house', 'artisan_s_house', 'fisherman_s_cottage']
@@ -414,6 +415,11 @@ def create_rest_activity(tables, citizen_id: str, home_id: str) -> Optional[Dict
     log.info(f"Creating rest activity for citizen {citizen_id} at home {home_id}")
     
     try:
+        # Check if citizen_id is valid
+        if not citizen_id:
+            log.error("Missing CitizenId for rest activity")
+            return None
+            
         now = datetime.datetime.now()
         
         # Calculate end time (next morning at 6 AM)
@@ -434,7 +440,7 @@ def create_rest_activity(tables, citizen_id: str, home_id: str) -> Optional[Dict
         activity = tables['activities'].create({
             "ActivityId": f"rest_{citizen_id}_{int(time.time())}",
             "Type": "rest",
-            "CitizenId": citizen_id,  # This should be the CitizenId, not the Airtable record ID
+            "CitizenId": citizen_id,
             "FromBuilding": home_id,
             "ToBuilding": home_id,
             "CreatedAt": now.isoformat(),
@@ -454,6 +460,11 @@ def create_goto_home_activity(tables, citizen_id: str, home_id: str, path_data: 
     log.info(f"Creating goto_home activity for citizen {citizen_id} to home {home_id}")
     
     try:
+        # Check if citizen_id is valid
+        if not citizen_id:
+            log.error("Missing CitizenId for goto_home activity")
+            return None
+            
         now = datetime.datetime.now()
         
         # Get timing information from path data
@@ -489,6 +500,11 @@ def create_idle_activity(tables, citizen_id: str) -> Optional[Dict]:
     log.info(f"Creating idle activity for citizen {citizen_id}")
     
     try:
+        # Check if citizen_id is valid
+        if not citizen_id:
+            log.error("Missing CitizenId for idle activity")
+            return None
+            
         now = datetime.datetime.now()
         end_time = now + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)
         
@@ -511,11 +527,13 @@ def create_idle_activity(tables, citizen_id: str) -> Optional[Dict]:
 
 def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
     """Process activity creation for a single citizen."""
-    # Get the Airtable record ID
-    record_id = citizen['id']
+    # Always use CitizenId from fields, not the Airtable record ID
+    citizen_id = citizen['fields'].get('CitizenId')
     
-    # Get the CitizenId from the fields
-    citizen_id = citizen['fields'].get('CitizenId', record_id)
+    # If CitizenId is missing, log an error and return
+    if not citizen_id:
+        log.error(f"Missing CitizenId in citizen record: {citizen['id']}")
+        return False
     
     citizen_name = f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}"
     
