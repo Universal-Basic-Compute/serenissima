@@ -39,7 +39,15 @@ function findResourceJsonFiles(dir: string): string[] {
 function loadResourceData(filePath: string): any {
   try {
     const data = fs.readFileSync(filePath, 'utf8');
-    return JSON.parse(data);
+    const resourceData = JSON.parse(data);
+    
+    return {
+      id: path.basename(filePath, '.json'),
+      name: resourceData.name || path.basename(filePath, '.json'),
+      category: resourceData.category || 'Uncategorized',
+      description: resourceData.description || '',
+      importPrice: resourceData.importPrice || 0
+    };
   } catch (error) {
     console.error(`Error loading resource data from ${filePath}:`, error);
     return null;
@@ -111,11 +119,8 @@ export async function GET(request: Request) {
         id,
         name: resourceData.name || id,
         category: resourceData.category || pathParts[0] || 'Uncategorized',
-        producedFrom: resourceData.producedFrom || [],
-        usedIn: resourceData.usedIn || [],
         description: resourceData.description || '',
-        icon: resourceData.icon || `${id.toLowerCase()}.png`,
-        path: relativePath
+        importPrice: resourceData.importPrice || 0
       };
     }).filter(Boolean); // Remove null entries
     
