@@ -2,7 +2,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ClientWalletProvider from "@/components/UI/ClientWalletProvider";
 import Compagno from "@/components/UI/Compagno";
-import ClientSideEffects from "./client-effects";
 import ContextMenuPreventer from "@/components/UI/ContextMenuPreventer";
 // Add this to ensure buildings are always visible
 
@@ -27,7 +26,6 @@ export default function RootLayout({
         <ClientWalletProvider>
           {children}
           <Compagno />
-          <ClientSideEffects />
           <ContextMenuPreventer />
           <script dangerouslySetInnerHTML={{
             __html: `
