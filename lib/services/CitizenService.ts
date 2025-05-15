@@ -44,7 +44,14 @@ export class CitizenService {
               // Position is valid
             } else {
               console.warn(`Invalid position for citizen ${citizen.id || citizen.CitizenId}:`, position);
-              position = null;
+              
+              // Try to use the position from the API response directly
+              if (citizen.position && typeof citizen.position === 'object' &&
+                  'lat' in citizen.position && 'lng' in citizen.position) {
+                position = citizen.position;
+              } else {
+                position = null;
+              }
             }
             
             return {
