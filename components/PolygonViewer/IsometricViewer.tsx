@@ -1304,26 +1304,6 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     return inside;
   }
   
-  // Helper function to convert screen coordinates to lat/lng
-  const screenToLatLng = (
-    screenX: number, 
-    screenY: number, 
-    currentScale: number, 
-    currentOffset: {x: number, y: number}, 
-    canvasWidth: number, 
-    canvasHeight: number
-  ): {lat: number, lng: number} => {
-    // Reverse the isometric projection
-    const x = (screenX - canvasWidth / 2 - currentOffset.x) / currentScale;
-    const y = -(screenY - canvasHeight / 2 - currentOffset.y) / (currentScale * 1.4);
-    
-    // Convert back to lat/lng
-    const lng = x / 20000 + 12.3326;
-    const lat = y / 20000 + 45.4371;
-    
-    return { lat, lng };
-  };
-  
   // Helper function to calculate distance between two points
   const calculateDistance = (point1: {lat: number, lng: number}, point2: {lat: number, lng: number}): number => {
     const R = 6371000; // Earth radius in meters
