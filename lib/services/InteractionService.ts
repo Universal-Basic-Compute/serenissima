@@ -6,7 +6,7 @@
 import { CoordinateService } from './CoordinateService';
 import { RenderService } from './RenderService';
 import { eventBus, EventTypes } from '../utils/eventBus';
-import { throttle } from '../utils/performanceUtils';
+import { throttle, debounce } from '../utils/performanceUtils';
 
 export interface InteractionState {
   isDragging: boolean;
@@ -241,22 +241,28 @@ export class InteractionService {
     }
   ): () => void {
     
-    // Store references to data
+    // Store references to data without triggering state updates
     this._polygonsToRender = data.polygonsToRender;
     this._buildings = data.buildings;
     this._emptyBuildingPoints = data.emptyBuildingPoints;
     this._polygons = data.polygons;
     this._citizensByBuilding = data.citizensByBuilding;
     
-    // Create throttled mouse move handler
+    // Create throttled mouse move handler that won't cause infinite updates
     const handleMouseMove = throttle((e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
       
-      // Always update mouse position
-      setters.setMousePosition({ x: mouseX, y: mouseY });
-      this.state.mousePosition = { x: mouseX, y: mouseY };
+      // Only update mouse position if it has changed significantly
+      if (Math.abs(mouseX - this.state.mousePosition.x) > 1 || 
+          Math.abs(mouseY - this.state.mousePosition.y) > 1) {
+        // Update internal state first
+        this.state.mousePosition = { x: mouseX, y: mouseY };
+        
+        // Then update component state
+        setters.setMousePosition({ x: mouseX, y: mouseY });
+      }
       
       // Log mouse position when in transport mode
       if (transportMode) {
@@ -271,8 +277,8 @@ export class InteractionService {
       }
     }, 50);
     
-    // Handle mouse click
-    const handleClick = (e: MouseEvent) => {
+    // Handle mouse click with debounce to prevent multiple rapid clicks
+    const handleClick = debounce((e: MouseEvent) => {
       if (this.isDraggingRef) return; // Skip click handling while dragging
       
       const rect = canvas.getBoundingClientRect();
@@ -633,7 +639,7 @@ export class InteractionService {
         setters.setSelectedCitizen(null);
         setters.setShowCitizenDetailsPanel(false);
       }
-    };
+    }, 300); // Debounce for 300ms
     
     // Handle mouse down for panning
     const handleMouseDown = (e: MouseEvent) => {
@@ -673,9 +679,12 @@ export class InteractionService {
       canvas.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('mouseup', handleMouseUp);
       
-      // Clean up the throttled function if it has a cancel method
+      // Clean up the throttled/debounced functions if they have cancel methods
       if (typeof handleMouseMove.cancel === 'function') {
         handleMouseMove.cancel();
+      }
+      if (typeof handleClick.cancel === 'function') {
+        handleClick.cancel();
       }
     };
   }
