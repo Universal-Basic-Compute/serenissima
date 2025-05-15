@@ -21,6 +21,7 @@ import json
 import subprocess
 import datetime
 import time
+import requests
 from typing import Dict, List, Optional, Any
 from pyairtable import Api, Table
 from dotenv import load_dotenv
@@ -69,6 +70,34 @@ def initialize_airtable():
         log.error(f"Failed to initialize Airtable: {e}")
         sys.exit(1)
 
+def get_polygon_centers():
+    """Fetch polygon centers from the API to use as positions for new citizens."""
+    try:
+        # Fetch polygon data from the API
+        response = requests.get('http://localhost:3000/api/get-polygons')
+        if response.status_code != 200:
+            log.error(f"Failed to fetch polygons: HTTP {response.status_code}")
+            return []
+        
+        data = response.json()
+        if not data.get('polygons'):
+            log.error("No polygons found in API response")
+            return []
+        
+        # Extract all polygon centers
+        centers = []
+        for polygon in data['polygons']:
+            if polygon.get('center'):
+                centers.append(polygon['center'])
+            elif polygon.get('centroid'):
+                centers.append(polygon['centroid'])
+        
+        log.info(f"Found {len(centers)} polygon centers for citizen positions")
+        return centers
+    except Exception as e:
+        log.error(f"Error fetching polygon centers: {e}")
+        return []
+
 def get_vacant_housing_buildings(tables) -> List[Dict]:
     """Fetch vacant housing buildings from Airtable."""
     log.info("Fetching vacant housing buildings...")
@@ -92,11 +121,17 @@ def get_vacant_housing_buildings(tables) -> List[Dict]:
         log.error(f"Error fetching vacant housing buildings: {e}")
         return []
 
-def save_citizen_to_airtable(tables, citizen: Dict) -> Optional[Dict]:
+def save_citizen_to_airtable(tables, citizen: Dict, polygon_centers: list) -> Optional[Dict]:
     """Save a citizen to Airtable."""
     log.info(f"Saving citizen to Airtable: {citizen['FirstName']} {citizen['LastName']}")
     
     try:
+        # Select a random polygon center for the citizen's position
+        position = None
+        if polygon_centers:
+            position = random.choice(polygon_centers)
+            log.info(f"Assigned position {position} to citizen {citizen['id']}")
+        
         # Create the citizen record
         record = tables['citizens'].create({
             "CitizenId": citizen["id"],
@@ -106,7 +141,8 @@ def save_citizen_to_airtable(tables, citizen: Dict) -> Optional[Dict]:
             "Description": citizen["Description"],
             "ImagePrompt": citizen["ImagePrompt"],
             "Wealth": citizen["Wealth"],
-            "CreatedAt": citizen["CreatedAt"]
+            "CreatedAt": citizen["CreatedAt"],
+            "Position": json.dumps(position) if position else None  # Add position field
         })
         
         log.info(f"Successfully saved citizen to Airtable with ID: {record['id']}")
@@ -243,6 +279,11 @@ def process_immigration(dry_run: bool = False):
         log.info("No vacant housing buildings found. Immigration process complete.")
         return
     
+    # Fetch polygon centers once for all citizens
+    polygon_centers = get_polygon_centers()
+    if not polygon_centers:
+        log.warning("Could not fetch polygon centers, citizens will not have positions")
+    
     immigration_count = 0
     # Track immigrants by social class
     immigration_by_class = {
@@ -277,8 +318,8 @@ def process_immigration(dry_run: bool = False):
             log.warning(f"Failed to generate citizen for building {building['id']}")
             continue
         
-        # Save the citizen to Airtable
-        citizen_record = save_citizen_to_airtable(tables, citizen)
+        # Save the citizen to Airtable with a random polygon center position
+        citizen_record = save_citizen_to_airtable(tables, citizen, polygon_centers)
         if not citizen_record:
             log.warning(f"Failed to save citizen {citizen['FirstName']} {citizen['LastName']} to Airtable")
             continue
