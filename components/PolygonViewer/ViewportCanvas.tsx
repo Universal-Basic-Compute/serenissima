@@ -259,7 +259,7 @@ export default function ViewportCanvas({
         // Handle transport point selection
         if (point) {
           console.log(`Transport point selected at: ${point.lat}, ${point.lng}`);
-          // Pass the point as is, not as an array
+          // Pass the point as an array
           transportService.handlePointSelected([point]);
         }
       })
