@@ -1286,8 +1286,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     }, 50),
     [activeView, scale, offset, buildings, polygonsToRender]
   ); // Memoize the handler with useCallback
-    
-    const handleClick = (e: MouseEvent) => {
+  
+  // Add handleClick with useCallback to prevent infinite re-renders
+  const handleClick = useCallback((e: MouseEvent) => {
       if (isDraggingRef.current) return; // Skip click handling while dragging
       
       const rect = canvas.getBoundingClientRect();
@@ -1635,7 +1636,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         setSelectedCitizen(null);
         setShowCitizenDetailsPanel(false);
       }
-    };
+    }, [activeView, transportMode, transportStartPoint, transportEndPoint, polygonsToRender, buildings, emptyBuildingPoints, polygons, citizensByBuilding, scale, offset, findBuildingPosition, calculateTransportRoute, screenToLatLng]);
     
     const canvas = canvasRef.current;
     if (!canvas) return;
