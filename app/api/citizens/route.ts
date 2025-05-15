@@ -103,13 +103,13 @@ export async function GET(request: Request) {
       }
       
       // Determine if this is a home or work building
-      if (residentialTypes.includes(buildingType)) {
+      if (residentialTypes.includes(airtableValueToString(buildingType))) {
         // This is a residential building, set as home
-        occupantToBuildings[occupant].home = buildingId;
+        occupantToBuildings[occupant].home = airtableValueToString(buildingId);
         console.log(`Assigned building ${buildingId} (${buildingType}) as HOME for ${occupant}`);
       } else {
         // Any building that is not a residential type is a work building
-        occupantToBuildings[occupant].work = buildingId;
+        occupantToBuildings[occupant].work = airtableValueToString(buildingId);
         console.log(`Assigned building ${buildingId} (${buildingType}) as WORK for ${occupant}`);
       }
     });
