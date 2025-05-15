@@ -527,38 +527,9 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-600"></div>
           </div>
         ) : !error && building ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4 overflow-y-auto flex-grow">
-            {/* Column 1: SELLS, RECIPES (wider column) */}
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4 overflow-y-auto flex-grow" style={{ gridTemplateColumns: "1.5fr 1fr 1fr" }}>
+            {/* Column 1: RECIPES (wider column) */}
             <div className="col-span-1 md:col-span-1 lg:col-span-1 space-y-4">
-              {/* Resources Selling */}
-              {buildingDefinition?.productionInformation?.sells && buildingDefinition.productionInformation.sells.length > 0 && (
-                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
-                    <FaStore className="mr-2" /> SELLS
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {buildingDefinition.productionInformation.sells.map((resource: string) => (
-                      <div key={`sell-${resource}`} className="flex flex-col items-center bg-green-50 p-2 rounded-md" title={resource.replace(/_/g, ' ')}>
-                        <div className="relative w-8 h-8 mb-1">
-                          <Image 
-                            src={getResourceIconPath(resource)}
-                            alt={resource}
-                            width={32}
-                            height={32}
-                            className="object-contain"
-                            onError={(e) => {
-                              // Fallback to a default icon if the image fails to load
-                              (e.target as HTMLImageElement).src = '/images/resources/default.png';
-                            }}
-                          />
-                        </div>
-                        <span className="text-xs text-gray-700 capitalize">{resource.replace(/_/g, ' ')}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               {/* Recipes */}
               {buildingDefinition?.productionInformation?.Arti && buildingDefinition.productionInformation.Arti.length > 0 && (
                 <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
@@ -659,8 +630,37 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
               )}
             </div>
             
-            {/* Column 2: BUYS, STORES */}
+            {/* Column 2: SELLS, BUYS, STORES */}
             <div className="col-span-1 md:col-span-1 lg:col-span-1 space-y-4">
+              {/* Resources Selling - moved to top of column 2 */}
+              {buildingDefinition?.productionInformation?.sells && buildingDefinition.productionInformation.sells.length > 0 && (
+                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
+                    <FaStore className="mr-2" /> SELLS
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {buildingDefinition.productionInformation.sells.map((resource: string) => (
+                      <div key={`sell-${resource}`} className="flex flex-col items-center bg-green-50 p-2 rounded-md" title={resource.replace(/_/g, ' ')}>
+                        <div className="relative w-8 h-8 mb-1">
+                          <Image 
+                            src={getResourceIconPath(resource)}
+                            alt={resource}
+                            width={32}
+                            height={32}
+                            className="object-contain"
+                            onError={(e) => {
+                              // Fallback to a default icon if the image fails to load
+                              (e.target as HTMLImageElement).src = '/images/resources/default.png';
+                            }}
+                          />
+                        </div>
+                        <span className="text-xs text-gray-700 capitalize">{resource.replace(/_/g, ' ')}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Resources Buying */}
               {buildingDefinition?.productionInformation?.inputResources && Object.keys(buildingDefinition.productionInformation.inputResources).length > 0 && (
                 <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
