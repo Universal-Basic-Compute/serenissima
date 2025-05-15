@@ -119,6 +119,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [justCompletedTransaction, setJustCompletedTransaction] = useState<boolean>(false);
   const [landRendered, setLandRendered] = useState<boolean>(false);
+  const [dynamicOwner, setDynamicOwner] = useState<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   
   // Find the selected polygon
@@ -126,19 +127,52 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
     ? polygons.find(p => p.id === selectedPolygonId)
     : null;
   
-  // Get the owner for the selected polygon
-  const owner = selectedPolygonId ? landOwners[selectedPolygonId] : null;
+  // Use the dynamically fetched owner instead of accessing landOwners directly
+  const owner = dynamicOwner;
   
+  
+  // Add useEffect to fetch the owner when a polygon is selected
+  useEffect(() => {
+    if (selectedPolygonId) {
+      // Reset owner when a new polygon is selected
+      setDynamicOwner(null);
+      
+      // Fetch the owner from the API
+      const fetchOwner = async () => {
+        try {
+          const response = await fetch(`${getBackendBaseUrl()}/api/get-land-owner/${selectedPolygonId}`);
+          
+          if (!response.ok) {
+            console.error(`Failed to fetch owner: ${response.status} ${response.statusText}`);
+            return;
+          }
+          
+          const data = await response.json();
+          console.log('Fetched owner data:', data);
+          
+          if (data.success && data.owner) {
+            setDynamicOwner(data.owner);
+          } else {
+            console.log('No owner found for this land');
+            setDynamicOwner(null);
+          }
+        } catch (error) {
+          console.error('Error fetching land owner:', error);
+        }
+      };
+      
+      fetchOwner();
+    }
+  }, [selectedPolygonId]);
   
   // Debug logging
   useEffect(() => {
     if (selectedPolygonId) {
       console.log('Selected polygon ID:', selectedPolygonId);
       console.log('Selected polygon data:', selectedPolygon);
-      console.log('Land owners data:', landOwners);
-      console.log('Owner for selected polygon:', owner);
+      console.log('Dynamically fetched owner:', dynamicOwner);
     }
-  }, [selectedPolygonId, selectedPolygon, landOwners, owner]);
+  }, [selectedPolygonId, selectedPolygon, dynamicOwner]);
   
   // Add this useEffect to render the top view of the land
   useEffect(() => {
