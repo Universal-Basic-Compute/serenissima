@@ -389,18 +389,16 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     }
   }, []);
   
-  // Add this ref to track image loading state
+  // Add these refs to track image loading state and prevent re-entrancy
   const loadingImagesRef = useRef(false);
+  const isRunningCoatOfArmsRef = useRef(false);
   
   // Fetch coat of arms data
   useEffect(() => {
-    // Use a ref to track if the effect is already running to prevent re-entrancy
-    const isRunningRef = useRef(false);
-    
     const fetchCoatOfArms = async () => {
       // Prevent concurrent executions of this effect
-      if (isRunningRef.current) return;
-      isRunningRef.current = true;
+      if (isRunningCoatOfArmsRef.current) return;
+      isRunningCoatOfArmsRef.current = true;
       
       try {
         if (!loadingCoatOfArms) {
@@ -521,7 +519,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         console.error('Error fetching coat of arms:', error);
       } finally {
         setLoadingCoatOfArms(false);
-        isRunningRef.current = false;
+        isRunningCoatOfArmsRef.current = false;
       }
     };
     
