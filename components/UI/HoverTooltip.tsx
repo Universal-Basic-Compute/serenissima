@@ -23,8 +23,12 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
         // Fetch building data
         fetch(`/api/buildings/${data.id}`)
           .then(res => res.ok ? res.json() : null)
-          .then(buildingData => {
+          .then(async buildingData => {
             if (buildingData) {
+              // Get building image path
+              const imagePath = await assetService.getBuildingImagePath(buildingData.type);
+              setBuildingImagePath(imagePath);
+              
               setTooltipData({
                 type: 'building',
                 name: buildingData.name || BuildingService.prototype.formatBuildingType(buildingData.type),
@@ -105,7 +109,19 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
     );
   } else if (tooltipData.type === 'building') {
     tooltipContent = (
-      <div>
+      <div className="flex flex-col items-center">
+        {/* Add the building image */}
+        <div className="w-32 h-24 mb-2 overflow-hidden rounded">
+          <img 
+            src={buildingImagePath || `/images/buildings/${tooltipData.type.toLowerCase().replace(/[_-]/g, '_')}.jpg`} 
+            alt={tooltipData.name}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              // Fallback to default image if the specific one doesn't exist
+              e.currentTarget.src = '/images/buildings/market_stall.jpg';
+            }}
+          />
+        </div>
         <div className="font-bold">{tooltipData.name}</div>
         <div>Type: {BuildingService.prototype.formatBuildingType(tooltipData.type)}</div>
         {tooltipData.owner && <div>Owner: {tooltipData.owner}</div>}
