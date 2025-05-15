@@ -734,10 +734,10 @@ export class InteractionService {
       this.hoveredBridgePointRef = newState.hoveredBridgePoint ?? null;
     }
     if ('hoveredCitizenBuilding' in newState) {
-      this.hoveredCitizenBuildingRef = newState.hoveredCitizenBuilding ?? null;
+      this.hoveredCitizenBuildingRef = (newState as any).hoveredCitizenBuilding ?? null;
     }
     if ('hoveredCitizenType' in newState) {
-      this.hoveredCitizenTypeRef = newState.hoveredCitizenType ?? null;
+      this.hoveredCitizenTypeRef = (newState as any).hoveredCitizenType ?? null;
     }
     if ('isDragging' in newState) {
       this.isDraggingRef = newState.isDragging ?? false;
