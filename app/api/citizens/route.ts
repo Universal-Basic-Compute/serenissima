@@ -129,7 +129,7 @@ export async function GET(request: Request) {
       const citizenId = record.fields.CitizenId ? 
         (typeof record.fields.CitizenId === 'string' ? 
           record.fields.CitizenId : 
-          String(record.fields.CitizenId as string)) 
+          String(record.fields.CitizenId)) 
         : `ctz_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
       
       // Get home and work assignments for this citizen
@@ -138,30 +138,30 @@ export async function GET(request: Request) {
       return {
         id: citizenId,
         citizenid: citizenId,
-        name: `${record.fields.FirstName ? String(record.fields.FirstName) : 'Unknown'} ${record.fields.LastName ? String(record.fields.LastName) : 'Citizen'}`,
+        name: `${record.fields.FirstName ? String(record.fields.FirstName as AirtableValue) : 'Unknown'} ${record.fields.LastName ? String(record.fields.LastName as AirtableValue) : 'Citizen'}`,
         firstname: record.fields.FirstName ? 
           (typeof record.fields.FirstName === 'string' ? 
             record.fields.FirstName : 
-            String(record.fields.FirstName as string)) : 'Unknown',
+            String(record.fields.FirstName)) : 'Unknown',
         lastname: record.fields.LastName ? 
           (typeof record.fields.LastName === 'string' ? 
             record.fields.LastName : 
-            String(record.fields.LastName as string)) : 'Citizen',
-        socialclass: String(record.fields.SocialClass || 'Popolani'),
-        description: String(record.fields.Description || 'A citizen of Venice.'),
+            String(record.fields.LastName)) : 'Citizen',
+        socialclass: String(record.fields.SocialClass as AirtableValue || 'Popolani'),
+        description: String(record.fields.Description as AirtableValue || 'A citizen of Venice.'),
         profileimage: formatImageUrl(
-          record.fields.ImageUrl ? String(record.fields.ImageUrl as string) : undefined, 
+          record.fields.ImageUrl ? String(record.fields.ImageUrl as AirtableValue) : undefined, 
           citizenId
         ),
         imageurl: formatImageUrl(
-          record.fields.ImageUrl ? String(record.fields.ImageUrl as string) : undefined, 
+          record.fields.ImageUrl ? String(record.fields.ImageUrl as AirtableValue) : undefined, 
           citizenId
         ),
         // Ensure position is included and properly formatted
         position: typeof record.fields.Position === 'string' 
           ? JSON.parse(record.fields.Position) 
           : record.fields.Position || { lat: 45.4371 + Math.random() * 0.01, lng: 12.3326 + Math.random() * 0.01 },
-        occupation: String(record.fields.Occupation || 'Citizen'),
+        occupation: String(record.fields.Occupation as AirtableValue || 'Citizen'),
         wealth: record.fields.Wealth || 0,
         createdat: String(record.fields.CreatedAt || new Date().toISOString()),
         // Add home and work assignments
