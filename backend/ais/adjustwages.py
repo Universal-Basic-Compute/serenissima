@@ -418,6 +418,7 @@ def update_building_wage_amount(tables, building_id: str, new_wage_amount: float
     try:
         # Find the building record
         formula = f"{{BuildingId}}='{building_id}'"
+        print(f"Searching for building with formula: {formula}")
         buildings = tables["buildings"].all(formula=formula)
         
         if not buildings:
@@ -452,17 +453,28 @@ def update_building_wage_amount(tables, building_id: str, new_wage_amount: float
         # Add or update the WagesReasoning field in the Notes
         existing_notes["WagesReasoning"] = reason
         
-        # Update the wage amount and Notes
-        tables["buildings"].update(building["id"], {
+        # Prepare the update data
+        update_data = {
             "Wages": new_wage_float,
             "Notes": json.dumps(existing_notes)
-        })
+        }
         
-        print(f"Updated wage amount for building {building_id} from {current_wage} to {new_wage_float}")
-        print(f"Added wage reasoning to Notes: {reason}")
-        return True
+        print(f"Updating building {building_id} with data: {json.dumps(update_data)}")
+        
+        # Update the wage amount and Notes
+        try:
+            updated_record = tables["buildings"].update(building["id"], update_data)
+            print(f"Update API response: {json.dumps(updated_record, indent=2)}")
+            print(f"Updated wage amount for building {building_id} from {current_wage} to {new_wage_float}")
+            print(f"Added wage reasoning to Notes: {reason}")
+            return True
+        except Exception as update_error:
+            print(f"Error during Airtable update API call: {str(update_error)}")
+            print(f"Exception traceback: {traceback.format_exc()}")
+            return False
     except Exception as e:
         print(f"Error updating wage amount for building {building_id}: {str(e)}")
+        print(f"Exception traceback: {traceback.format_exc()}")
         return False
 
 def create_notification_for_business_employee(tables, building_id: str, employee_id: str, ai_username: str, 
@@ -637,30 +649,53 @@ def process_ai_wage_adjustments(dry_run: bool = False):
                     
                     print(f"Processing wage adjustment for building {building_id}: {current_wage} -> {new_wage_amount}")
                     
-                    # Update the wage amount
-                    success = update_building_wage_amount(tables, building_id, new_wage_amount, reason)
+                    # Debug: Print the building record before update
+                    print(f"Building record before update: {json.dumps(building['fields'], indent=2)}")
                     
-                    if success:
-                        print(f"Successfully updated wage for building {building_id}")
-                        # Create notifications for employees
-                        occupant_id = building["fields"].get("Occupant", "")
-                        if occupant_id and occupant_id in all_citizens:
-                            create_notification_for_business_employee(
-                                tables, building_id, occupant_id, ai_username, 
-                                current_wage, new_wage_amount, reason
-                            )
-                        else:
-                            print(f"Building {building_id} has no occupant or occupant not found in citizens")
+                    # Update the wage amount
+                    try:
+                        success = update_building_wage_amount(tables, building_id, new_wage_amount, reason)
                         
-                        # Add to the list of adjustments for this AI
-                        ai_wage_adjustments[ai_username].append({
-                            "building_id": building_id,
-                            "old_wage": current_wage,
-                            "new_wage": new_wage_amount,
-                            "reason": reason
-                        })
-                    else:
-                        print(f"Failed to update wage for building {building_id}")
+                        if success:
+                            print(f"Successfully updated wage for building {building_id}")
+                            
+                            # Debug: Verify the update by fetching the building again
+                            try:
+                                updated_building = tables["buildings"].all(formula=f"{{BuildingId}}='{building_id}'")
+                                if updated_building:
+                                    print(f"Building record after update: {json.dumps(updated_building[0]['fields'], indent=2)}")
+                                    updated_wage = updated_building[0]["fields"].get("Wages", 0)
+                                    if updated_wage == new_wage_amount:
+                                        print(f"✅ Wage successfully updated to {updated_wage}")
+                                    else:
+                                        print(f"❌ Wage update failed! Expected {new_wage_amount}, got {updated_wage}")
+                                else:
+                                    print(f"❌ Could not find building {building_id} after update")
+                            except Exception as verify_error:
+                                print(f"Error verifying wage update: {str(verify_error)}")
+                            
+                            # Create notifications for employees
+                            occupant_id = building["fields"].get("Occupant", "")
+                            if occupant_id and occupant_id in all_citizens:
+                                create_notification_for_business_employee(
+                                    tables, building_id, occupant_id, ai_username, 
+                                    current_wage, new_wage_amount, reason
+                                )
+                            else:
+                                print(f"Building {building_id} has no occupant or occupant not found in citizens")
+                            
+                            # Add to the list of adjustments for this AI
+                            ai_wage_adjustments[ai_username].append({
+                                "building_id": building_id,
+                                "old_wage": current_wage,
+                                "new_wage": new_wage_amount,
+                                "reason": reason
+                            })
+                        else:
+                            print(f"❌ Failed to update wage for building {building_id}")
+                    except Exception as update_error:
+                        print(f"❌ Exception during wage update for building {building_id}: {str(update_error)}")
+                        print(f"Exception traceback: {traceback.format_exc()}")
             else:
                 print(f"No valid wage adjustment decisions received for {ai_username}")
         else:
