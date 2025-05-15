@@ -17,16 +17,48 @@ export class CitizenService {
     this.isLoading = true;
     
     try {
+      console.log('Loading citizens data...');
       const response = await fetch('/api/citizens');
       if (response.ok) {
         const data = await response.json();
         if (Array.isArray(data)) {
-          this.citizens = data;
+          // Process citizen positions
+          this.citizens = data.map(citizen => {
+            // Ensure position is properly formatted
+            let position = citizen.position;
+            
+            // If position is a string, try to parse it
+            if (typeof position === 'string') {
+              try {
+                position = JSON.parse(position);
+              } catch (e) {
+                console.warn(`Invalid position string for citizen ${citizen.id || citizen.CitizenId}:`, position);
+                position = null;
+              }
+            }
+            
+            // Validate position object
+            if (position && typeof position === 'object' && 
+                'lat' in position && 'lng' in position &&
+                typeof position.lat === 'number' && typeof position.lng === 'number') {
+              // Position is valid
+            } else {
+              console.warn(`Invalid position for citizen ${citizen.id || citizen.CitizenId}:`, position);
+              position = null;
+            }
+            
+            return {
+              ...citizen,
+              position
+            };
+          });
+          
+          console.log(`Loaded ${this.citizens.length} citizens, ${this.citizens.filter(c => c.position).length} with valid positions`);
           
           // Group citizens by building
           const byBuilding: Record<string, any[]> = {};
           
-          data.forEach(citizen => {
+          this.citizens.forEach(citizen => {
             // Add to home building
             if (citizen.Home) {
               if (!byBuilding[citizen.Home]) {

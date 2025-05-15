@@ -10,6 +10,7 @@ import { hoverStateService } from '@/lib/services/HoverStateService';
 import LandDetailsPanel from './LandDetailsPanel';
 import BuildingDetailsPanel from './BuildingDetailsPanel';
 import CitizenDetailsPanel from '../UI/CitizenDetailsPanel';
+import CitizenMarkers from './CitizenMarkers';
 import { HoverTooltip } from '../UI/HoverTooltip';
 
 interface IsometricViewerProps {
@@ -3128,6 +3129,15 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         ref={canvasRef} 
         className="w-full h-full"
         style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+      />
+      
+      {/* Citizen Markers */}
+      <CitizenMarkers 
+        isVisible={activeView === 'citizens'} 
+        scale={scale}
+        offset={offset}
+        canvasWidth={canvasRef.current?.width || window.innerWidth}
+        canvasHeight={canvasRef.current?.height || window.innerHeight}
       />
       
       {/* Add the hover tooltip */}
