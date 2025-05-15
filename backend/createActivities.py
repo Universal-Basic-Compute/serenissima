@@ -8,6 +8,7 @@ This script:
 3. Based on time and citizen location:
    - If nighttime and citizen is at home: create "rest" activity
    - If nighttime and citizen is not at home: create "goto_home" activity
+   - If daytime and citizen has work: check for production or resource fetching
    - If transport API fails: create "idle" activity for one hour
 
 Run this script periodically to keep citizens engaged in activities.
@@ -22,6 +23,8 @@ import datetime
 import time
 import requests
 import pytz
+import uuid
+from collections import defaultdict
 from typing import Dict, List, Optional, Any
 from pyairtable import Api, Table
 from dotenv import load_dotenv
@@ -57,11 +60,247 @@ def initialize_airtable():
         return {
             'citizens': Table(api_key, base_id, 'CITIZENS'),
             'buildings': Table(api_key, base_id, 'BUILDINGS'),
-            'activities': Table(api_key, base_id, 'ACTIVITIES')
+            'activities': Table(api_key, base_id, 'ACTIVITIES'),
+            'contracts': Table(api_key, base_id, 'CONTRACTS'),
+            'resources': Table(api_key, base_id, 'RESOURCES')
         }
     except Exception as e:
         log.error(f"Failed to initialize Airtable: {e}")
         sys.exit(1)
+
+def get_citizen_contracts(tables, citizen_id: str) -> List[Dict]:
+    """Get all active contracts where the citizen is the buyer, sorted by priority."""
+    log.info(f"Fetching contracts for citizen {citizen_id}")
+    
+    try:
+        # Get current time
+        now = datetime.datetime.now().isoformat()
+        
+        # Query contracts where the citizen is the buyer, type is recurrent, and the contract is active
+        formula = f"AND({{Buyer}}='{citizen_id}', {{Type}}='recurrent', {{CreatedAt}}<='{now}', {{EndAt}}>='{now}')"
+        contracts = tables['contracts'].all(formula=formula)
+        
+        # Sort by Priority in descending order
+        contracts.sort(key=lambda x: int(x['fields'].get('Priority', 0) or 0), reverse=True)
+        
+        log.info(f"Found {len(contracts)} active contracts for citizen {citizen_id}")
+        return contracts
+    except Exception as e:
+        log.error(f"Error getting contracts for citizen {citizen_id}: {e}")
+        return []
+
+def get_building_type_info(building_type: str) -> Optional[Dict]:
+    """Get building type information from the API."""
+    try:
+        # Get API base URL from environment variables, with a default fallback
+        api_base_url = os.getenv("API_BASE_URL", "https://serenissima.ai")
+        
+        # Construct the API URL
+        url = f"{api_base_url}/api/building-types"
+        
+        log.info(f"Fetching building type info for {building_type} from API: {url}")
+        
+        # Make the API request
+        response = requests.get(url)
+        
+        # Check if the request was successful
+        if response.status_code == 200:
+            data = response.json()
+            
+            if data.get("success") and "buildingTypes" in data:
+                building_types = data["buildingTypes"]
+                
+                # Find the specific building type
+                for bt in building_types:
+                    if bt.get("type") == building_type:
+                        log.info(f"Found building type info for {building_type}")
+                        return bt
+                
+                log.warning(f"Building type {building_type} not found in API response")
+                return None
+            else:
+                log.error(f"Unexpected API response format: {data}")
+                return None
+        else:
+            log.error(f"Error fetching building types from API: {response.status_code} - {response.text}")
+            return None
+    except Exception as e:
+        log.error(f"Exception fetching building type info: {str(e)}")
+        return None
+
+def get_building_resources(tables, building_id: str) -> Dict[str, float]:
+    """Get all resources in a building, returned as a dictionary of resource_type -> count."""
+    try:
+        formula = f"{{BuildingId}}='{building_id}'"
+        resources = tables['resources'].all(formula=formula)
+        
+        # Convert to dictionary for easier lookup
+        resource_dict = {}
+        for resource in resources:
+            resource_type = resource['fields'].get('Type', '')
+            count = float(resource['fields'].get('Count', 0) or 0)
+            resource_dict[resource_type] = count
+        
+        log.info(f"Found {len(resources)} resources in building {building_id}")
+        return resource_dict
+    except Exception as e:
+        log.error(f"Error getting resources for building {building_id}: {e}")
+        return {}
+
+def can_produce_output(resources: Dict[str, float], recipe: Dict) -> bool:
+    """Check if there are enough resources to produce the output according to the recipe."""
+    if not recipe or 'inputs' not in recipe:
+        return False
+    
+    for input_type, input_amount in recipe['inputs'].items():
+        if input_type not in resources or resources[input_type] < input_amount:
+            return False
+    
+    return True
+
+def find_path_between_buildings(from_building: Dict, to_building: Dict) -> Optional[Dict]:
+    """Find a path between two buildings using the transport API."""
+    try:
+        # Get API base URL from environment variables, with a default fallback
+        api_base_url = os.getenv("API_BASE_URL", "https://serenissima.ai")
+        
+        # Extract positions from buildings
+        from_position = None
+        to_position = None
+        
+        try:
+            from_position_str = from_building['fields'].get('Position')
+            to_position_str = to_building['fields'].get('Position')
+            
+            if from_position_str and to_position_str:
+                from_position = json.loads(from_position_str)
+                to_position = json.loads(to_position_str)
+        except (json.JSONDecodeError, TypeError):
+            log.warning(f"Invalid position data for buildings")
+            return None
+        
+        if not from_position or not to_position:
+            log.warning(f"Missing position data for buildings")
+            return None
+        
+        # Construct the API URL
+        url = f"{api_base_url}/api/transport"
+        
+        log.info(f"Finding path between buildings using API: {url}")
+        
+        # Make the API request
+        response = requests.post(
+            url,
+            json={
+                "startPoint": from_position,
+                "endPoint": to_position,
+                "startDate": datetime.datetime.now().isoformat()
+            }
+        )
+        
+        # Check if the request was successful
+        if response.status_code == 200:
+            data = response.json()
+            
+            if data.get("success") and "path" in data:
+                log.info(f"Found path between buildings with {len(data['path'])} points")
+                return data
+            else:
+                log.warning(f"No path found between buildings: {data.get('error', 'Unknown error')}")
+                return None
+        else:
+            log.error(f"Error finding path between buildings: {response.status_code} - {response.text}")
+            return None
+    except Exception as e:
+        log.error(f"Exception finding path between buildings: {str(e)}")
+        return None
+
+def create_resource_fetching_activity(tables, citizen: Dict, contract: Dict, from_building: Dict, to_building: Dict, path: Dict) -> Optional[Dict]:
+    """Create a resource fetching activity based on a contract."""
+    try:
+        citizen_id = citizen['id']
+        contract_id = contract['id']
+        from_building_id = from_building['id']
+        to_building_id = to_building['id']
+        resource_type = contract['fields'].get('ResourceType', '')
+        amount = float(contract['fields'].get('Amount', 0) or 0)
+        
+        now = datetime.datetime.now()
+        
+        # Calculate travel time based on path
+        travel_time_minutes = 30  # Default 30 minutes if no timing info
+        
+        if 'timing' in path and 'durationSeconds' in path['timing']:
+            travel_time_minutes = path['timing']['durationSeconds'] / 60
+        
+        # Calculate end time
+        end_time = now + datetime.timedelta(minutes=travel_time_minutes)
+        
+        # Create the activity
+        activity_id = f"fetch_{citizen_id}_{uuid.uuid4()}"
+        
+        activity = tables['activities'].create({
+            "ActivityId": activity_id,
+            "Type": "fetch_resource",
+            "CitizenId": citizen_id,
+            "ContractId": contract_id,
+            "FromBuilding": from_building_id,
+            "ToBuilding": to_building_id,
+            "ResourceId": resource_type,
+            "Amount": amount,
+            "CreatedAt": now.isoformat(),
+            "StartDate": now.isoformat(),
+            "EndDate": end_time.isoformat(),
+            "Path": json.dumps(path.get('path', [])),
+            "Notes": f"Fetching {amount} units of {resource_type} from {from_building['fields'].get('Name', from_building_id)} to {to_building['fields'].get('Name', to_building_id)}"
+        })
+        
+        log.info(f"Created resource fetching activity: {activity['id']}")
+        return activity
+    except Exception as e:
+        log.error(f"Error creating resource fetching activity: {e}")
+        return None
+
+def create_production_activity(tables, citizen: Dict, building: Dict, recipe: Dict) -> Optional[Dict]:
+    """Create a production activity based on a recipe."""
+    try:
+        citizen_id = citizen['id']
+        building_id = building['id']
+        
+        # Extract recipe details
+        inputs = recipe.get('inputs', {})
+        outputs = recipe.get('outputs', {})
+        craft_minutes = recipe.get('craftMinutes', 60)  # Default to 60 minutes if not specified
+        
+        now = datetime.datetime.now()
+        end_time = now + datetime.timedelta(minutes=craft_minutes)
+        
+        # Create a description of the production
+        input_desc = ", ".join([f"{amount} {resource}" for resource, amount in inputs.items()])
+        output_desc = ", ".join([f"{amount} {resource}" for resource, amount in outputs.items()])
+        
+        # Create the activity
+        activity_id = f"produce_{citizen_id}_{uuid.uuid4()}"
+        
+        activity = tables['activities'].create({
+            "ActivityId": activity_id,
+            "Type": "production",
+            "CitizenId": citizen_id,
+            "FromBuilding": building_id,
+            "ToBuilding": building_id,  # Same building for production
+            "CreatedAt": now.isoformat(),
+            "StartDate": now.isoformat(),
+            "EndDate": end_time.isoformat(),
+            "Notes": f"Producing {output_desc} from {input_desc}",
+            "RecipeInputs": json.dumps(inputs),
+            "RecipeOutputs": json.dumps(outputs)
+        })
+        
+        log.info(f"Created production activity: {activity['id']}")
+        return activity
+    except Exception as e:
+        log.error(f"Error creating production activity: {e}")
+        return None
 
 def get_idle_citizens(tables) -> List[Dict]:
     """Fetch all citizens who are currently idle (no active activities)."""
@@ -327,9 +566,111 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
                 # Path finding failed, create idle activity
                 create_idle_activity(tables, citizen_id)
     else:
-        # Daytime activities - for now, just create idle activities
-        # This can be expanded later to include work, shopping, etc.
-        create_idle_activity(tables, citizen_id)
+        # Daytime activities - check for work, production, or resource fetching
+        
+        # Check if citizen has a work building
+        work_building_id = citizen['fields'].get('Work')
+        
+        if work_building_id:
+            # Get the work building
+            formula = f"{{BuildingId}}='{work_building_id}'"
+            work_buildings = tables['buildings'].all(formula=formula)
+            
+            if work_buildings:
+                work_building = work_buildings[0]
+                building_type = work_building['fields'].get('Type')
+                
+                # Get building type information
+                building_type_info = get_building_type_info(building_type)
+                
+                if building_type_info and 'productionInformation' in building_type_info:
+                    production_info = building_type_info['productionInformation']
+                    
+                    # Check if there are Arti recipes
+                    if 'Arti' in production_info and isinstance(production_info['Arti'], list):
+                        recipes = production_info['Arti']
+                        
+                        # Get current resources in the building
+                        building_resources = get_building_resources(tables, work_building_id)
+                        
+                        # Check if any recipe can be produced
+                        can_produce = False
+                        selected_recipe = None
+                        
+                        for recipe in recipes:
+                            if can_produce_output(building_resources, recipe):
+                                can_produce = True
+                                selected_recipe = recipe
+                                break
+                        
+                        if can_produce and selected_recipe:
+                            # Create production activity
+                            create_production_activity(tables, citizen, work_building, selected_recipe)
+                            return True
+                        else:
+                            # Not enough resources for production, check contracts
+                            contracts = get_citizen_contracts(tables, citizen_id)
+                            
+                            if contracts:
+                                # Process contracts in priority order
+                                for contract in contracts:
+                                    # Get source and destination buildings
+                                    from_building_id = contract['fields'].get('SellerBuilding')
+                                    to_building_id = contract['fields'].get('BuyerBuilding')
+                                    
+                                    if from_building_id and to_building_id:
+                                        # Get building details
+                                        from_formula = f"{{BuildingId}}='{from_building_id}'"
+                                        to_formula = f"{{BuildingId}}='{to_building_id}'"
+                                        
+                                        from_buildings = tables['buildings'].all(formula=from_formula)
+                                        to_buildings = tables['buildings'].all(formula=to_formula)
+                                        
+                                        if from_buildings and to_buildings:
+                                            from_building = from_buildings[0]
+                                            to_building = to_buildings[0]
+                                            
+                                            # Check if source building has enough resources
+                                            resource_type = contract['fields'].get('ResourceType')
+                                            amount = float(contract['fields'].get('Amount', 0) or 0)
+                                            
+                                            source_resources = get_building_resources(tables, from_building_id)
+                                            
+                                            if resource_type in source_resources and source_resources[resource_type] >= amount:
+                                                # Find path between buildings
+                                                path = find_path_between_buildings(from_building, to_building)
+                                                
+                                                if path:
+                                                    # Create resource fetching activity
+                                                    create_resource_fetching_activity(
+                                                        tables, citizen, contract, from_building, to_building, path
+                                                    )
+                                                    return True
+                            
+                            # If we get here, no contracts could be executed
+                            log.info(f"No viable contracts for citizen {citizen_id}, creating idle activity")
+                            create_idle_activity(tables, citizen_id)
+                            return True
+                    else:
+                        # No Arti recipes, create idle activity
+                        log.info(f"No Arti recipes for building type {building_type}, creating idle activity")
+                        create_idle_activity(tables, citizen_id)
+                        return True
+                else:
+                    # No production information, create idle activity
+                    log.info(f"No production information for building type {building_type}, creating idle activity")
+                    create_idle_activity(tables, citizen_id)
+                    return True
+            else:
+                # Work building not found, create idle activity
+                log.warning(f"Work building {work_building_id} not found for citizen {citizen_id}, creating idle activity")
+                create_idle_activity(tables, citizen_id)
+                return True
+        else:
+            # No work building, create idle activity
+            log.info(f"Citizen {citizen_id} has no work building, creating idle activity")
+            create_idle_activity(tables, citizen_id)
+            return True
     
     return True
 
