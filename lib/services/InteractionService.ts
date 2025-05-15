@@ -363,9 +363,15 @@ export class InteractionService {
         
         // Only update state if the hovered building has changed
         if (newHoveredBuildingId !== currentHoveredBuildingId) {
+          console.log('%c InteractionService: hoveredBuildingId changing from', 'background: #FF9800; color: white;', 
+            currentHoveredBuildingId, 'to', newHoveredBuildingId);
+            
           this.hoveredBuildingIdRef = newHoveredBuildingId;
           this.state.hoveredBuildingId = newHoveredBuildingId;
-            
+              
+          // TEMPORARILY DISABLE BUILDING HOVER HANDLING
+          // This is to debug the infinite update loop
+          /*
           if (newHoveredBuildingId) {
             const building = buildings.find(b => b.id === newHoveredBuildingId);
             if (building) {
@@ -381,6 +387,7 @@ export class InteractionService {
             const { uiStateService } = require('./UIStateService');
             uiStateService.handleBuildingHover(null, null, null);
           }
+          */
         }
         
         // Check if mouse is over any empty building point

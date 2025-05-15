@@ -31,6 +31,14 @@ export class UIStateService {
     position: {x: number, y: number} | null,
     imagePath: string | null
   ): void {
+    // Add debug logging
+    console.log('%c UIStateService.setBuildingHover called:', 'background: #9C27B0; color: white;', {
+      buildingName,
+      position,
+      imagePath,
+      stack: new Error().stack
+    });
+    
     this.hoveredBuildingName = buildingName;
     this.hoveredBuildingPosition = position;
     this.hoveredBuildingImagePath = imagePath;

@@ -75,10 +75,47 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const hoveredBridgePointRef = useRef<{lat: number, lng: number} | null>(null);
   const hoveredCitizenBuildingRef = useRef<string | null>(null);
   const hoveredCitizenTypeRef = useRef<'home' | 'work' | null>(null);
+  
+  // Add a ref to track previous state for debugging
+  const prevStateRef = useRef({
+    hoveredBuildingId: null as string | null,
+    hoveredBuildingName: null as string | null,
+    hoveredBuildingPosition: null as {x: number, y: number} | null,
+    hoveredBuildingImagePath: null as string | null,
+    isLoadingBuildingImage: false
+  });
   const isDraggingRef = useRef<boolean>(false);
   
   // We no longer need this function as it's now handled by UIStateService
   // The fetchBuildingImagePath function has been moved to UIStateService
+  
+  // Add a debugging effect to track state changes that might cause infinite loops
+  useEffect(() => {
+    const currentState = {
+      hoveredBuildingId,
+      hoveredBuildingName,
+      hoveredBuildingPosition,
+      hoveredBuildingImagePath,
+      isLoadingBuildingImage
+    };
+    
+    // Compare with previous state
+    const prevState = prevStateRef.current;
+    
+    // Log any changes
+    Object.keys(currentState).forEach(key => {
+      if (currentState[key] !== prevState[key]) {
+        console.log(`%c State change detected in ${key}:`, 'background: #ff0000; color: white; padding: 2px 5px; border-radius: 3px;', {
+          from: prevState[key],
+          to: currentState[key],
+          stack: new Error().stack
+        });
+      }
+    });
+    
+    // Update the ref with current state
+    prevStateRef.current = { ...currentState as any };
+  }, [hoveredBuildingId, hoveredBuildingName, hoveredBuildingPosition, hoveredBuildingImagePath, isLoadingBuildingImage]);
 
   // Function to load citizens data - declared early to avoid reference before declaration
   const loadCitizens = useCallback(async () => {
@@ -1128,6 +1165,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         
         // Only update state if the hovered polygon has changed
         if (newHoveredPolygonId !== hoveredPolygonId) {
+          console.log('Setting hoveredPolygonId:', newHoveredPolygonId);
           setHoveredPolygonId(newHoveredPolygonId);
         }
       } else {
