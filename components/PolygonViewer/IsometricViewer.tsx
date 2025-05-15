@@ -126,7 +126,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         buildingImageFetchingRef.current = false;
       }
     }
-  }, [hoveredBuildingId, hoveredBuildingName]); // Remove hoveredBuildingImagePath and isLoadingBuildingImage from dependencies
+  }, [hoveredBuildingId, hoveredBuildingName, buildings]); // Only depend on these three props
   
   // Minimal debugging effect that won't cause infinite updates
   useEffect(() => {

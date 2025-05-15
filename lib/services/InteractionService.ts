@@ -346,9 +346,13 @@ export class InteractionService {
             continue;
           }
           
+          const world = { x, y };
+          const screen = CoordinateService.worldToScreen(
+            world.x, world.y, scale, offset, canvas.width, canvas.height
+          );
           const isoPos = {
-            x: CoordinateService.calculateIsoX(x, y, scale, offset, canvas.width),
-            y: CoordinateService.calculateIsoY(x, y, scale, offset, canvas.height)
+            x: screen.x,
+            y: screen.y
           };
           
           // Get building size
@@ -547,9 +551,13 @@ export class InteractionService {
           const x = (point.lng - 12.3326) * 20000;
           const y = (point.lat - 45.4371) * 20000;
           
+          const world = { x, y };
+          const screen = CoordinateService.worldToScreen(
+            world.x, world.y, scale, offset, canvas.width, canvas.height
+          );
           const isoPos = {
-            x: CoordinateService.calculateIsoX(x, y, scale, offset, canvas.width),
-            y: CoordinateService.calculateIsoY(x, y, scale, offset, canvas.height)
+            x: screen.x,
+            y: screen.y
           };
           
           // Check if click is on this building point
@@ -607,9 +615,13 @@ export class InteractionService {
               const x = (point.edge.lng - 12.3326) * 20000;
               const y = (point.edge.lat - 45.4371) * 20000;
               
+              const world = { x, y };
+              const screen = CoordinateService.worldToScreen(
+                world.x, world.y, scale, offset, canvas.width, canvas.height
+              );
               const isoPos = {
-                x: CoordinateService.calculateIsoX(x, y, scale, offset, canvas.width),
-                y: CoordinateService.calculateIsoY(x, y, scale, offset, canvas.height)
+                x: screen.x,
+                y: screen.y
               };
               
               // Check if click is on this dock point
