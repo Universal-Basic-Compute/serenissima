@@ -85,7 +85,7 @@ export async function GET(request: Request) {
       const occupant = building.fields.Occupant ? 
         (typeof building.fields.Occupant === 'string' ? 
           building.fields.Occupant : 
-          String(building.fields.Occupant as string)) : undefined;
+          String(building.fields.Occupant as AirtableValue)) : undefined;
       
       // Skip buildings without occupants
       if (!occupant) return;
@@ -129,7 +129,7 @@ export async function GET(request: Request) {
       const citizenId = record.fields.CitizenId ? 
         (typeof record.fields.CitizenId === 'string' ? 
           record.fields.CitizenId : 
-          String(record.fields.CitizenId)) 
+          String(record.fields.CitizenId as AirtableValue)) 
         : `ctz_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
       
       // Get home and work assignments for this citizen
