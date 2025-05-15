@@ -310,8 +310,9 @@ export class InteractionService {
           canvas.style.cursor = this.isDraggingRef ? 'grabbing' : 'grab';
         }
         
-        // Only update state if the hovered polygon has changed
-        if (newHoveredPolygonId !== this.hoveredPolygonIdRef) {
+        // Only update state if the hovered polygon has changed AND is different from current state
+        if (newHoveredPolygonId !== this.hoveredPolygonIdRef && 
+            newHoveredPolygonId !== this.state.hoveredPolygonId) {
           this.hoveredPolygonIdRef = newHoveredPolygonId;
           this.state.hoveredPolygonId = newHoveredPolygonId;
           setters.setHoveredPolygonId(newHoveredPolygonId);
@@ -372,11 +373,13 @@ export class InteractionService {
           }
         }
         
-        // Only update state if the hovered building has changed
-        if (newHoveredBuildingId !== this.hoveredBuildingIdRef) {
+        // Only update state if the hovered building has changed AND is different from current state
+        if (newHoveredBuildingId !== this.hoveredBuildingIdRef && 
+            newHoveredBuildingId !== this.state.hoveredBuildingId) {
           console.log('%c InteractionService: hoveredBuildingId changing from', 'background: #FF9800; color: white;', 
             this.hoveredBuildingIdRef, 'to', newHoveredBuildingId);
             
+          // Update refs first
           this.hoveredBuildingIdRef = newHoveredBuildingId;
           this.state.hoveredBuildingId = newHoveredBuildingId;
           
@@ -387,7 +390,12 @@ export class InteractionService {
             if (building) {
               // Update the state in a single batch to prevent multiple re-renders
               setters.setHoveredBuildingId(newHoveredBuildingId);
-              setters.setHoveredBuildingName(building.name || building.type);
+              
+              // Only update name if it's different from current
+              const buildingName = building.name || building.type;
+              if (buildingName !== uiStateService.getState().hoveredBuildingName) {
+                setters.setHoveredBuildingName(buildingName);
+              }
               
               // Calculate position for the building
               let position = null;
@@ -418,7 +426,11 @@ export class InteractionService {
                 }
               }
               
-              if (position) {
+              // Only update position if it's different from current
+              const currentPosition = uiStateService.getState().hoveredBuildingPosition;
+              if (position && (!currentPosition || 
+                  position.x !== currentPosition.x || 
+                  position.y !== currentPosition.y)) {
                 setters.setHoveredBuildingPosition(position);
               }
               

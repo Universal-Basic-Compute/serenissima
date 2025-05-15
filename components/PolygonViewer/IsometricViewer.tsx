@@ -89,11 +89,25 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   
   // Add a separate useEffect for fetching building images that won't cause an infinite loop
   const buildingImageFetchingRef = useRef(false);
+  const prevHoveredBuildingIdRef = useRef<string | null>(null);
+  const prevHoveredBuildingNameRef = useRef<string | null>(null);
   
   useEffect(() => {
     // Only fetch the image if we have a hovered building with a name but no image path yet
     // Use a ref to track if we're already fetching to prevent multiple fetches
-    if (hoveredBuildingId && hoveredBuildingName && !hoveredBuildingImagePath && !isLoadingBuildingImage && !buildingImageFetchingRef.current) {
+    // Also check if the building ID or name has actually changed
+    if (hoveredBuildingId && 
+        hoveredBuildingName && 
+        !hoveredBuildingImagePath && 
+        !isLoadingBuildingImage && 
+        !buildingImageFetchingRef.current &&
+        (hoveredBuildingId !== prevHoveredBuildingIdRef.current || 
+         hoveredBuildingName !== prevHoveredBuildingNameRef.current)) {
+      
+      // Update refs to track current values
+      prevHoveredBuildingIdRef.current = hoveredBuildingId;
+      prevHoveredBuildingNameRef.current = hoveredBuildingName;
+      
       // Set the ref immediately to prevent concurrent fetches
       buildingImageFetchingRef.current = true;
       
@@ -130,7 +144,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         buildingImageFetchingRef.current = false;
       }
     }
-  }, [hoveredBuildingId, hoveredBuildingName]);  // Remove hoveredBuildingImagePath and isLoadingBuildingImage from dependencies
+  }, [hoveredBuildingId, hoveredBuildingName, hoveredBuildingImagePath, isLoadingBuildingImage, buildings]);
   
   // Minimal debugging effect that won't cause infinite updates
   useEffect(() => {
