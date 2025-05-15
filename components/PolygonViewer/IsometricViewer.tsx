@@ -75,6 +75,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const hoveredBridgePointRef = useRef<{lat: number, lng: number} | null>(null);
   const hoveredCitizenBuildingRef = useRef<string | null>(null);
   const hoveredCitizenTypeRef = useRef<'home' | 'work' | null>(null);
+  const isDraggingRef = useRef<boolean>(false);
   
   // Function to fetch the building image path when hovering over a building
   const fetchBuildingImagePath = async (buildingType: string, variant?: string) => {
@@ -1020,11 +1021,13 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     
     const handleMouseDown = (e: MouseEvent) => {
       setIsDragging(true);
+      isDraggingRef.current = true; // Update the ref
       setDragStart({ x: e.clientX, y: e.clientY });
     };
     
     const handleMouseMove = (e: MouseEvent) => {
-      if (!isDragging) return;
+      // Use the ref value instead of the state
+      if (!isDraggingRef.current) return;
       
       const dx = e.clientX - dragStart.x;
       const dy = e.clientY - dragStart.y;
@@ -1033,15 +1036,11 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       setDragStart({ x: e.clientX, y: e.clientY });
     };
     
-    // Create a ref to track the current dragging state
-    const isDraggingRef = useRef(isDragging);
-    // Update the ref whenever isDragging changes
-    isDraggingRef.current = isDragging;
-    
     const handleMouseUp = () => {
       // Only update state if we're actually dragging
       if (isDraggingRef.current) {
         setIsDragging(false);
+        isDraggingRef.current = false; // Update the ref
       }
     };
     
@@ -1054,7 +1053,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, dragStart]);
+  }, [dragStart]); // Remove isDragging from dependencies
 
   // Emit map transformation events for other components to sync with
   useEffect(() => {
