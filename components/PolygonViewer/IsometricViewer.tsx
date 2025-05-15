@@ -36,7 +36,39 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [selectedCitizen, setSelectedCitizen] = useState<any>(null);
   const [showCitizenDetailsPanel, setShowCitizenDetailsPanel] = useState<boolean>(false);
   
+  // Data state
+  const [polygons, setPolygons] = useState<any[]>([]);
+  const [buildings, setBuildings] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [emptyBuildingPoints, setEmptyBuildingPoints] = useState<{lat: number, lng: number}[]>([]);
+  const [incomeData, setIncomeData] = useState<Record<string, number>>({});
+  const [minIncome, setMinIncome] = useState<number>(0);
+  const [maxIncome, setMaxIncome] = useState<number>(1000);
+  const [incomeDataLoaded, setIncomeDataLoaded] = useState<boolean>(false);
+  const [landOwners, setLandOwners] = useState<Record<string, string>>({});
+  const [users, setUsers] = useState<Record<string, any>>({});
+  const [buildingPositionsCache, setBuildingPositionsCache] = useState<Record<string, {x: number, y: number}>>({});
+  const [initialPositionCalculated, setInitialPositionCalculated] = useState<boolean>(false);
+  const [polygonsToRender, setPolygonsToRender] = useState<any[]>([]);
+  
   // Transport state is now managed by TransportService
+  const [transportMode, setTransportMode] = useState<boolean>(false);
+  const [transportStartPoint, setTransportStartPoint] = useState<{lat: number, lng: number} | null>(null);
+  const [transportEndPoint, setTransportEndPoint] = useState<{lat: number, lng: number} | null>(null);
+  const [transportPath, setTransportPath] = useState<any[]>([]);
+  const [calculatingPath, setCalculatingPath] = useState<boolean>(false);
+  const [waterOnlyMode, setWaterOnlyMode] = useState<boolean>(false);
+  const [mousePosition, setMousePosition] = useState<{x: number, y: number}>({x: 0, y: 0});
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [dragStart, setDragStart] = useState<{x: number, y: number}>({x: 0, y: 0});
+  const [offset, setOffset] = useState<{x: number, y: number}>({x: 0, y: 0});
+  const [scale, setScale] = useState<number>(3);
+  const [hoveredPolygonId, setHoveredPolygonId] = useState<string | null>(null);
+  const [hoveredBuildingId, setHoveredBuildingId] = useState<string | null>(null);
+  const [hoveredCanalPoint, setHoveredCanalPoint] = useState<{lat: number, lng: number} | null>(null);
+  const [hoveredBridgePoint, setHoveredBridgePoint] = useState<{lat: number, lng: number} | null>(null);
+  const [hoveredCitizenBuilding, setHoveredCitizenBuilding] = useState<string | null>(null);
+  const [hoveredCitizenType, setHoveredCitizenType] = useState<'home' | 'work' | null>(null);
   
   // Function to fetch the building image path when hovering over a building
   const fetchBuildingImagePath = async (buildingType: string, variant?: string) => {
@@ -825,7 +857,58 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     if (activeView === 'citizens') {
       loadCitizens();
     }
-  }, [activeView, loadCitizens]);
+  }, [activeView]);
+  
+  // Define loadCitizens function
+  const loadCitizens = useCallback(async () => {
+    try {
+      console.log('Loading citizens data...');
+      setCitizensLoaded(false);
+      
+      const response = await fetch('/api/citizens');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.citizens && Array.isArray(data.citizens)) {
+          setCitizens(data.citizens);
+          
+          // Group citizens by building
+          const byBuilding: Record<string, any[]> = {};
+          
+          data.citizens.forEach((citizen: any) => {
+            // Process home location
+            if (citizen.HomeBuilding) {
+              if (!byBuilding[citizen.HomeBuilding]) {
+                byBuilding[citizen.HomeBuilding] = [];
+              }
+              
+              byBuilding[citizen.HomeBuilding].push({
+                ...citizen,
+                markerType: 'home'
+              });
+            }
+            
+            // Process work location
+            if (citizen.WorkBuilding && citizen.WorkBuilding !== citizen.HomeBuilding) {
+              if (!byBuilding[citizen.WorkBuilding]) {
+                byBuilding[citizen.WorkBuilding] = [];
+              }
+              
+              byBuilding[citizen.WorkBuilding].push({
+                ...citizen,
+                markerType: 'work'
+              });
+            }
+          });
+          
+          setCitizensByBuilding(byBuilding);
+          setCitizensLoaded(true);
+          console.log(`Loaded ${data.citizens.length} citizens`);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading citizens:', error);
+    }
+  }, []);
   
   // Check image paths when citizens are loaded
   const checkImagePaths = async () => {
