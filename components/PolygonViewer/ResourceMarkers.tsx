@@ -173,28 +173,38 @@ export default function ResourceMarkers({
                 {locationResources.map((resource, index) => (
                   <div 
                     key={resource.id}
-                    className="absolute bg-amber-800 border-2 border-amber-600 rounded-full overflow-hidden flex items-center justify-center shadow-lg"
+                    className="absolute bg-amber-800 border-2 border-amber-600 rounded-lg overflow-hidden flex flex-col items-center justify-center shadow-lg"
                     style={{ 
-                      width: '32px', 
-                      height: '32px',
-                      left: `${Math.cos(2 * Math.PI * index / locationResources.length) * 40}px`,
-                      top: `${Math.sin(2 * Math.PI * index / locationResources.length) * 40}px`,
+                      width: '64px', // Increased from 32px to 64px (x2)
+                      height: '80px', // Increased height to accommodate name
+                      left: `${Math.cos(2 * Math.PI * index / locationResources.length) * 80}px`, // Increased radius
+                      top: `${Math.sin(2 * Math.PI * index / locationResources.length) * 80}px`, // Increased radius
                       transition: 'all 0.3s ease-out'
                     }}
                   >
                     <div className="relative w-full h-full group">
-                      <img 
-                        src={`/images/resources/${resource.icon}`}
-                        alt={resource.name}
-                        className="w-full h-full object-contain p-1"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = '/images/resources/default.png';
-                        }}
-                      />
+                      {/* Image container with rounded corners */}
+                      <div className="w-full h-[64px] flex items-center justify-center p-2">
+                        <img 
+                          src={`/images/resources/${resource.icon}`}
+                          alt={resource.name}
+                          className="w-full h-full object-contain"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/images/resources/default.png';
+                          }}
+                        />
+                      </div>
+                        
+                      {/* Resource name below the image */}
+                      <div className="w-full h-[16px] flex items-center justify-center bg-amber-900/80 text-white text-[8px] px-1 truncate">
+                        {resource.name}
+                      </div>
+                        
+                      {/* Count badge */}
                       <div className="absolute -bottom-1 -right-1 bg-amber-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                         {resource.amount}
                       </div>
-                      
+                        
                       {/* Detailed tooltip */}
                       <div className="absolute opacity-0 group-hover:opacity-100 bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-2 bg-black/90 text-white text-xs rounded w-48 pointer-events-none transition-opacity z-50">
                         <div className="font-bold text-amber-300">{resource.name}</div>
@@ -227,12 +237,12 @@ export default function ResourceMarkers({
                   {locationResources.slice(0, Math.min(3, locationResources.length)).map((resource, index) => (
                     <div 
                       key={resource.id}
-                      className="absolute bg-amber-800 border border-amber-600 rounded-full overflow-hidden"
+                      className="absolute bg-amber-800 border border-amber-600 rounded-lg overflow-hidden"
                       style={{ 
-                        width: '24px', 
-                        height: '24px',
-                        left: `${index * 3}px`,
-                        top: `${-index * 3}px`,
+                        width: '36px', // Increased from 24px
+                        height: '36px', // Keep square for the collapsed view
+                        left: `${index * 6}px`, // Adjust offset for larger icons
+                        top: `${-index * 6}px`, // Adjust offset for larger icons
                         zIndex: 40 - index,
                         boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
                       }}
