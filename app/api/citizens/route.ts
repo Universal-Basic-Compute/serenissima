@@ -152,16 +152,16 @@ export async function GET(request: Request) {
         profileimage: formatImageUrl(
           record.fields.ImageUrl ? 
             (typeof record.fields.ImageUrl === 'string' ? 
-              record.fields.ImageUrl as string : 
-              String(record.fields.ImageUrl)) as string : 
+              record.fields.ImageUrl : 
+              String(record.fields.ImageUrl)) : 
             undefined, 
           citizenId
         ),
         imageurl: formatImageUrl(
           record.fields.ImageUrl ? 
             (typeof record.fields.ImageUrl === 'string' ? 
-              record.fields.ImageUrl as string : 
-              String(record.fields.ImageUrl)) as string : 
+              record.fields.ImageUrl : 
+              String(record.fields.ImageUrl)) : 
             undefined, 
           citizenId
         ),
