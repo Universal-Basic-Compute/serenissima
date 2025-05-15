@@ -27,6 +27,10 @@ class PriorityQueue<T> {
 interface Point {
   lat: number;
   lng: number;
+  type?: string;
+  polygonId?: string;
+  transportMode?: string;
+  isIntermediatePoint?: boolean;
 }
 
 interface BridgePoint {
@@ -37,6 +41,7 @@ interface BridgePoint {
     distance: number;
   };
   id?: string;
+  isConstructed?: boolean;
 }
 
 interface BuildingPoint {
@@ -1384,7 +1389,7 @@ export class TransportService {
               const fraction = j / (numPoints + 1);
               // Add some randomness to the midpoint to create natural curves
               const jitter = 0.00005 * (Math.random() * 2 - 1);
-              const midpoint = {
+              const midpoint: Point = {
                 lat: point1.lat + (point2.lat - point1.lat) * fraction + jitter,
                 lng: point1.lng + (point2.lng - point1.lng) * fraction + jitter,
                 type: 'canal',
@@ -1472,7 +1477,7 @@ export class TransportService {
         const fraction = j / (numPoints + 1);
         // Add some randomness to create natural curves
         const jitter = 0.00005 * (Math.random() * 2 - 1);
-        const midpoint = {
+        const midpoint: Point = {
           lat: point1.lat + (point2.lat - point1.lat) * fraction + jitter,
           lng: point1.lng + (point2.lng - point1.lng) * fraction + jitter,
           type: 'canal',
