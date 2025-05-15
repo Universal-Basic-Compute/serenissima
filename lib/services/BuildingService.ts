@@ -54,7 +54,13 @@ export class BuildingService {
    * Get building position from cache or calculate it
    */
   public getBuildingPosition(building: any): {x: number, y: number} | null {
-    if (!building.position) return null;
+    if (!building || !building.position) return null;
+    
+    // Check if building has an ID before trying to access the cache
+    if (!building.id) {
+      console.warn('Building missing ID, cannot retrieve from cache');
+      return null;
+    }
     
     // Use cached position if available
     if (this.buildingPositionsCache[building.id]) {
@@ -63,33 +69,40 @@ export class BuildingService {
     
     // Calculate position if not in cache
     let position;
-    if (typeof building.position === 'string') {
-      try {
-        position = JSON.parse(building.position);
-      } catch (e) {
+    try {
+      if (typeof building.position === 'string') {
+        try {
+          position = JSON.parse(building.position);
+        } catch (e) {
+          console.warn(`Failed to parse position string for building ${building.id}:`, e);
+          return null;
+        }
+      } else {
+        position = building.position;
+      }
+      
+      // Convert lat/lng to world coordinates
+      let x, y;
+      if ('lat' in position && 'lng' in position) {
+        const world = CoordinateService.latLngToWorld(position.lat, position.lng);
+        x = world.x;
+        y = world.y;
+      } else if ('x' in position && 'z' in position) {
+        x = position.x;
+        y = position.z;
+      } else {
+        console.warn(`Invalid position format for building ${building.id}`);
         return null;
       }
-    } else {
-      position = building.position;
-    }
-    
-    // Convert lat/lng to world coordinates
-    let x, y;
-    if ('lat' in position && 'lng' in position) {
-      const world = CoordinateService.latLngToWorld(position.lat, position.lng);
-      x = world.x;
-      y = world.y;
-    } else if ('x' in position && 'z' in position) {
-      x = position.x;
-      y = position.z;
-    } else {
+      
+      // Store in cache for future use
+      this.buildingPositionsCache[building.id] = { x, y };
+      
+      return { x, y };
+    } catch (error) {
+      console.error(`Error calculating position for building ${building.id}:`, error);
       return null;
     }
-    
-    // Store in cache for future use
-    this.buildingPositionsCache[building.id] = { x, y };
-    
-    return { x, y };
   }
 
   /**
