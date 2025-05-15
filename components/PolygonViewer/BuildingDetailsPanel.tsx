@@ -705,7 +705,7 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
               {buildingDefinition?.productionInformation?.stores && buildingDefinition.productionInformation.stores.length > 0 && (
                 <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
                   <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
-                    <FaWarehouse className="mr-2" /> Storage Capacity
+                    <FaWarehouse className="mr-2" /> BUYS
                   </h3>
                   <div className="flex flex-wrap gap-2">
                     {buildingDefinition.productionInformation.stores.map((resource: string) => (
@@ -743,7 +743,7 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
               {buildingDefinition?.productionInformation?.sells && buildingDefinition.productionInformation.sells.length > 0 && (
                 <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
                   <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
-                    <FaStore className="mr-2" /> Sells Resources
+                    <FaStore className="mr-2" /> SELLS
                   </h3>
                   <div className="flex flex-wrap gap-2">
                     {buildingDefinition.productionInformation.sells.map((resource: string) => (
