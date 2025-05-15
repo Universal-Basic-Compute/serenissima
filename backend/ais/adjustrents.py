@@ -1,0 +1,579 @@
+import os
+import sys
+import json
+import traceback
+from datetime import datetime
+from typing import Dict, List, Optional, Tuple, Any
+import requests
+from dotenv import load_dotenv
+from pyairtable import Api, Table
+
+# Add the parent directory to the path to import user_utils
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from app.user_utils import find_user_by_identifier
+
+def initialize_airtable():
+    """Initialize connection to Airtable."""
+    load_dotenv()
+    
+    airtable_api_key = os.getenv("AIRTABLE_API_KEY")
+    airtable_base_id = os.getenv("AIRTABLE_BASE_ID")
+    
+    if not airtable_api_key or not airtable_base_id:
+        print("Error: Airtable credentials not found in environment variables")
+        sys.exit(1)
+    
+    api = Api(airtable_api_key)
+    
+    tables = {
+        "users": Table(airtable_api_key, airtable_base_id, "Users"),
+        "buildings": Table(airtable_api_key, airtable_base_id, "BUILDINGS"),
+        "citizens": Table(airtable_api_key, airtable_base_id, "CITIZENS"),
+        "notifications": Table(airtable_api_key, airtable_base_id, "NOTIFICATIONS")
+    }
+    
+    return tables
+
+def get_ai_users(tables) -> List[Dict]:
+    """Get all users that are marked as AI."""
+    try:
+        # Query users with IsAI field set to true
+        formula = "{IsAI}=1"
+        ai_users = tables["users"].all(formula=formula)
+        print(f"Found {len(ai_users)} AI users")
+        return ai_users
+    except Exception as e:
+        print(f"Error getting AI users: {str(e)}")
+        return []
+
+def get_user_buildings(tables, username: str) -> List[Dict]:
+    """Get all buildings owned by a specific user."""
+    try:
+        # Query buildings where the user is the owner
+        formula = f"{{Owner}}='{username}'"
+        buildings = tables["buildings"].all(formula=formula)
+        print(f"Found {len(buildings)} buildings owned by {username}")
+        return buildings
+    except Exception as e:
+        print(f"Error getting buildings for user {username}: {str(e)}")
+        return []
+
+def get_citizen_info(tables, citizen_ids: List[str]) -> Dict[str, Dict]:
+    """Get information about citizens by their IDs."""
+    try:
+        if not citizen_ids:
+            return {}
+            
+        # Create a formula to query citizens by ID
+        citizen_conditions = [f"RECORD_ID()='{citizen_id}'" for citizen_id in citizen_ids]
+        formula = f"OR({', '.join(citizen_conditions)})"
+        
+        citizens = tables["citizens"].all(formula=formula)
+        print(f"Found {len(citizens)} citizens from {len(citizen_ids)} IDs")
+        
+        # Index citizens by ID
+        citizens_by_id = {citizen["id"]: citizen for citizen in citizens}
+        return citizens_by_id
+    except Exception as e:
+        print(f"Error getting citizen info: {str(e)}")
+        return {}
+
+def get_kinos_api_key() -> str:
+    """Get the Kinos API key from environment variables."""
+    load_dotenv()
+    api_key = os.getenv("KINOS_API_KEY")
+    if not api_key:
+        print("Error: Kinos API key not found in environment variables")
+        sys.exit(1)
+    return api_key
+
+def prepare_rent_analysis_data(ai_user: Dict, user_buildings: List[Dict], citizens_info: Dict[str, Dict]) -> Dict:
+    """Prepare a comprehensive data package for the AI to analyze rent situations."""
+    
+    # Extract user information
+    username = ai_user["fields"].get("Username", "")
+    ducats = ai_user["fields"].get("Ducats", 0)
+    
+    # Process buildings data
+    buildings_data = []
+    for building in user_buildings:
+        building_id = building["fields"].get("BuildingId", "")
+        building_type = building["fields"].get("Type", "")
+        rent_amount = building["fields"].get("RentAmount", 0)
+        occupant_id = building["fields"].get("Occupant", "")
+        
+        # Get occupant information if available
+        occupant_data = None
+        if occupant_id and occupant_id in citizens_info:
+            citizen = citizens_info[occupant_id]
+            occupant_data = {
+                "id": citizen["id"],
+                "name": f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}",
+                "social_class": citizen["fields"].get("SocialClass", ""),
+                "wealth": citizen["fields"].get("Wealth", 0),
+                "work": citizen["fields"].get("Work", "")
+            }
+        
+        building_info = {
+            "id": building_id,
+            "type": building_type,
+            "rent_amount": rent_amount,
+            "income": building["fields"].get("Income", 0),
+            "maintenance_cost": building["fields"].get("MaintenanceCost", 0),
+            "occupant": occupant_data,
+            "is_occupied": occupant_id != ""
+        }
+        buildings_data.append(building_info)
+    
+    # Calculate financial metrics
+    total_income = sum(building["fields"].get("Income", 0) for building in user_buildings)
+    total_maintenance = sum(building["fields"].get("MaintenanceCost", 0) for building in user_buildings)
+    total_rent_received = sum(building["fields"].get("RentAmount", 0) for building in user_buildings 
+                             if building["fields"].get("Occupant", ""))
+    net_income = total_income - total_maintenance + total_rent_received
+    
+    # Prepare the complete data package
+    data_package = {
+        "user": {
+            "username": username,
+            "ducats": ducats,
+            "total_buildings": len(buildings_data),
+            "financial": {
+                "total_income": total_income,
+                "total_maintenance": total_maintenance,
+                "total_rent_received": total_rent_received,
+                "net_income": net_income
+            }
+        },
+        "buildings": buildings_data,
+        "timestamp": datetime.now().isoformat()
+    }
+    
+    return data_package
+
+def send_rent_adjustment_request(ai_username: str, data_package: Dict) -> Optional[Dict]:
+    """Send the rent adjustment request to the AI via Kinos API."""
+    try:
+        api_key = get_kinos_api_key()
+        blueprint = "serenissima-ai"
+        
+        # Construct the API URL
+        url = f"https://api.kinos-engine.ai/v2/blueprints/{blueprint}/kins/{ai_username}/messages"
+        
+        # Set up headers with API key
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
+        
+        # Log the API request details
+        print(f"Sending rent adjustment request to AI user {ai_username}")
+        print(f"API URL: {url}")
+        print(f"User has {data_package['user']['ducats']} ducats")
+        print(f"User owns {len(data_package['buildings'])} buildings")
+        
+        # Create a detailed prompt that addresses the AI directly as the decision-maker
+        prompt = f"""
+As a building owner in La Serenissima, you need to review and adjust the rent amounts for your buildings.
+
+Here's your current situation:
+- You own {len(data_package['buildings'])} buildings
+- Your current net income is {data_package['user']['financial']['net_income']} ducats
+- You receive {data_package['user']['financial']['total_rent_received']} ducats in rent from your buildings
+
+Please analyze your rent situation and develop a strategy for adjusting rent amounts for your buildings. Consider:
+1. The income and maintenance costs of each building
+2. The occupancy status of each building
+3. The social class and wealth of current occupants
+4. Market rates for similar buildings
+5. Your overall financial situation
+
+After your analysis, provide your rent adjustment decisions in this JSON format:
+```json
+{{
+  "rent_adjustments": [
+    {{
+      "building_id": "building-id-1",
+      "new_rent_amount": 100,
+      "reason": "brief explanation"
+    }},
+    {{
+      "building_id": "building-id-2",
+      "new_rent_amount": 200,
+      "reason": "brief explanation"
+    }}
+  ]
+}}
+```
+
+If you decide not to adjust any rents at this time, return an empty array:
+```json
+{{
+  "rent_adjustments": []
+}}
+```
+"""
+        
+        # Create system instructions with the detailed data
+        system_instructions = f"""
+You are {ai_username}, an AI building owner in La Serenissima. You make your own decisions about rent strategies.
+
+Here is the complete data about your current situation:
+{json.dumps(data_package, indent=2)}
+
+When developing your rent adjustment strategy:
+1. Analyze each building's profitability (income minus maintenance)
+2. Consider the social class and wealth of current occupants
+3. For occupied buildings, ensure rent amounts are reasonable compared to occupant wealth
+4. For vacant buildings, consider lowering rent to attract occupants
+5. Create a specific, actionable plan with building IDs and new rent amounts
+6. Provide brief reasons for each adjustment
+
+Your decision should be specific, data-driven, and focused on maximizing your income while maintaining reasonable occupancy rates.
+
+IMPORTANT: You must end your response with a JSON object containing your specific rent adjustment decisions.
+Include the building_id, new_rent_amount, and reason for each building you want to adjust.
+If you decide not to adjust any rents at this time, return an empty array.
+"""
+        
+        # Prepare the request payload
+        payload = {
+            "message": prompt,
+            "addSystem": system_instructions,
+            "min_files": 5,
+            "max_files": 15
+        }
+        
+        # Make the API request
+        print(f"Making API request to Kinos for {ai_username}...")
+        response = requests.post(url, headers=headers, json=payload)
+        
+        # Log the API response details
+        print(f"API response status code: {response.status_code}")
+        
+        # Check if the request was successful
+        if response.status_code == 200 or response.status_code == 201:
+            response_data = response.json()
+            status = response_data.get("status")
+            
+            print(f"API response status: {status}")
+            
+            if status == "completed":
+                print(f"Successfully sent rent adjustment request to AI user {ai_username}")
+                
+                # The response content is in the response field of response_data
+                content = response_data.get('response', '')
+                
+                # Log the entire response for debugging
+                print(f"FULL AI RESPONSE FROM {ai_username}:")
+                print("="*80)
+                print(content)
+                print("="*80)
+                
+                print(f"AI {ai_username} response length: {len(content)} characters")
+                print(f"AI {ai_username} response preview: {content[:200]}...")
+                
+                # Try to extract the JSON decision from the response
+                try:
+                    # Look for JSON block in the response - try multiple patterns
+                    import re
+                    
+                    # First try to find JSON in code blocks
+                    json_match = re.search(r'```(?:json)?\s*(.*?)\s*```', content, re.DOTALL)
+                    
+                    if json_match:
+                        json_str = json_match.group(1)
+                        try:
+                            decisions = json.loads(json_str)
+                            if "rent_adjustments" in decisions:
+                                print(f"Found rent adjustments in code block: {len(decisions['rent_adjustments'])}")
+                                return decisions
+                        except json.JSONDecodeError as e:
+                            print(f"Error parsing JSON from code block: {str(e)}")
+                    
+                    # Next, try to find JSON with curly braces pattern
+                    json_match = re.search(r'(\{[\s\S]*"rent_adjustments"[\s\S]*\})', content)
+                    if json_match:
+                        json_str = json_match.group(1)
+                        try:
+                            decisions = json.loads(json_str)
+                            if "rent_adjustments" in decisions:
+                                print(f"Found rent adjustments in curly braces pattern: {len(decisions['rent_adjustments'])}")
+                                return decisions
+                        except json.JSONDecodeError as e:
+                            print(f"Error parsing JSON from curly braces pattern: {str(e)}")
+                    
+                    # If we couldn't find a JSON block, try to parse the entire response
+                    try:
+                        decisions = json.loads(content)
+                        if "rent_adjustments" in decisions:
+                            print(f"Found rent adjustments in full response: {len(decisions['rent_adjustments'])}")
+                            return decisions
+                    except json.JSONDecodeError:
+                        print("Could not parse full response as JSON")
+                    
+                    # Last resort: try to extract just the array part
+                    array_match = re.search(r'"rent_adjustments"\s*:\s*(\[\s*\{.*?\}\s*\])', content, re.DOTALL)
+                    if array_match:
+                        array_str = array_match.group(1)
+                        try:
+                            array_data = json.loads(array_str)
+                            decisions = {"rent_adjustments": array_data}
+                            print(f"Found rent adjustments in array extraction: {len(decisions['rent_adjustments'])}")
+                            return decisions
+                        except json.JSONDecodeError as e:
+                            print(f"Error parsing JSON from array extraction: {str(e)}")
+                    
+                    # Manual extraction as last resort
+                    building_ids = re.findall(r'"building_id"\s*:\s*"([^"]+)"', content)
+                    rent_amounts = re.findall(r'"new_rent_amount"\s*:\s*(\d+)', content)
+                    reasons = re.findall(r'"reason"\s*:\s*"([^"]+)"', content)
+                    
+                    if building_ids and rent_amounts and len(building_ids) == len(rent_amounts):
+                        # Create a manually constructed decision object
+                        adjustments = []
+                        for i in range(len(building_ids)):
+                            reason = reasons[i] if i < len(reasons) else "No reason provided"
+                            adjustments.append({
+                                "building_id": building_ids[i],
+                                "new_rent_amount": int(rent_amounts[i]),
+                                "reason": reason
+                            })
+                        
+                        decisions = {"rent_adjustments": adjustments}
+                        print(f"Manually extracted rent adjustments: {len(decisions['rent_adjustments'])}")
+                        return decisions
+                    
+                    # If we get here, no valid decision was found
+                    print(f"No valid rent adjustment decision found in AI response. Full response:")
+                    print(content)
+                    return None
+                except Exception as e:
+                    print(f"Error extracting decision from AI response: {str(e)}")
+                    print(f"Full response content that caused the error:")
+                    print(content)
+                    return None
+            else:
+                print(f"Error processing rent adjustment request for AI user {ai_username}: {response_data}")
+                return None
+        else:
+            print(f"Error from Kinos API: {response.status_code} - {response.text}")
+            return None
+    except Exception as e:
+        print(f"Error sending rent adjustment request to AI user {ai_username}: {str(e)}")
+        print(f"Exception traceback: {traceback.format_exc()}")
+        return None
+
+def update_building_rent_amount(tables, building_id: str, new_rent_amount: float) -> bool:
+    """Update the rent amount for a building."""
+    try:
+        # Find the building record
+        formula = f"{{BuildingId}}='{building_id}'"
+        buildings = tables["buildings"].all(formula=formula)
+        
+        if not buildings:
+            print(f"Building {building_id} not found")
+            return False
+        
+        building = buildings[0]
+        current_rent = building["fields"].get("RentAmount", 0)
+        
+        # Update the rent amount
+        tables["buildings"].update(building["id"], {
+            "RentAmount": new_rent_amount
+        })
+        
+        print(f"Updated rent amount for building {building_id} from {current_rent} to {new_rent_amount}")
+        return True
+    except Exception as e:
+        print(f"Error updating rent amount for building {building_id}: {str(e)}")
+        return False
+
+def create_notification_for_building_occupant(tables, building_id: str, occupant: str, ai_username: str, 
+                                             old_rent: float, new_rent: float, reason: str) -> bool:
+    """Create a notification for the building occupant about the rent adjustment."""
+    try:
+        now = datetime.now().isoformat()
+        
+        # Create the notification
+        notification = {
+            "User": occupant,
+            "Type": "rent_adjustment",
+            "Content": f"The rent amount for your building {building_id} has been adjusted from {old_rent} to {new_rent} ducats by the building owner {ai_username}. Reason: {reason}",
+            "CreatedAt": now,
+            "ReadAt": None,
+            "Details": json.dumps({
+                "building_id": building_id,
+                "old_rent_amount": old_rent,
+                "new_rent_amount": new_rent,
+                "building_owner": ai_username,
+                "reason": reason,
+                "timestamp": now
+            })
+        }
+        
+        tables["notifications"].create(notification)
+        print(f"Created notification for building occupant {occupant} about rent adjustment")
+        return True
+    except Exception as e:
+        print(f"Error creating notification for building occupant: {str(e)}")
+        return False
+
+def create_admin_notification(tables, ai_rent_adjustments: Dict[str, List[Dict]]) -> None:
+    """Create a notification for admins with the AI rent adjustment summary."""
+    try:
+        now = datetime.now().isoformat()
+        
+        # Create a summary message
+        message = "AI Rent Adjustment Summary:\n\n"
+        
+        for ai_name, adjustments in ai_rent_adjustments.items():
+            message += f"- {ai_name}: {len(adjustments)} rent adjustments\n"
+            for adj in adjustments:
+                message += f"  * Building {adj['building_id']}: {adj['old_rent']} → {adj['new_rent']} ducats\n"
+        
+        # Create the notification
+        notification = {
+            "User": "NLR",  # Send to NLR as requested
+            "Type": "ai_rent_adjustments",
+            "Content": message,
+            "CreatedAt": now,
+            "ReadAt": None,
+            "Details": json.dumps({
+                "ai_rent_adjustments": ai_rent_adjustments,
+                "timestamp": now
+            })
+        }
+        
+        tables["notifications"].create(notification)
+        print("Created admin notification with AI rent adjustment summary")
+    except Exception as e:
+        print(f"Error creating admin notification: {str(e)}")
+
+def process_ai_rent_adjustments(dry_run: bool = False):
+    """Main function to process AI rent adjustments."""
+    print(f"Starting AI rent adjustment process (dry_run={dry_run})")
+    
+    # Initialize Airtable connection
+    tables = initialize_airtable()
+    
+    # Get AI users
+    ai_users = get_ai_users(tables)
+    if not ai_users:
+        print("No AI users found, exiting")
+        return
+    
+    # Track rent adjustments for each AI
+    ai_rent_adjustments = {}
+    
+    # Process each AI user
+    for ai_user in ai_users:
+        ai_username = ai_user["fields"].get("Username")
+        if not ai_username:
+            continue
+        
+        print(f"Processing AI user: {ai_username}")
+        ai_rent_adjustments[ai_username] = []
+        
+        # Get buildings owned by this AI
+        user_buildings = get_user_buildings(tables, ai_username)
+        
+        if not user_buildings:
+            print(f"AI user {ai_username} has no buildings, skipping")
+            continue
+        
+        # Get occupant IDs from buildings
+        occupant_ids = []
+        for building in user_buildings:
+            occupant_id = building["fields"].get("Occupant")
+            if occupant_id:
+                occupant_ids.append(occupant_id)
+        
+        # Get citizen information for occupants
+        citizens_info = get_citizen_info(tables, occupant_ids)
+        
+        # Prepare the data package for the AI
+        data_package = prepare_rent_analysis_data(ai_user, user_buildings, citizens_info)
+        
+        # Send the rent adjustment request to the AI
+        if not dry_run:
+            decisions = send_rent_adjustment_request(ai_username, data_package)
+            
+            if decisions and "rent_adjustments" in decisions:
+                rent_adjustments = decisions["rent_adjustments"]
+                
+                for adjustment in rent_adjustments:
+                    building_id = adjustment.get("building_id")
+                    new_rent_amount = adjustment.get("new_rent_amount")
+                    reason = adjustment.get("reason", "No reason provided")
+                    
+                    if not building_id or new_rent_amount is None:
+                        print(f"Invalid rent adjustment: {adjustment}")
+                        continue
+                    
+                    # Find the building to get current rent amount and occupant
+                    building_formula = f"{{BuildingId}}='{building_id}'"
+                    buildings = tables["buildings"].all(formula=building_formula)
+                    
+                    if not buildings:
+                        print(f"Building {building_id} not found")
+                        continue
+                    
+                    building = buildings[0]
+                    current_rent = building["fields"].get("RentAmount", 0)
+                    occupant_id = building["fields"].get("Occupant", "")
+                    
+                    # Check if the AI owns this building - if not, skip it
+                    building_owner = building["fields"].get("Owner", "")
+                    if building_owner != ai_username:
+                        print(f"Skipping building {building_id} - AI {ai_username} does not own this building (owned by {building_owner})")
+                        continue
+                    
+                    # Update the rent amount
+                    success = update_building_rent_amount(tables, building_id, new_rent_amount)
+                    
+                    if success:
+                        # Create notification for occupant if there is one
+                        if occupant_id:
+                            # Get the occupant's username from citizens table
+                            if occupant_id in citizens_info:
+                                citizen = citizens_info[occupant_id]
+                                # Check if the citizen has a User field
+                                occupant_username = citizen["fields"].get("User", "")
+                                if occupant_username:
+                                    create_notification_for_building_occupant(
+                                        tables, building_id, occupant_username, ai_username, 
+                                        current_rent, new_rent_amount, reason
+                                    )
+                        
+                        # Add to the list of adjustments for this AI
+                        ai_rent_adjustments[ai_username].append({
+                            "building_id": building_id,
+                            "old_rent": current_rent,
+                            "new_rent": new_rent_amount,
+                            "reason": reason
+                        })
+            else:
+                print(f"No valid rent adjustment decisions received for {ai_username}")
+        else:
+            # In dry run mode, just log what would happen
+            print(f"[DRY RUN] Would send rent adjustment request to AI user {ai_username}")
+            print(f"[DRY RUN] Data package summary:")
+            print(f"  - User: {data_package['user']['username']}")
+            print(f"  - Buildings: {len(data_package['buildings'])}")
+            print(f"  - Net Income: {data_package['user']['financial']['net_income']}")
+    
+    # Create admin notification with summary
+    if not dry_run and any(adjustments for adjustments in ai_rent_adjustments.values()):
+        create_admin_notification(tables, ai_rent_adjustments)
+    else:
+        print(f"[DRY RUN] Would create admin notification with rent adjustments: {ai_rent_adjustments}")
+    
+    print("AI rent adjustment process completed")
+
+if __name__ == "__main__":
+    # Check if this is a dry run
+    dry_run = "--dry-run" in sys.argv
+    
+    # Run the process
+    process_ai_rent_adjustments(dry_run)

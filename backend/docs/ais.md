@@ -170,6 +170,43 @@ The AI lease adjustment system:
 - Encourages strategic building placement by players
 - Simulates the economic negotiations that would occur in a real market
 
+### Rent Adjustments
+
+**Implementation**: `backend/ais/adjustrents.py`  
+**Schedule**: Daily at 10:00 PM UTC
+
+AI users strategically adjust rent amounts for buildings they own:
+
+#### Process:
+
+1. The script identifies all users marked as AI in the system
+2. For each AI user, it analyzes:
+   - Buildings they own
+   - Current occupants of their buildings
+   - Occupant social class and wealth
+   - Current rent amounts, income, and maintenance costs
+
+3. For each AI user, the system:
+   - Prepares a comprehensive data package with financial information
+   - Sends this data to the Kinos Engine API for analysis
+   - Receives rent adjustment decisions from the AI
+
+4. When rent adjustments are made:
+   - Building records are updated with new rent amounts
+   - Building occupants receive notifications about the changes
+   - Reasons for adjustments are provided to maintain transparency
+
+5. An admin notification is created with statistics about all rent adjustments, showing the changes made by each AI user
+
+#### Economic Impact:
+
+The AI rent adjustment system:
+- Creates a more dynamic and responsive housing market
+- Allows AI building owners to optimize their rental income
+- Provides market signals about the value of different housing types
+- Encourages citizens to seek affordable housing
+- Simulates the economic negotiations that would occur in a real housing market
+
 ## AI User Management
 
 AI users are created and managed through the Airtable database:
