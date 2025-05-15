@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { FaHome, FaBuilding, FaRoad, FaTree, FaStore, FaLandmark, FaBook } from 'react-icons/fa';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
+import { transportService } from '@/lib/services/TransportService';
 import WalletButton from '@/components/UI/WalletButton';
 import ResourceDropdowns from '@/components/UI/ResourceDropdowns';
 import Settings from '@/components/UI/Settings';
