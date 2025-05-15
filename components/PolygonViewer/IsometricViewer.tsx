@@ -2693,10 +2693,12 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       }
     };
     
-    eventBus.subscribe(EventTypes.HOVER_STATE_CHANGED, handleHoverStateChanged);
+    // Use a string literal for the event name instead of EventTypes.HOVER_STATE_CHANGED
+    const subscription = eventBus.subscribe('HOVER_STATE_CHANGED', handleHoverStateChanged);
     
     return () => {
-      eventBus.unsubscribe(EventTypes.HOVER_STATE_CHANGED, handleHoverStateChanged);
+      // Use the subscription object's unsubscribe method
+      subscription.unsubscribe();
     };
   }, [polygonsToRender, buildings, scale, offset, selectedPolygonId, selectedBuildingId]);
 
