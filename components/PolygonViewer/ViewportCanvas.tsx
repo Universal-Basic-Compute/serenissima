@@ -201,10 +201,10 @@ export default function ViewportCanvas({
     
     // Update the interaction service with current data
     interactionService.updatePolygons({
-      polygonsToRender,
+      polygons: polygonsToRender,
       buildings,
       emptyBuildingPoints,
-      polygons,
+      allPolygons: polygons,
       citizensByBuilding,
       transportStartPoint: transportService.getStartPoint() || null,
       transportEndPoint: transportService.getEndPoint() || null
@@ -218,15 +218,14 @@ export default function ViewportCanvas({
       offset,
       transportMode,
       {
-        polygonsToRender,
+        polygons: polygonsToRender,
         buildings,
         emptyBuildingPoints,
-        polygons,
+        allPolygons: polygons,
         citizensByBuilding,
         transportStartPoint: transportService.getStartPoint() || null,
         transportEndPoint: transportService.getEndPoint() || null
-      },
-      polygonsToRender
+      }
     );
     
     // Subscribe to events from InteractionService
@@ -259,8 +258,8 @@ export default function ViewportCanvas({
         // Handle transport point selection
         if (point) {
           console.log(`Transport point selected at: ${point.lat}, ${point.lng}`);
-          // Convert point to expected format if needed
-          transportService.handlePointSelected(point as any[]);
+          // Pass the point as is, not as an array
+          transportService.handlePointSelected(point);
         }
       })
     ];
@@ -288,10 +287,10 @@ export default function ViewportCanvas({
   // Add this effect to update the interaction service when data changes
   useEffect(() => {
     interactionService.updatePolygons({
-      polygonsToRender,
+      polygons: polygonsToRender,
       buildings,
       emptyBuildingPoints,
-      polygons,
+      allPolygons: polygons,
       citizensByBuilding,
       transportStartPoint: transportService.getStartPoint() || null,
       transportEndPoint: transportService.getEndPoint() || null
@@ -358,10 +357,10 @@ export default function ViewportCanvas({
       emptyBuildingPoints,
       interactionState,
       transportPath,
-      transportService.getStartPoint() as any,
-      transportService.getEndPoint() as any,
-      polygons as any,
-      incomeDataLoaded ? incomeData : {},
+      transportService.getStartPoint(),
+      transportService.getEndPoint(),
+      polygons,
+      incomeDataLoaded,
       minIncome,
       maxIncome
     );
