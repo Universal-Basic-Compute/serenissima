@@ -237,6 +237,21 @@ def process_import_contract(tables, contract: Dict, building_types: Dict, resour
             log.warning(f"Skipping contract {contract_id} due to missing required fields")
             return False
         
+        # Get building information
+        building = get_building_info(tables, buyer_building_id)
+        if not building:
+            log.warning(f"Building {buyer_building_id} not found")
+            return False
+        
+        # Check if the building is run by someone (business)
+        building_operator = building['fields'].get('RanBy')
+        
+        # If the building has a RanBy field, use that person as the buyer instead
+        # This handles cases where the business operator is different from the building owner
+        if building_operator and building_operator != buyer:
+            log.info(f"Building {buyer_building_id} is run by {building_operator}, using as buyer instead of {buyer}")
+            buyer = building_operator
+        
         # Get buyer's balance
         buyer_balance = get_user_balance(tables, buyer)
         
@@ -246,12 +261,6 @@ def process_import_contract(tables, contract: Dict, building_types: Dict, resour
         # Check if buyer has enough money
         if buyer_balance < total_cost:
             log.warning(f"Buyer {buyer} has insufficient funds ({buyer_balance}) for import cost ({total_cost})")
-            return False
-        
-        # Get building information
-        building = get_building_info(tables, buyer_building_id)
-        if not building:
-            log.warning(f"Building {buyer_building_id} not found")
             return False
         
         building_type = building['fields'].get('Type')
