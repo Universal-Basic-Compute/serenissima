@@ -28,11 +28,16 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
         setActivities(data.activities || []);
         console.log(`Loaded ${data.activities?.length || 0} activities for citizen ${citizenId}`);
       } else {
-        console.error(`Failed to fetch activities for citizen ${citizenId}: ${response.status} ${response.statusText}`);
+        // Change from console.error to console.warn for 404 responses
+        if (response.status === 404) {
+          console.warn(`No activities found for citizen ${citizenId}: ${response.status} ${response.statusText}`);
+        } else {
+          console.warn(`Failed to fetch activities for citizen ${citizenId}: ${response.status} ${response.statusText}`);
+        }
         setActivities([]);
       }
     } catch (error) {
-      console.error('Error fetching citizen activities:', error);
+      console.warn('Error fetching citizen activities:', error);
       setActivities([]);
     } finally {
       setIsLoadingActivities(false);
