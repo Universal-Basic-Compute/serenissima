@@ -1286,12 +1286,16 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             if (building) {
               setHoveredBuildingName(building.name || formatBuildingType(building.type));
               setHoveredBuildingPosition({ x: mouseX, y: mouseY });
-              // Don't call fetchBuildingImagePath directly here to avoid infinite loop
-              setTimeout(() => {
-                if (hoveredBuildingIdRef.current === newHoveredBuildingId) {
-                  fetchBuildingImagePath(building.type, building.variant);
-                }
-              }, 0);
+              
+              // IMPORTANT: Don't call fetchBuildingImagePath directly here
+              // Instead, use setTimeout to break the render cycle
+              if (building.type) {
+                setTimeout(() => {
+                  if (hoveredBuildingIdRef.current === newHoveredBuildingId) {
+                    fetchBuildingImagePath(building.type, building.variant);
+                  }
+                }, 0);
+              }
             }
           } else {
             setHoveredBuildingName(null);
