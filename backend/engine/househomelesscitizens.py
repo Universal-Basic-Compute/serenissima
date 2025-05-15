@@ -93,79 +93,65 @@ def get_homeless_citizens(tables) -> List[Dict]:
         log.error(f"Error fetching homeless citizens: {e}")
         return []
 
-def get_available_buildings(tables, building_type: str) -> List[Dict]:
-    """Fetch available buildings of a specific type, sorted by rent in ascending order."""
-    log.info(f"Fetching available buildings of type: {building_type}")
+def get_available_businesses(tables) -> List[Dict]:
+    """Fetch available businesses, sorted by wages in descending order."""
+    log.info("Fetching available businesses...")
     
     try:
-        # Get buildings of the specified type that are not already occupied
-        formula = f"AND({{Type}} = '{building_type}', OR({{Occupant}} = '', {{Occupant}} = BLANK()))"
-        buildings = tables['buildings'].all(formula=formula)
+        # Get business-type buildings without occupants
+        business_types = ['workshop', 'market-stall', 'tavern', 'warehouse', 'dock']
+        type_conditions = [f"{{Type}}='{business_type}'" for business_type in business_types]
+        formula = f"AND(OR({', '.join(type_conditions)}), OR({{Occupant}} = '', {{Occupant}} = BLANK()))"
         
-        # Sort by RentAmount in ascending order
-        buildings.sort(key=lambda b: float(b['fields'].get('RentAmount', 0) or 0))
+        available_businesses = tables['buildings'].all(formula=formula)
+        log.info(f"Found {len(available_businesses)} available businesses")
         
-        log.info(f"Found {len(buildings)} available buildings of type {building_type}")
-        return buildings
+        # Sort by Wages in descending order
+        available_businesses.sort(key=lambda b: float(b['fields'].get('Wages', 0) or 0), reverse=True)
+        
+        return available_businesses
     except Exception as e:
-        log.error(f"Error fetching buildings of type {building_type}: {e}")
+        log.error(f"Error fetching available businesses: {e}")
         return []
 
-def assign_citizen_to_building(tables, citizen: Dict, building: Dict) -> bool:
-    """Assign a citizen to a building and update both records."""
+def assign_citizen_to_business(tables, citizen: Dict, business: Dict) -> bool:
+    """Assign a citizen to a business and update both records."""
     citizen_id = citizen['id']
-    building_id = building['id']
+    business_id = business['id']
     citizen_name = f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}"
-    building_name = building['fields'].get('Name', building_id)
+    business_name = business['fields'].get('Name', business_id)
     
-    log.info(f"Assigning {citizen_name} to {building_name}")
+    log.info(f"Assigning {citizen_name} to {business_name}")
     
     try:
-        # Update building record with new occupant
-        tables['buildings'].update(building_id, {
-            'Occupant': citizen['fields']['CitizenId']  # Use CitizenId field instead of record id
+        # Update business record with new occupant
+        tables['buildings'].update(business_id, {
+            'Occupant': citizen_id,
+            'Status': 'active'
         })
         
-        # Create a notification for the user
-        try:
-            # Check if we have a NOTIFICATIONS table in our tables dictionary
-            if 'notifications' not in tables:
-                # Initialize the NOTIFICATIONS table
-                api_key = os.environ.get('AIRTABLE_API_KEY')
-                base_id = os.environ.get('AIRTABLE_BASE_ID')
-                tables['notifications'] = Table(api_key, base_id, 'NOTIFICATIONS')
-                log.info("Initialized NOTIFICATIONS table")
-            
-            # Create notification content
-            content = f"{citizen_name} has moved into {building_name}"
-            details = {
-                "citizen_id": citizen['fields']['CitizenId'],  # Use CitizenId field instead of record id
-                "citizen_name": citizen_name,
-                "building_id": building['fields']['BuildingId'],  # Use BuildingId field instead of record id
-                "building_name": building_name,
-                "building_type": building['fields'].get('Type', ''),
-                "rent_amount": building['fields'].get('RentAmount', 0)
-            }
-            
-            # Create the notification record
-            tables['notifications'].create({
-                "Type": "new_occupant",
-                "Content": content,
-                "Details": json.dumps(details),
-                "CreatedAt": datetime.datetime.now().isoformat(),
-                "ReadAt": None,  # Changed from IsRead: False to ReadAt: None
-                "User": citizen['fields']['CitizenId']  # Use CitizenId instead of citizen_id
-            })
-            
-            log.info(f"Created notification for {citizen_name}")
-        except Exception as notif_error:
-            log.error(f"Error creating notification: {notif_error}")
-            # Continue even if notification creation fails
+        # Get business owner
+        business_owner = business['fields'].get('Owner', '')
         
-        log.info(f"Successfully housed {citizen_name} in {building_name}")
+        # Create a notification for the business owner
+        if business_owner:
+            create_notification(
+                tables,
+                business_owner,
+                f"{citizen_name} now works in your business {business_name}",
+                {
+                    "citizen_id": citizen_id,
+                    "citizen_name": citizen_name,
+                    "business_id": business_id,
+                    "business_name": business_name,
+                    "event_type": "job_assignment"
+                }
+            )
+        
+        log.info(f"Successfully assigned {citizen_name} to {business_name}")
         return True
     except Exception as e:
-        log.error(f"Error assigning citizen to building: {e}")
+        log.error(f"Error assigning citizen to business: {e}")
         return False
 
 def find_suitable_building(tables, citizen: Dict) -> Optional[Dict]:
@@ -231,71 +217,76 @@ def create_admin_notification(tables, housing_summary) -> None:
     except Exception as e:
         log.error(f"Error creating admin notification: {e}")
 
-def house_homeless_citizens(dry_run: bool = False):
-    """Main function to house homeless citizens."""
-    log.info(f"Starting housing process (dry_run: {dry_run})")
+def assign_jobs_to_citizens(dry_run: bool = False):
+    """Main function to assign jobs to unemployed citizens."""
+    log.info(f"Starting job assignment process (dry_run: {dry_run})")
     
     tables = initialize_airtable()
-    homeless_citizens = get_homeless_citizens(tables)
+    unemployed_citizens = get_unemployed_citizens(tables)
     
-    if not homeless_citizens:
-        log.info("No homeless citizens found. Everyone is housed!")
+    if not unemployed_citizens:
+        log.info("No unemployed citizens found. Job assignment process complete.")
         return
     
-    housed_count = 0
+    available_businesses = get_available_businesses(tables)
+    
+    if not available_businesses:
+        log.info("No available businesses found. Job assignment process complete.")
+        return
+    
+    assigned_count = 0
     failed_count = 0
     
-    # Track housing by building type
-    housing_by_type = {
-        "canal_house": 0,
-        "merchant_s_house": 0,
-        "artisan_s_house": 0,
-        "fisherman_s_cottage": 0
-    }
+    # Track assignments by business type
+    assignments_by_type = {}
     
-    for citizen in homeless_citizens:
+    # Process each unemployed citizen
+    for citizen in unemployed_citizens:
         citizen_name = f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}"
         log.info(f"Processing citizen: {citizen_name}")
         
-        building = find_suitable_building(tables, citizen)
+        # Stop if we've run out of available businesses
+        if not available_businesses:
+            log.info("No more available businesses. Stopping job assignment process.")
+            break
         
-        if building:
-            building_name = building['fields'].get('Name', building['id'])
-            building_type = building['fields'].get('Type', 'unknown')
-            
-            if dry_run:
-                log.info(f"[DRY RUN] Would house {citizen_name} in {building_name}")
-                housed_count += 1
-                # Track housing by building type
-                if building_type in housing_by_type:
-                    housing_by_type[building_type] += 1
-            else:
-                success = assign_citizen_to_building(tables, citizen, building)
-                if success:
-                    housed_count += 1
-                    # Track housing by building type
-                    if building_type in housing_by_type:
-                        housing_by_type[building_type] += 1
-                else:
-                    failed_count += 1
+        # Get the highest-paying available business
+        business = available_businesses.pop(0)  # Remove from list to prevent double assignment
+        business_name = business['fields'].get('Name', business['id'])
+        business_type = business['fields'].get('Type', 'unknown')
+        
+        # Track assignments by business type
+        if business_type not in assignments_by_type:
+            assignments_by_type[business_type] = 0
+        
+        if dry_run:
+            log.info(f"[DRY RUN] Would assign {citizen_name} to {business_name}")
+            assigned_count += 1
+            assignments_by_type[business_type] += 1
         else:
-            log.warning(f"Could not find suitable housing for {citizen_name}")
-            failed_count += 1
+            success = assign_citizen_to_business(tables, citizen, business)
+            if success:
+                assigned_count += 1
+                assignments_by_type[business_type] += 1
+            else:
+                failed_count += 1
+                # Put the business back in the list if assignment failed
+                available_businesses.append(business)
     
-    log.info(f"Housing process complete. Housed: {housed_count}, Failed: {failed_count}")
+    log.info(f"Job assignment process complete. Assigned: {assigned_count}, Failed: {failed_count}")
     
-    # Create a summary of housing by building type
-    housing_summary = {
-        "total": housed_count,
-        **housing_by_type
+    # Create a summary of assignments by business type
+    assignment_summary = {
+        "total": assigned_count,
+        "by_business_type": assignments_by_type
     }
     
-    # Create a notification for the admin user with the housing summary
-    if housed_count > 0 and not dry_run:
-        create_admin_notification(tables, housing_summary)
+    # Create a notification for the admin user with the assignment summary
+    if assigned_count > 0 and not dry_run:
+        create_admin_summary(tables, assignment_summary)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="House homeless citizens in appropriate buildings.")
+    parser = argparse.ArgumentParser(description="Assign jobs to unemployed citizens.")
     parser.add_argument("--dry-run", action="store_true", help="Run without making changes")
     parser.add_argument("--verbose", action="store_true", help="Enable verbose logging")
     
@@ -304,4 +295,4 @@ if __name__ == "__main__":
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
     
-    house_homeless_citizens(dry_run=args.dry_run)
+    assign_jobs_to_citizens(dry_run=args.dry_run)

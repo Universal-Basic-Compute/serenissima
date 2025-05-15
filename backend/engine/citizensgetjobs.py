@@ -58,9 +58,23 @@ def get_unemployed_citizens(tables) -> List[Dict]:
     log.info("Fetching unemployed citizens...")
     
     try:
-        # Get citizens without a Work field or with empty Work field
-        formula = "OR({Work} = '', {Work} = BLANK())"
-        unemployed_citizens = tables['citizens'].all(formula=formula)
+        # Get all citizens
+        all_citizens = tables['citizens'].all()
+        
+        # Get all buildings with occupants that are businesses (not housing)
+        business_types = ['workshop', 'market-stall', 'tavern', 'warehouse', 'dock']
+        type_conditions = [f"{{Type}}='{business_type}'" for business_type in business_types]
+        business_formula = f"AND(OR({', '.join(type_conditions)}), NOT(OR({{Occupant}} = '', {{Occupant}} = BLANK())))"
+        
+        occupied_businesses = tables['buildings'].all(formula=business_formula)
+        
+        # Extract the occupant IDs
+        employed_citizen_ids = [building['fields'].get('Occupant') for building in occupied_businesses 
+                               if building['fields'].get('Occupant')]
+        
+        # Filter citizens to find those who are not occupants of any business
+        unemployed_citizens = [citizen for citizen in all_citizens 
+                              if citizen['id'] not in employed_citizen_ids]
         
         # Sort by Wealth in descending order
         unemployed_citizens.sort(key=lambda c: float(c['fields'].get('Wealth', 0) or 0), reverse=True)
