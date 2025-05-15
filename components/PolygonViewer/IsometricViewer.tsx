@@ -11,6 +11,7 @@ import LandDetailsPanel from './LandDetailsPanel';
 import BuildingDetailsPanel from './BuildingDetailsPanel';
 import CitizenDetailsPanel from '../UI/CitizenDetailsPanel';
 import CitizenMarkers from './CitizenMarkers';
+import ResourceMarkers from './ResourceMarkers';
 import { HoverTooltip } from '../UI/HoverTooltip';
 
 interface IsometricViewerProps {
@@ -2944,6 +2945,15 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       {/* Citizen Markers */}
       <CitizenMarkers 
         isVisible={activeView === 'citizens'} 
+        scale={scale}
+        offset={offset}
+        canvasWidth={canvasRef.current?.width || window.innerWidth}
+        canvasHeight={canvasRef.current?.height || window.innerHeight}
+      />
+      
+      {/* Resource Markers */}
+      <ResourceMarkers 
+        isVisible={activeView === 'resources'} 
         scale={scale}
         offset={offset}
         canvasWidth={canvasRef.current?.width || window.innerWidth}

@@ -271,7 +271,7 @@ export class ResourceService {
         icon: resource.icon || 'default.png',
         amount: resource.count,
         buildingId: resource.buildingId,
-        location: resource.location
+        location: resource.location // Ensure location is included
       }));
       
       this.playerResources = (data.playerResourceCounts || []).map(resource => ({
@@ -284,7 +284,7 @@ export class ResourceService {
         icon: resource.icon || 'default.png',
         amount: resource.count,
         buildingId: resource.buildingId,
-        location: resource.location
+        location: resource.location // Ensure location is included
       }));
       
       console.log(`%c[ResourceService] Received ${this.globalResources.length} global resources and ${this.playerResources.length} player resources`, 'color: #22c55e; font-weight: bold;');
