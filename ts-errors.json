@@ -1,39 +1,81 @@
 {
-  "totalErrors": 3,
+  "totalErrors": 8,
   "totalWarnings": 0,
-  "exitCode": 2,
-  "timestamp": "2025-05-15T06:45:31.577Z",
+  "exitCode": 1,
+  "timestamp": "2025-05-15T22:33:25.227Z",
   "errors": [
     {
-      "filePath": "components/PolygonViewer/IsometricViewer.tsx",
-      "line": 1656,
-      "column": 4,
-      "code": "TS1128",
-      "message": "Declaration or statement expected.",
+      "filePath": "app/api/citizens/route.ts",
+      "line": 99,
+      "column": 37,
+      "code": "TS2345",
+      "message": "Argument of type 'string | number | boolean | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]' is not assignable to parameter of type 'string'.",
       "type": "error"
     },
     {
-      "filePath": "components/PolygonViewer/IsometricViewer.tsx",
-      "line": 1656,
-      "column": 36,
-      "code": "TS1005",
-      "message": "';' expected.",
+      "filePath": "app/api/citizens/route.ts",
+      "line": 101,
+      "column": 9,
+      "code": "TS2322",
+      "message": "Type 'string | number | true | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]' is not assignable to type 'string'.",
       "type": "error"
     },
     {
-      "filePath": "components/PolygonViewer/IsometricViewer.tsx",
-      "line": 3863,
-      "column": 1,
-      "code": "TS1128",
-      "message": "Declaration or statement expected.",
+      "filePath": "app/api/citizens/route.ts",
+      "line": 105,
+      "column": 9,
+      "code": "TS2322",
+      "message": "Type 'string | number | true | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]' is not assignable to type 'string'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/ViewportCanvas.tsx",
+      "line": 247,
+      "column": 7,
+      "code": "TS2353",
+      "message": "Object literal may only specify known properties, and 'polygonsToRender' does not exist in type 'any[]'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/ViewportCanvas.tsx",
+      "line": 272,
+      "column": 7,
+      "code": "TS2345",
+      "message": "Argument of type 'Record<string, HTMLImageElement>' is not assignable to parameter of type '{ setMousePosition: (position: { x: number; y: number; }) => void; setSelectedPolygonId: (id: string) => void; setShowLandDetailsPanel: (show: boolean) => void; setSelectedBuildingId: (id: string) => void; ... 9 more ...; screenToLatLng: (screenX: number, screenY: number, scale: number, offset: { ...; }, canvasWidth...'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/ViewportCanvas.tsx",
+      "line": 334,
+      "column": 7,
+      "code": "TS2353",
+      "message": "Object literal may only specify known properties, and 'polygonsToRender' does not exist in type 'any[]'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/ViewportCanvas.tsx",
+      "line": 404,
+      "column": 7,
+      "code": "TS2345",
+      "message": "Argument of type '{ lat: number; lng: number; }' is not assignable to parameter of type 'any[]'.",
+      "type": "error"
+    },
+    {
+      "filePath": "components/PolygonViewer/ViewportCanvas.tsx",
+      "line": 456,
+      "column": 11,
+      "code": "TS2345",
+      "message": "Argument of type '{ lat: number; lng: number; }' is not assignable to parameter of type 'any[]'.",
       "type": "error"
     }
   ],
-  "rawOutputLines": 4,
+  "rawOutputLines": 15,
   "firstFewLines": [
-    "components/PolygonViewer/IsometricViewer.tsx(1656,4): error TS1128: Declaration or statement expected.\r",
-    "components/PolygonViewer/IsometricViewer.tsx(1656,36): error TS1005: ';' expected.\r",
-    "components/PolygonViewer/IsometricViewer.tsx(3863,1): error TS1128: Declaration or statement expected.\r"
+    "app/api/citizens/route.ts(99,37): error TS2345: Argument of type 'string | number | boolean | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]' is not assignable to parameter of type 'string'.\r",
+    "  Type 'number' is not assignable to type 'string'.\r",
+    "app/api/citizens/route.ts(101,9): error TS2322: Type 'string | number | true | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]' is not assignable to type 'string'.\r",
+    "  Type 'number' is not assignable to type 'string'.\r",
+    "app/api/citizens/route.ts(105,9): error TS2322: Type 'string | number | true | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]' is not assignable to type 'string'.\r"
   ],
-  "compilerExitCode": 2
+  "compilerExitCode": 1
 }

@@ -38,9 +38,7 @@
   "productionInformation": {
     "Arti": [
       {
-        "inputs": {
-          "water": 1
-        },
+        "inputs": {},
         "outputs": {
           "water": 1
         },

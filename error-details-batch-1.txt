@@ -1,3 +1,0 @@
-components/PolygonViewer/IsometricViewer.tsx:1656:4 - TS1128: Declaration or statement expected.
-components/PolygonViewer/IsometricViewer.tsx:1656:36 - TS1005: ';' expected.
-components/PolygonViewer/IsometricViewer.tsx:3863:1 - TS1128: Declaration or statement expected.

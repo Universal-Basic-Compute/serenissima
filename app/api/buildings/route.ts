@@ -515,11 +515,8 @@ export async function GET(request: Request) {
     
     // Log each building for debugging
     buildings.forEach((building, index) => {
-      console.log(`%c Building ${index + 1}:`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;', building);
+      //console.log(`%c Building ${index + 1}:`, 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;', building);
     });
-    
-    // Always add debug buildings to ensure we have something visible
-    console.log('%c Adding debug buildings regardless of Airtable data', 'background: #FFFF00; color: black; padding: 2px 5px; font-weight: bold;');
     
     // Add more detailed logging about the buildings being returned
     console.log(`%c BUILDINGS API: Returning ${buildings.length} total buildings to client`, 'background: #FF5500; color: white; padding: 4px 8px; font-weight: bold; border-radius: 4px;');
