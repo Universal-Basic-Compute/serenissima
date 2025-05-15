@@ -56,6 +56,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [mousePosition, setMousePosition] = useState<{x: number, y: number}>({ x: 0, y: 0 });
   const [buildingPositionsCache, setBuildingPositionsCache] = useState<Record<string, {x: number, y: number}>>({});
   const [initialPositionCalculated, setInitialPositionCalculated] = useState<boolean>(false);
+  const [buildingColorMode, setBuildingColorMode] = useState<'type' | 'owner'>('type');
   const [polygonsToRender, setPolygonsToRender] = useState<{
     polygon: any;
     coords: {x: number, y: number}[];
@@ -1791,6 +1792,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
 
       //console.log(`%c DRAWING BUILDINGS: ${buildingsWithValidPosition.length} of ${buildings.length} buildings have valid positions for drawing`, 'background: #9C27B0; color: white; padding: 4px 8px; font-weight: bold; border-radius: 4px;');
       
+      // Get current user identifier
+      const currentUser = getCurrentUserIdentifier();
+      
       buildings.forEach(building => {
         if (!building.position) return;
         
@@ -1842,27 +1846,37 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         
         // Get building size based on type
         const size = getBuildingSize(building.type);
-        const color = getBuildingColor(building.type);
+        
+        // Determine color based on mode
+        let color;
+        if (buildingColorMode === 'type') {
+          color = getBuildingColor(building.type);
+        } else {
+          // Use owner color
+          color = getBuildingOwnerColor(building.owner || 'unknown');
+        }
         
         // Determine if this building is selected
         const isSelected = selectedBuildingId !== null && selectedBuildingId === building.id;
         
-        // Determine the shape based on point_id or Point field
-        const pointId = building.point_id || building.Point;
-        let buildingShape = 'square'; // Default shape
-        
-        if (pointId) {
-          if (typeof pointId === 'string') {
-            if (pointId.startsWith('canal-') || pointId.includes('canal_')) {
-              buildingShape = 'circle';
-            } else if (pointId.startsWith('bridge-') || pointId.includes('bridge_')) {
-              buildingShape = 'triangle';
-            }
-          }
-        }
+        // Determine if this building is owned by the current user
+        const isOwnedByCurrentUser = building.owner === currentUser;
         
         // Draw simple square for building with select state
         const squareSize = Math.max(size.width, size.depth) * scale * 0.6;
+        
+        // If owned by current user, draw a halo first
+        if (isOwnedByCurrentUser) {
+          ctx.beginPath();
+          ctx.rect(
+            isoPos.x - squareSize/2 - 3, 
+            isoPos.y - squareSize/2 - 3, 
+            squareSize + 6, 
+            squareSize + 6
+          );
+          ctx.fillStyle = '#FFD700'; // Gold halo
+          ctx.fill();
+        }
         
         // Apply different styles for selected state
         if (isSelected) {
@@ -1877,29 +1891,14 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           ctx.lineWidth = 1;
         }
         
-        // Draw the appropriate shape based on the building's point type
+        // Draw square for building (all buildings are now square)
         ctx.beginPath();
-        
-        if (buildingShape === 'circle') {
-          // Draw circle for canal points
-          ctx.arc(isoPos.x, isoPos.y, squareSize/2, 0, Math.PI * 2);
-        } else if (buildingShape === 'triangle') {
-          // Draw triangle for bridge points
-          const halfSize = squareSize/2;
-          ctx.moveTo(isoPos.x, isoPos.y - halfSize);
-          ctx.lineTo(isoPos.x - halfSize, isoPos.y + halfSize);
-          ctx.lineTo(isoPos.x + halfSize, isoPos.y + halfSize);
-          ctx.closePath();
-        } else {
-          // Draw square for regular building points (default)
-          ctx.rect(
-            isoPos.x - squareSize/2, 
-            isoPos.y - squareSize/2, 
-            squareSize, 
-            squareSize
-          );
-        }
-        
+        ctx.rect(
+          isoPos.x - squareSize/2, 
+          isoPos.y - squareSize/2, 
+          squareSize, 
+          squareSize
+        );
         ctx.fill();
         ctx.stroke();
         
@@ -3025,6 +3024,19 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             className="px-3 py-1 bg-blue-600 hover:bg-blue-500 rounded text-white ml-2"
           >
             Reset
+          </button>
+        </div>
+      </div>
+      
+      {/* Building Color Mode Toggle */}
+      <div className="absolute bottom-4 left-4 bg-black/70 text-white p-3 rounded-lg shadow-lg">
+        <div className="flex items-center space-x-2">
+          <span className="text-sm">Building Color:</span>
+          <button 
+            onClick={() => setBuildingColorMode(buildingColorMode === 'type' ? 'owner' : 'type')}
+            className="px-3 py-1 bg-blue-600 hover:bg-blue-500 rounded text-white"
+          >
+            {buildingColorMode === 'type' ? 'Type' : 'Owner'}
           </button>
         </div>
       </div>
