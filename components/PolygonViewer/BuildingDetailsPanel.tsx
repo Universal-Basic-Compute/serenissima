@@ -586,7 +586,7 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                           {/* Input resources */}
                           <div className="col-span-1 border-r border-amber-200 pr-2">
                             <div className="text-xs text-amber-600 mb-1 font-medium">INPUTS</div>
-                            {recipe.inputs && Object.entries(recipe.inputs).map(([resource, amount]) => (
+                            {recipe.inputs && Object.entries(recipe.inputs).map(([resource, amount]: [string, unknown]) => (
                               <div key={`input-${resource}`} className="flex items-center mb-1">
                                 <div className="relative w-6 h-6 mr-1">
                                   <Image 
@@ -624,7 +624,7 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                           {/* Output resources */}
                           <div className="col-span-1">
                             <div className="text-xs text-amber-600 mb-1 font-medium">OUTPUTS</div>
-                            {recipe.outputs && Object.entries(recipe.outputs).map(([resource, amount]) => (
+                            {recipe.outputs && Object.entries(recipe.outputs).map(([resource, amount]: [string, unknown]) => (
                               <div key={`output-${resource}`} className="flex items-center mb-1">
                                 <div className="relative w-6 h-6 mr-1">
                                   <Image 
@@ -668,7 +668,7 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                     <FaBox className="mr-2 transform rotate-180" /> BUYS
                   </h3>
                   <div className="flex flex-wrap gap-2">
-                    {Object.entries(buildingDefinition.productionInformation.inputResources).map(([resource, amount]) => (
+                    {Object.entries(buildingDefinition.productionInformation.inputResources).map(([resource, amount]: [string, unknown]) => (
                       <div key={`input-${resource}`} className="flex flex-col items-center bg-blue-50 p-2 rounded-md" title={resource.replace(/_/g, ' ')}>
                         <div className="relative w-8 h-8 mb-1">
                           <Image 
