@@ -410,7 +410,7 @@ def update_building_lease_amount(tables, building_id: str, new_lease_amount: flo
 
 def create_notification_for_building_owner(tables, building_id: str, owner: str, ai_username: str, 
                                           old_lease: float, new_lease: float, reason: str) -> bool:
-    """Create a notification for the building owner about the lease adjustment."""
+    """Create a notification for the land owner about the lease adjustment."""
     try:
         now = datetime.now().isoformat()
         
@@ -418,21 +418,21 @@ def create_notification_for_building_owner(tables, building_id: str, owner: str,
         notification = {
             "User": owner,
             "Type": "lease_adjustment",
-            "Content": f"The lease amount for your building {building_id} has been adjusted from {old_lease} to {new_lease} ducats by the landowner {ai_username}. Reason: {reason}",
+            "Content": f"The lease amount for building {building_id} on your land has been adjusted from {old_lease} to {new_lease} ducats by the building owner {ai_username}. Reason: {reason}",
             "CreatedAt": now,
             "ReadAt": None,
             "Details": json.dumps({
                 "building_id": building_id,
                 "old_lease_amount": old_lease,
                 "new_lease_amount": new_lease,
-                "landowner": ai_username,
+                "building_owner": ai_username,
                 "reason": reason,
                 "timestamp": now
             })
         }
         
         tables["notifications"].create(notification)
-        print(f"Created notification for building owner {owner} about lease adjustment")
+        print(f"Created notification for land owner {owner} about lease adjustment")
         return True
     except Exception as e:
         print(f"Error creating notification for building owner: {str(e)}")
@@ -535,16 +535,28 @@ def process_ai_lease_adjustments(dry_run: bool = False):
                     current_lease = building["fields"].get("LeaseAmount", 0)
                     building_owner = building["fields"].get("Owner", "")
                     
+                    # Check if the AI owns this building - if not, skip it
+                    if building_owner != ai_username:
+                        print(f"Skipping building {building_id} - AI {ai_username} does not own this building (owned by {building_owner})")
+                        continue
+                    
                     # Update the lease amount
                     success = update_building_lease_amount(tables, building_id, new_lease_amount)
                     
                     if success:
-                        # Create notification for building owner if different from AI
-                        if building_owner and building_owner != ai_username:
-                            create_notification_for_building_owner(
-                                tables, building_id, building_owner, ai_username, 
-                                current_lease, new_lease_amount, reason
-                            )
+                        # Create notification for land owner if different from AI
+                        land_id = building["fields"].get("LandId", "")
+                        if land_id:
+                            # Find the land owner
+                            land_formula = f"{{LandId}}='{land_id}'"
+                            lands = tables["lands"].all(formula=land_formula)
+                            if lands:
+                                land_owner = lands[0]["fields"].get("User", "")
+                                if land_owner and land_owner != ai_username:
+                                    create_notification_for_building_owner(
+                                        tables, building_id, land_owner, ai_username, 
+                                        current_lease, new_lease_amount, reason
+                                    )
                         
                         # Add to the list of adjustments for this AI
                         ai_lease_adjustments[ai_username].append({
