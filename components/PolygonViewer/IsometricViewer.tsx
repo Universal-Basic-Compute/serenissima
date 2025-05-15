@@ -6,6 +6,11 @@ import ViewportCanvas from './ViewportCanvas';
 import LandDetailsPanel from './LandDetailsPanel';
 import BuildingDetailsPanel from './BuildingDetailsPanel';
 import CitizenDetailsPanel from '../UI/CitizenDetailsPanel';
+import ViewController from './ViewController';
+import ViewportController from './ViewportController';
+import { buildingService } from '@/lib/services/BuildingService';
+import { transportService } from '@/lib/services/TransportService';
+import { citizenService } from '@/lib/services/CitizenService';
 
 interface IsometricViewerProps {
   activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
@@ -15,9 +20,7 @@ interface IsometricViewerProps {
 type ViewType = 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
 
 export default function IsometricViewer({ activeView }: IsometricViewerProps) {
-  // Viewport state
-  const [scale, setScale] = useState(3); // Start with a 3x zoom for a closer view
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  // Viewport state is now managed by ViewportController
   
   // UI state
   const [hoveredBuildingName, setHoveredBuildingName] = useState<string | null>(null);
@@ -33,8 +36,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [selectedCitizen, setSelectedCitizen] = useState<any>(null);
   const [showCitizenDetailsPanel, setShowCitizenDetailsPanel] = useState<boolean>(false);
   
-  // Transport state
-  const [transportMode, setTransportMode] = useState<boolean>(false);
+  // Transport state is now managed by TransportService
   
   // Function to fetch the building image path when hovering over a building
   const fetchBuildingImagePath = async (buildingType: string, variant?: string) => {
@@ -185,7 +187,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       });
   }, []);
   
-  // Handle transport mode activation
+  // Transport mode activation is now handled by TransportService
   useEffect(() => {
     const handleShowTransportRoutes = () => {
       console.log('Activating transport route planning mode');
@@ -198,14 +200,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         }));
       }
       
-      // Set a small timeout to ensure view has changed before activating transport mode
-      setTimeout(() => {
-        setTransportMode(true);
-        setTransportStartPoint(null);
-        setTransportEndPoint(null);
-        setTransportPath([]);
-        console.log('Transport mode state set to:', true);
-      }, 100);
+      // Reset transport service state
+      transportService.reset();
     };
     
     const eventListener = () => handleShowTransportRoutes();
@@ -215,15 +211,6 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       window.removeEventListener('showTransportRoutes', eventListener);
     };
   }, [activeView]);
-  
-  // Dispatch event when transport mode changes
-  useEffect(() => {
-    // Dispatch event when transport mode changes
-    if (transportMode !== undefined) {
-      (window as any).__transportModeActive = transportMode;
-      window.dispatchEvent(new CustomEvent('transportModeChanged'));
-    }
-  }, [transportMode]);
   
   // Transport path rendering is now handled directly in the drawing code
   
@@ -1848,171 +1835,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     return R * c;
   };
   
-  // Function to calculate the transport route
-  const calculateTransportRoute = async (start: {lat: number, lng: number}, end: {lat: number, lng: number}) => {
-    try {
-      // Set calculating state to true to show loading indicator
-      setCalculatingPath(true);
-      console.log('Calculating transport route from', start, 'to', end);
-      
-      // Add this code to render a loading animation on the canvas
-      const renderLoadingAnimation = () => {
-        if (!canvasRef.current || !calculatingPath) return;
-        
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-        
-        // Draw a semi-transparent overlay
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // Draw a Venetian-styled loading message
-        const centerX = canvas.width / 2;
-        const centerY = canvas.height / 2;
-        
-        // Draw ornate frame
-        ctx.fillStyle = 'rgba(30, 30, 50, 0.85)';
-        ctx.fillRect(centerX - 200, centerY - 100, 400, 200);
-        
-        // Gold border
-        ctx.strokeStyle = 'rgba(218, 165, 32, 0.9)';
-        ctx.lineWidth = 4;
-        ctx.strokeRect(centerX - 200, centerY - 100, 400, 200);
-        
-        // Inner border
-        ctx.strokeStyle = 'rgba(218, 165, 32, 0.6)';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(centerX - 190, centerY - 90, 380, 180);
-        
-        // Title
-        ctx.font = '24px "Times New Roman", serif';
-        ctx.fillStyle = 'rgba(218, 165, 32, 0.9)';
-        ctx.textAlign = 'center';
-        ctx.fillText('Calcolando il Percorso', centerX, centerY - 50);
-        
-        // Subtitle
-        ctx.font = '16px "Times New Roman", serif';
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillText('Trovando la via migliore attraverso i canali...', centerX, centerY - 10);
-        
-        // Animated dots
-        const dots = Math.floor((Date.now() / 500) % 4);
-        let dotsText = '';
-        for (let i = 0; i < dots; i++) dotsText += '.';
-        ctx.fillText(dotsText, centerX, centerY + 30);
-        
-        // Draw gondola icon
-        const gondolaSize = 40;
-        const gondolaX = centerX;
-        const gondolaY = centerY + 60;
-        
-        // Animate gondola position
-        const oscillation = Math.sin(Date.now() / 300) * 5;
-        
-        // Draw gondola silhouette
-        ctx.fillStyle = '#000000';
-        ctx.beginPath();
-        ctx.ellipse(
-          gondolaX + oscillation, 
-          gondolaY, 
-          gondolaSize, 
-          gondolaSize/4, 
-          0, 0, Math.PI * 2
-        );
-        ctx.fill();
-        
-        // Draw gondolier
-        ctx.fillStyle = '#FFFFFF';
-        ctx.beginPath();
-        ctx.arc(
-          gondolaX + oscillation + gondolaSize/3, 
-          gondolaY - gondolaSize/8, 
-          gondolaSize/6, 
-          0, Math.PI * 2
-        );
-        ctx.fill();
-        
-        // Request next animation frame if still calculating
-        if (calculatingPath) {
-          requestAnimationFrame(renderLoadingAnimation);
-        }
-      };
-      
-      // Start the loading animation
-      renderLoadingAnimation();
-      
-      const response = await fetch('/api/transport', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          startPoint: start,
-          endPoint: end
-        }),
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Transport route calculated:', data);
-        
-        if (data.success && data.path) {
-          setTransportPath(data.path);
-          // Set water-only mode if the API indicates it's a water-only route
-          setWaterOnlyMode(!!data.waterOnly);
-        } else {
-          console.error('Failed to calculate route:', data.error);
-          
-          // If the error is about points not being within polygons, try to use water-only pathfinding
-          if (data.error === 'Start or end point is not within any polygon') {
-            console.log('Points not within polygons, attempting water-only pathfinding');
-            
-            // Show a message to the user
-            alert('Points are not on land. Attempting to find a water route...');
-            
-            // Make a direct request to the water-only pathfinding endpoint
-            const waterResponse = await fetch('/api/transport/water-only', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                startPoint: start,
-                endPoint: end
-              }),
-            });
-            
-            if (waterResponse.ok) {
-              const waterData = await waterResponse.json();
-              
-              if (waterData.success && waterData.path) {
-                setTransportPath(waterData.path);
-                setWaterOnlyMode(true);
-                return;
-              }
-            }
-          }
-          
-          // If we get here, both regular and water-only pathfinding failed
-          alert(`Could not find a route: ${data.error || 'Unknown error'}`);
-          // Reset end point to allow trying again
-          setTransportEndPoint(null);
-        }
-      } else {
-        console.error('API error:', response.status);
-        alert('Error calculating route. Please try again.');
-        setTransportEndPoint(null);
-      }
-    } catch (error) {
-      console.error('Error calculating transport route:', error);
-      alert('Error calculating route. Please try again.');
-      setTransportEndPoint(null);
-    } finally {
-      // Set calculating state to false to hide loading indicator
-      setCalculatingPath(false);
-    }
-  };
+  // Transport route calculation is now handled by TransportService
   
   // Function to find building position
   const findBuildingPosition = (buildingId: string): {x: number, y: number} | null => {
@@ -2073,7 +1896,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     return null;
   };
   
-  // Function to create a citizen marker
+  // Function to create a citizen marker - now using RenderService
   const createCitizenMarker = (
     ctx: CanvasRenderingContext2D, 
     x: number, 
@@ -2083,129 +1906,17 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     size: number = 20,
     isHovered: boolean = false
   ) => {
-    // Log citizen data for debugging
-    console.log(`Creating citizen marker for:`, {
-      citizenId: citizen.CitizenId || citizen.id,
-      name: `${citizen.FirstName || citizen.firstName || ''} ${citizen.LastName || citizen.lastName || ''}`,
-      imageUrl: citizen.ImageUrl || citizen.profileImage,
-      socialClass: citizen.SocialClass || citizen.socialClass,
-      markerType
-    });
-
-    // Determine color based on social class
-    const getSocialClassColor = (socialClass: string): string => {
-      const baseClass = socialClass?.toLowerCase() || '';
-      
-      // Base colors for different social classes
-      if (baseClass.includes('nobili')) {
-        // Gold/yellow for nobility
-        return markerType === 'home' 
-          ? (isHovered ? 'rgba(255, 215, 0, 0.9)' : 'rgba(218, 165, 32, 0.8)')
-          : (isHovered ? 'rgba(255, 215, 0, 0.9)' : 'rgba(218, 165, 32, 0.8)');
-      } else if (baseClass.includes('cittadini')) {
-        // Blue for citizens
-        return markerType === 'home' 
-          ? (isHovered ? 'rgba(70, 130, 180, 0.9)' : 'rgba(70, 130, 180, 0.8)')
-          : (isHovered ? 'rgba(70, 130, 180, 0.9)' : 'rgba(70, 130, 180, 0.8)');
-      } else if (baseClass.includes('popolani')) {
-        // Brown/amber for common people
-        return markerType === 'home' 
-          ? (isHovered ? 'rgba(205, 133, 63, 0.9)' : 'rgba(205, 133, 63, 0.8)')
-          : (isHovered ? 'rgba(205, 133, 63, 0.9)' : 'rgba(205, 133, 63, 0.8)');
-      } else if (baseClass.includes('laborer') || baseClass.includes('facchini')) {
-        // Gray for laborers
-        return markerType === 'home' 
-          ? (isHovered ? 'rgba(128, 128, 128, 0.9)' : 'rgba(128, 128, 128, 0.8)')
-          : (isHovered ? 'rgba(128, 128, 128, 0.9)' : 'rgba(128, 128, 128, 0.8)');
-      }
-      
-      // Default colors if social class is unknown or not matched
-      return markerType === 'home' 
-        ? (isHovered ? 'rgba(120, 170, 255, 0.9)' : 'rgba(100, 150, 255, 0.8)')
-        : (isHovered ? 'rgba(255, 170, 120, 0.9)' : 'rgba(255, 150, 100, 0.8)');
-    };
-
-    // Get color based on social class
-    const fillColor = getSocialClassColor(citizen.SocialClass || citizen.socialClass);
-
-    // Draw a circular background with color based on social class
-    ctx.beginPath();
-    ctx.arc(x, y, size + (isHovered ? 2 : 0), 0, Math.PI * 2);
-    ctx.fillStyle = fillColor;
-    ctx.fill();
+    // Get color from CitizenService
+    const fillColor = CitizenService.prototype.getSocialClassColor(
+      citizen.SocialClass || citizen.socialClass,
+      markerType,
+      isHovered
+    );
     
-    // Add a white border, thicker when hovered
-    ctx.strokeStyle = isHovered ? '#FFFF00' : '#FFFFFF';
-    ctx.lineWidth = isHovered ? 3 : 2;
-    ctx.stroke();
-    
-    // Add the citizen's initials
-    ctx.font = `bold ${size * 0.6}px Arial`;
-    ctx.fillStyle = '#FFFFFF';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    
-    // Get the first letters of the first and last name
-    const firstInitial = (citizen.FirstName || citizen.firstName || '').charAt(0).toUpperCase();
-    const lastInitial = (citizen.LastName || citizen.lastName || '').charAt(0).toUpperCase();
-    ctx.fillText(firstInitial + lastInitial, x, y);
-    
-    // Add a small icon to indicate home or work
-    const iconSize = size / 2;
-    const iconX = x + size - iconSize / 2;
-    const iconY = y - size + iconSize / 2;
-  
-    // Draw the icon background
-    ctx.beginPath();
-    ctx.arc(iconX, iconY, iconSize, 0, Math.PI * 2);
-    ctx.fillStyle = markerType === 'home' ? '#4b70e2' : '#e27a4b';
-    ctx.fill();
-    ctx.strokeStyle = '#FFFFFF';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-  
-    // Draw icon symbol - house for home, tools for work
-    if (markerType === 'home') {
-      // Draw a house icon instead of just the letter 'H'
-      ctx.fillStyle = '#FFFFFF';
-    
-      // Calculate house dimensions based on icon size
-      const houseWidth = iconSize * 0.8;
-      const houseHeight = iconSize * 0.6;
-      const roofHeight = iconSize * 0.4;
-    
-      // Draw the roof (triangle)
-      ctx.beginPath();
-      ctx.moveTo(iconX - houseWidth/2, iconY - houseHeight/2 + roofHeight/2);
-      ctx.lineTo(iconX, iconY - houseHeight/2 - roofHeight/2);
-      ctx.lineTo(iconX + houseWidth/2, iconY - houseHeight/2 + roofHeight/2);
-      ctx.closePath();
-      ctx.fill();
-    
-      // Draw the house body (rectangle)
-      ctx.fillRect(
-        iconX - houseWidth/2, 
-        iconY - houseHeight/2 + roofHeight/2, 
-        houseWidth, 
-        houseHeight
-      );
-    
-      // Draw a small door
-      ctx.fillStyle = '#4b70e2'; // Same as background color
-      const doorWidth = houseWidth * 0.4;
-      const doorHeight = houseHeight * 0.6;
-      ctx.fillRect(
-        iconX - doorWidth/2,
-        iconY - houseHeight/2 + roofHeight/2 + houseHeight - doorHeight,
-        doorWidth,
-        doorHeight
-      );
-    } else {
-      // For work, keep the 'W' text
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = `bold ${iconSize * 0.8}px Arial`;
-      ctx.fillText('W', iconX, iconY);
-    }
+    // Use RenderService to draw the marker
+    RenderService.prototype.createCitizenMarker(
+      ctx, x, y, citizen, markerType, size, isHovered
+    );
   };
 
   // Define isometric projection functions at the component level
@@ -3843,13 +3554,17 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
 
   return (
     <div className="w-screen h-screen">
-      <ViewportCanvas 
-        activeView={activeView}
-        scale={scale}
-        offset={offset}
-        onScaleChange={setScale}
-        onOffsetChange={setOffset}
-      />
+      <ViewportController>
+        {(scale, offset, setScale, setOffset) => (
+          <ViewportCanvas 
+            activeView={activeView}
+            scale={scale}
+            offset={offset}
+            onScaleChange={setScale}
+            onOffsetChange={setOffset}
+          />
+        )}
+      </ViewportController>
       
       {hoveredBuildingName && hoveredBuildingPosition && (
         <div 
@@ -3956,26 +3671,14 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       </div>
       
       {/* Exit Transport Mode button */}
-      {activeView === 'transport' && transportMode && (
+      {activeView === 'transport' && transportService.getState().startPoint !== null && (
         <button
-          onClick={() => setTransportMode(false)}
+          onClick={() => transportService.reset()}
           className="absolute top-20 right-4 bg-red-600 text-white px-3 py-1 rounded text-sm"
         >
           Exit Transport Mode
         </button>
       )}
-      
-      {/* Debug Transport Mode Toggle */}
-      <button
-        onClick={() => {
-          console.log('Manually toggling transport mode from:', transportMode);
-          setTransportMode(!transportMode);
-          console.log('Transport mode toggled to:', !transportMode);
-        }}
-        className="absolute top-28 right-4 bg-blue-600 text-white px-3 py-1 rounded text-sm"
-      >
-        {transportMode ? 'Disable Transport Mode' : 'Enable Transport Mode'}
-      </button>
     </div>
   );
 }

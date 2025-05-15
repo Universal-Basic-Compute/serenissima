@@ -5,6 +5,9 @@ import { CoordinateService } from '@/lib/services/CoordinateService';
 import { RenderService } from '@/lib/services/RenderService';
 import { InteractionService } from '@/lib/services/InteractionService';
 import { DataService } from '@/lib/services/DataService';
+import { BuildingService } from '@/lib/services/BuildingService';
+import { TransportService } from '@/lib/services/TransportService';
+import { CitizenService } from '@/lib/services/CitizenService';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 
 interface ViewportCanvasProps {
@@ -322,54 +325,28 @@ export default function ViewportCanvas({
     // Draw buildings
     buildings.forEach(building => {
       if (!building.position) return;
-      
-      // Use cached position if available
-      let x, y;
-      
-      // Calculate position
-      let position;
-      if (typeof building.position === 'string') {
-        try {
-          position = JSON.parse(building.position);
-        } catch (e) {
-          return;
-        }
-      } else {
-        position = building.position;
-      }
-      
-      // Convert lat/lng to world coordinates
-      let worldX, worldY;
-      if ('lat' in position && 'lng' in position) {
-        const world = CoordinateService.latLngToWorld(position.lat, position.lng);
-        worldX = world.x;
-        worldY = world.y;
-      } else if ('x' in position && 'z' in position) {
-        worldX = position.x;
-        worldY = position.z;
-      } else {
-        return;
-      }
-      
+        
+      // Get building position using BuildingService
+      const worldPos = BuildingService.prototype.getBuildingPosition(building);
+      if (!worldPos) return;
+        
       // Convert world to screen coordinates
       const screen = CoordinateService.worldToScreen(
-        worldX, worldY, scale, offset, canvas.width, canvas.height
+        worldPos.x, worldPos.y, scale, offset, canvas.width, canvas.height
       );
-      x = screen.x;
-      y = screen.y;
-      
-      // Get building size based on type
-      const size = this.getBuildingSize(building.type);
-      const color = this.getBuildingColor(building.type);
-      
+        
+      // Get building size and color using BuildingService
+      const size = BuildingService.prototype.getBuildingSize(building.type);
+      const color = BuildingService.prototype.getBuildingColor(building.type);
+        
       // Determine if this building is hovered or selected
       const isHovered = interactionState.hoveredBuildingId === building.id;
       const isSelected = interactionState.selectedBuildingId === building.id;
-      
+        
       // Determine the shape based on point_id or Point field
       const pointId = building.point_id || building.Point;
       let buildingShape: 'square' | 'circle' | 'triangle' = 'square'; // Default shape
-      
+        
       if (pointId) {
         if (typeof pointId === 'string') {
           if (pointId.startsWith('canal-') || pointId.includes('canal_')) {
@@ -379,13 +356,13 @@ export default function ViewportCanvas({
           }
         }
       }
-      
+        
       // Draw the building
       const squareSize = Math.max(size.width, size.depth) * scale * 0.6;
       const typeIndicator = building.type.charAt(0).toUpperCase();
-      
+        
       RenderService.prototype.drawBuilding(
-        ctx, x, y, squareSize, color, typeIndicator, isHovered, isSelected, buildingShape
+        ctx, screen.x, screen.y, squareSize, color, typeIndicator, isHovered, isSelected, buildingShape
       );
     });
     
