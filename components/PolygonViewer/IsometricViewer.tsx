@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 import ViewportCanvas from './ViewportCanvas';
 import LandDetailsPanel from './LandDetailsPanel';
