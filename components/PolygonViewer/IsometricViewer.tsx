@@ -2310,6 +2310,12 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       
     // Third pass: Draw coat of arms for lands with owners (only in land view)
     if (activeView === 'land') {
+      // Clear the coat of arms cache when view changes
+      if (Object.keys(renderedCoatOfArmsCache.current).length > 0 && 
+          (prevActiveView.current !== activeView || prevScale.current !== scale)) {
+        renderedCoatOfArmsCache.current = {};
+      }
+      
       // Always show coat of arms in land view regardless of zoom level
       polygonsToRender.forEach(({ polygon, centerX, centerY }) => {
         // Check if polygon has an owner
@@ -2318,23 +2324,60 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           
         // Use a fixed size for coat of arms
         const size = 50;
-            
+        
+        // Check if we already rendered this coat of arms at this position and size
+        const cacheKey = `${owner}_${Math.round(centerX)}_${Math.round(centerY)}_${size}`;
+        const cachedCoatOfArms = renderedCoatOfArmsCache.current[cacheKey];
+        
+        if (cachedCoatOfArms) {
+          // Use the cached version if available
+          if (cachedCoatOfArms.image) {
+            createCircularImage(ctx, cachedCoatOfArms.image, centerX, centerY, size);
+          } else {
+            createDefaultCircularAvatar(ctx, owner, centerX, centerY, size);
+          }
+        } else {
           // Check if we have a coat of arms image for this owner
           if (owner in coatOfArmsImages && coatOfArmsImages[owner]) {
             // Draw circular coat of arms with error handling
             try {
-              // Performance optimization: Draw the pre-resized image
               createCircularImage(ctx, coatOfArmsImages[owner], centerX, centerY, size);
+              // Cache the result
+              renderedCoatOfArmsCache.current[cacheKey] = {
+                image: coatOfArmsImages[owner],
+                x: centerX,
+                y: centerY,
+                size
+              };
             } catch (error) {
               console.error(`Error rendering coat of arms for ${owner}:`, error);
               // Fallback to default avatar
               createDefaultCircularAvatar(ctx, owner, centerX, centerY, size);
+              // Cache the fallback
+              renderedCoatOfArmsCache.current[cacheKey] = {
+                image: null,
+                x: centerX,
+                y: centerY,
+                size
+              };
             }
           } else {
             // Draw default avatar with initial
             createDefaultCircularAvatar(ctx, owner, centerX, centerY, size);
+            // Cache the default avatar
+            renderedCoatOfArmsCache.current[cacheKey] = {
+              image: null,
+              x: centerX,
+              y: centerY,
+              size
+            };
           }
-        });
+        }
+      });
+      
+      // Store current view and scale for comparison in next render
+      prevActiveView.current = activeView;
+      prevScale.current = scale;
     }
     
     // Draw buildings in all views, not just buildings view
