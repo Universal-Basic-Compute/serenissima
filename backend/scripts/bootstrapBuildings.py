@@ -4,11 +4,14 @@ Script to bootstrap Venice's economy by placing ~50 buildings at random building
 All buildings will be owned by ConsiglioDeiDieci.
 
 Usage:
-    python bootstrapBuildings.py [--dry-run] [--public]
+    python bootstrapBuildings.py [--dry-run] [--public] [--bridges] [--docks] [--wells]
 
 Options:
     --dry-run    Show what would be created without actually creating buildings
     --public     Create only public infrastructure (bridges, docks, cisterns)
+    --bridges    Create only bridges
+    --docks      Create only docks
+    --wells      Create only public wells/cisterns
 """
 
 import os
@@ -303,9 +306,12 @@ def create_building(tables, building_type: str, point: Dict, owner: str, dry_run
         print(f"Error creating building {building_type}: {str(e)}")
         return None
 
-def bootstrap_buildings(dry_run: bool = False, public_mode: bool = False):
+def bootstrap_buildings(dry_run: bool = False, public_mode: bool = False, 
+                       bridges_only: bool = False, docks_only: bool = False, 
+                       wells_only: bool = False):
     """Main function to bootstrap Venice with buildings."""
-    print(f"Starting building bootstrap process (dry_run={dry_run}, public_mode={public_mode})")
+    print(f"Starting building bootstrap process (dry_run={dry_run}, public_mode={public_mode}, "
+          f"bridges_only={bridges_only}, docks_only={docks_only}, wells_only={wells_only})")
     
     # Initialize Airtable
     tables = initialize_airtable()
@@ -338,15 +344,26 @@ def bootstrap_buildings(dry_run: bool = False, public_mode: bool = False):
     created_buildings = []
     failed_buildings = []
     
-    if public_mode:
-        # In public mode, create only public infrastructure
-        public_buildings = [
-            {"type": "bridge", "pointType": "bridge", "count": 10},
-            {"type": "public_dock", "pointType": "canal", "count": 10},
-            {"type": "public_well", "pointType": None, "count": 10}  # Cisterns/wells
-        ]
+    if public_mode or bridges_only or docks_only or wells_only:
+        # Define public infrastructure
+        public_buildings = []
         
-        print(f"Public mode: Creating public infrastructure only")
+        if bridges_only:
+            public_buildings.append({"type": "bridge", "pointType": "bridge", "count": 10})
+            print("Bridges only mode: Creating only bridges")
+        elif docks_only:
+            public_buildings.append({"type": "public_dock", "pointType": "canal", "count": 10})
+            print("Docks only mode: Creating only public docks")
+        elif wells_only:
+            public_buildings.append({"type": "public_well", "pointType": None, "count": 10})
+            print("Wells only mode: Creating only public wells/cisterns")
+        else:  # public_mode
+            public_buildings = [
+                {"type": "bridge", "pointType": "bridge", "count": 10},
+                {"type": "public_dock", "pointType": "canal", "count": 10},
+                {"type": "public_well", "pointType": None, "count": 10}  # Cisterns/wells
+            ]
+            print("Public mode: Creating all public infrastructure")
         
         for building in public_buildings:
             building_type = building["type"]
@@ -464,7 +481,15 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Bootstrap Venice with buildings")
     parser.add_argument("--dry-run", action="store_true", help="Show what would be created without actually creating buildings")
     parser.add_argument("--public", action="store_true", help="Create only public infrastructure (bridges, docks, cisterns)")
+    parser.add_argument("--bridges", action="store_true", help="Create only bridges")
+    parser.add_argument("--docks", action="store_true", help="Create only docks")
+    parser.add_argument("--wells", action="store_true", help="Create only public wells/cisterns")
     
     args = parser.parse_args()
     
-    bootstrap_buildings(args.dry_run, args.public)
+    # Check for conflicting options
+    if sum([args.public, args.bridges, args.docks, args.wells]) > 1:
+        print("Error: Please specify only one of --public, --bridges, --docks, or --wells")
+        sys.exit(1)
+    
+    bootstrap_buildings(args.dry_run, args.public, args.bridges, args.docks, args.wells)
