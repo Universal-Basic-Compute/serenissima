@@ -573,6 +573,41 @@ def create_or_update_import_contract(
             })
             
             print(f"Updated import contract for {resource_type} at building {building_id}: {hourly_amount} units/hour")
+            
+            # After successfully updating the contract, create or update a resource record
+            try:
+                # Check if a resource of this type already exists for this building
+                resource_formula = f"AND({{Type}}='import', {{ResourceType}}='{resource_type}', {{BuildingId}}='{building_id}')"
+                existing_resources = tables["resources"].all(formula=resource_formula)
+                
+                resource_data = {
+                    "Type": "import",
+                    "ResourceType": resource_type,
+                    "BuildingId": building_id,
+                    "Owner": ai_username,
+                    "Count": 0,  # Start with 0 count
+                    "UpdatedAt": now
+                }
+                
+                if existing_resources:
+                    # Update existing resource
+                    resource_id = existing_resources[0]["id"]
+                    tables["resources"].update(resource_id, resource_data)
+                    print(f"Updated import resource record for {resource_type} at building {building_id}")
+                else:
+                    # Create new resource record
+                    import uuid
+                    resource_id = f"resource-{uuid.uuid4()}"
+                    resource_data["ResourceId"] = resource_id
+                    resource_data["CreatedAt"] = now
+                    
+                    tables["resources"].create(resource_data)
+                    print(f"Created new import resource record for {resource_type} at building {building_id}")
+                    
+            except Exception as e:
+                print(f"Error creating/updating resource record: {str(e)}")
+                # Continue execution even if resource creation fails
+            
             return True
         else:
             # Create a new contract
@@ -602,6 +637,41 @@ def create_or_update_import_contract(
             tables["contracts"].create(new_contract)
             
             print(f"Created new import contract for {resource_type} at building {building_id}: {hourly_amount} units/hour")
+            
+            # After successfully creating or updating the contract, create or update a resource record
+            try:
+                # Check if a resource of this type already exists for this building
+                resource_formula = f"AND({{Type}}='import', {{ResourceType}}='{resource_type}', {{BuildingId}}='{building_id}')"
+                existing_resources = tables["resources"].all(formula=resource_formula)
+                
+                resource_data = {
+                    "Type": "import",
+                    "ResourceType": resource_type,
+                    "BuildingId": building_id,
+                    "Owner": ai_username,
+                    "Count": 0,  # Start with 0 count
+                    "UpdatedAt": now
+                }
+                
+                if existing_resources:
+                    # Update existing resource
+                    resource_id = existing_resources[0]["id"]
+                    tables["resources"].update(resource_id, resource_data)
+                    print(f"Updated import resource record for {resource_type} at building {building_id}")
+                else:
+                    # Create new resource record
+                    import uuid
+                    resource_id = f"resource-{uuid.uuid4()}"
+                    resource_data["ResourceId"] = resource_id
+                    resource_data["CreatedAt"] = now
+                    
+                    tables["resources"].create(resource_data)
+                    print(f"Created new import resource record for {resource_type} at building {building_id}")
+                    
+            except Exception as e:
+                print(f"Error creating/updating resource record: {str(e)}")
+                # Continue execution even if resource creation fails
+            
             return True
     except Exception as e:
         print(f"Error creating/updating import contract: {str(e)}")
