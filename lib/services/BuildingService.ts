@@ -1,6 +1,7 @@
 import { CoordinateService } from './CoordinateService';
 import { buildingPointsService } from './BuildingPointsService';
 import { eventBus, EventTypes } from '../utils/eventBus';
+import { dataService } from './DataService';
 
 export class BuildingService {
   private buildingPositionsCache: Record<string, {x: number, y: number}> = {};
