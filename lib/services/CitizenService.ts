@@ -66,7 +66,7 @@ export class CitizenService {
           const byBuilding: Record<string, any[]> = {};
           
           this.citizens.forEach(citizen => {
-            // Add to home building
+            // Add to home building if it exists
             if (citizen.Home) {
               if (!byBuilding[citizen.Home]) {
                 byBuilding[citizen.Home] = [];
@@ -77,7 +77,7 @@ export class CitizenService {
               });
             }
             
-            // Add to work building
+            // Add to work building if it exists
             if (citizen.Work) {
               if (!byBuilding[citizen.Work]) {
                 byBuilding[citizen.Work] = [];

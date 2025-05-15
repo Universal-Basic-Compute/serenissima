@@ -90,7 +90,12 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   }, [scale, offset, canvasWidth, canvasHeight]);
   
   const handleCitizenClick = (citizen: any) => {
-    setSelectedCitizen(citizen);
+    // Ensure we have a valid citizen object before setting it
+    if (citizen && (citizen.CitizenId || citizen.id)) {
+      setSelectedCitizen(citizen);
+    } else {
+      console.warn('Attempted to select invalid citizen:', citizen);
+    }
   };
   
   const handleCloseDetails = () => {
