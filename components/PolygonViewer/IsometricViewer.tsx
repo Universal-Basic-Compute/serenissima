@@ -3076,18 +3076,18 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         </button>
       )}
       
-      {/* Exit Transport Mode button */}
+      {/* Transport Mode UI - Moved to bottom left */}
       {activeView === 'transport' && transportMode && (
         <>
           <button
             onClick={() => setTransportMode(false)}
-            className="absolute top-20 right-4 bg-red-600 text-white px-3 py-1 rounded text-sm"
+            className="absolute bottom-4 left-20 bg-red-600 text-white px-3 py-1 rounded text-sm"
           >
             Exit Transport Mode
           </button>
           
-          {/* Add pathfinding mode toggle */}
-          <div className="absolute top-28 right-4 bg-black/70 text-white p-3 rounded-lg shadow-lg">
+          {/* Pathfinding mode toggle - moved to bottom left */}
+          <div className="absolute bottom-16 left-20 bg-black/70 text-white p-3 rounded-lg shadow-lg">
             <div className="flex items-center space-x-2">
               <span className="text-sm">Pathfinding Mode:</span>
               <button 
@@ -3105,7 +3105,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         </>
       )}
       
-      {/* Debug Transport Mode Toggle */}
+      {/* Debug Transport Mode Toggle - moved to bottom left */}
       <button
         onClick={() => {
           console.log('Manually toggling transport mode from:', transportMode);
@@ -3117,7 +3117,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           }
           console.log('Transport mode toggled to:', !transportMode);
         }}
-        className="absolute top-28 right-4 bg-blue-600 text-white px-3 py-1 rounded text-sm"
+        className="absolute bottom-28 left-20 bg-blue-600 text-white px-3 py-1 rounded text-sm"
       >
         {transportMode ? 'Disable Transport Mode' : 'Enable Transport Mode'}
       </button>
