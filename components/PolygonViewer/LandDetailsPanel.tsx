@@ -159,8 +159,8 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   const renderLandTopView = (polygon: Polygon, canvas: HTMLCanvasElement): void => {
     if (!polygon.coordinates || polygon.coordinates.length < 3) return;
     
-    // Set canvas size
-    canvas.width = 300;
+    // Set canvas size to be square
+    canvas.width = 200;
     canvas.height = 200;
     
     const ctx = canvas.getContext('2d');
@@ -589,16 +589,16 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
             <div className="flex flex-col items-center">
               <canvas 
                 ref={canvasRef} 
-                className="w-full h-[200px] border border-amber-100 rounded-lg mb-2"
-                style={{ maxWidth: '300px' }}
+                className="w-[200px] h-[200px] border border-amber-100 rounded-lg mb-2"
+                style={{ aspectRatio: '1/1' }}
               />
               
-              {/* Buildable area information - now in small text below the canvas */}
-              {selectedPolygon?.areaInSquareMeters && (
+              {/* Change buildable area to building points count */}
+              {selectedPolygon?.buildingPoints && (
                 <div className="text-center mt-1">
-                  <span className="text-sm text-amber-700">Buildable Area: </span>
+                  <span className="text-sm text-amber-700">Buildable Buildings: </span>
                   <span className="text-sm font-semibold text-amber-800">
-                    {Math.floor(selectedPolygon.areaInSquareMeters).toLocaleString()} m²
+                    {selectedPolygon.buildingPoints.length}
                   </span>
                 </div>
               )}
