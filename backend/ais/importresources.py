@@ -154,10 +154,13 @@ def get_user_resources(tables, username: str) -> List[Dict]:
 def get_user_contracts(tables, username: str) -> List[Dict]:
     """Get all contracts where the user is the buyer."""
     try:
-        # Query contracts where the user is the buyer
-        formula = f"{{Buyer}}='{username}'"
+        # Get current time
+        now = datetime.now().isoformat()
+        
+        # Query contracts where the user is the buyer and the contract is active (between CreatedAt and EndAt)
+        formula = f"AND({{Buyer}}='{username}', {{CreatedAt}}<='{now}', {{EndAt}}>='{now}')"
         contracts = tables["contracts"].all(formula=formula)
-        print(f"Found {len(contracts)} contracts where {username} is the buyer")
+        print(f"Found {len(contracts)} active contracts where {username} is the buyer")
         return contracts
     except Exception as e:
         print(f"Error getting contracts for user {username}: {str(e)}")
@@ -554,7 +557,7 @@ def create_or_update_import_contract(
                 break
         
         now = datetime.now().isoformat()
-        end_date = (datetime.now() + timedelta(days=30)).isoformat()  # Contract ends in 30 days
+        end_date = (datetime.now() + timedelta(weeks=1)).isoformat()  # Contract ends in 1 week
         
         if existing_contract:
             # Update the existing contract
