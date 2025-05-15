@@ -251,7 +251,7 @@ export default function ViewportCanvas({
       citizensByBuilding,
       transportStartPoint: transportService.getStartPoint() || null,
       transportEndPoint: transportService.getEndPoint() || null
-    } as InteractionData);
+    });
     
     // Set up interaction service with all required dependencies
     const cleanup = interactionService.initializeInteractions(
@@ -268,8 +268,8 @@ export default function ViewportCanvas({
         citizensByBuilding,
         transportStartPoint: transportService.getStartPoint() || null,
         transportEndPoint: transportService.getEndPoint() || null
-      } as InteractionData,
-      coatOfArmsImages as any // Type assertion to bypass type checking temporarily
+      },
+      coatOfArmsImages
     );
     
     // Subscribe to events from InteractionService
@@ -303,7 +303,7 @@ export default function ViewportCanvas({
         if (point) {
           console.log(`Transport point selected at: ${point.lat}, ${point.lng}`);
           // Pass the point correctly
-          transportService.handlePointSelected(point as PointData);
+          transportService.handlePointSelected(point);
         }
       })
     ];
@@ -338,7 +338,7 @@ export default function ViewportCanvas({
       citizensByBuilding,
       transportStartPoint: transportService.getStartPoint() || null,
       transportEndPoint: transportService.getEndPoint() || null
-    } as InteractionData);
+    });
   }, [polygonsToRender, buildings, emptyBuildingPoints, citizensByBuilding, polygons]);
   
   // Remove debugging for hover state changes
