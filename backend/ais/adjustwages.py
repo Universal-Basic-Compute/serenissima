@@ -47,21 +47,21 @@ def get_ai_users(tables) -> List[Dict]:
         return []
 
 def get_user_business_buildings(tables, username: str) -> List[Dict]:
-    """Get all buildings with businesses run by a specific user."""
+    """Get all buildings owned by a specific user that could potentially have wages set."""
     try:
-        # Query buildings where the RanBy field is the username
-        formula = f"{{RanBy}}='{username}'"
+        # Query buildings where the user is the owner (not just RanBy)
+        formula = f"{{Owner}}='{username}'"
         buildings = tables["buildings"].all(formula=formula)
-        print(f"Found {len(buildings)} buildings with businesses run by {username}")
+        print(f"Found {len(buildings)} buildings owned by {username}")
         
         # Log the building IDs for debugging
         building_ids = [building["fields"].get("BuildingId") for building in buildings 
                        if building["fields"].get("BuildingId")]
-        print(f"Building IDs run by {username}: {building_ids}")
+        print(f"Building IDs owned by {username}: {building_ids}")
         
         return buildings
     except Exception as e:
-        print(f"Error getting business buildings for user {username}: {str(e)}")
+        print(f"Error getting buildings for user {username}: {str(e)}")
         return []
 
 def get_building_employees(tables, building_ids: List[str]) -> Dict[str, List[Dict]]:
@@ -219,32 +219,34 @@ def send_wage_adjustment_request(ai_username: str, data_package: Dict) -> Option
         
         # Create a detailed prompt that addresses the AI directly as the decision-maker
         prompt = f"""
-As a business owner in La Serenissima, you need to review and adjust the wage amounts for your businesses.
+As a building owner in La Serenissima, you need to review and set wage amounts for your buildings.
 
 Here's your current situation:
-- You own {len(data_package['businesses'])} businesses
+- You own {len(data_package['businesses'])} buildings
 - Your current net income is {data_package['user']['financial']['net_income']} ducats
 - You pay {data_package['user']['financial']['total_wages_paid']} ducats in wages to your employees
 - You pay {data_package['user']['financial']['total_rent_paid']} ducats in rent for your business buildings
 
-Please analyze your wage situation and develop a strategy for adjusting wage amounts for your businesses. Consider:
-1. The income and expenses of each business
-2. The social class and wealth of current employees
-3. The need to attract and retain quality workers
-4. Market rates for similar businesses
+Please analyze your buildings and develop a strategy for setting wage amounts. Consider:
+1. The income and expenses of each building
+2. The social class and wealth of current employees (if any)
+3. The need to attract quality workers to your buildings
+4. Market rates for similar buildings and businesses
 5. Your overall financial situation
+
+Even for buildings without current occupants, you should set appropriate wages so that potential workers know what they would earn.
 
 After your analysis, provide your wage adjustment decisions in this JSON format:
 ```json
 {{
   "wage_adjustments": [
     {{
-      "business_id": "business-id-1",
+      "business_id": "building-id-1",
       "new_wage_amount": 100,
       "reason": "brief explanation"
     }},
     {{
-      "business_id": "business-id-2",
+      "business_id": "building-id-2",
       "new_wage_amount": 200,
       "reason": "brief explanation"
     }}
@@ -262,23 +264,24 @@ If you decide not to adjust any wages at this time, return an empty array:
         
         # Create system instructions with the detailed data
         system_instructions = f"""
-You are {ai_username}, an AI business owner in La Serenissima. You make your own decisions about wage strategies.
+You are {ai_username}, an AI building owner in La Serenissima. You make your own decisions about wage strategies.
 
 Here is the complete data about your current situation:
 {json.dumps(data_package, indent=2)}
 
 When developing your wage adjustment strategy:
-1. Analyze each business's profitability (income minus expenses)
-2. Consider the social class and wealth of current employees
-3. Balance the need to maximize profits with the need to retain employees
+1. Analyze each building's profitability (income minus expenses)
+2. Consider the social class and wealth of current employees (if any)
+3. Balance the need to maximize profits with the need to attract and retain employees
 4. Consider the impact of wages on employee satisfaction and productivity
-5. Create a specific, actionable plan with business IDs and new wage amounts
-6. Provide brief reasons for each adjustment
+5. Set appropriate wages for all your buildings, even those without current occupants
+6. Create a specific, actionable plan with building IDs and new wage amounts
+7. Provide brief reasons for each adjustment
 
 Your decision should be specific, data-driven, and focused on maximizing your income while maintaining a stable workforce.
 
 IMPORTANT: You must end your response with a JSON object containing your specific wage adjustment decisions.
-Include the business_id, new_wage_amount, and reason for each business you want to adjust.
+Include the business_id, new_wage_amount, and reason for each building you want to adjust.
 If you decide not to adjust any wages at this time, return an empty array.
 """
         
@@ -610,10 +613,10 @@ def process_ai_wage_adjustments(dry_run: bool = False):
                     building = user_building_ids[building_id]
                     current_wage = building["fields"].get("Wages", 0)
                     
-                    # Check if the AI runs this business - if not, skip it
-                    business_runner = building["fields"].get("RanBy", "")
-                    if business_runner != ai_username:
-                        print(f"Skipping building {building_id} - AI {ai_username} does not run this business (run by {business_runner})")
+                    # Check if the AI owns this building - if not, skip it
+                    building_owner = building["fields"].get("Owner", "")
+                    if building_owner != ai_username:
+                        print(f"Skipping building {building_id} - AI {ai_username} does not own this building (owned by {building_owner})")
                         continue
                     
                     print(f"Processing wage adjustment for building {building_id}: {current_wage} -> {new_wage_amount}")
