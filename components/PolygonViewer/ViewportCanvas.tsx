@@ -75,18 +75,18 @@ export default function ViewportCanvas({
         
         // Load income data if in land view
         if (activeView === 'land') {
-          const incomeResult = await incomeService.loadIncomeData();
-          // Check if incomeResult exists and is not null before accessing properties
-          if (incomeResult !== undefined && incomeResult !== null) {
-            const typedResult = incomeResult as {
-              incomeData: Record<string, number>;
-              minIncome: number;
-              maxIncome: number;
-            };
-            setIncomeData(typedResult.incomeData || {});
-            setMinIncome(typedResult.minIncome || 0);
-            setMaxIncome(typedResult.maxIncome || 1000);
+          try {
+            await incomeService.loadIncomeData();
+            const incomeData = incomeService.getIncomeData() || {};
+            const minIncome = incomeService.getMinIncome() || 0;
+            const maxIncome = incomeService.getMaxIncome() || 1000;
+            
+            setIncomeData(incomeData);
+            setMinIncome(minIncome);
+            setMaxIncome(maxIncome);
             setIncomeDataLoaded(true);
+          } catch (error) {
+            console.error('Error loading income data:', error);
           }
         }
         
@@ -200,18 +200,18 @@ export default function ViewportCanvas({
     };
     
     // Update the interaction service with current data
-    interactionService.updatePolygons({
+    interactionService.updatePolygons(
       polygonsToRender,
       buildings,
       emptyBuildingPoints,
       polygons,
       citizensByBuilding,
-      transportStartPoint: transportService.getStartPoint?.() || transportService.getTransportStartPoint?.() || null,
-      transportEndPoint: transportService.getEndPoint?.() || transportService.getTransportEndPoint?.() || null
-    });
+      transportService.getTransportStartPoint() || null,
+      transportService.getTransportEndPoint() || null
+    );
     
     // Set up interaction service with all required dependencies
-    const cleanup = interactionService.initializeInteractions({
+    const cleanup = interactionService.initializeInteractions(
       canvas,
       activeView,
       scale,
@@ -219,7 +219,7 @@ export default function ViewportCanvas({
       transportMode,
       polygonsToRender,
       buildings
-    });
+    );
     
     // Subscribe to events from InteractionService
     const subscriptions = [
@@ -278,15 +278,15 @@ export default function ViewportCanvas({
   
   // Add this effect to update the interaction service when data changes
   useEffect(() => {
-    interactionService.updatePolygons({
+    interactionService.updatePolygons(
       polygonsToRender,
       buildings,
       emptyBuildingPoints,
       polygons,
       citizensByBuilding,
-      transportStartPoint: transportService.getStartPoint?.() || null,
-      transportEndPoint: transportService.getEndPoint?.() || null
-    });
+      transportService.getTransportStartPoint() || null,
+      transportService.getTransportEndPoint() || null
+    );
   }, [polygonsToRender, buildings, emptyBuildingPoints, citizensByBuilding, polygons]);
   
   // Remove debugging for hover state changes
@@ -349,8 +349,8 @@ export default function ViewportCanvas({
       emptyBuildingPoints,
       interactionState,
       transportPath,
-      transportService.getStartPoint?.() || transportService.getTransportStartPoint?.() || null,
-      transportService.getEndPoint?.() || transportService.getTransportEndPoint?.() || null,
+      transportService.getTransportStartPoint() || null,
+      transportService.getTransportEndPoint() || null,
       polygons as Record<string, any[]>,
       incomeData,
       minIncome,
@@ -401,8 +401,8 @@ export default function ViewportCanvas({
           emptyBuildingPoints,
           interactionService.getState(),
           transportPath,
-          transportService.getTransportStartPoint?.() || transportService.getStartPoint?.() || null,
-          transportService.getTransportEndPoint?.() || transportService.getEndPoint?.() || null,
+          transportService.getTransportStartPoint() || null,
+          transportService.getTransportEndPoint() || null,
           polygons as Record<string, any[]>,
           incomeData,
           minIncome,
