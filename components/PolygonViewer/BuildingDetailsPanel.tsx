@@ -502,243 +502,8 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
           </div>
         ) : !error && building ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto flex-grow">
-            {/* Building Definition Information - First column, spans full width on mobile, 2 columns on larger screens */}
-            <div className="col-span-1 md:col-span-2 lg:col-span-1 space-y-4">
-              {buildingDefinition && (
-                <>
-                  {/* Building Image */}
-                  <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-                    <div className="relative w-full aspect-square overflow-hidden rounded-lg mb-3">
-                      <img 
-                        src={buildingImagePath}
-                        alt={buildingDefinition.name || formatBuildingType(building.type)}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          console.error('Error loading building image:', e);
-                          e.currentTarget.src = '/images/buildings/commercial/retail_shops/market_stall.jpg';
-                        }}
-                      />
-                    </div>
-                    
-                    <h3 className="text-xl font-serif font-semibold text-amber-800 mb-2">
-                      {buildingDefinition.name || formatBuildingType(building.type)}
-                    </h3>
-                    
-                    {buildingDefinition.shortDescription && (
-                      <p className="text-gray-700 mb-3">{buildingDefinition.shortDescription}</p>
-                    )}
-                    
-                    {buildingDefinition.flavorText && (
-                      <p className="italic text-gray-600 border-l-4 border-amber-200 pl-3 py-1">
-                        "{buildingDefinition.flavorText}"
-                      </p>
-                    )}
-                  </div>
-                  
-                  {/* Maintenance Cost */}
-                  {buildingDefinition.maintenanceCost !== undefined && (
-                    <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-                      <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Maintenance</h3>
-                      <div className="flex justify-between items-center bg-amber-50 p-2 rounded-lg">
-                        <span className="text-gray-700 font-medium">Daily Cost:</span>
-                        <span className="font-semibold text-amber-800">
-                          {buildingDefinition.maintenanceCost.toLocaleString()} ⚜️ ducats
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Full Description (Collapsible) */}
-                  {buildingDefinition.fullDescription && (
-                    <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-                      <button 
-                        onClick={() => setShowFullDescription(!showFullDescription)}
-                        className="w-full flex justify-between items-center text-left"
-                      >
-                        <h3 className="text-sm uppercase font-medium text-amber-600">Detailed Information</h3>
-                        <svg 
-                          xmlns="http://www.w3.org/2000/svg" 
-                          className={`h-5 w-5 transition-transform ${showFullDescription ? 'transform rotate-180' : ''}`} 
-                          fill="none" 
-                          viewBox="0 0 24 24" 
-                          stroke="currentColor"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </button>
-                      
-                      {showFullDescription && (
-                        <div className="mt-3 text-gray-700 border-t border-amber-200 pt-3">
-                          <p className="whitespace-pre-line">{buildingDefinition.fullDescription}</p>
-                        
-                          {/* Creation details added here */}
-                          <div className="mt-4 pt-3 border-t border-amber-100">
-                            <h4 className="font-medium text-amber-700 mb-2">Creation Details</h4>
-                            <div className="text-sm">
-                              <p className="text-gray-700">
-                                Created: <span className="font-medium">
-                                  {adjustDate(building.created_at)}
-                                </span>
-                              </p>
-                              {building.created_by && (
-                                <p className="text-gray-700 mt-1">
-                                  Created by: <span className="font-medium">{building.created_by}</span>
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-            
-            {/* Middle column - Location and Financial Information */}
+            {/* Column 1: BUYS, SELLS */}
             <div className="col-span-1 space-y-4">
-              {/* Location with land visualization */}
-              <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-                <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Location</h3>
-                
-                {landData ? (
-                  <div className="flex flex-col items-center">
-                    {/* Land name */}
-                    <p className="font-serif text-lg font-semibold text-amber-800 mb-2">
-                      {landData.historicalName || landData.englishName || 'Land Plot'}
-                    </p>
-                    
-                    {/* Land owner */}
-                    {landData.owner && (
-                      <p className="text-gray-700 mb-2">
-                        <span className="font-medium">Owner:</span> {landData.owner}
-                      </p>
-                    )}
-                    
-                    {/* Land coordinates */}
-                    {building?.position && (
-                      <p className="text-xs text-gray-500 mb-2">
-                        {typeof building.position === 'string' 
-                          ? building.position 
-                          : `Lat: ${building.position.lat?.toFixed(6)}, Lng: ${building.position.lng?.toFixed(6)}`
-                        }
-                      </p>
-                    )}
-                    
-                    {/* Canvas for land visualization */}
-                    <canvas 
-                      ref={canvasRef} 
-                      className="w-full h-[200px] border border-amber-100 rounded-lg mb-2"
-                      style={{ maxWidth: '300px' }}
-                    />
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center h-[200px]">
-                    <p className="text-gray-500 italic">Loading land details...</p>
-                  </div>
-                )}
-              </div>
-              
-              {/* Financial Information */}
-              {(building.lease_amount || building.rent_amount) && (
-                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Financial Details</h3>
-                  
-                  {building.lease_amount !== undefined && (
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-gray-700">Lease Amount:</span>
-                      <span className="font-semibold text-amber-800">
-                        {building.lease_amount.toLocaleString()} ⚜️ ducats
-                      </span>
-                    </div>
-                  )}
-                  
-                  {building.rent_amount !== undefined && (
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-700">Rent Amount:</span>
-                      <span className="font-semibold text-amber-800">
-                        {building.rent_amount.toLocaleString()} ⚜️ ducats
-                      </span>
-                    </div>
-                  )}
-                </div>
-              )}
-              
-              {/* Creation Information removed from here and moved to detailed information section */}
-            </div>
-            
-            {/* Right column - Owner, Occupant, Resources */}
-            <div className="col-span-1 space-y-4">
-              {/* Owner information */}
-              <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-                <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Owner</h3>
-                {building.owner ? (
-                  <div className="flex items-center justify-center">
-                    <PlayerProfile 
-                      username={building.owner}
-                      walletAddress={building.owner}
-                      size="medium"
-                      className="mx-auto"
-                    />
-                  </div>
-                ) : (
-                  <p className="text-center text-gray-500 italic">No owner information</p>
-                )}
-              </div>
-              
-              {/* Occupant Information */}
-              {building.occupant && (
-                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Occupant</h3>
-                  <div className="flex items-center justify-center">
-                    <PlayerProfile 
-                      username={building.occupant}
-                      walletAddress={building.occupant}
-                      size="medium"
-                      className="mx-auto"
-                    />
-                  </div>
-                </div>
-              )}
-              
-              {/* Resources Storage */}
-              {buildingDefinition?.productionInformation?.stores && buildingDefinition.productionInformation.stores.length > 0 && (
-                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
-                    <FaWarehouse className="mr-2" /> STORES
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {buildingDefinition.productionInformation.stores.map((resource: string) => (
-                      <div key={`store-${resource}`} className="flex flex-col items-center bg-amber-50 p-2 rounded-md" title={resource.replace(/_/g, ' ')}>
-                        <div className="relative w-8 h-8 mb-1">
-                          <Image 
-                            src={getResourceIconPath(resource)}
-                            alt={resource}
-                            width={32}
-                            height={32}
-                            className="object-contain"
-                            loading="lazy" // Add lazy loading
-                            unoptimized={true} // Disable Next.js image optimization for these small icons
-                            onError={(e) => {
-                              // Fallback to a default icon if the image fails to load
-                              (e.target as HTMLImageElement).src = '/images/resources/default.png';
-                              // Also update the cache to prevent future attempts
-                              resourceIconCache.set(resource, '/images/resources/default.png');
-                            }}
-                          />
-                        </div>
-                        <span className="text-xs text-gray-700 capitalize">{resource.replace(/_/g, ' ')}</span>
-                      </div>
-                    ))}
-                  </div>
-                  {buildingDefinition.productionInformation.storageCapacity && (
-                    <div className="mt-2 text-sm text-gray-700">
-                      <span className="font-medium">Total Capacity:</span> {buildingDefinition.productionInformation.storageCapacity} units
-                    </div>
-                  )}
-                </div>
-              )}
-              
               {/* Resources Buying */}
               {buildingDefinition?.productionInformation?.inputResources && Object.keys(buildingDefinition.productionInformation.inputResources).length > 0 && (
                 <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
@@ -799,8 +564,47 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                   </div>
                 </div>
               )}
-              
-              {/* Resources Production section is already defined above - removed duplicate */}
+            </div>
+            
+            {/* Column 2: STORES, PRODUCES */}
+            <div className="col-span-1 space-y-4">
+              {/* Resources Storage */}
+              {buildingDefinition?.productionInformation?.stores && buildingDefinition.productionInformation.stores.length > 0 && (
+                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
+                    <FaWarehouse className="mr-2" /> STORES
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {buildingDefinition.productionInformation.stores.map((resource: string) => (
+                      <div key={`store-${resource}`} className="flex flex-col items-center bg-amber-50 p-2 rounded-md" title={resource.replace(/_/g, ' ')}>
+                        <div className="relative w-8 h-8 mb-1">
+                          <Image 
+                            src={getResourceIconPath(resource)}
+                            alt={resource}
+                            width={32}
+                            height={32}
+                            className="object-contain"
+                            loading="lazy" // Add lazy loading
+                            unoptimized={true} // Disable Next.js image optimization for these small icons
+                            onError={(e) => {
+                              // Fallback to a default icon if the image fails to load
+                              (e.target as HTMLImageElement).src = '/images/resources/default.png';
+                              // Also update the cache to prevent future attempts
+                              resourceIconCache.set(resource, '/images/resources/default.png');
+                            }}
+                          />
+                        </div>
+                        <span className="text-xs text-gray-700 capitalize">{resource.replace(/_/g, ' ')}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {buildingDefinition.productionInformation.storageCapacity && (
+                    <div className="mt-2 text-sm text-gray-700">
+                      <span className="font-medium">Total Capacity:</span> {buildingDefinition.productionInformation.storageCapacity} units
+                    </div>
+                  )}
+                </div>
+              )}
               
               {/* Resources Production */}
               {buildingDefinition?.productionInformation?.produces && Object.keys(buildingDefinition.productionInformation.produces).length > 0 && (
@@ -902,6 +706,196 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                       </div>
                     ))}
                   </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Column 3: Name, Owner, Location, Maintenance, Detailed Info */}
+            <div className="col-span-1 space-y-4">
+              {/* Building Image and Name */}
+              {buildingDefinition && (
+                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+                  <div className="relative w-full aspect-square overflow-hidden rounded-lg mb-3">
+                    <img 
+                      src={buildingImagePath}
+                      alt={buildingDefinition.name || formatBuildingType(building.type)}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        console.error('Error loading building image:', e);
+                        e.currentTarget.src = '/images/buildings/commercial/retail_shops/market_stall.jpg';
+                      }}
+                    />
+                  </div>
+                  
+                  <h3 className="text-xl font-serif font-semibold text-amber-800 mb-2">
+                    {buildingDefinition.name || formatBuildingType(building.type)}
+                  </h3>
+                  
+                  {buildingDefinition.shortDescription && (
+                    <p className="text-gray-700 mb-3">{buildingDefinition.shortDescription}</p>
+                  )}
+                  
+                  {buildingDefinition.flavorText && (
+                    <p className="italic text-gray-600 border-l-4 border-amber-200 pl-3 py-1">
+                      "{buildingDefinition.flavorText}"
+                    </p>
+                  )}
+                </div>
+              )}
+              
+              {/* Owner information */}
+              <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+                <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Owner</h3>
+                {building.owner ? (
+                  <div className="flex items-center justify-center">
+                    <PlayerProfile 
+                      username={building.owner}
+                      walletAddress={building.owner}
+                      size="medium"
+                      className="mx-auto"
+                    />
+                  </div>
+                ) : (
+                  <p className="text-center text-gray-500 italic">No owner information</p>
+                )}
+              </div>
+              
+              {/* Location with land visualization */}
+              <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+                <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Location</h3>
+                
+                {landData ? (
+                  <div className="flex flex-col items-center">
+                    {/* Land name */}
+                    <p className="font-serif text-lg font-semibold text-amber-800 mb-2">
+                      {landData.historicalName || landData.englishName || 'Land Plot'}
+                    </p>
+                    
+                    {/* Land owner */}
+                    {landData.owner && (
+                      <p className="text-gray-700 mb-2">
+                        <span className="font-medium">Owner:</span> {landData.owner}
+                      </p>
+                    )}
+                    
+                    {/* Land coordinates */}
+                    {building?.position && (
+                      <p className="text-xs text-gray-500 mb-2">
+                        {typeof building.position === 'string' 
+                          ? building.position 
+                          : `Lat: ${building.position.lat?.toFixed(6)}, Lng: ${building.position.lng?.toFixed(6)}`
+                        }
+                      </p>
+                    )}
+                    
+                    {/* Canvas for land visualization */}
+                    <canvas 
+                      ref={canvasRef} 
+                      className="w-full h-[200px] border border-amber-100 rounded-lg mb-2"
+                      style={{ maxWidth: '300px' }}
+                    />
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center h-[200px]">
+                    <p className="text-gray-500 italic">Loading land details...</p>
+                  </div>
+                )}
+              </div>
+              
+              {/* Maintenance Cost */}
+              {buildingDefinition?.maintenanceCost !== undefined && (
+                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Maintenance</h3>
+                  <div className="flex justify-between items-center bg-amber-50 p-2 rounded-lg">
+                    <span className="text-gray-700 font-medium">Daily Cost:</span>
+                    <span className="font-semibold text-amber-800">
+                      {buildingDefinition.maintenanceCost.toLocaleString()} ⚜️ ducats
+                    </span>
+                  </div>
+                </div>
+              )}
+              
+              {/* Full Description (Collapsible) */}
+              {buildingDefinition?.fullDescription && (
+                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+                  <button 
+                    onClick={() => setShowFullDescription(!showFullDescription)}
+                    className="w-full flex justify-between items-center text-left"
+                  >
+                    <h3 className="text-sm uppercase font-medium text-amber-600">Detailed Information</h3>
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      className={`h-5 w-5 transition-transform ${showFullDescription ? 'transform rotate-180' : ''}`} 
+                      fill="none" 
+                      viewBox="0 0 24 24" 
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  
+                  {showFullDescription && (
+                    <div className="mt-3 text-gray-700 border-t border-amber-200 pt-3">
+                      <p className="whitespace-pre-line">{buildingDefinition.fullDescription}</p>
+                    
+                      {/* Creation details added here */}
+                      <div className="mt-4 pt-3 border-t border-amber-100">
+                        <h4 className="font-medium text-amber-700 mb-2">Creation Details</h4>
+                        <div className="text-sm">
+                          <p className="text-gray-700">
+                            Created: <span className="font-medium">
+                              {adjustDate(building.created_at)}
+                            </span>
+                          </p>
+                          {building.created_by && (
+                            <p className="text-gray-700 mt-1">
+                              Created by: <span className="font-medium">{building.created_by}</span>
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {/* Occupant Information */}
+              {building.occupant && (
+                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Occupant</h3>
+                  <div className="flex items-center justify-center">
+                    <PlayerProfile 
+                      username={building.occupant}
+                      walletAddress={building.occupant}
+                      size="medium"
+                      className="mx-auto"
+                    />
+                  </div>
+                </div>
+              )}
+              
+              {/* Financial Information */}
+              {(building.lease_amount || building.rent_amount) && (
+                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Financial Details</h3>
+                  
+                  {building.lease_amount !== undefined && (
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-gray-700">Lease Amount:</span>
+                      <span className="font-semibold text-amber-800">
+                        {building.lease_amount.toLocaleString()} ⚜️ ducats
+                      </span>
+                    </div>
+                  )}
+                  
+                  {building.rent_amount !== undefined && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-700">Rent Amount:</span>
+                      <span className="font-semibold text-amber-800">
+                        {building.rent_amount.toLocaleString()} ⚜️ ducats
+                      </span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
