@@ -132,58 +132,46 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   const owner = dynamicOwner;
   
   
-  // Add useEffect to fetch the owner when a polygon is selected
+  // Add useEffect to set the owner from landOwners prop
   useEffect(() => {
     if (selectedPolygonId) {
       // Reset owner when a new polygon is selected
       setDynamicOwner(null);
       setOwnerDetails(null);
       
-      // Fetch the owner from the API
-      const fetchOwner = async () => {
-        try {
-          const response = await fetch(`${getBackendBaseUrl()}/api/get-land-owner/${selectedPolygonId}`);
-          
-          if (!response.ok) {
-            console.error(`Failed to fetch owner: ${response.status} ${response.statusText}`);
-            return;
-          }
-          
-          const data = await response.json();
-          console.log('Fetched owner data:', data);
-          
-          if (data.success && data.owner) {
-            setDynamicOwner(data.owner);
-            
-            // Now fetch the owner details
-            try {
-              const userResponse = await fetch(`${getBackendBaseUrl()}/api/users/${data.owner}`);
-              
-              if (userResponse.ok) {
-                const userData = await userResponse.json();
-                console.log('Fetched user details:', userData);
-                
-                if (userData.success && userData.user) {
-                  setOwnerDetails(userData.user);
-                }
-              } else {
-                console.error(`Failed to fetch user details: ${userResponse.status} ${userResponse.statusText}`);
-              }
-            } catch (userError) {
-              console.error('Error fetching user details:', userError);
-            }
-          } else {
-            console.log('No owner found for this land');
-            setDynamicOwner(null);
-          }
-        } catch (error) {
-          console.error('Error fetching land owner:', error);
-        }
-      };
+      // Get the owner directly from the landOwners prop
+      const owner = selectedPolygonId && landOwners ? landOwners[selectedPolygonId] : null;
       
-      fetchOwner();
+      if (owner) {
+        console.log('Owner from landOwners prop:', owner);
+        setDynamicOwner(owner);
+        
+        // Fetch the owner details directly
+        const fetchOwnerDetails = async () => {
+          try {
+            const userResponse = await fetch(`${getBackendBaseUrl()}/api/users/${owner}`);
+            
+            if (userResponse.ok) {
+              const userData = await userResponse.json();
+              console.log('Fetched user details:', userData);
+              
+              if (userData.success && userData.user) {
+                setOwnerDetails(userData.user);
+              }
+            } else {
+              console.error(`Failed to fetch user details: ${userResponse.status} ${userResponse.statusText}`);
+            }
+          } catch (userError) {
+            console.error('Error fetching user details:', userError);
+          }
+        };
+        
+        fetchOwnerDetails();
+      } else {
+        console.log('No owner found for this land');
+      }
     }
-  }, [selectedPolygonId]);
+  }, [selectedPolygonId, landOwners]);
   
   // Debug logging
   useEffect(() => {
