@@ -128,14 +128,9 @@ def assign_citizen_to_business(tables, citizen: Dict, business: Dict) -> bool:
     log.info(f"Assigning {citizen_name} to {business_name}")
     
     try:
-        # Update citizen record with new job
-        tables['citizens'].update(citizen_id, {
-            'Work': business_id
-        })
-        
-        # Update business record with status to active
-        # Note: Removed the 'Worker' field as it doesn't exist in the BUSINESSES table
-        tables['businesses'].update(business_id, {
+        # Update business record with new occupant
+        tables['buildings'].update(business_id, {
+            'Occupant': citizen_id,
             'Status': 'active'
         })
         
