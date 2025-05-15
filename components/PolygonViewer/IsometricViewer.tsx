@@ -143,6 +143,323 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hoveredBuildingId]);
 
+  // Helper function to check if a point is inside a polygon
+  function isPointInPolygon(x: number, y: number, polygon: {x: number, y: number}[]): boolean {
+    let inside = false;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+      const xi = polygon[i].x, yi = polygon[i].y;
+      const xj = polygon[j].x, yj = polygon[j].y;
+      
+      const intersect = ((yi > y) !== (yj > y))
+          && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  }
+  
+  // Helper function to convert screen coordinates to lat/lng
+  const screenToLatLng = (
+    screenX: number, 
+    screenY: number, 
+    currentScale: number, 
+    currentOffset: {x: number, y: number}, 
+    canvasWidth: number, 
+    canvasHeight: number
+  ): {lat: number, lng: number} => {
+    // Reverse the isometric projection
+    const x = (screenX - canvasWidth / 2 - currentOffset.x) / currentScale;
+    const y = -(screenY - canvasHeight / 2 - currentOffset.y) / (currentScale * 1.4);
+    
+    // Convert back to lat/lng
+    const lng = x / 20000 + 12.3326;
+    const lat = y / 20000 + 45.4371;
+    
+    return { lat, lng };
+  };
+  
+  // Helper function to calculate distance between two points
+  const calculateDistance = (point1: {lat: number, lng: number}, point2: {lat: number, lng: number}): number => {
+    const R = 6371000; // Earth radius in meters
+    const lat1 = point1.lat * Math.PI / 180;
+    const lat2 = point2.lat * Math.PI / 180;
+    const deltaLat = (point2.lat - point1.lat) * Math.PI / 180;
+    const deltaLng = (point2.lng - point1.lng) * Math.PI / 180;
+
+    const a = Math.sin(deltaLat/2) * Math.sin(deltaLat/2) +
+            Math.cos(lat1) * Math.cos(lat2) *
+            Math.sin(deltaLng/2) * Math.sin(deltaLng/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  };
+  
+  // Function to calculate the transport route
+  const calculateTransportRoute = async (start: {lat: number, lng: number}, end: {lat: number, lng: number}) => {
+    try {
+      // Set calculating state to true to show loading indicator
+      setCalculatingPath(true);
+      console.log('Calculating transport route from', start, 'to', end);
+      
+      // Add this code to render a loading animation on the canvas
+      const renderLoadingAnimation = () => {
+        if (!canvasRef.current || !calculatingPath) return;
+        
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        
+        // Draw a semi-transparent overlay
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw a Venetian-styled loading message
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        
+        // Draw ornate frame
+        ctx.fillStyle = 'rgba(30, 30, 50, 0.85)';
+        ctx.fillRect(centerX - 200, centerY - 100, 400, 200);
+        
+        // Gold border
+        ctx.strokeStyle = 'rgba(218, 165, 32, 0.9)';
+        ctx.lineWidth = 4;
+        ctx.strokeRect(centerX - 200, centerY - 100, 400, 200);
+        
+        // Inner border
+        ctx.strokeStyle = 'rgba(218, 165, 32, 0.6)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(centerX - 190, centerY - 90, 380, 180);
+        
+        // Title
+        ctx.font = '24px "Times New Roman", serif';
+        ctx.fillStyle = 'rgba(218, 165, 32, 0.9)';
+        ctx.textAlign = 'center';
+        ctx.fillText('Calcolando il Percorso', centerX, centerY - 50);
+        
+        // Subtitle
+        ctx.font = '16px "Times New Roman", serif';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillText('Trovando la via migliore attraverso i canali...', centerX, centerY - 10);
+        
+        // Animated dots
+        const dots = Math.floor((Date.now() / 500) % 4);
+        let dotsText = '';
+        for (let i = 0; i < dots; i++) dotsText += '.';
+        ctx.fillText(dotsText, centerX, centerY + 30);
+        
+        // Draw gondola icon
+        const gondolaSize = 40;
+        const gondolaX = centerX;
+        const gondolaY = centerY + 60;
+        
+        // Animate gondola position
+        const oscillation = Math.sin(Date.now() / 300) * 5;
+        
+        // Draw gondola silhouette
+        ctx.fillStyle = '#000000';
+        ctx.beginPath();
+        ctx.ellipse(
+          gondolaX + oscillation, 
+          gondolaY, 
+          gondolaSize, 
+          gondolaSize/4, 
+          0, 0, Math.PI * 2
+        );
+        ctx.fill();
+        
+        // Draw gondolier
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.arc(
+          gondolaX + oscillation + gondolaSize/3, 
+          gondolaY - gondolaSize/8, 
+          gondolaSize/6, 
+          0, Math.PI * 2
+        );
+        ctx.fill();
+        
+        // Request next animation frame if still calculating
+        if (calculatingPath) {
+          requestAnimationFrame(renderLoadingAnimation);
+        }
+      };
+      
+      // Start the loading animation
+      renderLoadingAnimation();
+      
+      const response = await fetch('/api/transport', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          startPoint: start,
+          endPoint: end
+        }),
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Transport route calculated:', data);
+        
+        if (data.success && data.path) {
+          setTransportPath(data.path);
+          // Set water-only mode if the API indicates it's a water-only route
+          setWaterOnlyMode(!!data.waterOnly);
+        } else {
+          console.error('Failed to calculate route:', data.error);
+          
+          // If the error is about points not being within polygons, try to use water-only pathfinding
+          if (data.error === 'Start or end point is not within any polygon') {
+            console.log('Points not within polygons, attempting water-only pathfinding');
+            
+            // Show a message to the user
+            alert('Points are not on land. Attempting to find a water route...');
+            
+            // Make a direct request to the water-only pathfinding endpoint
+            const waterResponse = await fetch('/api/transport/water-only', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                startPoint: start,
+                endPoint: end
+              }),
+            });
+            
+            if (waterResponse.ok) {
+              const waterData = await waterResponse.json();
+              
+              if (waterData.success && waterData.path) {
+                setTransportPath(waterData.path);
+                setWaterOnlyMode(true);
+                return;
+              }
+            }
+          }
+          
+          // If we get here, both regular and water-only pathfinding failed
+          alert(`Could not find a route: ${data.error || 'Unknown error'}`);
+          // Reset end point to allow trying again
+          setTransportEndPoint(null);
+        }
+      } else {
+        console.error('API error:', response.status);
+        alert('Error calculating route. Please try again.');
+        setTransportEndPoint(null);
+      }
+    } catch (error) {
+      console.error('Error calculating transport route:', error);
+      alert('Error calculating route. Please try again.');
+      setTransportEndPoint(null);
+    } finally {
+      // Set calculating state to false to hide loading indicator
+      setCalculatingPath(false);
+    }
+  };
+  
+  // Function to find building position
+  const findBuildingPosition = (buildingId: string): {x: number, y: number} | null => {
+    // First check if any building in the buildings array matches
+    const building = buildings.find(b => b.id === buildingId);
+    if (building && building.position) {
+      let position;
+      if (typeof building.position === 'string') {
+        try {
+          position = JSON.parse(building.position);
+        } catch (e) {
+          return null;
+        }
+      } else {
+        position = building.position;
+      }
+      
+      // Convert lat/lng to isometric coordinates
+      let x, y;
+      if ('lat' in position && 'lng' in position) {
+        x = (position.lng - 12.3326) * 20000;
+        y = (position.lat - 45.4371) * 20000;
+      } else if ('x' in position && 'z' in position) {
+        x = position.x;
+        y = position.z;
+      } else {
+        return null;
+      }
+      
+      return {
+        x: calculateIsoX(x, y, scale, offset, canvasRef.current?.width || 0),
+        y: calculateIsoY(x, y, scale, offset, canvasRef.current?.height || 0)
+      };
+    }
+    
+    // If not found in buildings, check building points in polygons
+    for (const polygon of polygons) {
+      if (polygon.buildingPoints && Array.isArray(polygon.buildingPoints)) {
+        const buildingPoint = polygon.buildingPoints.find((bp: any) => 
+          bp.BuildingId === buildingId || 
+          bp.buildingId === buildingId || 
+          bp.id === buildingId
+        );
+        
+        if (buildingPoint) {
+          // Convert lat/lng to isometric coordinates
+          const x = (buildingPoint.lng - 12.3326) * 20000;
+          const y = (buildingPoint.lat - 45.4371) * 20000;
+          
+          return {
+            x: calculateIsoX(x, y, scale, offset, canvasRef.current?.width || 0),
+            y: calculateIsoY(x, y, scale, offset, canvasRef.current?.height || 0)
+          };
+        }
+      }
+    }
+    
+    return null;
+  };
+  
+  // Helper function to find which polygon contains this building point
+  function findPolygonIdForPoint(point: {lat: number, lng: number}): string {
+    for (const polygon of polygons) {
+      if (polygon.buildingPoints && Array.isArray(polygon.buildingPoints)) {
+        // Check if this point is in the polygon's buildingPoints
+        const found = polygon.buildingPoints.some((bp: any) => {
+          const threshold = 0.0001; // Small threshold for floating point comparison
+          return Math.abs(bp.lat - point.lat) < threshold && 
+                 Math.abs(bp.lng - point.lng) < threshold;
+        });
+        
+        if (found) {
+          return polygon.id;
+        }
+      }
+    }
+    
+    // If we can't find the exact polygon, try to find which polygon contains this point
+    for (const polygon of polygons) {
+      if (polygon.coordinates && polygon.coordinates.length > 2) {
+        if (isPointInPolygonCoordinates(point, polygon.coordinates)) {
+          return polygon.id;
+        }
+      }
+    }
+    
+    return 'unknown';
+  }
+
+  // Helper function to check if a point is inside polygon coordinates
+  function isPointInPolygonCoordinates(point: {lat: number, lng: number}, coordinates: {lat: number, lng: number}[]): boolean {
+    let inside = false;
+    for (let i = 0, j = coordinates.length - 1; i < coordinates.length; j = i++) {
+      const xi = coordinates[i].lng, yi = coordinates[i].lat;
+      const xj = coordinates[j].lng, yj = coordinates[j].lat;
+      
+      const intersect = ((yi > point.lat) !== (yj > point.lat))
+          && (point.lng < (xj - xi) * (point.lat - yi) / (yj - yi) + xi);
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  }
+  
   // Function to load citizens data - declared early to avoid reference before declaration
   const loadCitizens = useCallback(async () => {
     try {
@@ -1206,11 +1523,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     polygons, 
     citizensByBuilding,
     transportStartPoint,
-    transportEndPoint,
-    calculateTransportRoute,
-    findBuildingPosition,
-    findPolygonIdForPoint,
-    screenToLatLng
+    transportEndPoint
   ]);
 
   // Helper function to check if a point is inside a polygon
