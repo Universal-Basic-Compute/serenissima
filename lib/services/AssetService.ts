@@ -20,6 +20,9 @@ export class AssetService {
     this.isLoadingCoatOfArms = true;
     
     try {
+      // Debug log to see what's being passed in
+      console.log('Loading coat of arms images for owners:', Object.keys(ownerCoatOfArmsMap));
+      
       // Preload images
       const imagePromises: Promise<void>[] = [];
       const newImages: Record<string, HTMLImageElement> = {};
@@ -49,6 +52,9 @@ export class AssetService {
             // 3. Try with serenissima.ai domain through our proxy - use owner username, not land ID
             `/coat-of-arms/external/${encodeURIComponent(`https://serenissima.ai/coat-of-arms/${owner}.png`)}`
           ].filter(Boolean); // Remove null entries
+          
+          // Debug log to see what URLs we're trying
+          console.log(`Trying to load coat of arms for owner: ${owner}`, urlsToTry);
           
           // Create a promise that tries each URL in sequence
           const tryLoadImage = async (): Promise<HTMLImageElement> => {

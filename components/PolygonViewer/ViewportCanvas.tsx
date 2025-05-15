@@ -61,6 +61,7 @@ export default function ViewportCanvas({
         
         // Load land owners
         const landOwnersData = await dataService.loadLandOwners();
+        console.log('Loaded land owners data:', landOwnersData);
         setLandOwners(landOwnersData);
         
         // Load users
