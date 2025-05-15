@@ -185,6 +185,9 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     try {
       const date = new Date(dateString);
       
+      // Subtract 500 years from the year for Renaissance setting
+      date.setFullYear(date.getFullYear() - 500);
+      
       // Format as "Month Day, Year at HH:MM"
       return date.toLocaleDateString('en-US', { 
         year: 'numeric', 
