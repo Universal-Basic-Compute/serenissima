@@ -24,7 +24,7 @@ export async function GET(
     }
 
     // If not in cache, try to load from file system
-    const dataDir = path.join(process.cwd(), 'data');
+    const dataDir = path.join(process.cwd(), 'data', 'polygons');
     
     // First try to load the specific polygon file if it exists
     const specificPolygonPath = path.join(dataDir, `${polygonId}.json`);
@@ -75,8 +75,8 @@ export async function GET(
       }
     }
 
-    // If we still haven't found the polygon, scan the data directory for individual files
-    console.log(`Scanning data directory for polygon files...`);
+    // If we still haven't found the polygon, scan the polygons directory for individual files
+    console.log(`Scanning polygons directory for polygon files...`);
     const files = fs.readdirSync(dataDir).filter(file => file.endsWith('.json'));
     
     for (const file of files) {
