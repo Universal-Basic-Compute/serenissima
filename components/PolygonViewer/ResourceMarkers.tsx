@@ -30,6 +30,31 @@ export default function ResourceMarkers({
     }
   }, [isVisible]);
   
+  // Handle mouse enter for a resource location
+  const handleMouseEnter = (locationKey: string, locationResources: any[]) => {
+    setHoveredLocation(locationKey);
+    
+    // Use HoverStateService to set resource hover state
+    // Create a unique ID for this resource group
+    const resourceIds = locationResources.map(r => r.id).join('_');
+    hoverStateService.setHoveredResource(resourceIds, {
+      locationKey,
+      resources: locationResources,
+      position: {
+        lat: parseFloat(locationKey.split('_')[0]),
+        lng: parseFloat(locationKey.split('_')[1])
+      }
+    });
+  };
+  
+  // Handle mouse leave for a resource location
+  const handleMouseLeave = () => {
+    setHoveredLocation(null);
+    
+    // Clear resource hover state
+    hoverStateService.clearHoveredResource();
+  };
+  
   // Function to load resources
   const loadResources = async () => {
     try {
