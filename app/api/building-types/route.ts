@@ -120,9 +120,8 @@ export async function GET(request: Request) {
         pointType: buildingData.pointType || null,
         constructionCosts: buildingData.constructionCosts || null,
         maintenanceCost: buildingData.maintenanceCost || 0,
-        incomeGeneration: buildingData.incomeGeneration || 0,
         shortDescription: buildingData.shortDescription || '',
-        path: relativePath
+        productionInformation: buildingData.productionInformation || null
       };
     }).filter(Boolean); // Remove null entries
     
