@@ -77,10 +77,15 @@ export default function ViewportCanvas({
         if (activeView === 'land') {
           const incomeResult = await incomeService.loadIncomeData();
           // Check if incomeResult exists and is not null before accessing properties
-          if (incomeResult && typeof incomeResult === 'object' && 'incomeData' in incomeResult) {
-            setIncomeData(incomeResult.incomeData || {});
-            setMinIncome(incomeResult.minIncome || 0);
-            setMaxIncome(incomeResult.maxIncome || 1000);
+          if (incomeResult && typeof incomeResult === 'object') {
+            const typedResult = incomeResult as {
+              incomeData: Record<string, number>;
+              minIncome: number;
+              maxIncome: number;
+            };
+            setIncomeData(typedResult.incomeData || {});
+            setMinIncome(typedResult.minIncome || 0);
+            setMaxIncome(typedResult.maxIncome || 1000);
             setIncomeDataLoaded(true);
           }
         }
@@ -348,6 +353,8 @@ export default function ViewportCanvas({
       emptyBuildingPoints,
       interactionState,
       transportPath,
+      transportStartPoint: transportService.getStartPoint(),
+      transportEndPoint: transportService.getEndPoint(),
       polygons,
       incomeData,
       minIncome,
@@ -390,6 +397,8 @@ export default function ViewportCanvas({
           emptyBuildingPoints,
           interactionState: interactionService.getState(),
           transportPath,
+          transportStartPoint: transportService.getStartPoint(),
+          transportEndPoint: transportService.getEndPoint(),
           polygons,
           incomeData,
           minIncome,
