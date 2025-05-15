@@ -75,10 +75,10 @@ export class CitizenService {
             return {
               ...citizen,
               position,
-              CitizenId: citizen.CitizenId || citizen.id || `ctz_${Date.now()}_${Math.floor(Math.random() * 10000)}`,
-              FirstName: citizen.FirstName || citizen.firstName || 'Unknown',
-              LastName: citizen.LastName || citizen.lastName || 'Citizen',
-              SocialClass: citizen.SocialClass || citizen.socialClass || 'Popolani'
+              citizenid: citizen.citizenid || citizen.CitizenId || citizen.id || `ctz_${Date.now()}_${Math.floor(Math.random() * 10000)}`,
+              firstname: citizen.firstname || citizen.FirstName || citizen.firstName || 'Unknown',
+              lastname: citizen.lastname || citizen.LastName || citizen.lastName || 'Citizen',
+              socialclass: citizen.socialclass || citizen.SocialClass || citizen.socialClass || 'Popolani'
             };
           });
           

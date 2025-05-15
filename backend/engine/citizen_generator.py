@@ -114,9 +114,16 @@ Return the data as a valid JSON object with the fields listed above.
         citizen_data = json.loads(json_match.group(1))
         
         # Add required fields
-        citizen_data["SocialClass"] = social_class
+        citizen_data["socialclass"] = social_class
         citizen_data["id"] = f"ctz_{int(time.time())}_{random.randint(1000, 9999)}"
-        citizen_data["CreatedAt"] = datetime.datetime.now().isoformat()
+        citizen_data["createdat"] = datetime.datetime.now().isoformat()
+        
+        # Convert any capitalized keys to lowercase
+        lowercase_data = {}
+        for key, value in citizen_data.items():
+            lowercase_data[key.lower()] = value
+        
+        citizen_data = lowercase_data
         
         log.info(f"Successfully generated citizen: {citizen_data['FirstName']} {citizen_data['LastName']}")
         return citizen_data

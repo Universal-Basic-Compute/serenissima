@@ -267,10 +267,10 @@ export class RenderService {
     console.log('Full citizen object in RenderService.createCitizenMarker:', citizen);
 
     // Ensure we have the required properties for display
-    const firstName = citizen.FirstName || citizen.firstName || '';
-    const lastName = citizen.LastName || citizen.lastName || '';
-    const socialClass = citizen.SocialClass || citizen.socialClass || '';
-    const citizenId = citizen.CitizenId || citizen.id;
+    const firstName = citizen.firstname || citizen.FirstName || citizen.firstName || '';
+    const lastName = citizen.lastname || citizen.LastName || citizen.lastName || '';
+    const socialClass = citizen.socialclass || citizen.SocialClass || citizen.socialClass || '';
+    const citizenId = citizen.citizenid || citizen.CitizenId || citizen.id;
 
     // Determine color based on social class
     const getSocialClassColor = (socialClass: string): string => {

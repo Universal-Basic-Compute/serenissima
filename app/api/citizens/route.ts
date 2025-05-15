@@ -93,26 +93,21 @@ export async function GET(request: Request) {
       
       return {
         id: citizenId,
-        CitizenId: citizenId,
+        citizenid: citizenId,
         name: `${record.fields.FirstName || 'Unknown'} ${record.fields.LastName || 'Citizen'}`,
-        firstName: record.fields.FirstName || 'Unknown',
-        lastName: record.fields.LastName || 'Citizen',
-        FirstName: record.fields.FirstName || 'Unknown',
-        LastName: record.fields.LastName || 'Citizen',
-        socialClass: record.fields.SocialClass || 'Popolani',
-        SocialClass: record.fields.SocialClass || 'Popolani',
+        firstname: record.fields.FirstName || 'Unknown',
+        lastname: record.fields.LastName || 'Citizen',
+        socialclass: record.fields.SocialClass || 'Popolani',
         description: record.fields.Description || 'A citizen of Venice.',
-        Description: record.fields.Description || 'A citizen of Venice.',
-        profileImage: formatImageUrl(record.fields.ImageUrl?.toString(), citizenId),
-        ImageUrl: formatImageUrl(record.fields.ImageUrl?.toString(), citizenId),
+        profileimage: formatImageUrl(record.fields.ImageUrl?.toString(), citizenId),
+        imageurl: formatImageUrl(record.fields.ImageUrl?.toString(), citizenId),
         // Ensure position is included and properly formatted
         position: typeof record.fields.Position === 'string' 
           ? JSON.parse(record.fields.Position) 
           : record.fields.Position || { lat: 45.4371 + Math.random() * 0.01, lng: 12.3326 + Math.random() * 0.01 },
         occupation: record.fields.Occupation || 'Citizen',
         wealth: record.fields.Wealth || 0,
-        Wealth: record.fields.Wealth || 0,
-        CreatedAt: record.fields.CreatedAt || new Date().toISOString()
+        createdat: record.fields.CreatedAt || new Date().toISOString()
         // Home and Work fields removed
       };
     });
@@ -155,26 +150,19 @@ function getDebugCitizens() {
     
     debugCitizens.push({
       id: `debug-citizen-${i+1}`,
-      CitizenId: `debug-citizen-${i+1}`,
+      citizenid: `debug-citizen-${i+1}`,
       name: `${firstName} ${lastName}`,
-      firstName: firstName,
-      lastName: lastName,
-      FirstName: firstName,
-      LastName: lastName,
-      socialClass: socialClass,
-      SocialClass: socialClass,
+      firstname: firstName,
+      lastname: lastName,
+      socialclass: socialClass,
       description: `A ${socialClass.toLowerCase()} of Venice, living in the city during the Renaissance period.`,
-      Description: `A ${socialClass.toLowerCase()} of Venice, living in the city during the Renaissance period.`,
-      profileImage: `/images/citizens/default.png`,
-      ImageUrl: `/images/citizens/default.png`,
+      profileimage: `/images/citizens/default.png`,
+      imageurl: `/images/citizens/default.png`,
       position: { lat: 45.4371 + Math.random() * 0.01, lng: 12.3326 + Math.random() * 0.01 },
       occupation: socialClass === 'Nobili' ? 'Merchant' : 
                  socialClass === 'Cittadini' ? 'Artisan' : 
                  socialClass === 'Popolani' ? 'Shopkeeper' : 'Laborer',
       wealth: socialClass === 'Nobili' ? 'Wealthy' : 
-              socialClass === 'Cittadini' ? 'Comfortable' : 
-              socialClass === 'Popolani' ? 'Modest' : 'Poor',
-      Wealth: socialClass === 'Nobili' ? 'Wealthy' : 
               socialClass === 'Cittadini' ? 'Comfortable' : 
               socialClass === 'Popolani' ? 'Modest' : 'Poor',
       landId: `polygon-${i+1}`,
@@ -184,8 +172,8 @@ function getDebugCitizens() {
                    socialClass === 'Popolani' ? 'Townhouse' : 'Cottage',
       isHome: true,
       isWork: false,
-      NeedsCompletionScore: 0.75,
-      CreatedAt: new Date().toISOString()
+      needscompletionscore: 0.75,
+      createdat: new Date().toISOString()
     });
   }
   

@@ -29,17 +29,18 @@ export interface Polygon {
 
 // Add Citizen interface
 export interface Citizen {
-  CitizenId: string;
-  SocialClass: string;
-  FirstName: string;
-  LastName: string;
-  Description: string;
-  ImageUrl?: string;
-  Wealth: string;
+  citizenid: string;
+  socialclass: string;
+  firstname: string;
+  lastname: string;
+  description: string;
+  imageurl?: string;
+  profileimage?: string;
+  wealth: string;
   position?: {
     lat: number;
     lng: number;
   };
-  NeedsCompletionScore: number;
-  CreatedAt: string;
+  needscompletionscore: number;
+  createdat: string;
 }

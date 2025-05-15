@@ -142,13 +142,13 @@ def save_citizen_to_airtable(tables, citizen: Dict, polygon_centers: list) -> Op
         # Create the citizen record
         record = tables['citizens'].create({
             "CitizenId": citizen["id"],
-            "SocialClass": citizen["SocialClass"],
-            "FirstName": citizen["FirstName"],
-            "LastName": citizen["LastName"],
-            "Description": citizen["Description"],
-            "ImagePrompt": citizen["ImagePrompt"],
-            "Wealth": citizen["Wealth"],
-            "CreatedAt": citizen["CreatedAt"],
+            "SocialClass": citizen["socialclass"],
+            "FirstName": citizen["firstname"],
+            "LastName": citizen["lastname"],
+            "Description": citizen["description"],
+            "ImagePrompt": citizen["imageprompt"],
+            "Wealth": citizen["wealth"],
+            "CreatedAt": citizen["createdat"],
             "Position": json.dumps(position)  # Ensure position is always provided as JSON string
         })
         
@@ -212,7 +212,7 @@ def generate_citizen_image(citizen_id: str, image_prompt: str) -> bool:
 def create_immigration_notification(tables, citizen: Dict, building: Dict) -> None:
     """Create a notification about the new immigrant."""
     try:
-        citizen_name = f"{citizen['FirstName']} {citizen['LastName']}"
+        citizen_name = f"{citizen['firstname']} {citizen['lastname']}"
         building_name = building['fields'].get('Name', building['id'])
         building_type = building['fields'].get('Type', 'unknown')
         
@@ -221,7 +221,7 @@ def create_immigration_notification(tables, citizen: Dict, building: Dict) -> No
         details = {
             "citizen_id": citizen["id"],
             "citizen_name": citizen_name,
-            "social_class": citizen["SocialClass"],
+            "social_class": citizen["socialclass"],
             "building_type": building_type,
             "building_name": building_name,
             "event_type": "immigration"
