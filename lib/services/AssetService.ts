@@ -46,7 +46,7 @@ export class AssetService {
             // 2. Use the URL from the API if it's from our domain
             url && url.startsWith(window.location.origin) ? url as string : null,
             
-            // 3. Try with serenissima.ai domain through our proxy
+            // 3. Try with serenissima.ai domain through our proxy - use owner username, not land ID
             `/coat-of-arms/external/${encodeURIComponent(`https://serenissima.ai/coat-of-arms/${owner}.png`)}`
           ].filter(Boolean); // Remove null entries
           
