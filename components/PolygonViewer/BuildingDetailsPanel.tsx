@@ -809,7 +809,7 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                       <p className="text-xs text-gray-500 mb-2">
                         {typeof building.position === 'string' 
                           ? String(building.position) 
-                          : `Lat: ${String(building.position.lat?.toFixed(6))}, Lng: ${String(building.position.lng?.toFixed(6))}`
+                          : `Lat: ${String(building.position.lat?.toFixed(6) || '')}, Lng: ${String(building.position.lng?.toFixed(6) || '')}`
                         }
                       </p>
                     )}
