@@ -279,6 +279,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             const imagePromises: Promise<void>[] = [];
             const newImages: Record<string, HTMLImageElement> = {};
             
+            // Target size for coat of arms images (50px is our display size)
+            const targetSize = 100; // Slightly larger than display size for better quality
+            
             Object.entries(data.coatOfArms).forEach(([owner, url]) => {
               if (url) {
                 // Create an array of URLs to try in order
@@ -309,7 +312,12 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
                       const loadPromise = new Promise<HTMLImageElement>((resolve, reject) => {
                         img.onload = () => {
                           console.log(`Successfully loaded coat of arms for ${owner} from ${currentUrl}`);
-                          resolve(img);
+                          
+                          // Resize the image using canvas before storing
+                          const resizedImg = resizeImageToCanvas(img, targetSize);
+                          console.log(`Resized coat of arms for ${owner} from ${img.width}x${img.height} to ${resizedImg.width}x${resizedImg.height}`);
+                          
+                          resolve(resizedImg);
                         };
                         img.onerror = () => {
                           console.warn(`Failed to load coat of arms for ${owner} from ${currentUrl}`);
@@ -362,6 +370,43 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     fetchCoatOfArms();
   }, []);
   
+  // Helper function to resize an image using canvas
+  const resizeImageToCanvas = (img: HTMLImageElement, targetSize: number): HTMLImageElement => {
+    // Create a canvas element
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    if (!ctx) {
+      console.warn('Could not get canvas context for image resizing');
+      return img; // Return original if canvas context not available
+    }
+    
+    // Determine dimensions while maintaining aspect ratio
+    let width = targetSize;
+    let height = targetSize;
+    
+    if (img.width > img.height) {
+      // Landscape image
+      height = (img.height / img.width) * targetSize;
+    } else if (img.height > img.width) {
+      // Portrait image
+      width = (img.width / img.height) * targetSize;
+    }
+    
+    // Set canvas size
+    canvas.width = width;
+    canvas.height = height;
+    
+    // Draw the image on the canvas, resized
+    ctx.drawImage(img, 0, 0, width, height);
+    
+    // Create a new image from the canvas
+    const resizedImg = new Image();
+    resizedImg.src = canvas.toDataURL('image/png');
+    
+    return resizedImg;
+  };
+  
   // Function to create a circular clipping of an image
   const createCircularImage = (ctx: CanvasRenderingContext2D, img: HTMLImageElement, x: number, y: number, size: number) => {
     // Check if the image has loaded successfully
@@ -389,24 +434,13 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       // Clip to the circle
       ctx.clip();
       
-      // Calculate dimensions to maintain aspect ratio
-      let drawWidth = size;
-      let drawHeight = size;
-      let offsetX = 0;
-      let offsetY = 0;
+      // Since we've already resized the image to maintain aspect ratio,
+      // we can draw it directly centered in the circle
+      const drawX = x - img.width / 2;
+      const drawY = y - img.height / 2;
       
-      if (img.width > img.height) {
-        // Landscape image
-        drawHeight = (img.height / img.width) * size;
-        offsetY = (size - drawHeight) / 2;
-      } else if (img.height > img.width) {
-        // Portrait image
-        drawWidth = (img.width / img.height) * size;
-        offsetX = (size - drawWidth) / 2;
-      }
-      
-      // Draw the image with proper aspect ratio
-      ctx.drawImage(img, x - (drawWidth / 2) + offsetX, y - (drawHeight / 2) + offsetY, drawWidth, drawHeight);
+      // Draw the pre-resized image
+      ctx.drawImage(img, drawX, drawY);
       
       // Restore the context state
       ctx.restore();
