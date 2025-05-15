@@ -31,7 +31,7 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
               
               setTooltipData({
                 type: 'building',
-                name: buildingData.name || BuildingService.prototype.formatBuildingType(buildingData.type),
+                name: buildingData.name || buildingService.formatBuildingType(buildingData.type),
                 type: buildingData.type,
                 owner: buildingData.owner
               });

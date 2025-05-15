@@ -581,8 +581,8 @@ export class RenderService {
       try {
         if (!building || !building.id || !building.position) return;
         
-        // Get building position using BuildingService
-        const worldPos = BuildingService.prototype.getBuildingPosition(building);
+        // Get building position using buildingService singleton
+        const worldPos = buildingService.getBuildingPosition(building);
         if (!worldPos) {
           return; // Skip this building if position can't be determined
         }
@@ -592,9 +592,9 @@ export class RenderService {
           worldPos.x, worldPos.y, scale, offset, canvasWidth, canvasHeight
         );
         
-        // Get building size and color using BuildingService
-        const size = BuildingService.prototype.getBuildingSize(building.type);
-        const color = BuildingService.prototype.getBuildingColor(building.type);
+        // Get building size and color using buildingService singleton
+        const size = buildingService.getBuildingSize(building.type);
+        const color = buildingService.getBuildingColor(building.type);
         
         // Determine if this building is selected or hovered
         const isSelected = interactionState.selectedBuildingId === building.id;
