@@ -149,19 +149,23 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             console.log(`IsometricViewer: Setting window.__polygonData with ${data.polygons.length} polygons`);
             (window as any).__polygonData = data.polygons;
             
-            // Explicitly initialize the transport service with the polygon data
-            console.log(`IsometricViewer: Initializing transport service with ${data.polygons.length} polygons`);
-            const { transportService } = require('@/lib/services/TransportService');
-            
-            // Check if transportService is properly imported
-            console.log(`IsometricViewer: transportService exists: ${!!transportService}`);
-            console.log(`IsometricViewer: transportService type: ${typeof transportService}`);
-            
-            if (transportService && typeof transportService.setPolygonsData === 'function') {
-              const success = transportService.setPolygonsData(data.polygons);
-              console.log(`IsometricViewer: Transport service initialization ${success ? 'succeeded' : 'failed'}`);
-            } else {
-              console.error('IsometricViewer: transportService or setPolygonsData method is not available');
+            // IMPORTANT: Import and directly initialize the transport service
+            try {
+              const { transportService } = require('@/lib/services/TransportService');
+              console.log('IsometricViewer: Directly initializing transport service with polygon data');
+              
+              // Use the new direct initialization method
+              const success = transportService.initializeWithPolygonData(data.polygons);
+              console.log(`IsometricViewer: Direct transport service initialization ${success ? 'succeeded' : 'failed'}`);
+              
+              // If direct initialization failed, try the setPolygonsData method as fallback
+              if (!success) {
+                console.log('IsometricViewer: Trying setPolygonsData as fallback');
+                const fallbackSuccess = transportService.setPolygonsData(data.polygons);
+                console.log(`IsometricViewer: Fallback initialization ${fallbackSuccess ? 'succeeded' : 'failed'}`);
+              }
+            } catch (error) {
+              console.error('IsometricViewer: Error initializing transport service:', error);
             }
           } else {
             console.warn('IsometricViewer: window is not defined, running in non-browser environment');
@@ -1172,6 +1176,27 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       // Set calculating state to true to show loading indicator
       setCalculatingPath(true);
       console.log('Calculating transport route from', start, 'to', end);
+      
+      // First, check if we have polygon data available in state
+      if (polygons.length > 0) {
+        console.log(`We have ${polygons.length} polygons in state, ensuring transport service is initialized`);
+        
+        // Try to initialize the transport service directly with our polygon data
+        try {
+          const { transportService } = require('@/lib/services/TransportService');
+          
+          // Check if the service is already initialized
+          if (!transportService.isPolygonsLoaded()) {
+            console.log('Transport service not initialized, initializing with polygon data from state');
+            const success = transportService.initializeWithPolygonData(polygons);
+            console.log(`Direct transport service initialization ${success ? 'succeeded' : 'failed'}`);
+          } else {
+            console.log('Transport service is already initialized');
+          }
+        } catch (error) {
+          console.error('Error initializing transport service:', error);
+        }
+      }
       
       // Add this code to render a loading animation on the canvas
       const renderLoadingAnimation = () => {

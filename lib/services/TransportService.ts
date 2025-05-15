@@ -588,6 +588,49 @@ export class TransportService {
   }
 
   /**
+   * Check if polygons are loaded
+   */
+  public isPolygonsLoaded(): boolean {
+    return this.polygonsLoaded && this.polygons.length > 0;
+  }
+
+  /**
+   * Direct initialization with polygon data
+   * This method allows direct initialization from the IsometricViewer component
+   */
+  public initializeWithPolygonData(polygons: any[]): boolean {
+    console.log(`Direct initialization with ${polygons?.length || 0} polygons`);
+    
+    try {
+      if (!polygons || !Array.isArray(polygons) || polygons.length === 0) {
+        console.error('Invalid polygon data provided for direct initialization');
+        return false;
+      }
+      
+      // Process the polygons
+      const processedPolygons = this.processPolygons(polygons);
+      
+      if (processedPolygons.length === 0) {
+        console.error('No valid polygons after processing');
+        return false;
+      }
+      
+      // Store the processed polygons
+      this.polygons = processedPolygons;
+      this.polygonsLoaded = true;
+      
+      // Build the graph and canal network
+      this.buildGraphAndNetwork();
+      
+      console.log(`Successfully initialized transport service with ${processedPolygons.length} polygons`);
+      return true;
+    } catch (error) {
+      console.error('Error in direct initialization:', error);
+      return false;
+    }
+  }
+
+  /**
    * Method to directly set polygons data
    */
   public setPolygonsData(polygons: any[]): boolean {
