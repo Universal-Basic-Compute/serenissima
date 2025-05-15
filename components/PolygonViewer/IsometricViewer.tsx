@@ -79,6 +79,10 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   
   // Function to fetch the building image path when hovering over a building
   const fetchBuildingImagePath = async (buildingType: string, variant?: string) => {
+    // Create a unique ID for this request to prevent stale updates
+    const requestId = Date.now();
+    const currentRequestId = requestId;
+    
     try {
       setIsLoadingBuildingImage(true);
       
@@ -89,7 +93,10 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       try {
         const response = await fetch(flatImagePath, { method: 'HEAD' });
         if (response.ok) {
-          setHoveredBuildingImagePath(flatImagePath);
+          // Only update if this is still the most recent request
+          if (currentRequestId === requestId) {
+            setHoveredBuildingImagePath(flatImagePath);
+          }
           return;
         }
       } catch (error) {
@@ -100,20 +107,32 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       const response = await fetch(`/api/search-building-image?type=${encodeURIComponent(buildingType)}`);
       if (response.ok) {
         const data = await response.json();
-        if (data && data.imagePath) {
-          setHoveredBuildingImagePath(data.imagePath);
-        } else {
-          // Use fallback image if no specific image found
-          setHoveredBuildingImagePath('/images/buildings/market_stall.jpg');
+        // Only update if this is still the most recent request
+        if (currentRequestId === requestId) {
+          if (data && data.imagePath) {
+            setHoveredBuildingImagePath(data.imagePath);
+          } else {
+            // Use fallback image if no specific image found
+            setHoveredBuildingImagePath('/images/buildings/market_stall.jpg');
+          }
         }
       } else {
-        setHoveredBuildingImagePath('/images/buildings/market_stall.jpg');
+        // Only update if this is still the most recent request
+        if (currentRequestId === requestId) {
+          setHoveredBuildingImagePath('/images/buildings/market_stall.jpg');
+        }
       }
     } catch (error) {
       console.error('Error fetching building image path:', error);
-      setHoveredBuildingImagePath('/images/buildings/market_stall.jpg');
+      // Only update if this is still the most recent request
+      if (currentRequestId === requestId) {
+        setHoveredBuildingImagePath('/images/buildings/market_stall.jpg');
+      }
     } finally {
-      setIsLoadingBuildingImage(false);
+      // Only update if this is still the most recent request
+      if (currentRequestId === requestId) {
+        setIsLoadingBuildingImage(false);
+      }
     }
   };
 
@@ -1267,7 +1286,12 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             if (building) {
               setHoveredBuildingName(building.name || formatBuildingType(building.type));
               setHoveredBuildingPosition({ x: mouseX, y: mouseY });
-              fetchBuildingImagePath(building.type, building.variant);
+              // Don't call fetchBuildingImagePath directly here to avoid infinite loop
+              setTimeout(() => {
+                if (hoveredBuildingIdRef.current === newHoveredBuildingId) {
+                  fetchBuildingImagePath(building.type, building.variant);
+                }
+              }, 0);
             }
           } else {
             setHoveredBuildingName(null);
@@ -1830,7 +1854,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       canvas.removeEventListener('mousemove', handleMouseMove);
       canvas.removeEventListener('click', handleClick);
     };
-  }, [activeView, isDragging, scale, offset, emptyBuildingPoints, buildings, polygonsToRender, citizensByBuilding, transportMode, polygons]);
+  }, [activeView, isDragging, scale, offset, emptyBuildingPoints, buildings, polygonsToRender, citizensByBuilding, transportMode, polygons]); // Removed hoveredBuildingId and hoveredBuildingImagePath from dependencies
 
   // Helper function to check if a point is inside a polygon
   function isPointInPolygon(x: number, y: number, polygon: {x: number, y: number}[]): boolean {
