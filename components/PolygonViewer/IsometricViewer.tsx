@@ -1701,7 +1701,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
 
     // Now render in two passes: first the polygons, then the text
     // First pass: Draw all polygon shapes
-    newPolygonsToRender.forEach(({ polygon, coords, fillColor }) => {
+    polygonsToRender.forEach(({ polygon, coords, fillColor }) => {
       // Draw polygon path
       ctx.beginPath();
       ctx.moveTo(coords[0].x, coords[0].y);
