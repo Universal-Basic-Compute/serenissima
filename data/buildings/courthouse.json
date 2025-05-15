@@ -40,15 +40,29 @@
     "Holding cells"
   ],
   "productionInformation": {
-    "inputResources": {
-      "paper": 6,
-      "books": 2
-    },
-    "outputResources": {
-      "blackmail_evidence": 2,
-      "criminal_contacts": 1,
-      "forgery_tools": 1
-    },
+    "Arti": [
+      {
+        "inputs": {
+          "paper": 6,
+          "books": 2
+        },
+        "outputs": {
+          "blackmail_evidence": 2,
+          "criminal_contacts": 1
+        },
+        "craftTime": 1
+      },
+      {
+        "inputs": {
+          "paper": 4,
+          "criminal_contacts": 1
+        },
+        "outputs": {
+          "forgery_tools": 2
+        },
+        "craftTime": 2
+      }
+    ],
     "storageCapacity": 200,
     "stores": [
       "paper",

@@ -51,13 +51,12 @@ TASK:
 Create a detailed production information JSON object for a building in the game.
 
 The production information should include:
-1. Input resources the building consumes (with daily quantities)
-2. Output resources the building produces (with daily quantities)
-3. Total storage capacity
-4. List of resources the building can store
-5. List of resources the building can sell
+1. Arti - an array of recipes that transform input resources into output resources
+2. Total storage capacity
+3. List of resources the building can store
+4. List of resources the building can sell
 
-Use  ONLYthe following resources:
+Use ONLY the following resources:
 banking_services
 blackmail_evidence
 books
@@ -142,14 +141,27 @@ Please create a JSON object with the following structure:
 
 ```json
 {{
-  "inputResources": {{
-    "ResourceName1": 10,
-    "ResourceName2": 5
-  }},
-  "outputResources": {{
-    "OutputResourceName1": 8,
-    "OutputResourceName2": 3
-  }},
+  "Arti": [
+    {{
+      "inputs": {{
+        "ResourceName1": 10,
+        "ResourceName2": 5
+      }},
+      "outputs": {{
+        "OutputResourceName1": 8
+      }},
+      "craftTime": 1
+    }},
+    {{
+      "inputs": {{
+        "ResourceName3": 3
+      }},
+      "outputs": {{
+        "OutputResourceName2": 2
+      }},
+      "craftTime": 2
+    }}
+  ],
   "storageCapacity": 100,
   "stores": [
     "ResourceName1",
@@ -166,9 +178,10 @@ Please create a JSON object with the following structure:
 }}
 ```
 
-The numbers in inputResources and outputResources represent daily production/consumption rates.
+The numbers in inputs and outputs represent quantities needed/produced per craft.
+The craftTime is in days.
 Use resource IDs in snake_case (like "olive_oil" not "Olive Oil").
-Make sure the resources are from the provided list
+Make sure the resources are from the provided list.
 Return ONLY the JSON object with no additional text.
 """
         

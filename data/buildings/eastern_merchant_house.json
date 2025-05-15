@@ -21,8 +21,28 @@
   "maintenanceCost": 3000,
   "constructionTime": 864000000,
   "productionInformation": {
-    "inputResources": {},
-    "outputResources": {},
+    "Arti": [
+      {
+        "inputs": {
+          "raw_silk": 5,
+          "dyestuffs": 2
+        },
+        "outputs": {
+          "luxury_silk_garments": 1
+        },
+        "craftTime": 3
+      },
+      {
+        "inputs": {
+          "wine": 3,
+          "dyestuffs": 1
+        },
+        "outputs": {
+          "spiced_wine": 3
+        },
+        "craftTime": 1
+      }
+    ],
     "storageCapacity": 2000,
     "stores": [
       "paper",
