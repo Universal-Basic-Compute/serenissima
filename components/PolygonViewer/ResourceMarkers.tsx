@@ -184,11 +184,11 @@ export default function ResourceMarkers({
                   >
                     <div className="relative w-full h-full group">
                       <img 
-                        src={`/assets/icons/resources/${resource.icon}`}
+                        src={`/images/resources/${resource.icon}`}
                         alt={resource.name}
                         className="w-full h-full object-contain p-1"
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = '/assets/icons/resources/default.png';
+                          (e.target as HTMLImageElement).src = '/images/resources/default.png';
                         }}
                       />
                       <div className="absolute -bottom-1 -right-1 bg-amber-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
