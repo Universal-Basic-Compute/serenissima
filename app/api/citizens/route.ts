@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import Airtable from 'airtable';
-import { FieldSet, Record as AirtableRecord } from 'airtable';
+import { FieldSet, Record as AirtableRecord, Collaborator, Attachment } from 'airtable';
 
 // Initialize Airtable
 const base = new Airtable({
@@ -120,7 +120,9 @@ export async function GET(request: Request) {
     // Map citizens to the expected format
     const citizens = citizenRecords.map(record => {     
       // Ensure the citizen ID is a string
-      const citizenId = record.fields.CitizenId ? String(record.fields.CitizenId) : `ctz_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+      const citizenId = record.fields.CitizenId ? 
+        (typeof record.fields.CitizenId === 'string' ? record.fields.CitizenId : String(record.fields.CitizenId)) 
+        : `ctz_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
       
       // Get home and work assignments for this citizen
       const buildings = occupantToBuildings[citizenId] || {};
@@ -128,9 +130,9 @@ export async function GET(request: Request) {
       return {
         id: citizenId,
         citizenid: citizenId,
-        name: `${record.fields.FirstName || 'Unknown'} ${record.fields.LastName || 'Citizen'}`,
-        firstname: record.fields.FirstName || 'Unknown',
-        lastname: record.fields.LastName || 'Citizen',
+        name: `${record.fields.FirstName ? String(record.fields.FirstName) : 'Unknown'} ${record.fields.LastName ? String(record.fields.LastName) : 'Citizen'}`,
+        firstname: record.fields.FirstName ? String(record.fields.FirstName) : 'Unknown',
+        lastname: record.fields.LastName ? String(record.fields.LastName) : 'Citizen',
         socialclass: record.fields.SocialClass || 'Popolani',
         description: record.fields.Description || 'A citizen of Venice.',
         profileimage: formatImageUrl(record.fields.ImageUrl?.toString(), citizenId),
