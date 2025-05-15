@@ -70,6 +70,25 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [hoveredCitizenBuilding, setHoveredCitizenBuilding] = useState<string | null>(null);
   const [hoveredCitizenType, setHoveredCitizenType] = useState<'home' | 'work' | null>(null);
   
+  // Coat of arms state
+  const [ownerCoatOfArmsMap, setOwnerCoatOfArmsMap] = useState<Record<string, string>>({});
+  const [coatOfArmsImages, setCoatOfArmsImages] = useState<Record<string, HTMLImageElement>>({});
+  const [loadingCoatOfArms, setLoadingCoatOfArms] = useState<boolean>(false);
+  const [citizens, setCitizens] = useState<any[]>([]);
+  const [citizensLoaded, setCitizensLoaded] = useState<boolean>(false);
+  const [citizensByBuilding, setCitizensByBuilding] = useState<Record<string, any[]>>({});
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const isDraggingRef = useRef<boolean>(false);
+  const hoveredPolygonIdRef = useRef<string | null>(null);
+  const hoveredBuildingIdRef = useRef<string | null>(null);
+  const hoveredCanalPointRef = useRef<{lat: number, lng: number} | null>(null);
+  const hoveredBridgePointRef = useRef<{lat: number, lng: number} | null>(null);
+  const hoveredCitizenBuildingRef = useRef<string | null>(null);
+  const hoveredCitizenTypeRef = useRef<'home' | 'work' | null>(null);
+  const renderedCoatOfArmsCache = useRef<Record<string, {image: HTMLImageElement | null, x: number, y: number, size: number}>>({});
+  const prevActiveView = useRef<string>('');
+  const prevScale = useRef<number>(0);
+  
   // Function to fetch the building image path when hovering over a building
   const fetchBuildingImagePath = async (buildingType: string, variant?: string) => {
     try {
