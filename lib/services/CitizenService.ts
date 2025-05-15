@@ -92,6 +92,8 @@ export class CitizenService {
           this.citizensByBuilding = byBuilding;
           this.isLoaded = true;
           
+          console.log(`Citizens grouped by buildings: ${Object.keys(byBuilding).length} buildings have citizens`);
+          
           // Emit event to notify other components
           eventBus.emit(EventTypes.CITIZENS_LOADED, {
             citizens: this.citizens,
