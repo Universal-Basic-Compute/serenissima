@@ -144,7 +144,7 @@ Subcategory: {building_data.get('subcategory', 'Unknown')}
 Short Description: {building_data.get('shortDescription', 'No description available')}
 Full Description: {building_data.get('fullDescription', 'No description available')}
 
-Please create a JSON object with the following structure:
+Please think it through then create a JSON object with the following structure:
 
 ```json
 {{
