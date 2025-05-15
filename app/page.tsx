@@ -120,7 +120,8 @@ export default function TwoDPage() {
       });
       
     // Initialize the transport service
-    transportService.initializeService().then(success => {
+    // Using public methods instead of private initializeService
+    transportService.setPolygonsData(polygons).then(success => {
       console.log(`Transport service initialization ${success ? 'succeeded' : 'failed'}`);
     });
   }, []);
