@@ -10,6 +10,8 @@ export interface HoverState {
   hoveredBridgePointId: string | null;
   hoveredCitizenBuilding: string | null;
   hoveredCitizenType: 'home' | 'work' | null;
+  hoveredResourceId: string | null;
+  hoveredResourceData: any | null;
   // Add any other hover states you need
 }
 
@@ -20,7 +22,9 @@ export class HoverStateService {
     hoveredCanalPointId: null,
     hoveredBridgePointId: null,
     hoveredCitizenBuilding: null,
-    hoveredCitizenType: null
+    hoveredCitizenType: null,
+    hoveredResourceId: null,
+    hoveredResourceData: null
   };
   
   // Use refs to track current state without causing re-renders
@@ -30,6 +34,8 @@ export class HoverStateService {
   private hoveredBridgePointIdRef: string | null = null;
   private hoveredCitizenBuildingRef: string | null = null;
   private hoveredCitizenTypeRef: 'home' | 'work' | null = null;
+  private hoveredResourceIdRef: string | null = null;
+  private hoveredResourceDataRef: any | null = null;
   
   /**
    * Get the current hover state
@@ -127,6 +133,45 @@ export class HoverStateService {
   }
   
   /**
+   * Update hover state for a resource
+   */
+  public setHoveredResource(resourceId: string | null, resourceData: any | null): void {
+    // Only update if the state has changed
+    if (this.hoveredResourceIdRef !== resourceId) {
+      this.hoveredResourceIdRef = resourceId;
+      this.hoveredResourceDataRef = resourceData;
+      this.state.hoveredResourceId = resourceId;
+      this.state.hoveredResourceData = resourceData;
+      
+      // Emit event with only the changed property
+      eventBus.emit(HOVER_STATE_CHANGED, {
+        type: 'resource',
+        id: resourceId,
+        data: resourceData
+      });
+    }
+  }
+  
+  /**
+   * Clear resource hover state
+   */
+  public clearHoveredResource(): void {
+    if (this.hoveredResourceIdRef !== null) {
+      this.hoveredResourceIdRef = null;
+      this.hoveredResourceDataRef = null;
+      this.state.hoveredResourceId = null;
+      this.state.hoveredResourceData = null;
+      
+      // Emit event with only the changed property
+      eventBus.emit(HOVER_STATE_CHANGED, {
+        type: 'resource',
+        id: null,
+        data: null
+      });
+    }
+  }
+  
+  /**
    * Clear all hover states
    */
   public clearAllHoverStates(): void {
@@ -135,7 +180,8 @@ export class HoverStateService {
       this.hoveredBuildingIdRef !== null || 
       this.hoveredCanalPointIdRef !== null || 
       this.hoveredBridgePointIdRef !== null || 
-      this.hoveredCitizenBuildingRef !== null;
+      this.hoveredCitizenBuildingRef !== null ||
+      this.hoveredResourceIdRef !== null;
     
     // Reset all refs
     this.hoveredPolygonIdRef = null;
@@ -144,6 +190,8 @@ export class HoverStateService {
     this.hoveredBridgePointIdRef = null;
     this.hoveredCitizenBuildingRef = null;
     this.hoveredCitizenTypeRef = null;
+    this.hoveredResourceIdRef = null;
+    this.hoveredResourceDataRef = null;
     
     // Reset state
     this.state = {
@@ -152,7 +200,9 @@ export class HoverStateService {
       hoveredCanalPointId: null,
       hoveredBridgePointId: null,
       hoveredCitizenBuilding: null,
-      hoveredCitizenType: null
+      hoveredCitizenType: null,
+      hoveredResourceId: null,
+      hoveredResourceData: null
     };
     
     // Only emit if there was something to clear

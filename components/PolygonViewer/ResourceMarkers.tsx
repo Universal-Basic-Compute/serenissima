@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ResourceService } from '@/lib/services/ResourceService';
+import { hoverStateService } from '@/lib/services/HoverStateService';
 
 interface ResourceMarkersProps {
   isVisible: boolean;
@@ -164,8 +165,8 @@ export default function ResourceMarkers({
               transform: 'translate(-50%, -50%)',
               zIndex: isHovered ? 50 : 40
             }}
-            onMouseEnter={() => setHoveredLocation(locationKey)}
-            onMouseLeave={() => setHoveredLocation(null)}
+            onMouseEnter={() => handleMouseEnter(locationKey, locationResources)}
+            onMouseLeave={handleMouseLeave}
           >
             {isHovered ? (
               // Expanded view when hovered - show all resources

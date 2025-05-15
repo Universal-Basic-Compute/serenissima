@@ -99,6 +99,18 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
           type: 'bridgePoint',
           id: data.id
         });
+      } else if (data.type === 'resource') {
+        // For resources, use the data provided in the event
+        if (data.id && data.data) {
+          setTooltipData({
+            type: 'resource',
+            resources: data.data.resources,
+            locationKey: data.data.locationKey,
+            position: data.data.position
+          });
+        } else {
+          setTooltipData(null);
+        }
       } else if (data.type === 'clear') {
         setTooltipData(null);
       }
@@ -129,7 +141,8 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
     hoverState.hoveredBuildingId !== null || 
     hoverState.hoveredCanalPointId !== null || 
     hoverState.hoveredBridgePointId !== null || 
-    hoverState.hoveredCitizenBuilding !== null;
+    hoverState.hoveredCitizenBuilding !== null ||
+    hoverState.hoveredResourceId !== null;
   
   if (!shouldShow || !tooltipData) return null;
   
@@ -184,6 +197,43 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
         </div>
         <div>Building: {tooltipData.buildingId}</div>
         <div>Click to view details</div>
+      </div>
+    );
+  } else if (tooltipData.type === 'resource') {
+    // Render resource tooltip content
+    tooltipContent = (
+      <div>
+        <div className="font-bold mb-2">Resources at this location</div>
+        <div className="max-h-48 overflow-y-auto">
+          {tooltipData.resources.map((resource: any) => (
+            <div key={resource.id} className="mb-2 pb-2 border-b border-amber-700/30 last:border-0">
+              <div className="flex items-center">
+                <div className="w-6 h-6 mr-2 bg-amber-800/50 rounded overflow-hidden flex items-center justify-center">
+                  <img 
+                    src={`/images/resources/${resource.icon}`}
+                    alt={resource.name}
+                    className="w-5 h-5 object-contain"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/images/resources/default.png';
+                    }}
+                  />
+                </div>
+                <div className="font-medium">{resource.name}</div>
+                <div className="ml-auto text-amber-300 font-medium">x{resource.amount}</div>
+              </div>
+              {resource.rarity && resource.rarity !== 'common' && (
+                <div className="text-xs mt-1 capitalize text-amber-200">
+                  Rarity: {resource.rarity}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+        {tooltipData.position && (
+          <div className="text-xs mt-2 text-amber-300">
+            Location: {tooltipData.position.lat.toFixed(6)}, {tooltipData.position.lng.toFixed(6)}
+          </div>
+        )}
       </div>
     );
   }
