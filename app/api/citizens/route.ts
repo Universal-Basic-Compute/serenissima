@@ -142,15 +142,14 @@ export async function GET(request: Request) {
         Description: record.fields.Description || 'A citizen of Venice.',
         profileImage: formatImageUrl(record.fields.ImageUrl?.toString(), citizenId),
         ImageUrl: formatImageUrl(record.fields.ImageUrl?.toString(), citizenId),
-        position: position, // Use building position if found, otherwise random
+        position: position, // Use position directly
         occupation: record.fields.Occupation || 'Citizen',
         wealth: record.fields.Wealth || 'Average',
         Wealth: record.fields.Wealth || 'Average',
         landId: record.fields.Land || 'polygon-1',
         NeedsCompletionScore: 0.75,
-        CreatedAt: record.fields.CreatedAt || new Date().toISOString(),
-        Home: record.fields.Home || null,
-        Work: record.fields.Work || null
+        CreatedAt: record.fields.CreatedAt || new Date().toISOString()
+        // Home and Work fields removed
       };
     });
     
@@ -162,8 +161,7 @@ export async function GET(request: Request) {
         id: citizens[0].CitizenId,
         name: citizens[0].name,
         imageUrl: citizens[0].ImageUrl,
-        home: citizens[0].Home,
-        work: citizens[0].Work
+        position: citizens[0].position
       });
     }
     
@@ -222,8 +220,6 @@ function getDebugCitizens() {
                    socialClass === 'Popolani' ? 'Townhouse' : 'Cottage',
       isHome: true,
       isWork: false,
-      Home: `building-${i+1}`,
-      Work: `building-${i+10}`,
       NeedsCompletionScore: 0.75,
       CreatedAt: new Date().toISOString()
     });

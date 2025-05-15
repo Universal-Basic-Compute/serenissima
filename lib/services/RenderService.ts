@@ -535,7 +535,7 @@ export class RenderService {
       this.drawTransportPath(ctx, transportPath, scale, offset, canvas.width, canvas.height);
     }
     
-    // Draw citizen markers if in citizens view - removed building-based rendering
+    // No citizen markers are drawn here - they're handled by the CitizenMarkers component
     
     // Log performance metrics for debugging
     const endTime = performance.now();

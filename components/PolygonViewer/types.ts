@@ -36,8 +36,10 @@ export interface Citizen {
   Description: string;
   ImageUrl?: string;
   Wealth: string;
-  Home: string; // Building ID
-  Work?: string; // Business ID
+  position?: {
+    lat: number;
+    lng: number;
+  };
   NeedsCompletionScore: number;
   CreatedAt: string;
 }

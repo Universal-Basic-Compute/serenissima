@@ -50,7 +50,7 @@ export class CitizenService {
               
               // Try to use the position from the API response directly
               if (citizen.position && typeof citizen.position === 'object' &&
-                  'lat' in citizen.position && 'lng' in citizen.position) {
+                  'lat' in citizen.position && 'lng' in position) {
                 position = citizen.position;
               } else {
                 // If no valid position, create a random one near Venice
@@ -75,14 +75,14 @@ export class CitizenService {
           
           console.log(`Loaded ${this.citizens.length} citizens, ${this.citizens.filter(c => c.position).length} with valid positions`);
           
-          // Remove building grouping
+          // Clear the building associations completely
           this.citizensByBuilding = {};
           this.isLoaded = true;
           
           // Emit event to notify other components
           eventBus.emit(EventTypes.CITIZENS_LOADED, {
             citizens: this.citizens,
-            citizensByBuilding: this.citizensByBuilding
+            citizensByBuilding: {} // Empty object for building associations
           });
         }
       }
