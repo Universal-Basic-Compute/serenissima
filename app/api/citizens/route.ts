@@ -124,7 +124,9 @@ export async function GET(request: Request) {
     const citizens = citizenRecords.map(record => {     
       // Ensure the citizen ID is a string
       const citizenId = record.fields.CitizenId ? 
-        (typeof record.fields.CitizenId === 'string' ? record.fields.CitizenId : String(record.fields.CitizenId)) 
+        (typeof record.fields.CitizenId === 'string' ? 
+          record.fields.CitizenId : 
+          String(record.fields.CitizenId)) 
         : `ctz_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
       
       // Get home and work assignments for this citizen
@@ -144,8 +146,14 @@ export async function GET(request: Request) {
             String(record.fields.LastName)) : 'Citizen',
         socialclass: String(record.fields.SocialClass || 'Popolani'),
         description: String(record.fields.Description || 'A citizen of Venice.'),
-        profileimage: formatImageUrl(record.fields.ImageUrl?.toString(), citizenId),
-        imageurl: formatImageUrl(record.fields.ImageUrl?.toString(), citizenId),
+        profileimage: formatImageUrl(
+          record.fields.ImageUrl ? String(record.fields.ImageUrl) : undefined, 
+          citizenId
+        ),
+        imageurl: formatImageUrl(
+          record.fields.ImageUrl ? String(record.fields.ImageUrl) : undefined, 
+          citizenId
+        ),
         // Ensure position is included and properly formatted
         position: typeof record.fields.Position === 'string' 
           ? JSON.parse(record.fields.Position) 
