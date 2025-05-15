@@ -2063,6 +2063,64 @@ export class TransportService {
       // Enhance the path with canal segments
       const enhancedPath = this.enhancePathWithCanalSegments(pathPoints, this.canalNetwork);
       
+      // Handle the case when the path is too short or empty
+      if (enhancedPath.length <= 1 && startPolygon && endPolygon && startPolygon.id === endPolygon.id) {
+        console.log('Start and end points are in the same polygon but path is too short, creating direct path');
+        
+        // Calculate distance between start and end points
+        const directDistance = this.calculateDistance(startPoint, endPoint);
+        
+        // If the points are not at the same location, create a direct path
+        if (directDistance > 1) {
+          // Create a direct path with intermediate points
+          const numPoints = directDistance > 50 ? 3 : 2;
+          const newPath = [
+            // Start with the original start point
+            {
+              ...startPoint,
+              type: 'centroid',
+              polygonId: startPolygon.id,
+              transportMode: 'walking'
+            }
+          ];
+          
+          // Add intermediate points
+          for (let i = 1; i <= numPoints; i++) {
+            const fraction = i / (numPoints + 1);
+            // Add some randomness to create natural curves
+            const jitter = 0.00002 * (Math.random() * 2 - 1);
+            newPath.push({
+              lat: startPoint.lat + (endPoint.lat - startPoint.lat) * fraction + jitter,
+              lng: startPoint.lng + (endPoint.lng - startPoint.lng) * fraction + jitter,
+              type: 'centroid',
+              polygonId: startPolygon.id,
+              transportMode: 'walking',
+              isIntermediatePoint: true
+            });
+          }
+          
+          // Add the end point
+          newPath.push({
+            ...endPoint,
+            type: 'centroid',
+            polygonId: endPolygon.id,
+            transportMode: 'walking'
+          });
+          
+          // Replace the enhanced path with our new direct path
+          return {
+            success: true,
+            path: newPath,
+            distance: directDistance,
+            walkingDistance: directDistance,
+            waterDistance: 0,
+            estimatedTimeMinutes: Math.round((directDistance / 1000 / 5) * 60), // Walking at 5 km/h
+            startPolygon: startPolygon.id,
+            endPolygon: endPolygon.id
+          };
+        }
+      }
+      
       // Calculate the actual travel time based on distance and mode
       let totalWalkingDistance = 0;
       let totalWaterDistance = 0;
