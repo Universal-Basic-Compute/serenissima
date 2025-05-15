@@ -2142,10 +2142,6 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           const startScreenX = localIsoX(startX, startY);
           const startScreenY = localIsoY(startX, startY);
           
-          // Create local shorthand functions that use the current state values
-          const isoX = (x: number, y: number) => calculateIsoX(x, y, scale, offset, canvas.width);
-          const isoY = (x: number, y: number) => calculateIsoY(x, y, scale, offset, canvas.height);
-          
           // Draw a gold circle for start point with Venetian styling
           ctx.beginPath();
           ctx.arc(startScreenX, startScreenY, 8 * scale, 0, Math.PI * 2);
@@ -2959,14 +2955,15 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   }
 
   // Helper function to draw a building (simplified for 2D view)
-  function drawBuildingSquare(
+  // This function is not currently used but kept for future reference
+  const drawBuildingSquare = (
     ctx: CanvasRenderingContext2D, 
     x: number, 
     y: number, 
     size: number,
     color: string,
     typeIndicator: string
-  ) {
+  ): void => {
     // Draw square
     ctx.fillStyle = color;
     ctx.strokeStyle = '#000';
@@ -2982,7 +2979,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(typeIndicator, x, y);
-  }
+  };
 
   // Helper function to find which polygon contains this building point
   function findPolygonIdForPoint(point: {lat: number, lng: number}): string {
@@ -3028,7 +3025,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   }
 
   // Helper function to lighten a color
-  function lightenColor(color: string, percent: number): string {
+  const lightenColor = (color: string, percent: number): string => {
     // For debugging
     console.log(`Lightening color ${color} by ${percent}%`);
     
@@ -3053,7 +3050,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     
     console.log(`Lightened color: ${result}`);
     return result;
-  }
+  };
 
   // Helper function to format building types for display
   function formatBuildingType(type: string): string {
