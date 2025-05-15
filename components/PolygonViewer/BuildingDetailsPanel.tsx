@@ -16,13 +16,27 @@ export {};
 import { getBackendBaseUrl } from '@/lib/utils/apiUtils';
 import PlayerProfile from '../UI/PlayerProfile';
 
+// Add a cache for resource icons to prevent refetching
+const resourceIconCache = new Map<string, string>();
+
 // Helper function to get resource icon path
 const getResourceIconPath = (resourceId: string): string => {
+  // Check if we already have this path in the cache
+  if (resourceIconCache.has(resourceId)) {
+    return resourceIconCache.get(resourceId)!;
+  }
+  
   // Convert the resource name to lowercase, replace spaces with underscores
   const formattedName = resourceId.toLowerCase().replace(/\s+/g, '_');
   
+  // Create the path
+  const iconPath = `/images/resources/${formattedName}.png`;
+  
+  // Store in cache
+  resourceIconCache.set(resourceId, iconPath);
+  
   // Return the formatted name with .png extension
-  return `/images/resources/${formattedName}.png`;
+  return iconPath;
 };
 
 // Add this function to dynamically find the building image path
@@ -695,9 +709,13 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                             width={32}
                             height={32}
                             className="object-contain"
+                            loading="lazy" // Add lazy loading
+                            unoptimized={true} // Disable Next.js image optimization for these small icons
                             onError={(e) => {
                               // Fallback to a default icon if the image fails to load
                               (e.target as HTMLImageElement).src = '/images/resources/default.png';
+                              // Also update the cache to prevent future attempts
+                              resourceIconCache.set(resource, '/images/resources/default.png');
                             }}
                           />
                         </div>
@@ -762,8 +780,11 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                               width={32}
                               height={32}
                               className="object-contain"
+                              loading="lazy"
+                              unoptimized={true}
                               onError={(e) => {
                                 (e.target as HTMLImageElement).src = '/images/resources/default.png';
+                                resourceIconCache.set(output, '/images/resources/default.png');
                               }}
                             />
                           </div>
@@ -784,8 +805,11 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                                       width={24}
                                       height={24}
                                       className="object-contain"
+                                      loading="lazy"
+                                      unoptimized={true}
                                       onError={(e) => {
                                         (e.target as HTMLImageElement).src = '/images/resources/default.png';
+                                        resourceIconCache.set(input, '/images/resources/default.png');
                                       }}
                                     />
                                   </div>
