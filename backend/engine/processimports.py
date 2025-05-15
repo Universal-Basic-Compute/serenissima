@@ -10,7 +10,7 @@ This script:
    - Transfers the money from buyer to seller
    - Creates a resource record for the imported goods
 
-Run this script periodically to process resource imports.
+Run this script hourly to process resource imports.
 """
 
 import os
@@ -208,10 +208,13 @@ def process_import_contract(tables, contract: Dict, building_types: Dict, resour
         hourly_amount = float(fields.get('hourlyAmount', 0))
         price_per_resource = float(fields.get('PricePerResource', 0))
         
-        log.info(f"Processing import contract {contract_id} for {buyer}: {hourly_amount} {resource_type} at {price_per_resource} per unit")
+        # Since we're running hourly, use the exact hourly amount
+        import_amount = hourly_amount
+        
+        log.info(f"Processing import contract {contract_id} for {buyer}: {import_amount} {resource_type} at {price_per_resource} per unit")
         
         # Skip if any required field is missing
-        if not buyer or not resource_type or not buyer_building_id or hourly_amount <= 0:
+        if not buyer or not resource_type or not buyer_building_id or import_amount <= 0:
             log.warning(f"Skipping contract {contract_id} due to missing required fields")
             return False
         
@@ -219,7 +222,7 @@ def process_import_contract(tables, contract: Dict, building_types: Dict, resour
         buyer_balance = get_user_balance(tables, buyer)
         
         # Calculate total cost
-        total_cost = hourly_amount * price_per_resource
+        total_cost = import_amount * price_per_resource
         
         # Check if buyer has enough money
         if buyer_balance < total_cost:
@@ -255,8 +258,8 @@ def process_import_contract(tables, contract: Dict, building_types: Dict, resour
         total_stored = sum(float(resource['fields'].get('Count', 0)) for resource in building_resources)
         
         # Check if there's enough storage space
-        if total_stored + hourly_amount > storage_capacity:
-            log.warning(f"Building {buyer_building_id} has insufficient storage space (used: {total_stored}, capacity: {storage_capacity}, needed: {hourly_amount})")
+        if total_stored + import_amount > storage_capacity:
+            log.warning(f"Building {buyer_building_id} has insufficient storage space (used: {total_stored}, capacity: {storage_capacity}, needed: {import_amount})")
             return False
         
         # Get resource type information
@@ -300,7 +303,7 @@ def process_import_contract(tables, contract: Dict, building_types: Dict, resour
             "Notes": json.dumps({
                 "contract_id": contract_id,
                 "resource_type": resource_type,
-                "amount": hourly_amount,
+                "amount": import_amount,
                 "price_per_unit": price_per_resource,
                 "building_id": buyer_building_id
             })
@@ -321,7 +324,7 @@ def process_import_contract(tables, contract: Dict, building_types: Dict, resour
         if existing_resource:
             # Update existing resource
             current_count = float(existing_resource['fields'].get('Count', 0))
-            new_count = current_count + hourly_amount
+            new_count = current_count + import_amount
             
             tables['resources'].update(existing_resource['id'], {
                 'Count': new_count,
@@ -340,7 +343,7 @@ def process_import_contract(tables, contract: Dict, building_types: Dict, resour
                 "ResourceType": resource_type,
                 "Name": resource_def.get('name', resource_type),
                 "Category": resource_def.get('category', 'Uncategorized'),
-                "Count": hourly_amount,
+                "Count": import_amount,
                 "BuildingId": buyer_building_id,
                 "Owner": buyer,
                 "CreatedAt": now,
@@ -348,7 +351,7 @@ def process_import_contract(tables, contract: Dict, building_types: Dict, resour
             }
             
             tables['resources'].create(resource_data)
-            log.info(f"Created new resource record for {hourly_amount} {resource_type}")
+            log.info(f"Created new resource record for {import_amount} {resource_type}")
         
         return True
     except Exception as e:
