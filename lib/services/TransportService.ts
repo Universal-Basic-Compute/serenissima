@@ -1289,7 +1289,7 @@ export class TransportService {
   private enhancePathWithCanalSegments(pathPoints: any[], canalNetwork: Record<string, Point[]>): any[] {
     const enhancedPath: any[] = [];
 
-    // Add the starting point
+    // Always use the exact start point
     if (pathPoints.length > 0) {
       enhancedPath.push(pathPoints[0]);
     }
@@ -1383,8 +1383,16 @@ export class TransportService {
         }
       }
 
-      // Add the endpoint of this segment
-      enhancedPath.push(point2);
+      // Don't add the endpoint of this segment if it's the last point in the original path
+      // (we'll add it separately at the end to ensure we use the exact end point)
+      if (i < pathPoints.length - 2) {
+        enhancedPath.push(point2);
+      }
+    }
+
+    // Always use the exact end point
+    if (pathPoints.length > 1) {
+      enhancedPath.push(pathPoints[pathPoints.length - 1]);
     }
 
     return enhancedPath;
@@ -1394,7 +1402,7 @@ export class TransportService {
   private enhanceWaterPath(pathPoints: any[]): any[] {
     const enhancedPath: any[] = [];
     
-    // Add the starting point
+    // Always use the exact start point
     if (pathPoints.length > 0) {
       enhancedPath.push(pathPoints[0]);
     }
@@ -1424,8 +1432,16 @@ export class TransportService {
         enhancedPath.push(midpoint);
       }
       
-      // Add the endpoint of this segment
-      enhancedPath.push(point2);
+      // Don't add the endpoint of this segment if it's the last point in the original path
+      // (we'll add it separately at the end to ensure we use the exact end point)
+      if (i < pathPoints.length - 2) {
+        enhancedPath.push(point2);
+      }
+    }
+    
+    // Always use the exact end point
+    if (pathPoints.length > 1) {
+      enhancedPath.push(pathPoints[pathPoints.length - 1]);
     }
     
     return enhancedPath;
@@ -1858,6 +1874,27 @@ export class TransportService {
         };
       });
       
+      // Ensure the path starts with the exact start point and ends with the exact end point
+      if (pathPoints.length > 0) {
+        // Replace the first point with the exact start point
+        pathPoints[0] = {
+          ...startPoint,
+          nodeId: pathPoints[0].nodeId,
+          type: pathPoints[0].type,
+          polygonId: pathPoints[0].polygonId,
+          transportMode: 'gondola'
+        };
+        
+        // Replace the last point with the exact end point
+        pathPoints[pathPoints.length - 1] = {
+          ...endPoint,
+          nodeId: pathPoints[pathPoints.length - 1].nodeId,
+          type: pathPoints[pathPoints.length - 1].type,
+          polygonId: pathPoints[pathPoints.length - 1].polygonId,
+          transportMode: 'gondola'
+        };
+      }
+      
       console.log(`Final path has ${pathPoints.length} points`);
       
       // Enhance the path with intermediate points for smoother curves
@@ -2059,6 +2096,27 @@ export class TransportService {
           transportMode
         };
       });
+      
+      // Ensure the path starts with the exact start point and ends with the exact end point
+      if (pathPoints.length > 0) {
+        // Replace the first point with the exact start point
+        pathPoints[0] = {
+          ...startPoint,
+          nodeId: pathPoints[0].nodeId,
+          type: pathPoints[0].type,
+          polygonId: pathPoints[0].polygonId,
+          transportMode: pathPoints[0].transportMode
+        };
+        
+        // Replace the last point with the exact end point
+        pathPoints[pathPoints.length - 1] = {
+          ...endPoint,
+          nodeId: pathPoints[pathPoints.length - 1].nodeId,
+          type: pathPoints[pathPoints.length - 1].type,
+          polygonId: pathPoints[pathPoints.length - 1].polygonId,
+          transportMode: pathPoints[pathPoints.length - 1].transportMode
+        };
+      }
       
       // Enhance the path with canal segments
       const enhancedPath = this.enhancePathWithCanalSegments(pathPoints, this.canalNetwork);
