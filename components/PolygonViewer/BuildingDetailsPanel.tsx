@@ -705,7 +705,7 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
               {buildingDefinition?.productionInformation?.stores && buildingDefinition.productionInformation.stores.length > 0 && (
                 <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
                   <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
-                    <FaWarehouse className="mr-2" /> BUYS
+                    <FaWarehouse className="mr-2" /> STORES
                   </h3>
                   <div className="flex flex-wrap gap-2">
                     {buildingDefinition.productionInformation.stores.map((resource: string) => (
@@ -736,6 +736,38 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                       <span className="font-medium">Total Capacity:</span> {buildingDefinition.productionInformation.storageCapacity} units
                     </div>
                   )}
+                </div>
+              )}
+              
+              {/* Resources Buying */}
+              {buildingDefinition?.productionInformation?.inputResources && Object.keys(buildingDefinition.productionInformation.inputResources).length > 0 && (
+                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
+                    <FaBox className="mr-2 transform rotate-180" /> BUYS
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {Object.entries(buildingDefinition.productionInformation.inputResources).map(([resource, amount]) => (
+                      <div key={`input-${resource}`} className="flex flex-col items-center bg-blue-50 p-2 rounded-md" title={resource.replace(/_/g, ' ')}>
+                        <div className="relative w-8 h-8 mb-1">
+                          <Image 
+                            src={getResourceIconPath(resource)}
+                            alt={resource}
+                            width={32}
+                            height={32}
+                            className="object-contain"
+                            loading="lazy"
+                            unoptimized={true}
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/images/resources/default.png';
+                              resourceIconCache.set(resource, '/images/resources/default.png');
+                            }}
+                          />
+                        </div>
+                        <span className="text-xs text-gray-700 capitalize">{resource.replace(/_/g, ' ')}</span>
+                        {amount && <span className="text-xs text-gray-500">{amount}</span>}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 
@@ -774,7 +806,7 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
               {buildingDefinition?.productionInformation?.produces && Object.keys(buildingDefinition.productionInformation.produces).length > 0 && (
                 <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
                   <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
-                    <FaBox className="mr-2" /> Produces Resources
+                    <FaBox className="mr-2" /> PRODUCES
                   </h3>
                   <div className="space-y-3">
                     {Object.entries(buildingDefinition.productionInformation.produces).map(([output, inputs]: [string, any]) => (
@@ -834,6 +866,39 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                             Rate: {buildingDefinition.productionInformation.productionRate} units/day
                           </div>
                         )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Output Resources */}
+              {buildingDefinition?.productionInformation?.outputResources && 
+                Object.keys(buildingDefinition.productionInformation.outputResources).length > 0 && (
+                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
+                    <FaBox className="mr-2" /> PRODUCES
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {Object.entries(buildingDefinition.productionInformation.outputResources).map(([resource, amount]) => (
+                      <div key={`output-${resource}`} className="flex flex-col items-center bg-green-50 p-2 rounded-md" title={resource.replace(/_/g, ' ')}>
+                        <div className="relative w-8 h-8 mb-1">
+                          <Image 
+                            src={getResourceIconPath(resource)}
+                            alt={resource}
+                            width={32}
+                            height={32}
+                            className="object-contain"
+                            loading="lazy"
+                            unoptimized={true}
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/images/resources/default.png';
+                              resourceIconCache.set(resource, '/images/resources/default.png');
+                            }}
+                          />
+                        </div>
+                        <span className="text-xs text-gray-700 capitalize">{resource.replace(/_/g, ' ')}</span>
+                        {amount && <span className="text-xs text-gray-500">{amount}</span>}
                       </div>
                     ))}
                   </div>
