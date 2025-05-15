@@ -2,17 +2,23 @@ import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 
+// In-memory cache for polygons
 let polygonsCache: Record<string, any> = {};
 let cacheTimestamp: number = 0;
 
-export async function GET(
-  request: NextRequest,
-  context: { params: { polygonId: string } }
-): Promise<NextResponse> {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
-    const polygonId = context.params.polygonId;
+    // 🔍 Extraire l'ID depuis l'URL
+    const match = request.nextUrl.pathname.match(/\/api\/polygons\/([^/]+)/);
+    const polygonId = match?.[1];
+
+    if (!polygonId) {
+      return NextResponse.json({ error: 'Polygon ID is missing' }, { status: 400 });
+    }
+
     console.log(`Fetching polygon with ID: ${polygonId}`);
 
+    // ✅ Vérifier dans le cache
     if (Object.keys(polygonsCache).length > 0 && polygonsCache[polygonId]) {
       console.log(`Returning polygon ${polygonId} from cache`);
       return NextResponse.json(polygonsCache[polygonId]);
@@ -21,6 +27,7 @@ export async function GET(
     const dataDir = path.join(process.cwd(), 'data', 'polygons');
     const specificPolygonPath = path.join(dataDir, `${polygonId}.json`);
 
+    // ✅ Charger fichier spécifique
     if (fs.existsSync(specificPolygonPath)) {
       try {
         const polygonData = JSON.parse(fs.readFileSync(specificPolygonPath, 'utf8'));
@@ -31,6 +38,7 @@ export async function GET(
       }
     }
 
+    // ✅ Sinon charger fichier global
     console.log(`Polygon file not found, searching in all polygons...`);
     const allPolygonsPath = path.join(dataDir, 'polygons.json');
 
@@ -56,6 +64,7 @@ export async function GET(
       }
     }
 
+    // ✅ Si toujours pas trouvé, scanner tous les fichiers .json
     console.log(`Scanning polygons directory for polygon files...`);
     const files = fs.readdirSync(dataDir).filter(file => file.endsWith('.json'));
 
@@ -90,6 +99,7 @@ export async function GET(
       }
     }
 
+    // ❌ Si toujours rien trouvé
     console.log(`Polygon ${polygonId} not found`);
     return NextResponse.json({ error: `Polygon ${polygonId} not found` }, { status: 404 });
 
