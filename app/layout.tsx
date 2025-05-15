@@ -39,16 +39,25 @@ export default function RootLayout({
                 // Also set up a periodic check to ensure buildings stay visible
                 // Use a debounced version to prevent too many updates
                 let lastDispatchTime = 0;
+                let isDispatching = false; // Add a flag to prevent overlapping dispatches
+                
                 setInterval(function() {
                   // Only dispatch if the page has been loaded for more than 5 seconds
                   // And at least 30 seconds since last dispatch
+                  // And not currently dispatching
                   const now = performance.now();
                   if (document.readyState === 'complete' && 
                       now > 5000 && 
-                      now - lastDispatchTime > 30000) {
+                      now - lastDispatchTime > 30000 &&
+                      !isDispatching) {
                     console.log('Layout: Periodic ensureBuildingsVisible check');
+                    isDispatching = true;
                     window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
                     lastDispatchTime = now;
+                    // Reset the flag after a short delay
+                    setTimeout(() => {
+                      isDispatching = false;
+                    }, 1000);
                   }
                 }, 30000); // Keep at 30 seconds
                 
@@ -57,8 +66,15 @@ export default function RootLayout({
                 window.addEventListener('viewChanged', function(e) {
                   clearTimeout(viewChangeTimeout);
                   viewChangeTimeout = setTimeout(function() {
-                    console.log('View changed, ensuring buildings are visible');
-                    window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+                    if (!isDispatching) {
+                      console.log('View changed, ensuring buildings are visible');
+                      isDispatching = true;
+                      window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
+                      // Reset the flag after a short delay
+                      setTimeout(() => {
+                        isDispatching = false;
+                      }, 1000);
+                    }
                   }, 300); // Debounce for 300ms
                 });
               });

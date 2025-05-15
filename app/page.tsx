@@ -121,11 +121,8 @@ export default function TwoDPage() {
         });
       });
       
-      // Compare new points with current state to avoid unnecessary updates
-      const currentPointsJson = JSON.stringify(emptyBuildingPoints);
-      const newPointsJson = JSON.stringify(emptyPoints);
-      
-      if (currentPointsJson !== newPointsJson) {
+      // Use a deep comparison to avoid unnecessary state updates
+      if (JSON.stringify(emptyPoints) !== JSON.stringify(emptyBuildingPoints)) {
         setEmptyBuildingPoints(emptyPoints);
       }
     };
@@ -137,7 +134,6 @@ export default function TwoDPage() {
     };
     
     // Only calculate empty building points when polygons or buildings change
-    // NOT on every render or event
     if (polygons.length > 0 && buildings.length > 0) {
       calculateEmptyBuildingPoints();
     }
@@ -148,7 +144,7 @@ export default function TwoDPage() {
     return () => {
       window.removeEventListener('ensureBuildingsVisible', ensureBuildingsVisible);
     };
-  }, [polygons, buildings, emptyBuildingPoints]); // Added emptyBuildingPoints to dependencies
+  }, [polygons, buildings]); // Remove emptyBuildingPoints from dependencies
 
   // Update view when activeView changes
   useEffect(() => {

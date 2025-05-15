@@ -225,6 +225,14 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
     }
   }, [building]);
   
+  // Add refs to track current state without causing re-renders
+  const hoveredPolygonIdRef = useRef<string | null>(null);
+  const hoveredBuildingIdRef = useRef<string | null>(null);
+  const hoveredCanalPointRef = useRef<{lat: number, lng: number} | null>(null);
+  const hoveredBridgePointRef = useRef<{lat: number, lng: number} | null>(null);
+  const hoveredCitizenBuildingRef = useRef<string | null>(null);
+  const hoveredCitizenTypeRef = useRef<'home' | 'work' | null>(null);
+  
   // Add this useEffect to debug the building definition
   useEffect(() => {
     if (buildingDefinition) {

@@ -1086,6 +1086,14 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         return;
       }
       
+      // Use refs to track the current hover state to avoid dependency issues
+      const currentHoveredPolygonId = hoveredPolygonIdRef.current;
+      const currentHoveredBuildingId = hoveredBuildingIdRef.current;
+      const currentHoveredCanalPoint = hoveredCanalPointRef.current;
+      const currentHoveredBridgePoint = hoveredBridgePointRef.current;
+      const currentHoveredCitizenBuilding = hoveredCitizenBuildingRef.current;
+      const currentHoveredCitizenType = hoveredCitizenTypeRef.current;
+      
       // Only process hover detection in land view or buildings view
       if (activeView !== 'land' && activeView !== 'buildings') {
         // Reset hover states if not in land or buildings view
@@ -1115,7 +1123,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         }
         
         // Only update state if the hovered polygon has changed
-        if (hoveredId !== hoveredPolygonId) {
+        if (hoveredId !== currentHoveredPolygonId) {
+          hoveredPolygonIdRef.current = hoveredId;
           setHoveredPolygonId(hoveredId);
         }
       }
@@ -1177,7 +1186,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         }
         
         // Only update state if the hovered building has changed
-        if (newHoveredBuildingId !== hoveredBuildingId) {
+        if (newHoveredBuildingId !== currentHoveredBuildingId) {
+          hoveredBuildingIdRef.current = newHoveredBuildingId;
           setHoveredBuildingId(newHoveredBuildingId);
           
           if (newHoveredBuildingId) {
@@ -1268,12 +1278,14 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         }
       
         // Only update if the hovered canal point has changed
-        if (!foundHoveredCanalPoint && hoveredCanalPoint !== null) {
+        if (!foundHoveredCanalPoint && currentHoveredCanalPoint !== null) {
+          hoveredCanalPointRef.current = null;
           setHoveredCanalPoint(null);
         } else if (foundHoveredCanalPoint && 
-                  (hoveredCanalPoint === null || 
-                   hoveredCanalPoint.lat !== newHoveredCanalPoint.lat || 
-                   hoveredCanalPoint.lng !== newHoveredCanalPoint.lng)) {
+                  (currentHoveredCanalPoint === null || 
+                   currentHoveredCanalPoint.lat !== newHoveredCanalPoint.lat || 
+                   currentHoveredCanalPoint.lng !== newHoveredCanalPoint.lng)) {
+          hoveredCanalPointRef.current = newHoveredCanalPoint;
           setHoveredCanalPoint(newHoveredCanalPoint);
         }
       
@@ -1315,12 +1327,14 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         }
       
         // Only update if the hovered bridge point has changed
-        if (!foundHoveredBridgePoint && hoveredBridgePoint !== null) {
+        if (!foundHoveredBridgePoint && currentHoveredBridgePoint !== null) {
+          hoveredBridgePointRef.current = null;
           setHoveredBridgePoint(null);
         } else if (foundHoveredBridgePoint && 
-                  (hoveredBridgePoint === null || 
-                   hoveredBridgePoint.lat !== newHoveredBridgePoint.lat || 
-                   hoveredBridgePoint.lng !== newHoveredBridgePoint.lng)) {
+                  (currentHoveredBridgePoint === null || 
+                   currentHoveredBridgePoint.lat !== newHoveredBridgePoint.lat || 
+                   currentHoveredBridgePoint.lng !== newHoveredBridgePoint.lng)) {
+          hoveredBridgePointRef.current = newHoveredBridgePoint;
           setHoveredBridgePoint(newHoveredBridgePoint);
         }
       } else if (hoveredBuildingId !== null) {
@@ -1376,13 +1390,17 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         }
         
         // Only update if the hovered citizen has changed
-        if (!foundHoveredCitizen && (hoveredCitizenBuilding !== null || hoveredCitizenType !== null)) {
+        if (!foundHoveredCitizen && (currentHoveredCitizenBuilding !== null || currentHoveredCitizenType !== null)) {
+          hoveredCitizenBuildingRef.current = null;
+          hoveredCitizenTypeRef.current = null;
           setHoveredCitizenBuilding(null);
           setHoveredCitizenType(null);
           canvas.style.cursor = isDragging ? 'grabbing' : 'grab';
         } else if (foundHoveredCitizen && 
-                  (hoveredCitizenBuilding !== newHoveredCitizenBuilding || 
-                   hoveredCitizenType !== newHoveredCitizenType)) {
+                  (currentHoveredCitizenBuilding !== newHoveredCitizenBuilding || 
+                   currentHoveredCitizenType !== newHoveredCitizenType)) {
+          hoveredCitizenBuildingRef.current = newHoveredCitizenBuilding;
+          hoveredCitizenTypeRef.current = newHoveredCitizenType;
           setHoveredCitizenBuilding(newHoveredCitizenBuilding);
           setHoveredCitizenType(newHoveredCitizenType);
         }
@@ -1748,7 +1766,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       canvas.removeEventListener('mousemove', handleMouseMove);
       canvas.removeEventListener('click', handleClick);
     };
-  }, [polygonsToRender, buildings, isDragging, activeView, hoveredPolygonId, hoveredBuildingId, hoveredCanalPoint, hoveredBridgePoint, hoveredCitizenBuilding, hoveredCitizenType, scale, offset, emptyBuildingPoints, citizensByBuilding, transportMode]);
+  }, [isDragging, activeView, scale, offset, emptyBuildingPoints, citizensByBuilding, transportMode]);
 
   // Helper function to check if a point is inside a polygon
   function isPointInPolygon(x: number, y: number, polygon: {x: number, y: number}[]): boolean {
