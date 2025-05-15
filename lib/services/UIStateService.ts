@@ -31,24 +31,34 @@ export class UIStateService {
     position: {x: number, y: number} | null,
     imagePath: string | null
   ): void {
-    // Add debug logging
-    console.log('%c UIStateService.setBuildingHover called:', 'background: #9C27B0; color: white;', {
-      buildingName,
-      position,
-      imagePath,
-      stack: new Error().stack
-    });
-    
-    this.hoveredBuildingName = buildingName;
-    this.hoveredBuildingPosition = position;
-    this.hoveredBuildingImagePath = imagePath;
-    
-    // Emit event
-    eventBus.emit(EventTypes.BUILDING_HOVER_STATE_CHANGED, {
-      buildingName,
-      position,
-      imagePath
-    });
+    // Only emit the event if the state actually changed
+    if (
+      this.hoveredBuildingName !== buildingName ||
+      JSON.stringify(this.hoveredBuildingPosition) !== JSON.stringify(position) ||
+      this.hoveredBuildingImagePath !== imagePath
+    ) {
+      // Add debug logging
+      console.log('%c UIStateService.setBuildingHover: State changed, emitting event', 'background: #4CAF50; color: white;', {
+        buildingName,
+        position,
+        imagePath,
+        stack: new Error().stack
+      });
+      
+      // Update the state
+      this.hoveredBuildingName = buildingName;
+      this.hoveredBuildingPosition = position;
+      this.hoveredBuildingImagePath = imagePath;
+      
+      // Emit event
+      eventBus.emit(EventTypes.BUILDING_HOVER_STATE_CHANGED, {
+        buildingName,
+        position,
+        imagePath
+      });
+    } else {
+      console.log('%c UIStateService.setBuildingHover: No state change, skipping event', 'background: #FFC107; color: black;');
+    }
   }
   
   /**

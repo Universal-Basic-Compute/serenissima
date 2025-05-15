@@ -39,6 +39,10 @@ export default function RootLayout({
                   // Check if the coat of arms directory exists
                   const checkCoatOfArmsDir = async () => {
                     try {
+                      // Create the directory if it doesn't exist
+                      await fetch('/api/create-coat-of-arms-dir', { method: 'POST' });
+                      
+                      // Then check if the default image exists
                       const response = await fetch('/coat-of-arms/default.png', { method: 'HEAD' });
                       if (!response.ok) {
                         console.warn('Default coat of arms image not found. Using generated avatars instead.');
