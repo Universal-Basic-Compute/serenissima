@@ -153,7 +153,7 @@ export async function GET(request: Request) {
           record.fields.ImageUrl ? 
             (typeof record.fields.ImageUrl === 'string' ? 
               record.fields.ImageUrl as string : 
-              String(record.fields.ImageUrl as AirtableValue)) : 
+              String(record.fields.ImageUrl)) : 
             undefined, 
           citizenId
         ),
@@ -161,7 +161,7 @@ export async function GET(request: Request) {
           record.fields.ImageUrl ? 
             (typeof record.fields.ImageUrl === 'string' ? 
               record.fields.ImageUrl as string : 
-              String(record.fields.ImageUrl as AirtableValue)) : 
+              String(record.fields.ImageUrl)) : 
             undefined, 
           citizenId
         ),
