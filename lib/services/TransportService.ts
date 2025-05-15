@@ -204,8 +204,16 @@ export class TransportService {
         }
       }
       
+      // Determine if we're running in Node.js or browser environment
+      const isNode = typeof window === 'undefined';
+      
+      // Set base URL depending on environment
+      const baseUrl = isNode 
+        ? (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000')
+        : '';
+      
       // If local pathfinding failed or wasn't possible, fall back to API
-      const response = await fetch('/api/transport', {
+      const response = await fetch(`${baseUrl}/api/transport`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -241,7 +249,7 @@ export class TransportService {
             alert('Points are not on land. Attempting to find a water route...');
             
             // Make a direct request to the water-only pathfinding endpoint
-            const waterResponse = await fetch('/api/transport/water-only', {
+            const waterResponse = await fetch(`${baseUrl}/api/transport/water-only`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -370,9 +378,17 @@ export class TransportService {
     try {
       console.log('Starting loadPolygons()...');
       
+      // Determine if we're running in Node.js or browser environment
+      const isNode = typeof window === 'undefined';
+      
+      // Set base URL depending on environment
+      const baseUrl = isNode 
+        ? (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000')
+        : '';
+      
       // First try to load from the API endpoint
       try {
-        console.log('Fetching polygons from API endpoint: /api/get-polygons');
+        console.log(`Fetching polygons from API endpoint: ${baseUrl}/api/get-polygons`);
         
         // Add timeout handling
         const controller = new AbortController();
@@ -381,7 +397,7 @@ export class TransportService {
           controller.abort();
         }, 10000);
         
-        const response = await fetch('/api/get-polygons', {
+        const response = await fetch(`${baseUrl}/api/get-polygons`, {
           signal: controller.signal
         });
         
@@ -425,7 +441,7 @@ export class TransportService {
       
       try {
         // Fetch the list of polygon files
-        const filesResponse = await fetch('/api/list-polygon-files');
+        const filesResponse = await fetch(`${baseUrl}/api/list-polygon-files`);
         
         if (filesResponse.ok) {
           const filesData = await filesResponse.json();
@@ -445,7 +461,7 @@ export class TransportService {
                 const polygonId = file.replace('.json', '');
                 
                 // Fetch individual polygon data
-                const polygonResponse = await fetch(`/api/polygons/${polygonId}`);
+                const polygonResponse = await fetch(`${baseUrl}/api/polygons/${polygonId}`);
                 
                 if (polygonResponse.ok) {
                   const polygonData = await polygonResponse.json();
@@ -486,7 +502,7 @@ export class TransportService {
       console.log('Trying to load polygons.json directly');
       
       try {
-        const directResponse = await fetch('/data/polygons/polygons.json');
+        const directResponse = await fetch(`${baseUrl}/data/polygons/polygons.json`);
         
         if (directResponse.ok) {
           const directData = await directResponse.json();
