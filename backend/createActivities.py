@@ -218,7 +218,12 @@ def find_path_between_buildings(from_building: Dict, to_building: Dict) -> Optio
 def create_resource_fetching_activity(tables, citizen: Dict, contract: Dict, from_building: Dict, to_building: Dict, path: Dict) -> Optional[Dict]:
     """Create a resource fetching activity based on a contract."""
     try:
-        citizen_id = citizen['id']
+        # Get the Airtable record ID
+        record_id = citizen['id']
+        
+        # Get the CitizenId from the fields
+        citizen_id = citizen['fields'].get('CitizenId', record_id)
+        
         contract_id = contract['id']
         from_building_id = from_building['id']
         to_building_id = to_building['id']
@@ -264,7 +269,12 @@ def create_resource_fetching_activity(tables, citizen: Dict, contract: Dict, fro
 def create_production_activity(tables, citizen: Dict, building: Dict, recipe: Dict) -> Optional[Dict]:
     """Create a production activity based on a recipe."""
     try:
-        citizen_id = citizen['id']
+        # Get the Airtable record ID
+        record_id = citizen['id']
+        
+        # Get the CitizenId from the fields
+        citizen_id = citizen['fields'].get('CitizenId', record_id)
+        
         building_id = building['id']
         
         # Extract recipe details
@@ -424,7 +434,7 @@ def create_rest_activity(tables, citizen_id: str, home_id: str) -> Optional[Dict
         activity = tables['activities'].create({
             "ActivityId": f"rest_{citizen_id}_{int(time.time())}",
             "Type": "rest",
-            "CitizenId": citizen_id,
+            "CitizenId": citizen_id,  # This should be the CitizenId, not the Airtable record ID
             "FromBuilding": home_id,
             "ToBuilding": home_id,
             "CreatedAt": now.isoformat(),
@@ -459,7 +469,7 @@ def create_goto_home_activity(tables, citizen_id: str, home_id: str, path_data: 
         activity = tables['activities'].create({
             "ActivityId": f"goto_home_{citizen_id}_{int(time.time())}",
             "Type": "goto_home",
-            "CitizenId": citizen_id,
+            "CitizenId": citizen_id,  # This should be the CitizenId, not the Airtable record ID
             "ToBuilding": home_id,
             "CreatedAt": now.isoformat(),
             "StartDate": start_date,
@@ -486,7 +496,7 @@ def create_idle_activity(tables, citizen_id: str) -> Optional[Dict]:
         activity = tables['activities'].create({
             "ActivityId": f"idle_{citizen_id}_{int(time.time())}",
             "Type": "idle",
-            "CitizenId": citizen_id,
+            "CitizenId": citizen_id,  # This should be the CitizenId, not the Airtable record ID
             "CreatedAt": now.isoformat(),
             "StartDate": now.isoformat(),
             "EndDate": end_time.isoformat(),
@@ -501,7 +511,12 @@ def create_idle_activity(tables, citizen_id: str) -> Optional[Dict]:
 
 def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
     """Process activity creation for a single citizen."""
-    citizen_id = citizen['id']
+    # Get the Airtable record ID
+    record_id = citizen['id']
+    
+    # Get the CitizenId from the fields
+    citizen_id = citizen['fields'].get('CitizenId', record_id)
+    
     citizen_name = f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}"
     
     log.info(f"Processing activity for citizen {citizen_name} (ID: {citizen_id})")
