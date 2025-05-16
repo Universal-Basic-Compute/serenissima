@@ -530,22 +530,75 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
       const citizen = citizens.find(c => c.citizenid === citizenId || c.CitizenId === citizenId || c.id === citizenId);
       if (!citizen) return;
       
-      // Start with the first path
-      const initialPath = paths[0];
-      if (!initialPath.path || initialPath.path.length < 2) return;
+      // Find the most appropriate path based on time
+      const now = new Date();
+      let selectedPath: ActivityPath | null = null;
+      let initialProgress = 0;
       
-      // Random starting progress
-      const initialProgress = Math.random();
-      const initialPosition = calculatePositionAlongPath(initialPath.path, initialProgress) || initialPath.path[0];
+      // First, check for paths that are currently in progress (between start and end dates)
+      for (const path of paths) {
+        if (!path.path || path.path.length < 2) continue;
+        
+        const startTime = path.startTime ? new Date(path.startTime) : null;
+        const endTime = path.endTime ? new Date(path.endTime) : null;
+        
+        // Skip paths without a valid start time
+        if (!startTime) continue;
+        
+        // If the path has both start and end times, check if we're within that timeframe
+        if (startTime && endTime) {
+          if (now >= startTime && now <= endTime) {
+            // This path is currently active - calculate progress based on elapsed time
+            const totalDuration = endTime.getTime() - startTime.getTime();
+            const elapsedTime = now.getTime() - startTime.getTime();
+            initialProgress = Math.min(Math.max(elapsedTime / totalDuration, 0), 1);
+            selectedPath = path;
+            console.log(`Found active path for ${citizenId} with progress ${initialProgress.toFixed(2)}`);
+            break; // Found an active path, no need to check others
+          }
+        } 
+        // If the path only has a start time (no end time), check if it started in the last hour
+        else if (startTime) {
+          const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+          if (startTime >= oneHourAgo) {
+            // This path started recently - estimate progress based on typical speed
+            // Assume a typical activity takes about 1 hour to complete
+            const elapsedTime = now.getTime() - startTime.getTime();
+            initialProgress = Math.min(Math.max(elapsedTime / (60 * 60 * 1000), 0), 1);
+            selectedPath = path;
+            console.log(`Found recent path for ${citizenId} with estimated progress ${initialProgress.toFixed(2)}`);
+            break; // Found a recent path, no need to check others
+          }
+        }
+      }
+      
+      // If no active or recent path was found, just use the first path with random progress
+      if (!selectedPath && paths.length > 0) {
+        selectedPath = paths[0];
+        initialProgress = Math.random(); // Random progress between 0 and 1
+        console.log(`Using random progress ${initialProgress.toFixed(2)} for ${citizenId} with no active paths`);
+      }
+      
+      // Skip if no suitable path was found
+      if (!selectedPath || !selectedPath.path || selectedPath.path.length < 2) return;
+      
+      // Calculate position based on progress
+      const initialPosition = calculatePositionAlongPath(selectedPath.path, initialProgress) || selectedPath.path[0];
       
       // Random speed between 1-5 m/s (walking to running)
-      const speed = 1 + Math.random() * 4;
+      // Adjust speed based on activity type - slower for work, faster for transport
+      let speed = 1 + Math.random() * 4;
+      if (selectedPath.type.toLowerCase().includes('work')) {
+        speed = 0.5 + Math.random() * 1.5; // Slower for work activities
+      } else if (selectedPath.type.toLowerCase().includes('transport')) {
+        speed = 3 + Math.random() * 3; // Faster for transport activities
+      }
       
       initialAnimatedCitizens[citizenId] = {
         citizen,
         currentPosition: initialPosition,
-        pathIndex: 0,
-        currentPath: initialPath,
+        pathIndex: paths.indexOf(selectedPath),
+        currentPath: selectedPath,
         progress: initialProgress,
         speed
       };
