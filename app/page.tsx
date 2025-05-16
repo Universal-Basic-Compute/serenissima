@@ -269,6 +269,23 @@ export default function TwoDPage() {
     window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
   }, []); // Empty dependency array means this runs only once on mount
   
+  // Fetch land groups data
+  const fetchLandGroups = useCallback(async () => {
+    try {
+      console.log('Fetching land groups data from TwoDPage...');
+      const response = await fetch('/api/land-groups?includeUnconnected=true&minSize=1');
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.landGroups) {
+          console.log(`TwoDPage: Loaded ${data.landGroups.length} land groups`);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching land groups from TwoDPage:', error);
+    }
+  }, []);
+
   // Update view when activeView changes
   useEffect(() => {
     console.log(`View changed to: ${activeView}`);
