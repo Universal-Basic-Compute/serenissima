@@ -612,7 +612,8 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
         <CitizenDetailsPanel 
           citizen={selectedCitizen} 
           onClose={() => {
-            console.log('onClose callback executed from CitizenMarkers');
+            console.log('CitizenMarkers: onClose callback executed');
+            // Clear both selected citizen and paths
             setSelectedCitizen(null);
             setSelectedCitizenPaths([]);
           }} 

@@ -112,12 +112,10 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     };
   }, [citizen]);
   
-  const handleClose = (e?: React.MouseEvent) => {
-    if (e) {
-      e.stopPropagation();
-    }
-    console.log('Close function called directly');
-    // Skip animation and close immediately
+  const handleClose = () => {
+    // Log for debugging
+    console.log('Close button clicked, calling onClose directly');
+    // Call onClose directly without animation
     onClose();
   };
   
@@ -270,7 +268,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     >
       {/* Emergency close button */}
       <button 
-        onClick={onClose}
+        onClick={handleClose}
         className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full z-50 cursor-pointer"
         style={{ cursor: 'pointer' }}
       >
@@ -282,13 +280,9 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
           {citizen.firstname} {citizen.lastname}
         </h2>
         <button 
-          onClick={(e) => {
-            e.stopPropagation(); // Stop event propagation
-            console.log('Close button clicked with event:', e);
-            handleClose();
-          }}
-          className="text-amber-600 hover:text-amber-800 hover:bg-amber-100 transition-colors p-3 rounded-full cursor-pointer" // Add cursor-pointer explicitly
-          style={{ cursor: 'pointer' }} // Add inline style for cursor
+          onClick={handleClose}
+          className="text-amber-600 hover:text-amber-800 hover:bg-amber-100 transition-colors p-3 rounded-full cursor-pointer"
+          style={{ cursor: 'pointer' }}
           aria-label="Close"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
