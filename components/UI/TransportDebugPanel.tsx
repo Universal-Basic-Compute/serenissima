@@ -327,9 +327,16 @@ const TransportDebugPanel: React.FC<TransportDebugPanelProps> = ({ onClose, visi
                   <h3 className="text-lg font-medium text-amber-800 mb-2">Node Types</h3>
                   <div className="grid grid-cols-2 gap-4">
                     {Object.entries(graphInfo.nodesByType).map(([type, count]: [string, any]) => (
-                      <div key={type} className="bg-white p-3 rounded shadow-sm">
+                      <div key={type} className={`bg-white p-3 rounded shadow-sm ${
+                        (type === 'bridge' || type === 'canal') ? 'border-2 border-amber-500' : ''
+                      }`}>
                         <p className="text-sm text-amber-600">{type.charAt(0).toUpperCase() + type.slice(1)}</p>
                         <p className="text-2xl font-bold text-amber-800">{formatNumber(count)}</p>
+                        {(type === 'bridge' || type === 'canal') && count === 0 && pathfindingMode === 'real' && (
+                          <p className="text-xs text-red-600 mt-1">
+                            No {type} nodes in 'real' mode. Check if any {type}s are marked as constructed.
+                          </p>
+                        )}
                       </div>
                     ))}
                   </div>

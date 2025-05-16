@@ -150,12 +150,15 @@ export class TransportService {
    * @param mode 'all' to use all potential points, 'real' to only use constructed infrastructure
    */
   public setPathfindingMode(mode: 'all' | 'real'): void {
-    this.pathfindingMode = mode;
-    console.log(`Pathfinding mode set to: ${mode}`);
-    
-    // Rebuild the graph with the new mode
-    if (this.polygonsLoaded && this.polygons.length > 0) {
-      this.buildGraphAndNetwork();
+    if (this.pathfindingMode !== mode) {
+      console.log(`Changing pathfinding mode from ${this.pathfindingMode} to ${mode}`);
+      this.pathfindingMode = mode;
+      
+      // Rebuild the graph with the new mode if polygons are loaded
+      if (this.polygonsLoaded && this.polygons.length > 0) {
+        console.log('Rebuilding graph and network with new pathfinding mode');
+        this.buildGraphAndNetwork();
+      }
     }
   }
 
@@ -1370,6 +1373,13 @@ export class TransportService {
       }
     }
     
+    // Log the node types for debugging
+    const nodeTypes = {};
+    Object.values(graph.nodes).forEach(node => {
+      nodeTypes[node.type] = (nodeTypes[node.type] || 0) + 1;
+    });
+    console.log('Graph node types:', nodeTypes);
+  
     return graph;
   }
 
@@ -1397,6 +1407,21 @@ export class TransportService {
     
     // Count connected components
     const components = this.findConnectedComponents(this.graph);
+    
+    // Log detailed information about bridge and canal points
+    const bridgeNodes = Object.values(this.graph.nodes).filter(node => node.type === 'bridge');
+    const canalNodes = Object.values(this.graph.nodes).filter(node => node.type === 'canal');
+    
+    console.log(`Debug: Found ${bridgeNodes.length} bridge nodes and ${canalNodes.length} canal nodes`);
+    console.log(`Debug: Current pathfinding mode is ${this.pathfindingMode}`);
+    
+    if (bridgeNodes.length < 5) {
+      console.log('Debug: Bridge nodes:', bridgeNodes);
+    }
+    
+    if (canalNodes.length < 5) {
+      console.log('Debug: Canal nodes:', canalNodes);
+    }
     
     return {
       totalNodes: Object.keys(this.graph.nodes).length,
