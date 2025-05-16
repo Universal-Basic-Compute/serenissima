@@ -219,42 +219,101 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
       </div>
     );
   } else if (tooltipData.type === 'resource') {
-    // Render resource tooltip content
-    tooltipContent = (
-      <div>
-        <div className="font-bold mb-2">Resources at this location</div>
-        <div className="max-h-48 overflow-y-auto">
-          {tooltipData.resources.map((resource: any) => (
-            <div key={resource.id} className="mb-2 pb-2 border-b border-amber-700/30 last:border-0">
-              <div className="flex items-center">
-                <div className="w-6 h-6 mr-2 bg-amber-800/50 rounded overflow-hidden flex items-center justify-center">
-                  <img 
-                    src={`/images/resources/${resource.icon}`}
-                    alt={resource.name}
-                    className="w-5 h-5 object-contain"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/images/resources/default.png';
-                    }}
-                  />
-                </div>
-                <div className="font-medium">{resource.name}</div>
-                <div className="ml-auto text-amber-300 font-medium">x{resource.amount}</div>
-              </div>
-              {resource.rarity && resource.rarity !== 'common' && (
-                <div className="text-xs mt-1 capitalize text-amber-200">
-                  Rarity: {resource.rarity}
-                </div>
-              )}
+    // For resources, use the data provided in the event
+    if (tooltipData.resources && tooltipData.resources.length > 0) {
+      // Check if these are contract resources by looking for contractType property
+      const isContractResource = tooltipData.resources[0].contractType !== undefined;
+      
+      if (isContractResource) {
+        tooltipContent = (
+          <div>
+            <div className="font-bold mb-2">Contracts at this location</div>
+            <div className="max-h-48 overflow-y-auto">
+              {tooltipData.resources.map((resource: any) => {
+                // Determine contract type label and color
+                let contractTypeLabel = 'Contract';
+                let contractTypeColor = 'text-amber-300';
+                
+                if (resource.contractType === 'public_sell') {
+                  contractTypeLabel = 'Public Sell';
+                  contractTypeColor = 'text-green-400';
+                } else if (resource.owner === getCurrentUsername()) {
+                  contractTypeLabel = 'Your Sell';
+                  contractTypeColor = 'text-blue-400';
+                } else {
+                  contractTypeLabel = 'Your Buy';
+                  contractTypeColor = 'text-red-400';
+                }
+                
+                return (
+                  <div key={resource.id} className="mb-2 pb-2 border-b border-amber-700/30 last:border-0">
+                    <div className="flex items-center">
+                      <div className="w-6 h-6 mr-2 bg-amber-800/50 rounded overflow-hidden flex items-center justify-center">
+                        <img 
+                          src={`/images/resources/${resource.name.toLowerCase().replace(/\s+/g, '_')}.png`}
+                          alt={resource.name}
+                          className="w-5 h-5 object-contain"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/images/resources/default.png';
+                          }}
+                        />
+                      </div>
+                      <div className="font-medium">{resource.name}</div>
+                      <div className={`ml-auto ${contractTypeColor} font-medium`}>{contractTypeLabel}</div>
+                    </div>
+                    <div className="text-xs mt-1 flex justify-between">
+                      <span>Price: {resource.price} ⚜️</span>
+                      <span>Amount: {resource.amount}</span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-          ))}
-        </div>
-        {tooltipData.position && (
-          <div className="text-xs mt-2 text-amber-300">
-            Location: {tooltipData.position.lat.toFixed(6)}, {tooltipData.position.lng.toFixed(6)}
+            {tooltipData.position && (
+              <div className="text-xs mt-2 text-amber-300">
+                Location: {tooltipData.position.lat.toFixed(6)}, {tooltipData.position.lng.toFixed(6)}
+              </div>
+            )}
           </div>
-        )}
-      </div>
-    );
+        );
+      } else {
+        tooltipContent = (
+          <div>
+            <div className="font-bold mb-2">Resources at this location</div>
+            <div className="max-h-48 overflow-y-auto">
+              {tooltipData.resources.map((resource: any) => (
+                <div key={resource.id} className="mb-2 pb-2 border-b border-amber-700/30 last:border-0">
+                  <div className="flex items-center">
+                    <div className="w-6 h-6 mr-2 bg-amber-800/50 rounded overflow-hidden flex items-center justify-center">
+                      <img 
+                        src={`/images/resources/${resource.icon}`}
+                        alt={resource.name}
+                        className="w-5 h-5 object-contain"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = '/images/resources/default.png';
+                        }}
+                      />
+                    </div>
+                    <div className="font-medium">{resource.name}</div>
+                    <div className="ml-auto text-amber-300 font-medium">x{resource.amount}</div>
+                  </div>
+                  {resource.rarity && resource.rarity !== 'common' && (
+                    <div className="text-xs mt-1 capitalize text-amber-200">
+                      Rarity: {resource.rarity}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            {tooltipData.position && (
+              <div className="text-xs mt-2 text-amber-300">
+                Location: {tooltipData.position.lat.toFixed(6)}, {tooltipData.position.lng.toFixed(6)}
+              </div>
+            )}
+          </div>
+        );
+      }
+    }
   }
   
   return (
