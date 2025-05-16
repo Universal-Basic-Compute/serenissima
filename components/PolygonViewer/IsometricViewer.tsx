@@ -1633,6 +1633,14 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       // Get polygon owner color or income-based color or land group color
       let fillColor = '#FFF5D0'; // Default sand color
       
+      // Check if this polygon has a public dock
+      const hasPublicDock = polygon.canalPoints && Array.isArray(polygon.canalPoints) && 
+        polygon.canalPoints.some(point => {
+          if (!point.edge) return false;
+          const pointId = point.id || `canal-${point.edge.lat}-${point.edge.lng}`;
+          return pointId.includes('public_dock') || pointId.includes('dock-constructed');
+        });
+      
       if (activeView === 'land') {
         if (incomeDataLoaded && polygon.id && incomeData[polygon.id] !== undefined) {
           // Use income-based color in land view ONLY if income data is loaded
@@ -1705,7 +1713,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         centroidX: centerX, // Store both for compatibility
         centroidY: centerY,
         centerX: centerX,    // Add these explicitly
-        centerY: centerY
+        centerY: centerY,
+        hasPublicDock        // Add this flag to identify polygons with public docks
       };
     }).filter(Boolean);
   }, [polygons, landOwners, users, activeView, scale, offset, incomeData, incomeDataLoaded, landGroups, landGroupColors]);
@@ -1745,7 +1754,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
 
     // Now render in two passes: first the polygons, then the text
     // First pass: Draw all polygon shapes
-    polygonsToRender.forEach(({ polygon, coords, fillColor }) => {
+    polygonsToRender.forEach(({ polygon, coords, fillColor, hasPublicDock }) => {
       // Draw polygon path
       ctx.beginPath();
       ctx.moveTo(coords[0].x, coords[0].y);
@@ -1764,6 +1773,12 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         ctx.fill();
         ctx.strokeStyle = '#FF3300'; // Bright red-orange for selected
         ctx.lineWidth = 3.5;
+      } else if (hasPublicDock) {
+        // Public dock state: normal fill with orange border
+        ctx.fillStyle = fillColor;
+        ctx.fill();
+        ctx.strokeStyle = '#FF8C00'; // Orange for lands with public docks
+        ctx.lineWidth = 2.5;
       } else {
         // Normal state
         ctx.fillStyle = fillColor;
@@ -3268,6 +3283,21 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
                 <span>{groupId}</span>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+      
+      {/* Public Dock Legend - only visible in transport view */}
+      {activeView === 'transport' && (
+        <div className="absolute top-20 left-20 bg-black/70 text-white px-3 py-2 rounded text-sm pointer-events-none">
+          <p className="font-bold mb-2">Legend</p>
+          <div className="flex items-center mb-1">
+            <div className="w-4 h-4 mr-2 border-2 border-orange-500"></div>
+            <span>Land with Public Dock</span>
+          </div>
+          <div className="flex items-center">
+            <div className="w-4 h-4 mr-2 bg-blue-500 rounded-full"></div>
+            <span>Dock Point</span>
           </div>
         </div>
       )}
