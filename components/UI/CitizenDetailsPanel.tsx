@@ -113,12 +113,14 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
   }, [citizen]);
   
   const handleClose = () => {
+    console.log('Close button clicked'); // Add logging to debug
     // Animate out before closing
     setIsVisible(false);
     // Use a shorter timeout to make the closing more responsive
     setTimeout(() => {
+      console.log('Executing onClose callback');
       onClose();
-    }, 200); // Reduced from 300ms to 200ms for faster response
+    }, 100); // Reduced from 200ms to 100ms for faster response
   };
   
   const formatDucats = (amount: number | string) => {
@@ -266,6 +268,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
       className={`fixed top-20 right-4 bg-amber-50 border-2 border-amber-700 rounded-lg p-6 shadow-lg max-w-md z-50 transition-all duration-300 pointer-events-auto ${
         isVisible ? 'opacity-100 transform translate-x-0' : 'opacity-0 transform translate-x-10'
       }`}
+      style={{ pointerEvents: 'auto' }} // Explicitly set pointer-events to auto
     >
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-serif text-amber-800">
@@ -273,7 +276,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
         </h2>
         <button 
           onClick={handleClose}
-          className="text-amber-600 hover:text-amber-800 transition-colors p-2" // Added padding for larger click area
+          className="text-amber-600 hover:text-amber-800 hover:bg-amber-100 transition-colors p-3 rounded-full" // Increased padding, added hover background
           aria-label="Close"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
