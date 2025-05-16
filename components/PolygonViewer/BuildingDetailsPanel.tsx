@@ -169,9 +169,15 @@ interface BuildingDetailsPanelProps {
   selectedBuildingId: string | null;
   onClose: () => void;
   visible?: boolean;
+  polygons?: any[]; // Add this prop
 }
 
-export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visible = true }: BuildingDetailsPanelProps) {
+export default function BuildingDetailsPanel({ 
+  selectedBuildingId, 
+  onClose, 
+  visible = true,
+  polygons = [] // Add this with default empty array
+}: BuildingDetailsPanelProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [building, setBuilding] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -182,6 +188,8 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
   const [buildingDefinition, setBuildingDefinition] = useState<any>(null);
   const [showFullDescription, setShowFullDescription] = useState<boolean>(false);
   const [buildingImagePath, setBuildingImagePath] = useState<string>('/images/buildings/market_stall.jpg');
+  const [pointData, setPointData] = useState<any>(null);
+  const [polygonsData, setPolygonsData] = useState<any[]>(polygons);
   
   // Fetch building details when a building is selected
   useEffect(() => {
@@ -287,6 +295,15 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
   const hoveredCitizenBuildingRef = useRef<string | null>(null);
   const hoveredCitizenTypeRef = useRef<'home' | 'work' | null>(null);
   
+  // Add this useEffect to get polygons from window if not provided as props
+  useEffect(() => {
+    if (polygons.length === 0 && typeof window !== 'undefined' && window.__polygonData) {
+      setPolygonsData(window.__polygonData);
+    } else {
+      setPolygonsData(polygons);
+    }
+  }, [polygons]);
+  
   // Add this useEffect to debug the building definition
   useEffect(() => {
     if (buildingDefinition) {
@@ -295,6 +312,61 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
       console.log('Maintenance cost value:', buildingDefinition.maintenanceCost);
     }
   }, [buildingDefinition]);
+  
+  // Add this useEffect to find the point data when a building is selected
+  useEffect(() => {
+    if (building?.position && polygonsData.length > 0) {
+      let position;
+      try {
+        position = typeof building.position === 'string' ? JSON.parse(building.position) : building.position;
+      } catch (e) {
+        console.error('Error parsing building position:', e);
+        return;
+      }
+
+      // Find the polygon that contains this point
+      const findPointInPolygons = () => {
+        for (const polygon of polygonsData) {
+          // Check building points
+          if (polygon.buildingPoints) {
+            const buildingPoint = polygon.buildingPoints.find((point: any) => 
+              Math.abs(point.lat - position.lat) < 0.0001 && Math.abs(point.lng - position.lng) < 0.0001
+            );
+            if (buildingPoint) {
+              console.log('Found matching building point:', buildingPoint);
+              return buildingPoint;
+            }
+          }
+          
+          // Check bridge points
+          if (polygon.bridgePoints) {
+            const bridgePoint = polygon.bridgePoints.find((point: any) => 
+              point.edge && Math.abs(point.edge.lat - position.lat) < 0.0001 && Math.abs(point.edge.lng - position.lng) < 0.0001
+            );
+            if (bridgePoint) {
+              console.log('Found matching bridge point:', bridgePoint);
+              return bridgePoint;
+            }
+          }
+          
+          // Check canal points
+          if (polygon.canalPoints) {
+            const canalPoint = polygon.canalPoints.find((point: any) => 
+              point.edge && Math.abs(point.edge.lat - position.lat) < 0.0001 && Math.abs(point.edge.lng - position.lng) < 0.0001
+            );
+            if (canalPoint) {
+              console.log('Found matching canal point:', canalPoint);
+              return canalPoint;
+            }
+          }
+        }
+        return null;
+      };
+
+      const foundPoint = findPointInPolygons();
+      setPointData(foundPoint);
+    }
+  }, [building, polygonsData]);
   
   // Function to fetch land data
   const fetchLandData = async (landId: string) => {
@@ -813,46 +885,67 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                 )}
               </div>
               
-              {/* Location with land visualization */}
+              {/* Location with point visualization */}
               <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
                 <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Location</h3>
                 
-                {landData ? (
-                  <div className="flex flex-col items-center">
-                    {/* Land name */}
-                    <p className="font-serif text-lg font-semibold text-amber-800 mb-2">
-                      {landData.historicalName || landData.englishName || 'Land Plot'}
+                <div className="flex flex-col items-center">
+                  {/* Point name */}
+                  {pointData ? (
+                    <>
+                      {/* Street name or bridge/canal name */}
+                      <p className="font-serif text-lg font-semibold text-amber-800 mb-2">
+                        {pointData.streetName || pointData.connection?.historicalName || 'Building Location'}
+                      </p>
+                      
+                      {/* English name */}
+                      {(pointData.streetNameEnglish || pointData.connection?.englishName) && (
+                        <p className="text-gray-700 italic mb-2">
+                          {pointData.streetNameEnglish || pointData.connection?.englishName}
+                        </p>
+                      )}
+                      
+                      {/* Description */}
+                      {(pointData.streetDescription || pointData.connection?.historicalDescription) && (
+                        <p className="text-sm text-gray-600 mb-3">
+                          {pointData.streetDescription || pointData.connection?.historicalDescription}
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    landData ? (
+                      <p className="font-serif text-lg font-semibold text-amber-800 mb-2">
+                        {landData.historicalName || landData.englishName || 'Land Plot'}
+                      </p>
+                    ) : (
+                      <p className="text-gray-500 italic">Location details unavailable</p>
+                    )
+                  )}
+                  
+                  {/* Land owner - keep this if still needed */}
+                  {landData?.owner && (
+                    <p className="text-gray-700 mb-2">
+                      <span className="font-medium">Land Owner:</span> {landData.owner}
                     </p>
-                    
-                    {/* Land owner */}
-                    {landData.owner && (
-                      <p className="text-gray-700 mb-2">
-                        <span className="font-medium">Owner:</span> {landData.owner}
-                      </p>
-                    )}
-                    
-                    {/* Land coordinates */}
-                    {building?.position && (
-                      <p className="text-xs text-gray-500 mb-2">
-                        {typeof building.position === 'string' 
-                          ? String(building.position) 
-                          : `Lat: ${String(building.position.lat?.toFixed(6) || '')}, Lng: ${String(building.position.lng?.toFixed(6) || '')}`
-                        }
-                      </p>
-                    )}
-                    
-                    {/* Canvas for land visualization */}
-                    <canvas 
-                      ref={canvasRef} 
-                      className="w-full h-[200px] border border-amber-100 rounded-lg mb-2"
-                      style={{ maxWidth: '300px' }}
-                    />
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center h-[200px]">
-                    <p className="text-gray-500 italic">Loading land details...</p>
-                  </div>
-                )}
+                  )}
+                  
+                  {/* Land coordinates */}
+                  {building?.position && (
+                    <p className="text-xs text-gray-500 mb-2">
+                      {typeof building.position === 'string' 
+                        ? String(building.position) 
+                        : `Lat: ${String(building.position.lat?.toFixed(6) || '')}, Lng: ${String(building.position.lng?.toFixed(6) || '')}`
+                      }
+                    </p>
+                  )}
+                  
+                  {/* Canvas for land visualization */}
+                  <canvas 
+                    ref={canvasRef} 
+                    className="w-full h-[200px] border border-amber-100 rounded-lg mb-2"
+                    style={{ maxWidth: '300px' }}
+                  />
+                </div>
               </div>
               
               {/* Maintenance Cost */}
