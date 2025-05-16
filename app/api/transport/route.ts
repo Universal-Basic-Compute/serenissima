@@ -136,6 +136,15 @@ export async function POST(request: Request) {
     if (!result.success && result.error === 'Start or end point is not within any polygon') {
       console.log('Regular pathfinding failed, attempting water-only pathfinding as fallback');
       result = await transportService.findWaterOnlyPath(startPoint, endPoint);
+      
+      // If water-only pathfinding also failed, return a clear error
+      if (!result.success) {
+        return NextResponse.json({
+          success: false,
+          error: 'No path could be found between the specified points',
+          details: 'Points are not within navigable areas or no valid route exists'
+        });
+      }
     }
     
     // If path was found successfully, calculate the endDate
