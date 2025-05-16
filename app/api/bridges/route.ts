@@ -93,8 +93,14 @@ export async function GET(request: Request) {
       // If bridge has a LandId, fetch the polygon data
       if (bridge.landId) {
         try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/polygons/${bridge.landId}`);
-          
+          // Get API base URL from environment variables, with a default fallback
+          const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
+                        (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+            
+          // Use URL constructor to ensure proper URL formatting
+          const polygonUrl = new URL(`/api/polygons/${bridge.landId}`, baseUrl).toString();
+          const response = await fetch(polygonUrl);
+            
           if (response.ok) {
             const polygonData = await response.json();
             
