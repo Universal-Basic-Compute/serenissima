@@ -92,7 +92,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
       // Fetch activities for all citizens in chunks to avoid URL length limits
       const chunkSize = 10;
       const pathsMap: Record<string, ActivityPath[]> = {};
-      const allPaths: ActivityPath[] = []; // Add this to collect all paths
+      const allPaths: ActivityPath[] = []; // Collect all paths in a single array
       
       for (let i = 0; i < citizenIds.length; i += chunkSize) {
         const chunk = citizenIds.slice(i, i + chunkSize);
@@ -150,7 +150,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                   };
                   
                   pathsMap[citizenId].push(activityPath);
-                  allPaths.push(activityPath); // Add to all paths array
+                  allPaths.push(activityPath); // Add to the all paths array
                 } catch (e) {
                   console.warn(`Failed to parse activity path for ${activity.ActivityId || 'unknown'}:`, e);
                   return;
@@ -163,7 +163,12 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
       
       console.log(`Loaded activity paths for ${Object.keys(pathsMap).length} citizens, total paths: ${allPaths.length}`);
       setActivityPaths(pathsMap);
-      setVisiblePaths(allPaths); // Set all paths as visible
+      setVisiblePaths(allPaths); // Set all paths to be visible
+      
+      // Log the first few paths for debugging
+      if (allPaths.length > 0) {
+        console.log('Sample paths:', allPaths.slice(0, 3));
+      }
     } catch (error) {
       console.error('Error fetching activity paths:', error);
     } finally {
@@ -334,10 +339,28 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     };
   }, []);
   
+  // Add a separate effect to update paths when citizens change
+  useEffect(() => {
+    // This effect should run when the component mounts and when citizens change
+    if (citizens.length > 0) {
+      fetchActivityPaths();
+    }
+  }, [citizens]);
+  
   // Update when scale or offset changes
   useEffect(() => {
     // Force re-render when scale or offset changes
   }, [scale, offset, canvasWidth, canvasHeight]);
+  
+  // Add an additional useEffect to update visiblePaths when activeView changes
+  useEffect(() => {
+    if (activeView === 'citizens') {
+      // When in citizens view, make all paths visible
+      const allPaths = Object.values(activityPaths).flat();
+      setVisiblePaths(allPaths);
+      console.log(`Setting ${allPaths.length} paths as visible in citizens view`);
+    }
+  }, [activeView, activityPaths]);
   
   const handleCitizenClick = (citizen: any) => {
     // Ensure we have a valid citizen object before setting it
