@@ -331,12 +331,29 @@ If you decide not to set up any imports at this time, return an empty array:
 ```
 """
         
-        # Create system instructions with the detailed data
+        # Function to clean data for JSON serialization
+        def clean_for_json(obj):
+            """Clean an object to ensure it can be properly serialized to JSON."""
+            if isinstance(obj, str):
+                # Replace or remove control characters
+                return ''.join(c if ord(c) >= 32 or c in '\n\r\t' else ' ' for c in obj)
+            elif isinstance(obj, dict):
+                return {clean_for_json(k): clean_for_json(v) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [clean_for_json(item) for item in obj]
+            else:
+                return obj
+        
+        # Clean the data package and serialize it properly
+        cleaned_data = clean_for_json(data_package)
+        serialized_data = json.dumps(cleaned_data, indent=2, ensure_ascii=True)
+        
+        # Create system instructions with the cleaned, serialized data
         system_instructions = f"""
 You are {ai_username}, an AI building owner in La Serenissima. You make your own decisions about resource import strategies.
 
 Here is the complete data about your current situation:
-{json.dumps(data_package, indent=2)}
+{serialized_data}
 
 When developing your import strategy:
 1. Analyze which buildings can import which resources (check the "stores" array for each building)
