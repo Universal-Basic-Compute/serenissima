@@ -12,15 +12,32 @@ const TransportDebugPanel: React.FC<TransportDebugPanelProps> = ({ onClose, visi
   const [bridges, setBridges] = useState<any[]>([]);
   const [docks, setDocks] = useState<any[]>([]);
   const [allModeInfo, setAllModeInfo] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'graph' | 'bridges' | 'docks'>('graph');
+  const [activeTab, setActiveTab] = useState<'graph' | 'bridges' | 'docks' | 'path'>('graph');
   const [pathfindingMode, setPathfindingMode] = useState<'real' | 'all'>('real');
   const [error, setError] = useState<string | null>(null);
+  const [currentPath, setCurrentPath] = useState<any[]>([]);
 
   useEffect(() => {
     if (visible) {
       fetchDebugInfo();
     }
   }, [visible, pathfindingMode]);
+  
+  // Add an effect to listen for path changes
+  useEffect(() => {
+    const handlePathCalculated = (event: CustomEvent) => {
+      if (event.detail && event.detail.path) {
+        setCurrentPath(event.detail.path);
+      }
+    };
+
+    // Listen for the transport route calculated event
+    window.addEventListener('TRANSPORT_ROUTE_CALCULATED', handlePathCalculated as EventListener);
+    
+    return () => {
+      window.removeEventListener('TRANSPORT_ROUTE_CALCULATED', handlePathCalculated as EventListener);
+    };
+  }, []);
 
   const fetchDebugInfo = async () => {
     try {
@@ -66,6 +83,75 @@ const TransportDebugPanel: React.FC<TransportDebugPanelProps> = ({ onClose, visi
   // Helper function to format numbers with commas
   const formatNumber = (num: number): string => {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
+  
+  // Helper function to calculate distance between two points
+  const calculateDistance = (point1: {lat: number, lng: number}, point2: {lat: number, lng: number}): number => {
+    const R = 6371000; // Earth radius in meters
+    const lat1 = point1.lat * Math.PI / 180;
+    const lat2 = point2.lat * Math.PI / 180;
+    const deltaLat = (point2.lat - point1.lat) * Math.PI / 180;
+    const deltaLng = (point2.lng - point1.lng) * Math.PI / 180;
+
+    const a = Math.sin(deltaLat/2) * Math.sin(deltaLat/2) +
+            Math.cos(lat1) * Math.cos(lat2) *
+            Math.sin(deltaLng/2) * Math.sin(deltaLng/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  };
+  
+  // Function to calculate path statistics
+  const calculatePathStats = (path: any[]) => {
+    if (!path || path.length === 0) return null;
+    
+    // Calculate total distance
+    let totalDistance = 0;
+    let walkingDistance = 0;
+    let waterDistance = 0;
+    
+    for (let i = 1; i < path.length; i++) {
+      const point1 = path[i-1];
+      const point2 = path[i];
+      
+      // Calculate distance between consecutive points
+      const distance = calculateDistance(
+        { lat: point1.lat, lng: point1.lng },
+        { lat: point2.lat, lng: point2.lng }
+      );
+      
+      totalDistance += distance;
+      
+      // Track distance by mode
+      if (point1.transportMode === 'gondola') {
+        waterDistance += distance;
+      } else {
+        walkingDistance += distance;
+      }
+    }
+    
+    // Count points by type
+    const pointsByType = path.reduce((acc: Record<string, number>, point: any) => {
+      const type = point.type || 'unknown';
+      acc[type] = (acc[type] || 0) + 1;
+      return acc;
+    }, {});
+    
+    // Count points by transport mode
+    const pointsByMode = path.reduce((acc: Record<string, number>, point: any) => {
+      const mode = point.transportMode || 'unknown';
+      acc[mode] = (acc[mode] || 0) + 1;
+      return acc;
+    }, {});
+    
+    return {
+      totalPoints: path.length,
+      totalDistance,
+      walkingDistance,
+      waterDistance,
+      pointsByType,
+      pointsByMode,
+      intermediatePoints: path.filter(p => p.isIntermediatePoint).length
+    };
   };
 
   return (
@@ -152,6 +238,16 @@ const TransportDebugPanel: React.FC<TransportDebugPanelProps> = ({ onClose, visi
               onClick={() => setActiveTab('docks')}
             >
               Docks ({docks.length})
+            </button>
+            <button
+              className={`py-2 px-4 font-medium ${
+                activeTab === 'path' 
+                  ? 'border-b-2 border-amber-600 text-amber-800' 
+                  : 'text-amber-600 hover:text-amber-800'
+              }`}
+              onClick={() => setActiveTab('path')}
+            >
+              Current Path {currentPath.length > 0 ? `(${currentPath.length})` : ''}
             </button>
           </div>
         </div>
@@ -370,6 +466,165 @@ const TransportDebugPanel: React.FC<TransportDebugPanelProps> = ({ onClose, visi
               </div>
             )}
           </>
+        )}
+        
+        {/* Path Tab Content */}
+        {activeTab === 'path' && (
+          <div>
+            {currentPath.length > 0 ? (
+              <div className="space-y-4">
+                <div className="bg-amber-100 p-4 rounded-lg">
+                  <h3 className="text-lg font-medium text-amber-800 mb-2 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                    </svg>
+                    Path Overview
+                  </h3>
+                  
+                  {(() => {
+                    const stats = calculatePathStats(currentPath);
+                    if (!stats) return <p>No path statistics available</p>;
+                    
+                    return (
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-white p-3 rounded shadow-sm">
+                          <p className="text-sm text-amber-600">Total Points</p>
+                          <p className="text-2xl font-bold text-amber-800">{stats.totalPoints}</p>
+                          <p className="text-xs text-amber-500">{stats.intermediatePoints} intermediate</p>
+                        </div>
+                        <div className="bg-white p-3 rounded shadow-sm">
+                          <p className="text-sm text-amber-600">Total Distance</p>
+                          <p className="text-2xl font-bold text-amber-800">
+                            {stats.totalDistance < 1000 
+                              ? `${Math.round(stats.totalDistance)}m` 
+                              : `${(stats.totalDistance / 1000).toFixed(2)}km`}
+                          </p>
+                        </div>
+                        <div className="bg-white p-3 rounded shadow-sm">
+                          <p className="text-sm text-amber-600">Walking Distance</p>
+                          <p className="text-xl font-bold text-amber-800">
+                            {stats.walkingDistance < 1000 
+                              ? `${Math.round(stats.walkingDistance)}m` 
+                              : `${(stats.walkingDistance / 1000).toFixed(2)}km`}
+                          </p>
+                        </div>
+                        <div className="bg-white p-3 rounded shadow-sm">
+                          <p className="text-sm text-amber-600">Water Distance</p>
+                          <p className="text-xl font-bold text-amber-800">
+                            {stats.waterDistance < 1000 
+                              ? `${Math.round(stats.waterDistance)}m` 
+                              : `${(stats.waterDistance / 1000).toFixed(2)}km`}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+                
+                <div className="bg-amber-100 p-4 rounded-lg">
+                  <h3 className="text-lg font-medium text-amber-800 mb-2">Point Types</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    {(() => {
+                      const stats = calculatePathStats(currentPath);
+                      if (!stats) return null;
+                      
+                      return Object.entries(stats.pointsByType).map(([type, count]) => (
+                        <div key={type} className="bg-white p-3 rounded shadow-sm">
+                          <p className="text-sm text-amber-600">{type.charAt(0).toUpperCase() + type.slice(1)}</p>
+                          <p className="text-2xl font-bold text-amber-800">{count}</p>
+                        </div>
+                      ));
+                    })()}
+                  </div>
+                </div>
+                
+                <div className="bg-amber-100 p-4 rounded-lg">
+                  <h3 className="text-lg font-medium text-amber-800 mb-2">Transport Modes</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    {(() => {
+                      const stats = calculatePathStats(currentPath);
+                      if (!stats) return null;
+                      
+                      return Object.entries(stats.pointsByMode).map(([mode, count]) => (
+                        <div key={mode} className="bg-white p-3 rounded shadow-sm">
+                          <p className="text-sm text-amber-600">{mode.charAt(0).toUpperCase() + mode.slice(1)}</p>
+                          <p className="text-2xl font-bold text-amber-800">{count}</p>
+                        </div>
+                      ));
+                    })()}
+                  </div>
+                </div>
+                
+                <div className="bg-amber-100 p-4 rounded-lg">
+                  <h3 className="text-lg font-medium text-amber-800 mb-2">Path Points</h3>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full bg-white">
+                      <thead>
+                        <tr>
+                          <th className="py-2 px-4 border-b border-amber-300 text-left text-amber-800">#</th>
+                          <th className="py-2 px-4 border-b border-amber-300 text-left text-amber-800">Type</th>
+                          <th className="py-2 px-4 border-b border-amber-300 text-left text-amber-800">Mode</th>
+                          <th className="py-2 px-4 border-b border-amber-300 text-left text-amber-800">Polygon</th>
+                          <th className="py-2 px-4 border-b border-amber-300 text-left text-amber-800">Coordinates</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {currentPath.map((point, index) => (
+                          <tr key={index} className={index % 2 === 0 ? 'bg-amber-50' : 'bg-white'}>
+                            <td className="py-2 px-4 border-b border-amber-200">
+                              {index + 1}
+                              {point.isIntermediatePoint && (
+                                <span className="ml-1 text-xs text-amber-500">(i)</span>
+                              )}
+                            </td>
+                            <td className="py-2 px-4 border-b border-amber-200">
+                              {point.type || 'unknown'}
+                            </td>
+                            <td className="py-2 px-4 border-b border-amber-200">
+                              <span className={`px-2 py-1 rounded-full text-xs ${
+                                point.transportMode === 'gondola' 
+                                  ? 'bg-blue-100 text-blue-800' 
+                                  : 'bg-amber-100 text-amber-800'
+                              }`}>
+                                {point.transportMode || 'unknown'}
+                              </span>
+                            </td>
+                            <td className="py-2 px-4 border-b border-amber-200 text-xs">
+                              {point.polygonId ? (
+                                <span className="font-mono">{point.polygonId.substring(0, 10)}...</span>
+                              ) : (
+                                'N/A'
+                              )}
+                            </td>
+                            <td className="py-2 px-4 border-b border-amber-200 font-mono text-xs">
+                              {point.lat.toFixed(6)}, {point.lng.toFixed(6)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                
+                <div className="bg-amber-100 p-4 rounded-lg">
+                  <h3 className="text-lg font-medium text-amber-800 mb-2">Raw Path Data</h3>
+                  <div className="bg-gray-800 text-green-400 p-3 rounded font-mono text-xs overflow-x-auto">
+                    <pre>{JSON.stringify(currentPath, null, 2)}</pre>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-amber-100 p-6 rounded-lg text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-amber-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                </svg>
+                <h3 className="text-lg font-medium text-amber-800 mb-2">No Active Path</h3>
+                <p className="text-amber-700">
+                  Create a transport route on the map to see detailed path information here.
+                </p>
+              </div>
+            )}
+          </div>
         )}
       </div>
     </div>
