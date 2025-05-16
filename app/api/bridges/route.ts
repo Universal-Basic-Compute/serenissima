@@ -66,7 +66,8 @@ export async function GET(request: Request) {
                 position,
                 owner: fields.Owner || 'ConsiglioDeiDieci',
                 isConstructed: fields.IsConstructed === true || fields.IsConstructed === 'true',
-                constructionDate: fields.ConstructionDate || null
+                constructionDate: fields.ConstructionDate || null,
+                landId: fields.LandId || null // Store the LandId for later use
               };
             });
             
@@ -84,9 +85,102 @@ export async function GET(request: Request) {
         );
     });
     
+    // Enhance bridge data with polygon links
+    const enhancedRecords = await Promise.all((records as any[]).map(async (bridge) => {
+      // Initialize links array
+      const links: string[] = [];
+      
+      // If bridge has a LandId, fetch the polygon data
+      if (bridge.landId) {
+        try {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/polygons/${bridge.landId}`);
+          
+          if (response.ok) {
+            const polygonData = await response.json();
+            
+            // Check if the polygon has bridgePoints with connection information
+            if (polygonData.bridgePoints && Array.isArray(polygonData.bridgePoints)) {
+              // Find the bridge point that matches this bridge's position
+              const matchingBridgePoint = polygonData.bridgePoints.find((bp: any) => {
+                if (!bp.edge || !bridge.position) return false;
+                
+                // Use a small threshold for floating point comparison
+                const threshold = 0.0001;
+                return Math.abs(bp.edge.lat - bridge.position.lat) < threshold && 
+                       Math.abs(bp.edge.lng - bridge.position.lng) < threshold;
+              });
+              
+              // If we found a matching bridge point with connection info, add the polygon IDs to links
+              if (matchingBridgePoint && matchingBridgePoint.connection) {
+                // Add the current polygon ID
+                links.push(bridge.landId);
+                
+                // Add the target polygon ID
+                if (matchingBridgePoint.connection.targetPolygonId) {
+                  links.push(matchingBridgePoint.connection.targetPolygonId);
+                }
+              }
+            }
+          }
+        } catch (error) {
+          console.error(`Error fetching polygon data for bridge ${bridge.id}:`, error);
+        }
+      }
+      
+      // If we couldn't find links through the LandId, try to find by position
+      if (links.length === 0 && bridge.position) {
+        try {
+          // Fetch all polygons
+          const allPolygonsResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/get-polygons`);
+          
+          if (allPolygonsResponse.ok) {
+            const allPolygonsData = await allPolygonsResponse.json();
+            
+            if (allPolygonsData.polygons && Array.isArray(allPolygonsData.polygons)) {
+              // Find polygons that have this bridge position in their bridgePoints
+              for (const polygon of allPolygonsData.polygons) {
+                if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints)) {
+                  const matchingBridgePoint = polygon.bridgePoints.find((bp: any) => {
+                    if (!bp.edge || !bridge.position) return false;
+                    
+                    // Use a small threshold for floating point comparison
+                    const threshold = 0.0001;
+                    return Math.abs(bp.edge.lat - bridge.position.lat) < threshold && 
+                           Math.abs(bp.edge.lng - bridge.position.lng) < threshold;
+                  });
+                  
+                  if (matchingBridgePoint) {
+                    // Add this polygon ID
+                    if (polygon.id && !links.includes(polygon.id)) {
+                      links.push(polygon.id);
+                    }
+                    
+                    // Add the target polygon ID if available
+                    if (matchingBridgePoint.connection && 
+                        matchingBridgePoint.connection.targetPolygonId && 
+                        !links.includes(matchingBridgePoint.connection.targetPolygonId)) {
+                      links.push(matchingBridgePoint.connection.targetPolygonId);
+                    }
+                  }
+                }
+              }
+            }
+          }
+        } catch (error) {
+          console.error(`Error finding polygons for bridge ${bridge.id} by position:`, error);
+        }
+      }
+      
+      // Return the enhanced bridge with links
+      return {
+        ...bridge,
+        links: links.filter(Boolean) // Remove any null/undefined values
+      };
+    }));
+    
     return NextResponse.json({
       success: true,
-      bridges: records
+      bridges: enhancedRecords
     });
   } catch (error) {
     console.error('Error in bridges API:', error);
