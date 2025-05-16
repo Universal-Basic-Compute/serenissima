@@ -246,10 +246,21 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     const eventListener = () => handleShowTransportRoutes();
     window.addEventListener('showTransportRoutes', eventListener);
     
+    // Add listener for transport route calculated events
+    const handleTransportRouteCalculated = (event: CustomEvent) => {
+      console.log('Transport route calculated event received in IsometricViewer:', event.detail);
+      if (event.detail && event.detail.path) {
+        visualizeTransportPath(event.detail.path);
+      }
+    };
+    
+    window.addEventListener('TRANSPORT_ROUTE_CALCULATED', handleTransportRouteCalculated as EventListener);
+    
     return () => {
       window.removeEventListener('showTransportRoutes', eventListener);
+      window.removeEventListener('TRANSPORT_ROUTE_CALCULATED', handleTransportRouteCalculated as EventListener);
     };
-  }, [activeView]);
+  }, [activeView, visualizeTransportPath]);
   
   // Dispatch event when transport mode changes
   useEffect(() => {
