@@ -2,6 +2,34 @@ import { useEffect, useState, useRef } from 'react';
 import { FaWarehouse, FaStore, FaBox } from 'react-icons/fa';
 import Image from 'next/image';
 
+// Helper function to format craft time in minutes to a more readable format
+const formatCraftTime = (minutes: number): string => {
+  if (!minutes) return '';
+  
+  if (minutes < 60) {
+    return `${minutes} min`;
+  } else if (minutes < 1440) { // Less than a day
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return remainingMinutes > 0 
+      ? `${hours} hr ${remainingMinutes} min` 
+      : `${hours} hr`;
+  } else { // Days or more
+    const days = Math.floor(minutes / 1440);
+    const remainingHours = Math.floor((minutes % 1440) / 60);
+    const remainingMinutes = minutes % 60;
+    
+    let result = `${days} day${days !== 1 ? 's' : ''}`;
+    if (remainingHours > 0) {
+      result += ` ${remainingHours} hr`;
+    }
+    if (remainingMinutes > 0) {
+      result += ` ${remainingMinutes} min`;
+    }
+    return result;
+  }
+};
+
 // Declare the window interface extension for __polygonData
 declare global {
   interface Window {
@@ -715,7 +743,7 @@ export default function BuildingDetailsPanel({
                           <span className="font-medium text-amber-800">Recipe #{index + 1}</span>
                           {recipe.craftMinutes && (
                             <span className="text-xs bg-amber-100 px-2 py-1 rounded-full text-amber-700">
-                              {recipe.craftMinutes} minutes
+                              {formatCraftTime(recipe.craftMinutes)}
                             </span>
                           )}
                         </div>
