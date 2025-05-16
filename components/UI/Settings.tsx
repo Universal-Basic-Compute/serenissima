@@ -429,19 +429,6 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
                   <div className="flex items-center">
                     <input
                       type="checkbox"
-                      id="showFps"
-                      checked={showFps}
-                      onChange={(e) => setShowFps(e.target.checked)}
-                      className="h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded"
-                    />
-                    <label htmlFor="showFps" className="ml-2 block text-sm text-gray-700">
-                      Show FPS Counter
-                    </label>
-                  </div>
-                  
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
                       id="showDebugInfo"
                       checked={showDebugInfo}
                       onChange={(e) => setShowDebugInfo(e.target.checked)}
