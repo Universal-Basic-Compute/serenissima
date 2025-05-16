@@ -752,6 +752,11 @@ export class TransportService {
                              pointId.startsWith('building_') || // Many docks have building_ prefix
                              pointId.startsWith('canal_');      // Many docks have canal_ prefix
         
+        // Add debug logging for canal point construction status
+        if (this.pathfindingMode === 'real' && !isConstructed) {
+          console.log(`Canal point ${pointId} is not constructed and will be filtered in 'real' mode`);
+        }
+        
         return {
           ...point,
           isConstructed
@@ -1174,8 +1179,10 @@ export class TransportService {
             const pointId = point.id || `canal-${point.edge.lat}-${point.edge.lng}`;
             // Check if this is a constructed dock
             const isConstructed = !!point.isConstructed || 
-                                 (pointId.includes('public_dock') || pointId.includes('dock-constructed') ||
-                                  pointId.startsWith('building_') || pointId.startsWith('canal_'));
+                                 pointId.includes('public_dock') || 
+                                 pointId.includes('dock-constructed') ||
+                                 pointId.startsWith('building_') || 
+                                 pointId.startsWith('canal_');
           
             // In 'real' mode, only include constructed docks
             if (this.pathfindingMode === 'all' || isConstructed) {
@@ -1189,6 +1196,9 @@ export class TransportService {
                 polygonId: polygon.id
               };
               graph.edges[pointId] = [];
+            } else {
+              // Add debug logging for skipped canal points
+              console.log(`Skipping canal node ${pointId} in 'real' mode because it's not constructed`);
             }
           }
         }
@@ -2155,7 +2165,10 @@ export class TransportService {
               const pointId = point.id || `canal-${point.edge.lat}-${point.edge.lng}`;
               // Check if this is a constructed dock
               const isConstructed = !!point.isConstructed || 
-                                   (pointId.includes('public_dock') || pointId.includes('dock-constructed'));
+                                   pointId.includes('public_dock') || 
+                                   pointId.includes('dock-constructed') ||
+                                   pointId.startsWith('building_') || 
+                                   pointId.startsWith('canal_');
               
               // In 'real' mode, only include constructed docks
               if (this.pathfindingMode === 'all' || isConstructed) {
@@ -2165,6 +2178,8 @@ export class TransportService {
                   polygonId: polygon.id,
                   isConstructed
                 });
+              } else {
+                console.log(`Skipping canal point ${pointId} in canal network for 'real' mode because it's not constructed`);
               }
             }
           }
