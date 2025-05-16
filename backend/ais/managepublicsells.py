@@ -442,20 +442,12 @@ Include both contracts_to_create and contracts_to_end arrays with the required i
 If you decide not to make any changes, return empty arrays.
 """
         
-        # Log the complete message and system instructions
-        print("\n" + "="*80)
-        print("COMPLETE PROMPT SENT TO AI:")
-        print(prompt)
-        print("\nCOMPLETE SYSTEM INSTRUCTIONS SENT TO AI:")
-        print(system_instructions)
-        print("="*80 + "\n")
-        
         # Prepare the request payload
         payload = {
-            "message": prompt,
+            "content": prompt,
             "addSystem": system_instructions,
-            "min_files": 5,
-            "max_files": 15
+            "min_files": 4,
+            "max_files": 8
         }
         
         # Make the API request
