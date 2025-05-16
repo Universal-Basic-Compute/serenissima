@@ -721,14 +721,51 @@ export class TransportService {
         return null;
       }
       
+      // Process bridge points to ensure isConstructed is set correctly
+      let bridgePoints = Array.isArray(polygon.bridgePoints) ? polygon.bridgePoints : [];
+      bridgePoints = bridgePoints.map((point: any) => {
+        if (!point.edge) return point;
+        
+        // Set isConstructed based on ID patterns if not already set
+        const pointId = point.id || `bridge-${point.edge.lat}-${point.edge.lng}`;
+        const isConstructed = !!point.isConstructed || 
+                             pointId.includes('bridge-constructed') || 
+                             pointId.includes('public_bridge') ||
+                             pointId.startsWith('building_'); // Many bridges have building_ prefix
+        
+        return {
+          ...point,
+          isConstructed
+        };
+      });
+      
+      // Process canal points to ensure isConstructed is set correctly
+      let canalPoints = Array.isArray(polygon.canalPoints) ? polygon.canalPoints : [];
+      canalPoints = canalPoints.map((point: any) => {
+        if (!point.edge) return point;
+        
+        // Set isConstructed based on ID patterns if not already set
+        const pointId = point.id || `canal-${point.edge.lat}-${point.edge.lng}`;
+        const isConstructed = !!point.isConstructed || 
+                             pointId.includes('public_dock') || 
+                             pointId.includes('dock-constructed') ||
+                             pointId.startsWith('building_') || // Many docks have building_ prefix
+                             pointId.startsWith('canal_');      // Many docks have canal_ prefix
+        
+        return {
+          ...point,
+          isConstructed
+        };
+      });
+      
       // Create a processed polygon with all required properties
       return {
         id: polygon.id,
         coordinates: validCoordinates,
         centroid: polygon.centroid || null,
-        bridgePoints: Array.isArray(polygon.bridgePoints) ? polygon.bridgePoints : [],
+        bridgePoints: bridgePoints,
         buildingPoints: Array.isArray(polygon.buildingPoints) ? polygon.buildingPoints : [],
-        canalPoints: Array.isArray(polygon.canalPoints) ? polygon.canalPoints : []
+        canalPoints: canalPoints
       };
     }).filter(Boolean); // Remove null entries
     
