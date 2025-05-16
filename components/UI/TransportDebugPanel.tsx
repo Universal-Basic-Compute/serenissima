@@ -624,18 +624,18 @@ const TransportDebugPanel: React.FC<TransportDebugPanelProps> = ({ onClose, visi
                           <th className="py-2 px-4 border-b border-amber-300 text-left text-amber-800">#</th>
                           <th className="py-2 px-4 border-b border-amber-300 text-left text-amber-800">Type</th>
                           <th className="py-2 px-4 border-b border-amber-300 text-left text-amber-800">Mode</th>
+                          <th className="py-2 px-4 border-b border-amber-300 text-left text-amber-800">Intermediate</th>
                           <th className="py-2 px-4 border-b border-amber-300 text-left text-amber-800">Polygon</th>
                           <th className="py-2 px-4 border-b border-amber-300 text-left text-amber-800">Coordinates</th>
                         </tr>
                       </thead>
                       <tbody>
                         {currentPath.map((point, index) => (
-                          <tr key={index} className={index % 2 === 0 ? 'bg-amber-50' : 'bg-white'}>
+                          <tr key={index} className={`${index % 2 === 0 ? 'bg-amber-50' : 'bg-white'} ${
+                            point.isIntermediatePoint ? 'text-amber-500' : ''
+                          }`}>
                             <td className="py-2 px-4 border-b border-amber-200">
                               {index + 1}
-                              {point.isIntermediatePoint && (
-                                <span className="ml-1 text-xs text-amber-500">(i)</span>
-                              )}
                             </td>
                             <td className="py-2 px-4 border-b border-amber-200">
                               {point.type || 'unknown'}
@@ -648,6 +648,13 @@ const TransportDebugPanel: React.FC<TransportDebugPanelProps> = ({ onClose, visi
                               }`}>
                                 {point.transportMode || 'unknown'}
                               </span>
+                            </td>
+                            <td className="py-2 px-4 border-b border-amber-200 text-center">
+                              {point.isIntermediatePoint ? (
+                                <span className="text-green-600">✓</span>
+                              ) : (
+                                <span className="text-red-600">✗</span>
+                              )}
                             </td>
                             <td className="py-2 px-4 border-b border-amber-200 text-xs">
                               {point.polygonId ? (
@@ -667,6 +674,152 @@ const TransportDebugPanel: React.FC<TransportDebugPanelProps> = ({ onClose, visi
                 </div>
                 
                 <div className="bg-amber-100 p-4 rounded-lg">
+                  <h3 className="text-lg font-medium text-amber-800 mb-2">Path Visualization</h3>
+                  <div className="bg-blue-100 p-2 rounded-lg mb-4 relative" style={{ height: '200px' }}>
+                    {currentPath.length > 0 && (
+                      <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                        {/* Draw water background */}
+                        <rect x="0" y="0" width="100" height="100" fill="#87CEEB" />
+                        
+                        {/* Draw path segments */}
+                        {currentPath.slice(0, -1).map((point, index) => {
+                          const nextPoint = currentPath[index + 1];
+                          // Normalize coordinates to fit in the SVG viewBox
+                          const minLat = Math.min(...currentPath.map(p => p.lat));
+                          const maxLat = Math.max(...currentPath.map(p => p.lat));
+                          const minLng = Math.min(...currentPath.map(p => p.lng));
+                          const maxLng = Math.max(...currentPath.map(p => p.lng));
+                          
+                          // Add padding
+                          const latRange = (maxLat - minLat) || 0.001;
+                          const lngRange = (maxLng - minLng) || 0.001;
+                          
+                          const x1 = ((point.lng - minLng) / lngRange) * 90 + 5;
+                          const y1 = 100 - (((point.lat - minLat) / latRange) * 90 + 5);
+                          const x2 = ((nextPoint.lng - minLng) / lngRange) * 90 + 5;
+                          const y2 = 100 - (((nextPoint.lat - minLat) / latRange) * 90 + 5);
+                          
+                          return (
+                            <line 
+                              key={index}
+                              x1={x1}
+                              y1={y1}
+                              x2={x2}
+                              y2={y2}
+                              stroke={point.transportMode === 'gondola' ? '#0066CC' : '#CC5500'}
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                            />
+                          );
+                        })}
+                        
+                        {/* Draw points */}
+                        {currentPath.map((point, index) => {
+                          // Normalize coordinates to fit in the SVG viewBox
+                          const minLat = Math.min(...currentPath.map(p => p.lat));
+                          const maxLat = Math.max(...currentPath.map(p => p.lat));
+                          const minLng = Math.min(...currentPath.map(p => p.lng));
+                          const maxLng = Math.max(...currentPath.map(p => p.lng));
+                          
+                          // Add padding
+                          const latRange = (maxLat - minLat) || 0.001;
+                          const lngRange = (maxLng - minLng) || 0.001;
+                          
+                          const x = ((point.lng - minLng) / lngRange) * 90 + 5;
+                          const y = 100 - (((point.lat - minLat) / latRange) * 90 + 5);
+                          
+                          // Different colors for different point types
+                          let color = '#333333';
+                          if (index === 0) color = '#00CC00'; // Start point
+                          else if (index === currentPath.length - 1) color = '#CC0000'; // End point
+                          else if (point.type === 'bridge') color = '#B46432';
+                          else if (point.type === 'canal') color = '#0099CC';
+                          else if (point.type === 'building') color = '#4682B4';
+                          
+                          // Smaller radius for intermediate points
+                          const radius = point.isIntermediatePoint ? 1 : 2;
+                          
+                          return (
+                            <circle
+                              key={index}
+                              cx={x}
+                              cy={y}
+                              r={radius}
+                              fill={color}
+                              stroke="#FFFFFF"
+                              strokeWidth="0.5"
+                            />
+                          );
+                        })}
+                        
+                        {/* Add start and end labels */}
+                        {currentPath.length > 0 && (
+                          <>
+                            {/* Start label */}
+                            {(() => {
+                              const point = currentPath[0];
+                              const minLat = Math.min(...currentPath.map(p => p.lat));
+                              const maxLat = Math.max(...currentPath.map(p => p.lat));
+                              const minLng = Math.min(...currentPath.map(p => p.lng));
+                              const maxLng = Math.max(...currentPath.map(p => p.lng));
+                              
+                              const latRange = (maxLat - minLat) || 0.001;
+                              const lngRange = (maxLng - minLng) || 0.001;
+                              
+                              const x = ((point.lng - minLng) / lngRange) * 90 + 5;
+                              const y = 100 - (((point.lat - minLat) / latRange) * 90 + 5);
+                              
+                              return (
+                                <text
+                                  x={x}
+                                  y={y - 3}
+                                  fontSize="3"
+                                  fill="#00CC00"
+                                  textAnchor="middle"
+                                >
+                                  Start
+                                </text>
+                              );
+                            })()}
+                            
+                            {/* End label */}
+                            {(() => {
+                              const point = currentPath[currentPath.length - 1];
+                              const minLat = Math.min(...currentPath.map(p => p.lat));
+                              const maxLat = Math.max(...currentPath.map(p => p.lat));
+                              const minLng = Math.min(...currentPath.map(p => p.lng));
+                              const maxLng = Math.max(...currentPath.map(p => p.lng));
+                              
+                              const latRange = (maxLat - minLat) || 0.001;
+                              const lngRange = (maxLng - minLng) || 0.001;
+                              
+                              const x = ((point.lng - minLng) / lngRange) * 90 + 5;
+                              const y = 100 - (((point.lat - minLat) / latRange) * 90 + 5);
+                              
+                              return (
+                                <text
+                                  x={x}
+                                  y={y - 3}
+                                  fontSize="3"
+                                  fill="#CC0000"
+                                  textAnchor="middle"
+                                >
+                                  End
+                                </text>
+                              );
+                            })()}
+                          </>
+                        )}
+                      </svg>
+                    )}
+                    
+                    {currentPath.length === 0 && (
+                      <div className="absolute inset-0 flex items-center justify-center text-blue-800">
+                        No path data available to visualize
+                      </div>
+                    )}
+                  </div>
+                  
                   <h3 className="text-lg font-medium text-amber-800 mb-2">Raw Path Data</h3>
                   <div className="bg-gray-800 text-green-400 p-3 rounded font-mono text-xs overflow-x-auto">
                     <pre>{JSON.stringify(currentPath, null, 2)}</pre>

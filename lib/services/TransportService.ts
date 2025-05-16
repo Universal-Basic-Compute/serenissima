@@ -1632,11 +1632,20 @@ export class TransportService {
           }
         }
       } else if (point1.transportMode === 'walking') {
-        // For walking paths, we can add a single intermediate point for slight curves
-        if (this.calculateDistance(point1, point2) > 30) { // Only for longer segments
+        // For walking paths, add more intermediate points for better visualization
+        // Calculate distance between points to determine how many intermediate points to add
+        const distance = this.calculateDistance(point1, point2);
+        
+        // Add more points for longer distances
+        const numPoints = Math.max(1, Math.min(5, Math.floor(distance / 30)));
+        
+        for (let j = 1; j <= numPoints; j++) {
+          const fraction = j / (numPoints + 1);
+          // Add some randomness to create natural curves
+          const jitter = 0.00002 * (Math.random() * 2 - 1);
           const midpoint = {
-            lat: (point1.lat + point2.lat) / 2 + (Math.random() * 0.00002 - 0.00001),
-            lng: (point1.lng + point2.lng) / 2 + (Math.random() * 0.00002 - 0.00001),
+            lat: point1.lat + (point2.lat - point1.lat) * fraction + jitter,
+            lng: point1.lng + (point2.lng - point1.lng) * fraction + jitter,
             type: point1.type,
             transportMode: 'walking',
             isIntermediatePoint: true
