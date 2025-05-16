@@ -224,6 +224,27 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       });
   }, []);
   
+  // Fetch land groups data
+  const fetchLandGroups = useCallback(async () => {
+    try {
+      console.log('Fetching land groups data...');
+      const response = await fetch('/api/land-groups?includeUnconnected=true&minSize=1');
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.landGroups) {
+          console.log(`Loaded ${data.landGroups.length} land groups`);
+          
+          // This is just for debugging - we don't need to store the data in the page component
+          // since the IsometricViewer component will handle the actual rendering
+          console.log('Land groups loaded successfully');
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching land groups:', error);
+    }
+  }, []);
+
   // Handle transport mode activation
   useEffect(() => {
     const handleShowTransportRoutes = () => {
