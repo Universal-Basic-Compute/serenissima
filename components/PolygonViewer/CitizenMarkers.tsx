@@ -501,6 +501,85 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     }
   }, [activeView, activityPaths]);
   
+  // Add effect to initialize animated citizens when paths are loaded
+  useEffect(() => {
+    if (Object.keys(activityPaths).length === 0) return;
+    
+    // Initialize animated citizens from the activity paths
+    const initialAnimatedCitizens: Record<string, AnimatedCitizen> = {};
+    
+    Object.entries(activityPaths).forEach(([citizenId, paths]) => {
+      if (paths.length === 0) return;
+      
+      // Find the citizen object
+      const citizen = citizens.find(c => c.citizenid === citizenId || c.CitizenId === citizenId || c.id === citizenId);
+      if (!citizen) return;
+      
+      // Start with the first path
+      const initialPath = paths[0];
+      if (!initialPath.path || initialPath.path.length < 2) return;
+      
+      // Random starting progress
+      const initialProgress = Math.random();
+      const initialPosition = calculatePositionAlongPath(initialPath.path, initialProgress) || initialPath.path[0];
+      
+      // Random speed between 1-5 m/s (walking to running)
+      const speed = 1 + Math.random() * 4;
+      
+      initialAnimatedCitizens[citizenId] = {
+        citizen,
+        currentPosition: initialPosition,
+        pathIndex: 0,
+        currentPath: initialPath,
+        progress: initialProgress,
+        speed
+      };
+    });
+    
+    setAnimatedCitizens(initialAnimatedCitizens);
+    console.log(`Initialized ${Object.keys(initialAnimatedCitizens).length} animated citizens`);
+    
+    // Start animation loop
+    if (animationActive && Object.keys(initialAnimatedCitizens).length > 0) {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      animationFrameRef.current = requestAnimationFrame(animateCitizens);
+    }
+    
+    // Cleanup animation loop on unmount
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+    };
+  }, [activityPaths, citizens, animationActive, animateCitizens, calculatePositionAlongPath]);
+  
+  // Add effect to start/stop animation when view changes
+  useEffect(() => {
+    // Only animate in citizens view
+    const shouldAnimate = activeView === 'citizens';
+    setAnimationActive(shouldAnimate);
+    
+    if (shouldAnimate) {
+      if (!animationFrameRef.current) {
+        lastFrameTimeRef.current = 0;
+        animationFrameRef.current = requestAnimationFrame(animateCitizens);
+      }
+    } else if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+    };
+  }, [activeView, animateCitizens]);
+  
   const handleCitizenClick = (citizen: any) => {
     // Ensure we have a valid citizen object before setting it
     if (citizen && (citizen.CitizenId || citizen.id)) {
