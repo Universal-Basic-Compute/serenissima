@@ -783,8 +783,15 @@ export class TransportService {
    * Build the graph and canal network
    */
   private buildGraphAndNetwork(): void {
-    console.log('Building graph from polygons...');
-    this.graph = this.buildGraph(this.polygons);
+    console.log(`Building graph from polygons (mode: ${this.pathfindingMode})...`);
+    
+    // Use the appropriate graph building method based on pathfinding mode
+    if (this.pathfindingMode === 'real') {
+      this.graph = this.buildGraphReal(this.polygons);
+    } else {
+      this.graph = this.buildGraph(this.polygons);
+    }
+    
     console.log(`Graph built with ${Object.keys(this.graph.nodes).length} nodes and ${Object.values(this.graph.edges).flat().length} edges`);
     
     console.log('Building canal network from polygons...');
@@ -1435,6 +1442,314 @@ export class TransportService {
     });
     console.log('Graph node types after initial creation:', nodeTypes);
   
+    return graph;
+  }
+
+  /**
+   * Build a graph focused on real, constructed infrastructure
+   * This is an optimized version for 'real' mode that focuses on buildings first
+   */
+  private buildGraphReal(polygons: Polygon[]): Graph {
+    console.log('Building real infrastructure graph...');
+    const graph: Graph = {
+      nodes: {},
+      edges: {}
+    };
+    
+    // First, collect all constructed infrastructure
+    const constructedBridges: {point: Point, id: string, polygonId: string}[] = [];
+    const constructedDocks: {point: Point, id: string, polygonId: string}[] = [];
+    const buildingPoints: {point: Point, id: string, polygonId: string}[] = [];
+    const centroids: {point: Point, id: string, polygonId: string}[] = [];
+    
+    // Extract all infrastructure from polygons
+    for (const polygon of polygons) {
+      // Add centroid
+      if (polygon.centroid) {
+        const centroidId = `centroid-${polygon.id}`;
+        centroids.push({
+          point: polygon.centroid,
+          id: centroidId,
+          polygonId: polygon.id
+        });
+      }
+      
+      // Add building points
+      if (polygon.buildingPoints) {
+        for (const point of polygon.buildingPoints) {
+          const pointId = point.id || `building-${point.lat}-${point.lng}`;
+          buildingPoints.push({
+            point: { lat: point.lat, lng: point.lng },
+            id: pointId,
+            polygonId: polygon.id
+          });
+        }
+      }
+      
+      // Add constructed bridges
+      if (polygon.bridgePoints) {
+        for (const point of polygon.bridgePoints) {
+          if (point.edge) {
+            const pointId = point.id || `bridge-${point.edge.lat}-${point.edge.lng}`;
+            // Check if this is a constructed bridge
+            const isConstructed = !!point.isConstructed || 
+                               pointId.includes('bridge-constructed') || 
+                               pointId.includes('public_bridge') ||
+                               pointId.startsWith('building_');
+            
+            if (isConstructed) {
+              constructedBridges.push({
+                point: point.edge,
+                id: pointId,
+                polygonId: polygon.id
+              });
+            }
+          }
+        }
+      }
+      
+      // Add constructed docks
+      if (polygon.canalPoints) {
+        for (const point of polygon.canalPoints) {
+          if (point.edge) {
+            const pointId = point.id || `canal-${point.edge.lat}-${point.edge.lng}`;
+            // Check if this is a constructed dock
+            const isConstructed = !!point.isConstructed || 
+                               pointId.includes('public_dock') || 
+                               pointId.includes('dock-constructed') ||
+                               pointId.startsWith('building_') || 
+                               pointId.startsWith('canal_');
+            
+            if (isConstructed) {
+              constructedDocks.push({
+                point: point.edge,
+                id: pointId,
+                polygonId: polygon.id
+              });
+            }
+          }
+        }
+      }
+    }
+    
+    console.log(`Found ${buildingPoints.length} building points, ${constructedBridges.length} constructed bridges, ${constructedDocks.length} constructed docks`);
+    
+    // Add all nodes to the graph
+    // 1. Add building points
+    for (const point of buildingPoints) {
+      graph.nodes[point.id] = {
+        id: point.id,
+        position: point.point,
+        type: 'building',
+        polygonId: point.polygonId
+      };
+      graph.edges[point.id] = [];
+    }
+    
+    // 2. Add constructed bridges
+    for (const bridge of constructedBridges) {
+      graph.nodes[bridge.id] = {
+        id: bridge.id,
+        position: bridge.point,
+        type: 'bridge',
+        polygonId: bridge.polygonId
+      };
+      graph.edges[bridge.id] = [];
+    }
+    
+    // 3. Add constructed docks
+    for (const dock of constructedDocks) {
+      graph.nodes[dock.id] = {
+        id: dock.id,
+        position: dock.point,
+        type: 'canal',
+        polygonId: dock.polygonId
+      };
+      graph.edges[dock.id] = [];
+    }
+    
+    // 4. Add centroids
+    for (const centroid of centroids) {
+      graph.nodes[centroid.id] = {
+        id: centroid.id,
+        position: centroid.point,
+        type: 'centroid',
+        polygonId: centroid.polygonId
+      };
+      graph.edges[centroid.id] = [];
+    }
+    
+    // Connect nodes within each polygon
+    // Group nodes by polygon for more efficient processing
+    const nodesByPolygon: Record<string, string[]> = {};
+    
+    for (const [nodeId, node] of Object.entries(graph.nodes)) {
+      if (!nodesByPolygon[node.polygonId]) {
+        nodesByPolygon[node.polygonId] = [];
+      }
+      nodesByPolygon[node.polygonId].push(nodeId);
+    }
+    
+    // Connect nodes within each polygon
+    for (const [polygonId, nodeIds] of Object.entries(nodesByPolygon)) {
+      for (let i = 0; i < nodeIds.length; i++) {
+        const node1Id = nodeIds[i];
+        const node1 = graph.nodes[node1Id];
+        
+        for (let j = i + 1; j < nodeIds.length; j++) {
+          const node2Id = nodeIds[j];
+          const node2 = graph.nodes[node2Id];
+          
+          // Skip canal-to-non-canal connections (canal points should only connect to other canal points)
+          if ((node1.type === 'canal' && node2.type !== 'canal') || 
+              (node1.type !== 'canal' && node2.type === 'canal')) {
+            continue;
+          }
+          
+          const distance = this.calculateDistance(node1.position, node2.position);
+          
+          // Calculate weight based on node types - water travel is twice as fast
+          let weight = distance;
+          
+          // If both nodes are canal points, reduce the weight by half (making water travel twice as fast)
+          if (node1.type === 'canal' && node2.type === 'canal') {
+            weight = distance / 2;
+          }
+          
+          // Add bidirectional edges
+          graph.edges[node1Id].push({
+            from: node1Id,
+            to: node2Id,
+            weight: weight
+          });
+          
+          graph.edges[node2Id].push({
+            from: node2Id,
+            to: node1Id,
+            weight: weight
+          });
+        }
+      }
+    }
+    
+    // Connect bridge points between polygons
+    for (const polygon of polygons) {
+      if (polygon.bridgePoints) {
+        for (const bridgePoint of polygon.bridgePoints) {
+          if (bridgePoint.connection && bridgePoint.edge) {
+            const sourcePointId = bridgePoint.id || `bridge-${bridgePoint.edge.lat}-${bridgePoint.edge.lng}`;
+            
+            // Skip if this bridge is not constructed
+            const isConstructed = !!bridgePoint.isConstructed || 
+                               (sourcePointId.includes('bridge-constructed') || sourcePointId.includes('public_bridge'));
+            
+            if (!isConstructed) {
+              continue;
+            }
+            
+            // Ensure the source point has an edges array
+            if (!graph.edges[sourcePointId]) {
+              continue; // Skip if the node doesn't exist in the graph
+            }
+            
+            // Find the target polygon
+            const targetPolygon = polygons.find(p => p.id === bridgePoint.connection?.targetPolygonId);
+            
+            if (targetPolygon) {
+              // Find the corresponding bridge point in the target polygon
+              const targetBridgePoint = targetPolygon.bridgePoints.find(bp => 
+                bp.connection?.targetPolygonId === polygon.id &&
+                bp.edge && 
+                Math.abs(bp.edge.lat - bridgePoint.connection.targetPoint.lat) < 0.0001 &&
+                Math.abs(bp.edge.lng - bridgePoint.connection.targetPoint.lng) < 0.0001
+              );
+              
+              if (targetBridgePoint && targetBridgePoint.edge) {
+                const targetPointId = targetBridgePoint.id || `bridge-${targetBridgePoint.edge.lat}-${targetBridgePoint.edge.lng}`;
+                
+                // Skip if the target node doesn't exist in the graph
+                if (!graph.edges[targetPointId]) {
+                  continue;
+                }
+                
+                // Add bidirectional edges between the bridge points with lower weight to prioritize bridges
+                const distance = bridgePoint.connection.distance || 
+                  this.calculateDistance(bridgePoint.edge, bridgePoint.connection.targetPoint);
+                
+                // Use a lower weight for bridges to prioritize them in pathfinding
+                const weight = distance * 0.5; // Make bridges more attractive for pathfinding
+                
+                graph.edges[sourcePointId].push({
+                  from: sourcePointId,
+                  to: targetPointId,
+                  weight: weight
+                });
+                
+                graph.edges[targetPointId].push({
+                  from: targetPointId,
+                  to: sourcePointId,
+                  weight: weight
+                });
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    // Connect canal points across polygons, but only if they don't cross land
+    const canalNodes = Object.values(graph.nodes).filter(node => node.type === 'canal');
+    
+    for (let i = 0; i < canalNodes.length; i++) {
+      const canalNode1 = canalNodes[i];
+      
+      for (let j = 0; j < canalNodes.length; j++) {
+        // Allow connections to all canal nodes, not just those with higher indices
+        if (i === j) continue; // Skip self-connections
+        
+        const canalNode2 = canalNodes[j];
+        
+        // Skip if they're in the same polygon (already connected above)
+        if (canalNode1.polygonId === canalNode2.polygonId) {
+          continue;
+        }
+        
+        // Calculate distance between canal points
+        const distance = this.calculateDistance(canalNode1.position, canalNode2.position);
+        
+        // Increase maximum distance further and reduce minimum distance
+        if (distance > 5 && distance < 500) {
+          // Skip if the line between these points would cross land
+          if (this.doesLineIntersectLand(canalNode1.position, canalNode2.position, polygons)) {
+            continue;
+          }
+          
+          // Water travel is twice as fast, so divide the weight by 2
+          const weight = distance / 2;
+          
+          // Add bidirectional edges
+          graph.edges[canalNode1.id].push({
+            from: canalNode1.id,
+            to: canalNode2.id,
+            weight: weight
+          });
+          
+          graph.edges[canalNode2.id].push({
+            from: canalNode2.id,
+            to: canalNode1.id,
+            weight: weight
+          });
+        }
+      }
+    }
+    
+    // Log the node types for debugging
+    const nodeTypes = {};
+    Object.values(graph.nodes).forEach(node => {
+      nodeTypes[node.type] = (nodeTypes[node.type] || 0) + 1;
+    });
+    console.log('Real infrastructure graph node types:', nodeTypes);
+    
     return graph;
   }
 
