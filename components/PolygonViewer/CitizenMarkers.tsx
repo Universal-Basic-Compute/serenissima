@@ -78,10 +78,12 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     if (citizens.length === 0) return;
     
     setIsLoadingPaths(true);
+    console.log(`Fetching activity paths for ${citizens.length} citizens...`);
     
     try {
       // Get unique citizen IDs
       const citizenIds = [...new Set(citizens.map(c => c.citizenid || c.CitizenId || c.id))];
+      console.log(`Found ${citizenIds.length} unique citizen IDs for path fetching`);
       
       // Fetch activities for all citizens in chunks to avoid URL length limits
       const chunkSize = 10;
@@ -104,28 +106,47 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                 try {
                   // Parse path if it's a string
                   path = typeof activity.Path === 'string' ? JSON.parse(activity.Path) : activity.Path;
+                  
+                  // Log the parsed path for debugging
+                  console.log(`Parsed path for activity ${activity.ActivityId || 'unknown'}, citizen ${activity.CitizenId}:`, 
+                    path.length > 0 ? `${path.length} points, first: ${JSON.stringify(path[0])}` : 'empty path');
+                  
+                  // Skip activities without valid paths
+                  if (!Array.isArray(path) || path.length < 2) {
+                    console.warn(`Skipping invalid path for activity ${activity.ActivityId || 'unknown'}: not an array or too short`);
+                    return;
+                  }
+                  
+                  // Validate each point in the path
+                  const validPath = path.filter(point => 
+                    point && typeof point === 'object' && 
+                    'lat' in point && 'lng' in point &&
+                    typeof point.lat === 'number' && typeof point.lng === 'number'
+                  );
+                  
+                  if (validPath.length < 2) {
+                    console.warn(`Skipping path with insufficient valid points: ${validPath.length} valid out of ${path.length}`);
+                    return;
+                  }
+                  
+                  const citizenId = activity.CitizenId;
+                  
+                  if (!pathsMap[citizenId]) {
+                    pathsMap[citizenId] = [];
+                  }
+                  
+                  pathsMap[citizenId].push({
+                    id: activity.ActivityId || `activity-${Math.random()}`,
+                    citizenId,
+                    path: validPath, // Use the validated path
+                    type: activity.Type || 'unknown',
+                    startTime: activity.StartDate || activity.CreatedAt,
+                    endTime: activity.EndDate
+                  });
                 } catch (e) {
-                  console.warn('Failed to parse activity path:', e);
+                  console.warn(`Failed to parse activity path for ${activity.ActivityId || 'unknown'}:`, e);
                   return;
                 }
-                
-                // Skip activities without valid paths
-                if (!Array.isArray(path) || path.length < 2) return;
-                
-                const citizenId = activity.CitizenId;
-                
-                if (!pathsMap[citizenId]) {
-                  pathsMap[citizenId] = [];
-                }
-                
-                pathsMap[citizenId].push({
-                  id: activity.ActivityId || `activity-${Math.random()}`,
-                  citizenId,
-                  path,
-                  type: activity.Type || 'unknown',
-                  startTime: activity.StartDate || activity.CreatedAt,
-                  endTime: activity.EndDate
-                });
               }
             });
           }
@@ -207,6 +228,12 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     // Set hovered citizen paths
     const citizenId = citizen.citizenid || citizen.CitizenId || citizen.id;
     const paths = activityPaths[citizenId] || [];
+    
+    console.log(`Citizen hover: ${citizenId} has ${paths.length} activity paths`);
+    if (paths.length > 0) {
+      console.log(`First path has ${paths[0].path.length} points`);
+    }
+    
     setHoveredCitizenPaths(paths);
     
     // Log the paths for debugging
@@ -463,67 +490,106 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
       
       {/* Activity Paths */}
       {(hoveredCitizenPaths.length > 0 || selectedCitizenPaths.length > 0) && (
-        <svg className="absolute inset-0 pointer-events-none" style={{ zIndex: 980, width: canvasWidth, height: canvasHeight }}>
+        <svg 
+          className="absolute inset-0 pointer-events-none" 
+          style={{ 
+            zIndex: 980, 
+            width: canvasWidth, 
+            height: canvasHeight,
+            overflow: 'visible' // Add this to ensure paths aren't clipped
+          }}
+        >
+          {/* Debug text to confirm the SVG is rendering */}
+          <text x="20" y="40" fill="red" fontSize="12">
+            Paths: {hoveredCitizenPaths.length} hovered, {selectedCitizenPaths.length} selected
+          </text>
+          
           {/* Render paths for hovered citizen */}
-          {hoveredCitizenPaths.map((activity) => (
-            <g key={activity.id}>
-              <polyline 
-                points={activity.path.map(point => {
-                  const screenPos = latLngToScreen(point.lat, point.lng);
-                  return `${screenPos.x},${screenPos.y}`;
-                }).join(' ')}
-                fill="none"
-                stroke={getActivityPathColor(activity.type)}
-                strokeWidth="2"
-                strokeOpacity="0.6"
-                strokeDasharray="5,5"
-              />
-              {/* Add small circles at path points */}
-              {activity.path.map((point, index) => {
+          {hoveredCitizenPaths.map((activity) => {
+            // Generate points string with validation
+            const pointsString = activity.path
+              .filter(point => point && typeof point.lat === 'number' && typeof point.lng === 'number')
+              .map(point => {
                 const screenPos = latLngToScreen(point.lat, point.lng);
-                return (
-                  <circle 
-                    key={`point-${index}`}
-                    cx={screenPos.x}
-                    cy={screenPos.y}
-                    r="2"
-                    fill={getActivityPathColor(activity.type)}
-                    opacity="0.8"
-                  />
-                );
-              })}
-            </g>
-          ))}
+                return `${screenPos.x},${screenPos.y}`;
+              })
+              .join(' ');
+            
+            // Only render if we have valid points
+            if (!pointsString) return null;
+            
+            return (
+              <g key={activity.id}>
+                <polyline 
+                  points={pointsString}
+                  fill="none"
+                  stroke={getActivityPathColor(activity.type)}
+                  strokeWidth="2"
+                  strokeOpacity="0.6"
+                  strokeDasharray="5,5"
+                />
+                {/* Add small circles at path points */}
+                {activity.path.map((point, index) => {
+                  if (!point || typeof point.lat !== 'number' || typeof point.lng !== 'number') return null;
+                  
+                  const screenPos = latLngToScreen(point.lat, point.lng);
+                  return (
+                    <circle 
+                      key={`point-${index}`}
+                      cx={screenPos.x}
+                      cy={screenPos.y}
+                      r="2"
+                      fill={getActivityPathColor(activity.type)}
+                      opacity="0.8"
+                    />
+                  );
+                })}
+              </g>
+            );
+          })}
           
           {/* Render paths for selected citizen with higher opacity */}
-          {selectedCitizenPaths.map((activity) => (
-            <g key={activity.id}>
-              <polyline 
-                points={activity.path.map(point => {
-                  const screenPos = latLngToScreen(point.lat, point.lng);
-                  return `${screenPos.x},${screenPos.y}`;
-                }).join(' ')}
-                fill="none"
-                stroke={getActivityPathColor(activity.type)}
-                strokeWidth="3"
-                strokeOpacity="0.8"
-              />
-              {/* Add small circles at path points */}
-              {activity.path.map((point, index) => {
+          {selectedCitizenPaths.map((activity) => {
+            // Generate points string with validation
+            const pointsString = activity.path
+              .filter(point => point && typeof point.lat === 'number' && typeof point.lng === 'number')
+              .map(point => {
                 const screenPos = latLngToScreen(point.lat, point.lng);
-                return (
-                  <circle 
-                    key={`point-${index}`}
-                    cx={screenPos.x}
-                    cy={screenPos.y}
-                    r="3"
-                    fill={getActivityPathColor(activity.type)}
-                    opacity="1"
-                  />
-                );
-              })}
-            </g>
-          ))}
+                return `${screenPos.x},${screenPos.y}`;
+              })
+              .join(' ');
+            
+            // Only render if we have valid points
+            if (!pointsString) return null;
+            
+            return (
+              <g key={activity.id}>
+                <polyline 
+                  points={pointsString}
+                  fill="none"
+                  stroke={getActivityPathColor(activity.type)}
+                  strokeWidth="3"
+                  strokeOpacity="0.8"
+                />
+                {/* Add small circles at path points */}
+                {activity.path.map((point, index) => {
+                  if (!point || typeof point.lat !== 'number' || typeof point.lng !== 'number') return null;
+                  
+                  const screenPos = latLngToScreen(point.lat, point.lng);
+                  return (
+                    <circle 
+                      key={`point-${index}`}
+                      cx={screenPos.x}
+                      cy={screenPos.y}
+                      r="3"
+                      fill={getActivityPathColor(activity.type)}
+                      opacity="1"
+                    />
+                  );
+                })}
+              </g>
+            );
+          })}
         </svg>
       )}
       
