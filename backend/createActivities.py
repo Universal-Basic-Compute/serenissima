@@ -510,6 +510,9 @@ def create_goto_home_activity(tables, citizen_id: str, home_id: str, path_data: 
             end_time = now + datetime.timedelta(hours=1)
             end_date = end_time.isoformat()
         
+        # Ensure path is a valid JSON string
+        path_json = json.dumps(path_data.get('path', []))
+        
         # Create the activity
         activity = tables['activities'].create({
             "ActivityId": f"goto_home_{citizen_id}_{int(time.time())}",
@@ -519,7 +522,7 @@ def create_goto_home_activity(tables, citizen_id: str, home_id: str, path_data: 
             "CreatedAt": now.isoformat(),
             "StartDate": start_date,
             "EndDate": end_date,
-            "Path": json.dumps(path_data.get('path', [])),
+            "Path": path_json,
             "Notes": "Going home for the night"
         })
         

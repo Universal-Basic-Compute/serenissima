@@ -460,6 +460,16 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
           setCitizens(citizensWithAddedPositions);
         }
       }
+      
+      // Get citizen IDs for real-time position updates
+      const citizenIds = loadedCitizens
+        .map(c => c.citizenid || c.CitizenId || c.id)
+        .filter(Boolean);
+      
+      // Fetch real-time positions
+      if (citizenIds.length > 0) {
+        await fetchRealTimePositions(citizenIds);
+      }
   
       setIsLoading(false);
     };
@@ -485,13 +495,25 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
       fetchActivityPaths();
     });
     
+    // Set up interval to refresh real-time positions
+    const refreshInterval = setInterval(() => {
+      const citizenIds = citizens
+        .map(c => c.citizenid || c.CitizenId || c.id)
+        .filter(Boolean);
+      
+      if (citizenIds.length > 0) {
+        fetchRealTimePositions(citizenIds);
+      }
+    }, 10000); // Refresh every 10 seconds
+    
     // Subscribe to events and store the subscription
     const subscription = eventBus.subscribe(EventTypes.CITIZENS_LOADED, handleCitizensLoaded);
     
-    // Clean up event listeners
+    // Clean up event listeners and interval
     return () => {
       window.removeEventListener('loadCitizens', handleLoadCitizens);
       subscription.unsubscribe();
+      clearInterval(refreshInterval);
     };
   }, []);
   
