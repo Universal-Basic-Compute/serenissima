@@ -306,23 +306,6 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       console.error('Error fetching land groups:', error);
     }
   }, []);
-  
-  // Fetch land groups data
-  const fetchLandGroups = useCallback(async () => {
-    try {
-      console.log('Fetching land groups data from TwoDPage...');
-      const response = await fetch('/api/land-groups?includeUnconnected=true&minSize=1');
-      
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success && data.landGroups) {
-          console.log(`TwoDPage: Loaded ${data.landGroups.length} land groups`);
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching land groups from TwoDPage:', error);
-    }
-  }, []);
 
   // Dispatch event when transport mode changes
   useEffect(() => {
