@@ -3122,6 +3122,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         offset={offset}
         canvasWidth={canvasRef.current?.width || window.innerWidth}
         canvasHeight={canvasRef.current?.height || window.innerHeight}
+        activeView={activeView} // Add this line to pass the activeView prop
       />
       
       {/* Resource Markers */}

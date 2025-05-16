@@ -19,6 +19,7 @@ interface CitizenMarkersProps {
   offset: { x: number, y: number };
   canvasWidth: number;
   canvasHeight: number;
+  activeView?: string; // Add this prop
 }
 
 const CitizenMarkers: React.FC<CitizenMarkersProps> = ({ 
@@ -26,7 +27,8 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   scale, 
   offset,
   canvasWidth,
-  canvasHeight
+  canvasHeight,
+  activeView = 'citizens' // Default to 'citizens'
 }) => {
   const [citizens, setCitizens] = useState<any[]>([]);
   const [selectedCitizen, setSelectedCitizen] = useState<any>(null);
@@ -41,6 +43,8 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   const [isLoadingPaths, setIsLoadingPaths] = useState<boolean>(false);
   const [selectedCitizenPaths, setSelectedCitizenPaths] = useState<ActivityPath[]>([]);
   const [hoveredCitizenPaths, setHoveredCitizenPaths] = useState<ActivityPath[]>([]);
+  // Add a new state to track all visible paths
+  const [visiblePaths, setVisiblePaths] = useState<ActivityPath[]>([]);
   
   // Helper function to convert lat/lng to screen coordinates
   const latLngToScreen = (lat: number, lng: number) => {
@@ -88,6 +92,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
       // Fetch activities for all citizens in chunks to avoid URL length limits
       const chunkSize = 10;
       const pathsMap: Record<string, ActivityPath[]> = {};
+      const allPaths: ActivityPath[] = []; // Add this to collect all paths
       
       for (let i = 0; i < citizenIds.length; i += chunkSize) {
         const chunk = citizenIds.slice(i, i + chunkSize);
@@ -153,8 +158,9 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
         }
       }
       
-      console.log(`Loaded activity paths for ${Object.keys(pathsMap).length} citizens`);
+      console.log(`Loaded activity paths for ${Object.keys(pathsMap).length} citizens, total paths: ${allPaths.length}`);
       setActivityPaths(pathsMap);
+      setVisiblePaths(allPaths); // Set all paths as visible
     } catch (error) {
       console.error('Error fetching activity paths:', error);
     } finally {
@@ -489,8 +495,8 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
         </svg>
       )}
       
-      {/* Activity Paths */}
-      {(hoveredCitizenPaths.length > 0 || selectedCitizenPaths.length > 0) && (
+      {/* Activity Paths - Modified to show all paths in citizens view */}
+      {((activeView === 'citizens' && visiblePaths.length > 0) || hoveredCitizenPaths.length > 0 || selectedCitizenPaths.length > 0) && (
         <svg 
           className="absolute inset-0 pointer-events-none" 
           style={{ 
@@ -502,8 +508,55 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
         >
           {/* Debug text to confirm the SVG is rendering */}
           <text x="20" y="40" fill="red" fontSize="12">
-            Paths: {hoveredCitizenPaths.length} hovered, {selectedCitizenPaths.length} selected
+            Paths: {hoveredCitizenPaths.length} hovered, {selectedCitizenPaths.length} selected, {activeView === 'citizens' ? visiblePaths.length : 0} visible
           </text>
+          
+          {/* Render all paths when in citizens view */}
+          {activeView === 'citizens' && visiblePaths.map((activity) => {
+            // Generate points string with validation
+            const pointsString = activity.path
+              .filter(point => point && typeof point.lat === 'number' && typeof point.lng === 'number')
+              .map(point => {
+                const screenPos = latLngToScreen(point.lat, point.lng);
+                return `${screenPos.x},${screenPos.y}`;
+              })
+              .join(' ');
+            
+            // Only render if we have valid points
+            if (!pointsString) return null;
+            
+            return (
+              <g key={activity.id}>
+                <polyline 
+                  points={pointsString}
+                  fill="none"
+                  stroke={getActivityPathColor(activity.type)}
+                  strokeWidth="1.5"
+                  strokeOpacity="0.4"
+                  strokeDasharray="3,3"
+                />
+                {/* Add small circles at path endpoints only to reduce visual clutter */}
+                {activity.path.length > 0 && [
+                  activity.path[0],
+                  activity.path[activity.path.length - 1]
+                ].map((point, index) => {
+                  if (!point || typeof point.lat !== 'number' || typeof point.lng !== 'number') return null;
+                  
+                  const screenPos = latLngToScreen(point.lat, point.lng);
+                  return (
+                    <circle 
+                      key={`endpoint-${index}`}
+                      cx={screenPos.x}
+                      cy={screenPos.y}
+                      r="2"
+                      fill={getActivityPathColor(activity.type)}
+                      opacity="0.6"
+                    />
+                  );
+                })}
+              </g>
+            );
+          })}
           
           {/* Render paths for hovered citizen */}
           {hoveredCitizenPaths.map((activity) => {
