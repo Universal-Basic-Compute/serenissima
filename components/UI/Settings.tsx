@@ -19,6 +19,7 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
   const [showFps, setShowFps] = useState<boolean>(false);
   const [showDebugInfo, setShowDebugInfo] = useState<boolean>(false);
   const [saveMessage, setSaveMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
+  const [settingsDisabled, setSettingsDisabled] = useState(true); // Set to true to disable settings
 
   // Load settings from localStorage on component mount
   useEffect(() => {
@@ -341,6 +342,10 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
             {activeTab === 'sound' && (
               <div>
                 <h3 className="text-lg font-medium text-amber-800 mb-4">Sound Settings</h3>
+                <div className="bg-amber-100 border-l-4 border-amber-500 text-amber-700 p-4 mb-4 rounded">
+                  <p className="font-medium">Settings are temporarily disabled</p>
+                  <p className="text-sm">Only cache management is available at this time. Other settings will be enabled in a future update.</p>
+                </div>
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -352,7 +357,8 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
                       max="100"
                       value={masterVolume}
                       onChange={(e) => setMasterVolume(parseInt(e.target.value))}
-                      className="w-full h-2 bg-amber-200 rounded-lg appearance-none cursor-pointer"
+                      className={`w-full h-2 bg-amber-200 rounded-lg appearance-none ${settingsDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                      disabled={settingsDisabled}
                     />
                     <div className="text-right text-xs text-gray-500 mt-1">{masterVolume}%</div>
                   </div>
@@ -367,7 +373,8 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
                       max="100"
                       value={musicVolume}
                       onChange={(e) => setMusicVolume(parseInt(e.target.value))}
-                      className="w-full h-2 bg-amber-200 rounded-lg appearance-none cursor-pointer"
+                      className={`w-full h-2 bg-amber-200 rounded-lg appearance-none ${settingsDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                      disabled={settingsDisabled}
                     />
                     <div className="text-right text-xs text-gray-500 mt-1">{musicVolume}%</div>
                   </div>
@@ -382,7 +389,8 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
                       max="100"
                       value={effectsVolume}
                       onChange={(e) => setEffectsVolume(parseInt(e.target.value))}
-                      className="w-full h-2 bg-amber-200 rounded-lg appearance-none cursor-pointer"
+                      className={`w-full h-2 bg-amber-200 rounded-lg appearance-none ${settingsDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                      disabled={settingsDisabled}
                     />
                     <div className="text-right text-xs text-gray-500 mt-1">{effectsVolume}%</div>
                   </div>
@@ -393,9 +401,10 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
                       id="mute"
                       checked={isMuted}
                       onChange={(e) => setIsMuted(e.target.checked)}
-                      className="h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded"
+                      className={`h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded ${settingsDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      disabled={settingsDisabled}
                     />
-                    <label htmlFor="mute" className="ml-2 block text-sm text-gray-700">
+                    <label htmlFor="mute" className={`ml-2 block text-sm text-gray-700 ${settingsDisabled ? 'opacity-50' : ''}`}>
                       Mute All Sounds
                     </label>
                   </div>
@@ -426,15 +435,21 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
                     </button>
                   </div>
                   
+                  <div className="bg-amber-100 border-l-4 border-amber-500 text-amber-700 p-4 mb-4 rounded">
+                    <p className="font-medium">Settings are temporarily disabled</p>
+                    <p className="text-sm">Only cache management is available at this time. Other settings will be enabled in a future update.</p>
+                  </div>
+                  
                   <div className="flex items-center">
                     <input
                       type="checkbox"
                       id="showDebugInfo"
                       checked={showDebugInfo}
                       onChange={(e) => setShowDebugInfo(e.target.checked)}
-                      className="h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded"
+                      className={`h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded ${settingsDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      disabled={settingsDisabled}
                     />
-                    <label htmlFor="showDebugInfo" className="ml-2 block text-sm text-gray-700">
+                    <label htmlFor="showDebugInfo" className={`ml-2 block text-sm text-gray-700 ${settingsDisabled ? 'opacity-50' : ''}`}>
                       Show Debug Information
                     </label>
                   </div>
@@ -456,9 +471,9 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
           <div className="flex space-x-3">
             <button
               onClick={saveSettings}
-              disabled={isSaving}
+              disabled={isSaving || settingsDisabled}
               className={`px-4 py-2 rounded-md flex items-center ${
-                isSaving ? 'bg-gray-400 text-gray-700 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'
+                isSaving || settingsDisabled ? 'bg-gray-400 text-gray-700 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'
               }`}
             >
               <FaSave className="mr-2" />
