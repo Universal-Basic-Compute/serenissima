@@ -384,6 +384,12 @@ export default function BuildingDetailsPanel({
           if (!polygon.owner) {
             fetchLandOwner(landId);
           }
+          
+          // Find the point data if we have building position
+          if (building?.position) {
+            findPointInPolygon(polygon, building.position);
+          }
+          
           return;
         }
       }
@@ -403,11 +409,73 @@ export default function BuildingDetailsPanel({
         if (!data.polygon.owner) {
           fetchLandOwner(landId);
         }
+        
+        // Find the point data if we have building position
+        if (building?.position) {
+          findPointInPolygon(data.polygon, building.position);
+        }
       } else {
         console.error(`No polygon data returned for ID: ${landId}`);
       }
     } catch (error) {
       console.error('Error fetching land data:', error);
+    }
+  };
+  
+  // Add a new function to find the point in the polygon
+  const findPointInPolygon = (polygon: any, buildingPosition: any) => {
+    try {
+      let position;
+      if (typeof buildingPosition === 'string') {
+        position = JSON.parse(buildingPosition);
+      } else {
+        position = buildingPosition;
+      }
+      
+      if (!position || !position.lat || !position.lng) {
+        console.warn('Invalid building position:', position);
+        return;
+      }
+      
+      // Check building points
+      if (polygon.buildingPoints) {
+        const buildingPoint = polygon.buildingPoints.find((point: any) => 
+          Math.abs(point.lat - position.lat) < 0.0001 && Math.abs(point.lng - position.lng) < 0.0001
+        );
+        if (buildingPoint) {
+          console.log('Found matching building point:', buildingPoint);
+          setPointData(buildingPoint);
+          return;
+        }
+      }
+      
+      // Check bridge points
+      if (polygon.bridgePoints) {
+        const bridgePoint = polygon.bridgePoints.find((point: any) => 
+          point.edge && Math.abs(point.edge.lat - position.lat) < 0.0001 && Math.abs(point.edge.lng - position.lng) < 0.0001
+        );
+        if (bridgePoint) {
+          console.log('Found matching bridge point:', bridgePoint);
+          setPointData(bridgePoint);
+          return;
+        }
+      }
+      
+      // Check canal points
+      if (polygon.canalPoints) {
+        const canalPoint = polygon.canalPoints.find((point: any) => 
+          point.edge && Math.abs(point.edge.lat - position.lat) < 0.0001 && Math.abs(point.edge.lng - position.lng) < 0.0001
+        );
+        if (canalPoint) {
+          console.log('Found matching canal point:', canalPoint);
+          setPointData(canalPoint);
+          return;
+        }
+      }
+      
+      console.log('No matching point found in polygon for position:', position);
+    } catch (error) {
+      console.error('Error finding point in polygon:', error);
     }
   };
   
@@ -920,13 +988,6 @@ export default function BuildingDetailsPanel({
                     ) : (
                       <p className="text-gray-500 italic">Location details unavailable</p>
                     )
-                  )}
-                  
-                  {/* Land owner - keep this if still needed */}
-                  {landData?.owner && (
-                    <p className="text-gray-700 mb-2">
-                      <span className="font-medium">Land Owner:</span> {landData.owner}
-                    </p>
                   )}
                   
                   {/* Land coordinates */}
