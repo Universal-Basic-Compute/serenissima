@@ -1,8 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { citizenService } from '@/lib/services/CitizenService';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 import { CoordinateService } from '@/lib/services/CoordinateService';
 import CitizenDetailsPanel from '@/components/UI/CitizenDetailsPanel';
+
+interface ActivityPath {
+  id: string;
+  citizenId: string;
+  path: {lat: number, lng: number}[];
+  type: string;
+  startTime: string;
+  endTime?: string;
+}
 
 interface CitizenMarkersProps {
   isVisible: boolean;
@@ -28,6 +37,10 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     homePosition?: {x: number, y: number};
     workPosition?: {x: number, y: number};
   } | null>(null);
+  const [activityPaths, setActivityPaths] = useState<Record<string, ActivityPath[]>>({});
+  const [isLoadingPaths, setIsLoadingPaths] = useState<boolean>(false);
+  const [selectedCitizenPaths, setSelectedCitizenPaths] = useState<ActivityPath[]>([]);
+  const [hoveredCitizenPaths, setHoveredCitizenPaths] = useState<ActivityPath[]>([]);
   
   // Helper function to convert lat/lng to screen coordinates
   const latLngToScreen = (lat: number, lng: number) => {
@@ -58,6 +71,91 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     }
     
     return null;
+  };
+  
+  // Function to fetch activity paths
+  const fetchActivityPaths = async () => {
+    if (citizens.length === 0) return;
+    
+    setIsLoadingPaths(true);
+    
+    try {
+      // Get unique citizen IDs
+      const citizenIds = [...new Set(citizens.map(c => c.citizenid || c.CitizenId || c.id))];
+      
+      // Fetch activities for all citizens in chunks to avoid URL length limits
+      const chunkSize = 10;
+      const pathsMap: Record<string, ActivityPath[]> = {};
+      
+      for (let i = 0; i < citizenIds.length; i += chunkSize) {
+        const chunk = citizenIds.slice(i, i + chunkSize);
+        const queryParams = chunk.map(id => `citizenId=${encodeURIComponent(id)}`).join('&');
+        
+        const response = await fetch(`/api/activities?${queryParams}&limit=100&hasPath=true`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          
+          if (data.activities && Array.isArray(data.activities)) {
+            // Process activities with paths
+            data.activities.forEach((activity: any) => {
+              if (activity.Path) {
+                let path;
+                try {
+                  // Parse path if it's a string
+                  path = typeof activity.Path === 'string' ? JSON.parse(activity.Path) : activity.Path;
+                } catch (e) {
+                  console.warn('Failed to parse activity path:', e);
+                  return;
+                }
+                
+                // Skip activities without valid paths
+                if (!Array.isArray(path) || path.length < 2) return;
+                
+                const citizenId = activity.CitizenId;
+                
+                if (!pathsMap[citizenId]) {
+                  pathsMap[citizenId] = [];
+                }
+                
+                pathsMap[citizenId].push({
+                  id: activity.ActivityId || `activity-${Math.random()}`,
+                  citizenId,
+                  path,
+                  type: activity.Type || 'unknown',
+                  startTime: activity.StartDate || activity.CreatedAt,
+                  endTime: activity.EndDate
+                });
+              }
+            });
+          }
+        }
+      }
+      
+      console.log(`Loaded activity paths for ${Object.keys(pathsMap).length} citizens`);
+      setActivityPaths(pathsMap);
+    } catch (error) {
+      console.error('Error fetching activity paths:', error);
+    } finally {
+      setIsLoadingPaths(false);
+    }
+  };
+
+  // Add a function to get path color based on activity type
+  const getActivityPathColor = (type: string): string => {
+    const lowerType = type.toLowerCase();
+    
+    if (lowerType.includes('transport') || lowerType.includes('move')) {
+      return '#4b70e2'; // Blue
+    } else if (lowerType.includes('trade') || lowerType.includes('buy') || lowerType.includes('sell')) {
+      return '#e27a4b'; // Orange
+    } else if (lowerType.includes('work') || lowerType.includes('labor')) {
+      return '#4be27a'; // Green
+    } else if (lowerType.includes('craft') || lowerType.includes('create') || lowerType.includes('produce')) {
+      return '#e24b7a'; // Pink
+    }
+    
+    return '#aaaaaa'; // Default gray
   };
   
   // Add a function to handle citizen hover
@@ -105,11 +203,22 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     } else {
       console.log('No valid connections found for citizen:', citizen);
     }
+    
+    // Set hovered citizen paths
+    const citizenId = citizen.citizenid || citizen.CitizenId || citizen.id;
+    const paths = activityPaths[citizenId] || [];
+    setHoveredCitizenPaths(paths);
+    
+    // Log the paths for debugging
+    if (paths.length > 0) {
+      console.log(`Found ${paths.length} activity paths for citizen ${citizenId}`);
+    }
   };
   
   // Add a function to handle mouse leave
   const handleCitizenLeave = () => {
     setHoveredConnections(null);
+    setHoveredCitizenPaths([]);
   };
   
   useEffect(() => {
@@ -174,7 +283,10 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     eventBus.subscribe(EventTypes.CITIZENS_LOADED, handleCitizensLoaded);
     
     // Initial load
-    loadCitizensData();
+    loadCitizensData().then(() => {
+      // After citizens are loaded, fetch their activity paths
+      fetchActivityPaths();
+    });
     
     // Subscribe to events and store the subscription
     const subscription = eventBus.subscribe(EventTypes.CITIZENS_LOADED, handleCitizensLoaded);
@@ -195,6 +307,12 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     // Ensure we have a valid citizen object before setting it
     if (citizen && (citizen.CitizenId || citizen.id)) {
       setSelectedCitizen(citizen);
+      
+      // Set selected citizen paths
+      const citizenId = citizen.citizenid || citizen.CitizenId || citizen.id;
+      const paths = activityPaths[citizenId] || [];
+      setSelectedCitizenPaths(paths);
+      console.log(`Setting ${paths.length} paths for selected citizen ${citizenId}`);
     } else {
       console.warn('Attempted to select invalid citizen:', citizen);
     }
@@ -202,6 +320,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   
   const handleCloseDetails = () => {
     setSelectedCitizen(null);
+    setSelectedCitizenPaths([]);
   };
   
   if (!isVisible) return null;
@@ -342,10 +461,82 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
         </svg>
       )}
       
+      {/* Activity Paths */}
+      {(hoveredCitizenPaths.length > 0 || selectedCitizenPaths.length > 0) && (
+        <svg className="absolute inset-0 pointer-events-none" style={{ zIndex: 980, width: canvasWidth, height: canvasHeight }}>
+          {/* Render paths for hovered citizen */}
+          {hoveredCitizenPaths.map((activity) => (
+            <g key={activity.id}>
+              <polyline 
+                points={activity.path.map(point => {
+                  const screenPos = latLngToScreen(point.lat, point.lng);
+                  return `${screenPos.x},${screenPos.y}`;
+                }).join(' ')}
+                fill="none"
+                stroke={getActivityPathColor(activity.type)}
+                strokeWidth="2"
+                strokeOpacity="0.6"
+                strokeDasharray="5,5"
+              />
+              {/* Add small circles at path points */}
+              {activity.path.map((point, index) => {
+                const screenPos = latLngToScreen(point.lat, point.lng);
+                return (
+                  <circle 
+                    key={`point-${index}`}
+                    cx={screenPos.x}
+                    cy={screenPos.y}
+                    r="2"
+                    fill={getActivityPathColor(activity.type)}
+                    opacity="0.8"
+                  />
+                );
+              })}
+            </g>
+          ))}
+          
+          {/* Render paths for selected citizen with higher opacity */}
+          {selectedCitizenPaths.map((activity) => (
+            <g key={activity.id}>
+              <polyline 
+                points={activity.path.map(point => {
+                  const screenPos = latLngToScreen(point.lat, point.lng);
+                  return `${screenPos.x},${screenPos.y}`;
+                }).join(' ')}
+                fill="none"
+                stroke={getActivityPathColor(activity.type)}
+                strokeWidth="3"
+                strokeOpacity="0.8"
+              />
+              {/* Add small circles at path points */}
+              {activity.path.map((point, index) => {
+                const screenPos = latLngToScreen(point.lat, point.lng);
+                return (
+                  <circle 
+                    key={`point-${index}`}
+                    cx={screenPos.x}
+                    cy={screenPos.y}
+                    r="3"
+                    fill={getActivityPathColor(activity.type)}
+                    opacity="1"
+                  />
+                );
+              })}
+            </g>
+          ))}
+        </svg>
+      )}
+      
       {/* Loading Indicator */}
       {isLoading && (
         <div className="absolute top-20 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-lg">
           Loading citizens...
+        </div>
+      )}
+      
+      {isLoadingPaths && (
+        <div className="absolute top-32 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-lg">
+          Loading activity paths...
         </div>
       )}
       
