@@ -115,9 +115,10 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
   const handleClose = () => {
     // Animate out before closing
     setIsVisible(false);
+    // Use a shorter timeout to make the closing more responsive
     setTimeout(() => {
       onClose();
-    }, 300);
+    }, 200); // Reduced from 300ms to 200ms for faster response
   };
   
   const formatDucats = (amount: number | string) => {
@@ -272,7 +273,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
         </h2>
         <button 
           onClick={handleClose}
-          className="text-amber-600 hover:text-amber-800 transition-colors"
+          className="text-amber-600 hover:text-amber-800 transition-colors p-2" // Added padding for larger click area
           aria-label="Close"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
