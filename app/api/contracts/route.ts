@@ -79,7 +79,14 @@ export async function GET(request: Request) {
         // Try to get location from the seller building
         if (contractData.sellerBuilding) {
           try {
-            const buildingResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/buildings/${encodeURIComponent(contractData.sellerBuilding)}`);
+            // First, ensure we have a valid base URL with proper protocol
+            const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
+                          (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+            
+            // Then construct the full URL properly
+            const buildingUrl = new URL(`/api/buildings/${encodeURIComponent(contractData.sellerBuilding)}`, baseUrl);
+            const buildingResponse = await fetch(buildingUrl.toString());
+            
             if (buildingResponse.ok) {
               const buildingData = await buildingResponse.json();
               if (buildingData.building && buildingData.building.position) {
