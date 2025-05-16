@@ -71,6 +71,11 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [emptyBuildingPoints, setEmptyBuildingPoints] = useState<{lat: number, lng: number}[]>([]);
   const [showTransportDebugPanel, setShowTransportDebugPanel] = useState<boolean>(false);
   
+  // Add handler function for closing the transport debug panel
+  const handleTransportDebugPanelClose = () => {
+    setShowTransportDebugPanel(false);
+  };
+  
   // Add refs to track current state without causing re-renders
   const isDraggingRef = useRef<boolean>(false);
 
