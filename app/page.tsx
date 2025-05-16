@@ -32,6 +32,7 @@ export default function TwoDPage() {
   const [showGovernancePanel, setShowGovernancePanel] = useState<boolean>(false);
   const [showGuildsPanel, setShowGuildsPanel] = useState<boolean>(false);
   const [showKnowledgePanel, setShowKnowledgePanel] = useState<boolean>(false);
+  const [transportMode, setTransportMode] = useState<boolean>(false);
   
   // Data state
   const [polygons, setPolygons] = useState<any[]>([]);
