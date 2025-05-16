@@ -4,11 +4,25 @@ import { transportService } from '@/lib/services/TransportService';
 // Add a function to fetch bridge information
 async function fetchBridges() {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/bridges`);
+    // Use absolute URL for server-side fetching
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const response = await fetch(`${baseUrl}/api/bridges`, {
+      // Add these headers for server-side fetch
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'Transport-Debug-Service'
+      },
+      // Add cache: 'no-store' to avoid caching issues
+      cache: 'no-store'
+    });
+    
     if (response.ok) {
       const data = await response.json();
+      console.log(`Successfully fetched ${data.bridges?.length || 0} bridges`);
       return data.bridges || [];
     }
+    
+    console.error(`Failed to fetch bridges: ${response.status} ${response.statusText}`);
     return [];
   } catch (error) {
     console.error('Error fetching bridges:', error);
@@ -19,11 +33,25 @@ async function fetchBridges() {
 // Add a function to fetch dock information
 async function fetchDocks() {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/docks`);
+    // Use absolute URL for server-side fetching
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const response = await fetch(`${baseUrl}/api/docks`, {
+      // Add these headers for server-side fetch
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'Transport-Debug-Service'
+      },
+      // Add cache: 'no-store' to avoid caching issues
+      cache: 'no-store'
+    });
+    
     if (response.ok) {
       const data = await response.json();
+      console.log(`Successfully fetched ${data.docks?.length || 0} docks`);
       return data.docks || [];
     }
+    
+    console.error(`Failed to fetch docks: ${response.status} ${response.statusText}`);
     return [];
   } catch (error) {
     console.error('Error fetching docks:', error);
