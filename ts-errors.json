@@ -1,57 +1,10 @@
 {
-  "totalErrors": 5,
+  "totalErrors": 0,
   "totalWarnings": 0,
-  "exitCode": 2,
-  "timestamp": "2025-05-15T23:28:40.018Z",
-  "errors": [
-    {
-      "filePath": "app/api/citizens/route.ts",
-      "line": 106,
-      "column": 37,
-      "code": "TS2345",
-      "message": "Argument of type 'string | number | boolean | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]' is not assignable to parameter of type 'string'.",
-      "type": "error"
-    },
-    {
-      "filePath": "app/api/citizens/route.ts",
-      "line": 108,
-      "column": 9,
-      "code": "TS2322",
-      "message": "Type 'string | number | true | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]' is not assignable to type 'string'.",
-      "type": "error"
-    },
-    {
-      "filePath": "app/api/citizens/route.ts",
-      "line": 112,
-      "column": 9,
-      "code": "TS2322",
-      "message": "Type 'string | number | true | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]' is not assignable to type 'string'.",
-      "type": "error"
-    },
-    {
-      "filePath": "components/PolygonViewer/ViewportCanvas.tsx",
-      "line": 476,
-      "column": 7,
-      "code": "TS2345",
-      "message": "Argument of type 'PointData' is not assignable to parameter of type 'any[]'.",
-      "type": "error"
-    },
-    {
-      "filePath": "components/PolygonViewer/ViewportCanvas.tsx",
-      "line": 528,
-      "column": 11,
-      "code": "TS2345",
-      "message": "Argument of type 'PointData' is not assignable to parameter of type 'any[]'.",
-      "type": "error"
-    }
-  ],
-  "rawOutputLines": 11,
-  "firstFewLines": [
-    "app/api/citizens/route.ts(106,37): error TS2345: Argument of type 'string | number | boolean | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]' is not assignable to parameter of type 'string'.\r",
-    "  Type 'number' is not assignable to type 'string'.\r",
-    "app/api/citizens/route.ts(108,9): error TS2322: Type 'string | number | true | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]' is not assignable to type 'string'.\r",
-    "  Type 'number' is not assignable to type 'string'.\r",
-    "app/api/citizens/route.ts(112,9): error TS2322: Type 'string | number | true | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]' is not assignable to type 'string'.\r"
-  ],
-  "compilerExitCode": 2
+  "exitCode": 0,
+  "timestamp": "2025-05-16T16:05:43.071Z",
+  "errors": [],
+  "rawOutputLines": 1,
+  "firstFewLines": [],
+  "compilerExitCode": 0
 }
