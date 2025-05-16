@@ -858,6 +858,10 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
               
               // Only render from current position to end
               pathToRender = activity.path.slice(segmentIndex);
+              
+              // Add the current interpolated position as the first point
+              const currentPosition = animatedCitizen.currentPosition;
+              pathToRender = [currentPosition, ...pathToRender.slice(1)];
             }
             
             // Generate points string with validation
