@@ -349,6 +349,93 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     return '#aaaaaa'; // Default gray
   };
   
+  // Function to fetch real-time positions
+  const fetchRealTimePositions = async (citizenIds: string[]) => {
+    try {
+      // Build URL with citizen IDs
+      const params = new URLSearchParams();
+      citizenIds.forEach(id => params.append('citizenId', id));
+      params.append('includeActivities', 'true');
+      
+      const response = await fetch(`/api/citizens/positions?${params.toString()}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        
+        if (data.success && data.positions) {
+          console.log(`Fetched ${data.positions.length} real-time positions`);
+          
+          // Update animated citizens with real-time data
+          setAnimatedCitizens(prev => {
+            const updated = {...prev};
+            
+            data.positions.forEach(positionData => {
+              const { citizenId, position, activity } = positionData;
+              
+              // Find the citizen in our state
+              const citizen = citizens.find(c => 
+                c.citizenid === citizenId || 
+                c.CitizenId === citizenId || 
+                c.id === citizenId
+              );
+              
+              if (citizen && position) {
+                // If citizen has an active activity with a path, update their animation data
+                if (activity && activity.Path) {
+                  let path;
+                  try {
+                    path = typeof activity.Path === 'string' ? 
+                      JSON.parse(activity.Path) : activity.Path;
+                  } catch (e) {
+                    console.warn(`Failed to parse path for citizen ${citizenId}:`, e);
+                    return;
+                  }
+                  
+                  // Calculate progress based on time
+                  const startTime = new Date(activity.StartDate).getTime();
+                  const endTime = new Date(activity.EndDate).getTime();
+                  const currentTime = Date.now();
+                  const totalDuration = endTime - startTime;
+                  const progress = Math.min(1.0, Math.max(0.0, 
+                    (currentTime - startTime) / totalDuration));
+                  
+                  // Update or create animated citizen
+                  updated[citizenId] = {
+                    citizen,
+                    currentPosition: position,
+                    pathIndex: 0,
+                    currentPath: {
+                      id: activity.ActivityId,
+                      citizenId,
+                      path,
+                      type: activity.Type,
+                      startTime: activity.StartDate,
+                      endTime: activity.EndDate
+                    },
+                    progress,
+                    speed: 5 // Default speed
+                  };
+                } else {
+                  // If no active activity, just update position
+                  if (updated[citizenId]) {
+                    updated[citizenId].currentPosition = position;
+                  } else {
+                    // Create a static citizen (no animation)
+                    citizen.position = position;
+                  }
+                }
+              }
+            });
+            
+            return updated;
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching real-time positions:', error);
+    }
+  };
+  
   // Add a function to handle citizen hover
   const handleCitizenHover = (citizen: any) => {
     // Skip if citizen doesn't have a position
