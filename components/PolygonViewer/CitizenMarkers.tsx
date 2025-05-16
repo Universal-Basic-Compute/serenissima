@@ -79,26 +79,12 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   
   // Function to fetch activity paths
   const fetchActivityPaths = async () => {
-    if (citizens.length === 0) return;
-    
     setIsLoadingPaths(true);
-    console.log(`Fetching activity paths for ${citizens.length} citizens...`);
+    console.log('Fetching recent activity paths with routes...');
     
     try {
-      // Get unique citizen IDs
-      const citizenIds = [...new Set(citizens.map(c => c.citizenid || c.CitizenId || c.id))];
-      console.log(`Found ${citizenIds.length} unique citizen IDs for path fetching`);
-      
-      // Fetch activities for all citizens in chunks to avoid URL length limits
-      const chunkSize = 10;
-      const pathsMap: Record<string, ActivityPath[]> = {};
-      const allPaths: ActivityPath[] = []; // Collect all paths in a single array
-      
-      for (let i = 0; i < citizenIds.length; i += chunkSize) {
-        const chunk = citizenIds.slice(i, i + chunkSize);
-        const queryParams = chunk.map(id => `citizenId=${encodeURIComponent(id)}`).join('&');
-        
-        const response = await fetch(`/api/activities?${queryParams}&limit=100&hasPath=true`);
+      // Instead of fetching by citizen IDs, just get the most recent activities with paths
+      const response = await fetch(`/api/activities?limit=100&hasPath=true`);
         
         if (response.ok) {
           const data = await response.json();
@@ -341,11 +327,9 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   
   // Add a separate effect to update paths when citizens change
   useEffect(() => {
-    // This effect should run when the component mounts and when citizens change
-    if (citizens.length > 0) {
-      fetchActivityPaths();
-    }
-  }, [citizens]);
+    // This effect should run when the component mounts
+    fetchActivityPaths();
+  }, []);
   
   // Update when scale or offset changes
   useEffect(() => {
