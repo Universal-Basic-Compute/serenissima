@@ -356,7 +356,7 @@ const TransportDebugPanel: React.FC<TransportDebugPanelProps> = ({ onClose, visi
                             <td className="py-2 px-4 border-b border-amber-200 text-right">{formatNumber(graphInfo.totalNodes)}</td>
                             <td className="py-2 px-4 border-b border-amber-200 text-right">{formatNumber(allModeInfo.totalNodes)}</td>
                             <td className="py-2 px-4 border-b border-amber-200 text-right">
-                              {formatNumber(allModeInfo.totalNodes - graphInfo.totalNodes)}
+                              {formatNumber(Number(allModeInfo.totalNodes) - Number(graphInfo.totalNodes))}
                             </td>
                           </tr>
                           <tr>
@@ -364,7 +364,7 @@ const TransportDebugPanel: React.FC<TransportDebugPanelProps> = ({ onClose, visi
                             <td className="py-2 px-4 border-b border-amber-200 text-right">{formatNumber(graphInfo.totalEdges)}</td>
                             <td className="py-2 px-4 border-b border-amber-200 text-right">{formatNumber(allModeInfo.totalEdges)}</td>
                             <td className="py-2 px-4 border-b border-amber-200 text-right">
-                              {formatNumber(allModeInfo.totalEdges - graphInfo.totalEdges)}
+                              {formatNumber(Number(allModeInfo.totalEdges) - Number(graphInfo.totalEdges))}
                             </td>
                           </tr>
                           <tr>
