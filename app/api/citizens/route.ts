@@ -2,6 +2,32 @@ import { NextResponse } from 'next/server';
 import Airtable from 'airtable';
 import { FieldSet, Record as AirtableRecord, Collaborator, Attachment } from 'airtable';
 
+// Define interfaces for our data structures
+interface Citizen {
+  id: string;
+  citizenid: string;
+  name: string;
+  firstname: string;
+  lastname: string;
+  socialclass: string;
+  description: string;
+  profileimage: string;
+  imageurl: string;
+  position: { lat: number; lng: number };
+  occupation: string;
+  wealth: string | number;
+  createdat: string;
+  home: string | null;
+  work: string | null;
+  currentActivity?: {
+    id: string;
+    type: string;
+    progress: number;
+    path: Array<{ lat: number; lng: number }>;
+  };
+  needscompletionscore?: number;
+}
+
 // Define types for Airtable fields
 type AirtableValue = string | number | boolean | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[];
 
