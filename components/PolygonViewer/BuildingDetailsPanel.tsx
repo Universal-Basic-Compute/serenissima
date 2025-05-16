@@ -727,13 +727,13 @@ export default function BuildingDetailsPanel({
                             <div className="text-xs text-amber-600 mb-1 font-medium">INPUTS</div>
                             {recipe.inputs && Object.entries(recipe.inputs).map(([resource, amount]: [string, any]) => (
                               <div key={`input-${resource}`} className="flex items-center mb-1">
-                                <div className="relative w-6 h-6 mr-1">
+                                <div className="flex-shrink-0 w-6 h-6 mr-1">
                                   <Image 
                                     src={getResourceIconPath(resource)}
                                     alt={resource}
                                     width={24}
                                     height={24}
-                                    className="object-contain"
+                                    className="w-6 h-6 object-contain"
                                     loading="lazy"
                                     unoptimized={true}
                                     onError={(e) => {
@@ -765,13 +765,13 @@ export default function BuildingDetailsPanel({
                             <div className="text-xs text-amber-600 mb-1 font-medium">OUTPUTS</div>
                             {recipe.outputs && Object.entries(recipe.outputs).map(([resource, amount]: [string, any]) => (
                               <div key={`output-${resource}`} className="flex items-center mb-1">
-                                <div className="relative w-6 h-6 mr-1">
+                                <div className="flex-shrink-0 w-6 h-6 mr-1">
                                   <Image 
                                     src={getResourceIconPath(resource)}
                                     alt={resource}
                                     width={24}
                                     height={24}
-                                    className="object-contain"
+                                    className="w-6 h-6 object-contain"
                                     loading="lazy"
                                     unoptimized={true}
                                     onError={(e) => {
@@ -1121,12 +1121,9 @@ export default function BuildingDetailsPanel({
           </div>
         )}
         
-        {/* Add a decorative Venetian footer */}
+        {/* Simple decorative footer */}
         <div className="mt-4 text-center">
-          <div className="text-amber-600 text-xs italic">
-            La Serenissima Repubblica di Venezia
-          </div>
-          <div className="flex justify-center mt-1">
+          <div className="flex justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-600" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
             </svg>
