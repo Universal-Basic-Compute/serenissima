@@ -2042,55 +2042,75 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       //console.log(`%c BUILDINGS DRAWN: Completed drawing ${buildingsWithValidPosition.length} buildings`, 'background: #9C27B0; color: white; padding: 4px 8px; font-weight: bold; border-radius: 4px;');
     }
     
-    // Draw transport points if in transport view
-    if (activeView === 'transport') {
+    // Draw dock points and bridge points with consistent styling in all views
+    if (polygons.length > 0) {
+      // Draw dock points with subtle styling
       polygons.forEach(polygon => {
-        // Draw bridge points
-        if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints)) {
-          polygon.bridgePoints.forEach((point: any) => {
-            if (!point.edge) return;
-                
-            // Normalize coordinates
-            const x = (point.edge.lng - 12.3326) * 20000;
-            const y = (point.edge.lat - 45.4371) * 20000; // Remove the 0.7 factor
-                
-            const isoPos = {
-              x: calculateIsoX(x, y, scale, offset, canvas.width),
-              y: calculateIsoY(x, y, scale, offset, canvas.height)
-            };
-                
-            // Draw bridge point
-            ctx.beginPath();
-            ctx.arc(isoPos.x, isoPos.y, 5 * scale, 0, Math.PI * 2);
-            ctx.fillStyle = '#FF5500';
-            ctx.fill();
-            ctx.strokeStyle = '#000';
-            ctx.lineWidth = 1;
-            ctx.stroke();
-          });
-        }
-            
-        // Draw dock points
         if (polygon.canalPoints && Array.isArray(polygon.canalPoints)) {
           polygon.canalPoints.forEach((point: any) => {
             if (!point.edge) return;
-                
-            // Normalize coordinates
+            
+            // Convert lat/lng to isometric coordinates
             const x = (point.edge.lng - 12.3326) * 20000;
-            const y = (point.edge.lat - 45.4371) * 20000; // Remove the 0.7 factor
-                
+            const y = (point.edge.lat - 45.4371) * 20000;
+            
             const isoPos = {
               x: calculateIsoX(x, y, scale, offset, canvas.width),
               y: calculateIsoY(x, y, scale, offset, canvas.height)
             };
-                
-            // Draw dock point
+            
+            // Draw a small, semi-transparent circle for dock points
             ctx.beginPath();
-            ctx.arc(isoPos.x, isoPos.y, 5 * scale, 0, Math.PI * 2);
-            ctx.fillStyle = '#00AAFF';
+            ctx.arc(isoPos.x, isoPos.y, 2 * scale, 0, Math.PI * 2);
+      
+            // Use a subtle blue color with low opacity
+            // Make points more visible in transport view, more subtle in other views
+            const baseOpacity = activeView === 'transport' ? 0.6 : 0.15;
+      
+            ctx.fillStyle = `rgba(0, 120, 215, ${baseOpacity})`;
             ctx.fill();
-            ctx.strokeStyle = '#000';
-            ctx.lineWidth = 1;
+      
+            // Add a border
+            ctx.strokeStyle = 'rgba(0, 120, 215, 0.4)';
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          });
+        }
+        
+        // Draw bridge points with subtle styling
+        if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints)) {
+          polygon.bridgePoints.forEach((point: any) => {
+            if (!point.edge) return;
+            
+            // Convert lat/lng to isometric coordinates
+            const x = (point.edge.lng - 12.3326) * 20000;
+            const y = (point.edge.lat - 45.4371) * 20000;
+            
+            const isoPos = {
+              x: calculateIsoX(x, y, scale, offset, canvas.width),
+              y: calculateIsoY(x, y, scale, offset, canvas.height)
+            };
+            
+            // Draw a small, semi-transparent square for bridge points
+            const pointSize = 2 * scale;
+      
+            // Use a subtle orange/brown color with low opacity
+            // Make points more visible in transport view, more subtle in other views
+            const baseOpacity = activeView === 'transport' ? 0.6 : 0.15;
+      
+            ctx.fillStyle = `rgba(180, 120, 60, ${baseOpacity})`;
+            ctx.beginPath();
+            ctx.rect(
+              isoPos.x - pointSize/2, 
+              isoPos.y - pointSize/2, 
+              pointSize, 
+              pointSize
+            );
+            ctx.fill();
+      
+            // Add a border
+            ctx.strokeStyle = 'rgba(180, 120, 60, 0.4)';
+            ctx.lineWidth = 0.5;
             ctx.stroke();
           });
         }
@@ -2697,80 +2717,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       });
     }
     
-    // Draw dock points and bridge points in all views, but more discreet in non-buildings view
-    if (polygons.length > 0) {
-      // Draw dock points with subtle styling
-      polygons.forEach(polygon => {
-        if (polygon.canalPoints && Array.isArray(polygon.canalPoints)) {
-          polygon.canalPoints.forEach((point: any) => {
-            if (!point.edge) return;
-            
-            // Convert lat/lng to isometric coordinates
-            const x = (point.edge.lng - 12.3326) * 20000;
-            const y = (point.edge.lat - 45.4371) * 20000;
-            
-            const isoPos = {
-              x: calculateIsoX(x, y, scale, offset, canvas.width),
-              y: calculateIsoY(x, y, scale, offset, canvas.height)
-            };
-            
-            // Draw a small, semi-transparent circle for dock points
-            ctx.beginPath();
-            ctx.arc(isoPos.x, isoPos.y, 2 * scale, 0, Math.PI * 2);
-      
-            // Use a subtle blue color with low opacity
-            // Make points more visible in buildings view, more subtle in other views
-            const baseOpacity = activeView === 'buildings' ? 0.3 : 0.15;
-      
-            ctx.fillStyle = `rgba(0, 120, 215, ${baseOpacity})`;
-            ctx.fill();
-      
-            // Add a border
-            ctx.strokeStyle = 'rgba(0, 120, 215, 0.4)';
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
-          });
-        }
-        
-        // Draw bridge points with subtle styling
-        if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints)) {
-          polygon.bridgePoints.forEach((point: any) => {
-            if (!point.edge) return;
-            
-            // Convert lat/lng to isometric coordinates
-            const x = (point.edge.lng - 12.3326) * 20000;
-            const y = (point.edge.lat - 45.4371) * 20000;
-            
-            const isoPos = {
-              x: calculateIsoX(x, y, scale, offset, canvas.width),
-              y: calculateIsoY(x, y, scale, offset, canvas.height)
-            };
-            
-            // Draw a small, semi-transparent square for bridge points
-            const pointSize = 2 * scale;
-      
-            // Use a subtle orange/brown color with low opacity
-            // Make points more visible in buildings view, more subtle in other views
-            const baseOpacity = activeView === 'buildings' ? 0.3 : 0.15;
-      
-            ctx.fillStyle = `rgba(180, 120, 60, ${baseOpacity})`;
-            ctx.beginPath();
-            ctx.rect(
-              isoPos.x - pointSize/2, 
-              isoPos.y - pointSize/2, 
-              pointSize, 
-              pointSize
-            );
-            ctx.fill();
-      
-            // Add a border
-            ctx.strokeStyle = 'rgba(180, 120, 60, 0.4)';
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
-          });
-        }
-      });
-    }
+    // This section is now handled above with consistent styling across all views
     
     
   }, [loading, polygons, landOwners, users, activeView, buildings, scale, offset, incomeData, minIncome, maxIncome, selectedPolygonId, selectedBuildingId, emptyBuildingPoints, mousePosition, citizensLoaded, citizensByBuilding, incomeDataLoaded, polygonsToRender, getIncomeColor]);
