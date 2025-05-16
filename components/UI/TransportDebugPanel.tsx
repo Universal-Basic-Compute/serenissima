@@ -27,8 +27,9 @@ const TransportDebugPanel: React.FC<TransportDebugPanelProps> = ({ onClose, visi
   // Add an effect to listen for path changes
   useEffect(() => {
     const handlePathCalculated = (event: CustomEvent) => {
-      console.log('Transport route calculated event received:', event.detail);
+      console.log('Transport route calculated event received in debug panel:', event.detail);
       if (event.detail && event.detail.path) {
+        console.log(`Setting path with ${event.detail.path.length} points`);
         setCurrentPath(event.detail.path);
       }
     };
@@ -43,6 +44,18 @@ const TransportDebugPanel: React.FC<TransportDebugPanelProps> = ({ onClose, visi
         setCurrentPath(data.path);
       }
     });
+    
+    // Also try to get the initial path from the transport service
+    try {
+      const { transportService } = require('@/lib/services/TransportService');
+      const path = transportService.getPath();
+      if (path && path.length > 0) {
+        console.log('Initial path loaded from transport service:', path);
+        setCurrentPath(path);
+      }
+    } catch (error) {
+      console.error('Error getting initial path from transport service:', error);
+    }
     
     return () => {
       window.removeEventListener('TRANSPORT_ROUTE_CALCULATED', handlePathCalculated as EventListener);

@@ -230,6 +230,25 @@ export class TransportService {
             path: localResult.path,
             waterOnly: this.waterOnlyMode
           });
+          
+          // Create a custom event with the path data
+          const routeEvent = new CustomEvent('TRANSPORT_ROUTE_CALCULATED', {
+            detail: {
+              path: localResult.path,
+              waterOnly: this.waterOnlyMode
+            }
+          });
+          
+          // Dispatch the event
+          window.dispatchEvent(routeEvent);
+          
+          // Log the event for debugging
+          console.log('Dispatched TRANSPORT_ROUTE_CALCULATED event with path data:', {
+            pathLength: localResult.path.length,
+            firstPoint: localResult.path[0],
+            lastPoint: localResult.path[localResult.path.length - 1]
+          });
+          
           return;
         }
         
@@ -248,6 +267,18 @@ export class TransportService {
               path: waterResult.path,
               waterOnly: true
             });
+            
+            // Create a custom event with the path data
+            const routeEvent = new CustomEvent('TRANSPORT_ROUTE_CALCULATED', {
+              detail: {
+                path: waterResult.path,
+                waterOnly: true
+              }
+            });
+            
+            // Dispatch the event
+            window.dispatchEvent(routeEvent);
+            
             return;
           }
         }
@@ -298,6 +329,13 @@ export class TransportService {
           
           // Dispatch the event
           window.dispatchEvent(routeEvent);
+          
+          // Log the event for debugging
+          console.log('Dispatched TRANSPORT_ROUTE_CALCULATED event with path data:', {
+            pathLength: data.path.length,
+            firstPoint: data.path[0],
+            lastPoint: data.path[data.path.length - 1]
+          });
         } else {
           console.error('Failed to calculate route:', data.error);
           
@@ -481,6 +519,13 @@ export class TransportService {
       calculatingPath: this.calculatingPath,
       waterOnlyMode: this.waterOnlyMode
     };
+  }
+
+  /**
+   * Get the current transport path
+   */
+  public getPath(): any[] {
+    return this.transportPath;
   }
 
   /**
