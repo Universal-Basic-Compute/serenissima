@@ -156,7 +156,9 @@ export async function GET(request: Request) {
         historicalName,
         englishName,
         historicalDescription,
-        distance: links.length === 2 ? await calculateDistanceBetweenPolygons(links[0], links[1]) : null
+        distance: matchingBridgePoint && matchingBridgePoint.connection ? 
+          matchingBridgePoint.connection.distance : 
+          (links.length === 2 ? await calculateDistanceBetweenPolygons(links[0], links[1]) : null)
       };
     }));
     
