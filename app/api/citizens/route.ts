@@ -294,6 +294,8 @@ export async function GET(request: Request) {
         // Prepare the request parameters
         const requestUrl = `${url}?filterByFormula=${encodeURIComponent(filterByFormula)}&sort%5B0%5D%5Bfield%5D=CreatedAt&sort%5B0%5D%5Bdirection%5D=desc&maxRecords=100`;
         
+        console.log(`Making Airtable request to: ${requestUrl}`);
+        
         // Make the request to Airtable
         const response = await fetch(requestUrl, {
           headers: {
@@ -302,7 +304,9 @@ export async function GET(request: Request) {
           }
         });
         
-        if (response.ok) {
+        if (!response.ok) {
+          console.error(`Airtable API error: ${response.status} ${response.statusText}`);
+        } else {
           const data = await response.json();
           
           if (data.records && data.records.length > 0) {
@@ -329,6 +333,7 @@ export async function GET(request: Request) {
                   
                   // Skip activities without valid paths
                   if (!Array.isArray(path) || path.length < 2) {
+                    console.warn(`Skipping activity with invalid path for citizen ${citizenId}: not an array or too short`);
                     return;
                   }
                   
@@ -340,6 +345,7 @@ export async function GET(request: Request) {
                   );
                   
                   if (validPath.length < 2) {
+                    console.warn(`Skipping activity with insufficient valid points for citizen ${citizenId}: ${validPath.length} valid out of ${path.length}`);
                     return;
                   }
                   
@@ -350,6 +356,8 @@ export async function GET(request: Request) {
                     startTime: activity.StartDate || activity.CreatedAt,
                     endTime: activity.EndDate
                   });
+                  
+                  console.log(`Added activity for citizen ${citizenId}: ${activity.Type || 'unknown'} with ${validPath.length} points`);
                 } catch (e) {
                   console.warn(`Failed to parse activity path for ${record.id}:`, e);
                 }
@@ -362,6 +370,8 @@ export async function GET(request: Request) {
               const activities = citizenActivities[citizenId] || [];
               
               if (activities.length > 0) {
+                console.log(`Processing ${activities.length} activities for citizen ${citizenId}`);
+                
                 // Find the most appropriate activity based on time
                 let selectedActivity = null;
                 let initialProgress = 0;
@@ -372,7 +382,10 @@ export async function GET(request: Request) {
                   const endTime = activity.endTime ? new Date(activity.endTime) : null;
                   
                   // Skip activities without a valid start time
-                  if (!startTime) continue;
+                  if (!startTime) {
+                    console.log(`Activity for ${citizenId} has no start time, skipping`);
+                    continue;
+                  }
                   
                   // If the activity has both start and end times, check if we're within that timeframe
                   if (startTime && endTime) {
@@ -401,18 +414,27 @@ export async function GET(request: Request) {
                   }
                 }
                 
-                // If no active or recent activity was found, just use the first activity with random progress
+                // If no active or recent activity was found, just use the most recent activity with random progress
                 if (!selectedActivity && activities.length > 0) {
-                  selectedActivity = activities[0];
+                  // Sort activities by start time (most recent first)
+                  const sortedActivities = [...activities].sort((a, b) => {
+                    const aTime = a.startTime ? new Date(a.startTime).getTime() : 0;
+                    const bTime = b.startTime ? new Date(b.startTime).getTime() : 0;
+                    return bTime - aTime; // Descending order (most recent first)
+                  });
+                  
+                  selectedActivity = sortedActivities[0];
                   initialProgress = Math.random(); // Random progress between 0 and 1
-                  console.log(`Using random progress ${initialProgress.toFixed(2)} for ${citizenId} with no active activities`);
+                  console.log(`Using most recent activity for ${citizenId} with random progress ${initialProgress.toFixed(2)}`);
                 }
                 
                 // Calculate position based on progress
                 if (selectedActivity) {
+                  console.log(`Calculating position for citizen ${citizenId} along path with ${selectedActivity.path.length} points at progress ${initialProgress}`);
+                  
                   const calculatedPosition = calculatePositionAlongPath(selectedActivity.path, initialProgress);
                   if (calculatedPosition) {
-                    console.log(`Updated position for citizen ${citizenId} based on activity ${selectedActivity.id}`);
+                    console.log(`Updated position for citizen ${citizenId} based on activity ${selectedActivity.id}: ${JSON.stringify(calculatedPosition)}`);
                     return {
                       ...citizen,
                       position: calculatedPosition,
@@ -424,6 +446,8 @@ export async function GET(request: Request) {
                         path: selectedActivity.path
                       }
                     };
+                  } else {
+                    console.warn(`Failed to calculate position for citizen ${citizenId}, keeping original position`);
                   }
                 }
               }
@@ -433,9 +457,9 @@ export async function GET(request: Request) {
             });
             
             console.log(`Updated positions for ${Object.keys(citizenActivities).length} citizens based on activities`);
+          } else {
+            console.log('No activities with paths found');
           }
-        } else {
-          console.warn(`Failed to fetch activities: ${response.status} ${response.statusText}`);
         }
       }
     } catch (error) {
