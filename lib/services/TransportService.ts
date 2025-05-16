@@ -1110,10 +1110,14 @@ export class TransportService {
             const pointId = point.id || `bridge-${point.edge.lat}-${point.edge.lng}`;
             // Check if this is a constructed bridge
             const isConstructed = !!point.isConstructed || 
-                                 (pointId.includes('bridge-constructed') || pointId.includes('public_bridge'));
-            
+                                 (pointId.includes('bridge-constructed') || pointId.includes('public_bridge') ||
+                                  pointId.startsWith('building_'));
+          
             // In 'real' mode, only include constructed bridges
             if (this.pathfindingMode === 'all' || isConstructed) {
+              // Add debug logging to see what's happening with bridge points
+              console.log(`Adding bridge node ${pointId}, isConstructed: ${isConstructed}, mode: ${this.pathfindingMode}`);
+            
               graph.nodes[pointId] = {
                 id: pointId,
                 position: point.edge,
@@ -1125,7 +1129,7 @@ export class TransportService {
           }
         }
       }
-      
+    
       // Add canal point nodes - in 'real' mode, only include constructed docks
       if (polygon.canalPoints) {
         for (const point of polygon.canalPoints) {
@@ -1133,10 +1137,14 @@ export class TransportService {
             const pointId = point.id || `canal-${point.edge.lat}-${point.edge.lng}`;
             // Check if this is a constructed dock
             const isConstructed = !!point.isConstructed || 
-                                 (pointId.includes('public_dock') || pointId.includes('dock-constructed'));
-            
+                                 (pointId.includes('public_dock') || pointId.includes('dock-constructed') ||
+                                  pointId.startsWith('building_') || pointId.startsWith('canal_'));
+          
             // In 'real' mode, only include constructed docks
             if (this.pathfindingMode === 'all' || isConstructed) {
+              // Add debug logging to see what's happening with canal points
+              console.log(`Adding canal node ${pointId}, isConstructed: ${isConstructed}, mode: ${this.pathfindingMode}`);
+            
               graph.nodes[pointId] = {
                 id: pointId,
                 position: point.edge,
@@ -1378,7 +1386,7 @@ export class TransportService {
     Object.values(graph.nodes).forEach(node => {
       nodeTypes[node.type] = (nodeTypes[node.type] || 0) + 1;
     });
-    console.log('Graph node types:', nodeTypes);
+    console.log('Graph node types after initial creation:', nodeTypes);
   
     return graph;
   }
