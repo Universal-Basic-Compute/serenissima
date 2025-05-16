@@ -310,7 +310,13 @@ export default function TwoDPage() {
     } else if (activeView === 'citizens') {
       window.dispatchEvent(new CustomEvent('loadCitizens'));
     }
-  }, [activeView, transportMode]);
+    
+    // Define event handlers
+    const handleOpenGovernancePanel = () => setShowGovernancePanel(true);
+    const handleOpenGuildsPanel = () => setShowGuildsPanel(true);
+    const handleOpenKnowledgePanel = () => setShowKnowledgePanel(true);
+    const handleOpenLoanPanel = () => setShowLoanPanel(true);
+    const handleShowTransportDebug = () => setShowTransportDebugPanel(true);
     
     // Event handlers for closing panels
     const handleCloseGovernancePanel = () => setShowGovernancePanel(false);
@@ -350,7 +356,7 @@ export default function TwoDPage() {
       window.removeEventListener('closeLoanPanel', handleCloseLoanPanel);
       window.removeEventListener('loadLoans', handleLoadLoans);
     };
-  }, [activeView]);
+  }, [activeView, transportMode]);
   
   // Set up event listener for ensureBuildingsVisible
   useEffect(() => {
