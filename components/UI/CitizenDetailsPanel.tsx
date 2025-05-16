@@ -57,7 +57,8 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     // Add escape key handler
     const handleEscKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        handleClose();
+        console.log('ESC key pressed, calling onClose');
+        onClose(); // Call onClose directly without animation
       }
     };
     
@@ -110,14 +111,8 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     return () => {
       window.removeEventListener('keydown', handleEscKey);
     };
-  }, [citizen]);
+  }, [citizen, onClose]);
   
-  const handleClose = () => {
-    // Log for debugging
-    console.log('Close button clicked, calling onClose directly');
-    // Call onClose directly without animation
-    onClose();
-  };
   
   const formatDucats = (amount: number | string) => {
     if (!amount && amount !== 0) return 'Unknown';
@@ -266,21 +261,13 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
       }`}
       style={{ pointerEvents: 'auto', cursor: 'default' }} // Explicitly set pointer-events to auto and cursor to default
     >
-      {/* Emergency close button */}
-      <button 
-        onClick={handleClose}
-        className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full z-50 cursor-pointer"
-        style={{ cursor: 'pointer' }}
-      >
-        X
-      </button>
       
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-serif text-amber-800">
           {citizen.firstname} {citizen.lastname}
         </h2>
         <button 
-          onClick={handleClose}
+          onClick={onClose}
           className="text-amber-600 hover:text-amber-800 hover:bg-amber-100 transition-colors p-3 rounded-full cursor-pointer"
           style={{ cursor: 'pointer' }}
           aria-label="Close"
