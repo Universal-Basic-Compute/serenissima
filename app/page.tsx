@@ -290,6 +290,9 @@ export default function TwoDPage() {
       } catch (error) {
         console.error('Error setting transport mode:', error);
       }
+      
+      // Fetch land groups when switching to transport view
+      fetchLandGroups();
     } else if (transportMode) {
       // Deactivate transport mode when switching away
       console.log('Deactivating transport mode when leaving transport view');

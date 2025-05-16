@@ -49,6 +49,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [minIncome, setMinIncome] = useState<number>(0);
   const [maxIncome, setMaxIncome] = useState<number>(1000);
   const [incomeDataLoaded, setIncomeDataLoaded] = useState<boolean>(false);
+  const [landGroups, setLandGroups] = useState<Record<string, string>>({});
+  const [landGroupColors, setLandGroupColors] = useState<Record<string, string>>({});
   const [ownerCoatOfArmsMap, setOwnerCoatOfArmsMap] = useState<Record<string, string>>({});
   const [coatOfArmsImages, setCoatOfArmsImages] = useState<Record<string, HTMLImageElement>>({});
   const [loadingCoatOfArms, setLoadingCoatOfArms] = useState<boolean>(false);
@@ -308,6 +310,44 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       }
     } catch (error) {
       console.error('Error fetching income data:', error);
+    }
+  }, []);
+  
+  // Fetch land groups data
+  const fetchLandGroups = useCallback(async () => {
+    try {
+      console.log('Fetching land groups data...');
+      const response = await fetch('/api/land-groups?includeUnconnected=true&minSize=1');
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.landGroups) {
+          console.log(`Loaded ${data.landGroups.length} land groups`);
+          
+          // Create a mapping of polygon ID to group ID
+          const groupMapping: Record<string, string> = {};
+          data.landGroups.forEach((group: any) => {
+            if (group.lands && Array.isArray(group.lands)) {
+              group.lands.forEach((landId: string) => {
+                groupMapping[landId] = group.groupId;
+              });
+            }
+          });
+          
+          // Generate distinct colors for each group
+          const colors: Record<string, string> = {};
+          data.landGroups.forEach((group: any, index: number) => {
+            // Generate a color based on index to ensure distinctness
+            const hue = (index * 137.5) % 360; // Golden angle approximation for good distribution
+            colors[group.groupId] = `hsl(${hue}, 70%, 65%)`;
+          });
+          
+          setLandGroups(groupMapping);
+          setLandGroupColors(colors);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching land groups:', error);
     }
   }, []);
   
@@ -1581,8 +1621,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     return polygons.map(polygon => {
       if (!polygon.coordinates || polygon.coordinates.length < 3) return null;
     
-      // Get polygon owner color or income-based color
+      // Get polygon owner color or income-based color or land group color
       let fillColor = '#FFF5D0'; // Default sand color
+      
       if (activeView === 'land') {
         if (incomeDataLoaded && polygon.id && incomeData[polygon.id] !== undefined) {
           // Use income-based color in land view ONLY if income data is loaded
@@ -1594,6 +1635,13 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           if (user && user.color) {
             fillColor = user.color;
           }
+        }
+      } 
+      // Add land group coloring for transport view
+      else if (activeView === 'transport' && polygon.id && landGroups[polygon.id]) {
+        const groupId = landGroups[polygon.id];
+        if (landGroupColors[groupId]) {
+          fillColor = landGroupColors[groupId];
         }
       }
       // For other views, keep the default yellow color
@@ -1651,7 +1699,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         centerY: centerY
       };
     }).filter(Boolean);
-  }, [polygons, landOwners, users, activeView, scale, offset, incomeData, incomeDataLoaded]);
+  }, [polygons, landOwners, users, activeView, scale, offset, incomeData, incomeDataLoaded, landGroups, landGroupColors]);
 
   // Update polygonsToRender when the dependencies of calculatePolygonsToRender change
   useEffect(() => {
@@ -3193,6 +3241,24 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             <span>Low</span>
             <span>Medium</span>
             <span>High</span>
+          </div>
+        </div>
+      )}
+      
+      {/* Land Group Legend - only visible in transport view */}
+      {activeView === 'transport' && Object.keys(landGroups).length > 0 && (
+        <div className="absolute top-20 right-20 bg-black/70 text-white px-3 py-2 rounded text-sm max-h-60 overflow-y-auto">
+          <p className="font-bold mb-2">Land Groups</p>
+          <div className="space-y-1">
+            {Object.entries(landGroupColors).map(([groupId, color]) => (
+              <div key={groupId} className="flex items-center">
+                <div 
+                  className="w-4 h-4 mr-2 rounded-sm" 
+                  style={{ backgroundColor: color }}
+                ></div>
+                <span>{groupId}</span>
+              </div>
+            ))}
           </div>
         </div>
       )}
