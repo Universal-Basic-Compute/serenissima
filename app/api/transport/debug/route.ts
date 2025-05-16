@@ -63,37 +63,42 @@ export async function GET(request: Request) {
   try {
     // Get query parameters
     const { searchParams } = new URL(request.url);
-    const mode = searchParams.get('mode');
+    const mode = searchParams.get('mode') || 'real'; // Default to 'real' if not specified
     
     // Initialize the transport service if needed
     if (!transportService.isPolygonsLoaded()) {
       await transportService.preloadPolygons();
     }
     
-    // Get debug information about the graph
+    // Store the original pathfinding mode
+    const originalMode = transportService.getPathfindingMode();
+    
+    // Set the requested pathfinding mode
+    transportService.setPathfindingMode(mode === 'all' ? 'all' : 'real');
+    
+    // Get debug information about the graph with the requested mode
     const graphInfo = transportService.debugGraph();
     
     // Always fetch bridges and docks regardless of mode
     const bridges = await fetchBridges();
     const docks = await fetchDocks();
     
-    // If mode=all, include additional information
+    // If mode=all, include additional information for comparison
     let additionalInfo = {};
     if (mode === 'all') {
-      // Set pathfinding mode to 'all' temporarily if requested
-      const originalMode = transportService.getPathfindingMode();
+      // We already have the 'all' mode graph info, so no need to switch modes again
+      additionalInfo = {};
+    } else if (mode === 'real') {
+      // If we're in 'real' mode, get 'all' mode info for comparison
       transportService.setPathfindingMode('all');
-      
-      // Get updated graph info with 'all' mode
       const allModeGraphInfo = transportService.debugGraph();
-      
-      // Reset pathfinding mode to original
-      transportService.setPathfindingMode(originalMode);
-      
       additionalInfo = {
         allModeGraphInfo
       };
     }
+    
+    // Reset pathfinding mode to original
+    transportService.setPathfindingMode(originalMode);
     
     return NextResponse.json({
       success: true,
@@ -102,6 +107,7 @@ export async function GET(request: Request) {
       docks,
       bridgeCount: bridges.length,
       dockCount: docks.length,
+      requestedMode: mode,
       ...additionalInfo
     });
   } catch (error) {
