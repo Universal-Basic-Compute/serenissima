@@ -3115,14 +3115,14 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       {/* Transport Error Message */}
       <TransportErrorMessage />
       
-      {/* Citizen Markers */}
+      {/* Citizen Markers - Now visible in all views except land */}
       <CitizenMarkers 
-        isVisible={activeView === 'citizens'} 
+        isVisible={true} 
         scale={scale}
         offset={offset}
         canvasWidth={canvasRef.current?.width || window.innerWidth}
         canvasHeight={canvasRef.current?.height || window.innerHeight}
-        activeView={activeView} // Add this line to pass the activeView prop
+        activeView={activeView}
       />
       
       {/* Resource Markers */}

@@ -43,7 +43,7 @@ interface CitizenMarkersProps {
   offset: { x: number, y: number };
   canvasWidth: number;
   canvasHeight: number;
-  activeView?: string; // Add this prop
+  activeView?: string; // Accept any view type
 }
 
 const CitizenMarkers: React.FC<CitizenMarkersProps> = ({ 
@@ -619,11 +619,14 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   
   // Add an additional useEffect to update visiblePaths when activeView changes
   useEffect(() => {
-    if (activeView === 'citizens') {
-      // When in citizens view, make all paths visible
+    // Show paths in all views except land
+    if (activeView !== 'land') {
       const allPaths = Object.values(activityPaths).flat();
       setVisiblePaths(allPaths);
-      console.log(`Setting ${allPaths.length} paths as visible in citizens view`);
+      console.log(`Setting ${allPaths.length} paths as visible in ${activeView} view`);
+    } else {
+      // Clear paths in land view
+      setVisiblePaths([]);
     }
   }, [activeView, activityPaths]);
   
@@ -740,8 +743,8 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   
   // Add effect to start/stop animation when view changes
   useEffect(() => {
-    // Only animate in citizens view
-    const shouldAnimate = activeView === 'citizens';
+    // Animate in all views except land view
+    const shouldAnimate = activeView !== 'land';
     setAnimationActive(shouldAnimate);
     
     if (shouldAnimate) {
@@ -783,7 +786,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     setSelectedCitizenPaths([]);
   };
   
-  if (!isVisible) return null;
+  if (!isVisible || activeView === 'land') return null;
   
   // Don't render anything until positions are initialized
   if (!positionsInitialized && Object.keys(activityPaths).length > 0) {
