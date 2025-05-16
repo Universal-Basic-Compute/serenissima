@@ -940,7 +940,12 @@ export class TransportService {
       
       // Build the graph and canal network
       console.log('Building graph from polygons...');
-      this.graph = this.buildGraph(this.polygons);
+      // Use the appropriate graph building method based on pathfinding mode
+      if (this.pathfindingMode === 'real') {
+        this.graph = this.buildGraphReal(this.polygons);
+      } else {
+        this.graph = this.buildGraph(this.polygons);
+      }
       console.log(`Graph built with ${Object.keys(this.graph.nodes).length} nodes and ${Object.values(this.graph.edges).flat().length} edges`);
       
       console.log('Building canal network from polygons...');
@@ -1760,7 +1765,12 @@ export class TransportService {
   public debugGraph(): any {
     // Ensure graph is built
     if (!this.graph) {
-      this.graph = this.buildGraph(this.polygons);
+      // Use the appropriate graph building method based on pathfinding mode
+      if (this.pathfindingMode === 'real') {
+        this.graph = this.buildGraphReal(this.polygons);
+      } else {
+        this.graph = this.buildGraph(this.polygons);
+      }
     }
     
     // Count nodes by type
