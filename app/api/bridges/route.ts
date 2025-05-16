@@ -127,50 +127,6 @@ export async function GET(request: Request) {
         }
       }
       
-      // If we couldn't find links through the LandId, try to find by position
-      if (links.length === 0 && bridge.position) {
-        try {
-          // Fetch all polygons
-          const allPolygonsResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/get-polygons`);
-          
-          if (allPolygonsResponse.ok) {
-            const allPolygonsData = await allPolygonsResponse.json();
-            
-            if (allPolygonsData.polygons && Array.isArray(allPolygonsData.polygons)) {
-              // Find polygons that have this bridge position in their bridgePoints
-              for (const polygon of allPolygonsData.polygons) {
-                if (polygon.bridgePoints && Array.isArray(polygon.bridgePoints)) {
-                  const matchingBridgePoint = polygon.bridgePoints.find((bp: any) => {
-                    if (!bp.edge || !bridge.position) return false;
-                    
-                    // Use a small threshold for floating point comparison
-                    const threshold = 0.0001;
-                    return Math.abs(bp.edge.lat - bridge.position.lat) < threshold && 
-                           Math.abs(bp.edge.lng - bridge.position.lng) < threshold;
-                  });
-                  
-                  if (matchingBridgePoint) {
-                    // Add this polygon ID
-                    if (polygon.id && !links.includes(polygon.id)) {
-                      links.push(polygon.id);
-                    }
-                    
-                    // Add the target polygon ID if available
-                    if (matchingBridgePoint.connection && 
-                        matchingBridgePoint.connection.targetPolygonId && 
-                        !links.includes(matchingBridgePoint.connection.targetPolygonId)) {
-                      links.push(matchingBridgePoint.connection.targetPolygonId);
-                    }
-                  }
-                }
-              }
-            }
-          }
-        } catch (error) {
-          console.error(`Error finding polygons for bridge ${bridge.id} by position:`, error);
-        }
-      }
-      
       // Return the enhanced bridge with links
       return {
         ...bridge,
