@@ -170,66 +170,100 @@ export async function GET(request: Request) {
     console.log(`Processed occupant assignments for ${Object.keys(occupantToBuildings).length} citizens`);
     
     // Get all citizens directly without filtering for buildings
-    const citizenRecords = await base(CITIZENS_TABLE)
-      .select({
-        view: 'Grid view',
-      })
-      .firstPage();
-    
-    console.log(`Retrieved ${citizenRecords.length} citizens from Airtable`);
-    
-    if (citizenRecords.length === 0) {
-      console.log('No citizens found in Airtable, returning debug citizens');
-      return NextResponse.json(getDebugCitizens());
-    }
-    
-    // Map citizens to the expected format
-    const citizens = citizenRecords.map(record => {     
-      // Ensure the citizen ID is a string
-      const citizenId = record.fields.CitizenId ? 
-        airtableValueToString(record.fields.CitizenId)
-        : `ctz_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+    try {
+      const citizenRecords = await base(CITIZENS_TABLE)
+        .select({
+          view: 'Grid view',
+        })
+        .firstPage();
       
-      // Get home and work assignments for this citizen
-      const buildings = occupantToBuildings[citizenId] || {};
+      console.log(`Retrieved ${citizenRecords.length} citizens from Airtable`);
       
-      // Safely convert Airtable values to strings
-      const safeString = (value: AirtableValue | undefined | null, defaultValue: string = ''): string => {
-        if (value === undefined || value === null) return defaultValue;
-        if (typeof value === 'string') return value;
-        if (typeof value === 'number' || typeof value === 'boolean') return String(value);
-        // Handle arrays and other complex types
-        return String(value);
-      };
+      if (citizenRecords.length === 0) {
+        console.log('No citizens found in Airtable, returning debug citizens');
+        return NextResponse.json(getDebugCitizens());
+      }
       
-      return {
-        id: citizenId,
-        citizenid: citizenId,
-        name: `${safeString(record.fields.FirstName, 'Unknown')} ${safeString(record.fields.LastName, 'Citizen')}`,
-        firstname: safeString(record.fields.FirstName, 'Unknown'),
-        lastname: safeString(record.fields.LastName, 'Citizen'),
-        socialclass: safeString(record.fields.SocialClass, 'Popolani'),
-        description: safeString(record.fields.Description, 'A citizen of Venice.'),
-        profileimage: formatImageUrl(
-          record.fields.ImageUrl ? airtableValueToString(record.fields.ImageUrl) : undefined, 
-          citizenId
-        ),
-        imageurl: formatImageUrl(
-          record.fields.ImageUrl ? airtableValueToString(record.fields.ImageUrl) : undefined, 
-          citizenId
-        ),
-        // Ensure position is included and properly formatted
-        position: typeof record.fields.Position === 'string' 
-          ? JSON.parse(record.fields.Position as string) 
-          : (record.fields.Position as any) || { lat: 45.4371 + Math.random() * 0.01, lng: 12.3326 + Math.random() * 0.01 },
-        occupation: safeString(record.fields.Occupation, 'Citizen'),
-        wealth: record.fields.Wealth !== undefined ? record.fields.Wealth : 0,
-        createdat: safeString(record.fields.CreatedAt, new Date().toISOString()),
-        // Add home and work assignments
-        home: buildings.home || null,
-        work: buildings.work || null
-      };
-    });
+      // Map citizens to the expected format
+      const citizens = citizenRecords.map(record => {     
+        try {
+          // Ensure the citizen ID is a string
+          const citizenId = record.fields.CitizenId ? 
+            airtableValueToString(record.fields.CitizenId)
+            : `ctz_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+          
+          // Get home and work assignments for this citizen
+          const buildings = occupantToBuildings[citizenId] || {};
+          
+          // Safely convert Airtable values to strings
+          const safeString = (value: AirtableValue | undefined | null, defaultValue: string = ''): string => {
+            if (value === undefined || value === null) return defaultValue;
+            if (typeof value === 'string') return value;
+            if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+            // Handle arrays and other complex types
+            return String(value);
+          };
+          
+          // Ensure position is properly formatted
+          let position;
+          try {
+            position = typeof record.fields.Position === 'string' 
+              ? JSON.parse(record.fields.Position as string) 
+              : (record.fields.Position as any);
+          } catch (positionError) {
+            console.warn(`Error parsing position for citizen ${citizenId}:`, positionError);
+            position = { lat: 45.4371 + Math.random() * 0.01, lng: 12.3326 + Math.random() * 0.01 };
+          }
+          
+          // Ensure position has valid lat/lng
+          if (!position || typeof position !== 'object' || !('lat' in position) || !('lng' in position)) {
+            position = { lat: 45.4371 + Math.random() * 0.01, lng: 12.3326 + Math.random() * 0.01 };
+          }
+          
+          return {
+            id: citizenId,
+            citizenid: citizenId,
+            name: `${safeString(record.fields.FirstName, 'Unknown')} ${safeString(record.fields.LastName, 'Citizen')}`,
+            firstname: safeString(record.fields.FirstName, 'Unknown'),
+            lastname: safeString(record.fields.LastName, 'Citizen'),
+            socialclass: safeString(record.fields.SocialClass, 'Popolani'),
+            description: safeString(record.fields.Description, 'A citizen of Venice.'),
+            profileimage: formatImageUrl(
+              record.fields.ImageUrl ? airtableValueToString(record.fields.ImageUrl) : undefined, 
+              citizenId
+            ),
+            imageurl: formatImageUrl(
+              record.fields.ImageUrl ? airtableValueToString(record.fields.ImageUrl) : undefined, 
+              citizenId
+            ),
+            position: position,
+            occupation: safeString(record.fields.Occupation, 'Citizen'),
+            wealth: record.fields.Wealth !== undefined ? record.fields.Wealth : 0,
+            createdat: safeString(record.fields.CreatedAt, new Date().toISOString()),
+            // Add home and work assignments
+            home: buildings.home || null,
+            work: buildings.work || null
+          };
+        } catch (citizenError) {
+          console.error('Error processing citizen record:', citizenError, record);
+          // Return a minimal valid citizen object
+          return {
+            id: `error_${Date.now()}`,
+            citizenid: `error_${Date.now()}`,
+            name: 'Error Citizen',
+            firstname: 'Error',
+            lastname: 'Citizen',
+            socialclass: 'Popolani',
+            description: 'Error processing citizen data.',
+            position: { lat: 45.4371 + Math.random() * 0.01, lng: 12.3326 + Math.random() * 0.01 },
+            occupation: 'Unknown',
+            wealth: 0,
+            createdat: new Date().toISOString(),
+            home: null,
+            work: null
+          };
+        }
+      });
     
     // Now fetch activities with paths for all citizens
     console.log('Fetching activities with paths for citizens...');
@@ -414,10 +448,36 @@ export async function GET(request: Request) {
     }
     
     return NextResponse.json(citizens);
+    } catch (citizensError) {
+      console.error('Error fetching citizens from Airtable:', citizensError);
+      // Log detailed error information
+      if (citizensError instanceof Error) {
+        console.error('Error details:', {
+          name: citizensError.name,
+          message: citizensError.message,
+          stack: citizensError.stack
+        });
+      }
+      
+      console.log('Returning debug citizens due to error');
+      return NextResponse.json(getDebugCitizens());
+    }
   } catch (error) {
-    console.error('Error fetching citizens from Airtable:', error);
-    console.log('Returning debug citizens due to error');
-    return NextResponse.json(getDebugCitizens());
+    console.error('Critical error in citizens API:', error);
+    // Log detailed error information
+    if (error instanceof Error) {
+      console.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+    }
+    
+    // Return a proper error response with debug citizens
+    return NextResponse.json({
+      error: 'An error occurred while fetching citizens',
+      citizens: getDebugCitizens()
+    }, { status: 500 });
   }
 }
 
