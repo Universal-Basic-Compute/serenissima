@@ -158,7 +158,8 @@ export async function GET(request: Request) {
     const minGroupSize = parseInt(searchParams.get('minSize') || '1', 10);
     
     // Fetch all polygons
-    const polygonsResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/get-polygons`);
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const polygonsResponse = await fetch(`${baseUrl}/api/get-polygons`);
     if (!polygonsResponse.ok) {
       return NextResponse.json(
         { success: false, error: 'Failed to fetch polygons' },
@@ -169,7 +170,7 @@ export async function GET(request: Request) {
     const polygons: Polygon[] = polygonsData.polygons || [];
     
     // Fetch all bridges
-    const bridgesResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/bridges`);
+    const bridgesResponse = await fetch(`${baseUrl}/api/bridges`);
     if (!bridgesResponse.ok) {
       return NextResponse.json(
         { success: false, error: 'Failed to fetch bridges' },
@@ -180,7 +181,7 @@ export async function GET(request: Request) {
     const bridges: Bridge[] = bridgesData.bridges || [];
     
     // Fetch land owners for additional information
-    const landOwnersResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/get-land-owners`);
+    const landOwnersResponse = await fetch(`${baseUrl}/api/get-land-owners`);
     let landOwners: Record<string, string> = {};
     if (landOwnersResponse.ok) {
       const landOwnersData = await landOwnersResponse.json();
