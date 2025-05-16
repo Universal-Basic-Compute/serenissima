@@ -79,7 +79,7 @@ export async function GET(request: Request) {
         // Try to get location from the seller building
         if (contractData.sellerBuilding) {
           try {
-            const buildingResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/buildings/${contractData.sellerBuilding}`);
+            const buildingResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/buildings/${encodeURIComponent(contractData.sellerBuilding)}`);
             if (buildingResponse.ok) {
               const buildingData = await buildingResponse.json();
               if (buildingData.building && buildingData.building.position) {
