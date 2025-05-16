@@ -2,6 +2,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { contractService, Contract } from '@/lib/services/ContractService';
 import { hoverStateService } from '@/lib/services/HoverStateService';
 
+// Function to determine if a contract is active/being sold
+const isContractActive = (contract: Contract): boolean => {
+  // A contract is considered active if it's a public sell or has a buyer
+  return contract.type === 'public_sell' || (contract.buyer !== null && contract.buyer !== undefined);
+};
+
 interface MarketMarkersProps {
   isVisible: boolean;
   scale: number;
@@ -263,7 +269,8 @@ export default function MarketMarkers({
                         top: `${Math.sin(2 * Math.PI * index / locationContracts.length) * 120}px`,
                         transition: 'all 0.3s ease-out',
                         borderWidth: '2px',
-                        borderColor: borderColor
+                        borderColor: borderColor,
+                        opacity: isContractActive(contract) ? 1 : 0.5 // Apply transparency for inactive contracts
                       }}
                     >
                       <div className="relative w-full h-full group">
@@ -295,6 +302,9 @@ export default function MarketMarkers({
                           <div className="mt-1 text-xs">
                             {contract.type === 'public_sell' ? 'Public Sell Contract' : 
                              contract.seller === currentUsername ? 'Your Sell Contract' : 'Your Buy Contract'}
+                            {!isContractActive(contract) && (
+                              <span className="ml-2 text-red-400">(Inactive)</span>
+                            )}
                           </div>
                           <div className="mt-1 flex justify-between">
                             <span>Price: {contract.price} ⚜️</span>
@@ -349,7 +359,8 @@ export default function MarketMarkers({
                           zIndex: 40 - index,
                           boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
                           borderWidth: '2px',
-                          borderColor: borderColor
+                          borderColor: borderColor,
+                          opacity: isContractActive(contract) ? 1 : 0.5 // Apply transparency for inactive contracts
                         }}
                       >
                         <img 
