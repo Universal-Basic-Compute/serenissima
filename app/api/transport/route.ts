@@ -154,7 +154,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     
     // Get start and end points from request body
-    const { startPoint, endPoint, startDate } = body;
+    const { startPoint, endPoint, startDate, pathfindingMode } = body;
     
     // Validate parameters
     if (!startPoint || !endPoint || 
@@ -177,13 +177,13 @@ export async function POST(request: Request) {
       );
     }
     
-    // Find the path using the transport service
-    let result = await transportService.findPath(startPoint, endPoint);
+    // Find the path using the transport service with specified mode or default to 'real'
+    let result = await transportService.findPath(startPoint, endPoint, pathfindingMode || 'real');
     
     // If regular pathfinding failed with "not within any polygon" error, try water-only pathfinding
     if (!result.success && result.error === 'Start or end point is not within any polygon') {
       console.log('Regular pathfinding failed, attempting water-only pathfinding as fallback');
-      result = await transportService.findWaterOnlyPath(startPoint, endPoint);
+      result = await transportService.findWaterOnlyPath(startPoint, endPoint, mode || 'real');
       
       // If water-only pathfinding also failed, return a clear error
       if (!result.success) {

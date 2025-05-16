@@ -141,7 +141,7 @@ export class TransportService {
     
     // If we have both start and end points, calculate the route
     if (this.transportStartPoint && point) {
-      this.calculateRoute(this.transportStartPoint, point);
+      this.calculateRoute(this.transportStartPoint, point, 'real');
     }
   }
 
@@ -2112,7 +2112,11 @@ export class TransportService {
   }
 
   // Function to find a water-only path between two points
-  public async findWaterOnlyPath(startPoint: Point, endPoint: Point): Promise<any> {
+  public async findWaterOnlyPath(startPoint: Point, endPoint: Point, mode?: 'all' | 'real'): Promise<any> {
+    // If mode is provided, update the pathfinding mode
+    if (mode) {
+      this.setPathfindingMode(mode);
+    }
     try {
       console.log(`Starting water-only path calculation from ${startPoint.lat},${startPoint.lng} to ${endPoint.lat},${endPoint.lng} (mode: ${this.pathfindingMode})`);
       
@@ -2381,7 +2385,11 @@ export class TransportService {
   }
 
   // Main function to find the path between two points
-  public async findPath(startPoint: Point, endPoint: Point): Promise<any> {
+  public async findPath(startPoint: Point, endPoint: Point, mode?: 'all' | 'real'): Promise<any> {
+    // If mode is provided, update the pathfinding mode
+    if (mode) {
+      this.setPathfindingMode(mode);
+    }
     try {
       // Ensure polygons are loaded using the initialization service
       if (!this.polygonsLoaded) {
