@@ -166,6 +166,48 @@ def get_user_active_contracts(tables, username: str) -> List[Dict]:
         print(f"Error getting contracts for user {username}: {str(e)}")
         return []
 
+def get_recent_public_sell_contracts(tables, username: str, limit: int = 100) -> List[Dict]:
+    """Get recent public_sell contracts from other players to analyze market prices."""
+    try:
+        # Get current time
+        now = datetime.now().isoformat()
+        
+        # Query contracts where:
+        # 1. Type is public_sell
+        # 2. Seller is not the current AI user
+        # 3. Contract is active (between CreatedAt and EndAt)
+        # 4. Seller is not "Italia" (to exclude import contracts)
+        formula = f"AND({{Type}}='public_sell', {{Seller}}!='{username}', {{Seller}}!='Italia', {{CreatedAt}}<='{now}', {{EndAt}}>='{now}')"
+        
+        # Get the contracts and sort by created date descending
+        contracts = tables["contracts"].all(formula=formula)
+        
+        # Sort by CreatedAt descending and limit to the specified number
+        sorted_contracts = sorted(
+            contracts, 
+            key=lambda x: x["fields"].get("CreatedAt", ""), 
+            reverse=True
+        )[:limit]
+        
+        print(f"Found {len(sorted_contracts)} recent public_sell contracts from other players (limited to {limit})")
+        
+        # Transform into a more usable format
+        market_contracts = []
+        for contract in sorted_contracts:
+            market_contracts.append({
+                "id": contract["fields"].get("ContractId", ""),
+                "seller": contract["fields"].get("Seller", ""),
+                "resource_type": contract["fields"].get("ResourceType", ""),
+                "hourly_amount": contract["fields"].get("hourlyAmount", 0),
+                "price_per_resource": contract["fields"].get("PricePerResource", 0),
+                "created_at": contract["fields"].get("CreatedAt", "")
+            })
+        
+        return market_contracts
+    except Exception as e:
+        print(f"Error getting recent public_sell contracts: {str(e)}")
+        return []
+
 def get_kinos_api_key() -> str:
     """Get the Kinos API key from environment variables."""
     load_dotenv()
@@ -180,6 +222,7 @@ def prepare_public_sell_strategy_data(
     user_buildings: List[Dict], 
     user_resources: List[Dict],
     user_active_contracts: List[Dict],
+    market_contracts: List[Dict],
     building_types: Dict, 
     resource_types: Dict
 ) -> Dict:
@@ -254,6 +297,41 @@ def prepare_public_sell_strategy_data(
             "import_price": resource.get("importPrice", 0)
         }
     
+    # Process market contracts to provide price analysis
+    market_prices = {}
+    for contract in market_contracts:
+        resource_type = contract["resource_type"]
+        price = contract["price_per_resource"]
+        
+        if resource_type not in market_prices:
+            market_prices[resource_type] = {
+                "count": 0,
+                "min_price": float('inf'),
+                "max_price": 0,
+                "avg_price": 0,
+                "total_price": 0,
+                "recent_contracts": []
+            }
+        
+        # Update price statistics
+        market_prices[resource_type]["count"] += 1
+        market_prices[resource_type]["min_price"] = min(market_prices[resource_type]["min_price"], price)
+        market_prices[resource_type]["max_price"] = max(market_prices[resource_type]["max_price"], price)
+        market_prices[resource_type]["total_price"] += price
+        
+        # Add to recent contracts (limit to 5 per resource type)
+        if len(market_prices[resource_type]["recent_contracts"]) < 5:
+            market_prices[resource_type]["recent_contracts"].append({
+                "seller": contract["seller"],
+                "price": price,
+                "hourly_amount": contract["hourly_amount"]
+            })
+    
+    # Calculate average prices
+    for resource_type, data in market_prices.items():
+        if data["count"] > 0:
+            data["avg_price"] = data["total_price"] / data["count"]
+    
     # Prepare the complete data package
     data_package = {
         "user": {
@@ -266,6 +344,8 @@ def prepare_public_sell_strategy_data(
         "resources": list(resources_by_type.values()),
         "resource_info": resource_info,
         "existing_contracts": existing_contracts,
+        "market_prices": market_prices,  # Add market price analysis
+        "market_contracts": market_contracts[:20],  # Include a sample of recent contracts
         "timestamp": datetime.now().isoformat()
     }
     
@@ -347,10 +427,14 @@ Here is the complete data about your current situation:
 When developing your public sell strategy:
 1. Analyze which buildings can sell which resources (check the "sells" array for each building)
 2. Consider your current resource stockpiles and production capacity
-3. Set prices that are competitive but profitable (typically 1.2-1.5x the import price)
-4. Balance the hourly sell amounts based on your resource availability
-5. Consider ending contracts for resources you no longer wish to sell
-6. Create a specific, actionable plan with building IDs and resource types
+3. Analyze the market prices for each resource type (see market_prices data)
+4. Set competitive prices based on what other sellers are charging:
+   - If you want to sell quickly, price slightly below the market average
+   - If you want to maximize profit, price at or slightly above the market average
+   - Consider the import price as a minimum baseline (typically 1.2-1.5x the import price)
+5. Balance the hourly sell amounts based on your resource availability
+6. Consider ending contracts for resources you no longer wish to sell
+7. Create a specific, actionable plan with building IDs and resource types
 
 Your decision should be specific, data-driven, and focused on optimizing your market presence.
 
@@ -731,12 +815,16 @@ def process_ai_public_sell_strategies(dry_run: bool = False):
         # Get existing active contracts where this AI is the seller
         user_active_contracts = get_user_active_contracts(tables, ai_username)
         
+        # Get recent public_sell contracts from other players
+        market_contracts = get_recent_public_sell_contracts(tables, ai_username, 100)
+        
         # Prepare the data package for the AI
         data_package = prepare_public_sell_strategy_data(
             ai_user, 
             user_buildings, 
             user_resources,
             user_active_contracts,
+            market_contracts,
             building_types, 
             resource_types
         )
