@@ -390,7 +390,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                 left: `${position.x}px`,
                 top: `${position.y}px`,
                 transform: 'translate(-50%, -50%)',
-                zIndex: 1000,
+                zIndex: 50,
                 position: 'absolute' // Ensure absolute positioning works
               }}
               onClick={() => handleCitizenClick(citizen)}
@@ -417,7 +417,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
       
       {/* Connection lines to home and work when hovering */}
       {hoveredConnections && hoveredConnections.citizen && hoveredConnections.citizen.position && (
-        <svg className="absolute inset-0 pointer-events-none" style={{ zIndex: 990, width: canvasWidth, height: canvasHeight }}>
+        <svg className="absolute inset-0 pointer-events-none" style={{ zIndex: 45, width: canvasWidth, height: canvasHeight }}>
           {/* Debug info - add this to see if the SVG is rendering */}
           <text x="20" y="20" fill="red" fontSize="12">
             Hover connections active: {hoveredConnections.homePosition ? 'Home' : ''} {hoveredConnections.workPosition ? 'Work' : ''}
@@ -494,7 +494,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
         <svg 
           className="absolute inset-0 pointer-events-none" 
           style={{ 
-            zIndex: 980, 
+            zIndex: 40, 
             width: canvasWidth, 
             height: canvasHeight,
             overflow: 'visible' // Add this to ensure paths aren't clipped
