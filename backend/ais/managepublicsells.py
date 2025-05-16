@@ -562,7 +562,7 @@ def create_public_sell_contract(
         reason = decision.get("reason", "No reason provided")
         
         now = datetime.now().isoformat()
-        end_date = (datetime.now() + timedelta(hours=24)).isoformat()  # Contract ends in 24 hours
+        end_date = (datetime.now() + timedelta(hours=47)).isoformat()  # Contract ends in 47 hours
         
         # Create a new contract
         import uuid
