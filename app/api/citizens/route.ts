@@ -14,6 +14,59 @@ function airtableValueToString(value: AirtableValue | undefined | null): string 
   return String(value);
 }
 
+// Helper function to calculate distance between two geographic points using the Haversine formula
+function calculateDistance(point1: {lat: number, lng: number}, point2: {lat: number, lng: number}): number {
+  const R = 6371000; // Earth radius in meters
+  const lat1 = point1.lat * Math.PI / 180;
+  const lat2 = point2.lat * Math.PI / 180;
+  const deltaLat = (point2.lat - point1.lat) * Math.PI / 180;
+  const deltaLng = (point2.lng - point1.lng) * Math.PI / 180;
+
+  const a = Math.sin(deltaLat/2) * Math.sin(deltaLat/2) +
+          Math.cos(lat1) * Math.cos(lat2) *
+          Math.sin(deltaLng/2) * Math.sin(deltaLng/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
+
+// Helper function to calculate position along a path based on progress
+function calculatePositionAlongPath(path: {lat: number, lng: number}[], progress: number) {
+  if (!path || path.length < 2) return null;
+  
+  // Calculate total path length
+  let totalDistance = 0;
+  const segments: {start: number, end: number, distance: number}[] = [];
+  
+  for (let i = 0; i < path.length - 1; i++) {
+    const distance = calculateDistance(path[i], path[i+1]);
+    segments.push({
+      start: totalDistance,
+      end: totalDistance + distance,
+      distance
+    });
+    totalDistance += distance;
+  }
+  
+  // Find the segment where the progress falls
+  const targetDistance = progress * totalDistance;
+  const segment = segments.find(seg => targetDistance >= seg.start && targetDistance <= seg.end);
+  
+  if (!segment) return path[0]; // Default to start if no segment found
+  
+  // Calculate position within the segment
+  const segmentProgress = (targetDistance - segment.start) / segment.distance;
+  const segmentIndex = segments.indexOf(segment);
+  
+  const p1 = path[segmentIndex];
+  const p2 = path[segmentIndex + 1];
+  
+  // Interpolate between the two points
+  return {
+    lat: p1.lat + (p2.lat - p1.lat) * segmentProgress,
+    lng: p1.lng + (p2.lng - p1.lng) * segmentProgress
+  };
+}
+
 // Initialize Airtable
 const base = new Airtable({
   apiKey: process.env.AIRTABLE_API_KEY
@@ -178,6 +231,173 @@ export async function GET(request: Request) {
       };
     });
     
+    // Now fetch activities with paths for all citizens
+    console.log('Fetching activities with paths for citizens...');
+    try {
+      // Get the Airtable API key and base ID
+      const AIRTABLE_ACTIVITIES_TABLE = process.env.AIRTABLE_ACTIVITIES_TABLE || 'ACTIVITIES';
+      
+      if (!process.env.AIRTABLE_API_KEY || !process.env.AIRTABLE_BASE_ID) {
+        console.warn('Airtable credentials not configured for activities');
+      } else {
+        // Construct the Airtable API URL
+        const url = `https://api.airtable.com/v0/${process.env.AIRTABLE_BASE_ID}/${AIRTABLE_ACTIVITIES_TABLE}`;
+        
+        // Create the filter formula to get only activities with paths
+        const filterByFormula = `AND(NOT({Path} = ''), NOT({Path} = BLANK()))`;
+        
+        // Prepare the request parameters
+        const requestUrl = `${url}?filterByFormula=${encodeURIComponent(filterByFormula)}&sort%5B0%5D%5Bfield%5D=CreatedAt&sort%5B0%5D%5Bdirection%5D=desc&maxRecords=100`;
+        
+        // Make the request to Airtable
+        const response = await fetch(requestUrl, {
+          headers: {
+            'Authorization': `Bearer ${process.env.AIRTABLE_API_KEY}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          
+          if (data.records && data.records.length > 0) {
+            console.log(`Found ${data.records.length} activities with paths`);
+            
+            // Process activities and update citizen positions
+            const now = new Date();
+            const citizenActivities: Record<string, any[]> = {};
+            
+            // Group activities by citizen
+            data.records.forEach(record => {
+              const activity = record.fields;
+              const citizenId = activity.CitizenId;
+              
+              if (citizenId && activity.Path) {
+                if (!citizenActivities[citizenId]) {
+                  citizenActivities[citizenId] = [];
+                }
+                
+                try {
+                  // Parse path if it's a string
+                  const path = typeof activity.Path === 'string' ? 
+                    JSON.parse(activity.Path) : activity.Path;
+                  
+                  // Skip activities without valid paths
+                  if (!Array.isArray(path) || path.length < 2) {
+                    return;
+                  }
+                  
+                  // Validate each point in the path
+                  const validPath = path.filter(point => 
+                    point && typeof point === 'object' && 
+                    'lat' in point && 'lng' in point &&
+                    typeof point.lat === 'number' && typeof point.lng === 'number'
+                  );
+                  
+                  if (validPath.length < 2) {
+                    return;
+                  }
+                  
+                  citizenActivities[citizenId].push({
+                    id: record.id,
+                    path: validPath,
+                    type: activity.Type || 'unknown',
+                    startTime: activity.StartDate || activity.CreatedAt,
+                    endTime: activity.EndDate
+                  });
+                } catch (e) {
+                  console.warn(`Failed to parse activity path for ${record.id}:`, e);
+                }
+              }
+            });
+            
+            // Update citizen positions based on their activities
+            citizens = citizens.map(citizen => {
+              const citizenId = citizen.citizenid;
+              const activities = citizenActivities[citizenId] || [];
+              
+              if (activities.length > 0) {
+                // Find the most appropriate activity based on time
+                let selectedActivity = null;
+                let initialProgress = 0;
+                
+                // First, check for activities that are currently in progress
+                for (const activity of activities) {
+                  const startTime = activity.startTime ? new Date(activity.startTime) : null;
+                  const endTime = activity.endTime ? new Date(activity.endTime) : null;
+                  
+                  // Skip activities without a valid start time
+                  if (!startTime) continue;
+                  
+                  // If the activity has both start and end times, check if we're within that timeframe
+                  if (startTime && endTime) {
+                    if (now >= startTime && now <= endTime) {
+                      // This activity is currently active - calculate progress based on elapsed time
+                      const totalDuration = endTime.getTime() - startTime.getTime();
+                      const elapsedTime = now.getTime() - startTime.getTime();
+                      initialProgress = Math.min(Math.max(elapsedTime / totalDuration, 0), 1);
+                      selectedActivity = activity;
+                      console.log(`Found active activity for ${citizenId} with progress ${initialProgress.toFixed(2)}`);
+                      break; // Found an active activity, no need to check others
+                    }
+                  } 
+                  // If the activity only has a start time (no end time), check if it started in the last hour
+                  else if (startTime) {
+                    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+                    if (startTime >= oneHourAgo) {
+                      // This activity started recently - estimate progress based on typical speed
+                      // Assume a typical activity takes about 1 hour to complete
+                      const elapsedTime = now.getTime() - startTime.getTime();
+                      initialProgress = Math.min(Math.max(elapsedTime / (60 * 60 * 1000), 0), 1);
+                      selectedActivity = activity;
+                      console.log(`Found recent activity for ${citizenId} with estimated progress ${initialProgress.toFixed(2)}`);
+                      break; // Found a recent activity, no need to check others
+                    }
+                  }
+                }
+                
+                // If no active or recent activity was found, just use the first activity with random progress
+                if (!selectedActivity && activities.length > 0) {
+                  selectedActivity = activities[0];
+                  initialProgress = Math.random(); // Random progress between 0 and 1
+                  console.log(`Using random progress ${initialProgress.toFixed(2)} for ${citizenId} with no active activities`);
+                }
+                
+                // Calculate position based on progress
+                if (selectedActivity) {
+                  const calculatedPosition = calculatePositionAlongPath(selectedActivity.path, initialProgress);
+                  if (calculatedPosition) {
+                    console.log(`Updated position for citizen ${citizenId} based on activity ${selectedActivity.id}`);
+                    return {
+                      ...citizen,
+                      position: calculatedPosition,
+                      // Add activity information to the citizen object
+                      currentActivity: {
+                        id: selectedActivity.id,
+                        type: selectedActivity.type,
+                        progress: initialProgress,
+                        path: selectedActivity.path
+                      }
+                    };
+                  }
+                }
+              }
+              
+              // Return the citizen with original position if no activity position was calculated
+              return citizen;
+            });
+            
+            console.log(`Updated positions for ${Object.keys(citizenActivities).length} citizens based on activities`);
+          }
+        } else {
+          console.warn(`Failed to fetch activities: ${response.status} ${response.statusText}`);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching or processing activities:', error);
+      // Continue with original positions if there's an error
+    }
+    
     console.log(`Returning ${citizens.length} citizens with home and work assignments`);
     
     // Log a sample of the citizens data
@@ -188,7 +408,8 @@ export async function GET(request: Request) {
         imageUrl: citizens[0].imageurl,
         position: citizens[0].position,
         home: citizens[0].home,
-        work: citizens[0].work
+        work: citizens[0].work,
+        currentActivity: citizens[0].currentActivity
       });
     }
     
