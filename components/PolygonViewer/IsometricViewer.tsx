@@ -268,6 +268,44 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       window.removeEventListener('TRANSPORT_ROUTE_CALCULATED', handleTransportRouteCalculated as EventListener);
     };
   }, [activeView, visualizeTransportPath]);
+
+    // Fetch land groups data
+  const fetchLandGroups = useCallback(async () => {
+    try {
+      console.log('Fetching land groups data...');
+      const response = await fetch('/api/land-groups?includeUnconnected=true&minSize=1');
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.landGroups) {
+          console.log(`Loaded ${data.landGroups.length} land groups`);
+          
+          // Create a mapping of polygon ID to group ID
+          const groupMapping: Record<string, string> = {};
+          data.landGroups.forEach((group: any) => {
+            if (group.lands && Array.isArray(group.lands)) {
+              group.lands.forEach((landId: string) => {
+                groupMapping[landId] = group.groupId;
+              });
+            }
+          });
+          
+          // Generate distinct colors for each group
+          const colors: Record<string, string> = {};
+          data.landGroups.forEach((group: any, index: number) => {
+            // Generate a color based on index to ensure distinctness
+            const hue = (index * 137.5) % 360; // Golden angle approximation for good distribution
+            colors[group.groupId] = `hsl(${hue}, 70%, 65%)`;
+          });
+          
+          setLandGroups(groupMapping);
+          setLandGroupColors(colors);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching land groups:', error);
+    }
+  }, []);
   
   // Dispatch event when transport mode changes
   useEffect(() => {
@@ -318,44 +356,6 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       }
     } catch (error) {
       console.error('Error fetching income data:', error);
-    }
-  }, []);
-  
-  // Fetch land groups data
-  const fetchLandGroups = useCallback(async () => {
-    try {
-      console.log('Fetching land groups data...');
-      const response = await fetch('/api/land-groups?includeUnconnected=true&minSize=1');
-      
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success && data.landGroups) {
-          console.log(`Loaded ${data.landGroups.length} land groups`);
-          
-          // Create a mapping of polygon ID to group ID
-          const groupMapping: Record<string, string> = {};
-          data.landGroups.forEach((group: any) => {
-            if (group.lands && Array.isArray(group.lands)) {
-              group.lands.forEach((landId: string) => {
-                groupMapping[landId] = group.groupId;
-              });
-            }
-          });
-          
-          // Generate distinct colors for each group
-          const colors: Record<string, string> = {};
-          data.landGroups.forEach((group: any, index: number) => {
-            // Generate a color based on index to ensure distinctness
-            const hue = (index * 137.5) % 360; // Golden angle approximation for good distribution
-            colors[group.groupId] = `hsl(${hue}, 70%, 65%)`;
-          });
-          
-          setLandGroups(groupMapping);
-          setLandGroupColors(colors);
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching land groups:', error);
     }
   }, []);
   
