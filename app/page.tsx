@@ -268,27 +268,49 @@ export default function TwoDPage() {
     window.dispatchEvent(new CustomEvent('ensureBuildingsVisible'));
   }, []); // Empty dependency array means this runs only once on mount
   
-  // Set up event listeners for panel visibility
+  // Update view when activeView changes
   useEffect(() => {
-    // Event handlers for opening panels
-    const handleOpenGovernancePanel = () => setShowGovernancePanel(true);
-    const handleOpenGuildsPanel = () => setShowGuildsPanel(true);
-    const handleOpenKnowledgePanel = () => setShowKnowledgePanel(true);
-    const handleOpenLoanPanel = () => setShowLoanPanel(true);
-    const handleShowTransportDebug = () => {
-      // Switch to transport view first
-      if (activeView !== 'transport') {
-        window.dispatchEvent(new CustomEvent('switchToTransportView', {
-          detail: { view: 'transport' }
-        }));
-        // Small delay to ensure view has changed
-        setTimeout(() => {
-          setShowTransportDebugPanel(true);
-        }, 100);
-      } else {
-        setShowTransportDebugPanel(true);
+    console.log(`View changed to: ${activeView}`);
+    
+    // Dispatch a viewChanged event to notify other components
+    window.dispatchEvent(new CustomEvent('viewChanged', { 
+      detail: { view: activeView }
+    }));
+    
+    // Auto-activate transport mode when switching to transport view
+    if (activeView === 'transport') {
+      console.log('Automatically activating transport mode');
+      setTransportMode(true);
+      
+      // Also notify the transport service
+      try {
+        const { transportService } = require('@/lib/services/TransportService');
+        transportService.setTransportMode(true);
+      } catch (error) {
+        console.error('Error setting transport mode:', error);
       }
-    };
+    } else if (transportMode) {
+      // Deactivate transport mode when switching away
+      console.log('Deactivating transport mode when leaving transport view');
+      setTransportMode(false);
+      
+      // Also notify the transport service
+      try {
+        const { transportService } = require('@/lib/services/TransportService');
+        transportService.setTransportMode(false);
+      } catch (error) {
+        console.error('Error setting transport mode:', error);
+      }
+    }
+    
+    // Dispatch additional events for specific views
+    if (activeView === 'land') {
+      window.dispatchEvent(new CustomEvent('fetchIncomeData'));
+      window.dispatchEvent(new CustomEvent('showIncomeVisualization'));
+    } else if (activeView === 'citizens') {
+      window.dispatchEvent(new CustomEvent('loadCitizens'));
+    }
+  }, [activeView, transportMode]);
     
     // Event handlers for closing panels
     const handleCloseGovernancePanel = () => setShowGovernancePanel(false);

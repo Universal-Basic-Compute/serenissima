@@ -14,6 +14,7 @@ import CitizenMarkers from './CitizenMarkers';
 import ResourceMarkers from './ResourceMarkers';
 import { HoverTooltip } from '../UI/HoverTooltip';
 import TransportDebugPanel from '../UI/TransportDebugPanel';
+import TransportErrorMessage from '../UI/TransportErrorMessage';
 
 interface IsometricViewerProps {
   activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
