@@ -600,7 +600,7 @@ export default function TwoDPage() {
         
         {/* Bottom section with version number */}
         <div className="p-4 border-t border-gray-700 text-center">
-          <div className="text-xs text-gray-400">La Serenissima v0.2.1</div>
+          <div className="text-xs text-gray-400">La Serenissima v0.2.2</div>
         </div>
       </div>
       
