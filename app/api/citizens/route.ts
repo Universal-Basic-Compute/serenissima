@@ -31,7 +31,10 @@ function calculateDistance(point1: {lat: number, lng: number}, point2: {lat: num
 
 // Helper function to calculate position along a path based on progress
 function calculatePositionAlongPath(path: {lat: number, lng: number}[], progress: number) {
-  if (!path || path.length < 2) return null;
+  if (!path || path.length < 2) {
+    console.log('Invalid path: empty or too short');
+    return null;
+  }
   
   // Calculate total path length
   let totalDistance = 0;
@@ -47,11 +50,19 @@ function calculatePositionAlongPath(path: {lat: number, lng: number}[], progress
     totalDistance += distance;
   }
   
+  if (totalDistance === 0) {
+    console.log('Path has zero total distance');
+    return path[0]; // Return first point if path has no length
+  }
+  
   // Find the segment where the progress falls
   const targetDistance = progress * totalDistance;
   const segment = segments.find(seg => targetDistance >= seg.start && targetDistance <= seg.end);
   
-  if (!segment) return path[0]; // Default to start if no segment found
+  if (!segment) {
+    console.log(`No segment found for progress ${progress}, defaulting to start`);
+    return path[0]; // Default to start if no segment found
+  }
   
   // Calculate position within the segment
   const segmentProgress = (targetDistance - segment.start) / segment.distance;
