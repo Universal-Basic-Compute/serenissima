@@ -57,8 +57,19 @@ const TransportDebugPanel: React.FC<TransportDebugPanelProps> = ({ onClose, visi
       console.error('Error getting initial path from transport service:', error);
     }
     
+    // Add a listener for manual path updates
+    const handleManualPathUpdate = (event: CustomEvent) => {
+      console.log('Manual path update event received:', event.detail);
+      if (event.detail && event.detail.path) {
+        setCurrentPath(event.detail.path);
+      }
+    };
+    
+    window.addEventListener('MANUAL_PATH_UPDATE', handleManualPathUpdate as EventListener);
+    
     return () => {
       window.removeEventListener('TRANSPORT_ROUTE_CALCULATED', handlePathCalculated as EventListener);
+      window.removeEventListener('MANUAL_PATH_UPDATE', handleManualPathUpdate as EventListener);
       subscription.unsubscribe();
     };
   }, []);

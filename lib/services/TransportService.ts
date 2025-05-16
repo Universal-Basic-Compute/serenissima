@@ -319,6 +319,12 @@ export class TransportService {
             waterOnly: this.waterOnlyMode
           });
           
+          // Log the path data for debugging
+          console.log(`Transport path calculated with ${data.path.length} points:`, {
+            firstPoint: data.path[0],
+            lastPoint: data.path[data.path.length - 1]
+          });
+          
           // Create a custom event with the path data
           const routeEvent = new CustomEvent('TRANSPORT_ROUTE_CALCULATED', {
             detail: {
@@ -328,6 +334,7 @@ export class TransportService {
           });
           
           // Dispatch the event
+          console.log('Dispatching TRANSPORT_ROUTE_CALCULATED event with path data');
           window.dispatchEvent(routeEvent);
           
           // Log the event for debugging
@@ -525,6 +532,7 @@ export class TransportService {
    * Get the current transport path
    */
   public getPath(): any[] {
+    console.log(`Getting current transport path (${this.transportPath.length} points)`);
     return this.transportPath;
   }
 

@@ -140,6 +140,33 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [calculatingPath, setCalculatingPath] = useState<boolean>(false);
   const [waterOnlyMode, setWaterOnlyMode] = useState<boolean>(false);
   const [pathfindingMode, setPathfindingMode] = useState<'all' | 'real'>('real'); // Default to 'real' mode
+  
+  // Function to visualize the transport path
+  const visualizeTransportPath = useCallback((path: any[]) => {
+    if (!path || path.length < 2) return;
+    
+    console.log(`Visualizing transport path with ${path.length} points`);
+    
+    // Set the transport path state
+    setTransportPath(path);
+    
+    // Force a redraw
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        // Redraw everything
+        const event = new Event('redraw');
+        window.dispatchEvent(event);
+      }
+    }
+    
+    // Also dispatch an event for the debug panel
+    const pathUpdateEvent = new CustomEvent('MANUAL_PATH_UPDATE', {
+      detail: { path }
+    });
+    window.dispatchEvent(pathUpdateEvent);
+  }, []);
 
   // Load polygons
   useEffect(() => {
