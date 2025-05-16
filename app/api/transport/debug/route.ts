@@ -6,6 +6,8 @@ async function fetchBridges() {
   try {
     // Use absolute URL for server-side fetching
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    console.log(`Fetching bridges from: ${baseUrl}/api/bridges`);
+    
     const response = await fetch(`${baseUrl}/api/bridges`, {
       // Add these headers for server-side fetch
       headers: {
@@ -79,6 +81,23 @@ export async function GET(request: Request) {
     // Get debug information about the graph with the requested mode
     const graphInfo = transportService.debugGraph();
     
+    // Fix the component sizes array - it's likely too large to return in full
+    if (graphInfo.componentSizes && graphInfo.componentSizes.length > 0) {
+      // Just return summary statistics instead of the full array
+      const componentSizeStats = {
+        count: graphInfo.componentSizes.length,
+        min: Math.min(...graphInfo.componentSizes),
+        max: Math.max(...graphInfo.componentSizes),
+        avg: graphInfo.componentSizes.reduce((sum, size) => sum + size, 0) / graphInfo.componentSizes.length,
+        largestComponents: graphInfo.componentSizes
+          .sort((a, b) => b - a)
+          .slice(0, 5) // Just return the 5 largest components
+      };
+      
+      // Replace the full array with the summary
+      graphInfo.componentSizes = componentSizeStats;
+    }
+    
     // Always fetch bridges and docks regardless of mode
     const bridges = await fetchBridges();
     const docks = await fetchDocks();
@@ -92,6 +111,22 @@ export async function GET(request: Request) {
       // If we're in 'real' mode, get 'all' mode info for comparison
       transportService.setPathfindingMode('all');
       const allModeGraphInfo = transportService.debugGraph();
+      
+      // Fix component sizes for all mode too
+      if (allModeGraphInfo.componentSizes && allModeGraphInfo.componentSizes.length > 0) {
+        const componentSizeStats = {
+          count: allModeGraphInfo.componentSizes.length,
+          min: Math.min(...allModeGraphInfo.componentSizes),
+          max: Math.max(...allModeGraphInfo.componentSizes),
+          avg: allModeGraphInfo.componentSizes.reduce((sum, size) => sum + size, 0) / allModeGraphInfo.componentSizes.length,
+          largestComponents: allModeGraphInfo.componentSizes
+            .sort((a, b) => b - a)
+            .slice(0, 5)
+        };
+        
+        allModeGraphInfo.componentSizes = componentSizeStats;
+      }
+      
       additionalInfo = {
         allModeGraphInfo
       };
