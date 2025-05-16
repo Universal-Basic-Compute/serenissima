@@ -3187,21 +3187,6 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         </div>
       )}
       
-      {/* Controls */}
-      <div className="absolute bottom-4 right-4 bg-black/70 text-white p-3 rounded-lg shadow-lg">
-        <div className="flex items-center space-x-2">
-          <span className="text-sm">{Math.round(scale * 100)}%</span>
-          <button 
-            onClick={() => {
-              setScale(3); // Reset to 3x zoom instead of 1x
-              setOffset({ x: 0, y: 0 });
-            }}
-            className="px-3 py-1 bg-blue-600 hover:bg-blue-500 rounded text-white ml-2"
-          >
-            Reset
-          </button>
-        </div>
-      </div>
       
       {/* Building Color Mode Toggle and My Buildings Filter */}
       <div className="absolute bottom-4 left-4 bg-black/70 text-white p-3 rounded-lg shadow-lg">
