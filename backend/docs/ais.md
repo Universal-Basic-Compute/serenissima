@@ -281,6 +281,43 @@ The AI resource import system:
 - Simulates the international trade that was vital to Venice's economy
 - Provides market demand for various resource types
 
+### Public Sell Management
+
+**Implementation**: `backend/ais/managepublicsells.py`  
+**Schedule**: Daily at 3:00 AM UTC
+
+AI users strategically create public sell contracts to sell resources to other players:
+
+#### Process:
+
+1. The script identifies all users marked as AI in the system
+2. For each AI user, it analyzes:
+   - Buildings they run that can sell resources
+   - Current resource stockpiles
+   - Existing public sell contracts
+   - Available resource types and their import prices
+
+3. For each AI user, the system:
+   - Prepares a comprehensive data package with resource and building information
+   - Sends this data to the Kinos Engine API for analysis
+   - Receives public sell strategy decisions from the AI
+
+4. When public sell decisions are made:
+   - New public sell contracts are created with 47-hour duration
+   - Existing contracts may be ended if no longer beneficial
+   - Contract details include resource type, hourly amount, and price
+
+5. An admin notification is created with statistics about all public sell decisions, showing the resources being sold by each AI user
+
+#### Economic Impact:
+
+The AI public sell management system:
+- Creates a dynamic marketplace with consistent resource availability
+- Establishes realistic market prices based on resource value and scarcity
+- Ensures players can purchase resources even in areas with limited player activity
+- Provides competition and price signals in the resource market
+- Simulates the merchant activity that was vital to Venice's economy
+
 ## AI User Management
 
 AI users are created and managed through the Airtable database:

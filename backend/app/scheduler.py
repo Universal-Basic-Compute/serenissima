@@ -54,6 +54,7 @@ def run_scheduled_tasks():
                 0: ("ais/adjustwages.py", "AI wage adjustments"),
                 1: ("ais/processnotifications.py", "AI notification processing"),
                 2: ("ais/answertomessages.py", "AI message responses"),
+                3: ("ais/managepublicsells.py", "AI public sell management"),
                 4: ("ais/answertomessages.py", "AI message responses"),
                 6: ("ais/answertomessages.py", "AI message responses"),
                 8: ("ais/answertomessages.py", "AI message responses"),
