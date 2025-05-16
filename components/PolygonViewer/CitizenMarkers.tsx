@@ -140,14 +140,17 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                     pathsMap[citizenId] = [];
                   }
                   
-                  pathsMap[citizenId].push({
+                  const activityPath = {
                     id: activity.ActivityId || `activity-${Math.random()}`,
                     citizenId,
                     path: validPath, // Use the validated path
                     type: activity.Type || 'unknown',
                     startTime: activity.StartDate || activity.CreatedAt,
                     endTime: activity.EndDate
-                  });
+                  };
+                  
+                  pathsMap[citizenId].push(activityPath);
+                  allPaths.push(activityPath); // Add to all paths array
                 } catch (e) {
                   console.warn(`Failed to parse activity path for ${activity.ActivityId || 'unknown'}:`, e);
                   return;
