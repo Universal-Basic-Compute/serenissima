@@ -600,7 +600,7 @@ export default function TwoDPage() {
         
         {/* Bottom section with version number */}
         <div className="p-4 border-t border-gray-700 text-center">
-          <div className="text-xs text-gray-400">La Serenissima v0.2.2</div>
+          <div className="text-xs text-gray-400">v0.2.2</div>
         </div>
       </div>
       
@@ -612,31 +612,6 @@ export default function TwoDPage() {
       
       {/* Settings */}
       {showSettings && <Settings onClose={handleSettingsClose} />}
-      
-      {/* Information Panel */}
-      {showInfo && (
-        <div className="absolute top-20 right-4 bg-black/70 text-white p-4 rounded-lg max-w-sm border-2 border-amber-600 shadow-lg">
-          <h2 className="text-lg font-serif font-bold mb-2 text-amber-400">About 2D View</h2>
-          <p className="text-sm mb-3">
-            This is a simplified 2D isometric view of La Serenissima, designed for better performance.
-            It shows the same data as the 3D view but with a different rendering approach.
-          </p>
-          
-          <h3 className="text-md font-serif font-bold mb-1 text-amber-400">Legend</h3>
-          <div className="flex items-center space-x-2 mb-1">
-            <div className="w-4 h-4 bg-amber-500 border border-amber-700"></div>
-            <span className="text-sm">Land Parcels</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 bg-blue-500 border border-blue-700"></div>
-            <span className="text-sm">Water</span>
-          </div>
-          
-          <div className="mt-4 text-xs text-amber-400">
-            2D Isometric View v0.1.0
-          </div>
-        </div>
-      )}
       
       {/* Governance Panel */}
       {showGovernancePanel && (
