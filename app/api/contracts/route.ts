@@ -5,6 +5,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const username = searchParams.get('username');
+    const sellerBuilding = searchParams.get('sellerBuilding');
     
     // Initialize Airtable
     const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
@@ -24,7 +25,10 @@ export async function GET(request: Request) {
     // Build the filter formula based on parameters
     let formula = '';
     
-    if (username) {
+    if (sellerBuilding) {
+      // Filter by seller building
+      formula = `{SellerBuilding}='${sellerBuilding}'`;
+    } else if (username) {
       // Get public_sell contracts AND contracts where the user is buyer or seller
       formula = `OR({Type}='public_sell', {Buyer}='${username}', {Seller}='${username}')`;
     } else {

@@ -218,7 +218,27 @@ export default function BuildingDetailsPanel({
   const [buildingImagePath, setBuildingImagePath] = useState<string>('/images/buildings/market_stall.jpg');
   const [pointData, setPointData] = useState<any>(null);
   const [polygonsData, setPolygonsData] = useState<any[]>(polygons);
+  const [buildingContracts, setBuildingContracts] = useState<any[]>([]);
   
+  // Fetch building contracts
+  const fetchBuildingContracts = async (buildingId: string) => {
+    try {
+      const response = await fetch(`/api/contracts?sellerBuilding=${encodeURIComponent(buildingId)}`);
+      if (!response.ok) {
+        console.error(`Failed to fetch contracts: ${response.status} ${response.statusText}`);
+        return;
+      }
+      
+      const data = await response.json();
+      if (data.success && data.contracts) {
+        console.log(`Fetched ${data.contracts.length} contracts for building ${buildingId}`);
+        setBuildingContracts(data.contracts);
+      }
+    } catch (error) {
+      console.error('Error fetching building contracts:', error);
+    }
+  };
+
   // Fetch building details when a building is selected
   useEffect(() => {
     let isMounted = true;
@@ -248,6 +268,9 @@ export default function BuildingDetailsPanel({
             if (data.building.land_id) {
               fetchLandData(data.building.land_id);
             }
+            
+            // Fetch contracts for this building
+            fetchBuildingContracts(selectedBuildingId);
           } else {
             throw new Error('Invalid building data format');
           }
@@ -267,6 +290,7 @@ export default function BuildingDetailsPanel({
     } else {
       setBuilding(null);
       setError(null);
+      setBuildingContracts([]);
     }
     
     return () => {
@@ -1121,6 +1145,49 @@ export default function BuildingDetailsPanel({
                       </span>
                     </div>
                   )}
+                </div>
+              )}
+              
+              {/* Public Sale Contracts */}
+              {buildingContracts.length > 0 && (
+                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Public Sale Contracts</h3>
+                  
+                  <div className="space-y-3">
+                    {buildingContracts
+                      .filter(contract => contract.type === 'public_sell')
+                      .map((contract, index) => (
+                        <div key={contract.id || index} className="bg-amber-50 p-3 rounded-md border border-amber-100">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="font-medium text-amber-800">{contract.resourceType}</span>
+                            <span className="text-xs bg-green-100 px-2 py-1 rounded-full text-green-700">
+                              Public Sale
+                            </span>
+                          </div>
+                          
+                          <div className="grid grid-cols-3 gap-2 text-sm">
+                            <div className="flex flex-col">
+                              <span className="text-gray-500">Hourly Amount</span>
+                              <span className="font-medium">{contract.hourlyAmount || 0}</span>
+                            </div>
+                            
+                            <div className="flex flex-col">
+                              <span className="text-gray-500">Price</span>
+                              <span className="font-medium">{contract.price || contract.PricePerResource || 0} ⚜️</span>
+                            </div>
+                            
+                            <div className="flex flex-col">
+                              <span className="text-gray-500">Transporter</span>
+                              <span className="font-medium">{contract.transporter || contract.Transporter || 'None'}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    
+                    {buildingContracts.filter(contract => contract.type === 'public_sell').length === 0 && (
+                      <p className="text-center text-gray-500 italic">No public sale contracts</p>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
