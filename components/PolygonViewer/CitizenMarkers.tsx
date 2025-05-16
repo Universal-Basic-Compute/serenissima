@@ -373,7 +373,13 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
           
           // Debug log to verify position transformation
           if (Math.random() < 0.05) { // Only log ~5% of citizens to avoid console spam
-            console.log(`Citizen ${citizen.FirstName} ${citizen.LastName} position:`, {
+            const firstName = citizen.firstname || citizen.FirstName || '';
+            const lastName = citizen.lastname || citizen.LastName || '';
+            const displayName = firstName || lastName ? 
+              `${firstName} ${lastName}`.trim() : 
+              `Citizen ${citizen.citizenid || citizen.CitizenId || citizen.id || 'unknown'}`;
+            
+            console.log(`Citizen ${displayName} position:`, {
               original: originalPos,
               screen: position
             });
