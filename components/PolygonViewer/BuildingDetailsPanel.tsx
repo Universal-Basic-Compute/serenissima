@@ -1052,47 +1052,31 @@ export default function BuildingDetailsPanel({
                 </div>
               )}
               
-              {/* Full Description (Collapsible) */}
+              {/* Full Description (Always visible) */}
               {buildingDefinition?.fullDescription && (
                 <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-                  <button 
-                    onClick={() => setShowFullDescription(!showFullDescription)}
-                    className="w-full flex justify-between items-center text-left"
-                  >
-                    <h3 className="text-sm uppercase font-medium text-amber-600">Detailed Information</h3>
-                    <svg 
-                      xmlns="http://www.w3.org/2000/svg" 
-                      className={`h-5 w-5 transition-transform ${showFullDescription ? 'transform rotate-180' : ''}`} 
-                      fill="none" 
-                      viewBox="0 0 24 24" 
-                      stroke="currentColor"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
+                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-3">Detailed Information</h3>
                   
-                  {showFullDescription && (
-                    <div className="mt-3 text-gray-700 border-t border-amber-200 pt-3">
-                      <p className="whitespace-pre-line">{buildingDefinition.fullDescription}</p>
-                    
-                      {/* Creation details added here */}
-                      <div className="mt-4 pt-3 border-t border-amber-100">
-                        <h4 className="font-medium text-amber-700 mb-2">Creation Details</h4>
-                        <div className="text-sm">
-                          <p className="text-gray-700">
-                            Created: <span className="font-medium">
-                              {adjustDate(building.created_at)}
-                            </span>
+                  <div className="text-gray-700 border-t border-amber-200 pt-3">
+                    <p className="whitespace-pre-line">{buildingDefinition.fullDescription}</p>
+                  
+                    {/* Creation details added here */}
+                    <div className="mt-4 pt-3 border-t border-amber-100">
+                      <h4 className="font-medium text-amber-700 mb-2">Creation Details</h4>
+                      <div className="text-sm">
+                        <p className="text-gray-700">
+                          Created: <span className="font-medium">
+                            {adjustDate(building.created_at)}
+                          </span>
+                        </p>
+                        {building.created_by && (
+                          <p className="text-gray-700 mt-1">
+                            Created by: <span className="font-medium">{building.created_by}</span>
                           </p>
-                          {building.created_by && (
-                            <p className="text-gray-700 mt-1">
-                              Created by: <span className="font-medium">{building.created_by}</span>
-                            </p>
-                          )}
-                        </div>
+                        )}
                       </div>
                     </div>
-                  )}
+                  </div>
                 </div>
               )}
               
