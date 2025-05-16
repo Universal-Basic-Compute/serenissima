@@ -459,6 +459,22 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
                       Show Debug Information
                     </label>
                   </div>
+                  
+                  <div className="flex items-center mt-2">
+                    <input
+                      type="checkbox"
+                      id="showTransportDebug"
+                      checked={false}
+                      onChange={() => {
+                        // Dispatch an event to show the transport debug panel
+                        window.dispatchEvent(new CustomEvent('showTransportDebug'));
+                      }}
+                      className="h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded"
+                    />
+                    <label htmlFor="showTransportDebug" className="ml-2 block text-sm text-gray-700">
+                      Show Transport Debug Panel
+                    </label>
+                  </div>
                 </div>
               </div>
             )}

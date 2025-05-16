@@ -275,6 +275,20 @@ export default function TwoDPage() {
     const handleOpenGuildsPanel = () => setShowGuildsPanel(true);
     const handleOpenKnowledgePanel = () => setShowKnowledgePanel(true);
     const handleOpenLoanPanel = () => setShowLoanPanel(true);
+    const handleShowTransportDebug = () => {
+      // Switch to transport view first
+      if (activeView !== 'transport') {
+        window.dispatchEvent(new CustomEvent('switchToTransportView', {
+          detail: { view: 'transport' }
+        }));
+        // Small delay to ensure view has changed
+        setTimeout(() => {
+          setShowTransportDebugPanel(true);
+        }, 100);
+      } else {
+        setShowTransportDebugPanel(true);
+      }
+    };
     
     // Event handlers for closing panels
     const handleCloseGovernancePanel = () => setShowGovernancePanel(false);
@@ -294,6 +308,7 @@ export default function TwoDPage() {
     window.addEventListener('openGuildsPanel', handleOpenGuildsPanel);
     window.addEventListener('openKnowledgePanel', handleOpenKnowledgePanel);
     window.addEventListener('openLoanPanel', handleOpenLoanPanel);
+    window.addEventListener('showTransportDebug', handleShowTransportDebug);
     window.addEventListener('closeGovernancePanel', handleCloseGovernancePanel);
     window.addEventListener('closeGuildsPanel', handleCloseGuildsPanel);
     window.addEventListener('closeKnowledgePanel', handleCloseKnowledgePanel);
@@ -306,13 +321,14 @@ export default function TwoDPage() {
       window.removeEventListener('openGuildsPanel', handleOpenGuildsPanel);
       window.removeEventListener('openKnowledgePanel', handleOpenKnowledgePanel);
       window.removeEventListener('openLoanPanel', handleOpenLoanPanel);
+      window.removeEventListener('showTransportDebug', handleShowTransportDebug);
       window.removeEventListener('closeGovernancePanel', handleCloseGovernancePanel);
       window.removeEventListener('closeGuildsPanel', handleCloseGuildsPanel);
       window.removeEventListener('closeKnowledgePanel', handleCloseKnowledgePanel);
       window.removeEventListener('closeLoanPanel', handleCloseLoanPanel);
       window.removeEventListener('loadLoans', handleLoadLoans);
     };
-  }, []);
+  }, [activeView]);
   
   // Set up event listener for ensureBuildingsVisible
   useEffect(() => {
@@ -388,12 +404,19 @@ export default function TwoDPage() {
 
   // State for loan panel
   const [showLoanPanel, setShowLoanPanel] = useState<boolean>(false);
+  // State for transport debug panel
+  const [showTransportDebugPanel, setShowTransportDebugPanel] = useState<boolean>(false);
   
   // Handle loan panel closing
   const handleLoanPanelClose = () => {
     setShowLoanPanel(false);
     // Reset the active view to buildings when closing the panel
     setActiveView('buildings');
+  };
+  
+  // Handle transport debug panel closing
+  const handleTransportDebugPanelClose = () => {
+    setShowTransportDebugPanel(false);
   };
   
   // Update view when activeView changes
