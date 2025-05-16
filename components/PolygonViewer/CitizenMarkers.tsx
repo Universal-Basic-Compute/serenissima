@@ -78,17 +78,19 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   const [positionsInitialized, setPositionsInitialized] = useState<boolean>(false);
   
   // Helper function to convert lat/lng to screen coordinates
-  const latLngToScreen = (lat: number, lng: number) => {
-    // Convert lat/lng to world coordinates using CoordinateService
-    const world = CoordinateService.latLngToWorld(lat, lng);
+  const latLngToScreen = useCallback((lat: number, lng: number) => {
+    // Convert lat/lng to world coordinates
+    const world = {
+      x: (lng - 12.3326) * 20000,
+      y: (lat - 45.4371) * 20000
+    };
     
     // Convert world coordinates to screen coordinates
-    const screen = CoordinateService.worldToScreen(
-      world.x, world.y, scale, offset, canvasWidth, canvasHeight
-    );
-    
-    return screen;
-  };
+    return {
+      x: CoordinateService.worldToScreen(world.x, world.y, scale, offset, canvasWidth, canvasHeight).x,
+      y: CoordinateService.worldToScreen(world.x, world.y, scale, offset, canvasWidth, canvasHeight).y
+    };
+  }, [scale, offset, canvasWidth, canvasHeight]);
   
   // Add function to calculate position along a path based on progress
   const calculatePositionAlongPath = useCallback((path: {lat: number, lng: number}[], progress: number) => {
@@ -204,7 +206,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
       return hasChanges ? updated : prev;
     });
     
-    // Continue animation loop
+    // Continue animation loop regardless of mouse movement
     if (animationActive) {
       animationFrameRef.current = requestAnimationFrame(animateCitizens);
     }
@@ -614,7 +616,11 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   
   // Update when scale or offset changes
   useEffect(() => {
-    // Force re-render when scale or offset changes
+    // Force recalculation of all citizen positions when scale or offset changes
+    if (Object.keys(animatedCitizens).length > 0) {
+      // Just trigger a re-render, the positions will be recalculated in the render function
+      setAnimatedCitizens({...animatedCitizens});
+    }
   }, [scale, offset, canvasWidth, canvasHeight]);
   
   // Add an additional useEffect to update visiblePaths when activeView changes
@@ -632,7 +638,9 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   
   // Add effect to initialize animated citizens when paths are loaded
   useEffect(() => {
-    if (Object.keys(activityPaths).length === 0) return;
+    if (Object.keys(activityPaths).length === 0 || citizens.length === 0) return;
+    
+    console.log('Initializing animated citizens with paths...');
     
     // Initialize animated citizens from the activity paths
     const initialAnimatedCitizens: Record<string, AnimatedCitizen> = {};
@@ -718,17 +726,19 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
       };
     });
     
+    // Update state only once with all initialized citizens
     setAnimatedCitizens(initialAnimatedCitizens);
     console.log(`Initialized ${Object.keys(initialAnimatedCitizens).length} animated citizens`);
     
     // Set the positions initialized flag to true
     setPositionsInitialized(true);
     
-    // Start animation loop
+    // Start animation loop immediately
     if (animationActive && Object.keys(initialAnimatedCitizens).length > 0) {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
+      lastFrameTimeRef.current = 0;
       animationFrameRef.current = requestAnimationFrame(animateCitizens);
     }
     
@@ -764,6 +774,15 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
       }
     };
   }, [activeView, animateCitizens]);
+  
+  // Add this effect to start animation immediately after initialization
+  useEffect(() => {
+    if (positionsInitialized && animationActive && !animationFrameRef.current) {
+      console.log('Starting animation loop immediately after initialization');
+      lastFrameTimeRef.current = 0;
+      animationFrameRef.current = requestAnimationFrame(animateCitizens);
+    }
+  }, [positionsInitialized, animationActive, animateCitizens]);
   
   const handleCitizenClick = (citizen: any) => {
     // Ensure we have a valid citizen object before setting it
@@ -833,7 +852,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                 transform: 'translate(-50%, -50%)',
                 zIndex: 50,
                 position: 'absolute', // Ensure absolute positioning works
-                transition: 'left 0.5s linear, top 0.5s linear' // Add smooth transition
+                transition: 'none' // Remove transition to avoid lag
               }}
               onClick={() => handleCitizenClick(citizen)}
               onMouseEnter={() => handleCitizenHover(citizen)}
@@ -902,7 +921,8 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                 top: `${position.y}px`,
                 transform: 'translate(-50%, -50%)',
                 zIndex: 50,
-                position: 'absolute' // Ensure absolute positioning works
+                position: 'absolute', // Ensure absolute positioning works
+                transition: 'none' // Remove transition to avoid lag
               }}
               onClick={() => handleCitizenClick(citizen)}
               onMouseEnter={() => handleCitizenHover(citizen)}
