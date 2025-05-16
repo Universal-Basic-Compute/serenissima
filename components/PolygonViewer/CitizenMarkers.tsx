@@ -157,16 +157,6 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
           }
         }
       }
-    }
-      
-      console.log(`Loaded activity paths for ${Object.keys(pathsMap).length} citizens, total paths: ${allPaths.length}`);
-      setActivityPaths(pathsMap);
-      setVisiblePaths(allPaths); // Set all paths to be visible
-      
-      // Log the first few paths for debugging
-      if (allPaths.length > 0) {
-        console.log('Sample paths:', allPaths.slice(0, 3));
-      }
     } catch (error) {
       console.error('Error fetching activity paths:', error);
     } finally {
