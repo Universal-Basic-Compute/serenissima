@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { citizenService } from '@/lib/services/CitizenService';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 import { CoordinateService } from '@/lib/services/CoordinateService';
@@ -11,6 +11,15 @@ interface ActivityPath {
   type: string;
   startTime: string;
   endTime?: string;
+}
+
+interface AnimatedCitizen {
+  citizen: any;
+  currentPosition: {lat: number, lng: number};
+  pathIndex: number;
+  currentPath: ActivityPath | null;
+  progress: number;
+  speed: number; // meters per second
 }
 
 interface CitizenMarkersProps {
@@ -45,6 +54,11 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   const [hoveredCitizenPaths, setHoveredCitizenPaths] = useState<ActivityPath[]>([]);
   // Add a new state to track all visible paths
   const [visiblePaths, setVisiblePaths] = useState<ActivityPath[]>([]);
+  // Add new state variables for animation
+  const [animatedCitizens, setAnimatedCitizens] = useState<Record<string, AnimatedCitizen>>({});
+  const [animationActive, setAnimationActive] = useState<boolean>(true);
+  const animationFrameRef = useRef<number | null>(null);
+  const lastFrameTimeRef = useRef<number>(0);
   
   // Helper function to convert lat/lng to screen coordinates
   const latLngToScreen = (lat: number, lng: number) => {
@@ -58,6 +72,126 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     
     return screen;
   };
+  
+  // Add function to calculate position along a path based on progress
+  const calculatePositionAlongPath = useCallback((path: {lat: number, lng: number}[], progress: number) => {
+    if (!path || path.length < 2) return null;
+    
+    // Calculate total path length
+    let totalDistance = 0;
+    const segments: {start: number, end: number, distance: number}[] = [];
+    
+    for (let i = 0; i < path.length - 1; i++) {
+      const distance = calculateDistance(path[i], path[i+1]);
+      segments.push({
+        start: totalDistance,
+        end: totalDistance + distance,
+        distance
+      });
+      totalDistance += distance;
+    }
+    
+    // Find the segment where the progress falls
+    const targetDistance = progress * totalDistance;
+    const segment = segments.find(seg => targetDistance >= seg.start && targetDistance <= seg.end);
+    
+    if (!segment) return path[0]; // Default to start if no segment found
+    
+    // Calculate position within the segment
+    const segmentProgress = (targetDistance - segment.start) / segment.distance;
+    const segmentIndex = segments.indexOf(segment);
+    
+    const p1 = path[segmentIndex];
+    const p2 = path[segmentIndex + 1];
+    
+    // Interpolate between the two points
+    return {
+      lat: p1.lat + (p2.lat - p1.lat) * segmentProgress,
+      lng: p1.lng + (p2.lng - p1.lng) * segmentProgress
+    };
+  }, []);
+  
+  // Add animation loop function
+  const animateCitizens = useCallback((timestamp: number) => {
+    if (!lastFrameTimeRef.current) {
+      lastFrameTimeRef.current = timestamp;
+      animationFrameRef.current = requestAnimationFrame(animateCitizens);
+      return;
+    }
+    
+    // Calculate time delta in seconds
+    const deltaTime = (timestamp - lastFrameTimeRef.current) / 1000;
+    lastFrameTimeRef.current = timestamp;
+    
+    // Update each animated citizen
+    setAnimatedCitizens(prev => {
+      const updated = {...prev};
+      let hasChanges = false;
+      
+      Object.keys(updated).forEach(citizenId => {
+        const citizen = updated[citizenId];
+        
+        // Skip if no current path
+        if (!citizen.currentPath || !citizen.currentPath.path || citizen.currentPath.path.length < 2) return;
+        
+        // Update progress based on speed and time
+        const pathLength = citizen.currentPath.path.reduce((total, point, index, array) => {
+          if (index === 0) return total;
+          return total + calculateDistance(array[index-1], point);
+        }, 0);
+        
+        // Calculate progress increment based on speed and path length
+        const progressIncrement = (citizen.speed * deltaTime) / pathLength;
+        let newProgress = citizen.progress + progressIncrement;
+        
+        // If path is complete, move to next path or reset
+        if (newProgress >= 1) {
+          // Find the next path for this citizen
+          const citizenPaths = activityPaths[citizenId] || [];
+          const currentPathIndex = citizenPaths.findIndex(p => p.id === citizen.currentPath?.id);
+          
+          if (currentPathIndex >= 0 && currentPathIndex < citizenPaths.length - 1) {
+            // Move to next path
+            const nextPath = citizenPaths[currentPathIndex + 1];
+            updated[citizenId] = {
+              ...citizen,
+              currentPath: nextPath,
+              progress: 0,
+              pathIndex: currentPathIndex + 1
+            };
+          } else {
+            // Reset to beginning of current path or a random path
+            const randomPathIndex = Math.floor(Math.random() * citizenPaths.length);
+            updated[citizenId] = {
+              ...citizen,
+              currentPath: citizenPaths[randomPathIndex] || null,
+              progress: 0,
+              pathIndex: randomPathIndex
+            };
+          }
+        } else {
+          // Update position along the path
+          const newPosition = calculatePositionAlongPath(citizen.currentPath.path, newProgress);
+          
+          if (newPosition) {
+            updated[citizenId] = {
+              ...citizen,
+              currentPosition: newPosition,
+              progress: newProgress
+            };
+            hasChanges = true;
+          }
+        }
+      });
+      
+      return hasChanges ? updated : prev;
+    });
+    
+    // Continue animation loop
+    if (animationActive) {
+      animationFrameRef.current = requestAnimationFrame(animateCitizens);
+    }
+  }, [animationActive, activityPaths, calculatePositionAlongPath]);
   
   // Add a function to parse building coordinates from building ID
   const parseBuildingCoordinates = (buildingId: string): {lat: number, lng: number} | null => {
@@ -75,6 +209,25 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     }
     
     return null;
+  };
+  
+  // Toggle animation function
+  const toggleAnimation = () => {
+    setAnimationActive(prev => {
+      const newState = !prev;
+      
+      if (newState && !animationFrameRef.current) {
+        // Restart animation
+        lastFrameTimeRef.current = 0;
+        animationFrameRef.current = requestAnimationFrame(animateCitizens);
+      } else if (!newState && animationFrameRef.current) {
+        // Stop animation
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+      
+      return newState;
+    });
   };
   
   // Function to fetch activity paths
@@ -375,7 +528,68 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     <>
       {/* Citizen Markers */}
       <div className="absolute inset-0 pointer-events-none overflow-visible">
-        {citizens.map((citizen) => {
+        {/* Animated Citizens */}
+        {Object.values(animatedCitizens).map((animatedCitizen) => {
+          // Use the animated position instead of the original position
+          const position = latLngToScreen(
+            animatedCitizen.currentPosition.lat, 
+            animatedCitizen.currentPosition.lng
+          );
+          
+          // Skip if position is off-screen (with some margin)
+          if (position.x < -100 || position.x > canvasWidth + 100 || 
+              position.y < -100 || position.y > canvasHeight + 100) {
+            return null;
+          }
+          
+          const citizen = animatedCitizen.citizen;
+          
+          // Ensure we have the required properties for display
+          const firstName = citizen.firstname || citizen.FirstName || citizen.firstName || '';
+          const lastName = citizen.lastname || citizen.LastName || citizen.lastName || '';
+          const socialClass = citizen.socialclass || citizen.SocialClass || citizen.socialClass || '';
+          const citizenId = citizen.citizenid || citizen.CitizenId || citizen.id;
+          
+          return (
+            <div 
+              key={citizenId || `citizen-${Math.random()}`}
+              className="absolute pointer-events-auto"
+              style={{
+                left: `${position.x}px`,
+                top: `${position.y}px`,
+                transform: 'translate(-50%, -50%)',
+                zIndex: 50,
+                position: 'absolute', // Ensure absolute positioning works
+                transition: 'left 0.5s linear, top 0.5s linear' // Add smooth transition
+              }}
+              onClick={() => handleCitizenClick(citizen)}
+              onMouseEnter={() => handleCitizenHover(citizen)}
+              onMouseLeave={handleCitizenLeave}
+            >
+              <div 
+                className="w-4 h-4 rounded-full cursor-pointer hover:scale-125 transition-transform flex items-center justify-center"
+                style={{ 
+                  backgroundColor: citizenService.getSocialClassColor(socialClass),
+                  border: '1px solid white',
+                  boxShadow: '0 0 0 1px rgba(0,0,0,0.2)'
+                }}
+                title={`${firstName} ${lastName} (${socialClass})`}
+              >
+                <span className="text-white text-[8px] font-bold">
+                  {firstName?.[0] || '?'}{lastName?.[0] || '?'}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+        
+        {/* Static Citizens (those without paths) */}
+        {citizens.filter(citizen => {
+          const citizenId = citizen.citizenid || citizen.CitizenId || citizen.id;
+          // Only show citizens that aren't being animated
+          return !animatedCitizens[citizenId];
+        }).map((citizen) => {
+          // Original static citizen rendering code...
           // Log the original position and the transformed screen coordinates
           const originalPos = citizen.position;
           const position = latLngToScreen(citizen.position.lat, citizen.position.lng);
@@ -513,7 +727,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
         </svg>
       )}
       
-      {/* Activity Paths - Modified to show all paths in citizens view */}
+      {/* Activity Paths - Modified to show remaining portions of paths */}
       {((activeView === 'citizens' && visiblePaths.length > 0) || hoveredCitizenPaths.length > 0 || selectedCitizenPaths.length > 0) && (
         <svg 
           className="absolute inset-0 pointer-events-none" 
@@ -529,10 +743,31 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
             Paths: {hoveredCitizenPaths.length} hovered, {selectedCitizenPaths.length} selected, {activeView === 'citizens' ? visiblePaths.length : 0} visible
           </text>
           
+          {/* Animation status indicator */}
+          <text x="20" y="60" fill={animationActive ? "green" : "red"} fontSize="12">
+            Animation: {animationActive ? "Active" : "Paused"}
+          </text>
+          
           {/* Render all paths when in citizens view */}
           {activeView === 'citizens' && visiblePaths.map((activity) => {
+            // Get the animated citizen for this path
+            const animatedCitizen = Object.values(animatedCitizens).find(
+              ac => ac.currentPath?.id === activity.id
+            );
+            
+            // If this path is being animated, only show the remaining portion
+            let pathToRender = activity.path;
+            if (animatedCitizen && animatedCitizen.currentPath?.id === activity.id) {
+              // Find the current segment
+              const totalLength = activity.path.length;
+              const segmentIndex = Math.floor(animatedCitizen.progress * (totalLength - 1));
+              
+              // Only render from current position to end
+              pathToRender = activity.path.slice(segmentIndex);
+            }
+            
             // Generate points string with validation
-            const pointsString = activity.path
+            const pointsString = pathToRender
               .filter(point => point && typeof point.lat === 'number' && typeof point.lng === 'number')
               .map(point => {
                 const screenPos = latLngToScreen(point.lat, point.lng);
@@ -554,9 +789,9 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                   strokeDasharray="3,3"
                 />
                 {/* Add small circles at path endpoints only to reduce visual clutter */}
-                {activity.path.length > 0 && [
-                  activity.path[0],
-                  activity.path[activity.path.length - 1]
+                {pathToRender.length > 0 && [
+                  pathToRender[0],
+                  pathToRender[pathToRender.length - 1]
                 ].map((point, index) => {
                   if (!point || typeof point.lat !== 'number' || typeof point.lng !== 'number') return null;
                   
@@ -663,6 +898,31 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
             );
           })}
         </svg>
+      )}
+      
+      {/* Animation Control Button */}
+      {activeView === 'citizens' && (
+        <button
+          className="absolute bottom-20 left-20 bg-amber-600 text-white px-3 py-1 rounded text-sm flex items-center"
+          onClick={toggleAnimation}
+        >
+          {animationActive ? (
+            <>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Pause Citizens
+            </>
+          ) : (
+            <>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Animate Citizens
+            </>
+          )}
+        </button>
       )}
       
       {/* Loading Indicator */}
