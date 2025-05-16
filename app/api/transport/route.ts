@@ -69,6 +69,54 @@ export async function GET(request: Request) {
   }
 }
 
+// Function to extract journey information from the path
+function extractJourneyFromPath(path: any[]): any[] {
+  if (!path || !Array.isArray(path) || path.length === 0) {
+    return [];
+  }
+  
+  const journey: any[] = [];
+  let currentLandId: string | null = null;
+  
+  // Process each point in the path
+  for (const point of path) {
+    // Skip intermediate points to avoid duplicates
+    if (point.isIntermediatePoint) {
+      continue;
+    }
+    
+    // Add land polygons to the journey
+    if (point.polygonId && point.polygonId !== currentLandId) {
+      currentLandId = point.polygonId;
+      journey.push({
+        type: 'land',
+        id: point.polygonId,
+        position: { lat: point.lat, lng: point.lng }
+      });
+    }
+    
+    // Add bridges to the journey
+    if (point.type === 'bridge' && point.nodeId) {
+      journey.push({
+        type: 'bridge',
+        id: point.nodeId,
+        position: { lat: point.lat, lng: point.lng }
+      });
+    }
+    
+    // Add docks to the journey
+    if (point.type === 'canal' && point.nodeId) {
+      journey.push({
+        type: 'dock',
+        id: point.nodeId,
+        position: { lat: point.lat, lng: point.lng }
+      });
+    }
+  }
+  
+  return journey;
+}
+
 // Helper function to calculate the total distance of a path in meters
 function calculatePathDistance(path: {lat: number, lng: number}[]): number {
   let totalDistance = 0;
@@ -167,6 +215,10 @@ export async function POST(request: Request) {
         durationSeconds: travelTimeSeconds,
         distanceMeters: distance
       };
+      
+      // Extract journey information from the path
+      const journey = extractJourneyFromPath(result.path);
+      result.journey = journey;
     }
     
     return NextResponse.json(result);
