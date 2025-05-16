@@ -371,6 +371,14 @@ def send_public_sell_strategy_request(ai_username: str, data_package: Dict) -> O
         print(f"User has {data_package['user']['ducats']} ducats")
         print(f"User has {data_package['user']['sellable_buildings']} buildings that can sell resources")
         
+        # Log the complete message and system instructions
+        print("\n" + "="*80)
+        print("COMPLETE PROMPT SENT TO AI:")
+        print(prompt)
+        print("\nCOMPLETE SYSTEM INSTRUCTIONS SENT TO AI:")
+        print(system_instructions)
+        print("="*80 + "\n")
+        
         # Create a detailed prompt that addresses the AI directly as the decision-maker
         prompt = f"""
 As a merchant in La Serenissima, you need to decide which resources to sell publicly.
@@ -471,10 +479,11 @@ If you decide not to make any changes, return empty arrays.
                 content = response_data.get('response', '')
                 
                 # Log the entire response for debugging
-                print(f"FULL AI RESPONSE FROM {ai_username}:")
-                print("="*80)
+                print(f"\n{'='*80}")
+                print(f"COMPLETE AI RESPONSE FROM {ai_username}:")
+                print(f"{'='*80}")
                 print(content)
-                print("="*80)
+                print(f"{'='*80}\n")
                 
                 # Try to extract the JSON decision from the response
                 try:
