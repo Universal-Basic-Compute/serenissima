@@ -346,6 +346,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   };
   
   const handleCloseDetails = () => {
+    console.log('handleCloseDetails called in CitizenMarkers');
     setSelectedCitizen(null);
     setSelectedCitizenPaths([]);
   };
@@ -610,7 +611,11 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
       {selectedCitizen && (
         <CitizenDetailsPanel 
           citizen={selectedCitizen} 
-          onClose={handleCloseDetails} 
+          onClose={() => {
+            console.log('onClose callback executed from CitizenMarkers');
+            setSelectedCitizen(null);
+            setSelectedCitizenPaths([]);
+          }} 
         />
       )}
     </>

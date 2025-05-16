@@ -112,15 +112,13 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     };
   }, [citizen]);
   
-  const handleClose = () => {
-    console.log('Close button clicked'); // Add logging to debug
-    // Animate out before closing
-    setIsVisible(false);
-    // Use a shorter timeout to make the closing more responsive
-    setTimeout(() => {
-      console.log('Executing onClose callback');
-      onClose();
-    }, 100); // Reduced from 200ms to 100ms for faster response
+  const handleClose = (e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
+    console.log('Close function called directly');
+    // Skip animation and close immediately
+    onClose();
   };
   
   const formatDucats = (amount: number | string) => {
@@ -268,15 +266,29 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
       className={`fixed top-20 right-4 bg-amber-50 border-2 border-amber-700 rounded-lg p-6 shadow-lg max-w-md z-50 transition-all duration-300 pointer-events-auto ${
         isVisible ? 'opacity-100 transform translate-x-0' : 'opacity-0 transform translate-x-10'
       }`}
-      style={{ pointerEvents: 'auto' }} // Explicitly set pointer-events to auto
+      style={{ pointerEvents: 'auto', cursor: 'default' }} // Explicitly set pointer-events to auto and cursor to default
     >
+      {/* Emergency close button */}
+      <button 
+        onClick={onClose}
+        className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full z-50 cursor-pointer"
+        style={{ cursor: 'pointer' }}
+      >
+        X
+      </button>
+      
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-serif text-amber-800">
           {citizen.firstname} {citizen.lastname}
         </h2>
         <button 
-          onClick={handleClose}
-          className="text-amber-600 hover:text-amber-800 hover:bg-amber-100 transition-colors p-3 rounded-full" // Increased padding, added hover background
+          onClick={(e) => {
+            e.stopPropagation(); // Stop event propagation
+            console.log('Close button clicked with event:', e);
+            handleClose();
+          }}
+          className="text-amber-600 hover:text-amber-800 hover:bg-amber-100 transition-colors p-3 rounded-full cursor-pointer" // Add cursor-pointer explicitly
+          style={{ cursor: 'pointer' }} // Add inline style for cursor
           aria-label="Close"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
