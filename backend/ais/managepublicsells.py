@@ -371,14 +371,6 @@ def send_public_sell_strategy_request(ai_username: str, data_package: Dict) -> O
         print(f"User has {data_package['user']['ducats']} ducats")
         print(f"User has {data_package['user']['sellable_buildings']} buildings that can sell resources")
         
-        # Log the complete message and system instructions
-        print("\n" + "="*80)
-        print("COMPLETE PROMPT SENT TO AI:")
-        print(prompt)
-        print("\nCOMPLETE SYSTEM INSTRUCTIONS SENT TO AI:")
-        print(system_instructions)
-        print("="*80 + "\n")
-        
         # Create a detailed prompt that addresses the AI directly as the decision-maker
         prompt = f"""
 As a merchant in La Serenissima, you need to decide which resources to sell publicly.
@@ -449,6 +441,14 @@ IMPORTANT: You must end your response with a JSON object containing your specifi
 Include both contracts_to_create and contracts_to_end arrays with the required information for each.
 If you decide not to make any changes, return empty arrays.
 """
+        
+        # Log the complete message and system instructions
+        print("\n" + "="*80)
+        print("COMPLETE PROMPT SENT TO AI:")
+        print(prompt)
+        print("\nCOMPLETE SYSTEM INSTRUCTIONS SENT TO AI:")
+        print(system_instructions)
+        print("="*80 + "\n")
         
         # Prepare the request payload
         payload = {
