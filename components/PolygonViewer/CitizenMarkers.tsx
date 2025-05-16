@@ -74,6 +74,8 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   const [animationActive, setAnimationActive] = useState<boolean>(true);
   const animationFrameRef = useRef<number | null>(null);
   const lastFrameTimeRef = useRef<number>(0);
+  // Add a new state to track initialization status
+  const [positionsInitialized, setPositionsInitialized] = useState<boolean>(false);
   
   // Helper function to convert lat/lng to screen coordinates
   const latLngToScreen = (lat: number, lng: number) => {
@@ -716,6 +718,9 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     setAnimatedCitizens(initialAnimatedCitizens);
     console.log(`Initialized ${Object.keys(initialAnimatedCitizens).length} animated citizens`);
     
+    // Set the positions initialized flag to true
+    setPositionsInitialized(true);
+    
     // Start animation loop
     if (animationActive && Object.keys(initialAnimatedCitizens).length > 0) {
       if (animationFrameRef.current) {
@@ -779,6 +784,15 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   };
   
   if (!isVisible) return null;
+  
+  // Don't render anything until positions are initialized
+  if (!positionsInitialized && Object.keys(activityPaths).length > 0) {
+    return (
+      <div className="absolute top-20 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-lg">
+        Calculating citizen positions...
+      </div>
+    );
+  }
   
   return (
     <>
