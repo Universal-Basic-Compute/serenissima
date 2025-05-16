@@ -799,11 +799,11 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     }
   };
   
-  const handleCloseDetails = () => {
+  const handleCloseDetails = useCallback(() => {
     console.log('handleCloseDetails called in CitizenMarkers');
     setSelectedCitizen(null);
     setSelectedCitizenPaths([]);
-  };
+  }, []);
   
   if (!isVisible || activeView === 'land') return null;
   

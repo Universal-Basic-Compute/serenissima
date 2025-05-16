@@ -20,13 +20,18 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
   const fetchCitizenActivities = async (citizenId: string) => {
     if (!citizenId) return;
     
+    // Use a flag to prevent state updates after unmounting
+    let isMounted = true;
+    
     setIsLoadingActivities(true);
     try {
       const response = await fetch(`/api/activities?citizenId=${citizenId}&limit=10`);
       if (response.ok) {
         const data = await response.json();
-        setActivities(data.activities || []);
-        console.log(`Loaded ${data.activities?.length || 0} activities for citizen ${citizenId}`);
+        if (isMounted) {
+          setActivities(data.activities || []);
+          console.log(`Loaded ${data.activities?.length || 0} activities for citizen ${citizenId}`);
+        }
       } else {
         // Change from console.error to console.warn for 404 responses
         if (response.status === 404) {
@@ -34,14 +39,24 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
         } else {
           console.warn(`Failed to fetch activities for citizen ${citizenId}: ${response.status} ${response.statusText}`);
         }
-        setActivities([]);
+        if (isMounted) {
+          setActivities([]);
+        }
       }
     } catch (error) {
       console.warn('Error fetching citizen activities:', error);
-      setActivities([]);
+      if (isMounted) {
+        setActivities([]);
+      }
     } finally {
-      setIsLoadingActivities(false);
+      if (isMounted) {
+        setIsLoadingActivities(false);
+      }
     }
+    
+    return () => {
+      isMounted = false;
+    };
   };
   
   useEffect(() => {
@@ -101,17 +116,20 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
       }
     };
     
-    fetchBuildingDetails();
+    // Use a flag to prevent multiple fetches
+    let isMounted = true;
     
-    // Fetch citizen activities
-    if (citizen && citizen.citizenid) {
+    // Only fetch data if we have a valid citizen
+    if (citizen && citizen.citizenid && isMounted) {
+      fetchBuildingDetails();
       fetchCitizenActivities(citizen.citizenid);
     }
     
     return () => {
+      isMounted = false;
       window.removeEventListener('keydown', handleEscKey);
     };
-  }, [citizen, onClose]);
+  }, [citizen, onClose]); // Only depend on citizen and onClose
   
   
   const formatDucats = (amount: number | string) => {
