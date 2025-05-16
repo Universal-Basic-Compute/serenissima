@@ -43,7 +43,8 @@ export async function GET(request: Request) {
                   position = JSON.parse(fields.Position);
                 } else if (fields.Point) {
                   // Extract position from Point field (format: type_lat_lng)
-                  const parts = String(fields.Point).split('_');
+                  const pointValue = String(fields.Point);
+                  const parts = pointValue.split('_');
                   if (parts.length >= 3) {
                     const lat = parseFloat(parts[1]);
                     const lng = parseFloat(parts[2]);
