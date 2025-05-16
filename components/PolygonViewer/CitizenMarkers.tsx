@@ -1020,8 +1020,8 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
         </svg>
       )}
       
-      {/* Activity Paths - Modified to show remaining portions of paths */}
-      {((activeView === 'citizens' && visiblePaths.length > 0) || hoveredCitizenPaths.length > 0 || selectedCitizenPaths.length > 0) && (
+      {/* Activity Paths - Modified to show in all views except land */}
+      {((activeView !== 'land' && visiblePaths.length > 0) || hoveredCitizenPaths.length > 0 || selectedCitizenPaths.length > 0) && (
         <svg 
           className="absolute inset-0 pointer-events-none" 
           style={{ 
@@ -1033,7 +1033,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
         >
           {/* Debug text to confirm the SVG is rendering */}
           <text x="20" y="40" fill="red" fontSize="12">
-            Paths: {hoveredCitizenPaths.length} hovered, {selectedCitizenPaths.length} selected, {activeView === 'citizens' ? visiblePaths.length : 0} visible
+            Paths: {hoveredCitizenPaths.length} hovered, {selectedCitizenPaths.length} selected, {activeView !== 'land' ? visiblePaths.length : 0} visible
           </text>
           
           {/* Animation status indicator */}
@@ -1041,8 +1041,8 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
             Animation: {animationActive ? "Active" : "Paused"}
           </text>
           
-          {/* Render all paths when in citizens view */}
-          {activeView === 'citizens' && visiblePaths.map((activity) => {
+          {/* Render all paths when not in land view */}
+          {activeView !== 'land' && visiblePaths.map((activity) => {
             // Get the animated citizen for this path
             const animatedCitizen = Object.values(animatedCitizens).find(
               ac => ac.currentPath?.id === activity.id
@@ -1198,7 +1198,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
       )}
       
       {/* Animation Control Button */}
-      {activeView === 'citizens' && (
+      {activeView !== 'land' && (
         <button
           className="absolute bottom-20 left-20 bg-amber-600 text-white px-3 py-1 rounded text-sm flex items-center"
           onClick={toggleAnimation}
