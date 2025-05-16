@@ -30,7 +30,7 @@ const getResourceIconPath = (resourceId: string): string => {
   const formattedName = resourceId.toLowerCase().replace(/\s+/g, '_');
   
   // Create the path
-  const iconPath = `/assets/icons/resources/${formattedName}.png`;
+  const iconPath = `/images/resources/${formattedName}.png`;
   
   // Store in cache
   resourceIconCache.set(resourceId, iconPath);
@@ -597,8 +597,8 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                                     loading="lazy"
                                     unoptimized={true}
                                     onError={(e) => {
-                                      (e.target as HTMLImageElement).src = '/assets/icons/resources/default.png';
-                                      resourceIconCache.set(resource, '/assets/icons/resources/default.png');
+                                      (e.target as HTMLImageElement).src = '/images/resources/default.png';
+                                      resourceIconCache.set(resource, '/images/resources/default.png');
                                     }}
                                   />
                                 </div>
@@ -635,8 +635,8 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                                     loading="lazy"
                                     unoptimized={true}
                                     onError={(e) => {
-                                      (e.target as HTMLImageElement).src = '/assets/icons/resources/default.png';
-                                      resourceIconCache.set(resource, '/assets/icons/resources/default.png');
+                                      (e.target as HTMLImageElement).src = '/images/resources/default.png';
+                                      resourceIconCache.set(resource, '/images/resources/default.png');
                                     }}
                                   />
                                 </div>
@@ -680,8 +680,8 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                             unoptimized={true}
                             onError={(e) => {
                               // Fallback to a default icon if the image fails to load
-                              (e.target as HTMLImageElement).src = '/assets/icons/resources/default.png';
-                              resourceIconCache.set(resource, '/assets/icons/resources/default.png');
+                              (e.target as HTMLImageElement).src = '/images/resources/default.png';
+                              resourceIconCache.set(resource, '/images/resources/default.png');
                             }}
                           />
                         </div>
@@ -711,8 +711,8 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                             loading="lazy"
                             unoptimized={true}
                             onError={(e) => {
-                              (e.target as HTMLImageElement).src = '/assets/icons/resources/default.png';
-                              resourceIconCache.set(resource, '/assets/icons/resources/default.png');
+                              (e.target as HTMLImageElement).src = '/images/resources/default.png';
+                              resourceIconCache.set(resource, '/images/resources/default.png');
                             }}
                           />
                         </div>
@@ -744,9 +744,9 @@ export default function BuildingDetailsPanel({ selectedBuildingId, onClose, visi
                             unoptimized={true}
                             onError={(e) => {
                               // Fallback to a default icon if the image fails to load
-                              (e.target as HTMLImageElement).src = '/assets/icons/resources/default.png';
+                              (e.target as HTMLImageElement).src = '/images/resources/default.png';
                               // Also update the cache to prevent future attempts
-                              resourceIconCache.set(resource, '/assets/icons/resources/default.png');
+                              resourceIconCache.set(resource, '/images/resources/default.png');
                             }}
                           />
                         </div>
