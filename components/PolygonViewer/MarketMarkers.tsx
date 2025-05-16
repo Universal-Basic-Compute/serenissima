@@ -1,0 +1,379 @@
+import { useState, useEffect, useCallback } from 'react';
+import { contractService, Contract } from '@/lib/services/ContractService';
+import { hoverStateService } from '@/lib/services/HoverStateService';
+
+interface MarketMarkersProps {
+  isVisible: boolean;
+  scale: number;
+  offset: { x: number, y: number };
+  canvasWidth: number;
+  canvasHeight: number;
+}
+
+export default function MarketMarkers({ 
+  isVisible, 
+  scale, 
+  offset, 
+  canvasWidth, 
+  canvasHeight 
+}: MarketMarkersProps) {
+  const [contracts, setContracts] = useState<Contract[]>([]);
+  const [contractsByLocation, setContractsByLocation] = useState<Record<string, Contract[]>>({});
+  const [hoveredLocation, setHoveredLocation] = useState<string | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentUsername, setCurrentUsername] = useState<string | null>(null);
+  
+  // Function to get the current user's username
+  const getCurrentUsername = useCallback(() => {
+    return contractService.getCurrentUsername();
+  }, []);
+
+  // Handle mouse enter for contract location
+  const handleMouseEnter = useCallback((locationKey: string, locationContracts: Contract[]) => {
+    setHoveredLocation(locationKey);
+    
+    // Use HoverStateService to set resource hover state
+    // Create a unique ID for this contract group
+    const contractIds = locationContracts.map(c => c.contractId).join('_');
+    hoverStateService.setHoveredResource(contractIds, {
+      locationKey,
+      resources: locationContracts.map(contract => ({
+        id: contract.contractId,
+        name: contract.resourceType,
+        category: 'Market Contract',
+        description: `${contract.type === 'public_sell' ? 'Public Sell' : contract.seller === currentUsername ? 'Your Sell' : 'Your Buy'} Contract`,
+        icon: 'contract.png',
+        amount: contract.amount,
+        owner: contract.seller,
+        buildingId: contract.sellerBuilding,
+        location: contract.location,
+        rarity: 'common',
+        contractType: contract.type,
+        price: contract.price
+      })),
+      position: locationContracts[0].location
+    });
+  }, [currentUsername]);
+  
+  // Handle mouse leave for contract location
+  const handleMouseLeave = useCallback(() => {
+    setHoveredLocation(null);
+    hoverStateService.clearHoveredResource();
+  }, []);
+  
+  // Load contracts when component becomes visible
+  useEffect(() => {
+    if (isVisible) {
+      loadContracts();
+      
+      // Get current username
+      const username = getCurrentUsername();
+      setCurrentUsername(username);
+    }
+  }, [isVisible, getCurrentUsername]);
+  
+  // Function to load contracts
+  const loadContracts = async () => {
+    try {
+      setIsLoading(true);
+      
+      // Get current username
+      const username = getCurrentUsername();
+      
+      // Fetch contracts
+      const allContracts = await contractService.getContracts(username);
+      
+      // Filter contracts that have location data
+      const contractsWithLocation = allContracts.filter(
+        contract => contract.location && contract.location.lat && contract.location.lng
+      );
+      
+      setContracts(contractsWithLocation);
+      
+      // Group contracts by location
+      const groupedContracts: Record<string, Contract[]> = {};
+      contractsWithLocation.forEach(contract => {
+        if (!contract.location) return;
+        
+        const locationKey = `${contract.location.lat.toFixed(6)}_${contract.location.lng.toFixed(6)}`;
+        if (!groupedContracts[locationKey]) {
+          groupedContracts[locationKey] = [];
+        }
+        groupedContracts[locationKey].push(contract);
+      });
+      
+      setContractsByLocation(groupedContracts);
+      console.log(`Loaded ${contractsWithLocation.length} contracts with location data`);
+      console.log(`Grouped into ${Object.keys(groupedContracts).length} unique locations`);
+    } catch (error) {
+      console.error('Error loading contracts for map:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Convert lat/lng to screen coordinates
+  const latLngToScreen = useCallback((lat: number, lng: number): { x: number, y: number } => {
+    // Convert lat/lng to world coordinates
+    const x = (lng - 12.3326) * 20000;
+    const y = (lat - 45.4371) * 20000;
+    
+    // Apply isometric projection
+    return {
+      x: x * scale + canvasWidth / 2 + offset.x,
+      y: (-y) * scale * 1.4 + canvasHeight / 2 + offset.y
+    };
+  }, [scale, offset, canvasWidth, canvasHeight]);
+  
+  // Filter contracts by category
+  const filteredContractsByLocation = useCallback(() => {
+    if (!categoryFilter) return contractsByLocation;
+    
+    const filtered: Record<string, Contract[]> = {};
+    
+    Object.entries(contractsByLocation).forEach(([locationKey, locationContracts]) => {
+      const filteredContracts = locationContracts.filter(
+        contract => {
+          if (categoryFilter === 'public_sell') {
+            return contract.type === 'public_sell';
+          } else if (categoryFilter === 'user_sell') {
+            return contract.seller === currentUsername;
+          } else if (categoryFilter === 'user_buy') {
+            return contract.buyer === currentUsername;
+          }
+          return true;
+        }
+      );
+      
+      if (filteredContracts.length > 0) {
+        filtered[locationKey] = filteredContracts;
+      }
+    });
+    
+    return filtered;
+  }, [contractsByLocation, categoryFilter, currentUsername]);
+  
+  // If not visible, don't render anything
+  if (!isVisible) return null;
+  
+  return (
+    <div className="absolute inset-0 pointer-events-none">
+      {/* Filter controls - make this part pointer-events-auto */}
+      <div className="absolute bottom-4 left-20 bg-black/70 rounded-lg p-2 pointer-events-auto z-50">
+        <div className="flex justify-between items-center mb-2">
+          <div className="text-white text-sm">Filter by Contract Type:</div>
+          <button 
+            className="text-amber-400 hover:text-amber-300 px-2 py-1 rounded"
+            onClick={loadContracts}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <span className="flex items-center">
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Refreshing...
+              </span>
+            ) : (
+              <span>Refresh</span>
+            )}
+          </button>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button 
+            className={`px-2 py-1 text-xs rounded ${!categoryFilter ? 'bg-amber-600' : 'bg-gray-700'}`}
+            onClick={() => setCategoryFilter(null)}
+          >
+            All
+          </button>
+          <button 
+            className={`px-2 py-1 text-xs rounded ${categoryFilter === 'public_sell' ? 'bg-amber-600' : 'bg-gray-700'}`}
+            onClick={() => setCategoryFilter('public_sell')}
+          >
+            Public Sells
+          </button>
+          <button 
+            className={`px-2 py-1 text-xs rounded ${categoryFilter === 'user_sell' ? 'bg-amber-600' : 'bg-gray-700'}`}
+            onClick={() => setCategoryFilter('user_sell')}
+          >
+            My Sells
+          </button>
+          <button 
+            className={`px-2 py-1 text-xs rounded ${categoryFilter === 'user_buy' ? 'bg-amber-600' : 'bg-gray-700'}`}
+            onClick={() => setCategoryFilter('user_buy')}
+          >
+            My Buys
+          </button>
+        </div>
+      </div>
+      
+      {Object.entries(filteredContractsByLocation()).map(([locationKey, locationContracts]) => {
+        // Parse location from key
+        const [lat, lng] = locationKey.split('_').map(parseFloat);
+        const { x, y } = latLngToScreen(lat, lng);
+        
+        // Determine if this location is being hovered
+        const isHovered = hoveredLocation === locationKey;
+        
+        // Calculate total contracts at this location
+        const totalContracts = locationContracts.length;
+        
+        // Get the first contract to determine the resource type
+        const firstContract = locationContracts[0];
+        const resourceType = firstContract.resourceType;
+        
+        return (
+          <div 
+            key={locationKey}
+            className="absolute pointer-events-auto"
+            style={{ 
+              left: `${x}px`, 
+              top: `${y}px`, 
+              transform: 'translate(-50%, -50%)',
+              zIndex: isHovered ? 50 : 40
+            }}
+            onMouseEnter={() => handleMouseEnter(locationKey, locationContracts)}
+            onMouseLeave={() => handleMouseLeave()}
+          >
+            {isHovered ? (
+              // Expanded view when hovered - show all contracts
+              <div className="relative">
+                {locationContracts.map((contract, index) => {
+                  // Determine border color based on contract type
+                  let borderColor = '#d97706'; // Default amber color
+                  
+                  if (contract.type === 'public_sell') {
+                    borderColor = '#10B981'; // Green for public sells
+                  } else if (contract.seller === currentUsername) {
+                    borderColor = '#3B82F6'; // Blue for user sells
+                  } else if (contract.buyer === currentUsername) {
+                    borderColor = '#EF4444'; // Red for user buys
+                  }
+                  
+                  return (
+                    <div 
+                      key={contract.contractId}
+                      className="absolute bg-amber-800 rounded-lg overflow-hidden flex flex-col items-center justify-center shadow-lg"
+                      style={{ 
+                        width: '96px', // Smaller size
+                        height: '120px',
+                        left: `${Math.cos(2 * Math.PI * index / locationContracts.length) * 120}px`,
+                        top: `${Math.sin(2 * Math.PI * index / locationContracts.length) * 120}px`,
+                        transition: 'all 0.3s ease-out',
+                        borderWidth: '2px',
+                        borderColor: borderColor
+                      }}
+                    >
+                      <div className="relative w-full h-full group">
+                        {/* Image container with rounded corners */}
+                        <div className="w-full h-[96px] flex items-center justify-center p-2">
+                          <img 
+                            src={`/images/resources/${resourceType.toLowerCase().replace(/\s+/g, '_')}.png`}
+                            alt={resourceType}
+                            className="w-full h-full object-contain"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/images/resources/default.png';
+                            }}
+                          />
+                        </div>
+                          
+                        {/* Resource name below the image */}
+                        <div className="w-full h-[24px] flex items-center justify-center bg-amber-900/80 text-white text-[12px] px-2 truncate">
+                          {resourceType}
+                        </div>
+                          
+                        {/* Price badge */}
+                        <div className="absolute -bottom-1 -right-1 bg-amber-600 text-white text-base rounded-full w-6 h-6 flex items-center justify-center">
+                          {contract.price}
+                        </div>
+                          
+                        {/* Detailed tooltip */}
+                        <div className="absolute opacity-0 group-hover:opacity-100 bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-3 bg-black/90 text-white text-xs rounded w-56 pointer-events-none transition-opacity z-50">
+                          <div className="font-bold text-amber-300 text-base">{resourceType}</div>
+                          <div className="mt-1 text-xs">
+                            {contract.type === 'public_sell' ? 'Public Sell Contract' : 
+                             contract.seller === currentUsername ? 'Your Sell Contract' : 'Your Buy Contract'}
+                          </div>
+                          <div className="mt-1 flex justify-between">
+                            <span>Price: {contract.price} ⚜️</span>
+                            <span>Amount: {contract.amount}</span>
+                          </div>
+                          <div className="mt-1 text-xs">
+                            Seller: {contract.seller}
+                          </div>
+                          {contract.buyer && (
+                            <div className="mt-1 text-xs">
+                              Buyer: {contract.buyer}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+                
+                {/* Center indicator */}
+                <div className="w-8 h-8 bg-amber-700 border border-amber-500 rounded-full flex items-center justify-center text-white text-sm font-bold" style={{ borderWidth: '1px' }}>
+                  {locationContracts.length}
+                </div>
+              </div>
+            ) : (
+              // Collapsed view - show stack of contracts
+              <div className="relative">
+                {/* Stacked contracts indicator */}
+                <div className="relative">
+                  {/* Show up to 3 stacked icons */}
+                  {locationContracts.slice(0, Math.min(3, locationContracts.length)).map((contract, index) => {
+                    // Determine border color based on contract type
+                    let borderColor = '#d97706'; // Default amber color
+                    
+                    if (contract.type === 'public_sell') {
+                      borderColor = '#10B981'; // Green for public sells
+                    } else if (contract.seller === currentUsername) {
+                      borderColor = '#3B82F6'; // Blue for user sells
+                    } else if (contract.buyer === currentUsername) {
+                      borderColor = '#EF4444'; // Red for user buys
+                    }
+                    
+                    return (
+                      <div 
+                        key={contract.contractId}
+                        className="absolute bg-amber-800 rounded-lg overflow-hidden"
+                        style={{ 
+                          width: '54px', // Smaller size
+                          height: '54px',
+                          left: `${index * 9}px`,
+                          top: `${-index * 9}px`,
+                          zIndex: 40 - index,
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+                          borderWidth: '2px',
+                          borderColor: borderColor
+                        }}
+                      >
+                        <img 
+                          src={`/images/resources/${resourceType.toLowerCase().replace(/\s+/g, '_')}.png`}
+                          alt={resourceType}
+                          className="w-full h-full object-contain p-2"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/images/resources/default.png';
+                          }}
+                        />
+                      </div>
+                    );
+                  })}
+                  
+                  {/* Count badge */}
+                  <div className="absolute -bottom-1 -right-1 bg-amber-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {totalContracts}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}

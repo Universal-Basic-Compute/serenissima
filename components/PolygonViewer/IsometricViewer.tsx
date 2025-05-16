@@ -12,6 +12,7 @@ import BuildingDetailsPanel from './BuildingDetailsPanel';
 import CitizenDetailsPanel from '../UI/CitizenDetailsPanel';
 import CitizenMarkers from './CitizenMarkers';
 import ResourceMarkers from './ResourceMarkers';
+import MarketMarkers from './MarketMarkers';
 import { HoverTooltip } from '../UI/HoverTooltip';
 import TransportDebugPanel from '../UI/TransportDebugPanel';
 import TransportErrorMessage from '../UI/TransportErrorMessage';
@@ -3133,7 +3134,16 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         canvasWidth={canvasRef.current?.width || window.innerWidth}
         canvasHeight={canvasRef.current?.height || window.innerHeight}
       />
-      
+    
+      {/* Market Markers */}
+      <MarketMarkers 
+        isVisible={activeView === 'markets'} 
+        scale={scale}
+        offset={offset}
+        canvasWidth={canvasRef.current?.width || window.innerWidth}
+        canvasHeight={canvasRef.current?.height || window.innerHeight}
+      />
+    
       {/* Add the hover tooltip */}
       <HoverTooltip />
       

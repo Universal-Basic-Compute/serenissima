@@ -4,6 +4,25 @@ import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 import { buildingService } from '@/lib/services/BuildingService';
 import { assetService } from '@/lib/services/AssetService';
 
+// Helper function to get current username
+const getCurrentUsername = (): string | null => {
+  try {
+    if (typeof window === 'undefined') return null;
+    
+    const profileStr = localStorage.getItem('userProfile');
+    if (profileStr) {
+      const profile = JSON.parse(profileStr);
+      if (profile && profile.username) {
+        return profile.username;
+      }
+    }
+    return null;
+  } catch (error) {
+    console.error('Error getting current username:', error);
+    return null;
+  }
+};
+
 interface HoverTooltipProps {
   // Any props you need
 }
