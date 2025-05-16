@@ -850,7 +850,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                 left: `${position.x}px`,
                 top: `${position.y}px`,
                 transform: 'translate(-50%, -50%)',
-                zIndex: 50,
+                zIndex: 30,
                 position: 'absolute', // Ensure absolute positioning works
                 transition: 'none' // Remove transition to avoid lag
               }}
@@ -920,7 +920,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                 left: `${position.x}px`,
                 top: `${position.y}px`,
                 transform: 'translate(-50%, -50%)',
-                zIndex: 50,
+                zIndex: 30,
                 position: 'absolute', // Ensure absolute positioning works
                 transition: 'none' // Remove transition to avoid lag
               }}
@@ -948,7 +948,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
       
       {/* Connection lines to home and work when hovering */}
       {hoveredConnections && hoveredConnections.citizen && hoveredConnections.citizen.position && (
-        <svg className="absolute inset-0 pointer-events-none" style={{ zIndex: 45, width: canvasWidth, height: canvasHeight }}>
+        <svg className="absolute inset-0 pointer-events-none" style={{ zIndex: 25, width: canvasWidth, height: canvasHeight }}>
           {/* Debug info - add this to see if the SVG is rendering */}
           <text x="20" y="20" fill="red" fontSize="12">
             Hover connections active: {hoveredConnections.homePosition ? 'Home' : ''} {hoveredConnections.workPosition ? 'Work' : ''}
@@ -1025,7 +1025,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
         <svg 
           className="absolute inset-0 pointer-events-none" 
           style={{ 
-            zIndex: 40, 
+            zIndex: 20, 
             width: canvasWidth, 
             height: canvasHeight,
             overflow: 'visible' // Add this to ensure paths aren't clipped
@@ -1200,7 +1200,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
       {/* Animation Control Button */}
       {activeView !== 'land' && (
         <button
-          className="absolute bottom-20 left-20 bg-amber-600 text-white px-3 py-1 rounded text-sm flex items-center"
+          className="absolute bottom-20 left-20 bg-amber-600 text-white px-3 py-1 rounded text-sm flex items-center z-50"
           onClick={toggleAnimation}
         >
           {animationActive ? (
