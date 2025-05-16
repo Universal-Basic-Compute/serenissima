@@ -185,7 +185,7 @@ export async function GET(request: Request) {
       }
       
       // Map citizens to the expected format
-      const citizens = citizenRecords.map(record => {     
+      let citizens = citizenRecords.map(record => {     
         try {
           // Ensure the citizen ID is a string
           const citizenId = record.fields.CitizenId ? 
