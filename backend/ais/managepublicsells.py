@@ -176,8 +176,7 @@ def get_recent_public_sell_contracts(tables, username: str, limit: int = 100) ->
         # 1. Type is public_sell
         # 2. Seller is not the current AI user
         # 3. Contract is active (between CreatedAt and EndAt)
-        # 4. Seller is not "Italia" (to exclude import contracts)
-        formula = f"AND({{Type}}='public_sell', {{Seller}}!='{username}', {{Seller}}!='Italia', {{CreatedAt}}<='{now}', {{EndAt}}>='{now}')"
+        formula = f"AND({{Type}}='public_sell', {{Seller}}!='{username}', {{CreatedAt}}<='{now}', {{EndAt}}>='{now}')"
         
         # Get the contracts and sort by created date descending
         contracts = tables["contracts"].all(formula=formula)
@@ -392,8 +391,8 @@ After your analysis, provide your decisions in this JSON format:
 {{
   "contracts_to_create": [
     {{
-      "building_id": "building-id-1",
-      "resource_type": "resource-type-1",
+      "building_id": "building_id_1",
+      "resource_type": "resource_type_1",
       "hourly_amount": 10,
       "price_per_resource": 15,
       "reason": "brief explanation"
@@ -401,7 +400,7 @@ After your analysis, provide your decisions in this JSON format:
   ],
   "contracts_to_end": [
     {{
-      "contract_id": "contract-id-1",
+      "contract_id": "contrac_id_1",
       "reason": "brief explanation"
     }}
   ]
