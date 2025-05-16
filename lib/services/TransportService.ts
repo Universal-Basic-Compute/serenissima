@@ -287,6 +287,17 @@ export class TransportService {
             path: data.path,
             waterOnly: this.waterOnlyMode
           });
+          
+          // Create a custom event with the path data
+          const routeEvent = new CustomEvent('TRANSPORT_ROUTE_CALCULATED', {
+            detail: {
+              path: data.path,
+              waterOnly: this.waterOnlyMode
+            }
+          });
+          
+          // Dispatch the event
+          window.dispatchEvent(routeEvent);
         } else {
           console.error('Failed to calculate route:', data.error);
           
@@ -321,6 +332,17 @@ export class TransportService {
                   path: waterData.path,
                   waterOnly: true
                 });
+                
+                // Create a custom event with the path data
+                const routeEvent = new CustomEvent('TRANSPORT_ROUTE_CALCULATED', {
+                  detail: {
+                    path: waterData.path,
+                    waterOnly: true
+                  }
+                });
+                
+                // Dispatch the event
+                window.dispatchEvent(routeEvent);
                 return;
               }
             }
@@ -368,6 +390,18 @@ export class TransportService {
             waterOnly: false,
             isEmergencyPath: true
           });
+          
+          // Create a custom event with the path data
+          const routeEvent = new CustomEvent('TRANSPORT_ROUTE_CALCULATED', {
+            detail: {
+              path: directPath,
+              waterOnly: false,
+              isEmergencyPath: true
+            }
+          });
+          
+          // Dispatch the event
+          window.dispatchEvent(routeEvent);
           
           return;
         }
