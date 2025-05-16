@@ -3152,7 +3152,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       )}
       
       {/* Building Details Panel */}
-      {showBuildingDetailsPanel && selectedBuildingId && (activeView === 'buildings' || activeView === 'land' || activeView === 'citizens') && (
+      {showBuildingDetailsPanel && selectedBuildingId && (
         <BuildingDetailsPanel
           selectedBuildingId={selectedBuildingId}
           onClose={() => {
