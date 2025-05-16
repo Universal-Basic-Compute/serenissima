@@ -85,67 +85,79 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     try {
       // Instead of fetching by citizen IDs, just get the most recent activities with paths
       const response = await fetch(`/api/activities?limit=100&hasPath=true`);
+      
+      if (response.ok) {
+        const data = await response.json();
         
-        if (response.ok) {
-          const data = await response.json();
+        if (data.activities && Array.isArray(data.activities)) {
+          // Process activities with paths
+          const pathsMap: Record<string, ActivityPath[]> = {};
+          const allPaths: ActivityPath[] = []; // Collect all paths in a single array
           
-          if (data.activities && Array.isArray(data.activities)) {
-            // Process activities with paths
-            data.activities.forEach((activity: any) => {
-              if (activity.Path) {
-                let path;
-                try {
-                  // Parse path if it's a string
-                  path = typeof activity.Path === 'string' ? JSON.parse(activity.Path) : activity.Path;
-                  
-                  // Log the parsed path for debugging
-                  console.log(`Parsed path for activity ${activity.ActivityId || 'unknown'}, citizen ${activity.CitizenId}:`, 
-                    path.length > 0 ? `${path.length} points, first: ${JSON.stringify(path[0])}` : 'empty path');
-                  
-                  // Skip activities without valid paths
-                  if (!Array.isArray(path) || path.length < 2) {
-                    console.warn(`Skipping invalid path for activity ${activity.ActivityId || 'unknown'}: not an array or too short`);
-                    return;
-                  }
-                  
-                  // Validate each point in the path
-                  const validPath = path.filter(point => 
-                    point && typeof point === 'object' && 
-                    'lat' in point && 'lng' in point &&
-                    typeof point.lat === 'number' && typeof point.lng === 'number'
-                  );
-                  
-                  if (validPath.length < 2) {
-                    console.warn(`Skipping path with insufficient valid points: ${validPath.length} valid out of ${path.length}`);
-                    return;
-                  }
-                  
-                  const citizenId = activity.CitizenId;
-                  
-                  if (!pathsMap[citizenId]) {
-                    pathsMap[citizenId] = [];
-                  }
-                  
-                  const activityPath = {
-                    id: activity.ActivityId || `activity-${Math.random()}`,
-                    citizenId,
-                    path: validPath, // Use the validated path
-                    type: activity.Type || 'unknown',
-                    startTime: activity.StartDate || activity.CreatedAt,
-                    endTime: activity.EndDate
-                  };
-                  
-                  pathsMap[citizenId].push(activityPath);
-                  allPaths.push(activityPath); // Add to the all paths array
-                } catch (e) {
-                  console.warn(`Failed to parse activity path for ${activity.ActivityId || 'unknown'}:`, e);
+          data.activities.forEach((activity: any) => {
+            if (activity.Path) {
+              let path;
+              try {
+                // Parse path if it's a string
+                path = typeof activity.Path === 'string' ? JSON.parse(activity.Path) : activity.Path;
+                
+                // Log the parsed path for debugging
+                console.log(`Parsed path for activity ${activity.ActivityId || 'unknown'}, citizen ${activity.CitizenId}:`, 
+                  path.length > 0 ? `${path.length} points, first: ${JSON.stringify(path[0])}` : 'empty path');
+                
+                // Skip activities without valid paths
+                if (!Array.isArray(path) || path.length < 2) {
+                  console.warn(`Skipping invalid path for activity ${activity.ActivityId || 'unknown'}: not an array or too short`);
                   return;
                 }
+                
+                // Validate each point in the path
+                const validPath = path.filter(point => 
+                  point && typeof point === 'object' && 
+                  'lat' in point && 'lng' in point &&
+                  typeof point.lat === 'number' && typeof point.lng === 'number'
+                );
+                
+                if (validPath.length < 2) {
+                  console.warn(`Skipping path with insufficient valid points: ${validPath.length} valid out of ${path.length}`);
+                  return;
+                }
+                
+                const citizenId = activity.CitizenId;
+                
+                if (!pathsMap[citizenId]) {
+                  pathsMap[citizenId] = [];
+                }
+                
+                const activityPath = {
+                  id: activity.ActivityId || `activity-${Math.random()}`,
+                  citizenId,
+                  path: validPath, // Use the validated path
+                  type: activity.Type || 'unknown',
+                  startTime: activity.StartDate || activity.CreatedAt,
+                  endTime: activity.EndDate
+                };
+                
+                pathsMap[citizenId].push(activityPath);
+                allPaths.push(activityPath); // Add to the all paths array
+              } catch (e) {
+                console.warn(`Failed to parse activity path for ${activity.ActivityId || 'unknown'}:`, e);
+                return;
               }
-            });
+            }
+          });
+          
+          console.log(`Loaded activity paths for ${Object.keys(pathsMap).length} citizens, total paths: ${allPaths.length}`);
+          setActivityPaths(pathsMap);
+          setVisiblePaths(allPaths); // Set all paths to be visible
+          
+          // Log the first few paths for debugging
+          if (allPaths.length > 0) {
+            console.log('Sample paths:', allPaths.slice(0, 3));
           }
         }
       }
+    }
       
       console.log(`Loaded activity paths for ${Object.keys(pathsMap).length} citizens, total paths: ${allPaths.length}`);
       setActivityPaths(pathsMap);
