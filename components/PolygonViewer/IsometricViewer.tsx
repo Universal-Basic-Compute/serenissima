@@ -144,8 +144,6 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [calculatingPath, setCalculatingPath] = useState<boolean>(false);
   const [waterOnlyMode, setWaterOnlyMode] = useState<boolean>(false);
   const [pathfindingMode, setPathfindingMode] = useState<'all' | 'real'>('real'); // Default to 'real' mode
-  const [landGroups, setLandGroups] = useState<Record<string, string>>({});
-  const [landGroupColors, setLandGroupColors] = useState<Record<string, string>>({});
   
   // This is a duplicate function definition - removing it
 
