@@ -1445,7 +1445,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
               },
               body: JSON.stringify({
                 startPoint: start,
-                endPoint: end
+                endPoint: end,
+                pathfindingMode: mode || 'real'
               }),
             });
             
