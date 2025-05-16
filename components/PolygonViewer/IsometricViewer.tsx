@@ -3111,6 +3111,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
       />
       
+      {/* Transport Error Message */}
+      <TransportErrorMessage />
+      
       {/* Citizen Markers */}
       <CitizenMarkers 
         isVisible={activeView === 'citizens'} 

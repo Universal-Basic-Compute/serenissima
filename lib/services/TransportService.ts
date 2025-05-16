@@ -350,8 +350,12 @@ export class TransportService {
           if (data.error === 'Start or end point is not within any polygon') {
             console.log('Points not within polygons, attempting water-only pathfinding');
             
-            // Show a message to the user
-            alert('Points are not on land. Attempting to find a water route...');
+            // Dispatch event instead of showing alert
+            eventBus.emit(EventTypes.TRANSPORT_ROUTE_ERROR, {
+              error: 'Points are not on land',
+              detail: 'Attempting to find a water route...',
+              severity: 'warning'
+            });
             
             // Make a direct request to the water-only pathfinding endpoint
             const waterResponse = await fetch(`${baseUrl}/api/transport/water-only`, {
@@ -394,16 +398,24 @@ export class TransportService {
           }
           
           // If we get here, both regular and water-only pathfinding failed
-          alert(`Could not find a route: ${data.error || 'Unknown error'}`);
+          // Dispatch event instead of showing alert
+          eventBus.emit(EventTypes.TRANSPORT_ROUTE_ERROR, {
+            error: 'No path could be found',
+            detail: data.error || 'Unknown error',
+            severity: 'error'
+          });
           // Reset end point to allow trying again
           this.transportEndPoint = null;
-          eventBus.emit(EventTypes.TRANSPORT_ROUTE_ERROR, data.error || 'Unknown error');
         }
       } else {
         console.error('API error:', response.status);
-        alert('Error calculating route. Please try again.');
+        // Dispatch event instead of showing alert
+        eventBus.emit(EventTypes.TRANSPORT_ROUTE_ERROR, {
+          error: 'Error calculating route',
+          detail: 'Please try again. API error: ' + response.status,
+          severity: 'error'
+        });
         this.transportEndPoint = null;
-        eventBus.emit(EventTypes.TRANSPORT_ROUTE_ERROR, 'API error: ' + response.status);
       }
     } catch (error) {
       console.error('Error calculating transport route:', error);
@@ -411,10 +423,13 @@ export class TransportService {
       // No fallback path creation - just log the error
       console.error('Error calculating transport route - no path could be found:', error);
       
-      // If all else fails, show error and reset
-      alert('Error calculating route. Please try again.');
+      // If all else fails, dispatch error event and reset
+      eventBus.emit(EventTypes.TRANSPORT_ROUTE_ERROR, {
+        error: 'Error calculating route',
+        detail: 'Please try again. ' + (error instanceof Error ? error.message : String(error)),
+        severity: 'error'
+      });
       this.transportEndPoint = null;
-      eventBus.emit(EventTypes.TRANSPORT_ROUTE_ERROR, error);
     } finally {
       // Set calculating state to false to hide loading indicator
       this.calculatingPath = false;
