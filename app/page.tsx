@@ -436,8 +436,7 @@ export default function TwoDPage() {
 
   // State for loan panel
   const [showLoanPanel, setShowLoanPanel] = useState<boolean>(false);
-  // State for transport debug panel
-  const [showTransportDebugPanel, setShowTransportDebugPanel] = useState<boolean>(false);
+  // Transport debug panel state is now handled within IsometricViewer component
   
   // Handle loan panel closing
   const handleLoanPanelClose = () => {
@@ -446,10 +445,7 @@ export default function TwoDPage() {
     setActiveView('buildings');
   };
   
-  // Handle transport debug panel closing
-  const handleTransportDebugPanelClose = () => {
-    setShowTransportDebugPanel(false);
-  };
+  // Transport debug panel is now handled within IsometricViewer component
   
   // Update view when activeView changes
   useEffect(() => {
