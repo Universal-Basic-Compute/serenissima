@@ -166,7 +166,7 @@ def assign_citizen_to_business(tables, citizen: Dict, business: Dict, noupdate: 
             create_notification(
                 tables,
                 building_owner,
-                f"{citizen_name} now works in your building {building_name}",
+                f"🏢 **{citizen_name}** now works in your building **{building_name}**",
                 {
                     "citizen_id": citizen_id,
                     "citizen_name": citizen_name,
@@ -240,7 +240,7 @@ def create_admin_summary(tables, assignment_summary) -> None:
     """Create a summary notification for the admin."""
     try:
         # Create notification content
-        content = f"Job assignment report: {assignment_summary['total']} citizens assigned to businesses"
+        content = f"📊 **Job Assignment Report**: **{assignment_summary['total']}** citizens assigned to businesses"
         
         # Create detailed information
         details = {
@@ -248,7 +248,7 @@ def create_admin_summary(tables, assignment_summary) -> None:
             "timestamp": datetime.datetime.now().isoformat(),
             "total_assigned": assignment_summary['total'],
             "by_business_type": assignment_summary['by_business_type'],
-            "message": f"Job assignment process complete. {assignment_summary['total']} citizens were assigned to businesses."
+            "message": f"✅ Job assignment process complete. **{assignment_summary['total']}** citizens were assigned to businesses."
         }
         
         # Create the notification record
