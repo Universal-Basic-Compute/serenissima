@@ -149,6 +149,13 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [waterPointMode, setWaterPointMode] = useState<boolean>(false);
   const [waterPoints, setWaterPoints] = useState<any[]>([]);
   
+  // Water route mode state
+  const [waterRouteMode, setWaterRouteMode] = useState<boolean>(false);
+  const [waterRouteStartPoint, setWaterRouteStartPoint] = useState<any>(null);
+  const [waterRouteEndPoint, setWaterRouteEndPoint] = useState<any>(null);
+  const [waterRouteIntermediatePoints, setWaterRouteIntermediatePoints] = useState<any[]>([]);
+  const [waterRoutePath, setWaterRoutePath] = useState<any[]>([]);
+  
   // This is a duplicate function definition - removing it
 
   // Function to fetch existing water points
@@ -214,6 +221,216 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       console.error('Error saving water point:', error);
     }
   }, []);
+  
+  // Helper function to calculate the total distance of a path
+  const calculateTotalDistance = useCallback((path: any[]) => {
+    let totalDistance = 0;
+    for (let i = 0; i < path.length - 1; i++) {
+      const pt1 = path[i];
+      const pt2 = path[i + 1];
+      totalDistance += calculateDistance(
+        { lat: pt1.lat, lng: pt1.lng },
+        { lat: pt2.lat, lng: pt2.lng }
+      );
+    }
+    return totalDistance;
+  }, [calculateDistance]);
+  
+  // Function to save a water route
+  const saveWaterRoute = useCallback(async () => {
+    try {
+      if (!waterRouteStartPoint || !waterRouteEndPoint || waterRoutePath.length < 2) {
+        console.error('Cannot save water route: incomplete route data');
+        return;
+      }
+      
+      console.log('Saving water route...');
+      
+      // Calculate the centroid of the route
+      const allPoints = [
+        waterRouteStartPoint.position,
+        ...waterRouteIntermediatePoints,
+        waterRouteEndPoint.position
+      ];
+      
+      const centroidLat = allPoints.reduce((sum, pt) => sum + pt.lat, 0) / allPoints.length;
+      const centroidLng = allPoints.reduce((sum, pt) => sum + pt.lng, 0) / allPoints.length;
+      
+      // Calculate total length of the route
+      let totalLength = 0;
+      for (let i = 0; i < waterRoutePath.length - 1; i++) {
+        const pt1 = waterRoutePath[i];
+        const pt2 = waterRoutePath[i + 1];
+        totalLength += calculateDistance(
+          { lat: pt1.lat, lng: pt1.lng },
+          { lat: pt2.lat, lng: pt2.lng }
+        );
+      }
+      
+      // Create a unique ID for the route
+      const routeId = `waterroute_${centroidLat.toFixed(6)}_${centroidLng.toFixed(6)}`;
+      
+      // Create the connection objects for start and end points
+      const startPointConnection = {
+        targetId: waterRouteEndPoint.id,
+        intermediatePoints: waterRouteIntermediatePoints.map(pt => ({
+          lat: pt.lat,
+          lng: pt.lng
+        })),
+        distance: totalLength,
+        id: routeId
+      };
+      
+      const endPointConnection = {
+        targetId: waterRouteStartPoint.id,
+        intermediatePoints: [...waterRouteIntermediatePoints].reverse().map(pt => ({
+          lat: pt.lat,
+          lng: pt.lng
+        })),
+        distance: totalLength,
+        id: routeId
+      };
+      
+      // Update the water points with the new connections
+      const updatedStartPoint = {
+        ...waterRouteStartPoint,
+        connections: [
+          ...(waterRouteStartPoint.connections || []),
+          startPointConnection
+        ]
+      };
+      
+      const updatedEndPoint = {
+        ...waterRouteEndPoint,
+        connections: [
+          ...(waterRouteEndPoint.connections || []),
+          endPointConnection
+        ]
+      };
+      
+      // Save the updated water points
+      await fetch('/api/water-points', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ waterPoint: updatedStartPoint }),
+      });
+      
+      await fetch('/api/water-points', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ waterPoint: updatedEndPoint }),
+      });
+      
+      // Update local state
+      setWaterPoints(prevPoints => {
+        return prevPoints.map(pt => {
+          if (pt.id === waterRouteStartPoint.id) {
+            return updatedStartPoint;
+          }
+          if (pt.id === waterRouteEndPoint.id) {
+            return updatedEndPoint;
+          }
+          return pt;
+        });
+      });
+      
+      // Reset water route state
+      setWaterRouteStartPoint(null);
+      setWaterRouteEndPoint(null);
+      setWaterRouteIntermediatePoints([]);
+      setWaterRoutePath([]);
+      
+      // Show success message
+      alert(`Water route saved successfully! Total length: ${Math.round(totalLength)}m`);
+      
+      // Disable water route mode
+      setWaterRouteMode(false);
+      
+      // Refresh water points
+      fetchWaterPoints();
+      
+    } catch (error) {
+      console.error('Error saving water route:', error);
+      alert('Failed to save water route. Please try again.');
+    }
+  }, [waterRouteStartPoint, waterRouteEndPoint, waterRouteIntermediatePoints, waterRoutePath, calculateDistance, fetchWaterPoints]);
+  
+  // Function to handle water route clicks
+  const handleWaterRouteClick = useCallback((point: {lat: number, lng: number}, isWaterPoint: boolean, waterPointId?: string) => {
+    console.log('Water route click:', { point, isWaterPoint, waterPointId });
+    
+    // If clicked on a water point
+    if (isWaterPoint && waterPointId) {
+      // Find the water point in our state
+      const clickedWaterPoint = waterPoints.find(wp => wp.id === waterPointId);
+      if (!clickedWaterPoint) {
+        console.error(`Water point with ID ${waterPointId} not found`);
+        return;
+      }
+      
+      // If no start point is set, set it
+      if (!waterRouteStartPoint) {
+        console.log('Setting water route start point:', clickedWaterPoint);
+        setWaterRouteStartPoint(clickedWaterPoint);
+        setWaterRoutePath([clickedWaterPoint.position]);
+        return;
+      }
+      
+      // If start point is already set but no end point, set the end point
+      if (waterRouteStartPoint && !waterRouteEndPoint) {
+        // Don't allow connecting to the same point
+        if (waterPointId === waterRouteStartPoint.id) {
+          console.log('Cannot connect a water point to itself');
+          return;
+        }
+        
+        console.log('Setting water route end point:', clickedWaterPoint);
+        setWaterRouteEndPoint(clickedWaterPoint);
+        
+        // Create the complete path
+        const fullPath = [
+          waterRouteStartPoint.position,
+          ...waterRouteIntermediatePoints,
+          clickedWaterPoint.position
+        ];
+        setWaterRoutePath(fullPath);
+        
+        // Save the water route
+        setTimeout(() => {
+          saveWaterRoute();
+        }, 100);
+        
+        return;
+      }
+      
+      // If both start and end points are set, reset and start over
+      console.log('Resetting water route and setting new start point');
+      setWaterRouteStartPoint(clickedWaterPoint);
+      setWaterRouteEndPoint(null);
+      setWaterRouteIntermediatePoints([]);
+      setWaterRoutePath([clickedWaterPoint.position]);
+      return;
+    }
+    
+    // If clicked on water (not a water point) and we have a start point but no end point
+    if (!isWaterPoint && waterRouteStartPoint && !waterRouteEndPoint) {
+      console.log('Adding intermediate point:', point);
+      // Add an intermediate point
+      setWaterRouteIntermediatePoints(prev => [...prev, point]);
+      
+      // Update the path
+      const updatedPath = [
+        waterRouteStartPoint.position,
+        ...waterRouteIntermediatePoints,
+        point
+      ];
+      setWaterRoutePath(updatedPath);
+    }
+  }, [waterPoints, waterRouteStartPoint, waterRouteEndPoint, waterRouteIntermediatePoints, saveWaterRoute]);
 
   // Function to visualize the transport path
   const visualizeTransportPath = useCallback((path: any[]) => {
@@ -1283,7 +1500,10 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         transportStartPoint,
         transportEndPoint,
         waterPoints,
-        waterPointMode
+        waterPointMode,
+        waterRouteMode,
+        waterRouteStartPoint,
+        waterRouteIntermediatePoints
       },
       {
         setMousePosition,
@@ -1300,7 +1520,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         findBuildingPosition,
         findPolygonIdForPoint,
         screenToLatLng,
-        saveWaterPoint
+        saveWaterPoint,
+        handleWaterRouteClick
       }
     );
     
@@ -1311,13 +1532,19 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     scale, 
     offset, 
     transportMode, 
+    waterPointMode,
+    waterRouteMode,
+    waterRouteStartPoint,
+    waterRouteIntermediatePoints,
     polygonsToRender, 
     buildings, 
     emptyBuildingPoints, 
     polygons, 
     citizensByBuilding,
     transportStartPoint,
-    transportEndPoint
+    transportEndPoint,
+    waterPoints,
+    handleWaterRouteClick
   ]);
 
   // Helper function to check if a point is inside a polygon
@@ -1858,28 +2085,144 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             // Find the target water point
             const targetPoint = waterPoints.find(wp => wp.id === connection.targetId);
             if (targetPoint && targetPoint.position) {
-              // Convert target lat/lng to isometric coordinates
-              const targetX = (targetPoint.position.lng - 12.3326) * 20000;
-              const targetY = (targetPoint.position.lat - 45.4371) * 20000;
-            
-              const targetIsoPos = {
-                x: calculateIsoX(targetX, targetY, scale, offset, canvas.width),
-                y: calculateIsoY(targetX, targetY, scale, offset, canvas.height)
-              };
-            
-              // Draw a line connecting the water points
-              ctx.beginPath();
-              ctx.moveTo(isoPos.x, isoPos.y);
-              ctx.lineTo(targetIsoPos.x, targetIsoPos.y);
-              // Use a more transparent color in transport view
-              const lineOpacity = activeView === 'transport' && !waterPointMode ? 0.3 : 0.6;
-              ctx.strokeStyle = `rgba(0, 150, 255, ${lineOpacity})`;
-              ctx.lineWidth = 0.5 * scale;
-              ctx.stroke();
+              // Check if this connection has intermediate points
+              if (connection.intermediatePoints && connection.intermediatePoints.length > 0) {
+                // Draw a path with intermediate points
+                ctx.beginPath();
+                ctx.moveTo(isoPos.x, isoPos.y);
+                
+                // Draw through each intermediate point
+                for (const intPoint of connection.intermediatePoints) {
+                  const intX = (intPoint.lng - 12.3326) * 20000;
+                  const intY = (intPoint.lat - 45.4371) * 20000;
+                  
+                  const intIsoPos = {
+                    x: calculateIsoX(intX, intY, scale, offset, canvas.width),
+                    y: calculateIsoY(intX, intY, scale, offset, canvas.height)
+                  };
+                  
+                  ctx.lineTo(intIsoPos.x, intIsoPos.y);
+                }
+                
+                // Connect to the target point
+                const targetX = (targetPoint.position.lng - 12.3326) * 20000;
+                const targetY = (targetPoint.position.lat - 45.4371) * 20000;
+                
+                const targetIsoPos = {
+                  x: calculateIsoX(targetX, targetY, scale, offset, canvas.width),
+                  y: calculateIsoY(targetX, targetY, scale, offset, canvas.height)
+                };
+                
+                ctx.lineTo(targetIsoPos.x, targetIsoPos.y);
+                
+                // Style the path
+                const lineOpacity = activeView === 'transport' && !waterPointMode ? 0.3 : 0.6;
+                ctx.strokeStyle = `rgba(0, 150, 255, ${lineOpacity})`;
+                ctx.lineWidth = 0.5 * scale;
+                ctx.stroke();
+              } else {
+                // Draw a direct line for connections without intermediate points
+                const targetX = (targetPoint.position.lng - 12.3326) * 20000;
+                const targetY = (targetPoint.position.lat - 45.4371) * 20000;
+              
+                const targetIsoPos = {
+                  x: calculateIsoX(targetX, targetY, scale, offset, canvas.width),
+                  y: calculateIsoY(targetX, targetY, scale, offset, canvas.height)
+                };
+              
+                // Draw a line connecting the water points
+                ctx.beginPath();
+                ctx.moveTo(isoPos.x, isoPos.y);
+                ctx.lineTo(targetIsoPos.x, targetIsoPos.y);
+                // Use a more transparent color in transport view
+                const lineOpacity = activeView === 'transport' && !waterPointMode ? 0.3 : 0.6;
+                ctx.strokeStyle = `rgba(0, 150, 255, ${lineOpacity})`;
+                ctx.lineWidth = 0.5 * scale;
+                ctx.stroke();
+              }
             }
           });
         }
       });
+    }
+    
+    // Draw water route if in water route mode
+    if (activeView === 'transport' && waterRouteMode && waterRoutePath.length > 0) {
+      // Draw the path
+      ctx.beginPath();
+      
+      // Start at the first point
+      const firstPoint = waterRoutePath[0];
+      const firstX = (firstPoint.lng - 12.3326) * 20000;
+      const firstY = (firstPoint.lat - 45.4371) * 20000;
+      
+      const firstIsoPos = {
+        x: calculateIsoX(firstX, firstY, scale, offset, canvas.width),
+        y: calculateIsoY(firstX, firstY, scale, offset, canvas.height)
+      };
+      
+      ctx.moveTo(firstIsoPos.x, firstIsoPos.y);
+      
+      // Connect all points
+      for (let i = 1; i < waterRoutePath.length; i++) {
+        const point = waterRoutePath[i];
+        const x = (point.lng - 12.3326) * 20000;
+        const y = (point.lat - 45.4371) * 20000;
+        
+        const isoPos = {
+          x: calculateIsoX(x, y, scale, offset, canvas.width),
+          y: calculateIsoY(x, y, scale, offset, canvas.height)
+        };
+        
+        ctx.lineTo(isoPos.x, isoPos.y);
+      }
+      
+      // Style the path
+      ctx.strokeStyle = 'rgba(0, 150, 255, 0.8)';
+      ctx.lineWidth = 2 * scale;
+      ctx.stroke();
+      
+      // Draw dots for intermediate points
+      if (waterRouteIntermediatePoints.length > 0) {
+        for (const point of waterRouteIntermediatePoints) {
+          const x = (point.lng - 12.3326) * 20000;
+          const y = (point.lat - 45.4371) * 20000;
+          
+          const isoPos = {
+            x: calculateIsoX(x, y, scale, offset, canvas.width),
+            y: calculateIsoY(x, y, scale, offset, canvas.height)
+          };
+          
+          // Draw a small circle for intermediate points
+          ctx.beginPath();
+          ctx.arc(isoPos.x, isoPos.y, 2 * scale, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+          ctx.fill();
+        }
+      }
+      
+      // If we have a start point but no end point yet, draw a line from the last point to the mouse
+      if (waterRouteStartPoint && !waterRouteEndPoint && waterRoutePath.length > 0) {
+        // Get the last point in the path
+        const lastPoint = waterRoutePath[waterRoutePath.length - 1];
+        const lastX = (lastPoint.lng - 12.3326) * 20000;
+        const lastY = (lastPoint.lat - 45.4371) * 20000;
+        
+        const lastIsoPos = {
+          x: calculateIsoX(lastX, lastY, scale, offset, canvas.width),
+          y: calculateIsoY(lastX, lastY, scale, offset, canvas.height)
+        };
+        
+        // Draw a line from the last point to the mouse
+        ctx.beginPath();
+        ctx.moveTo(lastIsoPos.x, lastIsoPos.y);
+        ctx.lineTo(mousePosition.x, mousePosition.y);
+        ctx.strokeStyle = 'rgba(0, 150, 255, 0.5)';
+        ctx.lineWidth = 1.5 * scale;
+        ctx.setLineDash([5 * scale, 5 * scale]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
     }
 
     // Now render in two passes: first the polygons, then the text
@@ -3598,6 +3941,10 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
                 // Disable transport mode when enabling water point mode
                 setTransportMode(false);
               }
+              if (waterRouteMode) {
+                // Disable water route mode when enabling water point mode
+                setWaterRouteMode(false);
+              }
               // Load existing water points when enabling
               if (!waterPointMode) {
                 fetchWaterPoints();
@@ -3612,6 +3959,77 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             </svg>
             {waterPointMode ? 'Disable Water Point Mode' : 'Enable Water Point Mode'}
           </button>
+          
+          {/* Water Route Mode Toggle - only visible in transport view */}
+          {activeView === 'transport' && (
+            <button
+              onClick={() => {
+                console.log('Toggling water route mode from:', waterRouteMode);
+                setWaterRouteMode(!waterRouteMode);
+                if (!waterRouteMode) {
+                  // Reset water route state when enabling
+                  setWaterRouteStartPoint(null);
+                  setWaterRouteEndPoint(null);
+                  setWaterRouteIntermediatePoints([]);
+                  setWaterRoutePath([]);
+                }
+                // Disable other modes when enabling water route mode
+                if (transportMode) {
+                  setTransportMode(false);
+                }
+                if (waterPointMode) {
+                  setWaterPointMode(false);
+                }
+                // Load existing water points when enabling
+                if (!waterRouteMode) {
+                  fetchWaterPoints();
+                }
+              }}
+              className={`absolute bottom-64 left-20 ${
+                waterRouteMode ? 'bg-blue-600' : 'bg-amber-600'
+              } text-white px-3 py-1 rounded text-sm flex items-center`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+              </svg>
+              {waterRouteMode ? 'Finish Water Route' : 'Create Water Route'}
+            </button>
+          )}
+          
+          {/* Water Route Cancel Button - only visible when creating a route */}
+          {activeView === 'transport' && waterRouteMode && waterRouteStartPoint && (
+            <button
+              onClick={() => {
+                console.log('Canceling water route creation');
+                setWaterRouteStartPoint(null);
+                setWaterRouteEndPoint(null);
+                setWaterRouteIntermediatePoints([]);
+                setWaterRoutePath([]);
+              }}
+              className="absolute bottom-76 left-20 bg-red-600 text-white px-3 py-1 rounded text-sm flex items-center"
+              style={{ bottom: '76px' }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              Cancel Route
+            </button>
+          )}
+          
+          {/* Water Route Status - only visible in water route mode */}
+          {activeView === 'transport' && waterRouteMode && (
+            <div className="absolute top-20 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded text-sm">
+              {!waterRouteStartPoint ? (
+                <span>Click on a water point to start the route</span>
+              ) : !waterRouteEndPoint ? (
+                <span>
+                  <span className="text-blue-400">Start point selected.</span> Click on water to add waypoints or click on another water point to complete the route.
+                </span>
+              ) : (
+                <span>Route completed! Length: {Math.round(calculateTotalDistance(waterRoutePath))}m</span>
+              )}
+            </div>
+          )}
           
           {/* Transport Debug Button - Only visible in transport view */}
           {activeView === 'transport' && (

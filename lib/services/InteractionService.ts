@@ -48,6 +48,7 @@ export class InteractionService {
   private hoveredCitizenBuildingRef: string | null = null;
   private hoveredCitizenTypeRef: string | null = null;
   private waterPointModeRef: boolean = false;
+  private waterRouteModeRef: boolean = false;
   
   // Add these private properties to store data references
   private _polygonsToRender: any[] = [];
@@ -245,6 +246,9 @@ export class InteractionService {
       transportEndPoint: any;
       waterPoints?: any[];
       waterPointMode?: boolean;
+      waterRouteMode?: boolean;
+      waterRouteStartPoint?: any;
+      waterRouteIntermediatePoints?: any[];
     },
     setters: {
       setMousePosition: (position: { x: number, y: number }) => void;
@@ -262,6 +266,7 @@ export class InteractionService {
       findPolygonIdForPoint: (point: any) => string;
       screenToLatLng: (screenX: number, screenY: number, scale: number, offset: {x: number, y: number}, canvasWidth: number, canvasHeight: number) => {lat: number, lng: number};
       saveWaterPoint?: (point: {lat: number, lng: number}) => void;
+      handleWaterRouteClick?: (point: {lat: number, lng: number}, isWaterPoint: boolean, waterPointId?: string) => void;
     }
   ): () => void {
     
@@ -274,6 +279,9 @@ export class InteractionService {
     
     // Store water point mode reference
     this.waterPointModeRef = !!data.waterPointMode;
+  
+    // Store water route mode reference
+    this.waterRouteModeRef = !!data.waterRouteMode;
     
     // Create throttled mouse move handler that won't cause infinite updates
     const handleMouseMove = throttle((e: MouseEvent) => {
@@ -500,12 +508,56 @@ export class InteractionService {
       console.log('Click detected at:', { x: mouseX, y: mouseY });
       console.log('Current mode:', { activeView, transportMode, waterPointMode: this.waterPointModeRef });
       
+      // Handle water route mode clicks - make sure this is checked before other modes
+      if (activeView === 'transport' && this.waterRouteModeRef && setters.handleWaterRouteClick) {
+        console.log('Water route mode click detected');
+      
+        // Check if click is on a water point
+        let clickedOnWaterPoint = false;
+        let waterPointId = null;
+      
+        if (data.waterPoints && data.waterPoints.length > 0) {
+          for (const waterPoint of data.waterPoints) {
+            if (!waterPoint.position) continue;
+          
+            // Convert lat/lng to isometric coordinates
+            const x = (waterPoint.position.lng - 12.3326) * 20000;
+            const y = (waterPoint.position.lat - 45.4371) * 20000;
+          
+            const isoPos = {
+              x: CoordinateService.worldToScreen(x, y, scale, offset, canvas.width, canvas.height).x,
+              y: CoordinateService.worldToScreen(x, y, scale, offset, canvas.width, canvas.height).y
+            };
+          
+            // Check if mouse is over this water point
+            const pointSize = 1.25 * scale;
+            if (
+              mouseX >= isoPos.x - pointSize * 2 && 
+              mouseX <= isoPos.x + pointSize * 2 && 
+              mouseY >= isoPos.y - pointSize * 2 && 
+              mouseY <= isoPos.y + pointSize * 2
+            ) {
+              clickedOnWaterPoint = true;
+              waterPointId = waterPoint.id;
+              break;
+            }
+          }
+        }
+      
+        // Convert screen coordinates to lat/lng
+        const point = setters.screenToLatLng(mouseX, mouseY, scale, offset, canvas.width, canvas.height);
+      
+        // Handle the water route click
+        setters.handleWaterRouteClick(point, clickedOnWaterPoint, waterPointId);
+        return;
+      }
+    
       // Handle water point mode clicks - make sure this is checked before transport mode
       if (activeView === 'transport' && this.waterPointModeRef && setters.saveWaterPoint) {
         console.log('Water point mode click detected');
         // Convert screen coordinates to lat/lng
         const point = setters.screenToLatLng(mouseX, mouseY, scale, offset, canvas.width, canvas.height);
-        
+      
         // Save the new water point
         setters.saveWaterPoint(point);
         return;

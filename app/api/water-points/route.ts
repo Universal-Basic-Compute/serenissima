@@ -68,10 +68,41 @@ export async function POST(request: Request) {
     const existingIndex = data.waterPoints.findIndex(wp => wp.id === waterPoint.id);
     
     if (existingIndex >= 0) {
-      // Update existing water point
-      data.waterPoints[existingIndex] = waterPoint;
+      // Update existing water point, preserving any existing connections
+      const existingWaterPoint = data.waterPoints[existingIndex];
+      
+      // Ensure connections array exists on both objects
+      if (!existingWaterPoint.connections) existingWaterPoint.connections = [];
+      if (!waterPoint.connections) waterPoint.connections = [];
+      
+      // If the new water point has connections, add them to the existing ones
+      // avoiding duplicates by checking connection IDs
+      if (waterPoint.connections && waterPoint.connections.length > 0) {
+        for (const newConnection of waterPoint.connections) {
+          // Check if this connection already exists
+          const existingConnectionIndex = existingWaterPoint.connections.findIndex(
+            c => c.id === newConnection.id
+          );
+          
+          if (existingConnectionIndex >= 0) {
+            // Update existing connection
+            existingWaterPoint.connections[existingConnectionIndex] = newConnection;
+          } else {
+            // Add new connection
+            existingWaterPoint.connections.push(newConnection);
+          }
+        }
+      }
+      
+      // Update the water point with the merged connections
+      data.waterPoints[existingIndex] = {
+        ...waterPoint,
+        connections: existingWaterPoint.connections
+      };
     } else {
       // Add new water point
+      // Ensure it has a connections array
+      if (!waterPoint.connections) waterPoint.connections = [];
       data.waterPoints.push(waterPoint);
     }
     
