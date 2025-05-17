@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { FaHome, FaBuilding, FaRoad, FaTree, FaStore, FaLandmark, FaBook } from 'react-icons/fa';
+import { FaHome, FaBuilding, FaRoad, FaTree, FaStore, FaLandmark, FaBook, FaTimes } from 'react-icons/fa';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 import { transportService } from '@/lib/services/TransportService';
 import WalletButton from '@/components/UI/WalletButton';
@@ -15,6 +15,19 @@ import GuildsPanel from '@/components/UI/GuildsPanel';
 import KnowledgeRepository from '@/components/Knowledge/KnowledgeRepository';
 import LoanMarketplace from '@/components/Loans/LoanMarketplace';
 import LoanManagementDashboard from '@/components/Loans/LoanManagementDashboard';
+import { 
+  StrategiesArticle, 
+  BeginnersGuideArticle, 
+  EconomicSystemArticle,
+  LandOwnerGuideArticle,
+  DecreesGovernanceArticle,
+  BuildingOwnersGuideArticle,
+  BusinessOwnersGuideArticle,
+  HistoricalAccuracyArticle,
+  VenetianGuildsArticle,
+  GuildLeadershipArticle,
+  UnifiedCitizenModelArticle
+} from '@/components/Articles';
 
 // Import the 2D viewer component with no SSR
 const IsometricViewer = dynamic(() => import('@/components/PolygonViewer/IsometricViewer'), {
@@ -33,6 +46,7 @@ export default function TwoDPage() {
   const [showGuildsPanel, setShowGuildsPanel] = useState<boolean>(false);
   const [showKnowledgePanel, setShowKnowledgePanel] = useState<boolean>(false);
   const [transportMode, setTransportMode] = useState<boolean>(false);
+  const [selectedArticle, setSelectedArticle] = useState<string | null>(null);
   
   // Data state
   const [polygons, setPolygons] = useState<any[]>([]);
@@ -59,8 +73,22 @@ export default function TwoDPage() {
   
   const handleKnowledgePanelClose = () => {
     setShowKnowledgePanel(false);
+    setSelectedArticle(null); // Clear any selected article
     // Reset the active view to buildings when closing the panel
     setActiveView('buildings');
+  };
+  
+  const handleSelectArticle = (article: string) => {
+    console.log(`Selected article: ${article}`);
+    setSelectedArticle(article);
+    // Hide the knowledge panel when an article is selected
+    setShowKnowledgePanel(false);
+  };
+
+  const handleCloseArticle = () => {
+    setSelectedArticle(null);
+    // Show the knowledge panel again when the article is closed
+    setShowKnowledgePanel(true);
   };
   
   // Knowledge panel functions
@@ -700,6 +728,36 @@ export default function TwoDPage() {
           onShowResourceTree={handleShowResourceTree}
           onSelectArticle={handleSelectArticle}
         />
+      )}
+      
+      {/* Selected Article Modal */}
+      {selectedArticle && (
+        <div className="fixed inset-0 bg-black/50 z-50 overflow-auto">
+          <div className="max-w-4xl mx-auto my-8 bg-amber-50 rounded-lg shadow-xl">
+            <div className="p-4 flex justify-end">
+              <button 
+                onClick={handleCloseArticle}
+                className="text-amber-600 hover:text-amber-800 p-2"
+                aria-label="Close article"
+              >
+                <FaTimes size={24} />
+              </button>
+            </div>
+            <div className="px-8 pb-8">
+              {selectedArticle === 'strategies' && <StrategiesArticle />}
+              {selectedArticle === 'beginners-guide' && <BeginnersGuideArticle />}
+              {selectedArticle === 'economic-system' && <EconomicSystemArticle />}
+              {selectedArticle === 'landowner-guide' && <LandOwnerGuideArticle />}
+              {selectedArticle === 'decrees-governance' && <DecreesGovernanceArticle />}
+              {selectedArticle === 'building-owners-guide' && <BuildingOwnersGuideArticle />}
+              {selectedArticle === 'business-owners-guide' && <BusinessOwnersGuideArticle />}
+              {selectedArticle === 'historical-accuracy' && <HistoricalAccuracyArticle />}
+              {selectedArticle === 'venetian-guilds' && <VenetianGuildsArticle />}
+              {selectedArticle === 'guild-leadership' && <GuildLeadershipArticle />}
+              {selectedArticle === 'unified-citizen-model' && <UnifiedCitizenModelArticle />}
+            </div>
+          </div>
+        </div>
       )}
       
       {/* Loan Panel */}
