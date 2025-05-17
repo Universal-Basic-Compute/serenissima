@@ -586,6 +586,9 @@ def process_import_contract(tables, contract: Dict, building_types: Dict, resour
             return False
         
         log.info(f"Successfully created delivery activity for {import_amount} {resource_type}")
+        
+        # Note: We don't close or update the contract here
+        # The contract will be updated when the delivery activity is completed
         return True
     except Exception as e:
         log.error(f"Error processing import contract {contract.get('id', 'unknown')}: {e}")
