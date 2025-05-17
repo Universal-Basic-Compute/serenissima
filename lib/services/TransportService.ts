@@ -1078,29 +1078,168 @@ export class TransportService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
       
-      const response = await fetch(`${baseUrl}/data/watergraph.json`, {
-        signal: controller.signal
-      });
+      // Try multiple possible paths for the water graph file
+      const pathsToTry = [
+        `${baseUrl}/data/watergraph.json`,
+        `${baseUrl}/api/water-points`, // Try the API endpoint
+        `${baseUrl}/api/water-graph`, // Try another possible API endpoint
+        `${baseUrl}/watergraph.json` // Try root path
+      ];
+      
+      let response = null;
+      let successPath = '';
+      
+      // Try each path until one works
+      for (const path of pathsToTry) {
+        try {
+          console.log(`Attempting to load water graph from: ${path}`);
+          const tempResponse = await fetch(path, {
+            signal: controller.signal
+          });
+          
+          if (tempResponse.ok) {
+            response = tempResponse;
+            successPath = path;
+            console.log(`Successfully loaded water graph from: ${path}`);
+            break;
+          }
+        } catch (error) {
+          console.warn(`Failed to load water graph from ${path}:`, error);
+        }
+      }
       
       clearTimeout(timeoutId);
       
-      if (response.ok) {
+      if (response && response.ok) {
         const data = await response.json();
-        if (data && data.waterPoints && Array.isArray(data.waterPoints)) {
-          this.waterGraph = data;
-          console.log(`Successfully loaded water graph with ${data.waterPoints.length} water points`);
+        
+        // Check if the response is from the API endpoint which might have a different structure
+        let waterGraphData;
+        if (successPath.includes('/api/water-points') && data.waterPoints) {
+          // API response format
+          waterGraphData = data;
+        } else if (data && Array.isArray(data.waterPoints)) {
+          // Direct JSON file format
+          waterGraphData = data;
+        } else if (Array.isArray(data)) {
+          // Handle case where it's just an array of water points
+          waterGraphData = { waterPoints: data };
+        } else {
+          console.error('Invalid water graph data format:', data);
+          return false;
+        }
+        
+        if (waterGraphData && waterGraphData.waterPoints && Array.isArray(waterGraphData.waterPoints)) {
+          this.waterGraph = waterGraphData;
+          console.log(`Successfully loaded water graph with ${waterGraphData.waterPoints.length} water points`);
           return true;
         } else {
           console.error('Invalid water graph data format');
           return false;
         }
       } else {
-        console.error(`Failed to load water graph: ${response.status} ${response.statusText}`);
+        console.error(`Failed to load water graph from any path`);
+        
+        // As a last resort, try to create a minimal water graph from the polygons' canal points
+        if (this.polygons && this.polygons.length > 0) {
+          console.log('Attempting to create a minimal water graph from polygon canal points');
+          const minimalWaterGraph = this.createMinimalWaterGraph();
+          if (minimalWaterGraph) {
+            this.waterGraph = minimalWaterGraph;
+            console.log(`Created minimal water graph with ${minimalWaterGraph.waterPoints.length} water points`);
+            return true;
+          }
+        }
+        
         return false;
       }
     } catch (error) {
       console.error('Error loading water graph:', error);
       return false;
+    }
+  }
+
+  // Add this helper method to create a minimal water graph from polygon canal points
+  private createMinimalWaterGraph(): { waterPoints: any[] } | null {
+    try {
+      if (!this.polygons || this.polygons.length === 0) {
+        return null;
+      }
+      
+      const waterPoints: any[] = [];
+      const pointMap = new Map<string, any>();
+      
+      // Extract all canal points from polygons
+      for (const polygon of this.polygons) {
+        if (polygon.canalPoints && Array.isArray(polygon.canalPoints)) {
+          for (const canalPoint of polygon.canalPoints) {
+            if (canalPoint.edge) {
+              const id = `waterpoint_${canalPoint.edge.lat}_${canalPoint.edge.lng}`;
+              
+              if (!pointMap.has(id)) {
+                const waterPoint = {
+                  id,
+                  position: {
+                    lat: canalPoint.edge.lat,
+                    lng: canalPoint.edge.lng
+                  },
+                  connections: []
+                };
+                
+                waterPoints.push(waterPoint);
+                pointMap.set(id, waterPoint);
+              }
+            }
+          }
+        }
+      }
+      
+      // Create connections between nearby water points
+      for (let i = 0; i < waterPoints.length; i++) {
+        const point1 = waterPoints[i];
+        
+        for (let j = i + 1; j < waterPoints.length; j++) {
+          const point2 = waterPoints[j];
+          
+          // Calculate distance
+          const distance = this.calculateDistance(point1.position, point2.position);
+          
+          // Connect points that are within a reasonable distance
+          if (distance < 500) {
+            // Create a unique ID for this connection
+            const connectionId = `waterroute_${
+              ((point1.position.lat + point2.position.lat) / 2).toFixed(6)
+            }_${
+              ((point1.position.lng + point2.position.lng) / 2).toFixed(6)
+            }`;
+            
+            // Add connection from point1 to point2
+            point1.connections.push({
+              targetId: point2.id,
+              intermediatePoints: [],
+              distance,
+              id: connectionId
+            });
+            
+            // Add connection from point2 to point1
+            point2.connections.push({
+              targetId: point1.id,
+              intermediatePoints: [],
+              distance,
+              id: connectionId
+            });
+          }
+        }
+      }
+      
+      console.log(`Created minimal water graph with ${waterPoints.length} points and ${
+        waterPoints.reduce((sum, point) => sum + point.connections.length, 0)
+      } connections`);
+      
+      return { waterPoints };
+    } catch (error) {
+      console.error('Error creating minimal water graph:', error);
+      return null;
     }
   }
 
@@ -1123,7 +1262,9 @@ export class TransportService {
       if (this.polygonsLoaded && this.polygons.length > 0) {
         // Also ensure water graph is loaded
         if (!this.waterGraph) {
-          await this.loadWaterGraph();
+          console.log('Polygons loaded but water graph not loaded, loading water graph...');
+          const waterGraphLoaded = await this.loadWaterGraph();
+          console.log(`Water graph loading ${waterGraphLoaded ? 'succeeded' : 'failed'}`);
         }
         console.log(`Polygons already loaded (${this.polygons.length}), initialization complete`);
         resolve(true);
@@ -1147,6 +1288,12 @@ export class TransportService {
               if (success) {
                 console.log('Successfully loaded polygons from window.__polygonData');
                 this.polygonsLoaded = true;
+              
+                // Also load the water graph
+                console.log('Loading water graph after polygon loading...');
+                const waterGraphLoaded = await this.loadWaterGraph();
+                console.log(`Water graph loading ${waterGraphLoaded ? 'succeeded' : 'failed'}`);
+              
                 resolve(true);
                 return;
               } else {
@@ -1193,10 +1340,14 @@ export class TransportService {
       
       if (!success) {
         console.error(`Failed to load polygons after ${this.MAX_INITIALIZATION_ATTEMPTS} attempts`);
-      } else {
-        // Also load the water graph
-        await this.loadWaterGraph();
+        resolve(false);
+        return;
       }
+      
+      // Also load the water graph
+      console.log('Loading water graph after polygon loading...');
+      const waterGraphLoaded = await this.loadWaterGraph();
+      console.log(`Water graph loading ${waterGraphLoaded ? 'succeeded' : 'failed'}`);
       
       resolve(success);
     });
