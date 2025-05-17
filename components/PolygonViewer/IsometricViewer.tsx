@@ -2238,6 +2238,9 @@ number => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
+    // Reset any transformations
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    
     // Set canvas size
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -2397,48 +2400,48 @@ number => {
     if (activeView === 'transport' && waterRouteMode && waterRoutePath.length > 0) {
       // Draw the path
       ctx.beginPath();
-        
+          
       // Start at the first point
       const firstPoint = waterRoutePath[0];
       const firstX = (firstPoint.lng - 12.3326) * 20000;
       const firstY = (firstPoint.lat - 45.4371) * 20000;
-        
+          
       const firstIsoPos = {
         x: calculateIsoX(firstX, firstY, scale, offset, canvas.width),
         y: calculateIsoY(firstX, firstY, scale, offset, canvas.height)
       };
-        
+          
       ctx.moveTo(firstIsoPos.x, firstIsoPos.y);
-        
+          
       // Connect all points
       for (let i = 1; i < waterRoutePath.length; i++) {
         const point = waterRoutePath[i];
         const x = (point.lng - 12.3326) * 20000;
         const y = (point.lat - 45.4371) * 20000;
-          
+            
         const isoPos = {
           x: calculateIsoX(x, y, scale, offset, canvas.width),
           y: calculateIsoY(x, y, scale, offset, canvas.height)
         };
-          
+            
         ctx.lineTo(isoPos.x, isoPos.y);
       }
-        
+          
       // Save context before applying dash pattern
       ctx.save();
-        
-      // Style the path with dotted line
+          
+      // Style the path with dotted line - thinner lines
       ctx.strokeStyle = 'rgba(0, 150, 255, 0.8)';
-      ctx.lineWidth = 2 * scale;
-      ctx.setLineDash([8 * scale, 6 * scale]); // Add dotted pattern
+      ctx.lineWidth = 1.5 * scale; // Reduced from 2 to 1.5 for thinner lines
+      ctx.setLineDash([10 * scale, 8 * scale]); // Larger values for more visible dots with larger gaps
       ctx.stroke();
-        
+          
       // Add a second stroke with different pattern for emphasis
       ctx.strokeStyle = 'rgba(0, 180, 220, 0.6)'; // Lighter blue
-      ctx.lineWidth = 1 * scale;
-      ctx.setLineDash([4 * scale, 10 * scale]);
+      ctx.lineWidth = 0.8 * scale; // Reduced from 1 to 0.8
+      ctx.setLineDash([5 * scale, 12 * scale]); // Different pattern with larger gaps
       ctx.stroke();
-        
+          
       // Restore context to remove dash pattern
       ctx.restore();
       
@@ -3117,22 +3120,25 @@ number => {
               ctx.moveTo(localIsoX(x1, y1), localIsoY(x1, y1));
               ctx.lineTo(localIsoX(x2, y2), localIsoY(x2, y2));
               
-              // Venetian blue for water transport
+              // Venetian blue for water transport - make the line thinner
               ctx.strokeStyle = 'rgba(0, 102, 153, 0.8)';
-              ctx.lineWidth = 4 * scale;
+              ctx.lineWidth = 2 * scale; // Reduced from 4 to 2 for thinner lines
               
-              // Set the line to be dotted - make the pattern more pronounced
-              ctx.setLineDash([8 * scale, 6 * scale]); // Larger values for more visible dots
+              // Make the dash pattern more pronounced
+              ctx.setLineDash([10 * scale, 8 * scale]); // Increased values for more visible dots with larger gaps
               ctx.stroke();
               
-              // Draw a second stroke with a different color for emphasis
+              // Draw a second stroke with a different color for emphasis - also thinner
               ctx.strokeStyle = 'rgba(0, 180, 220, 0.6)'; // Lighter blue
-              ctx.lineWidth = 2 * scale;
-              ctx.setLineDash([4 * scale, 10 * scale]); // Different pattern for contrast
+              ctx.lineWidth = 1 * scale; // Reduced from 2 to 1
+              ctx.setLineDash([5 * scale, 12 * scale]); // Different pattern with larger gaps
               ctx.stroke();
               
               // Restore the context to remove the dash pattern
               ctx.restore();
+              
+              // Force a redraw by triggering a custom event
+              window.dispatchEvent(new CustomEvent('forceRedraw'));
             } else {
               // For walking paths, draw straight lines with texture
               ctx.beginPath();
@@ -3531,6 +3537,27 @@ number => {
     // This section is now handled above with consistent styling across all views
     
     
+    // Add a listener for force redraw
+    const handleForceRedraw = () => {
+      if (canvasRef.current) {
+        const ctx = canvasRef.current.getContext('2d');
+        if (ctx) {
+          // Reset any transformations
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          // Clear the canvas
+          ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+          // Redraw everything - trigger a full redraw cycle
+          const event = new Event('redraw');
+          window.dispatchEvent(event);
+        }
+      }
+    };
+    
+    window.addEventListener('forceRedraw', handleForceRedraw);
+    
+    return () => {
+      window.removeEventListener('forceRedraw', handleForceRedraw);
+    };
   }, [loading, polygons, landOwners, citizens, activeView, buildings, scale, offset, incomeData, minIncome, maxIncome, selectedPolygonId, selectedBuildingId, emptyBuildingPoints, mousePosition, citizensLoaded, citizensByBuilding, incomeDataLoaded, polygonsToRender, getIncomeColor]);
   
 
