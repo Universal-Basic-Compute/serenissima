@@ -26,7 +26,6 @@ def initialize_airtable():
     api = Api(airtable_api_key)
     
     tables = {
-        "citizens": Table(airtable_api_key, airtable_base_id, "CITIZENS"),
         "buildings": Table(airtable_api_key, airtable_base_id, "BUILDINGS"),
         "citizens": Table(airtable_api_key, airtable_base_id, "CITIZENS"),
         "notifications": Table(airtable_api_key, airtable_base_id, "NOTIFICATIONS")
@@ -38,7 +37,7 @@ def get_ai_citizens(tables) -> List[Dict]:
     """Get all citizens that are marked as AI, are in Venice, and have appropriate social class."""
     try:
         # Query citizens with IsAI=true, InVenice=true, and SocialClass is either Nobili or Cittadini
-        formula = "AND({IsAI}=1, {InVenice}=1, OR({SocialClass}='Nobili', {SocialClass}='Cittadini'))"
+        formula = "AND({IsAI}=1, {InVenice}=1)"
         ai_citizens = tables["citizens"].all(formula=formula)
         print(f"Found {len(ai_citizens)} AI citizens in Venice with Nobili or Cittadini social class")
         return ai_citizens
@@ -49,8 +48,7 @@ def get_ai_citizens(tables) -> List[Dict]:
 def get_citizen_business_buildings(tables, username: str) -> List[Dict]:
     """Get all buildings owned by a specific citizen that could potentially have wages set."""
     try:
-        # Query buildings where the citizen is the owner (not just RunBy)
-        formula = f"{{Owner}}='{username}'"
+        formula = f"AND({{RunBy}}='{username}', {{Category}}='business')"
         buildings = tables["buildings"].all(formula=formula)
         print(f"Found {len(buildings)} buildings owned by {username}")
         
@@ -88,7 +86,7 @@ def get_building_employees(tables, building_ids: List[str]) -> Dict[str, List[Di
                 continue
                 
             building = buildings[0]
-            occupant_id = building["fields"].get("Occupant", "")
+            occupant_id = building["fields"].get("Occupant", "") ---> should be occupant Username
             
             # If there's an occupant, add them to the employees list for this building
             if occupant_id:
@@ -289,8 +287,8 @@ If you decide not to adjust any wages at this time, return an empty array.
         payload = {
             "message": prompt,
             "addSystem": system_instructions,
-            "min_files": 5,
-            "max_files": 15
+            "min_files": 4,
+            "max_files": 8
         }
         
         # Make the API request
