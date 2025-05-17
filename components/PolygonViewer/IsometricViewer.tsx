@@ -84,6 +84,50 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   // Add refs to track current state without causing re-renders
   const isDraggingRef = useRef<boolean>(false);
 
+  // Function to get the current citizen's secondaryColor
+  const getCurrentCitizenSecondaryColor = useCallback(() => {
+    try {
+      // Try to get profile from localStorage
+      const profileStr = localStorage.getItem('citizenProfile');
+      if (profileStr) {
+        const profile = JSON.parse(profileStr);
+        if (profile && profile.secondaryColor) {
+          return profile.secondaryColor;
+        }
+      }
+      
+      // Default color if no secondaryColor is found
+      return '#FF8C00'; // Default to orange as fallback
+    } catch (error) {
+      console.error('Error getting current citizen secondary color:', error);
+      return '#FF8C00'; // Default to orange on error
+    }
+  }, []);
+  
+  // Function to get the current citizen's identifier
+  const getCurrentCitizenIdentifier = useCallback(() => {
+    try {
+      // Try to get username from profile
+      const profileStr = localStorage.getItem('citizenProfile');
+      if (profileStr) {
+        const profile = JSON.parse(profileStr);
+        if (profile && profile.username) {
+          return profile.username;
+        }
+      }
+      
+      // If no username in profile, fall back to wallet address from localStorage
+      const walletAddress = localStorage.getItem('walletAddress');
+      if (walletAddress) {
+        return walletAddress;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error getting current citizen identifier:', error);
+      return null;
+    }
+  }, []);
   
   // Helper function to convert screen coordinates to lat/lng
   const screenToLatLng = (
