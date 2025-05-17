@@ -64,6 +64,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     homePosition?: {x: number, y: number};
     workPosition?: {x: number, y: number};
   } | null>(null);
+  const [currentUsername, setCurrentUsername] = useState<string | null>(null);
   const [activityPaths, setActivityPaths] = useState<Record<string, ActivityPath[]>>({});
   const [isLoadingPaths, setIsLoadingPaths] = useState<boolean>(false);
   const [selectedCitizenPaths, setSelectedCitizenPaths] = useState<ActivityPath[]>([]);
@@ -531,6 +532,22 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     }
   }, [activeView, activityPaths]);
   
+  // Add effect to get the current logged-in citizen's username
+  useEffect(() => {
+    // Get current citizen from localStorage
+    const savedProfile = localStorage.getItem('citizenProfile');
+    if (savedProfile) {
+      try {
+        const profile = JSON.parse(savedProfile);
+        if (profile.username) {
+          setCurrentUsername(profile.username);
+        }
+      } catch (error) {
+        console.error('Error parsing citizen profile:', error);
+      }
+    }
+  }, []);
+  
   // Add effect to initialize animated citizens when paths are loaded
   useEffect(() => {
     if (Object.keys(activityPaths).length === 0 || citizens.length === 0) return;
@@ -759,13 +776,15 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
               onMouseLeave={handleCitizenLeave}
             >
               <div 
-                className="w-4 h-4 rounded-full cursor-pointer hover:scale-125 transition-transform flex items-center justify-center"
+                className={`w-4 h-4 rounded-full cursor-pointer hover:scale-125 transition-transform flex items-center justify-center ${
+                  citizen.worksFor === currentUsername ? 'ring-2 ring-yellow-400 ring-opacity-80' : ''
+                }`}
                 style={{ 
                   backgroundColor: citizenService.getSocialClassColor(socialClass),
                   border: '1px solid white',
-                  boxShadow: '0 0 0 1px rgba(0,0,0,0.2)'
+                  boxShadow: citizen.worksFor === currentUsername ? '0 0 8px 2px rgba(250, 204, 21, 0.7)' : '0 0 0 1px rgba(0,0,0,0.2)'
                 }}
-                title={`${firstName} ${lastName} (${socialClass})`}
+                title={`${firstName} ${lastName} (${socialClass})${citizen.worksFor === currentUsername ? ' - Works for you' : ''}`}
               >
                 <span className="text-white text-[8px] font-bold">
                   {firstName?.[0] || '?'}{lastName?.[0] || '?'}
@@ -829,13 +848,15 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
               onMouseLeave={handleCitizenLeave}
             >
               <div 
-                className="w-4 h-4 rounded-full cursor-pointer hover:scale-125 transition-transform flex items-center justify-center"
+                className={`w-4 h-4 rounded-full cursor-pointer hover:scale-125 transition-transform flex items-center justify-center ${
+                  citizen.worksFor === currentUsername ? 'ring-2 ring-yellow-400 ring-opacity-80' : ''
+                }`}
                 style={{ 
                   backgroundColor: citizenService.getSocialClassColor(socialClass),
                   border: '1px solid white',
-                  boxShadow: '0 0 0 1px rgba(0,0,0,0.2)'
+                  boxShadow: citizen.worksFor === currentUsername ? '0 0 8px 2px rgba(250, 204, 21, 0.7)' : '0 0 0 1px rgba(0,0,0,0.2)'
                 }}
-                title={`${firstName} ${lastName} (${socialClass})`}
+                title={`${firstName} ${lastName} (${socialClass})${citizen.worksFor === currentUsername ? ' - Works for you' : ''}`}
               >
                 <span className="text-white text-[8px] font-bold">
                   {firstName?.[0] || '?'}{lastName?.[0] || '?'}
