@@ -20,7 +20,9 @@ import logging
 import argparse
 import requests
 import pytz
-from datetime import datetime, time
+import random
+import uuid
+from datetime import datetime, time, timedelta
 from typing import Dict, List, Optional, Any
 from pyairtable import Api, Table
 from dotenv import load_dotenv
@@ -215,6 +217,224 @@ def get_building_info(tables, building_id: str) -> Optional[Dict]:
         log.error(f"Error getting building {building_id}: {e}")
         return None
 
+def find_available_citizen(tables) -> Optional[Dict]:
+    """Find a random citizen who is not in Venice and has no ongoing activities."""
+    log.info("Looking for an available citizen for import delivery...")
+    
+    try:
+        # Get current time
+        now = datetime.now().isoformat()
+        
+        # First get all citizens with InVenice = false
+        formula = "{InVenice}=FALSE()"
+        citizens = tables['citizens'].all(formula=formula)
+        
+        if not citizens:
+            log.info("No citizens found with InVenice=false")
+            return None
+        
+        log.info(f"Found {len(citizens)} citizens with InVenice=false")
+        
+        # Get all active activities
+        active_activities_formula = f"AND({{StartDate}} <= '{now}', {{EndDate}} >= '{now}')"
+        active_activities = tables['activities'].all(formula=active_activities_formula)
+        
+        # Extract citizen IDs with active activities
+        busy_citizen_ids = set()
+        for activity in active_activities:
+            citizen_id = activity['fields'].get('Citizen')
+            if citizen_id:
+                busy_citizen_ids.add(citizen_id)
+        
+        # Filter out citizens with active activities
+        available_citizens = []
+        for citizen in citizens:
+            citizen_id = citizen['fields'].get('Username')
+            if citizen_id and citizen_id not in busy_citizen_ids:
+                available_citizens.append(citizen)
+        
+        if not available_citizens:
+            log.info("No available citizens found (all have ongoing activities)")
+            return None
+        
+        # Select a random citizen from the available ones
+        selected_citizen = random.choice(available_citizens)
+        log.info(f"Selected citizen {selected_citizen['fields'].get('Username')} for import delivery")
+        
+        return selected_citizen
+    except Exception as e:
+        log.error(f"Error finding available citizen: {e}")
+        return None
+
+def generate_new_citizen(tables) -> Optional[Dict]:
+    """Generate a new citizen for import delivery using citizen_generator."""
+    log.info("Generating a new citizen for import delivery...")
+    
+    try:
+        # Import the citizen_generator module
+        from citizen_generator import generate_citizen
+        
+        # Generate a new citizen (using Popolani as default class for delivery personnel)
+        citizen_data = generate_citizen("Popolani")
+        if not citizen_data:
+            log.error("Failed to generate new citizen")
+            return None
+        
+        # Set InVenice to false for this new citizen
+        citizen_data["InVenice"] = False
+        
+        # Save to Airtable
+        citizen_record = tables['citizens'].create({
+            "CitizenId": citizen_data["id"],
+            "Username": citizen_data["id"],  # Use ID as username
+            "SocialClass": citizen_data["socialclass"],
+            "FirstName": citizen_data["firstname"],
+            "LastName": citizen_data["lastname"],
+            "Description": citizen_data["description"],
+            "ImagePrompt": citizen_data["imageprompt"],
+            "Ducats": citizen_data["ducats"],
+            "CreatedAt": citizen_data["createdat"],
+            "InVenice": False
+        })
+        
+        log.info(f"Successfully created new citizen for import delivery: {citizen_data['firstname']} {citizen_data['lastname']}")
+        return citizen_record
+    except Exception as e:
+        log.error(f"Error generating new citizen: {e}")
+        return None
+
+def create_delivery_activity(tables, citizen: Dict, contract: Dict, resource_type: str, 
+                            amount: float, buyer_building_id: str) -> Optional[Dict]:
+    """Create a delivery activity for importing resources."""
+    log.info(f"Creating delivery activity for {amount} units of {resource_type}")
+    
+    try:
+        # Get citizen ID (Username)
+        citizen_id = citizen['fields'].get('Username')
+        if not citizen_id:
+            log.error("Missing Username in citizen record")
+            return None
+        
+        # Fixed starting position at the edge of the map
+        start_position = {"lat": 45.43015357142857, "lng": 12.390025}
+        
+        # Get the destination building
+        building = None
+        try:
+            formula = f"{{BuildingId}}='{buyer_building_id}'"
+            buildings = tables['buildings'].all(formula=formula)
+            if buildings:
+                building = buildings[0]
+            else:
+                log.warning(f"Building {buyer_building_id} not found")
+                return None
+        except Exception as e:
+            log.error(f"Error fetching building {buyer_building_id}: {e}")
+            return None
+        
+        # Get building position
+        end_position = None
+        try:
+            position_str = building['fields'].get('Position')
+            if position_str:
+                end_position = json.loads(position_str)
+            
+            # If Position is missing, try to extract from Point field
+            if not end_position:
+                point_str = building['fields'].get('Point')
+                if point_str and isinstance(point_str, str):
+                    parts = point_str.split('_')
+                    if len(parts) >= 3:
+                        try:
+                            lat = float(parts[1])
+                            lng = float(parts[2])
+                            end_position = {"lat": lat, "lng": lng}
+                        except (ValueError, IndexError):
+                            log.warning(f"Failed to parse coordinates from Point field: {point_str}")
+        except Exception as e:
+            log.warning(f"Error parsing building position: {e}")
+            
+        if not end_position:
+            log.warning(f"No position found for building {buyer_building_id}")
+            return None
+        
+        # Get path from transport API
+        path_data = None
+        try:
+            # Get API base URL from environment variables, with a default fallback
+            api_base_url = os.getenv("API_BASE_URL", "https://serenissima.ai")
+            
+            # Construct the API URL
+            url = f"{api_base_url}/api/transport"
+            
+            # Make the API request
+            response = requests.post(
+                url,
+                json={
+                    "startPoint": start_position,
+                    "endPoint": end_position,
+                    "startDate": datetime.now().isoformat()
+                }
+            )
+            
+            if response.status_code == 200:
+                path_data = response.json()
+                if not path_data.get('success'):
+                    log.warning(f"Transport API returned error: {path_data.get('error')}")
+                    path_data = None
+            else:
+                log.warning(f"Transport API error: {response.status_code}")
+        except Exception as e:
+            log.error(f"Error calling transport API: {e}")
+        
+        # If path finding failed, create a simple straight line path
+        if not path_data or not path_data.get('path'):
+            log.warning("Path finding failed, creating simple path")
+            path_data = {
+                "path": [start_position, end_position],
+                "timing": {
+                    "startDate": datetime.now().isoformat(),
+                    "endDate": (datetime.now() + timedelta(hours=1)).isoformat(),
+                    "durationSeconds": 3600
+                }
+            }
+        
+        # Create the activity
+        now = datetime.now()
+        
+        # Calculate travel time based on path
+        travel_time_minutes = 60  # Default 60 minutes if no timing info
+        
+        if 'timing' in path_data and 'durationSeconds' in path_data['timing']:
+            travel_time_minutes = path_data['timing']['durationSeconds'] / 60
+        
+        # Calculate end time
+        end_time = now + timedelta(minutes=travel_time_minutes)
+        
+        # Create the activity
+        activity_id = f"import_{uuid.uuid4()}"
+        
+        activity = tables['activities'].create({
+            "ActivityId": activity_id,
+            "Type": "deliver_resource",
+            "Citizen": citizen_id,
+            "ContractId": contract['id'],
+            "ToBuilding": buyer_building_id,
+            "ResourceId": resource_type,
+            "Amount": amount,
+            "CreatedAt": now.isoformat(),
+            "StartDate": now.isoformat(),
+            "EndDate": end_time.isoformat(),
+            "Path": json.dumps(path_data.get('path', [])),
+            "Notes": f"Delivering {amount} units of {resource_type} from Italia to {building['fields'].get('Name', buyer_building_id)}"
+        })
+        
+        log.info(f"Created delivery activity: {activity['id']}")
+        return activity
+    except Exception as e:
+        log.error(f"Error creating delivery activity: {e}")
+        return None
+
 def process_import_contract(tables, contract: Dict, building_types: Dict, resource_types: Dict) -> bool:
     """Process a single import contract."""
     try:
@@ -340,46 +560,32 @@ def process_import_contract(tables, contract: Dict, building_types: Dict, resour
         tables['transactions'].create(transaction)
         log.info(f"Created transaction record for import of {hourly_amount} {resource_type}")
         
-        # 3. Create or update resource record
+        # 3. Find or generate a citizen for delivery
+        delivery_citizen = find_available_citizen(tables)
         
-        # Check if resource already exists in the building
-        existing_resource = None
-        for resource in building_resources:
-            if resource['fields'].get('Type') == resource_type:
-                existing_resource = resource
-                break
+        if not delivery_citizen:
+            log.info("No available citizens found, generating a new one")
+            delivery_citizen = generate_new_citizen(tables)
+            
+            if not delivery_citizen:
+                log.error("Failed to generate a new citizen for delivery")
+                return False
         
-        if existing_resource:
-            # Update existing resource
-            current_count = float(existing_resource['fields'].get('Count', 0))
-            new_count = current_count + import_amount
-            
-            tables['resources'].update(existing_resource['id'], {
-                'Count': new_count,
-                'UpdatedAt': now
-            })
-            
-            log.info(f"Updated resource {resource_type} count from {current_count} to {new_count}")
-        else:
-            # Create new resource record
-            import uuid
-            resource_id = f"resource-{uuid.uuid4()}"
-            
-            resource_data = {
-                "ResourceId": resource_id,
-                "Type": resource_type,
-                "Name": resource_def.get('name', resource_type),
-                "Category": resource_def.get('category', 'Uncategorized'),
-                "Count": import_amount,
-                "BuildingId": buyer_building_id,
-                "Owner": buyer,
-                "CreatedAt": now,
-                "UpdatedAt": now
-            }
-            
-            tables['resources'].create(resource_data)
-            log.info(f"Created new resource record for {import_amount} {resource_type}")
+        # 4. Create a delivery activity instead of directly creating/updating resources
+        activity = create_delivery_activity(
+            tables, 
+            delivery_citizen, 
+            contract, 
+            resource_type, 
+            import_amount, 
+            buyer_building_id
+        )
         
+        if not activity:
+            log.error("Failed to create delivery activity")
+            return False
+        
+        log.info(f"Successfully created delivery activity for {import_amount} {resource_type}")
         return True
     except Exception as e:
         log.error(f"Error processing import contract {contract.get('id', 'unknown')}: {e}")
@@ -396,6 +602,12 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
     
     # Initialize Airtable connection
     tables = initialize_airtable()
+    
+    # Make sure the activities table is included
+    if 'activities' not in tables:
+        tables['activities'] = Table(os.environ.get('AIRTABLE_API_KEY'), 
+                                    os.environ.get('AIRTABLE_BASE_ID'), 
+                                    'ACTIVITIES')
     
     # Get building types information
     building_types = get_building_types()
