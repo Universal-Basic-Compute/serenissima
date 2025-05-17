@@ -3586,8 +3586,8 @@ export class TransportService {
         }
       }
       
-      // Calculate time based on distance (walking at 5 km/h, gondola at 10 km/h)
-      const walkingTimeHours = totalWalkingDistance / 1000 / 5;
+      // Calculate time based on distance (walking at 3.5 km/h, gondola at 10 km/h)
+      const walkingTimeHours = totalWalkingDistance / 1000 / 3.5;
       const waterTimeHours = totalWaterDistance / 1000 / 10;
       const totalTimeMinutes = Math.round((walkingTimeHours + waterTimeHours) * 60);
       
@@ -3853,8 +3853,8 @@ export class TransportService {
           transportMode: 'walking'
         });
         
-        // Calculate time based on distance (walking at 5 km/h)
-        const timeHours = directDistance / 1000 / 5;
+        // Calculate time based on distance (walking at 3.5 km/h)
+        const timeHours = directDistance / 1000 / 3.5;
         const timeMinutes = Math.round(timeHours * 60);
         
         return {
@@ -3887,8 +3887,8 @@ export class TransportService {
         }
       }
       
-      // Assuming walking speed of 5 km/h and gondola speed of 10 km/h
-      const walkingTimeHours = totalWalkingDistance / 1000 / 5;
+      // Assuming walking speed of 3.5 km/h and gondola speed of 10 km/h
+      const walkingTimeHours = totalWalkingDistance / 1000 / 3.5;
       const waterTimeHours = totalWaterDistance / 1000 / 10;
       const totalTimeMinutes = (walkingTimeHours + waterTimeHours) * 60;
       
