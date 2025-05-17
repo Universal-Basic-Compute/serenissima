@@ -18,10 +18,10 @@ export default function WalletStatus({ className = '' }: WalletStatusProps) {
       // This ensures citizen data is properly loaded
       const reconnectWallet = async () => {
         try {
-          // Import the CitizenService to reconnect the wallet
-          const { CitizenService } = await import('@/lib/services/CitizenService');
-          const citizenService = new CitizenService();
-          await citizenService.connectWallet(storedWallet);
+          // Store the wallet address directly in localStorage
+          localStorage.setItem('walletAddress', storedWallet);
+          // Dispatch a wallet changed event to notify other components
+          window.dispatchEvent(new CustomEvent('walletChanged'));
           console.log('Successfully reconnected wallet from storage');
         } catch (error) {
           console.error('Error reconnecting stored wallet:', error);
