@@ -83,7 +83,9 @@
       "timber",
       "iron_fittings",
       "rope",
-      "criminal_contacts"
+      "criminal_contacts",
+      "sailcloth",
+      "war_galley"
     ],
     "sells": [
       "weapons",

@@ -73,7 +73,11 @@
       "weapons",
       "poison_components",
       "blackmail_evidence",
-      "criminal_contacts"
+      "criminal_contacts",
+      "spices",
+      "ink",
+      "cloth",
+      "dyes"
     ],
     "sells": [
       "spiced_wine",

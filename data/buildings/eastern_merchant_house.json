@@ -65,7 +65,10 @@
       "gold",
       "jewelry",
       "maps",
-      "paper"
+      "paper",
+      "spices",
+      "dyes",
+      "merchant_contacts"
     ],
     "sells": [
       "luxury_silk_garments",

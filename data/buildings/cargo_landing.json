@@ -87,7 +87,10 @@
       "spiced_wine",
       "wine",
       "fish",
-      "preserved_fish"
+      "preserved_fish",
+      "iron",
+      "iron_fittings",
+      "tools"
     ],
     "sells": [
       "porter_equipment",

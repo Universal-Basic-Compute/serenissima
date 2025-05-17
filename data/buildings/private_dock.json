@@ -83,7 +83,9 @@
       "criminal_contacts",
       "wine",
       "salt",
-      "spiced_wine"
+      "spiced_wine",
+      "luxury_silk_garments",
+      "jewelry"
     ],
     "sells": [
       "small_boats",

@@ -68,7 +68,11 @@
       "weapons",
       "books",
       "jewelry",
-      "fine_glassware"
+      "fine_glassware",
+      "luxury_silk_garments",
+      "raw_silk",
+      "dyestuffs",
+      "spices"
     ],
     "sells": [
       "banking_services",

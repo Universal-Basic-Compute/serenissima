@@ -89,7 +89,9 @@
       "salt",
       "fish",
       "preserved_fish",
-      "wine"
+      "wine",
+      "tools",
+      "sailcloth"
     ],
     "sells": [
       "small_boats",

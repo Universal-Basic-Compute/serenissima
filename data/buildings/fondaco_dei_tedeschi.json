@@ -110,7 +110,10 @@
       "jewelry",
       "maps",
       "silk_fabric",
-      "dyed_textiles"
+      "dyed_textiles",
+      "grain",
+      "books",
+      "tools"
     ],
     "sells": [
       "luxury_silk_garments",
