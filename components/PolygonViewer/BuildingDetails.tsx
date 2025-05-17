@@ -5,6 +5,7 @@ import BuildingImage from './BuildingDetails/BuildingImage';
 import BuildingLocation from './BuildingDetails/BuildingLocation';
 import BuildingMaintenance from './BuildingDetails/BuildingMaintenance';
 import BuildingOccupant from './BuildingDetails/BuildingOccupant';
+import BuildingOwner from './BuildingDetails/BuildingOwner';
 
 export { BuildingDescription };
 export { BuildingFinancials };
@@ -12,6 +13,7 @@ export { BuildingImage };
 export { BuildingLocation };
 export { BuildingMaintenance };
 export { BuildingOccupant };
+export { BuildingOwner };
 
 export function ResourceList({ 
   title, 
