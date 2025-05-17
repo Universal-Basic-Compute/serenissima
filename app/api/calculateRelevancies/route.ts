@@ -327,11 +327,29 @@ export async function GET(request: NextRequest) {
       // Get lands owned by this AI
       const aiLands = allLands.filter(land => land.owner === aiUsername);
       
+      // Fetch all citizens for land domination relevancy
+      const allCitizens = await fetchAllCitizens(base);
+      
+      // Even if the AI doesn't own lands, we should still calculate land domination relevancy
       if (aiLands.length === 0) {
-        return NextResponse.json(
-          { message: `AI ${aiUsername} does not own any lands` },
-          { status: 404 }
-        );
+        console.log(`AI ${aiUsername} does not own any lands, but will still calculate land domination relevancy`);
+        
+        // Calculate land domination relevancy only
+        const landDominationRelevancies = relevancyService.calculateLandDominationRelevancy(allCitizens, allLands);
+        
+        // Format the response to include both simple scores and detailed data
+        const simpleScores: Record<string, number> = {};
+        Object.entries(landDominationRelevancies).forEach(([id, data]) => {
+          simpleScores[id] = data.score;
+        });
+        
+        return NextResponse.json({
+          success: true,
+          ai: aiUsername,
+          ownedLandCount: 0,
+          relevancyScores: simpleScores,
+          detailedRelevancy: landDominationRelevancies
+        });
       }
       
       // Calculate land proximity relevancy with connectivity data
@@ -446,11 +464,42 @@ export async function POST(request: NextRequest) {
     // Get lands owned by this AI
     const aiLands = allLands.filter(land => land.owner === aiUsername);
     
+    // Even if the AI doesn't own lands, we should still calculate land domination relevancy
     if (aiLands.length === 0) {
-      return NextResponse.json(
-        { message: `AI ${aiUsername} does not own any lands` },
-        { status: 404 }
-      );
+      console.log(`AI ${aiUsername} does not own any lands, but will still calculate land domination relevancy`);
+      
+      // Calculate land domination relevancy only
+      const landDominationRelevancies = relevancyService.calculateLandDominationRelevancy(allCitizens, allLands);
+      
+      // Format the response to include both simple scores and detailed data
+      const simpleScores: Record<string, number> = {};
+      Object.entries(landDominationRelevancies).forEach(([id, data]) => {
+        simpleScores[id] = data.score;
+      });
+      
+      try {
+        // Save relevancies to Airtable
+        await saveRelevancies(base, aiUsername, landDominationRelevancies, allLands, allCitizens);
+        
+        return NextResponse.json({
+          success: true,
+          ai: aiUsername,
+          ownedLandCount: 0,
+          relevancyScores: simpleScores,
+          detailedRelevancy: landDominationRelevancies,
+          saved: true
+        });
+      } catch (error) {
+        return NextResponse.json({
+          success: false,
+          ai: aiUsername,
+          ownedLandCount: 0,
+          relevancyScores: simpleScores,
+          detailedRelevancy: landDominationRelevancies,
+          saved: false,
+          error: error.message
+        });
+      }
     }
     
     // Calculate land proximity relevancy with connectivity data
