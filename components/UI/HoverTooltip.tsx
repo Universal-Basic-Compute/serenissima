@@ -291,6 +291,38 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
       if (isContractSummary) {
         // Display contract summary tooltip
         const summary = tooltipData.resources[0];
+        
+        // Group contracts by resource type and contract type
+        const resourceBreakdown = {};
+        
+        // Check if we have resourceTypes in the summary
+        if (summary.resourceTypes && Array.isArray(summary.resourceTypes)) {
+          // Get all contracts at this location from the hover state
+          const allContracts = summary.allContracts || [];
+          
+          // Process each resource type
+          summary.resourceTypes.forEach(resourceType => {
+            // Find contracts for this resource type
+            const contractsForResource = allContracts.filter(c => c.resourceType === resourceType);
+            
+            // Count public sell contracts for this resource
+            const publicSellContracts = contractsForResource.filter(c => c.type === 'public_sell');
+            const totalPublicSellAmount = publicSellContracts.reduce((sum, c) => sum + (c.amount || 0), 0);
+            const avgPublicSellPrice = publicSellContracts.length > 0 
+              ? publicSellContracts.reduce((sum, c) => sum + (c.price || 0), 0) / publicSellContracts.length 
+              : 0;
+            
+            // Only add to breakdown if there are public sell contracts
+            if (publicSellContracts.length > 0) {
+              resourceBreakdown[resourceType] = {
+                count: publicSellContracts.length,
+                totalAmount: totalPublicSellAmount,
+                avgPrice: avgPublicSellPrice
+              };
+            }
+          });
+        }
+        
         tooltipContent = (
           <div>
             <div className="font-bold mb-2">Contracts at this location</div>
@@ -308,6 +340,22 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
                 <span className="font-medium">{summary.resourceTypes.length}</span>
               </div>
             </div>
+            
+            {/* Add a new section specifically for publicly sold resources */}
+            {Object.keys(resourceBreakdown).length > 0 && (
+              <div className="bg-green-800/30 p-2 rounded mb-2">
+                <div className="font-medium text-green-400 mb-1">Publicly Sold Resources:</div>
+                {Object.entries(resourceBreakdown).map(([resourceType, data]) => (
+                  <div key={resourceType} className="flex justify-between items-center text-sm mb-1 border-b border-green-800/30 pb-1 last:border-0 last:pb-0">
+                    <span className="text-white capitalize">{resourceType.replace(/_/g, ' ')}</span>
+                    <div className="flex flex-col items-end">
+                      <span className="text-green-300">{data.totalAmount} units</span>
+                      <span className="text-xs text-green-200">⚜️ {Math.round(data.avgPrice)} each</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
             
             <div className="text-sm">
               {summary.publicSellCount > 0 && (
