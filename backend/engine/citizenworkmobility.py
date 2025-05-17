@@ -247,7 +247,7 @@ def send_notifications(tables, citizen: Dict, old_business: Dict, new_business: 
     
     # Notification for old employer
     if old_owner and old_owner != 'Unknown':
-        content = f"{citizen_name} has left your business {old_business_name} for a better-paying position"
+        content = f"🏢 **{citizen_name}** has left your business **{old_business_name}** for a better-paying position"
         details = {
             "event_type": "employee_left",
             "citizen_id": citizen['id'],
@@ -260,7 +260,7 @@ def send_notifications(tables, citizen: Dict, old_business: Dict, new_business: 
     
     # Notification for new employer
     if new_owner and new_owner != 'Unknown':
-        content = f"{citizen_name} has joined your business {new_business_name}"
+        content = f"🎉 **{citizen_name}** has joined your business **{new_business_name}**"
         details = {
             "event_type": "employee_joined",
             "citizen_id": citizen['id'],
@@ -272,7 +272,9 @@ def send_notifications(tables, citizen: Dict, old_business: Dict, new_business: 
         create_notification(tables, new_owner, content, details)
     
     # Notification for citizen
-    content = f"You have moved from {old_business_name} to {new_business_name}, earning {new_wages - old_wages} more ⚜️ Ducats in wages"
+    wage_increase = new_wages - old_wages
+    formatted_increase = f"{wage_increase:,.0f}"
+    content = f"💼 You have moved from **{old_business_name}** to **{new_business_name}**, earning **{formatted_increase}** more ⚜️ Ducats in wages"
     details = {
         "event_type": "job_changed",
         "old_business_id": old_business['id'],
@@ -289,7 +291,7 @@ def create_admin_summary(tables, mobility_summary) -> None:
     """Create a summary notification for the admin."""
     try:
         # Create notification content
-        content = f"Work mobility report: {mobility_summary['total_moved']} citizens moved to better-paying jobs"
+        content = f"📊 **Work Mobility Report**: **{mobility_summary['total_moved']}** citizens moved to better-paying jobs"
         
         # Create detailed information
         details = {
