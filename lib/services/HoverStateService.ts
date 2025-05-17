@@ -123,7 +123,8 @@ export class HoverStateService {
       citizen: citizen ? {
         username: citizen.username || citizen.citizenid || citizen.CitizenId || citizen.id,
         name: `${citizen.firstname || citizen.FirstName || ''} ${citizen.lastname || citizen.LastName || ''}`,
-        socialClass: citizen.socialclass || citizen.SocialClass || citizen.socialClass || ''
+        socialClass: citizen.socialclass || citizen.SocialClass || citizen.socialClass || '',
+        imageUrl: citizen.imageurl || citizen.profileimage || citizen.ImageUrl || citizen.image
       } : null,
       buildingId,
       type
