@@ -18,6 +18,7 @@ import argparse
 import json
 import time
 import requests
+import subprocess
 from typing import Dict, List, Optional, Any
 from pyairtable import Api, Table
 from dotenv import load_dotenv
@@ -188,10 +189,41 @@ def process_citizen(tables, citizen: Dict) -> bool:
     
     # Get the image prompt
     image_prompt = citizen['fields'].get('ImagePrompt', '')
-    if not image_prompt:
-        log.warning(f"No image prompt for citizen {citizen_id}")
-        return False
     
+    # If no image prompt is available, call updatecitizenDescriptionAndImage.py
+    if not image_prompt:
+        log.info(f"No image prompt for citizen {citizen_id}, calling updatecitizenDescriptionAndImage.py")
+        
+        try:
+            # Get the citizen's username
+            citizen_username = citizen['fields'].get('Username', citizen_id)
+            
+            # Get the path to the updatecitizenDescriptionAndImage.py script
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            update_script_path = os.path.join(script_dir, "..", "scripts", "updatecitizenDescriptionAndImage.py")
+            
+            if not os.path.exists(update_script_path):
+                log.error(f"Update script not found at: {update_script_path}")
+                return False
+            
+            # Call the script to generate description and image
+            result = subprocess.run(
+                [sys.executable, update_script_path, citizen_username],
+                capture_output=True,
+                text=True
+            )
+            
+            if result.returncode != 0:
+                log.error(f"Error running updatecitizenDescriptionAndImage.py: {result.stderr}")
+                return False
+            
+            log.info(f"Successfully generated description and image for citizen {citizen_username}")
+            return True
+        except Exception as e:
+            log.error(f"Error calling updatecitizenDescriptionAndImage.py: {e}")
+            return False
+    
+    # If we have an image prompt, continue with the normal flow
     # Enhance the prompt
     enhanced_prompt = enhance_image_prompt(citizen)
     
