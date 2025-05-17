@@ -78,6 +78,40 @@ def initialize_airtable():
         log.error(f"Failed to initialize Airtable: {e}")
         sys.exit(1)
 
+def get_entrepreneurs_and_their_businesses(tables) -> tuple[List[Dict], Dict[str, List[Dict]]]:
+    """Fetch entrepreneurs (citizens who run at least one building) and their businesses."""
+    log.info("Fetching entrepreneurs and their businesses...")
+    
+    try:
+        # Get all buildings with non-empty RunBy field and Category='business'
+        formula = "AND(NOT(OR({RunBy} = '', {RunBy} = BLANK())), {Category}='business')"
+        run_by_buildings = tables['buildings'].all(formula=formula)
+        
+        # Group buildings by the citizen who runs them
+        entrepreneur_businesses = {}
+        for building in run_by_buildings:
+            run_by = building['fields'].get('RunBy')
+            if run_by:
+                if run_by not in entrepreneur_businesses:
+                    entrepreneur_businesses[run_by] = []
+                entrepreneur_businesses[run_by].append(building)
+        
+        # Get the entrepreneur citizens by Username, not ID
+        entrepreneur_usernames = list(entrepreneur_businesses.keys())
+        entrepreneurs = []
+        
+        if entrepreneur_usernames:
+            # Create a formula to get these citizens by Username
+            username_conditions = [f"{{Username}}='{username}'" for username in entrepreneur_usernames]
+            formula = f"OR({', '.join(username_conditions)})"
+            entrepreneurs = tables['citizens'].all(formula=formula)
+        
+        log.info(f"Found {len(entrepreneurs)} entrepreneurs running {len(run_by_buildings)} businesses")
+        return entrepreneurs, entrepreneur_businesses
+    except Exception as e:
+        log.error(f"Error fetching entrepreneurs: {e}")
+        return [], {}
+
 def get_employed_citizens(tables) -> List[Dict]:
     """Fetch citizens who have jobs."""
     log.info("Fetching employed citizens...")
