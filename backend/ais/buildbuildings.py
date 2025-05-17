@@ -206,7 +206,7 @@ def prepare_ai_building_strategy(ai_citizen: Dict, citizen_lands: List[Dict], ci
     """Prepare a comprehensive data package for the AI to make building decisions."""
     
     # Extract citizen information
-    citizenname = ai_citizen["fields"].get("Citizenname", "")
+    citizenname = ai_citizen["fields"].get("Username", "")
     ducats = ai_citizen["fields"].get("Ducats", 0)
     
     # Process lands data
@@ -822,7 +822,7 @@ Your response must be a JSON object with:
                                 
                                 # 3. Transfer ducats from citizen to ConsiglioDeiDieci
                                 # Find ConsiglioDeiDieci record
-                                consiglio_records = tables["citizens"].all(formula="{Citizenname}='ConsiglioDeiDieci'")
+                                consiglio_records = tables["citizens"].all(formula="{Username}='ConsiglioDeiDieci'")
                                 if not consiglio_records:
                                     print("ConsiglioDeiDieci account not found, cannot transfer ducats")
                                     return False
@@ -973,7 +973,7 @@ def process_ai_building_strategies(dry_run: bool = False):
     
     # Process each AI citizen
     for ai_citizen in ai_citizens:
-        ai_citizenname = ai_citizen["fields"].get("Citizenname")
+        ai_citizenname = ai_citizen["fields"].get("Username")
         if not ai_citizenname:
             print("Skipping AI citizen with no citizenname")
             continue

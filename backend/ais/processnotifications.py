@@ -193,7 +193,7 @@ def process_ai_notifications(dry_run: bool = False):
     
     # Process each AI citizen
     for ai_citizen in ai_citizens:
-        ai_citizenname = ai_citizen["fields"].get("Citizenname")
+        ai_citizenname = ai_citizen["fields"].get("Username")
         if not ai_citizenname:
             continue
         

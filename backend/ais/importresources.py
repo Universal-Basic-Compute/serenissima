@@ -186,7 +186,7 @@ def prepare_import_strategy_data(
     """Prepare a comprehensive data package for the AI to make import decisions."""
     
     # Extract citizen information
-    citizenname = ai_citizen["fields"].get("Citizenname", "")
+    citizenname = ai_citizen["fields"].get("Username", "")
     ducats = ai_citizen["fields"].get("Ducats", 0)
     
     # Find buildings that can import resources
@@ -767,7 +767,7 @@ def process_ai_import_strategies(dry_run: bool = False):
     
     # Process each AI citizen
     for ai_citizen in ai_citizens:
-        ai_citizenname = ai_citizen["fields"].get("Citizenname")
+        ai_citizenname = ai_citizen["fields"].get("Username")
         if not ai_citizenname:
             continue
         

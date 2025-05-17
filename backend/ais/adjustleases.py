@@ -100,7 +100,7 @@ def prepare_lease_analysis_data(ai_citizen: Dict, citizen_lands: List[Dict], cit
     """Prepare a comprehensive data package for the AI to analyze lease situations."""
     
     # Extract citizen information
-    citizenname = ai_citizen["fields"].get("Citizenname", "")
+    citizenname = ai_citizen["fields"].get("Username", "")
     ducats = ai_citizen["fields"].get("Ducats", 0)
     
     # Process lands data
@@ -494,7 +494,7 @@ def process_ai_lease_adjustments(dry_run: bool = False):
     
     # Process each AI citizen
     for ai_citizen in ai_citizens:
-        ai_citizenname = ai_citizen["fields"].get("Citizenname")
+        ai_citizenname = ai_citizen["fields"].get("Username")
         if not ai_citizenname:
             continue
         

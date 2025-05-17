@@ -90,7 +90,7 @@ def create_or_update_bid(tables, ai_citizen: Dict, land: Dict, existing_bid: Opt
         bid_amount = last_income * 30
         
         # Get AI citizen's compute balance
-        ai_citizenname = ai_citizen["fields"].get("Citizenname")
+        ai_citizenname = ai_citizen["fields"].get("Username")
         ai_compute = ai_citizen["fields"].get("Ducats", 0)
         
         # Check if AI has enough compute (2x the bid amount)
@@ -239,7 +239,7 @@ def process_ai_land_bidding(dry_run: bool = False):
     
     # Process each AI citizen
     for ai_citizen in ai_citizens:
-        ai_citizenname = ai_citizen["fields"].get("Citizenname")
+        ai_citizenname = ai_citizen["fields"].get("Username")
         if not ai_citizenname:
             continue
         
