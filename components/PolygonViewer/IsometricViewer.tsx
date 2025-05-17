@@ -2417,8 +2417,8 @@ number => {
     ctx.fillStyle = '#87CEEB';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   
-    // Draw water points if in water point mode or transport view
-    if ((waterPointMode || activeView === 'transport') && waterPoints.length > 0) {
+    // Draw water points in all views, but with different styling based on view
+    if (waterPoints.length > 0) {
       // Get the hovered water point ID from the hover state service
       const hoveredWaterPointId = hoverStateService.getHoveredWaterPointId();
       
@@ -2443,9 +2443,9 @@ number => {
         const pointSize = isHovered ? 2 * scale : 1.25 * scale;
         ctx.arc(isoPos.x, isoPos.y, pointSize, 0, Math.PI * 2);
         
-        // Use a more transparent color in transport view, unless hovered or in water route mode
+        // Use different opacity based on view - more visible in transport view, subtle in other views
         const opacity = isHovered || waterRouteMode ? 0.8 : 
-                       (activeView === 'transport' && !waterPointMode) ? 0.4 : 0.8;
+                       activeView === 'transport' ? 0.4 : 0.15; // Much more subtle in non-transport views
         ctx.fillStyle = isHovered ? 'rgba(0, 200, 255, 0.8)' : `rgba(0, 150, 255, ${opacity})`;
         ctx.fill();
       
@@ -2549,8 +2549,8 @@ number => {
                 ctx.beginPath();
                 ctx.moveTo(isoPos.x, isoPos.y);
                 ctx.lineTo(targetIsoPos.x, targetIsoPos.y);
-                // Use a more transparent color in transport view
-                const lineOpacity = activeView === 'transport' && !waterPointMode ? 0.3 : 0.6;
+                // Use different opacity based on view - more visible in transport view, subtle in other views
+                const lineOpacity = activeView === 'transport' ? 0.3 : 0.1; // Very subtle in non-transport views
                 ctx.strokeStyle = `rgba(0, 150, 255, ${lineOpacity})`;
                 ctx.lineWidth = 0.5 * scale;
                 ctx.stroke();
@@ -2561,8 +2561,8 @@ number => {
       });
     }
     
-    // Draw water route if in water route mode
-    if (activeView === 'transport' && waterRouteMode && waterRoutePath.length > 0) {
+    // Draw water route in all views, but only if there's a path to show
+    if (waterRoutePath.length > 0) {
       // Draw the path
       ctx.beginPath();
           
@@ -2595,8 +2595,8 @@ number => {
       // Save context before applying dash pattern
       ctx.save();
           
-      // Style the path with dotted line - thinner lines
-      ctx.strokeStyle = 'rgba(0, 150, 255, 0.8)';
+      // Style the path with dotted line - thinner lines and more transparent in non-transport views
+      ctx.strokeStyle = activeView === 'transport' ? 'rgba(0, 150, 255, 0.8)' : 'rgba(0, 150, 255, 0.3)';
       ctx.lineWidth = 1.5 * scale; // Reduced from 2 to 1.5 for thinner lines
       ctx.setLineDash([10 * scale, 8 * scale]); // Larger values for more visible dots with larger gaps
       ctx.stroke();
