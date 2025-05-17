@@ -86,12 +86,12 @@ def get_building_employees(tables, building_ids: List[str]) -> Dict[str, List[Di
                 continue
                 
             building = buildings[0]
-            occupant_id = building["fields"].get("Occupant", "") ---> should be occupant Username
+            occupant_username = building["fields"].get("Occupant", "")
             
             # If there's an occupant, add them to the employees list for this building
-            if occupant_id:
-                # Find the citizen record
-                matching_citizens = [c for c in citizens if c["id"] == occupant_id]
+            if occupant_username:
+                # Find the citizen record by Username
+                matching_citizens = [c for c in citizens if c["fields"].get("Username") == occupant_username]
                 
                 if matching_citizens:
                     if building_id not in employees_by_building:
