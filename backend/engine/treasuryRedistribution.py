@@ -235,7 +235,7 @@ def create_admin_summary(tables, redistribution_summary) -> None:
     """Create a summary notification for the admin."""
     try:
         # Create notification content
-        content = f"Treasury redistribution complete: {redistribution_summary['total_amount']} ⚜️ Ducats distributed to {redistribution_summary['total_citizens']} citizens"
+        content = f"🏛️ **Treasury Redistribution Complete**: **{redistribution_summary['total_amount']:,}** ⚜️ Ducats distributed to **{redistribution_summary['total_citizens']:,}** citizens 💰"
         
         # Create detailed information
         details = {
@@ -455,7 +455,7 @@ def redistribute_treasury(dry_run: bool = False):
                 create_notification(
                     tables,
                     citizen_id,
-                    f"You received {int(per_citizen_amount)} ⚜️ Ducats from the Treasury redistribution",
+                    f"You received **{int(per_citizen_amount):,}** ⚜️ Ducats from the **Treasury Redistribution** 💰",
                     {
                         "event_type": "treasury_redistribution",
                         "amount": per_citizen_amount,
@@ -483,16 +483,16 @@ def redistribute_treasury(dry_run: bool = False):
     # Send Telegram notification
     if redistribution_summary["total_citizens"] > 0:
         notification_message = (
-            "🏛️ Treasury Redistribution Complete 🏛️\n\n"
-            "The Council of Ten has distributed funds to the citizens of Venice.\n\n"
-            f"• {redistribution_summary['total_amount']} ⚜️ ducats distributed\n"
-            f"• {redistribution_summary['total_citizens']} citizens received funds\n\n"
-            "Distribution by social class:\n"
-            f"• Nobili: {redistribution_summary['by_class']['Nobili']['amount']} ⚜️ ducats to {redistribution_summary['by_class']['Nobili']['citizens']} citizens\n"
-            f"• Cittadini: {redistribution_summary['by_class']['Cittadini']['amount']} ⚜️ ducats to {redistribution_summary['by_class']['Cittadini']['citizens']} citizens\n"
-            f"• Popolani: {redistribution_summary['by_class']['Popolani']['amount']} ⚜️ ducats to {redistribution_summary['by_class']['Popolani']['citizens']} citizens\n"
-            f"• Facchini: {redistribution_summary['by_class']['Facchini']['amount']} ⚜️ ducats to {redistribution_summary['by_class']['Facchini']['citizens']} citizens\n\n"
-            "Visit https://serenissima.ai to check your citizens."
+            "🏛️ **Treasury Redistribution Complete** 🏛️\n\n"
+            "The **Council of Ten** has distributed funds to the citizens of Venice.\n\n"
+            f"• **{redistribution_summary['total_amount']:,}** ⚜️ ducats distributed 💰\n"
+            f"• **{redistribution_summary['total_citizens']:,}** citizens received funds\n\n"
+            "**Distribution by social class**:\n"
+            f"• **Nobili**: **{redistribution_summary['by_class']['Nobili']['amount']:,}** ⚜️ ducats to **{redistribution_summary['by_class']['Nobili']['citizens']:,}** citizens 👑\n"
+            f"• **Cittadini**: **{redistribution_summary['by_class']['Cittadini']['amount']:,}** ⚜️ ducats to **{redistribution_summary['by_class']['Cittadini']['citizens']:,}** citizens 🏙️\n"
+            f"• **Popolani**: **{redistribution_summary['by_class']['Popolani']['amount']:,}** ⚜️ ducats to **{redistribution_summary['by_class']['Popolani']['citizens']:,}** citizens 🏘️\n"
+            f"• **Facchini**: **{redistribution_summary['by_class']['Facchini']['amount']:,}** ⚜️ ducats to **{redistribution_summary['by_class']['Facchini']['citizens']:,}** citizens 🧳\n\n"
+            "Visit **https://serenissima.ai** to check your citizens."
         )
         
         # Try to send notification but continue even if it fails
