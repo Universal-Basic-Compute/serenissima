@@ -403,7 +403,8 @@ def generate_image(prompt: str, citizen_id: str) -> Optional[str]:
             log.error(f"Failed to download image: {image_response.status_code} {image_response.reason}")
             return None
         
-        # Save the image to the public folder
+        # Save the image to the public folder using the username directly
+        # No need to look up the username - citizen_id is already the username
         image_path = os.path.join(CITIZENS_IMAGE_DIR, f"{citizen_id}.jpg")
         with open(image_path, 'wb') as f:
             for chunk in image_response.iter_content(chunk_size=8192):
@@ -508,13 +509,8 @@ def update_citizen_description_and_image(username: str, dry_run: bool = False):
         log.info(f"[DRY RUN] New image prompt: {new_image_prompt}")
         return True
     
-    # Generate new image
-    citizen_id = citizen_info["citizen"]['fields'].get('CitizenId')
-    if not citizen_id:
-        log.warning(f"Citizen {username} has no CitizenId, using Username instead")
-        citizen_id = username
-        
-    image_url = generate_image(new_image_prompt, citizen_id)
+    # Generate new image - use username directly for the image file
+    image_url = generate_image(new_image_prompt, username)
     if not image_url:
         log.error(f"Failed to generate image for citizen {username}")
         # Continue anyway, as we can still update the description
