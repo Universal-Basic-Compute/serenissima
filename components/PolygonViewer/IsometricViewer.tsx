@@ -1412,24 +1412,67 @@ number => {
             
             // Create a map of bridge IDs to orientation data
             const bridgeOrientations = {};
+            
+            // Log all bridge IDs from the API for debugging
+            console.log("Bridge IDs from API:", data.bridges.map(b => b.buildingId));
+            console.log("Building IDs in our state:", buildings.map(b => b.id));
+            
             data.bridges.forEach(bridge => {
               if (bridge.buildingId && bridge.orientation !== undefined) {
                 bridgeOrientations[bridge.buildingId] = bridge.orientation;
+                
+                // Also map using the ID without the "bridge_" prefix if it exists
+                if (bridge.buildingId.startsWith('bridge_')) {
+                  const shortId = bridge.buildingId.substring(7); // Remove 'bridge_' prefix
+                  bridgeOrientations[shortId] = bridge.orientation;
+                }
+                
+                // Also map using just the coordinates part
+                const parts = bridge.buildingId.split('_');
+                if (parts.length >= 3) {
+                  const coordPart = `${parts[parts.length-2]}_${parts[parts.length-1]}`;
+                  bridgeOrientations[coordPart] = bridge.orientation;
+                }
               }
             });
             
             // Update buildings with orientation data
             const updatedBuildings = buildings.map(building => {
-              // Check if this building is a bridge and has orientation data
-              if (building.type && 
-                  building.type.toLowerCase().includes('bridge') && 
-                  building.id && 
-                  bridgeOrientations[building.id] !== undefined) {
+              // Check if this building is a bridge
+              if (building.type && building.type.toLowerCase().includes('bridge')) {
+                // Try different possible ID formats
+                let orientation = undefined;
                 
-                return {
-                  ...building,
-                  orientation: bridgeOrientations[building.id]
-                };
+                // Try exact match first
+                if (bridgeOrientations[building.id] !== undefined) {
+                  orientation = bridgeOrientations[building.id];
+                } 
+                // Try with 'bridge_' prefix
+                else if (building.id && !building.id.startsWith('bridge_')) {
+                  const prefixedId = `bridge_${building.id}`;
+                  if (bridgeOrientations[prefixedId] !== undefined) {
+                    orientation = bridgeOrientations[prefixedId];
+                  }
+                }
+                // Try with just the coordinates part
+                else if (building.id) {
+                  const parts = building.id.split('_');
+                  if (parts.length >= 3) {
+                    const coordPart = `${parts[parts.length-2]}_${parts[parts.length-1]}`;
+                    if (bridgeOrientations[coordPart] !== undefined) {
+                      orientation = bridgeOrientations[coordPart];
+                    }
+                  }
+                }
+                
+                // If we found an orientation, update the building
+                if (orientation !== undefined) {
+                  console.log(`Found orientation ${orientation} for bridge ${building.id}`);
+                  return {
+                    ...building,
+                    orientation
+                  };
+                }
               }
               return building;
             });
@@ -2883,7 +2926,7 @@ number => {
           if (building.orientation !== undefined) {
             // Use the orientation value directly from the API
             angle = building.orientation;
-            console.log(`Bridge ${building.id} orientation: ${angle}`);
+            console.log(`Bridge ${building.id} orientation: ${angle} radians (${angle * 180 / Math.PI} degrees)`);
             
             // Save the current context state
             ctx.save();
