@@ -161,8 +161,48 @@ export async function GET(request: NextRequest) {
     
     // 6.4 Resources the building can sell (from building definition)
     const sellableResources = [];
+    // Check multiple possible locations for sellable resources
     if (buildingDefinition?.productionInformation?.sells) {
-      buildingDefinition.productionInformation.sells.forEach(resourceId => {
+      // Handle array format
+      if (Array.isArray(buildingDefinition.productionInformation.sells)) {
+        buildingDefinition.productionInformation.sells.forEach(resourceId => {
+          // Find matching resource type for additional info
+          const resourceType = resourceTypes.find(rt => rt.id === resourceId || rt.name === resourceId);
+          
+          sellableResources.push({
+            resourceType: resourceId,
+            name: resourceType?.name || resourceId,
+            category: resourceType?.category || 'unknown',
+            icon: resourceType?.icon || `${resourceId.toLowerCase().replace(/\s+/g, '_')}.png`,
+            description: resourceType?.description || ''
+          });
+        });
+      } 
+      // Handle object format with resource IDs as keys
+      else if (typeof buildingDefinition.productionInformation.sells === 'object') {
+        Object.keys(buildingDefinition.productionInformation.sells).forEach(resourceId => {
+          // Find matching resource type for additional info
+          const resourceType = resourceTypes.find(rt => rt.id === resourceId || rt.name === resourceId);
+          
+          sellableResources.push({
+            resourceType: resourceId,
+            name: resourceType?.name || resourceId,
+            category: resourceType?.category || 'unknown',
+            icon: resourceType?.icon || `${resourceId.toLowerCase().replace(/\s+/g, '_')}.png`,
+            description: resourceType?.description || ''
+          });
+        });
+      }
+    }
+    
+    // Also check outputResources which might contain sellable resources
+    if (buildingDefinition?.productionInformation?.outputResources) {
+      Object.entries(buildingDefinition.productionInformation.outputResources).forEach(([resourceId, amount]) => {
+        // Skip if we already have this resource
+        if (sellableResources.some(r => r.resourceType === resourceId)) {
+          return;
+        }
+        
         // Find matching resource type for additional info
         const resourceType = resourceTypes.find(rt => rt.id === resourceId || rt.name === resourceId);
         
@@ -170,78 +210,165 @@ export async function GET(request: NextRequest) {
           resourceType: resourceId,
           name: resourceType?.name || resourceId,
           category: resourceType?.category || 'unknown',
+          amount: amount,
           icon: resourceType?.icon || `${resourceId.toLowerCase().replace(/\s+/g, '_')}.png`,
           description: resourceType?.description || ''
+        });
+      });
+    }
+    
+    // If we have public contracts but no sellable resources, add the contract resources as sellable
+    if (sellableResources.length === 0 && publiclySoldResources.length > 0) {
+      publiclySoldResources.forEach(contract => {
+        sellableResources.push({
+          resourceType: contract.resourceType,
+          name: contract.name,
+          category: contract.category,
+          icon: contract.icon,
+          description: contract.description
         });
       });
     }
     
     // 6.5 Resources the building can store (from building definition)
     const storableResources = [];
+    // Check multiple possible locations for storable resources
     if (buildingDefinition?.productionInformation?.stores) {
-      buildingDefinition.productionInformation.stores.forEach(resourceId => {
-        // Find matching resource type for additional info
-        const resourceType = resourceTypes.find(rt => rt.id === resourceId || rt.name === resourceId);
+      // Handle array format
+      if (Array.isArray(buildingDefinition.productionInformation.stores)) {
+        buildingDefinition.productionInformation.stores.forEach(resourceId => {
+          // Find matching resource type for additional info
+          const resourceType = resourceTypes.find(rt => rt.id === resourceId || rt.name === resourceId);
+          
+          storableResources.push({
+            resourceType: resourceId,
+            name: resourceType?.name || resourceId,
+            category: resourceType?.category || 'unknown',
+            icon: resourceType?.icon || `${resourceId.toLowerCase().replace(/\s+/g, '_')}.png`,
+            description: resourceType?.description || ''
+          });
+        });
+      } 
+      // Handle object format with resource IDs as keys
+      else if (typeof buildingDefinition.productionInformation.stores === 'object') {
+        Object.keys(buildingDefinition.productionInformation.stores).forEach(resourceId => {
+          // Find matching resource type for additional info
+          const resourceType = resourceTypes.find(rt => rt.id === resourceId || rt.name === resourceId);
+          
+          storableResources.push({
+            resourceType: resourceId,
+            name: resourceType?.name || resourceId,
+            category: resourceType?.category || 'unknown',
+            icon: resourceType?.icon || `${resourceId.toLowerCase().replace(/\s+/g, '_')}.png`,
+            description: resourceType?.description || ''
+          });
+        });
+      }
+    }
+    
+    // Also check if the building can store what it sells or buys
+    if (sellableResources.length > 0 && storableResources.length === 0) {
+      // If the building sells resources but has no explicit storage, assume it can store what it sells
+      sellableResources.forEach(resource => {
+        // Skip if we already have this resource
+        if (storableResources.some(r => r.resourceType === resource.resourceType)) {
+          return;
+        }
         
+        storableResources.push({...resource});
+      });
+    }
+    
+    if (boughtResources.length > 0 && storableResources.length === 0) {
+      // If the building buys resources but has no explicit storage, assume it can store what it buys
+      boughtResources.forEach(resource => {
+        // Skip if we already have this resource
+        if (storableResources.some(r => r.resourceType === resource.resourceType)) {
+          return;
+        }
+        
+        storableResources.push({...resource});
+      });
+    }
+    
+    // If we have public contracts but no storable resources, add the contract resources as storable
+    if (storableResources.length === 0 && publiclySoldResources.length > 0) {
+      publiclySoldResources.forEach(contract => {
         storableResources.push({
-          resourceType: resourceId,
-          name: resourceType?.name || resourceId,
-          category: resourceType?.category || 'unknown',
-          icon: resourceType?.icon || `${resourceId.toLowerCase().replace(/\s+/g, '_')}.png`,
-          description: resourceType?.description || ''
+          resourceType: contract.resourceType,
+          name: contract.name,
+          category: contract.category,
+          icon: contract.icon,
+          description: contract.description
         });
       });
     }
     
     // 6.6 Transformation recipes (from building definition)
     const transformationRecipes = [];
-    if (buildingDefinition?.productionInformation?.Arti) {
-      buildingDefinition.productionInformation.Arti.forEach((recipe, index) => {
-        const inputs = [];
-        const outputs = [];
-        
-        // Process inputs
-        if (recipe.inputs) {
-          Object.entries(recipe.inputs).forEach(([resourceId, amount]) => {
-            // Find matching resource type for additional info
-            const resourceType = resourceTypes.find(rt => rt.id === resourceId || rt.name === resourceId);
-            
-            inputs.push({
-              resourceType: resourceId,
-              name: resourceType?.name || resourceId,
-              category: resourceType?.category || 'unknown',
-              amount: amount,
-              icon: resourceType?.icon || `${resourceId.toLowerCase().replace(/\s+/g, '_')}.png`,
-              description: resourceType?.description || ''
+    // Check multiple possible locations for recipes
+    const recipeLocations = [
+      buildingDefinition?.productionInformation?.Arti,
+      buildingDefinition?.productionInformation?.recipes,
+      buildingDefinition?.recipes
+    ];
+    
+    for (const recipeLocation of recipeLocations) {
+      if (Array.isArray(recipeLocation)) {
+        recipeLocation.forEach((recipe, index) => {
+          const inputs = [];
+          const outputs = [];
+          
+          // Process inputs
+          if (recipe.inputs) {
+            Object.entries(recipe.inputs).forEach(([resourceId, amount]) => {
+              // Find matching resource type for additional info
+              const resourceType = resourceTypes.find(rt => rt.id === resourceId || rt.name === resourceId);
+              
+              inputs.push({
+                resourceType: resourceId,
+                name: resourceType?.name || resourceId,
+                category: resourceType?.category || 'unknown',
+                amount: amount,
+                icon: resourceType?.icon || `${resourceId.toLowerCase().replace(/\s+/g, '_')}.png`,
+                description: resourceType?.description || ''
+              });
             });
-          });
-        }
-        
-        // Process outputs
-        if (recipe.outputs) {
-          Object.entries(recipe.outputs).forEach(([resourceId, amount]) => {
-            // Find matching resource type for additional info
-            const resourceType = resourceTypes.find(rt => rt.id === resourceId || rt.name === resourceId);
-            
-            outputs.push({
-              resourceType: resourceId,
-              name: resourceType?.name || resourceId,
-              category: resourceType?.category || 'unknown',
-              amount: amount,
-              icon: resourceType?.icon || `${resourceId.toLowerCase().replace(/\s+/g, '_')}.png`,
-              description: resourceType?.description || ''
+          }
+          
+          // Process outputs
+          if (recipe.outputs) {
+            Object.entries(recipe.outputs).forEach(([resourceId, amount]) => {
+              // Find matching resource type for additional info
+              const resourceType = resourceTypes.find(rt => rt.id === resourceId || rt.name === resourceId);
+              
+              outputs.push({
+                resourceType: resourceId,
+                name: resourceType?.name || resourceId,
+                category: resourceType?.category || 'unknown',
+                amount: amount,
+                icon: resourceType?.icon || `${resourceId.toLowerCase().replace(/\s+/g, '_')}.png`,
+                description: resourceType?.description || ''
+              });
             });
+          }
+          
+          transformationRecipes.push({
+            id: `recipe-${index}`,
+            inputs,
+            outputs,
+            craftMinutes: recipe.craftMinutes || 0
           });
-        }
-        
-        transformationRecipes.push({
-          id: `recipe-${index}`,
-          inputs,
-          outputs,
-          craftMinutes: recipe.craftMinutes || 0
         });
-      });
+      }
     }
+    
+    // Add debug logging
+    console.log(`Processed building definition for ${building.type}:`);
+    console.log(`- Bought resources: ${boughtResources.length}`);
+    console.log(`- Sellable resources: ${sellableResources.length}`);
+    console.log(`- Storable resources: ${storableResources.length}`);
+    console.log(`- Transformation recipes: ${transformationRecipes.length}`);
     
     // 7. Return the comprehensive building resource information
     return NextResponse.json({
