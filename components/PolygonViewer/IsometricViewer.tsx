@@ -390,6 +390,148 @@ number => {
     }
   }, [waterRouteStartPoint, waterRouteEndPoint, waterRouteIntermediatePoints, waterRoutePath, calculateTotalDistance, fetchWaterPoints]);
   
+  // Add a new function to save water route with explicit data
+  const saveWaterRouteWithData = useCallback(async (routeData: {
+    startPoint: any,
+    endPoint: any,
+    intermediatePoints: any[],
+    path: any[]
+  }) => {
+    try {
+      if (!routeData.startPoint || !routeData.endPoint || routeData.path.length < 2) {
+        console.error('Cannot save water route: incomplete route data', {
+          startPoint: routeData.startPoint,
+          endPoint: routeData.endPoint,
+          pathLength: routeData.path.length
+        });
+        return;
+      }
+      
+      console.log('Saving water route with explicit data...', {
+        startPoint: routeData.startPoint,
+        endPoint: routeData.endPoint,
+        intermediatePoints: routeData.intermediatePoints,
+        pathLength: routeData.path.length
+      });
+      
+      // Calculate the centroid of the route
+      const allPoints = [
+        routeData.startPoint.position,
+        ...routeData.intermediatePoints,
+        routeData.endPoint.position
+      ];
+      
+      const centroidLat = allPoints.reduce((sum, pt) => sum + pt.lat, 0) / allPoints.length;
+      const centroidLng = allPoints.reduce((sum, pt) => sum + pt.lng, 0) / allPoints.length;
+      
+      // Calculate total length of the route
+      const totalLength = calculateTotalDistance(routeData.path);
+      
+      // Create a unique ID for the route
+      const routeId = `waterroute_${centroidLat.toFixed(6)}_${centroidLng.toFixed(6)}`;
+      
+      // Create the connection objects for start and end points
+      const startPointConnection = {
+        targetId: routeData.endPoint.id,
+        intermediatePoints: routeData.intermediatePoints.map(pt => ({
+          lat: pt.lat,
+          lng: pt.lng
+        })),
+        distance: totalLength,
+        id: routeId
+      };
+      
+      const endPointConnection = {
+        targetId: routeData.startPoint.id,
+        intermediatePoints: [...routeData.intermediatePoints].reverse().map(pt => ({
+          lat: pt.lat,
+          lng: pt.lng
+        })),
+        distance: totalLength,
+        id: routeId
+      };
+      
+      // Update the water points with the new connections
+      const updatedStartPoint = {
+        ...routeData.startPoint,
+        connections: [
+          ...(routeData.startPoint.connections || []),
+          startPointConnection
+        ]
+      };
+      
+      const updatedEndPoint = {
+        ...routeData.endPoint,
+        connections: [
+          ...(routeData.endPoint.connections || []),
+          endPointConnection
+        ]
+      };
+      
+      console.log('Saving updated water points:', {
+        startPoint: updatedStartPoint,
+        endPoint: updatedEndPoint
+      });
+      
+      // Save the updated water points
+      const startResponse = await fetch('/api/water-points', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ waterPoint: updatedStartPoint }),
+      });
+      
+      if (!startResponse.ok) {
+        throw new Error(`Failed to save start point: ${startResponse.status} ${startResponse.statusText}`);
+      }
+      
+      const endResponse = await fetch('/api/water-points', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ waterPoint: updatedEndPoint }),
+      });
+      
+      if (!endResponse.ok) {
+        throw new Error(`Failed to save end point: ${endResponse.status} ${endResponse.statusText}`);
+      }
+      
+      // Update local state
+      setWaterPoints(prevPoints => {
+        return prevPoints.map(pt => {
+          if (pt.id === routeData.startPoint.id) {
+            return updatedStartPoint;
+          }
+          if (pt.id === routeData.endPoint.id) {
+            return updatedEndPoint;
+          }
+          return pt;
+        });
+      });
+      
+      // Reset water route state
+      setWaterRouteStartPoint(null);
+      setWaterRouteEndPoint(null);
+      setWaterRouteIntermediatePoints([]);
+      setWaterRoutePath([]);
+      
+      // Show success message
+      alert(`Water route saved successfully! Total length: ${Math.round(totalLength)}m`);
+      
+      // Disable water route mode
+      setWaterRouteMode(false);
+      
+      // Refresh water points
+      fetchWaterPoints();
+      
+    } catch (error) {
+      console.error('Error saving water route:', error);
+      alert('Failed to save water route. Please try again.');
+    }
+  }, [calculateTotalDistance, fetchWaterPoints]);
+  
   // Function to handle water route clicks
   const handleWaterRouteClick = useCallback((point: {lat: number, lng: number}, isWaterPoint: boolean, waterPointId?: string) => {
     console.log('Water route click:', { point, isWaterPoint, waterPointId });
@@ -420,7 +562,6 @@ number => {
         }
         
         console.log('Setting water route end point:', clickedWaterPoint);
-        setWaterRouteEndPoint(clickedWaterPoint);
         
         // Create the complete path
         const fullPath = [
@@ -428,11 +569,25 @@ number => {
           ...waterRouteIntermediatePoints,
           clickedWaterPoint.position
         ];
+        
+        // Update all state in one batch, then save the route
+        setWaterRouteEndPoint(clickedWaterPoint);
         setWaterRoutePath(fullPath);
         
-        // Save the water route after a short delay to ensure state is updated
+        // IMPORTANT CHANGE: Use the actual values instead of relying on state
+        // This ensures we have the correct data when saving
         setTimeout(() => {
-          saveWaterRoute();
+          const routeToSave = {
+            startPoint: waterRouteStartPoint,
+            endPoint: clickedWaterPoint,
+            intermediatePoints: waterRouteIntermediatePoints,
+            path: fullPath
+          };
+          
+          console.log('Saving water route with data:', routeToSave);
+          
+          // Call a modified version of saveWaterRoute that takes the data directly
+          saveWaterRouteWithData(routeToSave);
         }, 100);
         
         return;
@@ -462,7 +617,7 @@ number => {
       ];
       setWaterRoutePath(updatedPath);
     }
-  }, [waterPoints, waterRouteStartPoint, waterRouteEndPoint, waterRouteIntermediatePoints, saveWaterRoute]);
+  }, [waterPoints, waterRouteStartPoint, waterRouteEndPoint, waterRouteIntermediatePoints]);
 
   // Function to visualize the transport path
   const visualizeTransportPath = useCallback((path: any[]) => {
