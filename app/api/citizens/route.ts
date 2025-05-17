@@ -43,7 +43,9 @@ export async function GET(request: Request) {
           'Color',
           'GuildId',
           'Preferences',
-          'LastActiveAt'
+          'LastActiveAt',
+          'CreatedAt',  // Add CreatedAt field
+          'UpdatedAt'   // Add UpdatedAt field
         ],
         filterByFormula: '{inVenice} = TRUE()',  // Only fetch citizens who are in Venice
         sort: [{ field: 'LastActiveAt', direction: 'desc' }]
@@ -79,7 +81,9 @@ export async function GET(request: Request) {
         familyMotto: record.get('FamilyMotto') as string || '',
         color: record.get('Color') as string || '',
         guildId: record.get('GuildId') as string || null,
-        preferences: record.get('Preferences') as object || {}
+        preferences: record.get('Preferences') as object || {},
+        createdAt: record.get('CreatedAt') as string || null,  // Add createdAt field
+        updatedAt: record.get('UpdatedAt') as string || null   // Add updatedAt field
       };
     });
     
@@ -107,7 +111,9 @@ export async function GET(request: Request) {
         familyMotto: 'At your service',
         color: '#FFC107',
         guildId: null,
-        preferences: {}
+        preferences: {},
+        createdAt: new Date().toISOString(),  // Add createdAt field
+        updatedAt: new Date().toISOString()   // Add updatedAt field
       },
       {
         username: 'marco_polo',
@@ -123,7 +129,9 @@ export async function GET(request: Request) {
         familyMotto: 'The world awaits',
         color: '#2196F3',
         guildId: 'merchants',
-        preferences: {}
+        preferences: {},
+        createdAt: new Date(Date.now() - 86400000).toISOString(),  // 1 day ago
+        updatedAt: new Date(Date.now() - 3600000).toISOString()    // 1 hour ago
       },
       {
         username: 'doge_venice',
@@ -139,7 +147,9 @@ export async function GET(request: Request) {
         familyMotto: 'For the glory of Venice',
         color: '#9C27B0',
         guildId: 'council',
-        preferences: {}
+        preferences: {},
+        createdAt: new Date(Date.now() - 31536000000).toISOString(),  // 1 year ago
+        updatedAt: new Date(Date.now() - 604800000).toISOString()     // 1 week ago
       }
     ];
     
