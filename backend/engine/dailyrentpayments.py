@@ -292,7 +292,7 @@ def process_housing_rent(tables, building: Dict, dry_run: bool = False) -> Tuple
         create_notification(
             tables,
             building_owner,
-            f"Your tenant {citizen_name} could not pay the rent of {int(rent_amount)} ⚜️ Ducats for {building_name} due to insufficient funds",
+            f"🏠 Your tenant **{citizen_name}** could not pay the rent of **{int(rent_amount):,} ⚜️ Ducats** for **{building_name}** due to **insufficient funds** 💸",
             {
                 "building_id": building_id,
                 "building_name": building_name,
@@ -341,7 +341,7 @@ def process_housing_rent(tables, building: Dict, dry_run: bool = False) -> Tuple
     create_notification(
         tables,
         building_owner,
-        f"Received rent payment of {int(rent_amount)} ⚜️ Ducats from {citizen_name} for {building_name}",
+        f"💰 Received rent payment of **{int(rent_amount):,} ⚜️ Ducats** from **{citizen_name}** for **{building_name}** 🏠",
         {
             "building_id": building_id,
             "building_name": building_name,
@@ -356,7 +356,7 @@ def process_housing_rent(tables, building: Dict, dry_run: bool = False) -> Tuple
     create_notification(
         tables,
         occupant_id,
-        f"Paid rent of {int(rent_amount)} ⚜️ Ducats to {building_owner} for {building_name}",
+        f"🏠 Paid rent of **{int(rent_amount):,} ⚜️ Ducats** to **{building_owner}** for **{building_name}**",
         {
             "building_id": building_id,
             "building_name": building_name,
@@ -443,7 +443,7 @@ def process_business_rent(tables, business: Dict, dry_run: bool = False) -> Tupl
         create_notification(
             tables,
             building_owner,
-            f"Your tenant {business_owner} could not pay the rent of {int(rent_amount)} ⚜️ Ducats for {business_name} in {building_name} due to insufficient funds",
+            f"🏢 Your tenant **{business_owner}** could not pay the rent of **{int(rent_amount):,} ⚜️ Ducats** for **{business_name}** in **{building_name}** due to **insufficient funds** 💸",
             {
                 "building_id": building_id,
                 "building_name": building_name,
@@ -461,7 +461,7 @@ def process_business_rent(tables, business: Dict, dry_run: bool = False) -> Tupl
         create_notification(
             tables,
             business_owner,
-            f"You could not pay the rent of {int(rent_amount)} ⚜️ Ducats for your business {business_name} due to insufficient funds",
+            f"⚠️ You could not pay the rent of **{int(rent_amount):,} ⚜️ Ducats** for your business **{business_name}** due to **insufficient funds** 💸",
             {
                 "building_id": building_id,
                 "building_name": building_name,
@@ -504,7 +504,7 @@ def process_business_rent(tables, business: Dict, dry_run: bool = False) -> Tupl
     create_notification(
         tables,
         building_owner,
-        f"Received business rent payment of {int(rent_amount)} ⚜️ Ducats from {business_owner} for {business_name} in {building_name}",
+        f"💰 Received business rent payment of **{int(rent_amount):,} ⚜️ Ducats** from **{business_owner}** for **{business_name}** in **{building_name}** 🏢",
         {
             "building_id": building_id,
             "building_name": building_name,
@@ -520,7 +520,7 @@ def process_business_rent(tables, business: Dict, dry_run: bool = False) -> Tupl
     create_notification(
         tables,
         business_owner,
-        f"Paid business rent of {int(rent_amount)} ⚜️ Ducats to {building_owner} for {business_name} in {building_name}",
+        f"🏢 Paid business rent of **{int(rent_amount):,} ⚜️ Ducats** to **{building_owner}** for **{business_name}** in **{building_name}**",
         {
             "building_id": building_id,
             "building_name": building_name,
@@ -539,7 +539,7 @@ def create_admin_summary(tables, rent_summary) -> None:
     """Create a summary notification for the admin."""
     try:
         # Create notification content
-        content = f"Daily rent payments processed: {rent_summary['housing']['successful'] + rent_summary['business']['successful']} successful, {rent_summary['housing']['failed'] + rent_summary['business']['failed']} failed"
+        content = f"🏛️ **Daily Rent Payments Summary**\n\n📊 Processed: **{rent_summary['housing']['successful'] + rent_summary['business']['successful']:,}** successful, **{rent_summary['housing']['failed'] + rent_summary['business']['failed']:,}** failed"
         
         # Create detailed information
         details = {
