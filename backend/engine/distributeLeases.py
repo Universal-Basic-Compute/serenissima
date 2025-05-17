@@ -560,13 +560,17 @@ def send_telegram_notification(message):
         return False
     
     try:
-        # URL encode the message
-        encoded_message = quote(message)
-        # Remove HTML parse mode which might be causing issues
-        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage?chat_id={MAIN_TELEGRAM_CHAT_ID}&text={encoded_message}"
+        # Use the proper API endpoint with JSON payload instead of URL parameters
+        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
         
-        # Send the message
-        response = requests.get(url)
+        # Prepare the payload as JSON
+        payload = {
+            "chat_id": MAIN_TELEGRAM_CHAT_ID,
+            "text": message
+        }
+        
+        # Send the message with a proper JSON payload
+        response = requests.post(url, json=payload)
         
         if response.status_code == 200:
             log.info("Telegram notification sent successfully")
