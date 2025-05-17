@@ -281,7 +281,6 @@ def create_resource_fetching_activity(tables, citizen: Dict, contract: Dict, fro
         activity = tables['activities'].create({
             "ActivityId": activity_id,
             "Type": "fetch_resource",
-            "CitizenId": citizen_id,
             "Citizen": citizen_username,
             "ContractId": contract_id,
             "FromBuilding": from_building_id,
@@ -335,7 +334,6 @@ def create_production_activity(tables, citizen: Dict, building: Dict, recipe: Di
         activity = tables['activities'].create({
             "ActivityId": activity_id,
             "Type": "production",
-            "CitizenId": citizen_id,
             "Citizen": citizen_username,
             "FromBuilding": building_id,
             "ToBuilding": building_id,  # Same building for production
@@ -486,7 +484,6 @@ def create_rest_activity(tables, citizen_id: str, citizen_username: str, home_id
         activity = tables['activities'].create({
             "ActivityId": f"rest_{citizen_id}_{int(time.time())}",
             "Type": "rest",
-            "CitizenId": citizen_id,
             "Citizen": citizen_username,
             "FromBuilding": home_id,  # This should be BuildingId
             "ToBuilding": home_id,    # This should be BuildingId
@@ -534,7 +531,6 @@ def create_goto_home_activity(tables, citizen_id: str, citizen_username: str, ho
         activity = tables['activities'].create({
             "ActivityId": f"goto_home_{citizen_id}_{int(time.time())}",
             "Type": "goto_home",
-            "CitizenId": citizen_id,  # This should be the CitizenId, not the Airtable record ID
             "Citizen": citizen_username,
             "ToBuilding": home_id,  # This should be BuildingId
             "CreatedAt": now.isoformat(),
@@ -571,7 +567,6 @@ def create_idle_activity(tables, citizen_id: str, citizen_username: str = None) 
         activity = tables['activities'].create({
             "ActivityId": f"idle_{citizen_id}_{int(time.time())}",
             "Type": "idle",
-            "CitizenId": citizen_id,  # This should be the CitizenId, not the Airtable record ID
             "Citizen": citizen_username,
             "CreatedAt": now.isoformat(),
             "StartDate": now.isoformat(),
