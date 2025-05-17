@@ -2254,11 +2254,17 @@ number => {
     const socialClass = citizen?.SocialClass || citizen?.socialClass || citizen?.socialclass || '';
     const citizenId = citizen?.CitizenId || citizen?.citizenId || citizen?.citizenid || citizen?.id || '';
     
+    // Ensure all values are strings to prevent rendering objects
+    const safeFirstName = typeof firstName === 'string' ? firstName : '';
+    const safeLastName = typeof lastName === 'string' ? lastName : '';
+    const safeSocialClass = typeof socialClass === 'string' ? socialClass : '';
+    const safeCitizenId = typeof citizenId === 'string' ? citizenId : '';
+    
     // Log citizen data for debugging with more details
     console.log(`Creating citizen marker for:`, {
-      citizenId,
-      name: `${firstName} ${lastName}`,
-      socialClass
+      citizenId: safeCitizenId,
+      name: `${safeFirstName} ${safeLastName}`,
+      socialClass: safeSocialClass
     });
 
     // Determine color based on social class
