@@ -380,7 +380,8 @@ export default function ContractMarkers({
                           resourceTypes,
                           publicSellCount,
                           citizenSellCount,
-                          citizenBuyCount
+                          citizenBuyCount,
+                          allContracts: locationContracts // Pass all contracts for detailed analysis
                         }
                       ],
                       position: locationContracts[0].location
@@ -483,7 +484,8 @@ export default function ContractMarkers({
                             resourceTypes,
                             publicSellCount,
                             citizenSellCount,
-                            citizenBuyCount
+                            citizenBuyCount,
+                            allContracts: locationContracts // Pass all contracts for detailed analysis
                           }
                         ],
                         position: locationContracts[0].location
