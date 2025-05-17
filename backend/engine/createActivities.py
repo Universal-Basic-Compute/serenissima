@@ -676,7 +676,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
             return True
         
         # Check if citizen is already at home
-        # Simple check: if positions are close enough (within 50 meters)
+        # Simple check: if positions are close enough (within 20 meters)
         is_at_home = False
         try:
             # Calculate distance between points
@@ -687,7 +687,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
             # Convert to approximate meters (very rough approximation)
             distance_meters = distance * 111000  # 1 degree is roughly 111 km at the equator
             
-            is_at_home = distance_meters < 50  # Within 50 meters
+            is_at_home = distance_meters < 20  # Within 20 meters
         except (KeyError, TypeError):
             log.warning(f"Error calculating distance for citizen {citizen_id}")
         
