@@ -147,7 +147,7 @@ def save_citizen_to_airtable(tables, citizen: Dict, polygon_centers: list) -> Op
             "LastName": citizen["lastname"],
             "Description": citizen["description"],
             "ImagePrompt": citizen["imageprompt"],
-            "Wealth": citizen["wealth"],
+            "Ducats": citizen["wealth"],
             "CreatedAt": citizen["createdat"],
             "Position": json.dumps(position)  # Ensure position is always provided as JSON string
         })

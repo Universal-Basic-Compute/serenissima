@@ -47,7 +47,7 @@ export function useWallet() {
           console.log('Fetched citizen profile from backend:', data);
           if (data.citizen_name) {
             const backendProfile = {
-              citizenname: data.citizen_name,
+              username: data.citizen_name,
               firstName: data.first_name || data.citizen_name.split(' ')[0] || '',
               lastName: data.last_name || data.citizen_name.split(' ').slice(1).join(' ') || '',
               coatOfArmsImage: data.coat_of_arms_image,
@@ -180,19 +180,19 @@ export function useWallet() {
         // Store wallet in both session and local storage
         setWalletAddress(address);
         
-        // Store wallet in Airtable and check for citizenname
+        // Store wallet in Airtable and check for username
         const citizenData = await storeWalletInAirtable(address);
         
         if (citizenData) {
-          // Check if the citizen has a citizenname
+          // Check if the citizen has a username
           if (citizenData.citizen_name === undefined || citizenData.citizen_name === null || citizenData.citizen_name === '') {
-            // If no citizenname, show the prompt
-            window.dispatchEvent(new CustomEvent('showCitizennamePrompt'));
+            // If no username, show the prompt
+            window.dispatchEvent(new CustomEvent('showUsernamePrompt'));
           } else {
             // Store the citizen profile information
             console.log('Setting citizen profile with data:', citizenData);
             const citizenProfile = {
-              citizenname: citizenData.citizen_name,
+              username: citizenData.citizen_name,
               firstName: citizenData.first_name || citizenData.citizen_name.split(' ')[0] || '',
               lastName: citizenData.last_name || citizenData.citizen_name.split(' ').slice(1).join(' ') || '',
               coatOfArmsImage: citizenData.coat_of_arms_image,

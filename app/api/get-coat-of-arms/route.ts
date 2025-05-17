@@ -39,10 +39,10 @@ export async function GET() {
     const coatOfArms: Record<string, string> = {};
     
     records.forEach(record => {
-      const citizenname = record.get('Citizenname');
+      const username = record.get('Username');
       const coatOfArmsImage = record.get('CoatOfArmsImage');
       
-      if (citizenname && coatOfArmsImage) {
+      if (username && coatOfArmsImage) {
         // Ensure the URL is properly formatted for production
         let imageUrl = coatOfArmsImage as string;
           
@@ -50,11 +50,11 @@ export async function GET() {
         imageUrl = `https://serenissima.ai${imageUrl}`;
         
         // Also add a local URL for fallback
-        const localUrl = `/coat-of-arms/${citizenname}.png`;
+        const localUrl = `/coat-of-arms/${username}.png`;
         
         // Store both URLs for better fallback options
-        coatOfArms[citizenname as string] = imageUrl;
-        //console.log(`Coat of arms for ${citizenname}: ${imageUrl} (local fallback: ${localUrl})`);
+        coatOfArms[username as string] = imageUrl;
+        //console.log(`Coat of arms for ${username}: ${imageUrl} (local fallback: ${localUrl})`);
       }
     });
     

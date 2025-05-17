@@ -7,7 +7,7 @@ const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
 
 interface GuildMember {
   citizenId: string;
-  citizenname: string;
+  username: string;
   firstName: string;
   lastName: string;
   coatOfArmsImage: string | null;
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
 
     const members: GuildMember[] = records.map(record => ({
       citizenId: record.id,
-      citizenname: record.get('CitizenName') as string,
+      username: record.get('CitizenName') as string,
       firstName: record.get('FirstName') as string,
       lastName: record.get('LastName') as string,
       coatOfArmsImage: record.get('CoatOfArmsImage') as string || null,

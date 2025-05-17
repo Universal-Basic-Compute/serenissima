@@ -39,12 +39,12 @@ export interface ResourceNode {
 }
 
 // Add this function to fetch resource counts
-export async function fetchResourceCounts(citizenname?: string): Promise<any[]> {
-  console.log(`%c[resourceUtils] Fetching resource counts for citizenname: ${citizenname || 'none'}`, 'color: #22c55e; font-weight: bold;');
+export async function fetchResourceCounts(username?: string): Promise<any[]> {
+  console.log(`%c[resourceUtils] Fetching resource counts for username: ${username || 'none'}`, 'color: #22c55e; font-weight: bold;');
   try {
     const url = new URL('/api/resources/counts', window.location.origin);
-    if (citizenname) {
-      url.searchParams.append('citizenname', citizenname);
+    if (username) {
+      url.searchParams.append('username', username);
     }
     
     console.log(`%c[resourceUtils] Fetching from URL: ${url.toString()}`, 'color: #22c55e; font-weight: bold;');

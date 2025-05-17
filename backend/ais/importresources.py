@@ -127,43 +127,43 @@ def get_resource_types_from_api() -> Dict:
         print(f"Exception fetching resource types from API: {str(e)}")
         return {}
 
-def get_citizen_buildings(tables, citizenname: str) -> List[Dict]:
+def get_citizen_buildings(tables, username: str) -> List[Dict]:
     """Get all buildings owned by a specific citizen."""
     try:
         # Query buildings where the citizen is the owner
-        formula = f"{{Owner}}='{citizenname}'"
+        formula = f"{{Owner}}='{username}'"
         buildings = tables["buildings"].all(formula=formula)
-        print(f"Found {len(buildings)} buildings owned by {citizenname}")
+        print(f"Found {len(buildings)} buildings owned by {username}")
         return buildings
     except Exception as e:
-        print(f"Error getting buildings for citizen {citizenname}: {str(e)}")
+        print(f"Error getting buildings for citizen {username}: {str(e)}")
         return []
 
-def get_citizen_resources(tables, citizenname: str) -> List[Dict]:
+def get_citizen_resources(tables, username: str) -> List[Dict]:
     """Get all resources owned by a specific citizen."""
     try:
         # Query resources where the citizen is the owner
-        formula = f"{{Owner}}='{citizenname}'"
+        formula = f"{{Owner}}='{username}'"
         resources = tables["resources"].all(formula=formula)
-        print(f"Found {len(resources)} resources owned by {citizenname}")
+        print(f"Found {len(resources)} resources owned by {username}")
         return resources
     except Exception as e:
-        print(f"Error getting resources for citizen {citizenname}: {str(e)}")
+        print(f"Error getting resources for citizen {username}: {str(e)}")
         return []
 
-def get_citizen_contracts(tables, citizenname: str) -> List[Dict]:
+def get_citizen_contracts(tables, username: str) -> List[Dict]:
     """Get all contracts where the citizen is the buyer."""
     try:
         # Get current time
         now = datetime.now().isoformat()
         
         # Query contracts where the citizen is the buyer and the contract is active (between CreatedAt and EndAt)
-        formula = f"AND({{Buyer}}='{citizenname}', {{CreatedAt}}<='{now}', {{EndAt}}>='{now}')"
+        formula = f"AND({{Buyer}}='{username}', {{CreatedAt}}<='{now}', {{EndAt}}>='{now}')"
         contracts = tables["contracts"].all(formula=formula)
-        print(f"Found {len(contracts)} active contracts where {citizenname} is the buyer")
+        print(f"Found {len(contracts)} active contracts where {username} is the buyer")
         return contracts
     except Exception as e:
-        print(f"Error getting contracts for citizen {citizenname}: {str(e)}")
+        print(f"Error getting contracts for citizen {username}: {str(e)}")
         return []
 
 def get_kinos_api_key() -> str:
@@ -186,7 +186,7 @@ def prepare_import_strategy_data(
     """Prepare a comprehensive data package for the AI to make import decisions."""
     
     # Extract citizen information
-    citizenname = ai_citizen["fields"].get("Username", "")
+    username = ai_citizen["fields"].get("Username", "")
     ducats = ai_citizen["fields"].get("Ducats", 0)
     
     # Find buildings that can import resources
@@ -253,7 +253,7 @@ def prepare_import_strategy_data(
     # Prepare the complete data package
     data_package = {
         "citizen": {
-            "citizenname": citizenname,
+            "username": username,
             "ducats": ducats,
             "total_buildings": len(citizen_buildings),
             "importable_buildings": len(importable_buildings)
@@ -267,14 +267,14 @@ def prepare_import_strategy_data(
     
     return data_package
 
-def send_import_strategy_request(ai_citizenname: str, data_package: Dict) -> Optional[Dict]:
+def send_import_strategy_request(ai_username: str, data_package: Dict) -> Optional[Dict]:
     """Send the import strategy request to the AI via Kinos API."""
     try:
         api_key = get_kinos_api_key()
         blueprint = "serenissima-ai"
         
         # Construct the API URL
-        url = f"https://api.kinos-engine.ai/v2/blueprints/{blueprint}/kins/{ai_citizenname}/messages"
+        url = f"https://api.kinos-engine.ai/v2/blueprints/{blueprint}/kins/{ai_username}/messages"
         
         # Set up headers with API key
         headers = {
@@ -283,7 +283,7 @@ def send_import_strategy_request(ai_citizenname: str, data_package: Dict) -> Opt
         }
         
         # Log the API request details
-        print(f"Sending import strategy request to AI citizen {ai_citizenname}")
+        print(f"Sending import strategy request to AI citizen {ai_username}")
         print(f"API URL: {url}")
         print(f"Citizen has {data_package['citizen']['ducats']} ducats")
         print(f"Citizen has {data_package['citizen']['importable_buildings']} buildings that can import resources")
@@ -350,7 +350,7 @@ If you decide not to set up any imports at this time, return an empty array:
         
         # Create system instructions with the cleaned, serialized data
         system_instructions = f"""
-You are {ai_citizenname}, an AI building owner in La Serenissima. You make your own decisions about resource import strategies.
+You are {ai_username}, an AI building owner in La Serenissima. You make your own decisions about resource import strategies.
 
 Here is the complete data about your current situation:
 {serialized_data}
@@ -379,7 +379,7 @@ If you decide not to set up any imports at this time, return an empty array.
         }
         
         # Make the API request
-        print(f"Making API request to Kinos for {ai_citizenname}...")
+        print(f"Making API request to Kinos for {ai_username}...")
         response = requests.post(url, headers=headers, json=payload)
         
         # Log the API response details
@@ -393,19 +393,19 @@ If you decide not to set up any imports at this time, return an empty array.
             print(f"API response status: {status}")
             
             if status == "completed":
-                print(f"Successfully sent import strategy request to AI citizen {ai_citizenname}")
+                print(f"Successfully sent import strategy request to AI citizen {ai_username}")
                 
                 # The response content is in the response field of response_data
                 content = response_data.get('response', '')
                 
                 # Log the entire response for debugging
-                print(f"FULL AI RESPONSE FROM {ai_citizenname}:")
+                print(f"FULL AI RESPONSE FROM {ai_username}:")
                 print("="*80)
                 print(content)
                 print("="*80)
                 
-                print(f"AI {ai_citizenname} response length: {len(content)} characters")
-                print(f"AI {ai_citizenname} response preview: {content[:200]}...")
+                print(f"AI {ai_username} response length: {len(content)} characters")
+                print(f"AI {ai_username} response preview: {content[:200]}...")
                 
                 # Try to extract the JSON decision from the response
                 try:
@@ -490,13 +490,13 @@ If you decide not to set up any imports at this time, return an empty array.
                     print(content)
                     return None
             else:
-                print(f"Error processing import strategy request for AI citizen {ai_citizenname}: {response_data}")
+                print(f"Error processing import strategy request for AI citizen {ai_username}: {response_data}")
                 return None
         else:
             print(f"Error from Kinos API: {response.status_code} - {response.text}")
             return None
     except Exception as e:
-        print(f"Error sending import strategy request to AI citizen {ai_citizenname}: {str(e)}")
+        print(f"Error sending import strategy request to AI citizen {ai_username}: {str(e)}")
         print(f"Exception traceback: {traceback.format_exc()}")
         return None
 
@@ -549,7 +549,7 @@ def validate_import_decision(
 
 def create_or_update_import_contract(
     tables, 
-    ai_citizenname: str, 
+    ai_username: str, 
     decision: Dict, 
     resource_types: Dict,
     existing_contracts: List[Dict]
@@ -604,7 +604,7 @@ def create_or_update_import_contract(
                     "Type": "import",
                     "ResourceType": resource_type,
                     "BuildingId": building_id,
-                    "Owner": ai_citizenname,
+                    "Owner": ai_username,
                     "Count": 0,  # Start with 0 count
                     "UpdatedAt": now
                 }
@@ -636,7 +636,7 @@ def create_or_update_import_contract(
             
             new_contract = {
                 "ContractId": contract_id,
-                "Buyer": ai_citizenname,
+                "Buyer": ai_username,
                 "Seller": "Italia",
                 "ResourceType": resource_type,
                 "Transporter": "Italia",
@@ -668,7 +668,7 @@ def create_or_update_import_contract(
                     "Type": "import",
                     "ResourceType": resource_type,
                     "BuildingId": building_id,
-                    "Owner": ai_citizenname,
+                    "Owner": ai_username,
                     "Count": 0,  # Start with 0 count
                     "UpdatedAt": now
                 }
@@ -765,12 +765,12 @@ def process_ai_import_strategies(dry_run: bool = False):
     # Filter AI citizens to only those who own buildings that can import resources
     filtered_ai_citizens = []
     for ai_citizen in ai_citizens:
-        ai_citizenname = ai_citizen["fields"].get("Citizenname")
-        if not ai_citizenname:
+        ai_username = ai_citizen["fields"].get("Citizenname")
+        if not ai_username:
             continue
             
         # Get buildings owned by this AI
-        citizen_buildings = get_citizen_buildings(tables, ai_citizenname)
+        citizen_buildings = get_citizen_buildings(tables, ai_username)
         
         # Check if any building can import resources
         has_importable_building = False
@@ -789,12 +789,12 @@ def process_ai_import_strategies(dry_run: bool = False):
         
         if has_importable_building and has_enough_ducats:
             filtered_ai_citizens.append(ai_citizen)
-            print(f"AI citizen {ai_citizenname} has buildings that can import resources and {ducats} ducats, including in processing")
+            print(f"AI citizen {ai_username} has buildings that can import resources and {ducats} ducats, including in processing")
         else:
             if not has_importable_building:
-                print(f"AI citizen {ai_citizenname} has no buildings that can import resources, skipping")
+                print(f"AI citizen {ai_username} has no buildings that can import resources, skipping")
             if not has_enough_ducats:
-                print(f"AI citizen {ai_citizenname} has insufficient ducats ({ducats}), skipping")
+                print(f"AI citizen {ai_username} has insufficient ducats ({ducats}), skipping")
     
     # Replace the original list with the filtered list
     ai_citizens = filtered_ai_citizens
@@ -809,25 +809,25 @@ def process_ai_import_strategies(dry_run: bool = False):
     
     # Process each AI citizen
     for ai_citizen in ai_citizens:
-        ai_citizenname = ai_citizen["fields"].get("Username")
-        if not ai_citizenname:
+        ai_username = ai_citizen["fields"].get("Username")
+        if not ai_username:
             continue
         
-        print(f"Processing AI citizen: {ai_citizenname}")
-        ai_import_results[ai_citizenname] = {
+        print(f"Processing AI citizen: {ai_username}")
+        ai_import_results[ai_username] = {
             "success": 0,
             "failure": 0,
             "imports": []
         }
         
         # Get buildings owned by this AI
-        citizen_buildings = get_citizen_buildings(tables, ai_citizenname)
+        citizen_buildings = get_citizen_buildings(tables, ai_username)
         
         # Get resources owned by this AI
-        citizen_resources = get_citizen_resources(tables, ai_citizenname)
+        citizen_resources = get_citizen_resources(tables, ai_username)
         
         # Get existing contracts where this AI is the buyer
-        citizen_contracts = get_citizen_contracts(tables, ai_citizenname)
+        citizen_contracts = get_citizen_contracts(tables, ai_username)
         
         # Prepare the data package for the AI
         data_package = prepare_import_strategy_data(
@@ -843,12 +843,12 @@ def process_ai_import_strategies(dry_run: bool = False):
         importable_buildings = data_package["importable_buildings"]
         
         if not importable_buildings:
-            print(f"AI citizen {ai_citizenname} has no buildings that can import resources, skipping")
+            print(f"AI citizen {ai_username} has no buildings that can import resources, skipping")
             continue
         
         # Send the import strategy request to the AI
         if not dry_run:
-            decisions = send_import_strategy_request(ai_citizenname, data_package)
+            decisions = send_import_strategy_request(ai_username, data_package)
             
             if decisions and "import_decisions" in decisions:
                 import_decisions = decisions["import_decisions"]
@@ -859,30 +859,30 @@ def process_ai_import_strategies(dry_run: bool = False):
                         # Create or update the import contract
                         success = create_or_update_import_contract(
                             tables, 
-                            ai_citizenname, 
+                            ai_username, 
                             decision, 
                             resource_types,
                             citizen_contracts
                         )
                         
                         if success:
-                            ai_import_results[ai_citizenname]["success"] += 1
-                            ai_import_results[ai_citizenname]["imports"].append({
+                            ai_import_results[ai_username]["success"] += 1
+                            ai_import_results[ai_username]["imports"].append({
                                 "building_id": decision["building_id"],
                                 "resource_type": decision["resource_type"],
                                 "hourly_amount": decision["hourly_amount"]
                             })
                         else:
-                            ai_import_results[ai_citizenname]["failure"] += 1
+                            ai_import_results[ai_username]["failure"] += 1
                     else:
-                        ai_import_results[ai_citizenname]["failure"] += 1
+                        ai_import_results[ai_username]["failure"] += 1
             else:
-                print(f"No valid import decisions received for {ai_citizenname}")
+                print(f"No valid import decisions received for {ai_username}")
         else:
             # In dry run mode, just log what would happen
-            print(f"[DRY RUN] Would send import strategy request to AI citizen {ai_citizenname}")
+            print(f"[DRY RUN] Would send import strategy request to AI citizen {ai_username}")
             print(f"[DRY RUN] Data package summary:")
-            print(f"  - Citizen: {data_package['citizen']['citizenname']}")
+            print(f"  - Citizen: {data_package['citizen']['username']}")
             print(f"  - Importable buildings: {len(importable_buildings)}")
             print(f"  - Resources: {len(data_package['resources'])}")
             print(f"  - Existing contracts: {len(data_package['existing_contracts'])}")

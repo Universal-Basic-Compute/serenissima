@@ -13,7 +13,7 @@ interface PolygonState {
   hoveredPolygonId: string | null;
   selectedPolygonId: string | null;
   landOwners: Record<string, string>; // Map of land ID to owner
-  citizens: Record<string, any>; // Map of citizenname to citizen data
+  citizens: Record<string, any>; // Map of username to citizen data
   bridges: any[];
   ownerCoatOfArmsMap: Record<string, string>;
   
@@ -425,7 +425,7 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
       }
       
       if (data.success && data.citizens) {
-        // Create a map of citizenname to citizen data
+        // Create a map of username to citizen data
         const citizensMap: Record<string, any> = {};
         
         data.citizens.forEach((citizen: any) => {
@@ -476,7 +476,7 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
       console.log('Owner coat of arms data:', data);
       
       if (data.success && data.citizens) {
-        // Create a map of owner citizenname to coat of arms URL
+        // Create a map of owner username to coat of arms URL
         const coatOfArmsMap: Record<string, string> = {};
         
         data.citizens.forEach((citizen: any) => {

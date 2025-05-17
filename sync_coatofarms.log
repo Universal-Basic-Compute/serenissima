@@ -21,14 +21,14 @@
 2025-05-10 15:40:56,389 - INFO - Examining 22 citizens for coat of arms images
 2025-05-10 15:40:56,390 - INFO - First citizen record fields: ['Wallet']
 2025-05-10 15:40:56,390 - INFO - First citizen record: {'id': 'rec1uiNqcZoQIMvCO', 'createdTime': '2025-05-07T14:32:07.000Z', 'fields': {'Wallet': 'Fopjr6gLWjcMeGjbFcn19AFXR5b6zTB16nQ119eV8YZn'}}
-2025-05-10 15:40:56,390 - INFO - Using wallet or ID as citizenname: Fopjr6gLWjcMeGjbFcn19AFXR5b6zTB16nQ119eV8YZn
+2025-05-10 15:40:56,390 - INFO - Using wallet or ID as username: Fopjr6gLWjcMeGjbFcn19AFXR5b6zTB16nQ119eV8YZn
 2025-05-10 15:40:56,390 - INFO - Citizen Fopjr6gLWjcMeGjbFcn19AFXR5b6zTB16nQ119eV8YZn has no coat of arms image
 2025-05-10 15:40:56,390 - INFO - All fields for Fopjr6gLWjcMeGjbFcn19AFXR5b6zTB16nQ119eV8YZn: {'Wallet': 'Fopjr6gLWjcMeGjbFcn19AFXR5b6zTB16nQ119eV8YZn'}
 2025-05-10 15:40:56,390 - INFO - Found coat of arms for citizen Marco in field 'CoatOfArmsImage': /coat-of-arms/Marco.png
 2025-05-10 15:40:56,391 - INFO - Added coat of arms for Marco: https://serenissima.ai/coat-of-arms/Marco.png
 2025-05-10 15:40:56,391 - INFO - Found coat of arms for citizen EtiennodaMurano in field 'CoatOfArmsImage': /coat-of-arms/Etienno_da_Murano_1746722931.png
 2025-05-10 15:40:56,391 - INFO - Added coat of arms for EtiennodaMurano: https://serenissima.ai/coat-of-arms/Etienno_da_Murano_1746722931.png
-2025-05-10 15:40:56,391 - INFO - Using wallet or ID as citizenname: HRybzuBwmEE7AhTdw2mUMTXzK97jH6C9y9FijnBnpV4W
+2025-05-10 15:40:56,391 - INFO - Using wallet or ID as username: HRybzuBwmEE7AhTdw2mUMTXzK97jH6C9y9FijnBnpV4W
 2025-05-10 15:40:56,391 - INFO - Citizen HRybzuBwmEE7AhTdw2mUMTXzK97jH6C9y9FijnBnpV4W has no coat of arms image
 2025-05-10 15:40:56,391 - INFO - All fields for HRybzuBwmEE7AhTdw2mUMTXzK97jH6C9y9FijnBnpV4W: {'Wallet': 'HRybzuBwmEE7AhTdw2mUMTXzK97jH6C9y9FijnBnpV4W', 'Ducats': 2000000, 'LastActiveAt': '2025-05-08T07:04:43.807Z'}
 2025-05-10 15:40:56,391 - INFO - Found coat of arms for citizen meyti_tgz in field 'CoatOfArmsImage': /coat-of-arms/meyti_tgz.png
@@ -43,7 +43,7 @@
 2025-05-10 15:40:56,392 - INFO - Added coat of arms for John_Jeffries: https://serenissima.ai/coat-of-arms/John_Jeffries.png
 2025-05-10 15:40:56,392 - INFO - Found coat of arms for citizen ConsiglioDeiDieci in field 'CoatOfArmsImage': /coat-of-arms/ConsiglioDeiDieci.png
 2025-05-10 15:40:56,392 - INFO - Added coat of arms for ConsiglioDeiDieci: https://serenissima.ai/coat-of-arms/ConsiglioDeiDieci.png
-2025-05-10 15:40:56,392 - INFO - Using wallet or ID as citizenname: BECGjgNwEnaaxvK84or6vWvbR1xcX6wQc5Zmy9vvqZ2V
+2025-05-10 15:40:56,392 - INFO - Using wallet or ID as username: BECGjgNwEnaaxvK84or6vWvbR1xcX6wQc5Zmy9vvqZ2V
 2025-05-10 15:40:56,392 - INFO - Citizen BECGjgNwEnaaxvK84or6vWvbR1xcX6wQc5Zmy9vvqZ2V has no coat of arms image
 2025-05-10 15:40:56,392 - INFO - All fields for BECGjgNwEnaaxvK84or6vWvbR1xcX6wQc5Zmy9vvqZ2V: {'Wallet': 'BECGjgNwEnaaxvK84or6vWvbR1xcX6wQc5Zmy9vvqZ2V'}
 2025-05-10 15:40:56,392 - INFO - Found coat of arms for citizen steven in field 'CoatOfArmsImage': /coat-of-arms/steven_1746864002.png
@@ -63,7 +63,7 @@
 2025-05-10 15:40:56,393 - INFO - Found coat of arms for citizen NLR in field 'CoatOfArmsImage': /coat-of-arms/de12ced3-79e6-4fdb-b575-fbcb2009e101.png
 2025-05-10 15:40:56,393 - INFO - Added coat of arms for NLR: https://serenissima.ai/coat-of-arms/de12ced3-79e6-4fdb-b575-fbcb2009e101.png
 2025-05-10 15:40:56,394 - INFO - Citizen meyti_tgz2 has no coat of arms image
-2025-05-10 15:40:56,395 - INFO - All fields for meyti_tgz2: {'Wallet': 'Hn7kRETV2xuhoUNWtYc2D8VFgNWhuZtgHCiwVDinhgV3', 'Citizenname': 'meyti_tgz2', 'FamilyMotto': 'Honor and cunning bring dominion', 'FamilyCoatOfArms': 'A golden lion standing over a silver sea, with a red crescent above � symbol of trade between the East and Venice.', 'FirstName': 'mahdi', 'LastName': 'taghizadeh', 'Color': '#DAA520', 'LastActiveAt': '2025-05-08T18:46:43.745Z'}
+2025-05-10 15:40:56,395 - INFO - All fields for meyti_tgz2: {'Wallet': 'Hn7kRETV2xuhoUNWtYc2D8VFgNWhuZtgHCiwVDinhgV3', 'Username': 'meyti_tgz2', 'FamilyMotto': 'Honor and cunning bring dominion', 'FamilyCoatOfArms': 'A golden lion standing over a silver sea, with a red crescent above � symbol of trade between the East and Venice.', 'FirstName': 'mahdi', 'LastName': 'taghizadeh', 'Color': '#DAA520', 'LastActiveAt': '2025-05-08T18:46:43.745Z'}
 2025-05-10 15:40:56,395 - INFO - Found coat of arms for citizen Feola007 in field 'CoatOfArmsImage': /coat-of-arms/Feola007.png
 2025-05-10 15:40:56,395 - INFO - Added coat of arms for Feola007: https://serenissima.ai/coat-of-arms/Feola007.png
 2025-05-10 15:40:56,395 - INFO - Found coat of arms for citizen Lucid in field 'CoatOfArmsImage': /coat-of-arms/Lucid.png

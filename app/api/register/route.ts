@@ -38,7 +38,7 @@ export async function POST(request: Request) {
         citizen: {
           id: citizen.id,
           walletAddress: citizen.fields.Wallet,
-          citizenname: citizen.fields.Citizenname || null,
+          username: citizen.fields.Username || null,
           firstName: citizen.fields.FirstName || null,
           lastName: citizen.fields.LastName || null,
           ducats: citizen.fields.Ducats || 0,
@@ -62,7 +62,7 @@ export async function POST(request: Request) {
       citizen: {
         id: newCitizen.id,
         walletAddress: newCitizen.fields.Wallet,
-        citizenname: null,
+        username: null,
         firstName: null,
         lastName: null,
         ducats: newCitizen.fields.Ducats || 100,

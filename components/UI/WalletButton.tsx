@@ -38,7 +38,7 @@ export default function WalletButton({ className = '', onSettingsClick }: Wallet
           className="bg-amber-50 px-4 py-2 rounded-lg shadow-md hover:bg-amber-100 transition-colors flex items-center border-2 border-amber-300"
         >
           <PlayerProfile
-            citizenname={citizenProfile.citizenname}
+            username={citizenProfile.username}
             firstName={citizenProfile.firstName}
             lastName={citizenProfile.lastName}
             coatOfArmsImage={citizenProfile.coatOfArmsImage}

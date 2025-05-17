@@ -80,11 +80,11 @@ def get_consiglio_dei_dieci(tables) -> Optional[Dict]:
     try:
         # Try different variations of the name
         for name_variation in ["ConsiglioDeiDieci", "Consiglio Dei Dieci", "Consiglio dei Dieci"]:
-            formula = f"{{Citizenname}}='{name_variation}'"
+            formula = f"{{Username}}='{name_variation}'"
             records = tables['citizens'].all(formula=formula)
             
             if records:
-                log.info(f"Found ConsiglioDeiDieci record with citizenname: {name_variation}")
+                log.info(f"Found ConsiglioDeiDieci record with username: {name_variation}")
                 return records[0]
         
         log.error("ConsiglioDeiDieci record not found")
@@ -129,14 +129,14 @@ def update_citizen_wealth(tables, citizen_id: str, amount: float) -> bool:
             return False
         
         # Get current wealth
-        current_wealth = citizen['fields'].get('Wealth', 0)
+        current_wealth = citizen['fields'].get('Ducats', 0)
         
         # Calculate new wealth
         new_wealth = current_wealth + amount
         
         # Update the citizen record
         tables['citizens'].update(citizen_id, {
-            'Wealth': new_wealth
+            'Ducats': new_wealth
         })
         
         log.info(f"Updated wealth for citizen {citizen_id}: {current_wealth} -> {new_wealth}")
@@ -297,8 +297,8 @@ def test_telegram_connection():
             return False
         
         bot_data = bot_response.json()
-        bot_citizenname = bot_data.get("result", {}).get("citizenname", "Unknown")
-        log.info(f"Connected to Telegram bot: @{bot_citizenname}")
+        bot_username = bot_data.get("result", {}).get("username", "Unknown")
+        log.info(f"Connected to Telegram bot: @{bot_username}")
         
         # Now try to get chat info to verify the chat ID
         chat_info_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getChat?chat_id={MAIN_TELEGRAM_CHAT_ID}"
@@ -375,7 +375,7 @@ def redistribute_treasury(dry_run: bool = False):
         return
     
     consiglio_id = consiglio['id']
-    consiglio_citizenname = consiglio['fields'].get('Citizenname', 'ConsiglioDeiDieci')
+    consiglio_username = consiglio['fields'].get('Username', 'ConsiglioDeiDieci')
     consiglio_balance = consiglio['fields'].get('Ducats', 0)
     
     log.info(f"ConsiglioDeiDieci balance: {consiglio_balance} ⚜️ Ducats")
@@ -449,7 +449,7 @@ def redistribute_treasury(dry_run: bool = False):
             # Update citizen's wealth
             if update_citizen_wealth(tables, citizen_id, per_citizen_amount):
                 # Create transaction record
-                create_transaction_record(tables, consiglio_citizenname, citizen_id, per_citizen_amount)
+                create_transaction_record(tables, consiglio_username, citizen_id, per_citizen_amount)
                 
                 # Create notification for citizen
                 create_notification(

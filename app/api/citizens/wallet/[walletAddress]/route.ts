@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
       citizen: {
         id: citizen.id,
         walletAddress: citizen.fields.Wallet,
-        citizenname: citizen.fields.Citizenname || null,
+        username: citizen.fields.Username || null,
         firstName: citizen.fields.FirstName || null,
         lastName: citizen.fields.LastName || null,
         ducats: citizen.fields.Ducats || 0,

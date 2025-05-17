@@ -172,10 +172,10 @@ async def store_wallet(wallet_data: WalletRequest):
         print(f"Searching for wallet with formula: {formula}")
         existing_records = citizens_table.all(formula=formula)
         
-        # If not found and we have a citizenname, try citizenname match
+        # If not found and we have a username, try username match
         if not existing_records and wallet_data.citizen_name:
-            formula = f"{{Citizenname}}='{wallet_data.citizen_name}'"
-            print(f"Searching for citizenname with formula: {formula}")
+            formula = f"{{Username}}='{wallet_data.citizen_name}'"
+            print(f"Searching for username with formula: {formula}")
             existing_records = citizens_table.all(formula=formula)
         
         if existing_records:
@@ -190,7 +190,7 @@ async def store_wallet(wallet_data: WalletRequest):
                 update_fields["Ducats"] = wallet_data.ducats
                 
             if wallet_data.citizen_name:
-                update_fields["Citizenname"] = wallet_data.citizen_name
+                update_fields["Username"] = wallet_data.citizen_name
                 
             if wallet_data.first_name:
                 update_fields["FirstName"] = wallet_data.first_name
@@ -224,7 +224,7 @@ async def store_wallet(wallet_data: WalletRequest):
                 "id": record["id"],
                 "wallet_address": record["fields"].get("Wallet", ""),
                 "ducats": record["fields"].get("Ducats", 0),
-                "citizen_name": record["fields"].get("Citizenname", None),
+                "citizen_name": record["fields"].get("Username", None),
                 "first_name": record["fields"].get("FirstName", None),
                 "last_name": record["fields"].get("LastName", None),
                 "email": record["fields"].get("Email", None),
@@ -243,7 +243,7 @@ async def store_wallet(wallet_data: WalletRequest):
             fields["Ducats"] = wallet_data.ducats
             
         if wallet_data.citizen_name:
-            fields["Citizenname"] = wallet_data.citizen_name
+            fields["Username"] = wallet_data.citizen_name
             
         if wallet_data.first_name:
             fields["FirstName"] = wallet_data.first_name
@@ -280,7 +280,7 @@ async def store_wallet(wallet_data: WalletRequest):
             "id": record["id"],
             "wallet_address": record["fields"].get("Wallet", ""),
             "ducats": record["fields"].get("Ducats", 0),
-            "citizen_name": record["fields"].get("Citizenname", None),
+            "citizen_name": record["fields"].get("Username", None),
             "first_name": record["fields"].get("FirstName", None),
             "last_name": record["fields"].get("LastName", None),
             "email": record["fields"].get("Email", None),
@@ -308,7 +308,7 @@ async def get_wallet(wallet_address: str):
         matching_records = [
             record for record in all_citizens 
             if record["fields"].get("Wallet", "").lower() == normalized_address or
-               record["fields"].get("Citizenname", "").lower() == normalized_address
+               record["fields"].get("Username", "").lower() == normalized_address
         ]
         
         if not matching_records:
@@ -320,7 +320,7 @@ async def get_wallet(wallet_address: str):
             "id": record["id"],
             "wallet_address": record["fields"].get("Wallet", ""),
             "ducats": record["fields"].get("Ducats", 0),
-            "citizen_name": record["fields"].get("Citizenname", None),
+            "citizen_name": record["fields"].get("Username", None),
             "first_name": record["fields"].get("FirstName", None),
             "last_name": record["fields"].get("LastName", None),
             "email": record["fields"].get("Email", None),
@@ -355,7 +355,7 @@ async def transfer_compute_endpoint(wallet_data: WalletRequest):
         matching_records = [
             record for record in all_citizens 
             if record["fields"].get("Wallet", "").lower() == normalized_address or
-               record["fields"].get("Citizenname", "").lower() == normalized_address
+               record["fields"].get("Username", "").lower() == normalized_address
         ]
         
         # Log the incoming amount for debugging
@@ -399,7 +399,7 @@ async def transfer_compute_endpoint(wallet_data: WalletRequest):
                 "id": updated_record["id"],
                 "wallet_address": updated_record["fields"].get("Wallet", ""),
                 "ducats": updated_record["fields"].get("Ducats", 0),
-                "citizen_name": updated_record["fields"].get("Citizenname", None),
+                "citizen_name": updated_record["fields"].get("Username", None),
                 "email": updated_record["fields"].get("Email", None),
                 "family_motto": updated_record["fields"].get("FamilyMotto", None),
                 "coat_of_arms_image": updated_record["fields"].get("CoatOfArmsImage", None)
@@ -437,7 +437,7 @@ async def transfer_compute_endpoint(wallet_data: WalletRequest):
                 "id": record["id"],
                 "wallet_address": record["fields"].get("Wallet", ""),
                 "ducats": record["fields"].get("Ducats", 0),
-                "citizen_name": record["fields"].get("Citizenname", None),
+                "citizen_name": record["fields"].get("Username", None),
                 "email": record["fields"].get("Email", None),
                 "family_motto": record["fields"].get("FamilyMotto", None)
             }
@@ -489,7 +489,7 @@ async def withdraw_compute(wallet_data: WalletRequest):
             "id": updated_record["id"],
             "wallet_address": updated_record["fields"].get("Wallet", ""),
             "ducats": updated_record["fields"].get("Ducats", 0),
-            "citizen_name": updated_record["fields"].get("Citizenname", None),
+            "citizen_name": updated_record["fields"].get("Username", None),
             "email": updated_record["fields"].get("Email", None),
             "family_motto": updated_record["fields"].get("FamilyMotto", None),
             "coat_of_arms_image": updated_record["fields"].get("CoatOfArmsImage", None)
@@ -614,18 +614,18 @@ async def get_lands():
             fields = record['fields']
             owner = fields.get('Citizen', '')
             
-            # If we have an owner, try to get their citizenname
-            owner_citizenname = owner
+            # If we have an owner, try to get their username
+            owner_username = owner
             if owner:
-                # Look up the citizen to get their citizenname
+                # Look up the citizen to get their username
                 citizen_formula = f"{{Wallet}}='{owner}'"
                 citizen_records = citizens_table.all(formula=citizen_formula)
                 if citizen_records:
-                    owner_citizenname = citizen_records[0]['fields'].get('Citizenname', owner)
+                    owner_username = citizen_records[0]['fields'].get('Username', owner)
             
             land_data = {
                 'id': fields.get('LandId', ''),
-                'owner': owner_citizenname,  # Use citizenname instead of wallet address
+                'owner': owner_username,  # Use username instead of wallet address
                 'historicalName': fields.get('HistoricalName', ''),
                 'englishName': fields.get('EnglishName', ''),
                 'description': fields.get('Description', '')
@@ -675,16 +675,16 @@ async def update_land_owner(land_id: str, data: dict):
         raise HTTPException(status_code=400, detail="Owner is required")
     
     try:
-        # Convert owner to citizenname if it's a wallet address
-        owner_citizenname = data["owner"]
+        # Convert owner to username if it's a wallet address
+        owner_username = data["owner"]
         if data["owner"].startswith("0x") or len(data["owner"]) > 30:
-            # Look up the citizenname for this wallet
+            # Look up the username for this wallet
             owner_records = citizens_table.all(formula=f"{{Wallet}}='{data['owner']}'")
             if owner_records:
-                owner_citizenname = owner_records[0]["fields"].get("Citizenname", data["owner"])
-                print(f"Converted owner wallet {data['owner']} to citizenname {owner_citizenname}")
+                owner_username = owner_records[0]["fields"].get("Username", data["owner"])
+                print(f"Converted owner wallet {data['owner']} to username {owner_username}")
             else:
-                print(f"Could not find citizenname for wallet {data['owner']}, using wallet as citizenname")
+                print(f"Could not find username for wallet {data['owner']}, using wallet as username")
         
         # Check if land exists
         formula = f"{{LandId}}='{land_id}'"
@@ -698,7 +698,7 @@ async def update_land_owner(land_id: str, data: dict):
             
             # Update the owner
             updated_record = lands_table.update(record["id"], {
-                "Citizen": owner_citizenname,  # Use citizenname instead of wallet address
+                "Citizen": owner_username,  # Use username instead of wallet address
                 "Wallet": data.get("wallet", data["owner"])  # Keep wallet for reference
             })
             
@@ -715,7 +715,7 @@ async def update_land_owner(land_id: str, data: dict):
             # Create new record
             fields = {
                 "LandId": land_id,
-                "Citizen": owner_citizenname,  # Use citizenname instead of wallet address
+                "Citizen": owner_username,  # Use username instead of wallet address
                 "Wallet": data.get("wallet", data["owner"])  # Keep wallet for reference
             }
             
@@ -847,16 +847,16 @@ async def create_transaction(transaction_data: TransactionRequest):
         raise HTTPException(status_code=400, detail="Price must be greater than 0")
     
     try:
-        # Convert seller to citizenname if it's a wallet address
-        seller_citizenname = transaction_data.seller
+        # Convert seller to username if it's a wallet address
+        seller_username = transaction_data.seller
         if transaction_data.seller.startswith("0x") or len(transaction_data.seller) > 30:
-            # Look up the citizenname for this wallet
+            # Look up the username for this wallet
             seller_records = citizens_table.all(formula=f"{{Wallet}}='{transaction_data.seller}'")
             if seller_records:
-                seller_citizenname = seller_records[0]["fields"].get("Citizenname", transaction_data.seller)
-                print(f"Converted seller wallet {transaction_data.seller} to citizenname {seller_citizenname}")
+                seller_username = seller_records[0]["fields"].get("Username", transaction_data.seller)
+                print(f"Converted seller wallet {transaction_data.seller} to username {seller_username}")
             else:
-                print(f"Could not find citizenname for wallet {transaction_data.seller}, using wallet as citizenname")
+                print(f"Could not find username for wallet {transaction_data.seller}, using wallet as username")
         
         # Check if transaction already exists for this asset
         formula = f"AND({{AssetId}}='{transaction_data.asset_id}', {{Type}}='{transaction_data.type}', {{ExecutedAt}}=BLANK())"
@@ -888,25 +888,25 @@ async def create_transaction(transaction_data: TransactionRequest):
         fields = {
             "Type": transaction_data.type,
             "AssetId": transaction_data.asset_id,
-            "Seller": seller_citizenname,  # Use citizenname instead of wallet address
+            "Seller": seller_username,  # Use username instead of wallet address
             "Price": transaction_data.price,
             "CreatedAt": now,
             "UpdatedAt": now
         }
         
         if transaction_data.buyer:
-            # Convert buyer to citizenname if it's a wallet address
-            buyer_citizenname = transaction_data.buyer
+            # Convert buyer to username if it's a wallet address
+            buyer_username = transaction_data.buyer
             if transaction_data.buyer.startswith("0x") or len(transaction_data.buyer) > 30:
-                # Look up the citizenname for this wallet
+                # Look up the username for this wallet
                 buyer_records = citizens_table.all(formula=f"{{Wallet}}='{transaction_data.buyer}'")
                 if buyer_records:
-                    buyer_citizenname = buyer_records[0]["fields"].get("Citizenname", transaction_data.buyer)
-                    print(f"Converted buyer wallet {transaction_data.buyer} to citizenname {buyer_citizenname}")
+                    buyer_username = buyer_records[0]["fields"].get("Username", transaction_data.buyer)
+                    print(f"Converted buyer wallet {transaction_data.buyer} to username {buyer_username}")
                 else:
-                    print(f"Could not find citizenname for wallet {transaction_data.buyer}, using wallet as citizenname")
+                    print(f"Could not find username for wallet {transaction_data.buyer}, using wallet as username")
             
-            fields["Buyer"] = buyer_citizenname  # Use citizenname instead of wallet address
+            fields["Buyer"] = buyer_username  # Use username instead of wallet address
             
         # Store land details as JSON in Notes field if this is a land transaction
         if transaction_data.type == "land":
@@ -1154,35 +1154,35 @@ async def execute_transaction(transaction_id: str, data: dict):
         price = record["fields"].get("Price", 0)
         buyer = data["buyer"]
         
-        # Always use citizennames for buyer and seller
-        # First, check if the buyer is a wallet address and convert to citizenname if needed
-        buyer_citizenname = buyer
+        # Always use usernames for buyer and seller
+        # First, check if the buyer is a wallet address and convert to username if needed
+        buyer_username = buyer
         if buyer.startswith("0x") or len(buyer) > 30:  # Simple check for wallet address
-            # Look up the citizenname for this wallet
+            # Look up the username for this wallet
             buyer_records = citizens_table.all(formula=f"{{Wallet}}='{buyer}'")
             if buyer_records:
-                buyer_citizenname = buyer_records[0]["fields"].get("Citizenname", buyer)
-                print(f"Converted buyer wallet {buyer} to citizenname {buyer_citizenname}")
+                buyer_username = buyer_records[0]["fields"].get("Username", buyer)
+                print(f"Converted buyer wallet {buyer} to username {buyer_username}")
             else:
-                print(f"Could not find citizenname for wallet {buyer}, using wallet as citizenname")
+                print(f"Could not find username for wallet {buyer}, using wallet as username")
         
         # Same for seller
-        seller_citizenname = seller
+        seller_username = seller
         if seller.startswith("0x") or len(seller) > 30:
             seller_records = citizens_table.all(formula=f"{{Wallet}}='{seller}'")
             if seller_records:
-                seller_citizenname = seller_records[0]["fields"].get("Citizenname", seller)
-                print(f"Converted seller wallet {seller} to citizenname {seller_citizenname}")
+                seller_username = seller_records[0]["fields"].get("Username", seller)
+                print(f"Converted seller wallet {seller} to username {seller_username}")
             else:
-                print(f"Could not find citizenname for wallet {seller}, using wallet as citizenname")
+                print(f"Could not find username for wallet {seller}, using wallet as username")
         
         # Transfer the price from buyer to seller first to ensure funds are available
-        if price > 0 and seller_citizenname and buyer_citizenname:
+        if price > 0 and seller_username and buyer_username:
             try:
-                # Find buyer record by citizenname
-                buyer_records = citizens_table.all(formula=f"{{Citizenname}}='{buyer_citizenname}'")
+                # Find buyer record by username
+                buyer_records = citizens_table.all(formula=f"{{Username}}='{buyer_username}'")
                 if not buyer_records:
-                    raise HTTPException(status_code=404, detail=f"Buyer not found: {buyer_citizenname}")
+                    raise HTTPException(status_code=404, detail=f"Buyer not found: {buyer_username}")
                 
                 buyer_record = buyer_records[0]
                 buyer_compute = buyer_record["fields"].get("Ducats", 0)
@@ -1191,21 +1191,21 @@ async def execute_transaction(transaction_id: str, data: dict):
                 if buyer_compute < price:
                     raise HTTPException(status_code=400, detail=f"Buyer does not have enough compute. Required: {price}, Available: {buyer_compute}")
                 
-                # Find seller record by citizenname
-                seller_records = citizens_table.all(formula=f"{{Citizenname}}='{seller_citizenname}'")
+                # Find seller record by username
+                seller_records = citizens_table.all(formula=f"{{Username}}='{seller_username}'")
                 if not seller_records:
-                    raise HTTPException(status_code=404, detail=f"Seller not found: {seller_citizenname}")
+                    raise HTTPException(status_code=404, detail=f"Seller not found: {seller_username}")
                 
                 seller_record = seller_records[0]
                 seller_compute = seller_record["fields"].get("Ducats", 0)
                 
-                print(f"Transferring {price} compute from {buyer_citizenname} (balance: {buyer_compute}) to {seller_citizenname} (balance: {seller_compute})")
+                print(f"Transferring {price} compute from {buyer_username} (balance: {buyer_compute}) to {seller_username} (balance: {seller_compute})")
                 
                 # Create a transaction log entry before making changes
                 transaction_log = {
                     "transaction_id": transaction_id,
-                    "buyer": buyer_citizenname,
-                    "seller": seller_citizenname,
+                    "buyer": buyer_username,
+                    "seller": seller_username,
                     "price": price,
                     "buyer_before": buyer_compute,
                     "seller_before": seller_compute,
@@ -1233,8 +1233,8 @@ async def execute_transaction(transaction_id: str, data: dict):
                     transactions_table.create({
                         "Type": "transfer",
                         "AssetId": "compute_token",
-                        "Seller": seller_citizenname,
-                        "Buyer": buyer_citizenname,
+                        "Seller": seller_username,
+                        "Buyer": buyer_username,
                         "Price": price,
                         "CreatedAt": datetime.datetime.now().isoformat(),
                         "UpdatedAt": datetime.datetime.now().isoformat(),
@@ -1254,8 +1254,8 @@ async def execute_transaction(transaction_id: str, data: dict):
                 try:
                     failed_transaction = {
                         "transaction_id": transaction_id,
-                        "buyer": buyer_citizenname,
-                        "seller": seller_citizenname,
+                        "buyer": buyer_username,
+                        "seller": seller_username,
                         "price": price,
                         "error": str(balance_error),
                         "timestamp": datetime.datetime.now().isoformat(),
@@ -1266,8 +1266,8 @@ async def execute_transaction(transaction_id: str, data: dict):
                     transactions_table.create({
                         "Type": "error",
                         "AssetId": "compute_token",
-                        "Seller": seller_citizenname,
-                        "Buyer": buyer_citizenname,
+                        "Seller": seller_username,
+                        "Buyer": buyer_username,
                         "Price": price,
                         "CreatedAt": datetime.datetime.now().isoformat(),
                         "UpdatedAt": datetime.datetime.now().isoformat(),
@@ -1280,12 +1280,12 @@ async def execute_transaction(transaction_id: str, data: dict):
                     print(f"ERROR saving failed transaction record: {str(record_error)}")
                     traceback.print_exc(file=sys.stdout)
             
-            print(f"Transferred {price} compute from {buyer_citizenname} to {seller_citizenname}")
+            print(f"Transferred {price} compute from {buyer_username} to {seller_username}")
         
         # Update the land ownership if it's a land transaction
         if record["fields"].get("Type") == "land" and record["fields"].get("AssetId"):
             land_id = record["fields"].get("AssetId")
-            print(f"Updating land ownership for asset {land_id} to {buyer_citizenname}")
+            print(f"Updating land ownership for asset {land_id} to {buyer_username}")
             
             # Check if land exists in Airtable
             try:
@@ -1298,19 +1298,19 @@ async def execute_transaction(transaction_id: str, data: dict):
                     land_record = land_records[0]
                     print(f"Found existing land record: {land_record['id']}")
                     
-                    # Update the owner with citizenname
+                    # Update the owner with username
                     lands_table.update(land_record["id"], {
-                        "Citizen": buyer_citizenname
+                        "Citizen": buyer_username
                     })
-                    print(f"Updated land owner in Airtable to {buyer_citizenname}")
+                    print(f"Updated land owner in Airtable to {buyer_username}")
                 else:
                     # Create new land record
                     print(f"Land record not found, creating new record for {land_id}")
                     lands_table.create({
                         "LandId": land_id,
-                        "Citizen": buyer_citizenname
+                        "Citizen": buyer_username
                     })
-                    print(f"Created new land record with owner {buyer_citizenname}")
+                    print(f"Created new land record with owner {buyer_username}")
             except Exception as land_error:
                 print(f"ERROR updating land ownership in Airtable: {str(land_error)}")
                 traceback.print_exc(file=sys.stdout)
@@ -1319,7 +1319,7 @@ async def execute_transaction(transaction_id: str, data: dict):
         # Update the transaction with buyer and executed_at timestamp
         now = datetime.datetime.now().isoformat()
         updated_record = transactions_table.update(transaction_id, {
-            "Buyer": buyer_citizenname,  # Use citizenname instead of wallet address
+            "Buyer": buyer_username,  # Use username instead of wallet address
             "ExecutedAt": now,
             "UpdatedAt": now
         })
@@ -1353,7 +1353,7 @@ async def generate_coat_of_arms(data: dict):
     if not data.get("description"):
         raise HTTPException(status_code=400, detail="Description is required")
     
-    citizenname = data.get("citizenname", "anonymous")
+    username = data.get("username", "anonymous")
     
     ideogram_api_key = os.getenv("IDEOGRAM_API_KEY", "")
     
@@ -1413,10 +1413,10 @@ async def generate_coat_of_arms(data: dict):
                 content={"success": False, "error": f"Failed to download image: {image_response.status_code} {image_response.reason}"}
             )
         
-        # Sanitize citizenname for filename
+        # Sanitize username for filename
         import re
-        sanitized_citizenname = re.sub(r'[^a-zA-Z0-9_-]', '_', citizenname)
-        filename = f"{sanitized_citizenname}_{int(time.time())}.png"
+        sanitized_username = re.sub(r'[^a-zA-Z0-9_-]', '_', username)
+        filename = f"{sanitized_username}_{int(time.time())}.png"
         
         # Create directory if it doesn't exist
         public_dir = os.path.join(os.getcwd(), 'public')
@@ -1468,10 +1468,10 @@ async def transfer_compute_solana(wallet_data: WalletRequest):
         print(f"Searching for wallet with formula: {formula}")
         existing_records = citizens_table.all(formula=formula)
         
-        # If not found, try citizenname match
+        # If not found, try username match
         if not existing_records:
-            formula = f"{{Citizenname}}='{wallet_data.wallet_address}'"
-            print(f"Searching for citizenname with formula: {formula}")
+            formula = f"{{Username}}='{wallet_data.wallet_address}'"
+            print(f"Searching for username with formula: {formula}")
             existing_records = citizens_table.all(formula=formula)
         
         # Log the incoming amount for debugging
@@ -1570,7 +1570,7 @@ async def transfer_compute_solana(wallet_data: WalletRequest):
                 "id": updated_record["id"],
                 "wallet_address": updated_record["fields"].get("Wallet", ""),
                 "ducats": updated_record["fields"].get("Ducats", 0),
-                "citizen_name": updated_record["fields"].get("Citizenname", None),
+                "citizen_name": updated_record["fields"].get("Username", None),
                 "email": updated_record["fields"].get("Email", None),
                 "family_motto": updated_record["fields"].get("FamilyMotto", None),
                 "coat_of_arms_image": updated_record["fields"].get("CoatOfArmsImage", None),
@@ -1611,7 +1611,7 @@ async def transfer_compute_solana(wallet_data: WalletRequest):
                 "id": record["id"],
                 "wallet_address": record["fields"].get("Wallet", ""),
                 "ducats": record["fields"].get("Ducats", 0),
-                "citizen_name": record["fields"].get("Citizenname", None),
+                "citizen_name": record["fields"].get("Username", None),
                 "email": record["fields"].get("Email", None),
                 "family_motto": record["fields"].get("FamilyMotto", None),
                 "transaction_signature": signature,
@@ -1719,10 +1719,10 @@ async def withdraw_compute_solana(wallet_data: WalletRequest):
         print(f"Searching for wallet with formula: {formula}")
         existing_records = citizens_table.all(formula=formula)
         
-        # If not found, try citizenname match
+        # If not found, try username match
         if not existing_records:
-            formula = f"{{Citizenname}}='{wallet_data.wallet_address}'"
-            print(f"Searching for citizenname with formula: {formula}")
+            formula = f"{{Username}}='{wallet_data.wallet_address}'"
+            print(f"Searching for username with formula: {formula}")
             existing_records = citizens_table.all(formula=formula)
         
         if not existing_records:
@@ -1801,7 +1801,7 @@ async def withdraw_compute_solana(wallet_data: WalletRequest):
                     "id": updated_record["id"],
                     "wallet_address": updated_record["fields"].get("Wallet", ""),
                     "ducats": updated_record["fields"].get("Ducats", 0),
-                    "citizen_name": updated_record["fields"].get("Citizenname", None),
+                    "citizen_name": updated_record["fields"].get("Username", None),
                     "email": updated_record["fields"].get("Email", None),
                     "family_motto": updated_record["fields"].get("FamilyMotto", None),
                     "coat_of_arms_image": updated_record["fields"].get("CoatOfArmsImage", None),
@@ -1837,7 +1837,7 @@ async def withdraw_compute_solana(wallet_data: WalletRequest):
             "id": updated_record["id"],
             "wallet_address": updated_record["fields"].get("Wallet", ""),
             "ducats": updated_record["fields"].get("Ducats", 0),
-            "citizen_name": updated_record["fields"].get("Citizenname", None),
+            "citizen_name": updated_record["fields"].get("Username", None),
             "email": updated_record["fields"].get("Email", None),
             "family_motto": updated_record["fields"].get("FamilyMotto", None),
             "coat_of_arms_image": updated_record["fields"].get("CoatOfArmsImage", None),
@@ -1872,7 +1872,7 @@ async def get_citizens_coat_of_arms():
             fields = record['fields']
             if 'CoatOfArmsImage' in fields:
                 citizen_data = {
-                    'citizen_name': fields.get('Citizenname', ''),
+                    'citizen_name': fields.get('Username', ''),
                     'first_name': fields.get('FirstName', ''),
                     'last_name': fields.get('LastName', ''),
                     'coat_of_arms_image': fields.get('CoatOfArmsImage', '')
@@ -1901,7 +1901,7 @@ async def get_citizens():
         for record in records:
             fields = record['fields']
             citizen_data = {
-                'citizen_name': fields.get('Citizenname', ''),
+                'citizen_name': fields.get('Username', ''),
                 'first_name': fields.get('FirstName', ''),
                 'last_name': fields.get('LastName', ''),
                 'wallet_address': fields.get('Wallet', ''),
@@ -2111,19 +2111,19 @@ async def apply_for_loan(loan_application: dict):
     if not loan_application.get("principalAmount") or loan_application.get("principalAmount") <= 0:
         raise HTTPException(status_code=400, detail="Principal amount must be greater than 0")
     
-    # Convert wallet address to citizenname if needed
+    # Convert wallet address to username if needed
     borrower = loan_application.get("borrower")
-    borrower_citizenname = borrower
+    borrower_username = borrower
     
-    # Check if borrower is a wallet address and convert to citizenname if needed
+    # Check if borrower is a wallet address and convert to username if needed
     if borrower and (borrower.startswith("0x") or len(borrower) > 30):
-        # Look up the citizenname for this wallet
+        # Look up the username for this wallet
         borrower_records = citizens_table.all(formula=f"{{Wallet}}='{borrower}'")
         if borrower_records:
-            borrower_citizenname = borrower_records[0]["fields"].get("Citizenname", borrower)
-            print(f"Converted borrower wallet {borrower} to citizenname {borrower_citizenname}")
+            borrower_username = borrower_records[0]["fields"].get("Username", borrower)
+            print(f"Converted borrower wallet {borrower} to username {borrower_username}")
         else:
-            print(f"Could not find citizenname for wallet {borrower}, using wallet as citizenname")
+            print(f"Could not find username for wallet {borrower}, using wallet as username")
     
     try:
         # If loanId is provided, get the loan details
@@ -2164,8 +2164,8 @@ async def apply_for_loan(loan_application: dict):
                 
                 # Create a new loan record instead of updating the template
                 new_loan = {
-                    "Name": f"Official Loan - {borrower_citizenname}",
-                    "Borrower": borrower_citizenname,
+                    "Name": f"Official Loan - {borrower_username}",
+                    "Borrower": borrower_username,
                     "Lender": lender,
                     "Status": "active",  # Set to active immediately
                     "Type": "official",  # Mark as an official loan
@@ -2190,7 +2190,7 @@ async def apply_for_loan(loan_application: dict):
                     # Find borrower record
                     borrower_records = citizens_table.all(formula=f"{{Wallet}}='{borrower}'")
                     if not borrower_records:
-                        borrower_records = citizens_table.all(formula=f"{{Citizenname}}='{borrower_citizenname}'")
+                        borrower_records = citizens_table.all(formula=f"{{Username}}='{borrower_username}'")
                     
                     if borrower_records:
                         borrower_record = borrower_records[0]
@@ -2269,8 +2269,8 @@ async def apply_for_loan(loan_application: dict):
             if loan_record["fields"].get("Status") == "template":
                 # Create a new loan record
                 new_loan = {
-                    "Name": f"Loan Application - {borrower_citizenname}",
-                    "Borrower": borrower_citizenname,
+                    "Name": f"Loan Application - {borrower_username}",
+                    "Borrower": borrower_username,
                     "Lender": loan_record["fields"].get("Lender", "Treasury"),
                     "Status": "pending",
                     "Type": "official",  # Mark as an official loan
@@ -2311,7 +2311,7 @@ async def apply_for_loan(loan_application: dict):
             else:
                 # For non-template loans, update the existing loan record
                 updated_record = loans_table.update(loan_id, {
-                    "Borrower": borrower_citizenname,
+                    "Borrower": borrower_username,
                     "Status": "pending",
                     "PrincipalAmount": principal,
                     "RemainingBalance": principal,
@@ -2346,8 +2346,8 @@ async def apply_for_loan(loan_application: dict):
             
             # Create the loan record
             record = loans_table.create({
-                "Name": f"Loan Application - {borrower_citizenname}",
-                "Borrower": borrower_citizenname,
+                "Name": f"Loan Application - {borrower_username}",
+                "Borrower": borrower_username,
                 "Status": "pending",
                 "Type": "custom",  # Mark as a custom loan
                 "PrincipalAmount": loan_application.get("principalAmount"),
@@ -2556,10 +2556,10 @@ async def inject_compute_complete(data: dict):
         print(f"Searching for wallet with formula: {formula}")
         existing_records = citizens_table.all(formula=formula)
         
-        # If not found, try citizenname match
+        # If not found, try username match
         if not existing_records:
-            formula = f"{{Citizenname}}='{data['wallet_address']}'"
-            print(f"Searching for citizenname with formula: {formula}")
+            formula = f"{{Username}}='{data['wallet_address']}'"
+            print(f"Searching for username with formula: {formula}")
             existing_records = citizens_table.all(formula=formula)
         
         # Log the incoming amount for debugging
@@ -2605,7 +2605,7 @@ async def inject_compute_complete(data: dict):
                 "id": updated_record["id"],
                 "wallet_address": updated_record["fields"].get("Wallet", ""),
                 "ducats": updated_record["fields"].get("Ducats", 0),
-                "citizen_name": updated_record["fields"].get("Citizenname", None),
+                "citizen_name": updated_record["fields"].get("Username", None),
                 "email": updated_record["fields"].get("Email", None),
                 "family_motto": updated_record["fields"].get("FamilyMotto", None),
                 "coat_of_arms_image": updated_record["fields"].get("CoatOfArmsImage", None),
@@ -2645,7 +2645,7 @@ async def inject_compute_complete(data: dict):
                 "id": record["id"],
                 "wallet_address": record["fields"].get("Wallet", ""),
                 "ducats": record["fields"].get("Ducats", 0),
-                "citizen_name": record["fields"].get("Citizenname", None),
+                "citizen_name": record["fields"].get("Username", None),
                 "email": record["fields"].get("Email", None),
                 "family_motto": record["fields"].get("FamilyMotto", None),
                 "transaction_signature": data["transaction_signature"]

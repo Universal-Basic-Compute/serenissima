@@ -16,7 +16,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: 'Polygon ID is missing' }, { status: 400 });
     }
 
-    console.log(`Fetching polygon with ID: ${polygonId}`);
+    //console.log(`Fetching polygon with ID: ${polygonId}`);
 
     // ✅ Vérifier dans le cache
     if (Object.keys(polygonsCache).length > 0 && polygonsCache[polygonId]) {

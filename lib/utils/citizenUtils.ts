@@ -1,18 +1,18 @@
 /**
- * Get the current citizen's citizenname
- * @returns The citizenname of the current citizen, or null if not logged in
+ * Get the current citizen's username
+ * @returns The username of the current citizen, or null if not logged in
  */
-export function getCitizenname(): string | null {
+export function getUsername(): string | null {
   // This is a placeholder implementation
-  // Replace with your actual implementation to get the citizenname
+  // Replace with your actual implementation to get the username
   // from your authentication system
   
   // Example: Get from localStorage
   try {
     const citizen = JSON.parse(localStorage.getItem('citizen') || 'null');
-    return citizen ? citizen.citizenname : null;
+    return citizen ? citizen.username : null;
   } catch (error) {
-    console.error('Error getting citizenname:', error);
+    console.error('Error getting username:', error);
     return null;
   }
 }

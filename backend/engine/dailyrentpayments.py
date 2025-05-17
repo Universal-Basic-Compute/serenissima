@@ -89,7 +89,7 @@ def get_businesses_with_buildings(tables) -> List[Dict]:
         return []
 
 def find_citizen_by_identifier(tables, identifier: str) -> Optional[Dict]:
-    """Find a citizen by citizenname or wallet address."""
+    """Find a citizen by username or wallet address."""
     log.info(f"Looking up citizen: {identifier}")
     
     # Handle known misspellings
@@ -98,12 +98,12 @@ def find_citizen_by_identifier(tables, identifier: str) -> Optional[Dict]:
         log.info(f"Corrected misspelled identifier from ConsiglioDeiDieci to {identifier}")
     
     try:
-        # First try to find by citizenname
-        formula = f"{{Citizenname}}='{identifier}'"
+        # First try to find by username
+        formula = f"{{Username}}='{identifier}'"
         citizens = tables['citizens'].all(formula=formula)
         
         if citizens:
-            log.info(f"Found citizen by citizenname: {identifier}")
+            log.info(f"Found citizen by username: {identifier}")
             return citizens[0]
         
         # If not found, try by wallet address
@@ -118,7 +118,7 @@ def find_citizen_by_identifier(tables, identifier: str) -> Optional[Dict]:
         if identifier == "ConsiglioDeiDieci":
             # Try with different variations
             for variation in ["Consiglio Dei Dieci", "Consiglio dei Dieci", "ConsiglioDeidieci"]:
-                formula = f"{{Citizenname}}='{variation}'"
+                formula = f"{{Username}}='{variation}'"
                 citizens = tables['citizens'].all(formula=formula)
                 if citizens:
                     log.info(f"Found citizen by alternative spelling: {variation}")
@@ -271,9 +271,9 @@ def process_housing_rent(tables, building: Dict, dry_run: bool = False) -> Tuple
             return False, 0
         
         citizen_name = f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}"
-        citizen_wealth = citizen['fields'].get('Wealth', 0)
+        citizen_wealth = citizen['fields'].get('Ducats', 0)
         
-        log.info(f"Citizen: {citizen_name}, Wealth: {citizen_wealth}")
+        log.info(f"Citizen: {citizen_name}, Ducats: {citizen_wealth}")
     except Exception as e:
         log.error(f"Error getting citizen details: {e}")
         return False, 0
@@ -311,7 +311,7 @@ def process_housing_rent(tables, building: Dict, dry_run: bool = False) -> Tuple
     # 1. Deduct from citizen's wealth
     try:
         tables['citizens'].update(occupant_id, {
-            "Wealth": citizen_wealth - rent_amount
+            "Ducats": citizen_wealth - rent_amount
         })
         log.info(f"Deducted {rent_amount} from citizen {citizen_name}'s wealth: {citizen_wealth} -> {citizen_wealth - rent_amount}")
     except Exception as e:

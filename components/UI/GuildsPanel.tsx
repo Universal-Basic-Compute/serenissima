@@ -18,7 +18,7 @@ interface GuildsPanelProps {
 // Define the GuildMember interface
 interface GuildMember {
   citizenId: string;
-  citizenname: string;
+  username: string;
   firstName: string;
   lastName: string;
   coatOfArmsImage: string | null;
@@ -382,7 +382,7 @@ function GuildDetails({ guild, onBack, formatDate, getLandName }: GuildDetailsPr
                         </div>
                       )}
                       <div className="text-xs">
-                        <p className="font-medium">{member.citizenname}</p>
+                        <p className="font-medium">{member.username}</p>
                         <p className="text-gray-600">{member.firstName} {member.lastName}</p>
                       </div>
                     </div>
@@ -500,10 +500,10 @@ Meeting Frequency: ${guild.meetingFrequency || 'As needed'}
                                   }
                                   
                                   const profile = JSON.parse(savedProfile);
-                                  const citizenname = profile.citizenname;
+                                  const username = profile.username;
                                   
-                                  if (!citizenname) {
-                                    throw new Error('Citizenname not found in profile.');
+                                  if (!username) {
+                                    throw new Error('Username not found in profile.');
                                   }
                                   
                                   // 1. Send a message to the guild (as a guild application)
@@ -513,7 +513,7 @@ Meeting Frequency: ${guild.meetingFrequency || 'As needed'}
                                       'Content-Type': 'application/json',
                                     },
                                     body: JSON.stringify({
-                                      sender: citizenname,
+                                      sender: username,
                                       receiver: guild.guildId,
                                       content: applicationText,
                                       type: 'guild_application'
@@ -533,7 +533,7 @@ Meeting Frequency: ${guild.meetingFrequency || 'As needed'}
                                       'Content-Type': 'application/json',
                                     },
                                     body: JSON.stringify({
-                                      citizenname: citizenname,
+                                      username: username,
                                       guildId: guild.guildId,
                                       status: 'pending'
                                     }),

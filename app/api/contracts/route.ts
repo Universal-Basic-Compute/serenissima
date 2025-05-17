@@ -4,7 +4,7 @@ import Airtable from 'airtable';
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const citizenname = searchParams.get('citizenname');
+    const username = searchParams.get('username');
     const sellerBuilding = searchParams.get('sellerBuilding');
     
     // Initialize Airtable
@@ -28,11 +28,11 @@ export async function GET(request: Request) {
     if (sellerBuilding) {
       // Filter by seller building
       formula = `{SellerBuilding}='${sellerBuilding}'`;
-    } else if (citizenname) {
+    } else if (username) {
       // Get public_sell contracts AND contracts where the citizen is buyer or seller
-      formula = `OR({Type}='public_sell', {Buyer}='${citizenname}', {Seller}='${citizenname}')`;
+      formula = `OR({Type}='public_sell', {Buyer}='${username}', {Seller}='${username}')`;
     } else {
-      // Just get public_sell contracts if no citizenname provided
+      // Just get public_sell contracts if no username provided
       formula = `{Type}='public_sell'`;
     }
     

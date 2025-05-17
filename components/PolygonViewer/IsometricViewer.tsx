@@ -3671,16 +3671,16 @@ number => {
   // Function to get the current citizen's identifier
   const getCurrentCitizenIdentifier = useCallback(() => {
     try {
-      // Try to get citizenname from profile
+      // Try to get username from profile
       const profileStr = localStorage.getItem('citizenProfile');
       if (profileStr) {
         const profile = JSON.parse(profileStr);
-        if (profile && profile.citizenname) {
-          return profile.citizenname;
+        if (profile && profile.username) {
+          return profile.username;
         }
       }
       
-      // If no citizenname in profile, fall back to wallet address from localStorage
+      // If no username in profile, fall back to wallet address from localStorage
       const walletAddress = localStorage.getItem('walletAddress');
       if (walletAddress) {
         return walletAddress;

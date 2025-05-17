@@ -149,30 +149,30 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
         }
       }));
       
-      // Get citizenname from localStorage instead of wallet address
-      const citizenname = (() => {
+      // Get username from localStorage instead of wallet address
+      const username = (() => {
         try {
           const savedProfile = localStorage.getItem('citizenProfile');
           if (savedProfile) {
             const profile = JSON.parse(savedProfile);
-            return profile.citizenname;
+            return profile.username;
           }
           return null;
         } catch (error) {
-          console.error('Error getting citizenname from localStorage:', error);
+          console.error('Error getting username from localStorage:', error);
           return null;
         }
       })();
       
-      // If citizenname is available, save to backend
-      if (citizenname) {
+      // If username is available, save to backend
+      if (username) {
         const response = await fetch('/api/citizen/settings', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            wallet_address: citizenname, // We're using the wallet_address field to pass the citizenname
+            wallet_address: username, // We're using the wallet_address field to pass the username
             settings: {
               qualityMode,
               waterQuality

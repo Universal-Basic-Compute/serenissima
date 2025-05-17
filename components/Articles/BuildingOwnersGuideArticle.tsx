@@ -464,7 +464,7 @@ const BuildingOwnersGuideArticle: React.FC<BuildingOwnersGuideArticleProps> = ({
               </div>
               
               <div className="bg-amber-50 p-3 rounded border border-amber-200">
-                <h5 className="font-bold text-amber-900 mb-1">Wealth-Based Prioritization</h5>
+                <h5 className="font-bold text-amber-900 mb-1">Ducats-Based Prioritization</h5>
                 <p className="text-sm">
                   When multiple citizens are seeking housing, those with lower wealth are prioritized in finding affordable options. This creates a natural sorting mechanism where the poorest citizens find the cheapest appropriate housing first, while wealthier citizens have more options but face more competition for premium properties.
                 </p>
@@ -644,7 +644,7 @@ const BuildingOwnersGuideArticle: React.FC<BuildingOwnersGuideArticleProps> = ({
                 <text x="250" y="140" fill="#7c2d12" fontFamily="serif" fontSize="10">Transport</text>
                 <text x="300" y="100" fill="#7c2d12" fontFamily="serif" fontSize="10">Retail</text>
                 <text x="300" y="160" fill="#7c2d12" fontFamily="serif" fontSize="10">Trade</text>
-                <text x="420" y="185" fill="#7c2d12" fontFamily="serif" fontSize="10">Wealth</text>
+                <text x="420" y="185" fill="#7c2d12" fontFamily="serif" fontSize="10">Ducats</text>
                 
                 {/* Synergy indicators */}
                 <circle cx="100" y="75" r="10" fill="#059669" fillOpacity="0.3" stroke="#059669" strokeWidth="1" />

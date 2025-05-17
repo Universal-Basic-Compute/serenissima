@@ -88,8 +88,8 @@ def get_homeless_citizens(tables) -> List[Dict]:
         homeless_citizens = [citizen for citizen in all_citizens 
                             if citizen['id'] not in occupied_citizen_ids]
         
-        # Sort by Wealth in descending order
-        homeless_citizens.sort(key=lambda c: float(c['fields'].get('Wealth', 0) or 0), reverse=True)
+        # Sort by Ducats in descending order
+        homeless_citizens.sort(key=lambda c: float(c['fields'].get('Ducats', 0) or 0), reverse=True)
         
         log.info(f"Found {len(homeless_citizens)} homeless citizens")
         return homeless_citizens
@@ -286,8 +286,8 @@ def get_unemployed_citizens(tables) -> List[Dict]:
         unemployed_citizens = [citizen for citizen in all_citizens 
                               if citizen['id'] not in employed_citizen_ids]
         
-        # Sort by Wealth in descending order
-        unemployed_citizens.sort(key=lambda c: float(c['fields'].get('Wealth', 0) or 0), reverse=True)
+        # Sort by Ducats in descending order
+        unemployed_citizens.sort(key=lambda c: float(c['fields'].get('Ducats', 0) or 0), reverse=True)
         
         log.info(f"Found {len(unemployed_citizens)} unemployed citizens")
         return unemployed_citizens

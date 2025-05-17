@@ -48,7 +48,7 @@ async function loadCitizensFromAirtable(): Promise<Citizen[]> {
     await new Promise((resolve, reject) => {
       airtableBase('CITIZENS').select({
         // Optionally specify fields to retrieve
-        // fields: ['CitizenId', 'SocialClass', 'FirstName', 'LastName', 'Description', 'ImagePrompt', 'Wealth', 'CreatedAt'],
+        // fields: ['CitizenId', 'SocialClass', 'FirstName', 'LastName', 'Description', 'ImagePrompt', 'Ducats', 'CreatedAt'],
         // Optionally specify a view
         // view: "Grid view"
       }).eachPage(
@@ -63,7 +63,7 @@ async function loadCitizensFromAirtable(): Promise<Citizen[]> {
               lastName: fields.LastName?.toString() || '',
               description: fields.Description?.toString() || '',
               imagePrompt: fields.ImagePrompt?.toString() || '',
-              wealth: typeof fields.Wealth === 'number' ? fields.Wealth : 0,
+              wealth: typeof fields.Ducats === 'number' ? fields.Ducats : 0,
               createdAt: fields.CreatedAt?.toString() || new Date().toISOString()
             });
           });
@@ -150,7 +150,7 @@ async function saveCitizensToAirtable(citizens: Citizen[]): Promise<void> {
         LastName: citizen.lastName,
         Description: citizen.description,
         ImagePrompt: citizen.imagePrompt,
-        Wealth: citizen.wealth,
+        Ducats: citizen.wealth,
         CreatedAt: citizen.createdAt
       }
     }));
@@ -223,8 +223,8 @@ La Serenissima is a sophisticated economic simulation set in Renaissance Venice 
 - AI citizens who participate in the economy as consumers, workers, and entrepreneurs
 
 CITIZEN SOCIAL CLASSES:
-1. Nobili - The noble families who control Venice's government. Wealthy, politically powerful, and often involved in long-distance trade.
-2. Cittadini - Wealthy non-noble citizens, including successful merchants, professionals, and high-ranking bureaucrats.
+1. Nobili - The noble families who control Venice's government. Ducatsy, politically powerful, and often involved in long-distance trade.
+2. Cittadini - Ducatsy non-noble citizens, including successful merchants, professionals, and high-ranking bureaucrats.
 3. Popolani - Common citizens including craftsmen, shopkeepers, and skilled workers.
 4. Laborers - Unskilled workers, servants, gondoliers, and the working poor.
 
@@ -238,7 +238,7 @@ Create 10 unique Venetian citizens with historically accurate names, description
 3. LastName - Historically accurate Venetian family name (ensure nobili have notable Venetian noble family names)
 4. Description - One sentence about personality, traits, and remarkable things about this person
 5. ImagePrompt - A detailed prompt for generating an image of this person, including physical appearance, clothing appropriate to their social class, and setting
-6. Wealth - Approximate wealth in Ducats, appropriate to their social class
+6. Ducats - Approximate wealth in Ducats, appropriate to their social class
 
 DISTRIBUTION GUIDELINES:
 - Nobili: Create 1, wealth range 5,000-50,000 ducats

@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     // Create an object with only the fields to update
     const updateFields: Record<string, any> = {};
     
-    if (data.citizenname !== undefined) updateFields.Citizenname = data.citizenname;
+    if (data.username !== undefined) updateFields.Username = data.username;
     if (data.firstName !== undefined) updateFields.FirstName = data.firstName;
     if (data.lastName !== undefined) updateFields.LastName = data.lastName;
     if (data.familyMotto !== undefined) updateFields.FamilyMotto = data.familyMotto;
@@ -43,13 +43,13 @@ export async function POST(request: Request) {
     
     // Now handle the citizen record
     try {
-      // First, check if a citizen with this citizenname already exists
-      const citizenname = updatedRecord.fields.Citizenname;
+      // First, check if a citizen with this username already exists
+      const username = updatedRecord.fields.Username;
       
-      if (citizenname) {
+      if (username) {
         const existingCitizens = await base(CITIZENS_TABLE)
           .select({
-            filterByFormula: `{Citizenname} = "${citizenname}"`,
+            filterByFormula: `{Username} = "${username}"`,
             maxRecords: 1
           })
           .firstPage();
@@ -67,13 +67,13 @@ export async function POST(request: Request) {
           // Create citizen update fields
           const citizenUpdateFields: Record<string, any> = {};
           
-          if (updatedRecord.fields.Citizenname) citizenUpdateFields.Citizenname = updatedRecord.fields.Citizenname;
+          if (updatedRecord.fields.Username) citizenUpdateFields.Username = updatedRecord.fields.Username;
           if (updatedRecord.fields.FirstName) citizenUpdateFields.FirstName = updatedRecord.fields.FirstName;
           if (updatedRecord.fields.LastName) citizenUpdateFields.LastName = updatedRecord.fields.LastName;
           
           // Update the citizen record
           await base(CITIZENS_TABLE).update(citizenId, citizenUpdateFields);
-          console.log(`Updated citizen record for ${citizenname}`);
+          console.log(`Updated citizen record for ${username}`);
         } else {
           // Create new citizen record
           const citizenId = `ctz_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
@@ -81,13 +81,13 @@ export async function POST(request: Request) {
           // Create citizen fields
           const citizenFields: Record<string, any> = {
             CitizenId: citizenId,
-            Citizenname: updatedRecord.fields.Citizenname,
+            Username: updatedRecord.fields.Username,
             FirstName: updatedRecord.fields.FirstName || 'Unknown',
             LastName: updatedRecord.fields.LastName || 'Citizen',
             SocialClass: 'Facchini', // Default social class
             Description: `A citizen of Venice.`,
             Position: defaultPosition,
-            Wealth: 0,
+            Ducats: 0,
             Prestige: 0,
             CreatedAt: new Date().toISOString()
           };
@@ -99,7 +99,7 @@ export async function POST(request: Request) {
           
           // Create the citizen record
           await base(CITIZENS_TABLE).create(citizenFields);
-          console.log(`Created new citizen record for ${citizenname}`);
+          console.log(`Created new citizen record for ${username}`);
         }
       }
     } catch (citizenError) {
@@ -114,7 +114,7 @@ export async function POST(request: Request) {
       citizen: {
         id: updatedRecord.id,
         walletAddress: updatedRecord.fields.Wallet,
-        citizenname: updatedRecord.fields.Citizenname || null,
+        username: updatedRecord.fields.Username || null,
         firstName: updatedRecord.fields.FirstName || null,
         lastName: updatedRecord.fields.LastName || null,
         ducats: updatedRecord.fields.Ducats || 0,

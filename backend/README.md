@@ -42,7 +42,7 @@ The server will start at http://localhost:8000
 The Citizens table should have the following fields:
 - Wallet (text): The wallet address
 - Ducats (number): The amount of compute resources invested
-- Citizenname (text): The citizen's citizenname
+- Username (text): The citizen's username
 - Email (text): The citizen's email address
 
 The LANDS table should have the following fields:

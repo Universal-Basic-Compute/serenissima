@@ -314,7 +314,7 @@ def process_work_mobility(dry_run: bool = False):
         return
     
     # Sort citizens by wealth in ascending order (lower wealth citizens have more incentive to move)
-    employed_citizens.sort(key=lambda c: float(c['fields'].get('Wealth', 0) or 0))
+    employed_citizens.sort(key=lambda c: float(c['fields'].get('Ducats', 0) or 0))
     log.info(f"Sorted {len(employed_citizens)} citizens by wealth in ascending order")
     
     # Get available businesses

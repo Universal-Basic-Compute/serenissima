@@ -46,28 +46,28 @@ def get_ai_citizens(tables) -> List[Dict]:
         print(f"Error getting AI citizens: {str(e)}")
         return []
 
-def get_citizen_lands(tables, citizenname: str) -> List[Dict]:
+def get_citizen_lands(tables, username: str) -> List[Dict]:
     """Get all lands owned by a specific citizen."""
     try:
         # Query lands where the citizen is the owner
-        formula = f"{{Citizen}}='{citizenname}'"
+        formula = f"{{Citizen}}='{username}'"
         lands = tables["lands"].all(formula=formula)
-        print(f"Found {len(lands)} lands owned by {citizenname}")
+        print(f"Found {len(lands)} lands owned by {username}")
         return lands
     except Exception as e:
-        print(f"Error getting lands for citizen {citizenname}: {str(e)}")
+        print(f"Error getting lands for citizen {username}: {str(e)}")
         return []
 
-def get_citizen_buildings(tables, citizenname: str) -> List[Dict]:
+def get_citizen_buildings(tables, username: str) -> List[Dict]:
     """Get all buildings owned by a specific citizen."""
     try:
         # Query buildings where the citizen is the owner
-        formula = f"{{Owner}}='{citizenname}'"
+        formula = f"{{Owner}}='{username}'"
         buildings = tables["buildings"].all(formula=formula)
-        print(f"Found {len(buildings)} buildings owned by {citizenname}")
+        print(f"Found {len(buildings)} buildings owned by {username}")
         return buildings
     except Exception as e:
-        print(f"Error getting buildings for citizen {citizenname}: {str(e)}")
+        print(f"Error getting buildings for citizen {username}: {str(e)}")
         return []
 
 def get_all_buildings_on_lands(tables, land_ids: List[str]) -> List[Dict]:
@@ -100,7 +100,7 @@ def prepare_lease_analysis_data(ai_citizen: Dict, citizen_lands: List[Dict], cit
     """Prepare a comprehensive data package for the AI to analyze lease situations."""
     
     # Extract citizen information
-    citizenname = ai_citizen["fields"].get("Username", "")
+    username = ai_citizen["fields"].get("Username", "")
     ducats = ai_citizen["fields"].get("Ducats", 0)
     
     # Process lands data
@@ -150,13 +150,13 @@ def prepare_lease_analysis_data(ai_citizen: Dict, citizen_lands: List[Dict], cit
     total_maintenance = sum(building["fields"].get("MaintenanceCost", 0) for building in citizen_buildings)
     total_lease_paid = sum(building["fields"].get("LeaseAmount", 0) for building in citizen_buildings)
     total_lease_received = sum(building["fields"].get("LeaseAmount", 0) for building in buildings_on_lands 
-                              if building["fields"].get("Owner", "") != citizenname)
+                              if building["fields"].get("Owner", "") != username)
     net_income = total_income - total_maintenance - total_lease_paid + total_lease_received
     
     # Prepare the complete data package
     data_package = {
         "citizen": {
-            "citizenname": citizenname,
+            "username": username,
             "ducats": ducats,
             "total_lands": len(lands_data),
             "total_buildings": len(buildings_data),
@@ -176,14 +176,14 @@ def prepare_lease_analysis_data(ai_citizen: Dict, citizen_lands: List[Dict], cit
     
     return data_package
 
-def send_lease_adjustment_request(ai_citizenname: str, data_package: Dict) -> Optional[Dict]:
+def send_lease_adjustment_request(ai_username: str, data_package: Dict) -> Optional[Dict]:
     """Send the lease adjustment request to the AI via Kinos API."""
     try:
         api_key = get_kinos_api_key()
         blueprint = "serenissima-ai"
         
         # Construct the API URL
-        url = f"https://api.kinos-engine.ai/v2/blueprints/{blueprint}/kins/{ai_citizenname}/messages"
+        url = f"https://api.kinos-engine.ai/v2/blueprints/{blueprint}/kins/{ai_username}/messages"
         
         # Set up headers with API key
         headers = {
@@ -192,7 +192,7 @@ def send_lease_adjustment_request(ai_citizenname: str, data_package: Dict) -> Op
         }
         
         # Log the API request details
-        print(f"Sending lease adjustment request to AI citizen {ai_citizenname}")
+        print(f"Sending lease adjustment request to AI citizen {ai_username}")
         print(f"API URL: {url}")
         print(f"Citizen has {data_package['citizen']['ducats']} ducats")
         print(f"Citizen owns {len(data_package['lands'])} lands and {len(data_package['buildings'])} buildings")
@@ -242,7 +242,7 @@ If you decide not to adjust any leases at this time, return an empty array:
         
         # Create system instructions with the detailed data
         system_instructions = f"""
-You are {ai_citizenname}, an AI landowner and building owner in La Serenissima. You make your own decisions about lease strategies.
+You are {ai_username}, an AI landowner and building owner in La Serenissima. You make your own decisions about lease strategies.
 
 Here is the complete data about your current situation:
 {json.dumps(data_package, indent=2)}
@@ -271,7 +271,7 @@ If you decide not to adjust any leases at this time, return an empty array.
         }
         
         # Make the API request
-        print(f"Making API request to Kinos for {ai_citizenname}...")
+        print(f"Making API request to Kinos for {ai_username}...")
         response = requests.post(url, headers=headers, json=payload)
         
         # Log the API response details
@@ -285,19 +285,19 @@ If you decide not to adjust any leases at this time, return an empty array.
             print(f"API response status: {status}")
             
             if status == "completed":
-                print(f"Successfully sent lease adjustment request to AI citizen {ai_citizenname}")
+                print(f"Successfully sent lease adjustment request to AI citizen {ai_username}")
                 
                 # The response content is in the response field of response_data
                 content = response_data.get('response', '')
                 
                 # Log the entire response for debugging
-                print(f"FULL AI RESPONSE FROM {ai_citizenname}:")
+                print(f"FULL AI RESPONSE FROM {ai_username}:")
                 print("="*80)
                 print(content)
                 print("="*80)
                 
-                print(f"AI {ai_citizenname} response length: {len(content)} characters")
-                print(f"AI {ai_citizenname} response preview: {content[:200]}...")
+                print(f"AI {ai_username} response length: {len(content)} characters")
+                print(f"AI {ai_username} response preview: {content[:200]}...")
                 
                 # Try to extract the JSON decision from the response
                 try:
@@ -380,13 +380,13 @@ If you decide not to adjust any leases at this time, return an empty array.
                     print(content)
                     return None
             else:
-                print(f"Error processing lease adjustment request for AI citizen {ai_citizenname}: {response_data}")
+                print(f"Error processing lease adjustment request for AI citizen {ai_username}: {response_data}")
                 return None
         else:
             print(f"Error from Kinos API: {response.status_code} - {response.text}")
             return None
     except Exception as e:
-        print(f"Error sending lease adjustment request to AI citizen {ai_citizenname}: {str(e)}")
+        print(f"Error sending lease adjustment request to AI citizen {ai_username}: {str(e)}")
         print(f"Exception traceback: {traceback.format_exc()}")
         return None
 
@@ -415,7 +415,7 @@ def update_building_lease_amount(tables, building_id: str, new_lease_amount: flo
         print(f"Error updating lease amount for building {building_id}: {str(e)}")
         return False
 
-def create_notification_for_building_owner(tables, building_id: str, owner: str, ai_citizenname: str, 
+def create_notification_for_building_owner(tables, building_id: str, owner: str, ai_username: str, 
                                           old_lease: float, new_lease: float, reason: str) -> bool:
     """Create a notification for the building owner about the lease adjustment."""
     try:
@@ -425,14 +425,14 @@ def create_notification_for_building_owner(tables, building_id: str, owner: str,
         notification = {
             "Citizen": owner,
             "Type": "lease_adjustment",
-            "Content": f"The lease amount for your building {building_id} has been adjusted from {old_lease} to {new_lease} ducats by the land owner {ai_citizenname}. Reason: {reason}",
+            "Content": f"The lease amount for your building {building_id} has been adjusted from {old_lease} to {new_lease} ducats by the land owner {ai_username}. Reason: {reason}",
             "CreatedAt": now,
             "ReadAt": None,
             "Details": json.dumps({
                 "building_id": building_id,
                 "old_lease_amount": old_lease,
                 "new_lease_amount": new_lease,
-                "land_owner": ai_citizenname,
+                "land_owner": ai_username,
                 "reason": reason,
                 "timestamp": now
             })
@@ -492,12 +492,12 @@ def process_ai_lease_adjustments(dry_run: bool = False):
     # Filter AI citizens to only those whose lands have buildings owned by others
     filtered_ai_citizens = []
     for ai_citizen in ai_citizens:
-        ai_citizenname = ai_citizen["fields"].get("Citizenname")
-        if not ai_citizenname:
+        ai_username = ai_citizen["fields"].get("Citizenname")
+        if not ai_username:
             continue
             
         # Get lands owned by this AI
-        citizen_lands = get_citizen_lands(tables, ai_citizenname)
+        citizen_lands = get_citizen_lands(tables, ai_username)
         
         # Get land IDs
         land_ids = [land["fields"].get("LandId") for land in citizen_lands if land["fields"].get("LandId")]
@@ -509,15 +509,15 @@ def process_ai_lease_adjustments(dry_run: bool = False):
         has_others_buildings = False
         for building in buildings_on_lands:
             building_owner = building["fields"].get("Owner", "")
-            if building_owner and building_owner != ai_citizenname:
+            if building_owner and building_owner != ai_username:
                 has_others_buildings = True
                 break
                 
         if has_others_buildings:
             filtered_ai_citizens.append(ai_citizen)
-            print(f"AI citizen {ai_citizenname} has lands with buildings owned by others, including in processing")
+            print(f"AI citizen {ai_username} has lands with buildings owned by others, including in processing")
         else:
-            print(f"AI citizen {ai_citizenname} has no lands with buildings owned by others, skipping")
+            print(f"AI citizen {ai_username} has no lands with buildings owned by others, skipping")
     
     # Replace the original list with the filtered list
     ai_citizens = filtered_ai_citizens
@@ -532,18 +532,18 @@ def process_ai_lease_adjustments(dry_run: bool = False):
     
     # Process each AI citizen
     for ai_citizen in ai_citizens:
-        ai_citizenname = ai_citizen["fields"].get("Username")
-        if not ai_citizenname:
+        ai_username = ai_citizen["fields"].get("Username")
+        if not ai_username:
             continue
         
-        print(f"Processing AI citizen: {ai_citizenname}")
-        ai_lease_adjustments[ai_citizenname] = []
+        print(f"Processing AI citizen: {ai_username}")
+        ai_lease_adjustments[ai_username] = []
         
         # Get lands owned by this AI
-        citizen_lands = get_citizen_lands(tables, ai_citizenname)
+        citizen_lands = get_citizen_lands(tables, ai_username)
         
         # Get buildings owned by this AI
-        citizen_buildings = get_citizen_buildings(tables, ai_citizenname)
+        citizen_buildings = get_citizen_buildings(tables, ai_username)
         
         # Get all buildings on lands owned by this AI
         land_ids = [land["fields"].get("LandId") for land in citizen_lands if land["fields"].get("LandId")]
@@ -554,7 +554,7 @@ def process_ai_lease_adjustments(dry_run: bool = False):
         
         # Send the lease adjustment request to the AI
         if not dry_run:
-            decisions = send_lease_adjustment_request(ai_citizenname, data_package)
+            decisions = send_lease_adjustment_request(ai_username, data_package)
             
             if decisions and "lease_adjustments" in decisions:
                 lease_adjustments = decisions["lease_adjustments"]
@@ -610,8 +610,8 @@ def process_ai_lease_adjustments(dry_run: bool = False):
                     land_owner = land["fields"].get("Citizen", "")
                     
                     # Check if the AI owns this land - if not, skip it
-                    if land_owner != ai_citizenname:
-                        print(f"Skipping building {building_id} - AI {ai_citizenname} does not own the land {land_id} (owned by {land_owner})")
+                    if land_owner != ai_username:
+                        print(f"Skipping building {building_id} - AI {ai_username} does not own the land {land_id} (owned by {land_owner})")
                         continue
                     
                     # Update the lease amount
@@ -619,26 +619,26 @@ def process_ai_lease_adjustments(dry_run: bool = False):
                     
                     if success:
                         # Create notification for building owner if different from AI
-                        if building_owner and building_owner != ai_citizenname:
+                        if building_owner and building_owner != ai_username:
                             create_notification_for_building_owner(
-                                tables, building_id, building_owner, ai_citizenname, 
+                                tables, building_id, building_owner, ai_username, 
                                 current_lease, new_lease_amount, reason
                             )
                         
                         # Add to the list of adjustments for this AI
-                        ai_lease_adjustments[ai_citizenname].append({
+                        ai_lease_adjustments[ai_username].append({
                             "building_id": building_id,
                             "old_lease": current_lease,
                             "new_lease": new_lease_amount,
                             "reason": reason
                         })
             else:
-                print(f"No valid lease adjustment decisions received for {ai_citizenname}")
+                print(f"No valid lease adjustment decisions received for {ai_username}")
         else:
             # In dry run mode, just log what would happen
-            print(f"[DRY RUN] Would send lease adjustment request to AI citizen {ai_citizenname}")
+            print(f"[DRY RUN] Would send lease adjustment request to AI citizen {ai_username}")
             print(f"[DRY RUN] Data package summary:")
-            print(f"  - Citizen: {data_package['citizen']['citizenname']}")
+            print(f"  - Citizen: {data_package['citizen']['username']}")
             print(f"  - Lands: {len(data_package['lands'])}")
             print(f"  - Buildings: {len(data_package['buildings'])}")
             print(f"  - Buildings on lands: {len(data_package['buildings_on_lands'])}")

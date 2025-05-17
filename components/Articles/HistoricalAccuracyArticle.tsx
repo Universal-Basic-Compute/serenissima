@@ -156,7 +156,7 @@ const HistoricalAccuracyArticle: React.FC<HistoricalAccuracyArticleProps> = ({ o
               <div>
                 <h4 className="text-lg font-serif text-amber-800 mt-4 flex items-center">
                   <span className="w-1 h-6 bg-amber-500 inline-block mr-2"></span>
-                  Currency and Wealth
+                  Currency and Ducats
                 </h4>
                 <p>
                   Renaissance Venice had a complex monetary system including various coins like the ducat, grosso, and lira. La Serenissima simplifies this into a dual-currency system:
@@ -207,7 +207,7 @@ const HistoricalAccuracyArticle: React.FC<HistoricalAccuracyArticleProps> = ({ o
               </p>
               <ul className="list-disc pl-6 my-3 space-y-1">
                 <li><strong>Nobili</strong>: The noble families who controlled the government</li>
-                <li><strong>Cittadini Originari</strong>: Wealthy non-nobles who held important bureaucratic positions</li>
+                <li><strong>Cittadini Originari</strong>: Ducatsy non-nobles who held important bureaucratic positions</li>
                 <li><strong>Popolani</strong>: Common citizens including merchants, artisans, and workers</li>
                 <li><strong>Forestieri</strong>: Foreigners with limited rights</li>
               </ul>

@@ -12,7 +12,7 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({ onClose, onSuccess }) => 
   const [error, setError] = useState<string | null>(null);
   
   // Form state
-  const [citizenname, setCitizenname] = useState('');
+  const [username, setUsername] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [familyMotto, setFamilyMotto] = useState('');
@@ -21,7 +21,7 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({ onClose, onSuccess }) => 
   // Initialize form with current citizen data
   useEffect(() => {
     if (citizenProfile) {
-      setCitizenname(citizenProfile.citizenname || '');
+      setUsername(citizenProfile.username || '');
       setFirstName(citizenProfile.firstName || '');
       setLastName(citizenProfile.lastName || '');
       setFamilyMotto(citizenProfile.familyMotto || '');
@@ -48,7 +48,7 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({ onClose, onSuccess }) => 
         },
         body: JSON.stringify({
           id: citizenProfile.id,
-          citizenname,
+          username,
           firstName,
           lastName,
           familyMotto,
@@ -108,16 +108,16 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({ onClose, onSuccess }) => 
         
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="citizenname" className="block text-amber-800 font-medium mb-1">
-              Citizenname
+            <label htmlFor="username" className="block text-amber-800 font-medium mb-1">
+              Username
             </label>
             <input
               type="text"
-              id="citizenname"
-              value={citizenname}
-              onChange={(e) => setCitizenname(e.target.value)}
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               className="w-full p-2 border border-amber-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
-              placeholder="Your public citizenname"
+              placeholder="Your public username"
             />
           </div>
           

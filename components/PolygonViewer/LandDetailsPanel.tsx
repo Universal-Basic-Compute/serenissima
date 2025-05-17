@@ -32,9 +32,9 @@ interface LandDetailsPanelProps {
 const isCurrentCitizenTheSeller = (transaction: any): boolean => {
   if (!transaction || !transaction.seller) return false;
   
-  // Get current citizen identifier (citizenname or wallet)
-  const currentCitizen = sessionStorage.getItem('citizenname') || 
-                     localStorage.getItem('citizenname') ||
+  // Get current citizen identifier (username or wallet)
+  const currentCitizen = sessionStorage.getItem('username') || 
+                     localStorage.getItem('username') ||
                      sessionStorage.getItem('walletAddress') || 
                      localStorage.getItem('walletAddress');
   
@@ -59,15 +59,15 @@ const isCurrentCitizenTheSeller = (transaction: any): boolean => {
   // Compare normalized identifiers
   const normalizedSeller = normalizeIdentifier(transaction.seller);
   const normalizedCurrentCitizen = normalizeIdentifier(currentCitizen);
-  const normalizedCitizenname = citizenProfile?.citizenname ? normalizeIdentifier(citizenProfile.citizenname) : null;
+  const normalizedUsername = citizenProfile?.username ? normalizeIdentifier(citizenProfile.username) : null;
   
   console.log('Normalized seller:', normalizedSeller);
   console.log('Normalized current citizen:', normalizedCurrentCitizen);
-  console.log('Normalized citizenname:', normalizedCitizenname);
+  console.log('Normalized username:', normalizedUsername);
   
-  // Check if seller matches either the wallet address or citizenname
+  // Check if seller matches either the wallet address or username
   const isSellerCurrentCitizen = normalizedSeller === normalizedCurrentCitizen || 
-                             normalizedSeller === normalizedCitizenname;
+                             normalizedSeller === normalizedUsername;
   
   console.log('Is seller the current citizen?', isSellerCurrentCitizen);
   
@@ -78,9 +78,9 @@ const isCurrentCitizenTheSeller = (transaction: any): boolean => {
 const isCurrentCitizenTheOwner = (ownerIdentifier: string | null): boolean => {
   if (!ownerIdentifier) return false;
   
-  // Get current citizen identifier (citizenname or wallet)
-  const currentCitizen = sessionStorage.getItem('citizenname') || 
-                     localStorage.getItem('citizenname') ||
+  // Get current citizen identifier (username or wallet)
+  const currentCitizen = sessionStorage.getItem('username') || 
+                     localStorage.getItem('username') ||
                      sessionStorage.getItem('walletAddress') || 
                      localStorage.getItem('walletAddress');
   
@@ -100,10 +100,10 @@ const isCurrentCitizenTheOwner = (ownerIdentifier: string | null): boolean => {
   // Compare normalized identifiers
   const normalizedOwner = normalizeIdentifier(ownerIdentifier);
   const normalizedCurrentCitizen = normalizeIdentifier(currentCitizen);
-  const normalizedCitizenname = citizenProfile?.citizenname ? normalizeIdentifier(citizenProfile.citizenname) : null;
+  const normalizedUsername = citizenProfile?.username ? normalizeIdentifier(citizenProfile.username) : null;
   
-  // Check if owner matches either the wallet address or citizenname
-  return normalizedOwner === normalizedCurrentCitizen || normalizedOwner === normalizedCitizenname;
+  // Check if owner matches either the wallet address or username
+  return normalizedOwner === normalizedCurrentCitizen || normalizedOwner === normalizedUsername;
 };
 
 export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons, landOwners, visible = true, preventAutoClose = false }: LandDetailsPanelProps) {
@@ -722,7 +722,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
             {owner && owner !== "" ? (
               <div className="flex items-center justify-center">
                 <PlayerProfile 
-                  citizenname={ownerDetails?.citizenname || owner}
+                  username={ownerDetails?.username || owner}
                   firstName={ownerDetails?.firstName}
                   lastName={ownerDetails?.lastName}
                   coatOfArmsImage={ownerDetails?.coatOfArmsImage}

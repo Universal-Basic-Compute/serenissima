@@ -111,52 +111,52 @@ def extract_coat_of_arms_urls(citizens: List[Dict]) -> Dict[str, str]:
     
     for citizen in citizens:
         fields = citizen.get('fields', {})
-        citizenname = fields.get('citizen_name')
+        username = fields.get('citizen_name')
         
-        # If citizenname is missing, try other possible field names
-        if not citizenname:
-            citizenname = fields.get('citizenname') or fields.get('Citizenname') or fields.get('name') or fields.get('Name')
+        # If username is missing, try other possible field names
+        if not username:
+            username = fields.get('username') or fields.get('Username') or fields.get('name') or fields.get('Name')
         
-        # If still no citizenname, use wallet address or record ID
-        if not citizenname:
-            citizenname = fields.get('Wallet') or fields.get('wallet_address') or citizen.get('id', 'unknown')
-            log.info(f"Using wallet or ID as citizenname: {citizenname}")
+        # If still no username, use wallet address or record ID
+        if not username:
+            username = fields.get('Wallet') or fields.get('wallet_address') or citizen.get('id', 'unknown')
+            log.info(f"Using wallet or ID as username: {username}")
         
         # Try all possible field names for coat of arms
         coat_of_arms_url = None
         for field_name in possible_field_names:
             if field_name in fields and fields[field_name]:
                 coat_of_arms_url = fields[field_name]
-                log.info(f"Found coat of arms for citizen {citizenname} in field '{field_name}': {coat_of_arms_url}")
+                log.info(f"Found coat of arms for citizen {username} in field '{field_name}': {coat_of_arms_url}")
                 break
         
-        if citizenname and coat_of_arms_url:
+        if username and coat_of_arms_url:
             # Ensure the URL is absolute
             if not coat_of_arms_url.startswith(('http://', 'https://')):
                 coat_of_arms_url = f"{PRODUCTION_URL}{coat_of_arms_url if coat_of_arms_url.startswith('/') else '/' + coat_of_arms_url}"
             
-            coat_of_arms_map[citizenname] = coat_of_arms_url
-            log.info(f"Added coat of arms for {citizenname}: {coat_of_arms_url}")
-        elif citizenname:
-            log.info(f"Citizen {citizenname} has no coat of arms image")
+            coat_of_arms_map[username] = coat_of_arms_url
+            log.info(f"Added coat of arms for {username}: {coat_of_arms_url}")
+        elif username:
+            log.info(f"Citizen {username} has no coat of arms image")
             # Log all fields for this citizen to help identify where the image might be
-            log.info(f"All fields for {citizenname}: {fields}")
+            log.info(f"All fields for {username}: {fields}")
     
     log.info(f"Found {len(coat_of_arms_map)} citizens with coat of arms images")
     return coat_of_arms_map
 
 def download_image(url_info: Tuple[str, str, str], dry_run: bool = False) -> Optional[Dict]:
     """Download an image from a URL and save it locally"""
-    citizenname, url, filename = url_info
+    username, url, filename = url_info
     
     if dry_run:
-        log.info(f"[DRY RUN] Would download {url} for citizen {citizenname} to {filename}")
-        return {"citizenname": citizenname, "url": url, "local_path": str(filename), "success": True}
+        log.info(f"[DRY RUN] Would download {url} for citizen {username} to {filename}")
+        return {"username": username, "url": url, "local_path": str(filename), "success": True}
     
     try:
         # Check if file already exists
         if os.path.exists(filename):
-            log.info(f"File already exists for {citizenname}, replacing it: {filename}")
+            log.info(f"File already exists for {username}, replacing it: {filename}")
             # We'll continue and overwrite it
         
         response = requests.get(url, timeout=30)
@@ -165,12 +165,12 @@ def download_image(url_info: Tuple[str, str, str], dry_run: bool = False) -> Opt
         with open(filename, 'wb') as f:
             f.write(response.content)
         
-        log.info(f"Downloaded {url} for citizen {citizenname} to {filename}")
-        return {"citizenname": citizenname, "url": url, "local_path": str(filename), "success": True}
+        log.info(f"Downloaded {url} for citizen {username} to {filename}")
+        return {"username": username, "url": url, "local_path": str(filename), "success": True}
     
     except Exception as e:
-        log.error(f"Error downloading {url} for citizen {citizenname}: {e}")
-        return {"citizenname": citizenname, "url": url, "error": str(e), "success": False}
+        log.error(f"Error downloading {url} for citizen {username}: {e}")
+        return {"username": username, "url": url, "error": str(e), "success": False}
 
 def sync_coat_of_arms(dry_run: bool = False):
     """Main function to synchronize coat of arms images"""
@@ -190,23 +190,23 @@ def sync_coat_of_arms(dry_run: bool = False):
     download_tasks = []
     mapping = {}
     
-    for citizenname, url in coat_of_arms_map.items():
+    for username, url in coat_of_arms_map.items():
         # Parse the URL to get the filename
         parsed_url = urlparse(url)
         path = parsed_url.path
         original_filename = os.path.basename(path)
         
-        # Create a filename that includes the citizenname for better organization
+        # Create a filename that includes the username for better organization
         # Use the original extension if available
         ext = os.path.splitext(original_filename)[1] or '.png'
-        safe_citizenname = citizenname.replace(' ', '_').lower()
-        filename = LOCAL_STORAGE_PATH / f"{safe_citizenname}{ext}"
+        safe_username = username.replace(' ', '_').lower()
+        filename = LOCAL_STORAGE_PATH / f"{safe_username}{ext}"
         
         # Add to download tasks
-        download_tasks.append((citizenname, url, filename))
+        download_tasks.append((username, url, filename))
         
         # Add to mapping
-        mapping[citizenname] = {
+        mapping[username] = {
             "production_url": url,
             "local_path": f"/coat-of-arms/{filename.name}"
         }

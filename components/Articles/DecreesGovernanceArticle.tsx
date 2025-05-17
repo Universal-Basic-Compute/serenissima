@@ -125,7 +125,7 @@ const DecreesGovernanceArticle: React.FC<DecreesGovernanceArticleProps> = ({ onC
           </div>
           
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h4 className="text-xl font-serif text-amber-800 mb-2">Wealth-Based Access</h4>
+            <h4 className="text-xl font-serif text-amber-800 mb-2">Ducats-Based Access</h4>
             
             <div className="flex flex-col md:flex-row gap-6">
               <div className="md:w-1/2">

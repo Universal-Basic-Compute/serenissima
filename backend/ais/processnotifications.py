@@ -43,16 +43,16 @@ def get_ai_citizens(tables) -> List[Dict]:
         print(f"Error getting AI citizens: {str(e)}")
         return []
 
-def get_unread_notifications_for_ai(tables, ai_citizenname: str) -> List[Dict]:
+def get_unread_notifications_for_ai(tables, ai_username: str) -> List[Dict]:
     """Get all unread notifications for an AI citizen."""
     try:
         # Query notifications where the citizen is the AI citizen and ReadAt is null
-        formula = f"AND({{Citizen}}='{ai_citizenname}', {{ReadAt}}=BLANK())"
+        formula = f"AND({{Citizen}}='{ai_username}', {{ReadAt}}=BLANK())"
         notifications = tables["notifications"].all(formula=formula)
-        print(f"Found {len(notifications)} unread notifications for AI citizen {ai_citizenname}")
+        print(f"Found {len(notifications)} unread notifications for AI citizen {ai_username}")
         return notifications
     except Exception as e:
-        print(f"Error getting unread notifications for AI citizen {ai_citizenname}: {str(e)}")
+        print(f"Error getting unread notifications for AI citizen {ai_username}: {str(e)}")
         return []
 
 def mark_notifications_as_read(tables, notification_ids: List[str]) -> bool:
@@ -78,18 +78,18 @@ def get_kinos_api_key() -> str:
         sys.exit(1)
     return api_key
 
-def send_notifications_to_ai(ai_citizenname: str, notifications: List[Dict]) -> bool:
+def send_notifications_to_ai(ai_username: str, notifications: List[Dict]) -> bool:
     """Send notifications to an AI citizen using the Kinos Engine API."""
     try:
         if not notifications:
-            print(f"No notifications to send to AI citizen {ai_citizenname}")
+            print(f"No notifications to send to AI citizen {ai_username}")
             return True
         
         api_key = get_kinos_api_key()
         blueprint = "serenissima-ai"
         
         # Construct the API URL for the build endpoint
-        url = f"https://api.kinos-engine.ai/v2/blueprints/{blueprint}/kins/{ai_citizenname}/build"
+        url = f"https://api.kinos-engine.ai/v2/blueprints/{blueprint}/kins/{ai_username}/build"
         
         # Set up headers with API key
         headers = {
@@ -134,16 +134,16 @@ def send_notifications_to_ai(ai_citizenname: str, notifications: List[Dict]) -> 
             status = response_data.get("status")
             
             if status == "completed":
-                print(f"Successfully sent {len(notifications)} notifications to AI citizen {ai_citizenname}")
+                print(f"Successfully sent {len(notifications)} notifications to AI citizen {ai_username}")
                 return True
             else:
-                print(f"Error processing notifications for AI citizen {ai_citizenname}: {response_data}")
+                print(f"Error processing notifications for AI citizen {ai_username}: {response_data}")
                 return False
         else:
             print(f"Error from Kinos API: {response.status_code} - {response.text}")
             return False
     except Exception as e:
-        print(f"Error sending notifications to AI citizen {ai_citizenname}: {str(e)}")
+        print(f"Error sending notifications to AI citizen {ai_username}: {str(e)}")
         return False
 
 def create_admin_notification(tables, ai_notification_counts: Dict[str, int]) -> None:
@@ -191,18 +191,18 @@ def process_ai_notifications(dry_run: bool = False):
     # Filter AI citizens to only those with unread notifications
     filtered_ai_citizens = []
     for ai_citizen in ai_citizens:
-        ai_citizenname = ai_citizen["fields"].get("Citizenname")
-        if not ai_citizenname:
+        ai_username = ai_citizen["fields"].get("Citizenname")
+        if not ai_username:
             continue
             
         # Get unread notifications for this AI
-        unread_notifications = get_unread_notifications_for_ai(tables, ai_citizenname)
+        unread_notifications = get_unread_notifications_for_ai(tables, ai_username)
         
         if unread_notifications:
             filtered_ai_citizens.append(ai_citizen)
-            print(f"AI citizen {ai_citizenname} has {len(unread_notifications)} unread notifications, including in processing")
+            print(f"AI citizen {ai_username} has {len(unread_notifications)} unread notifications, including in processing")
         else:
-            print(f"AI citizen {ai_citizenname} has no unread notifications, skipping")
+            print(f"AI citizen {ai_username} has no unread notifications, skipping")
     
     # Replace the original list with the filtered list
     ai_citizens = filtered_ai_citizens
@@ -217,26 +217,26 @@ def process_ai_notifications(dry_run: bool = False):
     
     # Process each AI citizen
     for ai_citizen in ai_citizens:
-        ai_citizenname = ai_citizen["fields"].get("Username")
-        if not ai_citizenname:
+        ai_username = ai_citizen["fields"].get("Username")
+        if not ai_username:
             continue
         
-        print(f"Processing notifications for AI citizen: {ai_citizenname}")
+        print(f"Processing notifications for AI citizen: {ai_username}")
         
         # Get unread notifications for this AI
-        unread_notifications = get_unread_notifications_for_ai(tables, ai_citizenname)
+        unread_notifications = get_unread_notifications_for_ai(tables, ai_username)
         
         if not unread_notifications:
-            print(f"No unread notifications for AI citizen {ai_citizenname}")
-            ai_notification_counts[ai_citizenname] = 0
+            print(f"No unread notifications for AI citizen {ai_username}")
+            ai_notification_counts[ai_username] = 0
             continue
         
-        ai_notification_counts[ai_citizenname] = len(unread_notifications)
+        ai_notification_counts[ai_username] = len(unread_notifications)
         
         # Process notifications
         if not dry_run:
             # Send notifications to AI
-            success = send_notifications_to_ai(ai_citizenname, unread_notifications)
+            success = send_notifications_to_ai(ai_username, unread_notifications)
             
             if success:
                 # Mark notifications as read
@@ -244,7 +244,7 @@ def process_ai_notifications(dry_run: bool = False):
                 mark_notifications_as_read(tables, notification_ids)
         else:
             # In dry run mode, just log what would happen
-            print(f"[DRY RUN] Would send {len(unread_notifications)} notifications to AI citizen {ai_citizenname}")
+            print(f"[DRY RUN] Would send {len(unread_notifications)} notifications to AI citizen {ai_username}")
             print(f"[DRY RUN] Would mark {len(unread_notifications)} notifications as read")
     
     # Create admin notification with summary

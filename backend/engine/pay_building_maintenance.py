@@ -91,8 +91,8 @@ def get_all_buildings():
 def get_citizen_balance(citizen_id):
     """Get current balance for a citizen directly from Airtable."""
     try:
-        # First try to find by citizenname
-        formula = f"{{Citizenname}}='{citizen_id}'"
+        # First try to find by username
+        formula = f"{{Username}}='{citizen_id}'"
         records = citizens_table.all(formula=formula)
         
         # If not found, try by wallet address
@@ -113,8 +113,8 @@ def get_citizen_balance(citizen_id):
 def update_citizen_balance(citizen_id, amount, description):
     """Update citizen balance directly in Airtable."""
     try:
-        # First try to find by citizenname
-        formula = f"{{Citizenname}}='{citizen_id}'"
+        # First try to find by username
+        formula = f"{{Username}}='{citizen_id}'"
         records = citizens_table.all(formula=formula)
         
         # If not found, try by wallet address

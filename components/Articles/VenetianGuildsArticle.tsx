@@ -286,7 +286,7 @@ const VenetianGuildsArticle: React.FC<VenetianGuildsArticleProps> = ({ onClose }
                 <span className="font-bold">Alternative Paths:</span> While the traditional apprenticeship system is the most common route, La Serenissima offers alternative paths to guild membership:
               </p>
               <ul className="list-disc pl-5 space-y-1 text-amber-800 mt-2">
-                <li><span className="font-medium">Purchase a Membership:</span> Wealthy merchants can sometimes buy their way into a guild, though they may face social resistance</li>
+                <li><span className="font-medium">Purchase a Membership:</span> Ducatsy merchants can sometimes buy their way into a guild, though they may face social resistance</li>
                 <li><span className="font-medium">Marriage:</span> Marrying into a guild family can provide access, particularly for widows continuing their husband's business</li>
                 <li><span className="font-medium">Foreign Master Recognition:</span> Established masters from other cities may receive expedited membership after demonstrating their skills</li>
                 <li><span className="font-medium">Political Appointment:</span> In rare cases, the Doge or Council of Ten may grant guild membership as a political favor</li>
@@ -550,7 +550,7 @@ const VenetianGuildsArticle: React.FC<VenetianGuildsArticleProps> = ({ onClose }
                 </p>
                 <ul className="list-disc pl-5 space-y-1 text-amber-800">
                   <li>Democratic one-member-one-vote systems</li>
-                  <li>Wealth-weighted voting based on economic contribution</li>
+                  <li>Ducats-weighted voting based on economic contribution</li>
                   <li>Meritocratic systems with earned voting rights</li>
                   <li>Hybrid approaches combining multiple methods</li>
                 </ul>

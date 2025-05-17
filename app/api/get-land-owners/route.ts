@@ -48,7 +48,7 @@ async function fetchCitizensData(base: any) {
     const records = await new Promise((resolve, reject) => {
       const allRecords: any[] = [];
       citizensTable.select({
-        fields: ['Citizenname', 'CoatOfArmsImage', 'Ducats', 'FirstName', 'LastName', 'FamilyMotto'] // Added new fields
+        fields: ['Username', 'CoatOfArmsImage', 'Ducats', 'FirstName', 'LastName', 'FamilyMotto'] // Added new fields
       }).eachPage(
         function page(records, fetchNextPage) {
           allRecords.push(...records);
@@ -67,8 +67,8 @@ async function fetchCitizensData(base: any) {
     // Transform to a map for easy lookup
     const citizensMap = new Map();
     (records as any[]).forEach(record => {
-      if (record.fields.Citizenname) {
-        citizensMap.set(record.fields.Citizenname, {
+      if (record.fields.Username) {
+        citizensMap.set(record.fields.Username, {
           coat_of_arms_image: record.fields.CoatOfArmsImage || null,
           ducats: record.fields.Ducats || 0,
           first_name: record.fields.FirstName || null,

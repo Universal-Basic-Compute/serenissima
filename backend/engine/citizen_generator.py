@@ -54,8 +54,8 @@ TASK:
 Create 1 unique Venetian citizen of the {social_class} social class with historically accurate name, description, and characteristics.
 
 SOCIAL CLASS INFORMATION:
-- Nobili: The noble families who control Venice's government. Wealthy, politically powerful, and often involved in long-distance trade.
-- Cittadini: Wealthy non-noble citizens, including successful merchants, professionals, and high-ranking bureaucrats.
+- Nobili: The noble families who control Venice's government. Ducatsy, politically powerful, and often involved in long-distance trade.
+- Cittadini: Ducatsy non-noble citizens, including successful merchants, professionals, and high-ranking bureaucrats.
 - Popolani: Common citizens including craftsmen, shopkeepers, and skilled workers.
 - Facchini: Unskilled workers, servants, gondoliers, and the working poor.
 
@@ -64,7 +64,7 @@ For the citizen, provide:
 2. LastName - Historically accurate Venetian family name (ensure nobili have notable Venetian noble family names)
 3. Description - One sentence about personality, traits, and remarkable things about this person
 4. ImagePrompt - A detailed prompt for generating an image of this person, including physical appearance, clothing appropriate to their social class, and setting
-5. Wealth - Approximate wealth in Ducats, appropriate to their social class:
+5. Ducats - Approximate wealth in Ducats, appropriate to their social class:
    - Nobili: 5,000-50,000 ducats
    - Cittadini: 1,000-5,000 ducats
    - Popolani: 100-1,000 ducats

@@ -182,21 +182,21 @@ def get_building_resources(tables, building_id: str) -> List[Dict]:
         log.error(f"Error getting resources for building {building_id}: {e}")
         return []
 
-def get_citizen_balance(tables, citizenname: str) -> float:
+def get_citizen_balance(tables, username: str) -> float:
     """Get the compute balance for a citizen."""
     try:
-        formula = f"{{Citizenname}}='{citizenname}'"
+        formula = f"{{Username}}='{username}'"
         citizens = tables['citizens'].all(formula=formula)
         
         if citizens:
             balance = citizens[0]['fields'].get('Ducats', 0)
-            log.info(f"Citizen {citizenname} has balance: {balance}")
+            log.info(f"Citizen {username} has balance: {balance}")
             return float(balance)
         else:
-            log.warning(f"Citizen {citizenname} not found")
+            log.warning(f"Citizen {username} not found")
             return 0
     except Exception as e:
-        log.error(f"Error getting balance for citizen {citizenname}: {e}")
+        log.error(f"Error getting balance for citizen {username}: {e}")
         return 0
 
 def get_building_info(tables, building_id: str) -> Optional[Dict]:
@@ -300,7 +300,7 @@ def process_import_contract(tables, contract: Dict, building_types: Dict, resour
         
         # 1. Transfer money from buyer to seller (Italia/Treasury)
         # Update buyer's balance
-        formula = f"{{Citizenname}}='{buyer}'"
+        formula = f"{{Username}}='{buyer}'"
         citizens = tables['citizens'].all(formula=formula)
         
         if not citizens:

@@ -124,7 +124,7 @@ const GuildLeadershipArticle: React.FC<GuildLeadershipArticleProps> = ({ onClose
               </div>
               
               <div className="bg-amber-50 p-3 rounded border border-amber-200">
-                <h5 className="font-bold text-amber-900 mb-1">Wealth-Weighted Systems</h5>
+                <h5 className="font-bold text-amber-900 mb-1">Ducats-Weighted Systems</h5>
                 <p className="text-sm text-amber-800 mb-2">
                   Some guilds allocate voting power based on economic contribution:
                 </p>

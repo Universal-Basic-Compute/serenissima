@@ -7,11 +7,11 @@ from fastapi import HTTPException
 
 def find_citizen_by_identifier(citizens_table, identifier, create_if_missing=False):
     """
-    Find a citizen by wallet address or citizenname (case-insensitive).
+    Find a citizen by wallet address or username (case-insensitive).
     
     Args:
         citizens_table: The Airtable citizens table
-        identifier: The wallet address or citizenname to search for
+        identifier: The wallet address or username to search for
         create_if_missing: Whether to create a new citizen if not found
         
     Returns:
@@ -29,7 +29,7 @@ def find_citizen_by_identifier(citizens_table, identifier, create_if_missing=Fal
         matching_records = [
             record for record in all_citizens 
             if record["fields"].get("Wallet", "").lower() == normalized_identifier or
-               record["fields"].get("Citizenname", "").lower() == normalized_identifier
+               record["fields"].get("Username", "").lower() == normalized_identifier
         ]
         
         if matching_records:
@@ -106,8 +106,8 @@ def transfer_compute(citizens_table, from_citizen, to_citizen, amount):
     
     Args:
         citizens_table: The Airtable citizens table
-        from_citizen: The wallet address or citizenname of the sender
-        to_citizen: The wallet address or citizenname of the recipient
+        from_citizen: The wallet address or username of the sender
+        to_citizen: The wallet address or username of the recipient
         amount: The amount to transfer
         
     Returns:

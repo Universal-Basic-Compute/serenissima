@@ -78,7 +78,7 @@ def get_business_details(tables, business_id: str) -> Optional[Dict]:
         return None
 
 def find_citizen_by_identifier(tables, identifier: str) -> Optional[Dict]:
-    """Find a citizen by citizenname or wallet address."""
+    """Find a citizen by username or wallet address."""
     log.info(f"Looking up citizen: {identifier}")
     
     # Handle known misspellings
@@ -87,12 +87,12 @@ def find_citizen_by_identifier(tables, identifier: str) -> Optional[Dict]:
         log.info(f"Corrected misspelled identifier from ConsiglioDeiDieci to {identifier}")
     
     try:
-        # First try to find by citizenname
-        formula = f"{{Citizenname}}='{identifier}'"
+        # First try to find by username
+        formula = f"{{Username}}='{identifier}'"
         citizens = tables['citizens'].all(formula=formula)
         
         if citizens:
-            log.info(f"Found citizen by citizenname: {identifier}")
+            log.info(f"Found citizen by username: {identifier}")
             return citizens[0]
         
         # If not found, try by wallet address
@@ -107,7 +107,7 @@ def find_citizen_by_identifier(tables, identifier: str) -> Optional[Dict]:
         if identifier == "ConsiglioDeiDieci":
             # Try with different variations
             for variation in ["Consiglio Dei Dieci", "Consiglio dei Dieci", "ConsiglioDeidieci"]:
-                formula = f"{{Citizenname}}='{variation}'"
+                formula = f"{{Username}}='{variation}'"
                 citizens = tables['citizens'].all(formula=formula)
                 if citizens:
                     log.info(f"Found citizen by alternative spelling: {variation}")
@@ -165,14 +165,14 @@ def update_citizen_wealth(tables, citizen_id: str, amount: float) -> Optional[Di
             return None
         
         # Get current wealth
-        current_wealth = citizen['fields'].get('Wealth', 0)
+        current_wealth = citizen['fields'].get('Ducats', 0)
         
         # Calculate new wealth
         new_wealth = current_wealth + amount
         
         # Update the citizen record
         updated_citizen = tables['citizens'].update(citizen_id, {
-            'Wealth': new_wealth
+            'Ducats': new_wealth
         })
         
         log.info(f"Updated wealth for citizen {citizen_id}: {current_wealth} -> {new_wealth}")

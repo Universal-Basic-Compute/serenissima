@@ -45,7 +45,7 @@ async function fetchCitizensNeedingImages(): Promise<Citizen[]> {
       airtableBase('CITIZENS').select({
         filterByFormula: '{ImageUrl} = ""', // Only get records with empty ImageUrl
         // Optionally specify fields to retrieve
-        fields: ['CitizenId', 'SocialClass', 'FirstName', 'LastName', 'Description', 'ImagePrompt', 'Wealth', 'CreatedAt']
+        fields: ['CitizenId', 'SocialClass', 'FirstName', 'LastName', 'Description', 'ImagePrompt', 'Ducats', 'CreatedAt']
       }).eachPage(
         function page(records, fetchNextPage) {
           // Process each page of records
@@ -58,7 +58,7 @@ async function fetchCitizensNeedingImages(): Promise<Citizen[]> {
               lastName: fields.LastName as string,
               description: fields.Description as string,
               imagePrompt: fields.ImagePrompt as string,
-              wealth: Number(fields.Wealth) || 0,
+              wealth: Number(fields.Ducats) || 0,
               createdAt: String(fields.CreatedAt) || new Date().toISOString()
             });
           });

@@ -296,7 +296,7 @@ const EconomicSystemArticle: React.FC<EconomicSystemArticleProps> = ({ onClose }
                   AI citizens have realistic needs and preferences, purchasing food, clothing, luxury goods, and services. Their consumption patterns vary by social class, profession, and individual taste, creating diverse market demand.
                 </p>
                 <p className="mt-2">
-                  Wealthier citizens demand luxury goods and services, while working-class citizens focus on necessities, creating natural market segmentation.
+                  Ducatsier citizens demand luxury goods and services, while working-class citizens focus on necessities, creating natural market segmentation.
                 </p>
               </div>
               

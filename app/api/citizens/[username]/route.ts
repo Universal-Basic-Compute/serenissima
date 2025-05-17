@@ -17,30 +17,30 @@ const initAirtable = () => {
   return new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
 };
 
-// Extract citizenname from pathname
-function extractCitizennameFromRequest(request: NextRequest): string | null {
+// Extract username from pathname
+function extractUsernameFromRequest(request: NextRequest): string | null {
   const match = request.nextUrl.pathname.match(/\/api\/citizens\/([^/]+)/);
   return match?.[1] ?? null;
 }
 
 export async function GET(request: NextRequest) {
   try {
-    const citizenname = extractCitizennameFromRequest(request);
+    const username = extractUsernameFromRequest(request);
 
-    if (!citizenname) {
+    if (!username) {
       return NextResponse.json(
-        { success: false, error: 'Citizenname is required' },
+        { success: false, error: 'Username is required' },
         { status: 400 }
       );
     }
 
-    console.log(`Fetching citizen data for citizenname: ${citizenname}`);
+    console.log(`Fetching citizen data for username: ${username}`);
 
-    const cachedData = citizenCache.get(citizenname);
+    const cachedData = citizenCache.get(username);
     const now = Date.now();
 
     if (cachedData && now - cachedData.timestamp < CACHE_DURATION) {
-      console.log(`Returning cached citizen data for citizenname: ${citizenname}`);
+      console.log(`Returning cached citizen data for username: ${username}`);
       return NextResponse.json({
         success: true,
         citizen: cachedData.data,
@@ -54,21 +54,21 @@ export async function GET(request: NextRequest) {
       return await base(AIRTABLE_CITIZENS_TABLE)
         .select({
           filterByFormula: `{${field}} = "${value}"`,
-          fields: ['Citizenname', 'FirstName', 'LastName', 'CoatOfArmsImage', 'FamilyMotto', 'Wallet', 'Ducats'],
+          fields: ['Username', 'FirstName', 'LastName', 'CoatOfArmsImage', 'FamilyMotto', 'Wallet', 'Ducats'],
         })
         .firstPage();
     };
 
-    let records = await queryCitizen('Citizenname', citizenname);
+    let records = await queryCitizen('Username', username);
 
-    if (!records.length && citizenname.startsWith('0x')) {
-      records = await queryCitizen('Wallet', citizenname);
+    if (!records.length && username.startsWith('0x')) {
+      records = await queryCitizen('Wallet', username);
     }
 
     if (records.length > 0) {
       const record = records[0];
       const citizenData = {
-        citizenname: record.get('Citizenname') as string,
+        username: record.get('Username') as string,
         firstName: record.get('FirstName') as string ?? '',
         lastName: record.get('LastName') as string ?? '',
         coatOfArmsImage: record.get('CoatOfArmsImage') as string ?? null,
@@ -77,15 +77,15 @@ export async function GET(request: NextRequest) {
         ducats: record.get('Ducats') as number ?? 0,
       };
 
-      citizenCache.set(citizenname, { data: citizenData, timestamp: now });
+      citizenCache.set(username, { data: citizenData, timestamp: now });
 
       return NextResponse.json({ success: true, citizen: citizenData });
     }
 
-    citizenCache.set(citizenname, { data: null, timestamp: now });
+    citizenCache.set(username, { data: null, timestamp: now });
 
     return NextResponse.json(
-      { success: false, error: `No citizen found for citizenname: ${citizenname}` },
+      { success: false, error: `No citizen found for username: ${username}` },
       { status: 404 }
     );
   } catch (error) {

@@ -43,7 +43,7 @@ La Serenissima is a blockchain-powered interactive experience set in Renaissance
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourcitizenname/la-serenissima.git
+   git clone https://github.com/yourusername/la-serenissima.git
    cd la-serenissima
    ```
 

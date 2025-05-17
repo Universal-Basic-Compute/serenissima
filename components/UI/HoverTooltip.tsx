@@ -4,21 +4,21 @@ import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 import { buildingService } from '@/lib/services/BuildingService';
 import { assetService } from '@/lib/services/AssetService';
 
-// Helper function to get current citizenname
-const getCurrentCitizenname = (): string | null => {
+// Helper function to get current username
+const getCurrentUsername = (): string | null => {
   try {
     if (typeof window === 'undefined') return null;
     
     const profileStr = localStorage.getItem('citizenProfile');
     if (profileStr) {
       const profile = JSON.parse(profileStr);
-      if (profile && profile.citizenname) {
-        return profile.citizenname;
+      if (profile && profile.username) {
+        return profile.username;
       }
     }
     return null;
   } catch (error) {
-    console.error('Error getting current citizenname:', error);
+    console.error('Error getting current username:', error);
     return null;
   }
 };
@@ -237,7 +237,7 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
                 if (resource.contractType === 'public_sell') {
                   contractTypeLabel = 'Public Sell';
                   contractTypeColor = 'text-green-400';
-                } else if (resource.owner === getCurrentCitizenname()) {
+                } else if (resource.owner === getCurrentUsername()) {
                   contractTypeLabel = 'Your Sell';
                   contractTypeColor = 'text-blue-400';
                 } else {

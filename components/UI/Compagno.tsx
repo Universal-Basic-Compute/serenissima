@@ -19,7 +19,7 @@ interface Notification {
 }
 
 interface Citizen {
-  citizenname: string;
+  username: string;
   firstName: string;
   lastName: string;
   coatOfArmsImage: string | null;
@@ -53,7 +53,7 @@ interface CompagnoProps {
 
 const KINOS_BACKEND_BASE_URL = 'https://api.kinos-engine.ai/v2';
 const BLUEPRINT = 'compagno';
-const DEFAULT_CITIZENNAME = 'visitor'; // Default citizenname for anonymous citizens
+const DEFAULT_CITIZENNAME = 'visitor'; // Default username for anonymous citizens
 
 const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -62,7 +62,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
   const [isTyping, setIsTyping] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [pagination, setPagination] = useState<PaginationInfo | null>(null);
-  const [citizenname, setCitizenname] = useState<string>(DEFAULT_CITIZENNAME);
+  const [username, setUsername] = useState<string>(DEFAULT_CITIZENNAME);
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
   const [playingMessageId, setPlayingMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -91,7 +91,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
     console.log('%c[DEBUG] Starting notification fetch', 'color: #ff69b4; font-weight: bold');
     console.log('%c[DEBUG] isOpen:', 'color: #ff69b4', isOpen);
     console.log('%c[DEBUG] activeTab:', 'color: #ff69b4', activeTab);
-    console.log('%c[DEBUG] Current citizenname:', 'color: #ff69b4', citizenname);
+    console.log('%c[DEBUG] Current username:', 'color: #ff69b4', username);
     
     // Add debounce logic to prevent multiple rapid calls
     const now = Date.now();
@@ -106,19 +106,19 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
     lastFetchRef.current = now;
     
     try {
-      // Get the current citizenname from localStorage if not already set
-      let citizenToFetch = citizenname;
+      // Get the current username from localStorage if not already set
+      let citizenToFetch = username;
       
       if (!citizenToFetch || citizenToFetch === DEFAULT_CITIZENNAME) {
-        // Try to get citizenname from localStorage
+        // Try to get username from localStorage
         const savedProfile = localStorage.getItem('citizenProfile');
         if (savedProfile) {
           try {
             const profile = JSON.parse(savedProfile);
-            if (profile.citizenname) {
-              citizenToFetch = profile.citizenname;
+            if (profile.username) {
+              citizenToFetch = profile.username;
               // Update the component state
-              setCitizenname(profile.citizenname);
+              setUsername(profile.username);
             }
           } catch (error) {
             console.error('Error parsing citizen profile:', error);
@@ -126,7 +126,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
         }
       }
       
-      // If still no citizenname, use the default
+      // If still no username, use the default
       if (!citizenToFetch) {
         citizenToFetch = DEFAULT_CITIZENNAME;
       }
@@ -201,7 +201,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
           {
             notificationId: 'dummy-1',
             type: 'System',
-            citizen: citizenname || DEFAULT_CITIZENNAME,
+            citizen: username || DEFAULT_CITIZENNAME,
             content: 'Welcome to La Serenissima! This is a test notification.',
             createdAt: new Date().toISOString(),
             readAt: null
@@ -209,7 +209,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
           {
             notificationId: 'dummy-2',
             type: 'Market',
-            citizen: citizenname || DEFAULT_CITIZENNAME,
+            citizen: username || DEFAULT_CITIZENNAME,
             content: 'A new land parcel is available for purchase in San Marco district.',
             createdAt: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
             readAt: null
@@ -220,7 +220,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
         console.log('%c[DEBUG] Set fallback notifications:', 'color: #ff69b4', dummyNotifications);
       }
     }
-  }, [citizenname, lastFetchTime, notifications.length, isOpen, activeTab]);
+  }, [username, lastFetchTime, notifications.length, isOpen, activeTab]);
 
   // Fetch citizens
   const fetchCitizens = useCallback(async () => {
@@ -239,13 +239,13 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
       
       if (data.success && data.citizens && Array.isArray(data.citizens)) {
         // Add Compagno as the first citizen if not already present
-        const compagnoExists = data.citizens.some((citizen: Citizen) => citizen.citizenname === 'compagno');
+        const compagnoExists = data.citizens.some((citizen: Citizen) => citizen.username === 'compagno');
         
         let citizensList = [...data.citizens];
         
         if (!compagnoExists) {
           citizensList.unshift({
-            citizenname: 'compagno',
+            username: 'compagno',
             firstName: 'Compagno',
             lastName: 'Bot',
             coatOfArmsImage: null
@@ -256,7 +256,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
       } else {
         // If no citizens returned but request was successful, just ensure Compagno is available
         setCitizens([{
-          citizenname: 'compagno',
+          username: 'compagno',
           firstName: 'Compagno',
           lastName: 'Bot',
           coatOfArmsImage: null
@@ -267,7 +267,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
       
       // Just ensure Compagno is available when there's an error
       setCitizens([{
-        citizenname: 'compagno',
+        username: 'compagno',
         firstName: 'Compagno',
         lastName: 'Bot',
         coatOfArmsImage: null
@@ -279,7 +279,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
 
   // Fetch messages between current citizen and selected citizen
   const fetchCitizenMessages = useCallback(async (otherCitizen: string) => {
-    if (!citizenname || !otherCitizen) return;
+    if (!username || !otherCitizen) return;
     
     setIsLoadingCitizenMessages(true);
     
@@ -290,7 +290,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          currentCitizen: citizenname,
+          currentCitizen: username,
           otherCitizen: otherCitizen
         })
       });
@@ -326,16 +326,16 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
     } finally {
       setIsLoadingCitizenMessages(false);
     }
-  }, [citizenname]);
+  }, [username]);
 
   // Send message to selected citizen
   const sendCitizenMessage = async (content: string, messageType: string = 'message') => {
-    if (!content.trim() || !citizenname || !selectedCitizen) return;
+    if (!content.trim() || !username || !selectedCitizen) return;
     
     // Optimistically add message to UI
     const tempMessage: Message = {
       messageId: `temp-${Date.now()}`,
-      sender: citizenname,
+      sender: username,
       receiver: selectedCitizen,
       content: content,
       type: messageType,
@@ -358,7 +358,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          sender: citizenname,
+          sender: username,
           receiver: selectedCitizen,
           content: content,
           type: messageType
@@ -417,7 +417,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            citizen: citizenname,
+            citizen: username,
             notificationIds
           }),
         }
@@ -480,27 +480,27 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
 
   // Fetch citizen information if available
   useEffect(() => {
-    // Try to get citizenname from localStorage or other source
+    // Try to get username from localStorage or other source
     const savedProfile = localStorage.getItem('citizenProfile');
     if (savedProfile) {
       try {
         const profile = JSON.parse(savedProfile);
-        if (profile.citizenname) {
-          console.log('%c[DEBUG] Found citizenname in localStorage:', 'color: #ff69b4', profile.citizenname);
-          setCitizenname(profile.citizenname);
+        if (profile.username) {
+          console.log('%c[DEBUG] Found username in localStorage:', 'color: #ff69b4', profile.username);
+          setUsername(profile.username);
         }
       } catch (error) {
         console.error('Error parsing citizen profile:', error);
       }
     } else {
-      console.log('%c[DEBUG] No citizen profile found in localStorage, using default citizenname:', 'color: #ff69b4', DEFAULT_CITIZENNAME);
+      console.log('%c[DEBUG] No citizen profile found in localStorage, using default username:', 'color: #ff69b4', DEFAULT_CITIZENNAME);
     }
     
     // Also listen for profile updates
     const handleProfileUpdate = (event: CustomEvent) => {
-      if (event.detail && event.detail.citizenname) {
-        console.log('%c[DEBUG] Profile updated, new citizenname:', 'color: #ff69b4', event.detail.citizenname);
-        setCitizenname(event.detail.citizenname);
+      if (event.detail && event.detail.username) {
+        console.log('%c[DEBUG] Profile updated, new username:', 'color: #ff69b4', event.detail.username);
+        setUsername(event.detail.username);
       }
     };
     
@@ -586,7 +586,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
     setIsLoadingHistory(true);
     try {
       const response = await fetch(
-        `${KINOS_BACKEND_BASE_URL}/blueprints/${BLUEPRINT}/kins/${citizenname}/messages?limit=25&offset=${offset}`,
+        `${KINOS_BACKEND_BASE_URL}/blueprints/${BLUEPRINT}/kins/${username}/messages?limit=25&offset=${offset}`,
         {
           method: 'GET',
           headers: {
@@ -679,7 +679,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
       }
       
       const response = await fetch(
-        `${KINOS_BACKEND_BASE_URL}/blueprints/${BLUEPRINT}/kins/${citizenname}/messages`,
+        `${KINOS_BACKEND_BASE_URL}/blueprints/${BLUEPRINT}/kins/${username}/messages`,
         {
           method: 'POST',
           headers: {
@@ -798,7 +798,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
   // Filter citizens based on search query
   const filteredCitizens = citizenSearchQuery
     ? citizens.filter(citizen => 
-        citizen.citizenname.toLowerCase().includes(citizenSearchQuery.toLowerCase()) ||
+        citizen.username.toLowerCase().includes(citizenSearchQuery.toLowerCase()) ||
         citizen.firstName.toLowerCase().includes(citizenSearchQuery.toLowerCase()) ||
         citizen.lastName.toLowerCase().includes(citizenSearchQuery.toLowerCase())
       )
@@ -1077,11 +1077,11 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                   ) : (
                     <ul>
                       {filteredCitizens.map(citizen => (
-                        <li key={citizen.citizenname}>
+                        <li key={citizen.username}>
                           <button
-                            onClick={() => setSelectedCitizen(citizen.citizenname)}
+                            onClick={() => setSelectedCitizen(citizen.username)}
                             className={`w-full text-left p-3 flex items-center ${
-                              selectedCitizen === citizen.citizenname 
+                              selectedCitizen === citizen.username 
                                 ? 'bg-amber-200' 
                                 : 'hover:bg-amber-100'
                             }`}
@@ -1110,10 +1110,10 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                             </div>
                             <div>
                               <div className="font-medium text-sm">
-                                {citizen.citizenname === 'compagno' ? 'Compagno' : `${citizen.firstName} ${citizen.lastName}`}
+                                {citizen.username === 'compagno' ? 'Compagno' : `${citizen.firstName} ${citizen.lastName}`}
                               </div>
                               <div className="text-xs text-gray-500">
-                                {citizen.citizenname === 'compagno' ? 'Virtual Assistant' : citizen.citizenname}
+                                {citizen.username === 'compagno' ? 'Virtual Assistant' : citizen.username}
                               </div>
                             </div>
                           </button>
@@ -1157,10 +1157,10 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                       ) : (
                         <div className="flex items-center">
                           <div className="w-6 h-6 rounded-full bg-amber-300 flex items-center justify-center mr-2 text-amber-800 text-xs">
-                            {citizens.find(u => u.citizenname === selectedCitizen)?.firstName.charAt(0) || '?'}
+                            {citizens.find(u => u.username === selectedCitizen)?.firstName.charAt(0) || '?'}
                           </div>
                           <span className="font-medium">
-                            {citizens.find(u => u.citizenname === selectedCitizen)?.firstName || ''} {citizens.find(u => u.citizenname === selectedCitizen)?.lastName || ''}
+                            {citizens.find(u => u.username === selectedCitizen)?.firstName || ''} {citizens.find(u => u.username === selectedCitizen)?.lastName || ''}
                           </span>
                         </div>
                       )}
@@ -1276,7 +1276,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                           {citizenMessages.length === 0 ? (
                             <div className="text-center py-8">
                               <div className="text-gray-500 italic mb-4">
-                                No messages yet with {citizens.find(u => u.citizenname === selectedCitizen)?.firstName || selectedCitizen}.
+                                No messages yet with {citizens.find(u => u.username === selectedCitizen)?.firstName || selectedCitizen}.
                               </div>
                               <div className="text-amber-700 text-sm">
                                 Send a message to start your conversation!
@@ -1287,14 +1287,14 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                               <div 
                                 key={message.messageId} 
                                 className={`mb-3 ${
-                                  message.sender === citizenname 
+                                  message.sender === username 
                                     ? 'text-right' 
                                     : 'text-left'
                                 }`}
                               >
                                 <div 
                                   className={`inline-block p-3 rounded-lg max-w-[80%] ${
-                                    message.sender === citizenname
+                                    message.sender === username
                                       ? 'citizen-bubble rounded-br-none'
                                       : 'assistant-bubble rounded-bl-none'
                                   }`}
@@ -1306,7 +1306,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                                         <div className="whitespace-pre-wrap">{message.content || "No content available"}</div>
                                         
                                         {/* Add response buttons for guild masters */}
-                                        {message.receiver === citizenname && (
+                                        {message.receiver === username && (
                                           <div className="mt-3 flex space-x-2">
                                             <button
                                               onClick={() => {
@@ -1334,7 +1334,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                                                       'Content-Type': 'application/json',
                                                     },
                                                     body: JSON.stringify({
-                                                      citizenname: message.sender,
+                                                      username: message.sender,
                                                       guildId: message.receiver,
                                                       status: 'approved'
                                                     })
@@ -1371,7 +1371,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                                                       'Content-Type': 'application/json',
                                                     },
                                                     body: JSON.stringify({
-                                                      citizenname: message.sender,
+                                                      username: message.sender,
                                                       guildId: null,
                                                       status: 'rejected'
                                                     })
@@ -1462,7 +1462,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                         type="text"
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
-                        placeholder={`Message ${selectedCitizen === 'compagno' ? 'Compagno' : citizens.find(u => u.citizenname === selectedCitizen)?.firstName || selectedCitizen}...`}
+                        placeholder={`Message ${selectedCitizen === 'compagno' ? 'Compagno' : citizens.find(u => u.username === selectedCitizen)?.firstName || selectedCitizen}...`}
                         className="flex-1 p-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
                         disabled={isTyping}
                       />

@@ -45,16 +45,16 @@ def get_ai_citizens(tables) -> List[Dict]:
         print(f"Error getting AI citizens: {str(e)}")
         return []
 
-def get_unread_messages_for_ai(tables, ai_citizenname: str) -> List[Dict]:
+def get_unread_messages_for_ai(tables, ai_username: str) -> List[Dict]:
     """Get all unread messages for an AI citizen."""
     try:
         # Query messages where the receiver is the AI citizen and ReadAt is null
-        formula = f"AND({{Receiver}}='{ai_citizenname}', {{ReadAt}}=BLANK())"
+        formula = f"AND({{Receiver}}='{ai_username}', {{ReadAt}}=BLANK())"
         messages = tables["messages"].all(formula=formula)
-        print(f"Found {len(messages)} unread messages for AI citizen {ai_citizenname}")
+        print(f"Found {len(messages)} unread messages for AI citizen {ai_username}")
         return messages
     except Exception as e:
-        print(f"Error getting unread messages for AI citizen {ai_citizenname}: {str(e)}")
+        print(f"Error getting unread messages for AI citizen {ai_username}: {str(e)}")
         return []
 
 def mark_message_as_read(tables, message_id: str) -> bool:
@@ -79,14 +79,14 @@ def get_kinos_api_key() -> str:
         sys.exit(1)
     return api_key
 
-def generate_ai_response(ai_citizenname: str, sender_citizenname: str, message_content: str) -> Optional[str]:
+def generate_ai_response(ai_username: str, sender_username: str, message_content: str) -> Optional[str]:
     """Generate an AI response using the Kinos Engine API."""
     try:
         api_key = get_kinos_api_key()
         blueprint = "serenissima-ai"
         
         # Construct the API URL
-        url = f"https://api.kinos-engine.ai/v2/blueprints/{blueprint}/kins/{ai_citizenname}/channels/{sender_citizenname}/messages"
+        url = f"https://api.kinos-engine.ai/v2/blueprints/{blueprint}/kins/{ai_username}/channels/{sender_username}/messages"
         
         # Set up headers with API key
         headers = {
@@ -107,7 +107,7 @@ def generate_ai_response(ai_citizenname: str, sender_citizenname: str, message_c
             response_data = response.json()
             
             # Get the most recent message from the assistant
-            messages_url = f"https://api.kinos-engine.ai/v2/blueprints/{blueprint}/kins/{ai_citizenname}/channels/{sender_citizenname}/messages"
+            messages_url = f"https://api.kinos-engine.ai/v2/blueprints/{blueprint}/kins/{ai_username}/channels/{sender_username}/messages"
             messages_response = requests.get(messages_url, headers=headers)
             
             if messages_response.status_code == 200:
@@ -136,15 +136,15 @@ def generate_ai_response(ai_citizenname: str, sender_citizenname: str, message_c
         print(f"Error generating AI response: {str(e)}")
         return None
 
-def create_response_message(tables, ai_citizenname: str, sender_citizenname: str, response_content: str) -> bool:
+def create_response_message(tables, ai_username: str, sender_username: str, response_content: str) -> bool:
     """Create a response message from the AI to the sender."""
     try:
         now = datetime.now().isoformat()
         
         # Create the message record
         message = {
-            "Sender": ai_citizenname,
-            "Receiver": sender_citizenname,
+            "Sender": ai_username,
+            "Receiver": sender_username,
             "Content": response_content,
             "CreatedAt": now,
             "Type": "message"  # Add the Type field with value "message"
@@ -152,7 +152,7 @@ def create_response_message(tables, ai_citizenname: str, sender_citizenname: str
         }
         
         tables["messages"].create(message)
-        print(f"Created response message from {ai_citizenname} to {sender_citizenname}")
+        print(f"Created response message from {ai_username} to {sender_username}")
         return True
     except Exception as e:
         print(f"Error creating response message: {str(e)}")
@@ -203,18 +203,18 @@ def process_ai_messages(dry_run: bool = False):
     # Filter AI citizens to only those who have unread messages
     filtered_ai_citizens = []
     for ai_citizen in ai_citizens:
-        ai_citizenname = ai_citizen["fields"].get("Citizenname")
-        if not ai_citizenname:
+        ai_username = ai_citizen["fields"].get("Citizenname")
+        if not ai_username:
             continue
             
         # Get unread messages for this AI
-        unread_messages = get_unread_messages_for_ai(tables, ai_citizenname)
+        unread_messages = get_unread_messages_for_ai(tables, ai_username)
         
         if unread_messages:
             filtered_ai_citizens.append(ai_citizen)
-            print(f"AI citizen {ai_citizenname} has {len(unread_messages)} unread messages, including in processing")
+            print(f"AI citizen {ai_username} has {len(unread_messages)} unread messages, including in processing")
         else:
-            print(f"AI citizen {ai_citizenname} has no unread messages, skipping")
+            print(f"AI citizen {ai_username} has no unread messages, skipping")
     
     # Replace the original list with the filtered list
     ai_citizens = filtered_ai_citizens
@@ -229,15 +229,15 @@ def process_ai_messages(dry_run: bool = False):
     
     # Process each AI citizen
     for ai_citizen in ai_citizens:
-        ai_citizenname = ai_citizen["fields"].get("Username")
-        if not ai_citizenname:
+        ai_username = ai_citizen["fields"].get("Username")
+        if not ai_username:
             continue
         
-        print(f"Processing AI citizen: {ai_citizenname}")
-        ai_response_counts[ai_citizenname] = 0
+        print(f"Processing AI citizen: {ai_username}")
+        ai_response_counts[ai_username] = 0
         
         # Get unread messages for this AI
-        unread_messages = get_unread_messages_for_ai(tables, ai_citizenname)
+        unread_messages = get_unread_messages_for_ai(tables, ai_username)
         
         # Process each unread message
         for message in unread_messages:
@@ -245,7 +245,7 @@ def process_ai_messages(dry_run: bool = False):
             sender = message["fields"].get("Sender")
             content = message["fields"].get("Content", "")
             
-            print(f"Processing message from {sender} to {ai_citizenname}: {content[:50]}...")
+            print(f"Processing message from {sender} to {ai_username}: {content[:50]}...")
             
             # Generate AI response
             if not dry_run:
@@ -253,18 +253,18 @@ def process_ai_messages(dry_run: bool = False):
                 mark_message_as_read(tables, message_id)
                 
                 # Generate and send response
-                response_content = generate_ai_response(ai_citizenname, sender, content)
+                response_content = generate_ai_response(ai_username, sender, content)
                 
                 if response_content:
                     # Create response message
-                    success = create_response_message(tables, ai_citizenname, sender, response_content)
+                    success = create_response_message(tables, ai_username, sender, response_content)
                     if success:
-                        ai_response_counts[ai_citizenname] += 1
+                        ai_response_counts[ai_username] += 1
             else:
                 # In dry run mode, just log what would happen
                 print(f"[DRY RUN] Would mark message {message_id} as read")
-                print(f"[DRY RUN] Would generate response from {ai_citizenname} to {sender}")
-                ai_response_counts[ai_citizenname] += 1
+                print(f"[DRY RUN] Would generate response from {ai_username} to {sender}")
+                ai_response_counts[ai_username] += 1
     
     # Create admin notification with summary
     if not dry_run and sum(ai_response_counts.values()) > 0:

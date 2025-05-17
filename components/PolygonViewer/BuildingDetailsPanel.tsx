@@ -994,7 +994,7 @@ export default function BuildingDetailsPanel({
                 {building.owner ? (
                   <div className="flex items-center justify-center">
                     <PlayerProfile 
-                      citizenname={building.owner}
+                      username={building.owner}
                       walletAddress={building.owner}
                       size="medium"
                       className="mx-auto"
@@ -1110,7 +1110,7 @@ export default function BuildingDetailsPanel({
                   <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Occupant</h3>
                   <div className="flex items-center justify-center">
                     <PlayerProfile 
-                      citizenname={building.occupant}
+                      username={building.occupant}
                       walletAddress={building.occupant}
                       size="medium"
                       className="mx-auto"

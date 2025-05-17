@@ -22,11 +22,11 @@ const initAirtable = () => {
 export async function POST(request: Request) {
   try {
     // Parse the request body
-    const { citizenname, guildId, status = 'pending' } = await request.json();
+    const { username, guildId, status = 'pending' } = await request.json();
     
-    if (!citizenname || !guildId) {
+    if (!username || !guildId) {
       return NextResponse.json(
-        { success: false, error: 'Citizenname and guildId are required' },
+        { success: false, error: 'Username and guildId are required' },
         { status: 400 }
       );
     }
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
       
       // Find the citizen record
       const citizenRecords = await base(AIRTABLE_CITIZENS_TABLE).select({
-        filterByFormula: `{CitizenName} = '${citizenname}'`
+        filterByFormula: `{CitizenName} = '${username}'`
       }).all();
       
       if (citizenRecords.length === 0) {
@@ -58,7 +58,7 @@ export async function POST(request: Request) {
       return NextResponse.json({
         success: true,
         citizen: {
-          citizenname,
+          username,
           guildId,
           guildStatus: status
         }

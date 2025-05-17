@@ -38,7 +38,7 @@ interface CacheEntry<T> {
 }
 
 export interface CitizenProfile {
-  citizenname: string;
+  username: string;
   firstName: string;
   lastName: string;
   coatOfArmsImage: string | null;
@@ -59,7 +59,7 @@ export class CitizenService {
   
   // Cache storage
   private citizensCache: CacheEntry<Record<string, any>> | null = null;
-  private citizenByCitizennameCache: Map<string, CacheEntry<any>> = new Map();
+  private citizenByUsernameCache: Map<string, CacheEntry<any>> = new Map();
   private citizenByWalletCache: Map<string, CacheEntry<CitizenProfile | null>> = new Map();
   
   // Cache configuration
@@ -84,9 +84,9 @@ export class CitizenService {
     if (storedProfile) {
       try {
         this.currentCitizen = JSON.parse(storedProfile);
-        log.info(`Restored citizen profile from storage: ${this.currentCitizen?.citizenname}`);
+        log.info(`Restored citizen profile from storage: ${this.currentCitizen?.username}`);
         log.debug('Citizen profile details:', { 
-          citizenname: this.currentCitizen?.citizenname,
+          username: this.currentCitizen?.username,
           hasCoatOfArms: !!this.currentCitizen?.coatOfArmsImage,
           hasMotto: !!this.currentCitizen?.familyMotto
         });
@@ -154,7 +154,7 @@ export class CitizenService {
   public clearCache(): void {
     log.info('Clearing all citizen data caches');
     this.citizensCache = null;
-    this.citizenByCitizennameCache.clear();
+    this.citizenByUsernameCache.clear();
     this.citizenByWalletCache.clear();
     log.debug('All citizen data caches cleared');
   }
@@ -191,10 +191,10 @@ export class CitizenService {
   private invalidateCitizenCache(citizen: CitizenProfile): void {
     if (!citizen) return;
     
-    log.debug(`Invalidating cache for citizen: ${citizen.citizenname}`);
+    log.debug(`Invalidating cache for citizen: ${citizen.username}`);
     
-    // Remove from citizenname cache
-    this.citizenByCitizennameCache.delete(citizen.citizenname);
+    // Remove from username cache
+    this.citizenByUsernameCache.delete(citizen.username);
     
     // Remove from wallet cache if wallet address exists
     if (citizen.walletAddress) {
@@ -294,8 +294,8 @@ export class CitizenService {
       log.debug('Updated citizens cache');
       
       // Clear individual citizen caches as they might be stale
-      this.citizenByCitizennameCache.clear();
-      log.debug('Cleared citizen by citizenname cache');
+      this.citizenByUsernameCache.clear();
+      log.debug('Cleared citizen by username cache');
       
       // Notify listeners that citizens data has been loaded
       log.debug('Emitting CITIZENS_DATA_LOADED event');
@@ -331,37 +331,37 @@ export class CitizenService {
   }
   
   /**
-   * Get a citizen by citizenname
-   * @throws {ValidationError} If citizenname is invalid
+   * Get a citizen by username
+   * @throws {ValidationError} If username is invalid
    * @throws {NotFoundError} If citizen is not found
    */
-  public getCitizenByCitizenname(citizenname: string): any {
-    log.debug(`Getting citizen by citizenname: ${citizenname}`);
+  public getCitizenByUsername(username: string): any {
+    log.debug(`Getting citizen by username: ${username}`);
     
-    if (!citizenname || typeof citizenname !== 'string') {
-      log.warn('Invalid citizenname provided', { citizenname, type: typeof citizenname });
-      throw new ValidationError('Invalid citizenname', 'citizenname');
+    if (!username || typeof username !== 'string') {
+      log.warn('Invalid username provided', { username, type: typeof username });
+      throw new ValidationError('Invalid username', 'username');
     }
     
     // Check cache first
-    const cachedEntry = this.citizenByCitizennameCache.get(citizenname);
+    const cachedEntry = this.citizenByUsernameCache.get(username);
     if (this.isCacheValid(cachedEntry)) {
-      log.debug(`Returning citizen from cache: ${citizenname}`);
+      log.debug(`Returning citizen from cache: ${username}`);
       return cachedEntry!.data;
     }
     
-    const citizen = this.citizens[citizenname];
+    const citizen = this.citizens[username];
     
     if (!citizen) {
-      log.warn(`Citizen not found with citizenname: ${citizenname}`);
-      throw new NotFoundError('Citizen', citizenname);
+      log.warn(`Citizen not found with username: ${username}`);
+      throw new NotFoundError('Citizen', username);
     }
     
     // Update cache
-    this.setCacheEntry(this.citizenByCitizennameCache, citizenname, citizen);
-    log.debug(`Updated cache for citizen: ${citizenname}`);
+    this.setCacheEntry(this.citizenByUsernameCache, username, citizen);
+    log.debug(`Updated cache for citizen: ${username}`);
     
-    log.debug(`Successfully retrieved citizen: ${citizenname}`);
+    log.debug(`Successfully retrieved citizen: ${username}`);
     return citizen;
   }
   
@@ -415,7 +415,7 @@ export class CitizenService {
       this.currentCitizen = cachedEntry!.data;
       
       if (this.currentCitizen) {
-        log.debug(`Cached profile found for wallet: ${maskedAddress}, citizenname: ${this.currentCitizen.citizenname}`);
+        log.debug(`Cached profile found for wallet: ${maskedAddress}, username: ${this.currentCitizen.username}`);
         
         // Notify listeners
         log.debug('Emitting CITIZEN_PROFILE_UPDATED event');
@@ -469,9 +469,9 @@ export class CitizenService {
       log.debug('Parsed citizen profile data from API response');
       
       if (data.citizen_name) {
-        log.info(`Found citizen profile for wallet: ${maskedAddress}, citizenname: ${data.citizen_name}`);
+        log.info(`Found citizen profile for wallet: ${maskedAddress}, username: ${data.citizen_name}`);
         log.debug('Citizen profile details', {
-          citizenname: data.citizen_name,
+          username: data.citizen_name,
           hasFirstName: !!data.first_name,
           hasLastName: !!data.last_name,
           hasCoatOfArms: !!data.coat_of_arms_image,
@@ -482,7 +482,7 @@ export class CitizenService {
         
         // Create citizen profile
         this.currentCitizen = {
-          citizenname: data.citizen_name,
+          username: data.citizen_name,
           firstName: data.first_name || data.citizen_name.split(' ')[0] || '',
           lastName: data.last_name || data.citizen_name.split(' ').slice(1).join(' ') || '',
           coatOfArmsImage: data.coat_of_arms_image,
@@ -497,9 +497,9 @@ export class CitizenService {
         this.setCacheEntry(this.citizenByWalletCache, address, this.currentCitizen);
         log.debug(`Updated cache for wallet: ${maskedAddress}`);
         
-        // Also cache by citizenname
-        this.setCacheEntry(this.citizenByCitizennameCache, this.currentCitizen.citizenname, {
-          citizen_name: this.currentCitizen.citizenname,
+        // Also cache by username
+        this.setCacheEntry(this.citizenByUsernameCache, this.currentCitizen.username, {
+          citizen_name: this.currentCitizen.username,
           first_name: this.currentCitizen.firstName,
           last_name: this.currentCitizen.lastName,
           coat_of_arms_image: this.currentCitizen.coatOfArmsImage,
@@ -509,7 +509,7 @@ export class CitizenService {
           color: this.currentCitizen.color,
           wallet_address: address
         });
-        log.debug(`Also cached citizen by citizenname: ${this.currentCitizen.citizenname}`);
+        log.debug(`Also cached citizen by username: ${this.currentCitizen.username}`);
         
         // Store in localStorage
         log.debug('Storing citizen profile in local storage');
@@ -525,7 +525,7 @@ export class CitizenService {
         return this.currentCitizen;
       }
       
-      log.info(`No citizenname found for wallet: ${maskedAddress}`);
+      log.info(`No username found for wallet: ${maskedAddress}`);
       
       // Cache the null result
       this.setCacheEntry(this.citizenByWalletCache, address, null);
@@ -567,11 +567,11 @@ export class CitizenService {
     }
     
     if (this.currentCitizen) {
-      log.debug(`Clearing citizen profile for: ${this.currentCitizen.citizenname}`);
+      log.debug(`Clearing citizen profile for: ${this.currentCitizen.username}`);
       
-      // Remove from citizenname cache
-      this.citizenByCitizennameCache.delete(this.currentCitizen.citizenname);
-      log.debug(`Removed citizenname from cache: ${this.currentCitizen.citizenname}`);
+      // Remove from username cache
+      this.citizenByUsernameCache.delete(this.currentCitizen.username);
+      log.debug(`Removed username from cache: ${this.currentCitizen.username}`);
     }
     
     this.walletAddress = null;
@@ -605,9 +605,9 @@ export class CitizenService {
     }
     
     // Validate profile data
-    if (profile.citizenname === '') {
-      log.warn('Invalid profile data: empty citizenname');
-      throw new ValidationError('Citizenname cannot be empty', 'citizenname');
+    if (profile.username === '') {
+      log.warn('Invalid profile data: empty username');
+      throw new ValidationError('Username cannot be empty', 'username');
     }
     
     const maskedAddress = this.walletAddress ? `${this.walletAddress.substring(0, 6)}...${this.walletAddress.substring(this.walletAddress.length - 4)}` : 'unknown';
@@ -620,8 +620,8 @@ export class CitizenService {
     
     log.debug('Profile update details', {
       changedFields,
-      currentCitizenname: this.currentCitizen?.citizenname,
-      newCitizenname: profile.citizenname || this.currentCitizen?.citizenname
+      currentUsername: this.currentCitizen?.username,
+      newUsername: profile.username || this.currentCitizen?.username
     });
     
     const endpoint = `${getBackendBaseUrl()}/api/wallet`;
@@ -632,7 +632,7 @@ export class CitizenService {
     try {
       const requestBody = {
         wallet_address: this.walletAddress,
-        citizen_name: profile.citizenname || this.currentCitizen?.citizenname,
+        citizen_name: profile.username || this.currentCitizen?.username,
         first_name: profile.firstName || this.currentCitizen?.firstName,
         last_name: profile.lastName || this.currentCitizen?.lastName,
         family_coat_of_arms: profile.familyCoatOfArms || this.currentCitizen?.familyCoatOfArms,
@@ -642,7 +642,7 @@ export class CitizenService {
       };
       
       log.debug('Prepared request payload', {
-        hasCitizenname: !!requestBody.citizen_name,
+        hasUsername: !!requestBody.citizen_name,
         hasFirstName: !!requestBody.first_name,
         hasLastName: !!requestBody.last_name,
         hasCoatOfArms: !!requestBody.coat_of_arms_image,
@@ -696,17 +696,17 @@ export class CitizenService {
       } as CitizenProfile;
       
       log.debug('Updated citizen profile', {
-        citizenname: this.currentCitizen.citizenname,
+        username: this.currentCitizen.username,
         DucatsChanged: previousDucats !== this.currentCitizen.Ducats,
         previousDucats,
         newDucats: this.currentCitizen.Ducats
       });
       
       // Update caches
-      if (this.currentCitizen.citizenname) {
-        // Update citizenname cache with API format
-        this.setCacheEntry(this.citizenByCitizennameCache, this.currentCitizen.citizenname, {
-          citizen_name: this.currentCitizen.citizenname,
+      if (this.currentCitizen.username) {
+        // Update username cache with API format
+        this.setCacheEntry(this.citizenByUsernameCache, this.currentCitizen.username, {
+          citizen_name: this.currentCitizen.username,
           first_name: this.currentCitizen.firstName,
           last_name: this.currentCitizen.lastName,
           coat_of_arms_image: this.currentCitizen.coatOfArmsImage,
@@ -716,7 +716,7 @@ export class CitizenService {
           color: this.currentCitizen.color,
           wallet_address: this.walletAddress
         });
-        log.debug(`Updated citizenname cache for: ${this.currentCitizen.citizenname}`);
+        log.debug(`Updated username cache for: ${this.currentCitizen.username}`);
       }
       
       // Update wallet cache

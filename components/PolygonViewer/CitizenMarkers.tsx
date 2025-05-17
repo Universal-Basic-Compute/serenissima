@@ -229,25 +229,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     
     return null;
   };
-  
-  // Toggle animation function
-  const toggleAnimation = () => {
-    setAnimationActive(prev => {
-      const newState = !prev;
-      
-      if (newState && !animationFrameRef.current) {
-        // Restart animation
-        lastFrameTimeRef.current = 0;
-        animationFrameRef.current = requestAnimationFrame(animateCitizens);
-      } else if (!newState && animationFrameRef.current) {
-        // Stop animation
-        cancelAnimationFrame(animationFrameRef.current);
-        animationFrameRef.current = null;
-      }
-      
-      return newState;
-    });
-  };
+;
   
   // Function to fetch activity paths
   const fetchActivityPaths = async () => {

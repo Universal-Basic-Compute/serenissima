@@ -317,7 +317,7 @@ def process_housing_mobility(dry_run: bool = False):
         return
     
     # Sort citizens by wealth in ascending order
-    housed_citizens.sort(key=lambda c: float(c['fields'].get('Wealth', 0) or 0))
+    housed_citizens.sort(key=lambda c: float(c['fields'].get('Ducats', 0) or 0))
     log.info(f"Sorted {len(housed_citizens)} citizens by wealth in ascending order")
     
     # Track mobility statistics

@@ -32,11 +32,11 @@ export class ContractService {
   /**
    * Get all contracts for the current citizen and public sell contracts
    */
-  public async getContracts(citizenname?: string): Promise<Contract[]> {
+  public async getContracts(username?: string): Promise<Contract[]> {
     try {
-      // Build URL with citizenname if available
-      const url = citizenname 
-        ? `/api/contracts?citizenname=${encodeURIComponent(citizenname)}`
+      // Build URL with username if available
+      const url = username 
+        ? `/api/contracts?username=${encodeURIComponent(username)}`
         : '/api/contracts';
       
       console.log(`Fetching contracts from: ${url}`);
@@ -64,22 +64,22 @@ export class ContractService {
   }
   
   /**
-   * Get the current citizen's citizenname from localStorage
+   * Get the current citizen's username from localStorage
    */
-  public getCurrentCitizenname(): string | null {
+  public getCurrentUsername(): string | null {
     try {
       if (typeof window === 'undefined') return null;
       
       const profileStr = localStorage.getItem('citizenProfile');
       if (profileStr) {
         const profile = JSON.parse(profileStr);
-        if (profile && profile.citizenname) {
-          return profile.citizenname;
+        if (profile && profile.username) {
+          return profile.username;
         }
       }
       return null;
     } catch (error) {
-      console.error('Error getting current citizenname:', error);
+      console.error('Error getting current username:', error);
       return null;
     }
   }

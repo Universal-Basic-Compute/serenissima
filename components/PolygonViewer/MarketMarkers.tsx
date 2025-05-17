@@ -28,11 +28,11 @@ export default function MarketMarkers({
   const [hoveredLocation, setHoveredLocation] = useState<string | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [currentCitizenname, setCurrentCitizenname] = useState<string | null>(null);
+  const [currentUsername, setCurrentUsername] = useState<string | null>(null);
   
-  // Function to get the current citizen's citizenname
-  const getCurrentCitizenname = useCallback(() => {
-    return contractService.getCurrentCitizenname();
+  // Function to get the current citizen's username
+  const getCurrentUsername = useCallback(() => {
+    return contractService.getCurrentUsername();
   }, []);
 
   // Handle mouse enter for contract location
@@ -48,7 +48,7 @@ export default function MarketMarkers({
         id: contract.contractId,
         name: contract.resourceType,
         category: 'Market Contract',
-        description: `${contract.type === 'public_sell' ? 'Public Sell' : contract.seller === currentCitizenname ? 'Your Sell' : 'Your Buy'} Contract`,
+        description: `${contract.type === 'public_sell' ? 'Public Sell' : contract.seller === currentUsername ? 'Your Sell' : 'Your Buy'} Contract`,
         icon: 'contract.png',
         amount: contract.amount,
         owner: contract.seller,
@@ -60,7 +60,7 @@ export default function MarketMarkers({
       })),
       position: locationContracts[0].location
     });
-  }, [currentCitizenname]);
+  }, [currentUsername]);
   
   // Handle mouse leave for contract location
   const handleMouseLeave = useCallback(() => {
@@ -73,22 +73,22 @@ export default function MarketMarkers({
     if (isVisible) {
       loadContracts();
       
-      // Get current citizenname
-      const citizenname = getCurrentCitizenname();
-      setCurrentCitizenname(citizenname);
+      // Get current username
+      const username = getCurrentUsername();
+      setCurrentUsername(username);
     }
-  }, [isVisible, getCurrentCitizenname]);
+  }, [isVisible, getCurrentUsername]);
   
   // Function to load contracts
   const loadContracts = async () => {
     try {
       setIsLoading(true);
       
-      // Get current citizenname
-      const citizenname = getCurrentCitizenname();
+      // Get current username
+      const username = getCurrentUsername();
       
       // Fetch contracts
-      const allContracts = await contractService.getContracts(citizenname);
+      const allContracts = await contractService.getContracts(username);
       
       // Filter contracts that have location data
       const contractsWithLocation = allContracts.filter(
@@ -144,9 +144,9 @@ export default function MarketMarkers({
           if (categoryFilter === 'public_sell') {
             return contract.type === 'public_sell';
           } else if (categoryFilter === 'citizen_sell') {
-            return contract.seller === currentCitizenname;
+            return contract.seller === currentUsername;
           } else if (categoryFilter === 'citizen_buy') {
-            return contract.buyer === currentCitizenname;
+            return contract.buyer === currentUsername;
           }
           return true;
         }
@@ -158,7 +158,7 @@ export default function MarketMarkers({
     });
     
     return filtered;
-  }, [contractsByLocation, categoryFilter, currentCitizenname]);
+  }, [contractsByLocation, categoryFilter, currentUsername]);
   
   // If not visible, don't render anything
   if (!isVisible) return null;
@@ -252,9 +252,9 @@ export default function MarketMarkers({
                   
                   if (contract.type === 'public_sell') {
                     borderColor = '#10B981'; // Green for public sells
-                  } else if (contract.seller === currentCitizenname) {
+                  } else if (contract.seller === currentUsername) {
                     borderColor = '#3B82F6'; // Blue for citizen sells
-                  } else if (contract.buyer === currentCitizenname) {
+                  } else if (contract.buyer === currentUsername) {
                     borderColor = '#EF4444'; // Red for citizen buys
                   }
                   
@@ -311,7 +311,7 @@ export default function MarketMarkers({
                           <div className="font-bold text-amber-300 text-base">{resourceType}</div>
                           <div className="mt-1 text-xs">
                             {contract.type === 'public_sell' ? 'Public Sell Contract' : 
-                             contract.seller === currentCitizenname ? 'Your Sell Contract' : 'Your Buy Contract'}
+                             contract.seller === currentUsername ? 'Your Sell Contract' : 'Your Buy Contract'}
                             {!isContractActive(contract) && (
                               <span className="ml-2 text-red-400">(Inactive)</span>
                             )}
@@ -351,9 +351,9 @@ export default function MarketMarkers({
                     
                     if (contract.type === 'public_sell') {
                       borderColor = '#10B981'; // Green for public sells
-                    } else if (contract.seller === currentCitizenname) {
+                    } else if (contract.seller === currentUsername) {
                       borderColor = '#3B82F6'; // Blue for citizen sells
-                    } else if (contract.buyer === currentCitizenname) {
+                    } else if (contract.buyer === currentUsername) {
                       borderColor = '#EF4444'; // Red for citizen buys
                     }
                     

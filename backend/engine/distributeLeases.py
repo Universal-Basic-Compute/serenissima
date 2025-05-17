@@ -119,7 +119,7 @@ def get_buildings_on_land(tables, land_id: str, land_record: Dict) -> List[Dict]
         return []
 
 def find_citizen_by_identifier(tables, identifier: str) -> Optional[Dict]:
-    """Find a citizen by citizenname or wallet address."""
+    """Find a citizen by username or wallet address."""
     log.info(f"Looking up citizen: {identifier}")
     
     # Handle known special cases
@@ -128,7 +128,7 @@ def find_citizen_by_identifier(tables, identifier: str) -> Optional[Dict]:
         variations = ["ConsiglioDeiDieci", "Consiglio Dei Dieci", "Consiglio dei Dieci"]
         for variation in variations:
             try:
-                formula = f"{{Citizenname}}='{variation}'"
+                formula = f"{{Username}}='{variation}'"
                 citizens = tables['citizens'].all(formula=formula)
                 if citizens:
                     log.info(f"Found citizen by special case variation: {variation}")
@@ -137,12 +137,12 @@ def find_citizen_by_identifier(tables, identifier: str) -> Optional[Dict]:
                 continue
     
     try:
-        # First try to find by citizenname
-        formula = f"{{Citizenname}}='{identifier}'"
+        # First try to find by username
+        formula = f"{{Username}}='{identifier}'"
         citizens = tables['citizens'].all(formula=formula)
         
         if citizens:
-            log.info(f"Found citizen by citizenname: {identifier}")
+            log.info(f"Found citizen by username: {identifier}")
             return citizens[0]
         
         # If not found, try by wallet address
@@ -532,8 +532,8 @@ def test_telegram_connection():
             return False
         
         bot_data = bot_response.json()
-        bot_citizenname = bot_data.get("result", {}).get("citizenname", "Unknown")
-        log.info(f"Connected to Telegram bot: @{bot_citizenname}")
+        bot_username = bot_data.get("result", {}).get("username", "Unknown")
+        log.info(f"Connected to Telegram bot: @{bot_username}")
         
         # Now try to get chat info to verify the chat ID
         chat_info_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getChat?chat_id={MAIN_TELEGRAM_CHAT_ID}"

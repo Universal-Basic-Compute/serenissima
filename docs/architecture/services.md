@@ -28,7 +28,7 @@ Responsible for citizen authentication, profile management, and preferences.
 
 ```typescript
 export interface CitizenProfile {
-  citizenname: string;
+  username: string;
   firstName: string;
   lastName: string;
   coatOfArmsImage: string | null;
