@@ -2818,65 +2818,62 @@ number => {
         const isBridge = building.type.toLowerCase().includes('bridge');
         
         if (isBridge) {
-          // Make the bridge rectangle smaller
-          const bridgeWidth = squareSize * 0.8; // Reduced from 1.2 to 0.8
-          const bridgeHeight = squareSize * 0.15; // Reduced from 0.25 to 0.15
+          // Make the bridge rectangle smaller in length but keep the width
+          const bridgeWidth = squareSize * 0.8; // Keep the same width
+          const bridgeHeight = squareSize * 0.08; // Reduce height for shorter bridges
           
-          // Find the polygon this bridge is on
-          let polygonCenter = { x: 0, y: 0 };
-          let foundPolygon = false;
+          // Use the orientation from the bridge data if available, otherwise calculate based on polygon center
+          let angle = 0;
           
-          // Try to find which polygon contains this bridge
-          for (const poly of polygonsToRender) {
-            if (poly.polygon.id === building.land_id) {
-              // Use the polygon's center
-              polygonCenter.x = poly.centerX;
-              polygonCenter.y = poly.centerY;
-              foundPolygon = true;
-              break;
+          if (building.orientation !== undefined) {
+            // Use the pre-calculated orientation from the API
+            angle = building.orientation;
+          } else {
+            // Find the polygon this bridge is on as fallback
+            let polygonCenter = { x: 0, y: 0 };
+            let foundPolygon = false;
+            
+            // Try to find which polygon contains this bridge
+            for (const poly of polygonsToRender) {
+              if (poly.polygon.id === building.land_id) {
+                // Use the polygon's center
+                polygonCenter.x = poly.centerX;
+                polygonCenter.y = poly.centerY;
+                foundPolygon = true;
+                break;
+              }
+            }
+            
+            if (foundPolygon) {
+              // Calculate angle from bridge to polygon center
+              const dx = polygonCenter.x - isoPos.x;
+              const dy = polygonCenter.y - isoPos.y;
+              angle = Math.atan2(dy, dx) + Math.PI/2; // Add 90 degrees to make it perpendicular
             }
           }
           
-          // If we couldn't find the polygon, use default orientation
-          if (!foundPolygon) {
-            ctx.beginPath();
-            ctx.rect(
-              isoPos.x - bridgeWidth/2, 
-              isoPos.y - bridgeHeight/2, 
-              bridgeWidth, 
-              bridgeHeight
-            );
-            ctx.fill();
-            ctx.stroke();
-          } else {
-            // Calculate angle from bridge to polygon center
-            const dx = polygonCenter.x - isoPos.x;
-            const dy = polygonCenter.y - isoPos.y;
-            const angle = Math.atan2(dy, dx);
-            
-            // Save the current context state
-            ctx.save();
-            
-            // Translate to the bridge position
-            ctx.translate(isoPos.x, isoPos.y);
-            
-            // Rotate the context - add 90 degrees (π/2) to orient perpendicular to the direction
-            ctx.rotate(angle + Math.PI/2);
-            
-            // Draw the rectangle centered at origin (0,0)
-            ctx.beginPath();
-            ctx.rect(
-              -bridgeWidth/2, 
-              -bridgeHeight/2, 
-              bridgeWidth, 
-              bridgeHeight
-            );
-            ctx.fill();
-            ctx.stroke();
-            
-            // Restore the context state
-            ctx.restore();
-          }
+          // Save the current context state
+          ctx.save();
+          
+          // Translate to the bridge position
+          ctx.translate(isoPos.x, isoPos.y);
+          
+          // Rotate the context using the calculated or provided angle
+          ctx.rotate(angle);
+          
+          // Draw the rectangle centered at origin (0,0)
+          ctx.beginPath();
+          ctx.rect(
+            -bridgeWidth/2, 
+            -bridgeHeight/2, 
+            bridgeWidth, 
+            bridgeHeight
+          );
+          ctx.fill();
+          ctx.stroke();
+          
+          // Restore the context state
+          ctx.restore();
         } else {
           // Draw square for non-bridge buildings
           ctx.beginPath();
