@@ -1912,19 +1912,37 @@ number => {
           if (citizen) {
             // Create a safe version with only the properties we need
             const safeCitizen = {
-              id: citizen.CitizenId || citizen.citizenId || citizen.citizenid || citizen.id || '',
-              firstName: citizen.FirstName || citizen.firstName || citizen.firstname || '',
-              lastName: citizen.LastName || citizen.lastName || citizen.lastname || '',
-              socialClass: citizen.SocialClass || citizen.socialClass || citizen.socialclass || '',
-              imageUrl: citizen.ImageUrl || citizen.imageUrl || '',
-              // Add any other properties you need
+              citizenid: citizen.CitizenId || citizen.citizenId || citizen.citizenid || citizen.id || '',
+              firstname: citizen.FirstName || citizen.firstName || citizen.firstname || '',
+              lastname: citizen.LastName || citizen.lastName || citizen.lastname || '',
+              socialclass: citizen.SocialClass || citizen.socialClass || citizen.socialclass || '',
+              imageurl: citizen.ImageUrl || citizen.imageUrl || citizen.imageurl || '',
+              description: citizen.Description || citizen.description || '',
+              username: citizen.Username || citizen.username || '',
+              isai: citizen.IsAI || citizen.isAI || citizen.isai || false,
+              // Add any other properties needed by CitizenDetailsPanel
+              ducats: citizen.Ducats || citizen.ducats || citizen.wealth || 0,
+              createdat: citizen.CreatedAt || citizen.createdat || new Date().toISOString(),
+              worksFor: citizen.WorksFor || citizen.worksFor || null,
+              workplace: citizen.Workplace || citizen.workplace || null
             };
-            // Convert any undefined values to empty strings to prevent rendering objects
+            
+            // Convert any undefined values to appropriate defaults to prevent rendering objects
             Object.keys(safeCitizen).forEach(key => {
               if (safeCitizen[key] === undefined || safeCitizen[key] === null) {
-                safeCitizen[key] = '';
+                // Use empty string for text fields, 0 for numbers, false for booleans
+                if (key === 'ducats') {
+                  safeCitizen[key] = 0;
+                } else if (key === 'isai') {
+                  safeCitizen[key] = false;
+                } else if (key === 'worksFor' || key === 'workplace') {
+                  safeCitizen[key] = null;
+                } else {
+                  safeCitizen[key] = '';
+                }
               }
             });
+            
             setSelectedCitizen(safeCitizen);
           } else {
             setSelectedCitizen(null);
