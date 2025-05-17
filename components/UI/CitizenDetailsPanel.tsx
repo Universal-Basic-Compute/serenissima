@@ -26,6 +26,8 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
   const [messagesFetchFailed, setMessagesFetchFailed] = useState<boolean>(false);
   // Add a ref to track if we've already tried to fetch messages for this citizen
   const messagesFetchAttemptedRef = useRef<{[citizenId: string]: boolean}>({});
+  // Add a ref to track if we've already tried to fetch activities for this citizen
+  const activitiesFetchAttemptedRef = useRef<{[citizenId: string]: boolean}>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
   const [playingMessageId, setPlayingMessageId] = useState<string | null>(null);
@@ -33,6 +35,15 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
   // Add function to fetch citizen activities
   const fetchCitizenActivities = async (citizenId: string) => {
     if (!citizenId) return;
+    
+    // Check if we've already attempted to fetch activities for this citizen
+    if (activitiesFetchAttemptedRef.current[citizenId]) {
+      console.log(`Already attempted to fetch activities for citizen ${citizenId}, skipping`);
+      return;
+    }
+    
+    // Mark that we've attempted to fetch activities for this citizen
+    activitiesFetchAttemptedRef.current[citizenId] = true;
     
     // Use a flag to prevent state updates after unmounting
     let isMounted = true;
@@ -286,6 +297,11 @@ Be historically accurate but engaging. Speak in first person as if you are this 
       if (!newAttemptedRef[citizen.citizenid]) {
         fetchMessageHistory();
       }
+      
+      // Similarly, only fetch activities if we haven't tried yet for this citizen
+      if (!activitiesFetchAttemptedRef.current[citizen.citizenid]) {
+        fetchCitizenActivities(citizen.citizenid);
+      }
     }
     
     // Add escape key handler
@@ -338,10 +354,10 @@ Be historically accurate but engaging. Speak in first person as if you are this 
     // Use a flag to prevent multiple fetches
     let isMounted = true;
     
-    // Only fetch data if we have a valid citizen
+    // Only fetch building data if we have a valid citizen
     if (citizen && citizen.citizenid && isMounted) {
       fetchBuildingDetails();
-      fetchCitizenActivities(citizen.citizenid);
+      // We're now handling activities fetch above with the ref check
     }
     
     return () => {
