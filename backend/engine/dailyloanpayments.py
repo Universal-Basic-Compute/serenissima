@@ -263,7 +263,7 @@ def process_loan_payment(tables, loan: Dict, dry_run: bool = False) -> bool:
             create_notification(
                 tables,
                 lender,
-                f"Loan payment from {borrower} could not be processed: borrower account not found",
+                f"⚠️ Loan payment from **{borrower}** could not be processed: **borrower account not found**",
                 {
                     "loan_id": loan_id,
                     "loan_name": loan_name,
@@ -283,7 +283,7 @@ def process_loan_payment(tables, loan: Dict, dry_run: bool = False) -> bool:
         create_notification(
             tables,
             borrower,
-            f"Your loan payment of {payment_amount} COMPUTE could not be processed: lender account not found",
+            f"⚠️ Your loan payment of **{payment_amount:,} ⚜️ Ducats** could not be processed: **lender account not found**",
             {
                 "loan_id": loan_id,
                 "loan_name": loan_name,
@@ -305,7 +305,7 @@ def process_loan_payment(tables, loan: Dict, dry_run: bool = False) -> bool:
         create_notification(
             tables,
             borrower,
-            f"Insufficient funds for loan payment of {int(payment_amount)} ⚜️ Ducats. Please add funds to your account to avoid penalties.",
+            f"⚠️ **Insufficient funds** for loan payment of **{int(payment_amount):,} ⚜️ Ducats**. Please add funds to your account to avoid penalties.",
             {
                 "loan_id": loan_id,
                 "loan_name": loan_name,
@@ -321,7 +321,7 @@ def process_loan_payment(tables, loan: Dict, dry_run: bool = False) -> bool:
         create_notification(
             tables,
             lender,
-            f"Loan payment of {int(payment_amount)} ⚜️ Ducats from {borrower} failed due to insufficient funds",
+            f"💸 Loan payment of **{int(payment_amount):,} ⚜️ Ducats** from **{borrower}** failed due to **insufficient funds**",
             {
                 "loan_id": loan_id,
                 "loan_name": loan_name,
@@ -366,11 +366,11 @@ def process_loan_payment(tables, loan: Dict, dry_run: bool = False) -> bool:
     
     # 5. Create notifications
     # For borrower
-    borrower_notification_content = f"Loan payment of {int(payment_amount)} ⚜️ Ducats processed"
+    borrower_notification_content = f"💰 Loan payment of **{int(payment_amount):,} ⚜️ Ducats** processed"
     if is_final_payment:
-        borrower_notification_content += ". Your loan has been fully repaid! Congratulations!"
+        borrower_notification_content += ". Your loan has been **fully repaid**! 🎉 Congratulations!"
     else:
-        borrower_notification_content += f". Remaining balance: {int(new_balance)} ⚜️ Ducats"
+        borrower_notification_content += f". Remaining balance: **{int(new_balance):,} ⚜️ Ducats**"
     
     create_notification(
         tables,
@@ -388,11 +388,11 @@ def process_loan_payment(tables, loan: Dict, dry_run: bool = False) -> bool:
     )
     
     # For lender
-    lender_notification_content = f"Received loan payment of {int(payment_amount)} ⚜️ Ducats from {borrower}"
+    lender_notification_content = f"💰 Received loan payment of **{int(payment_amount):,} ⚜️ Ducats** from **{borrower}**"
     if is_final_payment:
-        lender_notification_content += ". The loan has been fully repaid!"
+        lender_notification_content += ". The loan has been **fully repaid**! 🎉"
     else:
-        lender_notification_content += f". Remaining balance: {int(new_balance)} ⚜️ Ducats"
+        lender_notification_content += f". Remaining balance: **{int(new_balance):,} ⚜️ Ducats**"
     
     create_notification(
         tables,
@@ -415,7 +415,7 @@ def create_admin_summary(tables, payment_summary) -> None:
     """Create a summary notification for the admin."""
     try:
         # Create notification content
-        content = f"Daily loan payments processed: {payment_summary['successful']} successful, {payment_summary['failed']} failed, total: {int(payment_summary['total_amount'])} ⚜️ Ducats"
+        content = f"📊 **Daily Loan Payments Report**: **{payment_summary['successful']}** successful, **{payment_summary['failed']}** failed, total: **{int(payment_summary['total_amount']):,} ⚜️ Ducats**"
         
         # Create detailed information
         details = {
