@@ -20,13 +20,15 @@ export class CitizenService {
       console.log('Loading citizens data...');
       const response = await fetch('/api/citizens');
       if (response.ok) {
-        const data = await response.json();
-        if (Array.isArray(data)) {
+        const responseData = await response.json();
+        
+        // Check if the response has the expected structure
+        if (responseData.success && Array.isArray(responseData.citizens)) {
           // Log the raw data from the API
-          console.log('Raw citizens data from API:', data);
+          console.log('Raw citizens data from API:', responseData.citizens);
           
           // Process citizen positions
-          this.citizens = data.map(citizen => {
+          this.citizens = responseData.citizens.map(citizen => {
             // Ensure position is properly formatted
             let position = citizen.position;
             
@@ -67,7 +69,7 @@ export class CitizenService {
             return {
               ...citizen,
               position,
-              citizenid: citizen.citizenid || citizen.CitizenId || citizen.id || `ctz_${Date.now()}_${Math.floor(Math.random() * 10000)}`,
+              citizenid: citizen.citizenid || citizen.CitizenId || citizen.id || citizen.username || `ctz_${Date.now()}_${Math.floor(Math.random() * 10000)}`,
               firstname: citizen.firstname || citizen.FirstName || citizen.firstName || 'Unknown',
               lastname: citizen.lastname || citizen.LastName || citizen.lastName || 'Unknown',
               socialclass: citizen.socialclass || citizen.SocialClass || citizen.socialClass || 'Popolani'
@@ -87,6 +89,8 @@ export class CitizenService {
             citizens: this.citizens,
             citizensByBuilding: {} // Empty object for building associations
           });
+        } else {
+          console.error('Invalid response format from citizens API:', responseData);
         }
       }
     } catch (error) {
