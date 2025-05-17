@@ -784,11 +784,34 @@ Be historically accurate but engaging. Speak in first person as if you are this 
           >
             {isLoadingHistory ? (
               <div className="flex justify-center items-center h-full">
-                <FaSpinner className="animate-spin text-amber-600 text-2xl" />
+                <div className="bg-amber-700 text-white p-3 rounded-lg rounded-bl-none inline-block">
+                  <div className="flex space-x-2">
+                    <div className="w-2 h-2 bg-amber-300 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                    <div className="w-2 h-2 bg-amber-300 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                    <div className="w-2 h-2 bg-amber-300 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  </div>
+                </div>
               </div>
             ) : messages.length === 0 ? (
-              <div className="text-center py-8 text-gray-500 italic">
-                Start a conversation with {citizen.firstname}...
+              <div className="text-center py-8">
+                {messagesFetchFailed ? (
+                  <div className="text-gray-500 italic">
+                    Unable to load conversation history with {citizen.firstname}.
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full">
+                    <div className="bg-amber-700 text-white p-3 rounded-lg rounded-bl-none inline-block mb-4">
+                      <div className="flex space-x-2">
+                        <div className="w-2 h-2 bg-amber-300 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                        <div className="w-2 h-2 bg-amber-300 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                        <div className="w-2 h-2 bg-amber-300 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                      </div>
+                    </div>
+                    <div className="text-amber-700">
+                      Waiting for {citizen.firstname} to respond...
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <>
