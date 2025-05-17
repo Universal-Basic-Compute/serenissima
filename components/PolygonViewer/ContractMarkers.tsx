@@ -434,7 +434,6 @@ export default function ContractMarkers({
                           alt={resourceType}
                           className="w-full h-full object-contain p-2"
                           onError={(e) => {
-                            console.log(`Failed to load image for ${resourceType}, trying fallback paths`);
                             // Try alternative paths if the first one fails
                             (e.target as HTMLImageElement).src = `/images/resources/${resourceType.toLowerCase().replace(/\s+/g, '_')}.png`;
                             (e.target as HTMLImageElement).onerror = () => {
