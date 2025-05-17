@@ -807,9 +807,6 @@ Be historically accurate but engaging. Speak in first person as if you are this 
                         <div className="w-2 h-2 bg-amber-300 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
                       </div>
                     </div>
-                    <div className="text-amber-700">
-                      You just bumbed into {citizen.firstname} in the streets of Venice!
-                    </div>
                   </div>
                 )}
               </div>
