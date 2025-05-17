@@ -66,7 +66,7 @@ def initialize_airtable():
         # Return a dictionary of table objects using pyairtable
         return {
             'citizens': Table(api_key, base_id, 'CITIZENS'),
-            'users': Table(api_key, base_id, 'Users'),
+            'citizens': Table(api_key, base_id, 'Citizens'),
             'transactions': Table(api_key, base_id, 'TRANSACTIONS'),
             'notifications': Table(api_key, base_id, 'NOTIFICATIONS')
         }
@@ -75,17 +75,17 @@ def initialize_airtable():
         sys.exit(1)
 
 def get_consiglio_dei_dieci(tables) -> Optional[Dict]:
-    """Get the ConsiglioDeiDieci user record."""
+    """Get the ConsiglioDeiDieci citizen record."""
     log.info("Fetching ConsiglioDeiDieci record...")
     
     try:
         # Try different variations of the name
         for name_variation in ["ConsiglioDeiDieci", "Consiglio Dei Dieci", "Consiglio dei Dieci"]:
-            formula = f"{{Username}}='{name_variation}'"
-            records = tables['users'].all(formula=formula)
+            formula = f"{{Citizenname}}='{name_variation}'"
+            records = tables['citizens'].all(formula=formula)
             
             if records:
-                log.info(f"Found ConsiglioDeiDieci record with username: {name_variation}")
+                log.info(f"Found ConsiglioDeiDieci record with citizenname: {name_variation}")
                 return records[0]
         
         log.error("ConsiglioDeiDieci record not found")
@@ -146,19 +146,19 @@ def update_citizen_wealth(tables, citizen_id: str, amount: float) -> bool:
         log.error(f"Error updating wealth for citizen {citizen_id}: {e}")
         return False
 
-def update_compute_balance(tables, user_id: str, amount: float, operation: str = "add") -> bool:
-    """Update a user's compute balance."""
-    log.info(f"Updating compute balance for user {user_id}: {operation} {amount}")
+def update_compute_balance(tables, citizen_id: str, amount: float, operation: str = "add") -> bool:
+    """Update a citizen's compute balance."""
+    log.info(f"Updating compute balance for citizen {citizen_id}: {operation} {amount}")
     
     try:
-        # Get the user record
-        user = tables['users'].get(user_id)
-        if not user:
-            log.warning(f"User not found: {user_id}")
+        # Get the citizen record
+        citizen = tables['citizens'].get(citizen_id)
+        if not citizen:
+            log.warning(f"Citizen not found: {citizen_id}")
             return False
         
         # Get current Ducats
-        current_amount = user['fields'].get('Ducats', 0)
+        current_amount = citizen['fields'].get('Ducats', 0)
         
         # Calculate new amount
         if operation == "add":
@@ -169,20 +169,20 @@ def update_compute_balance(tables, user_id: str, amount: float, operation: str =
             log.error(f"Invalid operation: {operation}")
             return False
         
-        # Update the user record
-        tables['users'].update(user_id, {
+        # Update the citizen record
+        tables['citizens'].update(citizen_id, {
             'Ducats': new_amount
         })
         
-        log.info(f"Updated compute balance for user {user_id}: {current_amount} -> {new_amount}")
+        log.info(f"Updated compute balance for citizen {citizen_id}: {current_amount} -> {new_amount}")
         return True
     except Exception as e:
-        log.error(f"Error updating compute balance for user {user_id}: {e}")
+        log.error(f"Error updating compute balance for citizen {citizen_id}: {e}")
         return False
 
-def create_transaction_record(tables, from_user: str, to_citizen: str, amount: float) -> Optional[Dict]:
+def create_transaction_record(tables, from_citizen: str, to_citizen: str, amount: float) -> Optional[Dict]:
     """Create a transaction record for a redistribution payment."""
-    log.info(f"Creating transaction record for redistribution payment: {from_user} -> {to_citizen}, amount: {amount}")
+    log.info(f"Creating transaction record for redistribution payment: {from_citizen} -> {to_citizen}, amount: {amount}")
     
     try:
         now = datetime.datetime.now().isoformat()
@@ -191,7 +191,7 @@ def create_transaction_record(tables, from_user: str, to_citizen: str, amount: f
         transaction = tables['transactions'].create({
             "Type": "treasury_redistribution",
             "AssetId": f"redistribution_{now}",
-            "Seller": from_user,  # ConsiglioDeiDieci
+            "Seller": from_citizen,  # ConsiglioDeiDieci
             "Buyer": to_citizen,  # Citizen ID
             "Price": amount,
             "CreatedAt": now,
@@ -223,7 +223,7 @@ def create_notification(tables, citizen_id: str, content: str, details: Dict) ->
             "Details": json.dumps(details),
             "CreatedAt": now,
             "ReadAt": None,
-            "User": citizen_id
+            "Citizen": citizen_id
         })
         
         log.info(f"Created notification: {notification['id']}")
@@ -275,7 +275,7 @@ def create_admin_summary(tables, redistribution_summary) -> None:
             "Details": json.dumps(details),
             "CreatedAt": datetime.datetime.now().isoformat(),
             "ReadAt": None,
-            "User": "NLR"  # Admin user
+            "Citizen": "NLR"  # Admin citizen
         })
         
         log.info(f"Created admin summary notification")
@@ -298,8 +298,8 @@ def test_telegram_connection():
             return False
         
         bot_data = bot_response.json()
-        bot_username = bot_data.get("result", {}).get("username", "Unknown")
-        log.info(f"Connected to Telegram bot: @{bot_username}")
+        bot_citizenname = bot_data.get("result", {}).get("citizenname", "Unknown")
+        log.info(f"Connected to Telegram bot: @{bot_citizenname}")
         
         # Now try to get chat info to verify the chat ID
         chat_info_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getChat?chat_id={MAIN_TELEGRAM_CHAT_ID}"
@@ -376,7 +376,7 @@ def redistribute_treasury(dry_run: bool = False):
         return
     
     consiglio_id = consiglio['id']
-    consiglio_username = consiglio['fields'].get('Username', 'ConsiglioDeiDieci')
+    consiglio_citizenname = consiglio['fields'].get('Citizenname', 'ConsiglioDeiDieci')
     consiglio_balance = consiglio['fields'].get('Ducats', 0)
     
     log.info(f"ConsiglioDeiDieci balance: {consiglio_balance} ⚜️ Ducats")
@@ -450,7 +450,7 @@ def redistribute_treasury(dry_run: bool = False):
             # Update citizen's wealth
             if update_citizen_wealth(tables, citizen_id, per_citizen_amount):
                 # Create transaction record
-                create_transaction_record(tables, consiglio_username, citizen_id, per_citizen_amount)
+                create_transaction_record(tables, consiglio_citizenname, citizen_id, per_citizen_amount)
                 
                 # Create notification for citizen
                 create_notification(

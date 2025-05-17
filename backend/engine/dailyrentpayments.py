@@ -51,7 +51,7 @@ def initialize_airtable():
             'buildings': Table(api_key, base_id, 'BUILDINGS'),
             'citizens': Table(api_key, base_id, 'CITIZENS'),
             'businesses': Table(api_key, base_id, 'BUSINESSES'),
-            'users': Table(api_key, base_id, 'Users'),
+            'citizens': Table(api_key, base_id, 'Citizens'),
             'transactions': Table(api_key, base_id, 'TRANSACTIONS'),
             'notifications': Table(api_key, base_id, 'NOTIFICATIONS')
         }
@@ -89,9 +89,9 @@ def get_businesses_with_buildings(tables) -> List[Dict]:
         log.error(f"Error fetching businesses with buildings: {e}")
         return []
 
-def find_user_by_identifier(tables, identifier: str) -> Optional[Dict]:
-    """Find a user by username or wallet address."""
-    log.info(f"Looking up user: {identifier}")
+def find_citizen_by_identifier(tables, identifier: str) -> Optional[Dict]:
+    """Find a citizen by citizenname or wallet address."""
+    log.info(f"Looking up citizen: {identifier}")
     
     # Handle known misspellings
     if identifier == "ConsiglioDeiDieci":
@@ -99,51 +99,51 @@ def find_user_by_identifier(tables, identifier: str) -> Optional[Dict]:
         log.info(f"Corrected misspelled identifier from ConsiglioDeiDieci to {identifier}")
     
     try:
-        # First try to find by username
-        formula = f"{{Username}}='{identifier}'"
-        users = tables['users'].all(formula=formula)
+        # First try to find by citizenname
+        formula = f"{{Citizenname}}='{identifier}'"
+        citizens = tables['citizens'].all(formula=formula)
         
-        if users:
-            log.info(f"Found user by username: {identifier}")
-            return users[0]
+        if citizens:
+            log.info(f"Found citizen by citizenname: {identifier}")
+            return citizens[0]
         
         # If not found, try by wallet address
         formula = f"{{Wallet}}='{identifier}'"
-        users = tables['users'].all(formula=formula)
+        citizens = tables['citizens'].all(formula=formula)
         
-        if users:
-            log.info(f"Found user by wallet address: {identifier}")
-            return users[0]
+        if citizens:
+            log.info(f"Found citizen by wallet address: {identifier}")
+            return citizens[0]
         
         # Special case for ConsiglioDeiDieci - try alternative spellings
         if identifier == "ConsiglioDeiDieci":
             # Try with different variations
             for variation in ["Consiglio Dei Dieci", "Consiglio dei Dieci", "ConsiglioDeidieci"]:
-                formula = f"{{Username}}='{variation}'"
-                users = tables['users'].all(formula=formula)
-                if users:
-                    log.info(f"Found user by alternative spelling: {variation}")
-                    return users[0]
+                formula = f"{{Citizenname}}='{variation}'"
+                citizens = tables['citizens'].all(formula=formula)
+                if citizens:
+                    log.info(f"Found citizen by alternative spelling: {variation}")
+                    return citizens[0]
         
-        log.warning(f"User not found: {identifier}")
+        log.warning(f"Citizen not found: {identifier}")
         return None
     except Exception as e:
-        log.error(f"Error finding user {identifier}: {e}")
+        log.error(f"Error finding citizen {identifier}: {e}")
         return None
 
-def update_compute_balance(tables, user_id: str, amount: float, operation: str = "add") -> Optional[Dict]:
-    """Update a user's compute balance."""
-    log.info(f"Updating compute balance for user {user_id}: {operation} {amount}")
+def update_compute_balance(tables, citizen_id: str, amount: float, operation: str = "add") -> Optional[Dict]:
+    """Update a citizen's compute balance."""
+    log.info(f"Updating compute balance for citizen {citizen_id}: {operation} {amount}")
     
     try:
-        # Get the user record
-        user = tables['users'].get(user_id)
-        if not user:
-            log.warning(f"User not found: {user_id}")
+        # Get the citizen record
+        citizen = tables['citizens'].get(citizen_id)
+        if not citizen:
+            log.warning(f"Citizen not found: {citizen_id}")
             return None
         
         # Get current Ducats
-        current_amount = user['fields'].get('Ducats', 0)
+        current_amount = citizen['fields'].get('Ducats', 0)
         
         # Calculate new amount
         if operation == "add":
@@ -154,21 +154,21 @@ def update_compute_balance(tables, user_id: str, amount: float, operation: str =
             log.error(f"Invalid operation: {operation}")
             return None
         
-        # Update the user record
-        updated_user = tables['users'].update(user_id, {
+        # Update the citizen record
+        updated_citizen = tables['citizens'].update(citizen_id, {
             'Ducats': new_amount
         })
         
-        log.info(f"Updated compute balance for user {user_id}: {current_amount} -> {new_amount}")
-        return updated_user
+        log.info(f"Updated compute balance for citizen {citizen_id}: {current_amount} -> {new_amount}")
+        return updated_citizen
     except Exception as e:
-        log.error(f"Error updating compute balance for user {user_id}: {e}")
+        log.error(f"Error updating compute balance for citizen {citizen_id}: {e}")
         return None
 
-def create_transaction_record(tables, from_user: str, to_user: str, amount: float, 
+def create_transaction_record(tables, from_citizen: str, to_citizen: str, amount: float, 
                              building_id: str, payment_type: str, details: Dict = None) -> Optional[Dict]:
     """Create a transaction record for a rent payment."""
-    log.info(f"Creating transaction record for {payment_type} payment: {from_user} -> {to_user}, amount: {amount}")
+    log.info(f"Creating transaction record for {payment_type} payment: {from_citizen} -> {to_citizen}, amount: {amount}")
     
     try:
         now = datetime.datetime.now().isoformat()
@@ -188,8 +188,8 @@ def create_transaction_record(tables, from_user: str, to_user: str, amount: floa
         transaction = tables['transactions'].create({
             "Type": payment_type,
             "AssetId": f"{payment_type}_{building_id}_{now}",
-            "Seller": from_user,  # Tenant/Business owner is the seller (paying)
-            "Buyer": to_user,     # Building owner is the buyer (receiving)
+            "Seller": from_citizen,  # Tenant/Business owner is the seller (paying)
+            "Buyer": to_citizen,     # Building owner is the buyer (receiving)
             "Price": amount,
             "CreatedAt": now,
             "UpdatedAt": now,
@@ -203,13 +203,13 @@ def create_transaction_record(tables, from_user: str, to_user: str, amount: floa
         log.error(f"Error creating transaction record: {e}")
         return None
 
-def create_notification(tables, user: str, content: str, details: Dict) -> Optional[Dict]:
-    """Create a notification for a user."""
-    log.info(f"Creating notification for user {user}: {content}")
+def create_notification(tables, citizen: str, content: str, details: Dict) -> Optional[Dict]:
+    """Create a notification for a citizen."""
+    log.info(f"Creating notification for citizen {citizen}: {content}")
     
-    # Skip notification if user is empty or None
-    if not user:
-        log.warning(f"Cannot create notification: user is empty")
+    # Skip notification if citizen is empty or None
+    if not citizen:
+        log.warning(f"Cannot create notification: citizen is empty")
         return None
     
     try:
@@ -222,20 +222,20 @@ def create_notification(tables, user: str, content: str, details: Dict) -> Optio
             "Details": json.dumps(details),
             "CreatedAt": now,
             "ReadAt": None,
-            "User": user
+            "Citizen": citizen
         })
         
         log.info(f"Created notification: {notification['id']}")
         return notification
     except Exception as e:
-        log.error(f"Error creating notification for user {user}: {e}")
+        log.error(f"Error creating notification for citizen {citizen}: {e}")
         return None
 
 def process_housing_rent(tables, building: Dict, dry_run: bool = False) -> Tuple[bool, float]:
     """Process a housing rent payment from a citizen to a building owner."""
     building_id = building['id']
     building_name = building['fields'].get('Name', building_id)
-    building_owner = building['fields'].get('User', '')
+    building_owner = building['fields'].get('Citizen', '')
     occupant_id = building['fields'].get('Occupant', '')
     
     # Safely convert rent amount to float
@@ -279,8 +279,8 @@ def process_housing_rent(tables, building: Dict, dry_run: bool = False) -> Tuple
         log.error(f"Error getting citizen details: {e}")
         return False, 0
     
-    # Find building owner user record
-    building_owner_record = find_user_by_identifier(tables, building_owner)
+    # Find building owner citizen record
+    building_owner_record = find_citizen_by_identifier(tables, building_owner)
     if not building_owner_record:
         log.warning(f"Building owner {building_owner} not found, skipping payment")
         return False, 0
@@ -402,7 +402,7 @@ def process_business_rent(tables, business: Dict, dry_run: bool = False) -> Tupl
             return False, 0
         
         building_name = building['fields'].get('Name', building_id)
-        building_owner = building['fields'].get('User', '')
+        building_owner = building['fields'].get('Citizen', '')
         
         log.info(f"Building: {building_name}, Owner: {building_owner}")
     except Exception as e:
@@ -423,9 +423,9 @@ def process_business_rent(tables, business: Dict, dry_run: bool = False) -> Tupl
         log.info(f"[DRY RUN] Would transfer {rent_amount} ⚜️ Ducats from {business_owner} to {building_owner}")
         return True, rent_amount
     
-    # Find user records
-    business_owner_record = find_user_by_identifier(tables, business_owner)
-    building_owner_record = find_user_by_identifier(tables, building_owner)
+    # Find citizen records
+    business_owner_record = find_citizen_by_identifier(tables, business_owner)
+    building_owner_record = find_citizen_by_identifier(tables, building_owner)
     
     if not business_owner_record:
         log.warning(f"Business owner {business_owner} not found, skipping payment")
@@ -567,7 +567,7 @@ def create_admin_summary(tables, rent_summary) -> None:
             "Details": json.dumps(details),
             "CreatedAt": datetime.datetime.now().isoformat(),
             "ReadAt": None,
-            "User": "NLR"  # Admin user
+            "Citizen": "NLR"  # Admin citizen
         })
         
         log.info(f"Created admin summary notification")
@@ -613,7 +613,7 @@ def process_daily_rent_payments(dry_run: bool = False):
                 rent_summary["housing"]["total_amount"] += amount
                 
                 # Track by landlord
-                building_owner = building['fields'].get('User', '')
+                building_owner = building['fields'].get('Citizen', '')
                 if building_owner:
                     rent_summary["by_landlord"][building_owner] += amount
         else:
@@ -635,7 +635,7 @@ def process_daily_rent_payments(dry_run: bool = False):
                     try:
                         building = tables['buildings'].get(building_id)
                         if building:
-                            building_owner = building['fields'].get('User', '')
+                            building_owner = building['fields'].get('Citizen', '')
                             if building_owner:
                                 rent_summary["by_landlord"][building_owner] += amount
                     except Exception as e:
