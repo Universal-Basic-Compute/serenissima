@@ -102,7 +102,9 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
           })
           .catch(err => console.error('Error fetching polygon data:', err));
       } else if (data.type === 'citizen') {
-        // For citizens, we need to fetch the citizen data
+        // For citizens, we need to use the citizen data directly from the event
+        console.log('Citizen hover data received:', data);
+        
         if (data.citizen) {
           // If the citizen data is already provided in the event
           setTooltipData({

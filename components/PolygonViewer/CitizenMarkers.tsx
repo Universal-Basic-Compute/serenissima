@@ -384,7 +384,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     }
     
     // Set hovered citizen paths
-    const citizenId = citizen.citizenid || citizen.CitizenId || citizen.id;
+    const citizenId = citizen.citizenid || citizen.CitizenId || citizen.id || citizen.username;
     const paths = activityPaths[citizenId] || [];
     
     console.log(`Citizen hover: ${citizenId} has ${paths.length} activity paths`);
@@ -395,6 +395,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     setHoveredCitizenPaths(paths);
     
     // Update the hover state service with the citizen data
+    // Make sure to pass the complete citizen object
     hoverStateService.setHoveredCitizen(citizen, null, null);
     
     // Log the paths for debugging
