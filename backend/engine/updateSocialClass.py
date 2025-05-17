@@ -78,6 +78,33 @@ def get_entrepreneurs(tables) -> List[str]:
         log.error(f"Error fetching entrepreneurs: {e}")
         return []
 
+def get_business_building_owners(tables) -> List[str]:
+    """Fetch citizens who own at least one business building."""
+    log.info("Fetching business building owners...")
+    
+    try:
+        # Define business building types (excluding housing)
+        business_types = ['workshop', 'market-stall', 'tavern', 'warehouse', 'dock', 'factory', 'shop']
+        
+        # Create a formula to find business buildings
+        type_conditions = [f"{{Type}}='{business_type}'" for business_type in business_types]
+        formula = f"AND(OR({', '.join(type_conditions)}), NOT(OR({{Owner}} = '', {{Owner}} = BLANK())))"
+        
+        business_buildings = tables['buildings'].all(formula=formula)
+        
+        # Extract unique citizen IDs who own business buildings
+        business_owner_ids = set()
+        for building in business_buildings:
+            owner = building['fields'].get('Owner')
+            if owner:
+                business_owner_ids.add(owner)
+        
+        log.info(f"Found {len(business_owner_ids)} citizens who own business buildings")
+        return list(business_owner_ids)
+    except Exception as e:
+        log.error(f"Error fetching business building owners: {e}")
+        return []
+
 def get_all_citizens(tables) -> List[Dict]:
     """Fetch all citizens with their current social class, daily income, and prestige."""
     log.info("Fetching all citizens...")
@@ -121,6 +148,7 @@ def create_admin_summary(tables, update_summary) -> None:
             "total_citizens_updated": update_summary['total_updated'],
             "updates_by_reason": {
                 "entrepreneur": update_summary['by_reason']['entrepreneur'],
+                "business_owner": update_summary['by_reason']['business_owner'],
                 "daily_income": update_summary['by_reason']['daily_income'],
                 "prestige": update_summary['by_reason']['prestige']
             },
@@ -151,8 +179,11 @@ def update_social_class(dry_run: bool = False):
     
     tables = initialize_airtable()
     
-    # Get all entrepreneurs
+    # Get all entrepreneurs (citizens who run at least one building)
     entrepreneur_ids = get_entrepreneurs(tables)
+    
+    # Get all business building owners
+    business_owner_ids = get_business_building_owners(tables)
     
     # Get all citizens
     citizens = get_all_citizens(tables)
@@ -163,6 +194,7 @@ def update_social_class(dry_run: bool = False):
         "total_updated": 0,
         "by_reason": {
             "entrepreneur": 0,
+            "business_owner": 0,
             "daily_income": 0,
             "prestige": 0
         },
@@ -188,8 +220,9 @@ def update_social_class(dry_run: bool = False):
         new_social_class = current_social_class
         update_reason = None
         
-        # Check if citizen is an entrepreneur
+        # Check if citizen is an entrepreneur or business owner
         is_entrepreneur = citizen_id in entrepreneur_ids
+        is_business_owner = citizen_id in business_owner_ids
         
         # Apply rules in order of precedence (highest to lowest)
         
@@ -203,7 +236,12 @@ def update_social_class(dry_run: bool = False):
             new_social_class = "Cittadini"
             update_reason = "daily_income"
         
-        # Rule 3: Entrepreneurs must be at least Popolani
+        # Rule 3: Business building owners must be at least Popolani
+        elif is_business_owner and SOCIAL_CLASSES.index(current_social_class) < SOCIAL_CLASSES.index("Popolani"):
+            new_social_class = "Popolani"
+            update_reason = "business_owner"
+        
+        # Rule 4: Entrepreneurs must be at least Popolani
         elif is_entrepreneur and SOCIAL_CLASSES.index(current_social_class) < SOCIAL_CLASSES.index("Popolani"):
             new_social_class = "Popolani"
             update_reason = "entrepreneur"
@@ -236,6 +274,7 @@ def update_social_class(dry_run: bool = False):
                     "new_class": new_social_class,
                     "reason": update_reason,
                     "is_entrepreneur": is_entrepreneur,
+                    "is_business_owner": is_business_owner,
                     "daily_income": daily_income,
                     "prestige": prestige
                 }
