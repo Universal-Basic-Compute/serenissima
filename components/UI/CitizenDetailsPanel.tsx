@@ -98,39 +98,99 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     
     setIsLoadingHistory(true);
     try {
-      const response = await fetch(
-        `https://api.kinos-engine.ai/v2/blueprints/serenissima-ai/kins/${citizen.citizenid}/messages?limit=25`,
-        {
-          method: 'GET',
+      // Check if this is an AI citizen or a regular user
+      if (citizen.isai === false) {
+        // For non-AI citizens, use the regular messages API
+        console.log(`Fetching messages for non-AI citizen ${citizen.citizenid} using messages API`);
+        
+        // Get current user from localStorage
+        let currentUsername = 'visitor';
+        const savedProfile = localStorage.getItem('userProfile');
+        if (savedProfile) {
+          try {
+            const profile = JSON.parse(savedProfile);
+            if (profile.username) {
+              currentUsername = profile.username;
+            }
+          } catch (error) {
+            console.error('Error parsing user profile:', error);
+          }
+        }
+        
+        const response = await fetch('/api/messages', {
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
+          body: JSON.stringify({
+            currentUser: currentUsername,
+            otherUser: citizen.username || citizen.citizenid
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch message history: ${response.status}`);
         }
-      );
-
-      // Check for 404 specifically
-      if (response.status === 404) {
-        console.log(`No message history found for citizen ${citizen.citizenid}`);
-        // Set a welcome message instead of re-fetching
-        setMessages([
+        
+        const data = await response.json();
+        
+        if (data.success && data.messages) {
+          // Convert the message format to match what the component expects
+          const formattedMessages = data.messages.map(msg => ({
+            id: msg.messageId,
+            role: msg.sender === currentUsername ? 'user' : 'assistant',
+            content: msg.content,
+            timestamp: msg.createdAt
+          }));
+          
+          setMessages(formattedMessages);
+        } else {
+          // If no messages found, set a welcome message
+          setMessages([
+            {
+              id: 'welcome',
+              role: 'assistant',
+              content: `Buongiorno! I am ${citizen.firstname} ${citizen.lastname}. How may I assist you today?`,
+              timestamp: new Date().toISOString()
+            }
+          ]);
+        }
+      } else {
+        // For AI citizens, use the Kinos Engine API
+        const response = await fetch(
+          `https://api.kinos-engine.ai/v2/blueprints/serenissima-ai/kins/${citizen.citizenid}/messages?limit=25`,
           {
-            id: 'welcome',
-            role: 'assistant',
-            content: `Buongiorno! I am ${citizen.firstname} ${citizen.lastname}. How may I assist you today?`,
-            timestamp: new Date().toISOString()
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
           }
-        ]);
-        setIsLoadingHistory(false);
-        return; // Exit early to prevent re-fetching
-      }
+        );
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch message history: ${response.status}`);
-      }
+        // Check for 404 specifically
+        if (response.status === 404) {
+          console.log(`No message history found for citizen ${citizen.citizenid}`);
+          // Set a welcome message instead of re-fetching
+          setMessages([
+            {
+              id: 'welcome',
+              role: 'assistant',
+              content: `Buongiorno! I am ${citizen.firstname} ${citizen.lastname}. How may I assist you today?`,
+              timestamp: new Date().toISOString()
+            }
+          ]);
+          setIsLoadingHistory(false);
+          return; // Exit early to prevent re-fetching
+        }
 
-      const data = await response.json();
-      
-      setMessages(data.messages || []);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch message history: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        setMessages(data.messages || []);
+      }
     } catch (error) {
       console.error('Error fetching message history:', error);
       // If we can't fetch history, start with a welcome message
@@ -151,6 +211,20 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
   const sendMessage = async (content: string) => {
     if (!content.trim() || !citizen || !citizen.citizenid) return;
     
+    // Get current user from localStorage
+    let currentUsername = 'visitor';
+    const savedProfile = localStorage.getItem('userProfile');
+    if (savedProfile) {
+      try {
+        const profile = JSON.parse(savedProfile);
+        if (profile.username) {
+          currentUsername = profile.username;
+        }
+      } catch (error) {
+        console.error('Error parsing user profile:', error);
+      }
+    }
+    
     // Optimistically add user message to UI
     const userMessage = {
       id: `temp-${Date.now()}`,
@@ -164,41 +238,76 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     setIsTyping(true);
     
     try {
-      // Default system prompt
-      const systemPrompt = `You are ${citizen.firstname} ${citizen.lastname}, a ${citizen.socialclass} citizen of Renaissance Venice. 
-Your description: ${citizen.description}
-Respond in character, with the personality, knowledge, and perspective of a ${citizen.socialclass} in 16th century Venice.
-Be historically accurate but engaging. Speak in first person as if you are this character.`;
-      
-      const response = await fetch(
-        `https://api.kinos-engine.ai/v2/blueprints/serenissima-ai/kins/${citizen.citizenid}/messages`,
-        {
+      // Check if this is an AI citizen or a regular user
+      if (citizen.isai === false) {
+        // For non-AI citizens, use the regular messages API
+        console.log(`Sending message to non-AI citizen ${citizen.citizenid} using messages API`);
+        
+        const response = await fetch('/api/messages/send', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
+            sender: currentUsername,
+            receiver: citizen.username || citizen.citizenid,
             content: content,
-            model: 'claude-3-7-sonnet-latest',
-            mode: 'creative',
-            addSystem: systemPrompt
-          }),
+            type: 'message'
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Failed to send message: ${response.status}`);
         }
-      );
+        
+        const data = await response.json();
+        
+        if (data.success && data.message) {
+          // Add the message to the UI
+          setMessages(prev => [...prev, {
+            id: data.message.messageId,
+            role: 'assistant',
+            content: `I've received your message. I'll respond when I'm available.`,
+            timestamp: new Date().toISOString()
+          }]);
+        }
+      } else {
+        // Default system prompt for AI citizens
+        const systemPrompt = `You are ${citizen.firstname} ${citizen.lastname}, a ${citizen.socialclass} citizen of Renaissance Venice. 
+Your description: ${citizen.description}
+Respond in character, with the personality, knowledge, and perspective of a ${citizen.socialclass} in 16th century Venice.
+Be historically accurate but engaging. Speak in first person as if you are this character.`;
+        
+        const response = await fetch(
+          `https://api.kinos-engine.ai/v2/blueprints/serenissima-ai/kins/${citizen.citizenid}/messages`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              content: content,
+              model: 'claude-3-7-sonnet-latest',
+              mode: 'creative',
+              addSystem: systemPrompt
+            }),
+          }
+        );
 
-      if (!response.ok) {
-        throw new Error(`Failed to send message: ${response.status}`);
+        if (!response.ok) {
+          throw new Error(`Failed to send message: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        // Add the assistant's response to the messages
+        setMessages(prev => [...prev, {
+          id: data.id,
+          role: 'assistant',
+          content: data.content,
+          timestamp: data.timestamp
+        }]);
       }
-
-      const data = await response.json();
-      
-      // Add the assistant's response to the messages
-      setMessages(prev => [...prev, {
-        id: data.id,
-        role: 'assistant',
-        content: data.content,
-        timestamp: data.timestamp
-      }]);
     } catch (error) {
       console.error('Error sending message:', error);
       
