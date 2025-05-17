@@ -64,7 +64,7 @@ def generate_citizen(social_class: str) -> Optional[Dict[str, Any]]:
                 "content": prompt,
                 "model": "claude-3-7-sonnet-latest",
                 "mode": "creative",
-                "addSystem": "You are a historical expert on Renaissance Venice (1400-1600) helping to create a citizen for a historically accurate economic simulation game called La Serenissima. Create 1 unique Venetian citizen of the Facchini social class (unskilled workers, servants, gondoliers, and the working poor) with historically accurate name, description, and characteristics. Return ONLY a valid JSON object with the following fields: FirstName, LastName, Description, ImagePrompt (detailed prompt for generating an image), and Ducats (wealth between 10,000-100,000)."
+                "addSystem": "You are a historical expert on Renaissance Venice (1400-1600) helping to create a citizen for a historically accurate economic simulation game called La Serenissima. Create 1 unique Venetian citizen of the Facchini social class (unskilled workers, servants, gondoliers, and the working poor) with historically accurate name, description, and characteristics. Your response MUST be a valid JSON object with EXACTLY this format:\n\n```json\n{\n  \"FirstName\": \"string\",\n  \"LastName\": \"string\",\n  \"Description\": \"string\",\n  \"ImagePrompt\": \"string\",\n  \"Ducats\": number\n}\n```\n\nDo not include any text before or after the JSON. The Ducats value should be between 10,000-100,000."
             }
         )
         
