@@ -250,6 +250,9 @@ def create_resource_fetching_activity(tables, citizen: Dict, contract: Dict, fro
         # Always use CitizenId from fields, not the Airtable record ID
         citizen_id = citizen['fields'].get('CitizenId')
         
+        # Get the citizen's username
+        citizen_username = citizen['fields'].get('Username', citizen_id)
+        
         # If CitizenId is missing, log an error and return
         if not citizen_id:
             log.error(f"Missing CitizenId in citizen record: {citizen['id']}")
@@ -279,6 +282,7 @@ def create_resource_fetching_activity(tables, citizen: Dict, contract: Dict, fro
             "ActivityId": activity_id,
             "Type": "fetch_resource",
             "CitizenId": citizen_id,
+            "Citizen": citizen_username,
             "ContractId": contract_id,
             "FromBuilding": from_building_id,
             "ToBuilding": to_building_id,
@@ -302,6 +306,9 @@ def create_production_activity(tables, citizen: Dict, building: Dict, recipe: Di
     try:
         # Always use CitizenId from fields, not the Airtable record ID
         citizen_id = citizen['fields'].get('CitizenId')
+        
+        # Get the citizen's username
+        citizen_username = citizen['fields'].get('Username', citizen_id)
         
         # If CitizenId is missing, log an error and return
         if not citizen_id:
@@ -329,6 +336,7 @@ def create_production_activity(tables, citizen: Dict, building: Dict, recipe: Di
             "ActivityId": activity_id,
             "Type": "production",
             "CitizenId": citizen_id,
+            "Citizen": citizen_username,
             "FromBuilding": building_id,
             "ToBuilding": building_id,  # Same building for production
             "CreatedAt": now.isoformat(),
@@ -444,7 +452,7 @@ def get_path_to_home(citizen_position: Dict, home_position: Dict) -> Optional[Di
         log.error(f"Error calling transport API: {e}")
         return None
 
-def create_rest_activity(tables, citizen_id: str, home_id: str) -> Optional[Dict]:
+def create_rest_activity(tables, citizen_id: str, citizen_username: str, home_id: str) -> Optional[Dict]:
     """Create a rest activity for a citizen at their home."""
     log.info(f"Creating rest activity for citizen {citizen_id} at home {home_id}")
     
@@ -453,6 +461,10 @@ def create_rest_activity(tables, citizen_id: str, home_id: str) -> Optional[Dict
         if not citizen_id:
             log.error("Missing CitizenId for rest activity")
             return None
+        
+        # If citizen_username is not provided, use citizen_id as fallback
+        if not citizen_username:
+            citizen_username = citizen_id
             
         now = datetime.datetime.now()
         
@@ -475,6 +487,7 @@ def create_rest_activity(tables, citizen_id: str, home_id: str) -> Optional[Dict
             "ActivityId": f"rest_{citizen_id}_{int(time.time())}",
             "Type": "rest",
             "CitizenId": citizen_id,
+            "Citizen": citizen_username,
             "FromBuilding": home_id,  # This should be BuildingId
             "ToBuilding": home_id,    # This should be BuildingId
             "CreatedAt": now.isoformat(),
@@ -489,7 +502,7 @@ def create_rest_activity(tables, citizen_id: str, home_id: str) -> Optional[Dict
         log.error(f"Error creating rest activity: {e}")
         return None
 
-def create_goto_home_activity(tables, citizen_id: str, home_id: str, path_data: Dict) -> Optional[Dict]:
+def create_goto_home_activity(tables, citizen_id: str, citizen_username: str, home_id: str, path_data: Dict) -> Optional[Dict]:
     """Create a goto_home activity for a citizen."""
     log.info(f"Creating goto_home activity for citizen {citizen_id} to home {home_id}")
     
@@ -498,6 +511,10 @@ def create_goto_home_activity(tables, citizen_id: str, home_id: str, path_data: 
         if not citizen_id:
             log.error("Missing CitizenId for goto_home activity")
             return None
+            
+        # If citizen_username is not provided, use citizen_id as fallback
+        if not citizen_username:
+            citizen_username = citizen_id
             
         now = datetime.datetime.now()
         
@@ -518,6 +535,7 @@ def create_goto_home_activity(tables, citizen_id: str, home_id: str, path_data: 
             "ActivityId": f"goto_home_{citizen_id}_{int(time.time())}",
             "Type": "goto_home",
             "CitizenId": citizen_id,  # This should be the CitizenId, not the Airtable record ID
+            "Citizen": citizen_username,
             "ToBuilding": home_id,  # This should be BuildingId
             "CreatedAt": now.isoformat(),
             "StartDate": start_date,
@@ -532,7 +550,7 @@ def create_goto_home_activity(tables, citizen_id: str, home_id: str, path_data: 
         log.error(f"Error creating goto_home activity: {e}")
         return None
 
-def create_idle_activity(tables, citizen_id: str) -> Optional[Dict]:
+def create_idle_activity(tables, citizen_id: str, citizen_username: str = None) -> Optional[Dict]:
     """Create an idle activity for a citizen."""
     log.info(f"Creating idle activity for citizen {citizen_id}")
     
@@ -542,6 +560,10 @@ def create_idle_activity(tables, citizen_id: str) -> Optional[Dict]:
             log.error("Missing CitizenId for idle activity")
             return None
             
+        # If citizen_username is not provided, use citizen_id as fallback
+        if not citizen_username:
+            citizen_username = citizen_id
+            
         now = datetime.datetime.now()
         end_time = now + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)
         
@@ -550,6 +572,7 @@ def create_idle_activity(tables, citizen_id: str) -> Optional[Dict]:
             "ActivityId": f"idle_{citizen_id}_{int(time.time())}",
             "Type": "idle",
             "CitizenId": citizen_id,  # This should be the CitizenId, not the Airtable record ID
+            "Citizen": citizen_username,
             "CreatedAt": now.isoformat(),
             "StartDate": now.isoformat(),
             "EndDate": end_time.isoformat(),
@@ -672,7 +695,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
             # Citizen is at home, create rest activity
             # Use BuildingId instead of Airtable record ID
             home_building_id = home['fields'].get('BuildingId', home['id'])
-            create_rest_activity(tables, citizen_id, home_building_id)
+            create_rest_activity(tables, citizen_id, citizen_username, home_building_id)
         else:
             # Citizen needs to go home, get path
             path_data = get_path_to_home(citizen_position, home_position)
@@ -681,10 +704,10 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
                 # Create goto_home activity
                 # Use BuildingId instead of Airtable record ID
                 home_building_id = home['fields'].get('BuildingId', home['id'])
-                create_goto_home_activity(tables, citizen_id, home_building_id, path_data)
+                create_goto_home_activity(tables, citizen_id, citizen_username, home_building_id, path_data)
             else:
                 # Path finding failed, create idle activity
-                create_idle_activity(tables, citizen_id)
+                create_idle_activity(tables, citizen_id, citizen_username)
     else:
         # Daytime activities - check for work, production, or resource fetching
         
@@ -793,26 +816,26 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
                             
                             # If we get here, no contracts could be executed
                             log.info(f"No viable contracts for citizen {citizen_id}, creating idle activity")
-                            create_idle_activity(tables, citizen_id)
+                            create_idle_activity(tables, citizen_id, citizen_username)
                             return True
                     else:
                         # No Arti recipes, create idle activity
                         log.info(f"No Arti recipes for building type {building_type}, creating idle activity")
-                        create_idle_activity(tables, citizen_id)
+                        create_idle_activity(tables, citizen_id, citizen_username)
                         return True
                 else:
                     # No production information, create idle activity
                     log.info(f"No production information for building type {building_type}, creating idle activity")
-                    create_idle_activity(tables, citizen_id)
+                    create_idle_activity(tables, citizen_id, citizen_username)
                     return True
             else:
                 # No work building found, create idle activity
                 log.info(f"No work buildings found for citizen {citizen_username}, creating idle activity")
-                create_idle_activity(tables, citizen_id)
+                create_idle_activity(tables, citizen_id, citizen_username)
                 return True
         except Exception as e:
             log.error(f"Error finding work buildings for citizen {citizen_username}: {e}")
-            create_idle_activity(tables, citizen_id)
+            create_idle_activity(tables, citizen_id, citizen_username)
             return True
     
     return True
