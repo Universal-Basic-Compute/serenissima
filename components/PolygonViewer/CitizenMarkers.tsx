@@ -817,7 +817,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
         
         {/* Static Citizens (those without paths) */}
         {citizens.filter(citizen => {
-          const citizenId = citizen.citizenid || citizen.CitizenId || citizen.id;
+          const citizenId = citizen.username || citizen.citizenid || citizen.CitizenId || citizen.id;
           // Only show citizens that aren't being animated
           return !animatedCitizens[citizenId];
         }).map((citizen) => {
