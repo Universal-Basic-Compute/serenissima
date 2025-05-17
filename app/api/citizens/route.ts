@@ -25,29 +25,9 @@ export async function GET(request: Request) {
     // Initialize Airtable
     const base = initAirtable();
     
-    // Fetch citizens from Airtable
+    // Fetch citizens from Airtable - without specifying fields to get all of them
     const records = await base(AIRTABLE_CITIZENS_TABLE)
       .select({
-        fields: [
-          'Username', 
-          'FirstName', 
-          'LastName', 
-          'CoatOfArmsImage',
-          'IsAi',
-          'Ducats',
-          'SocialClass',
-          'Description',
-          'Position',
-          'Prestige',
-          'Wallet',
-          'FamilyMotto',
-          'Color',
-          'GuildId',
-          'Preferences',
-          'LastActiveAt',
-          'CreatedAt',  // Add CreatedAt field
-          'UpdatedAt'   // Add UpdatedAt field
-        ],
         filterByFormula: '{inVenice} = TRUE()',  // Only fetch citizens who are in Venice
         sort: [{ field: 'LastActiveAt', direction: 'desc' }]
       })
@@ -94,27 +74,16 @@ export async function GET(request: Request) {
 
       const username = record.get('Username') as string;
       
-      return {
+      // Create citizen object with all fields from the record
+      const citizen = {
+        ...record.fields,  // Include all fields from the record
         username: username,
-        firstName: record.get('FirstName') as string || '',
-        lastName: record.get('LastName') as string || '',
-        coatOfArmsImage: record.get('CoatOfArmsImage') as string || null,
-        isAi: record.get('IsAi') as boolean || false,
-        Ducats: record.get('Ducats') as number || 0,
-        socialClass: record.get('SocialClass') as string || '',
-        description: record.get('Description') as string || '',
-        position: position, // Now this will be a parsed JSON object if valid
-        prestige: record.get('Prestige') as number || 0,
-        wallet: record.get('Wallet') as string || '',
-        familyMotto: record.get('FamilyMotto') as string || '',
-        color: record.get('Color') as string || '',
-        guildId: record.get('GuildId') as string || null,
-        preferences: record.get('Preferences') as object || {},
-        createdAt: record.get('CreatedAt') as string || null,  // Add createdAt field
-        updatedAt: record.get('UpdatedAt') as string || null,   // Add updatedAt field
+        position: position, // Use the parsed position
         worksFor: employmentMap[username] || null,
         workplace: workplaceMap[username] || null
       };
+      
+      return citizen;
     });
     
     return NextResponse.json({
