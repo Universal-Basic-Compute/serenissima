@@ -257,28 +257,34 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                 path = typeof activity.Path === 'string' ? JSON.parse(activity.Path) : activity.Path;
                 
                 // Log the parsed path for debugging
-                console.log(`Parsed path for activity ${activity.ActivityId || 'unknown'}, citizen ${activity.CitizenId}:`, 
+                console.log(`Parsed path for activity ${activity.ActivityId || 'unknown'}, citizen ${activity.Citizen || activity.CitizenId}:`, 
                   path.length > 0 ? `${path.length} points, first: ${JSON.stringify(path[0])}` : 'empty path');
-                
+              
                 // Skip activities without valid paths
                 if (!Array.isArray(path) || path.length < 2) {
                   console.warn(`Skipping invalid path for activity ${activity.ActivityId || 'unknown'}: not an array or too short`);
                   return;
                 }
-                
+              
                 // Validate each point in the path
                 const validPath = path.filter(point => 
                   point && typeof point === 'object' && 
                   'lat' in point && 'lng' in point &&
                   typeof point.lat === 'number' && typeof point.lng === 'number'
                 );
-                
+              
                 if (validPath.length < 2) {
                   console.warn(`Skipping path with insufficient valid points: ${validPath.length} valid out of ${path.length}`);
                   return;
                 }
-                
-                const citizenId = activity.CitizenId;
+              
+                // Use Citizen (Username) field first, then fall back to CitizenId
+                const citizenId = activity.Citizen || activity.CitizenId;
+              
+                if (!citizenId) {
+                  console.warn(`Activity ${activity.ActivityId || 'unknown'} has no Citizen or CitizenId field, skipping`);
+                  return;
+                }
                 
                 if (!pathsMap[citizenId]) {
                   pathsMap[citizenId] = [];
@@ -383,8 +389,8 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
       console.log('No valid connections found for citizen:', citizen);
     }
     
-    // Set hovered citizen paths
-    const citizenId = citizen.citizenid || citizen.CitizenId || citizen.id || citizen.username;
+    // Set hovered citizen paths - use username first, then fall back to other IDs
+    const citizenId = citizen.username || citizen.citizenid || citizen.CitizenId || citizen.id;
     const paths = activityPaths[citizenId] || [];
     
     console.log(`Citizen hover: ${citizenId} has ${paths.length} activity paths`);
@@ -527,8 +533,13 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     Object.entries(activityPaths).forEach(([citizenId, paths]) => {
       if (paths.length === 0) return;
       
-      // Find the citizen object
-      const citizen = citizens.find(c => c.citizenid === citizenId || c.CitizenId === citizenId || c.id === citizenId);
+      // Find the citizen object - first try by username, then by other IDs
+      const citizen = citizens.find(c => 
+        c.username === citizenId || 
+        c.citizenid === citizenId || 
+        c.CitizenId === citizenId || 
+        c.id === citizenId
+      );
       if (!citizen) return;
       
       // Find the most appropriate path based on time
@@ -665,11 +676,11 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   
   const handleCitizenClick = (citizen: any) => {
     // Ensure we have a valid citizen object before setting it
-    if (citizen && (citizen.citizenid || citizen.CitizenId || citizen.id || citizen.username)) {
+    if (citizen && (citizen.username || citizen.citizenid || citizen.CitizenId || citizen.id)) {
       setSelectedCitizen(citizen);
       
-      // Set selected citizen paths
-      const citizenId = citizen.citizenid || citizen.CitizenId || citizen.id || citizen.username;
+      // Set selected citizen paths - use username first, then fall back to other IDs
+      const citizenId = citizen.username || citizen.citizenid || citizen.CitizenId || citizen.id;
       const paths = activityPaths[citizenId] || [];
       setSelectedCitizenPaths(paths);
       console.log(`Setting ${paths.length} paths for selected citizen ${citizenId}`);
