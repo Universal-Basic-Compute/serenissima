@@ -572,9 +572,15 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
         log.error(f"Missing CitizenId in citizen record: {citizen['id']}")
         return False
     
+    # Get the citizen's username for looking up work buildings
+    citizen_username = citizen['fields'].get('Username')
+    if not citizen_username:
+        log.warning(f"Citizen {citizen_id} has no Username, using CitizenId as fallback")
+        citizen_username = citizen_id
+    
     citizen_name = f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}"
     
-    log.info(f"Processing activity for citizen {citizen_name} (ID: {citizen_id})")
+    log.info(f"Processing activity for citizen {citizen_name} (ID: {citizen_id}, Username: {citizen_username})")
     
     # Get citizen's position
     citizen_position = None
@@ -682,28 +688,28 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
     else:
         # Daytime activities - check for work, production, or resource fetching
         
-        # Check if citizen has a work building
-        work_building_id = citizen['fields'].get('Work')
+        # NEW CODE: Check if citizen has a work building by looking up buildings where 
+        # Occupant = CitizenUsername AND Category = business
+        log.info(f"Looking for work buildings where Occupant={citizen_username} AND Category=business")
         
-        if work_building_id:
-            # Get the work building
-            # First try to find by BuildingId
-            formula = f"{{BuildingId}}='{work_building_id}'"
+        # Build the formula for finding work buildings
+        formula = f"AND({{Occupant}}='{citizen_username}', {{Category}}='business')"
+        
+        try:
+            # Query for business buildings where this citizen is the occupant
             work_buildings = tables['buildings'].all(formula=formula)
             
-            # If not found, try by Airtable record ID as fallback
-            if not work_buildings:
-                formula = f"RECORD_ID()='{work_building_id}'"
-                work_buildings = tables['buildings'].all(formula=formula)
-                if work_buildings:
-                    log.warning(f"Found work building by record ID instead of BuildingId: {work_building_id}")
-            
             if work_buildings:
+                log.info(f"Found {len(work_buildings)} work buildings for citizen {citizen_username}")
+                
+                # Use the first work building found
                 work_building = work_buildings[0]
                 building_type = work_building['fields'].get('Type')
                 
                 # Use BuildingId for logging
                 building_id = work_building['fields'].get('BuildingId', work_building['id'])
+                
+                log.info(f"Using work building: {building_id} (Type: {building_type})")
                 
                 # Get building type information
                 building_type_info = get_building_type_info(building_type)
@@ -800,13 +806,12 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
                     create_idle_activity(tables, citizen_id)
                     return True
             else:
-                # Work building not found, create idle activity
-                log.warning(f"Work building {work_building_id} not found for citizen {citizen_id}, creating idle activity")
+                # No work building found, create idle activity
+                log.info(f"No work buildings found for citizen {citizen_username}, creating idle activity")
                 create_idle_activity(tables, citizen_id)
                 return True
-        else:
-            # No work building, create idle activity
-            log.info(f"Citizen {citizen_id} has no work building, creating idle activity")
+        except Exception as e:
+            log.error(f"Error finding work buildings for citizen {citizen_username}: {e}")
             create_idle_activity(tables, citizen_id)
             return True
     
