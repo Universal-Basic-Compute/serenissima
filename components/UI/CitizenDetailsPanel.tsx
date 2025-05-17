@@ -1044,6 +1044,22 @@ Be historically accurate but engaging. Speak in first person as if you are this 
                   <p className="text-amber-800 font-medium">{workBuilding.name || formatBuildingType(workBuilding.type)}</p>
                   <p className="text-amber-700 text-sm">{formatBuildingType(workBuilding.type)}</p>
                 </div>
+              ) : citizen.worksFor ? (
+                <div>
+                  <p className="text-amber-800 font-medium">
+                    Works for: <span className="font-bold">{citizen.worksFor}</span>
+                  </p>
+                  {citizen.workplace && (
+                    <>
+                      <p className="text-amber-700 text-sm">
+                        {citizen.workplace.name || 'Unknown workplace'}
+                      </p>
+                      <p className="text-amber-600 text-xs">
+                        {formatBuildingType(citizen.workplace.type || '')}
+                      </p>
+                    </>
+                  )}
+                </div>
               ) : (
                 <p className="text-amber-700 italic">Unemployed</p>
               )}
