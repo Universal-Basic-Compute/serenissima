@@ -2783,17 +2783,25 @@ number => {
           ctx.fill();
         }
         
-        // Apply different styles for selected state
+        // Apply different styles based on category and ownership
+        ctx.fillStyle = isSelected ? lightenColor(color, 35) : color;
+
+        // Get the building category
+        const buildingCategory = building.category || 'unknown';
+
+        // Get the border color based on category
+        const borderColor = getBuildingCategoryColor(buildingCategory);
+
+        // Set border color and width
+        ctx.strokeStyle = borderColor;
+
+        // Make the border thicker for buildings owned by the current user
+        ctx.lineWidth = isOwnedByCurrentCitizen ? 2.5 : 1;
+
+        // If selected, make the border even thicker and use a highlight color
         if (isSelected) {
-          // Selected state: much brighter with a thicker border
-          ctx.fillStyle = lightenColor(color, 35); // Increased brightness for selection
-          ctx.strokeStyle = '#FF3300'; // Bright red-orange for selected
           ctx.lineWidth = 3.5;
-        } else {
-          // Normal state
-          ctx.fillStyle = color;
-          ctx.strokeStyle = '#000';
-          ctx.lineWidth = 1;
+          ctx.strokeStyle = '#FF3300'; // Bright red-orange for selected
         }
         
         // Draw square for building (all buildings are now square)
@@ -3728,6 +3736,31 @@ number => {
       const lightness = 45 + (Math.abs(hash >> 16) % 30);
       
       return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    };
+    
+    // Function to get color based on building category
+    const getBuildingCategoryColor = (category: string): string => {
+      // Default to black if no category
+      if (!category) return '#000000';
+      
+      // Convert to lowercase for case-insensitive comparison
+      const lowerCategory = category.toLowerCase();
+      
+      // Return color based on category
+      switch(lowerCategory) {
+        case 'bridge':
+          return '#8B4513'; // Brown for bridges
+        case 'business':
+          return '#4B0082'; // Indigo for businesses
+        case 'dock':
+          return '#1E90FF'; // Dodger blue for docks
+        case 'home':
+          return '#228B22'; // Forest green for homes
+        case 'well':
+          return '#4682B4'; // Steel blue for wells
+        default:
+          return '#000000'; // Black for unknown categories
+      }
     };
     
     // Special cases for common building types
