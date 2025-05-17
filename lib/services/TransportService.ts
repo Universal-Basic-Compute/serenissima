@@ -55,14 +55,14 @@ interface Polygon {
   coordinates: Point[];
   bridgePoints: BridgePoint[];
   buildingPoints: BuildingPoint[];
-  centroid?: Point;
+  center?: Point;
   canalPoints?: BridgePoint[];
 }
 
 interface GraphNode {
   id: string;
   position: Point;
-  type: 'building' | 'bridge' | 'centroid' | 'canal';
+  type: 'building' | 'bridge' | 'center' | 'canal';
   polygonId: string;
 }
 
@@ -767,7 +767,7 @@ export class TransportService {
       return {
         id: polygon.id,
         coordinates: validCoordinates,
-        centroid: polygon.centroid || null,
+        center: polygon.center || null,
         bridgePoints: bridgePoints,
         buildingPoints: Array.isArray(polygon.buildingPoints) ? polygon.buildingPoints : [],
         canalPoints: canalPoints
@@ -920,7 +920,7 @@ export class TransportService {
         return {
           id: polygonId,
           coordinates: validCoordinates,
-          centroid: polygon.centroid || null,
+          center: polygon.center || null,
           bridgePoints: Array.isArray(polygon.bridgePoints) ? polygon.bridgePoints : [],
           buildingPoints: Array.isArray(polygon.buildingPoints) ? polygon.buildingPoints : [],
           canalPoints: Array.isArray(polygon.canalPoints) ? polygon.canalPoints : []
@@ -1129,18 +1129,18 @@ export class TransportService {
       return this.doesLineIntersectLand(point1, point2, polygons);
     };
 
-    // Add nodes for each polygon's centroid, building points, bridge points, and canal points
+    // Add nodes for each polygon's center, building points, bridge points, and canal points
     for (const polygon of polygons) {
-      // Add centroid node
-      if (polygon.centroid) {
-        const centroidId = `centroid-${polygon.id}`;
-        graph.nodes[centroidId] = {
-          id: centroidId,
-          position: polygon.centroid,
-          type: 'centroid',
+      // Add center node
+      if (polygon.center) {
+        const centerId = `center-${polygon.id}`;
+        graph.nodes[centerId] = {
+          id: centerId,
+          position: polygon.center,
+          type: 'center',
           polygonId: polygon.id
         };
-        graph.edges[centroidId] = [];
+        graph.edges[centerId] = [];
       }
       
       // Add building point nodes
@@ -1401,7 +1401,7 @@ export class TransportService {
         graph.edges[canalNode.id] = [];
       }
       
-      // Find nearby non-canal nodes (buildings, bridges, centroids)
+      // Find nearby non-canal nodes (buildings, bridges, centers)
       for (const nonCanalNode of nonCanalNodes) {
         // Skip if they're in the same polygon (already connected above)
         if (canalNode.polygonId === nonCanalNode.polygonId) {
@@ -1465,16 +1465,16 @@ export class TransportService {
     const constructedBridges: {point: Point, id: string, polygonId: string}[] = [];
     const constructedDocks: {point: Point, id: string, polygonId: string}[] = [];
     const buildingPoints: {point: Point, id: string, polygonId: string}[] = [];
-    const centroids: {point: Point, id: string, polygonId: string}[] = [];
+    const centers: {point: Point, id: string, polygonId: string}[] = [];
     
     // Extract all infrastructure from polygons
     for (const polygon of polygons) {
-      // Add centroid
-      if (polygon.centroid) {
-        const centroidId = `centroid-${polygon.id}`;
-        centroids.push({
-          point: polygon.centroid,
-          id: centroidId,
+      // Add center
+      if (polygon.center) {
+        const centerId = `center-${polygon.id}`;
+        centers.push({
+          point: polygon.center,
+          id: centerId,
           polygonId: polygon.id
         });
       }
@@ -1482,7 +1482,7 @@ export class TransportService {
       // Add building points
       if (polygon.buildingPoints) {
         for (const point of polygon.buildingPoints) {
-          const pointId = point.id || `building-${point.lat}-${point.lng}`;
+          const pointId = point.id || `building_${point.lat}-${point.lng}`;
           buildingPoints.push({
             point: { lat: point.lat, lng: point.lng },
             id: pointId,
@@ -1495,12 +1495,10 @@ export class TransportService {
       if (polygon.bridgePoints) {
         for (const point of polygon.bridgePoints) {
           if (point.edge) {
-            const pointId = point.id || `bridge-${point.edge.lat}-${point.edge.lng}`;
+            const pointId = point.id || `bridge_${point.edge.lat}_${point.edge.lng}`;
             // Check if this is a constructed bridge
             const isConstructed = !!point.isConstructed || 
-                               pointId.includes('bridge-constructed') || 
-                               pointId.includes('public_bridge') ||
-                               pointId.startsWith('building_');
+                               pointId.startsWith('bridge_');
             
             if (isConstructed) {
               constructedBridges.push({
@@ -1517,13 +1515,10 @@ export class TransportService {
       if (polygon.canalPoints) {
         for (const point of polygon.canalPoints) {
           if (point.edge) {
-            const pointId = point.id || `canal-${point.edge.lat}-${point.edge.lng}`;
+            const pointId = point.id || `canal_${point.edge.lat}_${point.edge.lng}`;
             // Check if this is a constructed dock
             const isConstructed = !!point.isConstructed || 
-                               pointId.includes('public_dock') || 
-                               pointId.includes('dock-constructed') ||
-                               pointId.startsWith('building_') || 
-                               pointId.startsWith('canal_');
+                               pointId.includes('public_dock');
             
             if (isConstructed) {
               constructedDocks.push({
@@ -1573,15 +1568,15 @@ export class TransportService {
       graph.edges[dock.id] = [];
     }
     
-    // 4. Add centroids
-    for (const centroid of centroids) {
-      graph.nodes[centroid.id] = {
-        id: centroid.id,
-        position: centroid.point,
-        type: 'centroid',
-        polygonId: centroid.polygonId
+    // 4. Add centers
+    for (const center of centers) {
+      graph.nodes[center.id] = {
+        id: center.id,
+        position: center.point,
+        type: 'center',
+        polygonId: center.polygonId
       };
-      graph.edges[centroid.id] = [];
+      graph.edges[center.id] = [];
     }
     
     // Connect nodes within each polygon
@@ -2365,8 +2360,8 @@ export class TransportService {
         if (currentNode && neighborNode) {
           // Prioritize bridge connections
           if ((currentNode.type === 'bridge' && neighborNode.type === 'bridge') ||
-              (currentNode.type === 'bridge' && neighborNode.type === 'centroid') ||
-              (currentNode.type === 'centroid' && neighborNode.type === 'bridge')) {
+              (currentNode.type === 'bridge' && neighborNode.type === 'center') ||
+              (currentNode.type === 'center' && neighborNode.type === 'bridge')) {
             adjustedWeight *= 0.7; // Reduce weight to prioritize bridges
           }
           
@@ -2614,7 +2609,7 @@ export class TransportService {
       // Add start point (walking mode)
       path.push({
         ...startPoint,
-        type: 'centroid',
+        type: 'center',
         polygonId: 'virtual',
         transportMode: 'walking'
       });
@@ -2629,7 +2624,7 @@ export class TransportService {
           path.push({
             lat: startPoint.lat + (startCanalPoint.point.lat - startPoint.lat) * fraction + jitter,
             lng: startPoint.lng + (startCanalPoint.point.lng - startPoint.lng) * fraction + jitter,
-            type: 'centroid',
+            type: 'center',
             polygonId: 'virtual',
             transportMode: 'walking',
             isIntermediatePoint: true
@@ -2679,7 +2674,7 @@ export class TransportService {
           path.push({
             lat: endCanalPoint.point.lat + (endPoint.lat - endCanalPoint.point.lat) * fraction + jitter,
             lng: endCanalPoint.point.lng + (endPoint.lng - endCanalPoint.point.lng) * fraction + jitter,
-            type: 'centroid',
+            type: 'center',
             polygonId: 'virtual',
             transportMode: 'walking',
             isIntermediatePoint: true
@@ -2690,7 +2685,7 @@ export class TransportService {
       // Add end point (walking)
       path.push({
         ...endPoint,
-        type: 'centroid',
+        type: 'center',
         polygonId: 'virtual',
         transportMode: 'walking'
       });
