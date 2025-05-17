@@ -7,6 +7,7 @@ const base = new Airtable({
 }).base(process.env.AIRTABLE_BASE_ID || '');
 
 const USERS_TABLE = 'USERS';
+const CITIZENS_TABLE = 'CITIZENS';
 
 export async function POST(request: Request) {
   try {
@@ -39,6 +40,72 @@ export async function POST(request: Request) {
     
     // Update the user record
     const updatedRecord = await base(USERS_TABLE).update(data.id, updateFields);
+    
+    // Now handle the citizen record
+    try {
+      // First, check if a citizen with this username already exists
+      const username = updatedRecord.fields.Username;
+      
+      if (username) {
+        const existingCitizens = await base(CITIZENS_TABLE)
+          .select({
+            filterByFormula: `{Username} = "${username}"`,
+            maxRecords: 1
+          })
+          .firstPage();
+        
+        // Default position for new citizens
+        const defaultPosition = JSON.stringify({
+          lat: 45.440840,
+          lng: 12.327785
+        });
+        
+        if (existingCitizens && existingCitizens.length > 0) {
+          // Update existing citizen
+          const citizenId = existingCitizens[0].id;
+          
+          // Create citizen update fields
+          const citizenUpdateFields: Record<string, any> = {};
+          
+          if (updatedRecord.fields.Username) citizenUpdateFields.Username = updatedRecord.fields.Username;
+          if (updatedRecord.fields.FirstName) citizenUpdateFields.FirstName = updatedRecord.fields.FirstName;
+          if (updatedRecord.fields.LastName) citizenUpdateFields.LastName = updatedRecord.fields.LastName;
+          
+          // Update the citizen record
+          await base(CITIZENS_TABLE).update(citizenId, citizenUpdateFields);
+          console.log(`Updated citizen record for ${username}`);
+        } else {
+          // Create new citizen record
+          const citizenId = `ctz_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+          
+          // Create citizen fields
+          const citizenFields: Record<string, any> = {
+            CitizenId: citizenId,
+            Username: updatedRecord.fields.Username,
+            FirstName: updatedRecord.fields.FirstName || 'Unknown',
+            LastName: updatedRecord.fields.LastName || 'Citizen',
+            SocialClass: 'Facchini', // Default social class
+            Description: `A citizen of Venice.`,
+            Position: defaultPosition,
+            Wealth: 0,
+            Prestige: 0,
+            CreatedAt: new Date().toISOString()
+          };
+          
+          // Add image URL if coat of arms is available
+          if (updatedRecord.fields.CoatOfArmsImage) {
+            citizenFields.ImageUrl = updatedRecord.fields.CoatOfArmsImage;
+          }
+          
+          // Create the citizen record
+          await base(CITIZENS_TABLE).create(citizenFields);
+          console.log(`Created new citizen record for ${username}`);
+        }
+      }
+    } catch (citizenError) {
+      // Log the error but don't fail the user update
+      console.error('Error updating/creating citizen record:', citizenError);
+    }
     
     // Return the updated user data
     return NextResponse.json({
