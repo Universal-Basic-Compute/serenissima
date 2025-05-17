@@ -29,6 +29,9 @@ interface CitizenDetailsPanelProps {
     familyMotto?: string;
     coatOfArmsImage?: string;
     dailyIncome?: number;
+    // Add these new properties
+    home?: string;
+    work?: string;
   };
   onClose: () => void;
 }
