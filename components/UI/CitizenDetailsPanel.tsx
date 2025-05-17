@@ -521,8 +521,8 @@ Be historically accurate but engaging. Speak in first person as if you are this 
     // Check if it's a valid number
     if (isNaN(numericAmount)) return 'Unknown';
     
-    // Format without commas for thousands
-    return numericAmount + ' ⚜️'; // Using lys emoji instead of ₫
+    // Format without decimal places
+    return Math.floor(numericAmount) + ' ⚜️'; // Using lys emoji instead of ₫
   };
   
   const formatDate = (dateString: string) => {
@@ -1001,7 +1001,7 @@ Be historically accurate but engaging. Speak in first person as if you are this 
     </div>
     
     <div className="mt-4 text-xs text-amber-500 italic text-center">
-      Citizen of Venice since {formatDate(citizen.createdat)}
+      Citizen of Venice since {citizen.createdat ? formatDate(citizen.createdat) : 'the founding of the Republic'}
     </div>
   </div>
   );
