@@ -99,7 +99,7 @@ def create_or_update_bid(tables, ai_citizen: Dict, land: Dict, existing_bid: Opt
             return False
         
         # Get current land owner
-        land_owner = land["fields"].get("Citizen")
+        land_owner = land["fields"].get("Owner")
         
         if existing_bid:
             # Increase existing bid by 14% if AI has enough compute

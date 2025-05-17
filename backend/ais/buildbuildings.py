@@ -50,7 +50,7 @@ def get_citizen_lands(tables, username: str) -> List[Dict]:
     """Get all lands owned by a specific citizen."""
     try:
         # Query lands where the citizen is the owner
-        formula = f"{{Citizen}}='{username}'"
+        formula = f"{{Owner}}='{username}'"
         lands = tables["lands"].all(formula=formula)
         print(f"Found {len(lands)} lands owned by {username}")
         return lands

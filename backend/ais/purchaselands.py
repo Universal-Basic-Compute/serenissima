@@ -90,7 +90,7 @@ def update_land_with_owner(tables, land_id: str, owner: str) -> bool:
         
         # Update the land with the new owner
         tables["lands"].update(lands[0]["id"], {
-            "Citizen": owner
+            "Owner": owner
         })
         
         print(f"Updated land {land_id} with owner {owner}")

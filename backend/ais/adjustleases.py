@@ -50,7 +50,7 @@ def get_citizen_lands(tables, username: str) -> List[Dict]:
     """Get all lands owned by a specific citizen."""
     try:
         # Query lands where the citizen is the owner
-        formula = f"{{Citizen}}='{username}'"
+        formula = f"{{Owner}}='{username}'"
         lands = tables["lands"].all(formula=formula)
         print(f"Found {len(lands)} lands owned by {username}")
         return lands
@@ -607,7 +607,7 @@ def process_ai_lease_adjustments(dry_run: bool = False):
                         continue
                     
                     land = lands[0]
-                    land_owner = land["fields"].get("Citizen", "")
+                    land_owner = land["fields"].get("Owner", "")
                     
                     # Check if the AI owns this land - if not, skip it
                     if land_owner != ai_username:
