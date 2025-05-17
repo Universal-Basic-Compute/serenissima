@@ -19,6 +19,7 @@ import logging
 import argparse
 import json
 import datetime
+import subprocess
 from typing import Dict, List, Optional, Any, Tuple
 from pyairtable import Api, Table
 from dotenv import load_dotenv

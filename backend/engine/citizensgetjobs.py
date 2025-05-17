@@ -19,6 +19,7 @@ import logging
 import argparse
 import json
 import datetime
+import subprocess
 from typing import Dict, List, Optional, Any
 from pyairtable import Api, Table
 from dotenv import load_dotenv
@@ -203,6 +204,31 @@ def assign_citizen_to_business(tables, citizen: Dict, business: Dict) -> bool:
                     "event_type": "job_assignment"
                 }
             )
+        
+        # Call updatecitizenDescriptionAndImage.py to update the citizen's description and image
+        try:
+            # Get the path to the updatecitizenDescriptionAndImage.py script
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            update_script_path = os.path.join(script_dir, "..", "scripts", "updatecitizenDescriptionAndImage.py")
+            
+            if os.path.exists(update_script_path):
+                # Call the script to update the citizen's description and image
+                log.info(f"Calling updatecitizenDescriptionAndImage.py for citizen {citizen_username} after job assignment")
+                result = subprocess.run(
+                    [sys.executable, update_script_path, citizen_username],
+                    capture_output=True,
+                    text=True
+                )
+                
+                if result.returncode != 0:
+                    log.warning(f"Error updating citizen description and image: {result.stderr}")
+                else:
+                    log.info(f"Successfully updated description and image for citizen {citizen_username}")
+            else:
+                log.warning(f"Update script not found at: {update_script_path}")
+        except Exception as e:
+            log.warning(f"Error calling updatecitizenDescriptionAndImage.py: {e}")
+            # Continue anyway as this is not critical
         
         log.info(f"Successfully assigned {citizen_name} to {building_name}")
         return True
