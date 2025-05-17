@@ -219,23 +219,38 @@ export default function BuildingDetailsPanel({
   const [pointData, setPointData] = useState<any>(null);
   const [polygonsData, setPolygonsData] = useState<any[]>(polygons);
   const [buildingContracts, setBuildingContracts] = useState<any[]>([]);
+  const [buildingResources, setBuildingResources] = useState<any>(null);
+  const [isLoadingResources, setIsLoadingResources] = useState<boolean>(false);
   
-  // Fetch building contracts
-  const fetchBuildingContracts = async (buildingId: string) => {
+  // Fetch building resources (comprehensive data)
+  const fetchBuildingResources = async (buildingId: string) => {
     try {
-      const response = await fetch(`/api/contracts?sellerBuilding=${encodeURIComponent(buildingId)}`);
+      setIsLoadingResources(true);
+      console.log(`Fetching resources for building ${buildingId}`);
+      
+      const response = await fetch(`/api/building-resources/${encodeURIComponent(buildingId)}`);
+      
       if (!response.ok) {
-        console.error(`Failed to fetch contracts: ${response.status} ${response.statusText}`);
+        console.error(`Failed to fetch building resources: ${response.status} ${response.statusText}`);
         return;
       }
       
       const data = await response.json();
-      if (data.success && data.contracts) {
-        console.log(`Fetched ${data.contracts.length} contracts for building ${buildingId}`);
-        setBuildingContracts(data.contracts);
+      if (data.success) {
+        console.log(`Fetched resources for building ${buildingId}:`, data);
+        setBuildingResources(data);
+        
+        // Set building contracts from the publiclySold resources
+        if (data.resources && data.resources.publiclySold) {
+          setBuildingContracts(data.resources.publiclySold);
+        }
+      } else {
+        console.error(`Error fetching building resources: ${data.error}`);
       }
     } catch (error) {
-      console.error('Error fetching building contracts:', error);
+      console.error('Error fetching building resources:', error);
+    } finally {
+      setIsLoadingResources(false);
     }
   };
 
@@ -269,8 +284,8 @@ export default function BuildingDetailsPanel({
               fetchLandData(data.building.land_id);
             }
             
-            // Fetch contracts for this building
-            fetchBuildingContracts(selectedBuildingId);
+            // Fetch resources for this building (includes contracts)
+            fetchBuildingResources(selectedBuildingId);
           } else {
             throw new Error('Invalid building data format');
           }
@@ -291,6 +306,7 @@ export default function BuildingDetailsPanel({
       setBuilding(null);
       setError(null);
       setBuildingContracts([]);
+      setBuildingResources(null);
     }
     
     return () => {
@@ -751,7 +767,7 @@ export default function BuildingDetailsPanel({
             {/* Column 1: RECIPES (wider column) */}
             <div className="col-span-1 md:col-span-1 lg:col-span-1 space-y-4">
               {/* Recipes */}
-              {buildingDefinition?.productionInformation?.Arti && buildingDefinition.productionInformation.Arti.length > 0 && (
+              {buildingResources?.resources?.transformationRecipes && buildingResources.resources.transformationRecipes.length > 0 && (
                 <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
                   <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -760,12 +776,12 @@ export default function BuildingDetailsPanel({
                     RECIPES
                   </h3>
                   <div className="space-y-4">
-                    {buildingDefinition.productionInformation.Arti.map((recipe: any, index: number) => (
+                    {buildingResources.resources.transformationRecipes.map((recipe: any, index: number) => (
                       <div key={`recipe-${index}`} className="bg-amber-50 p-3 rounded-md border border-amber-100">
                         {/* Recipe title with craft time */}
                         <div className="flex justify-between items-center mb-2 pb-1 border-b border-amber-200">
                           <span className="font-medium text-amber-800">Recipe #{index + 1}</span>
-                          {recipe.craftMinutes && (
+                          {recipe.craftMinutes > 0 && (
                             <span className="text-xs bg-amber-100 px-2 py-1 rounded-full text-amber-700">
                               {formatCraftTime(recipe.craftMinutes)}
                             </span>
@@ -777,30 +793,30 @@ export default function BuildingDetailsPanel({
                           {/* Input resources */}
                           <div className="col-span-1 border-r border-amber-200 pr-2">
                             <div className="text-xs text-amber-600 mb-1 font-medium">INPUTS</div>
-                            {recipe.inputs && Object.entries(recipe.inputs).map(([resource, amount]: [string, any]) => (
-                              <div key={`input-${resource}`} className="flex items-center mb-1">
-                                <div className="flex-shrink-0 w-6 h-6 mr-1">
-                                  <Image 
-                                    src={getResourceIconPath(resource)}
-                                    alt={resource}
-                                    width={24}
-                                    height={24}
-                                    className="w-6 h-6 object-contain"
-                                    loading="lazy"
-                                    unoptimized={true}
-                                    onError={(e) => {
-                                      (e.target as HTMLImageElement).src = '/images/resources/default.png';
-                                      resourceIconCache.set(resource, '/images/resources/default.png');
-                                    }}
-                                  />
+                            {recipe.inputs && recipe.inputs.length > 0 ? (
+                              recipe.inputs.map((input: any) => (
+                                <div key={`input-${input.resourceType}`} className="flex items-center mb-1">
+                                  <div className="flex-shrink-0 w-6 h-6 mr-1">
+                                    <Image 
+                                      src={`/images/resources/${input.icon}`}
+                                      alt={input.name}
+                                      width={24}
+                                      height={24}
+                                      className="w-6 h-6 object-contain"
+                                      loading="lazy"
+                                      unoptimized={true}
+                                      onError={(e) => {
+                                        (e.target as HTMLImageElement).src = '/images/resources/default.png';
+                                      }}
+                                    />
+                                  </div>
+                                  <div className="flex-1">
+                                    <span className="text-xs capitalize">{input.name}</span>
+                                    <span className="text-xs text-amber-700 ml-1">x{input.amount}</span>
+                                  </div>
                                 </div>
-                                <div className="flex-1">
-                                  <span className="text-xs capitalize">{resource.replace(/_/g, ' ')}</span>
-                                  <span className="text-xs text-amber-700 ml-1">x{amount}</span>
-                                </div>
-                              </div>
-                            ))}
-                            {(!recipe.inputs || Object.keys(recipe.inputs).length === 0) && (
+                              ))
+                            ) : (
                               <div className="text-xs text-gray-500 italic">No inputs required</div>
                             )}
                           </div>
@@ -815,30 +831,30 @@ export default function BuildingDetailsPanel({
                           {/* Output resources */}
                           <div className="col-span-1">
                             <div className="text-xs text-amber-600 mb-1 font-medium">OUTPUTS</div>
-                            {recipe.outputs && Object.entries(recipe.outputs).map(([resource, amount]: [string, any]) => (
-                              <div key={`output-${resource}`} className="flex items-center mb-1">
-                                <div className="flex-shrink-0 w-6 h-6 mr-1">
-                                  <Image 
-                                    src={getResourceIconPath(resource)}
-                                    alt={resource}
-                                    width={24}
-                                    height={24}
-                                    className="w-6 h-6 object-contain"
-                                    loading="lazy"
-                                    unoptimized={true}
-                                    onError={(e) => {
-                                      (e.target as HTMLImageElement).src = '/images/resources/default.png';
-                                      resourceIconCache.set(resource, '/images/resources/default.png');
-                                    }}
-                                  />
+                            {recipe.outputs && recipe.outputs.length > 0 ? (
+                              recipe.outputs.map((output: any) => (
+                                <div key={`output-${output.resourceType}`} className="flex items-center mb-1">
+                                  <div className="flex-shrink-0 w-6 h-6 mr-1">
+                                    <Image 
+                                      src={`/images/resources/${output.icon}`}
+                                      alt={output.name}
+                                      width={24}
+                                      height={24}
+                                      className="w-6 h-6 object-contain"
+                                      loading="lazy"
+                                      unoptimized={true}
+                                      onError={(e) => {
+                                        (e.target as HTMLImageElement).src = '/images/resources/default.png';
+                                      }}
+                                    />
+                                  </div>
+                                  <div className="flex-1">
+                                    <span className="text-xs capitalize">{output.name}</span>
+                                    <span className="text-xs text-green-600 ml-1">x{output.amount}</span>
+                                  </div>
                                 </div>
-                                <div className="flex-1">
-                                  <span className="text-xs capitalize">{resource.replace(/_/g, ' ')}</span>
-                                  <span className="text-xs text-green-600 ml-1">x{amount}</span>
-                                </div>
-                              </div>
-                            ))}
-                            {(!recipe.outputs || Object.keys(recipe.outputs).length === 0) && (
+                              ))
+                            ) : (
                               <div className="text-xs text-gray-500 italic">No outputs produced</div>
                             )}
                           </div>
@@ -853,18 +869,18 @@ export default function BuildingDetailsPanel({
             {/* Column 2: SELLS, BUYS, STORES */}
             <div className="col-span-1 md:col-span-1 lg:col-span-1 space-y-4">
               {/* Resources Selling - moved to top of column 2 */}
-              {buildingDefinition?.productionInformation?.sells && buildingDefinition.productionInformation.sells.length > 0 && (
+              {buildingResources?.resources?.sellable && buildingResources.resources.sellable.length > 0 && (
                 <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
                   <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
                     <FaStore className="mr-2" /> SELLS
                   </h3>
                   <div className="grid grid-cols-1 gap-2">
-                    {buildingDefinition.productionInformation.sells.map((resource: string) => (
-                      <div key={`sell-${resource}`} className="flex items-center bg-green-50 p-2 rounded-md" title={resource.replace(/_/g, ' ')}>
+                    {buildingResources.resources.sellable.map((resource: any) => (
+                      <div key={`sell-${resource.resourceType}`} className="flex items-center bg-green-50 p-2 rounded-md" title={resource.name}>
                         <div className="relative w-8 h-8 mr-2">
                           <Image 
-                            src={getResourceIconPath(resource)}
-                            alt={resource}
+                            src={`/images/resources/${resource.icon}`}
+                            alt={resource.name}
                             width={32}
                             height={32}
                             className="object-contain"
@@ -873,11 +889,10 @@ export default function BuildingDetailsPanel({
                             onError={(e) => {
                               // Fallback to a default icon if the image fails to load
                               (e.target as HTMLImageElement).src = '/images/resources/default.png';
-                              resourceIconCache.set(resource, '/images/resources/default.png');
                             }}
                           />
                         </div>
-                        <span className="text-sm text-gray-700 capitalize">{resource.replace(/_/g, ' ')}</span>
+                        <span className="text-sm text-gray-700 capitalize">{resource.name}</span>
                       </div>
                     ))}
                   </div>
@@ -885,18 +900,18 @@ export default function BuildingDetailsPanel({
               )}
 
               {/* Resources Buying */}
-              {buildingDefinition?.productionInformation?.inputResources && Object.keys(buildingDefinition.productionInformation.inputResources).length > 0 && (
+              {buildingResources?.resources?.bought && buildingResources.resources.bought.length > 0 && (
                 <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
                   <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
                     <FaBox className="mr-2 transform rotate-180" /> BUYS
                   </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {Object.entries(buildingDefinition.productionInformation.inputResources).map(([resource, amount]: [string, any]) => (
-                      <div key={`input-${resource}`} className="flex flex-col items-center bg-blue-50 p-2 rounded-md" title={resource.replace(/_/g, ' ')}>
-                        <div className="relative w-8 h-8 mb-1">
+                  <div className="grid grid-cols-1 gap-2">
+                    {buildingResources.resources.bought.map((resource: any) => (
+                      <div key={`buy-${resource.resourceType}`} className="flex items-center bg-blue-50 p-2 rounded-md" title={resource.name}>
+                        <div className="relative w-8 h-8 mr-2">
                           <Image 
-                            src={getResourceIconPath(resource)}
-                            alt={resource}
+                            src={`/images/resources/${resource.icon}`}
+                            alt={resource.name}
                             width={32}
                             height={32}
                             className="object-contain"
@@ -904,12 +919,13 @@ export default function BuildingDetailsPanel({
                             unoptimized={true}
                             onError={(e) => {
                               (e.target as HTMLImageElement).src = '/images/resources/default.png';
-                              resourceIconCache.set(resource, '/images/resources/default.png');
                             }}
                           />
                         </div>
-                        <span className="text-xs text-gray-700 capitalize">{resource.replace(/_/g, ' ')}</span>
-                        {amount && <span className="text-xs text-gray-500">{amount}</span>}
+                        <div className="flex-1">
+                          <span className="text-sm text-gray-700 capitalize">{resource.name}</span>
+                          {resource.amount && <span className="text-xs text-gray-500 ml-2">x{resource.amount}</span>}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -917,18 +933,18 @@ export default function BuildingDetailsPanel({
               )}
 
               {/* Resources Storage */}
-              {buildingDefinition?.productionInformation?.stores && buildingDefinition.productionInformation.stores.length > 0 && (
+              {buildingResources?.resources?.storable && buildingResources.resources.storable.length > 0 && (
                 <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
                   <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
                     <FaWarehouse className="mr-2" /> STORES
                   </h3>
                   <div className="grid grid-cols-1 gap-2">
-                    {buildingDefinition.productionInformation.stores.map((resource: string) => (
-                      <div key={`store-${resource}`} className="flex items-center bg-amber-50 p-2 rounded-md" title={resource.replace(/_/g, ' ')}>
+                    {buildingResources.resources.storable.map((resource: any) => (
+                      <div key={`store-${resource.resourceType}`} className="flex items-center bg-amber-50 p-2 rounded-md" title={resource.name}>
                         <div className="relative w-8 h-8 mr-2">
                           <Image 
-                            src={getResourceIconPath(resource)}
-                            alt={resource}
+                            src={`/images/resources/${resource.icon}`}
+                            alt={resource.name}
                             width={32}
                             height={32}
                             className="object-contain"
@@ -937,20 +953,51 @@ export default function BuildingDetailsPanel({
                             onError={(e) => {
                               // Fallback to a default icon if the image fails to load
                               (e.target as HTMLImageElement).src = '/images/resources/default.png';
-                              // Also update the cache to prevent future attempts
-                              resourceIconCache.set(resource, '/images/resources/default.png');
                             }}
                           />
                         </div>
-                        <span className="text-sm text-gray-700 capitalize">{resource.replace(/_/g, ' ')}</span>
+                        <span className="text-sm text-gray-700 capitalize">{resource.name}</span>
                       </div>
                     ))}
                   </div>
-                  {buildingDefinition.productionInformation.storageCapacity && (
+                  {buildingResources.storageCapacity > 0 && (
                     <div className="mt-2 text-sm text-gray-700">
-                      <span className="font-medium">Total Capacity:</span> {buildingDefinition.productionInformation.storageCapacity} units
+                      <span className="font-medium">Total Capacity:</span> {buildingResources.storageCapacity} units
                     </div>
                   )}
+                </div>
+              )}
+              
+              {/* Current Inventory */}
+              {buildingResources?.resources?.stored && buildingResources.resources.stored.length > 0 && (
+                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
+                    <FaBox className="mr-2" /> CURRENT INVENTORY
+                  </h3>
+                  <div className="grid grid-cols-1 gap-2">
+                    {buildingResources.resources.stored.map((resource: any) => (
+                      <div key={`inventory-${resource.type}`} className="flex items-center bg-purple-50 p-2 rounded-md" title={resource.name}>
+                        <div className="relative w-8 h-8 mr-2">
+                          <Image 
+                            src={`/images/resources/${resource.icon}`}
+                            alt={resource.name}
+                            width={32}
+                            height={32}
+                            className="object-contain"
+                            loading="lazy"
+                            unoptimized={true}
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/images/resources/default.png';
+                            }}
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <span className="text-sm text-gray-700 capitalize">{resource.name}</span>
+                          <span className="text-sm font-medium text-purple-700 ml-2">{resource.count} units</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -1149,44 +1196,58 @@ export default function BuildingDetailsPanel({
               )}
               
               {/* Public Sale Contracts */}
-              {buildingContracts.length > 0 && (
+              {buildingResources?.resources?.publiclySold && buildingResources.resources.publiclySold.length > 0 && (
                 <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Public Sale Contracts</h3>
-                  
+                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    PUBLIC SALE CONTRACTS
+                  </h3>
                   <div className="space-y-3">
-                    {buildingContracts
-                      .filter(contract => contract.type === 'public_sell')
-                      .map((contract, index) => (
-                        <div key={contract.id || index} className="bg-amber-50 p-3 rounded-md border border-amber-100">
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="font-medium text-amber-800">{contract.resourceType}</span>
-                            <span className="text-xs bg-green-100 px-2 py-1 rounded-full text-green-700">
-                              Public Sale
-                            </span>
+                    {buildingResources.resources.publiclySold.map((contract: any) => (
+                      <div key={contract.id} className="bg-green-50 p-3 rounded-md border border-green-100">
+                        <div className="flex justify-between items-center mb-2">
+                          <div className="flex items-center">
+                            <div className="relative w-6 h-6 mr-2">
+                              <Image 
+                                src={`/images/resources/${contract.icon}`}
+                                alt={contract.name}
+                                width={24}
+                                height={24}
+                                className="w-6 h-6 object-contain"
+                                loading="lazy"
+                                unoptimized={true}
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = '/images/resources/default.png';
+                                }}
+                              />
+                            </div>
+                            <span className="font-medium text-green-800">{contract.name}</span>
+                          </div>
+                          <span className="text-xs bg-green-100 px-2 py-1 rounded-full text-green-700">
+                            Public Sale
+                          </span>
+                        </div>
+                        
+                        <div className="grid grid-cols-3 gap-2 text-sm">
+                          <div className="flex flex-col">
+                            <span className="text-gray-500">Hourly Amount</span>
+                            <span className="font-medium">{contract.hourlyAmount}</span>
                           </div>
                           
-                          <div className="grid grid-cols-3 gap-2 text-sm">
-                            <div className="flex flex-col">
-                              <span className="text-gray-500">Hourly Amount</span>
-                              <span className="font-medium">{contract.hourlyAmount || 0}</span>
-                            </div>
-                            
-                            <div className="flex flex-col">
-                              <span className="text-gray-500">Price</span>
-                              <span className="font-medium">{contract.price || contract.PricePerResource || 0} ⚜️</span>
-                            </div>
-                            
-                            <div className="flex flex-col">
-                              <span className="text-gray-500">Transporter</span>
-                              <span className="font-medium">{contract.transporter || contract.Transporter || 'None'}</span>
-                            </div>
+                          <div className="flex flex-col">
+                            <span className="text-gray-500">Price</span>
+                            <span className="font-medium">{contract.price} ⚜️</span>
+                          </div>
+                          
+                          <div className="flex flex-col">
+                            <span className="text-gray-500">Transporter</span>
+                            <span className="font-medium">{contract.transporter || 'None'}</span>
                           </div>
                         </div>
-                      ))}
-                    
-                    {buildingContracts.filter(contract => contract.type === 'public_sell').length === 0 && (
-                      <p className="text-center text-gray-500 italic">No public sale contracts</p>
-                    )}
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
