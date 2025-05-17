@@ -197,8 +197,8 @@ def update_social_class(dry_run: bool = False):
     
     # Get the current social class for each of these citizens
     for citizen_id in citizens_to_check:
-        # Find the citizen in the list of all citizens
-        citizen = next((c for c in citizens if c['id'] == citizen_id), None)
+        # Find the citizen in the list of all citizens by Username, not ID
+        citizen = next((c for c in citizens if c['fields'].get('Username') == citizen_id), None)
         if citizen:
             current_social_class = citizen['fields'].get('SocialClass', '')
             log.info(f"Citizen {citizen_id} has social class: '{current_social_class}'")
@@ -235,22 +235,23 @@ def update_social_class(dry_run: bool = False):
     
     for citizen in citizens:
         citizen_id = citizen['id']
+        username = citizen['fields'].get('Username', '')
         current_social_class = citizen['fields'].get('SocialClass', '')
         daily_income = float(citizen['fields'].get('DailyIncome', 0) or 0)
         prestige = float(citizen['fields'].get('Prestige', 0) or 0)
         
         # Skip if social class is not set
         if not current_social_class:
-            log.warning(f"Citizen {citizen_id} has no social class set, skipping")
+            log.warning(f"Citizen {username} has no social class set, skipping")
             continue
         
         # Determine new social class
         new_social_class = current_social_class
         update_reason = None
         
-        # Check if citizen is an entrepreneur or business owner
-        is_entrepreneur = citizen_id in entrepreneur_ids
-        is_business_owner = citizen_id in business_owner_ids
+        # Check if citizen is an entrepreneur or business owner by Username
+        is_entrepreneur = username in entrepreneur_ids
+        is_business_owner = username in business_owner_ids
         
         # Add detailed logging for entrepreneurs and business owners
         if is_entrepreneur or is_business_owner:
@@ -352,7 +353,7 @@ def update_social_class(dry_run: bool = False):
                     "daily_income": daily_income,
                     "prestige": prestige
                 }
-                create_notification(tables, citizen_id, content, details)
+                create_notification(tables, username, content, details)
                 
                 # Update statistics
                 update_summary["total_updated"] += 1
