@@ -1921,10 +1921,10 @@ export class TransportService {
         // Create abort controller for timeout
         const controller = new AbortController();
         let timeoutId: NodeJS.Timeout | null = setTimeout(() => {
-          console.log('Fetch timeout after 10 seconds for bridges');
+          console.log('Fetch timeout after 30 seconds for bridges');
           controller.abort();
           timeoutId = null;
-        }, 10000); // 10 second timeout
+        }, 30000); // 30 second timeout
         
         try {
           const bridgesResponse = await fetch(`${baseUrl}/api/bridges`, {
@@ -2006,10 +2006,10 @@ export class TransportService {
         // Create abort controller for timeout
         const controller = new AbortController();
         let timeoutId: NodeJS.Timeout | null = setTimeout(() => {
-          console.log('Fetch timeout after 10 seconds for docks');
+          console.log('Fetch timeout after 30 seconds for docks');
           controller.abort();
           timeoutId = null;
-        }, 10000); // 10 second timeout
+        }, 30000); // 30 second timeout
         
         try {
           const docksResponse = await fetch(`${baseUrl}/api/docks`, {
