@@ -531,7 +531,8 @@ export default function TwoDPage() {
 
   // State for loan panel
   const [showLoanPanel, setShowLoanPanel] = useState<boolean>(false);
-  // Transport debug panel state is now handled within IsometricViewer component
+  // State for transport debug panel
+  const [showTransportDebugPanel, setShowTransportDebugPanel] = useState<boolean>(false);
   
   // Handle loan panel closing
   const handleLoanPanelClose = () => {
