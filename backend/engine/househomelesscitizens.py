@@ -192,7 +192,7 @@ def assign_citizen_to_building(tables, citizen: Dict, building: Dict) -> bool:
         
         # Create notification for the citizen
         rent_amount = building['fields'].get('RentAmount', 0)
-        notification_content = f"You have been assigned housing at {building_name}. Monthly rent: {rent_amount} Ducats."
+        notification_content = f"🏠 You have been assigned housing at **{building_name}**. Monthly rent: **{rent_amount:,}** 💰 Ducats."
         
         details = {
             "event_type": "housing_assignment",
@@ -207,7 +207,7 @@ def assign_citizen_to_building(tables, citizen: Dict, building: Dict) -> bool:
         # If the building has a RanBy field, send notification to that citizen too
         ran_by_citizen = building['fields'].get('RanBy')
         if ran_by_citizen:
-            manager_notification = f"{citizen_name} has been assigned to your building {building_name}."
+            manager_notification = f"🏠 **{citizen_name}** has been assigned to your building **{building_name}**."
             manager_details = {
                 "event_type": "new_tenant",
                 "citizen_id": citizen_id,
@@ -229,7 +229,7 @@ def create_admin_notification(tables, housing_summary) -> None:
     """Create a notification for the admin citizen about the housing process."""
     try:
         # Create notification content with summary of all housed citizens
-        content = f"Housing report: {housing_summary['total']} citizens housed"
+        content = f"🏠 **Housing Report**: {housing_summary['total']:,} citizens housed"
         
         # Create detailed information about the housed citizens by building type
         details = {
@@ -242,7 +242,7 @@ def create_admin_notification(tables, housing_summary) -> None:
                 "artisan_s_house": housing_summary.get('artisan_s_house', 0),
                 "fisherman_s_cottage": housing_summary.get('fisherman_s_cottage', 0)
             },
-            "message": f"Housing process complete. {housing_summary['total']} citizens were housed: {housing_summary.get('canal_house', 0)} in canal houses, {housing_summary.get('merchant_s_house', 0)} in merchant houses, {housing_summary.get('artisan_s_house', 0)} in artisan houses, and {housing_summary.get('fisherman_s_cottage', 0)} in fisherman cottages."
+            "message": f"🏛️ **Housing process complete**. **{housing_summary['total']:,}** citizens were housed: **{housing_summary.get('canal_house', 0):,}** in canal houses, **{housing_summary.get('merchant_s_house', 0):,}** in merchant houses, **{housing_summary.get('artisan_s_house', 0):,}** in artisan houses, and **{housing_summary.get('fisherman_s_cottage', 0):,}** in fisherman cottages."
         }
         
         # Create the notification record
