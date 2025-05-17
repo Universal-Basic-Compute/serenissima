@@ -2828,6 +2828,9 @@ number => {
           if (building.orientation !== undefined) {
             // Use the orientation value directly from the API
             angle = building.orientation;
+            
+            // Log the orientation value for debugging
+            console.log(`Bridge ${building.id} orientation: ${angle}`);
           } else {
             // Fallback to calculating based on polygon center only if orientation is not provided
             let polygonCenter = { x: 0, y: 0 };
