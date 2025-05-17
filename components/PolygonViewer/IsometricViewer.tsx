@@ -2877,11 +2877,36 @@ number => {
           // Use the orientation from the bridge data directly
           let angle = 0;
           
-          // Use the orientation from the bridge data directly
+          // Debug log to check if we're reaching this code
+          console.log(`Processing bridge ${building.id}, has orientation: ${building.orientation !== undefined}`);
+          
           if (building.orientation !== undefined) {
             // Use the orientation value directly from the API
             angle = building.orientation;
             console.log(`Bridge ${building.id} orientation: ${angle}`);
+            
+            // Save the current context state
+            ctx.save();
+            
+            // Translate to the bridge position
+            ctx.translate(isoPos.x, isoPos.y);
+            
+            // Rotate the context using the orientation value directly
+            ctx.rotate(angle);
+            
+            // Draw the rectangle centered at origin (0,0)
+            ctx.beginPath();
+            ctx.rect(
+              -bridgeWidth/2, 
+              -bridgeHeight/2, 
+              bridgeWidth, 
+              bridgeHeight
+            );
+            ctx.fill();
+            ctx.stroke();
+            
+            // Restore the context state
+            ctx.restore();
           } else {
             // Fallback to calculating based on polygon center if orientation is not provided
             let polygonCenter = { x: 0, y: 0 };
@@ -2903,31 +2928,42 @@ number => {
               const dx = polygonCenter.x - isoPos.x;
               const dy = polygonCenter.y - isoPos.y;
               angle = Math.atan2(dy, dx) + Math.PI/2; // Add 90 degrees to make it perpendicular
+              
+              // Save the current context state
+              ctx.save();
+              
+              // Translate to the bridge position
+              ctx.translate(isoPos.x, isoPos.y);
+              
+              // Rotate the context
+              ctx.rotate(angle);
+              
+              // Draw the rectangle centered at origin (0,0)
+              ctx.beginPath();
+              ctx.rect(
+                -bridgeWidth/2, 
+                -bridgeHeight/2, 
+                bridgeWidth, 
+                bridgeHeight
+              );
+              ctx.fill();
+              ctx.stroke();
+              
+              // Restore the context state
+              ctx.restore();
+            } else {
+              // If we couldn't find the polygon, draw a default horizontal bridge
+              ctx.beginPath();
+              ctx.rect(
+                isoPos.x - bridgeWidth/2, 
+                isoPos.y - bridgeHeight/2, 
+                bridgeWidth, 
+                bridgeHeight
+              );
+              ctx.fill();
+              ctx.stroke();
             }
           }
-          
-          // Save the current context state
-          ctx.save();
-          
-          // Translate to the bridge position
-          ctx.translate(isoPos.x, isoPos.y);
-          
-          // Rotate the context using the orientation value directly
-          ctx.rotate(angle);
-          
-          // Draw the rectangle centered at origin (0,0)
-          ctx.beginPath();
-          ctx.rect(
-            -bridgeWidth/2, 
-            -bridgeHeight/2, 
-            bridgeWidth, 
-            bridgeHeight
-          );
-          ctx.fill();
-          ctx.stroke();
-          
-          // Restore the context state
-          ctx.restore();
         } else {
           // Draw square for non-bridge buildings
           ctx.beginPath();
