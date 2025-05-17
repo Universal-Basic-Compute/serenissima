@@ -71,6 +71,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     centroidY: number;
     centerX: number;
     centerY: number;
+    hasPublicDock?: boolean; // Add this property to the type definition
   }[]>([]);
   const [emptyBuildingPoints, setEmptyBuildingPoints] = useState<{lat: number, lng: number}[]>([]);
   const [showTransportDebugPanel, setShowTransportDebugPanel] = useState<boolean>(false);
