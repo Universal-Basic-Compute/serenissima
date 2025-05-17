@@ -257,11 +257,20 @@ number => {
   const saveWaterRoute = useCallback(async () => {
     try {
       if (!waterRouteStartPoint || !waterRouteEndPoint || waterRoutePath.length < 2) {
-        console.error('Cannot save water route: incomplete route data');
+        console.error('Cannot save water route: incomplete route data', {
+          startPoint: waterRouteStartPoint,
+          endPoint: waterRouteEndPoint,
+          pathLength: waterRoutePath.length
+        });
         return;
       }
       
-      console.log('Saving water route...');
+      console.log('Saving water route...', {
+        startPoint: waterRouteStartPoint,
+        endPoint: waterRouteEndPoint,
+        intermediatePoints: waterRouteIntermediatePoints,
+        pathLength: waterRoutePath.length
+      });
       
       // Calculate the centroid of the route
       const allPoints = [
@@ -274,15 +283,7 @@ number => {
       const centroidLng = allPoints.reduce((sum, pt) => sum + pt.lng, 0) / allPoints.length;
       
       // Calculate total length of the route
-      let totalLength = 0;
-      for (let i = 0; i < waterRoutePath.length - 1; i++) {
-        const pt1 = waterRoutePath[i];
-        const pt2 = waterRoutePath[i + 1];
-        totalLength += calculateDistance(
-          { lat: pt1.lat, lng: pt1.lng },
-          { lat: pt2.lat, lng: pt2.lng }
-        );
-      }
+      const totalLength = calculateTotalDistance(waterRoutePath);
       
       // Create a unique ID for the route
       const routeId = `waterroute_${centroidLat.toFixed(6)}_${centroidLng.toFixed(6)}`;
@@ -325,8 +326,13 @@ number => {
         ]
       };
       
+      console.log('Saving updated water points:', {
+        startPoint: updatedStartPoint,
+        endPoint: updatedEndPoint
+      });
+      
       // Save the updated water points
-      await fetch('/api/water-points', {
+      const startResponse = await fetch('/api/water-points', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -334,13 +340,21 @@ number => {
         body: JSON.stringify({ waterPoint: updatedStartPoint }),
       });
       
-      await fetch('/api/water-points', {
+      if (!startResponse.ok) {
+        throw new Error(`Failed to save start point: ${startResponse.status} ${startResponse.statusText}`);
+      }
+      
+      const endResponse = await fetch('/api/water-points', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ waterPoint: updatedEndPoint }),
       });
+      
+      if (!endResponse.ok) {
+        throw new Error(`Failed to save end point: ${endResponse.status} ${endResponse.statusText}`);
+      }
       
       // Update local state
       setWaterPoints(prevPoints => {
@@ -374,7 +388,7 @@ number => {
       console.error('Error saving water route:', error);
       alert('Failed to save water route. Please try again.');
     }
-  }, [waterRouteStartPoint, waterRouteEndPoint, waterRouteIntermediatePoints, waterRoutePath, calculateDistance, fetchWaterPoints]);
+  }, [waterRouteStartPoint, waterRouteEndPoint, waterRouteIntermediatePoints, waterRoutePath, calculateTotalDistance, fetchWaterPoints]);
   
   // Function to handle water route clicks
   const handleWaterRouteClick = useCallback((point: {lat: number, lng: number}, isWaterPoint: boolean, waterPointId?: string) => {
@@ -416,7 +430,7 @@ number => {
         ];
         setWaterRoutePath(fullPath);
         
-        // Save the water route
+        // Save the water route after a short delay to ensure state is updated
         setTimeout(() => {
           saveWaterRoute();
         }, 100);
@@ -437,12 +451,13 @@ number => {
     if (!isWaterPoint && waterRouteStartPoint && !waterRouteEndPoint) {
       console.log('Adding intermediate point:', point);
       // Add an intermediate point
-      setWaterRouteIntermediatePoints(prev => [...prev, point]);
+      const updatedIntermediatePoints = [...waterRouteIntermediatePoints, point];
+      setWaterRouteIntermediatePoints(updatedIntermediatePoints);
       
       // Update the path
       const updatedPath = [
         waterRouteStartPoint.position,
-        ...waterRouteIntermediatePoints,
+        ...updatedIntermediatePoints,
         point
       ];
       setWaterRoutePath(updatedPath);
