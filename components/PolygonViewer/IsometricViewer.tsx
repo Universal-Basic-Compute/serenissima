@@ -156,6 +156,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [waterRouteIntermediatePoints, setWaterRouteIntermediatePoints] = useState<any[]>([]);
   const [waterRoutePath, setWaterRoutePath] = useState<any[]>([]);
   
+  // Helper function to calculate distance between two points was moved to the top of the component
+  
   // This is a duplicate function definition - removing it
 
   // Function to fetch existing water points
