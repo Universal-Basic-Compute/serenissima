@@ -119,6 +119,16 @@ export class HoverStateService {
    * Update hover state for a citizen
    */
   public setHoveredCitizen(citizen: any, buildingId: string | null, type: 'home' | 'work' | null): void {
+    console.log('HOVER_SERVICE: setHoveredCitizen called with:', {
+      citizen: citizen ? {
+        id: citizen.citizenid || citizen.CitizenId || citizen.id,
+        name: `${citizen.firstname || citizen.FirstName || ''} ${citizen.lastname || citizen.LastName || ''}`,
+        socialClass: citizen.socialclass || citizen.SocialClass || citizen.socialClass || ''
+      } : null,
+      buildingId,
+      type
+    });
+
     // Only update if the state has changed
     if (this.hoveredCitizenBuildingRef !== buildingId || this.hoveredCitizenTypeRef !== type) {
       this.hoveredCitizenBuildingRef = buildingId;
@@ -127,6 +137,7 @@ export class HoverStateService {
       this.state.hoveredCitizenType = type;
       
       // Emit event with only the changed property and include the citizen data
+      console.log('HOVER_SERVICE: Emitting hover state changed event for citizen');
       eventBus.emit(HOVER_STATE_CHANGED, {
         type: 'citizen',
         citizen: citizen, // Include the full citizen object

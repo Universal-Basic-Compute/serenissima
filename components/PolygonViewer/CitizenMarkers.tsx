@@ -351,12 +351,22 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
       return;
     }
     
+    // Add more detailed logging about the citizen being hovered
+    console.log('HOVER: Citizen hover details:', {
+      id: citizen.citizenid || citizen.CitizenId || citizen.id,
+      username: citizen.username,
+      name: `${citizen.firstname || citizen.FirstName || ''} ${citizen.lastname || citizen.LastName || ''}`,
+      socialClass: citizen.socialclass || citizen.SocialClass || citizen.socialClass || '',
+      imageUrl: citizen.imageurl || citizen.profileimage || citizen.ImageUrl,
+      position: citizen.position
+    });
+    
     // Parse home and work building coordinates
     const homeCoords = parseBuildingCoordinates(citizen.home);
     const workCoords = parseBuildingCoordinates(citizen.work);
     
     // Log more detailed information for debugging
-    console.log('Citizen hover:', {
+    console.log('HOVER: Citizen hover connections:', {
       citizen: citizen.firstname + ' ' + citizen.lastname,
       home: citizen.home,
       work: citizen.work,
@@ -374,7 +384,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     
     // Log the calculated screen positions
     if (homeCoords || workCoords) {
-      console.log('Connection screen positions:', {
+      console.log('HOVER: Connection screen positions:', {
         homePosition: connections.homePosition,
         workPosition: connections.workPosition,
         citizenScreenPos: latLngToScreen(citizen.position.lat, citizen.position.lng)
@@ -384,24 +394,25 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     // Set connections even if we only have one valid position
     if (connections.homePosition || connections.workPosition) {
       setHoveredConnections(connections);
-      console.log('Set hovered connections:', connections);
+      console.log('HOVER: Set hovered connections:', connections);
     } else {
-      console.log('No valid connections found for citizen:', citizen);
+      console.log('HOVER: No valid connections found for citizen:', citizen);
     }
     
     // Set hovered citizen paths - use username first, then fall back to other IDs
     const citizenId = citizen.username || citizen.citizenid || citizen.CitizenId || citizen.id;
     const paths = activityPaths[citizenId] || [];
     
-    console.log(`Citizen hover: ${citizenId} has ${paths.length} activity paths`);
+    console.log(`HOVER: Citizen hover: ${citizenId} has ${paths.length} activity paths`);
     if (paths.length > 0) {
-      console.log(`First path has ${paths[0].path.length} points`);
+      console.log(`HOVER: First path has ${paths[0].path.length} points`);
     }
     
     setHoveredCitizenPaths(paths);
     
     // Update the hover state service with the citizen data
     // Make sure to pass the complete citizen object
+    console.log('HOVER: Setting hovered citizen in hoverStateService:', citizen);
     hoverStateService.setHoveredCitizen(citizen, null, null);
     
     // Log the paths for debugging

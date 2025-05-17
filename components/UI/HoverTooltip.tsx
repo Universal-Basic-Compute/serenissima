@@ -37,12 +37,13 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
   
   useEffect(() => {
     const handleHoverStateChanged = (data: any) => {
+      console.log('TOOLTIP: Hover state changed event received:', data);
       setHoverState(hoverStateService.getState());
       
       // Fetch additional data based on what's being hovered
       if (data.type === 'building' && data.id) {
         // Fetch building data
-        console.log('Fetching building data for:', data.id);
+        console.log('TOOLTIP: Fetching building data for:', data.id);
         
         fetch(`/api/buildings/${data.id}`)
           .then(res => {
@@ -105,10 +106,16 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
           .catch(err => console.error('Error fetching polygon data:', err));
       } else if (data.type === 'citizen') {
         // For citizens, we need to use the citizen data directly from the event
-        console.log('Citizen hover data received:', data);
+        console.log('TOOLTIP: Citizen hover data received:', data);
         
         if (data.citizen) {
           // If the citizen data is already provided in the event
+          console.log('TOOLTIP: Citizen data available in event:', {
+            name: `${data.citizen.firstname || data.citizen.FirstName || ''} ${data.citizen.lastname || data.citizen.LastName || ''}`,
+            socialClass: data.citizen.socialclass || data.citizen.SocialClass || data.citizen.socialClass || '',
+            imageUrl: data.citizen.imageurl || data.citizen.profileimage || data.citizen.ImageUrl
+          });
+          
           setTooltipData({
             type: 'citizen',
             citizen: data.citizen,
@@ -117,6 +124,7 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
           });
         } else {
           // If we only have the buildingId, we'll need to fetch the citizen data
+          console.log('TOOLTIP: No citizen data in event, only buildingId:', data.buildingId);
           setTooltipData({
             type: 'citizen',
             buildingId: data.buildingId,
