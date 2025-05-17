@@ -1075,19 +1075,48 @@ export default function BuildingDetailsPanel({
                   </div>
                 </div>
               )}
-              
-              {/* Full Description (Always visible) */}
+  
+              {/* Financial Information - MOVED UP */}
+              {(building.lease_amount || building.rent_amount) && (
+                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
+                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Financial Details</h3>
+      
+                  {building.lease_amount !== undefined && (
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-gray-700">Lease Amount:</span>
+                      <span className="font-semibold text-amber-800">
+                        {typeof building.lease_amount === 'number' 
+                          ? `${building.lease_amount.toLocaleString()} ⚜️ ducats`
+                          : `${String(building.lease_amount || '')} ⚜️ ducats`}
+                      </span>
+                    </div>
+                  )}
+      
+                  {building.rent_amount !== undefined && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-700">Rent Amount:</span>
+                      <span className="font-semibold text-amber-800">
+                        {typeof building.rent_amount === 'number'
+                          ? `${building.rent_amount.toLocaleString()} ⚜️ ducats`
+                          : `${String(building.rent_amount)} ⚜️ ducats`}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
+  
+              {/* Full Description (Always visible) - TEXT MADE SMALLER */}
               {buildingDefinition?.fullDescription && (
                 <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
                   <h3 className="text-sm uppercase font-medium text-amber-600 mb-3">Detailed Information</h3>
-                  
-                  <div className="text-gray-700 border-t border-amber-200 pt-3">
+      
+                  <div className="text-sm text-gray-700 border-t border-amber-200 pt-3">
                     <p className="whitespace-pre-line">{buildingDefinition.fullDescription}</p>
-                  
+      
                     {/* Creation details added here */}
                     <div className="mt-4 pt-3 border-t border-amber-100">
                       <h4 className="font-medium text-amber-700 mb-2">Creation Details</h4>
-                      <div className="text-sm">
+                      <div className="text-xs">
                         <p className="text-gray-700">
                           Created: <span className="font-medium">
                             {adjustDate(building.created_at)}
@@ -1116,35 +1145,6 @@ export default function BuildingDetailsPanel({
                       className="mx-auto"
                     />
                   </div>
-                </div>
-              )}
-              
-              {/* Financial Information */}
-              {(building.lease_amount || building.rent_amount) && (
-                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Financial Details</h3>
-                  
-                  {building.lease_amount !== undefined && (
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-gray-700">Lease Amount:</span>
-                      <span className="font-semibold text-amber-800">
-                        {typeof building.lease_amount === 'number' 
-                          ? `${building.lease_amount.toLocaleString()} ⚜️ ducats`
-                          : `${String(building.lease_amount || '')} ⚜️ ducats`}
-                      </span>
-                    </div>
-                  )}
-                  
-                  {building.rent_amount !== undefined && (
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-700">Rent Amount:</span>
-                      <span className="font-semibold text-amber-800">
-                        {typeof building.rent_amount === 'number'
-                          ? `${building.rent_amount.toLocaleString()} ⚜️ ducats`
-                          : `${String(building.rent_amount)} ⚜️ ducats`}
-                      </span>
-                    </div>
-                  )}
                 </div>
               )}
               
