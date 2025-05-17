@@ -7,6 +7,21 @@ const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
 const AIRTABLE_CITIZENS_TABLE = 'CITIZENS';
 const AIRTABLE_BUILDINGS_TABLE = 'BUILDINGS';
 
+// Utility function to convert field names to camelCase
+function toCamelCase(obj: Record<string, any>): Record<string, any> {
+  const result: Record<string, any> = {};
+  
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      // Convert first character to lowercase for the new key
+      const camelKey = key.charAt(0).toLowerCase() + key.slice(1);
+      result[camelKey] = obj[key];
+    }
+  }
+  
+  return result;
+}
+
 // Initialize Airtable
 const initAirtable = () => {
   if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
@@ -60,12 +75,19 @@ export async function GET(request: Request) {
     
     // Transform Airtable records to our citizen format
     const citizens = records.map(record => {
+      // Get all fields and convert keys to camelCase
+      const fields = toCamelCase(record.fields);
+      
       // Get the position field and try to parse it if it's a string
-      let position = record.get('Position') as string || '';
+      let position = record.get('Position');
+      
+      // Handle position parsing
       try {
-        // If position is a string that looks like JSON, parse it
-        if (typeof position === 'string' && (position.startsWith('{') || position.startsWith('['))) {
-          position = JSON.parse(position);
+        if (typeof position === 'string') {
+          // If position is a string that looks like JSON, parse it
+          if (position.startsWith('{') || position.startsWith('[')) {
+            position = JSON.parse(position);
+          }
         }
       } catch (error) {
         console.error('Error parsing position for citizen:', record.get('Username'), error);
@@ -76,7 +98,7 @@ export async function GET(request: Request) {
       
       // Create citizen object with all fields from the record
       const citizen = {
-        ...record.fields,  // Include all fields from the record
+        ...fields,  // Include all fields with camelCase keys
         username: username,
         position: position, // Use the parsed position
         worksFor: employmentMap[username] || null,
