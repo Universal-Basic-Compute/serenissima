@@ -7,6 +7,7 @@ import BuildingMaintenance from './BuildingDetails/BuildingMaintenance';
 import BuildingOccupant from './BuildingDetails/BuildingOccupant';
 import BuildingOwner from './BuildingDetails/BuildingOwner';
 import ContractList from './BuildingDetails/ContractList';
+import RecipeList from './BuildingDetails/RecipeList';
 
 export { BuildingDescription };
 export { BuildingFinancials };
@@ -16,6 +17,7 @@ export { BuildingMaintenance };
 export { BuildingOccupant };
 export { BuildingOwner };
 export { ContractList };
+export { RecipeList };
 
 export function ResourceList({ 
   title, 
