@@ -5,11 +5,13 @@ export class RelevancyService {
    * Calculate proximity-based relevancy scores for lands relative to an AI owner
    * @param aiLands Lands owned by the AI
    * @param allLands All lands in the system
+   * @param landGroups Optional mapping of lands to their group IDs
    * @returns Map of land IDs to relevancy scores
    */
   public calculateLandProximityRelevancy(
     aiLands: any[],
-    allLands: any[]
+    allLands: any[],
+    landGroups?: Record<string, string>
   ): Record<string, any> {
     const relevancyScores: Record<string, any> = {};
     
@@ -20,6 +22,17 @@ export class RelevancyService {
     
     // Calculate the centroid of all AI-owned lands
     const aiCentroids = aiLands.map(land => this.getLandCentroid(land));
+    
+    // Get the groups that the AI already owns lands in
+    const aiLandGroups = new Set<string>();
+    if (landGroups) {
+      aiLands.forEach(land => {
+        const groupId = landGroups[land.id];
+        if (groupId) {
+          aiLandGroups.add(groupId);
+        }
+      });
+    }
     
     // For each land not owned by the AI, calculate its relevancy score
     allLands.forEach(land => {
@@ -50,10 +63,31 @@ export class RelevancyService {
         }
       }
       
-      // Convert distance to relevancy score (closer = higher score)
+      // Convert distance to base relevancy score (closer = higher score)
       // Using an exponential decay function: score = 100 * e^(-distance/500)
       // This gives a score of 100 at distance 0, ~60 at 250m, ~37 at 500m, etc.
-      const score = 100 * Math.exp(-minDistance / 500);
+      let score = 100 * Math.exp(-minDistance / 500);
+      
+      // Apply connectivity bonus if the land is in the same group as any AI-owned land
+      let connectivityBonus = 0;
+      let isConnected = false;
+      
+      if (landGroups && landGroups[land.id]) {
+        const landGroupId = landGroups[land.id];
+        if (aiLandGroups.has(landGroupId)) {
+          // Apply a significant bonus for lands in the same group
+          connectivityBonus = 30;
+          isConnected = true;
+        }
+      }
+      
+      // Apply the connectivity bonus
+      score += connectivityBonus;
+      
+      // Cap the score at 100
+      score = Math.min(100, score);
+      
+      // Round to 2 decimal places
       const numericScore = parseFloat(score.toFixed(2));
       
       // Determine relevancy status based on score
@@ -67,19 +101,38 @@ export class RelevancyService {
         assetId: land.id,
         assetType: 'land',
         category: 'proximity',
-        type: 'geographic',
+        type: isConnected ? 'connected' : 'geographic',
         distance: Math.round(minDistance),
         closestLandId: closestAiLand?.id || '',
-        title: `Nearby Land (${Math.round(minDistance)}m)`,
-        description: land.historicalName 
-          ? `${land.historicalName} is ${Math.round(minDistance)} meters from your nearest property`
-          : `This land is ${Math.round(minDistance)} meters from your nearest property`,
-        timeHorizon: 'medium',
+        isConnected,
+        connectivityBonus,
+        title: isConnected 
+          ? `Connected Land (${Math.round(minDistance)}m)` 
+          : `Nearby Land (${Math.round(minDistance)}m)`,
+        description: this.generateRelevancyDescription(land, minDistance, isConnected),
+        timeHorizon: isConnected ? 'short' : 'medium',
         status: numericScore > 70 ? 'high' : numericScore > 40 ? 'medium' : 'low'
       };
     });
     
     return relevancyScores;
+  }
+  
+  /**
+   * Generate a descriptive text for the relevancy
+   */
+  private generateRelevancyDescription(land: any, distance: number, isConnected: boolean): string {
+    const landName = land.historicalName 
+      ? `${land.historicalName}` 
+      : 'This land';
+    
+    const distanceText = `${Math.round(distance)} meters from your nearest property`;
+    
+    if (isConnected) {
+      return `${landName} is ${distanceText} and is connected to your existing properties by bridges. Acquiring this land would strengthen your presence in this district.`;
+    } else {
+      return `${landName} is ${distanceText}. Acquiring this land would expand your influence to a new area.`;
+    }
   }
   
   /**

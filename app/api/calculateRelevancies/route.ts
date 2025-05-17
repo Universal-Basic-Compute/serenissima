@@ -53,8 +53,8 @@ export async function GET(request: NextRequest) {
         );
       }
       
-      // Calculate land proximity relevancy
-      const relevancyScores = relevancyService.calculateLandProximityRelevancy(aiLands, allLands);
+      // Calculate land proximity relevancy with connectivity data
+      const relevancyScores = relevancyService.calculateLandProximityRelevancy(aiLands, allLands, landGroups);
       
       // Format the response to include both simple scores and detailed data
       const simpleScores: Record<string, number> = {};
@@ -93,8 +93,8 @@ export async function GET(request: NextRequest) {
       // Skip AIs with no lands
       if (aiLands.length === 0) continue;
       
-      // Calculate land proximity relevancy
-      const relevancyScores = relevancyService.calculateLandProximityRelevancy(aiLands, allLands);
+      // Calculate land proximity relevancy with connectivity data
+      const relevancyScores = relevancyService.calculateLandProximityRelevancy(aiLands, allLands, landGroups);
       
       // Store results
       results[username] = {
@@ -156,6 +156,31 @@ export async function POST(request: NextRequest) {
       buildingPoints: record.get('BuildingPoints') as number || 0
     }));
     
+    // Fetch land groups to determine connectivity
+    console.log('Fetching land groups for connectivity analysis...');
+    const landGroupsResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/land-groups?includeUnconnected=true&minSize=1`);
+    
+    let landGroups: Record<string, string> = {};
+    
+    if (landGroupsResponse.ok) {
+      const landGroupsData = await landGroupsResponse.json();
+      
+      if (landGroupsData.success && landGroupsData.landGroups) {
+        console.log(`Loaded ${landGroupsData.landGroups.length} land groups for connectivity analysis`);
+        
+        // Create a mapping of polygon ID to group ID
+        landGroupsData.landGroups.forEach((group: any) => {
+          if (group.lands && Array.isArray(group.lands)) {
+            group.lands.forEach((landId: string) => {
+              landGroups[landId] = group.groupId;
+            });
+          }
+        });
+      }
+    } else {
+      console.warn('Failed to fetch land groups, proceeding without connectivity data');
+    }
+    
     // Get lands owned by this AI
     const aiLands = allLands.filter(land => land.owner === aiUsername);
     
@@ -166,8 +191,8 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Calculate land proximity relevancy
-    const relevancyScores = relevancyService.calculateLandProximityRelevancy(aiLands, allLands);
+    // Calculate land proximity relevancy with connectivity data
+    const relevancyScores = relevancyService.calculateLandProximityRelevancy(aiLands, allLands, landGroups);
       
     // Format the response to include both simple scores and detailed data
     const simpleScores: Record<string, number> = {};
@@ -202,13 +227,14 @@ export async function POST(request: NextRequest) {
             AssetID: landId,
             AssetType: 'land',
             Category: 'proximity',
-            Type: 'geographic',
+            Type: data.type,
             TargetCitizen: data.closestLandId ? allLands.find(land => land.id === data.closestLandId)?.owner || '' : '',
             RelevantToCitizen: aiUsername,
             Score: data.score,
             TimeHorizon: data.timeHorizon || 'medium',
             Title: data.title || `Nearby Land (${data.distance}m)`,
             Description: data.description || `This land is ${data.distance} meters from your nearest property`,
+            Notes: data.isConnected ? 'Connected by bridges to your existing properties' : '',
             Status: data.status || 'active',
             CreatedAt: new Date().toISOString()
           }
