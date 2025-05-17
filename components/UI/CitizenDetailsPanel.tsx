@@ -5,38 +5,7 @@ import remarkGfm from 'remark-gfm';
 import { FaSpinner, FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
 
 interface CitizenDetailsPanelProps {
-  citizen: {
-    citizenid: string;
-    firstname: string;
-    lastname: string;
-    socialclass: string;
-    imageurl?: string;
-    description?: string;
-    username?: string;
-    isai?: boolean;
-    isAi?: boolean;
-    ducats?: number;
-    createdat?: string;
-    worksFor?: string | null;
-    workplace?: any;
-    // Additional properties
-    color?: string;
-    secondaryColor?: string;
-    prestige?: number;
-    updatedAt?: string;
-    lastActiveAt?: string;
-    position?: any;
-    familyMotto?: string;
-    coatOfArmsImage?: string;
-    dailyIncome?: number;
-    // Add these new properties
-    home?: string;
-    work?: string;
-    // Add profileimage property
-    profileimage?: string;
-    // Add ImageUrl property (another variant of the image URL)
-    ImageUrl?: string;
-  };
+  citizen: any; // Use 'any' type instead of the detailed interface
   onClose: () => void;
 }
 
