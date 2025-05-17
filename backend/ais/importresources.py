@@ -762,6 +762,48 @@ def process_ai_import_strategies(dry_run: bool = False):
         print("No AI citizens found, exiting")
         return
     
+    # Filter AI citizens to only those who own buildings that can import resources
+    filtered_ai_citizens = []
+    for ai_citizen in ai_citizens:
+        ai_citizenname = ai_citizen["fields"].get("Citizenname")
+        if not ai_citizenname:
+            continue
+            
+        # Get buildings owned by this AI
+        citizen_buildings = get_citizen_buildings(tables, ai_citizenname)
+        
+        # Check if any building can import resources
+        has_importable_building = False
+        for building in citizen_buildings:
+            building_type = building["fields"].get("Type", "")
+            building_def = building_types.get(building_type, {})
+            can_import = building_def.get("canImport", False)
+            
+            if can_import:
+                has_importable_building = True
+                break
+                
+        # Also check if the citizen has enough ducats (minimum 10,000)
+        ducats = ai_citizen["fields"].get("Ducats", 0)
+        has_enough_ducats = ducats >= 10000
+        
+        if has_importable_building and has_enough_ducats:
+            filtered_ai_citizens.append(ai_citizen)
+            print(f"AI citizen {ai_citizenname} has buildings that can import resources and {ducats} ducats, including in processing")
+        else:
+            if not has_importable_building:
+                print(f"AI citizen {ai_citizenname} has no buildings that can import resources, skipping")
+            if not has_enough_ducats:
+                print(f"AI citizen {ai_citizenname} has insufficient ducats ({ducats}), skipping")
+    
+    # Replace the original list with the filtered list
+    ai_citizens = filtered_ai_citizens
+    print(f"Filtered down to {len(ai_citizens)} AI citizens with buildings that can import resources and sufficient ducats")
+    
+    if not ai_citizens:
+        print("No AI citizens with buildings that can import resources and sufficient ducats, exiting")
+        return
+    
     # Track import results for each AI
     ai_import_results = {}
     

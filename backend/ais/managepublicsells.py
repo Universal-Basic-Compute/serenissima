@@ -806,6 +806,43 @@ def process_ai_public_sell_strategies(dry_run: bool = False):
         print("No AI citizens found, exiting")
         return
     
+    # Filter AI citizens to only those who own buildings that can sell resources
+    filtered_ai_citizens = []
+    for ai_citizen in ai_citizens:
+        ai_citizenname = ai_citizen["fields"].get("Citizenname")
+        if not ai_citizenname:
+            continue
+            
+        # Get buildings run by this AI
+        citizen_buildings = get_citizen_buildings(tables, ai_citizenname)
+        
+        # Check if any building can sell resources
+        has_sellable_building = False
+        for building in citizen_buildings:
+            building_type = building["fields"].get("Type", "")
+            building_def = building_types.get(building_type, {})
+            production_info = building_def.get("productionInformation", {})
+            
+            if production_info and isinstance(production_info, dict):
+                sells = production_info.get("sells", [])
+                if sells:
+                    has_sellable_building = True
+                    break
+                    
+        if has_sellable_building:
+            filtered_ai_citizens.append(ai_citizen)
+            print(f"AI citizen {ai_citizenname} has buildings that can sell resources, including in processing")
+        else:
+            print(f"AI citizen {ai_citizenname} has no buildings that can sell resources, skipping")
+    
+    # Replace the original list with the filtered list
+    ai_citizens = filtered_ai_citizens
+    print(f"Filtered down to {len(ai_citizens)} AI citizens with buildings that can sell resources")
+    
+    if not ai_citizens:
+        print("No AI citizens with buildings that can sell resources, exiting")
+        return
+    
     # Track sell results for each AI
     ai_sell_results = {}
     

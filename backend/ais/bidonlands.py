@@ -228,6 +228,26 @@ def process_ai_land_bidding(dry_run: bool = False):
         print("No AI citizens found, exiting")
         return
     
+    # Filter AI citizens to only those with sufficient ducats for bidding (minimum 2,500,000)
+    filtered_ai_citizens = []
+    for ai_citizen in ai_citizens:
+        ai_citizenname = ai_citizen["fields"].get("Citizenname")
+        ducats = ai_citizen["fields"].get("Ducats", 0)
+        
+        if ducats >= 2500000:
+            filtered_ai_citizens.append(ai_citizen)
+            print(f"AI citizen {ai_citizenname} has {ducats} ducats, including in processing")
+        else:
+            print(f"AI citizen {ai_citizenname} has insufficient ducats ({ducats}) for bidding, skipping")
+    
+    # Replace the original list with the filtered list
+    ai_citizens = filtered_ai_citizens
+    print(f"Filtered down to {len(ai_citizens)} AI citizens with sufficient ducats for bidding")
+    
+    if not ai_citizens:
+        print("No AI citizens with sufficient ducats for bidding, exiting")
+        return
+    
     # Get lands with income
     lands = get_lands_with_income(tables)
     if not lands:

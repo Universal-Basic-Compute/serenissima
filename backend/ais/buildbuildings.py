@@ -954,6 +954,26 @@ def process_ai_building_strategies(dry_run: bool = False):
             print("No AI citizens found, exiting")
             return
         print(f"Successfully retrieved {len(ai_citizens)} AI citizens")
+        
+        # Filter AI citizens to only those with sufficient ducats for building (minimum 1,000,000)
+        filtered_ai_citizens = []
+        for ai_citizen in ai_citizens:
+            ai_citizenname = ai_citizen["fields"].get("Citizenname")
+            ducats = ai_citizen["fields"].get("Ducats", 0)
+            
+            if ducats >= 1000000:
+                filtered_ai_citizens.append(ai_citizen)
+                print(f"AI citizen {ai_citizenname} has {ducats} ducats, including in processing")
+            else:
+                print(f"AI citizen {ai_citizenname} has insufficient ducats ({ducats}) for building, skipping")
+        
+        # Replace the original list with the filtered list
+        ai_citizens = filtered_ai_citizens
+        print(f"Filtered down to {len(ai_citizens)} AI citizens with sufficient ducats for building")
+        
+        if not ai_citizens:
+            print("No AI citizens with sufficient ducats for building, exiting")
+            return
     except Exception as e:
         print(f"Failed to get AI citizens: {str(e)}")
         print(f"Exception traceback: {traceback.format_exc()}")

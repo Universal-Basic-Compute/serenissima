@@ -200,6 +200,30 @@ def process_ai_messages(dry_run: bool = False):
         print("No AI citizens found, exiting")
         return
     
+    # Filter AI citizens to only those who have unread messages
+    filtered_ai_citizens = []
+    for ai_citizen in ai_citizens:
+        ai_citizenname = ai_citizen["fields"].get("Citizenname")
+        if not ai_citizenname:
+            continue
+            
+        # Get unread messages for this AI
+        unread_messages = get_unread_messages_for_ai(tables, ai_citizenname)
+        
+        if unread_messages:
+            filtered_ai_citizens.append(ai_citizen)
+            print(f"AI citizen {ai_citizenname} has {len(unread_messages)} unread messages, including in processing")
+        else:
+            print(f"AI citizen {ai_citizenname} has no unread messages, skipping")
+    
+    # Replace the original list with the filtered list
+    ai_citizens = filtered_ai_citizens
+    print(f"Filtered down to {len(ai_citizens)} AI citizens with unread messages")
+    
+    if not ai_citizens:
+        print("No AI citizens with unread messages, exiting")
+        return
+    
     # Track response counts for each AI
     ai_response_counts = {}
     

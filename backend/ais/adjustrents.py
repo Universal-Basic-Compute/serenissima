@@ -463,6 +463,45 @@ def process_ai_rent_adjustments(dry_run: bool = False):
         print("No AI citizens found, exiting")
         return
     
+    # Filter AI citizens to only those who own at least one building that can be rented out
+    filtered_ai_citizens = []
+    for ai_citizen in ai_citizens:
+        ai_citizenname = ai_citizen["fields"].get("Citizenname")
+        if not ai_citizenname:
+            continue
+            
+        # Get buildings owned by this AI
+        citizen_buildings = get_citizen_buildings(tables, ai_citizenname)
+        
+        # Check if the citizen owns any buildings
+        if citizen_buildings:
+            # Check if any building is rentable (has a Type that can be rented)
+            has_rentable_building = False
+            for building in citizen_buildings:
+                building_type = building["fields"].get("Type", "")
+                # Most building types can be rented out, so we'll include all buildings
+                # except for specific types that can't be rented
+                non_rentable_types = ["bridge", "wall", "gate"]
+                if building_type and building_type not in non_rentable_types:
+                    has_rentable_building = True
+                    break
+                    
+            if has_rentable_building:
+                filtered_ai_citizens.append(ai_citizen)
+                print(f"AI citizen {ai_citizenname} has buildings that can be rented out, including in processing")
+            else:
+                print(f"AI citizen {ai_citizenname} has no buildings that can be rented out, skipping")
+        else:
+            print(f"AI citizen {ai_citizenname} has no buildings, skipping")
+    
+    # Replace the original list with the filtered list
+    ai_citizens = filtered_ai_citizens
+    print(f"Filtered down to {len(ai_citizens)} AI citizens with buildings that can be rented out")
+    
+    if not ai_citizens:
+        print("No AI citizens with buildings that can be rented out, exiting")
+        return
+    
     # Track rent adjustments for each AI
     ai_rent_adjustments = {}
     

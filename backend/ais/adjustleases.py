@@ -489,6 +489,44 @@ def process_ai_lease_adjustments(dry_run: bool = False):
         print("No AI citizens found, exiting")
         return
     
+    # Filter AI citizens to only those whose lands have buildings owned by others
+    filtered_ai_citizens = []
+    for ai_citizen in ai_citizens:
+        ai_citizenname = ai_citizen["fields"].get("Citizenname")
+        if not ai_citizenname:
+            continue
+            
+        # Get lands owned by this AI
+        citizen_lands = get_citizen_lands(tables, ai_citizenname)
+        
+        # Get land IDs
+        land_ids = [land["fields"].get("LandId") for land in citizen_lands if land["fields"].get("LandId")]
+        
+        # Get buildings on these lands
+        buildings_on_lands = get_all_buildings_on_lands(tables, land_ids)
+        
+        # Check if any buildings on these lands are owned by others
+        has_others_buildings = False
+        for building in buildings_on_lands:
+            building_owner = building["fields"].get("Owner", "")
+            if building_owner and building_owner != ai_citizenname:
+                has_others_buildings = True
+                break
+                
+        if has_others_buildings:
+            filtered_ai_citizens.append(ai_citizen)
+            print(f"AI citizen {ai_citizenname} has lands with buildings owned by others, including in processing")
+        else:
+            print(f"AI citizen {ai_citizenname} has no lands with buildings owned by others, skipping")
+    
+    # Replace the original list with the filtered list
+    ai_citizens = filtered_ai_citizens
+    print(f"Filtered down to {len(ai_citizens)} AI citizens with lands that have buildings owned by others")
+    
+    if not ai_citizens:
+        print("No AI citizens with lands that have buildings owned by others, exiting")
+        return
+    
     # Track lease adjustments for each AI
     ai_lease_adjustments = {}
     

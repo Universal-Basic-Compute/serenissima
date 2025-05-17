@@ -188,6 +188,30 @@ def process_ai_notifications(dry_run: bool = False):
         print("No AI citizens found, exiting")
         return
     
+    # Filter AI citizens to only those with unread notifications
+    filtered_ai_citizens = []
+    for ai_citizen in ai_citizens:
+        ai_citizenname = ai_citizen["fields"].get("Citizenname")
+        if not ai_citizenname:
+            continue
+            
+        # Get unread notifications for this AI
+        unread_notifications = get_unread_notifications_for_ai(tables, ai_citizenname)
+        
+        if unread_notifications:
+            filtered_ai_citizens.append(ai_citizen)
+            print(f"AI citizen {ai_citizenname} has {len(unread_notifications)} unread notifications, including in processing")
+        else:
+            print(f"AI citizen {ai_citizenname} has no unread notifications, skipping")
+    
+    # Replace the original list with the filtered list
+    ai_citizens = filtered_ai_citizens
+    print(f"Filtered down to {len(ai_citizens)} AI citizens with unread notifications")
+    
+    if not ai_citizens:
+        print("No AI citizens with unread notifications, exiting")
+        return
+    
     # Track notification counts for each AI
     ai_notification_counts = {}
     

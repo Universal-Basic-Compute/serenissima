@@ -574,6 +574,37 @@ def process_ai_wage_adjustments(dry_run: bool = False):
         print("No AI citizens found, exiting")
         return
     
+    # Filter AI citizens to only those who own at least one building with an occupant
+    filtered_ai_citizens = []
+    for ai_citizen in ai_citizens:
+        ai_citizenname = ai_citizen["fields"].get("Citizenname")
+        if not ai_citizenname:
+            continue
+            
+        # Get buildings owned by this AI
+        citizen_buildings = get_citizen_business_buildings(tables, ai_citizenname)
+        
+        # Check if any building has an occupant
+        has_building_with_occupant = False
+        for building in citizen_buildings:
+            if building["fields"].get("Occupant"):
+                has_building_with_occupant = True
+                break
+                
+        if has_building_with_occupant:
+            filtered_ai_citizens.append(ai_citizen)
+            print(f"AI citizen {ai_citizenname} has buildings with occupants, including in processing")
+        else:
+            print(f"AI citizen {ai_citizenname} has no buildings with occupants, skipping")
+    
+    # Replace the original list with the filtered list
+    ai_citizens = filtered_ai_citizens
+    print(f"Filtered down to {len(ai_citizens)} AI citizens with buildings that have occupants")
+    
+    if not ai_citizens:
+        print("No AI citizens with buildings that have occupants, exiting")
+        return
+    
     # Track wage adjustments for each AI
     ai_wage_adjustments = {}
     
