@@ -93,6 +93,21 @@ export class TransportService {
   private initializationAttempts: number = 0;
   private readonly MAX_INITIALIZATION_ATTEMPTS = 5;
   private pathfindingMode: 'all' | 'real' = 'real'; // Default to 'real' mode
+  private waterGraph: {
+    waterPoints: {
+      id: string;
+      position: {
+        lat: number;
+        lng: number;
+      };
+      connections: {
+        targetId: string;
+        intermediatePoints: any[];
+        distance: number;
+        id: string;
+      }[];
+    }[];
+  } | null = null;
   
   // Static method for initialization
   public static initialize(): Promise<boolean> {
@@ -1045,6 +1060,51 @@ export class TransportService {
   }
 
   /**
+   * Load water graph from watergraph.json
+   */
+  private async loadWaterGraph(): Promise<boolean> {
+    try {
+      console.log('Loading water graph from watergraph.json...');
+      
+      // Determine if we're running in Node.js or browser environment
+      const isNode = typeof window === 'undefined';
+      
+      // Set base URL depending on environment
+      const baseUrl = isNode 
+        ? (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000')
+        : '';
+      
+      // Create abort controller for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
+      const response = await fetch(`${baseUrl}/data/watergraph.json`, {
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.waterPoints && Array.isArray(data.waterPoints)) {
+          this.waterGraph = data;
+          console.log(`Successfully loaded water graph with ${data.waterPoints.length} water points`);
+          return true;
+        } else {
+          console.error('Invalid water graph data format');
+          return false;
+        }
+      } else {
+        console.error(`Failed to load water graph: ${response.status} ${response.statusText}`);
+        return false;
+      }
+    } catch (error) {
+      console.error('Error loading water graph:', error);
+      return false;
+    }
+  }
+
+  /**
    * Service initialization with retry logic
    */
   private async initializeService(): Promise<boolean> {
@@ -1061,6 +1121,10 @@ export class TransportService {
       
       // If polygons are already loaded, we're done
       if (this.polygonsLoaded && this.polygons.length > 0) {
+        // Also ensure water graph is loaded
+        if (!this.waterGraph) {
+          await this.loadWaterGraph();
+        }
         console.log(`Polygons already loaded (${this.polygons.length}), initialization complete`);
         resolve(true);
         return;
@@ -1129,12 +1193,157 @@ export class TransportService {
       
       if (!success) {
         console.error(`Failed to load polygons after ${this.MAX_INITIALIZATION_ATTEMPTS} attempts`);
+      } else {
+        // Also load the water graph
+        await this.loadWaterGraph();
       }
       
       resolve(success);
     });
     
     return this.initializationPromise;
+  }
+
+  /**
+   * Check if two points are in the same land group
+   */
+  private async arePointsInSameGroup(polygon1Id: string, polygon2Id: string): Promise<boolean> {
+    try {
+      // If they're the same polygon, they're in the same group
+      if (polygon1Id === polygon2Id) {
+        return true;
+      }
+
+      // Determine if we're running in Node.js or browser environment
+      const isNode = typeof window === 'undefined';
+      
+      // Set base URL depending on environment
+      const baseUrl = isNode 
+        ? (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000')
+        : '';
+      
+      // Create abort controller for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
+      const response = await fetch(`${baseUrl}/api/land-groups?includeUnconnected=true&minSize=1`, {
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.landGroups && Array.isArray(data.landGroups)) {
+          // Check if both polygons are in the same group
+          for (const group of data.landGroups) {
+            if (group.lands && Array.isArray(group.lands)) {
+              if (group.lands.includes(polygon1Id) && group.lands.includes(polygon2Id)) {
+                console.log(`Polygons ${polygon1Id} and ${polygon2Id} are in the same land group: ${group.groupId}`);
+                return true;
+              }
+            }
+          }
+          console.log(`Polygons ${polygon1Id} and ${polygon2Id} are in different land groups`);
+          return false;
+        }
+      }
+      
+      // If we couldn't determine land groups, assume they're not in the same group
+      console.warn('Could not determine land groups, assuming different groups');
+      return false;
+    } catch (error) {
+      console.error('Error checking if points are in the same group:', error);
+      // If there's an error, assume they're not in the same group
+      return false;
+    }
+  }
+
+  /**
+   * Dijkstra's algorithm for water graph pathfinding
+   */
+  private findWaterGraphPath(startId: string, endId: string): string[] | null {
+    if (!this.waterGraph || !this.waterGraph.waterPoints) {
+      console.error('Water graph not loaded');
+      return null;
+    }
+    
+    // Create a map of water points by ID for quick lookup
+    const waterPointsMap = new Map();
+    for (const waterPoint of this.waterGraph.waterPoints) {
+      waterPointsMap.set(waterPoint.id, waterPoint);
+    }
+    
+    // Initialize distances with Infinity
+    const distances: Record<string, number> = {};
+    const previous: Record<string, string | null> = {};
+    const visited: Set<string> = new Set();
+    
+    // Create a priority queue
+    const queue = new PriorityQueue<string>();
+    
+    // Initialize all distances as Infinity
+    for (const waterPoint of this.waterGraph.waterPoints) {
+      distances[waterPoint.id] = Infinity;
+      previous[waterPoint.id] = null;
+    }
+    
+    // Distance from start to itself is 0
+    distances[startId] = 0;
+    queue.enq(startId, 0);
+    
+    while (!queue.isEmpty()) {
+      const pointId = queue.deq();
+      if (!pointId) break;
+      
+      // If we've reached the end point, we're done
+      if (pointId === endId) {
+        break;
+      }
+      
+      // Skip if we've already processed this point
+      if (visited.has(pointId)) {
+        continue;
+      }
+      
+      visited.add(pointId);
+      
+      // Get the current water point
+      const currentPoint = waterPointsMap.get(pointId);
+      if (!currentPoint) continue;
+      
+      // Process all connections
+      for (const connection of currentPoint.connections) {
+        const neighborId = connection.targetId;
+        const weight = connection.distance;
+        
+        // Calculate new distance
+        const distance = distances[pointId] + weight;
+        
+        // If we found a better path, update it
+        if (distance < distances[neighborId]) {
+          distances[neighborId] = distance;
+          previous[neighborId] = pointId;
+          queue.enq(neighborId, distance);
+        }
+      }
+    }
+    
+    // If end point is not reachable
+    if (distances[endId] === Infinity) {
+      return null;
+    }
+    
+    // Reconstruct the path
+    const path: string[] = [];
+    let current = endId;
+    
+    while (current !== null) {
+      path.unshift(current);
+      current = previous[current] || null;
+    }
+    
+    return path;
   }
 
   /**
@@ -2591,88 +2800,57 @@ export class TransportService {
     try {
       console.log(`Starting water-only path calculation from ${startPoint.lat},${startPoint.lng} to ${endPoint.lat},${endPoint.lng} (mode: ${this.pathfindingMode})`);
       
-      // Ensure polygons are loaded using the initialization service
-      if (!this.polygonsLoaded) {
-        console.log('Polygons not loaded yet, initializing service for water-only path...');
+      // Ensure polygons and water graph are loaded
+      if (!this.polygonsLoaded || !this.waterGraph) {
+        console.log('Polygons or water graph not loaded yet, initializing service for water-only path...');
         const success = await this.initializeService();
         
         if (!success) {
           console.error('Failed to initialize transport service for water-only path');
           return {
             success: false,
-            error: 'No polygon data available for water-only pathfinding',
+            error: 'No data available for water-only pathfinding',
             details: 'Failed to initialize transport service'
           };
         }
       }
       
-      if (this.polygons.length === 0) {
-        console.error('No polygons available for water-only pathfinding');
+      // Ensure we have the water graph
+      if (!this.waterGraph || !this.waterGraph.waterPoints || this.waterGraph.waterPoints.length === 0) {
+        console.error('No water graph available for water-only pathfinding');
         return {
           success: false,
-          error: 'No polygon data available for water-only pathfinding',
-          details: 'Polygon array is empty'
+          error: 'No water graph available for water-only pathfinding',
+          details: 'Water graph is empty or not loaded'
         };
       }
       
-      console.log(`Loaded ${this.polygons.length} polygons for water-only pathfinding`);
+      console.log(`Using water graph with ${this.waterGraph.waterPoints.length} water points`);
       
-      // Extract all canal points for the water network
-      const allCanalPoints: {point: Point, id: string, polygonId: string, isConstructed: boolean}[] = [];
-      for (const polygon of this.polygons) {
-        if (polygon.canalPoints) {
-          for (const point of polygon.canalPoints) {
-            if (point.edge) {
-              const pointId = point.id || `canal-${point.edge.lat}-${point.edge.lng}`;
-              // Check if this is a constructed dock
-              const isConstructed = !!point.isConstructed || 
-                                   pointId.includes('public_dock') || 
-                                   pointId.includes('dock-constructed') ||
-                                   pointId.startsWith('building_') || 
-                                   pointId.startsWith('canal_');
-              
-              // In 'real' mode, only include constructed docks
-              if (this.pathfindingMode === 'all' || isConstructed) {
-                allCanalPoints.push({
-                  point: point.edge,
-                  id: pointId,
-                  polygonId: polygon.id,
-                  isConstructed
-                });
-              } else {
-                console.log(`Skipping canal point ${pointId} in canal network for 'real' mode because it's not constructed`);
-              }
-            }
-          }
-        }
-      }
-      
-      console.log(`Found ${allCanalPoints.length} canal points across all polygons (mode: ${this.pathfindingMode})`);
-      
-      // Find the closest canal points to the start and end points
-      let startCanalPoint = null;
-      let endCanalPoint = null;
+      // Find the closest water points to the start and end points
+      let startWaterPoint = null;
+      let endWaterPoint = null;
       let minStartDistance = Infinity;
       let minEndDistance = Infinity;
       
-      for (const canalPoint of allCanalPoints) {
-        const distanceToStart = this.calculateDistance(startPoint, canalPoint.point);
-        const distanceToEnd = this.calculateDistance(endPoint, canalPoint.point);
+      for (const waterPoint of this.waterGraph.waterPoints) {
+        const distanceToStart = this.calculateDistance(startPoint, waterPoint.position);
+        const distanceToEnd = this.calculateDistance(endPoint, waterPoint.position);
         
         if (distanceToStart < minStartDistance) {
           minStartDistance = distanceToStart;
-          startCanalPoint = canalPoint;
+          startWaterPoint = waterPoint;
         }
         
         if (distanceToEnd < minEndDistance) {
           minEndDistance = distanceToEnd;
-          endCanalPoint = canalPoint;
+          endWaterPoint = waterPoint;
         }
       }
       
-      // If we couldn't find canal points, create a direct path
-      if (!startCanalPoint || !endCanalPoint) {
-        console.log('No canal points found, creating direct water path');
+      // If we couldn't find water points, create a direct path
+      if (!startWaterPoint || !endWaterPoint) {
+        console.log('No water points found, creating direct water path');
         
         // Calculate direct distance
         const directDistance = this.calculateDistance(startPoint, endPoint);
@@ -2729,26 +2907,27 @@ export class TransportService {
         };
       }
       
-      console.log(`Found closest canal points: start=${startCanalPoint.id}, end=${endCanalPoint.id}`);
+      console.log(`Found closest water points: start=${startWaterPoint.id}, end=${endWaterPoint.id}`);
       
-      // Create a path with 3 segments:
-      // 1. From start point to nearest canal point (walking)
-      // 2. From start canal point to end canal point (gondola)
-      // 3. From end canal point to end point (walking)
+      // Find the shortest path between the water points using Dijkstra's algorithm
+      const waterPath = this.findWaterGraphPath(startWaterPoint.id, endWaterPoint.id);
       
-      // Calculate distances for each segment
-      const startToCanal = this.calculateDistance(startPoint, startCanalPoint.point);
-      const canalToCanal = this.calculateDistance(startCanalPoint.point, endCanalPoint.point);
-      const canalToEnd = this.calculateDistance(endCanalPoint.point, endPoint);
+      if (!waterPath || waterPath.length === 0) {
+        console.error('No path found between water points');
+        return {
+          success: false,
+          error: 'No path found between water points',
+          details: 'Unable to find a valid path between the water points'
+        };
+      }
       
-      // Total distance
-      const totalDistance = startToCanal + canalToCanal + canalToEnd;
+      console.log(`Found water path with ${waterPath.length} points`);
       
-      // Create the path
-      const path = [];
+      // Create the full path: start -> water network -> end
+      const fullPath = [];
       
       // Add start point (walking mode)
-      path.push({
+      fullPath.push({
         ...startPoint,
         type: 'center',
         polygonId: 'virtual',
@@ -2756,15 +2935,15 @@ export class TransportService {
       });
       
       // Add intermediate points for the first segment if it's long enough (walking)
-      if (startToCanal > 20) {
-        const numPoints = Math.max(1, Math.floor(startToCanal / 100));
+      if (minStartDistance > 20) {
+        const numPoints = Math.max(1, Math.floor(minStartDistance / 100));
         for (let i = 1; i <= numPoints; i++) {
           const fraction = i / (numPoints + 1);
           // Add some randomness to create natural curves
           const jitter = 0.00002 * (Math.random() * 2 - 1);
-          path.push({
-            lat: startPoint.lat + (startCanalPoint.point.lat - startPoint.lat) * fraction + jitter,
-            lng: startPoint.lng + (startCanalPoint.point.lng - startPoint.lng) * fraction + jitter,
+          fullPath.push({
+            lat: startPoint.lat + (startWaterPoint.position.lat - startPoint.lat) * fraction + jitter,
+            lng: startPoint.lng + (startWaterPoint.position.lng - startPoint.lng) * fraction + jitter,
             type: 'center',
             polygonId: 'virtual',
             transportMode: 'walking',
@@ -2773,48 +2952,30 @@ export class TransportService {
         }
       }
       
-      // Add start canal point (transition from walking to gondola)
-      path.push({
-        ...startCanalPoint.point,
-        type: 'canal',
-        polygonId: startCanalPoint.polygonId,
-        transportMode: 'gondola'
-      });
-      
-      // Add intermediate points for the canal-to-canal segment (gondola)
-      const numCanalPoints = Math.max(2, Math.floor(canalToCanal / 200));
-      for (let i = 1; i <= numCanalPoints; i++) {
-        const fraction = i / (numCanalPoints + 1);
-        // Add some randomness to create natural curves
-        const jitter = 0.00005 * (Math.random() * 2 - 1);
-        path.push({
-          lat: startCanalPoint.point.lat + (endCanalPoint.point.lat - startCanalPoint.point.lat) * fraction + jitter,
-          lng: startCanalPoint.point.lng + (endCanalPoint.point.lng - startCanalPoint.point.lng) * fraction + jitter,
-          type: 'canal',
-          polygonId: 'virtual',
-          transportMode: 'gondola',
-          isIntermediatePoint: true
-        });
+      // Add the water path (gondola mode)
+      for (const pointId of waterPath) {
+        const waterPoint = this.waterGraph.waterPoints.find(wp => wp.id === pointId);
+        if (waterPoint) {
+          fullPath.push({
+            ...waterPoint.position,
+            type: 'canal',
+            polygonId: 'virtual',
+            transportMode: 'gondola',
+            nodeId: waterPoint.id
+          });
+        }
       }
       
-      // Add end canal point (still gondola)
-      path.push({
-        ...endCanalPoint.point,
-        type: 'canal',
-        polygonId: endCanalPoint.polygonId,
-        transportMode: 'gondola'
-      });
-      
       // Add intermediate points for the last segment if it's long enough (walking)
-      if (canalToEnd > 20) {
-        const numPoints = Math.max(1, Math.floor(canalToEnd / 100));
+      if (minEndDistance > 20) {
+        const numPoints = Math.max(1, Math.floor(minEndDistance / 100));
         for (let i = 1; i <= numPoints; i++) {
           const fraction = i / (numPoints + 1);
           // Add some randomness to create natural curves
           const jitter = 0.00002 * (Math.random() * 2 - 1);
-          path.push({
-            lat: endCanalPoint.point.lat + (endPoint.lat - endCanalPoint.point.lat) * fraction + jitter,
-            lng: endCanalPoint.point.lng + (endPoint.lng - endCanalPoint.point.lng) * fraction + jitter,
+          fullPath.push({
+            lat: endWaterPoint.position.lat + (endPoint.lat - endWaterPoint.position.lat) * fraction + jitter,
+            lng: endWaterPoint.position.lng + (endPoint.lng - endWaterPoint.position.lng) * fraction + jitter,
             type: 'center',
             polygonId: 'virtual',
             transportMode: 'walking',
@@ -2824,30 +2985,47 @@ export class TransportService {
       }
       
       // Add end point (walking)
-      path.push({
+      fullPath.push({
         ...endPoint,
         type: 'center',
         polygonId: 'virtual',
         transportMode: 'walking'
       });
       
+      // Calculate distances and time
+      let totalWalkingDistance = 0;
+      let totalWaterDistance = 0;
+      
+      for (let i = 0; i < fullPath.length - 1; i++) {
+        const point1 = fullPath[i];
+        const point2 = fullPath[i + 1];
+        const distance = this.calculateDistance(point1, point2);
+        
+        if (point1.transportMode === 'gondola') {
+          totalWaterDistance += distance;
+        } else {
+          totalWalkingDistance += distance;
+        }
+      }
+      
       // Calculate time based on distance (walking at 5 km/h, gondola at 10 km/h)
-      const walkingTimeHours = (startToCanal + canalToEnd) / 1000 / 5;
-      const waterTimeHours = canalToCanal / 1000 / 10;
+      const walkingTimeHours = totalWalkingDistance / 1000 / 5;
+      const waterTimeHours = totalWaterDistance / 1000 / 10;
       const totalTimeMinutes = Math.round((walkingTimeHours + waterTimeHours) * 60);
       
-      console.log(`Created water path with ${path.length} points, distance: ${totalDistance}m, time: ${totalTimeMinutes} minutes`);
+      // Enhance the path with intermediate points for smoother visualization
+      const enhancedPath = this.enhanceWaterPath(fullPath);
       
       return {
         success: true,
-        path: path,
-        distance: totalDistance,
-        walkingDistance: startToCanal + canalToEnd,
-        waterDistance: canalToCanal,
+        path: enhancedPath,
+        distance: totalWalkingDistance + totalWaterDistance,
+        walkingDistance: totalWalkingDistance,
+        waterDistance: totalWaterDistance,
         estimatedTimeMinutes: totalTimeMinutes,
         waterOnly: false,
         // Add the roundTrip path by reversing the path and combining
-        roundTrip: [...path, ...path.slice().reverse().slice(1)]
+        roundTrip: [...enhancedPath, ...enhancedPath.slice().reverse().slice(1)]
       };
     } catch (error) {
       console.error('Error finding water-only path:', error);
@@ -2891,29 +3069,33 @@ export class TransportService {
         };
       }
       
-      // Check if both points are near water or bridges
-      const isStartNearWater = this.isPointNearWater(startPoint, this.polygons);
-      const isEndNearWater = this.isPointNearWater(endPoint, this.polygons);
-      const isStartNearBridge = this.isPointNearBridge(startPoint, this.polygons);
-      const isEndNearBridge = this.isPointNearBridge(endPoint, this.polygons);
+      // Find the polygons containing the start and end points
+      const startPolygon = this.findPolygonContainingPoint(startPoint, this.polygons);
+      const endPolygon = this.findPolygonContainingPoint(endPoint, this.polygons);
       
-      console.log(`Start point near water: ${isStartNearWater}, near bridge: ${isStartNearBridge}`);
-      console.log(`End point near water: ${isEndNearWater}, near bridge: ${isEndNearBridge}`);
-      
-      // If both points are near water, prioritize water routes
-      if (isStartNearWater && isEndNearWater) {
-        console.log('Both points are near water, prioritizing water routes');
-        // Try to find a water-based route first
-        const waterResult = await this.findWaterOnlyPath(startPoint, endPoint);
-        if (waterResult.success) {
-          return waterResult;
-        }
+      // If either point is not within a polygon, use water-only pathfinding
+      if (!startPolygon || !endPolygon) {
+        console.log('Points not within polygons, using water-only pathfinding');
+        return this.findWaterOnlyPath(startPoint, endPoint);
       }
       
-      // If both points are near bridges, prioritize bridge routes
-      if (isStartNearBridge && isEndNearBridge) {
-        console.log('Both points are near bridges, prioritizing bridge routes');
-        // The existing pathfinding will handle this with our improved weights
+      // Check if both points are in the same land group
+      const sameGroup = await this.arePointsInSameGroup(startPolygon.id, endPolygon.id);
+      
+      // If they're in the same polygon, use land pathfinding
+      if (startPolygon.id === endPolygon.id) {
+        console.log('Points are in the same polygon, using land pathfinding');
+        // Continue with existing land pathfinding...
+      } 
+      // If they're in the same land group, use land pathfinding
+      else if (sameGroup) {
+        console.log('Points are in the same land group, using land pathfinding');
+        // Continue with existing land pathfinding...
+      } 
+      // Otherwise, use water pathfinding
+      else {
+        console.log('Points are in different land groups, using water pathfinding');
+        return this.findWaterOnlyPath(startPoint, endPoint);
       }
       
       // Ensure graph is built
@@ -2928,23 +3110,6 @@ export class TransportService {
       // Ensure canal network is built
       if (!this.canalNetwork || Object.keys(this.canalNetwork).length === 0) {
         this.canalNetwork = this.buildCanalNetwork(this.polygons);
-      }
-      
-      // Find the polygons containing the start and end points
-      const startPolygon = this.findPolygonContainingPoint(startPoint, this.polygons);
-      const endPolygon = this.findPolygonContainingPoint(endPoint, this.polygons);
-      
-      // If either point is not within a polygon but both are near water, use water-only pathfinding
-      if ((!startPolygon || !endPolygon) && isStartNearWater && isEndNearWater) {
-        console.log('Points not within polygons but both near water, using water-only pathfinding');
-        return this.findWaterOnlyPath(startPoint, endPoint);
-      }
-      
-      if (!startPolygon || !endPolygon) {
-        return {
-          success: false,
-          error: 'Start or end point is not within any polygon'
-        };
       }
       
       // Find the closest nodes to the start and end points
