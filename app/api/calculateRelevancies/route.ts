@@ -7,41 +7,63 @@ const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
 const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
 const AIRTABLE_LANDS_TABLE = process.env.AIRTABLE_LANDS_TABLE || 'LANDS';
 const AIRTABLE_CITIZENS_TABLE = process.env.AIRTABLE_CITIZENS_TABLE || 'CITIZENS';
+const AIRTABLE_RELEVANCIES_TABLE = 'RELEVANCIES';
 
-export async function GET(request: NextRequest) {
+// Helper function to get all AI citizens who own lands
+async function getAllAiCitizensWithLands(base: any): Promise<string[]> {
   try {
-    // Check if Airtable credentials are configured
-    if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
-      return NextResponse.json(
-        { error: 'Airtable credentials not configured' },
-        { status: 500 }
-      );
+    console.log('Fetching AI citizens who own lands...');
+    
+    // First get all AI citizens
+    const aiCitizens = await base(AIRTABLE_CITIZENS_TABLE)
+      .select({
+        filterByFormula: '{IsAI} = TRUE()',
+        fields: ['Username']
+      })
+      .all();
+    
+    const aiUsernames = aiCitizens.map(citizen => citizen.get('Username')).filter(Boolean);
+    
+    if (aiUsernames.length === 0) {
+      console.log('No AI citizens found');
+      return [];
     }
     
-    // Initialize Airtable
-    const base = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
+    console.log(`Found ${aiUsernames.length} AI citizens`);
     
-    // Get query parameters
-    const { searchParams } = new URL(request.url);
-    const aiUsername = searchParams.get('ai');
+    // Now check which of these AI citizens own lands
+    const aiOwnersWithLands = [];
     
-    // Fetch all lands from Airtable
-    console.log('Fetching all lands from Airtable...');
-    const landsRecords = await base(AIRTABLE_LANDS_TABLE).select().all();
+    for (const username of aiUsernames) {
+      // Check if this AI owns any lands
+      const landsOwned = await base(AIRTABLE_LANDS_TABLE)
+        .select({
+          filterByFormula: `{Owner} = '${username}'`,
+          fields: ['Owner'],
+          maxRecords: 1
+        })
+        .firstPage();
+      
+      if (landsOwned.length > 0) {
+        aiOwnersWithLands.push(username);
+      }
+    }
     
-    // Transform land records to a more usable format
-    const allLands = landsRecords.map(record => ({
-      id: record.id,
-      owner: record.get('Owner') as string,
-      center: record.get('Center') as { lat: number, lng: number } || null,
-      coordinates: record.get('Coordinates') as { lat: number, lng: number }[] || [],
-      historicalName: record.get('HistoricalName') as string || null,
-      buildingPoints: record.get('BuildingPoints') as number || 0
-    }));
-    
-    // Fetch land groups to determine connectivity
+    console.log(`Found ${aiOwnersWithLands.length} AI citizens who own lands`);
+    return aiOwnersWithLands;
+  } catch (error) {
+    console.error('Error fetching AI citizens with lands:', error);
+    return [];
+  }
+}
+
+// Helper function to fetch land groups data
+async function fetchLandGroups(): Promise<Record<string, string>> {
+  try {
     console.log('Fetching land groups for connectivity analysis...');
-    const landGroupsResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/land-groups?includeUnconnected=true&minSize=1`);
+    const landGroupsResponse = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/land-groups?includeUnconnected=true&minSize=1`
+    );
     
     let landGroups: Record<string, string> = {};
     
@@ -62,6 +84,174 @@ export async function GET(request: NextRequest) {
       }
     } else {
       console.warn('Failed to fetch land groups, proceeding without connectivity data');
+    }
+    
+    return landGroups;
+  } catch (error) {
+    console.error('Error fetching land groups:', error);
+    return {};
+  }
+}
+
+// Helper function to save relevancies to Airtable
+async function saveRelevancies(
+  base: any, 
+  aiUsername: string, 
+  relevancyScores: Record<string, any>,
+  allLands: any[]
+): Promise<number> {
+  try {
+    // Delete existing relevancy records for this AI to avoid duplicates
+    const existingRecords = await base(AIRTABLE_RELEVANCIES_TABLE)
+      .select({
+        filterByFormula: `AND({RelevantToCitizen} = '${aiUsername}', {Category} = 'proximity')`
+      })
+      .all();
+      
+    if (existingRecords.length > 0) {
+      // Delete in batches of 10 to avoid API limits
+      const recordIds = existingRecords.map(record => record.id);
+      for (let i = 0; i < recordIds.length; i += 10) {
+        const batch = recordIds.slice(i, i + 10);
+        await base(AIRTABLE_RELEVANCIES_TABLE).destroy(batch);
+      }
+      console.log(`Deleted ${existingRecords.length} existing relevancy records for ${aiUsername}`);
+    }
+      
+    // Create new relevancy records
+    const relevancyRecords = Object.entries(relevancyScores).map(([landId, data]) => {
+      return {
+        fields: {
+          AssetID: landId,
+          AssetType: 'land',
+          Category: 'proximity',
+          Type: data.type,
+          TargetCitizen: data.closestLandId ? allLands.find(land => land.id === data.closestLandId)?.owner || '' : '',
+          RelevantToCitizen: aiUsername,
+          Score: data.score,
+          TimeHorizon: data.timeHorizon || 'medium',
+          Title: data.title || `Nearby Land (${data.distance}m)`,
+          Description: data.description || `This land is ${data.distance} meters from your nearest property`,
+          Notes: data.isConnected ? 'Connected by bridges to your existing properties' : '',
+          Status: data.status || 'active',
+          CreatedAt: new Date().toISOString()
+        }
+      };
+    });
+      
+    // Create records in batches of 10
+    for (let i = 0; i < relevancyRecords.length; i += 10) {
+      const batch = relevancyRecords.slice(i, i + 10);
+      await base(AIRTABLE_RELEVANCIES_TABLE).create(batch);
+    }
+      
+    console.log(`Created ${relevancyRecords.length} new relevancy records for ${aiUsername}`);
+    return relevancyRecords.length;
+  } catch (error) {
+    console.warn('Could not save to RELEVANCIES table:', error.message);
+    throw error;
+  }
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    // Check if Airtable credentials are configured
+    if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
+      return NextResponse.json(
+        { error: 'Airtable credentials not configured' },
+        { status: 500 }
+      );
+    }
+    
+    // Initialize Airtable
+    const base = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
+    
+    // Get query parameters
+    const { searchParams } = new URL(request.url);
+    const aiUsername = searchParams.get('ai');
+    const calculateAll = searchParams.get('calculateAll') === 'true';
+    
+    // Fetch all lands from Airtable
+    console.log('Fetching all lands from Airtable...');
+    const landsRecords = await base(AIRTABLE_LANDS_TABLE).select().all();
+    
+    // Transform land records to a more usable format
+    const allLands = landsRecords.map(record => ({
+      id: record.id,
+      owner: record.get('Owner') as string,
+      center: record.get('Center') as { lat: number, lng: number } | null,
+      coordinates: record.get('Coordinates') as { lat: number, lng: number }[] || [],
+      historicalName: record.get('HistoricalName') as string || null,
+      buildingPoints: record.get('BuildingPoints') as number || 0
+    }));
+    
+    // Fetch land groups data
+    const landGroups = await fetchLandGroups();
+    
+    // If calculateAll is true, calculate for all AI citizens who own lands
+    if (calculateAll) {
+      console.log('Calculating relevancies for all AI citizens who own lands');
+      
+      // Get all AI citizens who own lands
+      const aiOwnersWithLands = await getAllAiCitizensWithLands(base);
+      
+      if (aiOwnersWithLands.length === 0) {
+        return NextResponse.json({
+          success: true,
+          message: 'No AI citizens with lands found'
+        });
+      }
+      
+      const results = {};
+      let totalRelevanciesCreated = 0;
+      
+      // Calculate and save relevancies for each AI citizen
+      for (const aiOwner of aiOwnersWithLands) {
+        console.log(`Calculating relevancies for AI: ${aiOwner}`);
+        
+        // Get lands owned by this AI
+        const aiLands = allLands.filter(land => land.owner === aiOwner);
+        
+        if (aiLands.length === 0) {
+          console.log(`No lands found for AI: ${aiOwner}, skipping`);
+          continue;
+        }
+        
+        // Calculate land proximity relevancy with connectivity data
+        // Use batch processing for better performance with large datasets
+        const relevancyScores = relevancyService.calculateRelevancyInBatches(
+          aiLands, 
+          allLands, 
+          landGroups,
+          100 // Process in batches of 100 lands
+        );
+        
+        try {
+          // Save relevancies to Airtable
+          const relevanciesCreated = await saveRelevancies(base, aiOwner, relevancyScores, allLands);
+          
+          totalRelevanciesCreated += relevanciesCreated;
+          
+          // Store results
+          results[aiOwner] = {
+            ownedLandCount: aiLands.length,
+            relevanciesCreated
+          };
+        } catch (error) {
+          console.warn(`Could not save to RELEVANCIES table for ${aiOwner}:`, error.message);
+          results[aiOwner] = {
+            ownedLandCount: aiLands.length,
+            error: error.message
+          };
+        }
+      }
+      
+      return NextResponse.json({
+        success: true,
+        aiCount: Object.keys(results).length,
+        totalRelevanciesCreated,
+        results
+      });
     }
     
     // If an AI username is specified, calculate relevancy only for that AI
@@ -175,36 +365,14 @@ export async function POST(request: NextRequest) {
     const allLands = landsRecords.map(record => ({
       id: record.id,
       owner: record.get('Owner') as string,
-      center: record.get('Center') as { lat: number, lng: number } || null,
+      center: record.get('Center') as { lat: number, lng: number } | null,
       coordinates: record.get('Coordinates') as { lat: number, lng: number }[] || [],
       historicalName: record.get('HistoricalName') as string || null,
       buildingPoints: record.get('BuildingPoints') as number || 0
     }));
     
-    // Fetch land groups to determine connectivity
-    console.log('Fetching land groups for connectivity analysis...');
-    const landGroupsResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/land-groups?includeUnconnected=true&minSize=1`);
-    
-    let landGroups: Record<string, string> = {};
-    
-    if (landGroupsResponse.ok) {
-      const landGroupsData = await landGroupsResponse.json();
-      
-      if (landGroupsData.success && landGroupsData.landGroups) {
-        console.log(`Loaded ${landGroupsData.landGroups.length} land groups for connectivity analysis`);
-        
-        // Create a mapping of polygon ID to group ID
-        landGroupsData.landGroups.forEach((group: any) => {
-          if (group.lands && Array.isArray(group.lands)) {
-            group.lands.forEach((landId: string) => {
-              landGroups[landId] = group.groupId;
-            });
-          }
-        });
-      }
-    } else {
-      console.warn('Failed to fetch land groups, proceeding without connectivity data');
-    }
+    // Fetch land groups data
+    const landGroups = await fetchLandGroups();
     
     // Get lands owned by this AI
     const aiLands = allLands.filter(land => land.owner === aiUsername);
@@ -224,68 +392,30 @@ export async function POST(request: NextRequest) {
     Object.entries(relevancyScores).forEach(([landId, data]) => {
       simpleScores[landId] = data.score;
     });
-      
-    // Create or update records in the RELEVANCIES table
-    // First check if the table exists, if not, we'll skip this step
+    
     try {
-      // Delete existing relevancy records for this AI to avoid duplicates
-      const existingRecords = await base('RELEVANCIES')
-        .select({
-          filterByFormula: `AND({RelevantToCitizen} = '${aiUsername}', {Category} = 'proximity')`
-        })
-        .all();
-        
-      if (existingRecords.length > 0) {
-        // Delete in batches of 10 to avoid API limits
-        const recordIds = existingRecords.map(record => record.id);
-        for (let i = 0; i < recordIds.length; i += 10) {
-          const batch = recordIds.slice(i, i + 10);
-          await base('RELEVANCIES').destroy(batch);
-        }
-        console.log(`Deleted ${existingRecords.length} existing relevancy records for ${aiUsername}`);
-      }
-        
-      // Create new relevancy records
-      const relevancyRecords = Object.entries(relevancyScores).map(([landId, data]) => {
-        return {
-          fields: {
-            AssetID: landId,
-            AssetType: 'land',
-            Category: 'proximity',
-            Type: data.type,
-            TargetCitizen: data.closestLandId ? allLands.find(land => land.id === data.closestLandId)?.owner || '' : '',
-            RelevantToCitizen: aiUsername,
-            Score: data.score,
-            TimeHorizon: data.timeHorizon || 'medium',
-            Title: data.title || `Nearby Land (${data.distance}m)`,
-            Description: data.description || `This land is ${data.distance} meters from your nearest property`,
-            Notes: data.isConnected ? 'Connected by bridges to your existing properties' : '',
-            Status: data.status || 'active',
-            CreatedAt: new Date().toISOString()
-          }
-        };
-      });
-        
-      // Create records in batches of 10
-      for (let i = 0; i < relevancyRecords.length; i += 10) {
-        const batch = relevancyRecords.slice(i, i + 10);
-        await base('RELEVANCIES').create(batch);
-      }
-        
-      console.log(`Created ${relevancyRecords.length} new relevancy records for ${aiUsername}`);
-    } catch (error) {
-      console.warn('Could not save to RELEVANCIES table:', error.message);
-      // Continue without saving to Airtable
-    }
+      // Save relevancies to Airtable
+      await saveRelevancies(base, aiUsername, relevancyScores, allLands);
       
-    return NextResponse.json({
-      success: true,
-      ai: aiUsername,
-      ownedLandCount: aiLands.length,
-      relevancyScores: simpleScores,
-      detailedRelevancy: relevancyScores,
-      saved: true
-    });
+      return NextResponse.json({
+        success: true,
+        ai: aiUsername,
+        ownedLandCount: aiLands.length,
+        relevancyScores: simpleScores,
+        detailedRelevancy: relevancyScores,
+        saved: true
+      });
+    } catch (error) {
+      return NextResponse.json({
+        success: false,
+        ai: aiUsername,
+        ownedLandCount: aiLands.length,
+        relevancyScores: simpleScores,
+        detailedRelevancy: relevancyScores,
+        saved: false,
+        error: error.message
+      });
+    }
     
   } catch (error) {
     console.error('Error calculating and saving relevancies:', error);
