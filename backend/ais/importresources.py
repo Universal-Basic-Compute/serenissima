@@ -36,12 +36,12 @@ def initialize_airtable():
     return tables
 
 def get_ai_citizens(tables) -> List[Dict]:
-    """Get all citizens that are marked as AI."""
+    """Get all citizens that are marked as AI, are in Venice, and have appropriate social class."""
     try:
-        # Query citizens with IsAI field set to true
-        formula = "{IsAI}=1"
+        # Query citizens with IsAI=true, InVenice=true, and SocialClass is either Nobili or Cittadini
+        formula = "AND({IsAI}=1, {InVenice}=1, OR({SocialClass}='Nobili', {SocialClass}='Cittadini'))"
         ai_citizens = tables["citizens"].all(formula=formula)
-        print(f"Found {len(ai_citizens)} AI citizens")
+        print(f"Found {len(ai_citizens)} AI citizens in Venice with Nobili or Cittadini social class")
         return ai_citizens
     except Exception as e:
         print(f"Error getting AI citizens: {str(e)}")
