@@ -53,7 +53,10 @@ export class HoverStateService {
     if (
       this.currentState.type !== type || 
       this.currentState.id !== id ||
-      JSON.stringify(this.currentState.data) !== JSON.stringify(data)
+      // Use a more conservative approach for data comparison
+      (data !== null && this.currentState.data === null) ||
+      (data !== null && this.currentState.data !== null && 
+       JSON.stringify(this.currentState.data) !== JSON.stringify(data))
     ) {
       this.currentState = {
         type,
@@ -64,7 +67,16 @@ export class HoverStateService {
       };
       
       this.isHovering = type !== 'none';
-      this.throttledEmit(this.currentState);
+      
+      // Only emit if enough time has passed since last emit
+      const now = Date.now();
+      if (now - this.lastEmitTime > this.emitThrottleTime) {
+        eventBus.emit(HOVER_STATE_CHANGED, this.currentState);
+        this.lastEmitTime = now;
+      } else {
+        // Use the throttled emit for frequent updates
+        this.throttledEmit(this.currentState);
+      }
     }
   }
   

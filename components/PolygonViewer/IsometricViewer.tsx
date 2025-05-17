@@ -2382,9 +2382,14 @@ number => {
     setPolygonsToRender(newPolygonsToRender);
   }, [calculatePolygonsToRender]);
 
+  // Reference to track if we're currently drawing
+  const isDrawingRef = useRef(false);
+  
   // Draw the isometric view
   useEffect(() => {
-    if (loading || !canvasRef.current || polygons.length === 0) return;
+    if (loading || !canvasRef.current || polygons.length === 0 || isDrawingRef.current) return;
+    
+    isDrawingRef.current = true;
     
     // Remove debug logging for hover state
     
@@ -2398,19 +2403,33 @@ number => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
-    // Reset any transformations
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    
-    // Set canvas size
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // Draw water background
-    ctx.fillStyle = '#87CEEB';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Use requestAnimationFrame to ensure smooth rendering
+    requestAnimationFrame(() => {
+      const canvas = canvasRef.current;
+      if (!canvas) {
+        isDrawingRef.current = false;
+        return;
+      }
+      
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        isDrawingRef.current = false;
+        return;
+      }
+      
+      // Reset any transformations
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      
+      // Set canvas size
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw water background
+      ctx.fillStyle = '#87CEEB';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
   
     // Draw water points in all views, but with different styling based on view
     if (waterPoints.length > 0) {
@@ -2906,50 +2925,35 @@ number => {
         
         // Check if this is a bridge
         const isBridge = building.type.toLowerCase().includes('bridge');
-        
+          
         if (isBridge) {
           // Make the bridge rectangle smaller in length but keep the width
           const bridgeWidth = squareSize * 0.8; // Keep the same width
           const bridgeHeight = squareSize * 0.08; // Reduce height for shorter bridges
-          
-          // Use the orientation from the bridge data directly
+            
+          // Use the orientation from the bridge data directly or from cache
           let angle = 0;
-          
-          // Debug log to check if we're reaching this code
-          console.log(`Processing bridge ${building.id}, has orientation: ${building.orientation !== undefined}`);
-          
-          if (building.orientation !== undefined) {
+            
+          // Create a stable bridge orientation cache if it doesn't exist
+          if (!window.__bridgeOrientationCache) {
+            window.__bridgeOrientationCache = {};
+          }
+            
+          // Check if we already have a cached orientation for this bridge
+          if (window.__bridgeOrientationCache[building.id] !== undefined) {
+            angle = window.__bridgeOrientationCache[building.id];
+          } else if (building.orientation !== undefined) {
             // Use the orientation value directly from the API
             angle = building.orientation;
+            // Cache it for future renders
+            window.__bridgeOrientationCache[building.id] = angle;
+              
             console.log(`Bridge ${building.id} orientation: ${angle} radians (${angle * 180 / Math.PI} degrees)`);
-            
-            // Save the current context state
-            ctx.save();
-            
-            // Translate to the bridge position
-            ctx.translate(isoPos.x, isoPos.y);
-            
-            // Rotate the context using the orientation value directly
-            ctx.rotate(angle);
-            
-            // Draw the rectangle centered at origin (0,0)
-            ctx.beginPath();
-            ctx.rect(
-              -bridgeWidth/2, 
-              -bridgeHeight/2, 
-              bridgeWidth, 
-              bridgeHeight
-            );
-            ctx.fill();
-            ctx.stroke();
-            
-            // Restore the context state
-            ctx.restore();
           } else {
             // Fallback to calculating based on polygon center if orientation is not provided
             let polygonCenter = { x: 0, y: 0 };
             let foundPolygon = false;
-            
+              
             // Try to find which polygon contains this bridge
             for (const poly of polygonsToRender) {
               if (poly.polygon.id === building.land_id) {
@@ -2960,48 +2964,40 @@ number => {
                 break;
               }
             }
-            
+              
             if (foundPolygon) {
               // Calculate angle from bridge to polygon center
               const dx = polygonCenter.x - isoPos.x;
               const dy = polygonCenter.y - isoPos.y;
               angle = Math.atan2(dy, dx) + Math.PI/2; // Add 90 degrees to make it perpendicular
-              
-              // Save the current context state
-              ctx.save();
-              
-              // Translate to the bridge position
-              ctx.translate(isoPos.x, isoPos.y);
-              
-              // Rotate the context
-              ctx.rotate(angle);
-              
-              // Draw the rectangle centered at origin (0,0)
-              ctx.beginPath();
-              ctx.rect(
-                -bridgeWidth/2, 
-                -bridgeHeight/2, 
-                bridgeWidth, 
-                bridgeHeight
-              );
-              ctx.fill();
-              ctx.stroke();
-              
-              // Restore the context state
-              ctx.restore();
-            } else {
-              // If we couldn't find the polygon, draw a default horizontal bridge
-              ctx.beginPath();
-              ctx.rect(
-                isoPos.x - bridgeWidth/2, 
-                isoPos.y - bridgeHeight/2, 
-                bridgeWidth, 
-                bridgeHeight
-              );
-              ctx.fill();
-              ctx.stroke();
+                
+              // Cache the calculated orientation
+              window.__bridgeOrientationCache[building.id] = angle;
             }
           }
+            
+          // Save the current context state
+          ctx.save();
+            
+          // Translate to the bridge position
+          ctx.translate(isoPos.x, isoPos.y);
+            
+          // Rotate the context using the orientation value
+          ctx.rotate(angle);
+            
+          // Draw the rectangle centered at origin (0,0)
+          ctx.beginPath();
+          ctx.rect(
+            -bridgeWidth/2, 
+            -bridgeHeight/2, 
+            bridgeWidth, 
+            bridgeHeight
+          );
+          ctx.fill();
+          ctx.stroke();
+            
+          // Restore the context state
+          ctx.restore();
         } else {
           // Draw square for non-bridge buildings
           ctx.beginPath();
@@ -3810,6 +3806,9 @@ number => {
     };
     
     window.addEventListener('forceRedraw', handleForceRedraw);
+    
+    // Mark drawing as complete
+    isDrawingRef.current = false;
     
     return () => {
       window.removeEventListener('forceRedraw', handleForceRedraw);

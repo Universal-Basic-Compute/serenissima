@@ -43,6 +43,7 @@ const StorageProgressBar = ({ used, capacity }) => {
 declare global {
   interface Window {
     __polygonData?: any[];
+    __bridgeOrientationCache?: Record<string, number>;
   }
 }
 

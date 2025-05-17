@@ -294,79 +294,88 @@ export class InteractionService {
       this.state.mousePosition = { x: mouseX, y: mouseY };
       setters.setMousePosition({ x: mouseX, y: mouseY });
       
-      // Handle hover detection
-      let hoverDetected = false;
-      let hoverType: 'none' | 'polygon' | 'building' | 'buildingPoint' | 'canalPoint' | 'bridgePoint' | 'citizen' | 'resource' | 'waterPoint' = 'none';
-      let hoverId: string | null = null;
-      let hoverData: any = null;
-      
-      // Check for polygon hover - ONLY in land view
-      if (data.polygonsToRender && activeView === 'land') {
-        for (const { polygon, coords } of data.polygonsToRender) {
-          if (RenderService.prototype.isPointInPolygon(mouseX, mouseY, coords)) {
-            hoverType = 'polygon';
-            hoverId = polygon.id;
-            hoverData = polygon;
-            canvas.style.cursor = 'pointer';
-            hoverDetected = true;
-            break;
+      // Only process hover detection if we're not dragging
+      if (!this.isDraggingRef) {
+        // Create a stable hover state that doesn't change unless something meaningful changes
+        let newHoverState = {
+          type: 'none' as const,
+          id: null as string | null,
+          data: null
+        };
+        
+        let hoverDetected = false;
+        
+        // Check for polygon hover - ONLY in land view
+        if (data.polygonsToRender && activeView === 'land') {
+          for (const { polygon, coords } of data.polygonsToRender) {
+            if (RenderService.prototype.isPointInPolygon(mouseX, mouseY, coords)) {
+              newHoverState = {
+                type: 'polygon',
+                id: polygon.id,
+                data: polygon
+              };
+              canvas.style.cursor = 'pointer';
+              hoverDetected = true;
+              break;
+            }
           }
         }
-      }
-      
-      // Check for building hover if no polygon is hovered
-      if (!hoverDetected && data.buildings) {
-        for (const building of data.buildings) {
-          if (!building.position) continue;
-          
-          let position;
-          if (typeof building.position === 'string') {
-            try {
-              position = JSON.parse(building.position);
-            } catch (e) {
+        
+        // Check for building hover if no polygon is hovered
+        if (!hoverDetected && data.buildings) {
+          for (const building of data.buildings) {
+            if (!building.position) continue;
+            
+            let position;
+            if (typeof building.position === 'string') {
+              try {
+                position = JSON.parse(building.position);
+              } catch (e) {
+                continue;
+              }
+            } else {
+              position = building.position;
+            }
+            
+            // Convert lat/lng to isometric coordinates
+            let x, y;
+            if ('lat' in position && 'lng' in position) {
+              x = (position.lng - 12.3326) * 20000;
+              y = (position.lat - 45.4371) * 20000;
+            } else if ('x' in position && 'z' in position) {
+              x = position.x;
+              y = position.z;
+            } else {
               continue;
             }
-          } else {
-            position = building.position;
-          }
-          
-          // Convert lat/lng to isometric coordinates
-          let x, y;
-          if ('lat' in position && 'lng' in position) {
-            x = (position.lng - 12.3326) * 20000;
-            y = (position.lat - 45.4371) * 20000;
-          } else if ('x' in position && 'z' in position) {
-            x = position.x;
-            y = position.z;
-          } else {
-            continue;
-          }
-          
-          const isoPos = {
-            x: CoordinateService.worldToScreen(x, y, scale, offset, canvas.width, canvas.height).x,
-            y: CoordinateService.worldToScreen(x, y, scale, offset, canvas.width, canvas.height).y
-          };
-          
-          // Get building size
-          const size = this.getBuildingSize(building.type);
-          const squareSize = Math.max(size.width, size.depth) * scale * 0.6;
-          
-          // Check if mouse is over this building with a small buffer
-          if (
-            mouseX >= isoPos.x - squareSize/2 - 2 && // Add 2px buffer
-            mouseX <= isoPos.x + squareSize/2 + 2 && // Add 2px buffer
-            mouseY >= isoPos.y - squareSize/2 - 2 && // Add 2px buffer
-            mouseY <= isoPos.y + squareSize/2 + 2    // Add 2px buffer
-          ) {
-            hoverType = 'building';
-            hoverId = building.id;
-            hoverData = building;
-            canvas.style.cursor = 'pointer';
-            hoverDetected = true;
-            break;
+            
+            const isoPos = {
+              x: CoordinateService.worldToScreen(x, y, scale, offset, canvas.width, canvas.height).x,
+              y: CoordinateService.worldToScreen(x, y, scale, offset, canvas.width, canvas.height).y
+            };
+            
+            // Get building size
+            const size = this.getBuildingSize(building.type);
+            const squareSize = Math.max(size.width, size.depth) * scale * 0.6;
+            
+            // Check if mouse is over this building with a small buffer
+            if (
+              mouseX >= isoPos.x - squareSize/2 - 2 && // Add 2px buffer
+              mouseX <= isoPos.x + squareSize/2 + 2 && // Add 2px buffer
+              mouseY >= isoPos.y - squareSize/2 - 2 && // Add 2px buffer
+              mouseY <= isoPos.y + squareSize/2 + 2    // Add 2px buffer
+            ) {
+              newHoverState = {
+                type: 'building',
+                id: building.id,
+                data: building
+              };
+              canvas.style.cursor = 'pointer';
+              hoverDetected = true;
+              break;
+            }
           }
         }
-      }
       
       // Check for building point hover
       if (!hoverDetected && data.emptyBuildingPoints && activeView === 'buildings') {
@@ -566,22 +575,33 @@ export class InteractionService {
         }
       }
       
-      // Update hover state based on what was detected
-      if (hoverDetected) {
-        hoverStateService.setHoverState(hoverType, hoverId, hoverData, { x: mouseX, y: mouseY });
-        this.isHoveringRef = true;
-      } else if (hoverStateService.isCurrentlyHovering()) {
-        hoverStateService.clearHoverState();
-        this.isHoveringRef = false;
-        
-        // Set cursor based on dragging state
-        if (this.isDraggingRef) {
-          canvas.style.cursor = 'grabbing';
-        } else {
-          canvas.style.cursor = 'grab';
+        // Only update hover state if it actually changed
+        if (
+          hoverStateService.getHoverType() !== newHoverState.type || 
+          hoverStateService.getHoverId() !== newHoverState.id
+        ) {
+          if (hoverDetected) {
+            hoverStateService.setHoverState(
+              newHoverState.type, 
+              newHoverState.id, 
+              newHoverState.data, 
+              { x: mouseX, y: mouseY }
+            );
+            this.isHoveringRef = true;
+          } else if (hoverStateService.isCurrentlyHovering()) {
+            hoverStateService.clearHoverState();
+            this.isHoveringRef = false;
+            
+            // Set cursor based on dragging state
+            if (this.isDraggingRef) {
+              canvas.style.cursor = 'grabbing';
+            } else {
+              canvas.style.cursor = 'grab';
+            }
+          }
         }
       }
-    }, 200); // Increase from 150ms to 200ms throttle time to further reduce flickering
+    }, 250); // Increase to 250ms throttle time to further reduce flickering
     
     // Handle mouse click with debounce to prevent multiple rapid clicks
     const handleClick = debounce((e: MouseEvent) => {
