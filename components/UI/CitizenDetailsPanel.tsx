@@ -512,10 +512,17 @@ Be historically accurate but engaging. Speak in first person as if you are this 
   }, [messages]);
   
   
-  const formatDucats = (amount: number | string) => {
-    if (!amount && amount !== 0) return 'Unknown';
+  const formatDucats = (amount: number | string | undefined) => {
+    if (amount === undefined || amount === null) return 'Unknown';
+    
+    // Handle both string and number formats
     const numericAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
-    return isNaN(numericAmount) ? 'Unknown' : numericAmount.toLocaleString() + ' ⚜️'; // Using lys emoji instead of ₫
+    
+    // Check if it's a valid number
+    if (isNaN(numericAmount)) return 'Unknown';
+    
+    // Format with commas for thousands
+    return numericAmount.toLocaleString() + ' ⚜️'; // Using lys emoji instead of ₫
   };
   
   const formatDate = (dateString: string) => {
@@ -809,61 +816,80 @@ Be historically accurate but engaging. Speak in first person as if you are this 
           <div className="flex flex-col items-center mb-6">
           {/* Much larger image */}
           <div className="w-48 h-48 mb-4 relative">
-            {citizen.imageurl ? (
+            {citizen.imageurl || citizen.profileimage ? (
               <img 
-                src={citizen.imageurl.endsWith('.jpg') ? citizen.imageurl : `/images/citizens/${citizen.citizenid}.jpg`} 
+                src={citizen.imageurl || citizen.profileimage} 
                 alt={`${citizen.firstname} ${citizen.lastname}`} 
                 className="w-full h-full object-cover rounded-lg border-2 border-amber-600 shadow-lg"
-                onLoad={(e) => {
-                  console.log(`Successfully loaded citizen image: ${(e.target as HTMLImageElement).src}`);
-                }}
                 onError={(e) => {
-                  // Log the error
                   console.error(`Failed to load citizen image: ${(e.target as HTMLImageElement).src}`);
                   
-                  // Try to fetch the image directly to see if it exists
-                  fetch((e.target as HTMLImageElement).src, { method: 'HEAD' })
-                    .then(response => {
-                      console.log(`Image HEAD request returned: ${response.status} ${response.statusText}`);
-                    })
-                    .catch(error => {
-                      console.error(`Image HEAD request failed: ${error}`);
-                    });
-                  
-                  // Fallback if image fails to load
-                  (e.target as HTMLImageElement).style.display = 'none';
-                  (e.target as HTMLImageElement).parentElement!.innerHTML = `
-                    <div class="w-full h-full bg-amber-200 rounded-lg border-2 border-amber-600 flex items-center justify-center text-amber-800">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                    </div>
-                  `;
+                  // Try fallback to username-based path
+                  if (citizen.username) {
+                    const fallbackSrc = `/images/citizens/${citizen.username}.jpg`;
+                    console.log(`Trying fallback image: ${fallbackSrc}`);
+                    (e.target as HTMLImageElement).src = fallbackSrc;
+                    
+                    // Add a second error handler for the fallback
+                    (e.target as HTMLImageElement).onerror = () => {
+                      console.error(`Fallback image also failed: ${fallbackSrc}`);
+                      // Replace with placeholder
+                      const parent = (e.target as HTMLImageElement).parentElement;
+                      if (parent) {
+                        parent.innerHTML = `
+                          <div class="w-full h-full bg-amber-200 rounded-lg border-2 border-amber-600 flex items-center justify-center text-amber-800">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                          </div>
+                        `;
+                      }
+                    };
+                  } else {
+                    // Replace with placeholder immediately if no username
+                    const parent = (e.target as HTMLImageElement).parentElement;
+                    if (parent) {
+                      parent.innerHTML = `
+                        <div class="w-full h-full bg-amber-200 rounded-lg border-2 border-amber-600 flex items-center justify-center text-amber-800">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                        </div>
+                      `;
+                    }
+                  }
                 }}
               />
             ) : (
-              <img 
-                src={`/images/citizens/${citizen.citizenid}.jpg`}
-                alt={`${citizen.firstname} ${citizen.lastname}`} 
-                className="w-full h-full object-cover rounded-lg border-2 border-amber-600 shadow-lg"
-                onLoad={(e) => {
-                  console.log(`Successfully loaded citizen image: ${(e.target as HTMLImageElement).src}`);
-                }}
-                onError={(e) => {
-                  // Log the error
-                  console.error(`Failed to load citizen image: ${(e.target as HTMLImageElement).src}`);
-                  
-                  // Fallback if image fails to load
-                  (e.target as HTMLImageElement).style.display = 'none';
-                  (e.target as HTMLImageElement).parentElement!.innerHTML = `
-                    <div class="w-full h-full bg-amber-200 rounded-lg border-2 border-amber-600 flex items-center justify-center text-amber-800">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                    </div>
-                  `;
-                }}
-              />
+              // Try username-based path directly if no imageurl
+              citizen.username ? (
+                <img 
+                  src={`/images/citizens/${citizen.username}.jpg`}
+                  alt={`${citizen.firstname} ${citizen.lastname}`} 
+                  className="w-full h-full object-cover rounded-lg border-2 border-amber-600 shadow-lg"
+                  onError={(e) => {
+                    console.error(`Failed to load citizen image: ${(e.target as HTMLImageElement).src}`);
+                    // Replace with placeholder
+                    const parent = (e.target as HTMLImageElement).parentElement;
+                    if (parent) {
+                      parent.innerHTML = `
+                        <div class="w-full h-full bg-amber-200 rounded-lg border-2 border-amber-600 flex items-center justify-center text-amber-800">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                        </div>
+                      `;
+                    }
+                  }}
+                />
+              ) : (
+                // Placeholder if no image sources available
+                <div className="w-full h-full bg-amber-200 rounded-lg border-2 border-amber-600 flex items-center justify-center text-amber-800">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+              )
             )}
           </div>
         
@@ -874,7 +900,7 @@ Be historically accurate but engaging. Speak in first person as if you are this 
             </div>
             
             <div className="text-amber-700 text-sm font-medium">
-              Ducats: {formatDucats(citizen.wealth)}
+              Ducats: {formatDucats(citizen.Ducats || citizen.wealth || citizen.ducats)}
             </div>
           </div>
         </div>
