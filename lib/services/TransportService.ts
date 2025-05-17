@@ -2811,9 +2811,9 @@ export class TransportService {
   }
   
   // Add a new method to find the nearest public dock
-  private async findNearestPublicDock(point: Point): Promise<any | null> {
+  private async findNearestPublicDock(point: Point, landGroupId?: string): Promise<any | null> {
     try {
-      console.log(`Finding nearest public dock to ${point.lat},${point.lng}`);
+      console.log(`Finding nearest public dock to ${point.lat},${point.lng}${landGroupId ? ` in land group ${landGroupId}` : ''}`);
       
       // Determine if we're running in Node.js or browser environment
       const isNode = typeof window === 'undefined';
@@ -2849,14 +2849,43 @@ export class TransportService {
       console.log(`Found ${data.docks.length} docks in API response`);
       
       // Filter to only include constructed public docks
-      const publicDocks = data.docks.filter(dock => 
+      let publicDocks = data.docks.filter(dock => 
         dock.isConstructed && 
         dock.position && 
         (dock.id?.includes('public_dock') || dock.type?.includes('public_dock'))
       );
       
+      // If a land group ID is provided, filter docks to only include those in the same land group
+      if (landGroupId) {
+        // First, get the land groups data
+        const landGroupsResponse = await fetch(`${baseUrl}/api/land-groups?includeUnconnected=true&minSize=1`, {
+          signal: controller.signal
+        });
+        
+        if (landGroupsResponse.ok) {
+          const landGroupsData = await landGroupsResponse.json();
+          if (landGroupsData.success && landGroupsData.landGroups) {
+            // Find the land group that contains the specified landGroupId
+            const targetGroup = landGroupsData.landGroups.find(group => 
+              group.groupId === landGroupId || (group.lands && group.lands.includes(landGroupId))
+            );
+            
+            if (targetGroup && targetGroup.lands) {
+              console.log(`Filtering docks to land group ${targetGroup.groupId} with ${targetGroup.lands.length} lands`);
+              
+              // Filter docks to only include those in the same land group
+              publicDocks = publicDocks.filter(dock => 
+                dock.land_id && targetGroup.lands.includes(dock.land_id)
+              );
+              
+              console.log(`Found ${publicDocks.length} public docks in the same land group`);
+            }
+          }
+        }
+      }
+      
       if (publicDocks.length === 0) {
-        console.warn('No public docks found, trying all constructed docks');
+        console.warn('No suitable public docks found, trying all constructed docks');
         // If no public docks, try any constructed dock
         const constructedDocks = data.docks.filter(dock => 
           dock.isConstructed && dock.position
@@ -3156,13 +3185,49 @@ export class TransportService {
       
       console.log(`Using water graph with ${this.waterGraph.waterPoints.length} water points`);
       
-      // STEP 1: Find the nearest public dock to the start point
-      const startDock = await this.findNearestPublicDock(startPoint);
-      console.log(`Nearest public dock to start: ${startDock ? startDock.id : 'none'}`);
+      // STEP 1: Find the polygon containing the start point
+      const startPolygon = this.findPolygonContainingPoint(startPoint, this.polygons);
+      if (!startPolygon) {
+        console.log('Start point is not within any polygon, creating direct water path');
+        return this.createDirectWaterPath(startPoint, endPoint);
+      }
       
-      // If we couldn't find a public dock for the start, create a direct path
+      // STEP 2: Find the land group of the start polygon
+      let startLandGroupId = startPolygon.id; // Default to the polygon ID itself
+      
+      // Try to get the actual land group ID
+      try {
+        const isNode = typeof window === 'undefined';
+        const baseUrl = isNode ? (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000') : '';
+        
+        const landGroupsResponse = await fetch(`${baseUrl}/api/land-groups?includeUnconnected=true&minSize=1`);
+        
+        if (landGroupsResponse.ok) {
+          const landGroupsData = await landGroupsResponse.json();
+          if (landGroupsData.success && landGroupsData.landGroups) {
+            // Find the land group that contains the start polygon
+            const startGroup = landGroupsData.landGroups.find(group => 
+              group.lands && group.lands.includes(startPolygon.id)
+            );
+            
+            if (startGroup) {
+              startLandGroupId = startGroup.groupId;
+              console.log(`Start point is in land group ${startLandGroupId}`);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching land groups:', error);
+        // Continue with the polygon ID as fallback
+      }
+      
+      // STEP 3: Find the nearest public dock in the same land group as the start point
+      const startDock = await this.findNearestPublicDock(startPoint, startLandGroupId);
+      console.log(`Nearest public dock to start in same land group: ${startDock ? startDock.id : 'none'}`);
+      
+      // If we couldn't find a public dock in the same land group, create a direct path
       if (!startDock) {
-        console.log('No public dock found for start point, creating direct water path');
+        console.log('No public dock found in the same land group as start point, creating direct water path');
         return this.createDirectWaterPath(startPoint, endPoint);
       }
       
