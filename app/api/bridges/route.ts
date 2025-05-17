@@ -40,7 +40,9 @@ export async function GET(request: Request) {
               let position = null;
               try {
                 if (fields.Position) {
-                  position = JSON.parse(fields.Position);
+                  // Ensure Position is a string before parsing
+                  const positionStr = String(fields.Position);
+                  position = JSON.parse(positionStr);
                 } else if (fields.Point) {
                   // Extract position from Point field (format: type_lat_lng)
                   const pointValue = String(fields.Point);
