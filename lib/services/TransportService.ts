@@ -437,6 +437,15 @@ export class TransportService {
         this.transportEndPoint = null;
       }
     } catch (error) {
+      console.error('Error in API request:', error);
+      // Handle the error appropriately
+      eventBus.emit(EventTypes.TRANSPORT_ROUTE_ERROR, {
+        error: 'Error calculating route',
+        detail: 'Please try again. ' + (error instanceof Error ? error.message : String(error)),
+        severity: 'error'
+      });
+      this.transportEndPoint = null;
+    } catch (error) {
       console.error('Error calculating transport route:', error);
       
       // No fallback path creation - just log the error
