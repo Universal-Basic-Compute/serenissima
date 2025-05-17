@@ -2825,11 +2825,12 @@ number => {
           // Use the orientation from the bridge data directly
           let angle = 0;
           
+          // Debug log to check if we're reaching this code
+          console.log(`Processing bridge ${building.id}, has orientation: ${building.orientation !== undefined}`);
+          
           if (building.orientation !== undefined) {
             // Use the orientation value directly from the API
             angle = building.orientation;
-            
-            // Log the orientation value for debugging
             console.log(`Bridge ${building.id} orientation: ${angle}`);
           } else {
             // Fallback to calculating based on polygon center only if orientation is not provided
