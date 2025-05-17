@@ -289,18 +289,23 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
             # First try to parse the entire content as JSON
             result_data = json.loads(content)
         except json.JSONDecodeError:
-            # If that fails, try to extract JSON using a more precise regex
+            # If that fails, extract from first { to last }
             import re
-            # Look for JSON object with the expected fields
-            json_match = re.search(r'({[\s\S]*?"description"[\s\S]*?"imagePrompt"[\s\S]*?})', content)
-            if not json_match:
-                log.error(f"Could not extract JSON from Kinos Engine response: {content}")
-                return None
+            # Find the first { and last } in the content
+            first_brace = content.find('{')
+            last_brace = content.rfind('}')
             
-            try:
-                result_data = json.loads(json_match.group(1))
-            except json.JSONDecodeError as e:
-                log.error(f"Failed to parse extracted JSON: {e}")
+            if first_brace != -1 and last_brace != -1 and first_brace < last_brace:
+                json_str = content[first_brace:last_brace+1]
+                try:
+                    result_data = json.loads(json_str)
+                    log.info(f"Successfully extracted JSON using first-to-last brace method")
+                except json.JSONDecodeError as e:
+                    log.error(f"Failed to parse extracted JSON: {e}")
+                    log.error(f"Extracted content: {json_str}")
+                    return None
+            else:
+                log.error(f"Could not extract JSON from Kinos Engine response: {content}")
                 return None
         
         log.info(f"Successfully generated new description and image prompt for {username}")
