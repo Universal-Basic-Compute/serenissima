@@ -13,6 +13,16 @@ The activity system tracks what citizens are doing at any given time, creating a
 
 Activities are managed by the `createActivities.py` script, which runs periodically to ensure citizens always have something to do. This system applies equally to both AI and human citizens, creating a unified simulation where all citizens follow the same daily patterns and routines.
 
+### Unified Citizen Activity Model
+
+The activity system is a core component of La Serenissima's unified citizen model, where AI and human citizens are treated as equal participants in the game world:
+
+1. **Identical Activity Types**: Both AI and human citizens engage in the same types of activities
+2. **Shared Scheduling Logic**: The same scheduling algorithms determine when activities occur
+3. **Common Visualization**: Activities are displayed the same way on the map for all citizens
+4. **Equal Time Constraints**: The same time-based rules apply to activity duration and transitions
+5. **Unified Pathfinding**: All citizens use the same navigation system for movement
+
 ## Activity Types
 
 ### Rest

@@ -67,6 +67,16 @@ La Serenissima operates as a closed economic system where value circulates betwe
 
    This cycle applies equally to both AI and human citizens, creating a unified economy where all participants follow the same rules.
 
+### Unified Economic Participation
+
+The economic simulation treats AI and human citizens as equal participants:
+
+1. **Identical Economic Rules**: The same economic rules and constraints apply to all citizens
+2. **Equal Resource Access**: All citizens have the same access to resources and economic opportunities
+3. **Consistent Pricing**: The same pricing mechanisms apply to all economic transactions
+4. **Shared Market**: All citizens participate in the same marketplace for goods, services, and properties
+5. **Unified Taxation**: The same tax rules apply to all economic activities regardless of citizen type
+
 2. **Value Capture Mechanisms**:
    - Landowners capture value through land leases from building owners
    - Building owners profit from the difference between rents collected and leases paid

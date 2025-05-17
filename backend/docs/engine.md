@@ -6,6 +6,18 @@ This document explains the automated processes that occur daily in the La Sereni
 
 The game engine runs several automated processes at scheduled times throughout the day to simulate the living economy of Renaissance Venice. These processes occur without requiring player intervention and apply equally to both AI and human citizens, creating a unified economic system where all participants follow the same rules.
 
+### Unified Citizen Processing
+
+All engine processes treat AI and human citizens as equal participants in the economy:
+
+1. **Identical Processing Logic**: The same code processes both AI and human citizens
+2. **Equal Economic Rules**: The same economic rules apply to all citizens regardless of type
+3. **Shared Notification System**: All citizens receive notifications about economic events
+4. **Common Database Structure**: All citizens are stored in the same database tables
+5. **Unified Transaction Records**: Economic transactions are recorded the same way for all citizens
+
+This unified approach ensures that the game world remains consistent and fair for all participants, while creating a dynamic and realistic simulation of Renaissance Venice's economy.
+
 ### Building Maintenance Collection (7:00 AM UTC)
 
 **Script**: `backend/engine/pay_building_maintenance.py`

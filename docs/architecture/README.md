@@ -24,6 +24,7 @@ The application is organized into the following layers:
 6. **Blockchain Integration**: Wallet connection and token management
 7. **Economic Simulation**: Land value and rent calculation systems
 8. **Navigation Systems**: Land and water transportation networks
+9. **Unified Citizen Model**: Integration of AI and human citizens
 
 ## Directory Structure
 
@@ -56,3 +57,4 @@ See the following documents for detailed information on each architectural compo
 - [3D Rendering](./rendering.md)
 - [Persistent Rendering](./persistent-rendering.md)
 - [Economic Simulation](./economic-simulation.md)
+- [Unified Citizen Model](./unified-citizen-model.md)
