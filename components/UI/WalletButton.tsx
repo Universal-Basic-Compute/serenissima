@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useWalletContext } from './WalletProvider';
 import PlayerProfile from './PlayerProfile';
+import ProfileEditor from './ProfileEditor';
 
 interface WalletButtonProps {
   className?: string;
@@ -12,6 +13,7 @@ interface WalletButtonProps {
 export default function WalletButton({ className = '', onSettingsClick }: WalletButtonProps) {
   const { walletAddress, userProfile, isConnected, connectWallet } = useWalletContext();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [showProfileEditor, setShowProfileEditor] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   
   // Add effect to handle clicking outside the dropdown to close it
@@ -63,7 +65,7 @@ export default function WalletButton({ className = '', onSettingsClick }: Wallet
             </div>
             <button
               onClick={() => {
-                window.dispatchEvent(new CustomEvent('showUsernamePrompt'));
+                setShowProfileEditor(true);
                 setDropdownOpen(false);
               }}
               className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-amber-500 hover:text-white transition-colors"
@@ -232,4 +234,19 @@ export default function WalletButton({ className = '', onSettingsClick }: Wallet
       </button>
     );
   }
+  
+  // Render the profile editor if it's open
+  return (
+    <>
+      {showProfileEditor && (
+        <ProfileEditor 
+          onClose={() => setShowProfileEditor(false)}
+          onSuccess={(updatedProfile) => {
+            // You can add additional logic here if needed
+            console.log('Profile updated successfully:', updatedProfile);
+          }}
+        />
+      )}
+    </>
+  );
 }

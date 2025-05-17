@@ -11,6 +11,7 @@ interface WalletContextType {
   isConnecting: boolean;
   isInitialized: boolean;
   connectWallet: () => Promise<void>;
+  updateUserProfile: (updatedProfile: any) => Promise<void>;
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
@@ -133,6 +134,14 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     }
   };
   
+  // Function to update user profile
+  const updateUserProfile = async (updatedProfile: any) => {
+    if (updatedProfile) {
+      setUserProfile(updatedProfile);
+      localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
+    }
+  };
+
   // Initialize wallet from localStorage on component mount
   useEffect(() => {
     const initWallet = async () => {
@@ -170,7 +179,20 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       }
     };
     
+    // Add event listener for profile updates
+    const handleProfileUpdate = (event: CustomEvent) => {
+      if (event.detail) {
+        updateUserProfile(event.detail);
+      }
+    };
+    
+    window.addEventListener('userProfileUpdated', handleProfileUpdate as EventListener);
+    
     initWallet();
+    
+    return () => {
+      window.removeEventListener('userProfileUpdated', handleProfileUpdate as EventListener);
+    };
   }, []);
   
   const isConnected = !!walletAddress;
@@ -181,7 +203,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     isConnected,
     isConnecting,
     isInitialized,
-    connectWallet
+    connectWallet,
+    updateUserProfile
   };
   
   return (
