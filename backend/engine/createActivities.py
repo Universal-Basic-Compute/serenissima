@@ -385,6 +385,31 @@ def get_idle_citizens(tables) -> List[Dict]:
         log.error(f"Error fetching idle citizens: {e}")
         return []
 
+def get_citizen_workplace(tables, citizen_id: str, citizen_username: str) -> Optional[Dict]:
+    """Find the workplace building for a citizen."""
+    log.info(f"Finding workplace for citizen {citizen_id} (Username: {citizen_username})")
+    
+    try:
+        # Get buildings where this citizen is the occupant and the category is business
+        formula = f"AND({{Occupant}}='{citizen_username}', {{Category}}='business')"
+        
+        workplaces = tables['buildings'].all(formula=formula)
+        
+        if workplaces:
+            # Check if the workplace has a BuildingId
+            building_id = workplaces[0]['fields'].get('BuildingId')
+            if not building_id:
+                log.warning(f"Workplace found for citizen {citizen_id} but missing BuildingId: {workplaces[0]['id']}")
+            else:
+                log.info(f"Found workplace for citizen {citizen_id}: {building_id}")
+            return workplaces[0]
+        else:
+            log.info(f"No workplace found for citizen {citizen_id}")
+            return None
+    except Exception as e:
+        log.error(f"Error finding workplace for citizen {citizen_id}: {e}")
+        return None
+
 def get_citizen_home(tables, citizen_id: str) -> Optional[Dict]:
     """Find the home building for a citizen."""
     log.info(f"Finding home for citizen {citizen_id}")
@@ -497,6 +522,53 @@ def create_rest_activity(tables, citizen_id: str, citizen_username: str, home_id
         return activity
     except Exception as e:
         log.error(f"Error creating rest activity: {e}")
+        return None
+
+def create_goto_work_activity(tables, citizen_id: str, citizen_username: str, workplace_id: str, path_data: Dict) -> Optional[Dict]:
+    """Create a goto_work activity for a citizen."""
+    log.info(f"Creating goto_work activity for citizen {citizen_id} to workplace {workplace_id}")
+    
+    try:
+        # Check if citizen_id is valid
+        if not citizen_id:
+            log.error("Missing CitizenId for goto_work activity")
+            return None
+            
+        # If citizen_username is not provided, use citizen_id as fallback
+        if not citizen_username:
+            citizen_username = citizen_id
+            
+        now = datetime.datetime.now()
+        
+        # Get timing information from path data
+        start_date = path_data.get('timing', {}).get('startDate', now.isoformat())
+        end_date = path_data.get('timing', {}).get('endDate')
+        
+        if not end_date:
+            # If no end date provided, use a default duration
+            end_time = now + datetime.timedelta(hours=1)
+            end_date = end_time.isoformat()
+        
+        # Ensure path is a valid JSON string
+        path_json = json.dumps(path_data.get('path', []))
+        
+        # Create the activity
+        activity = tables['activities'].create({
+            "ActivityId": f"goto_work_{citizen_id}_{int(time.time())}",
+            "Type": "goto_work",
+            "Citizen": citizen_username,
+            "ToBuilding": workplace_id,  # This should be BuildingId
+            "CreatedAt": now.isoformat(),
+            "StartDate": start_date,
+            "EndDate": end_date,
+            "Path": path_json,
+            "Notes": "Going to work"
+        })
+        
+        log.info(f"Created goto_work activity: {activity['id']}")
+        return activity
+    except Exception as e:
+        log.error(f"Error creating goto_work activity: {e}")
         return None
 
 def create_goto_home_activity(tables, citizen_id: str, citizen_username: str, home_id: str, path_data: Dict) -> Optional[Dict]:
@@ -704,28 +776,65 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
                 # Path finding failed, create idle activity
                 create_idle_activity(tables, citizen_id, citizen_username)
     else:
-        # Daytime activities - check for work, production, or resource fetching
+        # Daytime activities - FIRST check if citizen is at their workplace
         
-        # NEW CODE: Check if citizen has a work building by looking up buildings where 
-        # Occupant = CitizenUsername AND Category = business
-        log.info(f"Looking for work buildings where Occupant={citizen_username} AND Category=business")
+        # Get citizen's workplace
+        workplace = get_citizen_workplace(tables, citizen_id, citizen_username)
         
-        # Build the formula for finding work buildings
-        formula = f"AND({{Occupant}}='{citizen_username}', {{Category}}='business')"
-        
-        try:
-            # Query for business buildings where this citizen is the occupant
-            work_buildings = tables['buildings'].all(formula=formula)
+        if workplace:
+            # Get workplace position
+            workplace_position = None
+            try:
+                # First try to get position from the Position field
+                position_str = workplace['fields'].get('Position')
+                if position_str:
+                    workplace_position = json.loads(position_str)
+                
+                # If Position is missing or invalid, try to extract from Point field
+                if not workplace_position:
+                    point_str = workplace['fields'].get('Point')
+                    if point_str and isinstance(point_str, str):
+                        # Parse the Point field which has format like "building_45.437908_12.337258"
+                        parts = point_str.split('_')
+                        if len(parts) >= 3:
+                            try:
+                                lat = float(parts[1])
+                                lng = float(parts[2])
+                                workplace_position = {"lat": lat, "lng": lng}
+                                log.info(f"Extracted position from Point field for workplace {workplace['fields'].get('BuildingId', workplace['id'])}: {workplace_position}")
+                            except (ValueError, IndexError):
+                                log.warning(f"Failed to parse coordinates from Point field: {point_str}")
+            except (json.JSONDecodeError, TypeError) as e:
+                log.warning(f"Invalid position data for workplace {workplace['fields'].get('BuildingId', workplace['id'])}: {workplace['fields'].get('Position')} - Error: {str(e)}")
             
-            if work_buildings:
-                log.info(f"Found {len(work_buildings)} work buildings for citizen {citizen_username}")
+            if not workplace_position:
+                log.warning(f"Workplace {workplace['fields'].get('BuildingId', workplace['id'])} has no position data, creating idle activity")
+                create_idle_activity(tables, citizen_id, citizen_username)
+                return True
+            
+            # Check if citizen is already at workplace
+            # Simple check: if positions are close enough (within 20 meters)
+            is_at_workplace = False
+            try:
+                # Calculate distance between points
+                from math import sqrt, pow
+                distance = sqrt(pow(citizen_position['lat'] - workplace_position['lat'], 2) + 
+                               pow(citizen_position['lng'] - workplace_position['lng'], 2))
                 
-                # Use the first work building found
-                work_building = work_buildings[0]
-                building_type = work_building['fields'].get('Type')
+                # Convert to approximate meters (very rough approximation)
+                distance_meters = distance * 111000  # 1 degree is roughly 111 km at the equator
                 
-                # Use BuildingId for logging
-                building_id = work_building['fields'].get('BuildingId', work_building['id'])
+                is_at_workplace = distance_meters < 20  # Within 20 meters
+            except (KeyError, TypeError):
+                log.warning(f"Error calculating distance for citizen {citizen_id}")
+            
+            if is_at_workplace:
+                # Citizen is at workplace, proceed with normal work activities
+                log.info(f"Citizen {citizen_id} is at their workplace, creating work activity")
+                
+                # Continue with existing work activity logic
+                building_type = workplace['fields'].get('Type')
+                building_id = workplace['fields'].get('BuildingId', workplace['id'])
                 
                 log.info(f"Using work building: {building_id} (Type: {building_type})")
                 
@@ -754,7 +863,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
                         
                         if can_produce and selected_recipe:
                             # Create production activity
-                            create_production_activity(tables, citizen, work_building, selected_recipe)
+                            create_production_activity(tables, citizen, workplace, selected_recipe)
                             return True
                         else:
                             # Not enough resources for production, check contracts
@@ -824,14 +933,157 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
                     create_idle_activity(tables, citizen_id, citizen_username)
                     return True
             else:
-                # No work building found, create idle activity
-                log.info(f"No work buildings found for citizen {citizen_username}, creating idle activity")
+                # Citizen is not at workplace, create goto_work activity
+                log.info(f"Citizen {citizen_id} is not at their workplace, creating goto_work activity")
+                
+                # Get path to workplace
+                path_data = find_path_between_buildings(
+                    {"fields": {"Position": json.dumps(citizen_position)}}, 
+                    workplace
+                )
+                
+                if path_data and path_data.get('success'):
+                    # Create goto_work activity
+                    # Use BuildingId instead of Airtable record ID
+                    workplace_building_id = workplace['fields'].get('BuildingId', workplace['id'])
+                    create_goto_work_activity(tables, citizen_id, citizen_username, workplace_building_id, path_data)
+                    return True
+                else:
+                    # Path finding failed, create idle activity
+                    log.warning(f"Failed to find path to workplace for citizen {citizen_id}, creating idle activity")
+                    create_idle_activity(tables, citizen_id, citizen_username)
+                    return True
+        else:
+            # No workplace found, continue with existing logic for citizens without workplaces
+            log.info(f"No workplace found for citizen {citizen_username}, checking for other activities")
+            
+            # Continue with the existing code for citizens without workplaces
+            # NEW CODE: Check if citizen has a work building by looking up buildings where 
+            # Occupant = CitizenUsername AND Category = business
+            log.info(f"Looking for work buildings where Occupant={citizen_username} AND Category=business")
+            
+            # Build the formula for finding work buildings
+            formula = f"AND({{Occupant}}='{citizen_username}', {{Category}}='business')"
+            
+            try:
+                # Query for business buildings where this citizen is the occupant
+                work_buildings = tables['buildings'].all(formula=formula)
+                
+                if work_buildings:
+                    log.info(f"Found {len(work_buildings)} work buildings for citizen {citizen_username}")
+                    
+                    # Use the first work building found
+                    work_building = work_buildings[0]
+                    building_type = work_building['fields'].get('Type')
+                    
+                    # Use BuildingId for logging
+                    building_id = work_building['fields'].get('BuildingId', work_building['id'])
+                    
+                    log.info(f"Using work building: {building_id} (Type: {building_type})")
+                    
+                    # Get building type information
+                    building_type_info = get_building_type_info(building_type)
+                    
+                    if building_type_info and 'productionInformation' in building_type_info:
+                        production_info = building_type_info['productionInformation']
+                        
+                        # Check if there are Arti recipes
+                        if 'Arti' in production_info and isinstance(production_info['Arti'], list):
+                            recipes = production_info['Arti']
+                            
+                            # Get current resources in the building
+                            building_resources = get_building_resources(tables, building_id)
+                            
+                            # Check if any recipe can be produced
+                            can_produce = False
+                            selected_recipe = None
+                            
+                            for recipe in recipes:
+                                if can_produce_output(building_resources, recipe):
+                                    can_produce = True
+                                    selected_recipe = recipe
+                                    break
+                            
+                            if can_produce and selected_recipe:
+                                # Create production activity
+                                create_production_activity(tables, citizen, work_building, selected_recipe)
+                                return True
+                            else:
+                                # Not enough resources for production, check contracts
+                                contracts = get_citizen_contracts(tables, citizen_id)
+                                
+                                if contracts:
+                                    # Process contracts in priority order
+                                    for contract in contracts:
+                                        # Get source and destination buildings
+                                        from_building_id = contract['fields'].get('SellerBuilding')
+                                        to_building_id = contract['fields'].get('BuyerBuilding')
+                                        
+                                        if from_building_id and to_building_id:
+                                            # Get building details - try by BuildingId first
+                                            from_formula = f"{{BuildingId}}='{from_building_id}'"
+                                            to_formula = f"{{BuildingId}}='{to_building_id}'"
+                                            
+                                            from_buildings = tables['buildings'].all(formula=from_formula)
+                                            to_buildings = tables['buildings'].all(formula=to_formula)
+                                            
+                                            # If not found, try by Airtable record ID as fallback
+                                            if not from_buildings:
+                                                from_formula = f"RECORD_ID()='{from_building_id}'"
+                                                from_buildings = tables['buildings'].all(formula=from_formula)
+                                                if from_buildings:
+                                                    log.warning(f"Found seller building by record ID instead of BuildingId: {from_building_id}")
+                                            
+                                            if not to_buildings:
+                                                to_formula = f"RECORD_ID()='{to_building_id}'"
+                                                to_buildings = tables['buildings'].all(formula=to_formula)
+                                                if to_buildings:
+                                                    log.warning(f"Found buyer building by record ID instead of BuildingId: {to_building_id}")
+                                            
+                                            if from_buildings and to_buildings:
+                                                from_building = from_buildings[0]
+                                                to_building = to_buildings[0]
+                                                
+                                                # Check if source building has enough resources
+                                                resource_type = contract['fields'].get('ResourceType')
+                                                amount = float(contract['fields'].get('Amount', 0) or 0)
+                                                
+                                                source_resources = get_building_resources(tables, from_building_id)
+                                                
+                                                if resource_type in source_resources and source_resources[resource_type] >= amount:
+                                                    # Find path between buildings
+                                                    path = find_path_between_buildings(from_building, to_building)
+                                                    
+                                                    if path:
+                                                        # Create resource fetching activity
+                                                        create_resource_fetching_activity(
+                                                            tables, citizen, contract, from_building, to_building, path
+                                                        )
+                                                        return True
+                                
+                                # If we get here, no contracts could be executed
+                                log.info(f"No viable contracts for citizen {citizen_id}, creating idle activity")
+                                create_idle_activity(tables, citizen_id, citizen_username)
+                                return True
+                        else:
+                            # No Arti recipes, create idle activity
+                            log.info(f"No Arti recipes for building type {building_type}, creating idle activity")
+                            create_idle_activity(tables, citizen_id, citizen_username)
+                            return True
+                    else:
+                        # No production information, create idle activity
+                        log.info(f"No production information for building type {building_type}, creating idle activity")
+                        create_idle_activity(tables, citizen_id, citizen_username)
+                        return True
+                else:
+                    # No work building found, create idle activity
+                    log.info(f"No work buildings found for citizen {citizen_username}, creating idle activity")
+                    create_idle_activity(tables, citizen_id, citizen_username)
+                    return True
+            except Exception as e:
+                log.error(f"Error finding work buildings for citizen {citizen_username}: {e}")
                 create_idle_activity(tables, citizen_id, citizen_username)
                 return True
-        except Exception as e:
-            log.error(f"Error finding work buildings for citizen {citizen_username}: {e}")
-            create_idle_activity(tables, citizen_id, citizen_username)
-            return True
     
     return True
 
