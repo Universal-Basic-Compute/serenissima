@@ -85,6 +85,22 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
         }
       );
 
+      // Check for 404 specifically
+      if (response.status === 404) {
+        console.log(`No message history found for citizen ${citizen.citizenid}`);
+        // Set a welcome message instead of re-fetching
+        setMessages([
+          {
+            id: 'welcome',
+            role: 'assistant',
+            content: `Buongiorno! I am ${citizen.firstname} ${citizen.lastname}. How may I assist you today?`,
+            timestamp: new Date().toISOString()
+          }
+        ]);
+        setIsLoadingHistory(false);
+        return; // Exit early to prevent re-fetching
+      }
+
       if (!response.ok) {
         throw new Error(`Failed to fetch message history: ${response.status}`);
       }
@@ -586,36 +602,6 @@ Be historically accurate but engaging. Speak in first person as if you are this 
             )}
           </div>
           
-          {/* Suggested questions */}
-          <div className="mb-3">
-            <p className="text-xs text-gray-500 mb-2">Suggested questions:</p>
-            <div className="flex flex-wrap gap-1">
-              <button
-                onClick={() => sendMessage(`Tell me about your life in Venice, ${citizen.firstname}.`)}
-                className="text-xs bg-amber-100 hover:bg-amber-200 text-amber-900 px-3 py-1.5 rounded-full border border-amber-300 transition-colors"
-              >
-                Tell me about your life in Venice
-              </button>
-              <button
-                onClick={() => sendMessage(`What is your profession, ${citizen.firstname}?`)}
-                className="text-xs bg-amber-100 hover:bg-amber-200 text-amber-900 px-3 py-1.5 rounded-full border border-amber-300 transition-colors"
-              >
-                What is your profession?
-              </button>
-              <button
-                onClick={() => sendMessage(`What do you think about the Doge?`)}
-                className="text-xs bg-amber-100 hover:bg-amber-200 text-amber-900 px-3 py-1.5 rounded-full border border-amber-300 transition-colors"
-              >
-                What do you think about the Doge?
-              </button>
-              <button
-                onClick={() => sendMessage(`How is life as a ${citizen.socialclass}?`)}
-                className="text-xs bg-amber-100 hover:bg-amber-200 text-amber-900 px-3 py-1.5 rounded-full border border-amber-300 transition-colors"
-              >
-                How is life as a {citizen.socialclass}?
-              </button>
-            </div>
-          </div>
           
           {/* Input area */}
           <form 
