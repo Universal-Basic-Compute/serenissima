@@ -650,179 +650,177 @@ Be historically accurate but engaging. Speak in first person as if you are this 
         {/* Right column - Citizen details */}
         <div className="w-3/5">
           <div className="flex flex-col items-center mb-6">
-        {/* Much larger image */}
-        <div className="w-48 h-48 mb-4 relative">
-          {citizen.imageurl ? (
-            <img 
-              src={citizen.imageurl.endsWith('.jpg') ? citizen.imageurl : `/images/citizens/${citizen.citizenid}.jpg`} 
-              alt={`${citizen.firstname} ${citizen.lastname}`} 
-              className="w-full h-full object-cover rounded-lg border-2 border-amber-600 shadow-lg"
-              onLoad={(e) => {
-                console.log(`Successfully loaded citizen image: ${(e.target as HTMLImageElement).src}`);
-              }}
-              onError={(e) => {
-                // Log the error
-                console.error(`Failed to load citizen image: ${(e.target as HTMLImageElement).src}`);
-                
-                // Try to fetch the image directly to see if it exists
-                fetch((e.target as HTMLImageElement).src, { method: 'HEAD' })
-                  .then(response => {
-                    console.log(`Image HEAD request returned: ${response.status} ${response.statusText}`);
-                  })
-                  .catch(error => {
-                    console.error(`Image HEAD request failed: ${error}`);
-                  });
-                
-                // Fallback if image fails to load
-                (e.target as HTMLImageElement).style.display = 'none';
-                (e.target as HTMLImageElement).parentElement!.innerHTML = `
-                  <div class="w-full h-full bg-amber-200 rounded-lg border-2 border-amber-600 flex items-center justify-center text-amber-800">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  </div>
-                `;
-              }}
-            />
-          ) : (
-            <img 
-              src={`/images/citizens/${citizen.citizenid}.jpg`}
-              alt={`${citizen.firstname} ${citizen.lastname}`} 
-              className="w-full h-full object-cover rounded-lg border-2 border-amber-600 shadow-lg"
-              onLoad={(e) => {
-                console.log(`Successfully loaded citizen image: ${(e.target as HTMLImageElement).src}`);
-              }}
-              onError={(e) => {
-                // Log the error
-                console.error(`Failed to load citizen image: ${(e.target as HTMLImageElement).src}`);
-                
-                // Fallback if image fails to load
-                (e.target as HTMLImageElement).style.display = 'none';
-                (e.target as HTMLImageElement).parentElement!.innerHTML = `
-                  <div class="w-full h-full bg-amber-200 rounded-lg border-2 border-amber-600 flex items-center justify-center text-amber-800">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  </div>
-                `;
-              }}
-            />
-          )}
+          {/* Much larger image */}
+          <div className="w-48 h-48 mb-4 relative">
+            {citizen.imageurl ? (
+              <img 
+                src={citizen.imageurl.endsWith('.jpg') ? citizen.imageurl : `/images/citizens/${citizen.citizenid}.jpg`} 
+                alt={`${citizen.firstname} ${citizen.lastname}`} 
+                className="w-full h-full object-cover rounded-lg border-2 border-amber-600 shadow-lg"
+                onLoad={(e) => {
+                  console.log(`Successfully loaded citizen image: ${(e.target as HTMLImageElement).src}`);
+                }}
+                onError={(e) => {
+                  // Log the error
+                  console.error(`Failed to load citizen image: ${(e.target as HTMLImageElement).src}`);
+                  
+                  // Try to fetch the image directly to see if it exists
+                  fetch((e.target as HTMLImageElement).src, { method: 'HEAD' })
+                    .then(response => {
+                      console.log(`Image HEAD request returned: ${response.status} ${response.statusText}`);
+                    })
+                    .catch(error => {
+                      console.error(`Image HEAD request failed: ${error}`);
+                    });
+                  
+                  // Fallback if image fails to load
+                  (e.target as HTMLImageElement).style.display = 'none';
+                  (e.target as HTMLImageElement).parentElement!.innerHTML = `
+                    <div class="w-full h-full bg-amber-200 rounded-lg border-2 border-amber-600 flex items-center justify-center text-amber-800">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </div>
+                  `;
+                }}
+              />
+            ) : (
+              <img 
+                src={`/images/citizens/${citizen.citizenid}.jpg`}
+                alt={`${citizen.firstname} ${citizen.lastname}`} 
+                className="w-full h-full object-cover rounded-lg border-2 border-amber-600 shadow-lg"
+                onLoad={(e) => {
+                  console.log(`Successfully loaded citizen image: ${(e.target as HTMLImageElement).src}`);
+                }}
+                onError={(e) => {
+                  // Log the error
+                  console.error(`Failed to load citizen image: ${(e.target as HTMLImageElement).src}`);
+                  
+                  // Fallback if image fails to load
+                  (e.target as HTMLImageElement).style.display = 'none';
+                  (e.target as HTMLImageElement).parentElement!.innerHTML = `
+                    <div class="w-full h-full bg-amber-200 rounded-lg border-2 border-amber-600 flex items-center justify-center text-amber-800">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </div>
+                  `;
+                }}
+              />
+            )}
+          </div>
+        
+          {/* Social class and wealth info */}
+          <div className="text-center">
+            <div className={`px-3 py-1.5 rounded-full text-sm font-medium inline-block mb-2 ${socialClassStyle}`}>
+              {citizen.socialclass}
+            </div>
+            
+            <div className="text-amber-700 text-sm font-medium">
+              Wealth: {formatDucats(citizen.wealth)}
+            </div>
+          </div>
         </div>
         
-        {/* Social class and wealth info */}
-        <div className="text-center">
-          <div className={`px-3 py-1.5 rounded-full text-sm font-medium inline-block mb-2 ${socialClassStyle}`}>
-            {citizen.socialclass}
+        {/* Add Home and Work section */}
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div>
+            <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Home</h3>
+            <div className="bg-amber-100 p-3 rounded-lg">
+              {isLoadingBuildings ? (
+                <p className="text-amber-700 italic">Loading...</p>
+              ) : homeBuilding ? (
+                <div>
+                  <p className="text-amber-800 font-medium">{homeBuilding.name || formatBuildingType(homeBuilding.type)}</p>
+                  <p className="text-amber-700 text-sm">{formatBuildingType(homeBuilding.type)}</p>
+                </div>
+              ) : (
+                <p className="text-amber-700 italic">Homeless</p>
+              )}
+            </div>
           </div>
           
-          <div className="text-amber-700 text-sm font-medium">
-            Wealth: {formatDucats(citizen.wealth)}
-          </div>
-        </div>
-      </div>
-      
-      {/* Add Home and Work section */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <div>
-          <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Home</h3>
-          <div className="bg-amber-100 p-3 rounded-lg">
-            {isLoadingBuildings ? (
-              <p className="text-amber-700 italic">Loading...</p>
-            ) : homeBuilding ? (
-              <div>
-                <p className="text-amber-800 font-medium">{homeBuilding.name || formatBuildingType(homeBuilding.type)}</p>
-                <p className="text-amber-700 text-sm">{formatBuildingType(homeBuilding.type)}</p>
-              </div>
-            ) : (
-              <p className="text-amber-700 italic">Homeless</p>
-            )}
-          </div>
-        </div>
-        
-        <div>
-          <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Work</h3>
-          <div className="bg-amber-100 p-3 rounded-lg">
-            {isLoadingBuildings ? (
-              <p className="text-amber-700 italic">Loading...</p>
-            ) : workBuilding ? (
-              <div>
-                <p className="text-amber-800 font-medium">{workBuilding.name || formatBuildingType(workBuilding.type)}</p>
-                <p className="text-amber-700 text-sm">{formatBuildingType(workBuilding.type)}</p>
-              </div>
-            ) : (
-              <p className="text-amber-700 italic">Unemployed</p>
-            )}
-          </div>
-        </div>
-      </div>
-      
-      <div className="mb-6">
-        <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">About</h3>
-        <p className="text-amber-700 italic">{citizen.description || 'No description available.'}</p>
-      </div>
-      
-      {/* Recent Activities Section */}
-      <div className="mb-6">
-        <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Recent Activities</h3>
-        
-        {isLoadingActivities ? (
-          <div className="flex justify-center py-4">
-            <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin"></div>
-          </div>
-        ) : activities.length > 0 ? (
-          <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
-            {activities.map((activity, index) => (
-              <div key={activity.ActivityId || index} className="bg-amber-100 rounded-lg p-2 text-sm">
-                <div className="flex items-center gap-2 mb-1">
-                  <div className="text-amber-700">
-                    {getActivityIcon(activity.Type)}
-                  </div>
-                  <div className="font-medium text-amber-800">
-                    {formatActivityType(activity.Type)}
-                  </div>
-                  <div className="ml-auto text-xs text-amber-600">
-                    {formatActivityDate(activity.EndDate || activity.StartDate || activity.CreatedAt)}
-                  </div>
+          <div>
+            <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Work</h3>
+            <div className="bg-amber-100 p-3 rounded-lg">
+              {isLoadingBuildings ? (
+                <p className="text-amber-700 italic">Loading...</p>
+              ) : workBuilding ? (
+                <div>
+                  <p className="text-amber-800 font-medium">{workBuilding.name || formatBuildingType(workBuilding.type)}</p>
+                  <p className="text-amber-700 text-sm">{formatBuildingType(workBuilding.type)}</p>
                 </div>
-                
-                {activity.FromBuilding && activity.ToBuilding && (
-                  <div className="flex items-center text-xs text-amber-700 mb-1">
-                    <span className="font-medium">{activity.FromBuilding}</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mx-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                    </svg>
-                    <span className="font-medium">{activity.ToBuilding}</span>
-                  </div>
-                )}
-                
-                {activity.ResourceId && activity.Amount && (
-                  <div className="text-xs text-amber-700 mb-1">
-                    <span className="font-medium">{activity.Amount}</span> units of <span className="font-medium">{activity.ResourceId}</span>
-                  </div>
-                )}
-                
-                {activity.Notes && (
-                  <div className="text-xs italic text-amber-600 mt-1">
-                    {activity.Notes}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-amber-700 italic">No recent activities found.</p>
-        )}
-      </div>
-      
+              ) : (
+                <p className="text-amber-700 italic">Unemployed</p>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-      
-      <div className="mt-4 text-xs text-amber-500 italic text-center">
-        Citizen of Venice since {formatDate(citizen.createdat)}
+        
+        <div className="mb-6">
+          <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">About</h3>
+          <p className="text-amber-700 italic">{citizen.description || 'No description available.'}</p>
+        </div>
+        
+        {/* Recent Activities Section */}
+        <div className="mb-6">
+          <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Recent Activities</h3>
+          
+          {isLoadingActivities ? (
+            <div className="flex justify-center py-4">
+              <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : activities.length > 0 ? (
+            <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+              {activities.map((activity, index) => (
+                <div key={activity.ActivityId || index} className="bg-amber-100 rounded-lg p-2 text-sm">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="text-amber-700">
+                      {getActivityIcon(activity.Type)}
+                    </div>
+                    <div className="font-medium text-amber-800">
+                      {formatActivityType(activity.Type)}
+                    </div>
+                    <div className="ml-auto text-xs text-amber-600">
+                      {formatActivityDate(activity.EndDate || activity.StartDate || activity.CreatedAt)}
+                    </div>
+                  </div>
+                  
+                  {activity.FromBuilding && activity.ToBuilding && (
+                    <div className="flex items-center text-xs text-amber-700 mb-1">
+                      <span className="font-medium">{activity.FromBuilding}</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mx-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                      </svg>
+                      <span className="font-medium">{activity.ToBuilding}</span>
+                    </div>
+                  )}
+                  
+                  {activity.ResourceId && activity.Amount && (
+                    <div className="text-xs text-amber-700 mb-1">
+                      <span className="font-medium">{activity.Amount}</span> units of <span className="font-medium">{activity.ResourceId}</span>
+                    </div>
+                  )}
+                  
+                  {activity.Notes && (
+                    <div className="text-xs italic text-amber-600 mt-1">
+                      {activity.Notes}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-amber-700 italic">No recent activities found.</p>
+          )}
+        </div>
       </div>
     </div>
+    
+    <div className="mt-4 text-xs text-amber-500 italic text-center">
+      Citizen of Venice since {formatDate(citizen.createdat)}
+    </div>
+  </div>
   );
 };
 
