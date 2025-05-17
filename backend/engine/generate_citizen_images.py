@@ -81,18 +81,27 @@ def enhance_image_prompt(citizen: Dict) -> str:
     style_addition = ''
     
     if social_class == 'Nobili':
-        style_addition = 'Renaissance portrait style with realistic details. 3/4 view portrait composition with Rembrandt lighting. Rich color palette with deep reds and gold tones.'
+        style_addition = 'Renaissance portrait style with realistic details. 3/4 view portrait composition with Rembrandt lighting. Rich color palette with deep reds and gold tones. Ornate clothing with fine details. Aristocratic bearing and confident expression. Venetian palazzo background with marble columns.'
     elif social_class == 'Cittadini':
-        style_addition = 'Renaissance portrait style with realistic details. 3/4 view portrait composition with warm Rembrandt lighting. Warm amber tones.'
+        style_addition = 'Renaissance portrait style with realistic details. 3/4 view portrait composition with warm Rembrandt lighting. Warm amber tones. Quality clothing with some decorative elements. Intelligent and dignified expression. Venetian merchant office or study background.'
     elif social_class == 'Popolani':
-        style_addition = 'Renaissance portrait style with realistic details. 3/4 view portrait composition with directional lighting. Muted earth tones.'
+        style_addition = 'Renaissance portrait style with realistic details. 3/4 view portrait composition with directional lighting. Muted earth tones. Practical, well-made clothing. Hardworking and capable expression. Workshop or marketplace background with tools of their trade.'
     elif social_class in ['Facchini', 'Laborer']:
-        style_addition = 'Renaissance portrait style with realistic details. 3/4 view portrait composition with natural lighting. Subdued color palette.'
+        style_addition = 'Renaissance portrait style with realistic details. 3/4 view portrait composition with natural lighting. Subdued color palette. Simple, functional clothing. Weather-worn features with determined expression. Venetian docks or working environment background.'
     else:
-        style_addition = 'Renaissance portrait style with realistic details. 3/4 view portrait composition.'
+        style_addition = 'Renaissance portrait style with realistic details. 3/4 view portrait composition with balanced lighting. Clothing and setting appropriate to their profession in Renaissance Venice.'
+    
+    # Add citizen's name and profession if available
+    first_name = citizen['fields'].get('FirstName', '')
+    last_name = citizen['fields'].get('LastName', '')
     
     # Combine original prompt with style guidelines
-    return f"{base_prompt} {style_addition}"
+    enhanced_prompt = f"{base_prompt} {style_addition}"
+    
+    # Add photorealistic quality directive
+    enhanced_prompt += " Photorealistic quality, highly detailed facial features, historically accurate."
+    
+    return enhanced_prompt
 
 def update_airtable_image_url(tables, citizen_id: str, image_url: str) -> bool:
     """Update Airtable with image URL."""

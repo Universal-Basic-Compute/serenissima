@@ -188,18 +188,23 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
         Based on all the information provided about this citizen's history, activities, and current status, please:
         
         1. Generate a detailed and historically accurate description of this citizen, including:
-           - Personality traits
-           - Work ethic and skills
-           - Social connections
-           - Aspirations and motivations
-           - Any notable achievements or events from their history
+           - Personality traits that reflect their activities and social class
+           - Work ethic and skills demonstrated through their job history
+           - Social connections and relationships with other citizens
+           - Aspirations and motivations that align with their economic activities
+           - Notable achievements or events from their history in Venice
+           - Family background appropriate to their social class
+           - Daily routines and habits
         
         2. Create a detailed image prompt for Ideogram that will generate a portrait of this citizen that:
-           - Reflects their social class ({social_class})
-           - Shows appropriate clothing and accessories for their profession
-           - Captures their personality
-           - Has a Renaissance Venetian style and setting
-           - Includes appropriate lighting and composition for a portrait
+           - Accurately reflects their social class ({social_class}) with appropriate status symbols
+           - Shows period-appropriate clothing and accessories for their specific profession
+           - Captures their personality traits mentioned in the description
+           - Features authentic Renaissance Venetian style, architecture, and setting
+           - Includes appropriate lighting (Rembrandt-style for higher classes, natural light for lower)
+           - Uses a color palette appropriate to their social standing (rich colors for nobility, muted for lower classes)
+           - Incorporates symbols of their trade or profession
+           - Shows facial features and expression that reflect their character
         
         Current description: {current_description}
         
@@ -325,6 +330,9 @@ def generate_image(prompt: str, citizen_id: str) -> Optional[str]:
         return None
     
     try:
+        # Enhance the prompt with additional styling guidance
+        enhanced_prompt = f"{prompt} Renaissance portrait style with realistic details. 3/4 view portrait composition with dramatic lighting. Historically accurate Venetian setting and clothing details. Photorealistic quality, high detail."
+        
         # Call the Ideogram API
         response = requests.post(
             "https://api.ideogram.ai/v1/ideogram-v3/generate",
@@ -333,7 +341,7 @@ def generate_image(prompt: str, citizen_id: str) -> Optional[str]:
                 "Content-Type": "application/json"
             },
             json={
-                "prompt": prompt,
+                "prompt": enhanced_prompt,
                 "style_type": "REALISTIC",
                 "rendering_speed": "DEFAULT"
             }
@@ -407,7 +415,10 @@ def create_notification(tables, username: str, old_description: str, new_descrip
     
     try:
         # Create notification content
-        content = "Your citizen profile has been updated with a new description and portrait based on your recent activities and achievements."
+        content = "Your citizen profile has been updated with a new description and portrait reflecting your recent activities, achievements, and status in Venice."
+        
+        # Extract a brief summary of changes by comparing old and new descriptions
+        summary = "Your portrait and description have been updated to better reflect your current status and history in Venice."
         
         # Create the notification record
         tables['notifications'].create({
@@ -417,6 +428,8 @@ def create_notification(tables, username: str, old_description: str, new_descrip
                 "event_type": "profile_update",
                 "old_description": old_description,
                 "new_description": new_description,
+                "summary": summary,
+                "reason": "Your character has evolved through your experiences in Venice",
                 "timestamp": datetime.datetime.now().isoformat()
             }),
             "CreatedAt": datetime.datetime.now().isoformat(),
