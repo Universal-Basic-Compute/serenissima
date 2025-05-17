@@ -62,7 +62,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [buildingPositionsCache, setBuildingPositionsCache] = useState<Record<string, {x: number, y: number}>>({});
   const [initialPositionCalculated, setInitialPositionCalculated] = useState<boolean>(false);
   const [buildingColorMode, setBuildingColorMode] = useState<'type' | 'owner'>('type');
-  const [showOnlyMyBuildings, setShowOnlyMyBuildings] = useState<boolean>(false);
+  const [buildingFilterMode, setBuildingFilterMode] = useState<'city' | 'me'>('city');
   const [polygonsToRender, setPolygonsToRender] = useState<{
     polygon: any;
     coords: {x: number, y: number}[];
@@ -3846,8 +3846,8 @@ number => {
   
   // Function to filter buildings based on ownership
   const filterBuildings = useCallback(() => {
-    if (!showOnlyMyBuildings) {
-      return buildings; // Return all buildings if filter is off
+    if (buildingFilterMode === 'city') {
+      return buildings; // Return all buildings if filter is set to city
     }
     
     // Get current citizen identifier
@@ -3855,7 +3855,7 @@ number => {
     
     // Filter buildings to only show those owned by the current citizen
     return buildings.filter(building => building.owner === currentCitizen);
-  }, [buildings, showOnlyMyBuildings, getCurrentCitizenIdentifier]);
+  }, [buildings, buildingFilterMode, getCurrentCitizenIdentifier]);
 
   // Helper function to draw a building (simplified for 2D view)
   // This function is not currently used but kept for future reference
@@ -4168,11 +4168,11 @@ number => {
       )}
       
       
-      {/* Building Color Mode Toggle and My Buildings Filter */}
+      {/* Building Color Mode Toggle and Filter Toggle */}
       <div className="absolute bottom-4 left-4 bg-black/70 text-white p-3 rounded-lg shadow-lg">
         <div className="flex flex-col space-y-2">
           <div className="flex items-center space-x-2">
-            <span className="text-sm">Building Color:</span>
+            <span className="text-sm">Color:</span>
             <button 
               onClick={() => setBuildingColorMode(buildingColorMode === 'type' ? 'owner' : 'type')}
               className="px-3 py-1 bg-blue-600 hover:bg-blue-500 rounded text-white"
@@ -4184,12 +4184,12 @@ number => {
           <div className="flex items-center space-x-2">
             <span className="text-sm">Filter:</span>
             <button 
-              onClick={() => setShowOnlyMyBuildings(!showOnlyMyBuildings)}
+              onClick={() => setBuildingFilterMode(buildingFilterMode === 'city' ? 'me' : 'city')}
               className={`px-3 py-1 rounded text-white ${
-                showOnlyMyBuildings ? 'bg-orange-600 hover:bg-orange-500' : 'bg-blue-600 hover:bg-blue-500'
+                buildingFilterMode === 'me' ? 'bg-orange-600 hover:bg-orange-500' : 'bg-blue-600 hover:bg-blue-500'
               }`}
             >
-              {showOnlyMyBuildings ? 'My Buildings' : 'All Buildings'}
+              {buildingFilterMode === 'city' ? 'City' : 'Me'}
             </button>
           </div>
         </div>
