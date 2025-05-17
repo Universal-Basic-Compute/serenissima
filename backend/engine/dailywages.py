@@ -215,7 +215,7 @@ def create_admin_summary(tables, wage_summary) -> None:
     """Create a summary notification for the admin."""
     try:
         # Create notification content
-        content = f"Daily wage payments processed: {wage_summary['successful']} successful, {wage_summary['failed']} failed, total: {int(wage_summary['total_amount'])} ⚜️ Ducats"
+        content = f"💰 **Daily Wage Payments** processed: **{wage_summary['successful']}** successful, **{wage_summary['failed']}** failed, total: **{int(wage_summary['total_amount']):,}** ⚜️ Ducats"
         
         # Create detailed information
         details = {
