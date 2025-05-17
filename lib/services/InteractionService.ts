@@ -555,18 +555,10 @@ export class InteractionService {
       
       // If no hover was detected, only clear hover states if we previously had something hovered
       if (!hoverDetected) {
-        // Only clear if we actually have something hovered
-        if (
-          this.hoveredPolygonIdRef !== null || 
-          this.hoveredBuildingIdRef !== null || 
-          this.hoveredCanalPointIdRef !== null || 
-          this.hoveredBridgePointIdRef !== null || 
-          this.hoveredCitizenBuildingRef !== null ||
-          this.hoveredResourceIdRef !== null ||
-          this.hoveredWaterPointIdRef !== null ||
-          this.hoveredBuildingPointRef !== null
-        ) {
+        // Only clear if we were previously hovering over something
+        if (this.isHoveringRef) {
           hoverStateService.clearAllHoverStates();
+          this.isHoveringRef = false;
         }
         
         // Set cursor based on dragging state
@@ -575,6 +567,9 @@ export class InteractionService {
         } else {
           canvas.style.cursor = 'grab';
         }
+      } else {
+        // We detected a hover, update the flag
+        this.isHoveringRef = true;
       }
     }, 150); // Increase from 100ms to 150ms throttle time to further reduce flickering
     
