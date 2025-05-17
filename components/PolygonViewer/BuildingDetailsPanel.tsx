@@ -1105,7 +1105,7 @@ export default function BuildingDetailsPanel({
                     </p>
                   )}
                 </div>
-              ) : null}
+              )}
               
               {/* Owner information */}
               <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
