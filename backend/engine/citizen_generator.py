@@ -30,85 +30,56 @@ log = logging.getLogger("citizen_generator")
 load_dotenv()
 
 def generate_citizen(social_class: str) -> Optional[Dict[str, Any]]:
-    """Generate a new citizen of the specified social class using Claude API.
+    """Generate a new citizen using Kinos Engine API.
     
     Args:
-        social_class: One of 'Nobili', 'Cittadini', 'Popolani', or 'Facchini'
+        social_class: Requested social class (will be ignored, always creates Facchini)
         
     Returns:
         A dictionary containing the citizen data, or None if generation failed
     """
+    # Always use Facchini regardless of requested social class
+    social_class = "Facchini"
+    
     log.info(f"Generating a new citizen of social class: {social_class}")
     
-    # Get Claude API key from environment
-    claude_api_key = os.environ.get('CLAUDE_API_KEY')
-    if not claude_api_key:
-        log.error("CLAUDE_API_KEY environment variable is not set")
+    # Get Kinos API key from environment
+    kinos_api_key = os.environ.get('KINOS_API_KEY')
+    if not kinos_api_key:
+        log.error("KINOS_API_KEY environment variable is not set")
         return None
     
     try:
-        # Create a system prompt for Claude
-        system_prompt = f"""You are a historical expert on Renaissance Venice (1400-1600) helping to create a citizen for a historically accurate economic simulation game called La Serenissima.
-
-TASK:
-Create 1 unique Venetian citizen of the {social_class} social class with historically accurate name, description, and characteristics.
-
-SOCIAL CLASS INFORMATION:
-- Nobili: The noble families who control Venice's government. Ducatsy, politically powerful, and often involved in long-distance trade.
-- Cittadini: Ducatsy non-noble citizens, including successful merchants, professionals, and high-ranking bureaucrats.
-- Popolani: Common citizens including craftsmen, shopkeepers, and skilled workers.
-- Facchini: Unskilled workers, servants, gondoliers, and the working poor.
-
-For the citizen, provide:
-1. FirstName - Historically accurate Venetian first name
-2. LastName - Historically accurate Venetian family name (ensure nobili have notable Venetian noble family names)
-3. Description - One sentence about personality, traits, and remarkable things about this person
-4. ImagePrompt - A detailed prompt for generating an image of this person, including physical appearance, clothing appropriate to their social class, and setting
-5. Ducats - Approximate wealth in Ducats, appropriate to their social class:
-   - Nobili: 5,000,000-50,000,000 ducats
-   - Cittadini: 1,000,000-5,000,000 ducats
-   - Popolani: 100,000-1,000,000 ducats
-   - Facchini: 10,000-100,000 ducats
-
-FORMAT:
-Return the data as a valid JSON object with the fields listed above.
-"""
-
-        citizen_prompt = f"Please create a single citizen of the {social_class} social class for our game. Return ONLY a valid JSON object with no additional text."
+        # Create a prompt for the Kinos Engine
+        prompt = f"Please create a single citizen of the {social_class} social class for our game. The citizen should have a historically accurate Venetian name, description, and characteristics appropriate for Renaissance Venice (1400-1600)."
         
-        # Call Claude API
+        # Call Kinos Engine API
         response = requests.post(
-            "https://api.anthropic.com/v1/messages",
+            "https://kin-engine.ai/v2/blueprints/serenissima-ai/kins/ConsiglioDeiDieci/messages/channels/immigration",
             headers={
                 "Content-Type": "application/json",
-                "x-api-key": claude_api_key,
-                "anthropic-version": "2023-06-01"
+                "Authorization": f"Bearer {kinos_api_key}"
             },
             json={
+                "content": prompt,
                 "model": "claude-3-7-sonnet-latest",
-                "max_tokens": 1000,
-                "system": system_prompt,
-                "messages": [
-                    {
-                        "role": "citizen",
-                        "content": citizen_prompt
-                    }
-                ]
+                "mode": "creative",
+                "addSystem": "You are a historical expert on Renaissance Venice (1400-1600) helping to create a citizen for a historically accurate economic simulation game called La Serenissima. Create 1 unique Venetian citizen of the Facchini social class (unskilled workers, servants, gondoliers, and the working poor) with historically accurate name, description, and characteristics. Return ONLY a valid JSON object with the following fields: FirstName, LastName, Description, ImagePrompt (detailed prompt for generating an image), and Ducats (wealth between 10,000-100,000)."
             }
         )
         
         if response.status_code != 200:
-            log.error(f"Error from Claude API: {response.status_code} {response.text}")
+            log.error(f"Error from Kinos Engine API: {response.status_code} {response.text}")
             return None
         
-        # Extract the JSON from Claude's response
-        content = response.json()["content"][0]["text"]
+        # Extract the JSON from Kinos Engine's response
+        content = response.json().get("content", "")
         
         # Find the JSON object in the response
         import re
         json_match = re.search(r'({[\s\S]*})', content)
         if not json_match:
-            log.error(f"Could not extract JSON from Claude response: {content}")
+            log.error(f"Could not extract JSON from Kinos Engine response: {content}")
             return None
         
         citizen_data = json.loads(json_match.group(1))
@@ -125,7 +96,7 @@ Return the data as a valid JSON object with the fields listed above.
         
         citizen_data = lowercase_data
         
-        log.info(f"Successfully generated citizen: {citizen_data['FirstName']} {citizen_data['LastName']}")
+        log.info(f"Successfully generated citizen: {citizen_data['firstname']} {citizen_data['lastname']}")
         return citizen_data
     except Exception as e:
         log.error(f"Error generating citizen: {e}")
