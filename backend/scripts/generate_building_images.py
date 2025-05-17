@@ -171,29 +171,70 @@ def generate_image(prompt: str, output_path: str) -> bool:
             log.error(f"Error from Ideogram API: {response.status_code} {response.text}")
             return False
         
+        # Log the full response for debugging
+        log.info(f"Ideogram API response: {response.text[:1000]}...")
+        
         # Extract image URL from response
         result = response.json()
+        
+        # Check if the expected data structure exists
+        if "data" not in result or not result["data"] or "url" not in result["data"][0]:
+            log.error(f"Unexpected response structure: {result}")
+            return False
+            
         image_url = result.get("data", [{}])[0].get("url", "")
         
         if not image_url:
             log.error("No image URL in response")
             return False
         
+        log.info(f"Image URL received: {image_url}")
+        
         # Download the image
+        log.info(f"Downloading image from URL: {image_url}")
         image_response = requests.get(image_url, stream=True)
+        
         if not image_response.ok:
             log.error(f"Failed to download image: {image_response.status_code} {image_response.reason}")
+            return False
+        
+        # Check content type to ensure it's an image
+        content_type = image_response.headers.get('Content-Type', '')
+        log.info(f"Content-Type of downloaded file: {content_type}")
+        
+        if 'image' not in content_type:
+            log.error(f"Downloaded content is not an image: {content_type}")
+            # Save the response content for inspection
+            debug_path = f"{output_path}.debug"
+            with open(debug_path, 'wb') as f:
+                for chunk in image_response.iter_content(chunk_size=8192):
+                    f.write(chunk)
+            log.error(f"Saved problematic response to {debug_path} for inspection")
             return False
         
         # Ensure the directory exists
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         
         # Save the image
+        log.info(f"Saving image to {output_path}")
         with open(output_path, 'wb') as f:
             for chunk in image_response.iter_content(chunk_size=8192):
                 f.write(chunk)
         
-        log.info(f"Successfully saved image to {output_path}")
+        # Verify the saved file
+        if os.path.exists(output_path):
+            file_size = os.path.getsize(output_path)
+            log.info(f"Successfully saved image to {output_path} (size: {file_size} bytes)")
+            
+            if file_size < 1000:  # Suspiciously small for an image
+                log.warning(f"Warning: Saved file is very small ({file_size} bytes), might not be a valid image")
+                # Save the response content for inspection
+                with open(f"{output_path}.response.json", 'w') as f:
+                    f.write(response.text)
+        else:
+            log.error(f"Failed to save image to {output_path}")
+            return False
+            
         return True
     except Exception as e:
         log.error(f"Error generating image: {e}")
