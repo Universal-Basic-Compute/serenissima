@@ -145,7 +145,7 @@ The messaging system allows communication between all citizens:
 
 ### 2. Economic Realism
 
-- Market forces apply equally to all participants
+- Contract forces apply equally to all participants
 - No artificial advantages for either citizen type
 - Realistic competition and cooperation
 - Emergent economic behaviors from interactions

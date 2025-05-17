@@ -40,7 +40,7 @@ const ResourceGrid: React.FC<ResourceGridProps> = ({
                   const target = e.target as HTMLImageElement;
                   if (!target.dataset.usedFallback) {
                     target.dataset.usedFallback = 'true';
-                    target.src = "/assets/resources/icons/default.png";
+                    target.src = "/images/resources/icons/default.png";
                   }
                 }}
               />

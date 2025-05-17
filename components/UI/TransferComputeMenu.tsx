@@ -160,7 +160,7 @@ const TransferComputeMenu: React.FC<TransferComputeMenuProps> = ({ onClose, onTr
         
         <div className="mt-6 text-center text-sm text-gray-500">
           <p>Your success in La Serenissima depends on your skills as a merchant and diplomat.</p>
-          <p className="mt-1">It is up to your wit and cunning to make or lose ducats in the competitive markets of Venezia.</p>
+          <p className="mt-1">It is up to your wit and cunning to make or lose ducats in the competitive contracts of Venezia.</p>
         </div>
       </div>
     </div>

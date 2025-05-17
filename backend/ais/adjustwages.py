@@ -49,7 +49,7 @@ def get_ai_citizens(tables) -> List[Dict]:
 def get_citizen_business_buildings(tables, username: str) -> List[Dict]:
     """Get all buildings owned by a specific citizen that could potentially have wages set."""
     try:
-        # Query buildings where the citizen is the owner (not just RanBy)
+        # Query buildings where the citizen is the owner (not just RunBy)
         formula = f"{{Owner}}='{username}'"
         buildings = tables["buildings"].all(formula=formula)
         print(f"Found {len(buildings)} buildings owned by {username}")
@@ -231,7 +231,7 @@ Please analyze your buildings and develop a strategy for setting wage amounts. C
 1. The income and expenses of each building
 2. The social class and wealth of current employees (if any)
 3. The need to attract quality workers to your buildings
-4. Market rates for similar buildings and businesses
+4. Contract rates for similar buildings and businesses
 5. Your overall financial situation
 
 Even for buildings without current occupants, you should set appropriate wages so that potential workers know what they would earn.

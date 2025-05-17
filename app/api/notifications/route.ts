@@ -114,7 +114,7 @@ export async function POST(request: Request) {
         },
         {
           notificationId: `${citizen}-notification-2`,
-          type: 'Market',
+          type: 'Contract',
           citizen: citizen,
           content: 'A new land parcel is available for purchase in San Marco district.',
           createdAt: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago

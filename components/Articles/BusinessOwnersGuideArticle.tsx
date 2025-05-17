@@ -129,7 +129,7 @@ const BusinessOwnersGuideArticle: React.FC<BusinessOwnersGuideArticleProps> = ({
               <div className="mb-3">
                 <h5 className="font-bold text-amber-900">Textile Production</h5>
                 <p>
-                  From silk weaving to wool processing, textiles represent one of Venice's most profitable industries. Success requires securing reliable raw material sources, skilled labor, and distribution channels to luxury markets throughout Europe.
+                  From silk weaving to wool processing, textiles represent one of Venice's most profitable industries. Success requires securing reliable raw material sources, skilled labor, and distribution channels to luxury contracts throughout Europe.
                 </p>
               </div>
               
@@ -154,14 +154,14 @@ const BusinessOwnersGuideArticle: React.FC<BusinessOwnersGuideArticleProps> = ({
               <div className="mb-3">
                 <h5 className="font-bold text-amber-900">Import/Export Trade</h5>
                 <p>
-                  Venice's position as a gateway between East and West creates opportunities for traders who can source exotic goods and distribute them throughout Europe. Success depends on market knowledge, reliable shipping, and risk management.
+                  Venice's position as a gateway between East and West creates opportunities for traders who can source exotic goods and distribute them throughout Europe. Success depends on contract knowledge, reliable shipping, and risk management.
                 </p>
               </div>
               
               <div className="mb-3">
                 <h5 className="font-bold text-amber-900">Retail Establishments</h5>
                 <p>
-                  From luxury boutiques near the Rialto to neighborhood markets, retail businesses serve both locals and visitors. Location is crucial, with shops in high-traffic areas commanding premium rents but generating higher sales volumes.
+                  From luxury boutiques near the Rialto to neighborhood contracts, retail businesses serve both locals and visitors. Location is crucial, with shops in high-traffic areas commanding premium rents but generating higher sales volumes.
                 </p>
               </div>
               
@@ -336,7 +336,7 @@ const BusinessOwnersGuideArticle: React.FC<BusinessOwnersGuideArticleProps> = ({
               <div className="bg-amber-50 p-3 rounded border border-amber-200">
                 <h5 className="font-bold text-amber-900 mb-1">Quality Control</h5>
                 <p className="text-sm">
-                  Venetian reputation for quality is a competitive advantage in European markets. Implement consistent quality standards for all materials and finished products. Train staff in quality assessment appropriate to your industry. Document quality processes to ensure consistency even with staff changes.
+                  Venetian reputation for quality is a competitive advantage in European contracts. Implement consistent quality standards for all materials and finished products. Train staff in quality assessment appropriate to your industry. Document quality processes to ensure consistency even with staff changes.
                 </p>
               </div>
             </div>
@@ -383,7 +383,7 @@ const BusinessOwnersGuideArticle: React.FC<BusinessOwnersGuideArticleProps> = ({
             
             <div className="mt-4 bg-amber-50 p-3 rounded border border-amber-200">
               <p className="italic text-amber-800">
-                <span className="font-bold">Case Study:</span> The Contarini glass workshop maintained production during the 1487 Egyptian trade disruption by stockpiling critical materials and developing alternative sources for key ingredients. While competitors closed their furnaces, Contarini captured their market share and established relationships with new clients that persisted for decades.
+                <span className="font-bold">Case Study:</span> The Contarini glass workshop maintained production during the 1487 Egyptian trade disruption by stockpiling critical materials and developing alternative sources for key ingredients. While competitors closed their furnaces, Contarini captured their contract share and established relationships with new clients that persisted for decades.
               </p>
             </div>
           </div>
@@ -431,7 +431,7 @@ const BusinessOwnersGuideArticle: React.FC<BusinessOwnersGuideArticleProps> = ({
               <div className="bg-amber-50 p-3 rounded border border-amber-200">
                 <h5 className="font-bold text-amber-900 mb-1">Pricing Strategy</h5>
                 <p className="text-sm">
-                  Effective pricing balances profitability with market competitiveness:
+                  Effective pricing balances profitability with contract competitiveness:
                 </p>
                 <ul className="list-disc pl-5 space-y-1 text-sm">
                   <li>Calculate full costs including materials, labor, overhead, and transportation</li>
@@ -440,7 +440,7 @@ const BusinessOwnersGuideArticle: React.FC<BusinessOwnersGuideArticleProps> = ({
                   <li>Adjust pricing seasonally based on demand fluctuations</li>
                 </ul>
                 <p className="text-sm mt-2">
-                  Remember that in luxury markets, excessively low prices can signal poor quality rather than good value.
+                  Remember that in luxury contracts, excessively low prices can signal poor quality rather than good value.
                 </p>
               </div>
               
@@ -491,12 +491,12 @@ const BusinessOwnersGuideArticle: React.FC<BusinessOwnersGuideArticleProps> = ({
               <div className="bg-amber-50 p-3 rounded border border-amber-200">
                 <h5 className="font-bold text-amber-900 mb-1">Horizontal Expansion</h5>
                 <p className="text-sm">
-                  Grow by increasing your capacity or market reach:
+                  Grow by increasing your capacity or contract reach:
                 </p>
                 <ul className="list-disc pl-5 space-y-1 text-sm">
                   <li><span className="font-medium">Additional Locations</span>: Open branches in different districts</li>
                   <li><span className="font-medium">Increased Production</span>: Expand workshop size or add equipment</li>
-                  <li><span className="font-medium">Market Extension</span>: Establish agents in other cities</li>
+                  <li><span className="font-medium">Contract Extension</span>: Establish agents in other cities</li>
                 </ul>
                 <p className="text-sm mt-2">
                   This approach leverages your existing expertise while reaching new customers or increasing capacity.
@@ -510,11 +510,11 @@ const BusinessOwnersGuideArticle: React.FC<BusinessOwnersGuideArticleProps> = ({
                 </p>
                 <ul className="list-disc pl-5 space-y-1 text-sm">
                   <li><span className="font-medium">Related Products</span>: Add complementary items to your line</li>
-                  <li><span className="font-medium">New Markets</span>: Adapt existing products for different customers</li>
+                  <li><span className="font-medium">New Contracts</span>: Adapt existing products for different customers</li>
                   <li><span className="font-medium">Complementary Services</span>: Add services that enhance your products</li>
                 </ul>
                 <p className="text-sm mt-2">
-                  Diversification reduces risk from market fluctuations while leveraging your reputation and customer base.
+                  Diversification reduces risk from contract fluctuations while leveraging your reputation and customer base.
                 </p>
               </div>
               
@@ -555,14 +555,14 @@ const BusinessOwnersGuideArticle: React.FC<BusinessOwnersGuideArticleProps> = ({
                 <text x="100" y="155" fill="#1e3a8a" fontFamily="serif" fontSize="12" textAnchor="middle">Additional Location</text>
                 
                 <rect x="350" y="125" width="100" height="50" rx="5" fill="#60a5fa" stroke="#2563eb" strokeWidth="2" />
-                <text x="400" y="155" fill="#1e3a8a" fontFamily="serif" fontSize="12" textAnchor="middle">Market Extension</text>
+                <text x="400" y="155" fill="#1e3a8a" fontFamily="serif" fontSize="12" textAnchor="middle">Contract Extension</text>
                 
                 {/* Diversification */}
                 <rect x="125" y="50" width="100" height="40" rx="5" fill="#c084fc" stroke="#7e22ce" strokeWidth="2" />
                 <text x="175" y="75" fill="#581c87" fontFamily="serif" fontSize="12" textAnchor="middle">Related Products</text>
                 
                 <rect x="275" y="50" width="100" height="40" rx="5" fill="#c084fc" stroke="#7e22ce" strokeWidth="2" />
-                <text x="325" y="75" fill="#581c87" fontFamily="serif" fontSize="12" textAnchor="middle">New Markets</text>
+                <text x="325" y="75" fill="#581c87" fontFamily="serif" fontSize="12" textAnchor="middle">New Contracts</text>
                 
                 <rect x="125" y="210" width="100" height="40" rx="5" fill="#c084fc" stroke="#7e22ce" strokeWidth="2" />
                 <text x="175" y="235" fill="#581c87" fontFamily="serif" fontSize="12" textAnchor="middle">Complementary Services</text>

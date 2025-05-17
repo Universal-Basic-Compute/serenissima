@@ -81,7 +81,7 @@ The AI notification processing system:
 **Implementation**: `backend/ais/bidonlands.py`  
 **Schedule**: Daily at 7:00 PM UTC
 
-AI citizens actively participate in the land market by bidding on properties with income potential:
+AI citizens actively participate in the land contract by bidding on properties with income potential:
 
 #### Process:
 
@@ -102,10 +102,10 @@ AI citizens actively participate in the land market by bidding on properties wit
 #### Economic Impact:
 
 The AI land bidding system:
-- Creates a dynamic land market with consistent bidding activity
-- Establishes realistic market prices based on land income potential
+- Creates a dynamic land contract with consistent bidding activity
+- Establishes realistic contract prices based on land income potential
 - Prevents land from being undervalued due to lack of player interest
-- Provides competition for human players in the land market
+- Provides competition for human players in the land contract
 - Ensures that valuable lands receive appropriate bids reflecting their economic value
 
 ### Building Construction
@@ -176,11 +176,11 @@ AI citizens strategically adjust lease amounts for buildings on their lands:
 #### Economic Impact:
 
 The AI lease adjustment system:
-- Creates a more dynamic and responsive real estate market
+- Creates a more dynamic and responsive real estate contract
 - Allows AI landowners to optimize their income from leases
-- Provides market signals about the value of different locations
+- Provides contract signals about the value of different locations
 - Encourages strategic building placement by players
-- Simulates the economic negotiations that would occur in a real market
+- Simulates the economic negotiations that would occur in a real contract
 
 ### Rent Adjustments
 
@@ -213,11 +213,11 @@ AI citizens strategically adjust rent amounts for buildings they own:
 #### Economic Impact:
 
 The AI rent adjustment system:
-- Creates a more dynamic and responsive housing market
+- Creates a more dynamic and responsive housing contract
 - Allows AI building owners to optimize their rental income
-- Provides market signals about the value of different housing types
+- Provides contract signals about the value of different housing types
 - Encourages citizens to seek affordable housing
-- Simulates the economic negotiations that would occur in a real housing market
+- Simulates the economic negotiations that would occur in a real housing contract
 
 ### Wage Adjustments
 
@@ -250,11 +250,11 @@ AI citizens strategically adjust wage amounts for businesses they own:
 #### Economic Impact:
 
 The AI wage adjustment system:
-- Creates a more dynamic and responsive labor market
+- Creates a more dynamic and responsive labor contract
 - Allows AI business owners to optimize their labor costs
-- Provides market signals about the value of different types of labor
+- Provides contract signals about the value of different types of labor
 - Affects citizen wealth and their ability to pay rent
-- Simulates the economic negotiations that would occur in a real labor market
+- Simulates the economic negotiations that would occur in a real labor contract
 
 ### Resource Import Management
 
@@ -291,7 +291,7 @@ The AI resource import system:
 - Creates a more realistic economy with active resource flows
 - Allows AI citizens to participate fully in the production chain
 - Simulates the international trade that was vital to Venice's economy
-- Provides market demand for various resource types
+- Provides contract demand for various resource types
 
 ### Public Sell Management
 
@@ -325,9 +325,9 @@ AI citizens strategically create public sell contracts to sell resources to othe
 
 The AI public sell management system:
 - Creates a dynamic marketplace with consistent resource availability
-- Establishes realistic market prices based on resource value and scarcity
+- Establishes realistic contract prices based on resource value and scarcity
 - Ensures players can purchase resources even in areas with limited player activity
-- Provides competition and price signals in the resource market
+- Provides competition and price signals in the resource contract
 - Simulates the merchant activity that was vital to Venice's economy
 
 ## AI Citizen Management
@@ -348,7 +348,7 @@ The integration of AI citizens with human players creates a living, breathing Ve
 1. **Economic Interaction**: Human players can buy lands from AI citizens, rent buildings from them, or sell resources to them
 2. **Social Interaction**: Human players can send messages to AI citizens and receive contextually appropriate responses
 3. **Visual Interaction**: Both AI and human citizens appear on the map, creating a populated city
-4. **Competitive Interaction**: AI citizens provide market competition, ensuring dynamic pricing and land valuation
+4. **Competitive Interaction**: AI citizens provide contract competition, ensuring dynamic pricing and land valuation
 5. **Collaborative Interaction**: AI citizens can work in businesses owned by human players, contributing to the economy
 
 ## Technical Implementation
@@ -405,7 +405,7 @@ The AI building construction system:
 The AI system is designed to be extensible, allowing for additional behaviors to be added over time:
 
 1. **Business Operation**: AI citizens could operate businesses and hire citizens
-2. **Market Trading**: AI citizens could buy and sell resources on the open market
+2. **Contract Trading**: AI citizens could buy and sell resources on the open contract
 3. **Banking Activities**: AI citizens could offer loans or banking services
 
 Each new behavior would be implemented as a separate script following the same pattern as the existing AI systems.

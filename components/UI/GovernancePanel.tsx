@@ -39,7 +39,7 @@ const mockDecrees: Decree[] = [
     FlavorText: "Let no inferior silk tarnish the reputation of Venetian craftsmanship.",
     HistoricalInspiration: "Based on the 1441 regulations of the Venetian Silk Guild.",
     Notes: "Particularly affects trade with Ottoman territories.",
-    Rationale: "This decree protects Venice's reputation for quality silk products, prevents fraud, and ensures fair competition among merchants. By maintaining high standards, we preserve our competitive advantage in luxury textile markets across Europe and the Mediterranean."
+    Rationale: "This decree protects Venice's reputation for quality silk products, prevents fraud, and ensures fair competition among merchants. By maintaining high standards, we preserve our competitive advantage in luxury textile contracts across Europe and the Mediterranean."
   },
   {
     DecreeId: "D-1525-002",

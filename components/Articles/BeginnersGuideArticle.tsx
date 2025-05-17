@@ -86,7 +86,7 @@ const BeginnersGuideArticle: React.FC<BeginnersGuideArticleProps> = ({ onClose }
                 <li><span className="font-bold">Buildings View</span>: Construct and manage buildings</li>
                 <li><span className="font-bold">Transport View</span>: Develop roads and transportation networks</li>
                 <li><span className="font-bold">Resources View</span>: Manage resources and production</li>
-                <li><span className="font-bold">Markets View</span>: Trade goods and services</li>
+                <li><span className="font-bold">Contracts View</span>: Trade goods and services</li>
                 <li><span className="font-bold">Governance View</span>: Participate in the Republic's governance</li>
                 <li><span className="font-bold">Knowledge View</span>: Access guides and information</li>
               </ul>
@@ -141,14 +141,14 @@ const BeginnersGuideArticle: React.FC<BeginnersGuideArticleProps> = ({ onClose }
               <div className="bg-amber-50 p-3 rounded border border-amber-200">
                 <h5 className="font-bold text-amber-900 mb-1">3. Secure Your Supply Chain</h5>
                 <p className="text-amber-800">
-                  Every production requires raw materials. Use the Markets View to purchase what you need, or establish relationships with resource suppliers. Consistent supply is crucial for profitable production.
+                  Every production requires raw materials. Use the Contracts View to purchase what you need, or establish relationships with resource suppliers. Consistent supply is crucial for profitable production.
                 </p>
               </div>
               
               <div className="bg-amber-50 p-3 rounded border border-amber-200">
                 <h5 className="font-bold text-amber-900 mb-1">4. Sell Your Goods</h5>
                 <p className="text-amber-800">
-                  Once production begins, you'll need to sell your goods. You can list them in the Markets View or establish direct relationships with other players who need your products. Watch market prices to maximize your profits.
+                  Once production begins, you'll need to sell your goods. You can list them in the Contracts View or establish direct relationships with other players who need your products. Watch contract prices to maximize your profits.
                 </p>
               </div>
             </div>
@@ -271,13 +271,13 @@ const BeginnersGuideArticle: React.FC<BeginnersGuideArticleProps> = ({ onClose }
             </div>
             
             <div className="bg-amber-100 p-4 rounded-lg border border-amber-300">
-              <h4 className="text-xl font-serif text-amber-800 mb-2">Monitor Market Fluctuations</h4>
+              <h4 className="text-xl font-serif text-amber-800 mb-2">Monitor Contract Fluctuations</h4>
               <p className="text-amber-800">
                 Prices in Serenissima fluctuate based on supply and demand. Keep track of price trends and adjust your production accordingly. Sometimes holding inventory until prices rise can be more profitable than immediate sales.
               </p>
               <div className="mt-3 bg-amber-50 p-3 rounded border border-amber-200">
                 <p className="italic text-amber-800 text-sm">
-                  <span className="font-bold">Tip:</span> The Markets View shows historical price data. Look for patterns in seasonal demand and plan your production cycle accordingly.
+                  <span className="font-bold">Tip:</span> The Contracts View shows historical price data. Look for patterns in seasonal demand and plan your production cycle accordingly.
                 </p>
               </div>
             </div>
@@ -315,7 +315,7 @@ const BeginnersGuideArticle: React.FC<BeginnersGuideArticleProps> = ({ onClose }
                   <span className="text-sm">→</span>
                 </div>
                 <p className="text-amber-800">
-                  <span className="font-bold">Luxury Production:</span> Transition from basic goods to high-value luxury items that command premium prices in the market.
+                  <span className="font-bold">Luxury Production:</span> Transition from basic goods to high-value luxury items that command premium prices in the contract.
                 </p>
               </div>
               

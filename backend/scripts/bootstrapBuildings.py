@@ -223,7 +223,7 @@ def get_building_types():
     print("Using hardcoded building types list")
     return [
         {"type": "bakery", "pointType": None},
-        {"type": "market_stall", "pointType": None},
+        {"type": "contract_stall", "pointType": None},
         {"type": "fisherman_s_cottage", "pointType": "canal"},
         {"type": "artisan_s_house", "pointType": None},
         {"type": "merchant_s_house", "pointType": None},
@@ -251,7 +251,7 @@ def get_bootstrap_buildings():
     """Define the buildings to bootstrap Venice with."""
     return [
         {"type": "bakery", "pointType": None, "count": 3},
-        {"type": "market_stall", "pointType": None, "count": 5},
+        {"type": "contract_stall", "pointType": None, "count": 5},
         {"type": "fisherman_s_cottage", "pointType": "canal", "count": 4},
         {"type": "artisan_s_house", "pointType": None, "count": 4},
         {"type": "merchant_s_house", "pointType": None, "count": 3},

@@ -197,17 +197,17 @@ export class AssetService {
           return data.imagePath;
         } else {
           // Use fallback image if no specific image found
-          this.buildingImages[cacheKey] = '/images/buildings/market_stall.jpg';
-          return '/images/buildings/market_stall.jpg';
+          this.buildingImages[cacheKey] = '/images/buildings/contract_stall.jpg';
+          return '/images/buildings/contract_stall.jpg';
         }
       } else {
-        this.buildingImages[cacheKey] = '/images/buildings/market_stall.jpg';
-        return '/images/buildings/market_stall.jpg';
+        this.buildingImages[cacheKey] = '/images/buildings/contract_stall.jpg';
+        return '/images/buildings/contract_stall.jpg';
       }
     } catch (error) {
       console.error('Error fetching building image path:', error);
-      this.buildingImages[cacheKey] = '/images/buildings/market_stall.jpg';
-      return '/images/buildings/market_stall.jpg';
+      this.buildingImages[cacheKey] = '/images/buildings/contract_stall.jpg';
+      return '/images/buildings/contract_stall.jpg';
     }
   }
   

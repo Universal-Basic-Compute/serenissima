@@ -58,7 +58,7 @@ const HistoricalAccuracyArticle: React.FC<HistoricalAccuracyArticleProps> = ({ o
               <li>Buildings generate income in real time</li>
               <li>Resources are consumed in real time</li>
               <li>Maintenance costs are charged in real time</li>
-              <li>Market fluctuations occur in real time</li>
+              <li>Contract fluctuations occur in real time</li>
             </ul>
             <p>
               This hybrid approach creates a more engaging experience where players see meaningful economic progress during each session while still experiencing the broader historical narrative at an accelerated pace.

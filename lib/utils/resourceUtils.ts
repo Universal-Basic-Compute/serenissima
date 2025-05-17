@@ -18,7 +18,7 @@ export interface ResourceNode {
   productionProperties?: any;
   transportProperties?: any;
   storageProperties?: any;
-  marketDynamics?: any;
+  contractDynamics?: any;
   historicalNotes?: any;
   stackSize?: number;
   baseProperties?: Record<string, any>;

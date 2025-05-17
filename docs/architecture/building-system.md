@@ -183,7 +183,7 @@ Buildings are defined in JSON files organized by category and subcategory:
 /data/buildings/
 ├── commercial/
 │   ├── retail_shops/
-│   │   ├── market_stall.json
+│   │   ├── contract_stall.json
 │   │   └── ...
 │   └── trade_facilities/
 │       ├── trading_post.json
@@ -202,7 +202,7 @@ Each building JSON file contains:
 
 ```json
 {
-  "name": "Market Stall",
+  "name": "Contract Stall",
   "category": "Commercial",
   "subcategory": "Retail Shops",
   "tier": 1,
@@ -263,7 +263,7 @@ The building system uses several API endpoints:
 ```typescript
 // 1. Select a building in the BuildingMenu
 const building = {
-  name: "Market Stall",
+  name: "Contract Stall",
   category: "Commercial",
   // ...other properties
 };

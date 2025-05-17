@@ -1,10 +1,10 @@
 2025-05-13 23:15:33,729 - maintenance_collector - INFO - Starting maintenance cost collection process
-2025-05-13 23:15:37,817 - maintenance_collector - ERROR - Error fetching buildings: HTTPConnectionPool(host='localhost', port=5000): Max retries exceeded with url: /buildings (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001F9B6D5F190>: Failed to establish a new connection: [WinError 10061] Aucune connexion n’a pu être établie car l’ordinateur cible l’a expressément refusée'))
+2025-05-13 23:15:37,817 - maintenance_collector - ERROR - Error fetching buildings: HTTPConnectionPool(host='localhost', port=5000): Max retries exceeded with url: /buildings (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001F9B6D5F190>: Failed to establish a new connection: [WinError 10061] Aucune connexion nï¿½a pu ï¿½tre ï¿½tablie car lï¿½ordinateur cible lï¿½a expressï¿½ment refusï¿½e'))
 2025-05-13 23:15:37,817 - maintenance_collector - INFO - Found 0 buildings to process
 2025-05-13 23:15:37,818 - maintenance_collector - INFO - Maintenance collection complete. Processed 0 buildings.
 2025-05-13 23:15:37,818 - maintenance_collector - INFO - Total maintenance collected: 0 ducats
 2025-05-13 23:15:37,819 - maintenance_collector - INFO - Buildings with errors: 0
-2025-05-13 23:15:41,915 - maintenance_collector - ERROR - Error sending admin notification to NLR: HTTPConnectionPool(host='localhost', port=5000): Max retries exceeded with url: /notifications (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001F9B6D5E380>: Failed to establish a new connection: [WinError 10061] Aucune connexion n’a pu être établie car l’ordinateur cible l’a expressément refusée'))
+2025-05-13 23:15:41,915 - maintenance_collector - ERROR - Error sending admin notification to NLR: HTTPConnectionPool(host='localhost', port=5000): Max retries exceeded with url: /notifications (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001F9B6D5E380>: Failed to establish a new connection: [WinError 10061] Aucune connexion nï¿½a pu ï¿½tre ï¿½tablie car lï¿½ordinateur cible lï¿½a expressï¿½ment refusï¿½e'))
 2025-05-16 09:00:47,357 - maintenance_collector - INFO - Starting maintenance cost collection process
 2025-05-16 09:00:48,109 - maintenance_collector - INFO - Successfully fetched 138 buildings from Airtable
 2025-05-16 09:00:48,109 - maintenance_collector - INFO - Found 138 buildings to process
@@ -27,7 +27,7 @@
 2025-05-16 09:00:48,110 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'rec6EFVnMWLceC9Tz', 'type': 'bridge', 'owner': None, 'land_id': None}
 2025-05-16 09:00:48,110 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'rec7DLnDybSY7X6ee', 'type': 'merchant_s_house', 'owner': None, 'land_id': None}
 2025-05-16 09:00:48,110 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'rec7a5tpJU8vJOjLT', 'type': 'bridge', 'owner': None, 'land_id': None}
-2025-05-16 09:00:48,110 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'rec7oxoMJKyvwm7X9', 'type': 'market_stall', 'owner': None, 'land_id': None}
+2025-05-16 09:00:48,110 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'rec7oxoMJKyvwm7X9', 'type': 'contract_stall', 'owner': None, 'land_id': None}
 2025-05-16 09:00:48,110 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'rec8oZkaY8abdGW2M', 'type': 'public_well', 'owner': None, 'land_id': None}
 2025-05-16 09:00:48,110 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'rec9CHZZZp39gfi1b', 'type': 'public_dock', 'owner': None, 'land_id': None}
 2025-05-16 09:00:48,110 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'rec9IwqlMwHI2aHGl', 'type': 'bridge', 'owner': None, 'land_id': None}
@@ -39,12 +39,12 @@
 2025-05-16 09:00:48,110 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recC1BxV2F7HSzzWz', 'type': 'public_dock', 'owner': None, 'land_id': None}
 2025-05-16 09:00:48,110 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recC3ZskW2tcsiEk8', 'type': 'public_well', 'owner': None, 'land_id': None}
 2025-05-16 09:00:48,110 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recCCxpdILLzg2xXC', 'type': 'public_dock', 'owner': None, 'land_id': None}
-2025-05-16 09:00:48,110 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recCQitGuprCFcJcc', 'type': 'market_stall', 'owner': None, 'land_id': None}
+2025-05-16 09:00:48,110 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recCQitGuprCFcJcc', 'type': 'contract_stall', 'owner': None, 'land_id': None}
 2025-05-16 09:00:48,110 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recChkOwZ8E9o2DiQ', 'type': 'public_dock', 'owner': None, 'land_id': None}
 2025-05-16 09:00:48,110 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recDEOtymjfXFZxdz', 'type': 'bridge', 'owner': None, 'land_id': None}
 2025-05-16 09:00:48,110 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recDp5h1iK9XT4ksb', 'type': 'public_dock', 'owner': None, 'land_id': None}
 2025-05-16 09:00:48,111 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recDy15jEBL6eSzx6', 'type': 'bridge', 'owner': None, 'land_id': None}
-2025-05-16 09:00:48,111 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recF59m8vo1LUZFVr', 'type': 'market_stall', 'owner': None, 'land_id': None}
+2025-05-16 09:00:48,111 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recF59m8vo1LUZFVr', 'type': 'contract_stall', 'owner': None, 'land_id': None}
 2025-05-16 09:00:48,111 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recFM1IRAZG0mfAZT', 'type': 'bridge', 'owner': None, 'land_id': None}
 2025-05-16 09:00:48,111 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recFYdlXcfaVjnKhM', 'type': 'bridge', 'owner': None, 'land_id': None}
 2025-05-16 09:00:48,111 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recFcPeFHJNjHcBwT', 'type': 'public_well', 'owner': None, 'land_id': None}
@@ -60,7 +60,7 @@
 2025-05-16 09:00:48,111 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recIuqPG4Y8lmBSIm', 'type': 'bridge', 'owner': None, 'land_id': None}
 2025-05-16 09:00:48,111 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recJ2jRQCIDC5pD8u', 'type': 'public_dock', 'owner': None, 'land_id': None}
 2025-05-16 09:00:48,111 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recJ3YF5p8eIIkQhE', 'type': 'fisherman_s_cottage', 'owner': None, 'land_id': None}
-2025-05-16 09:00:48,111 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recKUOqWGu9jWlDPR', 'type': 'market_stall', 'owner': None, 'land_id': None}
+2025-05-16 09:00:48,111 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recKUOqWGu9jWlDPR', 'type': 'contract_stall', 'owner': None, 'land_id': None}
 2025-05-16 09:00:48,111 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recKZIeelBSTSjtf4', 'type': 'artisan_s_house', 'owner': None, 'land_id': None}
 2025-05-16 09:00:48,111 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recKimq2DFBh4HKZ8', 'type': 'luxury_showroom', 'owner': None, 'land_id': None}
 2025-05-16 09:00:48,111 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recL26zciSwNqhTrc', 'type': 'bridge', 'owner': None, 'land_id': None}
@@ -76,7 +76,7 @@
 2025-05-16 09:00:48,112 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recOqN2rMKtqSQoOB', 'type': 'public_dock', 'owner': None, 'land_id': None}
 2025-05-16 09:00:48,112 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recPGkUE7fLWbhOJi', 'type': 'artisan_s_house', 'owner': None, 'land_id': None}
 2025-05-16 09:00:48,112 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recPPnIUz3EZItj33', 'type': 'bridge', 'owner': None, 'land_id': None}
-2025-05-16 09:00:48,112 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recPoEd0pgzFeZvo3', 'type': 'market_stall', 'owner': None, 'land_id': None}
+2025-05-16 09:00:48,112 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recPoEd0pgzFeZvo3', 'type': 'contract_stall', 'owner': None, 'land_id': None}
 2025-05-16 09:00:48,112 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recRrtPN8HfzDxkNs', 'type': 'bridge', 'owner': None, 'land_id': None}
 2025-05-16 09:00:48,112 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recSh4akXyEWQQhIm', 'type': 'customs_house', 'owner': None, 'land_id': None}
 2025-05-16 09:00:48,112 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recStQCTnkNWyyaco', 'type': 'bridge', 'owner': None, 'land_id': None}
@@ -117,7 +117,7 @@
 2025-05-16 09:00:48,113 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'reckXg9Wycut6WlxU', 'type': 'bridge', 'owner': None, 'land_id': None}
 2025-05-16 09:00:48,113 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'reckgUEYmHupQgRhn', 'type': 'bridge', 'owner': None, 'land_id': None}
 2025-05-16 09:00:48,113 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'reclsNuBg9VOdCvvC', 'type': 'guard_post', 'owner': None, 'land_id': None}
-2025-05-16 09:00:48,114 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recnFsZpOUU3pODBo', 'type': 'market_stall', 'owner': None, 'land_id': None}
+2025-05-16 09:00:48,114 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recnFsZpOUU3pODBo', 'type': 'contract_stall', 'owner': None, 'land_id': None}
 2025-05-16 09:00:48,114 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recnUPfiLIQUjFYW4', 'type': 'public_dock', 'owner': None, 'land_id': None}
 2025-05-16 09:00:48,114 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recnabzoxyxuVFv4t', 'type': 'merchant_s_house', 'owner': None, 'land_id': None}
 2025-05-16 09:00:48,114 - maintenance_collector - WARNING - Skipping building with missing data: {'id': 'recoPLlurIFIXv3rR', 'type': 'bridge', 'owner': None, 'land_id': None}

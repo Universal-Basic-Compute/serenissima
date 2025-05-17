@@ -99,7 +99,7 @@ def get_building_types_info() -> Dict:
         },
         "market-stall": {
             "type": "market-stall",
-            "name": "Market Stall",
+            "name": "Contract Stall",
             "shortDescription": "Small commercial space for selling goods",
             "constructionCost": 3000
         },

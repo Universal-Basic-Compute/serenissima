@@ -72,7 +72,7 @@ const ResourceDetails: React.FC<ResourceDetailsProps> = ({
               const target = e.target as HTMLImageElement;
               if (!target.dataset.usedFallback) {
                 target.dataset.usedFallback = 'true';
-                target.src = "/assets/resources/icons/default.png";
+                target.src = "/images/resources/icons/default.png";
               }
             }}
           />
@@ -348,7 +348,7 @@ const ResourceDetails: React.FC<ResourceDetailsProps> = ({
                         const target = e.target as HTMLImageElement;
                         if (!target.dataset.usedFallback) {
                           target.dataset.usedFallback = 'true';
-                          target.src = "/assets/resources/icons/default.png";
+                          target.src = "/images/resources/icons/default.png";
                         }
                       }}
                     />
@@ -382,7 +382,7 @@ const ResourceDetails: React.FC<ResourceDetailsProps> = ({
                         const target = e.target as HTMLImageElement;
                         if (!target.dataset.usedFallback) {
                           target.dataset.usedFallback = 'true';
-                          target.src = "/assets/resources/icons/default.png";
+                          target.src = "/images/resources/icons/default.png";
                         }
                       }}
                     />
@@ -522,39 +522,39 @@ const ResourceDetails: React.FC<ResourceDetailsProps> = ({
         </div>
       )}
       
-      {/* Market Dynamics */}
-      {resource.marketDynamics && (
+      {/* Contract Dynamics */}
+      {resource.contractDynamics && (
         <div className="mb-6">
           <h4 className="text-lg font-serif text-amber-300 mb-2 border-b border-amber-700/50 pb-1">
             <div className="flex items-center">
               <FaChartLine className="mr-2" />
-              Market Dynamics
+              Contract Dynamics
             </div>
           </h4>
           
           <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-amber-100 mb-3">
-            {resource.marketDynamics.baseAvailability !== undefined && (
+            {resource.contractDynamics.baseAvailability !== undefined && (
               <div>
-                <span className="font-medium">Base Availability:</span> {resource.marketDynamics.baseAvailability * 100}%
+                <span className="font-medium">Base Availability:</span> {resource.contractDynamics.baseAvailability * 100}%
               </div>
             )}
-            {resource.marketDynamics.demandLevel && (
+            {resource.contractDynamics.demandLevel && (
               <div>
-                <span className="font-medium">Demand Level:</span> {getCategoryDisplayName(resource.marketDynamics.demandLevel)}
+                <span className="font-medium">Demand Level:</span> {getCategoryDisplayName(resource.contractDynamics.demandLevel)}
               </div>
             )}
-            {resource.marketDynamics.priceVolatility !== undefined && (
+            {resource.contractDynamics.priceVolatility !== undefined && (
               <div>
-                <span className="font-medium">Price Volatility:</span> {resource.marketDynamics.priceVolatility * 100}%
+                <span className="font-medium">Price Volatility:</span> {resource.contractDynamics.priceVolatility * 100}%
               </div>
             )}
           </div>
           
-          {resource.marketDynamics.influencedBy && resource.marketDynamics.influencedBy.length > 0 && (
+          {resource.contractDynamics.influencedBy && resource.contractDynamics.influencedBy.length > 0 && (
             <div className="mb-3">
               <h5 className="text-sm text-amber-200 font-medium mb-1">Price Influenced By</h5>
               <div className="flex flex-wrap gap-1">
-                {resource.marketDynamics.influencedBy.map((factor: string) => (
+                {resource.contractDynamics.influencedBy.map((factor: string) => (
                   <span key={factor} className="text-xs bg-amber-800/40 text-amber-200 px-2 py-0.5 rounded">
                     {getCategoryDisplayName(factor)}
                   </span>
@@ -563,11 +563,11 @@ const ResourceDetails: React.FC<ResourceDetailsProps> = ({
             </div>
           )}
           
-          {resource.marketDynamics.regionalFactors && resource.marketDynamics.regionalFactors.length > 0 && (
+          {resource.contractDynamics.regionalFactors && resource.contractDynamics.regionalFactors.length > 0 && (
             <div>
               <h5 className="text-sm text-amber-200 font-medium mb-1">Regional Factors</h5>
               <div className="grid grid-cols-1 gap-1">
-                {resource.marketDynamics.regionalFactors.map((factor: any, index: number) => (
+                {resource.contractDynamics.regionalFactors.map((factor: any, index: number) => (
                   <div key={index} className="flex justify-between text-xs bg-amber-900/10 p-2 rounded">
                     <span className="text-amber-200">{getCategoryDisplayName(factor.region)}</span>
                     <div className="text-amber-100">
@@ -722,13 +722,13 @@ const ResourceDetails: React.FC<ResourceDetailsProps> = ({
               </div>
             )}
             
-            {resource.historicalNotes.historicalMarkets && resource.historicalNotes.historicalMarkets.length > 0 && (
+            {resource.historicalNotes.historicalContracts && resource.historicalNotes.historicalContracts.length > 0 && (
               <div>
-                <div className="text-sm text-amber-200 font-medium mb-1">Historical Markets</div>
+                <div className="text-sm text-amber-200 font-medium mb-1">Historical Contracts</div>
                 <div className="flex flex-wrap gap-1">
-                  {resource.historicalNotes.historicalMarkets.map((market: string, index: number) => (
+                  {resource.historicalNotes.historicalContracts.map((contract: string, index: number) => (
                     <span key={index} className="text-xs bg-amber-800/40 text-amber-100 px-2 py-0.5 rounded">
-                      {market}
+                      {contract}
                     </span>
                   ))}
                 </div>

@@ -223,7 +223,7 @@ export class BuildingService {
     // Special cases for common building types
     switch(type.toLowerCase()) {
       case 'market-stall':
-        return '#E6C275'; // Warm gold/amber for market stalls
+        return '#E6C275'; // Warm gold/amber for contract stalls
       case 'house':
         return '#E8D2B5'; // Venetian terracotta/sand for houses
       case 'workshop':

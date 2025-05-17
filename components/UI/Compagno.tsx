@@ -208,7 +208,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
           },
           {
             notificationId: 'dummy-2',
-            type: 'Market',
+            type: 'Contract',
             citizen: username || DEFAULT_CITIZENNAME,
             content: 'A new land parcel is available for purchase in San Marco district.',
             createdAt: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago

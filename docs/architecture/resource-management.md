@@ -285,5 +285,5 @@ The resource management system is designed for future expansion:
 3. **Resource Production**: Automated resource production from buildings
 4. **Resource Consumption**: Resource consumption by citizens and buildings
 5. **Resource Quality**: Variable quality levels for resources
-6. **Resource Markets**: Market system for buying and selling resources
+6. **Resource Contracts**: Contract system for buying and selling resources
 7. **Resource Expeditions**: Special missions to gather rare resources

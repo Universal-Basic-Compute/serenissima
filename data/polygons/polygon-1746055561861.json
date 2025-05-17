@@ -107,7 +107,7 @@
   },
   "historicalName": "Calle del Forno in Sestiere San Polo",
   "englishName": "Oven Street in the District of Saint Paul",
-  "historicalDescription": "A street known for its bakeries and located near the Rialto market, an important commercial hub of 15th century Venice.",
+  "historicalDescription": "A street known for its bakeries and located near the Rialto contract, an important commercial hub of 15th century Venice.",
   "nameConfidence": "medium",
   "areaInSquareMeters": 168912.38,
   "center": {
@@ -168,7 +168,7 @@
       },
       "historicalName": "Riva dei Meloni",
       "englishName": "Bank of the Melons",
-      "historicalDescription": "A small dock where fruit vendors, particularly those selling melons, would receive their goods. Located near San Polo, it served the local market that would have operated in the vicinity of Calle del Forno.",
+      "historicalDescription": "A small dock where fruit vendors, particularly those selling melons, would receive their goods. Located near San Polo, it served the local contract that would have operated in the vicinity of Calle del Forno.",
       "id": "canal_45.447816_12.321022"
     },
     {
@@ -748,7 +748,7 @@
       "lng": 12.321077885846746,
       "streetName": "Campiello dei Pistori",
       "streetNameEnglish": "Small Square of the Bakers",
-      "streetDescription": "A small square where bakers might have gathered or where a small grain market might have operated. 'Pistori' was the Venetian term for bakers, making this a center of the local baking community.",
+      "streetDescription": "A small square where bakers might have gathered or where a small grain contract might have operated. 'Pistori' was the Venetian term for bakers, making this a center of the local baking community.",
       "id": "building_45.446970_12.321078"
     },
     {

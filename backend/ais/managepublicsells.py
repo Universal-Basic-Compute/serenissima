@@ -131,7 +131,7 @@ def get_citizen_buildings(tables, username: str) -> List[Dict]:
     """Get all buildings run by a specific citizen."""
     try:
         # Query buildings where the citizen is running the building
-        formula = f"{{RanBy}}='{username}'"
+        formula = f"{{RunBy}}='{username}'"
         buildings = tables["buildings"].all(formula=formula)
         print(f"Found {len(buildings)} buildings run by {username}")
         return buildings
@@ -167,7 +167,7 @@ def get_citizen_active_contracts(tables, username: str) -> List[Dict]:
         return []
 
 def get_recent_public_sell_contracts(tables, username: str, limit: int = 100) -> List[Dict]:
-    """Get recent public_sell contracts from other players to analyze market prices."""
+    """Get recent public_sell contracts from other players to analyze contract prices."""
     try:
         # Get current time
         now = datetime.now().isoformat()
@@ -191,9 +191,9 @@ def get_recent_public_sell_contracts(tables, username: str, limit: int = 100) ->
         print(f"Found {len(sorted_contracts)} recent public_sell contracts from other players (limited to {limit})")
         
         # Transform into a more usable format
-        market_contracts = []
+        contract_contracts = []
         for contract in sorted_contracts:
-            market_contracts.append({
+            contract_contracts.append({
                 "id": contract["fields"].get("ContractId", ""),
                 "seller": contract["fields"].get("Seller", ""),
                 "resource_type": contract["fields"].get("ResourceType", ""),
@@ -202,7 +202,7 @@ def get_recent_public_sell_contracts(tables, username: str, limit: int = 100) ->
                 "created_at": contract["fields"].get("CreatedAt", "")
             })
         
-        return market_contracts
+        return contract_contracts
     except Exception as e:
         print(f"Error getting recent public_sell contracts: {str(e)}")
         return []
@@ -221,7 +221,7 @@ def prepare_public_sell_strategy_data(
     citizen_buildings: List[Dict], 
     citizen_resources: List[Dict],
     citizen_active_contracts: List[Dict],
-    market_contracts: List[Dict],
+    contract_contracts: List[Dict],
     building_types: Dict, 
     resource_types: Dict
 ) -> Dict:
@@ -296,14 +296,14 @@ def prepare_public_sell_strategy_data(
             "import_price": resource.get("importPrice", 0)
         }
     
-    # Process market contracts to provide price analysis
-    market_prices = {}
-    for contract in market_contracts:
+    # Process contract contracts to provide price analysis
+    contract_prices = {}
+    for contract in contract_contracts:
         resource_type = contract["resource_type"]
         price = contract["price_per_resource"]
         
-        if resource_type not in market_prices:
-            market_prices[resource_type] = {
+        if resource_type not in contract_prices:
+            contract_prices[resource_type] = {
                 "count": 0,
                 "min_price": float('inf'),
                 "max_price": 0,
@@ -313,21 +313,21 @@ def prepare_public_sell_strategy_data(
             }
         
         # Update price statistics
-        market_prices[resource_type]["count"] += 1
-        market_prices[resource_type]["min_price"] = min(market_prices[resource_type]["min_price"], price)
-        market_prices[resource_type]["max_price"] = max(market_prices[resource_type]["max_price"], price)
-        market_prices[resource_type]["total_price"] += price
+        contract_prices[resource_type]["count"] += 1
+        contract_prices[resource_type]["min_price"] = min(contract_prices[resource_type]["min_price"], price)
+        contract_prices[resource_type]["max_price"] = max(contract_prices[resource_type]["max_price"], price)
+        contract_prices[resource_type]["total_price"] += price
         
         # Add to recent contracts (limit to 5 per resource type)
-        if len(market_prices[resource_type]["recent_contracts"]) < 5:
-            market_prices[resource_type]["recent_contracts"].append({
+        if len(contract_prices[resource_type]["recent_contracts"]) < 5:
+            contract_prices[resource_type]["recent_contracts"].append({
                 "seller": contract["seller"],
                 "price": price,
                 "hourly_amount": contract["hourly_amount"]
             })
     
     # Calculate average prices
-    for resource_type, data in market_prices.items():
+    for resource_type, data in contract_prices.items():
         if data["count"] > 0:
             data["avg_price"] = data["total_price"] / data["count"]
     
@@ -343,8 +343,8 @@ def prepare_public_sell_strategy_data(
         "resources": list(resources_by_type.values()),
         "resource_info": resource_info,
         "existing_contracts": existing_contracts,
-        "market_prices": market_prices,  # Add market price analysis
-        "market_contracts": market_contracts[:20],  # Include a sample of recent contracts
+        "contract_prices": contract_prices,  # Add contract price analysis
+        "contract_contracts": contract_contracts[:20],  # Include a sample of recent contracts
         "timestamp": datetime.now().isoformat()
     }
     
@@ -383,7 +383,7 @@ Here's your current situation:
 Please analyze your buildings and resources to develop a strategy for public selling. Consider:
 1. Which resources each building can sell
 2. Your current resource stockpiles
-3. The import prices and market value of different resources
+3. The import prices and contract value of different resources
 4. Your existing public sell contracts
 
 After your analysis, provide your decisions in this JSON format:
@@ -443,16 +443,16 @@ Here is the complete data about your current situation:
 When developing your public sell strategy:
 1. Analyze which buildings can sell which resources (check the "sells" array for each building)
 2. Consider your current resource stockpiles and production capacity
-3. Analyze the market prices for each resource type (see market_prices data)
+3. Analyze the contract prices for each resource type (see contract_prices data)
 4. Set competitive prices based on what other sellers are charging:
-   - If you want to sell quickly, price slightly below the market average
-   - If you want to maximize profit, price at or slightly above the market average
+   - If you want to sell quickly, price slightly below the contract average
+   - If you want to maximize profit, price at or slightly above the contract average
    - Consider the import price as a minimum baseline (typically 1.2-1.5x the import price)
 5. Balance the hourly sell amounts based on your resource availability
 6. Consider ending contracts for resources you no longer wish to sell
 7. Create a specific, actionable plan with building IDs and resource types
 
-Your decision should be specific, data-driven, and focused on optimizing your market presence.
+Your decision should be specific, data-driven, and focused on optimizing your contract presence.
 
 IMPORTANT: You must end your response with a JSON object containing your specific public sell decisions.
 Include both contracts_to_create and contracts_to_end arrays with the required information for each.
@@ -870,7 +870,7 @@ def process_ai_public_sell_strategies(dry_run: bool = False):
         citizen_active_contracts = get_citizen_active_contracts(tables, ai_username)
         
         # Get recent public_sell contracts from other players
-        market_contracts = get_recent_public_sell_contracts(tables, ai_username, 100)
+        contract_contracts = get_recent_public_sell_contracts(tables, ai_username, 100)
         
         # Prepare the data package for the AI
         data_package = prepare_public_sell_strategy_data(
@@ -878,7 +878,7 @@ def process_ai_public_sell_strategies(dry_run: bool = False):
             citizen_buildings, 
             citizen_resources,
             citizen_active_contracts,
-            market_contracts,
+            contract_contracts,
             building_types, 
             resource_types
         )

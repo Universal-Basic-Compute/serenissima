@@ -11,7 +11,7 @@ const VENICE_CENTER = {
 // Maximum distance factor (in km) - beyond this distance, the multiplier is 1x
 const MAX_DISTANCE = 2.5; // ~2.5km covers most of Venice
 
-// Market stall reference values from the game economy
+// Contract stall reference values from the game economy
 const MARKET_STALL_DAILY_INCOME = 8000; // ducats
 const MARKET_STALL_SIZE = 20; // approximate size in square meters
 

@@ -98,14 +98,14 @@ const UnifiedCitizenModelArticle: React.FC<UnifiedCitizenModelArticleProps> = ({
             <div className="bg-amber-100 p-4 rounded-lg border border-amber-300">
               <h4 className="text-xl font-serif text-amber-800 mb-2">A Truly Living World</h4>
               <p>
-                By having AI citizens that follow the same rules as players, we create a Venice that feels genuinely alive. Markets remain active even in areas with few human players. Buildings have occupants who pay rent. Businesses have workers who earn wages. This creates a much more immersive and believable world than one populated by static NPCs.
+                By having AI citizens that follow the same rules as players, we create a Venice that feels genuinely alive. Contracts remain active even in areas with few human players. Buildings have occupants who pay rent. Businesses have workers who earn wages. This creates a much more immersive and believable world than one populated by static NPCs.
               </p>
             </div>
             
             <div className="bg-amber-100 p-4 rounded-lg border border-amber-300">
               <h4 className="text-xl font-serif text-amber-800 mb-2">Economic Realism</h4>
               <p>
-                Real economies don't distinguish between different types of participants—all follow the same rules and constraints. By treating AI and human citizens equally, La Serenissima creates a more realistic economic simulation where success depends on understanding and navigating market forces rather than exploiting game mechanics.
+                Real economies don't distinguish between different types of participants—all follow the same rules and constraints. By treating AI and human citizens equally, La Serenissima creates a more realistic economic simulation where success depends on understanding and navigating contract forces rather than exploiting game mechanics.
               </p>
             </div>
             
@@ -136,14 +136,14 @@ const UnifiedCitizenModelArticle: React.FC<UnifiedCitizenModelArticleProps> = ({
               <div className="bg-amber-50 p-3 rounded border border-amber-200">
                 <h5 className="font-bold text-amber-900 mb-1">Marketplace Transactions</h5>
                 <p className="text-sm">
-                  Buy from and sell to AI citizens in the various markets throughout Venice. AI merchants offer a wide range of goods and services, and they respond to market conditions just like human players.
+                  Buy from and sell to AI citizens in the various contracts throughout Venice. AI merchants offer a wide range of goods and services, and they respond to contract conditions just like human players.
                 </p>
               </div>
               
               <div className="bg-amber-50 p-3 rounded border border-amber-200">
                 <h5 className="font-bold text-amber-900 mb-1">Landlord-Tenant Relationships</h5>
                 <p className="text-sm">
-                  Rent buildings to AI citizens or rent from them. AI landlords charge market rates and maintain their properties, while AI tenants pay rent reliably and use the spaces according to their professions.
+                  Rent buildings to AI citizens or rent from them. AI landlords charge contract rates and maintain their properties, while AI tenants pay rent reliably and use the spaces according to their professions.
                 </p>
               </div>
               
@@ -157,7 +157,7 @@ const UnifiedCitizenModelArticle: React.FC<UnifiedCitizenModelArticleProps> = ({
               <div className="bg-amber-50 p-3 rounded border border-amber-200">
                 <h5 className="font-bold text-amber-900 mb-1">Land Development</h5>
                 <p className="text-sm">
-                  Build on land owned by AI citizens (paying lease fees) or collect lease fees from AI citizens building on your land. This creates a dynamic real estate market where both AI and human players compete for prime locations.
+                  Build on land owned by AI citizens (paying lease fees) or collect lease fees from AI citizens building on your land. This creates a dynamic real estate contract where both AI and human players compete for prime locations.
                 </p>
               </div>
               
@@ -191,7 +191,7 @@ const UnifiedCitizenModelArticle: React.FC<UnifiedCitizenModelArticleProps> = ({
               <div className="bg-amber-50 p-3 rounded border border-amber-200">
                 <h5 className="font-bold text-amber-900 mb-1">Social Events</h5>
                 <p className="text-sm">
-                  Participate in social events alongside AI citizens. From markets to festivals, AI citizens attend and participate in the same events as human players, creating a lively social atmosphere.
+                  Participate in social events alongside AI citizens. From contracts to festivals, AI citizens attend and participate in the same events as human players, creating a lively social atmosphere.
                 </p>
               </div>
               

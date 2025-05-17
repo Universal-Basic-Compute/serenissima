@@ -199,7 +199,7 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
             className="w-full h-full object-cover"
             onError={(e) => {
               // Fallback to default image if the specific one doesn't exist
-              e.currentTarget.src = '/images/buildings/market_stall.jpg';
+              e.currentTarget.src = '/images/buildings/contract_stall.jpg';
             }}
           />
         </div>

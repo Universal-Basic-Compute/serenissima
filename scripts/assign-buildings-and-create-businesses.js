@@ -22,13 +22,13 @@ const CITIZENS = ['Isabella', 'Marco', 'Sofia'];
 const BUILDING_TYPES = [
   'artisan_s_house', 'bakery', 'blacksmith', 'boat_workshop', 'bottega', 
   'canal_house', 'cargo_landing', 'eastern_merchant_house', 'fisherman_s_cottage', 
-  'granary', 'market_stall', 'merceria', 'merchant_s_house', 'small_warehouse'
+  'granary', 'contract_stall', 'merceria', 'merchant_s_house', 'small_warehouse'
 ];
 
 // Commercial building types that need business records
 const COMMERCIAL_BUILDING_TYPES = [
   'bakery', 'blacksmith', 'boat_workshop', 'bottega', 'cargo_landing', 
-  'eastern_merchant_house', 'granary', 'market_stall', 'merceria', 'small_warehouse'
+  'eastern_merchant_house', 'granary', 'contract_stall', 'merceria', 'small_warehouse'
 ];
 
 // Business name generators by type
@@ -40,7 +40,7 @@ const BUSINESS_NAME_GENERATORS = {
   'cargo_landing': () => `${getRandomItem(['Grand', 'Merchant\'s', 'Rialto', 'Dockside', 'Canal'])} ${getRandomItem(['Cargo Landing', 'Shipping Dock', 'Trading Port', 'Merchant Dock'])}`,
   'eastern_merchant_house': () => `${getRandomItem(['Silk Road', 'Spice', 'Oriental', 'Byzantine', 'Levantine'])} ${getRandomItem(['Trading House', 'Merchant Company', 'Import House', 'Exchange'])}`,
   'granary': () => `${getRandomItem(['Golden', 'Abundant', 'Venetian', 'Republic\'s', 'Merchant\'s'])} ${getRandomItem(['Granary', 'Grain Storage', 'Provisions', 'Storehouse'])}`,
-  'market_stall': () => `${getRandomItem(['Fresh', 'Daily', 'Rialto', 'Merchant\'s', 'Venetian'])} ${getRandomItem(['Market Stall', 'Goods', 'Provisions', 'Wares'])}`,
+  'contract_stall': () => `${getRandomItem(['Fresh', 'Daily', 'Rialto', 'Merchant\'s', 'Venetian'])} ${getRandomItem(['Contract Stall', 'Goods', 'Provisions', 'Wares'])}`,
   'merceria': () => `${getRandomItem(['Fine', 'Silk', 'Golden', 'Noble', 'Venetian'])} ${getRandomItem(['Merceria', 'Textiles', 'Fabrics', 'Clothier'])}`,
   'small_warehouse': () => `${getRandomItem(['Secure', 'Canal', 'Merchant\'s', 'Dockside', 'Trading'])} ${getRandomItem(['Warehouse', 'Storage', 'Depot', 'Storehouse'])}`
 };
@@ -54,7 +54,7 @@ const BUSINESS_DESCRIPTION_GENERATORS = {
   'cargo_landing': () => `A ${getRandomItem(['busy', 'strategic', 'well-positioned', 'efficient', 'profitable'])} cargo landing handling ${getRandomItem(['imports from the East', 'local goods distribution', 'bulk materials', 'specialty cargo'])}.`,
   'eastern_merchant_house': () => `A ${getRandomItem(['prestigious', 'well-connected', 'exotic', 'profitable', 'established'])} trading house specializing in ${getRandomItem(['silk and spices', 'Eastern luxury goods', 'rare imports', 'Byzantine trade'])}.`,
   'granary': () => `A ${getRandomItem(['large', 'secure', 'well-maintained', 'strategic', 'essential'])} granary storing ${getRandomItem(['grain for the city', 'food reserves', 'imported cereals', 'provisions for merchants'])}.`,
-  'market_stall': () => `A ${getRandomItem(['popular', 'busy', 'colorful', 'well-stocked', 'strategically located'])} market stall selling ${getRandomItem(['fresh produce', 'imported goods', 'local crafts', 'daily necessities'])}.`,
+  'contract_stall': () => `A ${getRandomItem(['popular', 'busy', 'colorful', 'well-stocked', 'strategically located'])} contract stall selling ${getRandomItem(['fresh produce', 'imported goods', 'local crafts', 'daily necessities'])}.`,
   'merceria': () => `A ${getRandomItem(['fine', 'luxurious', 'well-stocked', 'prestigious', 'specialized'])} textile shop offering ${getRandomItem(['imported silks', 'fine fabrics', 'materials for noble garments', 'specialty textiles'])}.`,
   'small_warehouse': () => `A ${getRandomItem(['secure', 'well-positioned', 'efficient', 'dry', 'accessible'])} warehouse used for ${getRandomItem(['merchant goods', 'valuable cargo', 'imported materials', 'local production storage'])}.`
 };

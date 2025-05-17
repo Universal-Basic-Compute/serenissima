@@ -79,7 +79,7 @@
   "seasonalEffects": {
     "carnival": "Increased demand, special event deliveries",
     "winter": "Challenging conditions, slower service",
-    "market days": "Peak activity, priority commercial deliveries"
+    "contract days": "Peak activity, priority commercial deliveries"
   },
   "aiInteractionPoints": [
     "Dispatch desk",

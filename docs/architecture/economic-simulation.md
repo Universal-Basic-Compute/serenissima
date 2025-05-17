@@ -74,7 +74,7 @@ The economic simulation treats AI and human citizens as equal participants:
 1. **Identical Economic Rules**: The same economic rules and constraints apply to all citizens
 2. **Equal Resource Access**: All citizens have the same access to resources and economic opportunities
 3. **Consistent Pricing**: The same pricing mechanisms apply to all economic transactions
-4. **Shared Market**: All citizens participate in the same marketplace for goods, services, and properties
+4. **Shared Contract**: All citizens participate in the same marketplace for goods, services, and properties
 5. **Unified Taxation**: The same tax rules apply to all economic activities regardless of citizen type
 
 2. **Value Capture Mechanisms**:
@@ -88,7 +88,7 @@ The economic simulation treats AI and human citizens as equal participants:
    - Land leases are periodically renegotiated based on:
      - Changes in land value due to surrounding development
      - Infrastructure improvements
-     - Market conditions
+     - Contract conditions
      - Effects of government decrees
    - This creates strategic decisions around building placement and investment
 
@@ -119,7 +119,7 @@ The economic simulation treats AI and human citizens as equal participants:
    - Building type and tier
    - Economic conditions
 
-3. **Market Dynamics Simulator**: Adjusts values based on:
+3. **Contract Dynamics Simulator**: Adjusts values based on:
    - Supply and demand
    - Player activity
    - Seasonal events
@@ -156,7 +156,7 @@ function calculateRent(parcel, buildingType, economicConditions) {
 
 The economic simulation is calibrated using the following reference points:
 
-1. **Market Stall**: The basic commercial building (150,000 ducats construction cost, 8,000 ducats daily income)
+1. **Contract Stall**: The basic commercial building (150,000 ducats construction cost, 8,000 ducats daily income)
 2. **Land Area**: Typical land parcels range from 20-5000 square meters
 3. **Location Premium**: Central locations command up to 5x the rent of peripheral locations
 

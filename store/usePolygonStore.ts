@@ -20,7 +20,7 @@ interface PolygonState {
   // UI state
   infoVisible: boolean;
   transferMenuOpen: boolean;
-  marketPanelVisible: boolean;
+  contractPanelVisible: boolean;
   purchaseModalVisible: boolean;
   purchaseModalData: {
     landId: string | null;
@@ -48,7 +48,7 @@ interface PolygonState {
   // UI actions
   setInfoVisible: (visible: boolean) => void;
   setTransferMenuOpen: (open: boolean) => void;
-  setMarketPanelVisible: (visible: boolean) => void;
+  setContractPanelVisible: (visible: boolean) => void;
   setPurchaseModalVisible: (visible: boolean) => void;
   setPurchaseModalData: (data: {
     landId: string | null;
@@ -77,7 +77,7 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
   // UI state
   infoVisible: false,
   transferMenuOpen: false,
-  marketPanelVisible: false,
+  contractPanelVisible: false,
   purchaseModalVisible: false,
   purchaseModalData: {
     landId: null,
@@ -93,8 +93,8 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
   setLoading: () => set({ loading: false }), // Always set to false
   setError: (error) => set({ error }),
   setActiveView: (view: ViewMode) => {
-    // Allow switching to buildings, land, or markets view
-    if (view === 'buildings' || view === 'land' || view === 'markets') {
+    // Allow switching to buildings, land, or contracts view
+    if (view === 'buildings' || view === 'land' || view === 'contracts') {
       set({ activeView: view });
     } else {
       console.log(`View mode ${view} is not yet available`);
@@ -118,7 +118,7 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
   // UI actions
   setInfoVisible: (visible) => set({ infoVisible: visible }),
   setTransferMenuOpen: (open) => set({ transferMenuOpen: open }),
-  setMarketPanelVisible: (visible) => set({ marketPanelVisible: visible }),
+  setContractPanelVisible: (visible) => set({ contractPanelVisible: visible }),
   setPurchaseModalVisible: (visible) => set({ purchaseModalVisible: visible }),
   setPurchaseModalData: (data) => set({ purchaseModalData: data }),
   setBuildingMenuVisible: (visible) => set({ buildingMenuVisible: visible }),

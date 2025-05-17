@@ -64,7 +64,7 @@
   "areaInSquareMeters": 23455.34,
   "historicalName": "Calle Seconda de li Saoneri in Sestiere San Polo",
   "englishName": "Second Street of the Soapmakers in the San Polo District",
-  "historicalDescription": "This area was known for its soapmaking workshops and proximity to the Rialto market in the 15th century.",
+  "historicalDescription": "This area was known for its soapmaking workshops and proximity to the Rialto contract in the 15th century.",
   "nameConfidence": "medium",
   "center": {
     "lat": 45.43675565615939,
@@ -181,7 +181,7 @@
         "id": "0b44dc16-e88a-4490-ae3b-92d042656e5e",
         "historicalName": "Ponte dei Baratteri",
         "englishName": "Bridge of the Traders",
-        "historicalDescription": "This bridge would have been named for the small-scale traders or barterers who conducted business in this commercial area of San Polo. These merchants often dealt in various goods needed by the soap makers and other artisans in the neighborhood, creating a small local market economy centered around the craft industries.",
+        "historicalDescription": "This bridge would have been named for the small-scale traders or barterers who conducted business in this commercial area of San Polo. These merchants often dealt in various goods needed by the soap makers and other artisans in the neighborhood, creating a small local contract economy centered around the craft industries.",
         "location": {
           "midpoint": {
             "lat": 45.43716794698756,
@@ -206,7 +206,7 @@
       "lng": 12.32839772934099,
       "streetName": "Ruga dei Spezieri di San Polo",
       "streetNameEnglish": "Row of the Spice Merchants of San Polo",
-      "streetDescription": "The term 'Ruga' typically indicated a commercial street, and spice merchants ('Spezieri') were vital to Venetian commerce. San Polo, being close to the Rialto market, was home to numerous merchants. This name suggests a street where spice merchants had their shops, reflecting Venice's role as a major center for the spice trade between East and West.",
+      "streetDescription": "The term 'Ruga' typically indicated a commercial street, and spice merchants ('Spezieri') were vital to Venetian commerce. San Polo, being close to the Rialto contract, was home to numerous merchants. This name suggests a street where spice merchants had their shops, reflecting Venice's role as a major center for the spice trade between East and West.",
       "id": "building_45.436487_12.328398"
     },
     {
@@ -214,7 +214,7 @@
       "lng": 12.328416663417654,
       "streetName": "Rio Terà dei Meloni",
       "streetNameEnglish": "Filled Canal of the Melons",
-      "streetDescription": "A 'Rio Terà' indicates a filled-in canal, common in Venice's urban development. 'Meloni' (melons) suggests this was once a landing where fruit, specifically melons, would have been unloaded from boats for local markets. San Polo's proximity to the Grand Canal made it an ideal location for small produce markets that served the local community.",
+      "streetDescription": "A 'Rio Terà' indicates a filled-in canal, common in Venice's urban development. 'Meloni' (melons) suggests this was once a landing where fruit, specifically melons, would have been unloaded from boats for local contracts. San Polo's proximity to the Grand Canal made it an ideal location for small produce contracts that served the local community.",
       "id": "building_45.436866_12.328417"
     },
     {

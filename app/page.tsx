@@ -39,7 +39,7 @@ export default function TwoDPage() {
   
   // UI state
   const [showInfo, setShowInfo] = useState(false);
-  type ViewType = 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
+  type ViewType = 'buildings' | 'land' | 'transport' | 'resources' | 'contracts' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
   const [activeView, setActiveView] = useState<ViewType>('buildings');
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [showGovernancePanel, setShowGovernancePanel] = useState<boolean>(false);
@@ -630,11 +630,11 @@ export default function TwoDPage() {
             </li>
             <li>
               <button
-                onClick={() => setActiveView('markets')}
+                onClick={() => setActiveView('contracts')}
                 className={`w-full flex items-center p-2 rounded-lg transition-colors ${
-                  activeView === 'markets' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
+                  activeView === 'contracts' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
                 }`}
-                title="Markets"
+                title="Contracts"
               >
                 <FaStore className="mx-auto h-5 w-5" />
               </button>

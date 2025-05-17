@@ -125,7 +125,7 @@ const LandOwnerGuideArticle: React.FC<LandOwnerGuideArticleProps> = ({ onClose }
             <ul className="list-disc pl-5 space-y-1 text-amber-800 mt-2">
               <li>Changes in land value due to surrounding development</li>
               <li>Infrastructure improvements (new bridges, docks, or public buildings)</li>
-              <li>Market conditions and economic cycles</li>
+              <li>Contract conditions and economic cycles</li>
               <li>Effects of government decrees and regulations</li>
             </ul>
             <p className="mt-2 text-amber-800">
@@ -158,9 +158,9 @@ const LandOwnerGuideArticle: React.FC<LandOwnerGuideArticleProps> = ({ onClose }
             </div>
             
             <div>
-              <h5 className="font-bold text-amber-900">Strategic Market Control</h5>
+              <h5 className="font-bold text-amber-900">Strategic Contract Control</h5>
               <p>
-                If your land contains or provides access to valuable markets, high pricing can create bottlenecks in trade networks. This gives you leverage over entire industries that depend on those markets, allowing you to extract premium rates from those who have no choice but to pay.
+                If your land contains or provides access to valuable contracts, high pricing can create bottlenecks in trade networks. This gives you leverage over entire industries that depend on those contracts, allowing you to extract premium rates from those who have no choice but to pay.
               </p>
               
               <div className="my-6 flex justify-center">
@@ -168,14 +168,14 @@ const LandOwnerGuideArticle: React.FC<LandOwnerGuideArticleProps> = ({ onClose }
                   {/* Background */}
                   <rect x="0" y="0" width="400" height="250" fill="#fef3c7" />
                   
-                  {/* Central market */}
+                  {/* Central contract */}
                   <rect x="150" y="75" width="100" height="100" rx="5" fill="#f59e0b" stroke="#b45309" strokeWidth="2" opacity="0.8">
-                    <title>Your Market Property</title>
+                    <title>Your Contract Property</title>
                   </rect>
                   
-                  {/* Market symbol */}
+                  {/* Contract symbol */}
                   <rect x="175" y="100" width="50" height="50" fill="#fef3c7" stroke="#b45309" strokeWidth="1" />
-                  <text x="200" y="130" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">Market</text>
+                  <text x="200" y="130" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">Contract</text>
                   
                   {/* Surrounding properties */}
                   <rect x="50" y="50" width="60" height="60" fill="#a3e635" stroke="#65a30d" strokeWidth="1" opacity="0.7">
@@ -213,8 +213,8 @@ const LandOwnerGuideArticle: React.FC<LandOwnerGuideArticleProps> = ({ onClose }
                   <text x="270" y="150" fill="#b91c1c" fontFamily="serif" fontSize="12">High Fee</text>
                   
                   {/* Labels */}
-                  <text x="200" y="65" fill="#7c2d12" fontFamily="serif" fontSize="16" fontWeight="bold" textAnchor="middle">Your Market Property</text>
-                  <text x="200" y="200" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">Differential Market Access Fees</text>
+                  <text x="200" y="65" fill="#7c2d12" fontFamily="serif" fontSize="16" fontWeight="bold" textAnchor="middle">Your Contract Property</text>
+                  <text x="200" y="200" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">Differential Contract Access Fees</text>
                   
                   {/* Arrow definition */}
                   <defs>
@@ -225,7 +225,7 @@ const LandOwnerGuideArticle: React.FC<LandOwnerGuideArticleProps> = ({ onClose }
                   </defs>
                 </svg>
                 <div className="text-sm text-amber-800 italic text-center mt-2">
-                  Controlling market properties allows you to charge differential fees, favoring allies and penalizing competitors
+                  Controlling contract properties allows you to charge differential fees, favoring allies and penalizing competitors
                 </div>
               </div>
             </div>
@@ -249,9 +249,9 @@ const LandOwnerGuideArticle: React.FC<LandOwnerGuideArticleProps> = ({ onClose }
             </div>
             
             <div className="mb-3">
-              <h5 className="font-bold text-amber-900">Market Penetration</h5>
+              <h5 className="font-bold text-amber-900">Contract Penetration</h5>
               <p>
-                Undercutting competing landowners can attract tenants away from them, allowing you to gain market share in competitive districts. This creates price pressure on rival landowners and can force them to lower their own prices or lose tenants, weakening their economic position.
+                Undercutting competing landowners can attract tenants away from them, allowing you to gain contract share in competitive districts. This creates price pressure on rival landowners and can force them to lower their own prices or lose tenants, weakening their economic position.
               </p>
             </div>
             
@@ -530,7 +530,7 @@ const LandOwnerGuideArticle: React.FC<LandOwnerGuideArticleProps> = ({ onClose }
                 
                 {/* Labels */}
                 <text x="75" y="40" fill="#7c2d12" fontFamily="serif" fontSize="14">Your Property</text>
-                <text x="325" y="190" fill="#7c2d12" fontFamily="serif" fontSize="14">Market</text>
+                <text x="325" y="190" fill="#7c2d12" fontFamily="serif" fontSize="14">Contract</text>
                 <text x="200" y="90" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">Your Chokepoint</text>
                 <text x="200" y="220" fill="#3b82f6" fontFamily="serif" fontSize="12" textAnchor="middle">Competitor's Expensive Water Route</text>
                 <text x="200" y="170" fill="#059669" fontFamily="serif" fontSize="12" textAnchor="middle">Your Efficient Land Route</text>
@@ -804,7 +804,7 @@ const LandOwnerGuideArticle: React.FC<LandOwnerGuideArticleProps> = ({ onClose }
             <h4 className="text-xl font-serif text-amber-800 mb-2">Infrastructure Investment</h4>
             
             <p className="mb-3">
-              Propose and fund infrastructure projects that disproportionately benefit your properties while appearing to serve the public good. A bridge that connects your commercial district to a major market creates value for you while earning political goodwill.
+              Propose and fund infrastructure projects that disproportionately benefit your properties while appearing to serve the public good. A bridge that connects your commercial district to a major contract creates value for you while earning political goodwill.
             </p>
             
             <div className="my-6 flex justify-center">
@@ -820,9 +820,9 @@ const LandOwnerGuideArticle: React.FC<LandOwnerGuideArticleProps> = ({ onClose }
                   <title>Your Commercial District</title>
                 </rect>
                 
-                {/* Market */}
+                {/* Contract */}
                 <rect x="225" y="150" width="125" height="70" fill="#a3e635" stroke="#65a30d" strokeWidth="2" opacity="0.8">
-                  <title>Major Market</title>
+                  <title>Major Contract</title>
                 </rect>
                 
                 {/* Bridge - your infrastructure project */}
@@ -854,7 +854,7 @@ const LandOwnerGuideArticle: React.FC<LandOwnerGuideArticleProps> = ({ onClose }
                 <text x="112" y="40" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">Your Commercial</text>
                 <text x="112" y="55" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">District</text>
                 
-                <text x="287" y="140" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">Major Market</text>
+                <text x="287" y="140" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">Major Contract</text>
                 
                 <text x="287" y="40" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">Competitor</text>
                 <text x="287" y="55" fill="#7c2d12" fontFamily="serif" fontSize="14" textAnchor="middle">District</text>
@@ -866,7 +866,7 @@ const LandOwnerGuideArticle: React.FC<LandOwnerGuideArticleProps> = ({ onClose }
                 <text x="200" y="30" fill="#ef4444" fontFamily="serif" fontSize="12" textAnchor="middle" fontStyle="italic">Longer Alternative Route</text>
               </svg>
               <div className="text-sm text-amber-800 italic text-center mt-2">
-                Strategic infrastructure projects like bridges can connect your properties to valuable markets while appearing to serve the public good
+                Strategic infrastructure projects like bridges can connect your properties to valuable contracts while appearing to serve the public good
               </div>
             </div>
             

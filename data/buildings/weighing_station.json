@@ -84,7 +84,7 @@
   "seasonalEffects": {
     "harvest seasons": "Increased grain and produce weighing",
     "shipping arrivals": "Peaks of activity following major ship arrivals",
-    "market days": "Extended hours and additional staff"
+    "contract days": "Extended hours and additional staff"
   },
   "aiInteractionPoints": [
     "Main weighing platform",

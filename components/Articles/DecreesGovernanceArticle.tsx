@@ -276,7 +276,7 @@ const DecreesGovernanceArticle: React.FC<DecreesGovernanceArticleProps> = ({ onC
                   <span className="font-bold">Guild Charters:</span> Grant special privileges to certain industries, such as exclusive manufacturing rights or quality certification authority.
                 </li>
                 <li>
-                  <span className="font-bold">Price Controls:</span> Set minimum or maximum prices for essential goods, stabilizing markets or creating arbitrage opportunities.
+                  <span className="font-bold">Price Controls:</span> Set minimum or maximum prices for essential goods, stabilizing contracts or creating arbitrage opportunities.
                 </li>
                 <li>
                   <span className="font-bold">Citizen Subsidies:</span> The Republic automatically distributes 10% of its treasury daily to citizens, representing grain subsidies and public investments. Decrees can influence how these funds are allocated among different districts or social classes.
@@ -301,7 +301,7 @@ const DecreesGovernanceArticle: React.FC<DecreesGovernanceArticleProps> = ({ onC
                   <span className="font-bold">Canal Improvements:</span> Fund dredging or bridge construction that improves access to your properties while serving public transportation needs.
                 </li>
                 <li>
-                  <span className="font-bold">Public Works:</span> Establish new markets, wells, or civic buildings that enhance nearby property values and commercial activity.
+                  <span className="font-bold">Public Works:</span> Establish new contracts, wells, or civic buildings that enhance nearby property values and commercial activity.
                 </li>
                 <li>
                   <span className="font-bold">District Development:</span> Designate areas for specific purposes, such as luxury housing or industrial use, to align with your investment strategy.

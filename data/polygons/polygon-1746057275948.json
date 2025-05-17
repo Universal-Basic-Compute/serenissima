@@ -376,7 +376,7 @@
         "id": "db315bcf-5840-40a2-ab86-9d25e62c6087",
         "historicalName": "Ponte del Fontego",
         "englishName": "Bridge of the Warehouse",
-        "historicalDescription": "Referring to the public warehouses (fontego) where goods were stored near the Rialto market. These state-controlled storage facilities were crucial to Venice's trade system, ensuring taxation and quality control of merchandise entering the city.",
+        "historicalDescription": "Referring to the public warehouses (fontego) where goods were stored near the Rialto contract. These state-controlled storage facilities were crucial to Venice's trade system, ensuring taxation and quality control of merchandise entering the city.",
         "location": {
           "midpoint": {
             "lat": 45.43239539149562,
@@ -419,7 +419,7 @@
       "lng": 12.350122244103353,
       "streetName": "Calle dei Mercanti di Rialto",
       "streetNameEnglish": "Street of the Rialto Merchants",
-      "streetDescription": "Named after the merchants who conducted business in the Rialto market area, this street would have been home to various traders and vendors who supplied goods to the bustling commercial center.",
+      "streetDescription": "Named after the merchants who conducted business in the Rialto contract area, this street would have been home to various traders and vendors who supplied goods to the bustling commercial center.",
       "id": "building_45.432439_12.350122"
     },
     {
@@ -491,7 +491,7 @@
       "lng": 12.354020859648784,
       "streetName": "Calle dei Sensali",
       "streetNameEnglish": "Street of the Brokers",
-      "streetDescription": "Named for the brokers who facilitated trade deals between merchants. These middlemen were essential to Venetian commerce in the Rialto market area, connecting buyers and sellers.",
+      "streetDescription": "Named for the brokers who facilitated trade deals between merchants. These middlemen were essential to Venetian commerce in the Rialto contract area, connecting buyers and sellers.",
       "id": "building_45.433416_12.354021"
     },
     {
@@ -507,15 +507,15 @@
       "lng": 12.355169393864834,
       "streetName": "Calle dei Stagneri",
       "streetNameEnglish": "Street of the Tinsmiths",
-      "streetDescription": "Named for the tinsmiths who had workshops in this area. These artisans created various tin items for household and commercial use, serving the needs of the Rialto market and surrounding neighborhood.",
+      "streetDescription": "Named for the tinsmiths who had workshops in this area. These artisans created various tin items for household and commercial use, serving the needs of the Rialto contract and surrounding neighborhood.",
       "id": "building_45.433296_12.355169"
     },
     {
       "lat": 45.43375230320709,
       "lng": 12.350677094957973,
       "streetName": "Fondamenta della Pescaria",
-      "streetNameEnglish": "Foundation of the Fish Market",
-      "streetDescription": "Named for its proximity to the fish market that operated in the Rialto area. This waterside street would have been busy with fishmongers and customers seeking fresh seafood from the lagoon.",
+      "streetNameEnglish": "Foundation of the Fish Contract",
+      "streetDescription": "Named for its proximity to the fish contract that operated in the Rialto area. This waterside street would have been busy with fishmongers and customers seeking fresh seafood from the lagoon.",
       "id": "building_45.433752_12.350677"
     },
     {
@@ -563,7 +563,7 @@
       "lng": 12.354431866527653,
       "streetName": "Rio Terà delle Becarie",
       "streetNameEnglish": "Filled Canal of the Butchers",
-      "streetDescription": "This former canal was filled to create a street where butcher shops were located. Keeping the meat market in a specific area was common practice in Renaissance Venice for sanitation and control purposes.",
+      "streetDescription": "This former canal was filled to create a street where butcher shops were located. Keeping the meat contract in a specific area was common practice in Renaissance Venice for sanitation and control purposes.",
       "id": "building_45.433702_12.354432"
     },
     {
@@ -635,7 +635,7 @@
       "lng": 12.355148005680373,
       "streetName": "Calle del Magazen",
       "streetNameEnglish": "Street of the Warehouse",
-      "streetDescription": "Named for a significant warehouse that stored goods for the nearby Rialto market. Storage facilities were essential to Venice's commercial infrastructure.",
+      "streetDescription": "Named for a significant warehouse that stored goods for the nearby Rialto contract. Storage facilities were essential to Venice's commercial infrastructure.",
       "id": "building_45.434246_12.355148"
     },
     {
@@ -683,7 +683,7 @@
       "lng": 12.356985872840387,
       "streetName": "Calle dei Boteri",
       "streetNameEnglish": "Street of the Barrel-makers",
-      "streetDescription": "Named for the craftsmen who made wooden barrels essential for storing wine, oil, and other liquids. These artisans would have served the merchants of the Rialto market area.",
+      "streetDescription": "Named for the craftsmen who made wooden barrels essential for storing wine, oil, and other liquids. These artisans would have served the merchants of the Rialto contract area.",
       "id": "building_45.435518_12.356986"
     },
     {

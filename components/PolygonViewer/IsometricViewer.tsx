@@ -12,17 +12,17 @@ import BuildingDetailsPanel from './BuildingDetailsPanel';
 import CitizenDetailsPanel from '../UI/CitizenDetailsPanel';
 import CitizenMarkers from './CitizenMarkers';
 import ResourceMarkers from './ResourceMarkers';
-import MarketMarkers from './MarketMarkers';
+import ContractMarkers from './ContractMarkers';
 import { HoverTooltip } from '../UI/HoverTooltip';
 import TransportDebugPanel from '../UI/TransportDebugPanel';
 import TransportErrorMessage from '../UI/TransportErrorMessage';
 
 interface IsometricViewerProps {
-  activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
+  activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'contracts' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
 }
 
 // Define a type for all possible view types to use throughout the component
-type ViewType = 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
+type ViewType = 'buildings' | 'land' | 'transport' | 'resources' | 'contracts' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
 
 export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -3685,7 +3685,7 @@ number => {
     // Special cases for common building types
     switch(type.toLowerCase()) {
       case 'market-stall':
-        return '#E6C275'; // Warm gold/amber for market stalls
+        return '#E6C275'; // Warm gold/amber for contract stalls
       case 'house':
         return '#E8D2B5'; // Venetian terracotta/sand for houses
       case 'workshop':
@@ -3992,9 +3992,9 @@ number => {
         canvasHeight={canvasRef.current?.height || window.innerHeight}
       />
     
-      {/* Market Markers */}
-      <MarketMarkers 
-        isVisible={activeView === 'markets'} 
+      {/* Contract Markers */}
+      <ContractMarkers 
+        isVisible={activeView === 'contracts'} 
         scale={scale}
         offset={offset}
         canvasWidth={canvasRef.current?.width || window.innerWidth}

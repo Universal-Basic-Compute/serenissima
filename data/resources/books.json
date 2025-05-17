@@ -3,7 +3,7 @@
   "name": "Books",
   "category": "finished_goods",
   "subcategory": "cultural_goods",
-  "description": "Printed volumes containing knowledge, stories, or religious texts. Venice's publishing industry is among Europe's most advanced, producing works in multiple languages for markets across the continent.",
+  "description": "Printed volumes containing knowledge, stories, or religious texts. Venice's publishing industry is among Europe's most advanced, producing works in multiple languages for contracts across the continent.",
   "varieties": [
     {
       "type": "religious_text",
@@ -54,7 +54,7 @@
       "Venetian Hebrew Printers"
     ],
     "historicalSignificance": "Venice became one of Europe's earliest and most important printing centers, with hundreds of printing houses by the early 16th century. The city's political stability, commercial networks, and relative intellectual freedom made it ideal for the publishing industry. Venetian printers pioneered innovations in typography, book design, and distribution, helping spread Renaissance learning throughout Europe.",
-    "historicalMarkets": [
+    "historicalContracts": [
       "Italian states",
       "Holy Roman Empire",
       "Ottoman territories",

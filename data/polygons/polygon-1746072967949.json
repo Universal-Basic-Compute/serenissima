@@ -106,7 +106,7 @@
       },
       "historicalName": "Fondamenta dei Rialto",
       "englishName": "Foundation of Rialto",
-      "historicalDescription": "Named for its proximity to the Rialto markets, this dock served merchants bringing goods to Venice's commercial center in San Polo. It was a bustling landing point for traders from across the Mediterranean.",
+      "historicalDescription": "Named for its proximity to the Rialto contracts, this dock served merchants bringing goods to Venice's commercial center in San Polo. It was a bustling landing point for traders from across the Mediterranean.",
       "id": "canal_45.439766_12.334573"
     },
     {
@@ -294,7 +294,7 @@
       "lng": 12.332601606999939,
       "streetName": "Calle dei Mercanti di San Polo",
       "streetNameEnglish": "Street of the Merchants of San Polo",
-      "streetDescription": "Named after the merchants who conducted business in the San Polo district. This area was a commercial hub near the Rialto markets, with many merchant families maintaining residences and shops in this contrada.",
+      "streetDescription": "Named after the merchants who conducted business in the San Polo district. This area was a commercial hub near the Rialto contracts, with many merchant families maintaining residences and shops in this contrada.",
       "id": "building_45.437148_12.332602"
     },
     {
@@ -414,7 +414,7 @@
       "lng": 12.333201033683252,
       "streetName": "Salizada dei Mercanti da Rialto",
       "streetNameEnglish": "Paved Street of the Rialto Merchants",
-      "streetDescription": "A paved street used by merchants traveling between their businesses in San Polo and the nearby Rialto market, which was the commercial heart of Renaissance Venice and located partially within the San Polo district.",
+      "streetDescription": "A paved street used by merchants traveling between their businesses in San Polo and the nearby Rialto contract, which was the commercial heart of Renaissance Venice and located partially within the San Polo district.",
       "id": "building_45.438952_12.333201"
     },
     {

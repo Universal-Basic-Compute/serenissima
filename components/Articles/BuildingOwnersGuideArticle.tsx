@@ -126,7 +126,7 @@ const BuildingOwnersGuideArticle: React.FC<BuildingOwnersGuideArticleProps> = ({
               <div className="mb-3">
                 <h5 className="font-bold text-amber-900">Basic Housing</h5>
                 <p>
-                  Simple dwellings for workers and lower-class citizens. While they generate modest rents, their true value lies in housing the workforce needed by nearby businesses. Strategic placement near workshops and markets ensures full occupancy.
+                  Simple dwellings for workers and lower-class citizens. While they generate modest rents, their true value lies in housing the workforce needed by nearby businesses. Strategic placement near workshops and contracts ensures full occupancy.
                 </p>
               </div>
               
@@ -149,9 +149,9 @@ const BuildingOwnersGuideArticle: React.FC<BuildingOwnersGuideArticleProps> = ({
               <h4 className="text-xl font-serif text-amber-800 mb-2">Commercial Buildings</h4>
               
               <div className="mb-3">
-                <h5 className="font-bold text-amber-900">Market Stalls</h5>
+                <h5 className="font-bold text-amber-900">Contract Stalls</h5>
                 <p>
-                  Small retail spaces that can be quickly constructed and leased to merchants. Their flexibility allows you to respond rapidly to changing market conditions, though they generate modest income individually.
+                  Small retail spaces that can be quickly constructed and leased to merchants. Their flexibility allows you to respond rapidly to changing contract conditions, though they generate modest income individually.
                 </p>
               </div>
               
@@ -210,7 +210,7 @@ const BuildingOwnersGuideArticle: React.FC<BuildingOwnersGuideArticleProps> = ({
               <div className="mb-3">
                 <h5 className="font-bold text-amber-900">Warehouses</h5>
                 <p>
-                  Storage facilities for goods and materials. Strategically placed warehouses near docks or markets command premium rents and provide flexibility to store goods until prices are favorable, enhancing your trading operations.
+                  Storage facilities for goods and materials. Strategically placed warehouses near docks or contracts command premium rents and provide flexibility to store goods until prices are favorable, enhancing your trading operations.
                 </p>
               </div>
               
@@ -275,9 +275,9 @@ const BuildingOwnersGuideArticle: React.FC<BuildingOwnersGuideArticleProps> = ({
                 <rect x="200" y="150" width="100" height="20" fill="#d97706" stroke="#92400e" strokeWidth="1" />
                 <text x="250" y="145" fill="#7c2d12" fontFamily="serif" fontSize="12" textAnchor="middle">Rialto Bridge</text>
                 
-                {/* Market */}
+                {/* Contract */}
                 <rect x="310" y="140" width="80" height="40" fill="#fbbf24" stroke="#b45309" strokeWidth="1" />
-                <text x="350" y="165" fill="#7c2d12" fontFamily="serif" fontSize="12" textAnchor="middle">Market</text>
+                <text x="350" y="165" fill="#7c2d12" fontFamily="serif" fontSize="12" textAnchor="middle">Contract</text>
                 
                 {/* Church */}
                 <rect x="110" y="70" width="40" height="40" fill="#fbbf24" stroke="#b45309" strokeWidth="1" />
@@ -418,7 +418,7 @@ const BuildingOwnersGuideArticle: React.FC<BuildingOwnersGuideArticleProps> = ({
                 <h5 className="font-bold text-amber-900 mb-1">Lease Structures</h5>
                 <p className="text-sm">
                   Different lease structures serve different purposes:
-                  <br />• <span className="font-medium">Fixed Rent:</span> Provides stable income but may underperform in booming markets
+                  <br />• <span className="font-medium">Fixed Rent:</span> Provides stable income but may underperform in booming contracts
                   <br />• <span className="font-medium">Percentage Rent:</span> Links your income to tenant success, ideal for retail
                   <br />• <span className="font-medium">Escalating Rent:</span> Builds in predictable increases over time
                 </p>
@@ -475,7 +475,7 @@ const BuildingOwnersGuideArticle: React.FC<BuildingOwnersGuideArticleProps> = ({
                 <p className="text-sm">
                   This mobility system has important implications for your rental strategy:
                   <br />• Setting rents too high increases vacancy risk as tenants find cheaper alternatives
-                  <br />• Modest discounts below market rate can attract and retain tenants from higher-priced properties
+                  <br />• Modest discounts below contract rate can attract and retain tenants from higher-priced properties
                   <br />• Premium properties must justify their cost through location, amenities, or prestige
                   <br />• Different pricing strategies work for different social classes and building types
                 </p>
@@ -499,7 +499,7 @@ const BuildingOwnersGuideArticle: React.FC<BuildingOwnersGuideArticleProps> = ({
                 <h5 className="font-bold text-amber-900 mb-1">Rent Setting Strategy</h5>
                 <p className="text-sm mb-3">
                   Setting optimal rents requires balancing multiple factors:
-                  <br />• Market rates for comparable properties
+                  <br />• Contract rates for comparable properties
                   <br />• Tenant quality and stability
                   <br />• Vacancy risk at different price points
                   <br />• Potential for tenant improvements
@@ -507,7 +507,7 @@ const BuildingOwnersGuideArticle: React.FC<BuildingOwnersGuideArticleProps> = ({
                 
                 <div className="bg-amber-50 p-2 rounded border border-amber-200 mb-3">
                   <p className="italic text-amber-800 text-xs">
-                    <span className="font-bold">Strategic Insight:</span> Slightly below-market rents for long-term, quality tenants often produce better returns than maximizing rent and facing frequent turnover.
+                    <span className="font-bold">Strategic Insight:</span> Slightly below-contract rents for long-term, quality tenants often produce better returns than maximizing rent and facing frequent turnover.
                   </p>
                 </div>
                 
@@ -569,14 +569,14 @@ const BuildingOwnersGuideArticle: React.FC<BuildingOwnersGuideArticleProps> = ({
               <div className="bg-amber-50 p-3 rounded border border-amber-200">
                 <h5 className="font-bold text-amber-900 mb-1">Interior Reconfiguration</h5>
                 <p className="text-sm">
-                  Adapting interiors to changing market demands can revitalize aging buildings. Converting large residential spaces into multiple smaller units or transforming warehouses into workshops can significantly increase income.
+                  Adapting interiors to changing contract demands can revitalize aging buildings. Converting large residential spaces into multiple smaller units or transforming warehouses into workshops can significantly increase income.
                 </p>
               </div>
               
               <div className="bg-amber-50 p-3 rounded border border-amber-200">
                 <h5 className="font-bold text-amber-900 mb-1">Specialized Facilities</h5>
                 <p className="text-sm">
-                  Adding specialized features like private docks, secure vaults, or unique amenities can attract premium tenants willing to pay significantly above-market rents for these rare features.
+                  Adding specialized features like private docks, secure vaults, or unique amenities can attract premium tenants willing to pay significantly above-contract rents for these rare features.
                 </p>
               </div>
             </div>
@@ -734,9 +734,9 @@ const BuildingOwnersGuideArticle: React.FC<BuildingOwnersGuideArticleProps> = ({
               </div>
               
               <div className="bg-amber-50 p-3 rounded border border-amber-200">
-                <h5 className="font-bold text-amber-900 mb-1">Market Buildings</h5>
+                <h5 className="font-bold text-amber-900 mb-1">Contract Buildings</h5>
                 <p className="text-sm">
-                  Control of market buildings allows you to influence which merchants can sell their goods and under what terms. This creates opportunities to favor complementary businesses while creating obstacles for competitors.
+                  Control of contract buildings allows you to influence which merchants can sell their goods and under what terms. This creates opportunities to favor complementary businesses while creating obstacles for competitors.
                 </p>
               </div>
             </div>
@@ -785,23 +785,23 @@ const BuildingOwnersGuideArticle: React.FC<BuildingOwnersGuideArticleProps> = ({
           <h3 className="text-2xl font-serif text-amber-700 mb-4">Case Studies</h3>
           
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h4 className="text-xl font-serif text-amber-800 mb-2">The Rialto Market Complex</h4>
+            <h4 className="text-xl font-serif text-amber-800 mb-2">The Rialto Contract Complex</h4>
             
             <div className="flex flex-col md:flex-row gap-6">
               <div className="md:w-1/2">
                 <p className="text-amber-800 mb-3">
-                  The Rialto Market represents the pinnacle of strategic building development in Venice. This complex demonstrates several key principles:
+                  The Rialto Contract represents the pinnacle of strategic building development in Venice. This complex demonstrates several key principles:
                 </p>
                 
                 <ul className="list-disc pl-5 space-y-1 text-amber-800">
-                  <li><span className="font-medium">Location Maximization:</span> Situated at the foot of the Rialto Bridge, the market captures maximum foot traffic</li>
+                  <li><span className="font-medium">Location Maximization:</span> Situated at the foot of the Rialto Bridge, the contract captures maximum foot traffic</li>
                   <li><span className="font-medium">Functional Specialization:</span> Different sections for fish, meat, produce, and specialty goods</li>
-                  <li><span className="font-medium">Vertical Integration:</span> Storage cellars below, market stalls at ground level, offices above</li>
+                  <li><span className="font-medium">Vertical Integration:</span> Storage cellars below, contract stalls at ground level, offices above</li>
                   <li><span className="font-medium">Transportation Integration:</span> Direct dock access for fresh deliveries</li>
                 </ul>
                 
                 <p className="mt-3 text-amber-800">
-                  The true genius of the Rialto development was creating a self-reinforcing economic ecosystem. The market attracted shoppers, who attracted merchants, who paid fees that funded improvements, which attracted more shoppers—creating a virtuous cycle of increasing value.
+                  The true genius of the Rialto development was creating a self-reinforcing economic ecosystem. The contract attracted shoppers, who attracted merchants, who paid fees that funded improvements, which attracted more shoppers—creating a virtuous cycle of increasing value.
                 </p>
               </div>
               
@@ -814,7 +814,7 @@ const BuildingOwnersGuideArticle: React.FC<BuildingOwnersGuideArticleProps> = ({
                 
                 <ol className="list-decimal pl-5 space-y-1 text-sm text-amber-800">
                   <li>Start with a strategic location near existing foot traffic</li>
-                  <li>Begin with a single building that serves a clear market need</li>
+                  <li>Begin with a single building that serves a clear contract need</li>
                   <li>Reinvest profits to acquire adjacent properties</li>
                   <li>Develop complementary functions that enhance the original business</li>
                   <li>Create distinctive architectural elements that make your complex recognizable</li>

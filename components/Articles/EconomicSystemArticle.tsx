@@ -133,7 +133,7 @@ const EconomicSystemArticle: React.FC<EconomicSystemArticleProps> = ({ onClose }
               Value flows through a continuous cycle: Land is leased to Building owners, who rent space to Businesses, which produce Resources, which supply Citizens and Players. Money flows in the opposite direction: Business owners pay rent to Building owners, who pay land leases to Land owners, and all pay taxes to the Republic—completing the economic loop.
             </p>
             <p className="mt-2">
-              This hierarchical relationship creates a dynamic property market where lease terms are periodically renegotiated based on changing economic conditions, infrastructure improvements, and market demand.
+              This hierarchical relationship creates a dynamic property contract where lease terms are periodically renegotiated based on changing economic conditions, infrastructure improvements, and contract demand.
             </p>
           </div>
           
@@ -170,7 +170,7 @@ const EconomicSystemArticle: React.FC<EconomicSystemArticleProps> = ({ onClose }
               <div className="bg-amber-50 p-3 rounded border border-amber-200">
                 <h5 className="font-bold text-amber-900">Trade Merchant</h5>
                 <p>
-                  Buy low and sell high by moving goods between markets. Success depends on understanding price differentials, transportation efficiency, and market timing. Requires less capital than other specializations but demands constant attention.
+                  Buy low and sell high by moving goods between contracts. Success depends on understanding price differentials, transportation efficiency, and contract timing. Requires less capital than other specializations but demands constant attention.
                 </p>
               </div>
               
@@ -183,7 +183,7 @@ const EconomicSystemArticle: React.FC<EconomicSystemArticleProps> = ({ onClose }
             </div>
           </div>
           
-          <h3 className="text-2xl font-serif text-amber-700 mb-4">Market Mechanics</h3>
+          <h3 className="text-2xl font-serif text-amber-700 mb-4">Contract Mechanics</h3>
 
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
             <h4 className="text-xl font-serif text-amber-800 mb-2">Price Formation</h4>
@@ -198,7 +198,7 @@ const EconomicSystemArticle: React.FC<EconomicSystemArticleProps> = ({ onClose }
                   Prices respond to the balance of goods available versus consumer needs. When many merchants produce the same good, prices fall. When demand exceeds supply, prices rise accordingly.
                 </p>
                 <p className="mt-2">
-                  This creates natural market cycles as merchants respond to price signals, often leading to periodic oversupply and shortages as the market seeks equilibrium.
+                  This creates natural contract cycles as merchants respond to price signals, often leading to periodic oversupply and shortages as the contract seeks equilibrium.
                 </p>
               </div>
               
@@ -273,7 +273,7 @@ const EconomicSystemArticle: React.FC<EconomicSystemArticleProps> = ({ onClose }
                 Beyond basic loans, Venice developed sophisticated financial instruments that are recreated in La Serenissima:
               </p>
               <ul className="list-disc pl-5 space-y-1 mt-2">
-                <li><span className="font-medium">Letters of Credit</span>: Allow merchants to conduct business in distant markets without carrying physical currency</li>
+                <li><span className="font-medium">Letters of Credit</span>: Allow merchants to conduct business in distant contracts without carrying physical currency</li>
                 <li><span className="font-medium">Maritime Insurance</span>: Protects against losses from shipwrecks and piracy</li>
                 <li><span className="font-medium">Futures Contracts</span>: Agreements to buy or sell goods at predetermined prices on future dates</li>
                 <li><span className="font-medium">Investment Partnerships</span>: Shared ventures where multiple investors pool capital for major projects</li>
@@ -293,17 +293,17 @@ const EconomicSystemArticle: React.FC<EconomicSystemArticleProps> = ({ onClose }
               <div className="bg-amber-50 p-3 rounded border border-amber-200">
                 <h5 className="font-bold text-amber-900">Consumption Patterns</h5>
                 <p>
-                  AI citizens have realistic needs and preferences, purchasing food, clothing, luxury goods, and services. Their consumption patterns vary by social class, profession, and individual taste, creating diverse market demand.
+                  AI citizens have realistic needs and preferences, purchasing food, clothing, luxury goods, and services. Their consumption patterns vary by social class, profession, and individual taste, creating diverse contract demand.
                 </p>
                 <p className="mt-2">
-                  Ducatsier citizens demand luxury goods and services, while working-class citizens focus on necessities, creating natural market segmentation.
+                  Ducatsier citizens demand luxury goods and services, while working-class citizens focus on necessities, creating natural contract segmentation.
                 </p>
               </div>
               
               <div className="bg-amber-50 p-3 rounded border border-amber-200">
                 <h5 className="font-bold text-amber-900">Labor and Production</h5>
                 <p>
-                  Citizens work in workshops, markets, and service establishments, providing the labor necessary for production. Their skills improve over time, increasing productivity and the quality of goods produced.
+                  Citizens work in workshops, contracts, and service establishments, providing the labor necessary for production. Their skills improve over time, increasing productivity and the quality of goods produced.
                 </p>
                 <p className="mt-2">
                   Skilled workers command higher wages, creating economic incentives for training and specialization. Labor shortages in specific sectors drive wage increases.
@@ -325,10 +325,10 @@ const EconomicSystemArticle: React.FC<EconomicSystemArticleProps> = ({ onClose }
               <div className="bg-amber-50 p-3 rounded border border-amber-200">
                 <h5 className="font-bold text-amber-900">Autonomous Decision-Making</h5>
                 <p>
-                  Rather than following simple scripts, AI citizens make economic decisions based on their needs, opportunities, and market conditions. They respond to price changes, seek better employment, and adjust their consumption patterns during economic downturns.
+                  Rather than following simple scripts, AI citizens make economic decisions based on their needs, opportunities, and contract conditions. They respond to price changes, seek better employment, and adjust their consumption patterns during economic downturns.
                 </p>
                 <p className="mt-2">
-                  This autonomous behavior creates emergent economic patterns that no single player can control, simulating the complexity of real markets.
+                  This autonomous behavior creates emergent economic patterns that no single player can control, simulating the complexity of real contracts.
                 </p>
               </div>
             </div>

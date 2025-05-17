@@ -10,7 +10,7 @@ import {
   ServiceError
 } from '../errors/ServiceErrors';
 import { getWalletAddress } from '../utils/walletUtils';
-import { Listing, Offer, Transaction } from '../store/marketStore';
+import { Listing, Offer, Transaction } from '../store/contractStore';
 
 // Extend the Listing interface to include updatedAt
 interface ExtendedListing {

@@ -8,7 +8,7 @@ const isContractActive = (contract: Contract): boolean => {
   return contract.type === 'public_sell' || (contract.buyer !== null && contract.buyer !== undefined);
 };
 
-interface MarketMarkersProps {
+interface ContractMarkersProps {
   isVisible: boolean;
   scale: number;
   offset: { x: number, y: number };
@@ -16,13 +16,13 @@ interface MarketMarkersProps {
   canvasHeight: number;
 }
 
-export default function MarketMarkers({ 
+export default function ContractMarkers({ 
   isVisible, 
   scale, 
   offset, 
   canvasWidth, 
   canvasHeight 
-}: MarketMarkersProps) {
+}: ContractMarkersProps) {
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [contractsByLocation, setContractsByLocation] = useState<Record<string, Contract[]>>({});
   const [hoveredLocation, setHoveredLocation] = useState<string | null>(null);
@@ -47,7 +47,7 @@ export default function MarketMarkers({
       resources: locationContracts.map(contract => ({
         id: contract.contractId,
         name: contract.resourceType,
-        category: 'Market Contract',
+        category: 'Contract Contract',
         description: `${contract.type === 'public_sell' ? 'Public Sell' : contract.seller === currentUsername ? 'Your Sell' : 'Your Buy'} Contract`,
         icon: 'contract.png',
         amount: contract.amount,
@@ -285,7 +285,7 @@ export default function MarketMarkers({
                             onError={(e) => {
                               console.log(`Failed to load image for ${resourceType}, trying fallback paths`);
                               // Try alternative paths if the first one fails
-                              (e.target as HTMLImageElement).src = `/assets/resources/${resourceType.toLowerCase().replace(/\s+/g, '_')}.png`;
+                              (e.target as HTMLImageElement).src = `/images/resources/${resourceType.toLowerCase().replace(/\s+/g, '_')}.png`;
                               (e.target as HTMLImageElement).onerror = () => {
                                 (e.target as HTMLImageElement).src = '/images/resources/default.png';
                                 (e.target as HTMLImageElement).onerror = () => {
@@ -382,7 +382,7 @@ export default function MarketMarkers({
                           onError={(e) => {
                             console.log(`Failed to load image for ${resourceType}, trying fallback paths`);
                             // Try alternative paths if the first one fails
-                            (e.target as HTMLImageElement).src = `/assets/resources/${resourceType.toLowerCase().replace(/\s+/g, '_')}.png`;
+                            (e.target as HTMLImageElement).src = `/images/resources/${resourceType.toLowerCase().replace(/\s+/g, '_')}.png`;
                             (e.target as HTMLImageElement).onerror = () => {
                               (e.target as HTMLImageElement).src = '/images/resources/default.png';
                               (e.target as HTMLImageElement).onerror = () => {

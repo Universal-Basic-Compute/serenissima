@@ -185,7 +185,7 @@ Please analyze your rent situation and develop a strategy for adjusting rent amo
 1. The income and maintenance costs of each building
 2. The occupancy status of each building
 3. The social class and wealth of current occupants
-4. Market rates for similar buildings
+4. Contract rates for similar buildings
 5. Your overall financial situation
 
 After your analysis, provide your rent adjustment decisions in this JSON format:

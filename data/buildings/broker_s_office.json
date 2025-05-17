@@ -76,7 +76,7 @@
   },
   "seasonalEffects": {
     "trading seasons": "Activity levels fluctuate with shipping seasons",
-    "market disruptions": "Particularly busy during price fluctuations or political changes",
+    "contract disruptions": "Particularly busy during price fluctuations or political changes",
     "end of fiscal periods": "Increased activity during closing periods"
   },
   "aiInteractionPoints": [

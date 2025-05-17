@@ -31,14 +31,14 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
   // Helper function to check if a view is disabled
   const isDisabled = (view: ViewMode): boolean => {
     // Only these views are enabled
-    const enabledViews: ActiveViewMode[] = ['buildings', 'land', 'markets', 'citizens', 'transport'];
+    const enabledViews: ActiveViewMode[] = ['buildings', 'land', 'contracts', 'citizens', 'transport'];
     return !enabledViews.includes(view as ActiveViewMode);
   };
 
   // Detailed descriptions for each view mode
   const viewDescriptions: Record<ViewMode | string, string> = {
     'governance': 'Examine political districts, administrative boundaries, and centers of power in the Venetian Republic',
-    'markets': 'Explore commercial hubs, trading posts, and economic activity across the Venetian territories',
+    'contracts': 'Explore commercial hubs, trading posts, and economic activity across the Venetian territories',
     'resources': 'Survey natural resources, production centers, and material wealth of La Serenissima',
     'transport': 'Navigate the network of canals, bridges, and maritime routes that connect the Republic',
     'buildings': 'Explore the architectural marvels, palaces, and structures of Venezia in detail',
@@ -134,11 +134,11 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
         <span className="text-[10px] mt-1">Loans</span>
       </IconButton>
       
-      {/* Markets View - Now Enabled */}
+      {/* Contracts View - Now Enabled */}
       <IconButton 
-        onClick={() => activeView !== 'markets' ? handleViewModeChange('markets') : null}
-        active={activeView === 'markets'}
-        title={viewDescriptions.markets}
+        onClick={() => activeView !== 'contracts' ? handleViewModeChange('contracts') : null}
+        active={activeView === 'contracts'}
+        title={viewDescriptions.contracts}
         activeColor="amber"
         compact={true}
         disabled={false}
@@ -146,7 +146,7 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
         </svg>
-        <span className="text-[10px] mt-1">Markets</span>
+        <span className="text-[10px] mt-1">Contracts</span>
       </IconButton>
       
       {/* Resources View - Now Enabled */}

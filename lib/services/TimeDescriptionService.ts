@@ -45,7 +45,7 @@ export class TimeDescriptionService {
       'while the Piazza San Marco bustled with activity',
       'as the shadows grew shortest beneath the summer sun',
       'when the heat of the day drove nobles to their shaded gardens',
-      'as the markets reached their peak of activity',
+      'as the contracts reached their peak of activity',
       'while the sun bathed the city in golden light',
       'as the church bells announced the midday hour',
       'when the canals reflected the brilliant blue sky',

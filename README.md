@@ -17,7 +17,7 @@ La Serenissima is a blockchain-powered interactive experience set in Renaissance
 - **Noble Identity System**: Create your Venetian noble identity with family coat of arms and motto
 - **$COMPUTE Integration**: Full blockchain economy with real value and ownership
 - **Interactive 3D Environment**: Explore Venice with dynamic water effects and atmospheric elements
-- **Multiple View Modes**: Land, Buildings, Transport, Resources, Markets, and Governance
+- **Multiple View Modes**: Land, Buildings, Transport, Resources, Contracts, and Governance
 - **Economic Simulation**: Realistic land value and rent calculations based on historical factors
 - **Airtable Integration**: Land data and economic calculations stored in Airtable for easy management
 
@@ -107,7 +107,7 @@ The application offers multiple view modes:
 - Building and infrastructure view
 - Transport network view
 - Resource distribution
-- Market activity
+- Contract activity
 - Governance structures
 
 ## Development Roadmap

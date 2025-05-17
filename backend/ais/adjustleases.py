@@ -211,7 +211,7 @@ Here's your current situation:
 Please analyze your lease situation and develop a strategy for adjusting lease amounts for your buildings. Consider:
 1. The income and maintenance costs of each building
 2. The location and value of the land each building is on
-3. Market rates for similar buildings
+3. Contract rates for similar buildings
 4. Your overall financial situation
 
 After your analysis, provide your lease adjustment decisions in this JSON format:
@@ -249,7 +249,7 @@ Here is the complete data about your current situation:
 
 When developing your lease adjustment strategy:
 1. Analyze each building's profitability (income minus maintenance and current lease)
-2. Consider fair market rates for different building types in different districts
+2. Consider fair contract rates for different building types in different districts
 3. For buildings on others' lands, ensure lease amounts are reasonable compared to the building's income
 4. For buildings on your own lands, you may want to set lower lease amounts to maximize your overall profit
 5. Create a specific, actionable plan with building IDs and new lease amounts

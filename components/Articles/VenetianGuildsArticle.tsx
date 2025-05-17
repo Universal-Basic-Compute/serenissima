@@ -61,7 +61,7 @@ const VenetianGuildsArticle: React.FC<VenetianGuildsArticleProps> = ({ onClose }
               <text x="475" y="200" fontFamily="serif" fontSize="18" fontWeight="bold" textAnchor="middle" fill="#7c2d12">Quality Control</text>
               
               <rect x="400" y="260" width="150" height="50" fill="#fcd34d" stroke="#b45309" strokeWidth="2" rx="5" />
-              <text x="475" y="290" fontFamily="serif" fontSize="18" fontWeight="bold" textAnchor="middle" fill="#7c2d12">Market Regulation</text>
+              <text x="475" y="290" fontFamily="serif" fontSize="18" fontWeight="bold" textAnchor="middle" fill="#7c2d12">Contract Regulation</text>
               
               <rect x="400" y="350" width="150" height="50" fill="#fde68a" stroke="#b45309" strokeWidth="2" rx="5" />
               <text x="475" y="380" fontFamily="serif" fontSize="18" fontWeight="bold" textAnchor="middle" fill="#7c2d12">Social Support</text>
@@ -144,7 +144,7 @@ const VenetianGuildsArticle: React.FC<VenetianGuildsArticleProps> = ({ onClose }
                   <li>Specialized dyes sourced from across the Mediterranean and beyond</li>
                   <li>Finished products exported throughout Europe, particularly to northern courts</li>
                   <li>Venetian merchants maintained dedicated warehouses in major trade centers</li>
-                  <li>The guild negotiated favorable trade terms with foreign markets</li>
+                  <li>The guild negotiated favorable trade terms with foreign contracts</li>
                 </ul>
               </div>
             </div>
@@ -364,14 +364,14 @@ const VenetianGuildsArticle: React.FC<VenetianGuildsArticleProps> = ({ onClose }
               </div>
               
               <div>
-                <h5 className="font-bold text-amber-900 mb-1">Market Protection</h5>
+                <h5 className="font-bold text-amber-900 mb-1">Contract Protection</h5>
                 <p className="text-sm mb-3 text-amber-800">
                   Guilds protected their members from outside competition:
                 </p>
                 <ul className="list-disc pl-5 space-y-1 text-sm text-amber-800">
                   <li>Monopoly rights over specific products or services</li>
                   <li>Import restrictions on competing foreign goods</li>
-                  <li>Designated market spaces for guild members</li>
+                  <li>Designated contract spaces for guild members</li>
                   <li>Price regulations to prevent undercutting</li>
                 </ul>
               </div>
@@ -477,9 +477,9 @@ const VenetianGuildsArticle: React.FC<VenetianGuildsArticleProps> = ({ onClose }
             
             <div className="grid md:grid-cols-3 gap-4">
               <div className="bg-amber-50 p-3 rounded border border-amber-200">
-                <h5 className="font-bold text-amber-900 mb-1">Market Influence</h5>
+                <h5 className="font-bold text-amber-900 mb-1">Contract Influence</h5>
                 <p className="text-amber-800">
-                  Guilds can coordinate buying and selling activities to drive prices in favorable directions, creating opportunities for collective profit. By timing market entries and exits, guilds can significantly impact resource valuations.
+                  Guilds can coordinate buying and selling activities to drive prices in favorable directions, creating opportunities for collective profit. By timing contract entries and exits, guilds can significantly impact resource valuations.
                 </p>
               </div>
               
@@ -493,7 +493,7 @@ const VenetianGuildsArticle: React.FC<VenetianGuildsArticleProps> = ({ onClose }
               <div className="bg-amber-50 p-3 rounded border border-amber-200">
                 <h5 className="font-bold text-amber-900 mb-1">Targeted Economic Actions</h5>
                 <p className="text-amber-800">
-                  Guilds can organize targeted economic actions against competitors, including undercutting prices in specific markets, establishing competing businesses, or creating alternative supply chains to challenge monopolies.
+                  Guilds can organize targeted economic actions against competitors, including undercutting prices in specific contracts, establishing competing businesses, or creating alternative supply chains to challenge monopolies.
                 </p>
               </div>
             </div>
@@ -528,7 +528,7 @@ const VenetianGuildsArticle: React.FC<VenetianGuildsArticleProps> = ({ onClose }
               <ul className="list-disc pl-5 space-y-1 text-amber-800">
                 <li>Access to shared resources and information</li>
                 <li>Preferential trading terms with fellow guild members</li>
-                <li>Collective bargaining power in markets</li>
+                <li>Collective bargaining power in contracts</li>
                 <li>Protection against economic aggression</li>
                 <li>Enhanced voting rights in governance matters</li>
               </ul>

@@ -23,7 +23,7 @@
   },
   "historicalName": "Fondamenta de le Erbe, Sestiere Dorsoduro",
   "englishName": "Quay of the Herbs, Dorsoduro District",
-  "historicalDescription": "This area in the Dorsoduro sestiere was known for its herb market along the canal quay in the 15th century, near the Church of San Nicolo dei Mendicoli.",
+  "historicalDescription": "This area in the Dorsoduro sestiere was known for its herb contract along the canal quay in the 15th century, near the Church of San Nicolo dei Mendicoli.",
   "nameConfidence": "medium",
   "areaInSquareMeters": 8716.76,
   "center": {
@@ -48,7 +48,7 @@
         "id": "58cdaf38-a614-4e96-bd2a-d4329bb7c07e",
         "historicalName": "Ponte degli Erbaioli",
         "englishName": "Bridge of the Herb Sellers",
-        "historicalDescription": "This bridge name derives from its proximity to Fondamenta de le Erbe, where herb sellers and vegetable merchants would gather to sell their produce brought in from nearby islands like Sant'Erasmo. The area was known for its small market of fresh herbs and vegetables during the Renaissance period.",
+        "historicalDescription": "This bridge name derives from its proximity to Fondamenta de le Erbe, where herb sellers and vegetable merchants would gather to sell their produce brought in from nearby islands like Sant'Erasmo. The area was known for its small contract of fresh herbs and vegetables during the Renaissance period.",
         "location": {
           "midpoint": {
             "lat": 45.43573420576599,
@@ -117,7 +117,7 @@
       "lng": 12.318792302285676,
       "streetName": "Calle dei Droghieri",
       "streetNameEnglish": "Street of the Druggists",
-      "streetDescription": "This name reflects the historical presence of apothecaries and spice merchants near Fondamenta de le Erbe in Dorsoduro. The proximity to herb markets ('erbe') made it a natural location for droghieri who sold medicinal herbs, spices, and compounds during the Renaissance period. Venice was a major hub for the spice trade from the East, and these merchants were essential to both medicine and cooking.",
+      "streetDescription": "This name reflects the historical presence of apothecaries and spice merchants near Fondamenta de le Erbe in Dorsoduro. The proximity to herb contracts ('erbe') made it a natural location for droghieri who sold medicinal herbs, spices, and compounds during the Renaissance period. Venice was a major hub for the spice trade from the East, and these merchants were essential to both medicine and cooking.",
       "id": "building_45.435531_12.318792"
     },
     {
@@ -133,7 +133,7 @@
       "lng": 12.320103175199636,
       "streetName": "Sottoportego del Basilico",
       "streetNameEnglish": "Passageway of the Basil",
-      "streetDescription": "This covered passageway (sottoportego) would likely connect to the herb market area. Basil was a prized herb in Renaissance Venice, used both in cooking and believed to have protective properties. The name suggests a small passage where perhaps specific herb vendors specialized in aromatic plants might have set up their stalls. Such specific herb designations were common in Venice's intricate street naming system, reflecting the microeconomies of different areas.",
+      "streetDescription": "This covered passageway (sottoportego) would likely connect to the herb contract area. Basil was a prized herb in Renaissance Venice, used both in cooking and believed to have protective properties. The name suggests a small passage where perhaps specific herb vendors specialized in aromatic plants might have set up their stalls. Such specific herb designations were common in Venice's intricate street naming system, reflecting the microeconomies of different areas.",
       "id": "building_45.435673_12.320103"
     }
   ],

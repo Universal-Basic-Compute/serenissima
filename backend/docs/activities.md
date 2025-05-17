@@ -141,7 +141,7 @@ The activity system integrates with several other game systems:
 Planned enhancements to the activity system include:
 
 1. **Social Activities**: Citizens visiting friends or attending social gatherings
-2. **Shopping**: Citizens visiting markets to purchase goods
+2. **Shopping**: Citizens visiting contracts to purchase goods
 3. **Religious Activities**: Church attendance and religious ceremonies
 4. **Entertainment**: Visiting taverns, theaters, and other entertainment venues
 5. **Seasonal Activities**: Special activities during festivals and holidays

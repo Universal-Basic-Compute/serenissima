@@ -35,7 +35,7 @@
   },
   "historicalName": "Calle de la Fava",
   "englishName": "Street of the Broad Bean",
-  "historicalDescription": "A small street in the San Marco sestiere, named after the nearby market where broad beans were commonly sold. The area was known for its bustling marketplaces and proximity to Piazza San Marco.",
+  "historicalDescription": "A small street in the San Marco sestiere, named after the nearby contract where broad beans were commonly sold. The area was known for its bustling marketplaces and proximity to Piazza San Marco.",
   "nameConfidence": "medium",
   "areaInSquareMeters": 42705.65,
   "center": {
@@ -250,7 +250,7 @@
       "lng": 12.33227108322995,
       "streetName": "Calle dei Bombaseri",
       "streetNameEnglish": "Street of the Cotton Merchants",
-      "streetDescription": "Cotton trade was significant in Renaissance Venice, with merchants importing cotton from Eastern Mediterranean markets. This street would have housed shops selling cotton fabrics near the commercial center around Calle de la Fava.",
+      "streetDescription": "Cotton trade was significant in Renaissance Venice, with merchants importing cotton from Eastern Mediterranean contracts. This street would have housed shops selling cotton fabrics near the commercial center around Calle de la Fava.",
       "id": "building_45.428875_12.332271"
     },
     {

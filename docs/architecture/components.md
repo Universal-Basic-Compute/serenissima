@@ -21,7 +21,7 @@ App
 │   │   ├── SimpleWater
 │   │   └── ViewModeMenu
 │   ├── LandDetailsPanel (Feature)
-│   ├── MarketPanel (Feature)
+│   ├── ContractPanel (Feature)
 │   ├── BuildingMenu (Feature)
 │   └── WalletStatus (UI)
 └── Other Pages...

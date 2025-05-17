@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 
-type ViewType = 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
+type ViewType = 'buildings' | 'land' | 'transport' | 'resources' | 'contracts' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
 
 interface ViewControllerProps {
   initialView?: ViewType;

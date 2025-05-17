@@ -99,7 +99,7 @@
   },
   "historicalName": "Campo San Polo",
   "englishName": "St. Paul's Square",
-  "historicalDescription": "A major square in the San Polo sestiere, known for its large size and the Church of San Polo which has stood there since the 9th century. In the 15th century, it was a bustling area with markets, festivities, and one of the main wells providing water to the district.",
+  "historicalDescription": "A major square in the San Polo sestiere, known for its large size and the Church of San Polo which has stood there since the 9th century. In the 15th century, it was a bustling area with contracts, festivities, and one of the main wells providing water to the district.",
   "nameConfidence": "high",
   "areaInSquareMeters": 54238.26,
   "center": {
@@ -146,7 +146,7 @@
       },
       "historicalName": "Riva dei Mercanti di Lana",
       "englishName": "Wool Merchants' Landing",
-      "historicalDescription": "The San Polo district was known for textile production and trade. This dock would have served wool merchants bringing their goods to the workshops and markets of the area.",
+      "historicalDescription": "The San Polo district was known for textile production and trade. This dock would have served wool merchants bringing their goods to the workshops and contracts of the area.",
       "id": "canal_45.442460_12.358757"
     },
     {
@@ -339,7 +339,7 @@
       "lng": 12.35474937104809,
       "streetName": "Calle dei Mercanti di San Polo",
       "streetNameEnglish": "Street of the Merchants of San Polo",
-      "streetDescription": "Named after the merchants who conducted business in Campo San Polo, one of Venice's largest squares. The area was a commercial hub where traders would set up market stalls, particularly during festivals and celebrations.",
+      "streetDescription": "Named after the merchants who conducted business in Campo San Polo, one of Venice's largest squares. The area was a commercial hub where traders would set up contract stalls, particularly during festivals and celebrations.",
       "id": "building_45.440453_12.354749"
     },
     {
@@ -347,7 +347,7 @@
       "lng": 12.355356668146714,
       "streetName": "Rio Terà dei Fruttaroli",
       "streetNameEnglish": "Filled Canal of the Fruit Sellers",
-      "streetDescription": "This street was originally a canal that was filled in (rio terà) where fruit vendors would sell their goods. The fruit market was an important part of daily life in the San Polo district, supplying the local residents with fresh produce.",
+      "streetDescription": "This street was originally a canal that was filled in (rio terà) where fruit vendors would sell their goods. The fruit contract was an important part of daily life in the San Polo district, supplying the local residents with fresh produce.",
       "id": "building_45.440379_12.355357"
     },
     {

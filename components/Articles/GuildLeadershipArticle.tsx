@@ -42,9 +42,9 @@ const GuildLeadershipArticle: React.FC<GuildLeadershipArticleProps> = ({ onClose
             
             <div className="grid md:grid-cols-3 gap-4">
               <div className="bg-amber-50 p-3 rounded border border-amber-200">
-                <h5 className="font-bold text-amber-900 mb-1">Market Influence</h5>
+                <h5 className="font-bold text-amber-900 mb-1">Contract Influence</h5>
                 <p className="text-amber-800">
-                  Guilds can coordinate buying and selling activities to drive prices in favorable directions, creating opportunities for collective profit. By timing market entries and exits, guilds can significantly impact resource valuations.
+                  Guilds can coordinate buying and selling activities to drive prices in favorable directions, creating opportunities for collective profit. By timing contract entries and exits, guilds can significantly impact resource valuations.
                 </p>
               </div>
               
@@ -58,7 +58,7 @@ const GuildLeadershipArticle: React.FC<GuildLeadershipArticleProps> = ({ onClose
               <div className="bg-amber-50 p-3 rounded border border-amber-200">
                 <h5 className="font-bold text-amber-900 mb-1">Targeted Economic Actions</h5>
                 <p className="text-amber-800">
-                  Guilds can organize targeted economic actions against competitors, including undercutting prices in specific markets, establishing competing businesses, or creating alternative supply chains to challenge monopolies.
+                  Guilds can organize targeted economic actions against competitors, including undercutting prices in specific contracts, establishing competing businesses, or creating alternative supply chains to challenge monopolies.
                 </p>
               </div>
             </div>
@@ -93,7 +93,7 @@ const GuildLeadershipArticle: React.FC<GuildLeadershipArticleProps> = ({ onClose
               <ul className="list-disc pl-5 space-y-1 text-amber-800">
                 <li>Access to shared resources and information</li>
                 <li>Preferential trading terms with fellow guild members</li>
-                <li>Collective bargaining power in markets</li>
+                <li>Collective bargaining power in contracts</li>
                 <li>Protection against economic aggression</li>
                 <li>Enhanced voting rights in governance matters</li>
               </ul>
@@ -198,7 +198,7 @@ const GuildLeadershipArticle: React.FC<GuildLeadershipArticleProps> = ({ onClose
               The most successful guild members actively participate in guild activities, contribute to collective goals, and leverage guild resources to advance both personal and shared objectives. Building a reputation within your guild can lead to leadership opportunities and greater influence in both guild affairs and the broader governance of Venice.
             </p>
             <p className="text-amber-800">
-              Whether you seek to dominate markets, secure reliable supply chains, or simply find protection in an uncertain economy, guild membership provides valuable tools for achieving your ambitions in La Serenissima.
+              Whether you seek to dominate contracts, secure reliable supply chains, or simply find protection in an uncertain economy, guild membership provides valuable tools for achieving your ambitions in La Serenissima.
             </p>
           </div>
         </div>

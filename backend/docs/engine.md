@@ -94,7 +94,7 @@ Every day at 11:00 AM UTC, the immigration system checks for vacant housing buil
    - Creates a notification for administrators
 4. The system tracks immigration statistics by social class and sends a summary notification to administrators
 
-The immigration process helps maintain population balance in the city and ensures that vacant properties have a chance to be occupied, creating a dynamic housing market. These new AI citizens become full participants in the economy, following the same rules and processes as human players.
+The immigration process helps maintain population balance in the city and ensures that vacant properties have a chance to be occupied, creating a dynamic housing contract. These new AI citizens become full participants in the economy, following the same rules and processes as human players.
 
 ### Job Assignment (10:00 AM UTC)
 
@@ -113,7 +113,7 @@ Every day at 10:00 AM UTC, the job assignment system finds employment for citize
    - For human citizens, this creates a new activity in their schedule
 6. The system tracks job assignment statistics and sends a summary notification to administrators
 
-This process ensures that citizens find employment based on their wealth and status, creating a stratified labor market similar to historical Venice. Both AI and human citizens participate in the same job market, creating a unified economy where all participants follow the same rules.
+This process ensures that citizens find employment based on their wealth and status, creating a stratified labor contract similar to historical Venice. Both AI and human citizens participate in the same job contract, creating a unified economy where all participants follow the same rules.
 
 ### Housing Assignment (12:00 PM UTC)
 
@@ -160,7 +160,7 @@ Every day at 2:00 PM UTC, the housing mobility system simulates citizens looking
    - The citizen about their new home and rent savings
    - Administrators with a summary of all housing changes
 
-This process creates a dynamic housing market with citizens seeking better economic opportunities, simulating the mobility of Renaissance Venice's population.
+This process creates a dynamic housing contract with citizens seeking better economic opportunities, simulating the mobility of Renaissance Venice's population.
 
 ### Work Mobility (4:00 PM UTC)
 
@@ -186,7 +186,7 @@ Every day at 4:00 PM UTC, the work mobility system simulates citizens looking fo
    - The citizen about their new job and wage increase
    - Administrators with a summary of all job changes
 
-This process creates a dynamic labor market with citizens seeking better economic opportunities, simulating the mobility of Renaissance Venice's workforce.
+This process creates a dynamic labor contract with citizens seeking better economic opportunities, simulating the mobility of Renaissance Venice's workforce.
 
 ### Loan Payments (3:00 PM UTC)
 
@@ -267,7 +267,7 @@ This process simulates the rental economy of Venice, with citizens paying rent f
 
 **Script**: `backend/ais/bidonlands.py`
 
-Every day at 7:00 PM UTC, the AI land bidding system allows AI citizens to participate in the land market:
+Every day at 7:00 PM UTC, the AI land bidding system allows AI citizens to participate in the land contract:
 
 1. The script identifies all citizens marked as AI in the system
 2. For each AI citizen, it checks their compute balance and existing bids
@@ -277,7 +277,7 @@ Every day at 7:00 PM UTC, the AI land bidding system allows AI citizens to parti
 4. AI citizens only bid if they have at least twice the bid amount in their compute balance
 5. An admin notification is created with statistics about all bidding activity
 
-This process creates a dynamic land market with AI participation, ensuring that valuable lands receive competitive bids even without human players bidding on them.
+This process creates a dynamic land contract with AI participation, ensuring that valuable lands receive competitive bids even without human players bidding on them.
 
 ### AI Building Construction (8:00 PM UTC)
 
@@ -307,7 +307,7 @@ Every day at 9:00 PM UTC, the AI lease adjustment system allows AI citizens to o
 3. The AI makes strategic decisions about lease adjustments based on:
    - Building income and maintenance costs
    - Land value and location
-   - Market rates for similar buildings
+   - Contract rates for similar buildings
    - Overall financial goals
 4. When lease adjustments are made:
    - Building records are updated with new lease amounts
@@ -315,7 +315,7 @@ Every day at 9:00 PM UTC, the AI lease adjustment system allows AI citizens to o
    - Reasons for adjustments are provided to maintain transparency
 5. An admin notification is created with statistics about all lease adjustments
 
-This process creates a more dynamic real estate market with AI landowners actively managing their properties, providing market signals about the value of different locations, and encouraging strategic building placement by players.
+This process creates a more dynamic real estate contract with AI landowners actively managing their properties, providing contract signals about the value of different locations, and encouraging strategic building placement by players.
 
 ### AI Rent Adjustments (10:00 PM UTC)
 
@@ -329,7 +329,7 @@ Every day at 10:00 PM UTC, the AI rent adjustment system allows AI citizens to o
    - Building income and maintenance costs
    - Occupant social class and wealth
    - Occupancy status (vacant or occupied)
-   - Market rates for similar housing
+   - Contract rates for similar housing
    - Overall financial goals
 4. When rent adjustments are made:
    - Building records are updated with new rent amounts
@@ -337,7 +337,7 @@ Every day at 10:00 PM UTC, the AI rent adjustment system allows AI citizens to o
    - Reasons for adjustments are provided to maintain transparency
 5. An admin notification is created with statistics about all rent adjustments
 
-This process creates a more dynamic housing market with AI building owners actively managing their properties, providing market signals about the value of different housing types, and encouraging citizens to seek affordable housing based on their wealth and social class.
+This process creates a more dynamic housing contract with AI building owners actively managing their properties, providing contract signals about the value of different housing types, and encouraging citizens to seek affordable housing based on their wealth and social class.
 
 ### AI Wage Adjustments (11:00 PM UTC)
 
@@ -350,7 +350,7 @@ Every day at 11:00 PM UTC, the AI wage adjustment system allows AI citizens to o
 3. The AI makes strategic decisions about wage adjustments based on:
    - Business income and expenses
    - Employee social class and wealth
-   - Labor market conditions
+   - Labor contract conditions
    - Need to attract and retain quality workers
    - Overall financial goals
 4. When wage adjustments are made:
@@ -359,7 +359,7 @@ Every day at 11:00 PM UTC, the AI wage adjustment system allows AI citizens to o
    - Reasons for adjustments are provided to maintain transparency
 5. An admin notification is created with statistics about all wage adjustments
 
-This process creates a more dynamic labor market with AI business owners actively managing their workforce, providing market signals about the value of different types of labor, and affecting citizen wealth which in turn impacts their ability to pay rent and potentially move to better housing.
+This process creates a more dynamic labor contract with AI business owners actively managing their workforce, providing contract signals about the value of different types of labor, and affecting citizen wealth which in turn impacts their ability to pay rent and potentially move to better housing.
 
 ### AI Message Responses (Every 2.4 hours)
 

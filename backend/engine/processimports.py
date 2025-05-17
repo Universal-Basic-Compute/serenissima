@@ -244,9 +244,9 @@ def process_import_contract(tables, contract: Dict, building_types: Dict, resour
             return False
         
         # Check if the building is run by someone (business)
-        building_operator = building['fields'].get('RanBy')
+        building_operator = building['fields'].get('RunBy')
         
-        # If the building has a RanBy field, use that person as the buyer instead
+        # If the building has a RunBy field, use that person as the buyer instead
         # This handles cases where the business operator is different from the building owner
         if building_operator and building_operator != buyer:
             log.info(f"Building {buyer_building_id} is run by {building_operator}, using as buyer instead of {buyer}")

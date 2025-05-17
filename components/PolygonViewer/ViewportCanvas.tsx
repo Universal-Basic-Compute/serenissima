@@ -127,7 +127,7 @@ interface InteractionState {
 }
 
 interface ViewportCanvasProps {
-  activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'markets' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
+  activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'contracts' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
   scale: number;
   offset: { x: number, y: number };
   onScaleChange: (newScale: number) => void;

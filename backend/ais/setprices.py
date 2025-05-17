@@ -270,7 +270,7 @@ Here's your current situation:
 - Each building can produce different types of resources
 - You need to set a competitive price for each resource
 
-Please analyze the market and set appropriate prices for each resource in each of your buildings. Consider:
+Please analyze the contract and set appropriate prices for each resource in each of your buildings. Consider:
 1. The import price of each resource (this is what merchants would pay to import it)
 2. The current price you're charging (if any)
 3. The demand for different resource types

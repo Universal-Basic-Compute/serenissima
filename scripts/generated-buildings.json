@@ -758,7 +758,7 @@
     },
     {
       "id": "building-1746854798862-6108",
-      "type": "market_stall",
+      "type": "contract_stall",
       "land_id": "polygon-1745879117945",
       "variant": "model",
       "owner": "ConsiglioDeiDieci",
@@ -2657,7 +2657,7 @@
     },
     {
       "id": "building-1746854798863-311",
-      "type": "market_stall",
+      "type": "contract_stall",
       "land_id": "polygon-1745879404342",
       "variant": "model",
       "owner": "ConsiglioDeiDieci",
@@ -4736,7 +4736,7 @@
     },
     {
       "id": "building-1746854798865-931",
-      "type": "market_stall",
+      "type": "contract_stall",
       "land_id": "polygon-1746052772601",
       "variant": "model",
       "owner": "ConsiglioDeiDieci",
@@ -5636,7 +5636,7 @@
     },
     {
       "id": "building-1746854798865-6389",
-      "type": "market_stall",
+      "type": "contract_stall",
       "land_id": "polygon-1746052845524",
       "variant": "model",
       "owner": "ConsiglioDeiDieci",
@@ -5879,7 +5879,7 @@
     },
     {
       "id": "building-1746854798865-5472",
-      "type": "market_stall",
+      "type": "contract_stall",
       "land_id": "polygon-1746055561861",
       "variant": "model",
       "owner": "ConsiglioDeiDieci",
@@ -7139,7 +7139,7 @@
     },
     {
       "id": "building-1746854798867-5341",
-      "type": "market_stall",
+      "type": "contract_stall",
       "land_id": "polygon-1746055928225",
       "variant": "model",
       "owner": "ConsiglioDeiDieci",
@@ -7706,7 +7706,7 @@
     },
     {
       "id": "building-1746854798868-5830",
-      "type": "market_stall",
+      "type": "contract_stall",
       "land_id": "polygon-1746056107157",
       "variant": "model",
       "owner": "ConsiglioDeiDieci",
@@ -8066,7 +8066,7 @@
     },
     {
       "id": "building-1746854798868-8877",
-      "type": "market_stall",
+      "type": "contract_stall",
       "land_id": "polygon-1746056196666",
       "variant": "model",
       "owner": "ConsiglioDeiDieci",
@@ -11630,7 +11630,7 @@
     },
     {
       "id": "building-1746854798871-6775",
-      "type": "market_stall",
+      "type": "contract_stall",
       "land_id": "polygon-1746057327626",
       "variant": "model",
       "owner": "ConsiglioDeiDieci",
@@ -11675,7 +11675,7 @@
     },
     {
       "id": "building-1746854798871-9102",
-      "type": "market_stall",
+      "type": "contract_stall",
       "land_id": "polygon-1746057352428",
       "variant": "model",
       "owner": "ConsiglioDeiDieci",
@@ -11711,7 +11711,7 @@
     },
     {
       "id": "building-1746854798871-387",
-      "type": "market_stall",
+      "type": "contract_stall",
       "land_id": "polygon-1746057352428",
       "variant": "model",
       "owner": "ConsiglioDeiDieci",
@@ -12737,7 +12737,7 @@
     },
     {
       "id": "building-1746854798872-4706",
-      "type": "market_stall",
+      "type": "contract_stall",
       "land_id": "polygon-1746057412398",
       "variant": "model",
       "owner": "ConsiglioDeiDieci",

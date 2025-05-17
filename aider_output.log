@@ -1548,7 +1548,7 @@ data\resources\raw_materials\soda_ash.json
       "Syrian plant harvesters"
     ],
     "historical_significance": "Soda ash, derived from the ashes of specific marine plants, was a critical import for Venice's glassmaking industry. The Republic maintained exclusive trade agreements with suppliers in Egypt and Syria to ensure a steady supply of this essential material. The quality of Venetian glass depended heavily on the purity of this imported alkali, and the city's glassmakers developed specific techniques to purify and prepare it for use.",
-    "historical_markets": [
+    "historical_contracts": [
       "Murano glass foundries",
       "Venetian soap makers"
     ],
@@ -1562,7 +1562,7 @@ data\resources\raw_materials\soda_ash.json
       "Syrian plant harvesters"
     ],
     "historical_significance": "Soda ash, derived from the ashes of specific marine plants, was a critical import for Venice's glassmaking industry. The Republic maintained exclusive trade agreements with suppliers in Egypt and Syria to ensure a steady supply of this essential material. The quality of Venetian glass depended heavily on the purity of this imported alkali, and the city's glassmakers developed specific techniques to purify and prepare it for use.",
-    "historical_markets": [
+    "historical_contracts": [
       "Murano glass foundries",
       "Venetian soap makers"
     ],
@@ -1581,7 +1581,7 @@ data\resources\raw_materials\sand.json
       "Murano Island Quarries"
     ],
     "historical_significance": "The unique composition of Murano sand, with its exceptional purity and specific mineral content, was a closely guarded secret of Venetian glassmaking. This special sand, when combined with soda ash, produced glass of unparalleled clarity and workability, enabling Venetian glassmakers to create their world-renowned cristallo glass. The Republic strictly controlled access to these sand deposits, considering them a strategic resource.",
-    "historical_markets": [
+    "historical_contracts": [
       "Murano glass foundries",
       "Venetian glass industry"
     ]
@@ -1593,7 +1593,7 @@ data\resources\raw_materials\sand.json
       "Murano Island Quarries"
     ],
     "historical_significance": "The unique composition of Murano sand, with its exceptional purity and specific mineral content, was a closely guarded secret of Venetian glassmaking. This special sand, when combined with soda ash, produced glass of unparalleled clarity and workability, enabling Venetian glassmakers to create their world-renowned cristallo glass. The Republic strictly controlled access to these sand deposits, considering them a strategic resource.",
-    "historical_markets": [
+    "historical_contracts": [
       "Murano glass foundries",
       "Venetian glass industry"
     ],
@@ -1606,7 +1606,7 @@ data\resources\raw_materials\sand.json
 data\resources\raw_materials\salt.json
 ```json
 <<<<<<< SEARCH
-  "market_dynamics": {
+  "contract_dynamics": {
     "base_availability": 0.9,
     "demand_level": "very_high",
     "price_volatility": 0.2,
@@ -1639,7 +1639,7 @@ data\resources\raw_materials\salt.json
     }
   }
 =======
-  "market_dynamics": {
+  "contract_dynamics": {
     "base_availability": 0.9,
     "demand_level": "very_high",
     "price_volatility": 0.2,
@@ -1682,9 +1682,9 @@ data\resources\raw_materials\salt.json
       "Venetian Lagoon"
     ],
     "historical_significance": "Salt was one of Venice's earliest and most important commodities, forming the foundation of its trading empire. The Republic maintained strict control over salt production and trade.",
-    "historical_markets": [
+    "historical_contracts": [
       "Venetian State Salt Monopoly",
-      "European food preservation markets"
+      "European food preservation contracts"
     ],
     "cultural_context": "Salt production was so vital to Venice that special laws protected salt workers and facilities, with severe penalties for interference with the salt trade."
   }
@@ -1694,7 +1694,7 @@ data\resources\raw_materials\salt.json
 data\resources\raw_materials\marble.json
 ```json
 <<<<<<< SEARCH
-  "market_dynamics": {
+  "contract_dynamics": {
     "base_availability": 0.4,
     "demand_level": "high",
     "price_volatility": 0.3,
@@ -1713,7 +1713,7 @@ data\resources\raw_materials\marble.json
     ]
   }
 =======
-  "market_dynamics": {
+  "contract_dynamics": {
     "base_availability": 0.4,
     "demand_level": "high",
     "price_volatility": 0.3,
@@ -1746,7 +1746,7 @@ data\resources\raw_materials\marble.json
       "Istrian peninsula"
     ],
     "historical_significance": "Marble was essential to Venice's architectural grandeur, despite the city having no natural stone resources of its own. The Republic's ability to import and use this heavy material on unstable lagoon foundations demonstrated both its wealth and engineering prowess.",
-    "historical_markets": [
+    "historical_contracts": [
       "Venetian construction industry",
       "Sculptors' workshops",
       "Church commissions"
@@ -2195,7 +2195,7 @@ data\resources\raw_materials\salt.json
     ],
     "max_storage_time": "unlimited"
   },
-  "market_dynamics": {
+  "contract_dynamics": {
     "base_availability": 0.9,
     "demand_level": "very_high",
     "price_volatility": 0.2,
@@ -2238,9 +2238,9 @@ data\resources\raw_materials\salt.json
       "Venetian Lagoon"
     ],
     "historical_significance": "Salt was one of Venice's earliest and most important commodities, forming the foundation of its trading empire. The Republic maintained strict control over salt production and trade.",
-    "historical_markets": [
+    "historical_contracts": [
       "Venetian State Salt Monopoly",
-      "European food preservation markets"
+      "European food preservation contracts"
     ],
     "cultural_context": "Salt production was so vital to Venice that special laws protected salt workers and facilities, with severe penalties for interference with the salt trade."
   }
@@ -2293,7 +2293,7 @@ data\resources\raw_materials\salt.json
     ],
     "maxStorageTime": "unlimited"
   },
-  "marketDynamics": {
+  "contractDynamics": {
     "baseAvailability": 0.9,
     "demandLevel": "very_high",
     "priceVolatility": 0.2,
@@ -2353,9 +2353,9 @@ data\resources\raw_materials\salt.json
       "Venetian Lagoon"
     ],
     "historicalSignificance": "Salt was one of Venice's earliest and most important commodities, forming the foundation of its trading empire. The Republic maintained strict control over salt production and trade.",
-    "historicalMarkets": [
+    "historicalContracts": [
       "Venetian State Salt Monopoly",
-      "European food preservation markets"
+      "European food preservation contracts"
     ],
     "culturalContext": "Salt production was so vital to Venice that special laws protected salt workers and facilities, with severe penalties for interference with the salt trade."
   }
@@ -2436,7 +2436,7 @@ data\resources\raw_materials\marble.json
 data\resources\raw_materials\raw_silk.json
 ```json
 <<<<<<< SEARCH
-  "marketDynamics": {
+  "contractDynamics": {
     "baseAvailability": 0.5,
     "demandLevel": "very_high",
     "priceVolatility": 0.6,
@@ -2472,7 +2472,7 @@ data\resources\raw_materials\raw_silk.json
   }
 }
 =======
-  "marketDynamics": {
+  "contractDynamics": {
     "baseAvailability": 0.5,
     "demandLevel": "very_high",
     "priceVolatility": 0.6,
@@ -2513,7 +2513,7 @@ data\resources\raw_materials\raw_silk.json
       "Persian silk traders"
     ],
     "historicalSignificance": "Raw silk was one of Venice's most valuable imports, forming the basis of its luxury textile industry. The Republic maintained exclusive trade routes to ensure a steady supply.",
-    "historicalMarkets": [
+    "historicalContracts": [
       "Venetian silk weavers",
       "European royal courts"
     ],

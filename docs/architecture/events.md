@@ -188,7 +188,7 @@ Example:
  * 
  * Emitters:
  * - LandDetailsPanel
- * - MarketPanel
+ * - ContractPanel
  * - TransactionService
  * 
  * Handlers:

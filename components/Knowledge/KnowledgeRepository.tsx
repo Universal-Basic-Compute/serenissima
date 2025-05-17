@@ -303,7 +303,7 @@ const KnowledgeRepository: React.FC<KnowledgeRepositoryProps> = ({
               <div className="p-6">
                 <h3 className="text-xl font-serif text-amber-800 mb-2">10 Cunning Strategies for Venetian Power</h3>
                 <p className="text-gray-600 mb-4">
-                  Learn essential strategies for economic success in the competitive markets of La Serenissima.
+                  Learn essential strategies for economic success in the competitive contracts of La Serenissima.
                 </p>
                 <button 
                   onClick={() => onSelectArticle("strategies")}

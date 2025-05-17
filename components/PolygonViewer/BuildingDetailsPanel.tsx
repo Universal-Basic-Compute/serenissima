@@ -115,11 +115,11 @@ const getBuildingImagePath = async (type: string, variant?: string): Promise<str
     }
     
     // If all else fails, use a default image
-    console.log(`No image found for building type: ${type}, using default market_stall.jpg`);
-    return '/images/buildings/market_stall.jpg';
+    console.log(`No image found for building type: ${type}, using default contract_stall.jpg`);
+    return '/images/buildings/contract_stall.jpg';
   } catch (error) {
     console.error('Error getting building image path:', error);
-    return '/images/buildings/market_stall.jpg';
+    return '/images/buildings/contract_stall.jpg';
   }
 };
 
@@ -215,7 +215,7 @@ export default function BuildingDetailsPanel({
   const [landRendered, setLandRendered] = useState<boolean>(false);
   const [buildingDefinition, setBuildingDefinition] = useState<any>(null);
   const [showFullDescription, setShowFullDescription] = useState<boolean>(false);
-  const [buildingImagePath, setBuildingImagePath] = useState<string>('/images/buildings/market_stall.jpg');
+  const [buildingImagePath, setBuildingImagePath] = useState<string>('/images/buildings/contract_stall.jpg');
   const [pointData, setPointData] = useState<any>(null);
   const [polygonsData, setPolygonsData] = useState<any[]>(polygons);
   const [buildingContracts, setBuildingContracts] = useState<any[]>([]);
@@ -327,7 +327,7 @@ export default function BuildingDetailsPanel({
         .catch(error => {
           if (isMounted) {
             console.error('Error resolving building image path:', error);
-            setBuildingImagePath('/images/buildings/market_stall.jpg');
+            setBuildingImagePath('/images/buildings/contract_stall.jpg');
           }
         });
     } else {
@@ -967,7 +967,7 @@ export default function BuildingDetailsPanel({
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         console.error('Error loading building image:', e);
-                        e.currentTarget.src = '/images/buildings/market_stall.jpg';
+                        e.currentTarget.src = '/images/buildings/contract_stall.jpg';
                       }}
                     />
                   </div>

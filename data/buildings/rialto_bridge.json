@@ -26,7 +26,7 @@
   },
   "seasonalEffects": {
     "carnival": "Decorated shops, masked revelers crossing",
-    "market days": "Peak commercial activity, special goods",
+    "contract days": "Peak commercial activity, special goods",
     "regatta viewing": "Crowds watching boat races from vantage point"
   },
   "aiInteractionPoints": [

@@ -71,7 +71,7 @@
   },
   "historicalName": "Calle dei Favri, San Marco",
   "englishName": "Street of the Blacksmiths, St. Mark's",
-  "historicalDescription": "This street was known for its concentration of blacksmith workshops in the San Marco sestiere during the 15th century, located near the Rialto Bridge and market area.",
+  "historicalDescription": "This street was known for its concentration of blacksmith workshops in the San Marco sestiere during the 15th century, located near the Rialto Bridge and contract area.",
   "nameConfidence": "medium",
   "areaInSquareMeters": 18788.35,
   "center": {
@@ -173,7 +173,7 @@
       "lng": 12.337312727556599,
       "streetName": "Salizada dei Mercanti di Rialto",
       "streetNameEnglish": "Paved Street of the Rialto Merchants",
-      "streetDescription": "This elevated and paved street ('salizada' indicates it was raised above flood level) would have been used by merchants traveling between San Marco and the Rialto market, Venice's commercial heart. Many merchants had offices in the San Marco district but conducted business at Rialto. The proximity to Calle dei Favri would place this on a logical route between the political center of Venice (San Marco) and its commercial center.",
+      "streetDescription": "This elevated and paved street ('salizada' indicates it was raised above flood level) would have been used by merchants traveling between San Marco and the Rialto contract, Venice's commercial heart. Many merchants had offices in the San Marco district but conducted business at Rialto. The proximity to Calle dei Favri would place this on a logical route between the political center of Venice (San Marco) and its commercial center.",
       "id": "building_45.434665_12.337313"
     },
     {

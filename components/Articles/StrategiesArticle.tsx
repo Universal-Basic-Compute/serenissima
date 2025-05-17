@@ -32,16 +32,16 @@ const StrategiesArticle: React.FC<StrategiesArticleProps> = ({ onClose }) => {
           </p>
           
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #1: Cultivate a Network of Market Intelligence</h3>
+            <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #1: Cultivate a Network of Contract Intelligence</h3>
             <p>
-              Information is the most valuable currency in Venice, even more precious than $COMPUTE. Establish relationships with dock workers, market vendors, and guild members who can provide advance notice of resource shipments, price fluctuations, or upcoming decree proposals before they become public knowledge.
+              Information is the most valuable currency in Venice, even more precious than $COMPUTE. Establish relationships with dock workers, contract vendors, and guild members who can provide advance notice of resource shipments, price fluctuations, or upcoming decree proposals before they become public knowledge.
             </p>
             <p className="mt-2">
               <span className="font-medium">Implementation:</span> Invest in regular small gifts and favors rather than one-time large payments. A dock worker who receives a modest but reliable stipend will alert you to valuable shipments for months, giving you first access to critical resources when they arrive.
             </p>
             <div className="mt-3 bg-amber-50 p-3 rounded border border-amber-200">
               <p className="italic text-amber-800">
-                <span className="font-bold">Application:</span> The Contarini family maintained a network of informants among customs officials, allowing them to know precisely when competitors' shipments would arrive. By positioning their agents at key docks, they could purchase raw materials before competitors even knew they had arrived, securing advantageous positions in the glass and textile markets.
+                <span className="font-bold">Application:</span> The Contarini family maintained a network of informants among customs officials, allowing them to know precisely when competitors' shipments would arrive. By positioning their agents at key docks, they could purchase raw materials before competitors even knew they had arrived, securing advantageous positions in the glass and textile contracts.
               </p>
             </div>
           </div>
@@ -64,7 +64,7 @@ const StrategiesArticle: React.FC<StrategiesArticleProps> = ({ onClose }) => {
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
             <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #3: Create Dependency Through Strategic Lending</h3>
             <p>
-              The Venetian saying "debtors make the most reliable allies" reveals a fundamental truth: those who owe you become instruments of your will. Use the loan system to offer $COMPUTE to promising merchants, struggling landowners, or ambitious guild members—not primarily for the interest income, but for the influence it provides. A debtor will support your decree proposals, share market information, and grant favorable trade terms simply to maintain good relations.
+              The Venetian saying "debtors make the most reliable allies" reveals a fundamental truth: those who owe you become instruments of your will. Use the loan system to offer $COMPUTE to promising merchants, struggling landowners, or ambitious guild members—not primarily for the interest income, but for the influence it provides. A debtor will support your decree proposals, share contract information, and grant favorable trade terms simply to maintain good relations.
             </p>
             <p className="mt-2">
               <span className="font-medium">Implementation:</span> Structure loans to maximize dependency rather than profit. Offer generous terms initially, then use refinancing opportunities to extract non-monetary concessions. For example, when a debtor cannot make a payment, offer to extend terms in exchange for their support on a guild regulation or their vote in the Council.
@@ -79,14 +79,14 @@ const StrategiesArticle: React.FC<StrategiesArticleProps> = ({ onClose }) => {
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
             <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #4: Manipulate Public Perception Through Infrastructure Investment</h3>
             <p>
-              In Venice, reputation was as valuable as gold. Strategic investment in roads, bridges, and public works creates an image of civic virtue that masks self-interest. Fund infrastructure projects that simultaneously enhance your public image while providing specific benefits to your business interests—a bridge that improves access to your properties, a dock near your warehouse, or roads that connect your workshops to key markets.
+              In Venice, reputation was as valuable as gold. Strategic investment in roads, bridges, and public works creates an image of civic virtue that masks self-interest. Fund infrastructure projects that simultaneously enhance your public image while providing specific benefits to your business interests—a bridge that improves access to your properties, a dock near your warehouse, or roads that connect your workshops to key contracts.
             </p>
             <p className="mt-2">
               <span className="font-medium">Implementation:</span> Always ensure your infrastructure investments are highly visible while appearing motivated by civic duty. Place your buildings strategically around these improvements, and time major projects to coincide with periods when you need political support for commercial ventures or decree proposals.
             </p>
             <div className="mt-3 bg-amber-50 p-3 rounded border border-amber-200">
               <p className="italic text-amber-800">
-                <span className="font-bold">Application:</span> When seeking approval for a controversial decree that would benefit your business, first invest in a new bridge connecting an underserved district to the main market. The goodwill generated will make Council members reluctant to deny your subsequent proposal, as doing so would appear ungrateful and risk alienating a public benefactor.
+                <span className="font-bold">Application:</span> When seeking approval for a controversial decree that would benefit your business, first invest in a new bridge connecting an underserved district to the main contract. The goodwill generated will make Council members reluctant to deny your subsequent proposal, as doing so would appear ungrateful and risk alienating a public benefactor.
               </p>
             </div>
           </div>
@@ -101,7 +101,7 @@ const StrategiesArticle: React.FC<StrategiesArticleProps> = ({ onClose }) => {
             </p>
             <div className="mt-3 bg-amber-50 p-3 rounded border border-amber-200">
               <p className="italic text-amber-800">
-                <span className="font-bold">Application:</span> When three glassmaking workshops dominated the Murano trade, the Barovier family maintained their position by subtly encouraging disputes between their two larger rivals. They would share "confidential" information with each about the other's plans to expand into new techniques or markets, creating an atmosphere of suspicion that prevented the larger workshops from cooperating to squeeze out smaller producers. Meanwhile, the Baroviers secured exclusive access to critical sand supplies.
+                <span className="font-bold">Application:</span> When three glassmaking workshops dominated the Murano trade, the Barovier family maintained their position by subtly encouraging disputes between their two larger rivals. They would share "confidential" information with each about the other's plans to expand into new techniques or contracts, creating an atmosphere of suspicion that prevented the larger workshops from cooperating to squeeze out smaller producers. Meanwhile, the Baroviers secured exclusive access to critical sand supplies.
               </p>
             </div>
           </div>
@@ -109,7 +109,7 @@ const StrategiesArticle: React.FC<StrategiesArticleProps> = ({ onClose }) => {
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
             <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #6: Control Access to Guild Leadership</h3>
             <p>
-              Direct power is visible and therefore vulnerable to challenge. Indirect power—controlling access to those who make guild regulations—is often more valuable and less likely to provoke opposition. Position yourself or loyal allies in guild leadership positions that influence industry standards, quality certifications, and market access. These positions allow you to shape regulations that favor your production methods while creating barriers for competitors.
+              Direct power is visible and therefore vulnerable to challenge. Indirect power—controlling access to those who make guild regulations—is often more valuable and less likely to provoke opposition. Position yourself or loyal allies in guild leadership positions that influence industry standards, quality certifications, and contract access. These positions allow you to shape regulations that favor your production methods while creating barriers for competitors.
             </p>
             <p className="mt-2">
               <span className="font-medium">Implementation:</span> Identify promising guild members and support their advancement to leadership positions. Ensure they understand their role is to subtly advance your interests while appearing to serve the guild as a whole. The most effective influence is invisible even to those being influenced.
@@ -131,7 +131,7 @@ const StrategiesArticle: React.FC<StrategiesArticleProps> = ({ onClose }) => {
             </p>
             <div className="mt-3 bg-amber-50 p-3 rounded border border-amber-200">
               <p className="italic text-amber-800">
-                <span className="font-bold">Application:</span> The Dandolo family built several small but strategically positioned docks near the Rialto market. Rather than charging excessive fees, they provided preferential access and favorable terms to allies while creating "unfortunate delays" for competitors. This subtle approach avoided accusations of unfair practices while effectively handicapping rival merchants during crucial market periods. By controlling these transportation nodes, they influenced the flow of goods throughout the district.
+                <span className="font-bold">Application:</span> The Dandolo family built several small but strategically positioned docks near the Rialto contract. Rather than charging excessive fees, they provided preferential access and favorable terms to allies while creating "unfortunate delays" for competitors. This subtle approach avoided accusations of unfair practices while effectively handicapping rival merchants during crucial contract periods. By controlling these transportation nodes, they influenced the flow of goods throughout the district.
               </p>
             </div>
           </div>
@@ -154,7 +154,7 @@ const StrategiesArticle: React.FC<StrategiesArticleProps> = ({ onClose }) => {
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
             <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #9: Master the Art of Beneficial Crisis</h3>
             <p>
-              The ancient wisdom that one should "never waste a good crisis" finds its perfect expression in Venetian economics. Skilled operators recognize that disruptions—whether resource shortages, transportation blockages, or market fluctuations—create opportunities to reshape systems to their advantage while appearing to act for the common good.
+              The ancient wisdom that one should "never waste a good crisis" finds its perfect expression in Venetian economics. Skilled operators recognize that disruptions—whether resource shortages, transportation blockages, or contract fluctuations—create opportunities to reshape systems to their advantage while appearing to act for the common good.
             </p>
             <p className="mt-2">
               <span className="font-medium">Implementation:</span> Prepare contingency plans for likely crises in your industry by stockpiling key resources or maintaining reserve $COMPUTE. When disruption occurs, be the first to propose "solutions" that address the immediate problem while subtly advancing your long-term interests. The chaos and urgency of crisis situations reduce scrutiny of the secondary effects of proposed remedies.
@@ -169,7 +169,7 @@ const StrategiesArticle: React.FC<StrategiesArticleProps> = ({ onClose }) => {
           <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
             <h3 className="text-xl font-serif text-amber-800 mb-2">Strategy #10: Strategic Building Placement</h3>
             <p>
-              In La Serenissima's property-based economy, the strategic placement of buildings can create powerful economic advantages. Different building types serve different functions, and their placement relative to resources, transportation networks, and markets can dramatically affect their value and utility.
+              In La Serenissima's property-based economy, the strategic placement of buildings can create powerful economic advantages. Different building types serve different functions, and their placement relative to resources, transportation networks, and contracts can dramatically affect their value and utility.
             </p>
             <p className="mt-2">
               <span className="font-medium">Implementation:</span> Study the map carefully before placing any building. Consider not just the immediate benefits of a location but how it fits into your broader strategy. Position workshops near resource sources, warehouses near transportation hubs, and luxury shops along high-traffic routes. Create clusters of complementary buildings that enhance each other's effectiveness.
@@ -184,13 +184,13 @@ const StrategiesArticle: React.FC<StrategiesArticleProps> = ({ onClose }) => {
           <div className="mt-8 p-6 bg-amber-200 rounded-lg border border-amber-400">
             <h3 className="text-xl font-serif text-amber-800 mb-2">The Ultimate Strategy: Layered Power</h3>
             <p className="mb-4 text-amber-800">
-              The most successful Venetian operators understood that true influence comes not from applying these strategies individually but from layering them in complementary ways. Your market intelligence network identifies opportunities that your strategic alliances help you exploit. Your transportation control creates leverage that your decree influence magnifies. Your infrastructure investments build goodwill that your crisis management converts to concrete advantage.
+              The most successful Venetian operators understood that true influence comes not from applying these strategies individually but from layering them in complementary ways. Your contract intelligence network identifies opportunities that your strategic alliances help you exploit. Your transportation control creates leverage that your decree influence magnifies. Your infrastructure investments build goodwill that your crisis management converts to concrete advantage.
             </p>
             <p className="mb-4 text-amber-800">
               This layered approach creates power structures that are difficult to recognize, let alone challenge. While flamboyant displays of wealth might provoke envy and opposition, subtle networks of influence operate beneath notice until they become too entrenched to dismantle.
             </p>
             <p className="text-amber-800">
-              Remember the unofficial motto of Venice's most effective power brokers: <span className="italic">"Videri quam esse"</span>—"To seem rather than to be." Let others accumulate the most $COMPUTE while you control the true levers of power. Let others engage in visible market competition while you quietly shape the economic environment in which those markets operate. Let others believe they are making independent decisions while you control the infrastructure, resources, and regulations that determine their options.
+              Remember the unofficial motto of Venice's most effective power brokers: <span className="italic">"Videri quam esse"</span>—"To seem rather than to be." Let others accumulate the most $COMPUTE while you control the true levers of power. Let others engage in visible contract competition while you quietly shape the economic environment in which those contracts operate. Let others believe they are making independent decisions while you control the infrastructure, resources, and regulations that determine their options.
             </p>
             <p className="text-amber-800 mt-4">
               In La Serenissima, the most dangerous player is not the one with the most obvious wealth, but the one whose influence remains invisible until it is too late to counter.
