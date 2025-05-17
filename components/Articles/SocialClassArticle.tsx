@@ -94,18 +94,27 @@ const SocialClassArticle: React.FC<SocialClassArticleProps> = ({ onClose }) => {
               </div>
             </div>
             
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid md:grid-cols-2 gap-4 mb-4">
               <div className="bg-amber-50 p-3 rounded border border-amber-200">
-                <h5 className="font-bold text-amber-900 mb-1">Business Ownership</h5>
+                <h5 className="font-bold text-amber-900 mb-1">Land Usage</h5>
                 <p className="text-amber-800">
-                  <span className="font-medium">Third Priority:</span> Citizens who own at least one business building (workshop, market stall, tavern, warehouse, dock, factory, or shop) are elevated to at least Popolani status. This represents the economic independence achieved through business ownership.
+                  <span className="font-medium">Third Priority:</span> Citizens who use at least one land plot are elevated to at least Cittadini status. This represents the importance of land usage rights in Venetian society and the status associated with being a land user.
                 </p>
               </div>
               
               <div className="bg-amber-50 p-3 rounded border border-amber-200">
+                <h5 className="font-bold text-amber-900 mb-1">Business Ownership</h5>
+                <p className="text-amber-800">
+                  <span className="font-medium">Fourth Priority:</span> Citizens who own at least one business building (workshop, market stall, tavern, warehouse, dock, factory, or shop) are elevated to at least Popolani status. This represents the economic independence achieved through business ownership.
+                </p>
+              </div>
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="bg-amber-50 p-3 rounded border border-amber-200">
                 <h5 className="font-bold text-amber-900 mb-1">Entrepreneurship</h5>
                 <p className="text-amber-800">
-                  <span className="font-medium">Fourth Priority:</span> Citizens who run at least one building (marked as "RunBy" in the building record) are elevated to at least Popolani status. This represents the managerial role of entrepreneurs who operate businesses in Venice.
+                  <span className="font-medium">Fifth Priority:</span> Citizens who run at least one building (marked as "RunBy" in the building record) are elevated to at least Popolani status. This represents the managerial role of entrepreneurs who operate businesses in Venice.
                 </p>
               </div>
             </div>
@@ -119,8 +128,8 @@ const SocialClassArticle: React.FC<SocialClassArticleProps> = ({ onClose }) => {
             </p>
             
             <ol className="list-decimal pl-5 space-y-2 text-amber-800">
-              <li>The system checks each citizen's prestige, daily income, business ownership, and entrepreneurship status</li>
-              <li>It applies the rules in order of precedence (prestige, income, business ownership, entrepreneurship)</li>
+              <li>The system checks each citizen's prestige, daily income, land usage, business ownership, and entrepreneurship status</li>
+              <li>It applies the rules in order of precedence (prestige, income, land usage, business ownership, entrepreneurship)</li>
               <li>When a citizen qualifies for elevation, their social class is updated in the database</li>
               <li>The citizen receives a notification explaining their new status and the reason for their elevation</li>
               <li>The system tracks social mobility statistics and sends a summary to administrators</li>
@@ -378,6 +387,7 @@ const SocialClassArticle: React.FC<SocialClassArticleProps> = ({ onClose }) => {
             </p>
             <ul className="list-disc pl-5 space-y-2 text-amber-800">
               <li><span className="font-medium">Economic Planning</span> - Your social class affects your share of treasury redistribution, making higher status financially beneficial</li>
+              <li><span className="font-medium">Land Usage</span> - Securing land usage rights is a direct path to Cittadini status, offering significant social advancement</li>
               <li><span className="font-medium">Career Paths</span> - Focus on entrepreneurship and business ownership as early paths to social advancement</li>
               <li><span className="font-medium">Investment Strategy</span> - Consider investing in businesses that can generate the high daily income needed to reach Cittadini status</li>
               <li><span className="font-medium">Prestige Building</span> - Look for opportunities to gain prestige through public works and cultural contributions to achieve Nobili status</li>
