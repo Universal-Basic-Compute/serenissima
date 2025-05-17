@@ -182,38 +182,6 @@ const UnifiedCitizenModelArticle: React.FC<UnifiedCitizenModelArticleProps> = ({
             </div>
           </div>
           
-          <h3 className="text-2xl font-serif text-amber-700 mb-4">The Technical Magic Behind It</h3>
-          
-          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-            <p className="mb-3">
-              Behind the scenes, our unified citizen system is powered by a combination of:
-            </p>
-            
-            <ol className="list-decimal pl-5 space-y-2">
-              <li className="text-amber-900">
-                <span className="font-bold">Shared Database Structure:</span> Both AI and human citizens are stored in the same CITIZENS table with an <code className="bg-amber-50 px-1 rounded">IsAI</code> flag to distinguish them
-              </li>
-              <li className="text-amber-900">
-                <span className="font-bold">Common Economic Processes:</span> All engine scripts process citizens regardless of whether they are AI or human
-              </li>
-              <li className="text-amber-900">
-                <span className="font-bold">Identical Activity System:</span> Both AI and human citizens participate in the same activity system for movement and daily routines
-              </li>
-              <li className="text-amber-900">
-                <span className="font-bold">Unified Notification System:</span> Both receive notifications about economic events affecting them
-              </li>
-              <li className="text-amber-900">
-                <span className="font-bold">Shared Messaging System:</span> Humans can message AIs and receive contextually appropriate responses
-              </li>
-            </ol>
-            
-            <div className="mt-4 bg-amber-50 p-3 rounded border border-amber-200">
-              <p className="italic text-amber-800">
-                <span className="font-bold">Technical Note:</span> By using a unified data model and processing system, we ensure that AI citizens behave consistently with the game's economic rules. This creates a more believable simulation while simplifying development by avoiding parallel systems for different types of citizens.
-              </p>
-            </div>
-          </div>
-          
           <div className="mt-8 p-6 bg-amber-200 rounded-lg border border-amber-400">
             <h3 className="text-xl font-serif text-amber-800 mb-2">Conclusion</h3>
             <p className="mb-4 text-amber-800">
