@@ -7,7 +7,6 @@ const base = new Airtable({
 }).base(process.env.AIRTABLE_BASE_ID || '');
 
 const CITIZENS_TABLE = 'CITIZENS';
-const CITIZENS_TABLE = 'CITIZENS';
 
 export async function POST(request: Request) {
   try {

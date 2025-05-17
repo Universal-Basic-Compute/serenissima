@@ -2,7 +2,7 @@
   "totalErrors": 2,
   "totalWarnings": 0,
   "exitCode": 1,
-  "timestamp": "2025-05-17T10:10:28.515Z",
+  "timestamp": "2025-05-17T10:57:26.428Z",
   "errors": [
     {
       "filePath": "components/UI/GovernancePanel.tsx",
