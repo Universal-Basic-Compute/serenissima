@@ -64,7 +64,7 @@ def get_active_activities(tables) -> List[Dict]:
         formula = f"AND({{StartDate}}<='{now}', {{EndDate}}>='{now}', NOT({{Path}} = ''), NOT({{Path}} = BLANK()))"
         activities = tables['activities'].all(formula=formula)
         
-        log.info(f"Found {len(activities)} active activities with paths")
+        log.info(f"Found **{len(activities)}** active activities with paths 🛣️")
         return activities
     except Exception as e:
         log.error(f"Error getting active activities: {e}")
@@ -77,7 +77,7 @@ def get_citizen_info(tables, citizen_id: str) -> Optional[Dict]:
         citizens = tables['citizens'].all(formula=formula)
         
         if citizens:
-            log.info(f"Found citizen {citizen_id}")
+            log.info(f"Found citizen **{citizen_id}** 👤")
             return citizens[0]
         else:
             log.warning(f"Citizen {citizen_id} not found")
@@ -250,7 +250,7 @@ def update_citizen_position(tables, citizen_id: str, position: Dict) -> bool:
             'Point': f"citizen_{position['lat']}_{position['lng']}"
         })
         
-        log.info(f"Updated position for citizen {citizen_id}: {position}")
+        log.info(f"Updated position for citizen **{citizen_id}** 📍: {position}")
         return True
     except Exception as e:
         log.error(f"Error updating position for citizen {citizen_id}: {e}")
@@ -258,13 +258,13 @@ def update_citizen_position(tables, citizen_id: str, position: Dict) -> bool:
 
 def update_citizen_positions(dry_run: bool = False):
     """Main function to update citizen positions."""
-    log.info(f"Starting citizen position update (dry_run: {dry_run})")
+    log.info(f"🔄 Starting citizen position update (dry_run: **{dry_run}**)")
     
     tables = initialize_airtable()
     activities = get_active_activities(tables)
     
     if not activities:
-        log.info("No active activities with paths found")
+        log.info("ℹ️ No active activities with paths found")
         return
     
     # Group activities by citizen
@@ -279,7 +279,7 @@ def update_citizen_positions(dry_run: bool = False):
         
         citizen_activities[citizen_id].append(activity)
     
-    log.info(f"Found activities for {len(citizen_activities)} citizens")
+    log.info(f"Found activities for **{len(citizen_activities)}** citizens 👥")
     
     # Update positions for each citizen
     success_count = 0
@@ -296,13 +296,13 @@ def update_citizen_positions(dry_run: bool = False):
             continue
         
         if dry_run:
-            log.info(f"[DRY RUN] Would update position for citizen {citizen_id}: {position}")
+            log.info(f"🔍 [DRY RUN] Would update position for citizen **{citizen_id}**: {position}")
             success_count += 1
         else:
             if update_citizen_position(tables, citizen_id, position):
                 success_count += 1
     
-    log.info(f"Position update complete. Successfully updated {success_count} out of {len(citizen_activities)} citizens")
+    log.info(f"✅ Position update complete. Successfully updated **{success_count}** out of **{len(citizen_activities)}** citizens")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Update citizen positions.")
