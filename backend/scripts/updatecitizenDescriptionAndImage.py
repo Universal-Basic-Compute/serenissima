@@ -293,24 +293,61 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
         try:
             # First try to parse the entire content as JSON
             result_data = json.loads(content)
+            log.info("Successfully parsed entire response as JSON")
         except json.JSONDecodeError:
-            # If that fails, extract from first { to last }
+            # Log the full response for debugging
+            log.error(f"Could not parse entire response as JSON. Full response: {content}")
+            
+            # If that fails, try to clean and extract the JSON
             import re
+            
+            # Remove potential comments (both // and /* */ style)
+            # First remove // comments
+            content_no_comments = re.sub(r'//.*?$', '', content, flags=re.MULTILINE)
+            # Then remove /* */ comments
+            content_no_comments = re.sub(r'/\*.*?\*/', '', content_no_comments, flags=re.DOTALL)
+            
             # Find the first { and last } in the content
-            first_brace = content.find('{')
-            last_brace = content.rfind('}')
+            first_brace = content_no_comments.find('{')
+            last_brace = content_no_comments.rfind('}')
             
             if first_brace != -1 and last_brace != -1 and first_brace < last_brace:
-                json_str = content[first_brace:last_brace+1]
+                # Extract the JSON string
+                json_str = content_no_comments[first_brace:last_brace+1]
+                
+                # Remove any trailing commas before closing braces or brackets (common JSON error)
+                json_str = re.sub(r',\s*}', '}', json_str)
+                json_str = re.sub(r',\s*]', ']', json_str)
+                
                 try:
                     result_data = json.loads(json_str)
-                    log.info(f"Successfully extracted JSON using first-to-last brace method")
+                    log.info(f"Successfully extracted and parsed JSON after cleaning")
                 except json.JSONDecodeError as e:
-                    log.error(f"Failed to parse extracted JSON: {e}")
-                    log.error(f"Extracted content: {json_str}")
-                    return None
+                    log.error(f"Failed to parse extracted JSON after cleaning: {e}")
+                    log.error(f"Cleaned JSON content: {json_str}")
+                    
+                    # Last resort: try a more aggressive approach to extract just the fields we need
+                    try:
+                        # Look for the description and imagePrompt fields directly
+                        desc_match = re.search(r'"description"\s*:\s*"(.*?)"(?=,|})', content, re.DOTALL)
+                        img_match = re.search(r'"imagePrompt"\s*:\s*"(.*?)"(?=,|})', content, re.DOTALL)
+                        
+                        if desc_match and img_match:
+                            # Manually construct a valid JSON object
+                            description = desc_match.group(1).replace('\\', '\\\\').replace('"', '\\"')
+                            image_prompt = img_match.group(1).replace('\\', '\\\\').replace('"', '\\"')
+                            
+                            manual_json = f'{{"description": "{description}", "imagePrompt": "{image_prompt}"}}'
+                            result_data = json.loads(manual_json)
+                            log.info("Successfully extracted JSON using regex field extraction")
+                        else:
+                            log.error("Could not extract required fields using regex")
+                            return None
+                    except Exception as regex_error:
+                        log.error(f"Failed in last-resort regex extraction: {regex_error}")
+                        return None
             else:
-                log.error(f"Could not extract JSON from Kinos Engine response: {content}")
+                log.error(f"Could not find JSON object markers in response: {content}")
                 return None
         
         log.info(f"Successfully generated new description and image prompt for {username}")
