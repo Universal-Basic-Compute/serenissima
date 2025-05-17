@@ -3850,7 +3850,5 @@ export class TransportService {
   }
 }
 
-}
-
 // Export a singleton instance
 export const transportService = new TransportService();
