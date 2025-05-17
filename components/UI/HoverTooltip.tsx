@@ -241,25 +241,34 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
     
     if (citizen) {
       // If we have the citizen data, display it
+      // Ensure we have the correct property names for image and social class
+      const imageUrl = citizen.imageurl || citizen.profileimage || citizen.ImageUrl || 
+                     `/images/citizens/${citizen.username || citizen.citizenid || citizen.CitizenId || 'default'}.jpg`;
+    
+      const firstName = citizen.firstname || citizen.FirstName || citizen.firstName || '';
+      const lastName = citizen.lastname || citizen.LastName || citizen.lastName || '';
+      const socialClass = citizen.socialclass || citizen.SocialClass || citizen.socialClass || 'Citizen';
+      
       tooltipContent = (
         <div className="flex flex-col items-center">
           {/* Citizen image */}
           <div className="w-32 h-32 mb-2 overflow-hidden rounded">
             <img 
-              src={citizen.imageurl || citizen.profileimage || citizen.ImageUrl || `/images/citizens/${citizen.username}.jpg`} 
-              alt={`${citizen.firstname || citizen.firstName} ${citizen.lastname || citizen.lastName}`}
+              src={imageUrl}
+              alt={`${firstName} ${lastName}`}
               className="w-full h-full object-cover"
               onError={(e) => {
+                console.log(`Failed to load citizen image: ${imageUrl}, trying fallback`);
                 // Fallback to default image if the specific one doesn't exist
                 e.currentTarget.src = '/images/citizens/default.jpg';
               }}
             />
           </div>
           <div className="font-bold text-center">
-            {(citizen.firstname || citizen.firstName)} {(citizen.lastname || citizen.lastName)}
+            {firstName} {lastName}
           </div>
           <div className="text-amber-300 text-sm">
-            {citizen.socialclass || citizen.socialClass || 'Citizen'}
+            {socialClass}
           </div>
           {tooltipData.citizenType && (
             <div className="mt-1 text-xs">
