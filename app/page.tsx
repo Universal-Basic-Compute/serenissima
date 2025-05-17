@@ -107,11 +107,6 @@ export default function TwoDPage() {
     // Implement resource tree display logic
   };
   
-  const handleSelectArticle = (article: string) => {
-    console.log(`Selected article: ${article}`);
-    // Implement article selection logic
-  };
-  
   // Load polygons and buildings data
   useEffect(() => {
     // Add a flag to track if the component is still mounted
