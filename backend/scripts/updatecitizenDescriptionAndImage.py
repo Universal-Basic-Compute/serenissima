@@ -187,24 +187,24 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
         
         Based on your history, activities, and current status as {first_name} {last_name}, a {social_class} who {workplace_info}, YOU choose:
         
-        1. YOUR new detailed and historically accurate description, including:
-           - YOUR personality traits that have developed through your experiences
-           - YOUR work ethic and skills demonstrated through your job history
-           - YOUR social connections and relationships with other citizens
-           - YOUR aspirations and motivations that align with your economic activities
-           - Notable achievements or events from YOUR history in Venice
-           - YOUR family background appropriate to your social class
-           - YOUR daily routines and habits
+        1. your new detailed and historically accurate description, including:
+           - your personality traits that have developed through your experiences
+           - your work ethic and skills demonstrated through your job history
+           - your social connections and relationships with other citizens
+           - your aspirations and motivations that align with your economic activities
+           - Notable achievements or events from your history in Venice
+           - your family background appropriate to your social class
+           - your daily routines and habits
         
         2. A detailed image prompt for Ideogram that will generate a portrait of YOU that:
-           - Accurately reflects YOUR social class ({social_class}) with appropriate status symbols
-           - Shows period-appropriate clothing and accessories for YOUR specific profession
-           - Captures YOUR personality traits mentioned in the description
+           - Accurately reflects your social class ({social_class}) with appropriate status symbols
+           - Shows period-appropriate clothing and accessories for your specific profession
+           - Captures your personality traits mentioned in the description
            - Features authentic Renaissance Venetian style, architecture, and setting
            - Includes appropriate lighting (Rembrandt-style for higher classes, natural light for lower)
-           - Uses a color palette appropriate to YOUR social standing
-           - Incorporates symbols of YOUR trade or profession
-           - Shows facial features and expression that reflect YOUR character
+           - Uses a color palette appropriate to your social standing
+           - Incorporates symbols of your trade or profession
+           - Shows facial features and expression that reflect your character
         
         Your current description: {current_description}
         
