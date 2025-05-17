@@ -2723,8 +2723,11 @@ number => {
         // Draw simple square for building with select state
         const squareSize = Math.max(size.width, size.depth) * scale * 0.6;
         
-        // If owned by current citizen, draw a halo first
+        // If owned by current citizen, draw a halo with the user's secondaryColor
         if (isOwnedByCurrentCitizen) {
+          // Get the current citizen's secondaryColor
+          const secondaryColor = getCurrentCitizenSecondaryColor();
+          
           ctx.beginPath();
           ctx.rect(
             isoPos.x - squareSize/2 - 3, 
@@ -2732,7 +2735,7 @@ number => {
             squareSize + 6, 
             squareSize + 6
           );
-          ctx.fillStyle = '#FF8C00'; // Orange halo instead of gold
+          ctx.fillStyle = secondaryColor; // Use secondaryColor instead of hardcoded orange
           ctx.fill();
         }
         
@@ -3559,7 +3562,7 @@ number => {
     return () => {
       window.removeEventListener('forceRedraw', handleForceRedraw);
     };
-  }, [loading, polygons, landOwners, citizens, activeView, buildings, scale, offset, incomeData, minIncome, maxIncome, selectedPolygonId, selectedBuildingId, emptyBuildingPoints, mousePosition, citizensLoaded, citizensByBuilding, incomeDataLoaded, polygonsToRender, getIncomeColor]);
+  }, [loading, polygons, landOwners, citizens, activeView, buildings, scale, offset, incomeData, minIncome, maxIncome, selectedPolygonId, selectedBuildingId, emptyBuildingPoints, mousePosition, citizensLoaded, citizensByBuilding, incomeDataLoaded, polygonsToRender, getIncomeColor, getCurrentCitizenSecondaryColor]);
   
 
   // Handle window resize
@@ -3774,6 +3777,26 @@ number => {
     } catch (error) {
       console.error('Error getting current citizen identifier:', error);
       return null;
+    }
+  }, []);
+  
+  // Function to get the current citizen's secondaryColor
+  const getCurrentCitizenSecondaryColor = useCallback(() => {
+    try {
+      // Try to get profile from localStorage
+      const profileStr = localStorage.getItem('citizenProfile');
+      if (profileStr) {
+        const profile = JSON.parse(profileStr);
+        if (profile && profile.secondaryColor) {
+          return profile.secondaryColor;
+        }
+      }
+      
+      // Default color if no secondaryColor is found
+      return '#FF8C00'; // Default to orange as fallback
+    } catch (error) {
+      console.error('Error getting current citizen secondary color:', error);
+      return '#FF8C00'; // Default to orange on error
     }
   }, []);
   
