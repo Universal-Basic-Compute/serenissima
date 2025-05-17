@@ -782,14 +782,14 @@ export class TransportService {
   /**
    * Build the graph and canal network
    */
-  private buildGraphAndNetwork(): void {
+  private async buildGraphAndNetwork(): Promise<void> {
     console.log(`Building graph from polygons (mode: ${this.pathfindingMode})...`);
     
     // Use the appropriate graph building method based on pathfinding mode
     if (this.pathfindingMode === 'real') {
-      this.graph = this.buildGraphReal(this.polygons);
+      this.graph = await this.buildGraphReal(this.polygons);
     } else {
-      this.graph = this.buildGraph(this.polygons);
+      this.graph = await this.buildGraph(this.polygons);
     }
     
     console.log(`Graph built with ${Object.keys(this.graph.nodes).length} nodes and ${Object.values(this.graph.edges).flat().length} edges`);
@@ -845,7 +845,7 @@ export class TransportService {
   /**
    * Method to directly set polygons data
    */
-  public setPolygonsData(polygons: any[]): boolean {
+  public async setPolygonsData(polygons: any[]): Promise<boolean> {
     try {
       console.log(`Setting polygons data directly with ${polygons?.length || 0} polygons`);
       
@@ -942,9 +942,9 @@ export class TransportService {
       console.log('Building graph from polygons...');
       // Use the appropriate graph building method based on pathfinding mode
       if (this.pathfindingMode === 'real') {
-        this.graph = this.buildGraphReal(this.polygons);
+        this.graph = await this.buildGraphReal(this.polygons);
       } else {
-        this.graph = this.buildGraph(this.polygons);
+        this.graph = await this.buildGraph(this.polygons);
       }
       console.log(`Graph built with ${Object.keys(this.graph.nodes).length} nodes and ${Object.values(this.graph.edges).flat().length} edges`);
       
@@ -1093,7 +1093,7 @@ export class TransportService {
   }
 
   // Function to build the graph from polygons
-  private buildGraph(polygons: Polygon[]): Graph {
+  private async buildGraph(polygons: Polygon[]): Promise<Graph> {
     const graph: Graph = {
       nodes: {},
       edges: {}
@@ -1454,20 +1454,88 @@ export class TransportService {
    * Build a graph focused on real, constructed infrastructure
    * This is an optimized version for 'real' mode that focuses on buildings first
    */
-  private buildGraphReal(polygons: Polygon[]): Graph {
-    console.log('Building real infrastructure graph...');
+  private async buildGraphReal(polygons: Polygon[]): Promise<Graph> {
+    console.log('Building real infrastructure graph using API data...');
     const graph: Graph = {
       nodes: {},
       edges: {}
     };
     
-    // First, collect all constructed infrastructure
-    const constructedBridges: {point: Point, id: string, polygonId: string}[] = [];
-    const constructedDocks: {point: Point, id: string, polygonId: string}[] = [];
+    // Fetch bridges from API
+    let bridges: any[] = [];
+    try {
+      // Determine if we're running in Node.js or browser environment
+      const isNode = typeof window === 'undefined';
+      
+      // Set base URL depending on environment
+      const baseUrl = isNode 
+        ? (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000')
+        : '';
+      
+      console.log(`Fetching bridges from API: ${baseUrl}/api/bridges`);
+      const bridgesResponse = await fetch(`${baseUrl}/api/bridges`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'Transport-Service'
+        },
+        cache: 'no-store'
+      });
+      
+      if (bridgesResponse.ok) {
+        const bridgesData = await bridgesResponse.json();
+        if (bridgesData.success && Array.isArray(bridgesData.bridges)) {
+          bridges = bridgesData.bridges;
+          console.log(`Successfully fetched ${bridges.length} bridges from API`);
+        } else {
+          console.error('Invalid bridges data format:', bridgesData);
+        }
+      } else {
+        console.error(`Failed to fetch bridges: ${bridgesResponse.status} ${bridgesResponse.statusText}`);
+      }
+    } catch (error) {
+      console.error('Error fetching bridges:', error);
+    }
+    
+    // Fetch docks from API
+    let docks: any[] = [];
+    try {
+      // Determine if we're running in Node.js or browser environment
+      const isNode = typeof window === 'undefined';
+      
+      // Set base URL depending on environment
+      const baseUrl = isNode 
+        ? (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000')
+        : '';
+      
+      console.log(`Fetching docks from API: ${baseUrl}/api/docks`);
+      const docksResponse = await fetch(`${baseUrl}/api/docks`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'Transport-Service'
+        },
+        cache: 'no-store'
+      });
+      
+      if (docksResponse.ok) {
+        const docksData = await docksResponse.json();
+        if (docksData.success && Array.isArray(docksData.docks)) {
+          docks = docksData.docks;
+          console.log(`Successfully fetched ${docks.length} docks from API`);
+        } else {
+          console.error('Invalid docks data format:', docksData);
+        }
+      } else {
+        console.error(`Failed to fetch docks: ${docksResponse.status} ${docksResponse.statusText}`);
+      }
+    } catch (error) {
+      console.error('Error fetching docks:', error);
+    }
+    
+    // Extract building points from polygons
     const buildingPoints: {point: Point, id: string, polygonId: string}[] = [];
     const centers: {point: Point, id: string, polygonId: string}[] = [];
     
-    // Extract all infrastructure from polygons
+    // Extract centers and building points from polygons
     for (const polygon of polygons) {
       // Add center
       if (polygon.center) {
@@ -1490,49 +1558,9 @@ export class TransportService {
           });
         }
       }
-      
-      // Add constructed bridges
-      if (polygon.bridgePoints) {
-        for (const point of polygon.bridgePoints) {
-          if (point.edge) {
-            const pointId = point.id || `bridge_${point.edge.lat}_${point.edge.lng}`;
-            // Check if this is a constructed bridge
-            const isConstructed = !!point.isConstructed || 
-                               pointId.startsWith('bridge_');
-            
-            if (isConstructed) {
-              constructedBridges.push({
-                point: point.edge,
-                id: pointId,
-                polygonId: polygon.id
-              });
-            }
-          }
-        }
-      }
-      
-      // Add constructed docks
-      if (polygon.canalPoints) {
-        for (const point of polygon.canalPoints) {
-          if (point.edge) {
-            const pointId = point.id || `canal_${point.edge.lat}_${point.edge.lng}`;
-            // Check if this is a constructed dock
-            const isConstructed = !!point.isConstructed || 
-                               pointId.includes('public_dock');
-            
-            if (isConstructed) {
-              constructedDocks.push({
-                point: point.edge,
-                id: pointId,
-                polygonId: polygon.id
-              });
-            }
-          }
-        }
-      }
     }
     
-    console.log(`Found ${buildingPoints.length} building points, ${constructedBridges.length} constructed bridges, ${constructedDocks.length} constructed docks`);
+    console.log(`Found ${buildingPoints.length} building points, ${bridges.length} bridges, ${docks.length} docks`);
     
     // Add all nodes to the graph
     // 1. Add building points
@@ -1546,26 +1574,32 @@ export class TransportService {
       graph.edges[point.id] = [];
     }
     
-    // 2. Add constructed bridges
-    for (const bridge of constructedBridges) {
-      graph.nodes[bridge.id] = {
-        id: bridge.id,
-        position: bridge.point,
-        type: 'bridge',
-        polygonId: bridge.polygonId
-      };
-      graph.edges[bridge.id] = [];
+    // 2. Add bridges from API
+    for (const bridge of bridges) {
+      if (bridge.position && bridge.isConstructed) {
+        const bridgeId = bridge.buildingId || `bridge_${bridge.position.lat}_${bridge.position.lng}`;
+        graph.nodes[bridgeId] = {
+          id: bridgeId,
+          position: bridge.position,
+          type: 'bridge',
+          polygonId: bridge.landId || 'unknown'
+        };
+        graph.edges[bridgeId] = [];
+      }
     }
     
-    // 3. Add constructed docks
-    for (const dock of constructedDocks) {
-      graph.nodes[dock.id] = {
-        id: dock.id,
-        position: dock.point,
-        type: 'canal',
-        polygonId: dock.polygonId
-      };
-      graph.edges[dock.id] = [];
+    // 3. Add docks from API
+    for (const dock of docks) {
+      if (dock.position && dock.isConstructed) {
+        const dockId = dock.buildingId || `dock_${dock.position.lat}_${dock.position.lng}`;
+        graph.nodes[dockId] = {
+          id: dockId,
+          position: dock.position,
+          type: 'canal',
+          polygonId: dock.landId || 'unknown'
+        };
+        graph.edges[dockId] = [];
+      }
     }
     
     // 4. Add centers
@@ -1632,67 +1666,44 @@ export class TransportService {
       }
     }
     
-    // Connect bridge points between polygons
-    for (const polygon of polygons) {
-      if (polygon.bridgePoints) {
-        for (const bridgePoint of polygon.bridgePoints) {
-          if (bridgePoint.connection && bridgePoint.edge) {
-            const sourcePointId = bridgePoint.id || `bridge-${bridgePoint.edge.lat}-${bridgePoint.edge.lng}`;
-            
-            // Skip if this bridge is not constructed
-            const isConstructed = !!bridgePoint.isConstructed || 
-                               (sourcePointId.includes('bridge-constructed') || sourcePointId.includes('public_bridge'));
-            
-            if (!isConstructed) {
-              continue;
-            }
-            
-            // Ensure the source point has an edges array
-            if (!graph.edges[sourcePointId]) {
-              continue; // Skip if the node doesn't exist in the graph
-            }
-            
-            // Find the target polygon
-            const targetPolygon = polygons.find(p => p.id === bridgePoint.connection?.targetPolygonId);
-            
-            if (targetPolygon) {
-              // Find the corresponding bridge point in the target polygon
-              const targetBridgePoint = targetPolygon.bridgePoints.find(bp => 
-                bp.connection?.targetPolygonId === polygon.id &&
-                bp.edge && 
-                Math.abs(bp.edge.lat - bridgePoint.connection.targetPoint.lat) < 0.0001 &&
-                Math.abs(bp.edge.lng - bridgePoint.connection.targetPoint.lng) < 0.0001
-              );
-              
-              if (targetBridgePoint && targetBridgePoint.edge) {
-                const targetPointId = targetBridgePoint.id || `bridge-${targetBridgePoint.edge.lat}-${targetBridgePoint.edge.lng}`;
-                
-                // Skip if the target node doesn't exist in the graph
-                if (!graph.edges[targetPointId]) {
-                  continue;
-                }
-                
-                // Add bidirectional edges between the bridge points with lower weight to prioritize bridges
-                const distance = bridgePoint.connection.distance || 
-                  this.calculateDistance(bridgePoint.edge, bridgePoint.connection.targetPoint);
-                
-                // Use a lower weight for bridges to prioritize them in pathfinding
-                const weight = distance * 0.5; // Make bridges more attractive for pathfinding
-                
-                graph.edges[sourcePointId].push({
-                  from: sourcePointId,
-                  to: targetPointId,
-                  weight: weight
-                });
-                
-                graph.edges[targetPointId].push({
-                  from: targetPointId,
-                  to: sourcePointId,
-                  weight: weight
-                });
-              }
-            }
+    // Connect bridges between polygons using the links property from the API
+    for (const bridge of bridges) {
+      if (bridge.position && bridge.isConstructed && bridge.links && bridge.links.length >= 2) {
+        const bridgeId = bridge.buildingId || `bridge_${bridge.position.lat}_${bridge.position.lng}`;
+        
+        // Skip if the bridge node doesn't exist in the graph
+        if (!graph.edges[bridgeId]) {
+          continue;
+        }
+        
+        // Connect this bridge to centers of the linked polygons
+        for (const linkedPolygonId of bridge.links) {
+          const centerId = `center-${linkedPolygonId}`;
+          
+          // Skip if the center node doesn't exist in the graph
+          if (!graph.edges[centerId]) {
+            continue;
           }
+          
+          // Calculate distance between bridge and center
+          const centerNode = graph.nodes[centerId];
+          const distance = this.calculateDistance(bridge.position, centerNode.position);
+          
+          // Use a lower weight for bridges to prioritize them in pathfinding
+          const weight = distance * 0.5; // Make bridges more attractive for pathfinding
+          
+          // Add bidirectional edges
+          graph.edges[bridgeId].push({
+            from: bridgeId,
+            to: centerId,
+            weight: weight
+          });
+          
+          graph.edges[centerId].push({
+            from: centerId,
+            to: bridgeId,
+            weight: weight
+          });
         }
       }
     }
@@ -1757,14 +1768,14 @@ export class TransportService {
    * Debug function to get information about the graph
    * This is used by the debug endpoint
    */
-  public debugGraph(): any {
+  public async debugGraph(): Promise<any> {
     // Ensure graph is built
     if (!this.graph) {
       // Use the appropriate graph building method based on pathfinding mode
       if (this.pathfindingMode === 'real') {
-        this.graph = this.buildGraphReal(this.polygons);
+        this.graph = await this.buildGraphReal(this.polygons);
       } else {
-        this.graph = this.buildGraph(this.polygons);
+        this.graph = await this.buildGraph(this.polygons);
       }
     }
     
@@ -2777,7 +2788,11 @@ export class TransportService {
       
       // Ensure graph is built
       if (!this.graph) {
-        this.graph = this.buildGraph(this.polygons);
+        if (this.pathfindingMode === 'real') {
+          this.graph = await this.buildGraphReal(this.polygons);
+        } else {
+          this.graph = await this.buildGraph(this.polygons);
+        }
       }
       
       // Ensure canal network is built
