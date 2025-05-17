@@ -386,8 +386,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     // Fetch land groups when switching to transport view
     if (activeView === 'transport') {
       fetchLandGroups();
+      fetchWaterPoints(); // Fetch water points when entering transport view
     }
-  }, [transportMode, activeView, fetchLandGroups]);
+  }, [transportMode, activeView, fetchLandGroups, fetchWaterPoints]);
   
   // Transport path rendering is now handled directly in the drawing code
   
@@ -1837,16 +1838,18 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           y: calculateIsoY(x, y, scale, offset, canvas.height)
         };
         
-        // Draw a distinctive circle for water points - MAKE 4X SMALLER
+        // Draw a distinctive circle for water points - make them lighter in transport view
         ctx.beginPath();
-        // Change from 5 * scale to 1.25 * scale (4x smaller)
+        // Use a smaller size for water points
         ctx.arc(isoPos.x, isoPos.y, 1.25 * scale, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(0, 150, 255, 0.8)';
+        // Use a more transparent color in transport view
+        const opacity = activeView === 'transport' && !waterPointMode ? 0.4 : 0.8;
+        ctx.fillStyle = `rgba(0, 150, 255, ${opacity})`;
         ctx.fill();
       
         // Add a white border
-        ctx.strokeStyle = '#FFFFFF';
-        ctx.lineWidth = 0.5; // Reduced from 1.5
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.lineWidth = 0.5;
         ctx.stroke();
       
         // Draw connections if any
@@ -1868,8 +1871,10 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
               ctx.beginPath();
               ctx.moveTo(isoPos.x, isoPos.y);
               ctx.lineTo(targetIsoPos.x, targetIsoPos.y);
-              ctx.strokeStyle = 'rgba(0, 150, 255, 0.6)';
-              ctx.lineWidth = 0.5 * scale; // Reduced from 2 * scale
+              // Use a more transparent color in transport view
+              const lineOpacity = activeView === 'transport' && !waterPointMode ? 0.3 : 0.6;
+              ctx.strokeStyle = `rgba(0, 150, 255, ${lineOpacity})`;
+              ctx.lineWidth = 0.5 * scale;
               ctx.stroke();
             }
           });
@@ -3428,10 +3433,22 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
             <div className="w-4 h-4 mr-2 border-2 border-orange-500"></div>
             <span>Land with Public Dock</span>
           </div>
-          <div className="flex items-center">
+          <div className="flex items-center mb-1">
             <div className="w-4 h-4 mr-2 bg-blue-500 rounded-full"></div>
             <span>Dock Point</span>
           </div>
+          {/* Add water point to legend */}
+          <div className="flex items-center">
+            <div className="w-3 h-3 mr-2 bg-blue-400 rounded-full opacity-60"></div>
+            <span>Water Point</span>
+          </div>
+        </div>
+      )}
+      
+      {/* Water Point Count - only visible in transport view */}
+      {activeView === 'transport' && waterPoints.length > 0 && (
+        <div className="absolute bottom-64 left-20 bg-black/70 text-white px-3 py-1 rounded text-xs">
+          {waterPoints.length} water points loaded
         </div>
       )}
       
