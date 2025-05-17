@@ -80,6 +80,41 @@ The relevancy scores are used by various AI systems to make more strategic decis
 2. **Land Purchasing**: AIs prioritize purchasing lands with higher relevancy scores
 3. **Building Construction**: AIs consider land relevancy when deciding where to build
 
+## Land Domination Relevancy
+
+In addition to land proximity, the system calculates Land Domination Relevancy, which identifies the most significant landowners in Venice:
+
+### Calculation Factors
+
+- **Land Count**: Number of lands owned by each citizen (60% weight)
+- **Building Points**: Total building points across all owned lands (40% weight)
+- **Normalization**: Scores are normalized against the citizen with the most lands/points
+
+### Scoring
+
+- Scores range from 0-100, with higher scores indicating greater land dominance
+- Status levels:
+  - High: >70 points (major landowner)
+  - Medium: 40-70 points (significant landowner)
+  - Low: <40 points (minor landowner)
+
+### Strategic Value
+
+Land domination relevancy helps AIs:
+- Identify major competitors in the real estate market
+- Recognize potential allies or threats
+- Understand the overall land ownership landscape
+- Make strategic decisions about land acquisition and development
+
+### Data Structure
+
+Each land domination relevancy record contains:
+- **AssetType**: 'citizen' (as opposed to 'land' for proximity relevancies)
+- **Category**: 'domination'
+- **Type**: 'landowner'
+- **TargetCitizen**: The citizen being evaluated
+- **Score**: Numerical score based on land count and building points
+
 ## Future Extensions
 
 The relevancy system is designed to be extensible to other types of relevancy:

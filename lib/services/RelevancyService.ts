@@ -304,6 +304,91 @@ export class RelevancyService {
   }
   
   /**
+   * Calculate land domination relevancy scores for all citizens
+   * This measures how dominant citizens are in terms of land ownership and building potential
+   */
+  public calculateLandDominationRelevancy(
+    allCitizens: any[],
+    allLands: LandData[]
+  ): Record<string, RelevancyScore> {
+    // Skip calculation if there are no lands or citizens
+    if (!allLands.length || !allCitizens.length) {
+      return {};
+    }
+    
+    // Calculate land counts and building points for each citizen
+    const citizenLandCounts: Record<string, number> = {};
+    const citizenBuildingPoints: Record<string, number> = {};
+    
+    allLands.forEach(land => {
+      if (land.owner) {
+        citizenLandCounts[land.owner] = (citizenLandCounts[land.owner] || 0) + 1;
+        citizenBuildingPoints[land.owner] = (citizenBuildingPoints[land.owner] || 0) + (land.buildingPoints || 0);
+      }
+    });
+    
+    // Find maximum values for normalization
+    const maxLandCount = Math.max(...Object.values(citizenLandCounts), 1);
+    const maxBuildingPoints = Math.max(...Object.values(citizenBuildingPoints), 1);
+    
+    // Calculate relevancy for each citizen who owns land
+    const relevancyScores: Record<string, RelevancyScore> = {};
+    
+    // Get list of citizens who own land
+    const landOwners = Object.keys(citizenLandCounts);
+    
+    landOwners.forEach(username => {
+      // Calculate land domination score
+      // 60% weight on land count, 40% weight on building points
+      const landCountScore = (citizenLandCounts[username] / maxLandCount) * 60;
+      const buildingPointsScore = (citizenBuildingPoints[username] / maxBuildingPoints) * 40;
+      
+      // Combined score
+      const score = landCountScore + buildingPointsScore;
+      
+      // Round to 2 decimal places
+      const numericScore = parseFloat(score.toFixed(2));
+      
+      // Determine status based on score
+      let status = 'low';
+      if (numericScore > 70) status = 'high';
+      else if (numericScore > 40) status = 'medium';
+      
+      // Find citizen details if available
+      const citizen = allCitizens.find(c => 
+        (c.username === username) || (c.Username === username)
+      );
+      
+      const firstName = citizen?.firstName || citizen?.FirstName || '';
+      const lastName = citizen?.lastName || citizen?.LastName || '';
+      const fullName = firstName && lastName ? `${firstName} ${lastName}` : username;
+      
+      // Generate title and description
+      const title = `Land Domination: ${fullName}`;
+      const description = `${fullName} owns ${citizenLandCounts[username]} lands with ${citizenBuildingPoints[username]} building points, making them a significant landowner in Venice.`;
+      
+      // Create the relevancy score object
+      relevancyScores[username] = {
+        score: numericScore,
+        assetId: username, // Using username as the asset ID for citizen-based relevancies
+        assetType: 'citizen',
+        category: 'domination',
+        type: 'landowner',
+        distance: 0, // Not applicable for this relevancy type
+        closestLandId: '', // Not applicable for this relevancy type
+        isConnected: false, // Not applicable for this relevancy type
+        connectivityBonus: 0, // Not applicable for this relevancy type
+        title,
+        description,
+        timeHorizon: 'medium',
+        status
+      };
+    });
+    
+    return relevancyScores;
+  }
+
+  /**
    * Calculate relevancy scores in batches to avoid memory issues
    */
   public calculateRelevancyInBatches(

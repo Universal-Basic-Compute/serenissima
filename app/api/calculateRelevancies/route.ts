@@ -93,18 +93,42 @@ async function fetchLandGroups(): Promise<Record<string, string>> {
   }
 }
 
+// Helper function to fetch all citizens data
+async function fetchAllCitizens(base: any): Promise<any[]> {
+  try {
+    console.log('Fetching all citizens data...');
+    const records = await base(AIRTABLE_CITIZENS_TABLE)
+      .select({
+        fields: ['Username', 'FirstName', 'LastName', 'IsAI']
+      })
+      .all();
+    
+    return records.map(record => ({
+      id: record.id,
+      username: record.get('Username'),
+      firstName: record.get('FirstName'),
+      lastName: record.get('LastName'),
+      isAI: record.get('IsAI') || false
+    }));
+  } catch (error) {
+    console.error('Error fetching citizens data:', error);
+    return [];
+  }
+}
+
 // Helper function to save relevancies to Airtable
 async function saveRelevancies(
   base: any, 
   aiUsername: string, 
   relevancyScores: Record<string, any>,
-  allLands: any[]
+  allLands: any[],
+  allCitizens: any[] = []
 ): Promise<number> {
   try {
     // Delete existing relevancy records for this AI to avoid duplicates
     const existingRecords = await base(AIRTABLE_RELEVANCIES_TABLE)
       .select({
-        filterByFormula: `AND({RelevantToCitizen} = '${aiUsername}', {Category} = 'proximity')`
+        filterByFormula: `{RelevantToCitizen} = '${aiUsername}'`
       })
       .all();
       
@@ -119,24 +143,50 @@ async function saveRelevancies(
     }
       
     // Create new relevancy records
-    const relevancyRecords = Object.entries(relevancyScores).map(([landId, data]) => {
-      return {
-        fields: {
-          AssetID: landId,
-          AssetType: 'land',
-          Category: 'proximity',
-          Type: data.type,
-          TargetCitizen: data.closestLandId ? allLands.find(land => land.id === data.closestLandId)?.owner || '' : '',
-          RelevantToCitizen: aiUsername,
-          Score: data.score,
-          TimeHorizon: data.timeHorizon || 'medium',
-          Title: data.title || `Nearby Land (${data.distance}m)`,
-          Description: data.description || `This land is ${data.distance} meters from your nearest property`,
-          Notes: data.isConnected ? 'Connected by bridges to your existing properties' : '',
-          Status: data.status || 'active',
-          CreatedAt: new Date().toISOString()
-        }
-      };
+    const relevancyRecords = Object.entries(relevancyScores).map(([id, data]) => {
+      // Handle different types of relevancies
+      if (data.assetType === 'land') {
+        return {
+          fields: {
+            AssetID: id,
+            AssetType: data.assetType,
+            Category: data.category,
+            Type: data.type,
+            TargetCitizen: data.closestLandId ? allLands.find(land => land.id === data.closestLandId)?.owner || '' : '',
+            RelevantToCitizen: aiUsername,
+            Score: data.score,
+            TimeHorizon: data.timeHorizon || 'medium',
+            Title: data.title || `Nearby Land (${data.distance}m)`,
+            Description: data.description || `This land is ${data.distance} meters from your nearest property`,
+            Notes: data.isConnected ? 'Connected by bridges to your existing properties' : '',
+            Status: data.status || 'active',
+            CreatedAt: new Date().toISOString()
+          }
+        };
+      } else if (data.assetType === 'citizen') {
+        // Find citizen details
+        const citizen = allCitizens.find(c => 
+          (c.username === id) || (c.Username === id)
+        );
+        
+        return {
+          fields: {
+            AssetID: id,
+            AssetType: data.assetType,
+            Category: data.category,
+            Type: data.type,
+            TargetCitizen: id, // The citizen this relevancy is about
+            RelevantToCitizen: aiUsername,
+            Score: data.score,
+            TimeHorizon: data.timeHorizon || 'medium',
+            Title: data.title || `Citizen Relevancy: ${id}`,
+            Description: data.description || `Relevancy information about citizen ${id}`,
+            Notes: citizen ? `${citizen.firstName || ''} ${citizen.lastName || ''}`.trim() : '',
+            Status: data.status || 'active',
+            CreatedAt: new Date().toISOString()
+          }
+        };
+      }
     });
       
     // Create records in batches of 10
@@ -202,6 +252,16 @@ export async function GET(request: NextRequest) {
         });
       }
       
+      // Fetch all citizens for land domination relevancy
+      const allCitizens = await fetchAllCitizens(base);
+      
+      // Calculate land domination relevancy once for all citizens
+      console.log('Calculating land domination relevancy for all citizens');
+      const landDominationRelevancies = relevancyService.calculateLandDominationRelevancy(
+        allCitizens,
+        allLands
+      );
+      
       const results = {};
       let totalRelevanciesCreated = 0;
       
@@ -219,16 +279,22 @@ export async function GET(request: NextRequest) {
         
         // Calculate land proximity relevancy with connectivity data
         // Use batch processing for better performance with large datasets
-        const relevancyScores = relevancyService.calculateRelevancyInBatches(
+        const proximityRelevancies = relevancyService.calculateRelevancyInBatches(
           aiLands, 
           allLands, 
           landGroups,
           100 // Process in batches of 100 lands
         );
         
+        // Combine both types of relevancies
+        const combinedRelevancies = {
+          ...proximityRelevancies,
+          ...landDominationRelevancies
+        };
+        
         try {
           // Save relevancies to Airtable
-          const relevanciesCreated = await saveRelevancies(base, aiOwner, relevancyScores, allLands);
+          const relevanciesCreated = await saveRelevancies(base, aiOwner, combinedRelevancies, allLands, allCitizens);
           
           totalRelevanciesCreated += relevanciesCreated;
           
@@ -371,6 +437,9 @@ export async function POST(request: NextRequest) {
       buildingPoints: record.get('BuildingPoints') as number || 0
     }));
     
+    // Fetch all citizens for land domination relevancy
+    const allCitizens = await fetchAllCitizens(base);
+    
     // Fetch land groups data
     const landGroups = await fetchLandGroups();
     
@@ -385,24 +454,33 @@ export async function POST(request: NextRequest) {
     }
     
     // Calculate land proximity relevancy with connectivity data
-    const relevancyScores = relevancyService.calculateLandProximityRelevancy(aiLands, allLands, landGroups);
+    const proximityRelevancies = relevancyService.calculateLandProximityRelevancy(aiLands, allLands, landGroups);
+    
+    // Calculate land domination relevancy
+    const landDominationRelevancies = relevancyService.calculateLandDominationRelevancy(allCitizens, allLands);
+    
+    // Combine both types of relevancies
+    const combinedRelevancies = {
+      ...proximityRelevancies,
+      ...landDominationRelevancies
+    };
       
     // Format the response to include both simple scores and detailed data
     const simpleScores: Record<string, number> = {};
-    Object.entries(relevancyScores).forEach(([landId, data]) => {
-      simpleScores[landId] = data.score;
+    Object.entries(combinedRelevancies).forEach(([id, data]) => {
+      simpleScores[id] = data.score;
     });
     
     try {
       // Save relevancies to Airtable
-      await saveRelevancies(base, aiUsername, relevancyScores, allLands);
+      await saveRelevancies(base, aiUsername, combinedRelevancies, allLands, allCitizens);
       
       return NextResponse.json({
         success: true,
         ai: aiUsername,
         ownedLandCount: aiLands.length,
         relevancyScores: simpleScores,
-        detailedRelevancy: relevancyScores,
+        detailedRelevancy: combinedRelevancies,
         saved: true
       });
     } catch (error) {
@@ -411,7 +489,7 @@ export async function POST(request: NextRequest) {
         ai: aiUsername,
         ownedLandCount: aiLands.length,
         relevancyScores: simpleScores,
-        detailedRelevancy: relevancyScores,
+        detailedRelevancy: combinedRelevancies,
         saved: false,
         error: error.message
       });
