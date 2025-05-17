@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import BuildingDescription from './BuildingDetails/BuildingDescription';
 import BuildingFinancials from './BuildingDetails/BuildingFinancials';
 import BuildingImage from './BuildingDetails/BuildingImage';
+import BuildingLocation from './BuildingDetails/BuildingLocation';
 
 export { BuildingDescription };
 export { BuildingFinancials };
 export { BuildingImage };
+export { BuildingLocation };
 
 export function ResourceList({ 
   title, 
