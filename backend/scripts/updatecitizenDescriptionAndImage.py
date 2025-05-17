@@ -380,7 +380,8 @@ def generate_image(prompt: str, citizen_id: str) -> Optional[str]:
             json={
                 "prompt": enhanced_prompt,
                 "style_type": "REALISTIC",
-                "rendering_speed": "DEFAULT"
+                "rendering_speed": "DEFAULT",
+                "model":"V_3"
             }
         )
         
