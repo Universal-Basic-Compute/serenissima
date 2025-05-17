@@ -4,7 +4,7 @@ This document outlines the architecture for the economic simulation systems in L
 
 ## Overview
 
-The economic simulation layer provides realistic economic mechanics that drive gameplay while maintaining historical authenticity. It models Renaissance Venetian economic principles while ensuring game balance and player engagement.
+The economic simulation layer provides realistic economic mechanics that drive gameplay while maintaining historical authenticity. It models Renaissance Venetian economic principles while ensuring game balance and player engagement. The simulation treats AI and human citizens as equal participants in the economy, with both types following the same economic rules and constraints.
 
 ## Economic Loop Visualization
 
@@ -59,11 +59,13 @@ La Serenissima operates as a closed economic system where value circulates betwe
    - LAND is leased to building owners for construction
    - BUILDINGS are rented to businesses and residents
    - BUSINESSES transform raw materials into valuable RESOURCES
-   - RESOURCES provision both Players and AI Citizens
+   - RESOURCES provision both human and AI Citizens
    - Money flows in the opposite direction:
      - Business owners pay rent to building owners
      - Building owners pay land leases to landowners
      - All parties pay taxes to the Republic
+
+   This cycle applies equally to both AI and human citizens, creating a unified economy where all participants follow the same rules.
 
 2. **Value Capture Mechanisms**:
    - Landowners capture value through land leases from building owners
@@ -80,14 +82,16 @@ La Serenissima operates as a closed economic system where value circulates betwe
      - Effects of government decrees
    - This creates strategic decisions around building placement and investment
 
-3. **Zero-Sum Competition**: The total amount of $COMPUTE in the system remains relatively constant. Economic success comes from capturing a larger share of the existing value pool rather than generating new value from nothing.
+3. **Zero-Sum Competition**: The total amount of $COMPUTE in the system remains relatively constant. Economic success comes from capturing a larger share of the existing value pool rather than generating new value from nothing. This competition occurs between all citizens, whether AI or human.
 
-4. **Economic Interdependence**: No player can succeed entirely alone:
+4. **Economic Interdependence**: No citizen can succeed entirely alone:
    - Land requires buildings to generate income
    - Buildings need businesses to attract customers
    - Businesses depend on resources to operate
    - Resources require consumers to have value
    - The entire cycle depends on the circulation of $COMPUTE
+   
+   This interdependence creates meaningful interactions between AI and human citizens, as they must engage with the same economic systems.
 
 
 ## Land Value and Rent System

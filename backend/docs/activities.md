@@ -4,14 +4,14 @@ This document explains the citizen activity system that simulates the daily live
 
 ## Overview
 
-The activity system tracks what citizens are doing at any given time, creating a living simulation of Venetian life. Citizens can engage in various activities including:
+The activity system tracks what citizens are doing at any given time, creating a living simulation of Venetian life. Both AI and human citizens can engage in various activities including:
 
 - **Rest**: Sleeping at home during nighttime hours
 - **Work**: Working at their assigned businesses during the day
 - **Travel**: Moving between locations via walking or gondola
 - **Idle**: Waiting for their next scheduled activity
 
-Activities are managed by the `createActivities.py` script, which runs periodically to ensure citizens always have something to do.
+Activities are managed by the `createActivities.py` script, which runs periodically to ensure citizens always have something to do. This system applies equally to both AI and human citizens, creating a unified simulation where all citizens follow the same daily patterns and routines.
 
 ## Activity Types
 

@@ -4,7 +4,7 @@ This document explains the automated processes that occur daily in the La Sereni
 
 ## Daily Automated Processes
 
-The game engine runs several automated processes at scheduled times throughout the day to simulate the living economy of Renaissance Venice. These processes occur without requiring player intervention.
+The game engine runs several automated processes at scheduled times throughout the day to simulate the living economy of Renaissance Venice. These processes occur without requiring player intervention and apply equally to both AI and human citizens, creating a unified economic system where all participants follow the same rules.
 
 ### Building Maintenance Collection (7:00 AM UTC)
 
@@ -78,10 +78,11 @@ Every day at 11:00 AM UTC, the immigration system checks for vacant housing buil
      - Fisherman cottages attract Facchini
    - Creates a detailed citizen profile with historically accurate name, description, and characteristics
    - Generates a unique portrait image for the citizen
+   - Sets the `IsAI` flag to true for these new citizens, making them automated participants
    - Creates a notification for administrators
 4. The system tracks immigration statistics by social class and sends a summary notification to administrators
 
-The immigration process helps maintain population balance in the city and ensures that vacant properties have a chance to be occupied, creating a dynamic housing market.
+The immigration process helps maintain population balance in the city and ensures that vacant properties have a chance to be occupied, creating a dynamic housing market. These new AI citizens become full participants in the economy, following the same rules and processes as human players.
 
 ### Job Assignment (10:00 AM UTC)
 
@@ -89,7 +90,7 @@ The immigration process helps maintain population balance in the city and ensure
 
 Every day at 10:00 AM UTC, the job assignment system finds employment for citizens without jobs:
 
-1. The script identifies all citizens without jobs (Work field is empty)
+1. The script identifies all citizens without jobs (Work field is empty), including both AI and human citizens
 2. Citizens are sorted by wealth in descending order (wealthier citizens get first pick of jobs)
 3. For each citizen, the system finds an available business (not already taken by another worker)
 4. Citizens are assigned to businesses with the highest wages
@@ -97,9 +98,10 @@ Every day at 10:00 AM UTC, the job assignment system finds employment for citize
    - The citizen record is updated with their new job
    - The business record is updated with its new worker and set to active status
    - A notification is created for the business owner about their new employee
+   - For human citizens, this creates a new activity in their schedule
 6. The system tracks job assignment statistics and sends a summary notification to administrators
 
-This process ensures that citizens find employment based on their wealth and status, creating a stratified labor market similar to historical Venice.
+This process ensures that citizens find employment based on their wealth and status, creating a stratified labor market similar to historical Venice. Both AI and human citizens participate in the same job market, creating a unified economy where all participants follow the same rules.
 
 ### Housing Assignment (12:00 PM UTC)
 

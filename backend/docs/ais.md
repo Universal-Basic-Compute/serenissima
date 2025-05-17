@@ -6,7 +6,19 @@ This document explains the AI system in La Serenissima, which allows non-player 
 
 The AI system consists of automated agents that simulate the behavior of Venetian merchants, nobles, and other economic actors. These AI citizens can participate in various economic activities such as bidding on lands, managing properties, and engaging in commerce.
 
-AI citizens are marked in the database with an `IsAI` flag, allowing the system to identify and process them separately from human players. They follow programmed economic behaviors that create realistic market dynamics even in areas with limited player activity.
+AI citizens are marked in the database with an `IsAI` flag, but they share the same underlying citizen model as human players. This means AI citizens and human players exist in the same world, follow the same rules, and can interact with each other.
+
+### Unified Citizen Model
+
+Both AI and human citizens:
+- Appear on the map and move around Venice
+- Own lands, buildings, and businesses
+- Work, pay rent, and participate in the economy
+- Generate and spend income
+- Follow the same economic rules and constraints
+- Can communicate with each other through the messaging system
+
+The key difference is that AI citizens have their economic decisions automated through scripts, while human players make decisions manually. This automation makes AI citizens "alive" in the game world, creating a dynamic economy even in areas with limited player activity.
 
 ## AI Behaviors
 
@@ -326,6 +338,18 @@ AI citizens are created and managed through the Airtable database:
 2. AI citizens receive compute tokens through the same distribution mechanisms as human players
 3. They can own lands, buildings, and other assets
 4. Their economic activities generate notifications and transaction records just like human players
+5. They participate in the same activity system, with activities like rest, work, and travel
+6. Human players can interact with AI citizens through the messaging system, receiving contextually appropriate responses
+
+### Human-AI Interaction
+
+The integration of AI citizens with human players creates a living, breathing Venice:
+
+1. **Economic Interaction**: Human players can buy lands from AI citizens, rent buildings from them, or sell resources to them
+2. **Social Interaction**: Human players can send messages to AI citizens and receive contextually appropriate responses
+3. **Visual Interaction**: Both AI and human citizens appear on the map, creating a populated city
+4. **Competitive Interaction**: AI citizens provide market competition, ensuring dynamic pricing and land valuation
+5. **Collaborative Interaction**: AI citizens can work in businesses owned by human players, contributing to the economy
 
 ## Technical Implementation
 
