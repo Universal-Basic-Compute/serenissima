@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { FaTimes, FaChevronDown, FaSpinner, FaVolumeUp, FaVolumeMute, FaBell, FaUser, FaSearch, FaArrowLeft } from 'react-icons/fa';
+import { FaTimes, FaChevronDown, FaSpinner, FaVolumeUp, FaVolumeMute, FaBell, FaCitizen, FaSearch, FaArrowLeft } from 'react-icons/fa';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { timeDescriptionService } from '@/lib/services/TimeDescriptionService';
@@ -11,15 +11,15 @@ import Portal from './Portal';
 interface Notification {
   notificationId: string;
   type: string;
-  user: string;
+  citizen: string;
   content: string;
   details?: any;
   createdAt: string;
   readAt: string | null;
 }
 
-interface User {
-  username: string;
+interface Citizen {
+  citizenname: string;
   firstName: string;
   lastName: string;
   coatOfArmsImage: string | null;
@@ -28,7 +28,7 @@ interface User {
 interface Message {
   id?: string;
   messageId?: string;
-  role?: 'user' | 'assistant';
+  role?: 'citizen' | 'assistant';
   sender?: string;
   receiver?: string;
   content: string;
@@ -53,7 +53,7 @@ interface CompagnoProps {
 
 const KINOS_BACKEND_BASE_URL = 'https://api.kinos-engine.ai/v2';
 const BLUEPRINT = 'compagno';
-const DEFAULT_USERNAME = 'visitor'; // Default username for anonymous users
+const DEFAULT_CITIZENNAME = 'visitor'; // Default citizenname for anonymous citizens
 
 const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -62,7 +62,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
   const [isTyping, setIsTyping] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [pagination, setPagination] = useState<PaginationInfo | null>(null);
-  const [username, setUsername] = useState<string>(DEFAULT_USERNAME);
+  const [citizenname, setCitizenname] = useState<string>(DEFAULT_CITIZENNAME);
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
   const [playingMessageId, setPlayingMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -73,12 +73,12 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const fetchIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastFetchRef = useRef<number>(0);
-  const [users, setUsers] = useState<User[]>([]);
-  const [isLoadingUsers, setIsLoadingUsers] = useState<boolean>(false);
-  const [selectedUser, setSelectedUser] = useState<string | null>(null);
-  const [userMessages, setUserMessages] = useState<Message[]>([]);
-  const [isLoadingUserMessages, setIsLoadingUserMessages] = useState<boolean>(false);
-  const [userSearchQuery, setUserSearchQuery] = useState<string>('');
+  const [citizens, setCitizens] = useState<Citizen[]>([]);
+  const [isLoadingCitizens, setIsLoadingCitizens] = useState<boolean>(false);
+  const [selectedCitizen, setSelectedCitizen] = useState<string | null>(null);
+  const [citizenMessages, setCitizenMessages] = useState<Message[]>([]);
+  const [isLoadingCitizenMessages, setIsLoadingCitizenMessages] = useState<boolean>(false);
+  const [citizenSearchQuery, setCitizenSearchQuery] = useState<string>('');
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   
 
@@ -91,7 +91,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
     console.log('%c[DEBUG] Starting notification fetch', 'color: #ff69b4; font-weight: bold');
     console.log('%c[DEBUG] isOpen:', 'color: #ff69b4', isOpen);
     console.log('%c[DEBUG] activeTab:', 'color: #ff69b4', activeTab);
-    console.log('%c[DEBUG] Current username:', 'color: #ff69b4', username);
+    console.log('%c[DEBUG] Current citizenname:', 'color: #ff69b4', citizenname);
     
     // Add debounce logic to prevent multiple rapid calls
     const now = Date.now();
@@ -106,41 +106,41 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
     lastFetchRef.current = now;
     
     try {
-      // Get the current username from localStorage if not already set
-      let userToFetch = username;
+      // Get the current citizenname from localStorage if not already set
+      let citizenToFetch = citizenname;
       
-      if (!userToFetch || userToFetch === DEFAULT_USERNAME) {
-        // Try to get username from localStorage
-        const savedProfile = localStorage.getItem('userProfile');
+      if (!citizenToFetch || citizenToFetch === DEFAULT_CITIZENNAME) {
+        // Try to get citizenname from localStorage
+        const savedProfile = localStorage.getItem('citizenProfile');
         if (savedProfile) {
           try {
             const profile = JSON.parse(savedProfile);
-            if (profile.username) {
-              userToFetch = profile.username;
+            if (profile.citizenname) {
+              citizenToFetch = profile.citizenname;
               // Update the component state
-              setUsername(profile.username);
+              setCitizenname(profile.citizenname);
             }
           } catch (error) {
-            console.error('Error parsing user profile:', error);
+            console.error('Error parsing citizen profile:', error);
           }
         }
       }
       
-      // If still no username, use the default
-      if (!userToFetch) {
-        userToFetch = DEFAULT_USERNAME;
+      // If still no citizenname, use the default
+      if (!citizenToFetch) {
+        citizenToFetch = DEFAULT_CITIZENNAME;
       }
       
       // Use the local API endpoint
       const apiUrl = `/api/notifications`;
       
-      console.log(`%c[DEBUG] Fetching notifications from: ${apiUrl} for user: ${userToFetch}`, 'color: #ff69b4');
+      console.log(`%c[DEBUG] Fetching notifications from: ${apiUrl} for citizen: ${citizenToFetch}`, 'color: #ff69b4');
       
       // Only pass the since parameter on refresh requests, not on initial load
       // This way, initial load will use the default 1-week lookback
       const requestBody = forceRefresh 
-        ? { user: userToFetch, since: lastFetchTime } 
-        : { user: userToFetch };
+        ? { citizen: citizenToFetch, since: lastFetchTime } 
+        : { citizen: citizenToFetch };
     
       const response = await fetch(
         apiUrl,
@@ -201,7 +201,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
           {
             notificationId: 'dummy-1',
             type: 'System',
-            user: username || DEFAULT_USERNAME,
+            citizen: citizenname || DEFAULT_CITIZENNAME,
             content: 'Welcome to La Serenissima! This is a test notification.',
             createdAt: new Date().toISOString(),
             readAt: null
@@ -209,7 +209,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
           {
             notificationId: 'dummy-2',
             type: 'Market',
-            user: username || DEFAULT_USERNAME,
+            citizen: citizenname || DEFAULT_CITIZENNAME,
             content: 'A new land parcel is available for purchase in San Marco district.',
             createdAt: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
             readAt: null
@@ -220,68 +220,68 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
         console.log('%c[DEBUG] Set fallback notifications:', 'color: #ff69b4', dummyNotifications);
       }
     }
-  }, [username, lastFetchTime, notifications.length, isOpen, activeTab]);
+  }, [citizenname, lastFetchTime, notifications.length, isOpen, activeTab]);
 
-  // Fetch users
-  const fetchUsers = useCallback(async () => {
+  // Fetch citizens
+  const fetchCitizens = useCallback(async () => {
     if (!isOpen || activeTab !== 'chats') return;
     
-    setIsLoadingUsers(true);
+    setIsLoadingCitizens(true);
     
     try {
-      const response = await fetch('/api/users');
+      const response = await fetch('/api/citizens');
       
       if (!response.ok) {
-        throw new Error(`Failed to fetch users: ${response.status}`);
+        throw new Error(`Failed to fetch citizens: ${response.status}`);
       }
       
       const data = await response.json();
       
-      if (data.success && data.users && Array.isArray(data.users)) {
-        // Add Compagno as the first user if not already present
-        const compagnoExists = data.users.some((user: User) => user.username === 'compagno');
+      if (data.success && data.citizens && Array.isArray(data.citizens)) {
+        // Add Compagno as the first citizen if not already present
+        const compagnoExists = data.citizens.some((citizen: Citizen) => citizen.citizenname === 'compagno');
         
-        let usersList = [...data.users];
+        let citizensList = [...data.citizens];
         
         if (!compagnoExists) {
-          usersList.unshift({
-            username: 'compagno',
+          citizensList.unshift({
+            citizenname: 'compagno',
             firstName: 'Compagno',
             lastName: 'Bot',
             coatOfArmsImage: null
           });
         }
         
-        setUsers(usersList);
+        setCitizens(citizensList);
       } else {
-        // If no users returned but request was successful, just ensure Compagno is available
-        setUsers([{
-          username: 'compagno',
+        // If no citizens returned but request was successful, just ensure Compagno is available
+        setCitizens([{
+          citizenname: 'compagno',
           firstName: 'Compagno',
           lastName: 'Bot',
           coatOfArmsImage: null
         }]);
       }
     } catch (error) {
-      console.error('Error fetching users:', error);
+      console.error('Error fetching citizens:', error);
       
       // Just ensure Compagno is available when there's an error
-      setUsers([{
-        username: 'compagno',
+      setCitizens([{
+        citizenname: 'compagno',
         firstName: 'Compagno',
         lastName: 'Bot',
         coatOfArmsImage: null
       }]);
     } finally {
-      setIsLoadingUsers(false);
+      setIsLoadingCitizens(false);
     }
   }, [isOpen, activeTab]);
 
-  // Fetch messages between current user and selected user
-  const fetchUserMessages = useCallback(async (otherUser: string) => {
-    if (!username || !otherUser) return;
+  // Fetch messages between current citizen and selected citizen
+  const fetchCitizenMessages = useCallback(async (otherCitizen: string) => {
+    if (!citizenname || !otherCitizen) return;
     
-    setIsLoadingUserMessages(true);
+    setIsLoadingCitizenMessages(true);
     
     try {
       const response = await fetch('/api/messages', {
@@ -290,8 +290,8 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          currentUser: username,
-          otherUser: otherUser
+          currentCitizen: citizenname,
+          otherCitizen: otherCitizen
         })
       });
       
@@ -314,29 +314,29 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
           return message;
         });
         
-        setUserMessages(processedMessages);
+        setCitizenMessages(processedMessages);
       } else {
         // Set empty array if no messages found
-        setUserMessages([]);
+        setCitizenMessages([]);
       }
     } catch (error) {
-      console.error('Error fetching user messages:', error);
+      console.error('Error fetching citizen messages:', error);
       // Set empty array on error
-      setUserMessages([]);
+      setCitizenMessages([]);
     } finally {
-      setIsLoadingUserMessages(false);
+      setIsLoadingCitizenMessages(false);
     }
-  }, [username]);
+  }, [citizenname]);
 
-  // Send message to selected user
-  const sendUserMessage = async (content: string, messageType: string = 'message') => {
-    if (!content.trim() || !username || !selectedUser) return;
+  // Send message to selected citizen
+  const sendCitizenMessage = async (content: string, messageType: string = 'message') => {
+    if (!content.trim() || !citizenname || !selectedCitizen) return;
     
     // Optimistically add message to UI
     const tempMessage: Message = {
       messageId: `temp-${Date.now()}`,
-      sender: username,
-      receiver: selectedUser,
+      sender: citizenname,
+      receiver: selectedCitizen,
       content: content,
       type: messageType,
       createdAt: new Date().toISOString(),
@@ -348,7 +348,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
       tempMessage.content = `📜 **Guild Application Response**\n\n${content}`;
     }
     
-    setUserMessages(prev => [...prev, tempMessage]);
+    setCitizenMessages(prev => [...prev, tempMessage]);
     setInputValue('');
     
     try {
@@ -358,8 +358,8 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          sender: username,
-          receiver: selectedUser,
+          sender: citizenname,
+          receiver: selectedCitizen,
           content: content,
           type: messageType
         })
@@ -373,7 +373,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
       
       if (data.success && data.message) {
         // Replace the temp message with the real one
-        setUserMessages(prev => 
+        setCitizenMessages(prev => 
           prev.map(msg => 
             msg.messageId === tempMessage.messageId ? data.message : msg
           )
@@ -417,7 +417,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            user: username,
+            citizen: citizenname,
             notificationIds
           }),
         }
@@ -478,36 +478,36 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
     };
   }, []);
 
-  // Fetch user information if available
+  // Fetch citizen information if available
   useEffect(() => {
-    // Try to get username from localStorage or other source
-    const savedProfile = localStorage.getItem('userProfile');
+    // Try to get citizenname from localStorage or other source
+    const savedProfile = localStorage.getItem('citizenProfile');
     if (savedProfile) {
       try {
         const profile = JSON.parse(savedProfile);
-        if (profile.username) {
-          console.log('%c[DEBUG] Found username in localStorage:', 'color: #ff69b4', profile.username);
-          setUsername(profile.username);
+        if (profile.citizenname) {
+          console.log('%c[DEBUG] Found citizenname in localStorage:', 'color: #ff69b4', profile.citizenname);
+          setCitizenname(profile.citizenname);
         }
       } catch (error) {
-        console.error('Error parsing user profile:', error);
+        console.error('Error parsing citizen profile:', error);
       }
     } else {
-      console.log('%c[DEBUG] No user profile found in localStorage, using default username:', 'color: #ff69b4', DEFAULT_USERNAME);
+      console.log('%c[DEBUG] No citizen profile found in localStorage, using default citizenname:', 'color: #ff69b4', DEFAULT_CITIZENNAME);
     }
     
     // Also listen for profile updates
     const handleProfileUpdate = (event: CustomEvent) => {
-      if (event.detail && event.detail.username) {
-        console.log('%c[DEBUG] Profile updated, new username:', 'color: #ff69b4', event.detail.username);
-        setUsername(event.detail.username);
+      if (event.detail && event.detail.citizenname) {
+        console.log('%c[DEBUG] Profile updated, new citizenname:', 'color: #ff69b4', event.detail.citizenname);
+        setCitizenname(event.detail.citizenname);
       }
     };
     
-    window.addEventListener('userProfileUpdated', handleProfileUpdate as EventListener);
+    window.addEventListener('citizenProfileUpdated', handleProfileUpdate as EventListener);
     
     return () => {
-      window.removeEventListener('userProfileUpdated', handleProfileUpdate as EventListener);
+      window.removeEventListener('citizenProfileUpdated', handleProfileUpdate as EventListener);
     };
   }, []);
 
@@ -545,33 +545,33 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
     }
   }, [fetchNotifications, isOpen, activeTab]);
 
-  // Fetch users when chats tab is active
+  // Fetch citizens when chats tab is active
   useEffect(() => {
     if (isOpen && activeTab === 'chats') {
-      fetchUsers();
+      fetchCitizens();
     }
-  }, [fetchUsers, isOpen, activeTab]);
+  }, [fetchCitizens, isOpen, activeTab]);
 
-  // Fetch messages when a user is selected
+  // Fetch messages when a citizen is selected
   useEffect(() => {
-    if (selectedUser) {
-      fetchUserMessages(selectedUser);
+    if (selectedCitizen) {
+      fetchCitizenMessages(selectedCitizen);
     }
-  }, [fetchUserMessages, selectedUser]);
+  }, [fetchCitizenMessages, selectedCitizen]);
 
   // Load message history when chat is opened
   useEffect(() => {
-    if (isOpen && activeTab === 'chats' && selectedUser === 'compagno') {
+    if (isOpen && activeTab === 'chats' && selectedCitizen === 'compagno') {
       fetchMessageHistory();
     }
-  }, [isOpen, activeTab, selectedUser]);
+  }, [isOpen, activeTab, selectedCitizen]);
 
   // Scroll to bottom of messages when new ones are added
   useEffect(() => {
     if (messagesEndRef.current && isOpen) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages, userMessages, isOpen]);
+  }, [messages, citizenMessages, isOpen]);
 
   // Update UI size when chats tab is active
   useEffect(() => {
@@ -586,7 +586,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
     setIsLoadingHistory(true);
     try {
       const response = await fetch(
-        `${KINOS_BACKEND_BASE_URL}/blueprints/${BLUEPRINT}/kins/${username}/messages?limit=25&offset=${offset}`,
+        `${KINOS_BACKEND_BASE_URL}/blueprints/${BLUEPRINT}/kins/${citizenname}/messages?limit=25&offset=${offset}`,
         {
           method: 'GET',
           headers: {
@@ -637,15 +637,15 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
   const sendMessage = async (content: string, additionalSystemPrompt?: string, addContext?: string, images?: string[]) => {
     if (!content.trim()) return;
     
-    // Optimistically add user message to UI
-    const userMessage: Message = {
+    // Optimistically add citizen message to UI
+    const citizenMessage: Message = {
       id: `temp-${Date.now()}`,
-      role: 'user',
+      role: 'citizen',
       content: content,
       timestamp: new Date().toISOString()
     };
     
-    setMessages(prev => [...prev, userMessage]);
+    setMessages(prev => [...prev, citizenMessage]);
     setInputValue('');
     setIsTyping(true);
     
@@ -655,7 +655,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
       
       // Extract text from the current page
       const pageText = extractPageText();
-      const pageContext = pageText ? `\n\nThe user is currently viewing a page with the following content:\n${pageText}` : '';
+      const pageContext = pageText ? `\n\nThe citizen is currently viewing a page with the following content:\n${pageText}` : '';
       
       // Use the additional system prompt if provided, otherwise use the default
       // Add the page context to the system prompt
@@ -679,7 +679,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
       }
       
       const response = await fetch(
-        `${KINOS_BACKEND_BASE_URL}/blueprints/${BLUEPRINT}/kins/${username}/messages`,
+        `${KINOS_BACKEND_BASE_URL}/blueprints/${BLUEPRINT}/kins/${citizenname}/messages`,
         {
           method: 'POST',
           headers: {
@@ -720,9 +720,9 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (activeTab === 'chats' && selectedUser && selectedUser !== 'compagno') {
-      await sendUserMessage(inputValue);
-    } else if (activeTab === 'chats' && selectedUser === 'compagno') {
+    if (activeTab === 'chats' && selectedCitizen && selectedCitizen !== 'compagno') {
+      await sendCitizenMessage(inputValue);
+    } else if (activeTab === 'chats' && selectedCitizen === 'compagno') {
       await sendMessage(inputValue);
     }
   };
@@ -795,32 +795,32 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
     }
   };
 
-  // Filter users based on search query
-  const filteredUsers = userSearchQuery
-    ? users.filter(user => 
-        user.username.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
-        user.firstName.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
-        user.lastName.toLowerCase().includes(userSearchQuery.toLowerCase())
+  // Filter citizens based on search query
+  const filteredCitizens = citizenSearchQuery
+    ? citizens.filter(citizen => 
+        citizen.citizenname.toLowerCase().includes(citizenSearchQuery.toLowerCase()) ||
+        citizen.firstName.toLowerCase().includes(citizenSearchQuery.toLowerCase()) ||
+        citizen.lastName.toLowerCase().includes(citizenSearchQuery.toLowerCase())
       )
-    : users;
+    : citizens;
 
   // Add event listeners for external control
   useEffect(() => {
     const handleOpenCompagnoChat = () => {
       setIsOpen(true);
       setActiveTab('chats');
-      setSelectedUser('compagno');
+      setSelectedCitizen('compagno');
     };
     
     const handleSendCompagnoMessage = (event: CustomEvent) => {
       if (event.detail && event.detail.message) {
         setIsOpen(true);
         setActiveTab('chats');
-        setSelectedUser('compagno');
+        setSelectedCitizen('compagno');
         
         // Extract text from the current page
         const pageText = extractPageText();
-        const pageContext = pageText ? `\n\nThe user is currently viewing a page with the following content:\n${pageText}` : '';
+        const pageContext = pageText ? `\n\nThe citizen is currently viewing a page with the following content:\n${pageText}` : '';
         
         // Add page context to the system prompt if provided
         const systemPrompt = event.detail.addSystem 
@@ -976,7 +976,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
             <button
               onClick={() => {
                 setActiveTab('chats');
-                fetchUsers();
+                fetchCitizens();
               }}
               className={`flex-1 py-2 text-sm font-medium ${
                 activeTab === 'chats' ? 'bg-amber-200 text-amber-800' : 'text-amber-700 hover:bg-amber-50'
@@ -1048,48 +1048,48 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
           ) : (
             // Chats content with sidebar
             <div className="flex-1 flex overflow-hidden">
-              {/* Users sidebar */}
+              {/* Citizens sidebar */}
               <div className="w-1/3 border-r border-amber-200 flex flex-col bg-amber-50">
                 {/* Search bar */}
                 <div className="p-2 border-b border-amber-200">
                   <div className="relative">
                     <input
                       type="text"
-                      placeholder="Search users..."
-                      value={userSearchQuery}
-                      onChange={(e) => setUserSearchQuery(e.target.value)}
+                      placeholder="Search citizens..."
+                      value={citizenSearchQuery}
+                      onChange={(e) => setCitizenSearchQuery(e.target.value)}
                       className="w-full pl-8 pr-3 py-1 border border-amber-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
                     />
                     <FaSearch className="absolute left-2 top-2 text-amber-400" />
                   </div>
                 </div>
                 
-                {/* Users list */}
+                {/* Citizens list */}
                 <div className="flex-1 overflow-y-auto">
-                  {isLoadingUsers ? (
+                  {isLoadingCitizens ? (
                     <div className="flex justify-center items-center h-32">
                       <FaSpinner className="animate-spin text-amber-600 text-2xl" />
                     </div>
-                  ) : filteredUsers.length === 0 ? (
+                  ) : filteredCitizens.length === 0 ? (
                     <div className="text-center py-8 text-gray-500 italic text-sm">
-                      No users found
+                      No citizens found
                     </div>
                   ) : (
                     <ul>
-                      {filteredUsers.map(user => (
-                        <li key={user.username}>
+                      {filteredCitizens.map(citizen => (
+                        <li key={citizen.citizenname}>
                           <button
-                            onClick={() => setSelectedUser(user.username)}
+                            onClick={() => setSelectedCitizen(citizen.citizenname)}
                             className={`w-full text-left p-3 flex items-center ${
-                              selectedUser === user.username 
+                              selectedCitizen === citizen.citizenname 
                                 ? 'bg-amber-200' 
                                 : 'hover:bg-amber-100'
                             }`}
                           >
                             <div className="w-8 h-8 rounded-full bg-amber-300 flex items-center justify-center mr-2 text-amber-800">
-                              {user.coatOfArmsImage ? (
+                              {citizen.coatOfArmsImage ? (
                                 <img 
-                                  src={user.coatOfArmsImage} 
+                                  src={citizen.coatOfArmsImage} 
                                   alt="" 
                                   className="w-8 h-8 rounded-full object-cover"
                                   onError={(e) => {
@@ -1104,16 +1104,16 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                                 />
                               ) : (
                                 <div className="w-8 h-8 rounded-full bg-amber-300 flex items-center justify-center text-amber-800">
-                                  {user.firstName.charAt(0)}
+                                  {citizen.firstName.charAt(0)}
                                 </div>
                               )}
                             </div>
                             <div>
                               <div className="font-medium text-sm">
-                                {user.username === 'compagno' ? 'Compagno' : `${user.firstName} ${user.lastName}`}
+                                {citizen.citizenname === 'compagno' ? 'Compagno' : `${citizen.firstName} ${citizen.lastName}`}
                               </div>
                               <div className="text-xs text-gray-500">
-                                {user.username === 'compagno' ? 'Virtual Assistant' : user.username}
+                                {citizen.citizenname === 'compagno' ? 'Virtual Assistant' : citizen.citizenname}
                               </div>
                             </div>
                           </button>
@@ -1126,18 +1126,18 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
               
               {/* Chat area */}
               <div className="w-2/3 flex flex-col">
-                {selectedUser ? (
+                {selectedCitizen ? (
                   <>
-                    {/* Selected user header */}
+                    {/* Selected citizen header */}
                     <div className="bg-amber-100 p-2 border-b border-amber-200 flex items-center">
                       <button 
-                        onClick={() => setSelectedUser(null)}
+                        onClick={() => setSelectedCitizen(null)}
                         className="mr-2 text-amber-700 hover:text-amber-900 md:hidden"
                       >
                         <FaArrowLeft />
                       </button>
                       
-                      {selectedUser === 'compagno' ? (
+                      {selectedCitizen === 'compagno' ? (
                         <div className="flex items-center">
                           <div className="w-6 h-6 mr-2">
                             <img 
@@ -1157,10 +1157,10 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                       ) : (
                         <div className="flex items-center">
                           <div className="w-6 h-6 rounded-full bg-amber-300 flex items-center justify-center mr-2 text-amber-800 text-xs">
-                            {users.find(u => u.username === selectedUser)?.firstName.charAt(0) || '?'}
+                            {citizens.find(u => u.citizenname === selectedCitizen)?.firstName.charAt(0) || '?'}
                           </div>
                           <span className="font-medium">
-                            {users.find(u => u.username === selectedUser)?.firstName || ''} {users.find(u => u.username === selectedUser)?.lastName || ''}
+                            {citizens.find(u => u.citizenname === selectedCitizen)?.firstName || ''} {citizens.find(u => u.citizenname === selectedCitizen)?.lastName || ''}
                           </span>
                         </div>
                       )}
@@ -1174,11 +1174,11 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                         backgroundRepeat: 'repeat'
                       }}
                     >
-                      {isLoadingUserMessages ? (
+                      {isLoadingCitizenMessages ? (
                         <div className="flex justify-center items-center h-32">
                           <FaSpinner className="animate-spin text-amber-600 text-2xl" />
                         </div>
-                      ) : selectedUser === 'compagno' ? (
+                      ) : selectedCitizen === 'compagno' ? (
                         // Compagno messages
                         <>
                           {/* Load more button */}
@@ -1206,15 +1206,15 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                             <div 
                               key={message.id || `msg-${index}`} 
                               className={`mb-3 ${
-                                message.role === 'user' 
+                                message.role === 'citizen' 
                                   ? 'text-right' 
                                   : 'text-left'
                               }`}
                             >
                               <div 
                                 className={`inline-block p-3 rounded-lg max-w-[80%] ${
-                                  message.role === 'user'
-                                    ? 'user-bubble rounded-br-none'
+                                  message.role === 'citizen'
+                                    ? 'citizen-bubble rounded-br-none'
                                     : 'assistant-bubble rounded-bl-none'
                                 }`}
                               >
@@ -1271,31 +1271,31 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                           )}
                         </>
                       ) : (
-                        // User messages
+                        // Citizen messages
                         <>
-                          {userMessages.length === 0 ? (
+                          {citizenMessages.length === 0 ? (
                             <div className="text-center py-8">
                               <div className="text-gray-500 italic mb-4">
-                                No messages yet with {users.find(u => u.username === selectedUser)?.firstName || selectedUser}.
+                                No messages yet with {citizens.find(u => u.citizenname === selectedCitizen)?.firstName || selectedCitizen}.
                               </div>
                               <div className="text-amber-700 text-sm">
                                 Send a message to start your conversation!
                               </div>
                             </div>
                           ) : (
-                            userMessages.map((message) => (
+                            citizenMessages.map((message) => (
                               <div 
                                 key={message.messageId} 
                                 className={`mb-3 ${
-                                  message.sender === username 
+                                  message.sender === citizenname 
                                     ? 'text-right' 
                                     : 'text-left'
                                 }`}
                               >
                                 <div 
                                   className={`inline-block p-3 rounded-lg max-w-[80%] ${
-                                    message.sender === username
-                                      ? 'user-bubble rounded-br-none'
+                                    message.sender === citizenname
+                                      ? 'citizen-bubble rounded-br-none'
                                       : 'assistant-bubble rounded-bl-none'
                                   }`}
                                 >
@@ -1306,14 +1306,14 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                                         <div className="whitespace-pre-wrap">{message.content || "No content available"}</div>
                                         
                                         {/* Add response buttons for guild masters */}
-                                        {message.receiver === username && (
+                                        {message.receiver === citizenname && (
                                           <div className="mt-3 flex space-x-2">
                                             <button
                                               onClick={() => {
                                                 const response = prompt("Enter your response to this application:");
                                                 if (response) {
                                                   // Send a response message
-                                                  sendUserMessage(response, 'guild_application_response');
+                                                  sendCitizenMessage(response, 'guild_application_response');
                                                   
                                                   // Update the application message type to 'approved'
                                                   fetch('/api/messages/update', {
@@ -1327,18 +1327,18 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                                                     })
                                                   }).catch(err => console.error('Error updating message type:', err));
                                                   
-                                                  // Update the user's guild status
-                                                  fetch('/api/users/update-guild', {
+                                                  // Update the citizen's guild status
+                                                  fetch('/api/citizens/update-guild', {
                                                     method: 'POST',
                                                     headers: {
                                                       'Content-Type': 'application/json',
                                                     },
                                                     body: JSON.stringify({
-                                                      username: message.sender,
+                                                      citizenname: message.sender,
                                                       guildId: message.receiver,
                                                       status: 'approved'
                                                     })
-                                                  }).catch(err => console.error('Error updating user guild status:', err));
+                                                  }).catch(err => console.error('Error updating citizen guild status:', err));
                                                 }
                                               }}
                                               className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700"
@@ -1350,7 +1350,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                                                 const response = prompt("Enter your reason for declining this application:");
                                                 if (response) {
                                                   // Send a response message
-                                                  sendUserMessage(response, 'guild_application_response');
+                                                  sendCitizenMessage(response, 'guild_application_response');
                                                   
                                                   // Update the application message type to 'rejected'
                                                   fetch('/api/messages/update', {
@@ -1364,18 +1364,18 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                                                     })
                                                   }).catch(err => console.error('Error updating message type:', err));
                                                   
-                                                  // Update the user's guild status
-                                                  fetch('/api/users/update-guild', {
+                                                  // Update the citizen's guild status
+                                                  fetch('/api/citizens/update-guild', {
                                                     method: 'POST',
                                                     headers: {
                                                       'Content-Type': 'application/json',
                                                     },
                                                     body: JSON.stringify({
-                                                      username: message.sender,
+                                                      citizenname: message.sender,
                                                       guildId: null,
                                                       status: 'rejected'
                                                     })
-                                                  }).catch(err => console.error('Error updating user guild status:', err));
+                                                  }).catch(err => console.error('Error updating citizen guild status:', err));
                                                 }
                                               }}
                                               className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700"
@@ -1418,7 +1418,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                     </div>
                     
                     {/* Suggestions */}
-                    {selectedUser === 'compagno' && messages.length <= 1 && (
+                    {selectedCitizen === 'compagno' && messages.length <= 1 && (
                       <div className="border-t border-gray-200 p-2 bg-amber-50">
                         <p className="text-xs text-gray-500 mb-2">Suggested questions:</p>
                         <div className="flex flex-wrap gap-1">
@@ -1462,7 +1462,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                         type="text"
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
-                        placeholder={`Message ${selectedUser === 'compagno' ? 'Compagno' : users.find(u => u.username === selectedUser)?.firstName || selectedUser}...`}
+                        placeholder={`Message ${selectedCitizen === 'compagno' ? 'Compagno' : citizens.find(u => u.citizenname === selectedCitizen)?.firstName || selectedCitizen}...`}
                         className="flex-1 p-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
                         disabled={isTyping}
                       />
@@ -1480,15 +1480,15 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                     </form>
                   </>
                 ) : (
-                  // No user selected
+                  // No citizen selected
                   <div className="flex-1 flex items-center justify-center bg-amber-50 bg-opacity-80">
                     <div className="text-center p-6">
                       <div className="w-16 h-16 mx-auto mb-4 opacity-50">
-                        <FaUser className="w-full h-full text-amber-400" />
+                        <FaUserclassName="w-full h-full text-amber-400" />
                       </div>
                       <h3 className="text-lg font-medium text-amber-800 mb-2">Select a Conversation</h3>
                       <p className="text-sm text-amber-600">
-                        Choose a user from the list to view your conversation history
+                        Choose a citizen from the list to view your conversation history
                       </p>
                     </div>
                   </div>
