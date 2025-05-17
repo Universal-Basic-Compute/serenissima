@@ -189,6 +189,8 @@ def update_social_class(dry_run: bool = False):
     # Get all citizens
     citizens = get_all_citizens(tables)
     
+    log.info("Processing citizens for social class updates...")
+    
     # Track update statistics
     update_summary = {
         "total_checked": len(citizens),
@@ -225,16 +227,20 @@ def update_social_class(dry_run: bool = False):
         is_entrepreneur = citizen_id in entrepreneur_ids
         is_business_owner = citizen_id in business_owner_ids
         
-        # Add debug logging for entrepreneurs
-        if is_entrepreneur:
-            log.info(f"Processing entrepreneur {citizen_id} with current class '{current_social_class}'")
+        # Add detailed logging for entrepreneurs and business owners
+        if is_entrepreneur or is_business_owner:
+            log.info(f"Processing citizen {citizen_id} - Current class: '{current_social_class}'")
+            log.info(f"  Is entrepreneur: {is_entrepreneur}, Is business owner: {is_business_owner}")
         
         try:
             # Check if the current social class is valid
             if current_social_class not in SOCIAL_CLASSES:
                 log.warning(f"Citizen {citizen_id} has invalid social class '{current_social_class}', setting to lowest class")
                 current_social_class = SOCIAL_CLASSES[0]  # Set to lowest class
-                
+                # Force an update since we're changing the class
+                new_social_class = SOCIAL_CLASSES[0]
+                update_reason = "invalid_class"
+            
             # Apply rules in order of precedence (highest to lowest)
             
             # Rule 1: Prestige > 10000 -> Nobili
@@ -251,25 +257,31 @@ def update_social_class(dry_run: bool = False):
             elif is_business_owner:
                 current_index = SOCIAL_CLASSES.index(current_social_class)
                 popolani_index = SOCIAL_CLASSES.index("Popolani")
+                
                 if current_index < popolani_index:
                     new_social_class = "Popolani"
                     update_reason = "business_owner"
                     log.info(f"Promoting business owner {citizen_id} from {current_social_class} to Popolani")
+                    log.info(f"  Current class index: {current_index}, Popolani index: {popolani_index}")
             
             # Rule 4: Entrepreneurs must be at least Popolani
             elif is_entrepreneur:
                 current_index = SOCIAL_CLASSES.index(current_social_class)
                 popolani_index = SOCIAL_CLASSES.index("Popolani")
+                
                 if current_index < popolani_index:
                     new_social_class = "Popolani"
                     update_reason = "entrepreneur"
                     log.info(f"Promoting entrepreneur {citizen_id} from {current_social_class} to Popolani")
+                    log.info(f"  Current class index: {current_index}, Popolani index: {popolani_index}")
         except ValueError as e:
             log.error(f"Error processing social class for citizen {citizen_id}: {e}")
             continue
             
         # Skip if no change
         if new_social_class == current_social_class:
+            if is_entrepreneur or is_business_owner:
+                log.info(f"  No change needed for {citizen_id}, already at appropriate class: {current_social_class}")
             continue
         
         citizen_name = f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}"
