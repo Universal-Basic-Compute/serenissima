@@ -660,11 +660,11 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   
   const handleCitizenClick = (citizen: any) => {
     // Ensure we have a valid citizen object before setting it
-    if (citizen && (citizen.CitizenId || citizen.id)) {
+    if (citizen && (citizen.citizenid || citizen.CitizenId || citizen.id || citizen.username)) {
       setSelectedCitizen(citizen);
       
       // Set selected citizen paths
-      const citizenId = citizen.citizenid || citizen.CitizenId || citizen.id;
+      const citizenId = citizen.citizenid || citizen.CitizenId || citizen.id || citizen.username;
       const paths = activityPaths[citizenId] || [];
       setSelectedCitizenPaths(paths);
       console.log(`Setting ${paths.length} paths for selected citizen ${citizenId}`);
