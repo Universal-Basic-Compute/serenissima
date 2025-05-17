@@ -4,12 +4,14 @@ import BuildingFinancials from './BuildingDetails/BuildingFinancials';
 import BuildingImage from './BuildingDetails/BuildingImage';
 import BuildingLocation from './BuildingDetails/BuildingLocation';
 import BuildingMaintenance from './BuildingDetails/BuildingMaintenance';
+import BuildingOccupant from './BuildingDetails/BuildingOccupant';
 
 export { BuildingDescription };
 export { BuildingFinancials };
 export { BuildingImage };
 export { BuildingLocation };
 export { BuildingMaintenance };
+export { BuildingOccupant };
 
 export function ResourceList({ 
   title, 
