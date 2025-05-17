@@ -249,7 +249,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     // Optimistically add citizen message to UI
     const citizenMessage = {
       id: `temp-${Date.now()}`,
-      role: 'citizen',
+      role: 'user',
       content: content,
       timestamp: new Date().toISOString()
     };
