@@ -40,11 +40,13 @@ export async function GET(request: Request) {
               let position = null;
               try {
                 if (fields.Position) {
-                  position = JSON.parse(fields.Position);
+                  // Ensure Position is a string before parsing
+                  const positionStr = String(fields.Position);
+                  position = JSON.parse(positionStr);
                 } else if (fields.Point) {
                   // Extract position from Point field (format: type_lat_lng)
-                  const pointValue = fields.Point as string | number | boolean | object;
-                  const parts = String(pointValue).split('_');
+                  const pointValue = String(fields.Point);
+                  const parts = pointValue.split('_');
                   if (parts.length >= 3) {
                     const lat = parseFloat(parts[1]);
                     const lng = parseFloat(parts[2]);
