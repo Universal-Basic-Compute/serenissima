@@ -2210,23 +2210,18 @@ number => {
     citizen: any,
     size: number = 20
   ) => {
-    // Log the full citizen object for debugging
-    console.log('Full citizen object in createCitizenMarker:', citizen);
-
     // Ensure we have the required properties for display
     // Try to extract data from various possible property names
-    const firstName = citizen.FirstName || citizen.firstName || '';
-    const lastName = citizen.LastName || citizen.lastName || '';
-    const socialClass = citizen.SocialClass || citizen.socialClass || '';
-    const citizenId = citizen.CitizenId || citizen.id;
+    const firstName = citizen.FirstName || citizen.firstName || citizen.firstname || '';
+    const lastName = citizen.LastName || citizen.lastName || citizen.lastname || '';
+    const socialClass = citizen.SocialClass || citizen.socialClass || citizen.socialclass || '';
+    const citizenId = citizen.CitizenId || citizen.citizenId || citizen.citizenid || citizen.id;
     
     // Log citizen data for debugging with more details
     console.log(`Creating citizen marker for:`, {
       citizenId,
       name: `${firstName} ${lastName}`,
-      imageUrl: citizen.ImageUrl || citizen.profileImage,
-      socialClass,
-      rawCitizen: citizen // Include the raw citizen object for debugging
+      socialClass
     });
 
     // Determine color based on social class
