@@ -1827,25 +1827,26 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     if ((waterPointMode || activeView === 'transport') && waterPoints.length > 0) {
       waterPoints.forEach(waterPoint => {
         if (!waterPoint.position) return;
-      
+        
         // Convert lat/lng to isometric coordinates
         const x = (waterPoint.position.lng - 12.3326) * 20000;
         const y = (waterPoint.position.lat - 45.4371) * 20000;
-      
+        
         const isoPos = {
           x: calculateIsoX(x, y, scale, offset, canvas.width),
           y: calculateIsoY(x, y, scale, offset, canvas.height)
         };
-      
-        // Draw a distinctive circle for water points
+        
+        // Draw a distinctive circle for water points - MAKE 4X SMALLER
         ctx.beginPath();
-        ctx.arc(isoPos.x, isoPos.y, 5 * scale, 0, Math.PI * 2);
+        // Change from 5 * scale to 1.25 * scale (4x smaller)
+        ctx.arc(isoPos.x, isoPos.y, 1.25 * scale, 0, Math.PI * 2);
         ctx.fillStyle = 'rgba(0, 150, 255, 0.8)';
         ctx.fill();
       
         // Add a white border
         ctx.strokeStyle = '#FFFFFF';
-        ctx.lineWidth = 1.5;
+        ctx.lineWidth = 0.5; // Reduced from 1.5
         ctx.stroke();
       
         // Draw connections if any
@@ -1868,7 +1869,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
               ctx.moveTo(isoPos.x, isoPos.y);
               ctx.lineTo(targetIsoPos.x, targetIsoPos.y);
               ctx.strokeStyle = 'rgba(0, 150, 255, 0.6)';
-              ctx.lineWidth = 2 * scale;
+              ctx.lineWidth = 0.5 * scale; // Reduced from 2 * scale
               ctx.stroke();
             }
           });
@@ -2786,20 +2787,20 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           // Draw a circle at mouse position with Venetian styling
           ctx.beginPath();
           ctx.arc(mousePosition.x, mousePosition.y, 6 * scale, 0, Math.PI * 2);
-          
+            
           // Use Venetian colors - gold for start point, red for end point
           const fillColor = transportStartPoint 
             ? 'rgba(180, 30, 30, 0.6)'  // Red for end point
             : 'rgba(218, 165, 32, 0.6)'; // Gold for start point
-          
+            
           ctx.fillStyle = fillColor;
           ctx.fill();
-          
+            
           // Add a subtle white border
           ctx.strokeStyle = '#FFFFFF';
           ctx.lineWidth = 1;
           ctx.stroke();
-          
+            
           // Add a pulsing effect to make it more noticeable
           const pulseSize = 8 * scale * (0.8 + 0.2 * Math.sin(Date.now() / 300));
           ctx.beginPath();
@@ -2807,9 +2808,70 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
           ctx.strokeStyle = fillColor;
           ctx.lineWidth = 0.8;
           ctx.stroke();
-          
+            
           // Change cursor style to crosshair for better precision
           canvas.style.cursor = 'crosshair';
+        }
+          
+        // Draw water point preview when in water point mode
+        if (activeView === 'transport' && waterPointMode) {
+          // Draw a circle at mouse position with water point styling
+          ctx.beginPath();
+          ctx.arc(mousePosition.x, mousePosition.y, 1.25 * scale, 0, Math.PI * 2);
+            
+          // Use a semi-transparent blue color
+          ctx.fillStyle = 'rgba(0, 150, 255, 0.6)';
+          ctx.fill();
+            
+          // Add a white border
+          ctx.strokeStyle = '#FFFFFF';
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+            
+          // Add a pulsing effect to make it more noticeable
+          const pulseSize = 3 * scale * (0.8 + 0.2 * Math.sin(Date.now() / 300));
+          ctx.beginPath();
+          ctx.arc(mousePosition.x, mousePosition.y, pulseSize, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(0, 150, 255, 0.4)';
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+            
+          // Change cursor style to crosshair for better precision
+          canvas.style.cursor = 'crosshair';
+            
+          // Show coordinates tooltip
+          const latLng = screenToLatLng(
+            mousePosition.x, 
+            mousePosition.y, 
+            scale, 
+            offset, 
+            canvas.width, 
+            canvas.height
+          );
+            
+          // Format coordinates to 6 decimal places
+          const coordText = `${latLng.lat.toFixed(6)}, ${latLng.lng.toFixed(6)}`;
+            
+          // Draw tooltip background
+          const textWidth = ctx.measureText(coordText).width;
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+          ctx.fillRect(
+            mousePosition.x + 15, 
+            mousePosition.y - 10, 
+            textWidth + 10, 
+            20
+          );
+            
+          // Draw tooltip text
+          ctx.fillStyle = '#FFFFFF';
+          ctx.font = '12px Arial';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(
+            coordText, 
+            mousePosition.x + 20, 
+            mousePosition.y
+          );
         }
       }
     }
