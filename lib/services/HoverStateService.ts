@@ -1,4 +1,5 @@
 import { eventBus, EventTypes } from '../utils/eventBus';
+import { debounce } from '../utils/performanceUtils';
 
 // Define the hover state changed event type
 const HOVER_STATE_CHANGED = 'HOVER_STATE_CHANGED';
@@ -211,20 +212,8 @@ export class HoverStateService {
     return this.hoveredWaterPointIdRef;
   }
   
-  /**
-   * Clear all hover states
-   */
-  public clearAllHoverStates(): void {
-    const hadHoverStates = 
-      this.hoveredPolygonIdRef !== null || 
-      this.hoveredBuildingIdRef !== null || 
-      this.hoveredCanalPointIdRef !== null || 
-      this.hoveredBridgePointIdRef !== null || 
-      this.hoveredCitizenBuildingRef !== null ||
-      this.hoveredResourceIdRef !== null ||
-      this.hoveredWaterPointIdRef !== null;
-    
-    // Reset all refs
+  // Add a debounce function for clearing hover states
+  private debouncedClearHoverStates = debounce(() => {
     this.hoveredPolygonIdRef = null;
     this.hoveredBuildingIdRef = null;
     this.hoveredCanalPointIdRef = null;
@@ -248,11 +237,28 @@ export class HoverStateService {
       hoveredWaterPointId: null
     };
     
-    // Only emit if there was something to clear
+    // Emit event
+    eventBus.emit(HOVER_STATE_CHANGED, {
+      type: 'clear'
+    });
+  }, 150); // 150ms delay before clearing hover states
+
+  /**
+   * Clear all hover states
+   */
+  public clearAllHoverStates(): void {
+    const hadHoverStates = 
+      this.hoveredPolygonIdRef !== null || 
+      this.hoveredBuildingIdRef !== null || 
+      this.hoveredCanalPointIdRef !== null || 
+      this.hoveredBridgePointIdRef !== null || 
+      this.hoveredCitizenBuildingRef !== null ||
+      this.hoveredResourceIdRef !== null ||
+      this.hoveredWaterPointIdRef !== null;
+    
     if (hadHoverStates) {
-      eventBus.emit(HOVER_STATE_CHANGED, {
-        type: 'clear'
-      });
+      // Use the debounced version to clear hover states
+      this.debouncedClearHoverStates();
     }
   }
 }
