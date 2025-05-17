@@ -1919,6 +1919,12 @@ number => {
               imageUrl: citizen.ImageUrl || citizen.imageUrl || '',
               // Add any other properties you need
             };
+            // Convert any undefined values to empty strings to prevent rendering objects
+            Object.keys(safeCitizen).forEach(key => {
+              if (safeCitizen[key] === undefined || safeCitizen[key] === null) {
+                safeCitizen[key] = '';
+              }
+            });
             setSelectedCitizen(safeCitizen);
           } else {
             setSelectedCitizen(null);
