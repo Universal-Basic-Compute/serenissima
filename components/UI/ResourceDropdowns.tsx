@@ -6,7 +6,8 @@ import { getWalletAddress } from '../../lib/utils/walletUtils';
 // Define the desired order of categories
 const CATEGORY_ORDER = ['raw_materials', 'processed_materials', 'finished_goods', 'utility_resources'];
 
-// Add a styled console log function
+// Add a styled console log function - commented out to reduce console noise
+/*
 const logInfo = (message: string, data?: any) => {
   console.log(`%c[ResourceDropdowns] ${message}`, 'color: #22c55e; font-weight: bold;', data || '');
 };
@@ -14,6 +15,7 @@ const logInfo = (message: string, data?: any) => {
 const logError = (message: string, error?: any) => {
   console.log(`%c[ResourceDropdowns] ERROR: ${message}`, 'color: #ef4444; font-weight: bold;', error || '');
 };
+*/
 
 // Helper function to get username from profile
 const getUsernameFromProfile = () => {
@@ -22,19 +24,19 @@ const getUsernameFromProfile = () => {
     if (profileStr) {
       const profile = JSON.parse(profileStr);
       if (profile && profile.username) {
-        logInfo(`Using username from profile: ${profile.username}`);
+        // logInfo(`Using username from profile: ${profile.username}`);
         return profile.username;
       }
     }
     return null;
   } catch (error) {
-    logError('Error parsing citizen profile:', error);
+    // logError('Error parsing citizen profile:', error);
     return null;
   }
 };
 
 const ResourceDropdowns: React.FC = () => {
-  logInfo('Component rendering');
+  // logInfo('Component rendering');
   
   const [categories, setCategories] = useState<ResourceCategory[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -43,14 +45,14 @@ const ResourceDropdowns: React.FC = () => {
   
   // Create a memoized function to load resource categories with counts
   const loadResourceCategories = useCallback(async () => {
-    logInfo('Loading resource categories...');
+    // logInfo('Loading resource categories...');
     try {
       setLoading(true);
       const resourceService = ResourceService.getInstance();
       
       // Clear the cache to force a fresh load if we've had errors
       if (error) {
-        logInfo('Clearing cache due to previous error');
+        // logInfo('Clearing cache due to previous error');
         resourceService.clearCache();
       }
       
@@ -59,23 +61,23 @@ const ResourceDropdowns: React.FC = () => {
       
       // If no username in profile, fall back to wallet address
       const owner = username || getWalletAddress();
-      logInfo('Current owner identifier:', owner);
+      // logInfo('Current owner identifier:', owner);
       
       // Get resource counts for the current citizen
-      logInfo('Fetching resource counts');
+      // logInfo('Fetching resource counts');
       const resources = await resourceService.getResourceCounts(owner);
-      logInfo(`Received ${resources.length} resources`);
+      // logInfo(`Received ${resources.length} resources`);
       
       // Get global resources
       const allGlobalResources = resourceService.getGlobalResources();
       setGlobalResources(allGlobalResources);
-      logInfo(`Received ${allGlobalResources.length} global resources`);
+      // logInfo(`Received ${allGlobalResources.length} global resources`);
       
       // Log sample of resources to debug icon issues
-      logInfo(`Received ${resources.length} resources with the following icons:`);
-      resources.slice(0, 5).forEach(resource => {
-        logInfo(`Resource: ${resource.name}, Icon: ${resource.icon}`);
-      });
+      // logInfo(`Received ${resources.length} resources with the following icons:`);
+      // resources.slice(0, 5).forEach(resource => {
+      //   logInfo(`Resource: ${resource.name}, Icon: ${resource.icon}`);
+      // });
       
       // Group resources by category
       const categoriesMap = new Map<string, ResourceCategory>();
@@ -113,9 +115,9 @@ const ResourceDropdowns: React.FC = () => {
       );
       
       // Log category statistics
-      nonEmptyCategories.forEach(category => {
-        logInfo(`Category ${category.id} has ${category.resources.length} resources after filtering`);
-      });
+      // nonEmptyCategories.forEach(category => {
+      //   logInfo(`Category ${category.id} has ${category.resources.length} resources after filtering`);
+      // });
       
       // Sort categories according to the predefined order
       const sortedCategories = [...nonEmptyCategories].sort((a, b) => {
@@ -135,11 +137,11 @@ const ResourceDropdowns: React.FC = () => {
         return a.name.localeCompare(b.name);
       });
       
-      logInfo(`Setting ${sortedCategories.length} categories`);
+      // logInfo(`Setting ${sortedCategories.length} categories`);
       setCategories(sortedCategories);
       setError(null);
     } catch (err) {
-      logError('Error loading resource categories:', err);
+      // logError('Error loading resource categories:', err);
       setError('Failed to load resources');
     } finally {
       setLoading(false);
@@ -148,33 +150,33 @@ const ResourceDropdowns: React.FC = () => {
   
   useEffect(() => {
     // Load resource categories on component mount
-    logInfo('Component mounted, loading categories');
+    // logInfo('Component mounted, loading categories');
     loadResourceCategories();
     
     // Refresh periodically (every 30 seconds)
-    logInfo('Setting up refresh interval');
+    // logInfo('Setting up refresh interval');
     const intervalId = setInterval(() => {
-      logInfo('Refreshing categories (interval)');
+      // logInfo('Refreshing categories (interval)');
       loadResourceCategories();
     }, 30000);
     
     return () => {
-      logInfo('Component unmounting, clearing interval');
+      // logInfo('Component unmounting, clearing interval');
       clearInterval(intervalId);
     };
   }, [loadResourceCategories]);
   
   if (loading && categories.length === 0) {
-    logInfo('Rendering loading state');
+    // logInfo('Rendering loading state');
     return <div className="text-amber-300 text-sm">Loading resources...</div>;
   }
   
   if (error && categories.length === 0) {
-    logError('Rendering error state:', error);
+    // logError('Rendering error state:', error);
     return <div className="text-red-400 text-sm">Error: {error}</div>;
   }
   
-  logInfo(`Rendering ${categories.length} resource categories`);
+  // logInfo(`Rendering ${categories.length} resource categories`);
   return (
     <div className="flex flex-wrap gap-2 relative z-30">
       {categories.map(category => {
