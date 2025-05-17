@@ -49,6 +49,7 @@ export class InteractionService {
   private hoveredCitizenTypeRef: string | null = null;
   private waterPointModeRef: boolean = false;
   private waterRouteModeRef: boolean = false;
+  private isHoveringRef: boolean = false; // Track if we're currently hovering over something
   
   // Add these private properties to store data references
   private _polygonsToRender: any[] = [];
