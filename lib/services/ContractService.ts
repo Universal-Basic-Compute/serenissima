@@ -159,6 +159,19 @@ export class ContractService {
   }
   
   /**
+   * Get contracts for a specific resource type
+   */
+  public async getContractsForResourceType(resourceType: string): Promise<Contract[]> {
+    // Ensure contracts are loaded
+    await this.getContracts();
+    
+    // Filter contracts by resource type
+    return this.contractsCache?.filter(contract => 
+      contract.resourceType.toLowerCase() === resourceType.toLowerCase()
+    ) || [];
+  }
+  
+  /**
    * Get the current citizen's username from localStorage
    */
   public getCurrentUsername(): string | null {

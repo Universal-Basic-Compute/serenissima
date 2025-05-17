@@ -55,10 +55,26 @@ const ResourceItem: React.FC<ResourceItemProps> = ({ resource, type = 'store' })
     }
   };
 
+  // Handle click on resource item
+  const handleResourceClick = () => {
+    if (type === 'sell' || type === 'buy') {
+      // Dispatch event to filter contracts by this resource type
+      window.dispatchEvent(new CustomEvent('filterContractsByResource', {
+        detail: { resourceType: resource.resourceType }
+      }));
+      
+      // Also switch to contracts view
+      window.dispatchEvent(new CustomEvent('viewChanged', { 
+        detail: { view: 'contracts' }
+      }));
+    }
+  };
+
   return (
     <div 
-      className={`flex items-center ${getBgColor()} p-2 rounded-md`} 
+      className={`flex items-center ${getBgColor()} p-2 rounded-md cursor-pointer hover:brightness-95 transition-all`} 
       title={resource.description || resource.name}
+      onClick={handleResourceClick}
     >
       <div className="relative w-8 h-8 mr-2">
         <Image 

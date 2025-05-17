@@ -95,12 +95,59 @@ export default function ContractMarkers({
       setCurrentUsername(username);
     }
     
-    // Clean up throttled functions when component unmounts
+    // Set up event listener for filtering by resource type
+    const handleFilterByResource = (event: CustomEvent) => {
+      if (event.detail && event.detail.resourceType) {
+        filterContractsByResourceType(event.detail.resourceType);
+      }
+    };
+    
+    window.addEventListener('filterContractsByResource', handleFilterByResource as EventListener);
+    
+    // Clean up throttled functions and event listeners when component unmounts
     return () => {
       handleMouseEnter.cancel();
       handleMouseLeave.cancel();
+      window.removeEventListener('filterContractsByResource', handleFilterByResource as EventListener);
     };
   }, [isVisible, getCurrentUsername, handleMouseEnter, handleMouseLeave]);
+  
+  // Function to filter contracts by resource type
+  const filterContractsByResourceType = async (resourceType: string) => {
+    try {
+      setIsLoading(true);
+      
+      // Use the ContractService to get contracts for this resource type
+      const filteredContracts = await contractService.getContractsForResourceType(resourceType);
+      
+      // Filter contracts that have location data
+      const contractsWithLocation = filteredContracts.filter(
+        contract => contract.location && contract.location.lat && contract.location.lng
+      );
+      
+      setContracts(contractsWithLocation);
+      
+      // Group contracts by location
+      const groupedContracts: Record<string, Contract[]> = {};
+      contractsWithLocation.forEach(contract => {
+        const locationKey = `${contract.location.lat.toFixed(6)}_${contract.location.lng.toFixed(6)}`;
+        if (!groupedContracts[locationKey]) {
+          groupedContracts[locationKey] = [];
+        }
+        groupedContracts[locationKey].push(contract);
+      });
+      
+      setContractsByLocation(groupedContracts);
+      console.log(`Filtered to ${contractsWithLocation.length} contracts for resource type: ${resourceType}`);
+      
+      // Set category filter to null to show all filtered contracts
+      setCategoryFilter(null);
+    } catch (error) {
+      console.error(`Error filtering contracts by resource type ${resourceType}:`, error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   // Function to load contracts
   const loadContracts = async () => {
