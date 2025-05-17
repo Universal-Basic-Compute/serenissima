@@ -12,7 +12,7 @@ import BuildingDetailsPanel from './BuildingDetailsPanel';
 import CitizenDetailsPanel from '../UI/CitizenDetailsPanel';
 import CitizenMarkers from './CitizenMarkers';
 import ResourceMarkers from './ResourceMarkers';
-import ContractMarkers from './ContractMarkers';
+import ContractMarkers from '@/components/PolygonViewer/ContractMarkers';
 import { HoverTooltip } from '../UI/HoverTooltip';
 import TransportDebugPanel from '../UI/TransportDebugPanel';
 import TransportErrorMessage from '../UI/TransportErrorMessage';
