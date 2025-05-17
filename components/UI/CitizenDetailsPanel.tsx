@@ -24,6 +24,8 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
   const [isTyping, setIsTyping] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [messagesFetchFailed, setMessagesFetchFailed] = useState<boolean>(false);
+  // Add a ref to track if we've already tried to fetch messages for this citizen
+  const messagesFetchAttemptedRef = useRef<{[citizenId: string]: boolean}>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
   const [playingMessageId, setPlayingMessageId] = useState<string | null>(null);
@@ -72,7 +74,16 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
   };
   // Function to fetch message history
   const fetchMessageHistory = async () => {
-    if (!citizen || !citizen.citizenid || messagesFetchFailed) return;
+    if (!citizen || !citizen.citizenid) return;
+    
+    // Check if we've already attempted to fetch messages for this citizen
+    if (messagesFetchAttemptedRef.current[citizen.citizenid]) {
+      console.log(`Already attempted to fetch messages for citizen ${citizen.citizenid}, skipping`);
+      return;
+    }
+    
+    // Mark that we've attempted to fetch messages for this citizen
+    messagesFetchAttemptedRef.current[citizen.citizenid] = true;
     
     setIsLoadingHistory(true);
     try {
@@ -98,8 +109,6 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
             timestamp: new Date().toISOString()
           }
         ]);
-        // Set the flag to prevent further fetch attempts
-        setMessagesFetchFailed(true);
         setIsLoadingHistory(false);
         return; // Exit early to prevent re-fetching
       }
@@ -122,8 +131,6 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
           timestamp: new Date().toISOString()
         }
       ]);
-      // Set the flag to prevent further fetch attempts
-      setMessagesFetchFailed(true);
     } finally {
       setIsLoadingHistory(false);
     }
@@ -270,11 +277,15 @@ Be historically accurate but engaging. Speak in first person as if you are this 
     setWorkBuilding(null);
     setIsLoadingBuildings(false);
     setActivities([]);
-    setMessagesFetchFailed(false); // Reset the flag when citizen changes
     
-    // Load message history when citizen changes
-    if (citizen && citizen.citizenid && !messagesFetchFailed) {
-      fetchMessageHistory();
+    // Reset the message fetch attempted flag when citizen changes
+    if (citizen && citizen.citizenid) {
+      // Only reset for the new citizen, keep track of previous attempts
+      const newAttemptedRef = {...messagesFetchAttemptedRef.current};
+      // If we haven't attempted for this citizen yet, fetch messages
+      if (!newAttemptedRef[citizen.citizenid]) {
+        fetchMessageHistory();
+      }
     }
     
     // Add escape key handler
