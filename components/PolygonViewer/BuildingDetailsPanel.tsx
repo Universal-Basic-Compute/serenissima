@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { 
   BuildingImage, 
   BuildingLocation, 
@@ -46,6 +46,7 @@ export default function BuildingDetailsPanel({
   const [buildingContracts, setBuildingContracts] = useState<any[]>([]);
   const [buildingResources, setBuildingResources] = useState<any>(null);
   const [isLoadingResources, setIsLoadingResources] = useState<boolean>(false);
+  const [currentUsername, setCurrentUsername] = useState<string | null>(null);
   
   // Add this useEffect to debug the building resources data
   useEffect(() => {
@@ -57,6 +58,24 @@ export default function BuildingDetailsPanel({
       console.log('Transformation recipes:', buildingResources.resources?.transformationRecipes);
     }
   }, [buildingResources]);
+  
+  // Get current username from localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const profileStr = localStorage.getItem('citizenProfile');
+        if (profileStr) {
+          const profile = JSON.parse(profileStr);
+          if (profile && profile.username) {
+            setCurrentUsername(profile.username);
+            console.log('Current username:', profile.username);
+          }
+        }
+      } catch (error) {
+        console.error('Error getting current username:', error);
+      }
+    }
+  }, []);
   
   // Fetch building resources (comprehensive data)
   const fetchBuildingResources = async (buildingId: string) => {
@@ -128,6 +147,13 @@ export default function BuildingDetailsPanel({
           if (data && data.building) {
             setBuilding(data.building);
             
+            // Store the runBy information in window for access by ResourceList component
+            if (data.building.occupant) {
+              (window as any).__currentBuildingRunBy = data.building.occupant;
+            } else {
+              (window as any).__currentBuildingRunBy = data.building.owner;
+            }
+            
             // If we have a land_id, fetch the land data
             if (data.building.land_id) {
               fetchLandData(data.building.land_id);
@@ -156,6 +182,8 @@ export default function BuildingDetailsPanel({
       setError(null);
       setBuildingContracts([]);
       setBuildingResources(null);
+      // Clear the runBy information
+      (window as any).__currentBuildingRunBy = null;
     }
     
     return () => {
