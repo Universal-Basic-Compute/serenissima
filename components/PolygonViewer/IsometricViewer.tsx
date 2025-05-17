@@ -2212,10 +2212,10 @@ number => {
   ) => {
     // Ensure we have the required properties for display
     // Try to extract data from various possible property names
-    const firstName = citizen.FirstName || citizen.firstName || citizen.firstname || '';
-    const lastName = citizen.LastName || citizen.lastName || citizen.lastname || '';
-    const socialClass = citizen.SocialClass || citizen.socialClass || citizen.socialclass || '';
-    const citizenId = citizen.CitizenId || citizen.citizenId || citizen.citizenid || citizen.id;
+    const firstName = citizen?.FirstName || citizen?.firstName || citizen?.firstname || '';
+    const lastName = citizen?.LastName || citizen?.lastName || citizen?.lastname || '';
+    const socialClass = citizen?.SocialClass || citizen?.socialClass || citizen?.socialclass || '';
+    const citizenId = citizen?.CitizenId || citizen?.citizenId || citizen?.citizenid || citizen?.id || '';
     
     // Log citizen data for debugging with more details
     console.log(`Creating citizen marker for:`, {
@@ -4289,7 +4289,7 @@ number => {
       )}
       
       {/* Citizen Details Panel */}
-      {showCitizenDetailsPanel && selectedCitizen && (
+      {showCitizenDetailsPanel && selectedCitizen ? (
         <CitizenDetailsPanel
           citizen={selectedCitizen}
           onClose={() => {
@@ -4297,7 +4297,7 @@ number => {
             setSelectedCitizen(null);
           }}
         />
-      )}
+      ) : null}
       
       {/* Income Legend - only visible in land view */}
       {activeView === 'land' && (
