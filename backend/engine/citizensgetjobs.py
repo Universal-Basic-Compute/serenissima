@@ -166,7 +166,7 @@ def get_available_businesses(tables) -> List[Dict]:
         log.error(f"Error fetching available businesses: {e}")
         return []
 
-def assign_citizen_to_business(tables, citizen: Dict, business: Dict) -> bool:
+def assign_citizen_to_business(tables, citizen: Dict, business: Dict, noupdate: bool = False) -> bool:
     """Assign a citizen to a business and update both records."""
     # Use the Username field instead of the CitizenId field
     citizen_id = citizen['fields'].get('CitizenId', citizen['id'])
@@ -202,29 +202,30 @@ def assign_citizen_to_business(tables, citizen: Dict, business: Dict) -> bool:
             )
         
         # Call updatecitizenDescriptionAndImage.py to update the citizen's description and image
-        try:
-            # Get the path to the updatecitizenDescriptionAndImage.py script
-            script_dir = os.path.dirname(os.path.abspath(__file__))
-            update_script_path = os.path.join(script_dir, "..", "scripts", "updatecitizenDescriptionAndImage.py")
-            
-            if os.path.exists(update_script_path):
-                # Call the script to update the citizen's description and image
-                log.info(f"Calling updatecitizenDescriptionAndImage.py for citizen {citizen_username} after job assignment")
-                result = subprocess.run(
-                    [sys.executable, update_script_path, citizen_username],
-                    capture_output=True,
-                    text=True
-                )
+        if not noupdate:
+            try:
+                # Get the path to the updatecitizenDescriptionAndImage.py script
+                script_dir = os.path.dirname(os.path.abspath(__file__))
+                update_script_path = os.path.join(script_dir, "..", "scripts", "updatecitizenDescriptionAndImage.py")
                 
-                if result.returncode != 0:
-                    log.warning(f"Error updating citizen description and image: {result.stderr}")
+                if os.path.exists(update_script_path):
+                    # Call the script to update the citizen's description and image
+                    log.info(f"Calling updatecitizenDescriptionAndImage.py for citizen {citizen_username} after job assignment")
+                    result = subprocess.run(
+                        [sys.executable, update_script_path, citizen_username],
+                        capture_output=True,
+                        text=True
+                    )
+                    
+                    if result.returncode != 0:
+                        log.warning(f"Error updating citizen description and image: {result.stderr}")
+                    else:
+                        log.info(f"Successfully updated description and image for citizen {citizen_username}")
                 else:
-                    log.info(f"Successfully updated description and image for citizen {citizen_username}")
-            else:
-                log.warning(f"Update script not found at: {update_script_path}")
-        except Exception as e:
-            log.warning(f"Error calling updatecitizenDescriptionAndImage.py: {e}")
-            # Continue anyway as this is not critical
+                    log.warning(f"Update script not found at: {update_script_path}")
+            except Exception as e:
+                log.warning(f"Error calling updatecitizenDescriptionAndImage.py: {e}")
+                # Continue anyway as this is not critical
         
         log.info(f"Successfully assigned {citizen_name} to {building_name}")
         return True
@@ -289,7 +290,7 @@ def create_admin_summary(tables, assignment_summary) -> None:
     except Exception as e:
         log.error(f"Error creating admin summary notification: {e}")
 
-def assign_jobs_to_citizens(dry_run: bool = False):
+def assign_jobs_to_citizens(dry_run: bool = False, noupdate: bool = False):
     """Main function to assign jobs to unemployed citizens."""
     log.info(f"Starting job assignment process (dry_run: {dry_run})")
     
@@ -396,7 +397,7 @@ def assign_jobs_to_citizens(dry_run: bool = False):
             assigned_count += 1
             assignments_by_type[business_type] += 1
         else:
-            success = assign_citizen_to_business(tables, citizen, business)
+            success = assign_citizen_to_business(tables, citizen, business, noupdate)
             if success:
                 assigned_count += 1
                 assignments_by_type[business_type] += 1
@@ -421,10 +422,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Assign jobs to unemployed citizens.")
     parser.add_argument("--dry-run", action="store_true", help="Run without making changes")
     parser.add_argument("--verbose", action="store_true", help="Enable verbose logging")
+    parser.add_argument("--noupdate", action="store_true", help="Skip updating citizen descriptions and images")
     
     args = parser.parse_args()
     
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
     
-    assign_jobs_to_citizens(dry_run=args.dry_run)
+    assign_jobs_to_citizens(dry_run=args.dry_run, noupdate=args.noupdate)
