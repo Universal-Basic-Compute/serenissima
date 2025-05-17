@@ -1920,34 +1920,44 @@ export class TransportService {
         
         // Create abort controller for timeout
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        const timeoutId = setTimeout(() => {
+          console.log('Fetch timeout after 10 seconds for bridges');
+          controller.abort();
+        }, 10000); // 10 second timeout
         
-        const bridgesResponse = await fetch(`${baseUrl}/api/bridges`, {
-          headers: {
-            'Content-Type': 'application/json',
-            'Citizen-Agent': 'Transport-Service'
-          },
-          cache: 'no-store',
-          signal: controller.signal
-        });
-        
-        clearTimeout(timeoutId);
-        
-        if (bridgesResponse.ok) {
-          const bridgesData = await bridgesResponse.json();
-          if (bridgesData.success && Array.isArray(bridgesData.bridges)) {
-            bridges = bridgesData.bridges;
-            console.log(`Successfully fetched ${bridges.length} bridges from API`);
-            bridgesFetched = true;
+        try {
+          const bridgesResponse = await fetch(`${baseUrl}/api/bridges`, {
+            headers: {
+              'Content-Type': 'application/json',
+              'Citizen-Agent': 'Transport-Service'
+            },
+            cache: 'no-store',
+            signal: controller.signal
+          });
+          
+          // Clear the timeout as soon as the response is received
+          clearTimeout(timeoutId);
+          
+          if (bridgesResponse.ok) {
+            const bridgesData = await bridgesResponse.json();
+            if (bridgesData.success && Array.isArray(bridgesData.bridges)) {
+              bridges = bridgesData.bridges;
+              console.log(`Successfully fetched ${bridges.length} bridges from API`);
+              bridgesFetched = true;
+            } else {
+              console.error('Invalid bridges data format:', bridgesData);
+              bridgeRetries++;
+            }
           } else {
-            console.error('Invalid bridges data format:', bridgesData);
+            console.error(`Failed to fetch bridges: ${bridgesResponse.status} ${bridgesResponse.statusText}`);
             bridgeRetries++;
+            // Add exponential backoff
+            await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, bridgeRetries)));
           }
-        } else {
-          console.error(`Failed to fetch bridges: ${bridgesResponse.status} ${bridgesResponse.statusText}`);
-          bridgeRetries++;
-          // Add exponential backoff
-          await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, bridgeRetries)));
+        } catch (error) {
+          // Make sure to clear the timeout if there's an error
+          clearTimeout(timeoutId);
+          throw error; // Re-throw to be caught by the outer catch
         }
       } catch (error) {
         console.error(`Error fetching bridges (attempt ${bridgeRetries + 1}):`, error);
