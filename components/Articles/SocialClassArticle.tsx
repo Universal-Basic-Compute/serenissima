@@ -238,7 +238,7 @@ const SocialClassArticle: React.FC<SocialClassArticleProps> = ({ onClose }) => {
                 <tbody>
                   <tr className="border-t border-amber-200">
                     <td className="px-4 py-2 font-medium">Nobili</td>
-                    <td className="px-4 py-2">All Tiers (1-5)</td>
+                    <td className="px-4 py-2">All Tiers (1-5)*</td>
                     <td className="px-4 py-2">Doge's Palace, St. Mark's Basilica, Grand Canal Palace, Arsenal Gate</td>
                   </tr>
                   <tr className="border-t border-amber-200 bg-amber-100/50">
@@ -262,6 +262,10 @@ const SocialClassArticle: React.FC<SocialClassArticleProps> = ({ onClose }) => {
             
             <p className="mt-3 text-amber-800">
               This tiered access system ensures that social advancement provides tangible economic benefits, as higher-tier buildings typically offer greater income potential, more advanced production capabilities, and access to more valuable resources and contracts.
+            </p>
+            
+            <p className="mt-2 text-amber-800 italic">
+              *Note: While Nobili can access all building tiers, tier 5 buildings (such as the Doge's Palace and St. Mark's Basilica) require a special decree from the Consiglio dei Dieci before construction can begin, regardless of social class.
             </p>
             
             <p className="mt-2 text-amber-800 italic">
