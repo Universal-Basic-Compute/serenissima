@@ -57,8 +57,15 @@ const ResourceItem: React.FC<ResourceItemProps> = ({ resource, type = 'store' })
           loading="lazy"
           unoptimized={true}
           onError={(e) => {
-            // Fallback to a default icon if the image fails to load
-            (e.target as HTMLImageElement).src = '/images/resources/default.png';
+            console.log(`Failed to load resource image: ${getIconPath()}, trying fallback paths`);
+            // Try alternative paths if the first one fails
+            (e.target as HTMLImageElement).src = `/resources/${resource.resourceType.toLowerCase().replace(/\s+/g, '_')}.png`;
+            (e.target as HTMLImageElement).onerror = () => {
+              (e.target as HTMLImageElement).src = '/images/resources/default.png';
+              (e.target as HTMLImageElement).onerror = () => {
+                (e.target as HTMLImageElement).src = '/resources/default.png';
+              };
+            };
           }}
         />
       </div>
