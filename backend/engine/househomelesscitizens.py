@@ -273,7 +273,7 @@ def house_homeless_citizens(dry_run: bool = False):
     # Process each homeless citizen
     for citizen in homeless_citizens:
         citizen_name = f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}"
-        social_class = citizen['fields'].get('SocialClass', '')"
+        social_class = citizen['fields'].get('SocialClass', '')
         
         log.info(f"Processing {citizen_name} ({social_class})")
         
