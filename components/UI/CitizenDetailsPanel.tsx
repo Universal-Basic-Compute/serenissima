@@ -440,6 +440,84 @@ Be historically accurate but engaging. Speak in first person as if you are this 
       if (!activitiesFetchAttemptedRef.current[citizen.citizenid]) {
         fetchCitizenActivities(citizen.citizenid);
       }
+      
+      // NEW CODE: If this is an AI citizen, send a POST request to initiate conversation
+      if (citizen.isai === true || citizen.isAi === true) {
+        // Get current citizen from localStorage
+        let currentUsername = 'visitor';
+        let currentFullName = 'Visitor';
+        let currentSocialClass = 'Visitor';
+        
+        const savedProfile = localStorage.getItem('citizenProfile');
+        if (savedProfile) {
+          try {
+            const profile = JSON.parse(savedProfile);
+            if (profile.username) {
+              currentUsername = profile.username;
+              currentFullName = `${profile.firstName || ''} ${profile.lastName || ''}`.trim();
+              currentSocialClass = profile.socialClass || 'Citizen';
+            }
+          } catch (error) {
+            console.error('Error parsing citizen profile:', error);
+          }
+        }
+        
+        // Use username as channel ID
+        const channelId = currentUsername;
+        
+        // Create system message for AI to initiate conversation
+        const systemMessage = `[SYSTEM]You just bumped into ${currentFullName} (${currentUsername} - ${currentSocialClass}) in the streets of Venice. Engage the conversation on relevant topics, if possible game-related[/SYSTEM]`;
+        
+        // Create system prompt with AI citizen info
+        const systemPrompt = `You are ${citizen.firstname} ${citizen.lastname}, a ${citizen.socialclass} citizen of Renaissance Venice. 
+Your description: ${citizen.description}
+Respond in character, with the personality, knowledge, and perspective of a ${citizen.socialclass} in 16th century Venice.
+Be historically accurate but engaging. Speak in first person as if you are this character.`;
+        
+        console.log(`Sending initial message to AI citizen ${citizen.citizenid} using channel ${channelId}`);
+        
+        // Send POST request to Kinos
+        fetch(
+          `https://api.kinos-engine.ai/v2/blueprints/serenissima-ai/kins/${citizen.citizenid}/channels/${channelId}/messages`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              content: systemMessage,
+              model: 'claude-3-7-sonnet-latest',
+              mode: 'creative',
+              addSystem: systemPrompt
+            }),
+          }
+        )
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`Failed to send initial message: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log('AI citizen initiated conversation:', data);
+          
+          // Add the assistant's response to the messages
+          setMessages(prev => [...prev, {
+            id: data.id,
+            role: 'assistant',
+            content: data.content,
+            timestamp: data.timestamp,
+            channel_id: channelId
+          }]);
+          
+          // Set isTyping to false in case it was set
+          setIsTyping(false);
+        })
+        .catch(error => {
+          console.error('Error sending initial message to AI citizen:', error);
+          // Don't add a fallback message here, as we already have a welcome message
+        });
+      }
     }
     
     // Add escape key handler
