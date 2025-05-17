@@ -1302,14 +1302,14 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                             <div 
                               key={message.id || `msg-${index}`} 
                               className={`mb-3 ${
-                                message.role === 'citizen' 
+                                message.role === 'user' 
                                   ? 'text-right' 
                                   : 'text-left'
                               }`}
                             >
                               <div 
                                 className={`inline-block p-3 rounded-lg max-w-[80%] ${
-                                  message.role === 'citizen'
+                                  message.role === 'user'
                                     ? 'citizen-bubble rounded-br-none'
                                     : 'assistant-bubble rounded-bl-none'
                                 }`}
