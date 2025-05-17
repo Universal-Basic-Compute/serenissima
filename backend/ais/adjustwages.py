@@ -451,10 +451,14 @@ def update_building_wage_amount(tables, building_id: str, new_wage_amount: float
         # Add or update the WagesReasoning field in the Notes
         existing_notes["WagesReasoning"] = reason
         
+        # Get current timestamp for UpdatedAt
+        now = datetime.now().isoformat()
+        
         # Prepare the update data
         update_data = {
             "Wages": new_wage_float,
-            "Notes": json.dumps(existing_notes)
+            "Notes": json.dumps(existing_notes),
+            "UpdatedAt": now  # Add UpdatedAt field
         }
         
         print(f"Updating building {building_id} with data: {json.dumps(update_data)}")
