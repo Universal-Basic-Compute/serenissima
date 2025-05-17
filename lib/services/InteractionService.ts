@@ -404,9 +404,11 @@ export class InteractionService {
             mouseY <= isoPos.y + pointSize + buffer
           ) {
             const pointId = `point-${point.lat}-${point.lng}`;
-            hoverType = 'buildingPoint';
-            hoverId = pointId;
-            hoverData = point;
+            newHoverState = {
+              type: 'buildingPoint',
+              id: pointId,
+              data: point
+            };
             canvas.style.cursor = 'pointer';
             hoverDetected = true;
             break;
@@ -430,12 +432,14 @@ export class InteractionService {
             const homeRadius = homeCitizens.length > 1 ? 25 : 20;
             
             if (Math.sqrt(Math.pow(mouseX - homeX, 2) + Math.pow(mouseY - homeY, 2)) <= homeRadius) {
-              hoverType = 'citizen';
-              hoverId = buildingId;
-              hoverData = { 
-                buildingId, 
-                citizenType: 'home',
-                citizen: homeCitizens.length === 1 ? homeCitizens[0] : null
+              newHoverState = {
+                type: 'citizen',
+                id: buildingId,
+                data: { 
+                  buildingId, 
+                  citizenType: 'home',
+                  citizen: homeCitizens.length === 1 ? homeCitizens[0] : null
+                }
               };
               canvas.style.cursor = 'pointer';
               hoverDetected = true;
@@ -452,12 +456,14 @@ export class InteractionService {
             const workRadius = workCitizens.length > 1 ? 25 : 20;
             
             if (Math.sqrt(Math.pow(mouseX - workX, 2) + Math.pow(mouseY - workY, 2)) <= workRadius) {
-              hoverType = 'citizen';
-              hoverId = buildingId;
-              hoverData = { 
-                buildingId, 
-                citizenType: 'work',
-                citizen: workCitizens.length === 1 ? workCitizens[0] : null
+              newHoverState = {
+                type: 'citizen',
+                id: buildingId,
+                data: { 
+                  buildingId, 
+                  citizenType: 'work',
+                  citizen: workCitizens.length === 1 ? workCitizens[0] : null
+                }
               };
               canvas.style.cursor = 'pointer';
               hoverDetected = true;
@@ -496,6 +502,11 @@ export class InteractionService {
                 if (this.hoveredCanalPointIdRef !== pointId) {
                   hoverStateService.setHoveredCanalPoint(pointId);
                 }
+                newHoverState = {
+                  type: 'canalPoint',
+                  id: pointId,
+                  data: point
+                };
                 canvas.style.cursor = 'pointer';
                 hoverDetected = true;
                 break;
@@ -535,6 +546,11 @@ export class InteractionService {
                 if (this.hoveredBridgePointIdRef !== pointId) {
                   hoverStateService.setHoveredBridgePoint(pointId);
                 }
+                newHoverState = {
+                  type: 'bridgePoint',
+                  id: pointId,
+                  data: point
+                };
                 canvas.style.cursor = 'pointer';
                 hoverDetected = true;
                 break;
@@ -568,6 +584,11 @@ export class InteractionService {
             mouseY <= isoPos.y + pointSize * 2
           ) {
             hoverStateService.setHoveredWaterPoint(waterPoint.id);
+            newHoverState = {
+              type: 'waterPoint',
+              id: waterPoint.id,
+              data: waterPoint
+            };
             canvas.style.cursor = 'pointer';
             hoverDetected = true;
             break;
