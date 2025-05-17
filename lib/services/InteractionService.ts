@@ -300,7 +300,10 @@ export class InteractionService {
       if (data.polygonsToRender && activeView === 'land') {
         for (const { polygon, coords } of data.polygonsToRender) {
           if (RenderService.prototype.isPointInPolygon(mouseX, mouseY, coords)) {
-            hoverStateService.setHoveredPolygon(polygon.id);
+            // Only update if the hovered polygon has changed
+            if (this.hoveredPolygonIdRef !== polygon.id) {
+              hoverStateService.setHoveredPolygon(polygon.id);
+            }
             canvas.style.cursor = 'pointer';
             hoverDetected = true;
             break;
@@ -352,7 +355,10 @@ export class InteractionService {
             mouseY >= isoPos.y - squareSize/2 - 2 && // Add 2px buffer
             mouseY <= isoPos.y + squareSize/2 + 2    // Add 2px buffer
           ) {
-            hoverStateService.setHoveredBuilding(building.id);
+            // Only update if the hovered building has changed
+            if (this.hoveredBuildingIdRef !== building.id) {
+              hoverStateService.setHoveredBuilding(building.id);
+            }
             canvas.style.cursor = 'pointer';
             hoverDetected = true;
             break;
@@ -464,7 +470,10 @@ export class InteractionService {
                 mouseY <= isoPos.y + pointSize * 2
               ) {
                 const pointId = point.id || `canal-${point.edge.lat}-${point.edge.lng}`;
-                hoverStateService.setHoveredCanalPoint(pointId);
+                // Only update if the hovered canal point has changed
+                if (this.hoveredCanalPointIdRef !== pointId) {
+                  hoverStateService.setHoveredCanalPoint(pointId);
+                }
                 canvas.style.cursor = 'pointer';
                 hoverDetected = true;
                 break;
@@ -500,7 +509,10 @@ export class InteractionService {
                 mouseY <= isoPos.y + pointSize * 2
               ) {
                 const pointId = point.id || `bridge-${point.edge.lat}-${point.edge.lng}`;
-                hoverStateService.setHoveredBridgePoint(pointId);
+                // Only update if the hovered bridge point has changed
+                if (this.hoveredBridgePointIdRef !== pointId) {
+                  hoverStateService.setHoveredBridgePoint(pointId);
+                }
                 canvas.style.cursor = 'pointer';
                 hoverDetected = true;
                 break;
@@ -552,7 +564,7 @@ export class InteractionService {
           canvas.style.cursor = 'grab';
         }
       }
-    }, 100); // Increase from 50ms to 100ms throttle time to reduce flickering
+    }, 150); // Increase from 100ms to 150ms throttle time to further reduce flickering
     
     // Handle mouse click with debounce to prevent multiple rapid clicks
     const handleClick = debounce((e: MouseEvent) => {
