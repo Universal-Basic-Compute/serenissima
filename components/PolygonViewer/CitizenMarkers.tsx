@@ -3,6 +3,7 @@ import { citizenService } from '@/lib/services/CitizenService';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 import { CoordinateService } from '@/lib/services/CoordinateService';
 import CitizenDetailsPanel from '@/components/UI/CitizenDetailsPanel';
+import { hoverStateService } from '@/lib/services/HoverStateService';
 
 // Helper function to calculate distance between two geographic points using the Haversine formula
 const calculateDistance = (point1: {lat: number, lng: number}, point2: {lat: number, lng: number}): number => {
@@ -393,7 +394,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     
     setHoveredCitizenPaths(paths);
     
-    // NEW CODE: Update the hover state service with the citizen data
+    // Update the hover state service with the citizen data
     hoverStateService.setHoveredCitizen(citizen, null, null);
     
     // Log the paths for debugging
