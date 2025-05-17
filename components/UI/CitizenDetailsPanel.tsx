@@ -819,10 +819,6 @@ Be historically accurate but engaging. Speak in first person as if you are this 
         </div>
       </div>
       
-          </div>
-        </div>
-      </div>
-      
       <div className="mt-4 text-xs text-amber-500 italic text-center">
         Citizen of Venice since {formatDate(citizen.createdat)}
       </div>
