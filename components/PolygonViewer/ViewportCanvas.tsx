@@ -153,7 +153,7 @@ export default function ViewportCanvas({
   const [minIncome, setMinIncome] = useState<number>(0);
   const [maxIncome, setMaxIncome] = useState<number>(1000);
   const [incomeDataLoaded, setIncomeDataLoaded] = useState<boolean>(false);
-  const [citizens, setCitizens] = useState<any[]>([]);
+  const [citizensList, setCitizensList] = useState<any[]>([]);
   const [citizensByBuilding, setCitizensByBuilding] = useState<Record<string, any[]>>({});
   const [citizensLoaded, setCitizensLoaded] = useState<boolean>(false);
   const [transportMode, setTransportMode] = useState<boolean>(false);
@@ -208,7 +208,7 @@ export default function ViewportCanvas({
         // Load citizens if in citizens view
         if (activeView === 'citizens') {
           const citizensResult = await dataService.loadCitizens();
-          setCitizens(citizensResult.citizens);
+          setCitizensList(citizensResult.citizens);
           setCitizensByBuilding(citizensResult.citizensByBuilding);
           setCitizensLoaded(true);
         }
