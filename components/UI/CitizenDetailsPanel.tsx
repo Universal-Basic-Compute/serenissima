@@ -817,7 +817,7 @@ Be historically accurate but engaging. Speak in first person as if you are this 
               <>
                 {messages.map((message) => (
                   <div 
-                    key={message.id} 
+                    key={message.id || `msg-${Date.now()}-${Math.random()}`} 
                     className={`mb-3 ${
                       message.role === 'citizen' 
                         ? 'text-right' 
@@ -872,7 +872,7 @@ Be historically accurate but engaging. Speak in first person as if you are this 
                 
                 {/* Typing indicator */}
                 {isTyping && (
-                  <div className="text-left mb-3">
+                  <div className="text-left mb-3" key="typing-indicator">
                     <div className="inline-block p-3 rounded-lg max-w-[80%] bg-amber-700 text-white rounded-bl-none">
                       <div className="flex space-x-2">
                         <div className="w-2 h-2 bg-amber-300 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
