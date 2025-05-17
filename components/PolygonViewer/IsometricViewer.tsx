@@ -129,6 +129,31 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     }
   }, []);
   
+  // Function to get color based on building category
+  const getBuildingCategoryColor = (category: string): string => {
+    // Default to black if no category
+    if (!category) return '#000000';
+    
+    // Convert to lowercase for case-insensitive comparison
+    const lowerCategory = category.toLowerCase();
+    
+    // Return color based on category
+    switch(lowerCategory) {
+      case 'bridge':
+        return '#8B4513'; // Brown for bridges
+      case 'business':
+        return '#4B0082'; // Indigo for businesses
+      case 'dock':
+        return '#1E90FF'; // Dodger blue for docks
+      case 'home':
+        return '#228B22'; // Forest green for homes
+      case 'well':
+        return '#4682B4'; // Steel blue for wells
+      default:
+        return '#000000'; // Black for unknown categories
+    }
+  };
+  
   // Helper function to convert screen coordinates to lat/lng
   const screenToLatLng = (
     screenX: number, 
