@@ -23,6 +23,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [messagesFetchFailed, setMessagesFetchFailed] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
   const [playingMessageId, setPlayingMessageId] = useState<string | null>(null);
@@ -71,7 +72,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
   };
   // Function to fetch message history
   const fetchMessageHistory = async () => {
-    if (!citizen || !citizen.citizenid) return;
+    if (!citizen || !citizen.citizenid || messagesFetchFailed) return;
     
     setIsLoadingHistory(true);
     try {
@@ -97,6 +98,8 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
             timestamp: new Date().toISOString()
           }
         ]);
+        // Set the flag to prevent further fetch attempts
+        setMessagesFetchFailed(true);
         setIsLoadingHistory(false);
         return; // Exit early to prevent re-fetching
       }
@@ -119,6 +122,8 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
           timestamp: new Date().toISOString()
         }
       ]);
+      // Set the flag to prevent further fetch attempts
+      setMessagesFetchFailed(true);
     } finally {
       setIsLoadingHistory(false);
     }
@@ -265,9 +270,10 @@ Be historically accurate but engaging. Speak in first person as if you are this 
     setWorkBuilding(null);
     setIsLoadingBuildings(false);
     setActivities([]);
+    setMessagesFetchFailed(false); // Reset the flag when citizen changes
     
     // Load message history when citizen changes
-    if (citizen && citizen.citizenid) {
+    if (citizen && citizen.citizenid && !messagesFetchFailed) {
       fetchMessageHistory();
     }
     
