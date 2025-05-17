@@ -353,7 +353,7 @@ export const HoverTooltip: React.FC = () => {
             {Object.keys(resourceBreakdown).length > 0 && (
               <div className="bg-green-800/30 p-2 rounded mb-2">
                 <div className="font-medium text-green-400 mb-1">Publicly Sold Resources:</div>
-                {Object.entries(resourceBreakdown).map(([resourceType, data]) => (
+                {Object.entries(resourceBreakdown).map(([resourceType, data]: [string, { totalAmount: number, avgPrice: number, count: number }]) => (
                   <div key={resourceType} className="flex justify-between items-center text-sm mb-1 border-b border-green-800/30 pb-1 last:border-0 last:pb-0">
                     <span className="text-white capitalize">{resourceType.replace(/_/g, ' ')}</span>
                     <div className="flex flex-col items-end">
