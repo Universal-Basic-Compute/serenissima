@@ -37,8 +37,7 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
   const [buildingImagePath, setBuildingImagePath] = useState<string | null>(null);
   
   useEffect(() => {
-    // Create a throttled state updater to prevent too many re-renders
-    const throttledStateUpdate = throttle((data: any) => {
+    const handleHoverStateChanged = throttle((data: any) => {
       console.log('TOOLTIP: Hover state changed event received:', data);
       setHoverState(hoverStateService.getState());
       
