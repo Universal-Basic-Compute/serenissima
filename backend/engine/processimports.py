@@ -518,48 +518,6 @@ def process_import_contract(tables, contract: Dict, building_types: Dict, resour
         
         # All checks passed, proceed with the import
         
-        # 1. Transfer money from buyer to seller (Italia/Treasury)
-        # Update buyer's balance
-        formula = f"{{Username}}='{buyer}'"
-        citizens = tables['citizens'].all(formula=formula)
-        
-        if not citizens:
-            log.warning(f"Citizen {buyer} not found")
-            return False
-        
-        citizen_id = citizens[0]['id']
-        new_balance = buyer_balance - total_cost
-        
-        tables['citizens'].update(citizen_id, {
-            'Ducats': new_balance
-        })
-        
-        log.info(f"Updated {buyer}'s balance from {buyer_balance} to {new_balance}")
-        
-        # 2. Create a transaction record
-        now = datetime.now().isoformat()
-        
-        transaction = {
-            "Type": "import",
-            "AssetId": resource_type,
-            "Seller": "Italia",
-            "Buyer": buyer,
-            "Price": total_cost,
-            "CreatedAt": now,
-            "UpdatedAt": now,
-            "ExecutedAt": now,
-            "Notes": json.dumps({
-                "contract_id": contract_id,
-                "resource_type": resource_type,
-                "amount": import_amount,
-                "price_per_unit": price_per_resource,
-                "building_id": buyer_building_id
-            })
-        }
-        
-        tables['transactions'].create(transaction)
-        log.info(f"Created transaction record for import of {hourly_amount} {resource_type}")
-        
         # 3. Find or generate a citizen for delivery
         delivery_citizen = find_available_citizen(tables)
         
@@ -587,8 +545,8 @@ def process_import_contract(tables, contract: Dict, building_types: Dict, resour
         
         log.info(f"Successfully created delivery activity for {import_amount} {resource_type}")
         
-        # Note: We don't close or update the contract here
-        # The contract will be updated when the delivery activity is completed
+        # Note: We don't process payment or close the contract here
+        # The payment and contract update will happen when the delivery activity is completed
         return True
     except Exception as e:
         log.error(f"Error processing import contract {contract.get('id', 'unknown')}: {e}")
