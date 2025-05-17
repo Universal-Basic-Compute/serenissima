@@ -1920,9 +1920,10 @@ export class TransportService {
         
         // Create abort controller for timeout
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => {
+        let timeoutId: NodeJS.Timeout | null = setTimeout(() => {
           console.log('Fetch timeout after 10 seconds for bridges');
           controller.abort();
+          timeoutId = null;
         }, 10000); // 10 second timeout
         
         try {
@@ -1936,7 +1937,10 @@ export class TransportService {
           });
           
           // Clear the timeout as soon as the response is received
-          clearTimeout(timeoutId);
+          if (timeoutId) {
+            clearTimeout(timeoutId);
+            timeoutId = null;
+          }
           
           if (bridgesResponse.ok) {
             const bridgesData = await bridgesResponse.json();
@@ -1956,7 +1960,18 @@ export class TransportService {
           }
         } catch (error) {
           // Make sure to clear the timeout if there's an error
-          clearTimeout(timeoutId);
+          if (timeoutId) {
+            clearTimeout(timeoutId);
+            timeoutId = null;
+          }
+          
+          // Check if this is an abort error
+          if (error instanceof Error && error.name === 'AbortError') {
+            console.error('Fetch request for bridges was aborted due to timeout');
+          } else {
+            console.error('Error during fetch:', error);
+          }
+          
           throw error; // Re-throw to be caught by the outer catch
         }
       } catch (error) {
@@ -1990,9 +2005,10 @@ export class TransportService {
         
         // Create abort controller for timeout
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => {
+        let timeoutId: NodeJS.Timeout | null = setTimeout(() => {
           console.log('Fetch timeout after 10 seconds for docks');
           controller.abort();
+          timeoutId = null;
         }, 10000); // 10 second timeout
         
         try {
@@ -2006,7 +2022,10 @@ export class TransportService {
           });
           
           // Clear the timeout as soon as the response is received
-          clearTimeout(timeoutId);
+          if (timeoutId) {
+            clearTimeout(timeoutId);
+            timeoutId = null;
+          }
           
           if (docksResponse.ok) {
             const docksData = await docksResponse.json();
@@ -2026,7 +2045,18 @@ export class TransportService {
           }
         } catch (error) {
           // Make sure to clear the timeout if there's an error
-          clearTimeout(timeoutId);
+          if (timeoutId) {
+            clearTimeout(timeoutId);
+            timeoutId = null;
+          }
+          
+          // Check if this is an abort error
+          if (error instanceof Error && error.name === 'AbortError') {
+            console.error('Fetch request for docks was aborted due to timeout');
+          } else {
+            console.error('Error during fetch:', error);
+          }
+          
           throw error; // Re-throw to be caught by the outer catch
         }
       } catch (error) {
