@@ -553,9 +553,21 @@ export class InteractionService {
         }
       }
       
-      // If no hover was detected, clear all hover states
+      // If no hover was detected, only clear hover states if we previously had something hovered
       if (!hoverDetected) {
-        hoverStateService.clearAllHoverStates();
+        // Only clear if we actually have something hovered
+        if (
+          this.hoveredPolygonIdRef !== null || 
+          this.hoveredBuildingIdRef !== null || 
+          this.hoveredCanalPointIdRef !== null || 
+          this.hoveredBridgePointIdRef !== null || 
+          this.hoveredCitizenBuildingRef !== null ||
+          this.hoveredResourceIdRef !== null ||
+          this.hoveredWaterPointIdRef !== null ||
+          this.hoveredBuildingPointRef !== null
+        ) {
+          hoverStateService.clearAllHoverStates();
+        }
         
         // Set cursor based on dragging state
         if (this.isDraggingRef) {
