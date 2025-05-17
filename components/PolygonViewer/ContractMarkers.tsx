@@ -176,9 +176,9 @@ export default function ContractMarkers({
   if (!isVisible) return null;
   
   return (
-    <div className="absolute inset-0 pointer-events-none">
+    <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 10 }}>
       {/* Filter controls - make this part pointer-events-auto */}
-      <div className="absolute bottom-4 left-20 bg-black/70 rounded-lg p-2 pointer-events-auto z-50">
+      <div className="absolute bottom-4 left-20 bg-black/70 rounded-lg p-2 pointer-events-auto z-10">
         <div className="flex justify-between items-center mb-2">
           <div className="text-white text-sm">Filter by Contract Type:</div>
           <button 
@@ -319,7 +319,7 @@ export default function ContractMarkers({
                         </div>
                           
                         {/* Detailed tooltip */}
-                        <div className="absolute opacity-0 group-hover:opacity-100 bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-3 bg-black/90 text-white text-xs rounded w-56 pointer-events-none transition-opacity z-50">
+                        <div className="absolute opacity-0 group-hover:opacity-100 bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-3 bg-black/90 text-white text-xs rounded w-56 pointer-events-none transition-opacity z-15">
                           <div className="font-bold text-amber-300 text-base">{resourceType}</div>
                           <div className="mt-1 text-xs">
                             {contract.type === 'public_sell' ? 'Public Sell Contract' : 
