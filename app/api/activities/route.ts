@@ -39,7 +39,7 @@ export async function GET(request: Request) {
     
     // Add path filter if requested
     if (hasPath) {
-      const pathFilter = `NOT({Path}=''), NOT({Path}=NULL())`;
+      const pathFilter = `AND(NOT({Path} = ''), NOT({Path} = BLANK()))`;
       filterByFormula = filterByFormula 
         ? `AND(${filterByFormula}, ${pathFilter})` 
         : pathFilter;

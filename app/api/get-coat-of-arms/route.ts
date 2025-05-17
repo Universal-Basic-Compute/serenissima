@@ -54,7 +54,7 @@ export async function GET() {
         
         // Store both URLs for better fallback options
         coatOfArms[username as string] = imageUrl;
-        console.log(`Coat of arms for ${username}: ${imageUrl} (local fallback: ${localUrl})`);
+        //console.log(`Coat of arms for ${username}: ${imageUrl} (local fallback: ${localUrl})`);
       }
     });
     

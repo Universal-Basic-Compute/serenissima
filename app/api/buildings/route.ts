@@ -366,7 +366,7 @@ export async function GET(request: Request) {
       // If we have a Point field, try to extract coordinates from it
       if (fields.Point) {
         const pointId = String(fields.Point);
-        console.log(`[API] Building ${fields.BuildingId || record.id} has Point ID: ${pointId}, attempting to extract position`);
+        //console.log(`[API] Building ${fields.BuildingId || record.id} has Point ID: ${pointId}, attempting to extract position`);
         
         // Try to extract coordinates from the Point field (format: type_lat_lng)
         const parts = pointId.split('_');
@@ -376,7 +376,7 @@ export async function GET(request: Request) {
           
           if (!isNaN(lat) && !isNaN(lng)) {
             position = { lat, lng };
-            console.log(`[API] Extracted coordinates from Point field for building ${fields.BuildingId || record.id}: lat=${lat}, lng=${lng}`);
+            //console.log(`[API] Extracted coordinates from Point field for building ${fields.BuildingId || record.id}: lat=${lat}, lng=${lng}`);
           } else {
             console.warn(`[API] Could not parse coordinates from Point field: ${pointId}`);
             
@@ -449,7 +449,7 @@ export async function GET(request: Request) {
       // Check if position has lat/lng format
       if (position && typeof position === 'object') {
         if ('lat' in position && 'lng' in position) {
-          console.log(`[API] Building ${fields.BuildingId || record.id} has lat/lng position:`, position);
+          //console.log(`[API] Building ${fields.BuildingId || record.id} has lat/lng position:`, position);
         } else {
           console.warn(`[API] Building ${fields.BuildingId || record.id} does NOT have lat/lng position:`, position);
         }

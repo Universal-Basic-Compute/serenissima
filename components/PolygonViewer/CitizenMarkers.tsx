@@ -786,10 +786,10 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
               `${firstName} ${lastName}`.trim() : 
               `Citizen ${citizen.citizenid || citizen.CitizenId || citizen.id || 'unknown'}`;
             
-            console.log(`Citizen ${displayName} position:`, {
+            /**console.log(`Citizen ${displayName} position:`, {
               original: originalPos,
               screen: position
-            });
+            });*/
           }
           
           // Skip if position is off-screen (with some margin)

@@ -26,7 +26,7 @@ def initialize_airtable():
     api = Api(airtable_api_key)
     
     tables = {
-        "users": Table(airtable_api_key, airtable_base_id, "Users"),
+        "users": Table(airtable_api_key, airtable_base_id, "USERS"),
         "buildings": Table(airtable_api_key, airtable_base_id, "BUILDINGS"),
         "citizens": Table(airtable_api_key, airtable_base_id, "CITIZENS"),
         "notifications": Table(airtable_api_key, airtable_base_id, "NOTIFICATIONS")

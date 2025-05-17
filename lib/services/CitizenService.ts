@@ -44,7 +44,7 @@ export class CitizenService {
             if (position && typeof position === 'object' && 
                 'lat' in position && 'lng' in position &&
                 typeof position.lat === 'number' && typeof position.lng === 'number') {
-              console.log(`Valid position for citizen ${citizen.id || citizen.CitizenId}:`, position);
+              //console.log(`Valid position for citizen ${citizen.id || citizen.CitizenId}:`, position);
             } else {
               console.warn(`Invalid position for citizen ${citizen.id || citizen.CitizenId}:`, position);
               
