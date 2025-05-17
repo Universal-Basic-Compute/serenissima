@@ -1980,34 +1980,44 @@ export class TransportService {
         
         // Create abort controller for timeout
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        const timeoutId = setTimeout(() => {
+          console.log('Fetch timeout after 10 seconds for docks');
+          controller.abort();
+        }, 10000); // 10 second timeout
         
-        const docksResponse = await fetch(`${baseUrl}/api/docks`, {
-          headers: {
-            'Content-Type': 'application/json',
-            'Citizen-Agent': 'Transport-Service'
-          },
-          cache: 'no-store',
-          signal: controller.signal
-        });
-        
-        clearTimeout(timeoutId);
-        
-        if (docksResponse.ok) {
-          const docksData = await docksResponse.json();
-          if (docksData.success && Array.isArray(docksData.docks)) {
-            docks = docksData.docks;
-            console.log(`Successfully fetched ${docks.length} docks from API`);
-            docksFetched = true;
+        try {
+          const docksResponse = await fetch(`${baseUrl}/api/docks`, {
+            headers: {
+              'Content-Type': 'application/json',
+              'Citizen-Agent': 'Transport-Service'
+            },
+            cache: 'no-store',
+            signal: controller.signal
+          });
+          
+          // Clear the timeout as soon as the response is received
+          clearTimeout(timeoutId);
+          
+          if (docksResponse.ok) {
+            const docksData = await docksResponse.json();
+            if (docksData.success && Array.isArray(docksData.docks)) {
+              docks = docksData.docks;
+              console.log(`Successfully fetched ${docks.length} docks from API`);
+              docksFetched = true;
+            } else {
+              console.error('Invalid docks data format:', docksData);
+              dockRetries++;
+            }
           } else {
-            console.error('Invalid docks data format:', docksData);
+            console.error(`Failed to fetch docks: ${docksResponse.status} ${docksResponse.statusText}`);
             dockRetries++;
+            // Add exponential backoff
+            await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, dockRetries)));
           }
-        } else {
-          console.error(`Failed to fetch docks: ${docksResponse.status} ${docksResponse.statusText}`);
-          dockRetries++;
-          // Add exponential backoff
-          await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, dockRetries)));
+        } catch (error) {
+          // Make sure to clear the timeout if there's an error
+          clearTimeout(timeoutId);
+          throw error; // Re-throw to be caught by the outer catch
         }
       } catch (error) {
         console.error(`Error fetching docks (attempt ${dockRetries + 1}):`, error);
