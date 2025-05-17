@@ -169,17 +169,24 @@ def assign_citizen_to_building(tables, citizen: Dict, building: Dict) -> bool:
     """Assign a citizen to a building by updating the Occupant field and sending notifications."""
     try:
         citizen_id = citizen['id']
+        # Get the citizen's username
+        citizen_username = citizen['fields'].get('Username', '')
+        
+        # If username is missing, fall back to ID
+        if not citizen_username:
+            citizen_username = citizen_id
+            
         building_id = building['id']
         citizen_name = f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}"
         building_name = building['fields'].get('Name', building['fields'].get('Type', 'Unknown building'))
         
         log.info(f"Assigning {citizen_name} to {building_name}")
         
-        # Update the building's Occupant field
+        # Update the building's Occupant field with the username instead of ID
         tables['buildings'].update(
             building_id,
             {
-                'Occupant': citizen_id
+                'Occupant': citizen_username
             }
         )
         
