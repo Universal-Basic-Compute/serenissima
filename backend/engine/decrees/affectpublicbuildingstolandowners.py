@@ -103,7 +103,7 @@ def get_land_owners(tables) -> Dict[str, str]:
         land_owners = {}
         for land in lands:
             land_id = land['fields'].get('LandId')
-            owner = land['fields'].get('Citizen')  # This should already be the Username
+            owner = land['fields'].get('Owner')  # This should already be the Username
             
             if land_id and owner:
                 land_owners[land_id] = owner

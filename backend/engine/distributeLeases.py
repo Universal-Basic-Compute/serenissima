@@ -70,8 +70,8 @@ def get_all_lands(tables) -> List[Dict]:
     log.info("Fetching all lands with owners...")
     
     try:
-        # Get lands that have a Citizen field (owner)
-        formula = "NOT(OR({Citizen} = '', {Citizen} = BLANK()))"
+        # Get lands that have a Owner field (owner)
+        formula = "NOT(OR({Owner} = '', {Owner} = BLANK()))"
         lands = tables['lands'].all(formula=formula)
         
         log.info(f"Found {len(lands)} lands with owners")
@@ -668,10 +668,10 @@ def distribute_leases(dry_run: bool = False):
             try:
                 land_id = land['id']
                 land_name = land['fields'].get('HistoricalName', land['fields'].get('EnglishName', land_id))
-                land_owner = land['fields'].get('Citizen', '')
-                
+                land_owner = land['fields'].get('Owner', '')
+            
                 log.info(f"Processing land {land_name} (ID: {land_id}) owned by {land_owner}")
-                
+            
                 # Skip if no owner
                 if not land_owner:
                     log.warning(f"Land {land_id} has no owner, skipping")
