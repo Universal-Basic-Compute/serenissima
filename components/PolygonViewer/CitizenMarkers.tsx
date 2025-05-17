@@ -1002,12 +1002,23 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
               const totalLength = activity.path.length;
               const segmentIndex = Math.floor(animatedCitizen.progress * (totalLength - 1));
               
-              // Only render from current position to end
-              pathToRender = activity.path.slice(segmentIndex);
-              
-              // Replace the first point with the current interpolated position
-              // This ensures the path starts exactly at the citizen's current position
-              pathToRender = [animatedCitizen.currentPosition, ...pathToRender.slice(1)];
+              // Instead of including all points in the current segment,
+              // just create a direct path from current position to the end of the current segment
+              // and then include all remaining points
+              if (segmentIndex + 1 < totalLength) {
+                const currentSegmentEnd = activity.path[segmentIndex + 1];
+                
+                // Create a new path that starts at the current position, goes to the end of the current segment,
+                // and then includes all remaining points
+                pathToRender = [
+                  animatedCitizen.currentPosition, 
+                  currentSegmentEnd, 
+                  ...activity.path.slice(segmentIndex + 2)
+                ];
+              } else {
+                // If we're at the last segment, just show a path from current position to end
+                pathToRender = [animatedCitizen.currentPosition, activity.path[totalLength - 1]];
+              }
             }
             
             // Generate points string with validation
