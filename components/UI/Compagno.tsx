@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { FaTimes, FaChevronDown, FaSpinner, FaVolumeUp, FaVolumeMute, FaBell, FaCitizen, FaSearch, FaArrowLeft } from 'react-icons/fa';
+import { FaTimes, FaChevronDown, FaSpinner, FaVolumeUp, FaVolumeMute, FaBell, FaUser, FaSearch, FaArrowLeft } from 'react-icons/fa';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { timeDescriptionService } from '@/lib/services/TimeDescriptionService';
@@ -1484,7 +1484,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                   <div className="flex-1 flex items-center justify-center bg-amber-50 bg-opacity-80">
                     <div className="text-center p-6">
                       <div className="w-16 h-16 mx-auto mb-4 opacity-50">
-                        <FaUserclassName="w-full h-full text-amber-400" />
+                        <FaUser className="w-full h-full text-amber-400" />
                       </div>
                       <h3 className="text-lg font-medium text-amber-800 mb-2">Select a Conversation</h3>
                       <p className="text-sm text-amber-600">
