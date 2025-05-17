@@ -598,7 +598,7 @@ const TransportDebugPanel: React.FC<TransportDebugPanelProps> = ({ onClose, visi
                       return Object.entries(stats.pointsByType).map(([type, count]) => (
                         <div key={type} className="bg-white p-3 rounded shadow-sm">
                           <p className="text-sm text-amber-600">{type.charAt(0).toUpperCase() + type.slice(1)}</p>
-                          <p className="text-2xl font-bold text-amber-800">{count}</p>
+                          <p className="text-2xl font-bold text-amber-800">{String(count)}</p>
                         </div>
                       ));
                     })()}
@@ -615,7 +615,7 @@ const TransportDebugPanel: React.FC<TransportDebugPanelProps> = ({ onClose, visi
                       return Object.entries(stats.pointsByMode).map(([mode, count]) => (
                         <div key={mode} className="bg-white p-3 rounded shadow-sm">
                           <p className="text-sm text-amber-600">{mode.charAt(0).toUpperCase() + mode.slice(1)}</p>
-                          <p className="text-2xl font-bold text-amber-800">{count}</p>
+                          <p className="text-2xl font-bold text-amber-800">{String(count)}</p>
                         </div>
                       ));
                     })()}

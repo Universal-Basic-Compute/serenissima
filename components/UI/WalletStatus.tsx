@@ -20,7 +20,7 @@ export default function WalletStatus({ className = '' }: WalletStatusProps) {
         try {
           // Import the CitizenService to reconnect the wallet
           const { CitizenService } = await import('@/lib/services/CitizenService');
-          const citizenService = CitizenService.getInstance();
+          const citizenService = new CitizenService();
           await citizenService.connectWallet(storedWallet);
           console.log('Successfully reconnected wallet from storage');
         } catch (error) {
