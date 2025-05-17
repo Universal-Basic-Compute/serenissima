@@ -454,10 +454,10 @@ def create_notification(tables, username: str, old_description: str, new_descrip
     
     try:
         # Create notification content
-        content = "Your citizen profile has been updated with a new description and portrait reflecting your recent activities, achievements, and status in Venice."
+        content = "🖼️ Your citizen profile has been updated with a new **description** and **portrait** reflecting your recent **activities**, **achievements**, and **status** in Venice."
         
         # Extract a brief summary of changes by comparing old and new descriptions
-        summary = "Your portrait and description have been updated to better reflect your current status and history in Venice."
+        summary = "🔄 Your **portrait** and **description** have been updated to better reflect your current **status** and **history** in Venice."
         
         # Create the notification record
         tables['notifications'].create({
@@ -468,7 +468,7 @@ def create_notification(tables, username: str, old_description: str, new_descrip
                 "old_description": old_description,
                 "new_description": new_description,
                 "summary": summary,
-                "reason": "Your character has evolved through your experiences in Venice",
+                "reason": "✨ Your character has **evolved** through your experiences in **Venice**",
                 "timestamp": datetime.datetime.now().isoformat()
             }),
             "CreatedAt": datetime.datetime.now().isoformat(),
