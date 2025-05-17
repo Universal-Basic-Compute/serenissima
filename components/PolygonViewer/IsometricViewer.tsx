@@ -2818,19 +2818,65 @@ number => {
         const isBridge = building.type.toLowerCase().includes('bridge');
         
         if (isBridge) {
-          // Draw a thin rectangle for bridges
-          const bridgeWidth = squareSize * 1.5; // Make bridge wider
-          const bridgeHeight = squareSize * 0.3; // Make bridge thinner
+          // Make the bridge rectangle smaller
+          const bridgeWidth = squareSize * 1.2; // Reduced from 1.5
+          const bridgeHeight = squareSize * 0.25; // Reduced from 0.3
           
-          ctx.beginPath();
-          ctx.rect(
-            isoPos.x - bridgeWidth/2, 
-            isoPos.y - bridgeHeight/2, 
-            bridgeWidth, 
-            bridgeHeight
-          );
-          ctx.fill();
-          ctx.stroke();
+          // Find the polygon this bridge is on
+          let polygonCenter = { x: 0, y: 0 };
+          let foundPolygon = false;
+          
+          // Try to find which polygon contains this bridge
+          for (const poly of polygonsToRender) {
+            if (poly.polygon.id === building.land_id) {
+              // Use the polygon's center
+              polygonCenter.x = poly.centerX;
+              polygonCenter.y = poly.centerY;
+              foundPolygon = true;
+              break;
+            }
+          }
+          
+          // If we couldn't find the polygon, use default orientation
+          if (!foundPolygon) {
+            ctx.beginPath();
+            ctx.rect(
+              isoPos.x - bridgeWidth/2, 
+              isoPos.y - bridgeHeight/2, 
+              bridgeWidth, 
+              bridgeHeight
+            );
+            ctx.fill();
+            ctx.stroke();
+          } else {
+            // Calculate angle from bridge to polygon center
+            const dx = polygonCenter.x - isoPos.x;
+            const dy = polygonCenter.y - isoPos.y;
+            const angle = Math.atan2(dy, dx);
+            
+            // Save the current context state
+            ctx.save();
+            
+            // Translate to the bridge position
+            ctx.translate(isoPos.x, isoPos.y);
+            
+            // Rotate the context
+            ctx.rotate(angle);
+            
+            // Draw the rectangle centered at origin (0,0)
+            ctx.beginPath();
+            ctx.rect(
+              -bridgeWidth/2, 
+              -bridgeHeight/2, 
+              bridgeWidth, 
+              bridgeHeight
+            );
+            ctx.fill();
+            ctx.stroke();
+            
+            // Restore the context state
+            ctx.restore();
+          }
         } else {
           // Draw square for non-bridge buildings
           ctx.beginPath();
