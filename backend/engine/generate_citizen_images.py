@@ -19,6 +19,7 @@ import json
 import time
 import requests
 import subprocess
+import re
 from typing import Dict, List, Optional, Any
 from pyairtable import Api, Table
 from dotenv import load_dotenv
@@ -35,9 +36,12 @@ load_dotenv()
 
 # Constants
 CITIZENS_IMAGE_DIR = os.path.join(os.getcwd(), 'public', 'images', 'citizens')
+COAT_OF_ARMS_DIR = os.path.join(os.getcwd(), 'public', 'coat-of-arms')
 
 # Ensure the images directory exists
 os.makedirs(CITIZENS_IMAGE_DIR, exist_ok=True)
+# Ensure the coat of arms directory exists
+os.makedirs(COAT_OF_ARMS_DIR, exist_ok=True)
 
 def initialize_airtable():
     """Initialize Airtable connection."""
@@ -58,18 +62,19 @@ def initialize_airtable():
         sys.exit(1)
 
 def fetch_citizens_needing_images(tables) -> List[Dict]:
-    """Fetch citizens from Airtable that need images."""
-    log.info("Fetching citizens from Airtable that need images...")
+    """Fetch citizens from Airtable that need images or coat of arms."""
+    log.info("Fetching citizens from Airtable that need images or coat of arms...")
     
     try:
         # Get citizens without an ImageUrl field or with empty ImageUrl field
-        formula = "OR({ImageUrl} = '', {ImageUrl} = BLANK())"
+        # OR citizens with FamilyCoatOfArms but no CoatOfArmsImage
+        formula = "OR(OR({ImageUrl} = '', {ImageUrl} = BLANK()), AND(NOT({FamilyCoatOfArms} = ''), OR({CoatOfArmsImage} = '', {CoatOfArmsImage} = BLANK())))"
         citizens = tables['citizens'].all(formula=formula)
         
-        log.info(f"Found {len(citizens)} citizens needing images")
+        log.info(f"Found {len(citizens)} citizens needing images or coat of arms")
         return citizens
     except Exception as e:
-        log.error(f"Error fetching citizens needing images: {e}")
+        log.error(f"Error fetching citizens needing images or coat of arms: {e}")
         return []
 
 def enhance_image_prompt(citizen: Dict) -> str:
@@ -104,15 +109,21 @@ def enhance_image_prompt(citizen: Dict) -> str:
     
     return enhanced_prompt
 
-def update_airtable_image_url(tables, citizen_id: str, image_url: str) -> bool:
-    """Update Airtable with image URL."""
+def update_airtable_image_url(tables, citizen_id: str, image_url: str, coat_of_arms_url: Optional[str] = None) -> bool:
+    """Update Airtable with image URL and coat of arms URL if provided."""
     log.info(f"Updating Airtable record for citizen {citizen_id} with image URL: {image_url}")
     
     try:
-        # Update the record with the new image URL
-        tables['citizens'].update(citizen_id, {
-            "ImageUrl": image_url
-        })
+        # Prepare update data
+        update_data = {"ImageUrl": image_url}
+        
+        # Add coat of arms URL if provided
+        if coat_of_arms_url:
+            update_data["CoatOfArmsImage"] = coat_of_arms_url
+            log.info(f"Also updating coat of arms image URL: {coat_of_arms_url}")
+        
+        # Update the record
+        tables['citizens'].update(citizen_id, update_data)
         
         log.info(f"Successfully updated Airtable record for citizen {citizen_id}")
         return True
@@ -181,8 +192,75 @@ def generate_image(prompt: str, citizen_id: str) -> Optional[str]:
         log.error(f"Error generating image for citizen {citizen_id}: {e}")
         return None
 
+def generate_coat_of_arms_image(description: str, username: str) -> Optional[str]:
+    """Generate coat of arms image using Ideogram API."""
+    if not description:
+        log.warning(f"No coat of arms description for {username}")
+        return None
+        
+    log.info(f"Generating coat of arms for {username}: {description[:100]}...")
+    
+    # Get Ideogram API key from environment
+    ideogram_api_key = os.environ.get('IDEOGRAM_API_KEY')
+    if not ideogram_api_key:
+        log.error("IDEOGRAM_API_KEY environment variable is not set")
+        return None
+    
+    # Enhance the prompt for better coat of arms generation
+    enhanced_prompt = f"A heraldic coat of arms shield with the following description: {description}. Renaissance Venetian style, detailed, ornate, historically accurate, centered composition, on a transparent background."
+    
+    try:
+        # Call the Ideogram API
+        response = requests.post(
+            "https://api.ideogram.ai/v1/ideogram-v3/generate",
+            headers={
+                "Api-Key": ideogram_api_key,
+                "Content-Type": "application/json"
+            },
+            json={
+                "prompt": enhanced_prompt,
+                "style_type": "REALISTIC",
+                "rendering_speed": "DEFAULT",
+                "model":"V_3"
+            }
+        )
+        
+        if response.status_code != 200:
+            log.error(f"Error from Ideogram API for coat of arms: {response.status_code} {response.text}")
+            return None
+        
+        # Extract image URL from response
+        result = response.json()
+        image_url = result.get("data", [{}])[0].get("url", "")
+        
+        if not image_url:
+            log.error("No coat of arms image URL in response")
+            return None
+        
+        # Download the image
+        image_response = requests.get(image_url, stream=True)
+        if not image_response.ok:
+            log.error(f"Failed to download coat of arms image: {image_response.status_code} {image_response.reason}")
+            return None
+        
+        # Save the image to the coat of arms folder using the username
+        image_path = os.path.join(COAT_OF_ARMS_DIR, f"{username}.png")
+        with open(image_path, 'wb') as f:
+            for chunk in image_response.iter_content(chunk_size=8192):
+                f.write(chunk)
+        
+        log.info(f"Generated and saved coat of arms for {username}")
+        
+        # Create the public URL path
+        public_image_url = f"/coat-of-arms/{username}.png"
+        
+        return public_image_url
+    except Exception as e:
+        log.error(f"Error generating coat of arms for {username}: {e}")
+        return None
+
 def process_citizen(tables, citizen: Dict) -> bool:
-    """Process a single citizen to generate an image."""
+    """Process a single citizen to generate an image and coat of arms."""
     citizen_id = citizen['id']
     citizen_name = f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}"
     
@@ -237,13 +315,23 @@ def process_citizen(tables, citizen: Dict) -> bool:
         log.warning(f"Failed to generate image for citizen {citizen_username}")
         return False
     
-    # Update Airtable with the image URL
-    success = update_airtable_image_url(tables, citizen_id, image_url)
+    # Check if we need to generate a coat of arms
+    coat_of_arms_description = citizen['fields'].get('FamilyCoatOfArms', '')
+    coat_of_arms_url = None
+    
+    if coat_of_arms_description:
+        coat_of_arms_url = generate_coat_of_arms_image(coat_of_arms_description, citizen_username)
+        if not coat_of_arms_url:
+            log.warning(f"Failed to generate coat of arms for citizen {citizen_username}")
+            # Continue anyway, as we still have the portrait image
+    
+    # Update Airtable with the image URL and coat of arms URL
+    success = update_airtable_image_url(tables, citizen_id, image_url, coat_of_arms_url)
     
     return success
 
-def process_specific_citizen(tables, citizen_id: str, image_prompt: str) -> bool:
-    """Process a specific citizen with the given ID and prompt."""
+def process_specific_citizen(tables, citizen_id: str, image_prompt: str, coat_of_arms_description: str = None) -> bool:
+    """Process a specific citizen with the given ID, prompt, and coat of arms description."""
     log.info(f"Processing specific citizen: {citizen_id}")
     
     if not image_prompt:
@@ -256,8 +344,16 @@ def process_specific_citizen(tables, citizen_id: str, image_prompt: str) -> bool
         log.warning(f"Failed to generate image for citizen {citizen_id}")
         return False
     
-    # Update Airtable with the image URL
-    success = update_airtable_image_url(tables, citizen_id, image_url)
+    # Generate coat of arms if description is provided
+    coat_of_arms_url = None
+    if coat_of_arms_description:
+        coat_of_arms_url = generate_coat_of_arms_image(coat_of_arms_description, citizen_id)
+        if not coat_of_arms_url:
+            log.warning(f"Failed to generate coat of arms for citizen {citizen_id}")
+            # Continue anyway, as we still have the portrait image
+    
+    # Update Airtable with the image URL and coat of arms URL
+    success = update_airtable_image_url(tables, citizen_id, image_url, coat_of_arms_url)
     
     return success
 
@@ -275,7 +371,12 @@ def generate_citizen_images(limit: int = 0):
                 with open('temp_citizen_image.json', 'r') as f:
                     citizen_data = json.load(f)
                 
-                success = process_specific_citizen(tables, citizen_id, citizen_data.get('imagePrompt', ''))
+                success = process_specific_citizen(
+                    tables, 
+                    citizen_id, 
+                    citizen_data.get('imagePrompt', ''),
+                    citizen_data.get('familyCoatOfArms', '')
+                )
                 log.info(f"Processed citizen {citizen_id} with result: {'success' if success else 'failed'}")
                 return
             except Exception as e:
@@ -288,10 +389,10 @@ def generate_citizen_images(limit: int = 0):
     citizens = fetch_citizens_needing_images(tables)
     
     if not citizens:
-        log.info("No citizens found that need images. Exiting.")
+        log.info("No citizens found that need images or coat of arms. Exiting.")
         return
     
-    log.info(f"Found {len(citizens)} citizens that need images")
+    log.info(f"Found {len(citizens)} citizens that need images or coat of arms")
     
     updated_count = 0
     processed_count = 0
@@ -303,7 +404,7 @@ def generate_citizen_images(limit: int = 0):
             break
         
         citizen_name = f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}"
-        log.info(f"Generating image for citizen {i+1}/{len(citizens)}: {citizen_name}")
+        log.info(f"Processing citizen {i+1}/{len(citizens)}: {citizen_name}")
         
         success = process_citizen(tables, citizen)
         
@@ -315,7 +416,7 @@ def generate_citizen_images(limit: int = 0):
         # Add a delay to avoid rate limiting
         time.sleep(3)
     
-    log.info(f"Generated images for {updated_count} citizens out of {processed_count} processed")
+    log.info(f"Processed {updated_count} citizens out of {processed_count} processed")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate images for citizens")
