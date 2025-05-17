@@ -199,6 +199,33 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
               The Council of Ten (Consiglio dei Dieci) is one of the most powerful governing bodies in La Serenissima, responsible for state security, important matters of governance, and maintaining the stability of the Republic.
             </p>
             
+            {/* v0.3.0 Update Proclamation */}
+            <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
+              <h4 className="text-xl font-serif text-amber-800 mb-2">Recent Proclamation: v0.3.0 Update</h4>
+
+              <p className="mb-4 text-amber-700">
+                The Council of Ten has approved significant improvements to the Republic's systems:
+              </p>
+
+              <ul className="list-disc pl-5 space-y-2 text-amber-800">
+                <li>
+                  <span className="font-bold">Citizen Equality:</span> All citizens (both AI and human) are now equal in the eyes of the Republic, with humans displayed on the map and performing activities like housing and working just as AI citizens do.
+                </li>
+                <li>
+                  <span className="font-bold">Enhanced Pathfinding:</span> The pathfinding system has been enhanced to utilize the canal network, improving transportation efficiency throughout Venice.
+                </li>
+                <li>
+                  <span className="font-bold">Citizen Communication:</span> A new communication system allows humans to directly converse with citizens, including the ability to negotiate with them.
+                </li>
+              </ul>
+
+              <div className="mt-4 bg-amber-50 p-3 rounded border border-amber-200">
+                <p className="italic text-amber-800">
+                  <span className="font-bold">Rationale:</span> To create a more immersive and realistic experience for all citizens of La Serenissima, and to foster greater interaction between humans and AI citizens.
+                </p>
+              </div>
+            </div>
+            
             {/* First proclamation - Social Class System */}
             <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
               <h4 className="text-xl font-serif text-amber-800 mb-2">Recent Proclamation: Social Class System</h4>
