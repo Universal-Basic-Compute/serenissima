@@ -54,7 +54,7 @@ def initialize_airtable():
         log.error(f"Failed to initialize Airtable: {e}")
         sys.exit(1)
 
-def get_entrepreneurs_and_their_businesses(tables) -> tuple[List[str], Dict[str, List[Dict]]]:
+def get_entrepreneurs_and_their_businesses(tables) -> tuple[List[Dict], Dict[str, List[Dict]]]:
     """Fetch entrepreneurs (citizens who run at least one building) and their businesses."""
     log.info("Fetching entrepreneurs and their businesses...")
     
@@ -72,9 +72,18 @@ def get_entrepreneurs_and_their_businesses(tables) -> tuple[List[str], Dict[str,
                     entrepreneur_businesses[run_by] = []
                 entrepreneur_businesses[run_by].append(building)
         
-        entrepreneur_ids = list(entrepreneur_businesses.keys())
-        log.info(f"Found {len(entrepreneur_ids)} entrepreneurs running {len(run_by_buildings)} businesses")
-        return entrepreneur_ids, entrepreneur_businesses
+        # Get the entrepreneur citizens by Username, not ID
+        entrepreneur_usernames = list(entrepreneur_businesses.keys())
+        entrepreneurs = []
+        
+        if entrepreneur_usernames:
+            # Create a formula to get these citizens by Username
+            username_conditions = [f"{{Username}}='{username}'" for username in entrepreneur_usernames]
+            formula = f"OR({', '.join(username_conditions)})"
+            entrepreneurs = tables['citizens'].all(formula=formula)
+        
+        log.info(f"Found {len(entrepreneurs)} entrepreneurs running {len(run_by_buildings)} businesses")
+        return entrepreneurs, entrepreneur_businesses
     except Exception as e:
         log.error(f"Error fetching entrepreneurs: {e}")
         return [], {}

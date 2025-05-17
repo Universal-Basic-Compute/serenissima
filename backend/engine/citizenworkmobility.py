@@ -87,25 +87,26 @@ def get_employed_citizens(tables) -> List[Dict]:
         formula = "NOT(OR({Occupant} = '', {Occupant} = BLANK()))"
         occupied_buildings = tables['buildings'].all(formula=formula)
         
-        # Extract the occupant IDs
-        citizen_ids = [building['fields'].get('Occupant') for building in occupied_buildings if building['fields'].get('Occupant')]
+        # Extract the occupant usernames
+        citizen_usernames = [building['fields'].get('Occupant') for building in occupied_buildings if building['fields'].get('Occupant')]
         
         # If no citizens are employed, return empty list
-        if not citizen_ids:
+        if not citizen_usernames:
             log.info("No employed citizens found")
             return []
         
-        # Create a formula to get these citizens
-        citizen_conditions = [f"RECORD_ID()='{citizen_id}'" for citizen_id in citizen_ids]
+        # Create a formula to get these citizens by Username
+        citizen_conditions = [f"{{Username}}='{username}'" for username in citizen_usernames]
         formula = f"OR({', '.join(citizen_conditions)})"
         
         employed_citizens = tables['citizens'].all(formula=formula)
         
         # Add the building information to each citizen for easier processing
         for citizen in employed_citizens:
-            # Find the building this citizen works at
+            # Find the building this citizen works at using Username
+            citizen_username = citizen['fields'].get('Username', '')
             for building in occupied_buildings:
-                if building['fields'].get('Occupant') == citizen['id']:
+                if building['fields'].get('Occupant') == citizen_username:
                     # Add building info to the citizen record
                     citizen['current_business'] = building
                     break
@@ -157,6 +158,12 @@ def move_citizen_to_new_job(tables, citizen: Dict, old_business: Dict, new_busin
     old_business_id = old_business['id']
     new_business_id = new_business['id']
     
+    # Get the citizen's username for updating the Occupant field
+    citizen_username = citizen['fields'].get('Username', '')
+    if not citizen_username:
+        log.error(f"Citizen {citizen_id} has no Username, cannot move to new job")
+        return False
+    
     citizen_name = f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}"
     old_business_name = old_business['fields'].get('Name', old_business_id)
     new_business_name = new_business['fields'].get('Name', new_business_id)
@@ -169,9 +176,9 @@ def move_citizen_to_new_job(tables, citizen: Dict, old_business: Dict, new_busin
             'Occupant': ""
         })
         
-        # Update new business record with new occupant
+        # Update new business record with new occupant (using Username)
         tables['buildings'].update(new_business_id, {
-            'Occupant': citizen_id
+            'Occupant': citizen_username
         })
         
         log.info(f"Successfully moved {citizen_name} to {new_business_name}")
@@ -314,7 +321,10 @@ def process_work_mobility(dry_run: bool = False):
         return
     
     # Get entrepreneurs and their businesses
-    entrepreneur_ids, entrepreneur_businesses = get_entrepreneurs_and_their_businesses(tables)
+    entrepreneurs, entrepreneur_businesses = get_entrepreneurs_and_their_businesses(tables)
+    
+    # Create a set of entrepreneur usernames for quick lookup
+    entrepreneur_usernames = {entrepreneur['fields'].get('Username', '') for entrepreneur in entrepreneurs}
     
     # Sort citizens by wealth in ascending order (lower wealth citizens have more incentive to move)
     employed_citizens.sort(key=lambda c: float(c['fields'].get('Ducats', 0) or 0))
@@ -343,10 +353,11 @@ def process_work_mobility(dry_run: bool = False):
     
     for citizen in employed_citizens:
         citizen_id = citizen['id']
+        citizen_username = citizen['fields'].get('Username', '')
         social_class = citizen['fields'].get('SocialClass', '')
         
-        # Check if this citizen is an entrepreneur
-        is_entrepreneur = citizen_id in entrepreneur_ids
+        # Check if this citizen is an entrepreneur by Username
+        is_entrepreneur = citizen_username in entrepreneur_usernames
         
         # Get current business from the attached building info
         current_business = citizen.get('current_business')
@@ -395,7 +406,7 @@ def process_work_mobility(dry_run: bool = False):
         # Find available businesses with wages above threshold
         if is_entrepreneur:
             # For entrepreneurs, only consider their own businesses
-            own_businesses = entrepreneur_businesses.get(citizen_id, [])
+            own_businesses = entrepreneur_businesses.get(citizen_username, [])
             
             # Filter to available businesses (not occupied by someone else)
             available_own_businesses = [
