@@ -138,7 +138,7 @@ def create_admin_summary(tables, update_summary) -> None:
     """Create a summary notification for the admin."""
     try:
         # Create notification content
-        content = f"Social class update report: {update_summary['total_updated']} citizens had their social class updated"
+        content = f"🏛️ **Social Class Update Report**: **{update_summary['total_updated']}** citizens had their social class updated"
         
         # Create detailed information
         details = {
@@ -343,7 +343,7 @@ def update_social_class(dry_run: bool = False):
                 log.info(f"  Airtable update completed successfully")
                 
                 # Create notification for the citizen
-                content = f"Your social status has been elevated to {new_social_class}!"
+                content = f"🏛️ Your social status has been elevated to **{new_social_class}**!"
                 details = {
                     "event_type": "social_class_update",
                     "previous_class": current_social_class,
