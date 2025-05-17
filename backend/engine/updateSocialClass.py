@@ -83,21 +83,20 @@ def get_business_building_owners(tables) -> List[str]:
     log.info("Fetching business building owners...")
     
     try:
-        # Define business building types (excluding housing)
-        business_types = ['workshop', 'market-stall', 'tavern', 'warehouse', 'dock', 'factory', 'shop']
+        # Get all buildings
+        all_buildings = tables['buildings'].all()
         
-        # Create a formula to find business buildings
-        type_conditions = [f"{{Type}}='{business_type}'" for business_type in business_types]
-        formula = f"AND(OR({', '.join(type_conditions)}), NOT(OR({{Owner}} = '', {{Owner}} = BLANK())))"
-        
-        business_buildings = tables['buildings'].all(formula=formula)
-        
-        # Extract unique citizen IDs who own business buildings
+        # Filter for business buildings with owners
         business_owner_ids = set()
-        for building in business_buildings:
+        for building in all_buildings:
+            # Check the Category field instead of Type
+            building_category = building['fields'].get('Category', '').lower()
             owner = building['fields'].get('Owner')
-            if owner:
+            
+            # Check if this is a business building category and has an owner
+            if building_category == 'business' and owner:
                 business_owner_ids.add(owner)
+                log.debug(f"Found business building of category '{building_category}' owned by '{owner}'")
         
         log.info(f"Found {len(business_owner_ids)} citizens who own business buildings")
         return list(business_owner_ids)
