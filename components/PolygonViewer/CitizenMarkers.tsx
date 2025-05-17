@@ -1038,6 +1038,19 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                       opacity="0.8"
                     />
                   );
+                  if (!point || typeof point.lat !== 'number' || typeof point.lng !== 'number') return null;
+                  
+                  const screenPos = latLngToScreen(point.lat, point.lng);
+                  return (
+                    <circle 
+                      key={`point-${index}`}
+                      cx={screenPos.x}
+                      cy={screenPos.y}
+                      r="2"
+                      fill={getActivityPathColor(activity.type)}
+                      opacity="0.8"
+                    />
+                  );
                 })}
               </g>
             );
