@@ -226,7 +226,7 @@ def create_immigration_notification(tables, citizen: Dict, building: Dict) -> No
         building_type = building['fields'].get('Type', 'unknown')
         
         # Create notification content
-        content = f"A new citizen, {citizen_name}, has arrived in Venice seeking housing"
+        content = f"🏙️ A new citizen, **{citizen_name}**, has arrived in Venice seeking housing"
         details = {
             "citizen_id": citizen["id"],
             "citizen_name": citizen_name,
@@ -254,7 +254,7 @@ def create_admin_notification(tables, immigration_summary) -> None:
     """Create a notification for the admin citizen about the immigration process."""
     try:
         # Create notification content with summary of all immigrants
-        content = f"Immigration report: {immigration_summary['total']} new citizens arrived in Venice"
+        content = f"🏙️ **Immigration Report**: **{immigration_summary['total']}** new citizens arrived in Venice"
         
         # Create detailed information about the immigrants by social class
         details = {
@@ -267,7 +267,7 @@ def create_admin_notification(tables, immigration_summary) -> None:
                 "Popolani": immigration_summary.get('Popolani', 0),
                 "Facchini": immigration_summary.get('Facchini', 0)
             },
-            "message": f"New citizens have arrived in Venice seeking housing: {immigration_summary.get('Nobili', 0)} Nobili, {immigration_summary.get('Cittadini', 0)} Cittadini, {immigration_summary.get('Popolani', 0)} Popolani, and {immigration_summary.get('Facchini', 0)} Facchini."
+            "message": f"🏙️ New citizens have arrived in Venice seeking housing: **{immigration_summary.get('Nobili', 0)}** 👑 **Nobili**, **{immigration_summary.get('Cittadini', 0)}** 🧠 **Cittadini**, **{immigration_summary.get('Popolani', 0)}** 🛠️ **Popolani**, and **{immigration_summary.get('Facchini', 0)}** 💪 **Facchini**."
         }
         
         # Create the notification record
