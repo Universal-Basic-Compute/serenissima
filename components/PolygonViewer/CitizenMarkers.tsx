@@ -393,6 +393,9 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     
     setHoveredCitizenPaths(paths);
     
+    // NEW CODE: Update the hover state service with the citizen data
+    hoverStateService.setHoveredCitizen(citizen, null, null);
+    
     // Log the paths for debugging
     if (paths.length > 0) {
       console.log(`Found ${paths.length} activity paths for citizen ${citizenId}`);

@@ -102,12 +102,23 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
           })
           .catch(err => console.error('Error fetching polygon data:', err));
       } else if (data.type === 'citizen') {
-        // For citizens, we don't need to fetch additional data
-        setTooltipData({
-          type: 'citizen',
-          buildingId: data.buildingId,
-          citizenType: data.citizenType
-        });
+        // For citizens, we need to fetch the citizen data
+        if (data.citizen) {
+          // If the citizen data is already provided in the event
+          setTooltipData({
+            type: 'citizen',
+            citizen: data.citizen,
+            buildingId: data.buildingId,
+            citizenType: data.citizenType
+          });
+        } else {
+          // If we only have the buildingId, we'll need to fetch the citizen data
+          setTooltipData({
+            type: 'citizen',
+            buildingId: data.buildingId,
+            citizenType: data.citizenType
+          });
+        }
       } else if (data.type === 'canalPoint') {
         setTooltipData({
           type: 'canalPoint',
@@ -209,15 +220,49 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
       </div>
     );
   } else if (tooltipData.type === 'citizen') {
-    tooltipContent = (
-      <div>
-        <div className="font-bold">
-          {tooltipData.citizenType === 'home' ? 'Residents' : 'Workers'}
+    const citizen = tooltipData.citizen;
+    
+    if (citizen) {
+      // If we have the citizen data, display it
+      tooltipContent = (
+        <div className="flex flex-col items-center">
+          {/* Citizen image */}
+          <div className="w-32 h-32 mb-2 overflow-hidden rounded">
+            <img 
+              src={citizen.imageurl || citizen.profileimage || citizen.ImageUrl || `/images/citizens/${citizen.username}.jpg`} 
+              alt={`${citizen.firstname || citizen.firstName} ${citizen.lastname || citizen.lastName}`}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                // Fallback to default image if the specific one doesn't exist
+                e.currentTarget.src = '/images/citizens/default.jpg';
+              }}
+            />
+          </div>
+          <div className="font-bold text-center">
+            {(citizen.firstname || citizen.firstName)} {(citizen.lastname || citizen.lastName)}
+          </div>
+          <div className="text-amber-300 text-sm">
+            {citizen.socialclass || citizen.socialClass || 'Citizen'}
+          </div>
+          {tooltipData.citizenType && (
+            <div className="mt-1 text-xs">
+              {tooltipData.citizenType === 'home' ? 'Resident' : 'Worker'} at {tooltipData.buildingId}
+            </div>
+          )}
         </div>
-        <div>Building: {tooltipData.buildingId}</div>
-        <div>Click to view details</div>
-      </div>
-    );
+      );
+    } else {
+      // If we don't have the citizen data, show a simpler tooltip
+      tooltipContent = (
+        <div>
+          <div className="font-bold">
+            {tooltipData.citizenType === 'home' ? 'Residents' : 'Workers'}
+          </div>
+          <div>Building: {tooltipData.buildingId}</div>
+          <div>Click to view details</div>
+        </div>
+      );
+    }
   } else if (tooltipData.type === 'resource') {
     // For resources, use the data provided in the event
     if (tooltipData.resources && tooltipData.resources.length > 0) {

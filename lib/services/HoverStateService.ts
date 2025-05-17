@@ -118,7 +118,7 @@ export class HoverStateService {
   /**
    * Update hover state for a citizen
    */
-  public setHoveredCitizen(buildingId: string | null, type: 'home' | 'work' | null): void {
+  public setHoveredCitizen(citizen: any, buildingId: string | null, type: 'home' | 'work' | null): void {
     // Only update if the state has changed
     if (this.hoveredCitizenBuildingRef !== buildingId || this.hoveredCitizenTypeRef !== type) {
       this.hoveredCitizenBuildingRef = buildingId;
@@ -126,9 +126,10 @@ export class HoverStateService {
       this.state.hoveredCitizenBuilding = buildingId;
       this.state.hoveredCitizenType = type;
       
-      // Emit event with only the changed property
+      // Emit event with only the changed property and include the citizen data
       eventBus.emit(HOVER_STATE_CHANGED, {
         type: 'citizen',
+        citizen: citizen, // Include the full citizen object
         buildingId,
         citizenType: type
       });
