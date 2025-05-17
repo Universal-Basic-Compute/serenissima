@@ -2,6 +2,21 @@ import { NextResponse } from 'next/server';
 import Airtable from 'airtable';
 import { buildingPointsService } from '@/lib/services/BuildingPointsService';
 
+// Utility function to convert field names to camelCase
+function toCamelCase(obj: Record<string, any>): Record<string, any> {
+  const result: Record<string, any> = {};
+  
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      // Convert first character to lowercase for the new key
+      const camelKey = key.charAt(0).toLowerCase() + key.slice(1);
+      result[camelKey] = obj[key];
+    }
+  }
+  
+  return result;
+}
+
 // Helper function to extract coordinates from point IDs with the format type_lat_lng
 const extractCoordinatesFromPointId = (pointId: string): { lat: number, lng: number } | null => {
   if (!pointId) return null;
@@ -357,16 +372,16 @@ export async function GET(request: Request) {
 
     // Transform Airtable records to our format
     const buildings = typedRecords.map(record => {
-      // Access fields in a type-safe way
-      const fields = record.fields;
+      // Get all fields and convert keys to camelCase
+      const fields = toCamelCase(record.fields);
       
       // Initialize position object
       let position: { lat?: number; lng?: number; x?: number; y?: number; z?: number; } = {};
       
       // If we have a Point field, try to extract coordinates from it
-      if (fields.Point) {
-        const pointId = String(fields.Point);
-        //console.log(`[API] Building ${fields.BuildingId || record.id} has Point ID: ${pointId}, attempting to extract position`);
+      if (fields.point) {
+        const pointId = String(fields.point);
+        //console.log(`[API] Building ${fields.buildingId || record.id} has Point ID: ${pointId}, attempting to extract position`);
         
         // Try to extract coordinates from the Point field (format: type_lat_lng)
         const parts = pointId.split('_');
@@ -376,7 +391,7 @@ export async function GET(request: Request) {
           
           if (!isNaN(lat) && !isNaN(lng)) {
             position = { lat, lng };
-            //console.log(`[API] Extracted coordinates from Point field for building ${fields.BuildingId || record.id}: lat=${lat}, lng=${lng}`);
+            //console.log(`[API] Extracted coordinates from Point field for building ${fields.buildingId || record.id}: lat=${lat}, lng=${lng}`);
           } else {
             console.warn(`[API] Could not parse coordinates from Point field: ${pointId}`);
             
@@ -417,25 +432,25 @@ export async function GET(request: Request) {
             };
           }
         }
-      } else if (fields.Position) {
+      } else if (fields.position) {
         // If we have a Position field (legacy), use that
-        if (typeof fields.Position === 'string') {
+        if (typeof fields.position === 'string') {
           try {
-            position = JSON.parse(fields.Position);
-            console.log(`[API] Building ${fields.BuildingId || record.id} parsed position:`, position);
+            position = JSON.parse(fields.position);
+            console.log(`[API] Building ${fields.buildingId || record.id} parsed position:`, position);
           } catch (error) {
             console.error('[API] Error parsing position JSON:', error);
-            console.error('[API] Original position string:', fields.Position);
+            console.error('[API] Original position string:', fields.position);
             
             // Generate a random position as fallback
             position = { 
               lat: 45.4371 + (Math.random() * 0.01 - 0.005),
               lng: 12.3358 + (Math.random() * 0.01 - 0.005)
             };
-            console.log(`[API] Generated random position for ${fields.BuildingId || record.id}:`, position);
+            console.log(`[API] Generated random position for ${fields.buildingId || record.id}:`, position);
           }
-        } else if (typeof fields.Position === 'object') {
-          position = fields.Position as { lat?: number; lng?: number; x?: number; y?: number; z?: number; };
+        } else if (typeof fields.position === 'object') {
+          position = fields.position as { lat?: number; lng?: number; x?: number; y?: number; z?: number; };
         }
       } else {
         // If we don't have any position information, generate a random position
@@ -443,15 +458,15 @@ export async function GET(request: Request) {
           lat: 45.4371 + (Math.random() * 0.01 - 0.005),
           lng: 12.3358 + (Math.random() * 0.01 - 0.005)
         };
-        console.log(`[API] No position information for building ${fields.BuildingId || record.id}, generated random position:`, position);
+        console.log(`[API] No position information for building ${fields.buildingId || record.id}, generated random position:`, position);
       }
       
       // Check if position has lat/lng format
       if (position && typeof position === 'object') {
         if ('lat' in position && 'lng' in position) {
-          //console.log(`[API] Building ${fields.BuildingId || record.id} has lat/lng position:`, position);
+          //console.log(`[API] Building ${fields.buildingId || record.id} has lat/lng position:`, position);
         } else {
-          console.warn(`[API] Building ${fields.BuildingId || record.id} does NOT have lat/lng position:`, position);
+          console.warn(`[API] Building ${fields.buildingId || record.id} does NOT have lat/lng position:`, position);
         }
       }
       
@@ -484,7 +499,7 @@ export async function GET(request: Request) {
           lng: parseFloat(lng.toFixed(10))
         } as { lat: number; lng: number };
             
-        console.log(`[API] Converted x/y/z position to lat/lng for building ${fields.BuildingId || record.id}:`, position);
+        console.log(`[API] Converted x/y/z position to lat/lng for building ${fields.buildingId || record.id}:`, position);
       }
       // Ensure lat/lng values are parsed as floats with full precision
       else if ('lat' in position && 'lng' in position) {
@@ -494,20 +509,12 @@ export async function GET(request: Request) {
         } as { lat: number; lng: number };
       }
       
-      // Include all the required fields from the BUILDINGS table
+      // Return all fields from the record in camelCase, with position properly handled
       return {
-        id: fields.BuildingId || record.id,
-        type: fields.Type,
-        land_id: fields.LandId,
-        variant: fields.Variant || 'model',
-        position: position,
-        point_id: fields.Point || null, // Include point_id in response
-        rotation: fields.Rotation || 0,
-        owner: fields.Owner,
-        created_at: fields.CreatedAt,
-        lease_amount: fields.LeaseAmount,
-        rent_amount: fields.RentAmount,
-        occupant: fields.Occupant
+        ...fields,
+        // Override specific fields that need special handling
+        id: fields.buildingId || record.id,
+        position: position
       };
     });
     
