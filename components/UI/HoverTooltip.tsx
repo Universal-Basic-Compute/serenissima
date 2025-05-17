@@ -283,10 +283,65 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
   } else if (tooltipData.type === 'resource') {
     // For resources, use the data provided in the event
     if (tooltipData.resources && tooltipData.resources.length > 0) {
+      // Check if this is a contract summary
+      const isContractSummary = tooltipData.resources[0].contractSummary === true;
       // Check if these are contract resources by looking for contractType property
       const isContractResource = tooltipData.resources[0].contractType !== undefined;
       
-      if (isContractResource) {
+      if (isContractSummary) {
+        // Display contract summary tooltip
+        const summary = tooltipData.resources[0];
+        tooltipContent = (
+          <div>
+            <div className="font-bold mb-2">Contracts at this location</div>
+            <div className="bg-amber-800/50 p-2 rounded mb-2">
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-amber-300">Total Contracts:</span>
+                <span className="font-medium">{summary.description.split(' ')[0]}</span>
+              </div>
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-amber-300">Total Amount:</span>
+                <span className="font-medium">{summary.amount}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-amber-300">Resource Types:</span>
+                <span className="font-medium">{summary.resourceTypes.length}</span>
+              </div>
+            </div>
+            
+            <div className="text-sm">
+              {summary.publicSellCount > 0 && (
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-green-400">Public Sell:</span>
+                  <span>{summary.publicSellCount}</span>
+                </div>
+              )}
+              {summary.citizenSellCount > 0 && (
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-blue-400">Your Sell:</span>
+                  <span>{summary.citizenSellCount}</span>
+                </div>
+              )}
+              {summary.citizenBuyCount > 0 && (
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-red-400">Your Buy:</span>
+                  <span>{summary.citizenBuyCount}</span>
+                </div>
+              )}
+            </div>
+            
+            <div className="mt-2 text-xs text-center text-amber-300">
+              Click to view building details
+            </div>
+            
+            {tooltipData.position && (
+              <div className="text-xs mt-2 text-amber-300">
+                Location: {tooltipData.position.lat.toFixed(6)}, {tooltipData.position.lng.toFixed(6)}
+              </div>
+            )}
+          </div>
+        );
+      } else if (isContractResource) {
         tooltipContent = (
           <div>
             <div className="font-bold mb-2">Contracts at this location</div>
