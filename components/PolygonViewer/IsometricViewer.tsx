@@ -2792,21 +2792,6 @@ number => {
         // Draw simple square for building with select state
         const squareSize = Math.max(size.width, size.depth) * scale * 0.6;
         
-        // If owned by current citizen, draw a halo with the user's secondaryColor
-        if (isOwnedByCurrentCitizen) {
-          // Get the current citizen's secondaryColor
-          const secondaryColor = getCurrentCitizenSecondaryColor();
-          
-          ctx.beginPath();
-          ctx.rect(
-            isoPos.x - squareSize/2 - 3, 
-            isoPos.y - squareSize/2 - 3, 
-            squareSize + 6, 
-            squareSize + 6
-          );
-          ctx.fillStyle = secondaryColor; // Use secondaryColor instead of hardcoded orange
-          ctx.fill();
-        }
         
         // Apply different styles based on category and ownership
         ctx.fillStyle = isSelected ? lightenColor(color, 35) : color;
