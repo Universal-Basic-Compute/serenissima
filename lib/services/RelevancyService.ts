@@ -10,8 +10,8 @@ export class RelevancyService {
   public calculateLandProximityRelevancy(
     aiLands: any[],
     allLands: any[]
-  ): Record<string, number> {
-    const relevancyScores: Record<string, number> = {};
+  ): Record<string, any> {
+    const relevancyScores: Record<string, any> = {};
     
     // Skip calculation if AI has no lands or there are no other lands
     if (!aiLands.length || !allLands.length) {
@@ -33,7 +33,10 @@ export class RelevancyService {
       
       // Calculate minimum distance to any AI-owned land
       let minDistance = Infinity;
-      for (const aiCentroid of aiCentroids) {
+      let closestAiLand = null;
+      
+      for (let i = 0; i < aiCentroids.length; i++) {
+        const aiCentroid = aiCentroids[i];
         if (!aiCentroid) continue;
         
         const distance = this.calculateDistance(
@@ -41,16 +44,34 @@ export class RelevancyService {
           aiCentroid.lat, aiCentroid.lng
         );
         
-        minDistance = Math.min(minDistance, distance);
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestAiLand = aiLands[i];
+        }
       }
       
       // Convert distance to relevancy score (closer = higher score)
       // Using an exponential decay function: score = 100 * e^(-distance/500)
       // This gives a score of 100 at distance 0, ~60 at 250m, ~37 at 500m, etc.
-      const relevancyScore = 100 * Math.exp(-minDistance / 500);
+      const score = 100 * Math.exp(-minDistance / 500);
+      const numericScore = parseFloat(score.toFixed(2));
       
-      // Store the score
-      relevancyScores[land.id] = parseFloat(relevancyScore.toFixed(2));
+      // Create a more detailed relevancy object
+      relevancyScores[land.id] = {
+        score: numericScore,
+        assetId: land.id,
+        assetType: 'land',
+        category: 'proximity',
+        type: 'geographic',
+        distance: Math.round(minDistance),
+        closestLandId: closestAiLand?.id || '',
+        title: `Nearby Land (${Math.round(minDistance)}m)`,
+        description: land.historicalName 
+          ? `${land.historicalName} is ${Math.round(minDistance)} meters from your nearest property`
+          : `This land is ${Math.round(minDistance)} meters from your nearest property`,
+        timeHorizon: 'medium',
+        status: numericScore > 70 ? 'high' : numericScore > 40 ? 'medium' : 'low'
+      };
     });
     
     return relevancyScores;

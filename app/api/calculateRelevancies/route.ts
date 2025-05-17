@@ -56,11 +56,18 @@ export async function GET(request: NextRequest) {
       // Calculate land proximity relevancy
       const relevancyScores = relevancyService.calculateLandProximityRelevancy(aiLands, allLands);
       
+      // Format the response to include both simple scores and detailed data
+      const simpleScores: Record<string, number> = {};
+      Object.entries(relevancyScores).forEach(([landId, data]) => {
+        simpleScores[landId] = data.score;
+      });
+      
       return NextResponse.json({
         success: true,
         ai: aiUsername,
         ownedLandCount: aiLands.length,
-        relevancyScores
+        relevancyScores: simpleScores,
+        detailedRelevancy: relevancyScores
       });
     }
     
@@ -161,43 +168,71 @@ export async function POST(request: NextRequest) {
     
     // Calculate land proximity relevancy
     const relevancyScores = relevancyService.calculateLandProximityRelevancy(aiLands, allLands);
-    
-    // Create or update a record in a new RELEVANCIES table
+      
+    // Format the response to include both simple scores and detailed data
+    const simpleScores: Record<string, number> = {};
+    Object.entries(relevancyScores).forEach(([landId, data]) => {
+      simpleScores[landId] = data.score;
+    });
+      
+    // Create or update records in the RELEVANCIES table
     // First check if the table exists, if not, we'll skip this step
     try {
-      // Find or create the AI's relevancy record
-      const relevancyRecords = await base('RELEVANCIES')
+      // Delete existing relevancy records for this AI to avoid duplicates
+      const existingRecords = await base('RELEVANCIES')
         .select({
-          filterByFormula: `{CitizenUsername} = '${aiUsername}'`,
-          maxRecords: 1
+          filterByFormula: `AND({RelevantToCitizen} = '${aiUsername}', {Category} = 'proximity')`
         })
         .all();
-      
-      const relevancyData = {
-        CitizenUsername: aiUsername,
-        LandProximityRelevancy: JSON.stringify(relevancyScores),
-        LastUpdated: new Date().toISOString()
-      };
-      
-      if (relevancyRecords.length > 0) {
-        // Update existing record
-        await base('RELEVANCIES').update(relevancyRecords[0].id, relevancyData);
-        console.log(`Updated relevancy record for ${aiUsername}`);
-      } else {
-        // Create new record
-        await base('RELEVANCIES').create(relevancyData);
-        console.log(`Created new relevancy record for ${aiUsername}`);
+        
+      if (existingRecords.length > 0) {
+        // Delete in batches of 10 to avoid API limits
+        const recordIds = existingRecords.map(record => record.id);
+        for (let i = 0; i < recordIds.length; i += 10) {
+          const batch = recordIds.slice(i, i + 10);
+          await base('RELEVANCIES').destroy(batch);
+        }
+        console.log(`Deleted ${existingRecords.length} existing relevancy records for ${aiUsername}`);
       }
+        
+      // Create new relevancy records
+      const relevancyRecords = Object.entries(relevancyScores).map(([landId, data]) => {
+        return {
+          fields: {
+            AssetID: landId,
+            AssetType: 'land',
+            Category: 'proximity',
+            Type: 'geographic',
+            TargetCitizen: data.closestLandId ? allLands.find(land => land.id === data.closestLandId)?.owner || '' : '',
+            RelevantToCitizen: aiUsername,
+            Score: data.score,
+            TimeHorizon: data.timeHorizon || 'medium',
+            Title: data.title || `Nearby Land (${data.distance}m)`,
+            Description: data.description || `This land is ${data.distance} meters from your nearest property`,
+            Status: data.status || 'active',
+            CreatedAt: new Date().toISOString()
+          }
+        };
+      });
+        
+      // Create records in batches of 10
+      for (let i = 0; i < relevancyRecords.length; i += 10) {
+        const batch = relevancyRecords.slice(i, i + 10);
+        await base('RELEVANCIES').create(batch);
+      }
+        
+      console.log(`Created ${relevancyRecords.length} new relevancy records for ${aiUsername}`);
     } catch (error) {
-      console.warn('Could not save to RELEVANCIES table, it may not exist:', error.message);
+      console.warn('Could not save to RELEVANCIES table:', error.message);
       // Continue without saving to Airtable
     }
-    
+      
     return NextResponse.json({
       success: true,
       ai: aiUsername,
       ownedLandCount: aiLands.length,
-      relevancyScores,
+      relevancyScores: simpleScores,
+      detailedRelevancy: relevancyScores,
       saved: true
     });
     
