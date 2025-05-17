@@ -164,16 +164,25 @@ def generate_citizen_image(citizen_id: str, image_prompt: str) -> bool:
     
     try:
         # Create a temporary file with the citizen data
-        with open("temp_citizen_image.json", "w") as f:
+        temp_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "temp_citizen_image.json")
+        with open(temp_file_path, "w") as f:
             json.dump({
                 "id": citizen_id,
                 "imagePrompt": image_prompt
             }, f)
         
+        # Get the absolute path to the generate_citizen_images.py script
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        image_script_path = os.path.join(script_dir, "generate_citizen_images.py")
+        
+        if not os.path.exists(image_script_path):
+            log.error(f"Image generation script not found at: {image_script_path}")
+            return False
+        
         # Import the generate_citizen_images module
         try:
             # First try to import directly
-            sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+            sys.path.append(script_dir)
             from generate_citizen_images import process_specific_citizen, initialize_airtable
             
             # Initialize Airtable
@@ -184,13 +193,13 @@ def generate_citizen_image(citizen_id: str, image_prompt: str) -> bool:
             
             log.info(f"Generated image for citizen {citizen_id} with result: {success}")
             return success
-        except ImportError:
+        except ImportError as ie:
             # Fall back to subprocess if import fails
-            log.info("Falling back to subprocess for image generation")
+            log.info(f"ImportError: {ie}. Falling back to subprocess for image generation")
             
-            # Call the Python script to generate the image
+            # Call the Python script to generate the image with absolute path
             result = subprocess.run(
-                ["python", "engine/generate_citizen_images.py", "--citizen-id", citizen_id],
+                [sys.executable, image_script_path, "--citizen-id", citizen_id],
                 capture_output=True,
                 text=True
             )
@@ -206,8 +215,8 @@ def generate_citizen_image(citizen_id: str, image_prompt: str) -> bool:
         return False
     finally:
         # Clean up the temporary file
-        if os.path.exists("temp_citizen_image.json"):
-            os.remove("temp_citizen_image.json")
+        if os.path.exists(temp_file_path):
+            os.remove(temp_file_path)
 
 def create_immigration_notification(tables, citizen: Dict, building: Dict) -> None:
     """Create a notification about the new immigrant."""
@@ -368,8 +377,9 @@ def process_immigration(dry_run: bool = False):
             
             # Check if the script exists before trying to run it
             if os.path.exists(househomeless_script):
+                # Use sys.executable to ensure we use the same Python interpreter
                 result = subprocess.run(
-                    ["python", househomeless_script],
+                    [sys.executable, househomeless_script],
                     capture_output=True,
                     text=True
                 )

@@ -75,14 +75,24 @@ def generate_citizen(social_class: str) -> Optional[Dict[str, Any]]:
         # Extract the JSON from Kinos Engine's response
         content = response.json().get("content", "")
         
-        # Find the JSON object in the response
-        import re
-        json_match = re.search(r'({[\s\S]*})', content)
-        if not json_match:
-            log.error(f"Could not extract JSON from Kinos Engine response: {content}")
-            return None
-        
-        citizen_data = json.loads(json_match.group(1))
+        # Find the JSON object in the response using a more robust approach
+        try:
+            # First try to parse the entire content as JSON
+            citizen_data = json.loads(content)
+        except json.JSONDecodeError:
+            # If that fails, try to extract JSON using a more precise regex
+            import re
+            # Look for JSON object with the expected fields
+            json_match = re.search(r'({[\s\S]*?"FirstName"[\s\S]*?"LastName"[\s\S]*?"Description"[\s\S]*?"ImagePrompt"[\s\S]*?"Ducats"[\s\S]*?})', content)
+            if not json_match:
+                log.error(f"Could not extract JSON from Kinos Engine response: {content}")
+                return None
+            
+            try:
+                citizen_data = json.loads(json_match.group(1))
+            except json.JSONDecodeError as e:
+                log.error(f"Failed to parse extracted JSON: {e}")
+                return None
         
         # Add required fields
         citizen_data["socialclass"] = social_class
