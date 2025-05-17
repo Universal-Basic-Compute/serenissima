@@ -367,7 +367,7 @@ def process_lease_payment(tables, land: Dict, building: Dict, dry_run: bool = Fa
         create_notification(
             tables,
             building_owner,
-            f"Insufficient funds for lease payment of {int(lease_amount)} ⚜️ Ducats for your building {building_name} on {land_name}",
+            f"❌ **Insufficient funds** for lease payment of **{int(lease_amount):,} ⚜️ Ducats** for your building **{building_name}** on **{land_name}**",
             {
                 "land_id": land_id,
                 "land_name": land_name,
@@ -389,7 +389,7 @@ def process_lease_payment(tables, land: Dict, building: Dict, dry_run: bool = Fa
         create_notification(
             tables,
             land_owner,
-            f"Missed lease payment of {int(net_amount)} ⚜️ Ducats from {building_owner} for building {building_name} on your land {land_name}",
+            f"❌ **Missed lease payment** of **{int(net_amount):,} ⚜️ Ducats** from **{building_owner}** for building **{building_name}** on your land **{land_name}**",
             {
                 "land_id": land_id,
                 "land_name": land_name,
@@ -474,7 +474,7 @@ def create_land_owner_summary(tables, land_owner: str, land_name: str, buildings
     # Get development rate from the first building's data (should be the same for all buildings on this land)
     development_rate = buildings_data[0].get("development_rate", 0) * 100 if buildings_data else 0
     
-    content = f"You received {int(total_amount)} ⚜️ Ducats in lease payments for your land {land_name} (after {avg_tax_rate:.1f}% republican tax, development rate: {development_rate:.1f}%)"
+    content = f"💰 You received **{int(total_amount):,} ⚜️ Ducats** in lease payments for your land **{land_name}** (after **{avg_tax_rate:.1f}%** republican tax, development rate: **{development_rate:.1f}%**)."
     
     details = {
         "land_name": land_name,
@@ -501,7 +501,7 @@ def create_building_owner_summary(tables, building_owner: str, buildings_data: L
     development_rates = [building.get("development_rate", 0) * 100 for building in buildings_data if "development_rate" in building]
     avg_development_rate = sum(development_rates) / len(development_rates) if development_rates else 0
     
-    content = f"You paid {int(total_amount + total_tax)} ⚜️ Ducats in lease payments for your {len(buildings_data)} buildings ({int(total_amount)} to land owners, {int(total_tax)} in republican tax at {avg_tax_rate:.1f}% rate, avg development: {avg_development_rate:.1f}%)"
+    content = f"🏠 You paid **{int(total_amount + total_tax):,} ⚜️ Ducats** in lease payments for your **{len(buildings_data)}** buildings (**{int(total_amount):,}** to land owners, **{int(total_tax):,}** in republican tax at **{avg_tax_rate:.1f}%** rate, avg development: **{avg_development_rate:.1f}%**)."
     
     details = {
         "total_amount": total_amount,
@@ -600,7 +600,7 @@ def create_admin_summary(tables, lease_summary) -> None:
     """Create a summary notification for the admin."""
     try:
         # Create notification content
-        content = f"Lease distribution complete: {lease_summary['successful']} payments processed, total: {int(lease_summary['total_amount'])} ⚜️ Ducats to land owners, {int(lease_summary['total_tax'])} ⚜️ Ducats in tax revenue"
+        content = f"🏛️ **Lease distribution complete**: **{lease_summary['successful']}** payments processed, total: **{int(lease_summary['total_amount']):,} ⚜️ Ducats** to land owners, **{int(lease_summary['total_tax']):,} ⚜️ Ducats** in tax revenue."
         
         # Get top gainers and losers
         top_gainers = sorted(lease_summary['by_land_owner'].items(), key=lambda x: x[1], reverse=True)[:5]
@@ -819,13 +819,13 @@ def distribute_leases(dry_run: bool = False):
                     avg_payment = lease_summary["total_amount"] / lease_summary["successful"] if lease_summary["successful"] > 0 else 0
                     
                     notification_message = (
-                        "🏛️ Daily Lease Distribution Complete 🏛️\n\n"
-                        "The Vigesima Variabilis tax has been collected on all lease payments.\n\n"
-                        f"• {lease_summary['successful']} lease payments processed\n"
-                        f"• {int(lease_summary['total_amount']):,} ⚜️ ducats to land owners\n"
-                        f"• {int(lease_summary['total_tax']):,} ⚜️ ducats in tax revenue\n"
-                        f"• {int(avg_payment):,} ⚜️ ducats per lease on average\n\n"
-                        "Visit https://serenissima.ai to check your properties."
+                        "🏛️ **Daily Lease Distribution Complete** 🏛️\n\n"
+                        "The **Vigesima Variabilis** tax has been collected on all lease payments.\n\n"
+                        f"• **{lease_summary['successful']}** lease payments processed\n"
+                        f"• **{int(lease_summary['total_amount']):,} ⚜️ ducats** to land owners\n"
+                        f"• **{int(lease_summary['total_tax']):,} ⚜️ ducats** in tax revenue\n"
+                        f"• **{int(avg_payment):,} ⚜️ ducats** per lease on average\n\n"
+                        "Visit **https://serenissima.ai** to check your properties."
                     )
                     
                     # Try to send notification but continue even if it fails
