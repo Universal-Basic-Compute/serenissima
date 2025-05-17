@@ -75,11 +75,6 @@ def find_citizen_by_identifier(tables, identifier: str) -> Optional[Dict]:
     """Find a citizen by username or wallet address."""
     log.info(f"Looking up citizen: {identifier}")
     
-    # Handle known misspellings
-    if identifier == "ConsiglioDeiDieci":
-        identifier = "ConsiglioDeiDieci"
-        log.info(f"Corrected misspelled identifier from ConsiglioDeiDieci to {identifier}")
-    
     try:
         # First try to find by username
         formula = f"{{Username}}='{identifier}'"
