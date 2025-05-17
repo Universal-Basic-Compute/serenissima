@@ -291,7 +291,7 @@ def create_resource_fetching_activity(tables, citizen: Dict, contract: Dict, fro
             "StartDate": now.isoformat(),
             "EndDate": end_time.isoformat(),
             "Path": json.dumps(path.get('path', [])),
-            "Notes": f"Fetching {amount} units of {resource_type} from {from_building['fields'].get('Name', from_building_id)} to {to_building['fields'].get('Name', to_building_id)}"
+            "Notes": f"🚚 Fetching **{amount:,.0f}** units of **{resource_type}** from **{from_building['fields'].get('Name', from_building_id)}** to **{to_building['fields'].get('Name', to_building_id)}**"
         })
         
         log.info(f"Created resource fetching activity: {activity['id']}")
@@ -325,8 +325,8 @@ def create_production_activity(tables, citizen: Dict, building: Dict, recipe: Di
         end_time = now + datetime.timedelta(minutes=craft_minutes)
         
         # Create a description of the production
-        input_desc = ", ".join([f"{amount} {resource}" for resource, amount in inputs.items()])
-        output_desc = ", ".join([f"{amount} {resource}" for resource, amount in outputs.items()])
+        input_desc = ", ".join([f"**{amount:,.0f}** **{resource}**" for resource, amount in inputs.items()])
+        output_desc = ", ".join([f"**{amount:,.0f}** **{resource}**" for resource, amount in outputs.items()])
         
         # Create the activity
         activity_id = f"produce_{citizen_id}_{uuid.uuid4()}"
@@ -340,7 +340,7 @@ def create_production_activity(tables, citizen: Dict, building: Dict, recipe: Di
             "CreatedAt": now.isoformat(),
             "StartDate": now.isoformat(),
             "EndDate": end_time.isoformat(),
-            "Notes": f"Producing {output_desc} from {input_desc}",
+            "Notes": f"⚒️ Producing {output_desc} from {input_desc}",
             "RecipeInputs": json.dumps(inputs),
             "RecipeOutputs": json.dumps(outputs)
         })
@@ -515,7 +515,7 @@ def create_rest_activity(tables, citizen_id: str, citizen_username: str, home_id
             "CreatedAt": now.isoformat(),
             "StartDate": now.isoformat(),
             "EndDate": end_time_utc.isoformat(),
-            "Notes": "Resting at home for the night"
+            "Notes": "🌙 **Resting** at home for the night"
         })
         
         log.info(f"Created rest activity: {activity['id']}")
@@ -562,7 +562,7 @@ def create_goto_work_activity(tables, citizen_id: str, citizen_username: str, wo
             "StartDate": start_date,
             "EndDate": end_date,
             "Path": path_json,
-            "Notes": "Going to work"
+            "Notes": "🏢 **Going to work**"
         })
         
         log.info(f"Created goto_work activity: {activity['id']}")
@@ -609,7 +609,7 @@ def create_goto_home_activity(tables, citizen_id: str, citizen_username: str, ho
             "StartDate": start_date,
             "EndDate": end_date,
             "Path": path_json,
-            "Notes": "Going home for the night"
+            "Notes": "🏠 **Going home** for the night"
         })
         
         log.info(f"Created goto_home activity: {activity['id']}")
@@ -643,7 +643,7 @@ def create_idle_activity(tables, citizen_id: str, citizen_username: str = None) 
             "CreatedAt": now.isoformat(),
             "StartDate": now.isoformat(),
             "EndDate": end_time.isoformat(),
-            "Notes": "Idle activity due to failed path finding or no home"
+            "Notes": "⏳ **Idle activity** due to failed path finding or no home"
         })
         
         log.info(f"Created idle activity: {activity['id']}")
