@@ -56,7 +56,7 @@ export async function GET(request: Request) {
     // Fetch all business buildings to determine employment relationships
     const businessBuildings = await base(AIRTABLE_BUILDINGS_TABLE)
       .select({
-        fields: ['Occupant', 'RunBy', 'BuildingName', 'Name', 'Type'],
+        fields: ['Occupant', 'RunBy', 'Type'],
         filterByFormula: '{Category} = "business"'
       })
       .all();
@@ -72,7 +72,7 @@ export async function GET(request: Request) {
       if (occupant && runBy) {
         employmentMap[occupant] = runBy;
         workplaceMap[occupant] = {
-          name: building.get('BuildingName') || building.get('Name') || 'Unknown Building',
+          name: building.get('Type') as string || 'Unknown Building',
           type: building.get('Type') as string
         };
       }
