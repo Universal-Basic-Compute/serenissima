@@ -46,7 +46,6 @@ def initialize_airtable():
         return {
             'citizens': Table(api_key, base_id, 'CITIZENS'),
             'businesses': Table(api_key, base_id, 'BUSINESSES'),
-            'citizens': Table(api_key, base_id, 'Citizens'),
             'transactions': Table(api_key, base_id, 'TRANSACTIONS'),
             'notifications': Table(api_key, base_id, 'NOTIFICATIONS')
         }

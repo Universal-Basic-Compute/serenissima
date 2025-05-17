@@ -48,7 +48,7 @@ def initialize_airtable():
         # Return a dictionary of table objects using pyairtable
         return {
             'loans': Table(api_key, base_id, 'LOANS'),
-            'citizens': Table(api_key, base_id, 'Citizens'),
+            'citizens': Table(api_key, base_id, 'CITIZENS'),
             'transactions': Table(api_key, base_id, 'TRANSACTIONS'),
             'notifications': Table(api_key, base_id, 'NOTIFICATIONS')
         }
