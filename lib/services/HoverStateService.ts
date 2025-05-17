@@ -14,6 +14,7 @@ export interface HoverState {
   hoveredResourceId: string | null;
   hoveredResourceData: any | null;
   hoveredWaterPointId: string | null;
+  hoveredBuildingPoint: any | null;
   // Add any other hover states you need
 }
 
@@ -27,7 +28,8 @@ export class HoverStateService {
     hoveredCitizenType: null,
     hoveredResourceId: null,
     hoveredResourceData: null,
-    hoveredWaterPointId: null
+    hoveredWaterPointId: null,
+    hoveredBuildingPoint: null
   };
   
   // Use refs to track current state without causing re-renders
@@ -40,6 +42,7 @@ export class HoverStateService {
   private hoveredResourceIdRef: string | null = null;
   private hoveredResourceDataRef: any | null = null;
   private hoveredWaterPointIdRef: string | null = null;
+  private hoveredBuildingPointRef: string | null = null;
   
   /**
    * Get the current hover state
@@ -212,6 +215,24 @@ export class HoverStateService {
     return this.hoveredWaterPointIdRef;
   }
   
+  /**
+   * Update hover state for a building point
+   */
+  public setHoveredBuildingPoint(pointId: string | null, point: any | null): void {
+    // Only update if the state has changed
+    if (this.hoveredBuildingPointRef !== pointId) {
+      this.hoveredBuildingPointRef = pointId;
+      this.state.hoveredBuildingPoint = point;
+      
+      // Emit event with only the changed property
+      eventBus.emit(HOVER_STATE_CHANGED, {
+        type: 'buildingPoint',
+        id: pointId,
+        point: point
+      });
+    }
+  }
+  
   // Add a debounce function for clearing hover states
   private debouncedClearHoverStates = debounce(() => {
     this.hoveredPolygonIdRef = null;
@@ -223,6 +244,7 @@ export class HoverStateService {
     this.hoveredResourceIdRef = null;
     this.hoveredResourceDataRef = null;
     this.hoveredWaterPointIdRef = null;
+    this.hoveredBuildingPointRef = null;
     
     // Reset state
     this.state = {
@@ -234,14 +256,15 @@ export class HoverStateService {
       hoveredCitizenType: null,
       hoveredResourceId: null,
       hoveredResourceData: null,
-      hoveredWaterPointId: null
+      hoveredWaterPointId: null,
+      hoveredBuildingPoint: null
     };
     
     // Emit event
     eventBus.emit(HOVER_STATE_CHANGED, {
       type: 'clear'
     });
-  }, 150); // 150ms delay before clearing hover states
+  }, 200); // 200ms delay before clearing hover states
 
   /**
    * Clear all hover states
@@ -254,10 +277,11 @@ export class HoverStateService {
       this.hoveredBridgePointIdRef !== null || 
       this.hoveredCitizenBuildingRef !== null ||
       this.hoveredResourceIdRef !== null ||
-      this.hoveredWaterPointIdRef !== null;
+      this.hoveredWaterPointIdRef !== null ||
+      this.hoveredBuildingPointRef !== null;
     
     if (hadHoverStates) {
-      // Use the debounced version to clear hover states
+      // Use the debounced version to clear hover states with a longer delay
       this.debouncedClearHoverStates();
     }
   }

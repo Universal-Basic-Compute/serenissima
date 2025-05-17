@@ -359,8 +359,8 @@ export class InteractionService {
           const size = this.getBuildingSize(building.type);
           const squareSize = Math.max(size.width, size.depth) * scale * 0.6;
       
-          // Add a small buffer to the hit area to make hovering more stable
-          const buffer = 2; // 2 pixel buffer
+          // Add a larger buffer to the hit area to make hovering more stable
+          const buffer = 5; // 5 pixel buffer (increased from 2)
       
           // Check if mouse is over this building with buffer
           if (
@@ -372,6 +372,44 @@ export class InteractionService {
             // Only update if the hovered building has changed
             if (this.hoveredBuildingIdRef !== building.id) {
               hoverStateService.setHoveredBuilding(building.id);
+            }
+            canvas.style.cursor = 'pointer';
+            hoverDetected = true;
+            break;
+          }
+        }
+      }
+      
+      // Check for building point hover
+      if (!hoverDetected && data.emptyBuildingPoints && activeView === 'buildings') {
+        for (const point of data.emptyBuildingPoints) {
+          // Convert lat/lng to isometric coordinates
+          const x = (point.lng - 12.3326) * 20000;
+          const y = (point.lat - 45.4371) * 20000;
+          
+          const world = { x, y };
+          const screen = CoordinateService.worldToScreen(
+            world.x, world.y, scale, offset, canvas.width, canvas.height
+          );
+          const isoPos = {
+            x: screen.x,
+            y: screen.y
+          };
+          
+          // Add a larger buffer for building points to make hover more stable
+          const pointSize = 2.8 * scale;
+          const buffer = 4; // 4 pixel buffer for building points
+          
+          if (
+            mouseX >= isoPos.x - pointSize - buffer && 
+            mouseX <= isoPos.x + pointSize + buffer && 
+            mouseY >= isoPos.y - pointSize - buffer && 
+            mouseY <= isoPos.y + pointSize + buffer
+          ) {
+            // Only update if the hovered building point has changed
+            const pointId = `point-${point.lat}-${point.lng}`;
+            if (this.hoveredBuildingPointRef !== pointId) {
+              hoverStateService.setHoveredBuildingPoint(pointId, point);
             }
             canvas.style.cursor = 'pointer';
             hoverDetected = true;
@@ -534,7 +572,7 @@ export class InteractionService {
           canvas.style.cursor = 'grab';
         }
       }
-    }, 100); // Increased from 50ms to 100ms to reduce flickering
+    }, 150); // Increased from 100ms to 150ms to further reduce flickering
     
     // Handle mouse click with debounce to prevent multiple rapid clicks
     const handleClick = debounce((e: MouseEvent) => {
