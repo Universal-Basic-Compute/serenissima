@@ -242,9 +242,64 @@ export default function TwoDPage() {
       }
     };
     
+    // Fetch building types
+    const fetchBuildingTypes = async () => {
+      try {
+        console.log('Fetching building types from API...');
+        
+        // Add a timeout to the fetch request
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        
+        const response = await fetch('/api/building-types', {
+          signal: controller.signal
+        }).catch(error => {
+          console.error('Fetch error:', error);
+          return null;
+        });
+        
+        clearTimeout(timeoutId);
+        
+        // Check if component is still mounted before updating state
+        if (!isMounted) return;
+        
+        if (!response || !response.ok) {
+          console.error(`Failed to fetch building types: ${response?.status} ${response?.statusText}`);
+          return;
+        }
+        
+        const data = await response.json().catch(error => {
+          console.error('JSON parsing error:', error);
+          return null;
+        });
+        
+        if (!data) {
+          console.error('Failed to parse JSON response');
+          return;
+        }
+        
+        if (data.buildingTypes) {
+          console.log(`Successfully fetched ${data.buildingTypes.length} building types`);
+          
+          // Store in window for other components
+          if (typeof window !== 'undefined') {
+            (window as any).__buildingTypes = data.buildingTypes;
+          }
+        } else {
+          console.error('No building types found in API response');
+        }
+      } catch (error) {
+        // Check if component is still mounted before updating state
+        if (!isMounted) return;
+        
+        console.error('Error loading building types:', error);
+      }
+    };
+    
     // Execute the fetch functions
     fetchPolygons();
     fetchBuildings();
+    fetchBuildingTypes();
     
     // Initialize the transport service with retry logic
     const initializeTransportService = async () => {

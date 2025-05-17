@@ -72,6 +72,23 @@ const getBuildingImagePath = async (type: string, variant?: string): Promise<str
   try {
     console.log(`Looking for image for building type: ${type}, variant: ${variant || 'none'}`);
     
+    // First check if we have building types data with image path
+    const cachedBuildingTypes = (typeof window !== 'undefined' && (window as any).__buildingTypes) 
+      ? (window as any).__buildingTypes 
+      : null;
+    
+    if (cachedBuildingTypes) {
+      const buildingType = cachedBuildingTypes.find((bt: any) => 
+        bt.type.toLowerCase() === type.toLowerCase() || 
+        bt.name?.toLowerCase() === type.toLowerCase()
+      );
+      
+      if (buildingType && buildingType.appearance && buildingType.appearance.imagePath) {
+        console.log(`Found image path in building type data: ${buildingType.appearance.imagePath}`);
+        return buildingType.appearance.imagePath;
+      }
+    }
+    
     // Try the direct flat path first
     const flatImagePath = `/images/buildings/${type}.jpg`;
     console.log(`Trying flat path: ${flatImagePath}`);
@@ -128,7 +145,38 @@ const loadBuildingDefinition = async (type: string, variant?: string, buildingDa
   try {
     console.log(`Looking for building definition for type: ${type}, variant: ${variant || 'none'}`);
     
-    // First try the building-data API endpoint which searches recursively
+    // First check if we have building types data
+    const cachedBuildingTypes = (typeof window !== 'undefined' && (window as any).__buildingTypes) 
+      ? (window as any).__buildingTypes 
+      : null;
+    
+    if (cachedBuildingTypes) {
+      const buildingType = cachedBuildingTypes.find((bt: any) => 
+        bt.type.toLowerCase() === type.toLowerCase() || 
+        bt.name?.toLowerCase() === type.toLowerCase()
+      );
+      
+      if (buildingType) {
+        console.log('Found building definition in cached building types:', buildingType);
+        return buildingType;
+      }
+    }
+    
+    // If not found in cache, try the building-types API directly
+    try {
+      const response = await fetch(`/api/building-types?type=${encodeURIComponent(type)}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.buildingType) {
+          console.log('Found building definition via building-types API:', data.buildingType);
+          return data.buildingType;
+        }
+      }
+    } catch (error) {
+      console.log(`Error with building-types API for ${type}:`, error);
+    }
+    
+    // If still not found, try the building-data API endpoint which searches recursively
     try {
       const response = await fetch(`/api/building-data/${encodeURIComponent(type)}`);
       if (response.ok) {

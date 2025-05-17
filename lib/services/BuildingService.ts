@@ -2,6 +2,7 @@ import { CoordinateService } from './CoordinateService';
 import { buildingPointsService } from './BuildingPointsService';
 import { eventBus, EventTypes } from '../utils/eventBus';
 import { dataService } from './DataService';
+import { fetchBuildingTypes } from '../utils/buildingTypeUtils';
 
 export class BuildingService {
   private buildingPositionsCache: Record<string, {x: number, y: number}> = {};
@@ -166,6 +167,27 @@ export class BuildingService {
    * Get building size based on type
    */
   public getBuildingSize(type: string): {width: number, height: number, depth: number} {
+    // First try to get size from building types API
+    const cachedBuildingTypes = (typeof window !== 'undefined' && (window as any).__buildingTypes) 
+      ? (window as any).__buildingTypes 
+      : null;
+    
+    if (cachedBuildingTypes) {
+      const buildingType = cachedBuildingTypes.find((bt: any) => 
+        bt.type.toLowerCase() === type.toLowerCase() || 
+        bt.name?.toLowerCase() === type.toLowerCase()
+      );
+      
+      if (buildingType && buildingType.dimensions) {
+        return {
+          width: buildingType.dimensions.width || 20,
+          height: buildingType.dimensions.height || 20,
+          depth: buildingType.dimensions.depth || 20
+        };
+      }
+    }
+    
+    // Fall back to hardcoded values if not found in API data
     switch(type.toLowerCase()) {
       case 'market-stall':
         return {width: 15, height: 15, depth: 15};
@@ -192,6 +214,22 @@ export class BuildingService {
    * Get building color based on type
    */
   public getBuildingColor(type: string): string {
+    // First try to get color from building types API
+    const cachedBuildingTypes = (typeof window !== 'undefined' && (window as any).__buildingTypes) 
+      ? (window as any).__buildingTypes 
+      : null;
+    
+    if (cachedBuildingTypes) {
+      const buildingType = cachedBuildingTypes.find((bt: any) => 
+        bt.type.toLowerCase() === type.toLowerCase() || 
+        bt.name?.toLowerCase() === type.toLowerCase()
+      );
+      
+      if (buildingType && buildingType.appearance && buildingType.appearance.color) {
+        return buildingType.appearance.color;
+      }
+    }
+    
     // Generate a deterministic color based on the building type
     const getColorFromType = (str: string): string => {
       // Create a hash from the string
