@@ -777,14 +777,19 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
             >
               <div 
                 className={`w-4 h-4 rounded-full cursor-pointer hover:scale-125 transition-transform flex items-center justify-center ${
+                  citizen.username === currentUsername ? 'ring-2 ring-purple-500 ring-opacity-80' : 
                   citizen.worksFor === currentUsername ? 'ring-2 ring-yellow-400 ring-opacity-80' : ''
                 }`}
                 style={{ 
                   backgroundColor: citizenService.getSocialClassColor(socialClass),
                   border: '1px solid white',
-                  boxShadow: citizen.worksFor === currentUsername ? '0 0 8px 2px rgba(250, 204, 21, 0.7)' : '0 0 0 1px rgba(0,0,0,0.2)'
+                  boxShadow: citizen.username === currentUsername ? '0 0 8px 2px rgba(168, 85, 247, 0.7)' : 
+                             citizen.worksFor === currentUsername ? '0 0 8px 2px rgba(250, 204, 21, 0.7)' : '0 0 0 1px rgba(0,0,0,0.2)'
                 }}
-                title={`${firstName} ${lastName} (${socialClass})${citizen.worksFor === currentUsername ? ' - Works for you' : ''}`}
+                title={`${firstName} ${lastName} (${socialClass})${
+                  citizen.username === currentUsername ? ' - This is you' : 
+                  citizen.worksFor === currentUsername ? ' - Works for you' : ''
+                }`}
               >
                 <span className="text-white text-[8px] font-bold">
                   {firstName?.[0] || '?'}{lastName?.[0] || '?'}
@@ -849,14 +854,19 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
             >
               <div 
                 className={`w-4 h-4 rounded-full cursor-pointer hover:scale-125 transition-transform flex items-center justify-center ${
+                  citizen.username === currentUsername ? 'ring-2 ring-purple-500 ring-opacity-80' : 
                   citizen.worksFor === currentUsername ? 'ring-2 ring-yellow-400 ring-opacity-80' : ''
                 }`}
                 style={{ 
                   backgroundColor: citizenService.getSocialClassColor(socialClass),
                   border: '1px solid white',
-                  boxShadow: citizen.worksFor === currentUsername ? '0 0 8px 2px rgba(250, 204, 21, 0.7)' : '0 0 0 1px rgba(0,0,0,0.2)'
+                  boxShadow: citizen.username === currentUsername ? '0 0 8px 2px rgba(168, 85, 247, 0.7)' : 
+                             citizen.worksFor === currentUsername ? '0 0 8px 2px rgba(250, 204, 21, 0.7)' : '0 0 0 1px rgba(0,0,0,0.2)'
                 }}
-                title={`${firstName} ${lastName} (${socialClass})${citizen.worksFor === currentUsername ? ' - Works for you' : ''}`}
+                title={`${firstName} ${lastName} (${socialClass})${
+                  citizen.username === currentUsername ? ' - This is you' : 
+                  citizen.worksFor === currentUsername ? ' - Works for you' : ''
+                }`}
               >
                 <span className="text-white text-[8px] font-bold">
                   {firstName?.[0] || '?'}{lastName?.[0] || '?'}
