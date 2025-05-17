@@ -130,7 +130,18 @@ def create_notification(tables, citizen: str, building_type: str, building_name:
             # Continue with land_id as the name
         
         # Create notification content
-        content = f"You are now responsible for maintaining the {building_type} on your land {land_name}"
+        # Add emoji based on building type
+        emoji = "🏛️"  # Default emoji
+        if "bridge" in building_type:
+            emoji = "🌉"
+        elif "dock" in building_type:
+            emoji = "⚓"
+        elif "canal" in building_type:
+            emoji = "🚣"
+        elif "cistern" in building_type or "well" in building_type:
+            emoji = "💧"
+            
+        content = f"{emoji} **Decree Notice**: You are now responsible for maintaining the **{building_type}** on your land **{land_name}**"
         details = {
             "decree": "Land Owner Infrastructure Maintenance Responsibility",
             "building_type": building_type,
@@ -240,7 +251,10 @@ def assign_buildings_to_land_owners(dry_run: bool = False):
     # Create a summary notification for the admin
     try:
         if not dry_run and assigned_count > 0:
-            summary_content = f"Decree implementation complete: {assigned_count} public buildings assigned to land owners"
+            # Format numbers with commas
+            formatted_assigned = f"{assigned_count:,}"
+            
+            summary_content = f"🏛️ **Decree Implementation Complete**: **{formatted_assigned}** public buildings assigned to land owners"
             summary_details = {
                 "decree": "Land Owner Infrastructure Maintenance Responsibility",
                 "assigned_count": assigned_count,
