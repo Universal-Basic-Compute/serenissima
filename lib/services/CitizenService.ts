@@ -29,40 +29,12 @@ export class CitizenService {
           
           // Process citizen positions
           this.citizens = responseData.citizens.map(citizen => {
-            // Ensure position is properly formatted
+            // Simple position parsing - assume it works
             let position = citizen.position;
             
-            // If position is a string, try to parse it
+            // If position is a string, parse it
             if (typeof position === 'string') {
-              try {
-                position = JSON.parse(position);
-              } catch (e) {
-                console.warn(`Invalid position string for citizen:`, position);
-                position = null;
-              }
-            }
-            
-            // Validate position object
-            if (position && typeof position === 'object' && 
-                'lat' in position && 'lng' in position &&
-                typeof position.lat === 'number' && typeof position.lng === 'number') {
-              // Valid position, no need to log
-            } else {
-              console.warn(`Invalid position for citizen:`, position);
-              
-              // Try to use the position from the API response directly
-              if (citizen.position && typeof citizen.position === 'object' &&
-                  'lat' in citizen.position && 'lng' in citizen.position) {
-                position = citizen.position;
-                console.log(`Using direct position object:`, position);
-              } else {
-                // Create a random position in Venice
-                position = {
-                  lat: 45.4371 + (Math.random() * 0.01),
-                  lng: 12.3326 + (Math.random() * 0.01)
-                };
-                console.log(`Created fallback position:`, position);
-              }
+              position = JSON.parse(position);
             }
             
             // Ensure all required fields are present

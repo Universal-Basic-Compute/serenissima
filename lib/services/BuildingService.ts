@@ -100,39 +100,34 @@ export class BuildingService {
     
     // Calculate position if not in cache
     let position;
-    try {
-      // First check if building has a position property
-      if (building.position) {
-        if (typeof building.position === 'string') {
-          try {
-            position = JSON.parse(building.position);
-          } catch (e) {
-            console.warn(`Failed to parse position string for building ${building.id}:`, e);
-          }
-        } else {
-          position = building.position;
-        }
-      } 
-      // If no position property, check for Point property
-      else if (building.Point) {
-        // Try to extract coordinates from the Point field (format: type_lat_lng)
-        const pointStr = String(building.Point);
-        const parts = pointStr.split('_');
-        if (parts.length >= 3) {
-          const lat = parseFloat(parts[1]);
-          const lng = parseFloat(parts[2]);
-          
-          if (!isNaN(lat) && !isNaN(lng)) {
-            position = { lat, lng };
-          }
+    
+    // First check if building has a position property
+    if (building.position) {
+      if (typeof building.position === 'string') {
+        position = JSON.parse(building.position);
+      } else {
+        position = building.position;
+      }
+    } 
+    // If no position property, check for Point property
+    else if (building.Point) {
+      // Try to extract coordinates from the Point field (format: type_lat_lng)
+      const pointStr = String(building.Point);
+      const parts = pointStr.split('_');
+      if (parts.length >= 3) {
+        const lat = parseFloat(parts[1]);
+        const lng = parseFloat(parts[2]);
+        
+        if (!isNaN(lat) && !isNaN(lng)) {
+          position = { lat, lng };
         }
       }
-      
-      // If we couldn't get a position, return null
-      if (!position) {
-        console.warn(`No valid position found for building ${building.id}`);
-        return null;
-      }
+    }
+    
+    // If we couldn't get a position, return null
+    if (!position) {
+      return null;
+    }
       
       // Convert lat/lng to world coordinates
       let x, y;

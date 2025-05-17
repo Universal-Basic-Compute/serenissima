@@ -78,20 +78,12 @@ export async function GET(request: Request) {
       // Get all fields and convert keys to camelCase
       const fields = toCamelCase(record.fields);
       
-      // Get the position field and try to parse it if it's a string
+      // Get the position field and parse it if it's a string
       let position = record.get('Position');
       
-      // Handle position parsing
-      try {
-        if (typeof position === 'string') {
-          // If position is a string that looks like JSON, parse it
-          if (position.startsWith('{') || position.startsWith('[')) {
-            position = JSON.parse(position);
-          }
-        }
-      } catch (error) {
-        console.error('Error parsing position for citizen:', record.get('Username'), error);
-        // Keep it as a string if parsing fails
+      // Simple position parsing - assume it works
+      if (typeof position === 'string' && (position.startsWith('{') || position.startsWith('['))) {
+        position = JSON.parse(position);
       }
 
       const username = record.get('Username') as string;
