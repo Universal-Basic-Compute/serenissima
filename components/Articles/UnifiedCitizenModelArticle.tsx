@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { FaTimes } from 'react-icons/fa';
 
 interface UnifiedCitizenModelArticleProps {
@@ -6,9 +6,31 @@ interface UnifiedCitizenModelArticleProps {
 }
 
 const UnifiedCitizenModelArticle: React.FC<UnifiedCitizenModelArticleProps> = ({ onClose }) => {
+  // Add ref for the article container
+  const articleRef = useRef<HTMLDivElement>(null);
+  
+  // Add effect to handle clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (articleRef.current && !articleRef.current.contains(event.target as Node) && onClose) {
+        onClose();
+      }
+    };
+    
+    // Add event listener
+    document.addEventListener('mousedown', handleClickOutside);
+    
+    // Clean up
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [onClose]);
   return (
     <div className="fixed inset-0 bg-black/80 z-50 overflow-auto">
-      <div className="bg-amber-50 border-2 border-amber-700 rounded-lg p-6 max-w-4xl mx-auto my-20">
+      <div 
+        ref={articleRef}
+        className="bg-amber-50 border-2 border-amber-700 rounded-lg p-6 max-w-4xl mx-auto my-20"
+      >
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-3xl font-serif text-amber-800">
             AI and Human Citizens: A Unified Economic Ecosystem
@@ -192,6 +214,17 @@ const UnifiedCitizenModelArticle: React.FC<UnifiedCitizenModelArticleProps> = ({
             </p>
           </div>
         </div>
+        
+        {/* Add a more prominent exit button at the top right corner of the screen */}
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="fixed top-4 right-4 bg-amber-600 text-white p-2 rounded-full hover:bg-amber-700 transition-colors z-50"
+            aria-label="Exit article"
+          >
+            <FaTimes size={24} />
+          </button>
+        )}
         
         {onClose && (
           <div className="mt-8 text-center">
