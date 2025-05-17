@@ -35,7 +35,7 @@ export class CitizenService {
               try {
                 position = JSON.parse(position);
               } catch (e) {
-                console.warn(`Invalid position string for citizen ${citizen.id || citizen.CitizenId}:`, position);
+                console.warn(`Invalid position string for citizen:`, position);
                 position = null;
               }
             }
@@ -44,30 +44,22 @@ export class CitizenService {
             if (position && typeof position === 'object' && 
                 'lat' in position && 'lng' in position &&
                 typeof position.lat === 'number' && typeof position.lng === 'number') {
-              //console.log(`Valid position for citizen ${citizen.id || citizen.CitizenId}:`, position);
+              // Valid position, no need to log
             } else {
-              console.warn(`Invalid position for citizen ${citizen.id || citizen.CitizenId}:`, position);
+              console.warn(`Invalid position for citizen:`, position);
               
               // Try to use the position from the API response directly
               if (citizen.position && typeof citizen.position === 'object' &&
                   'lat' in citizen.position && 'lng' in citizen.position) {
                 position = citizen.position;
-                console.log(`Using direct position object for ${citizen.id || citizen.CitizenId}:`, position);
+                console.log(`Using direct position object:`, position);
               } else {
                 // Create a random position in Venice
                 position = {
                   lat: 45.4371 + (Math.random() * 0.01),
                   lng: 12.3326 + (Math.random() * 0.01)
                 };
-                console.log(`Created fallback position for ${citizen.id || citizen.CitizenId}:`, position);
-                
-                // Log detailed debug information
-                console.error(`Citizen without valid position:`, {
-                  id: citizen.id || citizen.CitizenId,
-                  name: `${citizen.FirstName || citizen.firstName || ''} ${citizen.LastName || citizen.lastName || ''}`,
-                  rawPosition: citizen.position,
-                  citizenData: citizen
-                });
+                console.log(`Created fallback position:`, position);
               }
             }
             
