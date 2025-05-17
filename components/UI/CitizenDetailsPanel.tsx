@@ -32,6 +32,10 @@ interface CitizenDetailsPanelProps {
     // Add these new properties
     home?: string;
     work?: string;
+    // Add profileimage property
+    profileimage?: string;
+    // Add ImageUrl property (another variant of the image URL)
+    ImageUrl?: string;
   };
   onClose: () => void;
 }
