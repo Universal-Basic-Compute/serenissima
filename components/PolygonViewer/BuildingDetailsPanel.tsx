@@ -858,10 +858,10 @@ export default function BuildingDetailsPanel({
                   <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
                     <FaStore className="mr-2" /> SELLS
                   </h3>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 gap-2">
                     {buildingDefinition.productionInformation.sells.map((resource: string) => (
-                      <div key={`sell-${resource}`} className="flex flex-col items-center bg-green-50 p-2 rounded-md" title={resource.replace(/_/g, ' ')}>
-                        <div className="relative w-8 h-8 mb-1">
+                      <div key={`sell-${resource}`} className="flex items-center bg-green-50 p-2 rounded-md" title={resource.replace(/_/g, ' ')}>
+                        <div className="relative w-8 h-8 mr-2">
                           <Image 
                             src={getResourceIconPath(resource)}
                             alt={resource}
@@ -877,7 +877,7 @@ export default function BuildingDetailsPanel({
                             }}
                           />
                         </div>
-                        <span className="text-xs text-gray-700 capitalize text-center">{resource.replace(/_/g, ' ')}</span>
+                        <span className="text-sm text-gray-700 capitalize">{resource.replace(/_/g, ' ')}</span>
                       </div>
                     ))}
                   </div>
@@ -922,10 +922,10 @@ export default function BuildingDetailsPanel({
                   <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
                     <FaWarehouse className="mr-2" /> STORES
                   </h3>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 gap-2">
                     {buildingDefinition.productionInformation.stores.map((resource: string) => (
-                      <div key={`store-${resource}`} className="flex flex-col items-center bg-amber-50 p-2 rounded-md" title={resource.replace(/_/g, ' ')}>
-                        <div className="relative w-8 h-8 mb-1">
+                      <div key={`store-${resource}`} className="flex items-center bg-amber-50 p-2 rounded-md" title={resource.replace(/_/g, ' ')}>
+                        <div className="relative w-8 h-8 mr-2">
                           <Image 
                             src={getResourceIconPath(resource)}
                             alt={resource}
@@ -942,7 +942,7 @@ export default function BuildingDetailsPanel({
                             }}
                           />
                         </div>
-                        <span className="text-xs text-gray-700 capitalize text-center">{resource.replace(/_/g, ' ')}</span>
+                        <span className="text-sm text-gray-700 capitalize">{resource.replace(/_/g, ' ')}</span>
                       </div>
                     ))}
                   </div>
