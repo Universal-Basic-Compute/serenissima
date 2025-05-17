@@ -12,6 +12,33 @@ import {
   ContractList
 } from './BuildingDetails';
 
+// Storage Progress Bar Component
+const StorageProgressBar = ({ used, capacity }) => {
+  if (!capacity || capacity <= 0) return null;
+  
+  const percentage = Math.min(100, Math.round((used / capacity) * 100));
+  const getBarColor = () => {
+    if (percentage < 70) return 'bg-green-500';
+    if (percentage < 90) return 'bg-amber-500';
+    return 'bg-red-500';
+  };
+  
+  return (
+    <div className="mb-4">
+      <div className="flex justify-between items-center mb-1">
+        <span className="text-sm font-medium text-gray-700">Storage</span>
+        <span className="text-sm text-gray-600">{used} / {capacity} units ({percentage}%)</span>
+      </div>
+      <div className="w-full bg-gray-200 rounded-full h-2.5">
+        <div 
+          className={`h-2.5 rounded-full ${getBarColor()}`} 
+          style={{ width: `${percentage}%` }}
+        ></div>
+      </div>
+    </div>
+  );
+};
+
 // Declare the window interface extension for __polygonData
 declare global {
   interface Window {
@@ -56,6 +83,7 @@ export default function BuildingDetailsPanel({
       console.log('Bought resources:', buildingResources.resources?.bought);
       console.log('Storable resources:', buildingResources.resources?.storable);
       console.log('Transformation recipes:', buildingResources.resources?.transformationRecipes);
+      console.log('Storage info:', buildingResources.storage);
     }
   }, [buildingResources]);
   
@@ -593,6 +621,14 @@ export default function BuildingDetailsPanel({
             
             {/* Column 2: SELLS, BUYS, STORES */}
             <div className="col-span-1 md:col-span-1 lg:col-span-1 space-y-4">
+              {/* Add Storage Progress Bar */}
+              {buildingResources?.storage && (
+                <StorageProgressBar 
+                  used={buildingResources.storage.used} 
+                  capacity={buildingResources.storage.capacity} 
+                />
+              )}
+              
               {/* Resources Selling */}
               <ResourceList 
                 title="SELLS" 
@@ -621,7 +657,7 @@ export default function BuildingDetailsPanel({
                 title="STORES" 
                 resources={buildingResources?.resources?.storable || []} 
                 type="store" 
-                storageCapacity={buildingResources?.storageCapacity} 
+                storageCapacity={buildingResources?.storage?.capacity} 
               />
               
               {/* Current Inventory */}
