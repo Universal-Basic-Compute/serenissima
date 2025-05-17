@@ -1395,6 +1395,58 @@ number => {
     return () => clearInterval(interval);
   }, []); // Empty dependency array to run only on mount
   
+  // Fetch bridge data and merge with buildings
+  useEffect(() => {
+    // Only fetch bridge data if we have buildings
+    if (buildings.length === 0) return;
+    
+    const fetchBridgeData = async () => {
+      try {
+        console.log('Fetching bridge orientation data...');
+        const response = await fetch('/api/bridges');
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.bridges && Array.isArray(data.bridges)) {
+            console.log(`Loaded orientation data for ${data.bridges.length} bridges`);
+            
+            // Create a map of bridge IDs to orientation data
+            const bridgeOrientations = {};
+            data.bridges.forEach(bridge => {
+              if (bridge.buildingId && bridge.orientation !== undefined) {
+                bridgeOrientations[bridge.buildingId] = bridge.orientation;
+              }
+            });
+            
+            // Update buildings with orientation data
+            const updatedBuildings = buildings.map(building => {
+              // Check if this building is a bridge and has orientation data
+              if (building.type && 
+                  building.type.toLowerCase().includes('bridge') && 
+                  building.id && 
+                  bridgeOrientations[building.id] !== undefined) {
+                
+                return {
+                  ...building,
+                  orientation: bridgeOrientations[building.id]
+                };
+              }
+              return building;
+            });
+            
+            // Update the buildings state with the merged data
+            setBuildings(updatedBuildings);
+            console.log('Updated buildings with bridge orientation data');
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching bridge orientation data:', error);
+      }
+    };
+    
+    fetchBridgeData();
+  }, [buildings.length]); // Only re-run when buildings array length changes
+  
   // Pre-calculate building positions when buildings are loaded
   useEffect(() => {
     if (buildings.length > 0 && !initialPositionCalculated) {
@@ -2825,15 +2877,13 @@ number => {
           // Use the orientation from the bridge data directly
           let angle = 0;
           
-          // Debug log to check if we're reaching this code
-          console.log(`Processing bridge ${building.id}, has orientation: ${building.orientation !== undefined}`);
-          
+          // Use the orientation from the bridge data directly
           if (building.orientation !== undefined) {
             // Use the orientation value directly from the API
             angle = building.orientation;
             console.log(`Bridge ${building.id} orientation: ${angle}`);
           } else {
-            // Fallback to calculating based on polygon center only if orientation is not provided
+            // Fallback to calculating based on polygon center if orientation is not provided
             let polygonCenter = { x: 0, y: 0 };
             let foundPolygon = false;
             
