@@ -224,6 +224,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   
 
   
+  
   // Helper function to calculate the total distance of a path
   const calculateTotalDistance = useCallback((path: any[]) => {
     let totalDistance = 0;
