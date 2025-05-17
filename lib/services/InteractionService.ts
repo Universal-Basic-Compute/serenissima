@@ -484,6 +484,36 @@ export class InteractionService {
         }
       }
       
+      // Check for water point hover
+      if (!hoverDetected && data.waterPoints && Array.isArray(data.waterPoints) && activeView === 'transport') {
+        for (const waterPoint of data.waterPoints) {
+          if (!waterPoint.position) continue;
+          
+          // Convert lat/lng to isometric coordinates
+          const x = (waterPoint.position.lng - 12.3326) * 20000;
+          const y = (waterPoint.position.lat - 45.4371) * 20000;
+          
+          const isoPos = {
+            x: CoordinateService.worldToScreen(x, y, scale, offset, canvas.width, canvas.height).x,
+            y: CoordinateService.worldToScreen(x, y, scale, offset, canvas.width, canvas.height).y
+          };
+          
+          // Check if mouse is over this water point
+          const pointSize = 1.25 * scale;
+          if (
+            mouseX >= isoPos.x - pointSize * 2 && 
+            mouseX <= isoPos.x + pointSize * 2 && 
+            mouseY >= isoPos.y - pointSize * 2 && 
+            mouseY <= isoPos.y + pointSize * 2
+          ) {
+            hoverStateService.setHoveredWaterPoint(waterPoint.id);
+            canvas.style.cursor = 'pointer';
+            hoverDetected = true;
+            break;
+          }
+        }
+      }
+      
       // If no hover was detected, clear all hover states
       if (!hoverDetected) {
         hoverStateService.clearAllHoverStates();

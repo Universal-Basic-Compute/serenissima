@@ -12,6 +12,7 @@ export interface HoverState {
   hoveredCitizenType: 'home' | 'work' | null;
   hoveredResourceId: string | null;
   hoveredResourceData: any | null;
+  hoveredWaterPointId: string | null;
   // Add any other hover states you need
 }
 
@@ -24,7 +25,8 @@ export class HoverStateService {
     hoveredCitizenBuilding: null,
     hoveredCitizenType: null,
     hoveredResourceId: null,
-    hoveredResourceData: null
+    hoveredResourceData: null,
+    hoveredWaterPointId: null
   };
   
   // Use refs to track current state without causing re-renders
@@ -36,6 +38,7 @@ export class HoverStateService {
   private hoveredCitizenTypeRef: 'home' | 'work' | null = null;
   private hoveredResourceIdRef: string | null = null;
   private hoveredResourceDataRef: any | null = null;
+  private hoveredWaterPointIdRef: string | null = null;
   
   /**
    * Get the current hover state
@@ -172,6 +175,30 @@ export class HoverStateService {
   }
   
   /**
+   * Update hover state for a water point
+   */
+  public setHoveredWaterPoint(pointId: string | null): void {
+    // Only update if the state has changed
+    if (this.hoveredWaterPointIdRef !== pointId) {
+      this.hoveredWaterPointIdRef = pointId;
+      this.state.hoveredWaterPointId = pointId;
+      
+      // Emit event with only the changed property
+      eventBus.emit(HOVER_STATE_CHANGED, {
+        type: 'waterPoint',
+        id: pointId
+      });
+    }
+  }
+  
+  /**
+   * Get the current hovered water point ID
+   */
+  public getHoveredWaterPointId(): string | null {
+    return this.hoveredWaterPointIdRef;
+  }
+  
+  /**
    * Clear all hover states
    */
   public clearAllHoverStates(): void {
@@ -181,7 +208,8 @@ export class HoverStateService {
       this.hoveredCanalPointIdRef !== null || 
       this.hoveredBridgePointIdRef !== null || 
       this.hoveredCitizenBuildingRef !== null ||
-      this.hoveredResourceIdRef !== null;
+      this.hoveredResourceIdRef !== null ||
+      this.hoveredWaterPointIdRef !== null;
     
     // Reset all refs
     this.hoveredPolygonIdRef = null;
@@ -192,6 +220,7 @@ export class HoverStateService {
     this.hoveredCitizenTypeRef = null;
     this.hoveredResourceIdRef = null;
     this.hoveredResourceDataRef = null;
+    this.hoveredWaterPointIdRef = null;
     
     // Reset state
     this.state = {
@@ -202,7 +231,8 @@ export class HoverStateService {
       hoveredCitizenBuilding: null,
       hoveredCitizenType: null,
       hoveredResourceId: null,
-      hoveredResourceData: null
+      hoveredResourceData: null,
+      hoveredWaterPointId: null
     };
     
     // Only emit if there was something to clear

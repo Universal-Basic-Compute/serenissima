@@ -2055,6 +2055,9 @@ number => {
   
     // Draw water points if in water point mode or transport view
     if ((waterPointMode || activeView === 'transport') && waterPoints.length > 0) {
+      // Get the hovered water point ID from the hover state service
+      const hoveredWaterPointId = hoverStateService.getHoveredWaterPointId();
+      
       waterPoints.forEach(waterPoint => {
         if (!waterPoint.position) return;
         
@@ -2067,19 +2070,65 @@ number => {
           y: calculateIsoY(x, y, scale, offset, canvas.height)
         };
         
+        // Check if this water point is hovered
+        const isHovered = waterPoint.id === hoveredWaterPointId;
+        
         // Draw a distinctive circle for water points - make them lighter in transport view
         ctx.beginPath();
-        // Use a smaller size for water points
-        ctx.arc(isoPos.x, isoPos.y, 1.25 * scale, 0, Math.PI * 2);
-        // Use a more transparent color in transport view
-        const opacity = activeView === 'transport' && !waterPointMode ? 0.4 : 0.8;
-        ctx.fillStyle = `rgba(0, 150, 255, ${opacity})`;
+        // Use a larger size for hovered water points
+        const pointSize = isHovered ? 2 * scale : 1.25 * scale;
+        ctx.arc(isoPos.x, isoPos.y, pointSize, 0, Math.PI * 2);
+        
+        // Use a more transparent color in transport view, unless hovered or in water route mode
+        const opacity = isHovered || waterRouteMode ? 0.8 : 
+                       (activeView === 'transport' && !waterPointMode) ? 0.4 : 0.8;
+        ctx.fillStyle = isHovered ? 'rgba(0, 200, 255, 0.8)' : `rgba(0, 150, 255, ${opacity})`;
         ctx.fill();
       
-        // Add a white border
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-        ctx.lineWidth = 0.5;
+        // Add a white border, more prominent when hovered
+        ctx.strokeStyle = isHovered ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.5)';
+        ctx.lineWidth = isHovered ? 1 : 0.5;
         ctx.stroke();
+        
+        // Add a pulsing effect when hovered
+        if (isHovered) {
+          const pulseSize = 3 * scale * (0.8 + 0.2 * Math.sin(Date.now() / 300));
+          ctx.beginPath();
+          ctx.arc(isoPos.x, isoPos.y, pulseSize, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(0, 200, 255, 0.4)';
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+          
+          // Add tooltip for hovered water point in water route mode
+          if (waterRouteMode) {
+            // Draw tooltip background
+            const tooltipText = !waterRouteStartPoint ? 
+              "Click to start route" : 
+              !waterRouteEndPoint ? 
+                "Click to end route" : 
+                "Click to reset route";
+            
+            const textWidth = ctx.measureText(tooltipText).width;
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(
+              isoPos.x + 15, 
+              isoPos.y - 10, 
+              textWidth + 10, 
+              20
+            );
+            
+            // Draw tooltip text
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(
+              tooltipText, 
+              isoPos.x + 20, 
+              isoPos.y
+            );
+          }
+        }
       
         // Draw connections if any
         if (waterPoint.connections && Array.isArray(waterPoint.connections)) {
