@@ -15,7 +15,9 @@ async function fetchBridges() {
         'User-Agent': 'Transport-Debug-Service'
       },
       // Add cache: 'no-store' to avoid caching issues
-      cache: 'no-store'
+      cache: 'no-store',
+      // Add timeout signal
+      signal: AbortSignal.timeout(10000) // 10 second timeout
     });
     
     if (response.ok) {
@@ -44,7 +46,9 @@ async function fetchDocks() {
         'User-Agent': 'Transport-Debug-Service'
       },
       // Add cache: 'no-store' to avoid caching issues
-      cache: 'no-store'
+      cache: 'no-store',
+      // Add timeout signal
+      signal: AbortSignal.timeout(10000) // 10 second timeout
     });
     
     if (response.ok) {
@@ -67,19 +71,62 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const mode = searchParams.get('mode') || 'real'; // Default to 'real' if not specified
     
+    console.log(`Transport debug request with mode: ${mode}`);
+    
     // Initialize the transport service if needed
     if (!transportService.isPolygonsLoaded()) {
-      await transportService.preloadPolygons();
+      console.log('Transport service not initialized, preloading polygons...');
+      const success = await transportService.preloadPolygons();
+      console.log(`Preloading polygons ${success ? 'succeeded' : 'failed'}`);
+      
+      if (!success) {
+        return NextResponse.json(
+          { 
+            success: false, 
+            error: 'Failed to initialize transport service',
+            details: 'Could not load polygon data'
+          },
+          { status: 500 }
+        );
+      }
     }
     
     // Store the original pathfinding mode
     const originalMode = transportService.getPathfindingMode();
+    console.log(`Original pathfinding mode: ${originalMode}`);
     
     // Set the requested pathfinding mode
     transportService.setPathfindingMode(mode === 'all' ? 'all' : 'real');
+    console.log(`Set pathfinding mode to: ${mode === 'all' ? 'all' : 'real'}`);
     
     // Get debug information about the graph with the requested mode
-    const graphInfo = transportService.debugGraph();
+    console.log('Calling debugGraph() to get graph information...');
+    
+    // Add a timeout to prevent hanging
+    const debugGraphPromise = transportService.debugGraph();
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Debug graph operation timed out after 30 seconds')), 30000);
+    });
+    
+    const graphInfo = await Promise.race([debugGraphPromise, timeoutPromise])
+      .catch(error => {
+        console.error('Error or timeout in debugGraph():', error);
+        // Return a minimal graph info object if there's an error
+        return {
+          error: error.message || 'Unknown error in debugGraph()',
+          totalNodes: 0,
+          totalEdges: 0,
+          nodesByType: {},
+          connectedComponents: 0,
+          componentSizes: [],
+          pathfindingMode: transportService.getPathfindingMode(),
+          polygonsLoaded: transportService.isPolygonsLoaded(),
+          polygonCount: 0,
+          canalNetworkSegments: 0
+        };
+      });
+    
+    console.log('Graph debug info received:', Object.keys(graphInfo));
     
     // Fix the component sizes array - it's likely too large to return in full
     if (graphInfo.componentSizes && graphInfo.componentSizes.length > 0) {
@@ -109,27 +156,50 @@ export async function GET(request: Request) {
       additionalInfo = {};
     } else if (mode === 'real') {
       // If we're in 'real' mode, get 'all' mode info for comparison
-      transportService.setPathfindingMode('all');
-      const allModeGraphInfo = transportService.debugGraph();
-      
-      // Fix component sizes for all mode too
-      if (allModeGraphInfo.componentSizes && allModeGraphInfo.componentSizes.length > 0) {
-        const componentSizeStats = {
-          count: allModeGraphInfo.componentSizes.length,
-          min: Math.min(...allModeGraphInfo.componentSizes),
-          max: Math.max(...allModeGraphInfo.componentSizes),
-          avg: allModeGraphInfo.componentSizes.reduce((sum, size) => sum + size, 0) / allModeGraphInfo.componentSizes.length,
-          largestComponents: allModeGraphInfo.componentSizes
-            .sort((a, b) => b - a)
-            .slice(0, 5)
-        };
+      try {
+        console.log('Getting additional "all" mode graph info for comparison...');
+        transportService.setPathfindingMode('all');
         
-        allModeGraphInfo.componentSizes = componentSizeStats;
+        // Add a timeout for this operation too
+        const allModeGraphPromise = transportService.debugGraph();
+        const allModeTimeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('All mode debug graph operation timed out')), 30000);
+        });
+        
+        const allModeGraphInfo = await Promise.race([allModeGraphPromise, allModeTimeoutPromise])
+          .catch(error => {
+            console.error('Error or timeout in all mode debugGraph():', error);
+            return {
+              error: error.message || 'Unknown error in all mode debugGraph()',
+              totalNodes: 0,
+              totalEdges: 0
+            };
+          });
+        
+        // Fix component sizes for all mode too
+        if (allModeGraphInfo.componentSizes && allModeGraphInfo.componentSizes.length > 0) {
+          const componentSizeStats = {
+            count: allModeGraphInfo.componentSizes.length,
+            min: Math.min(...allModeGraphInfo.componentSizes),
+            max: Math.max(...allModeGraphInfo.componentSizes),
+            avg: allModeGraphInfo.componentSizes.reduce((sum, size) => sum + size, 0) / allModeGraphInfo.componentSizes.length,
+            largestComponents: allModeGraphInfo.componentSizes
+              .sort((a, b) => b - a)
+              .slice(0, 5)
+          };
+          
+          allModeGraphInfo.componentSizes = componentSizeStats;
+        }
+        
+        additionalInfo = {
+          allModeGraphInfo
+        };
+      } catch (error) {
+        console.error('Error getting all mode graph info:', error);
+        additionalInfo = {
+          allModeGraphInfo: { error: 'Failed to get all mode graph info' }
+        };
       }
-      
-      additionalInfo = {
-        allModeGraphInfo
-      };
     }
     
     // Reset pathfinding mode to original
@@ -148,7 +218,12 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('Error in transport debug route:', error);
     return NextResponse.json(
-      { success: false, error: 'An error occurred while debugging the transport graph' },
+      { 
+        success: false, 
+        error: 'An error occurred while debugging the transport graph',
+        details: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      },
       { status: 500 }
     );
   }

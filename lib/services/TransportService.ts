@@ -295,17 +295,24 @@ export class TransportService {
         ? (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000')
         : '';
       
-      // If local pathfinding failed or wasn't possible, fall back to API
-      const response = await fetch(`${baseUrl}/api/transport`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          startPoint: start,
-          endPoint: end
-        }),
-      });
+      // If local pathfinding failed or wasn't possible, fall back to API with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+      
+      try {
+        const response = await fetch(`${baseUrl}/api/transport`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            startPoint: start,
+            endPoint: end
+          }),
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
       
       if (response.ok) {
         const data = await response.json();
@@ -360,17 +367,24 @@ export class TransportService {
               severity: 'warning'
             });
             
-            // Make a direct request to the water-only pathfinding endpoint
-            const waterResponse = await fetch(`${baseUrl}/api/transport/water-only`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                startPoint: start,
-                endPoint: end
-              }),
-            });
+            // Make a direct request to the water-only pathfinding endpoint with timeout
+            const waterController = new AbortController();
+            const waterTimeoutId = setTimeout(() => waterController.abort(), 15000); // 15 second timeout
+            
+            try {
+              const waterResponse = await fetch(`${baseUrl}/api/transport/water-only`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  startPoint: start,
+                  endPoint: end
+                }),
+                signal: waterController.signal
+              });
+              
+              clearTimeout(waterTimeoutId);
             
             if (waterResponse.ok) {
               const waterData = await waterResponse.json();
@@ -1461,74 +1475,125 @@ export class TransportService {
       edges: {}
     };
     
-    // Fetch bridges from API
+    // Fetch bridges from API with retry logic and timeout
     let bridges: any[] = [];
-    try {
-      // Determine if we're running in Node.js or browser environment
-      const isNode = typeof window === 'undefined';
-      
-      // Set base URL depending on environment
-      const baseUrl = isNode 
-        ? (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000')
-        : '';
-      
-      console.log(`Fetching bridges from API: ${baseUrl}/api/bridges`);
-      const bridgesResponse = await fetch(`${baseUrl}/api/bridges`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'User-Agent': 'Transport-Service'
-        },
-        cache: 'no-store'
-      });
-      
-      if (bridgesResponse.ok) {
-        const bridgesData = await bridgesResponse.json();
-        if (bridgesData.success && Array.isArray(bridgesData.bridges)) {
-          bridges = bridgesData.bridges;
-          console.log(`Successfully fetched ${bridges.length} bridges from API`);
+    let bridgesFetched = false;
+    let bridgeRetries = 0;
+    const MAX_RETRIES = 3;
+    
+    while (!bridgesFetched && bridgeRetries < MAX_RETRIES) {
+      try {
+        // Determine if we're running in Node.js or browser environment
+        const isNode = typeof window === 'undefined';
+        
+        // Set base URL depending on environment
+        const baseUrl = isNode 
+          ? (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000')
+          : '';
+        
+        console.log(`Fetching bridges from API (attempt ${bridgeRetries + 1}): ${baseUrl}/api/bridges`);
+        
+        // Create abort controller for timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        
+        const bridgesResponse = await fetch(`${baseUrl}/api/bridges`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'Transport-Service'
+          },
+          cache: 'no-store',
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (bridgesResponse.ok) {
+          const bridgesData = await bridgesResponse.json();
+          if (bridgesData.success && Array.isArray(bridgesData.bridges)) {
+            bridges = bridgesData.bridges;
+            console.log(`Successfully fetched ${bridges.length} bridges from API`);
+            bridgesFetched = true;
+          } else {
+            console.error('Invalid bridges data format:', bridgesData);
+            bridgeRetries++;
+          }
         } else {
-          console.error('Invalid bridges data format:', bridgesData);
+          console.error(`Failed to fetch bridges: ${bridgesResponse.status} ${bridgesResponse.statusText}`);
+          bridgeRetries++;
+          // Add exponential backoff
+          await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, bridgeRetries)));
         }
-      } else {
-        console.error(`Failed to fetch bridges: ${bridgesResponse.status} ${bridgesResponse.statusText}`);
+      } catch (error) {
+        console.error(`Error fetching bridges (attempt ${bridgeRetries + 1}):`, error);
+        bridgeRetries++;
+        // Add exponential backoff
+        await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, bridgeRetries)));
       }
-    } catch (error) {
-      console.error('Error fetching bridges:', error);
     }
     
-    // Fetch docks from API
+    if (!bridgesFetched) {
+      console.warn(`Failed to fetch bridges after ${MAX_RETRIES} attempts, proceeding with empty bridges array`);
+    }
+    
+    // Fetch docks from API with retry logic and timeout
     let docks: any[] = [];
-    try {
-      // Determine if we're running in Node.js or browser environment
-      const isNode = typeof window === 'undefined';
-      
-      // Set base URL depending on environment
-      const baseUrl = isNode 
-        ? (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000')
-        : '';
-      
-      console.log(`Fetching docks from API: ${baseUrl}/api/docks`);
-      const docksResponse = await fetch(`${baseUrl}/api/docks`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'User-Agent': 'Transport-Service'
-        },
-        cache: 'no-store'
-      });
-      
-      if (docksResponse.ok) {
-        const docksData = await docksResponse.json();
-        if (docksData.success && Array.isArray(docksData.docks)) {
-          docks = docksData.docks;
-          console.log(`Successfully fetched ${docks.length} docks from API`);
+    let docksFetched = false;
+    let dockRetries = 0;
+    
+    while (!docksFetched && dockRetries < MAX_RETRIES) {
+      try {
+        // Determine if we're running in Node.js or browser environment
+        const isNode = typeof window === 'undefined';
+        
+        // Set base URL depending on environment
+        const baseUrl = isNode 
+          ? (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000')
+          : '';
+        
+        console.log(`Fetching docks from API (attempt ${dockRetries + 1}): ${baseUrl}/api/docks`);
+        
+        // Create abort controller for timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        
+        const docksResponse = await fetch(`${baseUrl}/api/docks`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'Transport-Service'
+          },
+          cache: 'no-store',
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (docksResponse.ok) {
+          const docksData = await docksResponse.json();
+          if (docksData.success && Array.isArray(docksData.docks)) {
+            docks = docksData.docks;
+            console.log(`Successfully fetched ${docks.length} docks from API`);
+            docksFetched = true;
+          } else {
+            console.error('Invalid docks data format:', docksData);
+            dockRetries++;
+          }
         } else {
-          console.error('Invalid docks data format:', docksData);
+          console.error(`Failed to fetch docks: ${docksResponse.status} ${docksResponse.statusText}`);
+          dockRetries++;
+          // Add exponential backoff
+          await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, dockRetries)));
         }
-      } else {
-        console.error(`Failed to fetch docks: ${docksResponse.status} ${docksResponse.statusText}`);
+      } catch (error) {
+        console.error(`Error fetching docks (attempt ${dockRetries + 1}):`, error);
+        dockRetries++;
+        // Add exponential backoff
+        await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, dockRetries)));
       }
-    } catch (error) {
-      console.error('Error fetching docks:', error);
+    }
+    
+    if (!docksFetched) {
+      console.warn(`Failed to fetch docks after ${MAX_RETRIES} attempts, proceeding with empty docks array`);
     }
     
     // Extract building points from polygons
