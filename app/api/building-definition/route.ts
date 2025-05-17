@@ -1,42 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import path from 'path';
-import fs from 'fs';
-
-// Helper function to find a building definition file in the flat directory structure
-async function findBuildingDefinition(buildingType: string): Promise<any> {
-  const buildingsDir = path.join(process.cwd(), 'data', 'buildings');
-  
-  // Ensure the directory exists
-  if (!fs.existsSync(buildingsDir)) {
-    return null;
-  }
-  
-  // Normalize the building type for comparison
-  const normalizedType = buildingType.toLowerCase().trim();
-  
-  // Get all building definition files in the flat directory
-  const files = fs.readdirSync(buildingsDir)
-    .filter(file => file.endsWith('.json'));
-  
-  // Check each file
-  for (const file of files) {
-    const filePath = path.join(buildingsDir, file);
-    try {
-      const fileContent = fs.readFileSync(filePath, 'utf8');
-      const definition = JSON.parse(fileContent);
-      
-      // Check if this is the building type we're looking for
-      if (definition.type && definition.type.toLowerCase().trim() === normalizedType) {
-        return definition;
-      }
-    } catch (error) {
-      console.error(`Error reading or parsing ${filePath}:`, error);
-    }
-  }
-  
-  // Building definition not found
-  return null;
-}
 
 export async function GET(request: NextRequest) {
   try {
@@ -51,17 +13,78 @@ export async function GET(request: NextRequest) {
       );
     }
     
-    // Find the building definition
-    const definition = await findBuildingDefinition(buildingType);
+    // Use the building-types API to get all building types
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
+                  (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
     
-    if (!definition) {
+    const buildingTypesUrl = new URL('/api/building-types', baseUrl);
+    console.log(`Fetching building types from: ${buildingTypesUrl.toString()}`);
+    
+    const response = await fetch(buildingTypesUrl.toString());
+    
+    if (!response.ok) {
+      console.error(`Failed to fetch building types: ${response.status} ${response.statusText}`);
       return NextResponse.json(
-        { error: `Building definition not found for type: ${buildingType}` },
-        { status: 404 }
+        { error: 'Failed to fetch building types' },
+        { status: 500 }
       );
     }
     
-    return NextResponse.json(definition);
+    const data = await response.json();
+    
+    if (!data.success || !data.buildingTypes) {
+      console.error('Invalid response from building-types API');
+      return NextResponse.json(
+        { error: 'Invalid response from building-types API' },
+        { status: 500 }
+      );
+    }
+    
+    // Normalize the requested building type for comparison
+    const normalizedRequestType = buildingType.toLowerCase().trim().replace(/\s+/g, '_');
+    
+    // First try exact match
+    let matchedBuilding = data.buildingTypes.find(bt => 
+      bt.type.toLowerCase().trim().replace(/\s+/g, '_') === normalizedRequestType
+    );
+    
+    // If no exact match, try partial match
+    if (!matchedBuilding) {
+      matchedBuilding = data.buildingTypes.find(bt => {
+        const normalizedType = bt.type.toLowerCase().trim().replace(/\s+/g, '_');
+        return normalizedType.includes(normalizedRequestType) || 
+               normalizedRequestType.includes(normalizedType);
+      });
+    }
+    
+    // If still no match, return a default building definition
+    if (!matchedBuilding) {
+      console.log(`No matching building type found for: ${buildingType}, returning default`);
+      
+      // Create a default building definition
+      const defaultDefinition = {
+        type: buildingType,
+        name: buildingType.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+        category: 'commercial',
+        subcategory: 'general',
+        tier: 1,
+        constructionCosts: null,
+        maintenanceCost: 0,
+        shortDescription: `A ${buildingType.replace(/_/g, ' ')} building.`,
+        productionInformation: {
+          storageCapacity: 1000,
+          stores: ["general_goods"],
+          sells: ["general_goods"]
+        },
+        canImport: true
+      };
+      
+      return NextResponse.json(defaultDefinition);
+    }
+    
+    // Return the matched building definition
+    return NextResponse.json(matchedBuilding);
+    
   } catch (error) {
     console.error('Error in GET /api/building-definition:', error);
     return NextResponse.json(
