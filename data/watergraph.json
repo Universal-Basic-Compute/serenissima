@@ -1333,6 +1333,12 @@
           ],
           "distance": 538.4990987946426,
           "id": "waterroute_45.440408_12.314066"
+        },
+        {
+          "targetId": "waterpoint_45.44366547615735_12.308025000124003",
+          "intermediatePoints": [],
+          "distance": 522.5352960030019,
+          "id": "waterroute_45.442997_12.311236"
         }
       ]
     },
@@ -2112,6 +2118,12 @@
           ],
           "distance": 536.2160233798614,
           "id": "waterroute_45.427459_12.363394"
+        },
+        {
+          "targetId": "waterpoint_45.42318928571429_12.371625",
+          "intermediatePoints": [],
+          "distance": 619.5204303031428,
+          "id": "waterroute_45.423811_12.367756"
         }
       ]
     },
@@ -8001,6 +8013,142 @@
           ],
           "distance": 291.8613654141944,
           "id": "waterroute_45.434486_12.322518"
+        }
+      ]
+    },
+    {
+      "id": "waterpoint_45.42318928571429_12.371625",
+      "position": {
+        "lat": 45.42318928571429,
+        "lng": 12.371625
+      },
+      "connections": [
+        {
+          "targetId": "waterpoint_45.42443193271671_12.363886764845178",
+          "intermediatePoints": [],
+          "distance": 619.5204303031428,
+          "id": "waterroute_45.423811_12.367756"
+        },
+        {
+          "targetId": "waterpoint_45.425975_12.381075",
+          "intermediatePoints": [],
+          "distance": 799.9059980358363,
+          "id": "waterroute_45.424582_12.376350"
+        }
+      ]
+    },
+    {
+      "id": "waterpoint_45.425975_12.381075",
+      "position": {
+        "lat": 45.425975,
+        "lng": 12.381075
+      },
+      "connections": [
+        {
+          "targetId": "waterpoint_45.42318928571429_12.371625",
+          "intermediatePoints": [],
+          "distance": 799.9059980358363,
+          "id": "waterroute_45.424582_12.376350"
+        },
+        {
+          "targetId": "waterpoint_45.43015357142857_12.390025",
+          "intermediatePoints": [],
+          "distance": 838.8643950555522,
+          "id": "waterroute_45.428064_12.385550"
+        }
+      ]
+    },
+    {
+      "id": "waterpoint_45.43015357142857_12.390025",
+      "position": {
+        "lat": 45.43015357142857,
+        "lng": 12.390025
+      },
+      "connections": [
+        {
+          "targetId": "waterpoint_45.425975_12.381075",
+          "intermediatePoints": [],
+          "distance": 838.8643950555522,
+          "id": "waterroute_45.428064_12.385550"
+        },
+        {
+          "targetId": "waterpoint_45.43251071428571_12.399674999999998",
+          "intermediatePoints": [],
+          "distance": 797.3254464850611,
+          "id": "waterroute_45.431332_12.394850"
+        }
+      ]
+    },
+    {
+      "id": "waterpoint_45.43251071428571_12.399674999999998",
+      "position": {
+        "lat": 45.43251071428571,
+        "lng": 12.399674999999998
+      },
+      "edgeNode": true,
+      "connections": [
+        {
+          "targetId": "waterpoint_45.43015357142857_12.390025",
+          "intermediatePoints": [],
+          "distance": 797.3254464850611,
+          "id": "waterroute_45.431332_12.394850"
+        }
+      ]
+    },
+    {
+      "id": "waterpoint_45.44366547615735_12.308025000124003",
+      "position": {
+        "lat": 45.44366547615735,
+        "lng": 12.308025000124003
+      },
+      "connections": [
+        {
+          "targetId": "waterpoint_45.44232893774416_12.314446153793305",
+          "intermediatePoints": [],
+          "distance": 522.5352960030019,
+          "id": "waterroute_45.442997_12.311236"
+        },
+        {
+          "targetId": "waterpoint_45.44780535710235_12.294487500144234",
+          "intermediatePoints": [],
+          "distance": 1152.0616172919965,
+          "id": "waterroute_45.445735_12.301256"
+        }
+      ]
+    },
+    {
+      "id": "waterpoint_45.44780535710235_12.294487500144234",
+      "position": {
+        "lat": 45.44780535710235,
+        "lng": 12.294487500144234
+      },
+      "connections": [
+        {
+          "targetId": "waterpoint_45.44366547615735_12.308025000124003",
+          "intermediatePoints": [],
+          "distance": 1152.0616172919965,
+          "id": "waterroute_45.445735_12.301256"
+        },
+        {
+          "targetId": "waterpoint_45.452269642799735_12.28561250017782",
+          "intermediatePoints": [],
+          "distance": 851.8867429606823,
+          "id": "waterroute_45.450037_12.290050"
+        }
+      ]
+    },
+    {
+      "id": "waterpoint_45.452269642799735_12.28561250017782",
+      "position": {
+        "lat": 45.452269642799735,
+        "lng": 12.28561250017782
+      },
+      "connections": [
+        {
+          "targetId": "waterpoint_45.44780535710235_12.294487500144234",
+          "intermediatePoints": [],
+          "distance": 851.8867429606823,
+          "id": "waterroute_45.450037_12.290050"
         }
       ]
     }

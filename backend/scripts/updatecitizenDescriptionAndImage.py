@@ -264,7 +264,7 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
         
         # Call Kinos Engine API
         response = requests.post(
-            f"https://kin-engine.ai/v2/blueprints/serenissima-ai/kins/{username}/messages",
+            f"https://api.kinos-engine.ai/v2/blueprints/serenissima-ai/kins/{username}/messages",
             headers={
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {kinos_api_key}"
