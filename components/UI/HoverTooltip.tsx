@@ -252,14 +252,14 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
         name: citizen.firstname || citizen.FirstName || '',
         lastName: citizen.lastname || citizen.LastName || '',
         socialClass: citizen.socialclass || citizen.SocialClass || citizen.socialClass || '',
-        imageUrl: citizen.imageurl || citizen.profileimage || citizen.ImageUrl
+        imageUrl: citizen.imageurl || citizen.profileimage || citizen.ImageUrl || citizen.image
       } : 'No citizen data'
     });
     
     if (citizen) {
       // If we have the citizen data, display it
       // Ensure we have the correct property names for image and social class
-      const imageUrl = citizen.imageurl || citizen.profileimage || citizen.ImageUrl || 
+      const imageUrl = citizen.imageurl || citizen.profileimage || citizen.ImageUrl || citizen.image || 
                      `/images/citizens/${citizen.username || citizen.citizenid || citizen.CitizenId || 'default'}.jpg`;
     
       console.log('TOOLTIP: Using image URL:', imageUrl);
@@ -272,8 +272,8 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
       
       tooltipContent = (
         <div className="flex flex-col items-center">
-          {/* Citizen image */}
-          <div className="w-32 h-32 mb-2 overflow-hidden rounded">
+          {/* Citizen image with improved styling */}
+          <div className="w-32 h-32 mb-2 overflow-hidden rounded-lg border-2 border-amber-600 shadow-md">
             <img 
               src={imageUrl}
               alt={`${firstName} ${lastName}`}
@@ -285,14 +285,14 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
               }}
             />
           </div>
-          <div className="font-bold text-center">
+          <div className="font-bold text-center text-lg">
             {firstName} {lastName}
           </div>
-          <div className="text-amber-300 text-sm">
+          <div className="text-amber-400 text-sm font-semibold mb-1">
             {socialClass}
           </div>
           {tooltipData.citizenType && (
-            <div className="mt-1 text-xs">
+            <div className="mt-1 text-xs bg-amber-800/50 px-2 py-1 rounded-full">
               {tooltipData.citizenType === 'home' ? 'Resident' : 'Worker'} at {tooltipData.buildingId}
             </div>
           )}
