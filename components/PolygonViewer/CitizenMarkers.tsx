@@ -799,8 +799,8 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                 style={{ 
                   backgroundColor: citizenService.getSocialClassColor(socialClass),
                   border: '1px solid white',
-                  boxShadow: citizen.username === currentUsername ? '0 0 8px 2px rgba(168, 85, 247, 0.7)' : 
-                             citizen.worksFor === currentUsername ? '0 0 8px 2px rgba(250, 204, 21, 0.7)' : '0 0 0 1px rgba(0,0,0,0.2)'
+                  boxShadow: citizen.username === currentUsername ? '0 0 0 2px rgba(168, 85, 247, 0.9)' : 
+                             citizen.worksFor === currentUsername ? '0 0 0 2px rgba(250, 204, 21, 0.9)' : '0 0 0 1px rgba(0,0,0,0.2)'
                 }}
                 title={`${firstName} ${lastName} (${socialClass})${
                   citizen.username === currentUsername ? ' - This is you' : 
@@ -876,8 +876,8 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                 style={{ 
                   backgroundColor: citizenService.getSocialClassColor(socialClass),
                   border: '1px solid white',
-                  boxShadow: citizen.username === currentUsername ? '0 0 8px 2px rgba(168, 85, 247, 0.7)' : 
-                             citizen.worksFor === currentUsername ? '0 0 8px 2px rgba(250, 204, 21, 0.7)' : '0 0 0 1px rgba(0,0,0,0.2)'
+                  boxShadow: citizen.username === currentUsername ? '0 0 0 2px rgba(168, 85, 247, 0.9)' : 
+                             citizen.worksFor === currentUsername ? '0 0 0 2px rgba(250, 204, 21, 0.9)' : '0 0 0 1px rgba(0,0,0,0.2)'
                 }}
                 title={`${firstName} ${lastName} (${socialClass})${
                   citizen.username === currentUsername ? ' - This is you' : 
