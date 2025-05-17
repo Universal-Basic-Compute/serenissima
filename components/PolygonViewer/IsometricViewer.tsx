@@ -2814,31 +2814,50 @@ number => {
           ctx.strokeStyle = '#FF3300'; // Bright red-orange for selected
         }
         
-        // Draw square for building (all buildings are now square)
-        ctx.beginPath();
-        ctx.rect(
-          isoPos.x - squareSize/2, 
-          isoPos.y - squareSize/2, 
-          squareSize, 
-          squareSize
-        );
-        ctx.fill();
-        ctx.stroke();
+        // Check if this is a bridge
+        const isBridge = building.type.toLowerCase().includes('bridge');
         
-        // Add a small indicator for the building type with fixed font size
-        // Determine text color based on building color darkness
-        const isDark = isColorDark(color);
-        ctx.fillStyle = isDark ? '#FFFFFF' : '#000000'; // White text for dark backgrounds, black for light
-        ctx.font = `10px Arial`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        // Use first letter of building type as an indicator
-        const typeIndicator = building.type.charAt(0).toUpperCase();
-        ctx.fillText(
-          typeIndicator, 
-          isoPos.x, 
-          isoPos.y
-        );
+        if (isBridge) {
+          // Draw a thin rectangle for bridges
+          const bridgeWidth = squareSize * 1.5; // Make bridge wider
+          const bridgeHeight = squareSize * 0.3; // Make bridge thinner
+          
+          ctx.beginPath();
+          ctx.rect(
+            isoPos.x - bridgeWidth/2, 
+            isoPos.y - bridgeHeight/2, 
+            bridgeWidth, 
+            bridgeHeight
+          );
+          ctx.fill();
+          ctx.stroke();
+        } else {
+          // Draw square for non-bridge buildings
+          ctx.beginPath();
+          ctx.rect(
+            isoPos.x - squareSize/2, 
+            isoPos.y - squareSize/2, 
+            squareSize, 
+            squareSize
+          );
+          ctx.fill();
+          ctx.stroke();
+          
+          // Add a small indicator for the building type with fixed font size
+          // Determine text color based on building color darkness
+          const isDark = isColorDark(color);
+          ctx.fillStyle = isDark ? '#FFFFFF' : '#000000'; // White text for dark backgrounds, black for light
+          ctx.font = `10px Arial`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          // Use first letter of building type as an indicator
+          const typeIndicator = building.type.charAt(0).toUpperCase();
+          ctx.fillText(
+            typeIndicator, 
+            isoPos.x, 
+            isoPos.y
+          );
+        }
       });
       
       //console.log(`%c BUILDINGS DRAWN: Completed drawing ${buildingsWithValidPosition.length} buildings`, 'background: #9C27B0; color: white; padding: 4px 8px; font-weight: bold; border-radius: 4px;');
