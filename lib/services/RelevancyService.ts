@@ -56,6 +56,11 @@ export class RelevancyService {
       const score = 100 * Math.exp(-minDistance / 500);
       const numericScore = parseFloat(score.toFixed(2));
       
+      // Determine relevancy status based on score
+      let status = 'low';
+      if (numericScore > 70) status = 'high';
+      else if (numericScore > 40) status = 'medium';
+      
       // Create a more detailed relevancy object
       relevancyScores[land.id] = {
         score: numericScore,
