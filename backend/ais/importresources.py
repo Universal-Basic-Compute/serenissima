@@ -721,7 +721,7 @@ def create_admin_notification(tables, ai_import_results: Dict[str, Dict]) -> Non
         
         # Create the notification
         notification = {
-            "Citizen": "NLR",  # Send to NLR as requested
+            "Citizen": "ConsiglioDeiDieci",  # Send to ConsiglioDeiDieci as requested
             "Type": "ai_import_strategy",
             "Content": message,
             "CreatedAt": now,

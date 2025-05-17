@@ -102,7 +102,7 @@ async function generateDecree(input) {
         Important: The Title must be in English, not Italian.`,
         messages: [
           {
-            role: 'citizen',
+            role: 'user',
             content: `Create a decree based on the following input: "${input}"`
           }
         ]

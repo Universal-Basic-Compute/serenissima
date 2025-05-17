@@ -239,8 +239,8 @@ def collect_maintenance_costs():
     logger.info(f"Total maintenance collected: {total_maintenance_collected} ducats")
     logger.info(f"Buildings with errors: {buildings_with_errors}")
     
-    # Send admin notification to NLR
-    send_admin_notification("NLR", total_maintenance_collected, buildings_processed, buildings_with_errors)
+    # Send admin notification to ConsiglioDeiDieci
+    send_admin_notification("ConsiglioDeiDieci", total_maintenance_collected, buildings_processed, buildings_with_errors)
     
     return {
         "total_collected": total_maintenance_collected,

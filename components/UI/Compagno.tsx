@@ -640,7 +640,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
     // Optimistically add citizen message to UI
     const citizenMessage: Message = {
       id: `temp-${Date.now()}`,
-      role: 'citizen',
+      role: 'user',
       content: content,
       timestamp: new Date().toISOString()
     };

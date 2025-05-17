@@ -252,10 +252,10 @@ def create_admin_notification(tables, housing_summary) -> None:
             "Details": json.dumps(details),
             "CreatedAt": datetime.datetime.now().isoformat(),
             "ReadAt": None,
-            "Citizen": "NLR"  # Specific citizen to receive the notification
+            "Citizen": "ConsiglioDeiDieci"  # Specific citizen to receive the notification
         })
         
-        log.info(f"Created admin notification for citizen NLR with housing summary")
+        log.info(f"Created admin notification for citizen ConsiglioDeiDieci with housing summary")
     except Exception as e:
         log.error(f"Error creating admin notification: {e}")
 

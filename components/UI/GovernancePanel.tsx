@@ -268,36 +268,6 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
               </div>
             </div>
             
-            {/* Second proclamation - Entrepreneurship Incentives */}
-            <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-              <h4 className="text-xl font-serif text-amber-800 mb-2">New Proclamation: Entrepreneurship Incentives</h4>
-              
-              <p className="mb-4 text-amber-700">
-                The Council of Ten has enacted new measures to encourage entrepreneurship and business management throughout La Serenissima:
-              </p>
-              
-              <ul className="list-disc pl-5 space-y-2 text-amber-800">
-                <li>
-                  <span className="font-bold">Entrepreneur Priority:</span> Citizens who run businesses (entrepreneurs) will receive priority in job assignments, ensuring they can manage their own enterprises.
-                </li>
-                <li>
-                  <span className="font-bold">Wage Optimization:</span> Entrepreneurs will be assigned to their highest-paying business, maximizing their personal income while maintaining oversight of their commercial interests.
-                </li>
-                <li>
-                  <span className="font-bold">Business Loyalty:</span> Entrepreneurs will only consider job opportunities within businesses they personally manage, ensuring continuity of leadership.
-                </li>
-                <li>
-                  <span className="font-bold">Social Advancement:</span> As previously established, entrepreneurs are guaranteed at least Popolani status, recognizing their contribution to Venice's commercial vitality.
-                </li>
-              </ul>
-              
-              <div className="mt-4 bg-amber-50 p-3 rounded border border-amber-200">
-                <p className="italic text-amber-800">
-                  <span className="font-bold">Rationale:</span> These measures ensure that those who invest in creating businesses can personally oversee their operations, fostering a culture of direct management that was characteristic of Venetian commerce. By allowing entrepreneurs to prioritize their own enterprises, we strengthen the connection between ownership and operation, encouraging more citizens to establish new businesses throughout the Republic.
-                </p>
-              </div>
-            </div>
-            
             <div className="text-center mt-8 text-amber-700">
               <p>Additional Council of Ten features coming soon.</p>
               <p className="text-sm italic mt-2">The Council watches over the Republic with vigilance and discretion.</p>

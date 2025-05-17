@@ -331,11 +331,11 @@
 2025-05-07 09:34:47,531 - income_distributor - INFO - Updated compute balance for citizen recVTR2tdnH6QmCFs from 112163283 to 112180508
 2025-05-07 09:34:47,788 - income_distributor - INFO - Created transaction record recPJ6wQnf0Pyh1ag for 17225 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
 2025-05-07 09:34:47,788 - income_distributor - INFO - Successfully distributed 17225 COMPUTE to ConsiglioDeiDieci for land polygon-1746056319492
-2025-05-07 09:34:47,788 - income_distributor - INFO - Processing land polygon-1746056541940 (Calle dei Avvocati, San Marco) with income 19928 for owner NLR
+2025-05-07 09:34:47,788 - income_distributor - INFO - Processing land polygon-1746056541940 (Calle dei Avvocati, San Marco) with income 19928 for owner ConsiglioDeiDieci
 2025-05-07 09:34:48,368 - income_distributor - INFO - Updated compute balance for citizen recVTR2tdnH6QmCFs from 112180508 to 112160580
 2025-05-07 09:34:48,762 - income_distributor - INFO - Updated compute balance for citizen recwL90fzVpME1qxg from 1619112 to 1639040
-2025-05-07 09:34:49,038 - income_distributor - INFO - Created transaction record rec2tB7h0OMv0GYXl for 19928 COMPUTE from ConsiglioDeiDieci to NLR
-2025-05-07 09:34:49,038 - income_distributor - INFO - Successfully distributed 19928 COMPUTE to NLR for land polygon-1746056541940
+2025-05-07 09:34:49,038 - income_distributor - INFO - Created transaction record rec2tB7h0OMv0GYXl for 19928 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
+2025-05-07 09:34:49,038 - income_distributor - INFO - Successfully distributed 19928 COMPUTE to ConsiglioDeiDieci for land polygon-1746056541940
 2025-05-07 09:34:49,039 - income_distributor - INFO - Processing land polygon-1746057432046 (Campo de Santa Elena) with income 4640 for owner ConsiglioDeiDieci
 2025-05-07 09:34:49,592 - income_distributor - INFO - Updated compute balance for citizen recVTR2tdnH6QmCFs from 112160580 to 112155940
 2025-05-07 09:34:49,988 - income_distributor - INFO - Updated compute balance for citizen recVTR2tdnH6QmCFs from 112155940 to 112160580
@@ -947,11 +947,11 @@
 2025-05-07 09:40:26,278 - income_distributor - INFO - Updated compute balance for citizen recVTR2tdnH6QmCFs from 111917093 to 111934318
 2025-05-07 09:40:26,574 - income_distributor - INFO - Created transaction record recvTns4WIc1jKNad for 17225 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
 2025-05-07 09:40:26,574 - income_distributor - INFO - Successfully distributed 17225 COMPUTE to ConsiglioDeiDieci for land polygon-1746056319492
-2025-05-07 09:40:26,574 - income_distributor - INFO - Processing land polygon-1746056541940 (Calle dei Avvocati, San Marco) with income 19928 for owner NLR
+2025-05-07 09:40:26,574 - income_distributor - INFO - Processing land polygon-1746056541940 (Calle dei Avvocati, San Marco) with income 19928 for owner ConsiglioDeiDieci
 2025-05-07 09:40:27,201 - income_distributor - INFO - Updated compute balance for citizen recVTR2tdnH6QmCFs from 111934318 to 111914390
 2025-05-07 09:40:27,624 - income_distributor - INFO - Updated compute balance for citizen recwL90fzVpME1qxg from 1639040 to 1658968
-2025-05-07 09:40:27,914 - income_distributor - INFO - Created transaction record recsXUnuXkMCNFhcf for 19928 COMPUTE from ConsiglioDeiDieci to NLR
-2025-05-07 09:40:27,914 - income_distributor - INFO - Successfully distributed 19928 COMPUTE to NLR for land polygon-1746056541940
+2025-05-07 09:40:27,914 - income_distributor - INFO - Created transaction record recsXUnuXkMCNFhcf for 19928 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
+2025-05-07 09:40:27,914 - income_distributor - INFO - Successfully distributed 19928 COMPUTE to ConsiglioDeiDieci for land polygon-1746056541940
 2025-05-07 09:40:27,914 - income_distributor - INFO - Processing land polygon-1746057432046 (Campo de Santa Elena) with income 4640 for owner ConsiglioDeiDieci
 2025-05-07 09:40:28,511 - income_distributor - INFO - Updated compute balance for citizen recVTR2tdnH6QmCFs from 111914390 to 111909750
 2025-05-07 09:40:28,914 - income_distributor - INFO - Updated compute balance for citizen recVTR2tdnH6QmCFs from 111909750 to 111914390
@@ -1598,11 +1598,11 @@
 2025-05-07 10:03:11,097 - income_distributor - INFO - Updated compute balance for citizen recVTR2tdnH6QmCFs from 111670903 to 111688128
 2025-05-07 10:03:11,378 - income_distributor - INFO - Created transaction record recZ2jN4wPBg0IazO for 17225 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
 2025-05-07 10:03:11,379 - income_distributor - INFO - Successfully distributed 17225 COMPUTE to ConsiglioDeiDieci for land polygon-1746056319492
-2025-05-07 10:03:11,379 - income_distributor - INFO - Processing land polygon-1746056541940 (Calle dei Avvocati, San Marco) with income 19928 for owner NLR
+2025-05-07 10:03:11,379 - income_distributor - INFO - Processing land polygon-1746056541940 (Calle dei Avvocati, San Marco) with income 19928 for owner ConsiglioDeiDieci
 2025-05-07 10:03:12,104 - income_distributor - INFO - Updated compute balance for citizen recVTR2tdnH6QmCFs from 111688128 to 111668200
 2025-05-07 10:03:12,542 - income_distributor - INFO - Updated compute balance for citizen recwL90fzVpME1qxg from 1658968 to 1678896
-2025-05-07 10:03:12,834 - income_distributor - INFO - Created transaction record recf2eCXcfyMDTbEG for 19928 COMPUTE from ConsiglioDeiDieci to NLR
-2025-05-07 10:03:12,834 - income_distributor - INFO - Successfully distributed 19928 COMPUTE to NLR for land polygon-1746056541940
+2025-05-07 10:03:12,834 - income_distributor - INFO - Created transaction record recf2eCXcfyMDTbEG for 19928 COMPUTE from ConsiglioDeiDieci to ConsiglioDeiDieci
+2025-05-07 10:03:12,834 - income_distributor - INFO - Successfully distributed 19928 COMPUTE to ConsiglioDeiDieci for land polygon-1746056541940
 2025-05-07 10:03:12,834 - income_distributor - INFO - Processing land polygon-1746057432046 (Campo de Santa Elena) with income 4640 for owner ConsiglioDeiDieci
 2025-05-07 10:03:13,446 - income_distributor - INFO - Updated compute balance for citizen recVTR2tdnH6QmCFs from 111668200 to 111663560
 2025-05-07 10:03:13,879 - income_distributor - INFO - Updated compute balance for citizen recVTR2tdnH6QmCFs from 111663560 to 111668200

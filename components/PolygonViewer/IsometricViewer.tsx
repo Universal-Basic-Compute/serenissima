@@ -3862,7 +3862,7 @@ number => {
   // Helper function to lighten a color
   const lightenColor = (color: string, percent: number): string => {
     // For debugging
-    console.log(`Lightening color ${color} by ${percent}%`);
+    //console.log(`Lightening color ${color} by ${percent}%`);
     
     // If color doesn't start with #, return a default color
     if (!color.startsWith('#')) {

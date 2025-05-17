@@ -234,7 +234,7 @@ def create_immigration_notification(tables, citizen: Dict, building: Dict) -> No
             "Details": json.dumps(details),
             "CreatedAt": datetime.datetime.now().isoformat(),
             "ReadAt": None,
-            "Citizen": "NLR"  # Admin notification
+            "Citizen": "ConsiglioDeiDieci"  # Admin notification
         })
         
         log.info(f"Created immigration notification for {citizen_name}")
@@ -268,10 +268,10 @@ def create_admin_notification(tables, immigration_summary) -> None:
             "Details": json.dumps(details),
             "CreatedAt": datetime.datetime.now().isoformat(),
             "ReadAt": None,
-            "Citizen": "NLR"  # Specific citizen to receive the notification
+            "Citizen": "ConsiglioDeiDieci"  # Specific citizen to receive the notification
         })
         
-        log.info(f"Created admin notification for citizen NLR with immigration summary")
+        log.info(f"Created admin notification for citizen ConsiglioDeiDieci with immigration summary")
     except Exception as e:
         log.error(f"Error creating admin notification: {e}")
 

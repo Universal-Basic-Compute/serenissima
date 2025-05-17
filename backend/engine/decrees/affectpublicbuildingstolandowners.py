@@ -255,7 +255,7 @@ def assign_buildings_to_land_owners(dry_run: bool = False):
                 "Details": json.dumps(summary_details),
                 "CreatedAt": datetime.datetime.now().isoformat(),
                 "ReadAt": None,
-                "Citizen": "NLR"  # Admin citizen
+                "Citizen": "ConsiglioDeiDieci"  # Admin citizen
             })
             
             log.info("Created summary notification for admin")

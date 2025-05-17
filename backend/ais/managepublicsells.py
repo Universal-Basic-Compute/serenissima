@@ -765,7 +765,7 @@ def create_admin_notification(tables, ai_sell_results: Dict[str, Dict]) -> None:
         
         # Create the notification
         notification = {
-            "Citizen": "NLR",  # Send to NLR as requested
+            "Citizen": "ConsiglioDeiDieci",  # Send to ConsiglioDeiDieci as requested
             "Type": "ai_public_sell_strategy",
             "Content": message,
             "CreatedAt": now,

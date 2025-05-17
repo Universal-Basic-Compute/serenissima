@@ -1,57 +1,30 @@
 {
-  "totalErrors": 5,
+  "totalErrors": 2,
   "totalWarnings": 0,
   "exitCode": 1,
-  "timestamp": "2025-05-16T21:57:34.166Z",
+  "timestamp": "2025-05-17T10:10:28.515Z",
   "errors": [
     {
-      "filePath": "app/api/bridges/route.ts",
-      "line": 43,
-      "column": 41,
-      "code": "TS2345",
-      "message": "Argument of type 'string | number | true | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]' is not assignable to parameter of type 'string'.",
+      "filePath": "components/UI/GovernancePanel.tsx",
+      "line": 244,
+      "column": 48,
+      "code": "TS1382",
+      "message": "Unexpected token. Did you mean `{'>'}` or `&gt;`?",
       "type": "error"
     },
     {
-      "filePath": "app/api/citizens/route.ts",
-      "line": 507,
-      "column": 38,
-      "code": "TS2339",
-      "message": "Property 'currentActivity' does not exist on type '{ id: string; citizenid: string; name: string; firstname: string; lastname: string; socialclass: string; description: string; profileimage: string; imageurl: string; position: any; occupation: string; wealth: string | ... 5 more ... | readonly Attachment[]; createdat: string; home: string; work: string; } | { ...; }'.",
-      "type": "error"
-    },
-    {
-      "filePath": "app/api/docks/route.ts",
-      "line": 43,
-      "column": 41,
-      "code": "TS2345",
-      "message": "Argument of type 'string | number | true | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]' is not assignable to parameter of type 'string'.",
-      "type": "error"
-    },
-    {
-      "filePath": "components/UI/TransportDebugPanel.tsx",
-      "line": 594,
-      "column": 76,
-      "code": "TS2322",
-      "message": "Type 'unknown' is not assignable to type 'ReactNode'.",
-      "type": "error"
-    },
-    {
-      "filePath": "components/UI/TransportDebugPanel.tsx",
-      "line": 611,
-      "column": 76,
-      "code": "TS2322",
-      "message": "Type 'unknown' is not assignable to type 'ReactNode'.",
+      "filePath": "components/UI/GovernancePanel.tsx",
+      "line": 245,
+      "column": 52,
+      "code": "TS1382",
+      "message": "Unexpected token. Did you mean `{'>'}` or `&gt;`?",
       "type": "error"
     }
   ],
-  "rawOutputLines": 9,
+  "rawOutputLines": 3,
   "firstFewLines": [
-    "app/api/bridges/route.ts(43,41): error TS2345: Argument of type 'string | number | true | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]' is not assignable to parameter of type 'string'.\r",
-    "  Type 'number' is not assignable to type 'string'.\r",
-    "app/api/citizens/route.ts(507,38): error TS2339: Property 'currentActivity' does not exist on type '{ id: string; citizenid: string; name: string; firstname: string; lastname: string; socialclass: string; description: string; profileimage: string; imageurl: string; position: any; occupation: string; wealth: string | ... 5 more ... | readonly Attachment[]; createdat: string; home: string; work: string; } | { ...; }'.\r",
-    "  Property 'currentActivity' does not exist on type '{ id: string; citizenid: string; name: string; firstname: string; lastname: string; socialclass: string; description: string; profileimage: string; imageurl: string; position: any; occupation: string; wealth: string | ... 5 more ... | readonly Attachment[]; createdat: string; home: string; work: string; }'.\r",
-    "app/api/docks/route.ts(43,41): error TS2345: Argument of type 'string | number | true | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]' is not assignable to parameter of type 'string'.\r"
+    "components/UI/GovernancePanel.tsx(244,48): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?\r",
+    "components/UI/GovernancePanel.tsx(245,52): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?\r"
   ],
   "compilerExitCode": 1
 }

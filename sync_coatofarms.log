@@ -60,8 +60,8 @@
 2025-05-10 15:40:56,393 - INFO - Added coat of arms for Tiara_raa99: https://serenissima.ai/coat-of-arms/Tiara_raa99_1746854719.png
 2025-05-10 15:40:56,393 - INFO - Found coat of arms for citizen bigbosefx in field 'CoatOfArmsImage': /coat-of-arms/bigbosefx.png
 2025-05-10 15:40:56,393 - INFO - Added coat of arms for bigbosefx: https://serenissima.ai/coat-of-arms/bigbosefx.png
-2025-05-10 15:40:56,393 - INFO - Found coat of arms for citizen NLR in field 'CoatOfArmsImage': /coat-of-arms/de12ced3-79e6-4fdb-b575-fbcb2009e101.png
-2025-05-10 15:40:56,393 - INFO - Added coat of arms for NLR: https://serenissima.ai/coat-of-arms/de12ced3-79e6-4fdb-b575-fbcb2009e101.png
+2025-05-10 15:40:56,393 - INFO - Found coat of arms for citizen ConsiglioDeiDieci in field 'CoatOfArmsImage': /coat-of-arms/de12ced3-79e6-4fdb-b575-fbcb2009e101.png
+2025-05-10 15:40:56,393 - INFO - Added coat of arms for ConsiglioDeiDieci: https://serenissima.ai/coat-of-arms/de12ced3-79e6-4fdb-b575-fbcb2009e101.png
 2025-05-10 15:40:56,394 - INFO - Citizen meyti_tgz2 has no coat of arms image
 2025-05-10 15:40:56,395 - INFO - All fields for meyti_tgz2: {'Wallet': 'Hn7kRETV2xuhoUNWtYc2D8VFgNWhuZtgHCiwVDinhgV3', 'Username': 'meyti_tgz2', 'FamilyMotto': 'Honor and cunning bring dominion', 'FamilyCoatOfArms': 'A golden lion standing over a silver sea, with a red crescent above � symbol of trade between the East and Venice.', 'FirstName': 'mahdi', 'LastName': 'taghizadeh', 'Color': '#DAA520', 'LastActiveAt': '2025-05-08T18:46:43.745Z'}
 2025-05-10 15:40:56,395 - INFO - Found coat of arms for citizen Feola007 in field 'CoatOfArmsImage': /coat-of-arms/Feola007.png
@@ -98,7 +98,7 @@
 2025-05-10 15:40:57,050 - INFO - File already exists for Lucid, replacing it: public\coat-of-arms\lucid.png
 2025-05-10 15:40:57,084 - ERROR - Error downloading https://serenissima.ai/coat-of-arms/bigbosefx.png for citizen bigbosefx: 404 Client Error: Not Found for url: https://serenissima.ai/coat-of-arms/bigbosefx.png
 2025-05-10 15:40:57,130 - INFO - Downloaded https://serenissima.ai/coat-of-arms/Isabella.png for citizen Isabella to public\coat-of-arms\isabella.png
-2025-05-10 15:40:57,165 - INFO - Downloaded https://serenissima.ai/coat-of-arms/de12ced3-79e6-4fdb-b575-fbcb2009e101.png for citizen NLR to public\coat-of-arms\nlr.png
+2025-05-10 15:40:57,165 - INFO - Downloaded https://serenissima.ai/coat-of-arms/de12ced3-79e6-4fdb-b575-fbcb2009e101.png for citizen ConsiglioDeiDieci to public\coat-of-arms\nlr.png
 2025-05-10 15:40:57,235 - INFO - Downloaded https://serenissima.ai/coat-of-arms/Lucid.png for citizen Lucid to public\coat-of-arms\lucid.png
 2025-05-10 15:40:57,339 - INFO - Downloaded https://serenissima.ai/coat-of-arms/Feola007.png for citizen Feola007 to public\coat-of-arms\feola007.png
 2025-05-10 15:40:57,342 - INFO - Saved mapping file to public\coat-of-arms\mapping.json
