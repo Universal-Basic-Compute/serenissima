@@ -43,7 +43,16 @@ const ResourceItem: React.FC<ResourceItemProps> = ({ resource, type = 'store' })
     
     // Remove any existing file extension before adding .png
     const baseIcon = resource.icon.replace(/\.png$/, '');
-    return `/images/resources/${baseIcon}.png`;
+    
+    // Ensure path starts with /images/
+    if (baseIcon.startsWith('resources/')) {
+      return `/images/${baseIcon}.png`;
+    } else if (!baseIcon.includes('/')) {
+      return `/images/resources/${baseIcon}.png`;
+    } else {
+      // If it has slashes but doesn't start with /images/, add /images/ prefix
+      return `/images/${baseIcon}.png`;
+    }
   };
 
   return (
