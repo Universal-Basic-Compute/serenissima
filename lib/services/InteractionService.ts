@@ -24,6 +24,8 @@ export interface InteractionState {
   waterPointMode?: boolean;
 }
 
+type HoverType = 'none' | 'polygon' | 'building' | 'buildingPoint' | 'citizen' | 'canalPoint' | 'bridgePoint' | 'waterPoint';
+
 export class InteractionService {
   private state: InteractionState = {
     isDragging: false,
@@ -298,7 +300,7 @@ export class InteractionService {
       if (!this.isDraggingRef) {
         // Create a stable hover state that doesn't change unless something meaningful changes
         let newHoverState = {
-          type: 'none' as const,
+          type: 'none' as HoverType,
           id: null as string | null,
           data: null
         };
@@ -499,7 +501,7 @@ export class InteractionService {
               ) {
                 const pointId = point.id || `canal-${point.edge.lat}-${point.edge.lng}`;
                 // Only update if the hovered canal point has changed
-                if (this.hoveredCanalPointIdRef !== pointId) {
+                if (this.hoveredCanalPointRef !== pointId) {
                   hoverStateService.setHoveredCanalPoint(pointId);
                 }
                 newHoverState = {
@@ -543,7 +545,7 @@ export class InteractionService {
               ) {
                 const pointId = point.id || `bridge-${point.edge.lat}-${point.edge.lng}`;
                 // Only update if the hovered bridge point has changed
-                if (this.hoveredBridgePointIdRef !== pointId) {
+                if (this.hoveredBridgePointRef !== pointId) {
                   hoverStateService.setHoveredBridgePoint(pointId);
                 }
                 newHoverState = {

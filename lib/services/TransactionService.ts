@@ -33,6 +33,7 @@ interface ExtendedListing {
 interface ExtendedOffer extends Offer {
   id: string;
   buyer: string;
+  listingId: string;
   metadata?: {
     historicalName?: string;
     englishName?: string;

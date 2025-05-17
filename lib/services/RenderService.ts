@@ -561,7 +561,7 @@ export class RenderService {
     polygonsToRender.forEach(({ polygon, coords, fillColor }) => {
       // Determine if this polygon is selected or hovered
       const isSelected = interactionState.selectedPolygonId === polygon.id;
-      const isHovered = hoverState.hoveredPolygonId === polygon.id;
+      const isHovered = hoverState.type === 'polygon' && hoverState.id === polygon.id;
       
       // Draw the polygon
       this.drawPolygon(ctx, coords, fillColor, isSelected, isHovered);
@@ -604,7 +604,7 @@ export class RenderService {
         
         // Determine if this building is selected or hovered
         const isSelected = interactionState.selectedBuildingId === building.id;
-        const isHovered = hoverState.hoveredBuildingId === building.id;
+        const isHovered = hoverState.type === 'building' && hoverState.id === building.id;
         
         // Determine the shape based on point_id or Point field
         const pointId = building.point_id || building.Point;
@@ -707,7 +707,7 @@ export class RenderService {
           const pointId = point.id || `canal-${point.edge.lat}-${point.edge.lng}`;
           
           // Check if this point is hovered
-          const isHovered = hoverState.hoveredCanalPointId === pointId;
+          const isHovered = hoverState.type === 'canalPoint' && hoverState.id === pointId;
           
           // Draw a small, semi-transparent circle for dock points
           ctx.beginPath();
@@ -756,7 +756,7 @@ export class RenderService {
           const pointId = point.id || `bridge-${point.edge.lat}-${point.edge.lng}`;
           
           // Check if this point is hovered
-          const isHovered = hoverState.hoveredBridgePointId === pointId;
+          const isHovered = hoverState.type === 'bridgePoint' && hoverState.id === pointId;
           
           // Draw a small, semi-transparent square for bridge points
           const pointSize = 2 * scale;

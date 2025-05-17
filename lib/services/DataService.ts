@@ -20,7 +20,7 @@ export class DataService {
   private polygonsLoaded: boolean = false;
   private buildingsLoaded: boolean = false;
   private landOwnersLoaded: boolean = false;
-  private citizensLoaded: boolean = false;
+  private citizensListLoaded: boolean = false;
   private incomeDataLoaded: boolean = false;
   private citizensLoaded: boolean = false;
   
@@ -28,7 +28,7 @@ export class DataService {
   private isLoadingPolygons: boolean = false;
   private isLoadingBuildings: boolean = false;
   private isLoadingLandOwners: boolean = false;
-  private isLoadingCitizens: boolean = false;
+  private isLoadingCitizensList: boolean = false;
   private isLoadingIncomeData: boolean = false;
   private isLoadingCitizens: boolean = false;
 
@@ -641,7 +641,7 @@ export class DataService {
     }
     
     if (dataType === 'citizens' || dataType === 'all') {
-      this.citizensCache = {};
+      this.citizensCache = [];
       this.citizensLoaded = false;
     }
     

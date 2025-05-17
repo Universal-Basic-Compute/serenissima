@@ -829,7 +829,7 @@ const TransportDebugPanel: React.FC<TransportDebugPanelProps> = ({ onClose, visi
                   
                   <h3 className="text-lg font-medium text-amber-800 mb-2">Raw Path Data</h3>
                   <div className="bg-gray-800 text-green-400 p-3 rounded font-mono text-xs overflow-x-auto">
-                    <pre>{JSON.stringify(currentPath, null, 2)}</pre>
+                    <pre>{JSON.stringify(currentPath as any[], null, 2)}</pre>
                   </div>
                 </div>
               </div>
