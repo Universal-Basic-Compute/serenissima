@@ -2822,14 +2822,14 @@ number => {
           const bridgeWidth = squareSize * 0.8; // Keep the same width
           const bridgeHeight = squareSize * 0.08; // Reduce height for shorter bridges
           
-          // Use the orientation from the bridge data if available, otherwise calculate based on polygon center
+          // Use the orientation from the bridge data directly
           let angle = 0;
           
           if (building.orientation !== undefined) {
-            // Use the pre-calculated orientation from the API
+            // Use the orientation value directly from the API
             angle = building.orientation;
           } else {
-            // Find the polygon this bridge is on as fallback
+            // Fallback to calculating based on polygon center only if orientation is not provided
             let polygonCenter = { x: 0, y: 0 };
             let foundPolygon = false;
             
@@ -2858,7 +2858,7 @@ number => {
           // Translate to the bridge position
           ctx.translate(isoPos.x, isoPos.y);
           
-          // Rotate the context using the calculated or provided angle
+          // Rotate the context using the orientation value directly
           ctx.rotate(angle);
           
           // Draw the rectangle centered at origin (0,0)
