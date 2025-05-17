@@ -808,7 +808,7 @@ Be historically accurate but engaging. Speak in first person as if you are this 
                       </div>
                     </div>
                     <div className="text-amber-700">
-                      Waiting for {citizen.firstname} to respond...
+                      You just bumbed into {citizen.firstname} in the streets of Venice!
                     </div>
                   </div>
                 )}
