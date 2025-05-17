@@ -217,8 +217,13 @@ def process_building(building: Dict[str, Any], force_regenerate: bool = False) -
     # Determine the output file path - use flat structure
     output_path = os.path.join(BUILDINGS_IMAGE_DIR, f"{safe_name}.jpg")
     
+    # Add more detailed logging about the check
+    log.info(f"Checking if image exists at: {output_path}")
+    image_exists = os.path.exists(output_path)
+    log.info(f"Image exists: {image_exists}, Force regenerate: {force_regenerate}")
+    
     # Check if the image already exists
-    if os.path.exists(output_path) and not force_regenerate:
+    if image_exists and not force_regenerate:
         log.info(f"Image already exists for {name}, skipping. Use --force to regenerate.")
         return True
     
