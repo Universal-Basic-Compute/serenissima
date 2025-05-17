@@ -795,17 +795,17 @@ export default function TwoDPage() {
               </button>
             </div>
             <div className="px-8 pb-8">
-              {selectedArticle === 'strategies' && <StrategiesArticle />}
-              {selectedArticle === 'beginners-guide' && <BeginnersGuideArticle />}
-              {selectedArticle === 'economic-system' && <EconomicSystemArticle />}
-              {selectedArticle === 'landowner-guide' && <LandOwnerGuideArticle />}
-              {selectedArticle === 'decrees-governance' && <DecreesGovernanceArticle />}
-              {selectedArticle === 'building-owners-guide' && <BuildingOwnersGuideArticle />}
-              {selectedArticle === 'business-owners-guide' && <BusinessOwnersGuideArticle />}
-              {selectedArticle === 'historical-accuracy' && <HistoricalAccuracyArticle />}
-              {selectedArticle === 'venetian-guilds' && <VenetianGuildsArticle />}
-              {selectedArticle === 'guild-leadership' && <GuildLeadershipArticle />}
-              {selectedArticle === 'unified-citizen-model' && <UnifiedCitizenModelArticle />}
+              {selectedArticle === 'strategies' && <StrategiesArticle onClose={handleCloseArticle} />}
+              {selectedArticle === 'beginners-guide' && <BeginnersGuideArticle onClose={handleCloseArticle} />}
+              {selectedArticle === 'economic-system' && <EconomicSystemArticle onClose={handleCloseArticle} />}
+              {selectedArticle === 'landowner-guide' && <LandOwnerGuideArticle onClose={handleCloseArticle} />}
+              {selectedArticle === 'decrees-governance' && <DecreesGovernanceArticle onClose={handleCloseArticle} />}
+              {selectedArticle === 'building-owners-guide' && <BuildingOwnersGuideArticle onClose={handleCloseArticle} />}
+              {selectedArticle === 'business-owners-guide' && <BusinessOwnersGuideArticle onClose={handleCloseArticle} />}
+              {selectedArticle === 'historical-accuracy' && <HistoricalAccuracyArticle onClose={handleCloseArticle} />}
+              {selectedArticle === 'venetian-guilds' && <VenetianGuildsArticle onClose={handleCloseArticle} />}
+              {selectedArticle === 'guild-leadership' && <GuildLeadershipArticle onClose={handleCloseArticle} />}
+              {selectedArticle === 'unified-citizen-model' && <UnifiedCitizenModelArticle onClose={handleCloseArticle} />}
             </div>
           </div>
         </div>
