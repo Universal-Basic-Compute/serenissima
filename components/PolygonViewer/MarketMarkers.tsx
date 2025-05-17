@@ -279,17 +279,17 @@ export default function MarketMarkers({
                           {/* Log resource type to help with debugging */}
                           {console.log(`Attempting to load resource image for: ${resourceType}`)}
                           <img 
-                            src={`/assets/resources/${resourceType.toLowerCase().replace(/\s+/g, '_')}.png`}
+                            src={`/resources/${resourceType.toLowerCase().replace(/\s+/g, '_')}.png`}
                             alt={resourceType}
                             className="w-full h-full object-contain"
                             onError={(e) => {
                               console.log(`Failed to load image for ${resourceType}, trying fallback paths`);
                               // Try alternative paths if the first one fails
-                              (e.target as HTMLImageElement).src = `/images/assets/resources/${resourceType.toLowerCase().replace(/\s+/g, '_')}.png`;
+                              (e.target as HTMLImageElement).src = `/assets/resources/${resourceType.toLowerCase().replace(/\s+/g, '_')}.png`;
                               (e.target as HTMLImageElement).onerror = () => {
-                                (e.target as HTMLImageElement).src = '/assets/resources/default.png';
+                                (e.target as HTMLImageElement).src = '/images/resources/default.png';
                                 (e.target as HTMLImageElement).onerror = () => {
-                                  (e.target as HTMLImageElement).src = '/images/resources/default.png';
+                                  (e.target as HTMLImageElement).src = '/resources/default.png';
                                 };
                               };
                             }}
@@ -376,17 +376,17 @@ export default function MarketMarkers({
                         {/* Log resource type to help with debugging */}
                         {console.log(`Attempting to load resource image for: ${resourceType}`)}
                         <img 
-                          src={`/assets/resources/${resourceType.toLowerCase().replace(/\s+/g, '_')}.png`}
+                          src={`/resources/${resourceType.toLowerCase().replace(/\s+/g, '_')}.png`}
                           alt={resourceType}
                           className="w-full h-full object-contain p-2"
                           onError={(e) => {
                             console.log(`Failed to load image for ${resourceType}, trying fallback paths`);
                             // Try alternative paths if the first one fails
-                            (e.target as HTMLImageElement).src = `/images/assets/resources/${resourceType.toLowerCase().replace(/\s+/g, '_')}.png`;
+                            (e.target as HTMLImageElement).src = `/assets/resources/${resourceType.toLowerCase().replace(/\s+/g, '_')}.png`;
                             (e.target as HTMLImageElement).onerror = () => {
-                              (e.target as HTMLImageElement).src = '/assets/resources/default.png';
+                              (e.target as HTMLImageElement).src = '/images/resources/default.png';
                               (e.target as HTMLImageElement).onerror = () => {
-                                (e.target as HTMLImageElement).src = '/images/resources/default.png';
+                                (e.target as HTMLImageElement).src = '/resources/default.png';
                               };
                             };
                           }}
