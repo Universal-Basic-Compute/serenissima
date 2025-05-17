@@ -222,6 +222,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     }
   }, []);
   
+
   // Helper function to calculate the total distance of a path
   const calculateTotalDistance = useCallback((path: any[]) => {
     let totalDistance = 0;
@@ -234,7 +235,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       );
     }
     return totalDistance;
-  }, [calculateDistance]);
+  }, []);
   
   // Function to save a water route
   const saveWaterRoute = useCallback(async () => {
