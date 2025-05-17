@@ -168,8 +168,7 @@ def get_available_businesses(tables) -> List[Dict]:
     try:
         # Get all buildings that are businesses (not housing)
         # This would need to be adjusted based on how you identify business buildings
-        business_types = ['workshop', 'market-stall', 'tavern', 'warehouse', 'dock']
-        type_conditions = [f"{{Type}}='{business_type}'" for business_type in business_types]
+        type_conditions = f"{{Category}}='business'"
         formula = f"OR({', '.join(type_conditions)})"
         
         all_businesses = tables['buildings'].all(formula=formula)
