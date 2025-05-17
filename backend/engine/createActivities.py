@@ -722,7 +722,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
                         recipes = production_info['Arti']
                         
                         # Get current resources in the building
-                        building_resources = get_building_resources(tables, work_building_id)
+                        building_resources = get_building_resources(tables, building_id)
                         
                         # Check if any recipe can be produced
                         can_produce = False
