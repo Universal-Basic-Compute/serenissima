@@ -572,6 +572,15 @@ export default function BuildingDetailsPanel({
                 title="BUYS" 
                 resources={buildingResources?.resources?.bought || []} 
                 type="buy" 
+                disabledResources={
+                  // Create a list of resource types that are in "bought" but not in "publiclySold"
+                  buildingResources?.resources?.bought
+                    ?.filter(buyResource => 
+                      !(buildingResources?.resources?.publiclySold || [])
+                        .some(sellResource => sellResource.resourceType === buyResource.resourceType)
+                    )
+                    .map(resource => resource.resourceType) || []
+                }
               />
 
               {/* Resources Storage */}
