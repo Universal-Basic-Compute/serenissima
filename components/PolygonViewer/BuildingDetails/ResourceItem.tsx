@@ -32,14 +32,18 @@ const ResourceItem: React.FC<ResourceItemProps> = ({ resource, type = 'store' })
   // Get icon path
   const getIconPath = () => {
     if (!resource.icon) {
-      return `/images/resources/${resource.resourceType.toLowerCase().replace(/\s+/g, '_')}.png`;
+      // Remove any existing file extension before adding .png
+      const baseResourceType = resource.resourceType.toLowerCase().replace(/\s+/g, '_').replace(/\.png$/, '');
+      return `/images/resources/${baseResourceType}.png`;
     }
     
     if (resource.icon.startsWith('/')) {
       return resource.icon;
     }
     
-    return `/images/resources/${resource.icon}`;
+    // Remove any existing file extension before adding .png
+    const baseIcon = resource.icon.replace(/\.png$/, '');
+    return `/images/resources/${baseIcon}.png`;
   };
 
   return (
