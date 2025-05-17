@@ -521,8 +521,8 @@ Be historically accurate but engaging. Speak in first person as if you are this 
     // Check if it's a valid number
     if (isNaN(numericAmount)) return 'Unknown';
     
-    // Format with commas for thousands
-    return numericAmount.toLocaleString() + ' ⚜️'; // Using lys emoji instead of ₫
+    // Format without commas for thousands
+    return numericAmount + ' ⚜️'; // Using lys emoji instead of ₫
   };
   
   const formatDate = (dateString: string) => {
@@ -816,9 +816,9 @@ Be historically accurate but engaging. Speak in first person as if you are this 
           <div className="flex flex-col items-center mb-6">
           {/* Much larger image */}
           <div className="w-48 h-48 mb-4 relative">
-            {citizen.imageurl || citizen.profileimage ? (
+            {citizen.imageurl || citizen.profileimage || citizen.ImageUrl ? (
               <img 
-                src={citizen.imageurl || citizen.profileimage} 
+                src={citizen.imageurl || citizen.profileimage || citizen.ImageUrl} 
                 alt={`${citizen.firstname} ${citizen.lastname}`} 
                 className="w-full h-full object-cover rounded-lg border-2 border-amber-600 shadow-lg"
                 onError={(e) => {
