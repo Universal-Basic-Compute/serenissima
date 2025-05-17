@@ -3094,9 +3094,9 @@ number => {
             const x2 = (point2.lng - 12.3326) * 20000;
             const y2 = (point2.lat - 45.4371) * 20000;
 
-            // For gondola paths, draw simple lines with distinctive color
+            // For gondola paths, draw dotted lines with distinctive color
             if (point1.transportMode === 'gondola') {
-              // Draw a simple path for gondolas
+              // Draw a dotted path for gondolas
               ctx.beginPath();
               ctx.moveTo(localIsoX(x1, y1), localIsoY(x1, y1));
               ctx.lineTo(localIsoX(x2, y2), localIsoY(x2, y2));
@@ -3104,7 +3104,13 @@ number => {
               // Venetian blue for water transport
               ctx.strokeStyle = 'rgba(0, 102, 153, 0.8)';
               ctx.lineWidth = 4 * scale;
+              
+              // Set the line to be dotted
+              ctx.setLineDash([6 * scale, 4 * scale]); // Adjust the values to control dot size and spacing
               ctx.stroke();
+              
+              // Reset the line dash to solid for other drawings
+              ctx.setLineDash([]);
             } else {
               // For walking paths, draw straight lines with texture
               ctx.beginPath();
