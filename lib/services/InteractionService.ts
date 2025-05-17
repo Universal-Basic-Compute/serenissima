@@ -345,12 +345,15 @@ export class InteractionService {
           const size = this.getBuildingSize(building.type);
           const squareSize = Math.max(size.width, size.depth) * scale * 0.6;
           
-          // Check if mouse is over this building
+          // Check if mouse is over this building with buffer
+          // Add a small buffer to the hit area to make hovering more stable
+          const buffer = 4; // 4 pixel buffer for more stable hovering
+          
           if (
-            mouseX >= isoPos.x - squareSize/2 &&
-            mouseX <= isoPos.x + squareSize/2 &&
-            mouseY >= isoPos.y - squareSize/2 &&
-            mouseY <= isoPos.y + squareSize/2
+            mouseX >= isoPos.x - squareSize/2 - buffer &&
+            mouseX <= isoPos.x + squareSize/2 + buffer &&
+            mouseY >= isoPos.y - squareSize/2 - buffer &&
+            mouseY <= isoPos.y + squareSize/2 + buffer
           ) {
             hoverStateService.setHoveredBuilding(building.id);
             canvas.style.cursor = 'pointer';
