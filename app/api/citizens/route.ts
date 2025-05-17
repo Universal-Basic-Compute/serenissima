@@ -211,13 +211,15 @@ export async function GET(request: Request) {
       const citizenRecords = await base(CITIZENS_TABLE)
         .select({
           view: 'Grid view',
+          // Add a filter to only include citizens with InVenice = true
+          filterByFormula: '{InVenice} = TRUE()'
         })
         .firstPage();
       
-      console.log(`Retrieved ${citizenRecords.length} citizens from Airtable`);
+      console.log(`Retrieved ${citizenRecords.length} citizens in Venice from Airtable`);
       
       if (citizenRecords.length === 0) {
-        console.log('No citizens found in Airtable, returning debug citizens');
+        console.log('No citizens found in Venice, returning debug citizens');
         return NextResponse.json(getDebugCitizens());
       }
       
