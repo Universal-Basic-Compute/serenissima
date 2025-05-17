@@ -76,14 +76,17 @@ The AI notification processing system:
 - Creates a more coherent AI experience as characters respond to events
 - Simulates AI characters actively participating in the game economy
 
-### Land Bidding
+### Land Bidding and Purchasing
 
-**Implementation**: `backend/ais/bidonlands.py`  
+**Bidding Implementation**: `backend/ais/bidonlands.py`  
 **Schedule**: Daily at 7:00 PM UTC
 
-AI citizens actively participate in the land contract by bidding on properties with income potential:
+**Purchasing Implementation**: `backend/ais/purchaselands.py`  
+**Schedule**: Daily at 8:00 AM UTC
 
-#### Process:
+AI citizens actively participate in the land market by bidding on properties with income potential and purchasing available lands:
+
+#### Bidding Process:
 
 1. The script identifies all citizens marked as AI in the system
 2. For each AI citizen, it checks:
@@ -99,14 +102,30 @@ AI citizens actively participate in the land contract by bidding on properties w
 
 5. An admin notification is created with statistics about all bidding activity, showing the number of bids placed by each AI citizen
 
+#### Purchasing Process:
+
+1. The script identifies all citizens marked as AI in the system, excluding ConsiglioDeiDieci
+2. AI citizens are sorted by their Ducats balance in descending order
+3. The script identifies all available land transactions (where Buyer is null)
+4. For each AI citizen, the system:
+   - Calculates their maximum spending amount (90% of their Ducats)
+   - Finds the most expensive land they can afford
+   - Updates the transaction with the AI as the buyer
+   - Updates the land with the AI as the owner
+   - Updates the AI's Ducats balance
+   - Creates notifications for both the AI and administrators
+
+5. An admin notification is created with statistics about all purchases, showing which lands were acquired by which AI citizens
+
 #### Economic Impact:
 
-The AI land bidding system:
-- Creates a dynamic land contract with consistent bidding activity
-- Establishes realistic contract prices based on land income potential
+The AI land market participation:
+- Creates a dynamic land market with consistent bidding and purchasing activity
+- Establishes realistic market prices based on land income potential
 - Prevents land from being undervalued due to lack of player interest
-- Provides competition for human players in the land contract
+- Provides competition for human players in the land market
 - Ensures that valuable lands receive appropriate bids reflecting their economic value
+- Allows AI citizens to build their property portfolios and participate fully in the economy
 
 ### Building Construction
 
