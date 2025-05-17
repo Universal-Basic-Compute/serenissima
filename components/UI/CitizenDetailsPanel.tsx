@@ -156,9 +156,29 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
           ]);
         }
       } else {
-        // For AI citizens, use the Kinos Engine API
+        // For AI citizens, use the Kinos Engine API with channels
+        
+        // Get current user from localStorage for channel ID
+        let currentUsername = 'visitor';
+        const savedProfile = localStorage.getItem('userProfile');
+        if (savedProfile) {
+          try {
+            const profile = JSON.parse(savedProfile);
+            if (profile.username) {
+              currentUsername = profile.username;
+            }
+          } catch (error) {
+            console.error('Error parsing user profile:', error);
+          }
+        }
+        
+        // Use username as channel ID
+        const channelId = currentUsername;
+        
+        console.log(`Fetching messages for AI citizen ${citizen.citizenid} using channel ${channelId}`);
+        
         const response = await fetch(
-          `https://api.kinos-engine.ai/v2/blueprints/serenissima-ai/kins/${citizen.citizenid}/messages?limit=25`,
+          `https://api.kinos-engine.ai/v2/blueprints/serenissima-ai/kins/${citizen.citizenid}/channels/${channelId}/messages?limit=25`,
           {
             method: 'GET',
             headers: {
@@ -169,14 +189,15 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
 
         // Check for 404 specifically
         if (response.status === 404) {
-          console.log(`No message history found for citizen ${citizen.citizenid}`);
+          console.log(`No message history found for citizen ${citizen.citizenid} in channel ${channelId}`);
           // Set a welcome message instead of re-fetching
           setMessages([
             {
               id: 'welcome',
               role: 'assistant',
               content: `Buongiorno! I am ${citizen.firstname} ${citizen.lastname}. How may I assist you today?`,
-              timestamp: new Date().toISOString()
+              timestamp: new Date().toISOString(),
+              channel_id: channelId
             }
           ]);
           setIsLoadingHistory(false);
@@ -272,6 +293,13 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
           }]);
         }
       } else {
+        // For AI citizens, use the Kinos Engine API with channels
+        
+        // Use username as channel ID
+        const channelId = currentUsername;
+        
+        console.log(`Sending message to AI citizen ${citizen.citizenid} using channel ${channelId}`);
+        
         // Default system prompt for AI citizens
         const systemPrompt = `You are ${citizen.firstname} ${citizen.lastname}, a ${citizen.socialclass} citizen of Renaissance Venice. 
 Your description: ${citizen.description}
@@ -279,7 +307,7 @@ Respond in character, with the personality, knowledge, and perspective of a ${ci
 Be historically accurate but engaging. Speak in first person as if you are this character.`;
         
         const response = await fetch(
-          `https://api.kinos-engine.ai/v2/blueprints/serenissima-ai/kins/${citizen.citizenid}/messages`,
+          `https://api.kinos-engine.ai/v2/blueprints/serenissima-ai/kins/${citizen.citizenid}/channels/${channelId}/messages`,
           {
             method: 'POST',
             headers: {
@@ -305,7 +333,8 @@ Be historically accurate but engaging. Speak in first person as if you are this 
           id: data.id,
           role: 'assistant',
           content: data.content,
-          timestamp: data.timestamp
+          timestamp: data.timestamp,
+          channel_id: channelId
         }]);
       }
     } catch (error) {
