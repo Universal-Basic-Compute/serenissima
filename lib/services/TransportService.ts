@@ -3035,6 +3035,91 @@ export class TransportService {
     return -1;
   }
 
+  // Helper method to create a direct water path
+  private createDirectWaterPath(startPoint: Point, endPoint: Point): any {
+    console.log('Creating direct water path');
+    
+    // Calculate direct distance
+    const directDistance = this.calculateDistance(startPoint, endPoint);
+    
+    // Create a direct path with intermediate points
+    const numPoints = Math.max(2, Math.floor(directDistance / 200)); // More points for longer distances
+    const directPath = [
+      {
+        ...startPoint,
+        type: 'canal',
+        polygonId: 'virtual',
+        transportMode: 'gondola'
+      }
+    ];
+    
+    // Add intermediate points
+    for (let i = 1; i <= numPoints; i++) {
+      const fraction = i / (numPoints + 1);
+      // Add some randomness to create natural curves
+      const jitter = 0.00005 * (Math.random() * 2 - 1);
+      directPath.push({
+        lat: startPoint.lat + (endPoint.lat - startPoint.lat) * fraction + jitter,
+        lng: startPoint.lng + (endPoint.lng - startPoint.lng) * fraction + jitter,
+        type: 'canal',
+        polygonId: 'virtual',
+        transportMode: 'gondola',
+        isIntermediatePoint: true
+      });
+    }
+    
+    // Add the end point
+    directPath.push({
+      ...endPoint,
+      type: 'canal',
+      polygonId: 'virtual',
+      transportMode: 'gondola'
+    });
+    
+    // Calculate time based on distance (gondola speed of 10 km/h)
+    const timeHours = directDistance / 1000 / 10;
+    const timeMinutes = Math.round(timeHours * 60);
+    
+    return {
+      success: true,
+      path: directPath,
+      distance: directDistance,
+      walkingDistance: 0,
+      waterDistance: directDistance,
+      estimatedTimeMinutes: timeMinutes,
+      waterOnly: true,
+      isDirectFallback: true,
+      // Add the roundTrip path
+      roundTrip: [...directPath, ...directPath.slice().reverse().slice(1)]
+    };
+  }
+
+  // Helper method to add intermediate points between two points
+  private addIntermediatePoints(
+    path: any[], 
+    startPoint: Point, 
+    endPoint: Point, 
+    transportMode: string,
+    distance: number
+  ): void {
+    if (distance <= 20) return; // No need for intermediate points for short distances
+    
+    const numPoints = Math.max(1, Math.floor(distance / 100));
+    for (let i = 1; i <= numPoints; i++) {
+      const fraction = i / (numPoints + 1);
+      // Add some randomness to create natural curves
+      const jitter = 0.00002 * (Math.random() * 2 - 1);
+      path.push({
+        lat: startPoint.lat + (endPoint.lat - startPoint.lat) * fraction + jitter,
+        lng: startPoint.lng + (endPoint.lng - startPoint.lng) * fraction + jitter,
+        type: 'center',
+        polygonId: 'virtual',
+        transportMode: transportMode,
+        isIntermediatePoint: true
+      });
+    }
+  }
+
   // Function to find a water-only path between two points
   public async findWaterOnlyPath(startPoint: Point, endPoint: Point, mode?: 'all' | 'real'): Promise<any> {
     // If mode is provided, update the pathfinding mode
@@ -3765,91 +3850,7 @@ export class TransportService {
   }
 }
 
-// Export a singleton instance
-  // Helper method to create a direct water path
-  private createDirectWaterPath(startPoint: Point, endPoint: Point): any {
-    console.log('Creating direct water path');
-    
-    // Calculate direct distance
-    const directDistance = this.calculateDistance(startPoint, endPoint);
-    
-    // Create a direct path with intermediate points
-    const numPoints = Math.max(2, Math.floor(directDistance / 200)); // More points for longer distances
-    const directPath = [
-      {
-        ...startPoint,
-        type: 'canal',
-        polygonId: 'virtual',
-        transportMode: 'gondola'
-      }
-    ];
-    
-    // Add intermediate points
-    for (let i = 1; i <= numPoints; i++) {
-      const fraction = i / (numPoints + 1);
-      // Add some randomness to create natural curves
-      const jitter = 0.00005 * (Math.random() * 2 - 1);
-      directPath.push({
-        lat: startPoint.lat + (endPoint.lat - startPoint.lat) * fraction + jitter,
-        lng: startPoint.lng + (endPoint.lng - startPoint.lng) * fraction + jitter,
-        type: 'canal',
-        polygonId: 'virtual',
-        transportMode: 'gondola',
-        isIntermediatePoint: true
-      });
-    }
-    
-    // Add the end point
-    directPath.push({
-      ...endPoint,
-      type: 'canal',
-      polygonId: 'virtual',
-      transportMode: 'gondola'
-    });
-    
-    // Calculate time based on distance (gondola speed of 10 km/h)
-    const timeHours = directDistance / 1000 / 10;
-    const timeMinutes = Math.round(timeHours * 60);
-    
-    return {
-      success: true,
-      path: directPath,
-      distance: directDistance,
-      walkingDistance: 0,
-      waterDistance: directDistance,
-      estimatedTimeMinutes: timeMinutes,
-      waterOnly: true,
-      isDirectFallback: true,
-      // Add the roundTrip path
-      roundTrip: [...directPath, ...directPath.slice().reverse().slice(1)]
-    };
-  }
-
-  // Helper method to add intermediate points between two points
-  private addIntermediatePoints(
-    path: any[], 
-    startPoint: Point, 
-    endPoint: Point, 
-    transportMode: string,
-    distance: number
-  ): void {
-    if (distance <= 20) return; // No need for intermediate points for short distances
-    
-    const numPoints = Math.max(1, Math.floor(distance / 100));
-    for (let i = 1; i <= numPoints; i++) {
-      const fraction = i / (numPoints + 1);
-      // Add some randomness to create natural curves
-      const jitter = 0.00002 * (Math.random() * 2 - 1);
-      path.push({
-        lat: startPoint.lat + (endPoint.lat - startPoint.lat) * fraction + jitter,
-        lng: startPoint.lng + (endPoint.lng - startPoint.lng) * fraction + jitter,
-        type: 'center',
-        polygonId: 'virtual',
-        transportMode: transportMode,
-        isIntermediatePoint: true
-      });
-    }
-  }
 }
 
+// Export a singleton instance
 export const transportService = new TransportService();
