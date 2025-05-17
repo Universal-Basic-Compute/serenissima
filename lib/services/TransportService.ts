@@ -412,6 +412,8 @@ export class TransportService {
                 return;
               }
             }
+          } catch (error) {
+            console.error('Error fetching water-only path:', error);
           }
           
           // If we get here, both regular and water-only pathfinding failed
