@@ -327,9 +327,25 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   };
 
   // Add a function to get path color based on activity type
-  const getActivityPathColor = (type: string): string => {
-    const lowerType = type.toLowerCase();
-    
+  const getActivityPathColor = (activity: ActivityPath): string => {
+    // Find the citizen for this activity
+    const citizen = citizens.find(c => 
+      c.username === activity.citizenId || 
+      c.citizenid === activity.citizenId || 
+      c.CitizenId === activity.citizenId || 
+      c.id === activity.citizenId
+    );
+  
+    if (citizen) {
+      // Get the social class
+      const socialClass = citizen.socialclass || citizen.SocialClass || citizen.socialClass || '';
+      // Return the color based on social class
+      return citizenService.getSocialClassColor(socialClass);
+    }
+  
+    // Fallback to default colors if citizen not found
+    const lowerType = activity.type.toLowerCase();
+  
     if (lowerType.includes('transport') || lowerType.includes('move')) {
       return '#4b70e2'; // Blue
     } else if (lowerType.includes('trade') || lowerType.includes('buy') || lowerType.includes('sell')) {
@@ -339,7 +355,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     } else if (lowerType.includes('craft') || lowerType.includes('create') || lowerType.includes('produce')) {
       return '#e24b7a'; // Pink
     }
-    
+  
     return '#aaaaaa'; // Default gray
   };
   
@@ -1011,10 +1027,10 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                 <polyline 
                   points={pointsString}
                   fill="none"
-                  stroke={getActivityPathColor(activity.type)}
-                  strokeWidth="1.5"
-                  strokeOpacity="0.4"
-                  strokeDasharray="3,3"
+                  stroke={getActivityPathColor(activity)}
+                  strokeWidth="2.5"
+                  strokeOpacity="0.6"
+                  strokeDasharray="4,4"
                 />
                 {/* Add small circles at path endpoints only to reduce visual clutter */}
                 {pathToRender.length > 0 && [
@@ -1029,9 +1045,9 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                       key={`endpoint-${index}`}
                       cx={screenPos.x}
                       cy={screenPos.y}
-                      r="2"
-                      fill={getActivityPathColor(activity.type)}
-                      opacity="0.6"
+                      r="3"
+                      fill={getActivityPathColor(activity)}
+                      opacity="0.7"
                     />
                   );
                 })}
@@ -1058,10 +1074,10 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                 <polyline 
                   points={pointsString}
                   fill="none"
-                  stroke={getActivityPathColor(activity.type)}
-                  strokeWidth="2"
-                  strokeOpacity="0.6"
-                  strokeDasharray="5,5"
+                  stroke={getActivityPathColor(activity)}
+                  strokeWidth="3.5"
+                  strokeOpacity="0.7"
+                  strokeDasharray="6,4"
                 />
                 {/* Add small circles at path points */}
                 {activity.path.map((point, index) => {
@@ -1073,8 +1089,8 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                       key={`point-${index}`}
                       cx={screenPos.x}
                       cy={screenPos.y}
-                      r="2"
-                      fill={getActivityPathColor(activity.type)}
+                      r="3.5"
+                      fill={getActivityPathColor(activity)}
                       opacity="0.8"
                     />
                   );
@@ -1102,9 +1118,9 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                 <polyline 
                   points={pointsString}
                   fill="none"
-                  stroke={getActivityPathColor(activity.type)}
-                  strokeWidth="3"
-                  strokeOpacity="0.8"
+                  stroke={getActivityPathColor(activity)}
+                  strokeWidth="4.5"
+                  strokeOpacity="0.9"
                 />
                 {/* Add small circles at path points */}
                 {activity.path.map((point, index) => {
@@ -1116,8 +1132,8 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                       key={`point-${index}`}
                       cx={screenPos.x}
                       cy={screenPos.y}
-                      r="3"
-                      fill={getActivityPathColor(activity.type)}
+                      r="4.5"
+                      fill={getActivityPathColor(activity)}
                       opacity="1"
                     />
                   );
