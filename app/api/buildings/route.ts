@@ -452,10 +452,12 @@ export async function GET(request: Request) {
     console.log(`%c BUILDINGS API: Returning ${buildings.length} total buildings to client`, 'background: #FF5500; color: white; padding: 4px 8px; font-weight: bold; border-radius: 4px;');
 
     // Log a breakdown of building types
-    const buildingTypeCount = buildings.reduce((acc, building) => {
-      acc[building.type] = (acc[building.type] || 0) + 1;
+    const buildingTypeCount = buildings.reduce((acc, building: any) => {
+      // Add type checking to handle buildings that might not have a type property
+      const buildingType = building.type || 'unknown';
+      acc[buildingType] = (acc[buildingType] || 0) + 1;
       return acc;
-    }, {});
+    }, {} as Record<string, number>);
     console.log('%c BUILDINGS API: Building types breakdown:', 'background: #FF5500; color: white; padding: 4px 8px; font-weight: bold; border-radius: 4px;');
     console.table(buildingTypeCount);
 
