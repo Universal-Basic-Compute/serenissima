@@ -3,11 +3,13 @@ import BuildingDescription from './BuildingDetails/BuildingDescription';
 import BuildingFinancials from './BuildingDetails/BuildingFinancials';
 import BuildingImage from './BuildingDetails/BuildingImage';
 import BuildingLocation from './BuildingDetails/BuildingLocation';
+import BuildingMaintenance from './BuildingDetails/BuildingMaintenance';
 
 export { BuildingDescription };
 export { BuildingFinancials };
 export { BuildingImage };
 export { BuildingLocation };
+export { BuildingMaintenance };
 
 export function ResourceList({ 
   title, 
