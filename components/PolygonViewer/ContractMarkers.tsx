@@ -429,8 +429,6 @@ export default function ContractMarkers({
                         }}
                         onClick={() => handleContractClick(contract)}
                       >
-                        {/* Log resource type to help with debugging */}
-                        {console.log(`Attempting to load resource image for: ${resourceType}`)}
                         <img 
                           src={`/resources/${resourceType.toLowerCase().replace(/\s+/g, '_')}.png`}
                           alt={resourceType}
