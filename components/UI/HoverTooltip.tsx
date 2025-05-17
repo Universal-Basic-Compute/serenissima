@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { hoverStateService, HoverState } from '@/lib/services/HoverStateService';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 import { buildingService } from '@/lib/services/BuildingService';
 import { assetService } from '@/lib/services/AssetService';
 import { useRouter } from 'next/navigation';
+import { throttle, debounce } from '@/lib/utils/performanceUtils';
 
 // Helper function to get current username
 const getCurrentUsername = (): string | null => {
@@ -36,7 +37,8 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
   const [buildingImagePath, setBuildingImagePath] = useState<string | null>(null);
   
   useEffect(() => {
-    const handleHoverStateChanged = (data: any) => {
+    // Create a throttled state updater to prevent too many re-renders
+    const throttledStateUpdate = throttle((data: any) => {
       console.log('TOOLTIP: Hover state changed event received:', data);
       setHoverState(hoverStateService.getState());
       
@@ -174,6 +176,14 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
       // Use the public method to unsubscribe
       eventBus.subscribe(hoverStateChangedEvent, handleHoverStateChanged).unsubscribe();
       window.removeEventListener('mousemove', handleMouseMove);
+      
+      // Cancel throttled functions
+      if (typeof handleHoverStateChanged.cancel === 'function') {
+        handleHoverStateChanged.cancel();
+      }
+      if (typeof handleMouseMove.cancel === 'function') {
+        handleMouseMove.cancel();
+      }
     };
   }, []);
   

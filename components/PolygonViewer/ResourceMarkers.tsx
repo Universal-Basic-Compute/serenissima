@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { ResourceService } from '@/lib/services/ResourceService';
 import { hoverStateService } from '@/lib/services/HoverStateService';
 import { getWalletAddress } from '@/lib/utils/walletUtils';
+import { throttle } from '@/lib/utils/performanceUtils';
 
 interface ResourceMarkersProps {
   isVisible: boolean;
@@ -44,35 +45,47 @@ export default function ResourceMarkers({
     }
   }, []);
 
-  // Handle mouse enter for resource location
-  const handleMouseEnter = useCallback((locationKey: string, locationResources: any[]) => {
-    setHoveredLocation(locationKey);
-    
-    // Use HoverStateService to set resource hover state
-    // Create a unique ID for this resource group
-    const resourceIds = locationResources.map(r => r.id).join('_');
-    hoverStateService.setHoveredResource(resourceIds, {
-      locationKey,
-      resources: locationResources,
-      position: {
-        lat: parseFloat(locationKey.split('_')[0]),
-        lng: parseFloat(locationKey.split('_')[1])
-      }
-    });
-  }, []);
+  // Handle mouse enter for resource location with throttling
+  const handleMouseEnter = useMemo(() => 
+    throttle((locationKey: string, locationResources: any[]) => {
+      setHoveredLocation(locationKey);
+      
+      // Use HoverStateService to set resource hover state
+      // Create a unique ID for this resource group
+      const resourceIds = locationResources.map(r => r.id).join('_');
+      hoverStateService.setHoveredResource(resourceIds, {
+        locationKey,
+        resources: locationResources,
+        position: {
+          lat: parseFloat(locationKey.split('_')[0]),
+          lng: parseFloat(locationKey.split('_')[1])
+        }
+      });
+    }, 100), // 100ms throttle
+    []
+  );
   
-  // Handle mouse leave for resource location
-  const handleMouseLeave = useCallback(() => {
-    setHoveredLocation(null);
-    hoverStateService.clearHoveredResource();
-  }, []);
+  // Handle mouse leave for resource location with throttling
+  const handleMouseLeave = useMemo(() => 
+    throttle(() => {
+      setHoveredLocation(null);
+      hoverStateService.clearHoveredResource();
+    }, 100), // 100ms throttle
+    []
+  );
   
   // Load resources when component becomes visible
   useEffect(() => {
     if (isVisible) {
       loadResources();
     }
-  }, [isVisible]);
+    
+    // Clean up throttled functions when component unmounts
+    return () => {
+      handleMouseEnter.cancel();
+      handleMouseLeave.cancel();
+    };
+  }, [isVisible, handleMouseEnter, handleMouseLeave]);
   
   
   // Function to load resources

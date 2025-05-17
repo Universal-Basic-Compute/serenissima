@@ -284,7 +284,7 @@ export class InteractionService {
     // Store water route mode reference
     this.waterRouteModeRef = !!data.waterRouteMode;
     
-    // Create throttled mouse move handler that won't cause infinite updates
+    // Create throttled mouse move handler with increased throttle time
     const handleMouseMove = throttle((e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
@@ -572,7 +572,7 @@ export class InteractionService {
         // We detected a hover, update the flag
         this.isHoveringRef = true;
       }
-    }, 150); // Increase from 100ms to 150ms throttle time to further reduce flickering
+    }, 200); // Increase from 150ms to 200ms throttle time to further reduce flickering
     
     // Handle mouse click with debounce to prevent multiple rapid clicks
     const handleClick = debounce((e: MouseEvent) => {

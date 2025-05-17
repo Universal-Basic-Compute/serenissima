@@ -34,36 +34,48 @@ export class HoverStateService {
   
   // Add a debounced version of clearAllHoverStates
   private debouncedClearHoverStates = debounce(() => {
-    this.hoveredPolygonIdRef = null;
-    this.hoveredBuildingIdRef = null;
-    this.hoveredCanalPointIdRef = null;
-    this.hoveredBridgePointIdRef = null;
-    this.hoveredCitizenBuildingRef = null;
-    this.hoveredCitizenTypeRef = null;
-    this.hoveredResourceIdRef = null;
-    this.hoveredResourceDataRef = null;
-    this.hoveredWaterPointIdRef = null;
-    this.hoveredBuildingPointRef = null;
-    
-    // Reset state
-    this.state = {
-      hoveredPolygonId: null,
-      hoveredBuildingId: null,
-      hoveredCanalPointId: null,
-      hoveredBridgePointId: null,
-      hoveredCitizenBuilding: null,
-      hoveredCitizenType: null,
-      hoveredResourceId: null,
-      hoveredResourceData: null,
-      hoveredWaterPointId: null,
-      hoveredBuildingPoint: null
-    };
-    
-    // Emit event
-    eventBus.emit(HOVER_STATE_CHANGED, {
-      type: 'clear'
-    });
-  }, 100); // 100ms debounce
+    // Only clear if something is actually hovered
+    if (this.hoveredPolygonIdRef !== null || 
+        this.hoveredBuildingIdRef !== null || 
+        this.hoveredCanalPointIdRef !== null || 
+        this.hoveredBridgePointIdRef !== null || 
+        this.hoveredCitizenBuildingRef !== null || 
+        this.hoveredCitizenTypeRef !== null || 
+        this.hoveredResourceIdRef !== null || 
+        this.hoveredWaterPointIdRef !== null || 
+        this.hoveredBuildingPointRef !== null) {
+      
+      this.hoveredPolygonIdRef = null;
+      this.hoveredBuildingIdRef = null;
+      this.hoveredCanalPointIdRef = null;
+      this.hoveredBridgePointIdRef = null;
+      this.hoveredCitizenBuildingRef = null;
+      this.hoveredCitizenTypeRef = null;
+      this.hoveredResourceIdRef = null;
+      this.hoveredResourceDataRef = null;
+      this.hoveredWaterPointIdRef = null;
+      this.hoveredBuildingPointRef = null;
+      
+      // Reset state
+      this.state = {
+        hoveredPolygonId: null,
+        hoveredBuildingId: null,
+        hoveredCanalPointId: null,
+        hoveredBridgePointId: null,
+        hoveredCitizenBuilding: null,
+        hoveredCitizenType: null,
+        hoveredResourceId: null,
+        hoveredResourceData: null,
+        hoveredWaterPointId: null,
+        hoveredBuildingPoint: null
+      };
+      
+      // Emit event
+      eventBus.emit(HOVER_STATE_CHANGED, {
+        type: 'clear'
+      });
+    }
+  }, 150); // Increased to 150ms debounce for better stability
   
   // Use refs to track current state without causing re-renders
   private hoveredPolygonIdRef: string | null = null;
@@ -188,7 +200,7 @@ export class HoverStateService {
   /**
    * Update hover state for a resource
    */
-  public setHoveredResource(resourceId: string | null, resourceData: any | null): void {
+  public setHoveredResource = throttle((resourceId: string | null, resourceData: any | null): void => {
     // Only update if the state has changed
     if (this.hoveredResourceIdRef !== resourceId) {
       this.hoveredResourceIdRef = resourceId;
@@ -203,7 +215,7 @@ export class HoverStateService {
         data: resourceData
       });
     }
-  }
+  }, 100); // 100ms throttle
   
   /**
    * Clear resource hover state

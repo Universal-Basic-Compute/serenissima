@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { contractService, Contract } from '@/lib/services/ContractService';
 import { hoverStateService } from '@/lib/services/HoverStateService';
 import { useRouter } from 'next/navigation';
+import { throttle } from '@/lib/utils/performanceUtils';
 
 // Function to determine if a contract is active/being sold
 const isContractActive = (contract: Contract): boolean => {
@@ -37,48 +38,54 @@ export default function ContractMarkers({
     return contractService.getCurrentUsername();
   }, []);
 
-  // Handle mouse enter for contract location
-  const handleMouseEnter = useCallback((locationKey: string, locationContracts: Contract[]) => {
-    setHoveredLocation(locationKey);
-    
-    // Use HoverStateService to set resource hover state
-    // Create a unique ID for this contract group
-    const contractIds = locationContracts.map(c => c.contractId).join('_');
-    hoverStateService.setHoveredResource(contractIds, {
-      locationKey,
-      resources: locationContracts.map(contract => ({
-        id: contract.contractId,
-        name: contract.resourceType,
-        category: 'Contract Contract',
-        description: `${contract.type === 'public_sell' ? 'Public Sell' : contract.seller === currentUsername ? 'Your Sell' : 'Your Buy'} Contract`,
-        icon: 'contract.png',
-        amount: contract.amount,
-        owner: contract.seller,
-        buildingId: contract.sellerBuilding,
-        location: contract.location,
-        rarity: 'common',
-        contractType: contract.type,
-        price: contract.price
-      })),
-      position: locationContracts[0].location
-    });
-  }, [currentUsername]);
+  // Create throttled versions of hover handlers to improve performance
+  const handleMouseEnter = useMemo(() => 
+    throttle((locationKey: string, locationContracts: Contract[]) => {
+      setHoveredLocation(locationKey);
+      
+      // Use HoverStateService to set resource hover state
+      // Create a unique ID for this contract group
+      const contractIds = locationContracts.map(c => c.contractId).join('_');
+      hoverStateService.setHoveredResource(contractIds, {
+        locationKey,
+        resources: locationContracts.map(contract => ({
+          id: contract.contractId,
+          name: contract.resourceType,
+          category: 'Contract Contract',
+          description: `${contract.type === 'public_sell' ? 'Public Sell' : contract.seller === currentUsername ? 'Your Sell' : 'Your Buy'} Contract`,
+          icon: 'contract.png',
+          amount: contract.amount,
+          owner: contract.seller,
+          buildingId: contract.sellerBuilding,
+          location: contract.location,
+          rarity: 'common',
+          contractType: contract.type,
+          price: contract.price
+        })),
+        position: locationContracts[0].location
+      });
+    }, 100), // 100ms throttle
+    [currentUsername]
+  );
   
-  // Handle mouse leave for contract location
-  const handleMouseLeave = useCallback(() => {
-    setHoveredLocation(null);
-    hoverStateService.clearHoveredResource();
-  }, []);
+  // Throttled mouse leave handler
+  const handleMouseLeave = useMemo(() => 
+    throttle(() => {
+      setHoveredLocation(null);
+      hoverStateService.clearHoveredResource();
+    }, 100), // 100ms throttle
+    []
+  );
   
   // Handle contract click
-  const handleContractClick = (contract: Contract) => {
+  const handleContractClick = useCallback((contract: Contract) => {
     if (contract.sellerBuilding) {
       // Set the selected building ID in the global state
       window.dispatchEvent(new CustomEvent('showBuildingDetailsPanel', {
         detail: { buildingId: contract.sellerBuilding }
       }));
     }
-  };
+  }, []);
   
   // Load contracts when component becomes visible
   useEffect(() => {
@@ -89,7 +96,13 @@ export default function ContractMarkers({
       const username = getCurrentUsername();
       setCurrentUsername(username);
     }
-  }, [isVisible, getCurrentUsername]);
+    
+    // Clean up throttled functions when component unmounts
+    return () => {
+      handleMouseEnter.cancel();
+      handleMouseLeave.cancel();
+    };
+  }, [isVisible, getCurrentUsername, handleMouseEnter, handleMouseLeave]);
   
   // Function to load contracts
   const loadContracts = async () => {
@@ -99,7 +112,7 @@ export default function ContractMarkers({
       // Get current username
       const username = getCurrentUsername();
       
-      // Fetch contracts
+      // Fetch contracts using the improved ContractService
       const allContracts = await contractService.getContracts(username);
       
       // Filter contracts that have location data
@@ -109,21 +122,20 @@ export default function ContractMarkers({
       
       setContracts(contractsWithLocation);
       
-      // Group contracts by location
-      const groupedContracts: Record<string, Contract[]> = {};
-      contractsWithLocation.forEach(contract => {
-        if (!contract.location) return;
-        
-        const locationKey = `${contract.location.lat.toFixed(6)}_${contract.location.lng.toFixed(6)}`;
-        if (!groupedContracts[locationKey]) {
-          groupedContracts[locationKey] = [];
+      // Get contracts already grouped by location from the service
+      const contractsByLocationData = await contractService.getContractsByLocation();
+      
+      // Filter out locations with no coordinates
+      const validContractsByLocation: Record<string, Contract[]> = {};
+      Object.entries(contractsByLocationData).forEach(([locationKey, contracts]) => {
+        if (contracts.length > 0 && contracts[0].location) {
+          validContractsByLocation[locationKey] = contracts;
         }
-        groupedContracts[locationKey].push(contract);
       });
       
-      setContractsByLocation(groupedContracts);
+      setContractsByLocation(validContractsByLocation);
       console.log(`Loaded ${contractsWithLocation.length} contracts with location data`);
-      console.log(`Grouped into ${Object.keys(groupedContracts).length} unique locations`);
+      console.log(`Grouped into ${Object.keys(validContractsByLocation).length} unique locations`);
     } catch (error) {
       console.error('Error loading contracts for map:', error);
     } finally {
