@@ -128,7 +128,8 @@ export class BuildingService {
     if (!position) {
       return null;
     }
-      
+    
+    try {
       // Convert lat/lng to world coordinates
       let x, y;
       if ('lat' in position && 'lng' in position) {
