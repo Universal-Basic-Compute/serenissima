@@ -13,13 +13,22 @@ interface CitizenDetailsPanelProps {
     imageurl?: string;
     description?: string;
     username?: string;
-    isai?: boolean;  // Add this property
-    isAi?: boolean;  // Add this as an alternative property name
+    isai?: boolean;
+    isAi?: boolean;
     ducats?: number;
     createdat?: string;
     worksFor?: string | null;
     workplace?: any;
-    // Add any other properties needed
+    // Additional properties
+    color?: string;
+    secondaryColor?: string;
+    prestige?: number;
+    updatedAt?: string;
+    lastActiveAt?: string;
+    position?: any;
+    familyMotto?: string;
+    coatOfArmsImage?: string;
+    dailyIncome?: number;
   };
   onClose: () => void;
 }

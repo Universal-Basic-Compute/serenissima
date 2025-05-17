@@ -1920,22 +1920,31 @@ number => {
               description: citizen.Description || citizen.description || '',
               username: citizen.Username || citizen.username || '',
               isai: citizen.IsAI || citizen.isAI || citizen.isai || false,
-              // Add any other properties needed by CitizenDetailsPanel
               ducats: citizen.Ducats || citizen.ducats || citizen.wealth || 0,
               createdat: citizen.CreatedAt || citizen.createdat || new Date().toISOString(),
               worksFor: citizen.WorksFor || citizen.worksFor || null,
-              workplace: citizen.Workplace || citizen.workplace || null
+              workplace: citizen.Workplace || citizen.workplace || null,
+              // Additional properties
+              color: citizen.Color || citizen.color || '',
+              secondaryColor: citizen.SecondaryColor || citizen.secondaryColor || '',
+              prestige: citizen.Prestige || citizen.prestige || 0,
+              updatedAt: citizen.UpdatedAt || citizen.updatedAt || '',
+              lastActiveAt: citizen.LastActiveAt || citizen.lastActiveAt || '',
+              position: citizen.Position || citizen.position || null,
+              familyMotto: citizen.FamilyMotto || citizen.familyMotto || '',
+              coatOfArmsImage: citizen.CoatOfArmsImage || citizen.coatOfArmsImage || '',
+              dailyIncome: citizen.DailyIncome || citizen.dailyIncome || 0
             };
             
             // Convert any undefined values to appropriate defaults to prevent rendering objects
             Object.keys(safeCitizen).forEach(key => {
               if (safeCitizen[key] === undefined || safeCitizen[key] === null) {
                 // Use empty string for text fields, 0 for numbers, false for booleans
-                if (key === 'ducats') {
+                if (['ducats', 'prestige', 'dailyIncome'].includes(key)) {
                   safeCitizen[key] = 0;
                 } else if (key === 'isai') {
                   safeCitizen[key] = false;
-                } else if (key === 'worksFor' || key === 'workplace') {
+                } else if (['worksFor', 'workplace', 'position'].includes(key)) {
                   safeCitizen[key] = null;
                 } else {
                   safeCitizen[key] = '';
