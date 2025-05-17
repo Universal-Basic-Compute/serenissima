@@ -32,6 +32,39 @@ export class HoverStateService {
     hoveredBuildingPoint: null
   };
   
+  // Add a debounced version of clearAllHoverStates
+  private debouncedClearHoverStates = debounce(() => {
+    this.hoveredPolygonIdRef = null;
+    this.hoveredBuildingIdRef = null;
+    this.hoveredCanalPointIdRef = null;
+    this.hoveredBridgePointIdRef = null;
+    this.hoveredCitizenBuildingRef = null;
+    this.hoveredCitizenTypeRef = null;
+    this.hoveredResourceIdRef = null;
+    this.hoveredResourceDataRef = null;
+    this.hoveredWaterPointIdRef = null;
+    this.hoveredBuildingPointRef = null;
+    
+    // Reset state
+    this.state = {
+      hoveredPolygonId: null,
+      hoveredBuildingId: null,
+      hoveredCanalPointId: null,
+      hoveredBridgePointId: null,
+      hoveredCitizenBuilding: null,
+      hoveredCitizenType: null,
+      hoveredResourceId: null,
+      hoveredResourceData: null,
+      hoveredWaterPointId: null,
+      hoveredBuildingPoint: null
+    };
+    
+    // Emit event
+    eventBus.emit(HOVER_STATE_CHANGED, {
+      type: 'clear'
+    });
+  }, 100); // 100ms debounce
+  
   // Use refs to track current state without causing re-renders
   private hoveredPolygonIdRef: string | null = null;
   private hoveredBuildingIdRef: string | null = null;
@@ -237,35 +270,8 @@ export class HoverStateService {
    * Clear all hover states
    */
   public clearAllHoverStates(): void {
-    this.hoveredPolygonIdRef = null;
-    this.hoveredBuildingIdRef = null;
-    this.hoveredCanalPointIdRef = null;
-    this.hoveredBridgePointIdRef = null;
-    this.hoveredCitizenBuildingRef = null;
-    this.hoveredCitizenTypeRef = null;
-    this.hoveredResourceIdRef = null;
-    this.hoveredResourceDataRef = null;
-    this.hoveredWaterPointIdRef = null;
-    this.hoveredBuildingPointRef = null;
-    
-    // Reset state
-    this.state = {
-      hoveredPolygonId: null,
-      hoveredBuildingId: null,
-      hoveredCanalPointId: null,
-      hoveredBridgePointId: null,
-      hoveredCitizenBuilding: null,
-      hoveredCitizenType: null,
-      hoveredResourceId: null,
-      hoveredResourceData: null,
-      hoveredWaterPointId: null,
-      hoveredBuildingPoint: null
-    };
-    
-    // Emit event
-    eventBus.emit(HOVER_STATE_CHANGED, {
-      type: 'clear'
-    });
+    // Use the debounced version instead of immediate clearing
+    this.debouncedClearHoverStates();
   }
 }
 

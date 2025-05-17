@@ -345,12 +345,12 @@ export class InteractionService {
           const size = this.getBuildingSize(building.type);
           const squareSize = Math.max(size.width, size.depth) * scale * 0.6;
           
-          // Check if mouse is over this building
+          // Check if mouse is over this building with a small buffer
           if (
-            mouseX >= isoPos.x - squareSize/2 &&
-            mouseX <= isoPos.x + squareSize/2 &&
-            mouseY >= isoPos.y - squareSize/2 &&
-            mouseY <= isoPos.y + squareSize/2
+            mouseX >= isoPos.x - squareSize/2 - 2 && // Add 2px buffer
+            mouseX <= isoPos.x + squareSize/2 + 2 && // Add 2px buffer
+            mouseY >= isoPos.y - squareSize/2 - 2 && // Add 2px buffer
+            mouseY <= isoPos.y + squareSize/2 + 2    // Add 2px buffer
           ) {
             hoverStateService.setHoveredBuilding(building.id);
             canvas.style.cursor = 'pointer';
@@ -552,7 +552,7 @@ export class InteractionService {
           canvas.style.cursor = 'grab';
         }
       }
-    }, 50); // Revert to original 50ms throttle time
+    }, 100); // Increase from 50ms to 100ms throttle time to reduce flickering
     
     // Handle mouse click with debounce to prevent multiple rapid clicks
     const handleClick = debounce((e: MouseEvent) => {
