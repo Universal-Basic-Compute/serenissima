@@ -241,8 +241,8 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
                 <li>
                   <span className="font-bold">Social Mobility:</span> Citizens can rise through the ranks based on their achievements:
                   <ul className="list-circle pl-5 mt-1 space-y-1">
-                    <li>Citizens with Prestige > 10,000 become Nobili</li>
-                    <li>Citizens with Daily Income > 100,000 Ducats become Cittadini</li>
+                    <li>Citizens with Prestige &gt; 10,000 become Nobili</li>
+                    <li>Citizens with Daily Income &gt; 100,000 Ducats become Cittadini</li>
                     <li>Business building owners are at least Popolani</li>
                     <li>Entrepreneurs (who run buildings) are at least Popolani</li>
                   </ul>
