@@ -171,8 +171,9 @@ def get_available_businesses(tables) -> List[Dict]:
 
 def assign_citizen_to_business(tables, citizen: Dict, business: Dict) -> bool:
     """Assign a citizen to a business and update both records."""
-    # Use the CitizenId field instead of the Airtable record ID
+    # Use the Username field instead of the CitizenId field
     citizen_id = citizen['fields'].get('CitizenId', citizen['id'])
+    citizen_username = citizen['fields'].get('Username', '')  # Get the Username
     building_id = business['id']
     citizen_name = f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}"
     building_name = business['fields'].get('Name', building_id)
@@ -180,9 +181,9 @@ def assign_citizen_to_business(tables, citizen: Dict, business: Dict) -> bool:
     log.info(f"Assigning {citizen_name} to {building_name}")
     
     try:
-        # Update building record with CitizenId as the occupant
+        # Update building record with Username as the occupant
         tables['buildings'].update(building_id, {
-            'Occupant': citizen_id
+            'Occupant': citizen_username  # Use Username instead of CitizenId
         })
         
         # Get building owner
@@ -195,7 +196,7 @@ def assign_citizen_to_business(tables, citizen: Dict, business: Dict) -> bool:
                 building_owner,
                 f"{citizen_name} now works in your building {building_name}",
                 {
-                    "citizen_id": citizen_id,  # Use CitizenId here too
+                    "citizen_id": citizen_id,
                     "citizen_name": citizen_name,
                     "building_id": building_id,
                     "building_name": building_name,
