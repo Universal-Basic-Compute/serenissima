@@ -77,7 +77,7 @@ export class CitizenService {
               position,
               citizenid: citizen.citizenid || citizen.CitizenId || citizen.id || `ctz_${Date.now()}_${Math.floor(Math.random() * 10000)}`,
               firstname: citizen.firstname || citizen.FirstName || citizen.firstName || 'Unknown',
-              lastname: citizen.lastname || citizen.LastName || citizen.lastName || 'Citizen',
+              lastname: citizen.lastname || citizen.LastName || citizen.lastName || 'Unknown',
               socialclass: citizen.socialclass || citizen.SocialClass || citizen.socialClass || 'Popolani'
             };
           });
