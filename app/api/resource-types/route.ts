@@ -24,7 +24,7 @@ function findResourceJsonFiles(dir: string): string[] {
         results = results.concat(subResults);
       } else if (item.endsWith('.json')) {
         // Add JSON files to results
-        console.log(`Found JSON file: ${itemPath}`);
+        //console.log(`Found JSON file: ${itemPath}`);
         results.push(itemPath);
       }
     }
