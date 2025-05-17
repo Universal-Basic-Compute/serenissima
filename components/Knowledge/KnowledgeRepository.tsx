@@ -342,6 +342,35 @@ const KnowledgeRepository: React.FC<KnowledgeRepositoryProps> = ({
                 </button>
               </div>
             </div>
+            
+            {/* Unified Citizen Model Article Card */}
+            <div className="bg-white rounded-lg overflow-hidden shadow-md border border-amber-200">
+              <div className="h-48 overflow-hidden">
+                <Image 
+                  src="/images/unified-citizen-model.png" 
+                  alt="Unified Citizen Model" 
+                  width={800}
+                  height={400}
+                  className="w-full h-full object-cover transition-transform hover:scale-105"
+                  onError={(e) => {
+                    // Fallback if image doesn't exist
+                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Unified+Citizen+Model';
+                  }}
+                />
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl font-serif text-amber-800 mb-2">AI and Human Citizens: A Unified Model</h3>
+                <p className="text-gray-600 mb-4">
+                  Discover how La Serenissima creates a seamless economic ecosystem where AI and human citizens coexist.
+                </p>
+                <button 
+                  onClick={() => onSelectArticle("unified-citizen-model")}
+                  className="inline-block px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors"
+                >
+                  Read Article
+                </button>
+              </div>
+            </div>
           </div>
         </div>
         
