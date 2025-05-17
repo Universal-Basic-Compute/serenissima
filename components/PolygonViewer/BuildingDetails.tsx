@@ -1,6 +1,9 @@
+import { useState, useEffect } from 'react';
 import BuildingDescription from './BuildingDetails/BuildingDescription';
+import BuildingFinancials from './BuildingDetails/BuildingFinancials';
 
 export { BuildingDescription };
+export { BuildingFinancials };
 
 export function ResourceList({ 
   title, 
