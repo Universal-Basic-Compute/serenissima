@@ -685,6 +685,11 @@ Be historically accurate but engaging. Speak in first person as if you are this 
     }
   };
   
+  // Add a function to filter system messages
+  const isSystemMessage = (message: any): boolean => {
+    return message.content && typeof message.content === 'string' && message.content.includes('[SYSTEM]');
+  };
+  
   // Add a helper function to get activity icon based on type
   const getActivityIcon = (type: string): JSX.Element => {
     const lowerType = type?.toLowerCase() || '';
@@ -812,7 +817,8 @@ Be historically accurate but engaging. Speak in first person as if you are this 
               </div>
             ) : (
               <>
-                {messages.map((message) => (
+                {/* Filter out system messages before mapping */}
+                {messages.filter(message => !isSystemMessage(message)).map((message) => (
                   <div 
                     key={message.id || `msg-${Date.now()}-${Math.random()}`} 
                     className={`mb-3 ${
