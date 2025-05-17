@@ -45,6 +45,7 @@ export async function GET(request: Request) {
           'Preferences',
           'LastActiveAt'
         ],
+        filterByFormula: '{inVenice} = TRUE()',  // Only fetch citizens who are in Venice
         sort: [{ field: 'LastActiveAt', direction: 'desc' }]
       })
       .all();
