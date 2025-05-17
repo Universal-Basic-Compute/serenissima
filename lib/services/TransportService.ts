@@ -2809,6 +2809,99 @@ export class TransportService {
     
     return false;
   }
+  
+  // Add a new method to find the nearest public dock
+  private async findNearestPublicDock(point: Point): Promise<any | null> {
+    try {
+      console.log(`Finding nearest public dock to ${point.lat},${point.lng}`);
+      
+      // Determine if we're running in Node.js or browser environment
+      const isNode = typeof window === 'undefined';
+      
+      // Set base URL depending on environment
+      const baseUrl = isNode 
+        ? (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000')
+        : '';
+      
+      // Create abort controller for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
+      // Fetch all dock buildings
+      const response = await fetch(`${baseUrl}/api/docks`, {
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        console.error(`Failed to fetch docks: ${response.status} ${response.statusText}`);
+        return null;
+      }
+      
+      const data = await response.json();
+      
+      if (!data.success || !Array.isArray(data.docks) || data.docks.length === 0) {
+        console.error('No docks found in API response');
+        return null;
+      }
+      
+      console.log(`Found ${data.docks.length} docks in API response`);
+      
+      // Filter to only include constructed public docks
+      const publicDocks = data.docks.filter(dock => 
+        dock.isConstructed && 
+        dock.position && 
+        (dock.id?.includes('public_dock') || dock.type?.includes('public_dock'))
+      );
+      
+      if (publicDocks.length === 0) {
+        console.warn('No public docks found, trying all constructed docks');
+        // If no public docks, try any constructed dock
+        const constructedDocks = data.docks.filter(dock => 
+          dock.isConstructed && dock.position
+        );
+        
+        if (constructedDocks.length === 0) {
+          console.warn('No constructed docks found');
+          return null;
+        }
+        
+        // Find the closest constructed dock
+        let closestDock = null;
+        let minDistance = Infinity;
+        
+        for (const dock of constructedDocks) {
+          const distance = this.calculateDistance(point, dock.position);
+          if (distance < minDistance) {
+            minDistance = distance;
+            closestDock = dock;
+          }
+        }
+        
+        console.log(`Found closest constructed dock at distance ${minDistance}m: ${closestDock.id}`);
+        return closestDock;
+      }
+      
+      // Find the closest public dock
+      let closestDock = null;
+      let minDistance = Infinity;
+      
+      for (const dock of publicDocks) {
+        const distance = this.calculateDistance(point, dock.position);
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestDock = dock;
+        }
+      }
+      
+      console.log(`Found closest public dock at distance ${minDistance}m: ${closestDock.id}`);
+      return closestDock;
+    } catch (error) {
+      console.error('Error finding nearest public dock:', error);
+      return null;
+    }
+  }
 
   // Dijkstra's algorithm to find the shortest path
   private findShortestPath(graph: Graph, startNodeId: string, endNodeId: string): { path: string[], distance: number } | null {
@@ -2978,15 +3071,25 @@ export class TransportService {
       
       console.log(`Using water graph with ${this.waterGraph.waterPoints.length} water points`);
       
-      // Find the closest water points to the start and end points
+      // First, find the nearest public dock buildings to the start and end points
+      const startDock = await this.findNearestPublicDock(startPoint);
+      const endDock = await this.findNearestPublicDock(endPoint);
+      
+      console.log(`Nearest public docks: start=${startDock ? startDock.id : 'none'}, end=${endDock ? endDock.id : 'none'}`);
+      
+      // If we couldn't find public docks, try to find the closest water points directly
       let startWaterPoint = null;
       let endWaterPoint = null;
       let minStartDistance = Infinity;
       let minEndDistance = Infinity;
       
+      // If we found docks, use their positions to find the closest water points
+      const startSearchPoint = startDock ? startDock.position : startPoint;
+      const endSearchPoint = endDock ? endDock.position : endPoint;
+      
       for (const waterPoint of this.waterGraph.waterPoints) {
-        const distanceToStart = this.calculateDistance(startPoint, waterPoint.position);
-        const distanceToEnd = this.calculateDistance(endPoint, waterPoint.position);
+        const distanceToStart = this.calculateDistance(startSearchPoint, waterPoint.position);
+        const distanceToEnd = this.calculateDistance(endSearchPoint, waterPoint.position);
         
         if (distanceToStart < minStartDistance) {
           minStartDistance = distanceToStart;
@@ -3074,7 +3177,7 @@ export class TransportService {
       
       console.log(`Found water path with ${waterPath.length} points`);
       
-      // Create the full path: start -> water network -> end
+      // Create the full path: start -> dock -> water network -> dock -> end
       const fullPath = [];
       
       // Add start point (walking mode)
@@ -3085,16 +3188,55 @@ export class TransportService {
         transportMode: 'walking'
       });
       
-      // Add intermediate points for the first segment if it's long enough (walking)
-      if (minStartDistance > 20) {
-        const numPoints = Math.max(1, Math.floor(minStartDistance / 100));
+      // If we found a dock for the start, add it as an intermediate point
+      if (startDock) {
+        // Add intermediate points for walking to the dock
+        const dockDistance = this.calculateDistance(startPoint, startDock.position);
+        if (dockDistance > 20) {
+          const numPoints = Math.max(1, Math.floor(dockDistance / 100));
+          for (let i = 1; i <= numPoints; i++) {
+            const fraction = i / (numPoints + 1);
+            // Add some randomness to create natural curves
+            const jitter = 0.00002 * (Math.random() * 2 - 1);
+            fullPath.push({
+              lat: startPoint.lat + (startDock.position.lat - startPoint.lat) * fraction + jitter,
+              lng: startPoint.lng + (startDock.position.lng - startPoint.lng) * fraction + jitter,
+              type: 'center',
+              polygonId: 'virtual',
+              transportMode: 'walking',
+              isIntermediatePoint: true
+            });
+          }
+        }
+        
+        // Add the dock as a waypoint
+        fullPath.push({
+          ...startDock.position,
+          type: 'building',
+          buildingType: 'dock',
+          buildingId: startDock.id,
+          polygonId: startDock.land_id || 'virtual',
+          transportMode: 'walking'
+        });
+      }
+      
+      // Add intermediate points for the segment from dock/start to water point (walking)
+      const startWaterDistance = this.calculateDistance(
+        startDock ? startDock.position : startPoint, 
+        startWaterPoint.position
+      );
+      
+      if (startWaterDistance > 20) {
+        const numPoints = Math.max(1, Math.floor(startWaterDistance / 100));
+        const startPos = startDock ? startDock.position : startPoint;
+        
         for (let i = 1; i <= numPoints; i++) {
           const fraction = i / (numPoints + 1);
           // Add some randomness to create natural curves
           const jitter = 0.00002 * (Math.random() * 2 - 1);
           fullPath.push({
-            lat: startPoint.lat + (startWaterPoint.position.lat - startPoint.lat) * fraction + jitter,
-            lng: startPoint.lng + (startWaterPoint.position.lng - startPoint.lng) * fraction + jitter,
+            lat: startPos.lat + (startWaterPoint.position.lat - startPos.lat) * fraction + jitter,
+            lng: startPos.lng + (startWaterPoint.position.lng - startPos.lng) * fraction + jitter,
             type: 'center',
             polygonId: 'virtual',
             transportMode: 'walking',
@@ -3117,21 +3259,60 @@ export class TransportService {
         }
       }
       
-      // Add intermediate points for the last segment if it's long enough (walking)
-      if (minEndDistance > 20) {
-        const numPoints = Math.max(1, Math.floor(minEndDistance / 100));
+      // Add intermediate points for the segment from water point to dock/end (walking)
+      const endWaterDistance = this.calculateDistance(
+        endWaterPoint.position,
+        endDock ? endDock.position : endPoint
+      );
+      
+      if (endWaterDistance > 20) {
+        const numPoints = Math.max(1, Math.floor(endWaterDistance / 100));
+        const endPos = endDock ? endDock.position : endPoint;
+        
         for (let i = 1; i <= numPoints; i++) {
           const fraction = i / (numPoints + 1);
           // Add some randomness to create natural curves
           const jitter = 0.00002 * (Math.random() * 2 - 1);
           fullPath.push({
-            lat: endWaterPoint.position.lat + (endPoint.lat - endWaterPoint.position.lat) * fraction + jitter,
-            lng: endWaterPoint.position.lng + (endPoint.lng - endWaterPoint.position.lng) * fraction + jitter,
+            lat: endWaterPoint.position.lat + (endPos.lat - endWaterPoint.position.lat) * fraction + jitter,
+            lng: endWaterPoint.position.lng + (endPos.lng - endWaterPoint.position.lng) * fraction + jitter,
             type: 'center',
             polygonId: 'virtual',
             transportMode: 'walking',
             isIntermediatePoint: true
           });
+        }
+      }
+      
+      // If we found a dock for the end, add it as an intermediate point
+      if (endDock) {
+        // Add the dock as a waypoint
+        fullPath.push({
+          ...endDock.position,
+          type: 'building',
+          buildingType: 'dock',
+          buildingId: endDock.id,
+          polygonId: endDock.land_id || 'virtual',
+          transportMode: 'walking'
+        });
+        
+        // Add intermediate points for walking from the dock to the end
+        const dockDistance = this.calculateDistance(endDock.position, endPoint);
+        if (dockDistance > 20) {
+          const numPoints = Math.max(1, Math.floor(dockDistance / 100));
+          for (let i = 1; i <= numPoints; i++) {
+            const fraction = i / (numPoints + 1);
+            // Add some randomness to create natural curves
+            const jitter = 0.00002 * (Math.random() * 2 - 1);
+            fullPath.push({
+              lat: endDock.position.lat + (endPoint.lat - endDock.position.lat) * fraction + jitter,
+              lng: endDock.position.lng + (endPoint.lng - endDock.position.lng) * fraction + jitter,
+              type: 'center',
+              polygonId: 'virtual',
+              transportMode: 'walking',
+              isIntermediatePoint: true
+            });
+          }
         }
       }
       
