@@ -174,7 +174,7 @@ export async function GET(request: Request) {
 
       // Transform records to the expected format
       const data = (records as any[]).map(record => {
-        const owner = record.fields.Citizen || record.fields.Wallet || null;
+        const owner = record.fields.Owner || record.fields.Wallet || null;
         const citizenData = owner ? citizensMap.get(owner) : null;
         
         return {
