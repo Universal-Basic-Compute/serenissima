@@ -3766,7 +3766,6 @@ export class TransportService {
 }
 
 // Export a singleton instance
-export const transportService = new TransportService();
   // Helper method to create a direct water path
   private createDirectWaterPath(startPoint: Point, endPoint: Point): any {
     console.log('Creating direct water path');
@@ -3851,3 +3850,6 @@ export const transportService = new TransportService();
       });
     }
   }
+}
+
+export const transportService = new TransportService();
