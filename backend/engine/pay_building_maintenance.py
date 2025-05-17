@@ -145,8 +145,8 @@ def send_admin_notification(recipient_id, total_collected, buildings_processed, 
     try:
         notification_data = {
             "Recipient": recipient_id,
-            "Title": "Building Maintenance Collection Summary",
-            "Message": f"Daily maintenance collection complete. Collected {total_collected} ducats from {buildings_processed} buildings. {buildings_with_errors} buildings had errors.",
+            "Title": "🏛️ Building Maintenance Collection Summary",
+            "Message": f"Daily maintenance collection complete. Collected **{total_collected:,}** 💰 ducats from **{buildings_processed:,}** 🏠 buildings. **{buildings_with_errors:,}** buildings had errors.",
             "Type": "admin",
             "Priority": "normal",
             "Data": json.dumps({
@@ -211,14 +211,16 @@ def collect_maintenance_costs():
             # Check if owner has enough funds
             if owner_balance < maintenance_cost:
                 logger.warning(f"Owner {owner_id} has insufficient funds for maintenance of building {building_id}")
+                # Create notification for owner about insufficient funds
+                insufficient_funds_message = f"⚠️ **Insufficient Funds**: You don't have enough ducats to pay the **{maintenance_cost:,}** 💰 maintenance cost for your **{building_type}** (ID: **{building_id}**)."
                 # TODO: Implement consequences for non-payment (building degradation, etc.)
                 continue
             
             # Deduct maintenance cost from owner
-            deduction_description = f"Maintenance cost for {building_type} (ID: {building_id})"
+            deduction_description = f"🔧 Maintenance cost for **{building_type}** (ID: **{building_id}**)"
             if update_citizen_balance(owner_id, -maintenance_cost, deduction_description):
                 # Add maintenance cost to ConsiglioDeiDieci
-                transfer_description = f"Maintenance fee collected from {owner_id} for {building_type} (ID: {building_id})"
+                transfer_description = f"💰 Maintenance fee collected from **{owner_id}** for **{building_type}** (ID: **{building_id}**)"
                 if update_citizen_balance(CONSIGLIO_CITIZEN_ID, maintenance_cost, transfer_description):
                     logger.info(f"Successfully collected {maintenance_cost} ducats from {owner_id} for building {building_id}")
                     total_maintenance_collected += maintenance_cost
