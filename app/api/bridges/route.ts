@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import Airtable from 'airtable';
+import { bridgeService } from '@/lib/services/BridgeService';
 
 export async function GET(request: Request) {
   try {
@@ -146,44 +147,21 @@ export async function GET(request: Request) {
                   historicalDescription = matchingBridgePoint.connection.historicalDescription;
                 }
               
-                // Calculate orientation based on the polygon segment
+                // Calculate orientation based on the polygon data
                 if (matchingBridgePoint.edge && polygonData.coordinates && polygonData.coordinates.length > 0) {
-                  // Find the closest segment to the bridge point
-                  const bridgePoint = matchingBridgePoint.edge;
-                  let closestSegmentStart = null;
-                  let closestSegmentEnd = null;
-                  let minDistance = Infinity;
-                
-                  // Loop through polygon coordinates to find the closest segment
-                  for (let i = 0; i < polygonData.coordinates.length; i++) {
-                    const start = polygonData.coordinates[i];
-                    const end = polygonData.coordinates[(i + 1) % polygonData.coordinates.length];
-                  
-                    // Calculate distance from bridge point to this segment
-                    const distance = distanceToSegment(
-                      bridgePoint.lat, bridgePoint.lng,
-                      start.lat, start.lng,
-                      end.lat, end.lng
+                  // If the polygon has a center, use it to calculate orientation
+                  if (polygonData.center) {
+                    orientation = bridgeService.calculateBridgeOrientation(
+                      matchingBridgePoint.edge,
+                      polygonData.center
                     );
-                  
-                    if (distance < minDistance) {
-                      minDistance = distance;
-                      closestSegmentStart = start;
-                      closestSegmentEnd = end;
-                    }
                   }
-                
-                  // If we found the closest segment, calculate orientation perpendicular to it
-                  if (closestSegmentStart && closestSegmentEnd) {
-                    // Calculate segment direction
-                    const dx = closestSegmentEnd.lng - closestSegmentStart.lng;
-                    const dy = closestSegmentEnd.lat - closestSegmentStart.lat;
-                  
-                    // Calculate angle of the segment
-                    const segmentAngle = Math.atan2(dy, dx);
-                  
-                    // Perpendicular angle is segment angle + 90 degrees (π/2 radians)
-                    orientation = segmentAngle + Math.PI/2;
+                  // If no center or center calculation fails, use the segment method
+                  else {
+                    orientation = bridgeService.calculateBridgeOrientationFromSegment(
+                      matchingBridgePoint.edge,
+                      polygonData.coordinates
+                    );
                   }
                 }
               }
@@ -222,34 +200,4 @@ export async function GET(request: Request) {
 }
 
 // Helper function to calculate distance from a point to a line segment
-function distanceToSegment(
-  pointLat: number, pointLng: number,
-  startLat: number, startLng: number,
-  endLat: number, endLng: number
-): number {
-  // Convert to Cartesian coordinates for simplicity
-  // This is an approximation that works for small distances
-  const scale = Math.cos(pointLat * Math.PI / 180);
-  const x = pointLng * scale;
-  const y = pointLat;
-  const x1 = startLng * scale;
-  const y1 = startLat;
-  const x2 = endLng * scale;
-  const y2 = endLat;
-  
-  // Calculate squared length of segment
-  const l2 = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
-  
-  // If segment is a point, return distance to the point
-  if (l2 === 0) return Math.sqrt((x - x1) * (x - x1) + (y - y1) * (y - y1));
-  
-  // Calculate projection of point onto line containing segment
-  const t = Math.max(0, Math.min(1, ((x - x1) * (x2 - x1) + (y - y1) * (y2 - y1)) / l2));
-  
-  // Calculate closest point on segment
-  const projX = x1 + t * (x2 - x1);
-  const projY = y1 + t * (y2 - y1);
-  
-  // Return distance to closest point
-  return Math.sqrt((x - projX) * (x - projX) + (y - projY) * (y - projY));
-}
+// Now using the BridgeService for this functionality
