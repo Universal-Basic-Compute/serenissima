@@ -21,6 +21,7 @@ export interface InteractionState {
   hoveredBridgePoint?: any;
   hoveredCitizenBuilding?: string | null;
   hoveredCitizenType?: string | null;
+  waterPointMode?: boolean;
 }
 
 export class InteractionService {
@@ -46,6 +47,7 @@ export class InteractionService {
   private hoveredBridgePointRef: any = null;
   private hoveredCitizenBuildingRef: string | null = null;
   private hoveredCitizenTypeRef: string | null = null;
+  private waterPointModeRef: boolean = false;
   
   // Add these private properties to store data references
   private _polygonsToRender: any[] = [];
@@ -241,6 +243,8 @@ export class InteractionService {
       citizensByBuilding: Record<string, any[]>;
       transportStartPoint: any;
       transportEndPoint: any;
+      waterPoints?: any[];
+      waterPointMode?: boolean;
     },
     setters: {
       setMousePosition: (position: { x: number, y: number }) => void;
@@ -257,6 +261,7 @@ export class InteractionService {
       findBuildingPosition: (buildingId: string) => {x: number, y: number} | null;
       findPolygonIdForPoint: (point: any) => string;
       screenToLatLng: (screenX: number, screenY: number, scale: number, offset: {x: number, y: number}, canvasWidth: number, canvasHeight: number) => {lat: number, lng: number};
+      saveWaterPoint?: (point: {lat: number, lng: number}) => void;
     }
   ): () => void {
     
@@ -266,6 +271,9 @@ export class InteractionService {
     this._emptyBuildingPoints = data.emptyBuildingPoints;
     this._polygons = data.polygons;
     this._citizensByBuilding = data.citizensByBuilding;
+    
+    // Store water point mode reference
+    this.waterPointModeRef = !!data.waterPointMode;
     
     // Create throttled mouse move handler that won't cause infinite updates
     const handleMouseMove = throttle((e: MouseEvent) => {
@@ -490,7 +498,18 @@ export class InteractionService {
       const mouseY = e.clientY - rect.top;
       
       console.log('Click detected at:', { x: mouseX, y: mouseY });
-      console.log('Current mode:', { activeView, transportMode });
+      console.log('Current mode:', { activeView, transportMode, waterPointMode: this.waterPointModeRef });
+      
+      // Handle water point mode clicks - make sure this is checked before transport mode
+      if (activeView === 'transport' && this.waterPointModeRef && setters.saveWaterPoint) {
+        console.log('Water point mode click detected');
+        // Convert screen coordinates to lat/lng
+        const point = setters.screenToLatLng(mouseX, mouseY, scale, offset, canvas.width, canvas.height);
+        
+        // Save the new water point
+        setters.saveWaterPoint(point);
+        return;
+      }
       
       // Handle transport mode clicks - make sure this is the first condition checked
       if (activeView === 'transport' && transportMode) {

@@ -145,7 +145,75 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [waterOnlyMode, setWaterOnlyMode] = useState<boolean>(false);
   const [pathfindingMode, setPathfindingMode] = useState<'all' | 'real'>('real'); // Default to 'real' mode
   
+  // Water point mode state
+  const [waterPointMode, setWaterPointMode] = useState<boolean>(false);
+  const [waterPoints, setWaterPoints] = useState<any[]>([]);
+  
   // This is a duplicate function definition - removing it
+
+  // Function to fetch existing water points
+  const fetchWaterPoints = useCallback(async () => {
+    try {
+      console.log('Fetching existing water points...');
+      const response = await fetch('/api/water-points');
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && Array.isArray(data.waterPoints)) {
+          console.log(`Loaded ${data.waterPoints.length} water points`);
+          setWaterPoints(data.waterPoints);
+        } else {
+          console.error('Invalid water points data format:', data);
+        }
+      } else {
+        console.error(`Failed to fetch water points: ${response.status} ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error('Error fetching water points:', error);
+    }
+  }, []);
+
+  // Function to save a new water point
+  const saveWaterPoint = useCallback(async (point: {lat: number, lng: number}) => {
+    try {
+      console.log('Saving new water point at:', point);
+      
+      // Create a new water point object
+      const newWaterPoint = {
+        id: `waterpoint_${point.lat}_${point.lng}`,
+        position: {
+          lat: point.lat,
+          lng: point.lng
+        },
+        connections: []
+      };
+      
+      // Add to local state first for immediate visual feedback
+      setWaterPoints(prev => [...prev, newWaterPoint]);
+      
+      // Save to server
+      const response = await fetch('/api/water-points', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ waterPoint: newWaterPoint }),
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          console.log('Water point saved successfully');
+        } else {
+          console.error('Failed to save water point:', data.error);
+        }
+      } else {
+        console.error(`API error: ${response.status} ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error('Error saving water point:', error);
+    }
+  }, []);
 
   // Function to visualize the transport path
   const visualizeTransportPath = useCallback((path: any[]) => {
@@ -1212,7 +1280,9 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         polygons,
         citizensByBuilding,
         transportStartPoint,
-        transportEndPoint
+        transportEndPoint,
+        waterPoints,
+        waterPointMode
       },
       {
         setMousePosition,
@@ -1228,7 +1298,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
         calculateTransportRoute,
         findBuildingPosition,
         findPolygonIdForPoint,
-        screenToLatLng
+        screenToLatLng,
+        saveWaterPoint
       }
     );
     
@@ -1751,6 +1822,59 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
     // Draw water background
     ctx.fillStyle = '#87CEEB';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+    // Draw water points if in water point mode or transport view
+    if ((waterPointMode || activeView === 'transport') && waterPoints.length > 0) {
+      waterPoints.forEach(waterPoint => {
+        if (!waterPoint.position) return;
+      
+        // Convert lat/lng to isometric coordinates
+        const x = (waterPoint.position.lng - 12.3326) * 20000;
+        const y = (waterPoint.position.lat - 45.4371) * 20000;
+      
+        const isoPos = {
+          x: calculateIsoX(x, y, scale, offset, canvas.width),
+          y: calculateIsoY(x, y, scale, offset, canvas.height)
+        };
+      
+        // Draw a distinctive circle for water points
+        ctx.beginPath();
+        ctx.arc(isoPos.x, isoPos.y, 5 * scale, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0, 150, 255, 0.8)';
+        ctx.fill();
+      
+        // Add a white border
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      
+        // Draw connections if any
+        if (waterPoint.connections && Array.isArray(waterPoint.connections)) {
+          waterPoint.connections.forEach(connection => {
+            // Find the target water point
+            const targetPoint = waterPoints.find(wp => wp.id === connection.targetId);
+            if (targetPoint && targetPoint.position) {
+              // Convert target lat/lng to isometric coordinates
+              const targetX = (targetPoint.position.lng - 12.3326) * 20000;
+              const targetY = (targetPoint.position.lat - 45.4371) * 20000;
+            
+              const targetIsoPos = {
+                x: calculateIsoX(targetX, targetY, scale, offset, canvas.width),
+                y: calculateIsoY(targetX, targetY, scale, offset, canvas.height)
+              };
+            
+              // Draw a line connecting the water points
+              ctx.beginPath();
+              ctx.moveTo(isoPos.x, isoPos.y);
+              ctx.lineTo(targetIsoPos.x, targetIsoPos.y);
+              ctx.strokeStyle = 'rgba(0, 150, 255, 0.6)';
+              ctx.lineWidth = 2 * scale;
+              ctx.stroke();
+            }
+          });
+        }
+      });
+    }
 
     // Now render in two passes: first the polygons, then the text
     // First pass: Draw all polygon shapes
@@ -3374,12 +3498,40 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
                 setTransportStartPoint(null);
                 setTransportEndPoint(null);
                 setTransportPath([]);
+                // Disable water point mode when enabling transport mode
+                if (waterPointMode) {
+                  setWaterPointMode(false);
+                }
               }
               console.log('Transport mode toggled to:', !transportMode);
             }}
             className="absolute bottom-28 left-20 bg-blue-600 text-white px-3 py-1 rounded text-sm"
           >
             {transportMode ? 'Disable Transport Mode' : 'Enable Transport Mode'}
+          </button>
+          
+          {/* Water Point Mode Toggle - only visible in transport view */}
+          <button
+            onClick={() => {
+              console.log('Toggling water point mode from:', waterPointMode);
+              setWaterPointMode(!waterPointMode);
+              if (transportMode) {
+                // Disable transport mode when enabling water point mode
+                setTransportMode(false);
+              }
+              // Load existing water points when enabling
+              if (!waterPointMode) {
+                fetchWaterPoints();
+              }
+            }}
+            className={`absolute bottom-52 left-20 ${
+              waterPointMode ? 'bg-blue-600' : 'bg-amber-600'
+            } text-white px-3 py-1 rounded text-sm flex items-center`}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12a8 8 0 01-8 8m0 0a8 8 0 01-8-8m8 8a8 8 0 018-8m-8 0a8 8 0 00-8 8m8-8v14m0-14v14" />
+            </svg>
+            {waterPointMode ? 'Disable Water Point Mode' : 'Enable Water Point Mode'}
           </button>
           
           {/* Transport Debug Button - Only visible in transport view */}
