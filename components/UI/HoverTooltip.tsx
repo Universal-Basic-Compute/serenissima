@@ -247,15 +247,28 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
   } else if (tooltipData.type === 'citizen') {
     const citizen = tooltipData.citizen;
     
+    console.log('TOOLTIP: Rendering citizen tooltip with data:', {
+      citizen: citizen ? {
+        name: citizen.firstname || citizen.FirstName || '',
+        lastName: citizen.lastname || citizen.LastName || '',
+        socialClass: citizen.socialclass || citizen.SocialClass || citizen.socialClass || '',
+        imageUrl: citizen.imageurl || citizen.profileimage || citizen.ImageUrl
+      } : 'No citizen data'
+    });
+    
     if (citizen) {
       // If we have the citizen data, display it
       // Ensure we have the correct property names for image and social class
       const imageUrl = citizen.imageurl || citizen.profileimage || citizen.ImageUrl || 
                      `/images/citizens/${citizen.username || citizen.citizenid || citizen.CitizenId || 'default'}.jpg`;
     
+      console.log('TOOLTIP: Using image URL:', imageUrl);
+    
       const firstName = citizen.firstname || citizen.FirstName || citizen.firstName || '';
       const lastName = citizen.lastname || citizen.LastName || citizen.lastName || '';
       const socialClass = citizen.socialclass || citizen.SocialClass || citizen.socialClass || 'Citizen';
+      
+      console.log('TOOLTIP: Citizen display info:', { firstName, lastName, socialClass });
       
       tooltipContent = (
         <div className="flex flex-col items-center">
@@ -266,7 +279,7 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
               alt={`${firstName} ${lastName}`}
               className="w-full h-full object-cover"
               onError={(e) => {
-                console.log(`Failed to load citizen image: ${imageUrl}, trying fallback`);
+                console.log(`TOOLTIP: Failed to load citizen image: ${imageUrl}, trying fallback`);
                 // Fallback to default image if the specific one doesn't exist
                 e.currentTarget.src = '/images/citizens/default.jpg';
               }}
@@ -287,6 +300,7 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
       );
     } else {
       // If we don't have the citizen data, show a simpler tooltip
+      console.log('TOOLTIP: No citizen data available for tooltip');
       tooltipContent = (
         <div>
           <div className="font-bold">
