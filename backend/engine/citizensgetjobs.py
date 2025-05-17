@@ -53,6 +53,65 @@ def initialize_airtable():
         log.error(f"Failed to initialize Airtable: {e}")
         sys.exit(1)
 
+def get_entrepreneurs_and_their_businesses(tables) -> tuple[List[str], Dict[str, List[Dict]]]:
+    """Fetch entrepreneurs (citizens who run at least one building) and their businesses."""
+    log.info("Fetching entrepreneurs and their businesses...")
+    
+    try:
+        # Get all buildings with non-empty RunBy field
+        formula = "NOT(OR({RunBy} = '', {RunBy} = BLANK()))"
+        run_by_buildings = tables['buildings'].all(formula=formula)
+        
+        # Group buildings by the citizen who runs them
+        entrepreneur_businesses = {}
+        for building in run_by_buildings:
+            run_by = building['fields'].get('RunBy')
+            if run_by:
+                if run_by not in entrepreneur_businesses:
+                    entrepreneur_businesses[run_by] = []
+                entrepreneur_businesses[run_by].append(building)
+        
+        entrepreneur_ids = list(entrepreneur_businesses.keys())
+        log.info(f"Found {len(entrepreneur_ids)} entrepreneurs running {len(run_by_buildings)} businesses")
+        return entrepreneur_ids, entrepreneur_businesses
+    except Exception as e:
+        log.error(f"Error fetching entrepreneurs: {e}")
+        return [], {}
+
+def get_entrepreneurs_and_their_businesses(tables) -> tuple[List[Dict], Dict[str, List[Dict]]]:
+    """Fetch entrepreneurs (citizens who run at least one building) and their businesses."""
+    log.info("Fetching entrepreneurs and their businesses...")
+    
+    try:
+        # Get all buildings with non-empty RunBy field
+        formula = "NOT(OR({RunBy} = '', {RunBy} = BLANK()))"
+        run_by_buildings = tables['buildings'].all(formula=formula)
+        
+        # Group buildings by the citizen who runs them
+        entrepreneur_businesses = {}
+        for building in run_by_buildings:
+            run_by = building['fields'].get('RunBy')
+            if run_by:
+                if run_by not in entrepreneur_businesses:
+                    entrepreneur_businesses[run_by] = []
+                entrepreneur_businesses[run_by].append(building)
+        
+        # Get the entrepreneur citizens
+        entrepreneur_ids = list(entrepreneur_businesses.keys())
+        entrepreneurs = []
+        
+        if entrepreneur_ids:
+            # Create a formula to get these citizens
+            citizen_conditions = [f"RECORD_ID()='{citizen_id}'" for citizen_id in entrepreneur_ids]
+            formula = f"OR({', '.join(citizen_conditions)})"
+            entrepreneurs = tables['citizens'].all(formula=formula)
+        
+        log.info(f"Found {len(entrepreneurs)} entrepreneurs running {len(run_by_buildings)} businesses")
+        return entrepreneurs, entrepreneur_businesses
+    except Exception as e:
+        log.error(f"Error fetching entrepreneurs: {e}")
+        return [], {}
+
 def get_unemployed_citizens(tables) -> List[Dict]:
     """Fetch citizens without jobs, sorted by wealth in descending order."""
     log.info("Fetching unemployed citizens...")
@@ -229,6 +288,66 @@ def assign_jobs_to_citizens(dry_run: bool = False):
     
     # Track assignments by business type
     assignments_by_type = {}
+    
+    # Get entrepreneurs and their businesses
+    entrepreneurs, entrepreneur_businesses = get_entrepreneurs_and_their_businesses(tables)
+    
+    # Get all occupied businesses to check if entrepreneurs are already employed
+    formula = "NOT(OR({Occupant} = '', {Occupant} = BLANK()))"
+    occupied_businesses = tables['buildings'].all(formula=formula)
+    
+    # Process entrepreneurs first
+    log.info("Processing entrepreneurs first...")
+    for entrepreneur in entrepreneurs:
+        citizen_id = entrepreneur['fields'].get('CitizenId', entrepreneur['id'])
+        citizen_name = f"{entrepreneur['fields'].get('FirstName', '')} {entrepreneur['fields'].get('LastName', '')}"
+        
+        # Check if this entrepreneur is already employed
+        is_employed = False
+        for business in occupied_businesses:
+            if business['fields'].get('Occupant') == citizen_id:
+                is_employed = True
+                break
+        
+        if is_employed:
+            log.info(f"Entrepreneur {citizen_name} is already employed, skipping")
+            continue
+        
+        # Get this entrepreneur's businesses
+        their_businesses = entrepreneur_businesses.get(citizen_id, [])
+        
+        # Filter to only unoccupied businesses
+        available_own_businesses = [b for b in their_businesses if not b['fields'].get('Occupant')]
+        
+        if not available_own_businesses:
+            log.info(f"Entrepreneur {citizen_name} has no available businesses to work at")
+            continue
+        
+        # Sort by wages in descending order
+        available_own_businesses.sort(key=lambda b: float(b['fields'].get('Wages', 0) or 0), reverse=True)
+        
+        # Assign to highest paying business they run
+        best_business = available_own_businesses[0]
+        
+        if dry_run:
+            log.info(f"[DRY RUN] Would assign entrepreneur {citizen_name} to their own business {best_business['fields'].get('Name', best_business['id'])}")
+            assigned_count += 1
+            business_type = best_business['fields'].get('Type', 'unknown')
+            if business_type not in assignments_by_type:
+                assignments_by_type[business_type] = 0
+            assignments_by_type[business_type] += 1
+        else:
+            success = assign_citizen_to_business(tables, entrepreneur, best_business)
+            if success:
+                assigned_count += 1
+                business_type = best_business['fields'].get('Type', 'unknown')
+                if business_type not in assignments_by_type:
+                    assignments_by_type[business_type] = 0
+                assignments_by_type[business_type] += 1
+                
+                # Remove this business from available businesses if it was there
+                if best_business in available_businesses:
+                    available_businesses.remove(best_business)
     
     # Process each unemployed citizen
     for citizen in unemployed_citizens:

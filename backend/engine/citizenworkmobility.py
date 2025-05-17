@@ -313,6 +313,9 @@ def process_work_mobility(dry_run: bool = False):
         log.info("No employed citizens found. Mobility process complete.")
         return
     
+    # Get entrepreneurs and their businesses
+    entrepreneur_ids, entrepreneur_businesses = get_entrepreneurs_and_their_businesses(tables)
+    
     # Sort citizens by wealth in ascending order (lower wealth citizens have more incentive to move)
     employed_citizens.sort(key=lambda c: float(c['fields'].get('Ducats', 0) or 0))
     log.info(f"Sorted {len(employed_citizens)} citizens by wealth in ascending order")
@@ -341,6 +344,9 @@ def process_work_mobility(dry_run: bool = False):
     for citizen in employed_citizens:
         citizen_id = citizen['id']
         social_class = citizen['fields'].get('SocialClass', '')
+        
+        # Check if this citizen is an entrepreneur
+        is_entrepreneur = citizen_id in entrepreneur_ids
         
         # Get current business from the attached building info
         current_business = citizen.get('current_business')
@@ -387,10 +393,27 @@ def process_work_mobility(dry_run: bool = False):
         log.info(f"Citizen {citizen_name} is looking for wages above {min_new_wages} (current: {current_wages})")
         
         # Find available businesses with wages above threshold
-        suitable_businesses = [
-            b for b in available_businesses 
-            if float(b['fields'].get('Wages', 0) or 0) > min_new_wages
-        ]
+        if is_entrepreneur:
+            # For entrepreneurs, only consider their own businesses
+            own_businesses = entrepreneur_businesses.get(citizen_id, [])
+            
+            # Filter to available businesses (not occupied by someone else)
+            available_own_businesses = [
+                b for b in own_businesses 
+                if not b['fields'].get('Occupant') or b['fields'].get('Occupant') == ""
+            ]
+            
+            # Filter to businesses with wages above threshold
+            suitable_businesses = [
+                b for b in available_own_businesses 
+                if float(b['fields'].get('Wages', 0) or 0) > min_new_wages
+            ]
+        else:
+            # For regular citizens, use the original logic
+            suitable_businesses = [
+                b for b in available_businesses 
+                if float(b['fields'].get('Wages', 0) or 0) > min_new_wages
+            ]
         
         # Sort by wages (descending)
         suitable_businesses.sort(key=lambda b: float(b['fields'].get('Wages', 0) or 0), reverse=True)
