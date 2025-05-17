@@ -4617,3 +4617,5 @@ number => {
     </div>
   );
 }
+
+export default IsometricViewer;
