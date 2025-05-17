@@ -166,21 +166,15 @@ def get_available_businesses(tables) -> List[Dict]:
     log.info("Fetching available businesses...")
     
     try:
-        # Get all buildings that are businesses (not housing)
-        # This would need to be adjusted based on how you identify business buildings
-        type_conditions = f"{{Category}}='business'"
-        formula = f"OR({', '.join(type_conditions)})"
-        
-        all_businesses = tables['buildings'].all(formula=formula)
-        log.info(f"Fetched {len(all_businesses)} total businesses")
-        
-        # Filter out businesses that already have occupants
-        available_businesses = [b for b in all_businesses if not b['fields'].get('Occupant')]
-        
+        # Create a formula to find buildings with Category='business' that don't have occupants
+        formula = "AND({Category}='business', OR({Occupant} = '', {Occupant}= BLANK()))"
+
+        available_businesses = tables['buildings'].all(formula=formula)
+        log.info(f"Found {len(available_businesses)} available businesses")
+
         # Sort by Wages in descending order
         available_businesses.sort(key=lambda b: float(b['fields'].get('Wages', 0) or 0), reverse=True)
-        
-        log.info(f"Found {len(available_businesses)} available businesses")
+
         return available_businesses
     except Exception as e:
         log.error(f"Error fetching available businesses: {e}")
