@@ -270,6 +270,17 @@ export default function BuildingDetailsPanel({
   const [buildingResources, setBuildingResources] = useState<any>(null);
   const [isLoadingResources, setIsLoadingResources] = useState<boolean>(false);
   
+  // Add this useEffect to debug the building resources data
+  useEffect(() => {
+    if (buildingResources) {
+      console.log('Building resources loaded:', buildingResources);
+      console.log('Sellable resources:', buildingResources.resources?.sellable);
+      console.log('Bought resources:', buildingResources.resources?.bought);
+      console.log('Storable resources:', buildingResources.resources?.storable);
+      console.log('Transformation recipes:', buildingResources.resources?.transformationRecipes);
+    }
+  }, [buildingResources]);
+  
   // Fetch building resources (comprehensive data)
   const fetchBuildingResources = async (buildingId: string) => {
     try {
@@ -286,6 +297,19 @@ export default function BuildingDetailsPanel({
       const data = await response.json();
       if (data.success) {
         console.log(`Fetched resources for building ${buildingId}:`, data);
+        
+        // Ensure all resource arrays exist even if they're empty
+        const resources = data.resources || {};
+        resources.sellable = resources.sellable || [];
+        resources.bought = resources.bought || [];
+        resources.storable = resources.storable || [];
+        resources.stored = resources.stored || [];
+        resources.publiclySold = resources.publiclySold || [];
+        resources.transformationRecipes = resources.transformationRecipes || [];
+        
+        // Update the data with the normalized resources
+        data.resources = resources;
+        
         setBuildingResources(data);
         
         // Set building contracts from the publiclySold resources
@@ -811,11 +835,11 @@ export default function BuildingDetailsPanel({
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-600"></div>
           </div>
         ) : !error && building ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4 overflow-y-auto flex-grow" style={{ gridTemplateColumns: "1.5fr 1fr 1fr" }}>
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4 overflow-y-auto flex-grow" style={{ gridTemplateColumns: "1fr 1fr 1fr" }}>
             {/* Column 1: RECIPES (wider column) */}
             <div className="col-span-1 md:col-span-1 lg:col-span-1 space-y-4">
               {/* Recipes */}
-              {buildingResources?.resources?.transformationRecipes && buildingResources.resources.transformationRecipes.length > 0 && (
+              {buildingResources?.resources?.transformationRecipes && buildingResources.resources.transformationRecipes.length > 0 ? (
                 <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
                   <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -911,13 +935,13 @@ export default function BuildingDetailsPanel({
                     ))}
                   </div>
                 </div>
-              )}
+              ) : null}
             </div>
             
             {/* Column 2: SELLS, BUYS, STORES */}
             <div className="col-span-1 md:col-span-1 lg:col-span-1 space-y-4">
               {/* Resources Selling - moved to top of column 2 */}
-              {buildingResources?.resources?.sellable && buildingResources.resources.sellable.length > 0 && (
+              {buildingResources?.resources?.sellable && buildingResources.resources.sellable.length > 0 ? (
                 <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
                   <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
                     <FaStore className="mr-2" /> SELLS
@@ -945,10 +969,10 @@ export default function BuildingDetailsPanel({
                     ))}
                   </div>
                 </div>
-              )}
+              ) : null}
 
               {/* Resources Buying */}
-              {buildingResources?.resources?.bought && buildingResources.resources.bought.length > 0 && (
+              {buildingResources?.resources?.bought && buildingResources.resources.bought.length > 0 ? (
                 <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
                   <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
                     <FaBox className="mr-2 transform rotate-180" /> BUYS
@@ -978,10 +1002,10 @@ export default function BuildingDetailsPanel({
                     ))}
                   </div>
                 </div>
-              )}
+              ) : null}
 
               {/* Resources Storage */}
-              {buildingResources?.resources?.storable && buildingResources.resources.storable.length > 0 && (
+              {buildingResources?.resources?.storable && buildingResources.resources.storable.length > 0 ? (
                 <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
                   <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
                     <FaWarehouse className="mr-2" /> STORES
@@ -1014,10 +1038,10 @@ export default function BuildingDetailsPanel({
                     </div>
                   )}
                 </div>
-              )}
+              ) : null}
               
               {/* Current Inventory */}
-              {buildingResources?.resources?.stored && buildingResources.resources.stored.length > 0 && (
+              {buildingResources?.resources?.stored && buildingResources.resources.stored.length > 0 ? (
                 <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
                   <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
                     <FaBox className="mr-2" /> CURRENT INVENTORY
@@ -1047,7 +1071,7 @@ export default function BuildingDetailsPanel({
                     ))}
                   </div>
                 </div>
-              )}
+              ) : null}
             </div>
             
             {/* Column 3: Name, Owner, Location, Maintenance, Detailed Info */}
@@ -1081,7 +1105,7 @@ export default function BuildingDetailsPanel({
                     </p>
                   )}
                 </div>
-              )}
+              ) : null}
               
               {/* Owner information */}
               <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
@@ -1244,7 +1268,7 @@ export default function BuildingDetailsPanel({
               )}
               
               {/* Public Sale Contracts */}
-              {buildingResources?.resources?.publiclySold && buildingResources.resources.publiclySold.length > 0 && (
+              {buildingResources?.resources?.publiclySold && buildingResources.resources.publiclySold.length > 0 ? (
                 <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
                   <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
