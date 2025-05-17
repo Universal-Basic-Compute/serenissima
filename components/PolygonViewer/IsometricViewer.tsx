@@ -2819,8 +2819,8 @@ number => {
         
         if (isBridge) {
           // Make the bridge rectangle smaller
-          const bridgeWidth = squareSize * 1.2; // Reduced from 1.5
-          const bridgeHeight = squareSize * 0.25; // Reduced from 0.3
+          const bridgeWidth = squareSize * 0.8; // Reduced from 1.2 to 0.8
+          const bridgeHeight = squareSize * 0.15; // Reduced from 0.25 to 0.15
           
           // Find the polygon this bridge is on
           let polygonCenter = { x: 0, y: 0 };
@@ -2860,8 +2860,8 @@ number => {
             // Translate to the bridge position
             ctx.translate(isoPos.x, isoPos.y);
             
-            // Rotate the context
-            ctx.rotate(angle);
+            // Rotate the context - add 90 degrees (π/2) to orient perpendicular to the direction
+            ctx.rotate(angle + Math.PI/2);
             
             // Draw the rectangle centered at origin (0,0)
             ctx.beginPath();
