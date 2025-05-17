@@ -192,7 +192,7 @@ def get_citizen_balance(tables, username: str) -> float:
         
         if citizens:
             balance = citizens[0]['fields'].get('Ducats', 0)
-            log.info(f"Citizen {username} has balance: {balance}")
+            log.info(f"👤 Citizen **{username}** has balance: **{balance:,.2f}** ducats")
             return float(balance)
         else:
             log.warning(f"Citizen {username} not found")
@@ -259,7 +259,7 @@ def find_available_citizen(tables) -> Optional[Dict]:
         
         # Select a random citizen from the available ones
         selected_citizen = random.choice(available_citizens)
-        log.info(f"Selected citizen {selected_citizen['fields'].get('Username')} for import delivery")
+        log.info(f"👤 Selected citizen **{selected_citizen['fields'].get('Username')}** for import delivery")
         
         return selected_citizen
     except Exception as e:
@@ -297,7 +297,7 @@ def generate_new_citizen(tables) -> Optional[Dict]:
             "InVenice": False
         })
         
-        log.info(f"Successfully created new citizen for import delivery: {citizen_data['firstname']} {citizen_data['lastname']}")
+        log.info(f"👤 Successfully created new citizen for import delivery: **{citizen_data['firstname']} {citizen_data['lastname']}**")
         return citizen_record
     except Exception as e:
         log.error(f"Error generating new citizen: {e}")
@@ -426,10 +426,10 @@ def create_delivery_activity(tables, citizen: Dict, contract: Dict, resource_typ
             "StartDate": now.isoformat(),
             "EndDate": end_time.isoformat(),
             "Path": json.dumps(path_data.get('path', [])),
-            "Notes": f"Delivering {amount} units of {resource_type} from Italia to {building['fields'].get('Name', buyer_building_id)}"
+            "Notes": f"🚢 Delivering **{amount}** units of **{resource_type}** from **Italia** to **{building['fields'].get('Name', buyer_building_id)}**"
         })
         
-        log.info(f"Created delivery activity: {activity['id']}")
+        log.info(f"🚢 Created delivery activity: **{activity['id']}**")
         return activity
     except Exception as e:
         log.error(f"Error creating delivery activity: {e}")
@@ -450,7 +450,7 @@ def process_import_contract(tables, contract: Dict, building_types: Dict, resour
         # Since we're running hourly, use the exact hourly amount
         import_amount = hourly_amount
         
-        log.info(f"Processing import contract {contract_id} for {buyer}: {import_amount} {resource_type} at {price_per_resource} per unit")
+        log.info(f"📜 Processing import contract **{contract_id}** for **{buyer}**: **{import_amount:,.1f}** **{resource_type}** at **{price_per_resource:,.2f}** ducats per unit")
         
         # Skip if any required field is missing
         if not buyer or not resource_type or not buyer_building_id or import_amount <= 0:
@@ -469,7 +469,7 @@ def process_import_contract(tables, contract: Dict, building_types: Dict, resour
         # If the building has a RunBy field, use that person as the buyer instead
         # This handles cases where the business operator is different from the building owner
         if building_operator and building_operator != buyer:
-            log.info(f"Building {buyer_building_id} is run by {building_operator}, using as buyer instead of {buyer}")
+            log.info(f"🏗️ Building **{buyer_building_id}** is run by **{building_operator}**, using as buyer instead of **{buyer}**")
             buyer = building_operator
         
         # Get buyer's balance
@@ -480,7 +480,7 @@ def process_import_contract(tables, contract: Dict, building_types: Dict, resour
         
         # Check if buyer has enough money
         if buyer_balance < total_cost:
-            log.warning(f"Buyer {buyer} has insufficient funds ({buyer_balance}) for import cost ({total_cost})")
+            log.warning(f"Buyer **{buyer}** has insufficient funds (**{buyer_balance:,.2f}** ducats) for import cost (**{total_cost:,.2f}** ducats)")
             return False
         
         building_type = building['fields'].get('Type')
@@ -507,7 +507,7 @@ def process_import_contract(tables, contract: Dict, building_types: Dict, resour
         
         # Check if there's enough storage space
         if total_stored + import_amount > storage_capacity:
-            log.warning(f"Building {buyer_building_id} has insufficient storage space (used: {total_stored}, capacity: {storage_capacity}, needed: {import_amount})")
+            log.warning(f"🏗️ Building **{buyer_building_id}** has insufficient storage space (used: **{total_stored:,.1f}**, capacity: **{storage_capacity:,.1f}**, needed: **{import_amount:,.1f}**)")
             return False
         
         # Get resource type information
@@ -543,7 +543,7 @@ def process_import_contract(tables, contract: Dict, building_types: Dict, resour
             log.error("Failed to create delivery activity")
             return False
         
-        log.info(f"Successfully created delivery activity for {import_amount} {resource_type}")
+        log.info(f"✅ Successfully created delivery activity for **{import_amount:,.1f}** **{resource_type}**")
         
         # Note: We don't process payment or close the contract here
         # The payment and contract update will happen when the delivery activity is completed
@@ -554,11 +554,11 @@ def process_import_contract(tables, contract: Dict, building_types: Dict, resour
 
 def process_imports(dry_run: bool = False, night_mode: bool = False):
     """Main function to process import contracts."""
-    log.info(f"Starting import processing (dry_run={dry_run}, night_mode={night_mode})")
+    log.info(f"🚢 Starting import processing (dry_run=**{dry_run}**, night_mode=**{night_mode}**)")
     
     # Check if it's within dock working hours, unless night_mode is enabled
     if not night_mode and not is_dock_working_hours():
-        log.info("Outside of dock working hours (6 AM - 6 PM Venice time). Skipping import processing.")
+        log.info("🌙 Outside of dock working hours (**6 AM - 6 PM** Venice time). Skipping import processing.")
         return
     
     # Initialize Airtable connection
@@ -593,13 +593,13 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
     success_count = 0
     for contract in contracts:
         if dry_run:
-            log.info(f"[DRY RUN] Would process contract {contract['id']}")
+            log.info(f"🧪 **[DRY RUN]** Would process contract **{contract['id']}**")
             success_count += 1
         else:
             if process_import_contract(tables, contract, building_types, resource_types):
                 success_count += 1
     
-    log.info(f"Import processing complete. Successfully processed {success_count} out of {len(contracts)} contracts")
+    log.info(f"🚢 Import processing complete. Successfully processed **{success_count}** out of **{len(contracts)}** contracts")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process import contracts.")
