@@ -133,8 +133,8 @@ Production Tier Time
 (Tier 5) 1-7 days Ships, elaborate art pieces, major construction
 """
 
-        # Create a user prompt with building details and expected format
-        user_prompt = f"""I need production information for a building called "{building_name}".
+        # Create a citizen prompt with building details and expected format
+        citizen_prompt = f"""I need production information for a building called "{building_name}".
 
 Here's what I know about this building:
 Category: {building_data.get('category', 'Unknown')}
@@ -204,8 +204,8 @@ If it does not make sense for the building to store/transform/sell resources, wr
                 "system": system_prompt,
                 "messages": [
                     {
-                        "role": "user",
-                        "content": user_prompt
+                        "role": "citizen",
+                        "content": citizen_prompt
                     }
                 ]
             }

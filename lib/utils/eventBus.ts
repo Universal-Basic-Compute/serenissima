@@ -91,9 +91,9 @@ export const EventTypes = {
   BUILDING_POINT_SELECTED: 'BUILDING_POINT_SELECTED',
   BUILDING_POSITIONS_CALCULATED: 'BUILDING_POSITIONS_CALCULATED',
   
-  // User events
-  USERS_DATA_LOADED: 'usersDataLoaded',
-  USER_PROFILE_UPDATED: 'userProfileUpdated',
+  // Citizen events
+  CITIZENS_DATA_LOADED: 'citizensDataLoaded',
+  CITIZEN_PROFILE_UPDATED: 'citizenProfileUpdated',
   WALLET_CHANGED: 'walletChanged',
   
   // View events

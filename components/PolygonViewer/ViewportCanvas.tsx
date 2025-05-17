@@ -146,7 +146,7 @@ export default function ViewportCanvas({
   const [polygons, setPolygons] = useState<any[]>([]);
   const [buildings, setBuildings] = useState<any[]>([]);
   const [landOwners, setLandOwners] = useState<Record<string, string>>({});
-  const [users, setUsers] = useState<Record<string, any>>({});
+  const [citizens, setCitizens] = useState<Record<string, any>>({});
   const [emptyBuildingPoints, setEmptyBuildingPoints] = useState<{lat: number, lng: number}[]>([]);
   const [polygonsToRender, setPolygonsToRender] = useState<any[]>([]);
   const [incomeData, setIncomeData] = useState<Record<string, number>>({});
@@ -180,9 +180,9 @@ export default function ViewportCanvas({
         console.log('Loaded land owners data:', landOwnersData);
         setLandOwners(landOwnersData);
         
-        // Load users
-        const usersData = await dataService.loadUsers();
-        setUsers(usersData);
+        // Load citizens
+        const citizensData = await dataService.loadCitizens();
+        setCitizens(citizensData);
         
         // Calculate empty building points
         const emptyPoints = dataService.getEmptyBuildingPoints(polygonsData, buildingsData);
@@ -425,7 +425,7 @@ export default function ViewportCanvas({
     const newPolygonsToRender = renderService.calculatePolygonsToRender(
       polygons,
       landOwners,
-      users,
+      citizens,
       scale,
       offset,
       canvas.width,
@@ -439,7 +439,7 @@ export default function ViewportCanvas({
     if (JSON.stringify(newPolygonsToRender) !== JSON.stringify(polygonsToRender)) {
       setPolygonsToRender(newPolygonsToRender);
     }
-  }, [polygons, landOwners, users, scale, offset, activeView, incomeData, incomeDataLoaded, loading]);
+  }, [polygons, landOwners, citizens, scale, offset, activeView, incomeData, incomeDataLoaded, loading]);
   
   // Draw the canvas
   useEffect(() => {

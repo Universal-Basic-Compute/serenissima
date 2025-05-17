@@ -85,7 +85,7 @@ export class TransactionService {
   // Cache storage
   private transactionsCache: Map<string, CacheEntry<Transaction>> = new Map();
   private transactionsByAssetCache: Map<string, CacheEntry<Transaction[]>> = new Map();
-  private transactionsByUserCache: Map<string, CacheEntry<Transaction[]>> = new Map();
+  private transactionsByCitizenCache: Map<string, CacheEntry<Transaction[]>> = new Map();
   
   // Cache configuration
   private cacheConfig: CacheConfig = {
@@ -129,7 +129,7 @@ export class TransactionService {
     log.info('Clearing all transaction data caches');
     this.transactionsCache.clear();
     this.transactionsByAssetCache.clear();
-    this.transactionsByUserCache.clear();
+    this.transactionsByCitizenCache.clear();
     log.debug('All transaction data caches cleared');
   }
   
@@ -166,7 +166,7 @@ export class TransactionService {
     log.debug('Invalidating transactions cache');
     this.transactionsCache.clear();
     this.transactionsByAssetCache.clear();
-    this.transactionsByUserCache.clear();
+    this.transactionsByCitizenCache.clear();
     
     // If we have specific transaction data, also invalidate related caches
     if (data && data.assetId) {
@@ -174,11 +174,11 @@ export class TransactionService {
     }
     
     if (data && data.buyer) {
-      this.transactionsByUserCache.delete(data.buyer);
+      this.transactionsByCitizenCache.delete(data.buyer);
     }
     
     if (data && data.seller) {
-      this.transactionsByUserCache.delete(data.seller);
+      this.transactionsByCitizenCache.delete(data.seller);
     }
   }
   
@@ -451,24 +451,24 @@ export class TransactionService {
   }
   
   /**
-   * Get transactions by user
-   * @throws {ValidationError} If user ID is missing
+   * Get transactions by citizen
+   * @throws {ValidationError} If citizen ID is missing
    * @throws {ApiError} If API request fails
    */
-  public async getTransactionsByUser(userId?: string, role?: 'buyer' | 'seller'): Promise<Transaction[]> {
-    // Get user ID from params or current wallet
-    const userAddress = userId || getWalletAddress();
-    if (!userAddress) {
+  public async getTransactionsByCitizen(citizenId?: string, role?: 'buyer' | 'seller'): Promise<Transaction[]> {
+    // Get citizen ID from params or current wallet
+    const citizenAddress = citizenId || getWalletAddress();
+    if (!citizenAddress) {
       throw new AuthenticationError('Wallet must be connected to get transactions');
     }
     
-    log.debug(`Getting transactions for user: ${userAddress}, role: ${role || 'any'}`);
+    log.debug(`Getting transactions for citizen: ${citizenAddress}, role: ${role || 'any'}`);
     
     // Check cache first
-    const cacheKey = `${userAddress}_${role || 'any'}`;
-    const cachedEntry = this.transactionsByUserCache.get(cacheKey);
+    const cacheKey = `${citizenAddress}_${role || 'any'}`;
+    const cachedEntry = this.transactionsByCitizenCache.get(cacheKey);
     if (this.isCacheValid(cachedEntry)) {
-      log.debug(`Returning transactions from cache for user: ${userAddress}`);
+      log.debug(`Returning transactions from cache for citizen: ${citizenAddress}`);
       return cachedEntry!.data;
     }
     
@@ -495,17 +495,17 @@ export class TransactionService {
         return [];
       }
       
-      // Convert API response to our Transaction interface and filter by user
+      // Convert API response to our Transaction interface and filter by citizen
       const transactions: Transaction[] = data
         .filter(item => {
           if (!item.executed_at) return false; // Only include executed transactions
           
           if (role === 'buyer') {
-            return item.buyer === userAddress;
+            return item.buyer === citizenAddress;
           } else if (role === 'seller') {
-            return item.seller === userAddress;
+            return item.seller === citizenAddress;
           } else {
-            return item.buyer === userAddress || item.seller === userAddress;
+            return item.buyer === citizenAddress || item.seller === citizenAddress;
           }
         })
         .map(item => ({
@@ -520,7 +520,7 @@ export class TransactionService {
         }));
       
       // Update cache
-      this.setCacheEntry(this.transactionsByUserCache, cacheKey, transactions);
+      this.setCacheEntry(this.transactionsByCitizenCache, cacheKey, transactions);
       
       return transactions;
     } catch (error) {
@@ -529,11 +529,11 @@ export class TransactionService {
         throw error;
       }
       
-      log.error('Unexpected error fetching transactions by user:', error);
+      log.error('Unexpected error fetching transactions by citizen:', error);
       throw new ApiError(
         error instanceof Error ? error.message : 'Unknown error',
         500,
-        'getTransactionsByUser'
+        'getTransactionsByCitizen'
       );
     }
   }

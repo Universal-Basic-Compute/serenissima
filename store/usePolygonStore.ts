@@ -13,7 +13,7 @@ interface PolygonState {
   hoveredPolygonId: string | null;
   selectedPolygonId: string | null;
   landOwners: Record<string, string>; // Map of land ID to owner
-  users: Record<string, any>; // Map of username to user data
+  citizens: Record<string, any>; // Map of citizenname to citizen data
   bridges: any[];
   ownerCoatOfArmsMap: Record<string, string>;
   
@@ -41,7 +41,7 @@ interface PolygonState {
   setSelectedPolygonId: (id: string | null) => void;
   loadPolygons: () => Promise<void>;
   loadLandOwners: () => Promise<void>;
-  loadUsers: () => Promise<void>;
+  loadCitizens: () => Promise<void>;
   loadBridges: () => Promise<void>;
   loadOwnerCoatOfArms: () => Promise<void>;
   
@@ -70,7 +70,7 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
   hoveredPolygonId: null,
   selectedPolygonId: null,
   landOwners: {},
-  users: {},
+  citizens: {},
   bridges: [],
   ownerCoatOfArmsMap: {},
   
@@ -383,13 +383,13 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
     }
   },
   
-  loadUsers: async () => {
+  loadCitizens: async () => {
     try {
-      console.log('Loading users data...');
+      console.log('Loading citizens data...');
       
       // Create a cache key based on timestamp (cache for 5 minutes)
-      const cacheKey = 'users_cache';
-      const cacheTimestampKey = 'users_cache_timestamp';
+      const cacheKey = 'citizens_cache';
+      const cacheTimestampKey = 'citizens_cache_timestamp';
       const currentTime = Date.now();
       const cacheTime = 5 * 60 * 1000; // 5 minutes in milliseconds
       
@@ -403,18 +403,18 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
         // Use cached data
         const cachedData = localStorage.getItem(cacheKey);
         if (cachedData) {
-          console.log('Using cached users data');
+          console.log('Using cached citizens data');
           data = JSON.parse(cachedData);
         }
       }
       
       // If no valid cache, fetch from API
       if (!data) {
-        console.log('Fetching fresh users data from API');
-        const response = await fetch('/api/get-all-users');
+        console.log('Fetching fresh citizens data from API');
+        const response = await fetch('/api/get-all-citizens');
         
         if (!response.ok) {
-          throw new Error(`Failed to fetch users: ${response.status}`);
+          throw new Error(`Failed to fetch citizens: ${response.status}`);
         }
         
         data = await response.json();
@@ -424,34 +424,34 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
         localStorage.setItem(cacheTimestampKey, currentTime.toString());
       }
       
-      if (data.success && data.users) {
-        // Create a map of username to user data
-        const usersMap: Record<string, any> = {};
+      if (data.success && data.citizens) {
+        // Create a map of citizenname to citizen data
+        const citizensMap: Record<string, any> = {};
         
-        data.users.forEach((user: any) => {
-          if (user.user_name) {
-            usersMap[user.user_name] = user;
+        data.citizens.forEach((citizen: any) => {
+          if (citizen.citizen_name) {
+            citizensMap[citizen.citizen_name] = citizen;
             
             // Also map by wallet address if available
-            if (user.wallet_address) {
-              usersMap[user.wallet_address] = user;
+            if (citizen.wallet_address) {
+              citizensMap[citizen.wallet_address] = citizen;
             }
             
             // Add specific debug for ConsiglioDeiDieci
-            if (user.user_name === 'ConsiglioDeiDieci') {
-              console.log('ConsiglioDeiDieci user data found:', user);
-              console.log('ConsiglioDeiDieci color value:', user.color);
+            if (citizen.citizen_name === 'ConsiglioDeiDieci') {
+              console.log('ConsiglioDeiDieci citizen data found:', citizen);
+              console.log('ConsiglioDeiDieci color value:', citizen.color);
             }
           }
         });
         
-        console.log('Processed users map with', Object.keys(usersMap).length, 'entries');
-        set({ users: usersMap });
+        console.log('Processed citizens map with', Object.keys(citizensMap).length, 'entries');
+        set({ citizens: citizensMap });
       } else {
-        console.error('Invalid response format from users API');
+        console.error('Invalid response format from citizens API');
       }
     } catch (error) {
-      console.error('Error loading users:', error);
+      console.error('Error loading citizens:', error);
     }
   },
   
@@ -467,7 +467,7 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
   
   loadOwnerCoatOfArms: async () => {
     try {
-      const response = await fetch(`${getBackendBaseUrl()}/api/users/coat-of-arms`);
+      const response = await fetch(`${getBackendBaseUrl()}/api/citizens/coat-of-arms`);
       if (!response.ok) {
         throw new Error(`Failed to fetch owner coat of arms: ${response.status}`);
       }
@@ -475,13 +475,13 @@ const usePolygonStore = create<PolygonState>((set, get) => ({
       const data = await response.json();
       console.log('Owner coat of arms data:', data);
       
-      if (data.success && data.users) {
-        // Create a map of owner username to coat of arms URL
+      if (data.success && data.citizens) {
+        // Create a map of owner citizenname to coat of arms URL
         const coatOfArmsMap: Record<string, string> = {};
         
-        data.users.forEach((user: any) => {
-          if (user.user_name && user.coat_of_arms_image) {
-            coatOfArmsMap[user.user_name] = user.coat_of_arms_image;
+        data.citizens.forEach((citizen: any) => {
+          if (citizen.citizen_name && citizen.coat_of_arms_image) {
+            coatOfArmsMap[citizen.citizen_name] = citizen.coat_of_arms_image;
           }
         });
         

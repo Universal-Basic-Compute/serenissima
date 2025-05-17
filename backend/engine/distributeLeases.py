@@ -57,7 +57,7 @@ def initialize_airtable():
         return {
             'lands': Table(api_key, base_id, 'LANDS'),
             'buildings': Table(api_key, base_id, 'BUILDINGS'),
-            'users': Table(api_key, base_id, 'Users'),
+            'citizens': Table(api_key, base_id, 'Citizens'),
             'transactions': Table(api_key, base_id, 'TRANSACTIONS'),
             'notifications': Table(api_key, base_id, 'NOTIFICATIONS')
         }
@@ -70,8 +70,8 @@ def get_all_lands(tables) -> List[Dict]:
     log.info("Fetching all lands with owners...")
     
     try:
-        # Get lands that have a User field (owner)
-        formula = "NOT(OR({User} = '', {User} = BLANK()))"
+        # Get lands that have a Citizen field (owner)
+        formula = "NOT(OR({Citizen} = '', {Citizen} = BLANK()))"
         lands = tables['lands'].all(formula=formula)
         
         log.info(f"Found {len(lands)} lands with owners")
@@ -92,7 +92,7 @@ def get_buildings_on_land(tables, land_id: str, land_record: Dict) -> List[Dict]
     
     try:
         # Use the LandId field to query buildings - improved formula with better error handling
-        formula = f"AND({{Land}}='{land_id_value}', NOT({{User}} = BLANK()))"
+        formula = f"AND({{Land}}='{land_id_value}', NOT({{Citizen}} = BLANK()))"
         
         # First try with the formula that requires LeaseAmount
         try:
@@ -118,9 +118,9 @@ def get_buildings_on_land(tables, land_id: str, land_record: Dict) -> List[Dict]
             log.error(f"Response content: {e.response.text}")
         return []
 
-def find_user_by_identifier(tables, identifier: str) -> Optional[Dict]:
-    """Find a user by username or wallet address."""
-    log.info(f"Looking up user: {identifier}")
+def find_citizen_by_identifier(tables, identifier: str) -> Optional[Dict]:
+    """Find a citizen by citizenname or wallet address."""
+    log.info(f"Looking up citizen: {identifier}")
     
     # Handle known special cases
     if identifier == "ConsiglioDeiDieci":
@@ -128,50 +128,50 @@ def find_user_by_identifier(tables, identifier: str) -> Optional[Dict]:
         variations = ["ConsiglioDeiDieci", "Consiglio Dei Dieci", "Consiglio dei Dieci"]
         for variation in variations:
             try:
-                formula = f"{{Username}}='{variation}'"
-                users = tables['users'].all(formula=formula)
-                if users:
-                    log.info(f"Found user by special case variation: {variation}")
-                    return users[0]
+                formula = f"{{Citizenname}}='{variation}'"
+                citizens = tables['citizens'].all(formula=formula)
+                if citizens:
+                    log.info(f"Found citizen by special case variation: {variation}")
+                    return citizens[0]
             except Exception:
                 continue
     
     try:
-        # First try to find by username
-        formula = f"{{Username}}='{identifier}'"
-        users = tables['users'].all(formula=formula)
+        # First try to find by citizenname
+        formula = f"{{Citizenname}}='{identifier}'"
+        citizens = tables['citizens'].all(formula=formula)
         
-        if users:
-            log.info(f"Found user by username: {identifier}")
-            return users[0]
+        if citizens:
+            log.info(f"Found citizen by citizenname: {identifier}")
+            return citizens[0]
         
         # If not found, try by wallet address
         formula = f"{{Wallet}}='{identifier}'"
-        users = tables['users'].all(formula=formula)
+        citizens = tables['citizens'].all(formula=formula)
         
-        if users:
-            log.info(f"Found user by wallet address: {identifier}")
-            return users[0]
+        if citizens:
+            log.info(f"Found citizen by wallet address: {identifier}")
+            return citizens[0]
         
-        log.warning(f"User not found: {identifier}")
+        log.warning(f"Citizen not found: {identifier}")
         return None
     except Exception as e:
-        log.error(f"Error finding user {identifier}: {e}")
+        log.error(f"Error finding citizen {identifier}: {e}")
         return None
 
-def update_compute_balance(tables, user_id: str, amount: float, operation: str = "add") -> Optional[Dict]:
-    """Update a user's compute balance."""
-    log.info(f"Updating compute balance for user {user_id}: {operation} {amount}")
+def update_compute_balance(tables, citizen_id: str, amount: float, operation: str = "add") -> Optional[Dict]:
+    """Update a citizen's compute balance."""
+    log.info(f"Updating compute balance for citizen {citizen_id}: {operation} {amount}")
     
     try:
-        # Get the user record
-        user = tables['users'].get(user_id)
-        if not user:
-            log.warning(f"User not found: {user_id}")
+        # Get the citizen record
+        citizen = tables['citizens'].get(citizen_id)
+        if not citizen:
+            log.warning(f"Citizen not found: {citizen_id}")
             return None
         
         # Get current Ducats
-        current_amount = user['fields'].get('Ducats', 0)
+        current_amount = citizen['fields'].get('Ducats', 0)
         
         # Calculate new amount
         if operation == "add":
@@ -179,26 +179,26 @@ def update_compute_balance(tables, user_id: str, amount: float, operation: str =
         elif operation == "subtract":
             new_amount = current_amount - amount
             if new_amount < 0:
-                log.warning(f"User {user_id} has insufficient funds: {current_amount} < {amount}")
+                log.warning(f"Citizen {citizen_id} has insufficient funds: {current_amount} < {amount}")
                 return None
         else:
             log.error(f"Invalid operation: {operation}")
             return None
         
-        # Update the user record
-        updated_user = tables['users'].update(user_id, {
+        # Update the citizen record
+        updated_citizen = tables['citizens'].update(citizen_id, {
             'Ducats': new_amount
         })
         
-        log.info(f"Updated compute balance for user {user_id}: {current_amount} -> {new_amount}")
-        return updated_user
+        log.info(f"Updated compute balance for citizen {citizen_id}: {current_amount} -> {new_amount}")
+        return updated_citizen
     except Exception as e:
-        log.error(f"Error updating compute balance for user {user_id}: {e}")
+        log.error(f"Error updating compute balance for citizen {citizen_id}: {e}")
         return None
 
-def create_transaction_record(tables, from_user: str, to_user: str, amount: float, land_id: str, building_id: str) -> Optional[Dict]:
+def create_transaction_record(tables, from_citizen: str, to_citizen: str, amount: float, land_id: str, building_id: str) -> Optional[Dict]:
     """Create a transaction record for a lease payment."""
-    log.info(f"Creating transaction record for lease payment: {from_user} -> {to_user}, amount: {amount}")
+    log.info(f"Creating transaction record for lease payment: {from_citizen} -> {to_citizen}, amount: {amount}")
     
     try:
         now = datetime.datetime.now().isoformat()
@@ -207,8 +207,8 @@ def create_transaction_record(tables, from_user: str, to_user: str, amount: floa
         transaction = tables['transactions'].create({
             "Type": "lease_payment",
             "AssetId": f"lease_{land_id}_{building_id}",
-            "Seller": from_user,  # Building owner is the seller (paying)
-            "Buyer": to_user,     # Land owner is the buyer (receiving)
+            "Seller": from_citizen,  # Building owner is the seller (paying)
+            "Buyer": to_citizen,     # Land owner is the buyer (receiving)
             "Price": amount,
             "CreatedAt": now,
             "UpdatedAt": now,
@@ -227,13 +227,13 @@ def create_transaction_record(tables, from_user: str, to_user: str, amount: floa
         log.error(f"Error creating transaction record: {e}")
         return None
 
-def create_notification(tables, user: str, content: str, details: Dict) -> Optional[Dict]:
-    """Create a notification for a user."""
-    log.info(f"Creating notification for user {user}: {content}")
+def create_notification(tables, citizen: str, content: str, details: Dict) -> Optional[Dict]:
+    """Create a notification for a citizen."""
+    log.info(f"Creating notification for citizen {citizen}: {content}")
     
-    # Skip notification if user is empty or None
-    if not user:
-        log.warning(f"Cannot create notification: user is empty")
+    # Skip notification if citizen is empty or None
+    if not citizen:
+        log.warning(f"Cannot create notification: citizen is empty")
         return None
     
     try:
@@ -246,13 +246,13 @@ def create_notification(tables, user: str, content: str, details: Dict) -> Optio
             "Details": json.dumps(details),
             "CreatedAt": now,
             "ReadAt": None,
-            "User": user
+            "Citizen": citizen
         })
         
         log.info(f"Created notification: {notification['id']}")
         return notification
     except Exception as e:
-        log.error(f"Error creating notification for user {user}: {e}")
+        log.error(f"Error creating notification for citizen {citizen}: {e}")
         return None
 
 def calculate_tax_rate(land: Dict) -> float:
@@ -292,12 +292,12 @@ def process_lease_payment(tables, land: Dict, building: Dict, dry_run: bool = Fa
     """Process a lease payment from a building owner to a land owner."""
     land_id = land['id']
     land_name = land['fields'].get('HistoricalName', land['fields'].get('EnglishName', land_id))
-    land_owner = land['fields'].get('User', '')
+    land_owner = land['fields'].get('Citizen', '')
     
     building_id = building['id']
     building_name = building['fields'].get('Name', building_id)
     building_type = building['fields'].get('Type', 'unknown')
-    building_owner = building['fields'].get('User', '')
+    building_owner = building['fields'].get('Citizen', '')
     
     # Safely convert lease amount to float
     try:
@@ -336,10 +336,10 @@ def process_lease_payment(tables, land: Dict, building: Dict, dry_run: bool = Fa
         log.info(f"[DRY RUN] Would transfer {tax_amount} ⚜️ Ducats from {building_owner} to ConsiglioDeiDieci (tax)")
         return True, net_amount, tax_amount
     
-    # Find user records
-    building_owner_record = find_user_by_identifier(tables, building_owner)
-    land_owner_record = find_user_by_identifier(tables, land_owner)
-    consiglio_record = find_user_by_identifier(tables, "ConsiglioDeiDieci")
+    # Find citizen records
+    building_owner_record = find_citizen_by_identifier(tables, building_owner)
+    land_owner_record = find_citizen_by_identifier(tables, land_owner)
+    consiglio_record = find_citizen_by_identifier(tables, "ConsiglioDeiDieci")
     
     if not building_owner_record:
         log.warning(f"Building owner {building_owner} not found, skipping payment")
@@ -429,9 +429,9 @@ def process_lease_payment(tables, land: Dict, building: Dict, dry_run: bool = Fa
     
     return True, net_amount, tax_amount
 
-def create_tax_transaction_record(tables, from_user: str, to_user: str, amount: float, land_id: str, building_id: str, tax_rate: float) -> Optional[Dict]:
+def create_tax_transaction_record(tables, from_citizen: str, to_citizen: str, amount: float, land_id: str, building_id: str, tax_rate: float) -> Optional[Dict]:
     """Create a transaction record for a lease tax payment."""
-    log.info(f"Creating tax transaction record: {from_user} -> {to_user}, amount: {amount}")
+    log.info(f"Creating tax transaction record: {from_citizen} -> {to_citizen}, amount: {amount}")
     
     try:
         now = datetime.datetime.now().isoformat()
@@ -440,8 +440,8 @@ def create_tax_transaction_record(tables, from_user: str, to_user: str, amount: 
         transaction = tables['transactions'].create({
             "Type": "lease_tax",
             "AssetId": f"tax_{land_id}_{building_id}",
-            "Seller": from_user,  # Building owner is the seller (paying)
-            "Buyer": to_user,     # ConsiglioDeiDieci is the buyer (receiving)
+            "Seller": from_citizen,  # Building owner is the seller (paying)
+            "Buyer": to_citizen,     # ConsiglioDeiDieci is the buyer (receiving)
             "Price": amount,
             "CreatedAt": now,
             "UpdatedAt": now,
@@ -532,8 +532,8 @@ def test_telegram_connection():
             return False
         
         bot_data = bot_response.json()
-        bot_username = bot_data.get("result", {}).get("username", "Unknown")
-        log.info(f"Connected to Telegram bot: @{bot_username}")
+        bot_citizenname = bot_data.get("result", {}).get("citizenname", "Unknown")
+        log.info(f"Connected to Telegram bot: @{bot_citizenname}")
         
         # Now try to get chat info to verify the chat ID
         chat_info_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getChat?chat_id={MAIN_TELEGRAM_CHAT_ID}"
@@ -622,7 +622,7 @@ def create_admin_summary(tables, lease_summary) -> None:
             "Details": json.dumps(details),
             "CreatedAt": datetime.datetime.now().isoformat(),
             "ReadAt": None,
-            "User": "NLR"  # Admin user
+            "Citizen": "NLR"  # Admin citizen
         })
         
         log.info(f"Created admin summary notification")
@@ -664,7 +664,7 @@ def distribute_leases(dry_run: bool = False):
             try:
                 land_id = land['id']
                 land_name = land['fields'].get('HistoricalName', land['fields'].get('EnglishName', land_id))
-                land_owner = land['fields'].get('User', '')
+                land_owner = land['fields'].get('Citizen', '')
                 
                 log.info(f"Processing land {land_name} (ID: {land_id}) owned by {land_owner}")
                 
@@ -697,7 +697,7 @@ def distribute_leases(dry_run: bool = False):
                                 lease_summary["by_land_owner"][land_owner] += net_amount
                                 
                                 # Get building owner safely
-                                building_owner = building['fields'].get('User', '')
+                                building_owner = building['fields'].get('Citizen', '')
                                 if building_owner:
                                     lease_summary["by_building_owner"][building_owner] -= (net_amount + tax_amount)
                                     lease_summary["by_building_owner_tax"][building_owner] += tax_amount
@@ -787,7 +787,7 @@ def distribute_leases(dry_run: bool = False):
                     # Group buildings by land
                     lands_data = {}
                     for building in buildings_data:
-                        land_id = next((land['id'] for land in lands if land['fields'].get('User') == land_owner), None)
+                        land_id = next((land['id'] for land in lands if land['fields'].get('Citizen') == land_owner), None)
                         if land_id:
                             land_name = next((land['fields'].get('HistoricalName', land['fields'].get('EnglishName', land_id)) 
                                             for land in lands if land['id'] == land_id), land_id)

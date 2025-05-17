@@ -15,20 +15,20 @@ const logError = (message: string, error?: any) => {
   console.log(`%c[ResourceDropdowns] ERROR: ${message}`, 'color: #ef4444; font-weight: bold;', error || '');
 };
 
-// Helper function to get username from profile
-const getUsernameFromProfile = () => {
+// Helper function to get citizenname from profile
+const getCitizennameFromProfile = () => {
   try {
-    const profileStr = localStorage.getItem('userProfile');
+    const profileStr = localStorage.getItem('citizenProfile');
     if (profileStr) {
       const profile = JSON.parse(profileStr);
-      if (profile && profile.username) {
-        logInfo(`Using username from profile: ${profile.username}`);
-        return profile.username;
+      if (profile && profile.citizenname) {
+        logInfo(`Using citizenname from profile: ${profile.citizenname}`);
+        return profile.citizenname;
       }
     }
     return null;
   } catch (error) {
-    logError('Error parsing user profile:', error);
+    logError('Error parsing citizen profile:', error);
     return null;
   }
 };
@@ -54,14 +54,14 @@ const ResourceDropdowns: React.FC = () => {
         resourceService.clearCache();
       }
       
-      // First try to get username from profile
-      const username = getUsernameFromProfile();
+      // First try to get citizenname from profile
+      const citizenname = getCitizennameFromProfile();
       
-      // If no username in profile, fall back to wallet address
-      const owner = username || getWalletAddress();
+      // If no citizenname in profile, fall back to wallet address
+      const owner = citizenname || getWalletAddress();
       logInfo('Current owner identifier:', owner);
       
-      // Get resource counts for the current user
+      // Get resource counts for the current citizen
       logInfo('Fetching resource counts');
       const resources = await resourceService.getResourceCounts(owner);
       logInfo(`Received ${resources.length} resources`);

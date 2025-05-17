@@ -180,8 +180,8 @@ def move_citizen_to_new_job(tables, citizen: Dict, old_business: Dict, new_busin
         log.error(f"Error moving citizen to new job: {e}")
         return False
 
-def create_notification(tables, user: str, content: str, details: Dict) -> None:
-    """Create a notification for a user."""
+def create_notification(tables, citizen: str, content: str, details: Dict) -> None:
+    """Create a notification for a citizen."""
     try:
         # Create the notification record
         tables['notifications'].create({
@@ -190,10 +190,10 @@ def create_notification(tables, user: str, content: str, details: Dict) -> None:
             "Details": json.dumps(details),
             "CreatedAt": datetime.datetime.now().isoformat(),
             "ReadAt": None,
-            "User": user
+            "Citizen": citizen
         })
         
-        log.info(f"Created notification for user {user}")
+        log.info(f"Created notification for citizen {citizen}")
     except Exception as e:
         log.error(f"Error creating notification: {e}")
 
@@ -295,7 +295,7 @@ def create_admin_summary(tables, mobility_summary) -> None:
             "Details": json.dumps(details),
             "CreatedAt": datetime.datetime.now().isoformat(),
             "ReadAt": None,
-            "User": "NLR"  # Admin user
+            "Citizen": "NLR"  # Admin citizen
         })
         
         log.info(f"Created admin summary notification")
@@ -429,7 +429,7 @@ def process_work_mobility(dry_run: bool = False):
     
     log.info(f"Work mobility process complete. Checked: {mobility_summary['total_checked']}, Looking: {mobility_summary['total_looking']}, Moved: {mobility_summary['total_moved']}")
     
-    # Create a notification for the admin user with the mobility summary
+    # Create a notification for the admin citizen with the mobility summary
     if mobility_summary["total_moved"] > 0 and not dry_run:
         create_admin_summary(tables, mobility_summary)
 

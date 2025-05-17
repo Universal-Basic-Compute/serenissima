@@ -11,7 +11,7 @@ interface WalletButtonProps {
 }
 
 export default function WalletButton({ className = '', onSettingsClick }: WalletButtonProps) {
-  const { walletAddress, userProfile, isConnected, connectWallet } = useWalletContext();
+  const { walletAddress, citizenProfile, isConnected, connectWallet } = useWalletContext();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showProfileEditor, setShowProfileEditor] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -30,7 +30,7 @@ export default function WalletButton({ className = '', onSettingsClick }: Wallet
     };
   }, []);
   
-  if (isConnected && userProfile) {
+  if (isConnected && citizenProfile) {
     return (
       <div className={`${className} flex-shrink-0`} ref={dropdownRef}>
         <button 
@@ -38,12 +38,12 @@ export default function WalletButton({ className = '', onSettingsClick }: Wallet
           className="bg-amber-50 px-4 py-2 rounded-lg shadow-md hover:bg-amber-100 transition-colors flex items-center border-2 border-amber-300"
         >
           <PlayerProfile
-            username={userProfile.username}
-            firstName={userProfile.firstName}
-            lastName={userProfile.lastName}
-            coatOfArmsImage={userProfile.coatOfArmsImage}
-            familyMotto={userProfile.familyMotto}
-            Ducats={userProfile.Ducats}
+            citizenname={citizenProfile.citizenname}
+            firstName={citizenProfile.firstName}
+            lastName={citizenProfile.lastName}
+            coatOfArmsImage={citizenProfile.coatOfArmsImage}
+            familyMotto={citizenProfile.familyMotto}
+            Ducats={citizenProfile.Ducats}
             size="medium"
             className="mr-2"
             showMotto={false}
@@ -59,8 +59,8 @@ export default function WalletButton({ className = '', onSettingsClick }: Wallet
             <div className="px-4 py-3 border-b border-amber-100 bg-amber-50">
               <p className="text-xs text-amber-700">Wallet</p>
               <p className="text-sm truncate font-medium">{walletAddress?.slice(0, 6)}...{walletAddress?.slice(-4)}</p>
-              {userProfile.familyMotto && (
-                <p className="text-xs italic text-amber-600 mt-1">"{userProfile.familyMotto}"</p>
+              {citizenProfile.familyMotto && (
+                <p className="text-xs italic text-amber-600 mt-1">"{citizenProfile.familyMotto}"</p>
               )}
             </div>
             <button
@@ -104,7 +104,7 @@ export default function WalletButton({ className = '', onSettingsClick }: Wallet
             <button
               onClick={async () => {
                 // Clear current wallet connection
-                localStorage.removeItem('userProfile');
+                localStorage.removeItem('citizenProfile');
                 
                 // Disconnect the current wallet first
                 sessionStorage.removeItem('walletAddress');
@@ -145,7 +145,7 @@ export default function WalletButton({ className = '', onSettingsClick }: Wallet
                   setDropdownOpen(false);
                   
                   // Clear current wallet connection
-                  localStorage.removeItem('userProfile');
+                  localStorage.removeItem('citizenProfile');
                   
                   // Disconnect the current wallet first
                   sessionStorage.removeItem('walletAddress');

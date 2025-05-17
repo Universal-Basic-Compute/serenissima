@@ -8,9 +8,9 @@ import requests
 from dotenv import load_dotenv
 from pyairtable import Api, Table
 
-# Add the parent directory to the path to import user_utils
+# Add the parent directory to the path to import citizen_utils
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from app.user_utils import find_user_by_identifier
+from app.citizen_utils import find_citizen_by_identifier
 
 def initialize_airtable():
     """Initialize connection to Airtable."""
@@ -26,7 +26,7 @@ def initialize_airtable():
     api = Api(airtable_api_key)
     
     tables = {
-        "users": Table(airtable_api_key, airtable_base_id, "USERS"),
+        "citizens": Table(airtable_api_key, airtable_base_id, "CITIZENS"),
         "buildings": Table(airtable_api_key, airtable_base_id, "BUILDINGS"),
         "citizens": Table(airtable_api_key, airtable_base_id, "CITIZENS"),
         "notifications": Table(airtable_api_key, airtable_base_id, "NOTIFICATIONS")
@@ -34,34 +34,34 @@ def initialize_airtable():
     
     return tables
 
-def get_ai_users(tables) -> List[Dict]:
-    """Get all users that are marked as AI."""
+def get_ai_citizens(tables) -> List[Dict]:
+    """Get all citizens that are marked as AI."""
     try:
-        # Query users with IsAI field set to true
+        # Query citizens with IsAI field set to true
         formula = "{IsAI}=1"
-        ai_users = tables["users"].all(formula=formula)
-        print(f"Found {len(ai_users)} AI users")
-        return ai_users
+        ai_citizens = tables["citizens"].all(formula=formula)
+        print(f"Found {len(ai_citizens)} AI citizens")
+        return ai_citizens
     except Exception as e:
-        print(f"Error getting AI users: {str(e)}")
+        print(f"Error getting AI citizens: {str(e)}")
         return []
 
-def get_user_business_buildings(tables, username: str) -> List[Dict]:
-    """Get all buildings owned by a specific user that could potentially have wages set."""
+def get_citizen_business_buildings(tables, citizenname: str) -> List[Dict]:
+    """Get all buildings owned by a specific citizen that could potentially have wages set."""
     try:
-        # Query buildings where the user is the owner (not just RanBy)
-        formula = f"{{Owner}}='{username}'"
+        # Query buildings where the citizen is the owner (not just RanBy)
+        formula = f"{{Owner}}='{citizenname}'"
         buildings = tables["buildings"].all(formula=formula)
-        print(f"Found {len(buildings)} buildings owned by {username}")
+        print(f"Found {len(buildings)} buildings owned by {citizenname}")
         
         # Log the building IDs for debugging
         building_ids = [building["fields"].get("BuildingId") for building in buildings 
                        if building["fields"].get("BuildingId")]
-        print(f"Building IDs owned by {username}: {building_ids}")
+        print(f"Building IDs owned by {citizenname}: {building_ids}")
         
         return buildings
     except Exception as e:
-        print(f"Error getting buildings for user {username}: {str(e)}")
+        print(f"Error getting buildings for citizen {citizenname}: {str(e)}")
         return []
 
 def get_building_employees(tables, building_ids: List[str]) -> Dict[str, List[Dict]]:
@@ -119,16 +119,16 @@ def get_kinos_api_key() -> str:
         sys.exit(1)
     return api_key
 
-def prepare_wage_analysis_data(ai_user: Dict, user_business_buildings: List[Dict], citizens_info: Dict[str, Dict]) -> Dict:
+def prepare_wage_analysis_data(ai_citizen: Dict, citizen_business_buildings: List[Dict], citizens_info: Dict[str, Dict]) -> Dict:
     """Prepare a comprehensive data package for the AI to analyze wage situations."""
     
-    # Extract user information
-    username = ai_user["fields"].get("Username", "")
-    ducats = ai_user["fields"].get("Ducats", 0)
+    # Extract citizen information
+    citizenname = ai_citizen["fields"].get("Citizenname", "")
+    ducats = ai_citizen["fields"].get("Ducats", 0)
     
     # Process business buildings data
     businesses_data = []
-    for building in user_business_buildings:
+    for building in citizen_business_buildings:
         building_id = building["fields"].get("BuildingId", "")
         building_type = building["fields"].get("Type", "")
         wages = building["fields"].get("Wages", 0)
@@ -165,18 +165,18 @@ def prepare_wage_analysis_data(ai_user: Dict, user_business_buildings: List[Dict
         businesses_data.append(business_info)
     
     # Calculate financial metrics
-    total_income = sum(building["fields"].get("Income", 0) for building in user_business_buildings)
+    total_income = sum(building["fields"].get("Income", 0) for building in citizen_business_buildings)
     total_wages_paid = sum(
         building["fields"].get("Wages", 0) * (1 if building["fields"].get("Occupant", "") else 0)
-        for building in user_business_buildings
+        for building in citizen_business_buildings
     )
-    total_rent_paid = sum(building["fields"].get("RentAmount", 0) for building in user_business_buildings)
+    total_rent_paid = sum(building["fields"].get("RentAmount", 0) for building in citizen_business_buildings)
     net_income = total_income - total_wages_paid - total_rent_paid
     
     # Prepare the complete data package
     data_package = {
-        "user": {
-            "username": username,
+        "citizen": {
+            "citizenname": citizenname,
             "ducats": ducats,
             "total_businesses": len(businesses_data),
             "financial": {
@@ -192,14 +192,14 @@ def prepare_wage_analysis_data(ai_user: Dict, user_business_buildings: List[Dict
     
     return data_package
 
-def send_wage_adjustment_request(ai_username: str, data_package: Dict) -> Optional[Dict]:
+def send_wage_adjustment_request(ai_citizenname: str, data_package: Dict) -> Optional[Dict]:
     """Send the wage adjustment request to the AI via Kinos API."""
     try:
         api_key = get_kinos_api_key()
         blueprint = "serenissima-ai"
         
         # Construct the API URL
-        url = f"https://api.kinos-engine.ai/v2/blueprints/{blueprint}/kins/{ai_username}/messages"
+        url = f"https://api.kinos-engine.ai/v2/blueprints/{blueprint}/kins/{ai_citizenname}/messages"
         
         # Set up headers with API key
         headers = {
@@ -208,10 +208,10 @@ def send_wage_adjustment_request(ai_username: str, data_package: Dict) -> Option
         }
         
         # Log the API request details
-        print(f"Sending wage adjustment request to AI user {ai_username}")
+        print(f"Sending wage adjustment request to AI citizen {ai_citizenname}")
         print(f"API URL: {url}")
-        print(f"User has {data_package['user']['ducats']} ducats")
-        print(f"User owns {len(data_package['businesses'])} businesses")
+        print(f"Citizen has {data_package['citizen']['ducats']} ducats")
+        print(f"Citizen owns {len(data_package['businesses'])} businesses")
         
         # Log business IDs for debugging
         business_ids = [business["id"] for business in data_package["businesses"]]
@@ -223,9 +223,9 @@ As a building owner in La Serenissima, you need to review and set wage amounts f
 
 Here's your current situation:
 - You own {len(data_package['businesses'])} buildings
-- Your current net income is {data_package['user']['financial']['net_income']} ducats
-- You pay {data_package['user']['financial']['total_wages_paid']} ducats in wages to your employees
-- You pay {data_package['user']['financial']['total_rent_paid']} ducats in rent for your business buildings
+- Your current net income is {data_package['citizen']['financial']['net_income']} ducats
+- You pay {data_package['citizen']['financial']['total_wages_paid']} ducats in wages to your employees
+- You pay {data_package['citizen']['financial']['total_rent_paid']} ducats in rent for your business buildings
 
 Please analyze your buildings and develop a strategy for setting wage amounts. Consider:
 1. The income and expenses of each building
@@ -264,7 +264,7 @@ If you decide not to adjust any wages at this time, return an empty array:
         
         # Create system instructions with the detailed data
         system_instructions = f"""
-You are {ai_username}, an AI building owner in La Serenissima. You make your own decisions about wage strategies.
+You are {ai_citizenname}, an AI building owner in La Serenissima. You make your own decisions about wage strategies.
 
 Here is the complete data about your current situation:
 {json.dumps(data_package, indent=2)}
@@ -294,7 +294,7 @@ If you decide not to adjust any wages at this time, return an empty array.
         }
         
         # Make the API request
-        print(f"Making API request to Kinos for {ai_username}...")
+        print(f"Making API request to Kinos for {ai_citizenname}...")
         response = requests.post(url, headers=headers, json=payload)
         
         # Log the API response details
@@ -308,19 +308,19 @@ If you decide not to adjust any wages at this time, return an empty array.
             print(f"API response status: {status}")
             
             if status == "completed":
-                print(f"Successfully sent wage adjustment request to AI user {ai_username}")
+                print(f"Successfully sent wage adjustment request to AI citizen {ai_citizenname}")
                 
                 # The response content is in the response field of response_data
                 content = response_data.get('response', '')
                 
                 # Log the entire response for debugging
-                print(f"FULL AI RESPONSE FROM {ai_username}:")
+                print(f"FULL AI RESPONSE FROM {ai_citizenname}:")
                 print("="*80)
                 print(content)
                 print("="*80)
                 
-                print(f"AI {ai_username} response length: {len(content)} characters")
-                print(f"AI {ai_username} response preview: {content[:200]}...")
+                print(f"AI {ai_citizenname} response length: {len(content)} characters")
+                print(f"AI {ai_citizenname} response preview: {content[:200]}...")
                 
                 # Try to extract the JSON decision from the response
                 try:
@@ -403,13 +403,13 @@ If you decide not to adjust any wages at this time, return an empty array.
                     print(content)
                     return None
             else:
-                print(f"Error processing wage adjustment request for AI user {ai_username}: {response_data}")
+                print(f"Error processing wage adjustment request for AI citizen {ai_citizenname}: {response_data}")
                 return None
         else:
             print(f"Error from Kinos API: {response.status_code} - {response.text}")
             return None
     except Exception as e:
-        print(f"Error sending wage adjustment request to AI user {ai_username}: {str(e)}")
+        print(f"Error sending wage adjustment request to AI citizen {ai_citizenname}: {str(e)}")
         print(f"Exception traceback: {traceback.format_exc()}")
         return None
 
@@ -477,11 +477,11 @@ def update_building_wage_amount(tables, building_id: str, new_wage_amount: float
         print(f"Exception traceback: {traceback.format_exc()}")
         return False
 
-def create_notification_for_business_employee(tables, building_id: str, employee_id: str, ai_username: str, 
+def create_notification_for_business_employee(tables, building_id: str, employee_id: str, ai_citizenname: str, 
                                              old_wage: float, new_wage: float, reason: str) -> bool:
     """Create a notification for a business employee about the wage adjustment."""
     try:
-        # Get the employee's user ID
+        # Get the employee's citizen ID
         formula = f"RECORD_ID()='{employee_id}'"
         citizens = tables["citizens"].all(formula=formula)
         
@@ -490,10 +490,10 @@ def create_notification_for_business_employee(tables, building_id: str, employee
             return False
         
         citizen = citizens[0]
-        user_id = citizen["fields"].get("User", "")
+        citizen_id = citizen["fields"].get("Citizen", "")
         
-        if not user_id:
-            print(f"Citizen {employee_id} has no associated user, skipping notification")
+        if not citizen_id:
+            print(f"Citizen {employee_id} has no associated citizen, skipping notification")
             return False
         
         now = datetime.now().isoformat()
@@ -507,9 +507,9 @@ def create_notification_for_business_employee(tables, building_id: str, employee
         
         # Create the notification
         notification = {
-            "User": user_id,
+            "Citizen": citizen_id,
             "Type": "wage_adjustment",
-            "Content": f"Your wage at {building_type} has been adjusted from {old_wage} to {new_wage} ducats by the business owner {ai_username}. Reason: {reason}",
+            "Content": f"Your wage at {building_type} has been adjusted from {old_wage} to {new_wage} ducats by the business owner {ai_citizenname}. Reason: {reason}",
             "CreatedAt": now,
             "ReadAt": None,
             "Details": json.dumps({
@@ -517,14 +517,14 @@ def create_notification_for_business_employee(tables, building_id: str, employee
                 "building_type": building_type,
                 "old_wage_amount": old_wage,
                 "new_wage_amount": new_wage,
-                "business_owner": ai_username,
+                "business_owner": ai_citizenname,
                 "reason": reason,
                 "timestamp": now
             })
         }
         
         tables["notifications"].create(notification)
-        print(f"Created notification for employee {user_id} about wage adjustment")
+        print(f"Created notification for employee {citizen_id} about wage adjustment")
         return True
     except Exception as e:
         print(f"Error creating notification for employee: {str(e)}")
@@ -545,7 +545,7 @@ def create_admin_notification(tables, ai_wage_adjustments: Dict[str, List[Dict]]
         
         # Create the notification
         notification = {
-            "User": "NLR",  # Send to NLR as requested
+            "Citizen": "NLR",  # Send to NLR as requested
             "Type": "ai_wage_adjustments",
             "Content": message,
             "CreatedAt": now,
@@ -568,38 +568,38 @@ def process_ai_wage_adjustments(dry_run: bool = False):
     # Initialize Airtable connection
     tables = initialize_airtable()
     
-    # Get AI users
-    ai_users = get_ai_users(tables)
-    if not ai_users:
-        print("No AI users found, exiting")
+    # Get AI citizens
+    ai_citizens = get_ai_citizens(tables)
+    if not ai_citizens:
+        print("No AI citizens found, exiting")
         return
     
     # Track wage adjustments for each AI
     ai_wage_adjustments = {}
     
-    # Process each AI user
-    for ai_user in ai_users:
-        ai_username = ai_user["fields"].get("Username")
-        if not ai_username:
+    # Process each AI citizen
+    for ai_citizen in ai_citizens:
+        ai_citizenname = ai_citizen["fields"].get("Citizenname")
+        if not ai_citizenname:
             continue
         
-        print(f"Processing AI user: {ai_username}")
-        ai_wage_adjustments[ai_username] = []
+        print(f"Processing AI citizen: {ai_citizenname}")
+        ai_wage_adjustments[ai_citizenname] = []
         
         # Get buildings with businesses run by this AI
-        user_business_buildings = get_user_business_buildings(tables, ai_username)
+        citizen_business_buildings = get_citizen_business_buildings(tables, ai_citizenname)
         
-        if not user_business_buildings:
-            print(f"AI user {ai_username} has no businesses, skipping")
+        if not citizen_business_buildings:
+            print(f"AI citizen {ai_citizenname} has no businesses, skipping")
             continue
         
         # Create a map of building IDs for quick lookup
-        user_building_ids = {building["fields"].get("BuildingId"): building for building in user_business_buildings 
+        citizen_building_ids = {building["fields"].get("BuildingId"): building for building in citizen_business_buildings 
                            if building["fields"].get("BuildingId")}
-        print(f"AI user {ai_username} runs these businesses: {list(user_building_ids.keys())}")
+        print(f"AI citizen {ai_citizenname} runs these businesses: {list(citizen_building_ids.keys())}")
         
         # Get building IDs
-        building_ids = list(user_building_ids.keys())
+        building_ids = list(citizen_building_ids.keys())
         
         # Get employees working at these buildings
         building_employees = get_building_employees(tables, building_ids)
@@ -613,15 +613,15 @@ def process_ai_wage_adjustments(dry_run: bool = False):
             print(f"Error getting all citizens: {str(e)}")
         
         # Prepare the data package for the AI
-        data_package = prepare_wage_analysis_data(ai_user, user_business_buildings, all_citizens)
+        data_package = prepare_wage_analysis_data(ai_citizen, citizen_business_buildings, all_citizens)
         
         # Send the wage adjustment request to the AI
         if not dry_run:
-            decisions = send_wage_adjustment_request(ai_username, data_package)
+            decisions = send_wage_adjustment_request(ai_citizenname, data_package)
             
             if decisions and "wage_adjustments" in decisions:
                 wage_adjustments = decisions["wage_adjustments"]
-                print(f"AI {ai_username} returned {len(wage_adjustments)} wage adjustments")
+                print(f"AI {ai_citizenname} returned {len(wage_adjustments)} wage adjustments")
                 
                 for adjustment in wage_adjustments:
                     # Get the building_id, which might be called "business_id" in the AI's response
@@ -633,19 +633,19 @@ def process_ai_wage_adjustments(dry_run: bool = False):
                         print(f"Invalid wage adjustment: {adjustment}")
                         continue
                     
-                    # Check if this building ID is in the user's businesses
-                    if building_id not in user_building_ids:
-                        print(f"Building {building_id} not run by {ai_username} or doesn't exist")
+                    # Check if this building ID is in the citizen's businesses
+                    if building_id not in citizen_building_ids:
+                        print(f"Building {building_id} not run by {ai_citizenname} or doesn't exist")
                         continue
                     
                     # Get the building from our map
-                    building = user_building_ids[building_id]
+                    building = citizen_building_ids[building_id]
                     current_wage = building["fields"].get("Wages", 0)
                     
                     # Check if the AI owns this building - if not, skip it
                     building_owner = building["fields"].get("Owner", "")
-                    if building_owner != ai_username:
-                        print(f"Skipping building {building_id} - AI {ai_username} does not own this building (owned by {building_owner})")
+                    if building_owner != ai_citizenname:
+                        print(f"Skipping building {building_id} - AI {ai_citizenname} does not own this building (owned by {building_owner})")
                         continue
                     
                     print(f"Processing wage adjustment for building {building_id}: {current_wage} -> {new_wage_amount}")
@@ -679,14 +679,14 @@ def process_ai_wage_adjustments(dry_run: bool = False):
                             occupant_id = building["fields"].get("Occupant", "")
                             if occupant_id and occupant_id in all_citizens:
                                 create_notification_for_business_employee(
-                                    tables, building_id, occupant_id, ai_username, 
+                                    tables, building_id, occupant_id, ai_citizenname, 
                                     current_wage, new_wage_amount, reason
                                 )
                             else:
                                 print(f"Building {building_id} has no occupant or occupant not found in citizens")
                             
                             # Add to the list of adjustments for this AI
-                            ai_wage_adjustments[ai_username].append({
+                            ai_wage_adjustments[ai_citizenname].append({
                                 "building_id": building_id,
                                 "old_wage": current_wage,
                                 "new_wage": new_wage_amount,
@@ -698,14 +698,14 @@ def process_ai_wage_adjustments(dry_run: bool = False):
                         print(f"❌ Exception during wage update for building {building_id}: {str(update_error)}")
                         print(f"Exception traceback: {traceback.format_exc()}")
             else:
-                print(f"No valid wage adjustment decisions received for {ai_username}")
+                print(f"No valid wage adjustment decisions received for {ai_citizenname}")
         else:
             # In dry run mode, just log what would happen
-            print(f"[DRY RUN] Would send wage adjustment request to AI user {ai_username}")
+            print(f"[DRY RUN] Would send wage adjustment request to AI citizen {ai_citizenname}")
             print(f"[DRY RUN] Data package summary:")
-            print(f"  - User: {data_package['user']['username']}")
+            print(f"  - Citizen: {data_package['citizen']['citizenname']}")
             print(f"  - Businesses: {len(data_package['businesses'])}")
-            print(f"  - Net Income: {data_package['user']['financial']['net_income']}")
+            print(f"  - Net Income: {data_package['citizen']['financial']['net_income']}")
     
     # Create admin notification with summary
     if not dry_run and any(adjustments for adjustments in ai_wage_adjustments.values()):

@@ -12,7 +12,7 @@ async function fetchBridges() {
       // Add these headers for server-side fetch
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': 'Transport-Debug-Service'
+        'Citizen-Agent': 'Transport-Debug-Service'
       },
       // Add cache: 'no-store' to avoid caching issues
       cache: 'no-store',
@@ -43,7 +43,7 @@ async function fetchDocks() {
       // Add these headers for server-side fetch
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': 'Transport-Debug-Service'
+        'Citizen-Agent': 'Transport-Debug-Service'
       },
       // Add cache: 'no-store' to avoid caching issues
       cache: 'no-store',

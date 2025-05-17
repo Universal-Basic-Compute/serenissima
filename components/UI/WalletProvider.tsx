@@ -6,12 +6,12 @@ import { useWallet } from '@/lib/hooks/useWallet';
 // Create a context for the wallet
 interface WalletContextType {
   walletAddress: string | null;
-  userProfile: any;
+  citizenProfile: any;
   isConnected: boolean;
   isConnecting: boolean;
   isInitialized: boolean;
   connectWallet: () => Promise<void>;
-  updateUserProfile: (updatedProfile: any) => Promise<void>;
+  updateCitizenProfile: (updatedProfile: any) => Promise<void>;
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
@@ -20,14 +20,14 @@ const WalletContext = createContext<WalletContextType | undefined>(undefined);
 export function WalletProvider({ children }: { children: ReactNode }) {
   // Define the useWallet hook directly here
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  const [userProfile, setUserProfile] = useState<any>(null);
+  const [citizenProfile, setCitizenProfile] = useState<any>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   
-  // Register user with the API
-  const registerUser = async (walletAddress: string) => {
+  // Register citizen with the API
+  const registerCitizen = async (walletAddress: string) => {
     try {
-      console.log('Registering user with wallet address:', walletAddress);
+      console.log('Registering citizen with wallet address:', walletAddress);
       
       const response = await fetch('/api/register', {
         method: 'POST',
@@ -44,34 +44,34 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       const data = await response.json();
       
       if (data.success) {
-        console.log('User registration successful:', data.user);
-        return data.user;
+        console.log('Citizen registration successful:', data.citizen);
+        return data.citizen;
       } else {
         console.error('Registration error:', data.error);
         return null;
       }
     } catch (error) {
-      console.error('Error registering user:', error);
+      console.error('Error registering citizen:', error);
       return null;
     }
   };
   
-  // Fetch user profile
-  const fetchUserProfile = async (walletAddress: string) => {
+  // Fetch citizen profile
+  const fetchCitizenProfile = async (walletAddress: string) => {
     try {
-      const response = await fetch(`/api/users/wallet/${walletAddress}`);
+      const response = await fetch(`/api/citizens/wallet/${walletAddress}`);
       
       if (response.ok) {
         const data = await response.json();
-        setUserProfile(data.user);
-        localStorage.setItem('userProfile', JSON.stringify(data.user));
-        return data.user;
+        setCitizenProfile(data.citizen);
+        localStorage.setItem('citizenProfile', JSON.stringify(data.citizen));
+        return data.citizen;
       } else {
-        console.error('Failed to fetch user profile:', response.status);
+        console.error('Failed to fetch citizen profile:', response.status);
         return null;
       }
     } catch (error) {
-      console.error('Error fetching user profile:', error);
+      console.error('Error fetching citizen profile:', error);
       return null;
     }
   };
@@ -106,15 +106,15 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       setWalletAddress(address);
       localStorage.setItem('walletAddress', address);
       
-      // Register or fetch the user profile
-      const userProfile = await registerUser(address);
+      // Register or fetch the citizen profile
+      const citizenProfile = await registerCitizen(address);
       
-      if (userProfile) {
-        setUserProfile(userProfile);
-        localStorage.setItem('userProfile', JSON.stringify(userProfile));
+      if (citizenProfile) {
+        setCitizenProfile(citizenProfile);
+        localStorage.setItem('citizenProfile', JSON.stringify(citizenProfile));
       } else {
-        // If registration fails, try to fetch the user profile from the API
-        await fetchUserProfile(address);
+        // If registration fails, try to fetch the citizen profile from the API
+        await fetchCitizenProfile(address);
       }
       
       // Dispatch event to notify components about wallet change
@@ -123,8 +123,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       console.error('Error connecting wallet:', error);
       
       if (error instanceof Error) {
-        if (error.message.includes('User rejected')) {
-          console.log('User rejected the connection request');
+        if (error.message.includes('Citizen rejected')) {
+          console.log('Citizen rejected the connection request');
         } else {
           alert(`Failed to connect wallet: ${error.message}`);
         }
@@ -134,11 +134,11 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     }
   };
   
-  // Function to update user profile
-  const updateUserProfile = async (updatedProfile: any) => {
+  // Function to update citizen profile
+  const updateCitizenProfile = async (updatedProfile: any) => {
     if (updatedProfile) {
-      setUserProfile(updatedProfile);
-      localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
+      setCitizenProfile(updatedProfile);
+      localStorage.setItem('citizenProfile', JSON.stringify(updatedProfile));
     }
   };
 
@@ -156,20 +156,20 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         if (storedAddress) {
           setWalletAddress(storedAddress);
           
-          // Try to load user profile from localStorage first
-          const storedProfile = localStorage.getItem('userProfile');
+          // Try to load citizen profile from localStorage first
+          const storedProfile = localStorage.getItem('citizenProfile');
           if (storedProfile) {
             try {
               const parsedProfile = JSON.parse(storedProfile);
-              setUserProfile(parsedProfile);
+              setCitizenProfile(parsedProfile);
             } catch (e) {
-              console.error('Error parsing stored user profile:', e);
+              console.error('Error parsing stored citizen profile:', e);
               // If parsing fails, fetch from API
-              await fetchUserProfile(storedAddress);
+              await fetchCitizenProfile(storedAddress);
             }
           } else {
             // If no stored profile, fetch from API
-            await fetchUserProfile(storedAddress);
+            await fetchCitizenProfile(storedAddress);
           }
         }
       } catch (error) {
@@ -182,16 +182,16 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     // Add event listener for profile updates
     const handleProfileUpdate = (event: CustomEvent) => {
       if (event.detail) {
-        updateUserProfile(event.detail);
+        updateCitizenProfile(event.detail);
       }
     };
     
-    window.addEventListener('userProfileUpdated', handleProfileUpdate as EventListener);
+    window.addEventListener('citizenProfileUpdated', handleProfileUpdate as EventListener);
     
     initWallet();
     
     return () => {
-      window.removeEventListener('userProfileUpdated', handleProfileUpdate as EventListener);
+      window.removeEventListener('citizenProfileUpdated', handleProfileUpdate as EventListener);
     };
   }, []);
   
@@ -199,12 +199,12 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   
   const wallet = {
     walletAddress,
-    userProfile,
+    citizenProfile,
     isConnected,
     isConnecting,
     isInitialized,
     connectWallet,
-    updateUserProfile
+    updateCitizenProfile
   };
   
   return (

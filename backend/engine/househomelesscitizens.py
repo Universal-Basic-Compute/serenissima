@@ -120,8 +120,8 @@ def get_available_businesses(tables) -> List[Dict]:
         log.error(f"Error fetching available businesses: {e}")
         return []
 
-def create_notification(tables, user: str, content: str, details: Dict) -> None:
-    """Create a notification for a user."""
+def create_notification(tables, citizen: str, content: str, details: Dict) -> None:
+    """Create a notification for a citizen."""
     try:
         # Create the notification record
         tables['notifications'].create({
@@ -130,10 +130,10 @@ def create_notification(tables, user: str, content: str, details: Dict) -> None:
             "Details": json.dumps(details),
             "CreatedAt": datetime.datetime.now().isoformat(),
             "ReadAt": None,
-            "User": user
+            "Citizen": citizen
         })
         
-        log.info(f"Created notification for user {user}")
+        log.info(f"Created notification for citizen {citizen}")
     except Exception as e:
         log.error(f"Error creating notification: {e}")
 
@@ -230,7 +230,7 @@ def find_suitable_building(tables, citizen: Dict) -> Optional[Dict]:
     return None
 
 def create_admin_notification(tables, housing_summary) -> None:
-    """Create a notification for the admin user about the housing process."""
+    """Create a notification for the admin citizen about the housing process."""
     try:
         # Create notification content with summary of all housed citizens
         content = f"Housing report: {housing_summary['total']} citizens housed"
@@ -256,10 +256,10 @@ def create_admin_notification(tables, housing_summary) -> None:
             "Details": json.dumps(details),
             "CreatedAt": datetime.datetime.now().isoformat(),
             "ReadAt": None,
-            "User": "NLR"  # Specific user to receive the notification
+            "Citizen": "NLR"  # Specific citizen to receive the notification
         })
         
-        log.info(f"Created admin notification for user NLR with housing summary")
+        log.info(f"Created admin notification for citizen NLR with housing summary")
     except Exception as e:
         log.error(f"Error creating admin notification: {e}")
 
@@ -359,7 +359,7 @@ def assign_jobs_to_citizens(dry_run: bool = False):
         "by_business_type": assignments_by_type
     }
     
-    # Create a notification for the admin user with the assignment summary
+    # Create a notification for the admin citizen with the assignment summary
     if assigned_count > 0 and not dry_run:
         create_admin_summary(tables, assignment_summary)
 
@@ -385,7 +385,7 @@ def create_admin_summary(tables, assignment_summary) -> None:
             "Details": json.dumps(details),
             "CreatedAt": datetime.datetime.now().isoformat(),
             "ReadAt": None,
-            "User": "NLR"  # Admin user
+            "Citizen": "NLR"  # Admin citizen
         })
         
         log.info(f"Created admin summary notification")

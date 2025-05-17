@@ -98,22 +98,22 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     
     setIsLoadingHistory(true);
     try {
-      // Check if this is an AI citizen or a regular user
+      // Check if this is an AI citizen or a regular citizen
       if (citizen.isai === false) {
         // For non-AI citizens, use the regular messages API
         console.log(`Fetching messages for non-AI citizen ${citizen.citizenid} using messages API`);
         
-        // Get current user from localStorage
-        let currentUsername = 'visitor';
-        const savedProfile = localStorage.getItem('userProfile');
+        // Get current citizen from localStorage
+        let currentCitizenname = 'visitor';
+        const savedProfile = localStorage.getItem('citizenProfile');
         if (savedProfile) {
           try {
             const profile = JSON.parse(savedProfile);
-            if (profile.username) {
-              currentUsername = profile.username;
+            if (profile.citizenname) {
+              currentCitizenname = profile.citizenname;
             }
           } catch (error) {
-            console.error('Error parsing user profile:', error);
+            console.error('Error parsing citizen profile:', error);
           }
         }
         
@@ -123,8 +123,8 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            currentUser: currentUsername,
-            otherUser: citizen.username || citizen.citizenid
+            currentCitizen: currentCitizenname,
+            otherCitizen: citizen.citizenname || citizen.citizenid
           })
         });
         
@@ -138,7 +138,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
           // Convert the message format to match what the component expects
           const formattedMessages = data.messages.map(msg => ({
             id: msg.messageId,
-            role: msg.sender === currentUsername ? 'user' : 'assistant',
+            role: msg.sender === currentCitizenname ? 'citizen' : 'assistant',
             content: msg.content,
             timestamp: msg.createdAt
           }));
@@ -158,22 +158,22 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
       } else {
         // For AI citizens, use the Kinos Engine API with channels
         
-        // Get current user from localStorage for channel ID
-        let currentUsername = 'visitor';
-        const savedProfile = localStorage.getItem('userProfile');
+        // Get current citizen from localStorage for channel ID
+        let currentCitizenname = 'visitor';
+        const savedProfile = localStorage.getItem('citizenProfile');
         if (savedProfile) {
           try {
             const profile = JSON.parse(savedProfile);
-            if (profile.username) {
-              currentUsername = profile.username;
+            if (profile.citizenname) {
+              currentCitizenname = profile.citizenname;
             }
           } catch (error) {
-            console.error('Error parsing user profile:', error);
+            console.error('Error parsing citizen profile:', error);
           }
         }
         
-        // Use username as channel ID
-        const channelId = currentUsername;
+        // Use citizenname as channel ID
+        const channelId = currentCitizenname;
         
         console.log(`Fetching messages for AI citizen ${citizen.citizenid} using channel ${channelId}`);
         
@@ -232,34 +232,34 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
   const sendMessage = async (content: string) => {
     if (!content.trim() || !citizen || !citizen.citizenid) return;
     
-    // Get current user from localStorage
-    let currentUsername = 'visitor';
-    const savedProfile = localStorage.getItem('userProfile');
+    // Get current citizen from localStorage
+    let currentCitizenname = 'visitor';
+    const savedProfile = localStorage.getItem('citizenProfile');
     if (savedProfile) {
       try {
         const profile = JSON.parse(savedProfile);
-        if (profile.username) {
-          currentUsername = profile.username;
+        if (profile.citizenname) {
+          currentCitizenname = profile.citizenname;
         }
       } catch (error) {
-        console.error('Error parsing user profile:', error);
+        console.error('Error parsing citizen profile:', error);
       }
     }
     
-    // Optimistically add user message to UI
-    const userMessage = {
+    // Optimistically add citizen message to UI
+    const citizenMessage = {
       id: `temp-${Date.now()}`,
-      role: 'user',
+      role: 'citizen',
       content: content,
       timestamp: new Date().toISOString()
     };
     
-    setMessages(prev => [...prev, userMessage]);
+    setMessages(prev => [...prev, citizenMessage]);
     setInputValue('');
     setIsTyping(true);
     
     try {
-      // Check if this is an AI citizen or a regular user
+      // Check if this is an AI citizen or a regular citizen
       if (citizen.isai === false) {
         // For non-AI citizens, use the regular messages API
         console.log(`Sending message to non-AI citizen ${citizen.citizenid} using messages API`);
@@ -270,8 +270,8 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            sender: currentUsername,
-            receiver: citizen.username || citizen.citizenid,
+            sender: currentCitizenname,
+            receiver: citizen.citizenname || citizen.citizenid,
             content: content,
             type: 'message'
           })
@@ -295,8 +295,8 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
       } else {
         // For AI citizens, use the Kinos Engine API with channels
         
-        // Use username as channel ID
-        const channelId = currentUsername;
+        // Use citizenname as channel ID
+        const channelId = currentCitizenname;
         
         console.log(`Sending message to AI citizen ${citizen.citizenid} using channel ${channelId}`);
         
@@ -704,14 +704,14 @@ Be historically accurate but engaging. Speak in first person as if you are this 
                   <div 
                     key={message.id} 
                     className={`mb-3 ${
-                      message.role === 'user' 
+                      message.role === 'citizen' 
                         ? 'text-right' 
                         : 'text-left'
                     }`}
                   >
                     <div 
                       className={`inline-block p-3 rounded-lg max-w-[80%] ${
-                        message.role === 'user'
+                        message.role === 'citizen'
                           ? 'bg-amber-100 text-amber-900 rounded-br-none'
                           : 'bg-amber-700 text-white rounded-bl-none'
                       }`}

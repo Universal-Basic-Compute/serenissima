@@ -22,11 +22,11 @@ const initAirtable = () => {
 export async function POST(request: Request) {
   try {
     // Parse the request body
-    const { currentUser, otherUser } = await request.json();
+    const { currentCitizen, otherCitizen } = await request.json();
     
-    if (!currentUser || !otherUser) {
+    if (!currentCitizen || !otherCitizen) {
       return NextResponse.json(
-        { success: false, error: 'Both users are required' },
+        { success: false, error: 'Both citizens are required' },
         { status: 400 }
       );
     }
@@ -35,13 +35,13 @@ export async function POST(request: Request) {
       // Initialize Airtable
       const base = initAirtable();
       
-      // Build filter formula to get messages between the two users
-      // Include guild application messages if the otherUser is a guild ID
+      // Build filter formula to get messages between the two citizens
+      // Include guild application messages if the otherCitizen is a guild ID
       const filterFormula = `OR(
-        AND({Sender} = '${currentUser}', {Receiver} = '${otherUser}'),
-        AND({Sender} = '${otherUser}', {Receiver} = '${currentUser}'),
-        AND({Type} = 'guild_application', {Receiver} = '${currentUser}'),
-        AND({Type} = 'guild_application', {Sender} = '${currentUser}', {Receiver} = '${otherUser}')
+        AND({Sender} = '${currentCitizen}', {Receiver} = '${otherCitizen}'),
+        AND({Sender} = '${otherCitizen}', {Receiver} = '${currentCitizen}'),
+        AND({Type} = 'guild_application', {Receiver} = '${currentCitizen}'),
+        AND({Type} = 'guild_application', {Sender} = '${currentCitizen}', {Receiver} = '${otherCitizen}')
       )`;
       
       // Fetch messages from Airtable

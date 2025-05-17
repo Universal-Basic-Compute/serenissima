@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaTimes, FaBalanceScale, FaHistory, FaLandmark, FaUsers, FaShip, FaTree, FaCogs } from 'react-icons/fa';
+import { FaTimes, FaBalanceScale, FaHistory, FaLandmark, FaCitizens, FaShip, FaTree, FaCogs } from 'react-icons/fa';
 
 interface HistoricalAccuracyArticleProps {
   onClose: () => void;
@@ -68,7 +68,7 @@ const HistoricalAccuracyArticle: React.FC<HistoricalAccuracyArticleProps> = ({ o
           {/* Population and Scale Compression Section */}
           <section className="mb-8">
             <div className="flex items-center mb-2">
-              <FaUsers className="text-amber-700 mr-2" size={20} />
+              <FaCitizens className="text-amber-700 mr-2" size={20} />
               <h3 className="text-xl font-serif text-amber-800 mt-0">Population and Scale Compression</h3>
             </div>
             <p>
@@ -193,7 +193,7 @@ const HistoricalAccuracyArticle: React.FC<HistoricalAccuracyArticleProps> = ({ o
           {/* Social Structure Section */}
           <section className="mb-8">
             <div className="flex items-center mb-2">
-              <FaUsers className="text-amber-700 mr-2" size={20} />
+              <FaCitizens className="text-amber-700 mr-2" size={20} />
               <h3 className="text-xl font-serif text-amber-800 mt-0">Social Structure Adaptations</h3>
             </div>
             

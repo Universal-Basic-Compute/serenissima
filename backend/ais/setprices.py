@@ -8,9 +8,9 @@ import requests
 from dotenv import load_dotenv
 from pyairtable import Api, Table
 
-# Add the parent directory to the path to import user_utils
+# Add the parent directory to the path to import citizen_utils
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from app.user_utils import find_user_by_identifier
+from app.citizen_utils import find_citizen_by_identifier
 
 def initialize_airtable():
     """Initialize connection to Airtable."""
@@ -26,35 +26,35 @@ def initialize_airtable():
     api = Api(airtable_api_key)
     
     tables = {
-        "users": Table(airtable_api_key, airtable_base_id, "USERS"),
+        "citizens": Table(airtable_api_key, airtable_base_id, "CITIZENS"),
         "buildings": Table(airtable_api_key, airtable_base_id, "BUILDINGS"),
         "notifications": Table(airtable_api_key, airtable_base_id, "NOTIFICATIONS")
     }
     
     return tables
 
-def get_ai_users(tables) -> List[Dict]:
-    """Get all users that are marked as AI."""
+def get_ai_citizens(tables) -> List[Dict]:
+    """Get all citizens that are marked as AI."""
     try:
-        # Query users with IsAI field set to true
+        # Query citizens with IsAI field set to true
         formula = "{IsAI}=1"
-        ai_users = tables["users"].all(formula=formula)
-        print(f"Found {len(ai_users)} AI users")
-        return ai_users
+        ai_citizens = tables["citizens"].all(formula=formula)
+        print(f"Found {len(ai_citizens)} AI citizens")
+        return ai_citizens
     except Exception as e:
-        print(f"Error getting AI users: {str(e)}")
+        print(f"Error getting AI citizens: {str(e)}")
         return []
 
-def get_user_buildings(tables, username: str) -> List[Dict]:
-    """Get all buildings owned by a specific user."""
+def get_citizen_buildings(tables, citizenname: str) -> List[Dict]:
+    """Get all buildings owned by a specific citizen."""
     try:
-        # Query buildings where the user is the owner
-        formula = f"{{Owner}}='{username}'"
+        # Query buildings where the citizen is the owner
+        formula = f"{{Owner}}='{citizenname}'"
         buildings = tables["buildings"].all(formula=formula)
-        print(f"Found {len(buildings)} buildings owned by {username}")
+        print(f"Found {len(buildings)} buildings owned by {citizenname}")
         return buildings
     except Exception as e:
-        print(f"Error getting buildings for user {username}: {str(e)}")
+        print(f"Error getting buildings for citizen {citizenname}: {str(e)}")
         return []
 
 def get_all_buildings(tables) -> List[Dict]:
@@ -156,17 +156,17 @@ def get_kinos_api_key() -> str:
         sys.exit(1)
     return api_key
 
-def prepare_price_setting_data(ai_user: Dict, user_buildings: List[Dict], 
+def prepare_price_setting_data(ai_citizen: Dict, citizen_buildings: List[Dict], 
                               building_definitions: Dict, resource_types: Dict) -> Dict:
     """Prepare a comprehensive data package for the AI to set resource prices."""
     
-    # Extract user information
-    username = ai_user["fields"].get("Username", "")
-    ducats = ai_user["fields"].get("Ducats", 0)
+    # Extract citizen information
+    citizenname = ai_citizen["fields"].get("Citizenname", "")
+    ducats = ai_citizen["fields"].get("Ducats", 0)
     
     # Process buildings data
     buildings_data = []
-    for building in user_buildings:
+    for building in citizen_buildings:
         building_id = building["fields"].get("BuildingId", "")
         building_type = building["fields"].get("Type", "")
         
@@ -230,8 +230,8 @@ def prepare_price_setting_data(ai_user: Dict, user_buildings: List[Dict],
     
     # Prepare the complete data package
     data_package = {
-        "user": {
-            "username": username,
+        "citizen": {
+            "citizenname": citizenname,
             "ducats": ducats,
             "total_buildings": len(buildings_data)
         },
@@ -241,14 +241,14 @@ def prepare_price_setting_data(ai_user: Dict, user_buildings: List[Dict],
     
     return data_package
 
-def send_price_setting_request(ai_username: str, data_package: Dict) -> Optional[Dict]:
+def send_price_setting_request(ai_citizenname: str, data_package: Dict) -> Optional[Dict]:
     """Send the price setting request to the AI via Kinos API."""
     try:
         api_key = get_kinos_api_key()
         blueprint = "serenissima-ai"
         
         # Construct the API URL
-        url = f"https://api.kinos-engine.ai/v2/blueprints/{blueprint}/kins/{ai_username}/messages"
+        url = f"https://api.kinos-engine.ai/v2/blueprints/{blueprint}/kins/{ai_citizenname}/messages"
         
         # Set up headers with API key
         headers = {
@@ -257,9 +257,9 @@ def send_price_setting_request(ai_username: str, data_package: Dict) -> Optional
         }
         
         # Log the API request details
-        print(f"Sending price setting request to AI user {ai_username}")
+        print(f"Sending price setting request to AI citizen {ai_citizenname}")
         print(f"API URL: {url}")
-        print(f"User has {len(data_package['buildings'])} buildings with outputs")
+        print(f"Citizen has {len(data_package['buildings'])} buildings with outputs")
         
         # Create a detailed prompt that addresses the AI directly as the decision-maker
         prompt = f"""
@@ -310,7 +310,7 @@ If you decide not to change any prices at this time, return an empty array:
         
         # Create system instructions with the detailed data
         system_instructions = f"""
-You are {ai_username}, an AI building owner in La Serenissima. You make your own decisions about pricing strategies.
+You are {ai_citizenname}, an AI building owner in La Serenissima. You make your own decisions about pricing strategies.
 
 Here is the complete data about your current situation:
 {json.dumps(data_package, indent=2)}
@@ -341,7 +341,7 @@ If you decide not to change any prices at this time, return an empty array.
         }
         
         # Make the API request
-        print(f"Making API request to Kinos for {ai_username}...")
+        print(f"Making API request to Kinos for {ai_citizenname}...")
         response = requests.post(url, headers=headers, json=payload)
         
         # Log the API response details
@@ -355,19 +355,19 @@ If you decide not to change any prices at this time, return an empty array.
             print(f"API response status: {status}")
             
             if status == "completed":
-                print(f"Successfully sent price setting request to AI user {ai_username}")
+                print(f"Successfully sent price setting request to AI citizen {ai_citizenname}")
                 
                 # The response content is in the response field of response_data
                 content = response_data.get('response', '')
                 
                 # Log the entire response for debugging
-                print(f"FULL AI RESPONSE FROM {ai_username}:")
+                print(f"FULL AI RESPONSE FROM {ai_citizenname}:")
                 print("="*80)
                 print(content)
                 print("="*80)
                 
-                print(f"AI {ai_username} response length: {len(content)} characters")
-                print(f"AI {ai_username} response preview: {content[:200]}...")
+                print(f"AI {ai_citizenname} response length: {len(content)} characters")
+                print(f"AI {ai_citizenname} response preview: {content[:200]}...")
                 
                 # Try to extract the JSON decision from the response
                 try:
@@ -430,13 +430,13 @@ If you decide not to change any prices at this time, return an empty array.
                     print(content)
                     return None
             else:
-                print(f"Error processing price setting request for AI user {ai_username}: {response_data}")
+                print(f"Error processing price setting request for AI citizen {ai_citizenname}: {response_data}")
                 return None
         else:
             print(f"Error from Kinos API: {response.status_code} - {response.text}")
             return None
     except Exception as e:
-        print(f"Error sending price setting request to AI user {ai_username}: {str(e)}")
+        print(f"Error sending price setting request to AI citizen {ai_citizenname}: {str(e)}")
         print(f"Exception traceback: {traceback.format_exc()}")
         return None
 
@@ -497,7 +497,7 @@ def create_admin_notification(tables, ai_price_settings: Dict[str, List[Dict]]) 
         
         # Create the notification
         notification = {
-            "User": "NLR",  # Send to NLR as requested
+            "Citizen": "NLR",  # Send to NLR as requested
             "Type": "ai_price_settings",
             "Content": message,
             "CreatedAt": now,
@@ -520,10 +520,10 @@ def process_ai_price_settings(dry_run: bool = False):
     # Initialize Airtable connection
     tables = initialize_airtable()
     
-    # Get AI users
-    ai_users = get_ai_users(tables)
-    if not ai_users:
-        print("No AI users found, exiting")
+    # Get AI citizens
+    ai_citizens = get_ai_citizens(tables)
+    if not ai_citizens:
+        print("No AI citizens found, exiting")
         return
     
     # Get building definitions
@@ -541,33 +541,33 @@ def process_ai_price_settings(dry_run: bool = False):
     # Track price settings for each AI
     ai_price_settings = {}
     
-    # Process each AI user
-    for ai_user in ai_users:
-        ai_username = ai_user["fields"].get("Username")
-        if not ai_username:
+    # Process each AI citizen
+    for ai_citizen in ai_citizens:
+        ai_citizenname = ai_citizen["fields"].get("Citizenname")
+        if not ai_citizenname:
             continue
         
-        print(f"Processing AI user: {ai_username}")
-        ai_price_settings[ai_username] = []
+        print(f"Processing AI citizen: {ai_citizenname}")
+        ai_price_settings[ai_citizenname] = []
         
         # Get buildings owned by this AI
-        user_buildings = get_user_buildings(tables, ai_username)
+        citizen_buildings = get_citizen_buildings(tables, ai_citizenname)
         
-        if not user_buildings:
-            print(f"AI user {ai_username} has no buildings, skipping")
+        if not citizen_buildings:
+            print(f"AI citizen {ai_citizenname} has no buildings, skipping")
             continue
         
         # Prepare the data package for the AI
-        data_package = prepare_price_setting_data(ai_user, user_buildings, building_definitions, resource_types)
+        data_package = prepare_price_setting_data(ai_citizen, citizen_buildings, building_definitions, resource_types)
         
         # Check if there are any buildings with outputs
         if not data_package["buildings"]:
-            print(f"AI user {ai_username} has no buildings with outputs, skipping")
+            print(f"AI citizen {ai_citizenname} has no buildings with outputs, skipping")
             continue
         
         # Send the price setting request to the AI
         if not dry_run:
-            decisions = send_price_setting_request(ai_username, data_package)
+            decisions = send_price_setting_request(ai_citizenname, data_package)
             
             if decisions and "price_settings" in decisions:
                 price_settings = decisions["price_settings"]
@@ -586,18 +586,18 @@ def process_ai_price_settings(dry_run: bool = False):
                     
                     if success:
                         # Add to the list of settings for this AI
-                        ai_price_settings[ai_username].append({
+                        ai_price_settings[ai_citizenname].append({
                             "building_id": building_id,
                             "resource_prices": resource_prices,
                             "reasoning": reasoning
                         })
             else:
-                print(f"No valid price setting decisions received for {ai_username}")
+                print(f"No valid price setting decisions received for {ai_citizenname}")
         else:
             # In dry run mode, just log what would happen
-            print(f"[DRY RUN] Would send price setting request to AI user {ai_username}")
+            print(f"[DRY RUN] Would send price setting request to AI citizen {ai_citizenname}")
             print(f"[DRY RUN] Data package summary:")
-            print(f"  - User: {data_package['user']['username']}")
+            print(f"  - Citizen: {data_package['citizen']['citizenname']}")
             print(f"  - Buildings with outputs: {len(data_package['buildings'])}")
             
             # Log some sample buildings and their outputs

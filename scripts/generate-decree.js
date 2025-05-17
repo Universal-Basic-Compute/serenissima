@@ -55,7 +55,7 @@ async function generateDecree(input) {
         model: 'claude-3-7-sonnet-latest',
         max_tokens: 4000,
         system: `You are a decree generator for La Serenissima, a digital recreation of Renaissance Venice. 
-        Your task is to create a historically plausible decree based on the user's input.
+        Your task is to create a historically plausible decree based on the citizen's input.
         
         ABOUT LA SERENISSIMA:
         La Serenissima is a blockchain-based economic simulation set in Renaissance Venice (1400-1600).
@@ -102,7 +102,7 @@ async function generateDecree(input) {
         Important: The Title must be in English, not Italian.`,
         messages: [
           {
-            role: 'user',
+            role: 'citizen',
             content: `Create a decree based on the following input: "${input}"`
           }
         ]
@@ -194,9 +194,9 @@ async function pushDecreeToAirtable(decree) {
   }
 }
 
-// Function to create notifications for all users about the new decree
+// Function to create notifications for all citizens about the new decree
 async function createDecreeNotifications(decree) {
-  console.log('Creating notifications for all users about the new decree...');
+  console.log('Creating notifications for all citizens about the new decree...');
   
   try {
     // Get Airtable configuration
@@ -211,13 +211,13 @@ async function createDecreeNotifications(decree) {
     const Airtable = require('airtable');
     const base = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
     
-    // Get all users from Airtable
-    const users = await base('USERS').select().all();
-    console.log(`Found ${users.length} users to notify`);
+    // Get all citizens from Airtable
+    const citizens = await base('CITIZENS').select().all();
+    console.log(`Found ${citizens.length} citizens to notify`);
     
-    // Log sample user record to understand structure
-    if (users.length > 0) {
-      console.log('Sample user record structure:', JSON.stringify(users[0], null, 2));
+    // Log sample citizen record to understand structure
+    if (citizens.length > 0) {
+      console.log('Sample citizen record structure:', JSON.stringify(citizens[0], null, 2));
     }
     
     // Create notification content
@@ -230,12 +230,12 @@ async function createDecreeNotifications(decree) {
       description: decree.Description.substring(0, 100) + (decree.Description.length > 100 ? '...' : '')
     };
     
-    // Create notifications for each user
-    const notificationPromises = users.map(user => {
+    // Create notifications for each citizen
+    const notificationPromises = citizens.map(citizen => {
       return base('NOTIFICATIONS').create({
-        NotificationId: `decree-${decree.DecreeId}-user-${user.id}`,
+        NotificationId: `decree-${decree.DecreeId}-citizen-${citizen.id}`,
         Type: 'Decree',
-        User: user.id, // Use user ID directly instead of array
+        Citizen: citizen.id, // Use citizen ID directly instead of array
         Content: notificationContent,
         Details: JSON.stringify(notificationDetails),
         ReadAt: null,
@@ -245,7 +245,7 @@ async function createDecreeNotifications(decree) {
     
     // Wait for all notifications to be created
     await Promise.all(notificationPromises);
-    console.log(`Created ${users.length} notifications for the new decree`);
+    console.log(`Created ${citizens.length} notifications for the new decree`);
     
     return true;
   } catch (error) {
@@ -302,29 +302,29 @@ async function sendTelegramNotification(decree) {
 // Main function
 async function main() {
   try {
-    // Get user input from command line arguments
-    const userInput = process.argv.slice(2).join(' ');
+    // Get citizen input from command line arguments
+    const citizenInput = process.argv.slice(2).join(' ');
     
-    if (!userInput) {
+    if (!citizenInput) {
       console.error('Please provide a description for the decree');
       console.log('Usage: node generate-decree.js "Your decree description here"');
       process.exit(1);
     }
     
     // Generate the decree
-    const decree = await generateDecree(userInput);
+    const decree = await generateDecree(citizenInput);
     
     // Push the decree directly to Airtable
     const recordId = await pushDecreeToAirtable(decree);
     
-    // Create notifications for all users
+    // Create notifications for all citizens
     await createDecreeNotifications(decree);
     
     // Send Telegram notification
     await sendTelegramNotification(decree);
     
     console.log('\nDecree generated successfully and pushed to Airtable');
-    console.log('Notifications created for all users');
+    console.log('Notifications created for all citizens');
     console.log('Telegram notification sent to chat');
     console.log(`Airtable Record ID: ${recordId}`);
     

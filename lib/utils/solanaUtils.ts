@@ -55,7 +55,7 @@ const TREASURY_PUBLIC_KEY = new PublicKey(
 );
 
 /**
- * Transfer COMPUTE tokens from treasury to a user
+ * Transfer COMPUTE tokens from treasury to a citizen
  * @param recipientAddress The recipient's wallet address
  * @param amount The amount of tokens to transfer
  * @returns Transaction signature
@@ -142,21 +142,21 @@ export async function transferComputeFromTreasury(
 }
 
 /**
- * Withdraw COMPUTE tokens from a user to the treasury
- * @param userAddress The user's wallet address
+ * Withdraw COMPUTE tokens from a citizen to the treasury
+ * @param citizenAddress The citizen's wallet address
  * @param amount The amount of tokens to withdraw
  * @returns Transaction signature
  */
 export async function withdrawComputeToTreasury(
-  userAddress: string,
+  citizenAddress: string,
   amount: number
 ): Promise<string> {
   try {
     // Initialize treasury keypair
     const treasury = initializeTreasuryKeypair();
     
-    // Convert user address to PublicKey
-    const user = new PublicKey(userAddress);
+    // Convert citizen address to PublicKey
+    const citizen = new PublicKey(citizenAddress);
     
     // Get the token account for the treasury
     const treasuryTokenAccount = await getAssociatedTokenAddress(
@@ -164,29 +164,29 @@ export async function withdrawComputeToTreasury(
       treasury.publicKey
     );
     
-    // Get the token account for the user
-    const userTokenAccount = await getAssociatedTokenAddress(
+    // Get the token account for the citizen
+    const citizenTokenAccount = await getAssociatedTokenAddress(
       COMPUTE_TOKEN_MINT,
-      user
+      citizen
     );
     
-    // Check if the user token account exists
-    const accountInfo = await connection.getAccountInfo(userTokenAccount);
+    // Check if the citizen token account exists
+    const accountInfo = await connection.getAccountInfo(citizenTokenAccount);
     if (!accountInfo) {
-      throw new Error(`User ${userAddress} does not have a COMPUTE token account`);
+      throw new Error(`Citizen ${citizenAddress} does not have a COMPUTE token account`);
     }
     
     // Create transfer instruction
-    // Note: This requires the user to sign the transaction, which isn't possible in this backend flow
-    // In a real application, this would be done client-side with the user's wallet
-    // For this example, we'll simulate it by transferring from treasury to user
+    // Note: This requires the citizen to sign the transaction, which isn't possible in this backend flow
+    // In a real application, this would be done client-side with the citizen's wallet
+    // For this example, we'll simulate it by transferring from treasury to citizen
     
-    // For demonstration purposes, we'll transfer from treasury to user instead
-    console.log(`Simulating withdrawal by transferring from treasury to user`);
+    // For demonstration purposes, we'll transfer from treasury to citizen instead
+    console.log(`Simulating withdrawal by transferring from treasury to citizen`);
     
     const transferIx = createTransferInstruction(
       treasuryTokenAccount,
-      userTokenAccount,
+      citizenTokenAccount,
       treasury.publicKey,
       amount
     );
@@ -201,7 +201,7 @@ export async function withdrawComputeToTreasury(
       [treasury]
     );
     
-    console.log(`Simulated withdrawal of ${amount} COMPUTE tokens for ${userAddress}: ${signature}`);
+    console.log(`Simulated withdrawal of ${amount} COMPUTE tokens for ${citizenAddress}: ${signature}`);
     return signature;
   } catch (error) {
     console.error('Error withdrawing COMPUTE tokens to treasury:', error);
@@ -209,11 +209,11 @@ export async function withdrawComputeToTreasury(
   }
 }
 /**
- * Prepare a transaction for injecting COMPUTE tokens from a user to the treasury
- * This creates a transaction that needs to be signed by the user
+ * Prepare a transaction for injecting COMPUTE tokens from a citizen to the treasury
+ * This creates a transaction that needs to be signed by the citizen
  * @param senderAddress The sender's wallet address
  * @param amount The amount of tokens to transfer
- * @returns Serialized transaction that needs to be signed by the user
+ * @returns Serialized transaction that needs to be signed by the citizen
  */
 export async function prepareInjectComputeTransaction(
   senderAddress: string,
@@ -241,7 +241,7 @@ export async function prepareInjectComputeTransaction(
     // Check if the sender token account exists
     const accountInfo = await connection.getAccountInfo(senderTokenAccount);
     if (!accountInfo) {
-      throw new Error(`User ${senderAddress} does not have a COMPUTE token account`);
+      throw new Error(`Citizen ${senderAddress} does not have a COMPUTE token account`);
     }
     
     // Create transfer instruction - FROM sender TO treasury
@@ -270,7 +270,7 @@ export async function prepareInjectComputeTransaction(
       verifySignatures: false
     }).toString('base64');
     
-    // Create a message for the user to understand what they're signing
+    // Create a message for the citizen to understand what they're signing
     const message = `You are injecting ${amount} COMPUTE tokens to the Republic's treasury.`;
     
     return {

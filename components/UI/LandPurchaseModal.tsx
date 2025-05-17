@@ -10,17 +10,17 @@ interface LandPurchaseModalProps {
   onComplete: () => void;
 }
 
-// Add a function to get username from wallet address
-const getUsernameFromWallet = async (walletAddress: string): Promise<string | null> => {
+// Add a function to get citizenname from wallet address
+const getCitizennameFromWallet = async (walletAddress: string): Promise<string | null> => {
   try {
     const response = await fetch(`${getBackendBaseUrl()}/api/wallet/${walletAddress}`);
     if (response.ok) {
       const data = await response.json();
-      return data.user_name || null;
+      return data.citizen_name || null;
     }
     return null;
   } catch (error) {
-    console.warn(`Could not get username for wallet ${walletAddress}:`, error);
+    console.warn(`Could not get citizenname for wallet ${walletAddress}:`, error);
     return null;
   }
 };
@@ -50,21 +50,21 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
         return;
       }
       
-      // Get the username for this wallet
-      let username = null;
+      // Get the citizenname for this wallet
+      let citizenname = null;
       try {
-        const userResponse = await fetch(`${getBackendBaseUrl()}/api/wallet/${walletAddress}`);
-        if (userResponse.ok) {
-          const userData = await userResponse.json();
-          username = userData.user_name;
-          console.log(`Found username ${username} for wallet ${walletAddress}`);
+        const citizenResponse = await fetch(`${getBackendBaseUrl()}/api/wallet/${walletAddress}`);
+        if (citizenResponse.ok) {
+          const citizenData = await citizenResponse.json();
+          citizenname = citizenData.citizen_name;
+          console.log(`Found citizenname ${citizenname} for wallet ${walletAddress}`);
         }
       } catch (error) {
-        console.warn(`Could not get username for wallet ${walletAddress}:`, error);
+        console.warn(`Could not get citizenname for wallet ${walletAddress}:`, error);
       }
       
-      // Use username if available, otherwise use wallet address
-      const buyerIdentifier = username || walletAddress;
+      // Use citizenname if available, otherwise use wallet address
+      const buyerIdentifier = citizenname || walletAddress;
       console.log(`Starting purchase process for land ${landId} by ${buyerIdentifier} (wallet: ${walletAddress})`);
       
       // First try the Next.js API route
@@ -78,7 +78,7 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            buyer: buyerIdentifier,  // Use username instead of wallet address
+            buyer: buyerIdentifier,  // Use citizenname instead of wallet address
             wallet: walletAddress    // Also include wallet for reference
           }),
           // Add a timeout to prevent hanging requests
@@ -105,12 +105,12 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
               console.log('Fetched updated land data:', landData);
           
               // Dispatch a custom event to notify other components
-              if (landData && landData.user) {
-                console.log(`Dispatching landOwnershipChanged event with new owner: ${landData.user}`);
+              if (landData && landData.citizen) {
+                console.log(`Dispatching landOwnershipChanged event with new owner: ${landData.citizen}`);
                 window.dispatchEvent(new CustomEvent('landOwnershipChanged', {
                   detail: { 
                     landId: landId, 
-                    newOwner: landData.user
+                    newOwner: landData.citizen
                   }
                 }));
               }
@@ -135,25 +135,25 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
               executed_at: new Date().toISOString()
             };
           
-            // Get the username for the wallet address with retry logic
-            let username = null;
+            // Get the citizenname for the wallet address with retry logic
+            let citizenname = null;
             let retryCount = 0;
             const maxRetries = 3;
           
-            while (retryCount < maxRetries && username === null) {
+            while (retryCount < maxRetries && citizenname === null) {
               try {
-                console.log(`Attempt ${retryCount + 1} to get username for wallet ${walletAddress}`);
-                username = await getUsernameFromWallet(walletAddress);
-                if (username) {
-                  console.log(`Successfully retrieved username: ${username}`);
+                console.log(`Attempt ${retryCount + 1} to get citizenname for wallet ${walletAddress}`);
+                citizenname = await getCitizennameFromWallet(walletAddress);
+                if (citizenname) {
+                  console.log(`Successfully retrieved citizenname: ${citizenname}`);
                 } else {
-                  console.warn(`No username found for wallet ${walletAddress} on attempt ${retryCount + 1}`);
+                  console.warn(`No citizenname found for wallet ${walletAddress} on attempt ${retryCount + 1}`);
                 }
               } catch (error) {
-                console.error(`Error getting username on attempt ${retryCount + 1}:`, error);
+                console.error(`Error getting citizenname on attempt ${retryCount + 1}:`, error);
               }
             
-              if (username === null && retryCount < maxRetries - 1) {
+              if (citizenname === null && retryCount < maxRetries - 1) {
                 // Wait with exponential backoff before retrying
                 const delay = Math.pow(2, retryCount) * 1000;
                 console.log(`Waiting ${delay}ms before retry ${retryCount + 2}`);
@@ -163,15 +163,15 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
               retryCount++;
             }
           
-            const ownerToSet = username || walletAddress;
-            console.log(`Setting land owner to: ${ownerToSet} (username: ${username}, wallet: ${walletAddress})`);
+            const ownerToSet = citizenname || walletAddress;
+            console.log(`Setting land owner to: ${ownerToSet} (citizenname: ${citizenname}, wallet: ${walletAddress})`);
     
             // Dispatch custom events to notify other components
             console.log('Dispatching landOwnershipChanged event');
             window.dispatchEvent(new CustomEvent('landOwnershipChanged', {
               detail: { 
                 landId: landId, 
-                newOwner: ownerToSet, // Use username instead of wallet address
+                newOwner: ownerToSet, // Use citizenname instead of wallet address
                 transaction: localTransaction
               }
             }));
@@ -181,7 +181,7 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
             window.dispatchEvent(new CustomEvent('landPurchased', {
               detail: { 
                 landId: landId, 
-                newOwner: ownerToSet, // Use username instead of wallet address
+                newOwner: ownerToSet, // Use citizenname instead of wallet address
                 transaction: localTransaction
               }
             }));
@@ -219,25 +219,25 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
           executed_at: new Date().toISOString()
         };
     
-        // Get the username for the wallet address with retry logic
-        let username = null;
+        // Get the citizenname for the wallet address with retry logic
+        let citizenname = null;
         let retryCount = 0;
         const maxRetries = 3;
       
-        while (retryCount < maxRetries && username === null) {
+        while (retryCount < maxRetries && citizenname === null) {
           try {
-            console.log(`Attempt ${retryCount + 1} to get username for wallet ${walletAddress}`);
-            username = await getUsernameFromWallet(walletAddress);
-            if (username) {
-              console.log(`Successfully retrieved username: ${username}`);
+            console.log(`Attempt ${retryCount + 1} to get citizenname for wallet ${walletAddress}`);
+            citizenname = await getCitizennameFromWallet(walletAddress);
+            if (citizenname) {
+              console.log(`Successfully retrieved citizenname: ${citizenname}`);
             } else {
-              console.warn(`No username found for wallet ${walletAddress} on attempt ${retryCount + 1}`);
+              console.warn(`No citizenname found for wallet ${walletAddress} on attempt ${retryCount + 1}`);
             }
           } catch (error) {
-            console.error(`Error getting username on attempt ${retryCount + 1}:`, error);
+            console.error(`Error getting citizenname on attempt ${retryCount + 1}:`, error);
           }
         
-          if (username === null && retryCount < maxRetries - 1) {
+          if (citizenname === null && retryCount < maxRetries - 1) {
             // Wait with exponential backoff before retrying
             const delay = Math.pow(2, retryCount) * 1000;
             console.log(`Waiting ${delay}ms before retry ${retryCount + 2}`);
@@ -247,15 +247,15 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
           retryCount++;
         }
       
-        const ownerToSet = username || walletAddress;
-        console.log(`Setting land owner to: ${ownerToSet} (username: ${username}, wallet: ${walletAddress})`);
+        const ownerToSet = citizenname || walletAddress;
+        console.log(`Setting land owner to: ${ownerToSet} (citizenname: ${citizenname}, wallet: ${walletAddress})`);
     
         // Dispatch custom events to notify other components
         console.log('Dispatching landOwnershipChanged event');
         window.dispatchEvent(new CustomEvent('landOwnershipChanged', {
           detail: { 
             landId: landId, 
-            newOwner: ownerToSet, // Use username instead of wallet address
+            newOwner: ownerToSet, // Use citizenname instead of wallet address
             transaction: updatedTransaction
           }
         }));
@@ -265,7 +265,7 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
         window.dispatchEvent(new CustomEvent('landPurchased', {
           detail: { 
             landId: landId, 
-            newOwner: ownerToSet, // Use username instead of wallet address
+            newOwner: ownerToSet, // Use citizenname instead of wallet address
             transaction: updatedTransaction
           }
         }));
@@ -280,47 +280,47 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
           }
         }));
       
-        // Fetch updated user data to reflect new compute balance with retry logic
-        let userDataFetched = false;
+        // Fetch updated citizen data to reflect new compute balance with retry logic
+        let citizenDataFetched = false;
         retryCount = 0;
       
-        while (retryCount < maxRetries && !userDataFetched) {
+        while (retryCount < maxRetries && !citizenDataFetched) {
           try {
-            console.log(`Attempt ${retryCount + 1} to fetch updated user data`);
-            const userResponse = await fetch(`${getBackendBaseUrl()}/api/wallet/${walletAddress}`);
+            console.log(`Attempt ${retryCount + 1} to fetch updated citizen data`);
+            const citizenResponse = await fetch(`${getBackendBaseUrl()}/api/wallet/${walletAddress}`);
           
-            if (userResponse.ok) {
-              const userData = await userResponse.json();
-              console.log('Fetched updated user data:', userData);
+            if (citizenResponse.ok) {
+              const citizenData = await citizenResponse.json();
+              console.log('Fetched updated citizen data:', citizenData);
             
-              // Dispatch event to update user profile with new Ducats
-              console.log('Dispatching userProfileUpdated event');
-              window.dispatchEvent(new CustomEvent('userProfileUpdated', {
-                detail: userData
+              // Dispatch event to update citizen profile with new Ducats
+              console.log('Dispatching citizenProfileUpdated event');
+              window.dispatchEvent(new CustomEvent('citizenProfileUpdated', {
+                detail: citizenData
               }));
             
-              // Update local storage with new user data
+              // Update local storage with new citizen data
               try {
-                const storedProfile = localStorage.getItem('userProfile');
+                const storedProfile = localStorage.getItem('citizenProfile');
                 if (storedProfile) {
                   const profile = JSON.parse(storedProfile);
-                  profile.Ducats = userData.ducats;
-                  localStorage.setItem('userProfile', JSON.stringify(profile));
-                  console.log('Updated localStorage with new Ducats:', userData.ducats);
+                  profile.Ducats = citizenData.ducats;
+                  localStorage.setItem('citizenProfile', JSON.stringify(profile));
+                  console.log('Updated localStorage with new Ducats:', citizenData.ducats);
                 }
               } catch (storageError) {
                 console.error('Error updating localStorage:', storageError);
               }
             
-              userDataFetched = true;
+              citizenDataFetched = true;
             } else {
-              console.warn(`Failed to fetch user data: ${userResponse.status}`);
+              console.warn(`Failed to fetch citizen data: ${citizenResponse.status}`);
             }
           } catch (error) {
-            console.error(`Error fetching user data on attempt ${retryCount + 1}:`, error);
+            console.error(`Error fetching citizen data on attempt ${retryCount + 1}:`, error);
           }
         
-          if (!userDataFetched && retryCount < maxRetries - 1) {
+          if (!citizenDataFetched && retryCount < maxRetries - 1) {
             // Wait with exponential backoff before retrying
             const delay = Math.pow(2, retryCount) * 1000;
             console.log(`Waiting ${delay}ms before retry ${retryCount + 2}`);
@@ -345,7 +345,7 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              buyer: buyerIdentifier,  // Use username instead of wallet address
+              buyer: buyerIdentifier,  // Use citizenname instead of wallet address
               wallet: walletAddress    // Also include wallet for reference
             }),
             // Add a timeout to prevent hanging requests
@@ -365,15 +365,15 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
               executed_at: new Date().toISOString()
             };
     
-            // Get the username for the wallet address
-            const username = await getUsernameFromWallet(walletAddress);
-            const ownerToSet = username || walletAddress;
+            // Get the citizenname for the wallet address
+            const citizenname = await getCitizennameFromWallet(walletAddress);
+            const ownerToSet = citizenname || walletAddress;
     
             // Dispatch custom events to notify other components
             window.dispatchEvent(new CustomEvent('landOwnershipChanged', {
               detail: { 
                 landId: landId, 
-                newOwner: ownerToSet, // Use username instead of wallet address
+                newOwner: ownerToSet, // Use citizenname instead of wallet address
                 transaction: updatedTransaction
               }
             }));
@@ -382,7 +382,7 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
             window.dispatchEvent(new CustomEvent('landPurchased', {
               detail: { 
                 landId: landId, 
-                newOwner: ownerToSet, // Use username instead of wallet address
+                newOwner: ownerToSet, // Use citizenname instead of wallet address
                 transaction: updatedTransaction
               }
             }));
@@ -396,14 +396,14 @@ const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
               }
             }));
     
-            // Fetch updated user data to reflect new compute balance
-            const userResponse = await fetch(`${getBackendBaseUrl()}/api/wallet/${walletAddress}`);
-            if (userResponse.ok) {
-              const userData = await userResponse.json();
+            // Fetch updated citizen data to reflect new compute balance
+            const citizenResponse = await fetch(`${getBackendBaseUrl()}/api/wallet/${walletAddress}`);
+            if (citizenResponse.ok) {
+              const citizenData = await citizenResponse.json();
       
-              // Dispatch event to update user profile with new Ducats
-              window.dispatchEvent(new CustomEvent('userProfileUpdated', {
-                detail: userData
+              // Dispatch event to update citizen profile with new Ducats
+              window.dispatchEvent(new CustomEvent('citizenProfileUpdated', {
+                detail: citizenData
               }));
             }
       

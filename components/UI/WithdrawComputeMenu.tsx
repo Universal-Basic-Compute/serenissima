@@ -28,23 +28,23 @@ export default function WithdrawComputeMenu({ onClose, onWithdraw, Ducats = 0 }:
       return;
     }
 
-    // Check if user has any active loans
+    // Check if citizen has any active loans
     const walletAddress = getWalletAddress();
     if (walletAddress) {
       try {
         const loanStore = useLoanStore.getState();
-        const userLoans = await loanStore.loadUserLoans(walletAddress);
+        const citizenLoans = await loanStore.loadCitizenLoans(walletAddress);
         
         // Check if there are any active loans
-        const activeLoans = userLoans.filter(loan => loan.status === LoanStatus.ACTIVE);
+        const activeLoans = citizenLoans.filter(loan => loan.status === LoanStatus.ACTIVE);
         
         if (activeLoans.length > 0) {
           setError('You must repay all active loans before withdrawing compute. This is required by the Venetian Banking Guild.');
           return;
         }
       } catch (error) {
-        console.error('Error checking user loans:', error);
-        // Continue with withdrawal if we can't check loans to avoid blocking users
+        console.error('Error checking citizen loans:', error);
+        // Continue with withdrawal if we can't check loans to avoid blocking citizens
       }
     }
 

@@ -25,9 +25,9 @@ from typing import Dict, List, Any, Optional
 from dotenv import load_dotenv
 from pyairtable import Api, Table
 
-# Add the parent directory to the path to import user_utils
+# Add the parent directory to the path to import citizen_utils
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from app.user_utils import find_user_by_identifier
+from app.citizen_utils import find_citizen_by_identifier
 
 def initialize_airtable():
     """Initialize connection to Airtable."""
@@ -43,7 +43,7 @@ def initialize_airtable():
     api = Api(airtable_api_key)
     
     tables = {
-        "users": Table(airtable_api_key, airtable_base_id, "USERS"),
+        "citizens": Table(airtable_api_key, airtable_base_id, "CITIZENS"),
         "buildings": Table(airtable_api_key, airtable_base_id, "BUILDINGS"),
         "polygons": Table(airtable_api_key, airtable_base_id, "POLYGONS")
     }

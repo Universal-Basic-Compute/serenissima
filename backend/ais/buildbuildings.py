@@ -8,9 +8,9 @@ import requests
 from dotenv import load_dotenv
 from pyairtable import Api, Table
 
-# Add the parent directory to the path to import user_utils
+# Add the parent directory to the path to import citizen_utils
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from app.user_utils import find_user_by_identifier
+from app.citizen_utils import find_citizen_by_identifier
 
 def initialize_airtable():
     """Initialize connection to Airtable."""
@@ -26,7 +26,7 @@ def initialize_airtable():
     api = Api(airtable_api_key)
     
     tables = {
-        "users": Table(airtable_api_key, airtable_base_id, "USERS"),
+        "citizens": Table(airtable_api_key, airtable_base_id, "CITIZENS"),
         "lands": Table(airtable_api_key, airtable_base_id, "LANDS"),
         "buildings": Table(airtable_api_key, airtable_base_id, "BUILDINGS"),
         "notifications": Table(airtable_api_key, airtable_base_id, "NOTIFICATIONS")
@@ -34,28 +34,28 @@ def initialize_airtable():
     
     return tables
 
-def get_ai_users(tables) -> List[Dict]:
-    """Get all users that are marked as AI."""
+def get_ai_citizens(tables) -> List[Dict]:
+    """Get all citizens that are marked as AI."""
     try:
-        # Query users with IsAI field set to true
+        # Query citizens with IsAI field set to true
         formula = "{IsAI}=1"
-        ai_users = tables["users"].all(formula=formula)
-        print(f"Found {len(ai_users)} AI users")
-        return ai_users
+        ai_citizens = tables["citizens"].all(formula=formula)
+        print(f"Found {len(ai_citizens)} AI citizens")
+        return ai_citizens
     except Exception as e:
-        print(f"Error getting AI users: {str(e)}")
+        print(f"Error getting AI citizens: {str(e)}")
         return []
 
-def get_user_lands(tables, username: str) -> List[Dict]:
-    """Get all lands owned by a specific user."""
+def get_citizen_lands(tables, citizenname: str) -> List[Dict]:
+    """Get all lands owned by a specific citizen."""
     try:
-        # Query lands where the user is the owner
-        formula = f"{{User}}='{username}'"
+        # Query lands where the citizen is the owner
+        formula = f"{{Citizen}}='{citizenname}'"
         lands = tables["lands"].all(formula=formula)
-        print(f"Found {len(lands)} lands owned by {username}")
+        print(f"Found {len(lands)} lands owned by {citizenname}")
         return lands
     except Exception as e:
-        print(f"Error getting lands for user {username}: {str(e)}")
+        print(f"Error getting lands for citizen {citizenname}: {str(e)}")
         return []
 
 def get_all_buildings(tables) -> List[Dict]:
@@ -68,17 +68,17 @@ def get_all_buildings(tables) -> List[Dict]:
         print(f"Error getting buildings: {str(e)}")
         return []
 
-def get_user_buildings(tables, username: str) -> List[Dict]:
-    """Get all buildings owned by a specific user."""
+def get_citizen_buildings(tables, citizenname: str) -> List[Dict]:
+    """Get all buildings owned by a specific citizen."""
     try:
-        # Query buildings where the user is the owner
+        # Query buildings where the citizen is the owner
         # Use "Owner" instead of "owner" for the field name
-        formula = f"{{Owner}}='{username}'"
+        formula = f"{{Owner}}='{citizenname}'"
         buildings = tables["buildings"].all(formula=formula)
-        print(f"Found {len(buildings)} buildings owned by {username}")
+        print(f"Found {len(buildings)} buildings owned by {citizenname}")
         return buildings
     except Exception as e:
-        print(f"Error getting buildings for user {username}: {str(e)}")
+        print(f"Error getting buildings for citizen {citizenname}: {str(e)}")
         return []
 
 def get_building_types_info() -> Dict:
@@ -202,16 +202,16 @@ def get_kinos_api_key() -> str:
         sys.exit(1)
     return api_key
 
-def prepare_ai_building_strategy(ai_user: Dict, user_lands: List[Dict], user_buildings: List[Dict], all_buildings: List[Dict]) -> Dict:
+def prepare_ai_building_strategy(ai_citizen: Dict, citizen_lands: List[Dict], citizen_buildings: List[Dict], all_buildings: List[Dict]) -> Dict:
     """Prepare a comprehensive data package for the AI to make building decisions."""
     
-    # Extract user information
-    username = ai_user["fields"].get("Username", "")
-    ducats = ai_user["fields"].get("Ducats", 0)
+    # Extract citizen information
+    citizenname = ai_citizen["fields"].get("Citizenname", "")
+    ducats = ai_citizen["fields"].get("Ducats", 0)
     
     # Process lands data
     lands_data = []
-    for land in user_lands:
+    for land in citizen_lands:
         land_info = {
             "id": land["fields"].get("LandId", ""),
             "historical_name": land["fields"].get("HistoricalName", ""),
@@ -225,7 +225,7 @@ def prepare_ai_building_strategy(ai_user: Dict, user_lands: List[Dict], user_bui
     
     # Process buildings data
     buildings_data = []
-    for building in user_buildings:
+    for building in citizen_buildings:
         building_info = {
             "id": building["fields"].get("BuildingId", ""),
             "type": building["fields"].get("Type", ""),
@@ -241,21 +241,21 @@ def prepare_ai_building_strategy(ai_user: Dict, user_lands: List[Dict], user_bui
     
     # Create a summary of buildings by type
     building_summary = {}
-    for building in user_buildings:
+    for building in citizen_buildings:
         building_type = building["fields"].get("Type", "unknown")
         if building_type not in building_summary:
             building_summary[building_type] = 0
         building_summary[building_type] += 1
     
     # Calculate financial metrics
-    total_income = sum(building["fields"].get("Income", 0) for building in user_buildings)
-    total_maintenance = sum(building["fields"].get("MaintenanceCost", 0) for building in user_buildings)
+    total_income = sum(building["fields"].get("Income", 0) for building in citizen_buildings)
+    total_maintenance = sum(building["fields"].get("MaintenanceCost", 0) for building in citizen_buildings)
     net_income = total_income - total_maintenance
     
     # Prepare the complete data package
     data_package = {
-        "user": {
-            "username": username,
+        "citizen": {
+            "citizenname": citizenname,
             "ducats": ducats,
             "total_lands": len(lands_data),
             "total_buildings": len(buildings_data),
@@ -274,14 +274,14 @@ def prepare_ai_building_strategy(ai_user: Dict, user_lands: List[Dict], user_bui
     
     return data_package
 
-def send_building_strategy_request(ai_username: str, data_package: Dict) -> Optional[Dict]:
+def send_building_strategy_request(ai_citizenname: str, data_package: Dict) -> Optional[Dict]:
     """Send the building strategy request to the AI via Kinos API."""
     try:
         api_key = get_kinos_api_key()
         blueprint = "serenissima-ai"
         
         # Construct the API URL
-        url = f"https://api.kinos-engine.ai/v2/blueprints/{blueprint}/kins/{ai_username}/messages"
+        url = f"https://api.kinos-engine.ai/v2/blueprints/{blueprint}/kins/{ai_citizenname}/messages"
         
         # Set up headers with API key
         headers = {
@@ -290,10 +290,10 @@ def send_building_strategy_request(ai_username: str, data_package: Dict) -> Opti
         }
         
         # Log the API request details
-        print(f"Sending building strategy request to AI user {ai_username}")
+        print(f"Sending building strategy request to AI citizen {ai_citizenname}")
         print(f"API URL: {url}")
-        print(f"User has {data_package['user']['ducats']} ducats")
-        print(f"User owns {len(data_package['lands'])} lands and {len(data_package['buildings'])} buildings")
+        print(f"Citizen has {data_package['citizen']['ducats']} ducats")
+        print(f"Citizen owns {len(data_package['lands'])} lands and {len(data_package['buildings'])} buildings")
         
         # Create a detailed prompt that addresses the AI directly as the decision-maker
         prompt = f"""
@@ -302,8 +302,8 @@ As a landowner in La Serenissima, you need to decide on your next building inves
 Here's your current situation:
 - You own {len(data_package['lands'])} lands
 - You have {len(data_package['buildings'])} buildings
-- Your current net income is {data_package['user']['financial']['net_income']} ducats
-- You have {data_package['user']['ducats']} ducats available
+- Your current net income is {data_package['citizen']['financial']['net_income']} ducats
+- You have {data_package['citizen']['ducats']} ducats available
 
 What building would you like to construct next to maximize your income? Consider:
 1. Your current building portfolio
@@ -330,7 +330,7 @@ If you decide not to build anything at this time, return an empty JSON object:
         
         # Create system instructions with the detailed data
         system_instructions = f"""
-You are {ai_username}, an AI landowner in La Serenissima. You make your own decisions about building strategy.
+You are {ai_citizenname}, an AI landowner in La Serenissima. You make your own decisions about building strategy.
 
 Here is the complete data about your current situation:
 {json.dumps(data_package, indent=2)}
@@ -359,7 +359,7 @@ If you decide not to build anything at this time, return an empty JSON object.
         }
         
         # Make the API request
-        print(f"Making API request to Kinos for {ai_username}...")
+        print(f"Making API request to Kinos for {ai_citizenname}...")
         response = requests.post(url, headers=headers, json=payload)
         
         # Log the API response details
@@ -374,12 +374,12 @@ If you decide not to build anything at this time, return an empty JSON object.
             print(f"Full API response: {json.dumps(response_data)}")
             
             if status == "completed":
-                print(f"Successfully sent building strategy request to AI user {ai_username}")
+                print(f"Successfully sent building strategy request to AI citizen {ai_citizenname}")
                 
                 # The response content is in the response field of response_data
                 content = response_data.get('response', '')
-                print(f"AI {ai_username} response length: {len(content)} characters")
-                print(f"AI {ai_username} response preview: {content[:200]}...")
+                print(f"AI {ai_citizenname} response length: {len(content)} characters")
+                print(f"AI {ai_citizenname} response preview: {content[:200]}...")
                 
                 # Try to extract the JSON decision from the response
                 try:
@@ -407,8 +407,8 @@ If you decide not to build anything at this time, return an empty JSON object.
                                 "reason": reason
                             }
                             
-                            print(f"AI {ai_username} decision: {json.dumps(decision)}")
-                            print(f"AI {ai_username} wants to build a {building_type} on land {land_id}")
+                            print(f"AI {ai_citizenname} decision: {json.dumps(decision)}")
+                            print(f"AI {ai_citizenname} wants to build a {building_type} on land {land_id}")
                             print(f"Reason: {reason}")
                             
                             return decision
@@ -425,13 +425,13 @@ If you decide not to build anything at this time, return an empty JSON object.
                 
                 return None
             else:
-                print(f"Error processing building strategy request for AI user {ai_username}: {response_data}")
+                print(f"Error processing building strategy request for AI citizen {ai_citizenname}: {response_data}")
                 return None
         else:
             print(f"Error from Kinos API: {response.status_code} - {response.text}")
             return None
     except Exception as e:
-        print(f"Error sending building strategy request to AI user {ai_username}: {str(e)}")
+        print(f"Error sending building strategy request to AI citizen {ai_citizenname}: {str(e)}")
         print(f"Exception traceback: {traceback.format_exc()}")
         return None
 
@@ -449,7 +449,7 @@ def create_admin_notification(tables, ai_strategy_results: Dict[str, bool]) -> N
         
         # Create the notification
         notification = {
-            "User": "admin",
+            "Citizen": "admin",
             "Type": "ai_building_strategy",
             "Content": message,
             "CreatedAt": now,
@@ -465,16 +465,16 @@ def create_admin_notification(tables, ai_strategy_results: Dict[str, bool]) -> N
     except Exception as e:
         print(f"Error creating admin notification: {str(e)}")
 
-def get_polygon_data_for_user(username: str, user_lands: List[Dict]) -> List[Dict]:
-    """Get polygon data for all lands owned by the user."""
+def get_polygon_data_for_citizen(citizenname: str, citizen_lands: List[Dict]) -> List[Dict]:
+    """Get polygon data for all lands owned by the citizen."""
     try:
         polygon_data = []
         
         # Get the data directory path
         data_dir = os.path.join(os.getcwd(), 'data')
         
-        # For each land owned by the user, try to find the corresponding polygon file
-        for land in user_lands:
+        # For each land owned by the citizen, try to find the corresponding polygon file
+        for land in citizen_lands:
             land_id = land["fields"].get("LandId", "")
             if not land_id:
                 continue
@@ -496,7 +496,7 @@ def get_polygon_data_for_user(username: str, user_lands: List[Dict]) -> List[Dic
         
         return polygon_data
     except Exception as e:
-        print(f"Error getting polygon data for user {username}: {str(e)}")
+        print(f"Error getting polygon data for citizen {citizenname}: {str(e)}")
         return []
 
 def get_available_building_points(polygons: List[Dict], existing_buildings: List[Dict]) -> Dict[str, List[Dict]]:
@@ -627,19 +627,19 @@ def get_available_building_points(polygons: List[Dict], existing_buildings: List
         print(f"Error getting available building points: {str(e)}")
         return {"land": [], "canal": [], "bridge": []}
 
-def send_building_placement_request(ai_username: str, decision: Dict, polygon_data: List[Dict], 
+def send_building_placement_request(ai_citizenname: str, decision: Dict, polygon_data: List[Dict], 
                                    available_points: Dict[str, List[Dict]], building_types: Dict) -> bool:
     """Send a second request to the AI to choose a specific point for building placement."""
     try:
         if not decision or "building_type" not in decision or "land_id" not in decision:
-            print(f"No valid building decision from AI {ai_username}, skipping placement request")
+            print(f"No valid building decision from AI {ai_citizenname}, skipping placement request")
             print(f"Decision data: {json.dumps(decision)}")
             return False
         
         building_type = decision["building_type"]
         land_id = decision["land_id"]
         
-        print(f"Processing building placement for {ai_username}: {building_type} on land {land_id}")
+        print(f"Processing building placement for {ai_citizenname}: {building_type} on land {land_id}")
         
         # Determine which point type is needed for this building
         point_type = "land"  # Default for most buildings
@@ -685,7 +685,7 @@ def send_building_placement_request(ai_username: str, decision: Dict, polygon_da
         blueprint = "serenissima-ai"
         
         # Construct the API URL
-        url = f"https://api.kinos-engine.ai/v2/blueprints/{blueprint}/kins/{ai_username}/messages"
+        url = f"https://api.kinos-engine.ai/v2/blueprints/{blueprint}/kins/{ai_citizenname}/messages"
         
         # Set up headers with API key
         headers = {
@@ -712,7 +712,7 @@ Respond with a JSON object containing your selection:
         
         # Create system instructions with the detailed data
         system_instructions = f"""
-You are {ai_username}, an AI landowner in La Serenissima.
+You are {ai_citizenname}, an AI landowner in La Serenissima.
 
 You previously decided to build a {building_type_info['name']} ({building_type}) on land {land_id}.
 
@@ -738,7 +738,7 @@ Your response must be a JSON object with:
         }
         
         # Make the API request
-        print(f"Making building placement API request to Kinos for {ai_username}...")
+        print(f"Making building placement API request to Kinos for {ai_citizenname}...")
         response = requests.post(url, headers=headers, json=payload)
         
         # Log the API response details
@@ -752,12 +752,12 @@ Your response must be a JSON object with:
             print(f"Building placement API response status: {status}")
             
             if status == "completed":
-                print(f"Successfully sent building placement request to AI user {ai_username}")
+                print(f"Successfully sent building placement request to AI citizen {ai_citizenname}")
                 
                 # The response content is in the response field of response_data
                 content = response_data.get('response', '')
-                print(f"AI {ai_username} placement response length: {len(content)} characters")
-                print(f"AI {ai_username} placement response preview: {content[:200]}...")
+                print(f"AI {ai_citizenname} placement response length: {len(content)} characters")
+                print(f"AI {ai_citizenname} placement response preview: {content[:200]}...")
                 
                 # Try to extract the JSON decision from the response
                 try:
@@ -779,13 +779,13 @@ Your response must be a JSON object with:
                             "reason": reason
                         }
                         
-                        print(f"AI {ai_username} placement decision: {json.dumps(placement_decision)}")
+                        print(f"AI {ai_citizenname} placement decision: {json.dumps(placement_decision)}")
                         
                         # Validate the index
                         if 0 <= selected_index < len(filtered_points):
                             selected_point = filtered_points[selected_index]
                             
-                            print(f"AI {ai_username} selected point {selected_index} at position {selected_point['lat']}, {selected_point['lng']}")
+                            print(f"AI {ai_citizenname} selected point {selected_index} at position {selected_point['lat']}, {selected_point['lng']}")
                             print(f"Reason: {reason}")
                             
                             # Validate the index
@@ -793,7 +793,7 @@ Your response must be a JSON object with:
                                 selected_point = filtered_points[selected_index]
                                 reason = placement_decision.get("reason", "No reason provided")
                                 
-                                print(f"AI {ai_username} selected point {selected_index} at position {selected_point['lat']}, {selected_point['lng']}")
+                                print(f"AI {ai_citizenname} selected point {selected_index} at position {selected_point['lat']}, {selected_point['lng']}")
                                 print(f"Reason: {reason}")
                                 
                                 # Now we need to create the building
@@ -801,28 +801,28 @@ Your response must be a JSON object with:
                                 construction_cost = building_type_info.get("constructionCost", 0)
                                 print(f"Construction cost for {building_type}: {construction_cost} ducats")
                                 
-                                # 2. Check if the user has enough ducats
-                                from app.user_utils import find_user_by_identifier
+                                # 2. Check if the citizen has enough ducats
+                                from app.citizen_utils import find_citizen_by_identifier
                                 
                                 # Get the tables from the function parameters
                                 tables = initialize_airtable()
                                 
-                                # Find the user record
-                                user_record = find_user_by_identifier(tables["users"], ai_username)
-                                if not user_record:
-                                    print(f"User {ai_username} not found, cannot create building")
+                                # Find the citizen record
+                                citizen_record = find_citizen_by_identifier(tables["citizens"], ai_citizenname)
+                                if not citizen_record:
+                                    print(f"Citizen {ai_citizenname} not found, cannot create building")
                                     return False
                                 
-                                user_ducats = user_record["fields"].get("Ducats", 0)
-                                print(f"User {ai_username} has {user_ducats} ducats")
+                                citizen_ducats = citizen_record["fields"].get("Ducats", 0)
+                                print(f"Citizen {ai_citizenname} has {citizen_ducats} ducats")
                                 
-                                if user_ducats < construction_cost:
-                                    print(f"User {ai_username} does not have enough ducats to build {building_type}. Required: {construction_cost}, Available: {user_ducats}")
+                                if citizen_ducats < construction_cost:
+                                    print(f"Citizen {ai_citizenname} does not have enough ducats to build {building_type}. Required: {construction_cost}, Available: {citizen_ducats}")
                                     return False
                                 
-                                # 3. Transfer ducats from user to ConsiglioDeiDieci
+                                # 3. Transfer ducats from citizen to ConsiglioDeiDieci
                                 # Find ConsiglioDeiDieci record
-                                consiglio_records = tables["users"].all(formula="{Username}='ConsiglioDeiDieci'")
+                                consiglio_records = tables["citizens"].all(formula="{Citizenname}='ConsiglioDeiDieci'")
                                 if not consiglio_records:
                                     print("ConsiglioDeiDieci account not found, cannot transfer ducats")
                                     return False
@@ -831,19 +831,19 @@ Your response must be a JSON object with:
                                 consiglio_ducats = consiglio_record["fields"].get("Ducats", 0)
                                 print(f"ConsiglioDeiDieci has {consiglio_ducats} ducats before transfer")
                                 
-                                # Update user's ducats
-                                print(f"Updating {ai_username}'s ducats from {user_ducats} to {user_ducats - construction_cost}")
-                                tables["users"].update(user_record["id"], {
-                                    "Ducats": user_ducats - construction_cost
+                                # Update citizen's ducats
+                                print(f"Updating {ai_citizenname}'s ducats from {citizen_ducats} to {citizen_ducats - construction_cost}")
+                                tables["citizens"].update(citizen_record["id"], {
+                                    "Ducats": citizen_ducats - construction_cost
                                 })
                                 
                                 # Update ConsiglioDeiDieci's ducats
                                 print(f"Updating ConsiglioDeiDieci's ducats from {consiglio_ducats} to {consiglio_ducats + construction_cost}")
-                                tables["users"].update(consiglio_record["id"], {
+                                tables["citizens"].update(consiglio_record["id"], {
                                     "Ducats": consiglio_ducats + construction_cost
                                 })
                                 
-                                print(f"Transferred {construction_cost} ducats from {ai_username} to ConsiglioDeiDieci")
+                                print(f"Transferred {construction_cost} ducats from {ai_citizenname} to ConsiglioDeiDieci")
                                 
                                 # 4. Create the building record
                                 # Generate a unique building ID
@@ -860,7 +860,7 @@ Your response must be a JSON object with:
                                     "LandId": land_id,
                                     "LeaseAmount": 0,
                                     "Variant": "model",
-                                    "Owner": ai_username,
+                                    "Owner": ai_citizenname,
                                     "Point": point_id,
                                     # Store position data in Notes field instead
                                     "Notes": json.dumps({"position": {"lat": selected_point["lat"], "lng": selected_point["lng"]}}),
@@ -873,16 +873,16 @@ Your response must be a JSON object with:
                                 # Add the building to Airtable
                                 try:
                                     new_building = tables["buildings"].create(building_record)
-                                    print(f"Created new building: {building_id} of type {building_type} for {ai_username} on land {land_id}")
+                                    print(f"Created new building: {building_id} of type {building_type} for {ai_citizenname} on land {land_id}")
                                     print(f"Building record ID: {new_building['id']}")
                                 except Exception as building_error:
                                     print(f"Error creating building record: {str(building_error)}")
                                     print(f"Exception traceback: {traceback.format_exc()}")
                                     return False
                                 
-                                # 5. Create a notification for the user
+                                # 5. Create a notification for the citizen
                                 notification = {
-                                    "User": ai_username,
+                                    "Citizen": ai_citizenname,
                                     "Type": "building_created",
                                     "Content": f"You have successfully built a {building_type_info['name']} on your land {land_id} for {construction_cost} ducats.",
                                     "CreatedAt": datetime.now().isoformat(),
@@ -901,7 +901,7 @@ Your response must be a JSON object with:
                                 
                                 try:
                                     tables["notifications"].create(notification)
-                                    print(f"Created notification for {ai_username} about new building")
+                                    print(f"Created notification for {ai_citizenname} about new building")
                                 except Exception as notification_error:
                                     print(f"Error creating notification: {str(notification_error)}")
                                     # Continue even if notification creation fails
@@ -921,13 +921,13 @@ Your response must be a JSON object with:
                     print(content)
                 return False
             else:
-                print(f"Error processing building placement request for AI user {ai_username}: {response_data}")
+                print(f"Error processing building placement request for AI citizen {ai_citizenname}: {response_data}")
                 return False
         else:
             print(f"Error from Kinos API: {response.status_code} - {response.text}")
             return False
     except Exception as e:
-        print(f"Error sending building placement request to AI user {ai_username}: {str(e)}")
+        print(f"Error sending building placement request to AI citizen {ai_citizenname}: {str(e)}")
         print(f"Exception traceback: {traceback.format_exc()}")
         return False
 
@@ -947,15 +947,15 @@ def process_ai_building_strategies(dry_run: bool = False):
         print(f"Exception traceback: {traceback.format_exc()}")
         return
     
-    # Get AI users
+    # Get AI citizens
     try:
-        ai_users = get_ai_users(tables)
-        if not ai_users:
-            print("No AI users found, exiting")
+        ai_citizens = get_ai_citizens(tables)
+        if not ai_citizens:
+            print("No AI citizens found, exiting")
             return
-        print(f"Successfully retrieved {len(ai_users)} AI users")
+        print(f"Successfully retrieved {len(ai_citizens)} AI citizens")
     except Exception as e:
-        print(f"Failed to get AI users: {str(e)}")
+        print(f"Failed to get AI citizens: {str(e)}")
         print(f"Exception traceback: {traceback.format_exc()}")
         return
     
@@ -971,104 +971,104 @@ def process_ai_building_strategies(dry_run: bool = False):
     # Track results for each AI
     ai_strategy_results = {}
     
-    # Process each AI user
-    for ai_user in ai_users:
-        ai_username = ai_user["fields"].get("Username")
-        if not ai_username:
-            print("Skipping AI user with no username")
+    # Process each AI citizen
+    for ai_citizen in ai_citizens:
+        ai_citizenname = ai_citizen["fields"].get("Citizenname")
+        if not ai_citizenname:
+            print("Skipping AI citizen with no citizenname")
             continue
         
         print(f"\n{'='*80}")
-        print(f"Processing AI user: {ai_username}")
+        print(f"Processing AI citizen: {ai_citizenname}")
         print(f"{'='*80}")
         
         try:
             # Get lands owned by this AI
-            user_lands = get_user_lands(tables, ai_username)
-            print(f"Retrieved {len(user_lands)} lands for {ai_username}")
+            citizen_lands = get_citizen_lands(tables, ai_citizenname)
+            print(f"Retrieved {len(citizen_lands)} lands for {ai_citizenname}")
             
-            if not user_lands:
-                print(f"AI user {ai_username} has no lands, skipping")
-                ai_strategy_results[ai_username] = False
+            if not citizen_lands:
+                print(f"AI citizen {ai_citizenname} has no lands, skipping")
+                ai_strategy_results[ai_citizenname] = False
                 continue
             
             # Get buildings owned by this AI
-            user_buildings = get_user_buildings(tables, ai_username)
-            print(f"Retrieved {len(user_buildings)} buildings for {ai_username}")
+            citizen_buildings = get_citizen_buildings(tables, ai_citizenname)
+            print(f"Retrieved {len(citizen_buildings)} buildings for {ai_citizenname}")
             
-            # Get polygon data for this user's lands
-            polygon_data = get_polygon_data_for_user(ai_username, user_lands)
+            # Get polygon data for this citizen's lands
+            polygon_data = get_polygon_data_for_citizen(ai_citizenname, citizen_lands)
             print(f"Retrieved polygon data for {len(polygon_data)} lands")
             
             # Get available building points
-            available_points = get_available_building_points(polygon_data, user_buildings)
+            available_points = get_available_building_points(polygon_data, citizen_buildings)
             
             # Check if there are any available building points
             total_points = sum(len(points) for points in available_points.values())
-            print(f"Found {total_points} total available building points for {ai_username}")
+            print(f"Found {total_points} total available building points for {ai_citizenname}")
             
             if total_points == 0:
-                print(f"No available building points for AI user {ai_username}, skipping")
-                ai_strategy_results[ai_username] = False
+                print(f"No available building points for AI citizen {ai_citizenname}, skipping")
+                ai_strategy_results[ai_citizenname] = False
                 continue
             
             # Prepare the data package for the AI
-            data_package = prepare_ai_building_strategy(ai_user, user_lands, user_buildings, all_buildings)
-            print(f"Prepared data package for {ai_username}")
+            data_package = prepare_ai_building_strategy(ai_citizen, citizen_lands, citizen_buildings, all_buildings)
+            print(f"Prepared data package for {ai_citizenname}")
             
             # Send the building strategy request to the AI
             if not dry_run:
                 print(f"\n{'-'*80}")
-                print(f"STEP 1: Get building decision for {ai_username}")
+                print(f"STEP 1: Get building decision for {ai_citizenname}")
                 print(f"{'-'*80}")
                 
                 # First call: Get building decision
-                decision = send_building_strategy_request(ai_username, data_package)
+                decision = send_building_strategy_request(ai_citizenname, data_package)
                 
                 if decision is not None:
                     print(f"\n{'-'*80}")
-                    print(f"STEP 2: Get placement decision for {ai_username}")
+                    print(f"STEP 2: Get placement decision for {ai_citizenname}")
                     print(f"{'-'*80}")
                     
                     # Second call: Get placement decision
                     building_types = get_building_types_from_api()
                     placement_success = send_building_placement_request(
-                        ai_username, 
+                        ai_citizenname, 
                         decision, 
                         polygon_data, 
                         available_points,
                         building_types
                     )
                     
-                    ai_strategy_results[ai_username] = placement_success
-                    print(f"Building strategy for {ai_username} completed with result: {'SUCCESS' if placement_success else 'FAILED'}")
+                    ai_strategy_results[ai_citizenname] = placement_success
+                    print(f"Building strategy for {ai_citizenname} completed with result: {'SUCCESS' if placement_success else 'FAILED'}")
                 else:
-                    print(f"No valid building decision received for {ai_username}")
-                    ai_strategy_results[ai_username] = False
+                    print(f"No valid building decision received for {ai_citizenname}")
+                    ai_strategy_results[ai_citizenname] = False
             else:
                 # In dry run mode, just log what would happen
-                print(f"[DRY RUN] Would send building strategy request to AI user {ai_username}")
+                print(f"[DRY RUN] Would send building strategy request to AI citizen {ai_citizenname}")
                 print(f"[DRY RUN] Data package summary:")
-                print(f"  - User: {data_package['user']['username']}")
+                print(f"  - Citizen: {data_package['citizen']['citizenname']}")
                 print(f"  - Lands: {len(data_package['lands'])}")
                 print(f"  - Buildings: {len(data_package['buildings'])}")
-                print(f"  - Net Income: {data_package['user']['financial']['net_income']}")
+                print(f"  - Net Income: {data_package['citizen']['financial']['net_income']}")
                 print(f"  - Available building points: {total_points}")
-                ai_strategy_results[ai_username] = True
+                ai_strategy_results[ai_citizenname] = True
         except Exception as e:
-            print(f"Error processing AI user {ai_username}: {str(e)}")
+            print(f"Error processing AI citizen {ai_citizenname}: {str(e)}")
             print(f"Exception traceback: {traceback.format_exc()}")
-            ai_strategy_results[ai_username] = False
+            ai_strategy_results[ai_citizenname] = False
         else:
             # In dry run mode, just log what would happen
-            print(f"[DRY RUN] Would send building strategy request to AI user {ai_username}")
+            print(f"[DRY RUN] Would send building strategy request to AI citizen {ai_citizenname}")
             print(f"[DRY RUN] Data package summary:")
-            print(f"  - User: {data_package['user']['username']}")
+            print(f"  - Citizen: {data_package['citizen']['citizenname']}")
             print(f"  - Lands: {len(data_package['lands'])}")
             print(f"  - Buildings: {len(data_package['buildings'])}")
-            print(f"  - Net Income: {data_package['user']['financial']['net_income']}")
+            print(f"  - Net Income: {data_package['citizen']['financial']['net_income']}")
             print(f"  - Available building points: {total_points}")
-            ai_strategy_results[ai_username] = True
+            ai_strategy_results[ai_citizenname] = True
     
     # Create admin notification with summary
     if not dry_run and ai_strategy_results:

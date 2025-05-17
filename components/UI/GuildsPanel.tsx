@@ -17,8 +17,8 @@ interface GuildsPanelProps {
 
 // Define the GuildMember interface
 interface GuildMember {
-  userId: string;
-  username: string;
+  citizenId: string;
+  citizenname: string;
   firstName: string;
   lastName: string;
   coatOfArmsImage: string | null;
@@ -243,7 +243,7 @@ function GuildDetails({ guild, onBack, formatDate, getLandName }: GuildDetailsPr
   const [showApplicationModal, setShowApplicationModal] = useState<boolean>(false);
   const [applicationText, setApplicationText] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [userGuildId, setUserGuildId] = useState<string | null>(null);
+  const [citizenGuildId, setCitizenGuildId] = useState<string | null>(null);
 
   // Fetch guild members when the component mounts
   useEffect(() => {
@@ -270,19 +270,19 @@ function GuildDetails({ guild, onBack, formatDate, getLandName }: GuildDetailsPr
     fetchGuildMembers();
   }, [guild.guildId]);
   
-  // Check if the current user is already in a guild
+  // Check if the current citizen is already in a guild
   useEffect(() => {
-    // Get the current user's profile from localStorage
-    const savedProfile = localStorage.getItem('userProfile');
+    // Get the current citizen's profile from localStorage
+    const savedProfile = localStorage.getItem('citizenProfile');
     if (savedProfile) {
       try {
         const profile = JSON.parse(savedProfile);
         // If the profile has a guildId, store it
         if (profile.guildId) {
-          setUserGuildId(profile.guildId);
+          setCitizenGuildId(profile.guildId);
         }
       } catch (error) {
-        console.error('Error parsing user profile:', error);
+        console.error('Error parsing citizen profile:', error);
       }
     }
   }, []);
@@ -365,7 +365,7 @@ function GuildDetails({ guild, onBack, formatDate, getLandName }: GuildDetailsPr
               ) : (
                 <div className="space-y-2 max-h-40 overflow-y-auto">
                   {members.map(member => (
-                    <div key={member.userId} className="flex items-center space-x-2">
+                    <div key={member.citizenId} className="flex items-center space-x-2">
                       {member.coatOfArmsImage ? (
                         <img 
                           src={member.coatOfArmsImage} 
@@ -382,7 +382,7 @@ function GuildDetails({ guild, onBack, formatDate, getLandName }: GuildDetailsPr
                         </div>
                       )}
                       <div className="text-xs">
-                        <p className="font-medium">{member.username}</p>
+                        <p className="font-medium">{member.citizenname}</p>
                         <p className="text-gray-600">{member.firstName} {member.lastName}</p>
                       </div>
                     </div>
@@ -392,9 +392,9 @@ function GuildDetails({ guild, onBack, formatDate, getLandName }: GuildDetailsPr
               
               {/* Apply for Membership button right after members list */}
               <div className="mt-4">
-                {userGuildId ? (
+                {citizenGuildId ? (
                   <div className="text-amber-700 text-sm italic text-center p-2 bg-amber-100 rounded">
-                    {userGuildId === guild.guildId ? 
+                    {citizenGuildId === guild.guildId ? 
                       "You are already a member of this guild." : 
                       "You are already a member of another guild. You must leave your current guild before joining a new one."}
                   </div>
@@ -469,7 +469,7 @@ Meeting Frequency: ${guild.meetingFrequency || 'As needed'}
                                 window.dispatchEvent(new CustomEvent('sendCompagnoMessage', {
                                   detail: {
                                     message: `Hey Compagno, can you help me to apply to the ${guild.guildName} Guild?`,
-                                    addSystem: `The user is asking about applying to a guild in Venice. Here is information about the guild they're interested in:\n${guildInfo}\n\nHelp them understand the application process, requirements, and benefits of joining this guild. Be encouraging but also explain any obligations or fees they should be aware of.`
+                                    addSystem: `The citizen is asking about applying to a guild in Venice. Here is information about the guild they're interested in:\n${guildInfo}\n\nHelp them understand the application process, requirements, and benefits of joining this guild. Be encouraging but also explain any obligations or fees they should be aware of.`
                                   }
                                 }));
                               }, 200);
@@ -493,17 +493,17 @@ Meeting Frequency: ${guild.meetingFrequency || 'As needed'}
                               onClick={async () => {
                                 setIsSubmitting(true);
                                 try {
-                                  // Get the current user profile from localStorage
-                                  const savedProfile = localStorage.getItem('userProfile');
+                                  // Get the current citizen profile from localStorage
+                                  const savedProfile = localStorage.getItem('citizenProfile');
                                   if (!savedProfile) {
-                                    throw new Error('User profile not found. Please create a profile first.');
+                                    throw new Error('Citizen profile not found. Please create a profile first.');
                                   }
                                   
                                   const profile = JSON.parse(savedProfile);
-                                  const username = profile.username;
+                                  const citizenname = profile.citizenname;
                                   
-                                  if (!username) {
-                                    throw new Error('Username not found in profile.');
+                                  if (!citizenname) {
+                                    throw new Error('Citizenname not found in profile.');
                                   }
                                   
                                   // 1. Send a message to the guild (as a guild application)
@@ -513,7 +513,7 @@ Meeting Frequency: ${guild.meetingFrequency || 'As needed'}
                                       'Content-Type': 'application/json',
                                     },
                                     body: JSON.stringify({
-                                      sender: username,
+                                      sender: citizenname,
                                       receiver: guild.guildId,
                                       content: applicationText,
                                       type: 'guild_application'
@@ -526,21 +526,21 @@ Meeting Frequency: ${guild.meetingFrequency || 'As needed'}
                                   
                                   const messageData = await messageResponse.json();
                                   
-                                  // 2. Update the user's guild membership status to pending
-                                  const userUpdateResponse = await fetch('/api/users/update-guild', {
+                                  // 2. Update the citizen's guild membership status to pending
+                                  const citizenUpdateResponse = await fetch('/api/citizens/update-guild', {
                                     method: 'POST',
                                     headers: {
                                       'Content-Type': 'application/json',
                                     },
                                     body: JSON.stringify({
-                                      username: username,
+                                      citizenname: citizenname,
                                       guildId: guild.guildId,
                                       status: 'pending'
                                     }),
                                   });
                                   
-                                  if (!userUpdateResponse.ok) {
-                                    throw new Error('Failed to update user guild status');
+                                  if (!citizenUpdateResponse.ok) {
+                                    throw new Error('Failed to update citizen guild status');
                                   }
                                   
                                   // Show success message

@@ -138,7 +138,7 @@ export async function GET(request: NextRequest) {
             variant: fields.Variant || '',
             position: fields.Position || '',
             rotation: fields.Rotation || 0,
-            owner: fields.User || '',
+            owner: fields.Citizen || '',
             created_at: fields.CreatedAt || new Date().toISOString(),
             created_by: fields.CreatedBy || '',
             updated_at: fields.UpdatedAt || new Date().toISOString(),

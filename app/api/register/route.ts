@@ -6,7 +6,7 @@ const base = new Airtable({
   apiKey: process.env.AIRTABLE_API_KEY
 }).base(process.env.AIRTABLE_BASE_ID || '');
 
-const USERS_TABLE = 'USERS';
+const CITIZENS_TABLE = 'CITIZENS';
 
 export async function POST(request: Request) {
   try {
@@ -21,37 +21,37 @@ export async function POST(request: Request) {
       );
     }
     
-    // Check if user already exists
-    const existingUsers = await base(USERS_TABLE)
+    // Check if citizen already exists
+    const existingCitizens = await base(CITIZENS_TABLE)
       .select({
         filterByFormula: `{Wallet} = "${walletAddress}"`,
         maxRecords: 1
       })
       .firstPage();
     
-    if (existingUsers && existingUsers.length > 0) {
-      // User already exists, return the existing user
-      const user = existingUsers[0];
+    if (existingCitizens && existingCitizens.length > 0) {
+      // Citizen already exists, return the existing citizen
+      const citizen = existingCitizens[0];
       
       return NextResponse.json({
         success: true,
-        user: {
-          id: user.id,
-          walletAddress: user.fields.Wallet,
-          username: user.fields.Username || null,
-          firstName: user.fields.FirstName || null,
-          lastName: user.fields.LastName || null,
-          ducats: user.fields.Ducats || 0,
-          coatOfArmsImage: user.fields.CoatOfArmsImage || null,
-          familyMotto: user.fields.FamilyMotto || null,
-          createdAt: user.fields.CreatedAt || null
+        citizen: {
+          id: citizen.id,
+          walletAddress: citizen.fields.Wallet,
+          citizenname: citizen.fields.Citizenname || null,
+          firstName: citizen.fields.FirstName || null,
+          lastName: citizen.fields.LastName || null,
+          ducats: citizen.fields.Ducats || 0,
+          coatOfArmsImage: citizen.fields.CoatOfArmsImage || null,
+          familyMotto: citizen.fields.FamilyMotto || null,
+          createdAt: citizen.fields.CreatedAt || null
         },
-        message: 'User already exists'
+        message: 'Citizen already exists'
       });
     }
     
-    // Create a new user
-    const newUser = await base(USERS_TABLE).create({
+    // Create a new citizen
+    const newCitizen = await base(CITIZENS_TABLE).create({
       Wallet: walletAddress,
       Ducats: 100, // Starting amount
       CreatedAt: new Date().toISOString()
@@ -59,23 +59,23 @@ export async function POST(request: Request) {
     
     return NextResponse.json({
       success: true,
-      user: {
-        id: newUser.id,
-        walletAddress: newUser.fields.Wallet,
-        username: null,
+      citizen: {
+        id: newCitizen.id,
+        walletAddress: newCitizen.fields.Wallet,
+        citizenname: null,
         firstName: null,
         lastName: null,
-        ducats: newUser.fields.Ducats || 100,
+        ducats: newCitizen.fields.Ducats || 100,
         coatOfArmsImage: null,
         familyMotto: null,
-        createdAt: newUser.fields.CreatedAt
+        createdAt: newCitizen.fields.CreatedAt
       },
-      message: 'User registered successfully'
+      message: 'Citizen registered successfully'
     });
   } catch (error) {
-    console.error('Error registering user:', error);
+    console.error('Error registering citizen:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to register user' },
+      { success: false, error: 'Failed to register citizen' },
       { status: 500 }
     );
   }

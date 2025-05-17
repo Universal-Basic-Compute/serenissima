@@ -6,7 +6,7 @@ const base = new Airtable({
   apiKey: process.env.AIRTABLE_API_KEY
 }).base(process.env.AIRTABLE_BASE_ID || '');
 
-const USERS_TABLE = 'USERS';
+const CITIZENS_TABLE = 'CITIZENS';
 const CITIZENS_TABLE = 'CITIZENS';
 
 export async function POST(request: Request) {
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     // Validate required fields
     if (!data.id) {
       return NextResponse.json(
-        { success: false, error: 'User ID is required' },
+        { success: false, error: 'Citizen ID is required' },
         { status: 400 }
       );
     }
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     // Create an object with only the fields to update
     const updateFields: Record<string, any> = {};
     
-    if (data.username !== undefined) updateFields.Username = data.username;
+    if (data.citizenname !== undefined) updateFields.Citizenname = data.citizenname;
     if (data.firstName !== undefined) updateFields.FirstName = data.firstName;
     if (data.lastName !== undefined) updateFields.LastName = data.lastName;
     if (data.familyMotto !== undefined) updateFields.FamilyMotto = data.familyMotto;
@@ -38,18 +38,18 @@ export async function POST(request: Request) {
       );
     }
     
-    // Update the user record
-    const updatedRecord = await base(USERS_TABLE).update(data.id, updateFields);
+    // Update the citizen record
+    const updatedRecord = await base(CITIZENS_TABLE).update(data.id, updateFields);
     
     // Now handle the citizen record
     try {
-      // First, check if a citizen with this username already exists
-      const username = updatedRecord.fields.Username;
+      // First, check if a citizen with this citizenname already exists
+      const citizenname = updatedRecord.fields.Citizenname;
       
-      if (username) {
+      if (citizenname) {
         const existingCitizens = await base(CITIZENS_TABLE)
           .select({
-            filterByFormula: `{Username} = "${username}"`,
+            filterByFormula: `{Citizenname} = "${citizenname}"`,
             maxRecords: 1
           })
           .firstPage();
@@ -67,13 +67,13 @@ export async function POST(request: Request) {
           // Create citizen update fields
           const citizenUpdateFields: Record<string, any> = {};
           
-          if (updatedRecord.fields.Username) citizenUpdateFields.Username = updatedRecord.fields.Username;
+          if (updatedRecord.fields.Citizenname) citizenUpdateFields.Citizenname = updatedRecord.fields.Citizenname;
           if (updatedRecord.fields.FirstName) citizenUpdateFields.FirstName = updatedRecord.fields.FirstName;
           if (updatedRecord.fields.LastName) citizenUpdateFields.LastName = updatedRecord.fields.LastName;
           
           // Update the citizen record
           await base(CITIZENS_TABLE).update(citizenId, citizenUpdateFields);
-          console.log(`Updated citizen record for ${username}`);
+          console.log(`Updated citizen record for ${citizenname}`);
         } else {
           // Create new citizen record
           const citizenId = `ctz_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
@@ -81,7 +81,7 @@ export async function POST(request: Request) {
           // Create citizen fields
           const citizenFields: Record<string, any> = {
             CitizenId: citizenId,
-            Username: updatedRecord.fields.Username,
+            Citizenname: updatedRecord.fields.Citizenname,
             FirstName: updatedRecord.fields.FirstName || 'Unknown',
             LastName: updatedRecord.fields.LastName || 'Citizen',
             SocialClass: 'Facchini', // Default social class
@@ -99,22 +99,22 @@ export async function POST(request: Request) {
           
           // Create the citizen record
           await base(CITIZENS_TABLE).create(citizenFields);
-          console.log(`Created new citizen record for ${username}`);
+          console.log(`Created new citizen record for ${citizenname}`);
         }
       }
     } catch (citizenError) {
-      // Log the error but don't fail the user update
+      // Log the error but don't fail the citizen update
       console.error('Error updating/creating citizen record:', citizenError);
     }
     
-    // Return the updated user data
+    // Return the updated citizen data
     return NextResponse.json({
       success: true,
-      message: 'User profile updated successfully',
-      user: {
+      message: 'Citizen profile updated successfully',
+      citizen: {
         id: updatedRecord.id,
         walletAddress: updatedRecord.fields.Wallet,
-        username: updatedRecord.fields.Username || null,
+        citizenname: updatedRecord.fields.Citizenname || null,
         firstName: updatedRecord.fields.FirstName || null,
         lastName: updatedRecord.fields.LastName || null,
         ducats: updatedRecord.fields.Ducats || 0,
@@ -124,9 +124,9 @@ export async function POST(request: Request) {
       }
     });
   } catch (error) {
-    console.error('Error updating user profile:', error);
+    console.error('Error updating citizen profile:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to update user profile' },
+      { success: false, error: 'Failed to update citizen profile' },
       { status: 500 }
     );
   }

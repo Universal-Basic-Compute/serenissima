@@ -18,13 +18,13 @@ export async function POST(request: Request) {
       );
     }
     
-    // Check if user has any active loans
+    // Check if citizen has any active loans
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL || 'http://localhost:10000'}/api/loans/user/${wallet_address}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL || 'http://localhost:10000'}/api/loans/citizen/${wallet_address}`);
       
       if (response.ok) {
-        const userLoans = await response.json();
-        const activeLoans = userLoans.filter(loan => loan.status === 'active');
+        const citizenLoans = await response.json();
+        const activeLoans = citizenLoans.filter(loan => loan.status === 'active');
         
         if (activeLoans.length > 0) {
           return NextResponse.json(
@@ -37,8 +37,8 @@ export async function POST(request: Request) {
         }
       }
     } catch (error) {
-      console.warn('Error checking user loans, proceeding with withdrawal:', error);
-      // Continue with withdrawal if we can't check loans to avoid blocking users
+      console.warn('Error checking citizen loans, proceeding with withdrawal:', error);
+      // Continue with withdrawal if we can't check loans to avoid blocking citizens
     }
     
     // Call the backend API to withdraw compute

@@ -90,7 +90,7 @@ async function getHistoricalName(locationInfo) {
         max_tokens: 1000,
         messages: [
           {
-            role: "user",
+            role: "citizen",
             content: `I have a location in Venice, Italy with the following modern information:
             
 Latitude: ${locationInfo.lat}

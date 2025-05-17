@@ -57,7 +57,7 @@ This decree assigns public infrastructure buildings to land owners, making them 
 
 2. For each building, the system:
    - Determines which land parcel the building is located on
-   - Sets the User field of the building to match the land owner
+   - Sets the Citizen field of the building to match the land owner
    - Creates notifications for affected land owners
 
 3. Land owners receive notifications about the public infrastructure they are now responsible for maintaining.
@@ -77,10 +77,10 @@ This decree creates a responsibility system where land owners must maintain publ
 Decrees are implemented as Python scripts in the `backend/engine/decrees/` directory. Each decree script:
 
 1. Connects to the Airtable database
-2. Retrieves the necessary data (buildings, lands, users, etc.)
+2. Retrieves the necessary data (buildings, lands, citizens, etc.)
 3. Implements the decree's logic
 4. Updates records in the database
-5. Creates notifications for affected users
+5. Creates notifications for affected citizens
 6. Logs the results of the decree implementation
 
 Decrees are scheduled to run automatically using cron jobs set up in the `backend/startup.sh` script.

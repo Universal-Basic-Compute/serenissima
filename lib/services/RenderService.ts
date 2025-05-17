@@ -394,7 +394,7 @@ export class RenderService {
   public calculatePolygonsToRender(
     polygons: any[],
     landOwners: Record<string, string>,
-    users: Record<string, any>,
+    citizens: Record<string, any>,
     scale: number,
     offset: { x: number, y: number },
     canvasWidth: number,
@@ -417,9 +417,9 @@ export class RenderService {
         } else if (polygon.id && landOwners[polygon.id]) {
           // Use owner color in land view
           const owner = landOwners[polygon.id];
-          const user = users[owner];
-          if (user && user.color) {
-            fillColor = user.color;
+          const citizen = citizens[owner];
+          if (citizen && citizen.color) {
+            fillColor = citizen.color;
           }
         }
       }
@@ -946,11 +946,11 @@ export class RenderService {
       // Use a fixed size for coat of arms
       const size = 50;
       
-      // Use the owner's username for the coat of arms
-      const ownerUsername = polygon.owner;
+      // Use the owner's citizenname for the coat of arms
+      const ownerCitizenname = polygon.owner;
       
       // Check if we already rendered this coat of arms at this position and size
-      const cacheKey = `${ownerUsername}_${Math.round(centerX)}_${Math.round(centerY)}_${size}`;
+      const cacheKey = `${ownerCitizenname}_${Math.round(centerX)}_${Math.round(centerY)}_${size}`;
       const cachedCoatOfArms = renderedCoatOfArmsCache[cacheKey];
       
       if (cachedCoatOfArms) {
@@ -958,25 +958,25 @@ export class RenderService {
         if (cachedCoatOfArms.image) {
           this.createCircularImage(ctx, cachedCoatOfArms.image, centerX, centerY, size);
         } else {
-          this.createDefaultCircularAvatar(ctx, ownerUsername, centerX, centerY, size);
+          this.createDefaultCircularAvatar(ctx, ownerCitizenname, centerX, centerY, size);
         }
       } else {
         // Check if we have a coat of arms image for this owner
-        if (ownerUsername in coatOfArmsImages && coatOfArmsImages[ownerUsername]) {
+        if (ownerCitizenname in coatOfArmsImages && coatOfArmsImages[ownerCitizenname]) {
           // Draw circular coat of arms with error handling
           try {
-            this.createCircularImage(ctx, coatOfArmsImages[ownerUsername], centerX, centerY, size);
+            this.createCircularImage(ctx, coatOfArmsImages[ownerCitizenname], centerX, centerY, size);
             // Cache the result
             renderedCoatOfArmsCache[cacheKey] = {
-              image: coatOfArmsImages[ownerUsername],
+              image: coatOfArmsImages[ownerCitizenname],
               x: centerX,
               y: centerY,
               size
             };
           } catch (error) {
-            console.error(`Error rendering coat of arms for ${ownerUsername}:`, error);
+            console.error(`Error rendering coat of arms for ${ownerCitizenname}:`, error);
             // Fallback to default avatar
-            this.createDefaultCircularAvatar(ctx, ownerUsername, centerX, centerY, size);
+            this.createDefaultCircularAvatar(ctx, ownerCitizenname, centerX, centerY, size);
             // Cache the fallback
             renderedCoatOfArmsCache[cacheKey] = {
               image: null,
@@ -987,7 +987,7 @@ export class RenderService {
           }
         } else {
           // Draw default avatar with initial
-          this.createDefaultCircularAvatar(ctx, ownerUsername, centerX, centerY, size);
+          this.createDefaultCircularAvatar(ctx, ownerCitizenname, centerX, centerY, size);
           // Cache the default avatar
           renderedCoatOfArmsCache[cacheKey] = {
             image: null,

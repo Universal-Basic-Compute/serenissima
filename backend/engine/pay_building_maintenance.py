@@ -31,17 +31,17 @@ logger = logging.getLogger("maintenance_collector")
 AIRTABLE_API_KEY = os.getenv("AIRTABLE_API_KEY")
 AIRTABLE_BASE_ID = os.getenv("AIRTABLE_BASE_ID")
 AIRTABLE_BUILDINGS_TABLE = os.getenv("AIRTABLE_BUILDINGS_TABLE", "BUILDINGS")
-AIRTABLE_USERS_TABLE = os.getenv("AIRTABLE_USERS_TABLE", "Users")
+AIRTABLE_CITIZENS_TABLE = os.getenv("AIRTABLE_CITIZENS_TABLE", "Citizens")
 AIRTABLE_NOTIFICATIONS_TABLE = os.getenv("AIRTABLE_NOTIFICATIONS_TABLE", "NOTIFICATIONS")
 
 # Initialize Airtable
 airtable = Api(AIRTABLE_API_KEY)
 buildings_table = Table(AIRTABLE_API_KEY, AIRTABLE_BASE_ID, AIRTABLE_BUILDINGS_TABLE)
-users_table = Table(AIRTABLE_API_KEY, AIRTABLE_BASE_ID, AIRTABLE_USERS_TABLE)
+citizens_table = Table(AIRTABLE_API_KEY, AIRTABLE_BASE_ID, AIRTABLE_CITIZENS_TABLE)
 notifications_table = Table(AIRTABLE_API_KEY, AIRTABLE_BASE_ID, AIRTABLE_NOTIFICATIONS_TABLE)
 
-# ConsiglioDeiDieci user ID
-CONSIGLIO_USER_ID = "ConsiglioDeiDieci"
+# ConsiglioDeiDieci citizen ID
+CONSIGLIO_CITIZEN_ID = "ConsiglioDeiDieci"
 
 # Building data directory
 BUILDINGS_DATA_DIR = os.getenv("BUILDINGS_DATA_DIR", "../data/buildings")
@@ -76,7 +76,7 @@ def get_all_buildings():
             building = {
                 "id": record.get("id"),
                 "type": record.get("fields", {}).get("Type"),
-                "owner": record.get("fields", {}).get("User"),
+                "owner": record.get("fields", {}).get("Citizen"),
                 "land_id": record.get("fields", {}).get("Land")
             }
             buildings.append(building)
@@ -88,55 +88,55 @@ def get_all_buildings():
         return []
 
 
-def get_user_balance(user_id):
-    """Get current balance for a user directly from Airtable."""
+def get_citizen_balance(citizen_id):
+    """Get current balance for a citizen directly from Airtable."""
     try:
-        # First try to find by username
-        formula = f"{{Username}}='{user_id}'"
-        records = users_table.all(formula=formula)
+        # First try to find by citizenname
+        formula = f"{{Citizenname}}='{citizen_id}'"
+        records = citizens_table.all(formula=formula)
         
         # If not found, try by wallet address
         if not records:
-            formula = f"{{Wallet}}='{user_id}'"
-            records = users_table.all(formula=formula)
+            formula = f"{{Wallet}}='{citizen_id}'"
+            records = citizens_table.all(formula=formula)
         
         if records:
             return records[0].get("fields", {}).get("Ducats", 0)
         else:
-            logger.warning(f"User not found: {user_id}")
+            logger.warning(f"Citizen not found: {citizen_id}")
             return 0
     except Exception as e:
-        logger.error(f"Error fetching balance for user {user_id}: {str(e)}")
+        logger.error(f"Error fetching balance for citizen {citizen_id}: {str(e)}")
         return 0
 
 
-def update_user_balance(user_id, amount, description):
-    """Update user balance directly in Airtable."""
+def update_citizen_balance(citizen_id, amount, description):
+    """Update citizen balance directly in Airtable."""
     try:
-        # First try to find by username
-        formula = f"{{Username}}='{user_id}'"
-        records = users_table.all(formula=formula)
+        # First try to find by citizenname
+        formula = f"{{Citizenname}}='{citizen_id}'"
+        records = citizens_table.all(formula=formula)
         
         # If not found, try by wallet address
         if not records:
-            formula = f"{{Wallet}}='{user_id}'"
-            records = users_table.all(formula=formula)
+            formula = f"{{Wallet}}='{citizen_id}'"
+            records = citizens_table.all(formula=formula)
         
         if not records:
-            logger.warning(f"User not found: {user_id}")
+            logger.warning(f"Citizen not found: {citizen_id}")
             return False
         
-        user_record = records[0]
-        current_balance = user_record.get("fields", {}).get("Ducats", 0)
+        citizen_record = records[0]
+        current_balance = citizen_record.get("fields", {}).get("Ducats", 0)
         new_balance = current_balance + amount
         
-        # Update the user's balance
-        users_table.update(user_record["id"], {"Ducats": new_balance})
+        # Update the citizen's balance
+        citizens_table.update(citizen_record["id"], {"Ducats": new_balance})
         
-        logger.info(f"Updated balance for {user_id}: {current_balance} -> {new_balance} ({description})")
+        logger.info(f"Updated balance for {citizen_id}: {current_balance} -> {new_balance} ({description})")
         return True
     except Exception as e:
-        logger.error(f"Error updating balance for user {user_id}: {str(e)}")
+        logger.error(f"Error updating balance for citizen {citizen_id}: {str(e)}")
         return False
 
 
@@ -206,7 +206,7 @@ def collect_maintenance_costs():
                 continue
             
             # Get owner's current balance
-            owner_balance = get_user_balance(owner_id)
+            owner_balance = get_citizen_balance(owner_id)
             
             # Check if owner has enough funds
             if owner_balance < maintenance_cost:
@@ -216,15 +216,15 @@ def collect_maintenance_costs():
             
             # Deduct maintenance cost from owner
             deduction_description = f"Maintenance cost for {building_type} (ID: {building_id})"
-            if update_user_balance(owner_id, -maintenance_cost, deduction_description):
+            if update_citizen_balance(owner_id, -maintenance_cost, deduction_description):
                 # Add maintenance cost to ConsiglioDeiDieci
                 transfer_description = f"Maintenance fee collected from {owner_id} for {building_type} (ID: {building_id})"
-                if update_user_balance(CONSIGLIO_USER_ID, maintenance_cost, transfer_description):
+                if update_citizen_balance(CONSIGLIO_CITIZEN_ID, maintenance_cost, transfer_description):
                     logger.info(f"Successfully collected {maintenance_cost} ducats from {owner_id} for building {building_id}")
                     total_maintenance_collected += maintenance_cost
                     buildings_processed += 1
                 else:
-                    logger.error(f"Failed to transfer maintenance cost to {CONSIGLIO_USER_ID}")
+                    logger.error(f"Failed to transfer maintenance cost to {CONSIGLIO_CITIZEN_ID}")
                     buildings_with_errors += 1
             else:
                 logger.error(f"Failed to deduct maintenance cost from {owner_id}")

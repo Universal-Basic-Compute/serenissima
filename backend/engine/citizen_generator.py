@@ -74,7 +74,7 @@ FORMAT:
 Return the data as a valid JSON object with the fields listed above.
 """
 
-        user_prompt = f"Please create a single citizen of the {social_class} social class for our game. Return ONLY a valid JSON object with no additional text."
+        citizen_prompt = f"Please create a single citizen of the {social_class} social class for our game. Return ONLY a valid JSON object with no additional text."
         
         # Call Claude API
         response = requests.post(
@@ -90,8 +90,8 @@ Return the data as a valid JSON object with the fields listed above.
                 "system": system_prompt,
                 "messages": [
                     {
-                        "role": "user",
-                        "content": user_prompt
+                        "role": "citizen",
+                        "content": citizen_prompt
                     }
                 ]
             }

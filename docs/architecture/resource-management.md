@@ -234,7 +234,7 @@ interface ResourceCategory {
                                          └────────────────┘
 ```
 
-1. User clicks on a resource in ResourceDropdown
+1. Citizen clicks on a resource in ResourceDropdown
 2. Click handler captures the selected resource
 3. Selected resource state is updated
 4. ResourceDetailsModal is shown with the selected resource details

@@ -11,7 +11,7 @@ export class DataService {
   private polygonsCache: any[] = [];
   private buildingsCache: any[] = [];
   private landOwnersCache: Record<string, string> = {};
-  private usersCache: Record<string, any> = {};
+  private citizensCache: Record<string, any> = {};
   private incomeDataCache: Record<string, number> = {};
   private citizensCache: any[] = [];
   private citizensByBuildingCache: Record<string, any[]> = {};
@@ -20,7 +20,7 @@ export class DataService {
   private polygonsLoaded: boolean = false;
   private buildingsLoaded: boolean = false;
   private landOwnersLoaded: boolean = false;
-  private usersLoaded: boolean = false;
+  private citizensLoaded: boolean = false;
   private incomeDataLoaded: boolean = false;
   private citizensLoaded: boolean = false;
   
@@ -28,7 +28,7 @@ export class DataService {
   private isLoadingPolygons: boolean = false;
   private isLoadingBuildings: boolean = false;
   private isLoadingLandOwners: boolean = false;
-  private isLoadingUsers: boolean = false;
+  private isLoadingCitizens: boolean = false;
   private isLoadingIncomeData: boolean = false;
   private isLoadingCitizens: boolean = false;
 
@@ -236,74 +236,74 @@ export class DataService {
   }
 
   /**
-   * Load users data
+   * Load citizens data
    */
-  public async loadUsers(): Promise<Record<string, any>> {
-    if (this.usersLoaded) {
-      return this.usersCache;
+  public async loadCitizens(): Promise<Record<string, any>> {
+    if (this.citizensLoaded) {
+      return this.citizensCache;
     }
     
-    if (this.isLoadingUsers) {
+    if (this.isLoadingCitizens) {
       // Wait for the current loading to complete
       return new Promise((resolve) => {
         const checkInterval = setInterval(() => {
-          if (!this.isLoadingUsers) {
+          if (!this.isLoadingCitizens) {
             clearInterval(checkInterval);
-            resolve(this.usersCache);
+            resolve(this.citizensCache);
           }
         }, 100);
       });
     }
     
-    this.isLoadingUsers = true;
+    this.isLoadingCitizens = true;
     
     try {
       const apiUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-      const response = await fetch(`${apiUrl}/api/users`);
+      const response = await fetch(`${apiUrl}/api/citizens`);
       
       if (response.ok) {
         const data = await response.json();
         if (data && Array.isArray(data)) {
-          const usersMap: Record<string, any> = {};
-          data.forEach(user => {
-            if (user.user_name) {
-              usersMap[user.user_name] = user;
+          const citizensMap: Record<string, any> = {};
+          data.forEach(citizen => {
+            if (citizen.citizen_name) {
+              citizensMap[citizen.citizen_name] = citizen;
             }
           });
           
           // Ensure ConsiglioDeiDieci is always present
-          if (!usersMap['ConsiglioDeiDieci']) {
-            usersMap['ConsiglioDeiDieci'] = {
-              user_name: 'ConsiglioDeiDieci',
+          if (!citizensMap['ConsiglioDeiDieci']) {
+            citizensMap['ConsiglioDeiDieci'] = {
+              citizen_name: 'ConsiglioDeiDieci',
               color: '#8B0000', // Dark red
               coat_of_arms_image: null
             }
           }
           
-          this.usersCache = usersMap;
-          this.usersLoaded = true;
+          this.citizensCache = citizensMap;
+          this.citizensLoaded = true;
         }
       }
       
-      return this.usersCache;
+      return this.citizensCache;
     } catch (error) {
-      console.warn('Error loading users data:', error);
+      console.warn('Error loading citizens data:', error);
       
-      // Create a default ConsiglioDeiDieci user as fallback
-      const fallbackUsers = {
+      // Create a default ConsiglioDeiDieci citizen as fallback
+      const fallbackCitizens = {
         'ConsiglioDeiDieci': {
-          user_name: 'ConsiglioDeiDieci',
+          citizen_name: 'ConsiglioDeiDieci',
           color: '#8B0000', // Dark red
           coat_of_arms_image: null
         }
       };
       
-      this.usersCache = fallbackUsers;
-      this.usersLoaded = true;
+      this.citizensCache = fallbackCitizens;
+      this.citizensLoaded = true;
       
-      return this.usersCache;
+      return this.citizensCache;
     } finally {
-      this.isLoadingUsers = false;
+      this.isLoadingCitizens = false;
     }
   }
 
@@ -554,10 +554,10 @@ export class DataService {
   }
   
   /**
-   * Get users
+   * Get citizens
    */
-  public getUsers(): Record<string, any> {
-    return this.usersCache;
+  public getCitizens(): Record<string, any> {
+    return this.citizensCache;
   }
   
   /**
@@ -624,7 +624,7 @@ export class DataService {
   /**
    * Reset cache for a specific data type
    */
-  public resetCache(dataType: 'polygons' | 'buildings' | 'landOwners' | 'users' | 'incomeData' | 'citizens' | 'all'): void {
+  public resetCache(dataType: 'polygons' | 'buildings' | 'landOwners' | 'citizens' | 'incomeData' | 'citizens' | 'all'): void {
     if (dataType === 'polygons' || dataType === 'all') {
       this.polygonsCache = [];
       this.polygonsLoaded = false;
@@ -640,9 +640,9 @@ export class DataService {
       this.landOwnersLoaded = false;
     }
     
-    if (dataType === 'users' || dataType === 'all') {
-      this.usersCache = {};
-      this.usersLoaded = false;
+    if (dataType === 'citizens' || dataType === 'all') {
+      this.citizensCache = {};
+      this.citizensLoaded = false;
     }
     
     if (dataType === 'incomeData' || dataType === 'all') {

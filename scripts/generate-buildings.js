@@ -145,7 +145,7 @@ async function saveBuildingsToAirtable(buildings) {
           Type: building.type,
           Land: building.land_id,
           Variant: building.variant,
-          User: building.owner,
+          Citizen: building.owner,
           Position: building.position,
           CreatedAt: building.created_at
         }

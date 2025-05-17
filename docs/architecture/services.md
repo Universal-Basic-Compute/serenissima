@@ -22,13 +22,13 @@ Services are implemented as TypeScript classes with well-defined interfaces. Eac
 
 ## Core Services
 
-### UserService
+### CitizenService
 
-Responsible for user authentication, profile management, and preferences.
+Responsible for citizen authentication, profile management, and preferences.
 
 ```typescript
-export interface UserProfile {
-  username: string;
+export interface CitizenProfile {
+  citizenname: string;
   firstName: string;
   lastName: string;
   coatOfArmsImage: string | null;
@@ -39,12 +39,12 @@ export interface UserProfile {
   walletAddress?: string;
 }
 
-export class UserService {
-  public getCurrentUser(): UserProfile | null;
+export class CitizenService {
+  public getCurrentCitizen(): CitizenProfile | null;
   public getWalletAddress(): string | null;
-  public connectWallet(address: string): Promise<UserProfile | null>;
+  public connectWallet(address: string): Promise<CitizenProfile | null>;
   public disconnectWallet(): void;
-  public updateUserProfile(profile: Partial<UserProfile>): Promise<UserProfile | null>;
+  public updateCitizenProfile(profile: Partial<CitizenProfile>): Promise<CitizenProfile | null>;
   public configureCaching(config: Partial<CacheConfig>): void;
   public clearCache(): void;
 }
@@ -111,7 +111,7 @@ export interface RoadData {
 
 export class RoadService {
   public static getInstance(): RoadService;
-  public saveRoad(points: THREE.Vector3[], curvature: number, userId?: string, landId?: string): RoadData;
+  public saveRoad(points: THREE.Vector3[], curvature: number, citizenId?: string, landId?: string): RoadData;
   public getRoads(): RoadData[];
   public getRoadById(id: string): RoadData | undefined;
   public deleteRoad(id: string): boolean;
@@ -162,10 +162,10 @@ Services are registered and discovered through a simple service locator pattern:
 
 ```typescript
 // Service registration
-ServiceLocator.register('userService', new UserService());
+ServiceLocator.register('citizenService', new CitizenService());
 
 // Service discovery
-const userService = ServiceLocator.get<UserService>('userService');
+const citizenService = ServiceLocator.get<CitizenService>('citizenService');
 ```
 
 ## Error Handling
@@ -210,7 +210,7 @@ Example usage:
  * @throws {ValidationError} If address is invalid
  * @throws {ApiError} If API request fails
  */
-public async connectWallet(address: string): Promise<UserProfile | null> {
+public async connectWallet(address: string): Promise<CitizenProfile | null> {
   if (!address || address.trim() === '') {
     throw new ValidationError('Wallet address cannot be empty', 'address');
   }
@@ -236,7 +236,7 @@ Consumers should handle these typed errors appropriately:
 
 ```typescript
 try {
-  await userService.connectWallet(address);
+  await citizenService.connectWallet(address);
 } catch (error) {
   if (error instanceof ValidationError) {
     // Handle validation error

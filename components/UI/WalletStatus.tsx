@@ -15,13 +15,13 @@ export default function WalletStatus({ className = '' }: WalletStatusProps) {
       setWalletAddress(storedWallet);
       
       // Attempt to reconnect with the stored wallet address
-      // This ensures user data is properly loaded
+      // This ensures citizen data is properly loaded
       const reconnectWallet = async () => {
         try {
-          // Import the UserService to reconnect the wallet
-          const { getUserService } = await import('@/lib/services/UserService');
-          const userService = getUserService();
-          await userService.connectWallet(storedWallet);
+          // Import the CitizenService to reconnect the wallet
+          const { getCitizenService } = await import('@/lib/services/CitizenService');
+          const citizenService = getCitizenService();
+          await citizenService.connectWallet(storedWallet);
           console.log('Successfully reconnected wallet from storage');
         } catch (error) {
           console.error('Error reconnecting stored wallet:', error);

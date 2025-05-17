@@ -20,7 +20,7 @@ const ExtendedEventTypes = {
 // Loan store
 export interface LoanState {
   availableLoans: LoanData[];
-  userLoans: LoanData[];
+  citizenLoans: LoanData[];
   selectedLoan: LoanData | null;
   loading: boolean;
   error: string | null;
@@ -28,7 +28,7 @@ export interface LoanState {
 
 export interface LoanActions {
   loadAvailableLoans: () => Promise<LoanData[]>;
-  loadUserLoans: (userId: string) => Promise<LoanData[]>;
+  loadCitizenLoans: (citizenId: string) => Promise<LoanData[]>;
   setSelectedLoan: (loan: LoanData | null) => void;
   applyForLoan: (application: any) => Promise<LoanData>;
   makePayment: (loanId: string, amount: number) => Promise<LoanData>;
@@ -37,7 +37,7 @@ export interface LoanActions {
 
 export const useLoanStore = create<LoanState & LoanActions>((set, get) => ({
   availableLoans: [],
-  userLoans: [],
+  citizenLoans: [],
   selectedLoan: null,
   loading: false,
   error: null,
@@ -60,12 +60,12 @@ export const useLoanStore = create<LoanState & LoanActions>((set, get) => ({
     }
   },
   
-  loadUserLoans: async (userId) => {
+  loadCitizenLoans: async (citizenId) => {
     set({ loading: true, error: null });
     try {
       const loanService = LoanService.getInstance();
-      const loans = await loanService.getUserLoans(userId);
-      set({ userLoans: loans, loading: false });
+      const loans = await loanService.getCitizenLoans(citizenId);
+      set({ citizenLoans: loans, loading: false });
       return loans;
     } catch (error) {
       set({ error: error instanceof Error ? error.message : String(error), loading: false });
@@ -90,9 +90,9 @@ export const useLoanStore = create<LoanState & LoanActions>((set, get) => ({
         set({ availableLoans });
       }
       
-      // Update user loans
-      const userLoans = [...get().userLoans, loan];
-      set({ userLoans, loading: false });
+      // Update citizen loans
+      const citizenLoans = [...get().citizenLoans, loan];
+      set({ citizenLoans, loading: false });
       
       // Emit event for loan application
       eventBus.emit(ExtendedEventTypes.LOAN_APPLIED, { 
@@ -113,12 +113,12 @@ export const useLoanStore = create<LoanState & LoanActions>((set, get) => ({
       const loanService = LoanService.getInstance();
       const updatedLoan = await loanService.makePayment(loanId, amount);
       
-      // Update user loans
-      const userLoans = get().userLoans.map(loan => 
+      // Update citizen loans
+      const citizenLoans = get().citizenLoans.map(loan => 
         loan.id === loanId ? updatedLoan : loan
       );
       
-      set({ userLoans, loading: false });
+      set({ citizenLoans, loading: false });
       
       // Emit event for loan payment
       eventBus.emit(ExtendedEventTypes.LOAN_PAYMENT_MADE, { 

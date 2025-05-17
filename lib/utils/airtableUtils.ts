@@ -75,7 +75,7 @@ export const airtableUtils = {
         },
         body: JSON.stringify({
           wallet_address: walletAddress,
-          ducats: amount, // Send the whole token amount as entered by the user
+          ducats: amount, // Send the whole token amount as entered by the citizen
         }),
       });
       

@@ -16,7 +16,7 @@ This document outlines the target architecture for La Serenissima, a 3D interact
 
 The application is organized into the following layers:
 
-1. **UI Layer**: React components for user interface
+1. **UI Layer**: React components for citizen interface
 2. **Service Layer**: Business logic and data access
 3. **State Management**: Centralized state store
 4. **Event System**: Communication between components

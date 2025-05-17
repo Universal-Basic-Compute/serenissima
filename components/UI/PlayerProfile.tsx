@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import AnimatedDucats from './AnimatedDucats';
 
 interface PlayerProfileProps {
-  username?: string;
+  citizenname?: string;
   firstName?: string;
   lastName?: string;
   coatOfArmsImage?: string | null;
@@ -17,11 +17,11 @@ interface PlayerProfileProps {
   onSettingsClick?: () => void; // Add this new prop
 }
 
-// Add a cache for user profiles to avoid redundant fetches
-const userProfileCache: Record<string, any> = {};
+// Add a cache for citizen profiles to avoid redundant fetches
+const citizenProfileCache: Record<string, any> = {};
 
 const PlayerProfile: React.FC<PlayerProfileProps> = ({
-  username,
+  citizenname,
   firstName,
   lastName,
   coatOfArmsImage,
@@ -35,9 +35,9 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
   showDucats = true, // Default to showing ducats
   onSettingsClick
 }) => {
-  // Add state for user data
-  const [userData, setUserData] = useState<{
-    username: string;
+  // Add state for citizen data
+  const [citizenData, setCitizenData] = useState<{
+    citizenname: string;
     firstName: string;
     lastName: string;
     coatOfArmsImage: string | null;
@@ -50,12 +50,12 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
   
   // No scrollbar styles needed
 
-  // Fetch user data if wallet address is provided but no direct data
+  // Fetch citizen data if wallet address is provided but no direct data
   useEffect(() => {
-    // If we already have the username and other data, use that
-    if (username && firstName && lastName) {
-      setUserData({
-        username,
+    // If we already have the citizenname and other data, use that
+    if (citizenname && firstName && lastName) {
+      setCitizenData({
+        citizenname,
         firstName,
         lastName,
         coatOfArmsImage: coatOfArmsImage || null,
@@ -68,14 +68,14 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
     // Listen for profile updates
     const handleProfileUpdate = (event: CustomEvent) => {
       if (event.detail && (
-          (username && event.detail.user_name === username) || 
+          (citizenname && event.detail.citizen_name === citizenname) || 
           (walletAddress && event.detail.wallet_address === walletAddress)
         )) {
-        console.log(`Received profile update for ${username || walletAddress} with compute: ${event.detail.ducats}`);
-        setUserData({
-          username: event.detail.user_name || username || 'Unknown',
-          firstName: event.detail.first_name || event.detail.user_name?.split(' ')[0] || firstName || 'Unknown',
-          lastName: event.detail.last_name || event.detail.user_name?.split(' ').slice(1).join(' ') || lastName || 'User',
+        console.log(`Received profile update for ${citizenname || walletAddress} with compute: ${event.detail.ducats}`);
+        setCitizenData({
+          citizenname: event.detail.citizen_name || citizenname || 'Unknown',
+          firstName: event.detail.first_name || event.detail.citizen_name?.split(' ')[0] || firstName || 'Unknown',
+          lastName: event.detail.last_name || event.detail.citizen_name?.split(' ').slice(1).join(' ') || lastName || 'Citizen',
           coatOfArmsImage: event.detail.coat_of_arms_image || coatOfArmsImage,
           familyMotto: event.detail.family_motto || familyMotto,
           Ducats: event.detail.ducats
@@ -83,13 +83,13 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
       }
     };
     
-    window.addEventListener('userProfileUpdated', handleProfileUpdate as EventListener);
+    window.addEventListener('citizenProfileUpdated', handleProfileUpdate as EventListener);
     
     return () => {
-      window.removeEventListener('userProfileUpdated', handleProfileUpdate as EventListener);
+      window.removeEventListener('citizenProfileUpdated', handleProfileUpdate as EventListener);
     };
     
-  }, [walletAddress, username, firstName, lastName, coatOfArmsImage]);
+  }, [walletAddress, citizenname, firstName, lastName, coatOfArmsImage]);
 
   // Determine sizes based on the size prop
   const dimensions = {
@@ -97,28 +97,28 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
       container: 'w-14 max-w-full',
       image: 'w-10 h-10',
       initials: 'w-10 h-10 text-xs',
-      username: 'text-xs truncate',
+      citizenname: 'text-xs truncate',
       name: 'text-xs truncate'
     },
     small: {
       container: 'w-18 max-w-full',
       image: 'w-14 h-14',
       initials: 'w-14 h-14 text-sm',
-      username: 'text-sm truncate',
+      citizenname: 'text-sm truncate',
       name: 'text-xs truncate'
     },
     medium: {
       container: 'w-32 max-w-full',
       image: 'w-24 h-24',
       initials: 'w-24 h-24 text-lg',
-      username: 'text-base font-semibold truncate',
+      citizenname: 'text-base font-semibold truncate',
       name: 'text-sm truncate'
     },
     large: {
       container: 'w-40 max-w-full',
       image: 'w-32 h-32',
       initials: 'w-32 h-32 text-2xl',
-      username: 'text-lg font-semibold truncate',
+      citizenname: 'text-lg font-semibold truncate',
       name: 'text-base truncate'
     }
   };
@@ -132,7 +132,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
         <div className={`${dim.image} rounded-full border-2 border-amber-300 bg-amber-50 flex items-center justify-center`}>
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-amber-700"></div>
         </div>
-        <div className={`${dim.username} text-center mt-1 text-gray-400`}>Loading...</div>
+        <div className={`${dim.citizenname} text-center mt-1 text-gray-400`}>Loading...</div>
       </div>
     );
   }
@@ -143,10 +143,10 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
   };
 
   // Use either provided data or fetched data
-  const displayData = userData || {
-    username: username || 'Unknown',
+  const displayData = citizenData || {
+    citizenname: citizenname || 'Unknown',
     firstName: firstName || 'Unknown',
-    lastName: lastName || 'User',
+    lastName: lastName || 'Citizen',
     coatOfArmsImage: coatOfArmsImage,
     Ducats: Ducats !== undefined ? Ducats : 0,
     // Don't add any default color here
@@ -164,7 +164,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
           <div className="rounded-full border-3 border-amber-600 overflow-hidden bg-amber-50 flex items-center justify-center shadow-md mx-auto">
             <img 
               src={displayData.coatOfArmsImage} 
-              alt={`${displayData.username}'s Coat of Arms`}
+              alt={`${displayData.citizenname}'s Coat of Arms`}
               className={`${dim.image} object-cover`}
               onError={(e) => {
                 console.error('Error loading coat of arms image in PlayerProfile:', displayData.coatOfArmsImage);
@@ -185,9 +185,9 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
           </div>
         )}
         
-        {/* Username */}
-        <div className={`${dim.username} font-medium text-center mt-1 w-full username-text truncate px-1`}>
-          {displayData.username}
+        {/* Citizenname */}
+        <div className={`${dim.citizenname} font-medium text-center mt-1 w-full citizenname-text truncate px-1`}>
+          {displayData.citizenname}
         </div>
         
         {/* Ducats (Ducats) */}
@@ -204,9 +204,9 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
         )}
         
         {/* Family Motto - Replace the Full Name section */}
-        {(userData?.familyMotto || familyMotto) && (
+        {(citizenData?.familyMotto || familyMotto) && (
           <div className={`${dim.name} italic text-amber-600 text-center mt-1 w-full font-light motto-text line-clamp-2`}>
-            "{userData?.familyMotto || familyMotto}"
+            "{citizenData?.familyMotto || familyMotto}"
           </div>
         )}
       </div>
@@ -228,7 +228,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
         
         /* Add responsive text sizing */
         @media (max-width: 480px) {
-          .username-text {
+          .citizenname-text {
             font-size: 0.75rem;
             white-space: nowrap;
             overflow: hidden;

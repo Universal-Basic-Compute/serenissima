@@ -6,8 +6,8 @@ const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
 const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
 
 interface GuildMember {
-  userId: string;
-  username: string;
+  citizenId: string;
+  citizenname: string;
   firstName: string;
   lastName: string;
   coatOfArmsImage: string | null;
@@ -51,13 +51,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Guild has no ID field' }, { status: 404 });
     }
 
-    const records = await base('USERS').select({
+    const records = await base('CITIZENS').select({
       filterByFormula: `{GuildId} = '${actualGuildId}'`
     }).all();
 
     const members: GuildMember[] = records.map(record => ({
-      userId: record.id,
-      username: record.get('UserName') as string,
+      citizenId: record.id,
+      citizenname: record.get('CitizenName') as string,
       firstName: record.get('FirstName') as string,
       lastName: record.get('LastName') as string,
       coatOfArmsImage: record.get('CoatOfArmsImage') as string || null,

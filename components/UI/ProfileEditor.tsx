@@ -7,33 +7,33 @@ interface ProfileEditorProps {
 }
 
 const ProfileEditor: React.FC<ProfileEditorProps> = ({ onClose, onSuccess }) => {
-  const { userProfile } = useWalletContext();
+  const { citizenProfile } = useWalletContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
   // Form state
-  const [username, setUsername] = useState('');
+  const [citizenname, setCitizenname] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [familyMotto, setFamilyMotto] = useState('');
   const [coatOfArmsImage, setCoatOfArmsImage] = useState('');
   
-  // Initialize form with current user data
+  // Initialize form with current citizen data
   useEffect(() => {
-    if (userProfile) {
-      setUsername(userProfile.username || '');
-      setFirstName(userProfile.firstName || '');
-      setLastName(userProfile.lastName || '');
-      setFamilyMotto(userProfile.familyMotto || '');
-      setCoatOfArmsImage(userProfile.coatOfArmsImage || '');
+    if (citizenProfile) {
+      setCitizenname(citizenProfile.citizenname || '');
+      setFirstName(citizenProfile.firstName || '');
+      setLastName(citizenProfile.lastName || '');
+      setFamilyMotto(citizenProfile.familyMotto || '');
+      setCoatOfArmsImage(citizenProfile.coatOfArmsImage || '');
     }
-  }, [userProfile]);
+  }, [citizenProfile]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!userProfile || !userProfile.id) {
-      setError('User profile not found');
+    if (!citizenProfile || !citizenProfile.id) {
+      setError('Citizen profile not found');
       return;
     }
     
@@ -41,14 +41,14 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({ onClose, onSuccess }) => 
     setError(null);
     
     try {
-      const response = await fetch('/api/users/update', {
+      const response = await fetch('/api/citizens/update', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          id: userProfile.id,
-          username,
+          id: citizenProfile.id,
+          citizenname,
           firstName,
           lastName,
           familyMotto,
@@ -60,16 +60,16 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({ onClose, onSuccess }) => 
       
       if (data.success) {
         // Update local storage with the new profile data
-        localStorage.setItem('userProfile', JSON.stringify(data.user));
+        localStorage.setItem('citizenProfile', JSON.stringify(data.citizen));
         
         // Dispatch an event to notify other components about the profile update
-        window.dispatchEvent(new CustomEvent('userProfileUpdated', { 
-          detail: data.user 
+        window.dispatchEvent(new CustomEvent('citizenProfileUpdated', { 
+          detail: data.citizen 
         }));
         
         // Call the success callback if provided
         if (onSuccess) {
-          onSuccess(data.user);
+          onSuccess(data.citizen);
         }
         
         // Close the editor
@@ -108,16 +108,16 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({ onClose, onSuccess }) => 
         
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="username" className="block text-amber-800 font-medium mb-1">
-              Username
+            <label htmlFor="citizenname" className="block text-amber-800 font-medium mb-1">
+              Citizenname
             </label>
             <input
               type="text"
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              id="citizenname"
+              value={citizenname}
+              onChange={(e) => setCitizenname(e.target.value)}
               className="w-full p-2 border border-amber-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
-              placeholder="Your public username"
+              placeholder="Your public citizenname"
             />
           </div>
           

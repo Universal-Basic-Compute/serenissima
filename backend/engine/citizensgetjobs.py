@@ -150,13 +150,13 @@ def assign_citizen_to_business(tables, citizen: Dict, business: Dict) -> bool:
         log.error(f"Error assigning citizen to building: {e}")
         return False
 
-def create_notification(tables, user: str, content: str, details: Dict) -> Optional[Dict]:
-    """Create a notification for a user."""
-    log.info(f"Creating notification for user {user}: {content}")
+def create_notification(tables, citizen: str, content: str, details: Dict) -> Optional[Dict]:
+    """Create a notification for a citizen."""
+    log.info(f"Creating notification for citizen {citizen}: {content}")
     
-    # Skip notification if user is empty or None
-    if not user:
-        log.warning(f"Cannot create notification: user is empty")
+    # Skip notification if citizen is empty or None
+    if not citizen:
+        log.warning(f"Cannot create notification: citizen is empty")
         return None
     
     try:
@@ -169,13 +169,13 @@ def create_notification(tables, user: str, content: str, details: Dict) -> Optio
             "Details": json.dumps(details),
             "CreatedAt": now,
             "ReadAt": None,
-            "User": user
+            "Citizen": citizen
         })
         
         log.info(f"Created notification: {notification['id']}")
         return notification
     except Exception as e:
-        log.error(f"Error creating notification for user {user}: {e}")
+        log.error(f"Error creating notification for citizen {citizen}: {e}")
         return None
 
 def create_admin_summary(tables, assignment_summary) -> None:
@@ -200,7 +200,7 @@ def create_admin_summary(tables, assignment_summary) -> None:
             "Details": json.dumps(details),
             "CreatedAt": datetime.datetime.now().isoformat(),
             "ReadAt": None,
-            "User": "NLR"  # Admin user
+            "Citizen": "NLR"  # Admin citizen
         })
         
         log.info(f"Created admin summary notification")
@@ -271,7 +271,7 @@ def assign_jobs_to_citizens(dry_run: bool = False):
         "by_business_type": assignments_by_type
     }
     
-    # Create a notification for the admin user with the assignment summary
+    # Create a notification for the admin citizen with the assignment summary
     if assigned_count > 0 and not dry_run:
         create_admin_summary(tables, assignment_summary)
 

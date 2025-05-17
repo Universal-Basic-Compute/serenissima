@@ -15,14 +15,14 @@ The application state is organized into domains:
 
 ```typescript
 interface RootState {
-  user: UserState;
+  citizen: CitizenState;
   polygons: PolygonState;
   transactions: TransactionState;
   ui: UIState;
 }
 
-interface UserState {
-  profile: UserProfile | null;
+interface CitizenState {
+  profile: CitizenProfile | null;
   walletAddress: string | null;
   loading: boolean;
   error: string | null;
@@ -88,8 +88,8 @@ We use Zustand for state management, which provides:
 Each domain has its own store:
 
 ```typescript
-// User store
-export const useUserStore = create<UserState & UserActions>((set) => ({
+// Citizen store
+export const useCitizenStore = create<CitizenState & CitizenActions>((set) => ({
   profile: null,
   walletAddress: null,
   loading: false,
@@ -97,7 +97,7 @@ export const useUserStore = create<UserState & UserActions>((set) => ({
   
   setProfile: (profile) => set({ profile }),
   setWalletAddress: (address) => set({ walletAddress: address }),
-  clearUser: () => set({ profile: null, walletAddress: null }),
+  clearCitizen: () => set({ profile: null, walletAddress: null }),
   // ...other actions
 }));
 
@@ -209,7 +209,7 @@ Components access state through hooks:
 
 ```typescript
 const MyComponent = () => {
-  const { profile, walletAddress } = useUserStore();
+  const { profile, walletAddress } = useCitizenStore();
   const { selectedPolygonId, setSelectedPolygonId } = usePolygonStore();
   
   // Component logic
@@ -259,13 +259,13 @@ export const usePolygonStore = create<PolygonState & PolygonActions>((set, get) 
 Critical state is persisted to localStorage:
 
 ```typescript
-export const useUserStore = create<UserState & UserActions>(
+export const useCitizenStore = create<CitizenState & CitizenActions>(
   persist(
     (set) => ({
       // ...state and actions
     }),
     {
-      name: 'user-storage',
+      name: 'citizen-storage',
       getStorage: () => localStorage,
     }
   )
@@ -280,7 +280,7 @@ State is synchronized with the server through services:
 const updateProfile = async (profile) => {
   set({ loading: true, error: null });
   try {
-    const updatedProfile = await userService.updateUserProfile(profile);
+    const updatedProfile = await citizenService.updateCitizenProfile(profile);
     set({ profile: updatedProfile, loading: false });
   } catch (error) {
     set({ error: error.message, loading: false });

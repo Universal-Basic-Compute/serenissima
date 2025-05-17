@@ -7,11 +7,11 @@ const base = new Airtable({
   apiKey: process.env.AIRTABLE_API_KEY
 }).base(process.env.AIRTABLE_BASE_ID || '');
 
-const USERS_TABLE = 'USERS';
+const CITIZENS_TABLE = 'CITIZENS';
 
 // Helper function to extract wallet address from the request
 function extractWalletAddressFromRequest(request: NextRequest): string | null {
-  const match = request.nextUrl.pathname.match(/\/api\/users\/wallet\/([^/]+)/);
+  const match = request.nextUrl.pathname.match(/\/api\/citizens\/wallet\/([^/]+)/);
   return match?.[1] ?? null;
 }
 
@@ -26,41 +26,41 @@ export async function GET(request: NextRequest) {
       );
     }
     
-    // Find user by wallet address
-    const users = await base(USERS_TABLE)
+    // Find citizen by wallet address
+    const citizens = await base(CITIZENS_TABLE)
       .select({
         filterByFormula: `{Wallet} = "${walletAddress}"`,
         maxRecords: 1
       })
       .firstPage();
     
-    if (!users || users.length === 0) {
+    if (!citizens || citizens.length === 0) {
       return NextResponse.json(
-        { success: false, error: 'User not found' },
+        { success: false, error: 'Citizen not found' },
         { status: 404 }
       );
     }
     
-    const user = users[0];
+    const citizen = citizens[0];
     
     return NextResponse.json({
       success: true,
-      user: {
-        id: user.id,
-        walletAddress: user.fields.Wallet,
-        username: user.fields.Username || null,
-        firstName: user.fields.FirstName || null,
-        lastName: user.fields.LastName || null,
-        ducats: user.fields.Ducats || 0,
-        coatOfArmsImage: user.fields.CoatOfArmsImage || null,
-        familyMotto: user.fields.FamilyMotto || null,
-        createdAt: user.fields.CreatedAt || null
+      citizen: {
+        id: citizen.id,
+        walletAddress: citizen.fields.Wallet,
+        citizenname: citizen.fields.Citizenname || null,
+        firstName: citizen.fields.FirstName || null,
+        lastName: citizen.fields.LastName || null,
+        ducats: citizen.fields.Ducats || 0,
+        coatOfArmsImage: citizen.fields.CoatOfArmsImage || null,
+        familyMotto: citizen.fields.FamilyMotto || null,
+        createdAt: citizen.fields.CreatedAt || null
       }
     });
   } catch (error) {
-    console.error('Error fetching user by wallet address:', error);
+    console.error('Error fetching citizen by wallet address:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch user' },
+      { success: false, error: 'Failed to fetch citizen' },
       { status: 500 }
     );
   }

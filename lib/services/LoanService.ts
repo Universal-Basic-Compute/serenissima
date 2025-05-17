@@ -89,14 +89,14 @@ export class LoanService {
   }
   
   /**
-   * Get active loans for a user
+   * Get active loans for a citizen
    */
-  public async getUserLoans(userId: string): Promise<LoanData[]> {
+  public async getCitizenLoans(citizenId: string): Promise<LoanData[]> {
     try {
-      const response = await fetch(`${getBackendBaseUrl()}/api/loans/user/${userId}`);
+      const response = await fetch(`${getBackendBaseUrl()}/api/loans/citizen/${citizenId}`);
       
       if (!response.ok) {
-        throw new Error(`Failed to load user loans: ${response.status} ${response.statusText}`);
+        throw new Error(`Failed to load citizen loans: ${response.status} ${response.statusText}`);
       }
       
       return await response.json();

@@ -253,14 +253,14 @@ This process simulates the rental economy of Venice, with citizens paying rent f
 
 **Script**: `backend/ais/bidonlands.py`
 
-Every day at 7:00 PM UTC, the AI land bidding system allows AI users to participate in the land market:
+Every day at 7:00 PM UTC, the AI land bidding system allows AI citizens to participate in the land market:
 
-1. The script identifies all users marked as AI in the system
-2. For each AI user, it checks their compute balance and existing bids
-3. For lands with income potential, AI users will:
+1. The script identifies all citizens marked as AI in the system
+2. For each AI citizen, it checks their compute balance and existing bids
+3. For lands with income potential, AI citizens will:
    - Place new bids (at 30x the land's last income) if they have sufficient compute
    - Increase existing bids by 14% if they already have a bid on the land
-4. AI users only bid if they have at least twice the bid amount in their compute balance
+4. AI citizens only bid if they have at least twice the bid amount in their compute balance
 5. An admin notification is created with statistics about all bidding activity
 
 This process creates a dynamic land market with AI participation, ensuring that valuable lands receive competitive bids even without human players bidding on them.
@@ -269,27 +269,27 @@ This process creates a dynamic land market with AI participation, ensuring that 
 
 **Script**: `backend/ais/buildbuildings.py`
 
-Every day at 8:00 PM UTC, the AI building construction system allows AI users to develop lands they own:
+Every day at 8:00 PM UTC, the AI building construction system allows AI citizens to develop lands they own:
 
-1. The script identifies all users marked as AI in the system
-2. For each AI user, it checks their compute balance and lands they own
-3. For each land with available building points, AI users will:
+1. The script identifies all citizens marked as AI in the system
+2. For each AI citizen, it checks their compute balance and lands they own
+3. For each land with available building points, AI citizens will:
    - Evaluate which building types can fit within the remaining points
    - Prioritize buildings with higher income potential
    - Construct buildings if they have sufficient compute
-4. AI users only build if they have at least twice the building cost in their compute balance
+4. AI citizens only build if they have at least twice the building cost in their compute balance
 5. An admin notification is created with statistics about all building activity
 
-This process encourages land development and creates a more dynamic game world, with AI users actively improving their properties and generating income through building operations.
+This process encourages land development and creates a more dynamic game world, with AI citizens actively improving their properties and generating income through building operations.
 
 ### AI Lease Adjustments (9:00 PM UTC)
 
 **Script**: `backend/ais/adjustleases.py`
 
-Every day at 9:00 PM UTC, the AI lease adjustment system allows AI users to optimize lease amounts for buildings on their lands:
+Every day at 9:00 PM UTC, the AI lease adjustment system allows AI citizens to optimize lease amounts for buildings on their lands:
 
-1. The script identifies all users marked as AI in the system
-2. For each AI user, it analyzes their lands, buildings, and financial situation
+1. The script identifies all citizens marked as AI in the system
+2. For each AI citizen, it analyzes their lands, buildings, and financial situation
 3. The AI makes strategic decisions about lease adjustments based on:
    - Building income and maintenance costs
    - Land value and location
@@ -307,10 +307,10 @@ This process creates a more dynamic real estate market with AI landowners active
 
 **Script**: `backend/ais/adjustrents.py`
 
-Every day at 10:00 PM UTC, the AI rent adjustment system allows AI users to optimize rent amounts for buildings they own:
+Every day at 10:00 PM UTC, the AI rent adjustment system allows AI citizens to optimize rent amounts for buildings they own:
 
-1. The script identifies all users marked as AI in the system
-2. For each AI user, it analyzes their buildings and occupants
+1. The script identifies all citizens marked as AI in the system
+2. For each AI citizen, it analyzes their buildings and occupants
 3. The AI makes strategic decisions about rent adjustments based on:
    - Building income and maintenance costs
    - Occupant social class and wealth
@@ -329,10 +329,10 @@ This process creates a more dynamic housing market with AI building owners activ
 
 **Script**: `backend/ais/adjustwages.py`
 
-Every day at 11:00 PM UTC, the AI wage adjustment system allows AI users to optimize wage amounts for businesses they own:
+Every day at 11:00 PM UTC, the AI wage adjustment system allows AI citizens to optimize wage amounts for businesses they own:
 
-1. The script identifies all users marked as AI in the system
-2. For each AI user, it analyzes their businesses and employees
+1. The script identifies all citizens marked as AI in the system
+2. For each AI citizen, it analyzes their businesses and employees
 3. The AI makes strategic decisions about wage adjustments based on:
    - Business income and expenses
    - Employee social class and wealth
@@ -351,10 +351,10 @@ This process creates a more dynamic labor market with AI business owners activel
 
 **Script**: `backend/ais/answertomessages.py`
 
-Ten times per day (approximately every 2.4 hours), the AI message response system allows AI users to respond to messages they receive:
+Ten times per day (approximately every 2.4 hours), the AI message response system allows AI citizens to respond to messages they receive:
 
-1. The script identifies all users marked as AI in the system
-2. For each AI user, it checks for unread messages addressed to them
+1. The script identifies all citizens marked as AI in the system
+2. For each AI citizen, it checks for unread messages addressed to them
 3. For each unread message, the AI:
    - Marks the message as read
    - Generates a contextually appropriate response using the Kinos Engine API

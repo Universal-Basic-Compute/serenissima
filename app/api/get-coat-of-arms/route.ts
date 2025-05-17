@@ -8,11 +8,11 @@ dotenv.config();
 // Get Airtable credentials
 const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
 const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
-const AIRTABLE_USERS_TABLE = "USERS";
+const AIRTABLE_CITIZENS_TABLE = "CITIZENS";
 
 export async function GET() {
   try {
-    console.log("Fetching coat of arms data from Users Airtable...");
+    console.log("Fetching coat of arms data from Citizens Airtable...");
     
     // Initialize Airtable
     if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
@@ -28,21 +28,21 @@ export async function GET() {
       apiKey: AIRTABLE_API_KEY
     });
     
-    // Connect to the Users table
+    // Connect to the Citizens table
     const base = Airtable.base(AIRTABLE_BASE_ID);
     
-    // Fetch all records from the Users table
-    const records = await base(AIRTABLE_USERS_TABLE).select().all();
-    console.log(`Retrieved ${records.length} user records from Airtable`);
+    // Fetch all records from the Citizens table
+    const records = await base(AIRTABLE_CITIZENS_TABLE).select().all();
+    console.log(`Retrieved ${records.length} citizen records from Airtable`);
     
     // Extract coat of arms data from the records
     const coatOfArms: Record<string, string> = {};
     
     records.forEach(record => {
-      const username = record.get('Username');
+      const citizenname = record.get('Citizenname');
       const coatOfArmsImage = record.get('CoatOfArmsImage');
       
-      if (username && coatOfArmsImage) {
+      if (citizenname && coatOfArmsImage) {
         // Ensure the URL is properly formatted for production
         let imageUrl = coatOfArmsImage as string;
           
@@ -50,15 +50,15 @@ export async function GET() {
         imageUrl = `https://serenissima.ai${imageUrl}`;
         
         // Also add a local URL for fallback
-        const localUrl = `/coat-of-arms/${username}.png`;
+        const localUrl = `/coat-of-arms/${citizenname}.png`;
         
         // Store both URLs for better fallback options
-        coatOfArms[username as string] = imageUrl;
-        //console.log(`Coat of arms for ${username}: ${imageUrl} (local fallback: ${localUrl})`);
+        coatOfArms[citizenname as string] = imageUrl;
+        //console.log(`Coat of arms for ${citizenname}: ${imageUrl} (local fallback: ${localUrl})`);
       }
     });
     
-    console.log(`Extracted coat of arms data for ${Object.keys(coatOfArms).length} users`);
+    console.log(`Extracted coat of arms data for ${Object.keys(coatOfArms).length} citizens`);
     
     // Return the coat of arms data
     return NextResponse.json({ coatOfArms });

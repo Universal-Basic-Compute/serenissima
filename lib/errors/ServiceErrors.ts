@@ -81,7 +81,7 @@ export class DataFormatError extends ServiceError {
 }
 
 /**
- * Error thrown when user is not authorized to perform an action
+ * Error thrown when citizen is not authorized to perform an action
  */
 export class UnauthorizedActionError extends ServiceError {
   constructor(message: string) {

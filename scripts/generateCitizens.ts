@@ -250,8 +250,8 @@ FORMAT:
 Return the data as a valid JSON array with 10 objects, each containing the fields listed above.`;
 }
 
-// Generate the user prompt for Claude
-function generateUserPrompt(): string {
+// Generate the citizen prompt for Claude
+function generateCitizenPrompt(): string {
   return `Please generate 10 unique Venetian citizens for our game. 
   
 Each citizen should have these fields:
@@ -305,8 +305,8 @@ async function generateCitizensWithClaude(existingCitizens: Citizen[]): Promise<
           system: generateSystemPrompt(existingCitizens),
           messages: [
             {
-              role: "user",
-              content: generateUserPrompt()
+              role: "citizen",
+              content: generateCitizenPrompt()
             }
           ]
         },

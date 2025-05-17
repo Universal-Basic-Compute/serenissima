@@ -69,8 +69,8 @@ export const EventTypes = {
   LAND_PURCHASED: 'landPurchased',
   SHOW_LAND_PURCHASE_MODAL: 'showLandPurchaseModal',
   KEEP_LAND_DETAILS_PANEL_OPEN: 'keepLandDetailsPanelOpen',
-  USERS_DATA_LOADED: 'usersDataLoaded',
-  USER_PROFILE_UPDATED: 'userProfileUpdated',
+  CITIZENS_DATA_LOADED: 'citizensDataLoaded',
+  CITIZEN_PROFILE_UPDATED: 'citizenProfileUpdated',
   WALLET_CHANGED: 'walletChanged',
   BUILDING_PLACED: 'buildingPlaced',
   VIEW_MODE_CHANGED: 'viewModeChanged',
@@ -142,15 +142,15 @@ Events should include all necessary data for handlers:
 // Good event data
 eventBus.emit(EventTypes.LAND_OWNERSHIP_CHANGED, {
   landId: 'polygon-123',
-  newOwner: 'user-456',
-  previousOwner: 'user-789',
+  newOwner: 'citizen-456',
+  previousOwner: 'citizen-789',
   timestamp: Date.now()
 });
 
 // Bad event data (missing context)
 eventBus.emit(EventTypes.LAND_OWNERSHIP_CHANGED, {
   landId: 'polygon-123',
-  newOwner: 'user-456'
+  newOwner: 'citizen-456'
 });
 ```
 
@@ -194,13 +194,13 @@ Example:
  * Handlers:
  * - PolygonRenderer
  * - LandDetailsPanel
- * - UserProfile
+ * - CitizenProfile
  * 
  * Example:
  * eventBus.emit(EventTypes.LAND_OWNERSHIP_CHANGED, {
  *   landId: 'polygon-123',
- *   newOwner: 'user-456',
- *   previousOwner: 'user-789',
+ *   newOwner: 'citizen-456',
+ *   previousOwner: 'citizen-789',
  *   timestamp: Date.now()
  * });
  */
@@ -212,7 +212,7 @@ Example:
 /**
  * INTERACTION_CLICK
  * 
- * Emitted when a user clicks in the 3D scene.
+ * Emitted when a citizen clicks in the 3D scene.
  * 
  * Data:
  * - x: number - The client X coordinate of the click
@@ -238,7 +238,7 @@ Example:
 /**
  * INTERACTION_DRAG
  * 
- * Emitted when a user drags in the 3D scene.
+ * Emitted when a citizen drags in the 3D scene.
  * 
  * Data:
  * - x: number - The current client X coordinate

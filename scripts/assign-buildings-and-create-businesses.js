@@ -2,7 +2,7 @@
  * Building and Business Assignment Script
  * 
  * This script:
- * 1. Assigns specified building types to random users from a predefined list
+ * 1. Assigns specified building types to random citizens from a predefined list
  * 2. Creates corresponding business records for commercial buildings
  * 
  * Usage: node scripts/assign-buildings-and-create-businesses.js [--dry-run]
@@ -16,7 +16,7 @@ const { v4: uuidv4 } = require('uuid');
 const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base(process.env.AIRTABLE_BASE_ID);
 
 // Constants
-const USERS = ['Isabella', 'Marco', 'Sofia'];
+const CITIZENS = ['Isabella', 'Marco', 'Sofia'];
 
 // Building types to assign
 const BUILDING_TYPES = [
@@ -64,9 +64,9 @@ function getRandomItem(array) {
   return array[Math.floor(Math.random() * array.length)];
 }
 
-// Helper function to get a random user
-function getRandomUser() {
-  return getRandomItem(USERS);
+// Helper function to get a random citizen
+function getRandomCitizen() {
+  return getRandomItem(CITIZENS);
 }
 
 // Helper function to generate a business name based on building type
@@ -109,19 +109,19 @@ async function assignBuildingsAndCreateBusinesses(dryRun = false) {
         const landId = building.fields.land_id || building.fields.Land;
         
         // Skip if already has an owner
-        if (building.fields.User && !dryRun) {
-          console.log(`Skipping ${buildingName} (${buildingType}) - already has owner: ${building.fields.User}`);
+        if (building.fields.Citizen && !dryRun) {
+          console.log(`Skipping ${buildingName} (${buildingType}) - already has owner: ${building.fields.Citizen}`);
           continue;
         }
         
-        // Assign a random user
-        const randomUser = getRandomUser();
-        console.log(`Assigning ${buildingName} (${buildingType}) to ${randomUser}${dryRun ? ' (DRY RUN)' : ''}`);
+        // Assign a random citizen
+        const randomCitizen = getRandomCitizen();
+        console.log(`Assigning ${buildingName} (${buildingType}) to ${randomCitizen}${dryRun ? ' (DRY RUN)' : ''}`);
         
         if (!dryRun) {
           // Update the building record
           await base('BUILDINGS').update(buildingId, {
-            User: randomUser
+            Citizen: randomCitizen
           });
           stats.buildingsAssigned++;
         }
@@ -143,7 +143,7 @@ async function assignBuildingsAndCreateBusinesses(dryRun = false) {
               Description: businessDescription,
               BuildingId: buildingId,
               LandId: landId,
-              Owner: randomUser,
+              Owner: randomCitizen,
               CreatedAt: now,
               UpdatedAt: now,
               Status: 'active'

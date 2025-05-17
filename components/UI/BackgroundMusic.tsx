@@ -91,7 +91,7 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
       audioRef.current.volume = volume;
       audioRef.current.play().catch(error => {
         console.error('Error playing audio:', error);
-        // If autoplay is blocked, we'll need user interaction
+        // If autoplay is blocked, we'll need citizen interaction
         setIsPlaying(false);
       });
     }
@@ -112,20 +112,20 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
         audioRef.current.volume = volume;
         audioRef.current.loop = false; // Ensure it's not looping
         
-        // Add a listener for when the user interacts with the page
-        const handleUserInteraction = () => {
+        // Add a listener for when the citizen interacts with the page
+        const handleCitizenInteraction = () => {
           if (!isPlaying && audioRef.current) {
-            // Try to play on first user interaction
+            // Try to play on first citizen interaction
             audioRef.current.play()
               .then(() => {
                 setIsPlaying(true);
                 // Remove the event listeners once we've successfully started playing
-                document.removeEventListener('click', handleUserInteraction);
-                document.removeEventListener('keydown', handleUserInteraction);
-                document.removeEventListener('touchstart', handleUserInteraction);
+                document.removeEventListener('click', handleCitizenInteraction);
+                document.removeEventListener('keydown', handleCitizenInteraction);
+                document.removeEventListener('touchstart', handleCitizenInteraction);
               })
               .catch(error => {
-                console.error('Still could not play audio after user interaction:', error);
+                console.error('Still could not play audio after citizen interaction:', error);
               });
           }
         };
@@ -142,10 +142,10 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
               console.log('Autoplay prevented by browser (expected):', error);
               setIsPlaying(false);
               
-              // Add event listeners to start playing on first user interaction
-              document.addEventListener('click', handleUserInteraction);
-              document.addEventListener('keydown', handleUserInteraction);
-              document.addEventListener('touchstart', handleUserInteraction);
+              // Add event listeners to start playing on first citizen interaction
+              document.addEventListener('click', handleCitizenInteraction);
+              document.addEventListener('keydown', handleCitizenInteraction);
+              document.addEventListener('touchstart', handleCitizenInteraction);
               
               // Show controls briefly to indicate music is available
               setShowControls(true);

@@ -143,8 +143,8 @@ async def generate_icon_prompt(resource):
         The style should be consistent with Renaissance Venice aesthetics.
         """
         
-        # Create user prompt with resource details
-        user_prompt = f"""
+        # Create citizen prompt with resource details
+        citizen_prompt = f"""
         Please create an image generation prompt for an icon representing this resource:
         
         Resource Name: {resource_name}
@@ -169,7 +169,7 @@ async def generate_icon_prompt(resource):
             max_tokens=1000,
             system=system_prompt,
             messages=[
-                {"role": "user", "content": user_prompt}
+                {"role": "citizen", "content": citizen_prompt}
             ]
         )
         

@@ -142,7 +142,7 @@ export async function POST(request: Request) {
         Point?: string;
         Notes?: string;
         Rotation?: number;
-        Owner: string; // Changed from User to Owner
+        Owner: string; // Changed from Citizen to Owner
         CreatedAt: string;
         LeaseAmount?: number;
         RentAmount?: number;
@@ -313,7 +313,7 @@ export async function GET(request: Request) {
         LandId: string; // Changed from Land to LandId
         LeaseAmount?: number;
         Variant?: string;
-        Owner: string; // Changed from User to Owner
+        Owner: string; // Changed from Citizen to Owner
         Position?: string | {
           lat?: number;
           lng?: number;

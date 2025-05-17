@@ -4,7 +4,7 @@ import Airtable from 'airtable';
 // Configure Airtable
 const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
 const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
-const AIRTABLE_USERS_TABLE = process.env.AIRTABLE_USERS_TABLE || 'USERS';
+const AIRTABLE_CITIZENS_TABLE = process.env.AIRTABLE_CITIZENS_TABLE || 'CITIZENS';
 
 // Initialize Airtable
 const initAirtable = () => {
@@ -22,11 +22,11 @@ const initAirtable = () => {
 export async function POST(request: Request) {
   try {
     // Parse the request body
-    const { username, guildId, status = 'pending' } = await request.json();
+    const { citizenname, guildId, status = 'pending' } = await request.json();
     
-    if (!username || !guildId) {
+    if (!citizenname || !guildId) {
       return NextResponse.json(
-        { success: false, error: 'Username and guildId are required' },
+        { success: false, error: 'Citizenname and guildId are required' },
         { status: 400 }
       );
     }
@@ -35,47 +35,47 @@ export async function POST(request: Request) {
       // Initialize Airtable
       const base = initAirtable();
       
-      // Find the user record
-      const userRecords = await base(AIRTABLE_USERS_TABLE).select({
-        filterByFormula: `{UserName} = '${username}'`
+      // Find the citizen record
+      const citizenRecords = await base(AIRTABLE_CITIZENS_TABLE).select({
+        filterByFormula: `{CitizenName} = '${citizenname}'`
       }).all();
       
-      if (userRecords.length === 0) {
+      if (citizenRecords.length === 0) {
         return NextResponse.json(
-          { success: false, error: 'User not found' },
+          { success: false, error: 'Citizen not found' },
           { status: 404 }
         );
       }
       
-      const userRecord = userRecords[0];
+      const citizenRecord = citizenRecords[0];
       
-      // Update user's guild membership
-      await base(AIRTABLE_USERS_TABLE).update(userRecord.id, {
+      // Update citizen's guild membership
+      await base(AIRTABLE_CITIZENS_TABLE).update(citizenRecord.id, {
         'GuildId': guildId
         // 'GuildStatus' field removed as it doesn't exist in the Airtable table
       });
       
       return NextResponse.json({
         success: true,
-        user: {
-          username,
+        citizen: {
+          citizenname,
           guildId,
           guildStatus: status
         }
       });
       
     } catch (error) {
-      console.error('Error updating user guild in Airtable:', error);
+      console.error('Error updating citizen guild in Airtable:', error);
       return NextResponse.json(
-        { success: false, error: 'Failed to update user guild in Airtable' },
+        { success: false, error: 'Failed to update citizen guild in Airtable' },
         { status: 500 }
       );
     }
     
   } catch (error) {
-    console.error('Error updating user guild:', error);
+    console.error('Error updating citizen guild:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to update user guild' },
+      { success: false, error: 'Failed to update citizen guild' },
       { status: 500 }
     );
   }

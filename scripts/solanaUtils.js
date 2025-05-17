@@ -23,11 +23,11 @@ const TREASURY_PUBLIC_KEY = new PublicKey(
 );
 
 /**
- * Prepare a transaction for injecting COMPUTE tokens from a user to the treasury
- * This creates a transaction that needs to be signed by the user
+ * Prepare a transaction for injecting COMPUTE tokens from a citizen to the treasury
+ * This creates a transaction that needs to be signed by the citizen
  * @param {string} senderAddress The sender's wallet address
  * @param {number} amount The amount of tokens to transfer
- * @returns {Promise<Object>} Serialized transaction that needs to be signed by the user
+ * @returns {Promise<Object>} Serialized transaction that needs to be signed by the citizen
  */
 async function prepareInjectComputeTransaction(senderAddress, amount) {
   try {
@@ -49,7 +49,7 @@ async function prepareInjectComputeTransaction(senderAddress, amount) {
     // Check if the sender token account exists
     const accountInfo = await connection.getAccountInfo(senderTokenAccount);
     if (!accountInfo) {
-      console.log(`User ${senderAddress} does not have a COMPUTE token account. This is okay - the frontend will create it.`);
+      console.log(`Citizen ${senderAddress} does not have a COMPUTE token account. This is okay - the frontend will create it.`);
       // We don't throw an error here because the frontend will handle creating the token account
     }
     
@@ -79,7 +79,7 @@ async function prepareInjectComputeTransaction(senderAddress, amount) {
       verifySignatures: false
     }).toString('base64');
     
-    // Create a message for the user to understand what they're signing
+    // Create a message for the citizen to understand what they're signing
     const message = `You are injecting ${amount} COMPUTE tokens to the Republic's treasury.`;
     
     return {

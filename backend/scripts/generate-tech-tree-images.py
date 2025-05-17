@@ -179,8 +179,8 @@ async def generate_image_prompt(node):
         The style should be consistent with Renaissance Venice aesthetics - think of paintings, architecture, and artifacts from 15th-16th century Venice.
         """
         
-        # Create user prompt with node details
-        user_prompt = f"""
+        # Create citizen prompt with node details
+        citizen_prompt = f"""
         Please create an image generation prompt for a tech tree node representing this concept:
         
         Node Title: {node_title}
@@ -203,7 +203,7 @@ async def generate_image_prompt(node):
             max_tokens=1000,
             system=system_prompt,
             messages=[
-                {"role": "user", "content": user_prompt}
+                {"role": "citizen", "content": citizen_prompt}
             ]
         )
         

@@ -66,7 +66,7 @@ The 3D components use the facade pattern to hide Three.js complexity:
    - `RenderingFacade`: Manages rendering pipeline and post-processing
 
 2. **Manager Classes**: Use facades to implement higher-level functionality
-   - `InteractionManager`: Uses `InteractionFacade` for user interaction
+   - `InteractionManager`: Uses `InteractionFacade` for citizen interaction
    - `PolygonRenderer`: Uses rendering facades for polygon visualization
    - `RoadCreationManager`: Uses facades for road creation UI
 
@@ -88,7 +88,7 @@ Components should communicate through:
    - Wrap complex components with error boundaries
    - Provide meaningful fallback UIs
    - Log errors for debugging
-   - Allow users to retry or recover from errors
+   - Allow citizens to retry or recover from errors
    - Use specialized error boundaries for different component types:
      - `ErrorBoundary`: Generic error boundary for all components
      - `ThreeDErrorBoundary`: Specialized for 3D/Three.js components with WebGL-specific error handling

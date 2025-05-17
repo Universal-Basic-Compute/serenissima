@@ -68,9 +68,9 @@ export function clearWalletAddress(): void {
 }
 
 /**
- * Stores a wallet address in Airtable and retrieves user data
+ * Stores a wallet address in Airtable and retrieves citizen data
  * @param walletAddress The wallet address to store
- * @returns The user data from Airtable
+ * @returns The citizen data from Airtable
  */
 export async function storeWalletInAirtable(walletAddress: string) {
   try {
@@ -101,7 +101,7 @@ export async function storeWalletInAirtable(walletAddress: string) {
 /**
  * Connects and persists a wallet address
  * @param address The wallet address to connect and persist
- * @returns The user data from the API
+ * @returns The citizen data from the API
  */
 export async function connectAndPersistWallet(address: string): Promise<any> {
   if (!address) return null;
@@ -131,7 +131,7 @@ export async function connectAndPersistWallet(address: string): Promise<any> {
     // Dispatch a custom event to notify components
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('walletConnected', { 
-        detail: { address, userData: data } 
+        detail: { address, citizenData: data } 
       }));
     }
     

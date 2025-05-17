@@ -28,82 +28,82 @@ interface LandDetailsPanelProps {
   preventAutoClose?: boolean; // Add this prop to prevent auto-closing after purchase
 }
 
-// Helper function to check if current user is the seller
-const isCurrentUserTheSeller = (transaction: any): boolean => {
+// Helper function to check if current citizen is the seller
+const isCurrentCitizenTheSeller = (transaction: any): boolean => {
   if (!transaction || !transaction.seller) return false;
   
-  // Get current user identifier (username or wallet)
-  const currentUser = sessionStorage.getItem('username') || 
-                     localStorage.getItem('username') ||
+  // Get current citizen identifier (citizenname or wallet)
+  const currentCitizen = sessionStorage.getItem('citizenname') || 
+                     localStorage.getItem('citizenname') ||
                      sessionStorage.getItem('walletAddress') || 
                      localStorage.getItem('walletAddress');
   
-  if (!currentUser) return false;
+  if (!currentCitizen) return false;
   
-  // Get user profile from localStorage
-  let userProfile = null;
+  // Get citizen profile from localStorage
+  let citizenProfile = null;
   try {
-    const profileStr = localStorage.getItem('userProfile');
+    const profileStr = localStorage.getItem('citizenProfile');
     if (profileStr) {
-      userProfile = JSON.parse(profileStr);
+      citizenProfile = JSON.parse(profileStr);
     }
   } catch (e) {
-    console.error('Error parsing user profile:', e);
+    console.error('Error parsing citizen profile:', e);
   }
   
   // Log the comparison details
   console.log('Transaction seller:', transaction.seller);
-  console.log('Current user identifier:', currentUser);
-  console.log('User profile:', userProfile);
+  console.log('Current citizen identifier:', currentCitizen);
+  console.log('Citizen profile:', citizenProfile);
   
   // Compare normalized identifiers
   const normalizedSeller = normalizeIdentifier(transaction.seller);
-  const normalizedCurrentUser = normalizeIdentifier(currentUser);
-  const normalizedUsername = userProfile?.username ? normalizeIdentifier(userProfile.username) : null;
+  const normalizedCurrentCitizen = normalizeIdentifier(currentCitizen);
+  const normalizedCitizenname = citizenProfile?.citizenname ? normalizeIdentifier(citizenProfile.citizenname) : null;
   
   console.log('Normalized seller:', normalizedSeller);
-  console.log('Normalized current user:', normalizedCurrentUser);
-  console.log('Normalized username:', normalizedUsername);
+  console.log('Normalized current citizen:', normalizedCurrentCitizen);
+  console.log('Normalized citizenname:', normalizedCitizenname);
   
-  // Check if seller matches either the wallet address or username
-  const isSellerCurrentUser = normalizedSeller === normalizedCurrentUser || 
-                             normalizedSeller === normalizedUsername;
+  // Check if seller matches either the wallet address or citizenname
+  const isSellerCurrentCitizen = normalizedSeller === normalizedCurrentCitizen || 
+                             normalizedSeller === normalizedCitizenname;
   
-  console.log('Is seller the current user?', isSellerCurrentUser);
+  console.log('Is seller the current citizen?', isSellerCurrentCitizen);
   
-  return isSellerCurrentUser;
+  return isSellerCurrentCitizen;
 };
 
-// Helper function to check if current user is the owner
-const isCurrentUserTheOwner = (ownerIdentifier: string | null): boolean => {
+// Helper function to check if current citizen is the owner
+const isCurrentCitizenTheOwner = (ownerIdentifier: string | null): boolean => {
   if (!ownerIdentifier) return false;
   
-  // Get current user identifier (username or wallet)
-  const currentUser = sessionStorage.getItem('username') || 
-                     localStorage.getItem('username') ||
+  // Get current citizen identifier (citizenname or wallet)
+  const currentCitizen = sessionStorage.getItem('citizenname') || 
+                     localStorage.getItem('citizenname') ||
                      sessionStorage.getItem('walletAddress') || 
                      localStorage.getItem('walletAddress');
   
-  if (!currentUser) return false;
+  if (!currentCitizen) return false;
   
-  // Get user profile from localStorage
-  let userProfile = null;
+  // Get citizen profile from localStorage
+  let citizenProfile = null;
   try {
-    const profileStr = localStorage.getItem('userProfile');
+    const profileStr = localStorage.getItem('citizenProfile');
     if (profileStr) {
-      userProfile = JSON.parse(profileStr);
+      citizenProfile = JSON.parse(profileStr);
     }
   } catch (e) {
-    console.error('Error parsing user profile:', e);
+    console.error('Error parsing citizen profile:', e);
   }
   
   // Compare normalized identifiers
   const normalizedOwner = normalizeIdentifier(ownerIdentifier);
-  const normalizedCurrentUser = normalizeIdentifier(currentUser);
-  const normalizedUsername = userProfile?.username ? normalizeIdentifier(userProfile.username) : null;
+  const normalizedCurrentCitizen = normalizeIdentifier(currentCitizen);
+  const normalizedCitizenname = citizenProfile?.citizenname ? normalizeIdentifier(citizenProfile.citizenname) : null;
   
-  // Check if owner matches either the wallet address or username
-  return normalizedOwner === normalizedCurrentUser || normalizedOwner === normalizedUsername;
+  // Check if owner matches either the wallet address or citizenname
+  return normalizedOwner === normalizedCurrentCitizen || normalizedOwner === normalizedCitizenname;
 };
 
 export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons, landOwners, visible = true, preventAutoClose = false }: LandDetailsPanelProps) {
@@ -149,20 +149,20 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
         // Fetch the owner details directly
         const fetchOwnerDetails = async () => {
           try {
-            const userResponse = await fetch(`${getBackendBaseUrl()}/api/users/${owner}`);
+            const citizenResponse = await fetch(`${getBackendBaseUrl()}/api/citizens/${owner}`);
             
-            if (userResponse.ok) {
-              const userData = await userResponse.json();
-              console.log('Fetched user details:', userData);
+            if (citizenResponse.ok) {
+              const citizenData = await citizenResponse.json();
+              console.log('Fetched citizen details:', citizenData);
               
-              if (userData.success && userData.user) {
-                setOwnerDetails(userData.user);
+              if (citizenData.success && citizenData.citizen) {
+                setOwnerDetails(citizenData.citizen);
               }
             } else {
-              console.error(`Failed to fetch user details: ${userResponse.status} ${userResponse.statusText}`);
+              console.error(`Failed to fetch citizen details: ${citizenResponse.status} ${citizenResponse.statusText}`);
             }
-          } catch (userError) {
-            console.error('Error fetching user details:', userError);
+          } catch (citizenError) {
+            console.error('Error fetching citizen details:', citizenError);
           }
         };
         
@@ -410,7 +410,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
   // Add effect to maintain panel visibility after a purchase
   useEffect(() => {
     if (transaction && transaction.buyer === (sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress'))) {
-      // If the current user is the buyer, ensure the panel stays visible
+      // If the current citizen is the buyer, ensure the panel stays visible
       setIsVisible(true);
     }
   }, [transaction]);
@@ -722,7 +722,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
             {owner && owner !== "" ? (
               <div className="flex items-center justify-center">
                 <PlayerProfile 
-                  username={ownerDetails?.username || owner}
+                  citizenname={ownerDetails?.citizenname || owner}
                   firstName={ownerDetails?.firstName}
                   lastName={ownerDetails?.lastName}
                   coatOfArmsImage={ownerDetails?.coatOfArmsImage}
@@ -763,9 +763,9 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                 return null; // Return null to avoid the TypeScript error
               })()}
               
-              {/* Check if current user is the seller using our helper function */}
-              {isCurrentUserTheSeller(transaction) ? (
-                /* Show Remove from Sale button if user is the owner */
+              {/* Check if current citizen is the seller using our helper function */}
+              {isCurrentCitizenTheSeller(transaction) ? (
+                /* Show Remove from Sale button if citizen is the owner */
                 <button
                   onClick={async () => {
                     // Get the current wallet address
@@ -810,7 +810,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                   Remove from Sale
                 </button>
               ) : (
-                /* Show Acquire Land button if user is not the owner */
+                /* Show Acquire Land button if citizen is not the owner */
                 <button
                   onClick={() => {
                     // Get the current wallet address using the more reliable getWalletAddress function
@@ -823,9 +823,9 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                       return;
                     }
                     
-                    // Check if this is the user's own listing
-                    if (isCurrentUserTheSeller(transaction)) {
-                      console.log('User tried to purchase their own listing');
+                    // Check if this is the citizen's own listing
+                    if (isCurrentCitizenTheSeller(transaction)) {
+                      console.log('Citizen tried to purchase their own listing');
                       alert('You cannot purchase your own listing');
                       return;
                     }
@@ -1010,8 +1010,8 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
 
         {/* Action buttons at the bottom with improved styling */}
         <div className="pt-4 mt-auto border-t-2 border-amber-300">
-          {owner && !isCurrentUserTheOwner(owner) && (
-            // Only show "Make an Offer" button if the land is owned by someone else (not the current user)
+          {owner && !isCurrentCitizenTheOwner(owner) && (
+            // Only show "Make an Offer" button if the land is owned by someone else (not the current citizen)
             showOfferInput ? (
               <div className="flex flex-col w-full space-y-3">
                 <div className="flex space-x-2">
@@ -1092,7 +1092,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
             )
           )}
           
-          {/* Show a message if the user owns this property */}
+          {/* Show a message if the citizen owns this property */}
           {owner && owner === (sessionStorage.getItem('walletAddress') || localStorage.getItem('walletAddress')) && (
             <div className="bg-amber-100 p-4 rounded-lg text-center border border-amber-300">
               <p className="text-amber-800 font-medium">This property belongs to your noble house</p>

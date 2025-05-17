@@ -65,7 +65,7 @@
     "lat": 45.43556191524828,
     "lng": 12.335251919240763
   },
-  "historicalName": "Calle dei Fuseri presso San Luca",
+  "historicalName": "Calle dei Fcitizeni presso San Luca",
   "englishName": "Spindle-makers' Street near Saint Luke's",
   "historicalDescription": "A narrow street in the San Marco sestiere, known for its spindle-making workshops and proximity to the Church of San Luca.",
   "nameConfidence": "medium",
@@ -84,9 +84,9 @@
         "lat": 45.436534717440765,
         "lng": 12.333231149268046
       },
-      "historicalName": "Riva dei Fuseri",
+      "historicalName": "Riva dei Fcitizeni",
       "englishName": "Landing of the Spindle Makers",
-      "historicalDescription": "Named after the Fuseri (spindle makers) who had workshops in this area. Calle dei Fuseri was home to artisans who created wooden spindles used in Venice's important textile industry. This dock would have served as a loading point for materials and finished products.",
+      "historicalDescription": "Named after the Fcitizeni (spindle makers) who had workshops in this area. Calle dei Fcitizeni was home to artisans who created wooden spindles used in Venice's important textile industry. This dock would have served as a loading point for materials and finished products.",
       "id": "canal_45.436433_12.333443"
     },
     {
@@ -133,9 +133,9 @@
         },
         "distance": 11.237746029652527,
         "id": "8eab7420-fdf0-401b-a4e1-f8cf108e9be0",
-        "historicalName": "Ponte dei Fuseri",
+        "historicalName": "Ponte dei Fcitizeni",
         "englishName": "Bridge of the Spindle Makers",
-        "historicalDescription": "Named after the 'fuseri', craftsmen who made spindles for the Venetian textile industry. Since this bridge is located in Calle dei Fuseri near San Luca, it naturally takes its name from the street and the guild that historically operated in this area during the Renaissance period.",
+        "historicalDescription": "Named after the 'fcitizeni', craftsmen who made spindles for the Venetian textile industry. Since this bridge is located in Calle dei Fcitizeni near San Luca, it naturally takes its name from the street and the guild that historically operated in this area during the Renaissance period.",
         "location": {
           "midpoint": {
             "lat": 45.43651736376286,
@@ -265,7 +265,7 @@
         "id": "085563b1-3eb2-4008-88cb-17a47574b453",
         "historicalName": "Ponte dei Stoffe",
         "englishName": "Bridge of the Fabrics",
-        "historicalDescription": "The area near Calle dei Fuseri was known for textile merchants who sold fine fabrics. This bridge would have been used by merchants transporting fabrics from workshops to shops, connecting the production areas with the commercial district of San Luca where wealthy patrons would shop.",
+        "historicalDescription": "The area near Calle dei Fcitizeni was known for textile merchants who sold fine fabrics. This bridge would have been used by merchants transporting fabrics from workshops to shops, connecting the production areas with the commercial district of San Luca where wealthy patrons would shop.",
         "location": {
           "midpoint": {
             "lat": 45.435593298122384,
@@ -298,7 +298,7 @@
       "lng": 12.33399388041142,
       "streetName": "Rio Terà dei Merciari",
       "streetNameEnglish": "Filled Canal of the Mercers",
-      "streetDescription": "This former canal was filled in to create a street where mercers (fabric and textile merchants) had their shops. Located near San Luca and Calle dei Fuseri, this area was known for various textile trades, with mercers selling fine fabrics and notions to the wealthy Venetian population.",
+      "streetDescription": "This former canal was filled in to create a street where mercers (fabric and textile merchants) had their shops. Located near San Luca and Calle dei Fcitizeni, this area was known for various textile trades, with mercers selling fine fabrics and notions to the wealthy Venetian population.",
       "id": "building_45.435470_12.333994"
     },
     {
@@ -306,7 +306,7 @@
       "lng": 12.33472522340781,
       "streetName": "Calle degli Orafi di San Luca",
       "streetNameEnglish": "Street of the Goldsmiths of San Luca",
-      "streetDescription": "This street was home to several goldsmith workshops associated with the parish of San Luca. Goldsmiths often established their businesses near the Fuseri (makers of spindles) since both crafts served the textile and luxury goods industries that flourished in this central commercial district.",
+      "streetDescription": "This street was home to several goldsmith workshops associated with the parish of San Luca. Goldsmiths often established their businesses near the Fcitizeni (makers of spindles) since both crafts served the textile and luxury goods industries that flourished in this central commercial district.",
       "id": "building_45.435398_12.334725"
     },
     {
@@ -370,7 +370,7 @@
       "lng": 12.335447160874871,
       "streetName": "Calle dei Testori",
       "streetNameEnglish": "Street of the Weavers of Headwear",
-      "streetDescription": "Named after the craftsmen who specialized in weaving fine fabrics for headwear. Located near Calle dei Fuseri, these artisans were part of the textile manufacturing ecosystem that made Venice famous for luxury clothing items, including elaborate hats and headdresses for nobility and wealthy citizens.",
+      "streetDescription": "Named after the craftsmen who specialized in weaving fine fabrics for headwear. Located near Calle dei Fcitizeni, these artisans were part of the textile manufacturing ecosystem that made Venice famous for luxury clothing items, including elaborate hats and headdresses for nobility and wealthy citizens.",
       "id": "building_45.436428_12.335447"
     }
   ],

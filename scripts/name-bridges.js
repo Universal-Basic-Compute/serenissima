@@ -90,7 +90,7 @@ async function getHistoricalBridgeName(startLocationInfo, endLocationInfo) {
         max_tokens: 1000,
         messages: [
           {
-            role: "user",
+            role: "citizen",
             content: `I have a bridge in Venice, Italy connecting two locations:
 
 Start Location:

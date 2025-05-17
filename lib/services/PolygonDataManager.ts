@@ -8,14 +8,14 @@ export class PolygonDataManager {
   private polygons: Polygon[] = [];
   private ownerColorMap: Record<string, string> = {};
   private ownerCoatOfArmsMap: Record<string, string> = {};
-  private users: Record<string, any> = {};
+  private citizens: Record<string, any> = {};
   
-  constructor(polygons: Polygon[] = [], users: Record<string, any> = {}) {
+  constructor(polygons: Polygon[] = [], citizens: Record<string, any> = {}) {
     this.polygons = polygons;
-    this.users = users;
+    this.citizens = citizens;
     
-    // Process user data to extract colors and coat of arms
-    this.processUserData(users);
+    // Process citizen data to extract colors and coat of arms
+    this.processCitizenData(citizens);
     
     // Ensure ConsiglioDeiDieci always has a color
     if (!this.ownerColorMap['ConsiglioDeiDieci']) {
@@ -25,29 +25,29 @@ export class PolygonDataManager {
   }
   
   /**
-   * Process user data to extract colors and coat of arms
+   * Process citizen data to extract colors and coat of arms
    */
-  private processUserData(users: Record<string, any>): void {
-    Object.values(users).forEach(user => {
-      if (user.user_name) {
+  private processCitizenData(citizens: Record<string, any>): void {
+    Object.values(citizens).forEach(citizen => {
+      if (citizen.citizen_name) {
         // Store coat of arms image if available
-        if (user.coat_of_arms_image) {
-          this.ownerCoatOfArmsMap[user.user_name] = user.coat_of_arms_image;
+        if (citizen.coat_of_arms_image) {
+          this.ownerCoatOfArmsMap[citizen.citizen_name] = citizen.coat_of_arms_image;
         }
         
         // Store color if available - ensure we check for null/undefined
-        if (user.color) {
-          this.ownerColorMap[user.user_name] = user.color;
-          console.log(`Stored color for ${user.user_name}: ${user.color}`);
-        } else if (user.user_name === 'ConsiglioDeiDieci') {
+        if (citizen.color) {
+          this.ownerColorMap[citizen.citizen_name] = citizen.color;
+          console.log(`Stored color for ${citizen.citizen_name}: ${citizen.color}`);
+        } else if (citizen.citizen_name === 'ConsiglioDeiDieci') {
           // Provide a default color for ConsiglioDeiDieci if missing
-          this.ownerColorMap[user.user_name] = '#8B0000'; // Dark red
+          this.ownerColorMap[citizen.citizen_name] = '#8B0000'; // Dark red
           console.log(`Assigned default color for ConsiglioDeiDieci: #8B0000`);
         }
       }
     });
     
-    console.log(`Processed ${Object.keys(this.ownerCoatOfArmsMap).length} coat of arms and ${Object.keys(this.ownerColorMap).length} colors from users data`);
+    console.log(`Processed ${Object.keys(this.ownerCoatOfArmsMap).length} coat of arms and ${Object.keys(this.ownerColorMap).length} colors from citizens data`);
   }
   
   /**
@@ -70,8 +70,8 @@ export class PolygonDataManager {
   public getOwnerColor(owner: string): string | null {
     if (this.ownerColorMap[owner]) {
       return this.ownerColorMap[owner];
-    } else if (this.users[owner] && this.users[owner].color) {
-      const color = this.users[owner].color;
+    } else if (this.citizens[owner] && this.citizens[owner].color) {
+      const color = this.citizens[owner].color;
       // Cache for future use
       this.ownerColorMap[owner] = color;
       return color;
@@ -100,14 +100,14 @@ export class PolygonDataManager {
     // Update the owner color map
     this.ownerColorMap = { ...this.ownerColorMap, ...colorMap };
     
-    // Update the users data with color information
+    // Update the citizens data with color information
     Object.entries(colorMap).forEach(([owner, color]) => {
-      if (this.users[owner]) {
-        this.users[owner].color = color;
+      if (this.citizens[owner]) {
+        this.citizens[owner].color = color;
       } else {
-        // Create user entry if it doesn't exist
-        this.users[owner] = { 
-          user_name: owner,
+        // Create citizen entry if it doesn't exist
+        this.citizens[owner] = { 
+          citizen_name: owner,
           color: color
         };
       }
@@ -128,14 +128,14 @@ export class PolygonDataManager {
     // Update the coat of arms map
     this.ownerCoatOfArmsMap = { ...this.ownerCoatOfArmsMap, ...ownerCoatOfArmsMap };
     
-    // Update the users data with coat of arms information
+    // Update the citizens data with coat of arms information
     Object.entries(ownerCoatOfArmsMap).forEach(([owner, url]) => {
-      if (this.users[owner]) {
-        this.users[owner].coat_of_arms_image = url;
+      if (this.citizens[owner]) {
+        this.citizens[owner].coat_of_arms_image = url;
       } else {
-        // Create user entry if it doesn't exist
-        this.users[owner] = { 
-          user_name: owner,
+        // Create citizen entry if it doesn't exist
+        this.citizens[owner] = { 
+          citizen_name: owner,
           coat_of_arms_image: url
         };
       }

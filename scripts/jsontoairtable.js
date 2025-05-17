@@ -9,7 +9,7 @@ const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base(process
 // Map of collection names to Airtable table names
 const TABLE_MAP = {
   'DECREES': 'Decrees',
-  'USERS': 'Users',
+  'CITIZENS': 'Citizens',
   'TRANSACTIONS': 'Transactions',
   'BUILDINGS': 'Buildings',
   'LOANS': 'Loans',

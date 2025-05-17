@@ -8,9 +8,9 @@ import requests
 from dotenv import load_dotenv
 from pyairtable import Api, Table
 
-# Add the parent directory to the path to import user_utils
+# Add the parent directory to the path to import citizen_utils
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from app.user_utils import find_user_by_identifier
+from app.citizen_utils import find_citizen_by_identifier
 
 def initialize_airtable():
     """Initialize connection to Airtable."""
@@ -26,7 +26,7 @@ def initialize_airtable():
     api = Api(airtable_api_key)
     
     tables = {
-        "users": Table(airtable_api_key, airtable_base_id, "USERS"),
+        "citizens": Table(airtable_api_key, airtable_base_id, "CITIZENS"),
         "buildings": Table(airtable_api_key, airtable_base_id, "BUILDINGS"),
         "resources": Table(airtable_api_key, airtable_base_id, "RESOURCES"),
         "contracts": Table(airtable_api_key, airtable_base_id, "CONTRACTS"),
@@ -35,16 +35,16 @@ def initialize_airtable():
     
     return tables
 
-def get_ai_users(tables) -> List[Dict]:
-    """Get all users that are marked as AI."""
+def get_ai_citizens(tables) -> List[Dict]:
+    """Get all citizens that are marked as AI."""
     try:
-        # Query users with IsAI field set to true
+        # Query citizens with IsAI field set to true
         formula = "{IsAI}=1"
-        ai_users = tables["users"].all(formula=formula)
-        print(f"Found {len(ai_users)} AI users")
-        return ai_users
+        ai_citizens = tables["citizens"].all(formula=formula)
+        print(f"Found {len(ai_citizens)} AI citizens")
+        return ai_citizens
     except Exception as e:
-        print(f"Error getting AI users: {str(e)}")
+        print(f"Error getting AI citizens: {str(e)}")
         return []
 
 def get_building_types_from_api() -> Dict:
@@ -127,46 +127,46 @@ def get_resource_types_from_api() -> Dict:
         print(f"Exception fetching resource types from API: {str(e)}")
         return {}
 
-def get_user_buildings(tables, username: str) -> List[Dict]:
-    """Get all buildings run by a specific user."""
+def get_citizen_buildings(tables, citizenname: str) -> List[Dict]:
+    """Get all buildings run by a specific citizen."""
     try:
-        # Query buildings where the user is running the building
-        formula = f"{{RanBy}}='{username}'"
+        # Query buildings where the citizen is running the building
+        formula = f"{{RanBy}}='{citizenname}'"
         buildings = tables["buildings"].all(formula=formula)
-        print(f"Found {len(buildings)} buildings run by {username}")
+        print(f"Found {len(buildings)} buildings run by {citizenname}")
         return buildings
     except Exception as e:
-        print(f"Error getting buildings for user {username}: {str(e)}")
+        print(f"Error getting buildings for citizen {citizenname}: {str(e)}")
         return []
 
-def get_user_resources(tables, username: str) -> List[Dict]:
-    """Get all resources owned by a specific user."""
+def get_citizen_resources(tables, citizenname: str) -> List[Dict]:
+    """Get all resources owned by a specific citizen."""
     try:
-        # Query resources where the user is the owner
-        formula = f"{{Owner}}='{username}'"
+        # Query resources where the citizen is the owner
+        formula = f"{{Owner}}='{citizenname}'"
         resources = tables["resources"].all(formula=formula)
-        print(f"Found {len(resources)} resources owned by {username}")
+        print(f"Found {len(resources)} resources owned by {citizenname}")
         return resources
     except Exception as e:
-        print(f"Error getting resources for user {username}: {str(e)}")
+        print(f"Error getting resources for citizen {citizenname}: {str(e)}")
         return []
 
-def get_user_active_contracts(tables, username: str) -> List[Dict]:
-    """Get all active contracts where the user is the seller."""
+def get_citizen_active_contracts(tables, citizenname: str) -> List[Dict]:
+    """Get all active contracts where the citizen is the seller."""
     try:
         # Get current time
         now = datetime.now().isoformat()
         
-        # Query contracts where the user is the seller and the contract is active (between CreatedAt and EndAt)
-        formula = f"AND({{Seller}}='{username}', {{CreatedAt}}<='{now}', {{EndAt}}>='{now}')"
+        # Query contracts where the citizen is the seller and the contract is active (between CreatedAt and EndAt)
+        formula = f"AND({{Seller}}='{citizenname}', {{CreatedAt}}<='{now}', {{EndAt}}>='{now}')"
         contracts = tables["contracts"].all(formula=formula)
-        print(f"Found {len(contracts)} active contracts where {username} is the seller")
+        print(f"Found {len(contracts)} active contracts where {citizenname} is the seller")
         return contracts
     except Exception as e:
-        print(f"Error getting contracts for user {username}: {str(e)}")
+        print(f"Error getting contracts for citizen {citizenname}: {str(e)}")
         return []
 
-def get_recent_public_sell_contracts(tables, username: str, limit: int = 100) -> List[Dict]:
+def get_recent_public_sell_contracts(tables, citizenname: str, limit: int = 100) -> List[Dict]:
     """Get recent public_sell contracts from other players to analyze market prices."""
     try:
         # Get current time
@@ -174,9 +174,9 @@ def get_recent_public_sell_contracts(tables, username: str, limit: int = 100) ->
         
         # Query contracts where:
         # 1. Type is public_sell
-        # 2. Seller is not the current AI user
+        # 2. Seller is not the current AI citizen
         # 3. Contract is active (between CreatedAt and EndAt)
-        formula = f"AND({{Type}}='public_sell', {{Seller}}!='{username}', {{CreatedAt}}<='{now}', {{EndAt}}>='{now}')"
+        formula = f"AND({{Type}}='public_sell', {{Seller}}!='{citizenname}', {{CreatedAt}}<='{now}', {{EndAt}}>='{now}')"
         
         # Get the contracts and sort by created date descending
         contracts = tables["contracts"].all(formula=formula)
@@ -217,23 +217,23 @@ def get_kinos_api_key() -> str:
     return api_key
 
 def prepare_public_sell_strategy_data(
-    ai_user: Dict, 
-    user_buildings: List[Dict], 
-    user_resources: List[Dict],
-    user_active_contracts: List[Dict],
+    ai_citizen: Dict, 
+    citizen_buildings: List[Dict], 
+    citizen_resources: List[Dict],
+    citizen_active_contracts: List[Dict],
     market_contracts: List[Dict],
     building_types: Dict, 
     resource_types: Dict
 ) -> Dict:
     """Prepare a comprehensive data package for the AI to make public sell decisions."""
     
-    # Extract user information
-    username = ai_user["fields"].get("Username", "")
-    ducats = ai_user["fields"].get("Ducats", 0)
+    # Extract citizen information
+    citizenname = ai_citizen["fields"].get("Citizenname", "")
+    ducats = ai_citizen["fields"].get("Ducats", 0)
     
     # Find buildings that can sell resources
     sellable_buildings = []
-    for building in user_buildings:
+    for building in citizen_buildings:
         building_id = building["fields"].get("BuildingId", "")
         building_type = building["fields"].get("Type", "")
         
@@ -253,9 +253,9 @@ def prepare_public_sell_strategy_data(
                     "sells": sells
                 })
     
-    # Process user resources
+    # Process citizen resources
     resources_by_type = {}
-    for resource in user_resources:
+    for resource in citizen_resources:
         resource_type = resource["fields"].get("Type", "")
         count = resource["fields"].get("Count", 0)
         building_id = resource["fields"].get("BuildingId", "")
@@ -274,7 +274,7 @@ def prepare_public_sell_strategy_data(
     
     # Process existing public sell contracts
     existing_contracts = []
-    for contract in user_active_contracts:
+    for contract in citizen_active_contracts:
         if contract["fields"].get("Type") == "public_sell":
             existing_contracts.append({
                 "id": contract["fields"].get("ContractId", ""),
@@ -333,10 +333,10 @@ def prepare_public_sell_strategy_data(
     
     # Prepare the complete data package
     data_package = {
-        "user": {
-            "username": username,
+        "citizen": {
+            "citizenname": citizenname,
             "ducats": ducats,
-            "total_buildings": len(user_buildings),
+            "total_buildings": len(citizen_buildings),
             "sellable_buildings": len(sellable_buildings)
         },
         "sellable_buildings": sellable_buildings,
@@ -350,14 +350,14 @@ def prepare_public_sell_strategy_data(
     
     return data_package
 
-def send_public_sell_strategy_request(ai_username: str, data_package: Dict) -> Optional[Dict]:
+def send_public_sell_strategy_request(ai_citizenname: str, data_package: Dict) -> Optional[Dict]:
     """Send the public sell strategy request to the AI via Kinos API."""
     try:
         api_key = get_kinos_api_key()
         blueprint = "serenissima-ai"
         
         # Construct the API URL
-        url = f"https://api.kinos-engine.ai/v2/blueprints/{blueprint}/kins/{ai_username}/messages"
+        url = f"https://api.kinos-engine.ai/v2/blueprints/{blueprint}/kins/{ai_citizenname}/messages"
         
         # Set up headers with API key
         headers = {
@@ -366,17 +366,17 @@ def send_public_sell_strategy_request(ai_username: str, data_package: Dict) -> O
         }
         
         # Log the API request details
-        print(f"Sending public sell strategy request to AI user {ai_username}")
+        print(f"Sending public sell strategy request to AI citizen {ai_citizenname}")
         print(f"API URL: {url}")
-        print(f"User has {data_package['user']['ducats']} ducats")
-        print(f"User has {data_package['user']['sellable_buildings']} buildings that can sell resources")
+        print(f"Citizen has {data_package['citizen']['ducats']} ducats")
+        print(f"Citizen has {data_package['citizen']['sellable_buildings']} buildings that can sell resources")
         
         # Create a detailed prompt that addresses the AI directly as the decision-maker
         prompt = f"""
 As a merchant in La Serenissima, you need to decide which resources to sell publicly.
 
 Here's your current situation:
-- You run {data_package['user']['sellable_buildings']} buildings that can sell resources
+- You run {data_package['citizen']['sellable_buildings']} buildings that can sell resources
 - You have {len(data_package['resources'])} different resource stockpiles
 - You currently have {len(data_package['existing_contracts'])} active public sell contracts
 
@@ -435,7 +435,7 @@ If you decide not to make any changes, return empty arrays:
         
         # Create system instructions with the cleaned, serialized data
         system_instructions = f"""
-You are {ai_username}, an AI merchant in La Serenissima. You make your own decisions about which resources to sell publicly.
+You are {ai_citizenname}, an AI merchant in La Serenissima. You make your own decisions about which resources to sell publicly.
 
 Here is the complete data about your current situation:
 {serialized_data}
@@ -468,7 +468,7 @@ If you decide not to make any changes, return empty arrays.
         }
         
         # Make the API request
-        print(f"Making API request to Kinos for {ai_username}...")
+        print(f"Making API request to Kinos for {ai_citizenname}...")
         response = requests.post(url, headers=headers, json=payload)
         
         # Log the API response details
@@ -482,14 +482,14 @@ If you decide not to make any changes, return empty arrays.
             print(f"API response status: {status}")
             
             if status == "completed":
-                print(f"Successfully sent public sell strategy request to AI user {ai_username}")
+                print(f"Successfully sent public sell strategy request to AI citizen {ai_citizenname}")
                 
                 # The response content is in the response field of response_data
                 content = response_data.get('response', '')
                 
                 # Log the entire response for debugging
                 print(f"\n{'='*80}")
-                print(f"COMPLETE AI RESPONSE FROM {ai_username}:")
+                print(f"COMPLETE AI RESPONSE FROM {ai_citizenname}:")
                 print(f"{'='*80}")
                 print(content)
                 print(f"{'='*80}\n")
@@ -543,13 +543,13 @@ If you decide not to make any changes, return empty arrays.
                     print(content)
                     return None
             else:
-                print(f"Error processing public sell strategy request for AI user {ai_username}: {response_data}")
+                print(f"Error processing public sell strategy request for AI citizen {ai_citizenname}: {response_data}")
                 return None
         else:
             print(f"Error from Kinos API: {response.status_code} - {response.text}")
             return None
     except Exception as e:
-        print(f"Error sending public sell strategy request to AI user {ai_username}: {str(e)}")
+        print(f"Error sending public sell strategy request to AI citizen {ai_citizenname}: {str(e)}")
         print(f"Exception traceback: {traceback.format_exc()}")
         return None
 
@@ -557,7 +557,7 @@ def validate_create_contract_decision(
     decision: Dict, 
     sellable_buildings: List[Dict], 
     resource_types: Dict,
-    user_resources: List[Dict]
+    citizen_resources: List[Dict]
 ) -> bool:
     """Validate that a contract creation decision is valid."""
     building_id = decision.get("building_id")
@@ -610,15 +610,15 @@ def validate_create_contract_decision(
         print(f"Resource type {resource_type} not found")
         return False
     
-    # Check if the user has this resource type
+    # Check if the citizen has this resource type
     has_resource = False
-    for resource in user_resources:
+    for resource in citizen_resources:
         if resource["fields"].get("Type") == resource_type:
             has_resource = True
             break
     
     if not has_resource:
-        print(f"User does not have any resources of type {resource_type}")
+        print(f"Citizen does not have any resources of type {resource_type}")
         return False
     
     return True
@@ -650,7 +650,7 @@ def validate_end_contract_decision(
 
 def create_public_sell_contract(
     tables, 
-    ai_username: str, 
+    ai_citizenname: str, 
     decision: Dict, 
     resource_types: Dict
 ) -> bool:
@@ -671,7 +671,7 @@ def create_public_sell_contract(
         
         new_contract = {
             "ContractId": contract_id,
-            "Seller": ai_username,
+            "Seller": ai_citizenname,
             "Buyer": "public",  # Public contract
             "Type": "public_sell",
             "ResourceType": resource_type,
@@ -765,7 +765,7 @@ def create_admin_notification(tables, ai_sell_results: Dict[str, Dict]) -> None:
         
         # Create the notification
         notification = {
-            "User": "NLR",  # Send to NLR as requested
+            "Citizen": "NLR",  # Send to NLR as requested
             "Type": "ai_public_sell_strategy",
             "Content": message,
             "CreatedAt": now,
@@ -800,23 +800,23 @@ def process_ai_public_sell_strategies(dry_run: bool = False):
         print("Failed to get resource types, exiting")
         return
     
-    # Get AI users
-    ai_users = get_ai_users(tables)
-    if not ai_users:
-        print("No AI users found, exiting")
+    # Get AI citizens
+    ai_citizens = get_ai_citizens(tables)
+    if not ai_citizens:
+        print("No AI citizens found, exiting")
         return
     
     # Track sell results for each AI
     ai_sell_results = {}
     
-    # Process each AI user
-    for ai_user in ai_users:
-        ai_username = ai_user["fields"].get("Username")
-        if not ai_username:
+    # Process each AI citizen
+    for ai_citizen in ai_citizens:
+        ai_citizenname = ai_citizen["fields"].get("Citizenname")
+        if not ai_citizenname:
             continue
         
-        print(f"Processing AI user: {ai_username}")
-        ai_sell_results[ai_username] = {
+        print(f"Processing AI citizen: {ai_citizenname}")
+        ai_sell_results[ai_citizenname] = {
             "created": 0,
             "ended": 0,
             "created_contracts": [],
@@ -824,23 +824,23 @@ def process_ai_public_sell_strategies(dry_run: bool = False):
         }
         
         # Get buildings run by this AI
-        user_buildings = get_user_buildings(tables, ai_username)
+        citizen_buildings = get_citizen_buildings(tables, ai_citizenname)
         
         # Get resources owned by this AI
-        user_resources = get_user_resources(tables, ai_username)
+        citizen_resources = get_citizen_resources(tables, ai_citizenname)
         
         # Get existing active contracts where this AI is the seller
-        user_active_contracts = get_user_active_contracts(tables, ai_username)
+        citizen_active_contracts = get_citizen_active_contracts(tables, ai_citizenname)
         
         # Get recent public_sell contracts from other players
-        market_contracts = get_recent_public_sell_contracts(tables, ai_username, 100)
+        market_contracts = get_recent_public_sell_contracts(tables, ai_citizenname, 100)
         
         # Prepare the data package for the AI
         data_package = prepare_public_sell_strategy_data(
-            ai_user, 
-            user_buildings, 
-            user_resources,
-            user_active_contracts,
+            ai_citizen, 
+            citizen_buildings, 
+            citizen_resources,
+            citizen_active_contracts,
             market_contracts,
             building_types, 
             resource_types
@@ -850,30 +850,30 @@ def process_ai_public_sell_strategies(dry_run: bool = False):
         sellable_buildings = data_package["sellable_buildings"]
         
         if not sellable_buildings:
-            print(f"AI user {ai_username} has no buildings that can sell resources, skipping")
+            print(f"AI citizen {ai_citizenname} has no buildings that can sell resources, skipping")
             continue
         
         # Send the public sell strategy request to the AI
         if not dry_run:
-            decisions = send_public_sell_strategy_request(ai_username, data_package)
+            decisions = send_public_sell_strategy_request(ai_citizenname, data_package)
             
             if decisions:
                 # Process contracts to create
                 if "contracts_to_create" in decisions and decisions["contracts_to_create"]:
                     for decision in decisions["contracts_to_create"]:
                         # Validate the contract creation decision
-                        if validate_create_contract_decision(decision, sellable_buildings, resource_types, user_resources):
+                        if validate_create_contract_decision(decision, sellable_buildings, resource_types, citizen_resources):
                             # Create the public sell contract
                             success = create_public_sell_contract(
                                 tables, 
-                                ai_username, 
+                                ai_citizenname, 
                                 decision, 
                                 resource_types
                             )
                             
                             if success:
-                                ai_sell_results[ai_username]["created"] += 1
-                                ai_sell_results[ai_username]["created_contracts"].append({
+                                ai_sell_results[ai_citizenname]["created"] += 1
+                                ai_sell_results[ai_citizenname]["created_contracts"].append({
                                     "building_id": decision["building_id"],
                                     "resource_type": decision["resource_type"],
                                     "hourly_amount": decision["hourly_amount"],
@@ -884,7 +884,7 @@ def process_ai_public_sell_strategies(dry_run: bool = False):
                 if "contracts_to_end" in decisions and decisions["contracts_to_end"]:
                     for decision in decisions["contracts_to_end"]:
                         # Validate the contract ending decision
-                        if validate_end_contract_decision(decision, user_active_contracts):
+                        if validate_end_contract_decision(decision, citizen_active_contracts):
                             # End the public sell contract
                             success = end_public_sell_contract(
                                 tables, 
@@ -893,18 +893,18 @@ def process_ai_public_sell_strategies(dry_run: bool = False):
                             )
                             
                             if success:
-                                ai_sell_results[ai_username]["ended"] += 1
-                                ai_sell_results[ai_username]["ended_contracts"].append({
+                                ai_sell_results[ai_citizenname]["ended"] += 1
+                                ai_sell_results[ai_citizenname]["ended_contracts"].append({
                                     "contract_id": decision["contract_id"],
                                     "reason": decision.get("reason", "No reason provided")
                                 })
             else:
-                print(f"No valid public sell decisions received for {ai_username}")
+                print(f"No valid public sell decisions received for {ai_citizenname}")
         else:
             # In dry run mode, just log what would happen
-            print(f"[DRY RUN] Would send public sell strategy request to AI user {ai_username}")
+            print(f"[DRY RUN] Would send public sell strategy request to AI citizen {ai_citizenname}")
             print(f"[DRY RUN] Data package summary:")
-            print(f"  - User: {data_package['user']['username']}")
+            print(f"  - Citizen: {data_package['citizen']['citizenname']}")
             print(f"  - Sellable buildings: {len(sellable_buildings)}")
             print(f"  - Resources: {len(data_package['resources'])}")
             print(f"  - Existing contracts: {len(data_package['existing_contracts'])}")

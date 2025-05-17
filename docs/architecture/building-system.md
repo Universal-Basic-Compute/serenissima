@@ -140,11 +140,11 @@ The building system follows a layered architecture with clear separation between
                     └───────────────┘    └────────────────┘
 ```
 
-1. User selects a building in the BuildingMenu
+1. Citizen selects a building in the BuildingMenu
 2. Selection is stored in BuildingStore
 3. BuildingService prepares the building data
 4. PlaceableBuilding component shows placement preview
-5. User places the building, triggering a placement event
+5. Citizen places the building, triggering a placement event
 6. Event bus notifies BuildingRenderer
 7. BuildingRenderer adds the building to the Three.js scene
 
@@ -243,7 +243,7 @@ Building models are stored as GLB files in the public directory:
 The system supports multiple variants of each building model:
 
 1. **Variant Discovery**: The API endpoint `/api/building-variants/[name]` discovers available variants
-2. **Variant Selection**: Users can select different variants in the BuildingMenu
+2. **Variant Selection**: Citizens can select different variants in the BuildingMenu
 3. **Variant Rendering**: BuildingModelViewer loads and displays the selected variant
 
 ## API Endpoints
@@ -277,7 +277,7 @@ buildingStore.setPlaceableBuilding({
   variant: "model"
 });
 
-// 4. When the user clicks to place the building
+// 4. When the citizen clicks to place the building
 const position = { x: 100, y: 0, z: 100 };
 buildingService.saveBuilding({
   type: "market-stall",

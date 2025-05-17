@@ -234,7 +234,7 @@ def create_immigration_notification(tables, citizen: Dict, building: Dict) -> No
             "Details": json.dumps(details),
             "CreatedAt": datetime.datetime.now().isoformat(),
             "ReadAt": None,
-            "User": "NLR"  # Admin notification
+            "Citizen": "NLR"  # Admin notification
         })
         
         log.info(f"Created immigration notification for {citizen_name}")
@@ -242,7 +242,7 @@ def create_immigration_notification(tables, citizen: Dict, building: Dict) -> No
         log.error(f"Error creating immigration notification: {e}")
 
 def create_admin_notification(tables, immigration_summary) -> None:
-    """Create a notification for the admin user about the immigration process."""
+    """Create a notification for the admin citizen about the immigration process."""
     try:
         # Create notification content with summary of all immigrants
         content = f"Immigration report: {immigration_summary['total']} new citizens arrived in Venice"
@@ -268,10 +268,10 @@ def create_admin_notification(tables, immigration_summary) -> None:
             "Details": json.dumps(details),
             "CreatedAt": datetime.datetime.now().isoformat(),
             "ReadAt": None,
-            "User": "NLR"  # Specific user to receive the notification
+            "Citizen": "NLR"  # Specific citizen to receive the notification
         })
         
-        log.info(f"Created admin notification for user NLR with immigration summary")
+        log.info(f"Created admin notification for citizen NLR with immigration summary")
     except Exception as e:
         log.error(f"Error creating admin notification: {e}")
 
@@ -354,7 +354,7 @@ def process_immigration(dry_run: bool = False):
         **immigration_by_class
     }
     
-    # Create a notification for the admin user with the immigration summary
+    # Create a notification for the admin citizen with the immigration summary
     if immigration_count > 0 and not dry_run:
         create_admin_notification(tables, immigration_summary)
         

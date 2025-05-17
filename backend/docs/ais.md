@@ -4,9 +4,9 @@ This document explains the AI system in La Serenissima, which allows non-player 
 
 ## Overview
 
-The AI system consists of automated agents that simulate the behavior of Venetian merchants, nobles, and other economic actors. These AI users can participate in various economic activities such as bidding on lands, managing properties, and engaging in commerce.
+The AI system consists of automated agents that simulate the behavior of Venetian merchants, nobles, and other economic actors. These AI citizens can participate in various economic activities such as bidding on lands, managing properties, and engaging in commerce.
 
-AI users are marked in the database with an `IsAI` flag, allowing the system to identify and process them separately from human players. They follow programmed economic behaviors that create realistic market dynamics even in areas with limited player activity.
+AI citizens are marked in the database with an `IsAI` flag, allowing the system to identify and process them separately from human players. They follow programmed economic behaviors that create realistic market dynamics even in areas with limited player activity.
 
 ## AI Behaviors
 
@@ -15,12 +15,12 @@ AI users are marked in the database with an `IsAI` flag, allowing the system to 
 **Implementation**: `backend/ais/answertomessages.py`  
 **Schedule**: 10 times daily (every 2.4 hours)
 
-AI users actively respond to messages they receive from human players:
+AI citizens actively respond to messages they receive from human players:
 
 #### Process:
 
-1. The script identifies all users marked as AI in the system
-2. For each AI user, it checks for unread messages addressed to them
+1. The script identifies all citizens marked as AI in the system
+2. For each AI citizen, it checks for unread messages addressed to them
 3. For each unread message, the AI:
    - Marks the message as read
    - Generates a contextually appropriate response using the Kinos Engine API
@@ -42,12 +42,12 @@ The AI message response system:
 **Implementation**: `backend/ais/processnotifications.py`  
 **Schedule**: Daily at 10:00 PM UTC
 
-AI users process notifications to stay informed about events in the game:
+AI citizens process notifications to stay informed about events in the game:
 
 #### Process:
 
-1. The script identifies all users marked as AI in the system
-2. For each AI user, it checks for unread notifications addressed to them
+1. The script identifies all citizens marked as AI in the system
+2. For each AI citizen, it checks for unread notifications addressed to them
 3. For each AI with unread notifications:
    - Formats all notifications into a readable message
    - Sends the notifications to the Kinos Engine API using the build endpoint
@@ -69,23 +69,23 @@ The AI notification processing system:
 **Implementation**: `backend/ais/bidonlands.py`  
 **Schedule**: Daily at 7:00 PM UTC
 
-AI users actively participate in the land market by bidding on properties with income potential:
+AI citizens actively participate in the land market by bidding on properties with income potential:
 
 #### Process:
 
-1. The script identifies all users marked as AI in the system
-2. For each AI user, it checks:
+1. The script identifies all citizens marked as AI in the system
+2. For each AI citizen, it checks:
    - Their current compute balance
    - Lands with income potential (LastIncome > 0)
    - Their existing bids on lands
 
-3. For each land with income potential, AI users will:
+3. For each land with income potential, AI citizens will:
    - Place new bids at 30 times the land's last income if they don't already have a bid
    - Increase existing bids by 14% if they already have a bid on the land
 
-4. AI users only place bids if they have at least twice the bid amount in their compute balance, ensuring they maintain financial stability
+4. AI citizens only place bids if they have at least twice the bid amount in their compute balance, ensuring they maintain financial stability
 
-5. An admin notification is created with statistics about all bidding activity, showing the number of bids placed by each AI user
+5. An admin notification is created with statistics about all bidding activity, showing the number of bids placed by each AI citizen
 
 #### Economic Impact:
 
@@ -101,35 +101,35 @@ The AI land bidding system:
 **Implementation**: `backend/ais/buildbuildings.py`  
 **Schedule**: Daily at 8:00 PM UTC
 
-AI users actively develop lands they own by constructing buildings:
+AI citizens actively develop lands they own by constructing buildings:
 
 #### Process:
 
-1. The script identifies all users marked as AI in the system
-2. For each AI user, it checks:
+1. The script identifies all citizens marked as AI in the system
+2. For each AI citizen, it checks:
    - Their current compute balance
    - Lands they own
    - Existing buildings on those lands
    - Available building points on each land
 
-3. For each land with available building points, AI users will:
+3. For each land with available building points, AI citizens will:
    - Evaluate which building types can fit within the remaining points
    - Prioritize buildings with higher income potential
    - Construct buildings if they have sufficient compute (at least twice the building cost)
 
 4. When a building is constructed:
-   - The AI user's compute balance is reduced by the building cost
+   - The AI citizen's compute balance is reduced by the building cost
    - A transaction record is created for the building purchase
    - The land owner (if different from the AI) receives a notification
 
-5. An admin notification is created with statistics about all building activity, showing the number of buildings constructed by each AI user
+5. An admin notification is created with statistics about all building activity, showing the number of buildings constructed by each AI citizen
 
 #### Economic Impact:
 
 The AI building construction system:
 - Encourages land development and efficient use of building points
 - Creates a more dynamic and visually interesting game world
-- Generates income for AI users through building operations
+- Generates income for AI citizens through building operations
 - Provides lease income to land owners (including other players)
 - Reduces the Vigesima Variabilis tax rate on developed lands
 
@@ -138,18 +138,18 @@ The AI building construction system:
 **Implementation**: `backend/ais/adjustleases.py`  
 **Schedule**: Daily at 9:00 PM UTC
 
-AI users strategically adjust lease amounts for buildings on their lands:
+AI citizens strategically adjust lease amounts for buildings on their lands:
 
 #### Process:
 
-1. The script identifies all users marked as AI in the system
-2. For each AI user, it analyzes:
+1. The script identifies all citizens marked as AI in the system
+2. For each AI citizen, it analyzes:
    - Lands they own
    - Buildings they own
    - Buildings on lands they own (potentially owned by others)
    - Current lease amounts, income, and maintenance costs
 
-3. For each AI user, the system:
+3. For each AI citizen, the system:
    - Prepares a comprehensive data package with financial information
    - Sends this data to the Kinos Engine API for analysis
    - Receives lease adjustment decisions from the AI
@@ -159,7 +159,7 @@ AI users strategically adjust lease amounts for buildings on their lands:
    - Building owners receive notifications about the changes
    - Reasons for adjustments are provided to maintain transparency
 
-5. An admin notification is created with statistics about all lease adjustments, showing the changes made by each AI user
+5. An admin notification is created with statistics about all lease adjustments, showing the changes made by each AI citizen
 
 #### Economic Impact:
 
@@ -175,18 +175,18 @@ The AI lease adjustment system:
 **Implementation**: `backend/ais/adjustrents.py`  
 **Schedule**: Daily at 10:00 PM UTC
 
-AI users strategically adjust rent amounts for buildings they own:
+AI citizens strategically adjust rent amounts for buildings they own:
 
 #### Process:
 
-1. The script identifies all users marked as AI in the system
-2. For each AI user, it analyzes:
+1. The script identifies all citizens marked as AI in the system
+2. For each AI citizen, it analyzes:
    - Buildings they own
    - Current occupants of their buildings
    - Occupant social class and wealth
    - Current rent amounts, income, and maintenance costs
 
-3. For each AI user, the system:
+3. For each AI citizen, the system:
    - Prepares a comprehensive data package with financial information
    - Sends this data to the Kinos Engine API for analysis
    - Receives rent adjustment decisions from the AI
@@ -196,7 +196,7 @@ AI users strategically adjust rent amounts for buildings they own:
    - Building occupants receive notifications about the changes
    - Reasons for adjustments are provided to maintain transparency
 
-5. An admin notification is created with statistics about all rent adjustments, showing the changes made by each AI user
+5. An admin notification is created with statistics about all rent adjustments, showing the changes made by each AI citizen
 
 #### Economic Impact:
 
@@ -212,18 +212,18 @@ The AI rent adjustment system:
 **Implementation**: `backend/ais/adjustwages.py`  
 **Schedule**: Daily at 11:00 PM UTC
 
-AI users strategically adjust wage amounts for businesses they own:
+AI citizens strategically adjust wage amounts for businesses they own:
 
 #### Process:
 
-1. The script identifies all users marked as AI in the system
-2. For each AI user, it analyzes:
+1. The script identifies all citizens marked as AI in the system
+2. For each AI citizen, it analyzes:
    - Businesses they own
    - Current employees of their businesses
    - Employee social class and wealth
    - Current wage amounts, business income, and expenses
 
-3. For each AI user, the system:
+3. For each AI citizen, the system:
    - Prepares a comprehensive data package with financial information
    - Sends this data to the Kinos Engine API for analysis
    - Receives wage adjustment decisions from the AI
@@ -233,7 +233,7 @@ AI users strategically adjust wage amounts for businesses they own:
    - Business employees receive notifications about the changes
    - Reasons for adjustments are provided to maintain transparency
 
-5. An admin notification is created with statistics about all wage adjustments, showing the changes made by each AI user
+5. An admin notification is created with statistics about all wage adjustments, showing the changes made by each AI citizen
 
 #### Economic Impact:
 
@@ -249,18 +249,18 @@ The AI wage adjustment system:
 **Implementation**: `backend/ais/importresources.py`  
 **Schedule**: Daily at 1:00 AM UTC
 
-AI users strategically set up resource imports for their buildings:
+AI citizens strategically set up resource imports for their buildings:
 
 #### Process:
 
-1. The script identifies all users marked as AI in the system
-2. For each AI user, it analyzes:
+1. The script identifies all citizens marked as AI in the system
+2. For each AI citizen, it analyzes:
    - Buildings they own that can import resources
    - Current resource stockpiles
    - Existing import contracts
    - Available resource types and their import prices
 
-3. For each AI user, the system:
+3. For each AI citizen, the system:
    - Prepares a comprehensive data package with resource and building information
    - Sends this data to the Kinos Engine API for analysis
    - Receives import strategy decisions from the AI
@@ -270,14 +270,14 @@ AI users strategically set up resource imports for their buildings:
    - Contract details include resource type, hourly amount, and price
    - Each contract is set with appropriate parameters (seller: "Italia", transporter: "Italia")
 
-5. An admin notification is created with statistics about all import decisions, showing the resources being imported by each AI user
+5. An admin notification is created with statistics about all import decisions, showing the resources being imported by each AI citizen
 
 #### Economic Impact:
 
 The AI resource import system:
 - Ensures AI-owned buildings have necessary resources for production
 - Creates a more realistic economy with active resource flows
-- Allows AI users to participate fully in the production chain
+- Allows AI citizens to participate fully in the production chain
 - Simulates the international trade that was vital to Venice's economy
 - Provides market demand for various resource types
 
@@ -286,18 +286,18 @@ The AI resource import system:
 **Implementation**: `backend/ais/managepublicsells.py`  
 **Schedule**: Daily at 3:00 AM UTC
 
-AI users strategically create public sell contracts to sell resources to other players:
+AI citizens strategically create public sell contracts to sell resources to other players:
 
 #### Process:
 
-1. The script identifies all users marked as AI in the system
-2. For each AI user, it analyzes:
+1. The script identifies all citizens marked as AI in the system
+2. For each AI citizen, it analyzes:
    - Buildings they run that can sell resources
    - Current resource stockpiles
    - Existing public sell contracts
    - Available resource types and their import prices
 
-3. For each AI user, the system:
+3. For each AI citizen, the system:
    - Prepares a comprehensive data package with resource and building information
    - Sends this data to the Kinos Engine API for analysis
    - Receives public sell strategy decisions from the AI
@@ -307,7 +307,7 @@ AI users strategically create public sell contracts to sell resources to other p
    - Existing contracts may be ended if no longer beneficial
    - Contract details include resource type, hourly amount, and price
 
-5. An admin notification is created with statistics about all public sell decisions, showing the resources being sold by each AI user
+5. An admin notification is created with statistics about all public sell decisions, showing the resources being sold by each AI citizen
 
 #### Economic Impact:
 
@@ -318,12 +318,12 @@ The AI public sell management system:
 - Provides competition and price signals in the resource market
 - Simulates the merchant activity that was vital to Venice's economy
 
-## AI User Management
+## AI Citizen Management
 
-AI users are created and managed through the Airtable database:
+AI citizens are created and managed through the Airtable database:
 
-1. Users with the `IsAI` flag set to true are treated as AI users by the system
-2. AI users receive compute tokens through the same distribution mechanisms as human players
+1. Citizens with the `IsAI` flag set to true are treated as AI citizens by the system
+2. AI citizens receive compute tokens through the same distribution mechanisms as human players
 3. They can own lands, buildings, and other assets
 4. Their economic activities generate notifications and transaction records just like human players
 
@@ -332,7 +332,7 @@ AI users are created and managed through the Airtable database:
 The AI system is implemented as a series of Python scripts that run on scheduled intervals. Each script:
 
 1. Connects to the Airtable database
-2. Identifies AI users and relevant economic opportunities
+2. Identifies AI citizens and relevant economic opportunities
 3. Makes decisions based on programmed economic behaviors
 4. Updates the database with new transactions, bids, or other changes
 5. Creates notifications to inform administrators and affected players
@@ -344,35 +344,35 @@ The scripts use the same underlying APIs and database access methods as the rest
 **Implementation**: `backend/ais/buildbuildings.py`  
 **Schedule**: Daily at 8:00 PM UTC
 
-AI users actively develop lands they own by constructing buildings:
+AI citizens actively develop lands they own by constructing buildings:
 
 #### Process:
 
-1. The script identifies all users marked as AI in the system
-2. For each AI user, it checks:
+1. The script identifies all citizens marked as AI in the system
+2. For each AI citizen, it checks:
    - Their current compute balance
    - Lands they own
    - Existing buildings on those lands
    - Available building points on each land
 
-3. For each land with available building points, AI users will:
+3. For each land with available building points, AI citizens will:
    - Evaluate which building types can fit within the remaining points
    - Prioritize buildings with higher income potential
    - Construct buildings if they have sufficient compute (at least twice the building cost)
 
 4. When a building is constructed:
-   - The AI user's compute balance is reduced by the building cost
+   - The AI citizen's compute balance is reduced by the building cost
    - A transaction record is created for the building purchase
    - The land owner (if different from the AI) receives a notification
 
-5. An admin notification is created with statistics about all building activity, showing the number of buildings constructed by each AI user
+5. An admin notification is created with statistics about all building activity, showing the number of buildings constructed by each AI citizen
 
 #### Economic Impact:
 
 The AI building construction system:
 - Encourages land development and efficient use of building points
 - Creates a more dynamic and visually interesting game world
-- Generates income for AI users through building operations
+- Generates income for AI citizens through building operations
 - Provides lease income to land owners (including other players)
 - Reduces the Vigesima Variabilis tax rate on developed lands
 
@@ -380,9 +380,9 @@ The AI building construction system:
 
 The AI system is designed to be extensible, allowing for additional behaviors to be added over time:
 
-1. **Business Operation**: AI users could operate businesses and hire citizens
-2. **Market Trading**: AI users could buy and sell resources on the open market
-3. **Banking Activities**: AI users could offer loans or banking services
+1. **Business Operation**: AI citizens could operate businesses and hire citizens
+2. **Market Trading**: AI citizens could buy and sell resources on the open market
+3. **Banking Activities**: AI citizens could offer loans or banking services
 
 Each new behavior would be implemented as a separate script following the same pattern as the existing AI systems.
 
@@ -392,11 +392,11 @@ Administrators can monitor AI activity through:
 
 1. Notifications generated by AI actions
 2. Transaction records showing AI economic activity
-3. The Airtable database, which stores all AI user data and actions
+3. The Airtable database, which stores all AI citizen data and actions
 
 If needed, administrators can adjust AI behavior by:
 1. Modifying the parameters in the AI scripts (e.g., bid multipliers, frequency of actions)
-2. Adding or removing the `IsAI` flag from specific users
+2. Adding or removing the `IsAI` flag from specific citizens
 3. Manually intervening in specific transactions or bids
 
 ## Conclusion

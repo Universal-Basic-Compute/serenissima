@@ -6,9 +6,9 @@ from typing import Dict, List, Optional, Tuple
 from dotenv import load_dotenv
 from pyairtable import Api, Table
 
-# Add the parent directory to the path to import user_utils
+# Add the parent directory to the path to import citizen_utils
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from app.user_utils import find_user_by_identifier
+from app.citizen_utils import find_citizen_by_identifier
 
 def initialize_airtable():
     """Initialize connection to Airtable."""
@@ -24,7 +24,7 @@ def initialize_airtable():
     api = Api(airtable_api_key)
     
     tables = {
-        "users": Table(airtable_api_key, airtable_base_id, "USERS"),
+        "citizens": Table(airtable_api_key, airtable_base_id, "CITIZENS"),
         "lands": Table(airtable_api_key, airtable_base_id, "LANDS"),
         "transactions": Table(airtable_api_key, airtable_base_id, "TRANSACTIONS"),
         "notifications": Table(airtable_api_key, airtable_base_id, "NOTIFICATIONS")
@@ -32,16 +32,16 @@ def initialize_airtable():
     
     return tables
 
-def get_ai_users(tables) -> List[Dict]:
-    """Get all users that are marked as AI."""
+def get_ai_citizens(tables) -> List[Dict]:
+    """Get all citizens that are marked as AI."""
     try:
-        # Query users with IsAI field set to true
+        # Query citizens with IsAI field set to true
         formula = "{IsAI}=1"
-        ai_users = tables["users"].all(formula=formula)
-        print(f"Found {len(ai_users)} AI users")
-        return ai_users
+        ai_citizens = tables["citizens"].all(formula=formula)
+        print(f"Found {len(ai_citizens)} AI citizens")
+        return ai_citizens
     except Exception as e:
-        print(f"Error getting AI users: {str(e)}")
+        print(f"Error getting AI citizens: {str(e)}")
         return []
 
 def get_lands_with_income(tables) -> List[Dict]:
@@ -56,11 +56,11 @@ def get_lands_with_income(tables) -> List[Dict]:
         print(f"Error getting lands with income: {str(e)}")
         return []
 
-def get_existing_bids(tables, ai_user_id: str) -> Dict[str, Dict]:
-    """Get existing bids from an AI user, indexed by land_id."""
+def get_existing_bids(tables, ai_citizen_id: str) -> Dict[str, Dict]:
+    """Get existing bids from an AI citizen, indexed by land_id."""
     try:
-        # Query transactions where the buyer is the AI user and type is 'land'
-        formula = f"AND({{Buyer}}='{ai_user_id}', {{Type}}='land', {{ExecutedAt}}=BLANK())"
+        # Query transactions where the buyer is the AI citizen and type is 'land'
+        formula = f"AND({{Buyer}}='{ai_citizen_id}', {{Type}}='land', {{ExecutedAt}}=BLANK())"
         transactions = tables["transactions"].all(formula=formula)
         
         # Index by asset_id (land_id)
@@ -70,13 +70,13 @@ def get_existing_bids(tables, ai_user_id: str) -> Dict[str, Dict]:
             if asset_id:
                 bids_by_land[asset_id] = transaction
         
-        print(f"Found {len(bids_by_land)} existing bids for AI user {ai_user_id}")
+        print(f"Found {len(bids_by_land)} existing bids for AI citizen {ai_citizen_id}")
         return bids_by_land
     except Exception as e:
         print(f"Error getting existing bids: {str(e)}")
         return {}
 
-def create_or_update_bid(tables, ai_user: Dict, land: Dict, existing_bid: Optional[Dict] = None) -> bool:
+def create_or_update_bid(tables, ai_citizen: Dict, land: Dict, existing_bid: Optional[Dict] = None) -> bool:
     """Create a new bid or update an existing one."""
     try:
         land_id = land["fields"].get("LandId")
@@ -89,17 +89,17 @@ def create_or_update_bid(tables, ai_user: Dict, land: Dict, existing_bid: Option
         # Calculate bid amount (30x the last income)
         bid_amount = last_income * 30
         
-        # Get AI user's compute balance
-        ai_username = ai_user["fields"].get("Username")
-        ai_compute = ai_user["fields"].get("Ducats", 0)
+        # Get AI citizen's compute balance
+        ai_citizenname = ai_citizen["fields"].get("Citizenname")
+        ai_compute = ai_citizen["fields"].get("Ducats", 0)
         
         # Check if AI has enough compute (2x the bid amount)
         if ai_compute < bid_amount * 2:
-            print(f"AI {ai_username} doesn't have enough compute for bid on {land_id}. Needs {bid_amount * 2}, has {ai_compute}")
+            print(f"AI {ai_citizenname} doesn't have enough compute for bid on {land_id}. Needs {bid_amount * 2}, has {ai_compute}")
             return False
         
         # Get current land owner
-        land_owner = land["fields"].get("User")
+        land_owner = land["fields"].get("Citizen")
         
         if existing_bid:
             # Increase existing bid by 14% if AI has enough compute
@@ -107,7 +107,7 @@ def create_or_update_bid(tables, ai_user: Dict, land: Dict, existing_bid: Option
             new_bid = current_bid * 1.2
             
             if ai_compute < new_bid * 2:
-                print(f"AI {ai_username} doesn't have enough compute to increase bid on {land_id}. Needs {new_bid * 2}, has {ai_compute}")
+                print(f"AI {ai_citizenname} doesn't have enough compute to increase bid on {land_id}. Needs {new_bid * 2}, has {ai_compute}")
                 return False
             
             # Update the transaction with the new bid
@@ -117,21 +117,21 @@ def create_or_update_bid(tables, ai_user: Dict, land: Dict, existing_bid: Option
                 "UpdatedAt": now
             })
             
-            print(f"Updated bid for {land_id} from {current_bid} to {new_bid} by AI {ai_username}")
+            print(f"Updated bid for {land_id} from {current_bid} to {new_bid} by AI {ai_citizenname}")
             
             # Send notification to land owner about the updated bid
             if land_owner:
                 try:
-                    notification_content = f"AI {ai_username} has increased their bid on your land {land_id} from {current_bid} to {new_bid} compute."
+                    notification_content = f"AI {ai_citizenname} has increased their bid on your land {land_id} from {current_bid} to {new_bid} compute."
                     tables["notifications"].create({
-                        "User": land_owner,
+                        "Citizen": land_owner,
                         "Type": "bid_update",
                         "Content": notification_content,
                         "CreatedAt": now,
                         "ReadAt": None,
                         "Details": json.dumps({
                             "land_id": land_id,
-                            "bidder": ai_username,
+                            "bidder": ai_citizenname,
                             "previous_bid": current_bid,
                             "new_bid": new_bid,
                             "timestamp": now
@@ -151,28 +151,28 @@ def create_or_update_bid(tables, ai_user: Dict, land: Dict, existing_bid: Option
                 "Type": "land",
                 "AssetId": land_id,
                 "Seller": land_owner if land_owner else "Republic",
-                "Buyer": ai_username,
+                "Buyer": ai_citizenname,
                 "Price": bid_amount,
                 "CreatedAt": now,
                 "UpdatedAt": now
             }
             
             tables["transactions"].create(transaction)
-            print(f"Created new bid for {land_id} at {bid_amount} by AI {ai_username}")
+            print(f"Created new bid for {land_id} at {bid_amount} by AI {ai_citizenname}")
             
             # Send notification to land owner about the new bid
             if land_owner:
                 try:
-                    notification_content = f"AI {ai_username} has placed a bid of {bid_amount} compute on your land {land_id}."
+                    notification_content = f"AI {ai_citizenname} has placed a bid of {bid_amount} compute on your land {land_id}."
                     tables["notifications"].create({
-                        "User": land_owner,
+                        "Citizen": land_owner,
                         "Type": "new_bid",
                         "Content": notification_content,
                         "CreatedAt": now,
                         "ReadAt": None,
                         "Details": json.dumps({
                             "land_id": land_id,
-                            "bidder": ai_username,
+                            "bidder": ai_citizenname,
                             "bid_amount": bid_amount,
                             "timestamp": now
                         })
@@ -199,7 +199,7 @@ def create_admin_notification(tables, ai_bid_counts: Dict[str, int]) -> None:
         
         # Create the notification
         notification = {
-            "User": "admin",
+            "Citizen": "admin",
             "Type": "ai_bidding",
             "Content": message,
             "CreatedAt": now,
@@ -222,10 +222,10 @@ def process_ai_land_bidding(dry_run: bool = False):
     # Initialize Airtable connection
     tables = initialize_airtable()
     
-    # Get AI users
-    ai_users = get_ai_users(tables)
-    if not ai_users:
-        print("No AI users found, exiting")
+    # Get AI citizens
+    ai_citizens = get_ai_citizens(tables)
+    if not ai_citizens:
+        print("No AI citizens found, exiting")
         return
     
     # Get lands with income
@@ -237,17 +237,17 @@ def process_ai_land_bidding(dry_run: bool = False):
     # Track bid counts for each AI
     ai_bid_counts = {}
     
-    # Process each AI user
-    for ai_user in ai_users:
-        ai_username = ai_user["fields"].get("Username")
-        if not ai_username:
+    # Process each AI citizen
+    for ai_citizen in ai_citizens:
+        ai_citizenname = ai_citizen["fields"].get("Citizenname")
+        if not ai_citizenname:
             continue
         
-        print(f"Processing AI user: {ai_username}")
-        ai_bid_counts[ai_username] = 0
+        print(f"Processing AI citizen: {ai_citizenname}")
+        ai_bid_counts[ai_citizenname] = 0
         
         # Get existing bids for this AI
-        existing_bids = get_existing_bids(tables, ai_username)
+        existing_bids = get_existing_bids(tables, ai_citizenname)
         
         # Process each land
         for land in lands:
@@ -260,16 +260,16 @@ def process_ai_land_bidding(dry_run: bool = False):
             
             # Create or update bid
             if not dry_run:
-                success = create_or_update_bid(tables, ai_user, land, existing_bid)
+                success = create_or_update_bid(tables, ai_citizen, land, existing_bid)
                 if success:
-                    ai_bid_counts[ai_username] += 1
+                    ai_bid_counts[ai_citizenname] += 1
             else:
                 # In dry run mode, just log what would happen
                 if existing_bid:
-                    print(f"[DRY RUN] Would update bid for {land_id} by AI {ai_username}")
+                    print(f"[DRY RUN] Would update bid for {land_id} by AI {ai_citizenname}")
                 else:
-                    print(f"[DRY RUN] Would create new bid for {land_id} by AI {ai_username}")
-                ai_bid_counts[ai_username] += 1
+                    print(f"[DRY RUN] Would create new bid for {land_id} by AI {ai_citizenname}")
+                ai_bid_counts[ai_citizenname] += 1
     
     # Create admin notification with summary
     if not dry_run and sum(ai_bid_counts.values()) > 0:

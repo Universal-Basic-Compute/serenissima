@@ -222,11 +222,11 @@ def main():
         log.error("No buildings match the specified filters. Exiting.")
         return
     
-    # Confirm with user before proceeding
+    # Confirm with citizen before proceeding
     if not args.dry_run:
         confirmation = input(f"This will adjust maintenance costs for {len(buildings)} buildings by dividing by {args.factor}. Continue? (y/n): ")
         if confirmation.lower() != 'y':
-            log.info("Operation cancelled by user.")
+            log.info("Operation cancelled by citizen.")
             return
     
     # Process buildings

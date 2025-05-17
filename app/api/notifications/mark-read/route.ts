@@ -22,16 +22,16 @@ const initAirtable = () => {
 export async function POST(request: Request) {
   try {
     // Parse the request body
-    const { user, notificationIds } = await request.json();
+    const { citizen, notificationIds } = await request.json();
     
-    if (!user || !notificationIds || !Array.isArray(notificationIds)) {
+    if (!citizen || !notificationIds || !Array.isArray(notificationIds)) {
       return NextResponse.json(
-        { success: false, error: 'User and notification IDs array are required' },
+        { success: false, error: 'Citizen and notification IDs array are required' },
         { status: 400 }
       );
     }
     
-    console.log(`Marking notifications as read for user: ${user}, notifications: ${notificationIds.join(', ')}`);
+    console.log(`Marking notifications as read for citizen: ${citizen}, notifications: ${notificationIds.join(', ')}`);
     
     try {
       // Initialize Airtable

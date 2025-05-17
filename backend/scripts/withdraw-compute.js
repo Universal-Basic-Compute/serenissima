@@ -48,7 +48,7 @@ async function withdrawCompute() {
   try {
     // Read withdrawal data from the temporary file
     const withdrawData = JSON.parse(fs.readFileSync('withdraw_data.json', 'utf8'));
-    const { user, amount, signature: userSignature, message } = withdrawData;
+    const { citizen, amount, signature: citizenSignature, message } = withdrawData;
     
     // If dependencies are missing, use a simplified approach
     if (!Connection || !PublicKey || !Keypair) {
@@ -57,7 +57,7 @@ async function withdrawCompute() {
         status: "simplified",
         message: "Using simplified mode due to missing dependencies",
         amount,
-        user
+        citizen
       }));
       return;
     }
@@ -85,24 +85,24 @@ async function withdrawCompute() {
     // Get mint info to determine decimals
     const mintInfo = await getMint(connection, computeTokenMint);
     
-    // Get user public key
-    const userPublicKey = new PublicKey(user);
+    // Get citizen public key
+    const citizenPublicKey = new PublicKey(citizen);
     
-    // In a real application, we would verify the user's signature here
-    // This ensures the user has authorized this withdrawal
-    if (userSignature && message && nacl.sign) {
+    // In a real application, we would verify the citizen's signature here
+    // This ensures the citizen has authorized this withdrawal
+    if (citizenSignature && message && nacl.sign) {
       const messageBytes = Buffer.from(message, 'utf8');
-      const signatureBytes = Buffer.from(userSignature, 'base64');
+      const signatureBytes = Buffer.from(citizenSignature, 'base64');
       
       // Verify the signature
       const isValid = nacl.sign.detached.verify(
         messageBytes,
         signatureBytes,
-        userPublicKey.toBytes()
+        citizenPublicKey.toBytes()
       );
       
       if (!isValid) {
-        throw new Error('Invalid signature: User has not properly authorized this withdrawal');
+        throw new Error('Invalid signature: Citizen has not properly authorized this withdrawal');
       }
     } else {
       console.warn('WARNING: Proceeding without signature verification. This should be required in production.');
@@ -116,19 +116,19 @@ async function withdrawCompute() {
       treasuryKeypair.publicKey
     );
     
-    // Get user token account
-    const userTokenAccount = await getOrCreateAssociatedTokenAccount(
+    // Get citizen token account
+    const citizenTokenAccount = await getOrCreateAssociatedTokenAccount(
       connection,
       treasuryKeypair, // Payer for account creation if needed
       computeTokenMint,
-      userPublicKey
+      citizenPublicKey
     );
     
-    // Create transfer instruction with proper decimals (from treasury to user)
+    // Create transfer instruction with proper decimals (from treasury to citizen)
     const transferInstruction = createTransferCheckedInstruction(
       treasuryTokenAccount.address,
       computeTokenMint,
-      userTokenAccount.address,
+      citizenTokenAccount.address,
       treasuryKeypair.publicKey, // Owner of the source account
       BigInt(Math.floor(amount * (10 ** mintInfo.decimals))), // Convert to proper decimal representation
       mintInfo.decimals
@@ -156,7 +156,7 @@ async function withdrawCompute() {
         signature,
         message: "Withdrawal completed successfully",
         amount,
-        user
+        citizen
       }));
     } catch (txError) {
       console.error('Transaction error:', txError);
@@ -169,9 +169,9 @@ async function withdrawCompute() {
           requireAllSignatures: false,
           verifySignatures: false
         }).toString('base64'),
-        message: "User must sign this transaction to complete withdrawal",
+        message: "Citizen must sign this transaction to complete withdrawal",
         amount,
-        user
+        citizen
       }));
     }
     

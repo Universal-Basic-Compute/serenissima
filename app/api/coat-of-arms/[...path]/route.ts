@@ -21,7 +21,7 @@ export async function GET(
       try {
         const response = await fetch(externalUrl, {
           headers: {
-            'User-Agent': 'Serenissima-Proxy/1.0',
+            'Citizen-Agent': 'Serenissima-Proxy/1.0',
           },
         });
         

@@ -67,7 +67,7 @@ def initialize_airtable():
         return {
             'contracts': Table(api_key, base_id, 'CONTRACTS'),
             'resources': Table(api_key, base_id, 'RESOURCES'),
-            'users': Table(api_key, base_id, 'Users'),
+            'citizens': Table(api_key, base_id, 'Citizens'),
             'buildings': Table(api_key, base_id, 'BUILDINGS'),
             'transactions': Table(api_key, base_id, 'TRANSACTIONS')
         }
@@ -182,21 +182,21 @@ def get_building_resources(tables, building_id: str) -> List[Dict]:
         log.error(f"Error getting resources for building {building_id}: {e}")
         return []
 
-def get_user_balance(tables, username: str) -> float:
-    """Get the compute balance for a user."""
+def get_citizen_balance(tables, citizenname: str) -> float:
+    """Get the compute balance for a citizen."""
     try:
-        formula = f"{{Username}}='{username}'"
-        users = tables['users'].all(formula=formula)
+        formula = f"{{Citizenname}}='{citizenname}'"
+        citizens = tables['citizens'].all(formula=formula)
         
-        if users:
-            balance = users[0]['fields'].get('Ducats', 0)
-            log.info(f"User {username} has balance: {balance}")
+        if citizens:
+            balance = citizens[0]['fields'].get('Ducats', 0)
+            log.info(f"Citizen {citizenname} has balance: {balance}")
             return float(balance)
         else:
-            log.warning(f"User {username} not found")
+            log.warning(f"Citizen {citizenname} not found")
             return 0
     except Exception as e:
-        log.error(f"Error getting balance for user {username}: {e}")
+        log.error(f"Error getting balance for citizen {citizenname}: {e}")
         return 0
 
 def get_building_info(tables, building_id: str) -> Optional[Dict]:
@@ -253,7 +253,7 @@ def process_import_contract(tables, contract: Dict, building_types: Dict, resour
             buyer = building_operator
         
         # Get buyer's balance
-        buyer_balance = get_user_balance(tables, buyer)
+        buyer_balance = get_citizen_balance(tables, buyer)
         
         # Calculate total cost
         total_cost = import_amount * price_per_resource
@@ -300,17 +300,17 @@ def process_import_contract(tables, contract: Dict, building_types: Dict, resour
         
         # 1. Transfer money from buyer to seller (Italia/Treasury)
         # Update buyer's balance
-        formula = f"{{Username}}='{buyer}'"
-        users = tables['users'].all(formula=formula)
+        formula = f"{{Citizenname}}='{buyer}'"
+        citizens = tables['citizens'].all(formula=formula)
         
-        if not users:
-            log.warning(f"User {buyer} not found")
+        if not citizens:
+            log.warning(f"Citizen {buyer} not found")
             return False
         
-        user_id = users[0]['id']
+        citizen_id = citizens[0]['id']
         new_balance = buyer_balance - total_cost
         
-        tables['users'].update(user_id, {
+        tables['citizens'].update(citizen_id, {
             'Ducats': new_balance
         })
         

@@ -9,7 +9,7 @@ let cachedData: any = null;
 let cacheTimestamp: number = 0;
 const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
 const FETCH_TIMEOUT = 15000; // Reduce timeout to 15 seconds
-const AIRTABLE_USERS_TABLE = process.env.AIRTABLE_USERS_TABLE || 'USERS';
+const AIRTABLE_CITIZENS_TABLE = process.env.AIRTABLE_CITIZENS_TABLE || 'CITIZENS';
 
 // Path to the mapping file created by sync_coatofarms.py
 const MAPPING_FILE_PATH = path.join(process.cwd(), 'public', 'coat-of-arms', 'mapping.json');
@@ -39,16 +39,16 @@ async function loadMappingFile() {
   }
 }
 
-// Function to fetch user data from the USERS table
-async function fetchUsersData(base: any) {
+// Function to fetch citizen data from the CITIZENS table
+async function fetchCitizensData(base: any) {
   try {
-    const usersTable = base(AIRTABLE_USERS_TABLE);
+    const citizensTable = base(AIRTABLE_CITIZENS_TABLE);
     
-    // Fetch all user records
+    // Fetch all citizen records
     const records = await new Promise((resolve, reject) => {
       const allRecords: any[] = [];
-      usersTable.select({
-        fields: ['Username', 'CoatOfArmsImage', 'Ducats', 'FirstName', 'LastName', 'FamilyMotto'] // Added new fields
+      citizensTable.select({
+        fields: ['Citizenname', 'CoatOfArmsImage', 'Ducats', 'FirstName', 'LastName', 'FamilyMotto'] // Added new fields
       }).eachPage(
         function page(records, fetchNextPage) {
           allRecords.push(...records);
@@ -65,10 +65,10 @@ async function fetchUsersData(base: any) {
     });
     
     // Transform to a map for easy lookup
-    const usersMap = new Map();
+    const citizensMap = new Map();
     (records as any[]).forEach(record => {
-      if (record.fields.Username) {
-        usersMap.set(record.fields.Username, {
+      if (record.fields.Citizenname) {
+        citizensMap.set(record.fields.Citizenname, {
           coat_of_arms_image: record.fields.CoatOfArmsImage || null,
           ducats: record.fields.Ducats || 0,
           first_name: record.fields.FirstName || null,
@@ -78,10 +78,10 @@ async function fetchUsersData(base: any) {
       }
     });
     
-    console.log(`Retrieved ${usersMap.size} user records from Airtable`);
-    return usersMap;
+    console.log(`Retrieved ${citizensMap.size} citizen records from Airtable`);
+    return citizensMap;
   } catch (error) {
-    console.error('Error fetching users data:', error);
+    console.error('Error fetching citizens data:', error);
     return new Map();
   }
 }
@@ -139,8 +139,8 @@ export async function GET(request: Request) {
       const base = new Airtable({apiKey: AIRTABLE_API_KEY}).base(AIRTABLE_BASE_ID);
       const landsTable = base(AIRTABLE_LANDS_TABLE);
       
-      // Fetch both land records and user data in parallel
-      const [records, usersMap] = await Promise.all([
+      // Fetch both land records and citizen data in parallel
+      const [records, citizensMap] = await Promise.all([
         new Promise((resolve, reject) => {
           const allRecords: any[] = [];
           landsTable.select().eachPage(
@@ -157,7 +157,7 @@ export async function GET(request: Request) {
             }
           );
         }),
-        fetchUsersData(base)
+        fetchCitizensData(base)
       ]);
       
       // Define the land data interface
@@ -174,19 +174,19 @@ export async function GET(request: Request) {
 
       // Transform records to the expected format
       const data = (records as any[]).map(record => {
-        const owner = record.fields.User || record.fields.Wallet || null;
-        const userData = owner ? usersMap.get(owner) : null;
+        const owner = record.fields.Citizen || record.fields.Wallet || null;
+        const citizenData = owner ? citizensMap.get(owner) : null;
         
         return {
           id: record.fields.LandId || record.id,
           owner: owner,
-          // Use coat of arms from user data if available, otherwise use from land record
-          coat_of_arms_image: userData?.coat_of_arms_image || record.fields.CoatOfArmsImage || null,
-          // Add the new fields from user data
-          ducats: userData?.ducats || 0,
-          first_name: userData?.first_name || null,
-          last_name: userData?.last_name || null,
-          family_motto: userData?.family_motto || null
+          // Use coat of arms from citizen data if available, otherwise use from land record
+          coat_of_arms_image: citizenData?.coat_of_arms_image || record.fields.CoatOfArmsImage || null,
+          // Add the new fields from citizen data
+          ducats: citizenData?.ducats || 0,
+          first_name: citizenData?.first_name || null,
+          last_name: citizenData?.last_name || null,
+          family_motto: citizenData?.family_motto || null
         } as LandData;
       });
       

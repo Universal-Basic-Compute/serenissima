@@ -9,7 +9,7 @@ export function useWallet() {
   const [walletAdapter, setWalletAdapter] = useState<PhantomWalletAdapter | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [userProfile, setUserProfile] = useState<any>(null);
+  const [citizenProfile, setCitizenProfile] = useState<any>(null);
 
   // Initialize wallet adapter
   useEffect(() => {
@@ -25,31 +25,31 @@ export function useWallet() {
       console.log("Found stored wallet address, setting as connected");
       setWalletAddressState(storedWallet);
       
-      // Try to load user profile from localStorage first
-      const storedProfile = localStorage.getItem('userProfile');
+      // Try to load citizen profile from localStorage first
+      const storedProfile = localStorage.getItem('citizenProfile');
       if (storedProfile) {
         try {
           const parsedProfile = JSON.parse(storedProfile);
-          console.log('Loaded user profile from localStorage:', parsedProfile);
-          setUserProfile(parsedProfile);
+          console.log('Loaded citizen profile from localStorage:', parsedProfile);
+          setCitizenProfile(parsedProfile);
         } catch (e) {
           console.error('Error parsing stored profile:', e);
         }
       }
       
-      // Also fetch user profile data from backend to ensure it's up to date
+      // Also fetch citizen profile data from backend to ensure it's up to date
       fetch(`${getBackendBaseUrl()}/api/wallet/${storedWallet}`)
         .then(response => {
           if (response.ok) return response.json();
-          throw new Error('Failed to fetch user profile');
+          throw new Error('Failed to fetch citizen profile');
         })
         .then(data => {
-          console.log('Fetched user profile from backend:', data);
-          if (data.user_name) {
+          console.log('Fetched citizen profile from backend:', data);
+          if (data.citizen_name) {
             const backendProfile = {
-              username: data.user_name,
-              firstName: data.first_name || data.user_name.split(' ')[0] || '',
-              lastName: data.last_name || data.user_name.split(' ').slice(1).join(' ') || '',
+              citizenname: data.citizen_name,
+              firstName: data.first_name || data.citizen_name.split(' ')[0] || '',
+              lastName: data.last_name || data.citizen_name.split(' ').slice(1).join(' ') || '',
               coatOfArmsImage: data.coat_of_arms_image,
               familyMotto: data.family_motto,
               familyCoatOfArms: data.family_coat_of_arms,
@@ -59,14 +59,14 @@ export function useWallet() {
             };
           
             // Update state with backend data
-            setUserProfile(backendProfile);
+            setCitizenProfile(backendProfile);
             
             // Also update localStorage
-            localStorage.setItem('userProfile', JSON.stringify(backendProfile));
+            localStorage.setItem('citizenProfile', JSON.stringify(backendProfile));
           }
         })
         .catch(error => {
-          console.error('Error fetching user profile:', error);
+          console.error('Error fetching citizen profile:', error);
         });
     } else if (adapter.connected) {
       // If adapter is connected but not in storage, update both
@@ -106,16 +106,16 @@ export function useWallet() {
     };
   }, []);
 
-  // Listen for user profile updates
+  // Listen for citizen profile updates
   useEffect(() => {
     const handleProfileUpdated = (event: CustomEvent) => {
-      setUserProfile(event.detail);
+      setCitizenProfile(event.detail);
     };
     
-    window.addEventListener('userProfileUpdated', handleProfileUpdated as EventListener);
+    window.addEventListener('citizenProfileUpdated', handleProfileUpdated as EventListener);
     
     return () => {
-      window.removeEventListener('userProfileUpdated', handleProfileUpdated as EventListener);
+      window.removeEventListener('citizenProfileUpdated', handleProfileUpdated as EventListener);
     };
   }, []);
 
@@ -140,11 +140,11 @@ export function useWallet() {
         
         // Clear wallet from both storages
         clearWalletAddress();
-        localStorage.removeItem('userProfile'); // Also clear user profile from storage
+        localStorage.removeItem('citizenProfile'); // Also clear citizen profile from storage
         
         // Update state after successful disconnect
         setWalletAddressState(null);
-        setUserProfile(null); // Also clear the user profile
+        setCitizenProfile(null); // Also clear the citizen profile
         
         // Dispatch a custom event to notify other components
         window.dispatchEvent(new CustomEvent('walletChanged'));
@@ -180,28 +180,28 @@ export function useWallet() {
         // Store wallet in both session and local storage
         setWalletAddress(address);
         
-        // Store wallet in Airtable and check for username
-        const userData = await storeWalletInAirtable(address);
+        // Store wallet in Airtable and check for citizenname
+        const citizenData = await storeWalletInAirtable(address);
         
-        if (userData) {
-          // Check if the user has a username
-          if (userData.user_name === undefined || userData.user_name === null || userData.user_name === '') {
-            // If no username, show the prompt
-            window.dispatchEvent(new CustomEvent('showUsernamePrompt'));
+        if (citizenData) {
+          // Check if the citizen has a citizenname
+          if (citizenData.citizen_name === undefined || citizenData.citizen_name === null || citizenData.citizen_name === '') {
+            // If no citizenname, show the prompt
+            window.dispatchEvent(new CustomEvent('showCitizennamePrompt'));
           } else {
-            // Store the user profile information
-            console.log('Setting user profile with data:', userData);
-            const userProfile = {
-              username: userData.user_name,
-              firstName: userData.first_name || userData.user_name.split(' ')[0] || '',
-              lastName: userData.last_name || userData.user_name.split(' ').slice(1).join(' ') || '',
-              coatOfArmsImage: userData.coat_of_arms_image,
-              familyMotto: userData.family_motto,
-              Ducats: userData.ducats,
+            // Store the citizen profile information
+            console.log('Setting citizen profile with data:', citizenData);
+            const citizenProfile = {
+              citizenname: citizenData.citizen_name,
+              firstName: citizenData.first_name || citizenData.citizen_name.split(' ')[0] || '',
+              lastName: citizenData.last_name || citizenData.citizen_name.split(' ').slice(1).join(' ') || '',
+              coatOfArmsImage: citizenData.coat_of_arms_image,
+              familyMotto: citizenData.family_motto,
+              Ducats: citizenData.ducats,
               walletAddress: address
             };
-            setUserProfile(userProfile);
-            localStorage.setItem('userProfile', JSON.stringify(userProfile));
+            setCitizenProfile(citizenProfile);
+            localStorage.setItem('citizenProfile', JSON.stringify(citizenProfile));
           }
         }
       }
@@ -213,7 +213,7 @@ export function useWallet() {
 
   return {
     walletAddress,
-    userProfile,
+    citizenProfile,
     isConnected: !!walletAddress,
     isConnecting,
     isInitialized,

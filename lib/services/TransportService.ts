@@ -1565,7 +1565,7 @@ export class TransportService {
         const bridgesResponse = await fetch(`${baseUrl}/api/bridges`, {
           headers: {
             'Content-Type': 'application/json',
-            'User-Agent': 'Transport-Service'
+            'Citizen-Agent': 'Transport-Service'
           },
           cache: 'no-store',
           signal: controller.signal
@@ -1625,7 +1625,7 @@ export class TransportService {
         const docksResponse = await fetch(`${baseUrl}/api/docks`, {
           headers: {
             'Content-Type': 'application/json',
-            'User-Agent': 'Transport-Service'
+            'Citizen-Agent': 'Transport-Service'
           },
           cache: 'no-store',
           signal: controller.signal

@@ -13,7 +13,7 @@ This is a Python FastAPI backend for storing wallet addresses and compute invest
    ```
    AIRTABLE_API_KEY=your_airtable_api_key
    AIRTABLE_BASE_ID=your_airtable_base_id
-   AIRTABLE_USERS_TABLE=Users
+   AIRTABLE_CITIZENS_TABLE=Citizens
    ```
 
 3. Run the server:
@@ -39,11 +39,11 @@ The server will start at http://localhost:8000
 
 ## Airtable Structure
 
-The Users table should have the following fields:
+The Citizens table should have the following fields:
 - Wallet (text): The wallet address
 - Ducats (number): The amount of compute resources invested
-- Username (text): The user's username
-- Email (text): The user's email address
+- Citizenname (text): The citizen's citizenname
+- Email (text): The citizen's email address
 
 The LANDS table should have the following fields:
 - LandId (text): The ID of the land (polygon)

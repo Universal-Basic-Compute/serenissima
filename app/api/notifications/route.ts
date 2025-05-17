@@ -34,16 +34,16 @@ const initAirtable = () => {
   return Airtable.base(AIRTABLE_BASE_ID);
 };
 
-// Get notifications for a user
+// Get notifications for a citizen
 export async function POST(request: Request) {
   try {
     // Parse the request body
-    const { user, since } = await request.json();
+    const { citizen, since } = await request.json();
     
-    if (!user) {
-      console.log('\x1b[35m%s\x1b[0m', '[DEBUG] Error: User is required');
+    if (!citizen) {
+      console.log('\x1b[35m%s\x1b[0m', '[DEBUG] Error: Citizen is required');
       return NextResponse.json(
-        { success: false, error: 'User is required' },
+        { success: false, error: 'Citizen is required' },
         { status: 400 }
       );
     }
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
       ? (typeof since === 'number' ? new Date(since).toISOString() : since)
       : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
     
-    console.log('\x1b[35m%s\x1b[0m', `[DEBUG] Fetching notifications for user: ${user}, since: ${effectiveSince}`);
+    console.log('\x1b[35m%s\x1b[0m', `[DEBUG] Fetching notifications for citizen: ${citizen}, since: ${effectiveSince}`);
     
     try {
       // Initialize Airtable
@@ -63,8 +63,8 @@ export async function POST(request: Request) {
       // Format the date for Airtable filter formula
       const formattedDate = formatDateForAirtable(effectiveSince);
       
-      // Build filter formula with just the user - removing date filter that's causing issues
-      const filterFormula = `{User} = '${user}'`;
+      // Build filter formula with just the citizen - removing date filter that's causing issues
+      const filterFormula = `{Citizen} = '${citizen}'`;
       
       console.log('\x1b[35m%s\x1b[0m', `[DEBUG] Airtable filter formula: ${filterFormula}`);
       
@@ -83,7 +83,7 @@ export async function POST(request: Request) {
       const notifications = records.map(record => ({
         notificationId: record.id,
         type: record.get('Type') as string,
-        user: record.get('User') as string,
+        citizen: record.get('Citizen') as string,
         content: record.get('Content') as string,
         details: record.get('Details') ? JSON.parse(record.get('Details') as string) : undefined,
         createdAt: record.get('CreatedAt') as string,
@@ -105,25 +105,25 @@ export async function POST(request: Request) {
       
       const sampleNotifications = [
         {
-          notificationId: `${user}-notification-1`,
+          notificationId: `${citizen}-notification-1`,
           type: 'System',
-          user: user,
+          citizen: citizen,
           content: 'Welcome to La Serenissima! Explore the city and discover its wonders.',
           createdAt: new Date().toISOString(),
           readAt: null
         },
         {
-          notificationId: `${user}-notification-2`,
+          notificationId: `${citizen}-notification-2`,
           type: 'Market',
-          user: user,
+          citizen: citizen,
           content: 'A new land parcel is available for purchase in San Marco district.',
           createdAt: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
           readAt: null
         },
         {
-          notificationId: `${user}-notification-3`,
+          notificationId: `${citizen}-notification-3`,
           type: 'Governance',
-          user: user,
+          citizen: citizen,
           content: 'The Council of Ten has issued a new decree regarding building regulations.',
           createdAt: new Date(Date.now() - 7200000).toISOString(), // 2 hours ago
           readAt: null

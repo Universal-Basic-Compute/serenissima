@@ -7,7 +7,7 @@ const COMPUTE_DECIMALS = 6;
 const COMPUTE_MULTIPLIER = Math.pow(10, COMPUTE_DECIMALS);
 
 /**
- * Injects compute from a user's wallet to the treasury
+ * Injects compute from a citizen's wallet to the treasury
  * @param walletAddress The wallet address to inject compute from
  * @param amount The amount of compute to inject
  * @returns The response data from the API
@@ -250,7 +250,7 @@ export async function transferCompute(walletAddress: string, amount: number) {
 }
 
 /**
- * Withdraws compute from a user's wallet
+ * Withdraws compute from a citizen's wallet
  * @param walletAddress The wallet address to withdraw compute from
  * @param amount The amount of compute to withdraw
  * @returns The response data from the API
@@ -369,7 +369,7 @@ export async function getComputeBalance(walletAddress: string): Promise<number> 
 }
 
 /**
- * Deduct compute from a user's wallet
+ * Deduct compute from a citizen's wallet
  * @param walletAddress The wallet address to deduct from
  * @param amount The amount to deduct
  * @returns Promise resolving when the deduction is complete

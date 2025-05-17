@@ -158,16 +158,16 @@ export async function POST(request: Request) {
       );
     }
     
-    // Instead of deducting compute, update the user's Ducats balance
+    // Instead of deducting compute, update the citizen's Ducats balance
     try {
-      // Get the user record from Airtable
-      const userRecord = await new Promise((resolve, reject) => {
+      // Get the citizen record from Airtable
+      const citizenRecord = await new Promise((resolve, reject) => {
         if (!base) {
           reject(new Error('Airtable not configured'));
           return;
         }
         
-        (base!('USERS') as unknown as AirtableTable).select({
+        (base!('CITIZENS') as unknown as AirtableTable).select({
           filterByFormula: `{WalletAddress} = '${data.walletAddress}'`
         }).firstPage((err, records) => {
           if (err) {
@@ -178,13 +178,13 @@ export async function POST(request: Request) {
           if (records && records.length > 0) {
             resolve(records[0]);
           } else {
-            reject(new Error('User not found'));
+            reject(new Error('Citizen not found'));
           }
         });
       });
 
-      // Update the user's Ducats balance
-      const currentDucats = (userRecord as AirtableRecord).get('Ducats') || 0;
+      // Update the citizen's Ducats balance
+      const currentDucats = (citizenRecord as AirtableRecord).get('Ducats') || 0;
       const newDucats = currentDucats - data.cost;
 
       if (newDucats < 0) {
@@ -197,11 +197,11 @@ export async function POST(request: Request) {
         );
       }
 
-      // Update the user's Ducats balance
+      // Update the citizen's Ducats balance
       await new Promise((resolve, reject) => {
-        (base!('USERS') as unknown as AirtableTable).update([
+        (base!('CITIZENS') as unknown as AirtableTable).update([
           {
-            id: (userRecord as AirtableRecord).id,
+            id: (citizenRecord as AirtableRecord).id,
             fields: {
               Ducats: newDucats
             }
@@ -218,8 +218,8 @@ export async function POST(request: Request) {
       // Also add Ducats to ConsiglioDeiDieci
       try {
         const consiglioDeiDieciRecord = await new Promise((resolve, reject) => {
-          (base!('USERS') as unknown as AirtableTable).select({
-            filterByFormula: `{UserName} = 'ConsiglioDeiDieci'`
+          (base!('CITIZENS') as unknown as AirtableTable).select({
+            filterByFormula: `{CitizenName} = 'ConsiglioDeiDieci'`
           }).firstPage((err, records) => {
             if (err) {
               reject(err);
@@ -229,7 +229,7 @@ export async function POST(request: Request) {
             if (records && records.length > 0) {
               resolve(records[0]);
             } else {
-              reject(new Error('ConsiglioDeiDieci user not found'));
+              reject(new Error('ConsiglioDeiDieci citizen not found'));
             }
           });
         });
@@ -239,7 +239,7 @@ export async function POST(request: Request) {
         const newConsiglioDucats = currentConsiglioDucats + data.cost;
 
         await new Promise((resolve, reject) => {
-          (base!('USERS') as unknown as AirtableTable).update([
+          (base!('CITIZENS') as unknown as AirtableTable).update([
             {
               id: (consiglioDeiDieciRecord as AirtableRecord).id,
               fields: {
@@ -258,8 +258,8 @@ export async function POST(request: Request) {
         console.warn('Error updating ConsiglioDeiDieci balance:', consiglioDeiDieciError);
         // Continue even if we couldn't update ConsiglioDeiDieci
       }
-    } catch (userBalanceError) {
-      console.warn('Error updating user balance, falling back to deductCompute:', userBalanceError);
+    } catch (citizenBalanceError) {
+      console.warn('Error updating citizen balance, falling back to deductCompute:', citizenBalanceError);
       // Fallback to deducting compute if Airtable update fails
       await deductCompute(data.walletAddress, data.cost);
     }
@@ -279,7 +279,7 @@ export async function POST(request: Request) {
         Variant: data.variant || 'model',
         Position: positionString,
         Rotation: data.rotation || 0,
-        User: data.walletAddress,
+        Citizen: data.walletAddress,
         CreatedAt: data.created_at || new Date().toISOString(),
         Cost: data.cost || 0
       }, function(err, record) {
@@ -301,7 +301,7 @@ export async function POST(request: Request) {
       variant: typedRecord.fields.Variant || 'model',
       position: JSON.parse(typedRecord.fields.Position),
       rotation: typedRecord.fields.Rotation || 0,
-      owner: typedRecord.fields.User,
+      owner: typedRecord.fields.Citizen,
       created_at: typedRecord.fields.CreatedAt,
       cost: typedRecord.fields.Cost || 0
     };

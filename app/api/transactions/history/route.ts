@@ -8,12 +8,12 @@ const FETCH_TIMEOUT = 10000; // 10 seconds timeout
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const userId = searchParams.get('userId');
+    const citizenId = searchParams.get('citizenId');
     const assetId = searchParams.get('assetId');
     const role = searchParams.get('role');
     
     // Create a cache key based on the request parameters
-    const cacheKey = `${userId || 'all'}_${assetId || 'all'}_${role || 'all'}`;
+    const cacheKey = `${citizenId || 'all'}_${assetId || 'all'}_${role || 'all'}`;
     const currentTime = Date.now();
     
     // Check if we have valid cached data
@@ -52,14 +52,14 @@ export async function GET(request: NextRequest) {
       // Filter transactions based on parameters
       let filteredTransactions = data.filter((tx: any) => tx.executed_at); // Only include executed transactions
       
-      if (userId) {
+      if (citizenId) {
         if (role === 'buyer') {
-          filteredTransactions = filteredTransactions.filter((tx: any) => tx.buyer === userId);
+          filteredTransactions = filteredTransactions.filter((tx: any) => tx.buyer === citizenId);
         } else if (role === 'seller') {
-          filteredTransactions = filteredTransactions.filter((tx: any) => tx.seller === userId);
+          filteredTransactions = filteredTransactions.filter((tx: any) => tx.seller === citizenId);
         } else {
           filteredTransactions = filteredTransactions.filter((tx: any) => 
-            tx.buyer === userId || tx.seller === userId
+            tx.buyer === citizenId || tx.seller === citizenId
           );
         }
       }

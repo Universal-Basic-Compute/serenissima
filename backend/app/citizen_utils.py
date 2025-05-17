@@ -1,79 +1,79 @@
 """
-Utility functions for user operations to standardize user lookup and wallet handling.
+Utility functions for citizen operations to standardize citizen lookup and wallet handling.
 """
 import traceback
 import sys
 from fastapi import HTTPException
 
-def find_user_by_identifier(users_table, identifier, create_if_missing=False):
+def find_citizen_by_identifier(citizens_table, identifier, create_if_missing=False):
     """
-    Find a user by wallet address or username (case-insensitive).
+    Find a citizen by wallet address or citizenname (case-insensitive).
     
     Args:
-        users_table: The Airtable users table
-        identifier: The wallet address or username to search for
-        create_if_missing: Whether to create a new user if not found
+        citizens_table: The Airtable citizens table
+        identifier: The wallet address or citizenname to search for
+        create_if_missing: Whether to create a new citizen if not found
         
     Returns:
-        The user record if found, or a new record if create_if_missing is True
+        The citizen record if found, or a new record if create_if_missing is True
         
     Raises:
-        HTTPException: If user not found and create_if_missing is False
+        HTTPException: If citizen not found and create_if_missing is False
     """
     try:
         # Normalize the identifier to lowercase for case-insensitive comparison
         normalized_identifier = identifier.lower()
         
-        # Get all users and find matching record
-        all_users = users_table.all()
+        # Get all citizens and find matching record
+        all_citizens = citizens_table.all()
         matching_records = [
-            record for record in all_users 
+            record for record in all_citizens 
             if record["fields"].get("Wallet", "").lower() == normalized_identifier or
-               record["fields"].get("Username", "").lower() == normalized_identifier
+               record["fields"].get("Citizenname", "").lower() == normalized_identifier
         ]
         
         if matching_records:
             return matching_records[0]
         
         if create_if_missing:
-            # Create a new user record with the wallet address
-            print(f"Creating new user record for {identifier}")
-            record = users_table.create({
+            # Create a new citizen record with the wallet address
+            print(f"Creating new citizen record for {identifier}")
+            record = citizens_table.create({
                 "Wallet": identifier,
                 "Ducats": 0
             })
             return record
         
-        raise HTTPException(status_code=404, detail=f"User not found: {identifier}")
+        raise HTTPException(status_code=404, detail=f"Citizen not found: {identifier}")
     except HTTPException:
         raise
     except Exception as e:
-        error_msg = f"Error finding user: {str(e)}"
+        error_msg = f"Error finding citizen: {str(e)}"
         print(f"ERROR: {error_msg}")
         traceback.print_exc(file=sys.stdout)
         raise HTTPException(status_code=500, detail=error_msg)
 
-def update_compute_balance(users_table, user_id, amount, operation="add"):
+def update_compute_balance(citizens_table, citizen_id, amount, operation="add"):
     """
-    Update a user's compute balance.
+    Update a citizen's compute balance.
     
     Args:
-        users_table: The Airtable users table
-        user_id: The Airtable record ID of the user
+        citizens_table: The Airtable citizens table
+        citizen_id: The Airtable record ID of the citizen
         amount: The amount to add or subtract
         operation: "add" or "subtract"
         
     Returns:
-        The updated user record
+        The updated citizen record
         
     Raises:
         HTTPException: If the operation fails
     """
     try:
         # Get the current record
-        record = users_table.get(user_id)
+        record = citizens_table.get(citizen_id)
         if not record:
-            raise HTTPException(status_code=404, detail=f"User record not found: {user_id}")
+            raise HTTPException(status_code=404, detail=f"Citizen record not found: {citizen_id}")
         
         current_amount = record["fields"].get("Ducats", 0)
         
@@ -87,7 +87,7 @@ def update_compute_balance(users_table, user_id, amount, operation="add"):
             raise HTTPException(status_code=400, detail=f"Invalid operation: {operation}")
         
         # Update the record
-        updated_record = users_table.update(user_id, {
+        updated_record = citizens_table.update(citizen_id, {
             "Ducats": new_amount
         })
         
@@ -100,14 +100,14 @@ def update_compute_balance(users_table, user_id, amount, operation="add"):
         traceback.print_exc(file=sys.stdout)
         raise HTTPException(status_code=500, detail=error_msg)
 
-def transfer_compute(users_table, from_user, to_user, amount):
+def transfer_compute(citizens_table, from_citizen, to_citizen, amount):
     """
-    Transfer compute from one user to another.
+    Transfer compute from one citizen to another.
     
     Args:
-        users_table: The Airtable users table
-        from_user: The wallet address or username of the sender
-        to_user: The wallet address or username of the recipient
+        citizens_table: The Airtable citizens table
+        from_citizen: The wallet address or citizenname of the sender
+        to_citizen: The wallet address or citizenname of the recipient
         amount: The amount to transfer
         
     Returns:
@@ -118,11 +118,11 @@ def transfer_compute(users_table, from_user, to_user, amount):
     """
     try:
         # Find the sender
-        from_record = find_user_by_identifier(users_table, from_user)
+        from_record = find_citizen_by_identifier(citizens_table, from_citizen)
         from_id = from_record["id"]
         
         # Find the recipient
-        to_record = find_user_by_identifier(users_table, to_user, create_if_missing=True)
+        to_record = find_citizen_by_identifier(citizens_table, to_citizen, create_if_missing=True)
         to_id = to_record["id"]
         
         # Check if sender has enough compute
@@ -131,10 +131,10 @@ def transfer_compute(users_table, from_user, to_user, amount):
             raise HTTPException(status_code=400, detail=f"Insufficient balance. Required: {amount}, Available: {from_amount}")
         
         # Update sender's balance
-        updated_from = update_compute_balance(users_table, from_id, amount, "subtract")
+        updated_from = update_compute_balance(citizens_table, from_id, amount, "subtract")
         
         # Update recipient's balance
-        updated_to = update_compute_balance(users_table, to_id, amount, "add")
+        updated_to = update_compute_balance(citizens_table, to_id, amount, "add")
         
         return (updated_from, updated_to)
     except HTTPException:

@@ -25,7 +25,7 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
   useEffect(() => {
     const loadSettings = () => {
       try {
-        const savedSettings = localStorage.getItem('userSettings');
+        const savedSettings = localStorage.getItem('citizenSettings');
         if (savedSettings) {
           const settings = JSON.parse(savedSettings);
           
@@ -108,7 +108,7 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
       };
       
       // Save to localStorage
-      localStorage.setItem('userSettings', JSON.stringify(settings));
+      localStorage.setItem('citizenSettings', JSON.stringify(settings));
       
       // Apply audio settings
       applyAudioSettings(masterVolume, musicVolume, effectsVolume, isMuted);
@@ -149,30 +149,30 @@ const Settings: React.FC<SettingsProps> = ({ onClose }) => {
         }
       }));
       
-      // Get username from localStorage instead of wallet address
-      const username = (() => {
+      // Get citizenname from localStorage instead of wallet address
+      const citizenname = (() => {
         try {
-          const savedProfile = localStorage.getItem('userProfile');
+          const savedProfile = localStorage.getItem('citizenProfile');
           if (savedProfile) {
             const profile = JSON.parse(savedProfile);
-            return profile.username;
+            return profile.citizenname;
           }
           return null;
         } catch (error) {
-          console.error('Error getting username from localStorage:', error);
+          console.error('Error getting citizenname from localStorage:', error);
           return null;
         }
       })();
       
-      // If username is available, save to backend
-      if (username) {
-        const response = await fetch('/api/user/settings', {
+      // If citizenname is available, save to backend
+      if (citizenname) {
+        const response = await fetch('/api/citizen/settings', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            wallet_address: username, // We're using the wallet_address field to pass the username
+            wallet_address: citizenname, // We're using the wallet_address field to pass the citizenname
             settings: {
               qualityMode,
               waterQuality

@@ -5,7 +5,7 @@ Script to implement the decree that assigns public infrastructure buildings to l
 This script:
 1. Finds all buildings of types: bridge, public_dock, canal_maintenance_office, cistern, public_well
 2. For each building, determines which land it's located on
-3. Sets the User field of the building to match the land owner
+3. Sets the Citizen field of the building to match the land owner
 4. Creates notifications for affected land owners
 
 This implements the decree: "Land Owner Infrastructure Maintenance Responsibility"
@@ -103,7 +103,7 @@ def get_land_owners(tables) -> Dict[str, str]:
         land_owners = {}
         for land in lands:
             land_id = land['fields'].get('LandId')
-            owner = land['fields'].get('User')
+            owner = land['fields'].get('Citizen')
             
             if land_id and owner:
                 land_owners[land_id] = owner
@@ -114,8 +114,8 @@ def get_land_owners(tables) -> Dict[str, str]:
         log.error(f"Error fetching land owners: {e}")
         return {}
 
-def create_notification(tables, user: str, building_type: str, building_name: str, land_id: str) -> None:
-    """Create a notification for a user about a building assignment."""
+def create_notification(tables, citizen: str, building_type: str, building_name: str, land_id: str) -> None:
+    """Create a notification for a citizen about a building assignment."""
     try:
         # Get the land's historical name if available
         land_name = land_id  # Default to ID if name not found
@@ -147,10 +147,10 @@ def create_notification(tables, user: str, building_type: str, building_name: st
             "Details": json.dumps(details),
             "CreatedAt": datetime.datetime.now().isoformat(),
             "ReadAt": None,
-            "User": user
+            "Citizen": citizen
         })
         
-        log.info(f"Created notification for user {user} about {building_type} assignment on land {land_name}")
+        log.info(f"Created notification for citizen {citizen} about {building_type} assignment on land {land_name}")
     except Exception as e:
         log.error(f"Error creating notification: {e}")
 
@@ -194,7 +194,7 @@ def assign_buildings_to_land_owners(dry_run: bool = False):
         # Check for both 'Land' and 'land_id' fields
         land_id = building['fields'].get('Land') or building['fields'].get('land_id')
         
-        current_user = building['fields'].get('User')
+        current_citizen = building['fields'].get('Citizen')
         
         if not land_id:
             log.warning(f"Building {building_id} ({building_type}) has no Land field, skipping")
@@ -209,7 +209,7 @@ def assign_buildings_to_land_owners(dry_run: bool = False):
             continue
         
         # Check if the building is already assigned to the correct owner
-        if current_user == land_owner:
+        if current_citizen == land_owner:
             log.info(f"Building {building_id} ({building_type}) already assigned to {land_owner}, skipping")
             already_assigned_count += 1
             continue
@@ -224,7 +224,7 @@ def assign_buildings_to_land_owners(dry_run: bool = False):
             try:
                 # Update the building record with the land owner
                 tables['buildings'].update(building_id, {
-                    "User": land_owner
+                    "Citizen": land_owner
                 })
                 
                 log.info(f"Assigned building {building_id} ({building_type}) to {land_owner}")
@@ -255,7 +255,7 @@ def assign_buildings_to_land_owners(dry_run: bool = False):
                 "Details": json.dumps(summary_details),
                 "CreatedAt": datetime.datetime.now().isoformat(),
                 "ReadAt": None,
-                "User": "NLR"  # Admin user
+                "Citizen": "NLR"  # Admin citizen
             })
             
             log.info("Created summary notification for admin")

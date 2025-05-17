@@ -27,7 +27,7 @@ La Serenissima is a blockchain-powered interactive experience set in Renaissance
 - **Backend**: FastAPI (Python), Node.js
 - **Blockchain**: Solana (for $COMPUTE integration)
 - **AI Integration**: For coat of arms generation and historical content
-- **Database**: Airtable (land data, economic calculations, user profiles)
+- **Database**: Airtable (land data, economic calculations, citizen profiles)
 - **3D Rendering**: Three.js with custom shaders and effects
 
 ## Getting Started
@@ -43,7 +43,7 @@ La Serenissima is a blockchain-powered interactive experience set in Renaissance
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/la-serenissima.git
+   git clone https://github.com/yourcitizenname/la-serenissima.git
    cd la-serenissima
    ```
 
@@ -96,7 +96,7 @@ Create your Venetian noble identity:
 
 The economy features:
 - $COMPUTE token as the primary currency
-- Land transactions between users
+- Land transactions between citizens
 - Token deposits and withdrawals via Solana
 - Transaction history and marketplace
 

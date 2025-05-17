@@ -4,7 +4,7 @@ import Airtable from 'airtable';
 // Configure Airtable
 const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
 const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
-const AIRTABLE_USERS_TABLE = process.env.AIRTABLE_USERS_TABLE || 'USERS';
+const AIRTABLE_CITIZENS_TABLE = process.env.AIRTABLE_CITIZENS_TABLE || 'CITIZENS';
 
 // Initialize Airtable
 const initAirtable = () => {
@@ -31,34 +31,34 @@ export async function POST(request: Request) {
       );
     }
     
-    console.log(`Updating settings for user with wallet: ${wallet_address}`, settings);
+    console.log(`Updating settings for citizen with wallet: ${wallet_address}`, settings);
     
     try {
       // Initialize Airtable
       const base = initAirtable();
       
-      // Find the user record by Username field instead of wallet_address
-      // We're using the wallet_address as the username in this case
-      const records = await base(AIRTABLE_USERS_TABLE)
+      // Find the citizen record by Citizenname field instead of wallet_address
+      // We're using the wallet_address as the citizenname in this case
+      const records = await base(AIRTABLE_CITIZENS_TABLE)
         .select({
-          filterByFormula: `{Username} = '${wallet_address}'`,
+          filterByFormula: `{Citizenname} = '${wallet_address}'`,
           maxRecords: 1
         })
         .all();
       
       if (records.length === 0) {
         return NextResponse.json(
-          { success: false, error: 'User not found' },
+          { success: false, error: 'Citizen not found' },
           { status: 404 }
         );
       }
       
-      const userRecord = records[0];
+      const citizenRecord = records[0];
       
       // Get existing preferences or initialize empty object
       let preferences = {};
       try {
-        const existingPreferences = userRecord.get('Preferences');
+        const existingPreferences = citizenRecord.get('Preferences');
         if (existingPreferences) {
           preferences = JSON.parse(existingPreferences as string);
         }
@@ -72,8 +72,8 @@ export async function POST(request: Request) {
         ...settings
       };
       
-      // Update the user record with the merged preferences
-      await base(AIRTABLE_USERS_TABLE).update(userRecord.id, {
+      // Update the citizen record with the merged preferences
+      await base(AIRTABLE_CITIZENS_TABLE).update(citizenRecord.id, {
         'Preferences': JSON.stringify(updatedPreferences)
       });
       

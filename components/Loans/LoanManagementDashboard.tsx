@@ -8,8 +8,8 @@ import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 import { useWalletContext } from '@/components/UI/WalletProvider';
 
 const LoanManagementDashboard: React.FC = () => {
-  const { userLoans, loading, error, loadUserLoans, makePayment } = useLoanStore();
-  const { userProfile } = useWalletContext();
+  const { citizenLoans, loading, error, loadCitizenLoans, makePayment } = useLoanStore();
+  const { citizenProfile } = useWalletContext();
   const [selectedLoan, setSelectedLoan] = useState<LoanData | null>(null);
   const [paymentAmount, setPaymentAmount] = useState<number>(0);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState<boolean>(false);
@@ -21,14 +21,14 @@ const LoanManagementDashboard: React.FC = () => {
     console.log("LoanManagementDashboard: Wallet address:", walletAddress);
     
     if (walletAddress) {
-      console.log("LoanManagementDashboard: Loading user loans for wallet:", walletAddress);
-      loadUserLoans(walletAddress)
+      console.log("LoanManagementDashboard: Loading citizen loans for wallet:", walletAddress);
+      loadCitizenLoans(walletAddress)
         .then(loans => {
-          console.log("LoanManagementDashboard: User loans loaded:", loans);
-          console.log("LoanManagementDashboard: Number of user loans:", loans.length);
+          console.log("LoanManagementDashboard: Citizen loans loaded:", loans);
+          console.log("LoanManagementDashboard: Number of citizen loans:", loans.length);
         })
         .catch(error => {
-          console.error("LoanManagementDashboard: Error loading user loans:", error);
+          console.error("LoanManagementDashboard: Error loading citizen loans:", error);
         });
     } else {
       console.warn("LoanManagementDashboard: No wallet address found, cannot load loans");
@@ -37,10 +37,10 @@ const LoanManagementDashboard: React.FC = () => {
     // Add event listener for refreshing loans
     const handleRefreshLoans = () => {
       if (walletAddress) {
-        console.log("LoanManagementDashboard: Refreshing user loans");
-        loadUserLoans(walletAddress)
+        console.log("LoanManagementDashboard: Refreshing citizen loans");
+        loadCitizenLoans(walletAddress)
           .catch(error => {
-            console.error("LoanManagementDashboard: Error refreshing user loans:", error);
+            console.error("LoanManagementDashboard: Error refreshing citizen loans:", error);
           });
       }
     };
@@ -57,7 +57,7 @@ const LoanManagementDashboard: React.FC = () => {
       (data) => {
         // Refresh loans after payment
         if (walletAddress) {
-          loadUserLoans(walletAddress);
+          loadCitizenLoans(walletAddress);
         }
       }
     );
@@ -67,7 +67,7 @@ const LoanManagementDashboard: React.FC = () => {
       (data) => {
         // Refresh loans after application
         if (walletAddress) {
-          loadUserLoans(walletAddress);
+          loadCitizenLoans(walletAddress);
         }
       }
     );
@@ -77,7 +77,7 @@ const LoanManagementDashboard: React.FC = () => {
       loanPaymentMadeSubscription.unsubscribe();
       loanAppliedSubscription.unsubscribe();
     };
-  }, [loadUserLoans]);
+  }, [loadCitizenLoans]);
   
   const handleOpenPaymentModal = (loan: LoanData) => {
     setSelectedLoan(loan);
@@ -116,8 +116,8 @@ const LoanManagementDashboard: React.FC = () => {
   };
   
   // Calculate total debt and daily payment obligations
-  const totalDebt = userLoans.reduce((sum, loan) => sum + loan.remainingBalance, 0);
-  const dailyPayments = userLoans.reduce((sum, loan) => {
+  const totalDebt = citizenLoans.reduce((sum, loan) => sum + loan.remainingBalance, 0);
+  const dailyPayments = citizenLoans.reduce((sum, loan) => {
     // Calculate daily payment for each loan
     const interestDecimal = loan.interestRate / 100;
     const totalInterest = loan.principalAmount * interestDecimal * (loan.termDays / 365);
@@ -178,14 +178,14 @@ const LoanManagementDashboard: React.FC = () => {
           </div>
         ) : (
           <>
-            {userLoans.length === 0 ? (
+            {citizenLoans.length === 0 ? (
               <div className="text-center py-8 text-gray-500 italic">
                 <p>You have no active loans.</p>
                 <p className="mt-2">Browse the available loans above and click "Apply" to request financing for your ventures.</p>
               </div>
             ) : (
               <div className="space-y-6">
-                {userLoans.map((loan) => (
+                {citizenLoans.map((loan) => (
                   <div key={loan.id} className="bg-parchment rounded-lg border border-amber-700 shadow-md overflow-hidden relative">
                     {/* Add Venetian seal watermark */}
                     <div className="absolute opacity-10 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
@@ -201,10 +201,10 @@ const LoanManagementDashboard: React.FC = () => {
                     <div className="p-6 relative z-10">
                       <div className="flex justify-between items-start">
                         <div>
-                          {/* Format the loan name to use user's name instead of wallet address */}
+                          {/* Format the loan name to use citizen's name instead of wallet address */}
                           <h3 className="text-lg font-serif font-medium text-amber-800">
                             {loan.name.startsWith('Official Loan - ') 
-                              ? `Official Loan - ${userProfile?.firstName || ''} ${userProfile?.lastName || ''}`
+                              ? `Official Loan - ${citizenProfile?.firstName || ''} ${citizenProfile?.lastName || ''}`
                               : loan.name}
                           </h3>
                           <p className="text-sm text-amber-700 italic">From: {

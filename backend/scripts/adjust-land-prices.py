@@ -22,7 +22,7 @@ from datetime import datetime
 
 # Add the parent directory to the Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from app.user_utils import find_user_by_identifier
+from app.citizen_utils import find_citizen_by_identifier
 
 # Load environment variables
 load_dotenv()
@@ -150,7 +150,7 @@ def main():
     # Get land transactions
     records = get_land_transactions(transactions_table)
     
-    # Confirm with user before proceeding
+    # Confirm with citizen before proceeding
     if not args.dry_run:
         confirmation = input(f"This will adjust {len(records)} land transaction prices by dividing by {args.division_factor}. Continue? (y/n): ")
         if confirmation.lower() != 'y':
