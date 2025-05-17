@@ -628,6 +628,21 @@ number => {
     }
   }, [calculateTotalDistance, fetchWaterPoints]);
   
+  // Function to check if the current user is ConsiglioDeiDieci
+  const isConsiglioDeiDieci = () => {
+    try {
+      const profileStr = localStorage.getItem('citizenProfile');
+      if (profileStr) {
+        const profile = JSON.parse(profileStr);
+        return profile.username === 'ConsiglioDeiDieci';
+      }
+      return false;
+    } catch (error) {
+      console.error('Error checking if user is ConsiglioDeiDieci:', error);
+      return false;
+    }
+  };
+  
   // Function to handle water route clicks
   const handleWaterRouteClick = useCallback((point: {lat: number, lng: number}, isWaterPoint: boolean, waterPointId?: string) => {
     console.log('Water route click:', { point, isWaterPoint, waterPointId });
