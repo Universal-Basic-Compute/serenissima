@@ -59,8 +59,8 @@ def get_entrepreneurs_and_their_businesses(tables) -> tuple[List[Dict], Dict[str
     log.info("Fetching entrepreneurs and their businesses...")
     
     try:
-        # Get all buildings with non-empty RunBy field
-        formula = "NOT(OR({RunBy} = '', {RunBy} = BLANK()))"
+        # Get all buildings with non-empty RunBy field and Category='business'
+        formula = "AND(NOT(OR({RunBy} = '', {RunBy} = BLANK())), {Category}='business')"
         run_by_buildings = tables['buildings'].all(formula=formula)
         
         # Group buildings by the citizen who runs them
