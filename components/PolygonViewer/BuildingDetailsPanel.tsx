@@ -108,6 +108,9 @@ export default function BuildingDetailsPanel({
         
         setBuildingResources(data);
         
+        // Store publicly sold resources in window for access by ResourceList component
+        (window as any).__buildingPubliclySoldResources = resources.publiclySold;
+        
         // Set building contracts from the publiclySold resources
         if (data.resources && data.resources.publiclySold) {
           setBuildingContracts(data.resources.publiclySold);
@@ -184,6 +187,8 @@ export default function BuildingDetailsPanel({
       setBuildingResources(null);
       // Clear the runBy information
       (window as any).__currentBuildingRunBy = null;
+      // Clear the publicly sold resources
+      (window as any).__buildingPubliclySoldResources = null;
     }
     
     return () => {
