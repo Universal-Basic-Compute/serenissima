@@ -65,10 +65,10 @@ For the citizen, provide:
 3. Description - One sentence about personality, traits, and remarkable things about this person
 4. ImagePrompt - A detailed prompt for generating an image of this person, including physical appearance, clothing appropriate to their social class, and setting
 5. Ducats - Approximate wealth in Ducats, appropriate to their social class:
-   - Nobili: 5,000-50,000 ducats
-   - Cittadini: 1,000-5,000 ducats
-   - Popolani: 100-1,000 ducats
-   - Facchini: 10-100 ducats
+   - Nobili: 5,000,000-50,000,000 ducats
+   - Cittadini: 1,000,000-5,000,000 ducats
+   - Popolani: 100,000-1,000,000 ducats
+   - Facchini: 10,000-100,000 ducats
 
 FORMAT:
 Return the data as a valid JSON object with the fields listed above.
