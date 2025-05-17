@@ -238,23 +238,23 @@ const SocialClassArticle: React.FC<SocialClassArticleProps> = ({ onClose }) => {
                 <tbody>
                   <tr className="border-t border-amber-200">
                     <td className="px-4 py-2 font-medium">Nobili</td>
-                    <td className="px-4 py-2">All Tiers (1-4)</td>
-                    <td className="px-4 py-2">Palazzo, Grand Warehouse, Shipyard, Banking House</td>
+                    <td className="px-4 py-2">All Tiers (1-5)</td>
+                    <td className="px-4 py-2">Doge's Palace, St. Mark's Basilica, Grand Canal Palace, Arsenal Gate</td>
                   </tr>
                   <tr className="border-t border-amber-200 bg-amber-100/50">
                     <td className="px-4 py-2 font-medium">Cittadini</td>
                     <td className="px-4 py-2">Tiers 1-3</td>
-                    <td className="px-4 py-2">Trading Post, Merchant Office, Glassworks</td>
+                    <td className="px-4 py-2">Fondaco dei Tedeschi, Shipyard, Mint, Eastern Merchant House</td>
                   </tr>
                   <tr className="border-t border-amber-200">
                     <td className="px-4 py-2 font-medium">Popolani</td>
                     <td className="px-4 py-2">Tiers 1-2</td>
-                    <td className="px-4 py-2">Workshop, Market Stall, Tavern</td>
+                    <td className="px-4 py-2">Bottega, Glassblower Workshop, Merceria, Canal House</td>
                   </tr>
                   <tr className="border-t border-amber-200 bg-amber-100/50">
                     <td className="px-4 py-2 font-medium">Facchini</td>
                     <td className="px-4 py-2">Tier 1 only</td>
-                    <td className="px-4 py-2">Small Shop, Fisherman's Hut, Basic Crafting Station</td>
+                    <td className="px-4 py-2">Market Stall, Fisherman's Cottage, Blacksmith, Bakery</td>
                   </tr>
                 </tbody>
               </table>
