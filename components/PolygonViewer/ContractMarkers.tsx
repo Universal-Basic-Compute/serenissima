@@ -250,7 +250,7 @@ export default function ContractMarkers({
               left: `${x}px`, 
               top: `${y}px`, 
               transform: 'translate(-50%, -50%)',
-              zIndex: isHovered ? 50 : 40
+              zIndex: isHovered ? 15 : 10
             }}
             onMouseEnter={() => handleMouseEnter(locationKey, locationContracts)}
             onMouseLeave={() => handleMouseLeave()}
