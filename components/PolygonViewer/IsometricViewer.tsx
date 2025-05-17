@@ -369,17 +369,30 @@ number => {
         });
       });
       
-      // Reset water route state
+      // Reset water route state but keep water route mode active
       setWaterRouteStartPoint(null);
       setWaterRouteEndPoint(null);
       setWaterRouteIntermediatePoints([]);
       setWaterRoutePath([]);
       
-      // Show success message
-      alert(`Water route saved successfully! Total length: ${Math.round(totalLength)}m`);
+      // Show a subtle notification instead of an alert
+      console.log(`Water route saved successfully! Total length: ${Math.round(totalLength)}m`);
       
-      // Disable water route mode
-      setWaterRouteMode(false);
+      // Create a small notification that will disappear after a few seconds
+      const notification = document.createElement('div');
+      notification.className = 'fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50';
+      notification.textContent = `Route saved! Length: ${Math.round(totalLength)}m`;
+      document.body.appendChild(notification);
+      
+      // Remove the notification after 3 seconds
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.parentNode.removeChild(notification);
+        }
+      }, 3000);
+      
+      // Don't disable water route mode - keep it active
+      // setWaterRouteMode(false); - Remove this line
       
       // Refresh water points
       fetchWaterPoints();
@@ -511,17 +524,30 @@ number => {
         });
       });
       
-      // Reset water route state
+      // Reset water route state but keep water route mode active
       setWaterRouteStartPoint(null);
       setWaterRouteEndPoint(null);
       setWaterRouteIntermediatePoints([]);
       setWaterRoutePath([]);
       
-      // Show success message
-      alert(`Water route saved successfully! Total length: ${Math.round(totalLength)}m`);
+      // Show a subtle notification instead of an alert
+      console.log(`Water route saved successfully! Total length: ${Math.round(totalLength)}m`);
       
-      // Disable water route mode
-      setWaterRouteMode(false);
+      // Create a small notification that will disappear after a few seconds
+      const notification = document.createElement('div');
+      notification.className = 'fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50';
+      notification.textContent = `Route saved! Length: ${Math.round(totalLength)}m`;
+      document.body.appendChild(notification);
+      
+      // Remove the notification after 3 seconds
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.parentNode.removeChild(notification);
+        }
+      }, 3000);
+      
+      // Don't disable water route mode - keep it active
+      // setWaterRouteMode(false); - Remove this line
       
       // Refresh water points
       fetchWaterPoints();
@@ -617,7 +643,7 @@ number => {
       ];
       setWaterRoutePath(updatedPath);
     }
-  }, [waterPoints, waterRouteStartPoint, waterRouteEndPoint, waterRouteIntermediatePoints]);
+  }, [waterPoints, waterRouteStartPoint, waterRouteEndPoint, waterRouteIntermediatePoints, saveWaterRouteWithData]);
 
   // Function to visualize the transport path
   const visualizeTransportPath = useCallback((path: any[]) => {
