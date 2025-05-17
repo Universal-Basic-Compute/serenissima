@@ -92,6 +92,18 @@ The frontend can visualize citizen activities by:
 - Showing appropriate icons for different activity types
 - Providing activity information in the citizen detail view
 
+## AI and Human Citizen Integration
+
+The activity system treats AI and human citizens identically:
+
+1. **Unified Activity Model**: Both AI and human citizens use the same activity data structure and follow the same rules
+2. **Shared Visualization**: All citizens appear on the map and can be observed performing their activities
+3. **Equal Scheduling**: The activity creation system schedules activities for all citizens regardless of whether they are AI or human
+4. **Economic Impact**: Activities for both AI and human citizens have the same economic effects (e.g., working generates income)
+5. **Interaction Opportunities**: Human players can encounter and interact with AI citizens performing their activities
+
+The key difference is that AI citizens have their activities automatically determined by the system, while human players can potentially override certain activities through direct gameplay actions. This integration creates a seamless world where AI and human citizens coexist and follow the same daily patterns.
+
 ## Integration with Other Systems
 
 The activity system integrates with several other game systems:
