@@ -82,6 +82,63 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   
 
+  // Fetch unread notification count
+  const fetchUnreadCount = useCallback(async () => {
+    // Skip fetching if the component is open to avoid duplicate counts
+    if (isOpen) return;
+    
+    try {
+      // Get the current username from localStorage if not already set
+      let citizenToFetch = username;
+      
+      if (!citizenToFetch || citizenToFetch === DEFAULT_CITIZENNAME) {
+        // Try to get username from localStorage
+        const savedProfile = localStorage.getItem('citizenProfile');
+        if (savedProfile) {
+          try {
+            const profile = JSON.parse(savedProfile);
+            if (profile.username) {
+              citizenToFetch = profile.username;
+            }
+          } catch (error) {
+            console.error('Error parsing citizen profile:', error);
+          }
+        }
+      }
+      
+      // If still no username, use the default
+      if (!citizenToFetch) {
+        citizenToFetch = DEFAULT_CITIZENNAME;
+      }
+      
+      // Use the unread count API endpoint
+      const apiUrl = `/api/notifications/unread-count`;
+      
+      const response = await fetch(
+        apiUrl,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ citizen: citizenToFetch })
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch unread count: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.success && typeof data.unreadCount === 'number') {
+        setUnreadCount(data.unreadCount);
+      }
+    } catch (error) {
+      console.error('Error fetching unread notification count:', error);
+    }
+  }, [username, isOpen]);
+
   // Fetch notifications
   const fetchNotifications = useCallback(async (forceRefresh = false) => {
     // Skip fetching if the component isn't open to reduce unnecessary API calls
@@ -513,6 +570,24 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
     };
   }, []);
 
+  // Set up polling for unread count
+  useEffect(() => {
+    // Only poll when the component is not open
+    if (!isOpen) {
+      // Fetch immediately on mount
+      fetchUnreadCount();
+      
+      // Set up polling every 2 minutes
+      const unreadCountInterval = setInterval(() => {
+        fetchUnreadCount();
+      }, 120000); // 2 minutes
+      
+      return () => {
+        clearInterval(unreadCountInterval);
+      };
+    }
+  }, [fetchUnreadCount, isOpen]);
+
   // Set up notification polling
   useEffect(() => {
     // Only fetch notifications when the component is open or when notifications panel is shown
@@ -885,9 +960,9 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
             />
             <div className="hidden text-2xl font-serif">C</div>
             
-            {/* Notification badge */}
+            {/* Notification badge - Changed to purple */}
             {unreadCount > 0 && (
-              <div className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold animate-pulse">
+              <div className="absolute top-0 right-0 bg-purple-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold animate-pulse">
                 {unreadCount}
               </div>
             )}
@@ -932,7 +1007,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                   className="ml-3 relative"
                 >
                   <FaBell className="h-5 w-5" />
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
+                  <span className="absolute -top-1 -right-1 bg-purple-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
                     {unreadCount}
                   </span>
                 </button>
@@ -970,7 +1045,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
             >
               Notifications
               {unreadCount > 0 && (
-                <span className="absolute top-1 right-2 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
+                <span className="absolute top-1 right-2 bg-purple-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
                   {unreadCount}
                 </span>
               )}
