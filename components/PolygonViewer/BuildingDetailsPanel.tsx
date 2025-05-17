@@ -1,34 +1,16 @@
 import { useEffect, useState, useRef } from 'react';
-import { FaWarehouse, FaStore, FaBox } from 'react-icons/fa';
-import Image from 'next/image';
-
-// Helper function to format craft time in minutes to a more readable format
-const formatCraftTime = (minutes: number): string => {
-  if (!minutes) return '';
-  
-  if (minutes < 60) {
-    return `${minutes} min`;
-  } else if (minutes < 1440) { // Less than a day
-    const hours = Math.floor(minutes / 60);
-    const remainingMinutes = minutes % 60;
-    return remainingMinutes > 0 
-      ? `${hours} hr ${remainingMinutes} min` 
-      : `${hours} hr`;
-  } else { // Days or more
-    const days = Math.floor(minutes / 1440);
-    const remainingHours = Math.floor((minutes % 1440) / 60);
-    const remainingMinutes = minutes % 60;
-    
-    let result = `${days} day${days !== 1 ? 's' : ''}`;
-    if (remainingHours > 0) {
-      result += ` ${remainingHours} hr`;
-    }
-    if (remainingMinutes > 0) {
-      result += ` ${remainingMinutes} min`;
-    }
-    return result;
-  }
-};
+import { 
+  BuildingImage, 
+  BuildingLocation, 
+  BuildingOwner, 
+  BuildingOccupant, 
+  BuildingMaintenance, 
+  BuildingFinancials, 
+  BuildingDescription,
+  ResourceList,
+  RecipeList,
+  ContractList
+} from './BuildingDetails';
 
 // Declare the window interface extension for __polygonData
 declare global {
@@ -40,230 +22,25 @@ declare global {
 // Ensure the global declaration is properly exported
 export {};
 
-// Access the global variable through window
-import { getBackendBaseUrl } from '@/lib/utils/apiUtils';
-import PlayerProfile from '../UI/PlayerProfile';
-
-// Add a cache for resource icons to prevent refetching
-const resourceIconCache = new Map<string, string>();
-
-// Helper function to get resource icon path
-const getResourceIconPath = (resourceId: string): string => {
-  // Check if we already have this path in the cache
-  if (resourceIconCache.has(resourceId)) {
-    return resourceIconCache.get(resourceId)!;
-  }
-  
-  // Convert the resource name to lowercase, replace spaces with underscores
-  const formattedName = resourceId.toLowerCase().replace(/\s+/g, '_');
-  
-  // Create the path
-  const iconPath = `/images/resources/${formattedName}.png`;
-  
-  // Store in cache
-  resourceIconCache.set(resourceId, iconPath);
-  
-  // Return the formatted name with .png extension
-  return iconPath;
-};
-
-// Add this function to dynamically find the building image path
-const getBuildingImagePath = async (type: string, variant?: string): Promise<string> => {
-  try {
-    console.log(`Looking for image for building type: ${type}, variant: ${variant || 'none'}`);
-    
-    // First check if we have building types data with image path
-    const cachedBuildingTypes = (typeof window !== 'undefined' && (window as any).__buildingTypes) 
-      ? (window as any).__buildingTypes 
-      : null;
-    
-    if (cachedBuildingTypes) {
-      const buildingType = cachedBuildingTypes.find((bt: any) => 
-        bt.type.toLowerCase() === type.toLowerCase() || 
-        bt.name?.toLowerCase() === type.toLowerCase()
-      );
-      
-      if (buildingType && buildingType.appearance && buildingType.appearance.imagePath) {
-        console.log(`Found image path in building type data: ${buildingType.appearance.imagePath}`);
-        return buildingType.appearance.imagePath;
-      }
-    }
-    
-    // Try the direct flat path first
-    const flatImagePath = `/images/buildings/${type}.jpg`;
-    console.log(`Trying flat path: ${flatImagePath}`);
-    
-    try {
-      const response = await fetch(flatImagePath, { method: 'HEAD' });
-      if (response.ok) {
-        console.log(`Found image at flat path: ${flatImagePath}`);
-        return flatImagePath;
-      }
-    } catch (error) {
-      console.log(`Image not found at ${flatImagePath}`);
-    }
-    
-    // Try with underscores instead of spaces
-    const underscorePath = `/images/buildings/${type.replace(/\s+/g, '_').toLowerCase()}.jpg`;
-    console.log(`Trying underscore path: ${underscorePath}`);
-    
-    try {
-      const response = await fetch(underscorePath, { method: 'HEAD' });
-      if (response.ok) {
-        console.log(`Found image at underscore path: ${underscorePath}`);
-        return underscorePath;
-      }
-    } catch (error) {
-      console.log(`Image not found at ${underscorePath}`);
-    }
-    
-    // Try with hyphens instead of spaces
-    const hyphenPath = `/images/buildings/${type.replace(/\s+/g, '-').toLowerCase()}.jpg`;
-    console.log(`Trying hyphen path: ${hyphenPath}`);
-    
-    try {
-      const response = await fetch(hyphenPath, { method: 'HEAD' });
-      if (response.ok) {
-        console.log(`Found image at hyphen path: ${hyphenPath}`);
-        return hyphenPath;
-      }
-    } catch (error) {
-      console.log(`Image not found at ${hyphenPath}`);
-    }
-    
-    // If all else fails, use a default image
-    console.log(`No image found for building type: ${type}, using default contract_stall.jpg`);
-    return '/images/buildings/contract_stall.jpg';
-  } catch (error) {
-    console.error('Error getting building image path:', error);
-    return '/images/buildings/contract_stall.jpg';
-  }
-};
-
-// Add this helper function to find and load the building definition file
-const loadBuildingDefinition = async (type: string, variant?: string, buildingData?: any): Promise<any> => {
-  try {
-    console.log(`Looking for building definition for type: ${type}, variant: ${variant || 'none'}`);
-    
-    // First check if we have building types data
-    const cachedBuildingTypes = (typeof window !== 'undefined' && (window as any).__buildingTypes) 
-      ? (window as any).__buildingTypes 
-      : null;
-    
-    if (cachedBuildingTypes) {
-      const buildingType = cachedBuildingTypes.find((bt: any) => 
-        bt.type.toLowerCase() === type.toLowerCase() || 
-        bt.name?.toLowerCase() === type.toLowerCase()
-      );
-      
-      if (buildingType) {
-        console.log('Found building definition in cached building types:', buildingType);
-        return buildingType;
-      }
-    }
-    
-    // If not found in cache, try the building-types API directly
-    try {
-      const response = await fetch(`/api/building-types?type=${encodeURIComponent(type)}`);
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success && data.buildingType) {
-          console.log('Found building definition via building-types API:', data.buildingType);
-          return data.buildingType;
-        }
-      }
-    } catch (error) {
-      console.log(`Error with building-types API for ${type}:`, error);
-    }
-    
-    // If still not found, try the building-data API endpoint which searches recursively
-    try {
-      const response = await fetch(`/api/building-data/${encodeURIComponent(type)}`);
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Found building definition via building-data API:', data);
-        return data;
-      } else {
-        console.log(`building-data API returned ${response.status} for ${type}`);
-      }
-    } catch (error) {
-      console.log(`Error with building-data API for ${type}:`, error);
-    }
-    
-    // Then try the general data API with various paths
-    const pathsToTry = [
-      // Try with category/subcategory structure if we know them
-      ...(buildingData?.category && buildingData?.subcategory 
-        ? [`/api/data/buildings/${buildingData.category}/${buildingData.subcategory}/${type}.json`] 
-        : []),
-      // Try direct path
-      `/api/data/buildings/${type}.json`,
-      // Try lowercase
-      `/api/data/buildings/${type.toLowerCase()}.json`,
-      // Try with underscores instead of spaces
-      `/api/data/buildings/${type.replace(/\s+/g, '_').toLowerCase()}.json`,
-      // Try with hyphens instead of spaces
-      `/api/data/buildings/${type.replace(/\s+/g, '-').toLowerCase()}.json`
-    ];
-    
-    // Try each path in sequence
-    for (const path of pathsToTry) {
-      try {
-        console.log(`Trying path: ${path}`);
-        const response = await fetch(path);
-        if (response.ok) {
-          const data = await response.json();
-          console.log(`Found building definition at ${path}:`, data);
-          return data;
-        }
-      } catch (error) {
-        console.log(`Error fetching from ${path}:`, error);
-      }
-    }
-    
-    // If we still haven't found it, try the building-definition API
-    try {
-      const response = await fetch(`/api/building-definition?type=${encodeURIComponent(type)}`);
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Found building definition via building-definition API:', data);
-        return data;
-      }
-    } catch (error) {
-      console.log(`Error with building-definition API for ${type}:`, error);
-    }
-    
-    console.log(`No building definition found for ${type} after trying all methods`);
-    return null;
-  } catch (error) {
-    console.error('Error loading building definition:', error);
-    return null;
-  }
-};
-
 interface BuildingDetailsPanelProps {
   selectedBuildingId: string | null;
   onClose: () => void;
   visible?: boolean;
-  polygons?: any[]; // Add this prop
+  polygons?: any[];
 }
 
 export default function BuildingDetailsPanel({ 
   selectedBuildingId, 
   onClose, 
   visible = true,
-  polygons = [] // Add this with default empty array
+  polygons = []
 }: BuildingDetailsPanelProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [building, setBuilding] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [landData, setLandData] = useState<any>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [landRendered, setLandRendered] = useState<boolean>(false);
   const [buildingDefinition, setBuildingDefinition] = useState<any>(null);
-  const [showFullDescription, setShowFullDescription] = useState<boolean>(false);
-  const [buildingImagePath, setBuildingImagePath] = useState<string>('/images/buildings/contract_stall.jpg');
   const [pointData, setPointData] = useState<any>(null);
   const [polygonsData, setPolygonsData] = useState<any[]>(polygons);
   const [buildingContracts, setBuildingContracts] = useState<any[]>([]);
@@ -386,6 +163,107 @@ export default function BuildingDetailsPanel({
     };
   }, [selectedBuildingId]);
   
+  // Add this helper function to find and load the building definition file
+  const loadBuildingDefinition = async (type: string, variant?: string, buildingData?: any): Promise<any> => {
+    try {
+      console.log(`Looking for building definition for type: ${type}, variant: ${variant || 'none'}`);
+      
+      // First check if we have building types data
+      const cachedBuildingTypes = (typeof window !== 'undefined' && (window as any).__buildingTypes) 
+        ? (window as any).__buildingTypes 
+        : null;
+      
+      if (cachedBuildingTypes) {
+        const buildingType = cachedBuildingTypes.find((bt: any) => 
+          bt.type.toLowerCase() === type.toLowerCase() || 
+          bt.name?.toLowerCase() === type.toLowerCase()
+        );
+        
+        if (buildingType) {
+          console.log('Found building definition in cached building types:', buildingType);
+          return buildingType;
+        }
+      }
+      
+      // If not found in cache, try the building-types API directly
+      try {
+        const response = await fetch(`/api/building-types?type=${encodeURIComponent(type)}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.buildingType) {
+            console.log('Found building definition via building-types API:', data.buildingType);
+            return data.buildingType;
+          }
+        }
+      } catch (error) {
+        console.log(`Error with building-types API for ${type}:`, error);
+      }
+      
+      // If still not found, try the building-data API endpoint which searches recursively
+      try {
+        const response = await fetch(`/api/building-data/${encodeURIComponent(type)}`);
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Found building definition via building-data API:', data);
+          return data;
+        } else {
+          console.log(`building-data API returned ${response.status} for ${type}`);
+        }
+      } catch (error) {
+        console.log(`Error with building-data API for ${type}:`, error);
+      }
+      
+      // Then try the general data API with various paths
+      const pathsToTry = [
+        // Try with category/subcategory structure if we know them
+        ...(buildingData?.category && buildingData?.subcategory 
+          ? [`/api/data/buildings/${buildingData.category}/${buildingData.subcategory}/${type}.json`] 
+          : []),
+        // Try direct path
+        `/api/data/buildings/${type}.json`,
+        // Try lowercase
+        `/api/data/buildings/${type.toLowerCase()}.json`,
+        // Try with underscores instead of spaces
+        `/api/data/buildings/${type.replace(/\s+/g, '_').toLowerCase()}.json`,
+        // Try with hyphens instead of spaces
+        `/api/data/buildings/${type.replace(/\s+/g, '-').toLowerCase()}.json`
+      ];
+      
+      // Try each path in sequence
+      for (const path of pathsToTry) {
+        try {
+          console.log(`Trying path: ${path}`);
+          const response = await fetch(path);
+          if (response.ok) {
+            const data = await response.json();
+            console.log(`Found building definition at ${path}:`, data);
+            return data;
+          }
+        } catch (error) {
+          console.log(`Error fetching from ${path}:`, error);
+        }
+      }
+      
+      // If we still haven't found it, try the building-definition API
+      try {
+        const response = await fetch(`/api/building-definition?type=${encodeURIComponent(type)}`);
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Found building definition via building-definition API:', data);
+          return data;
+        }
+      } catch (error) {
+        console.log(`Error with building-definition API for ${type}:`, error);
+      }
+      
+      console.log(`No building definition found for ${type} after trying all methods`);
+      return null;
+    } catch (error) {
+      console.error('Error loading building definition:', error);
+      return null;
+    }
+  };
+  
   // Add this effect to load the building definition when a building is selected
   useEffect(() => {
     let isMounted = true;
@@ -404,20 +282,6 @@ export default function BuildingDetailsPanel({
             setBuildingDefinition(null);
           }
         });
-      
-      // Resolve the image path
-      getBuildingImagePath(building.type, building.variant)
-        .then(path => {
-          if (isMounted) {
-            setBuildingImagePath(path);
-          }
-        })
-        .catch(error => {
-          if (isMounted) {
-            console.error('Error resolving building image path:', error);
-            setBuildingImagePath('/images/buildings/contract_stall.jpg');
-          }
-        });
     } else {
       setBuildingDefinition(null);
     }
@@ -426,14 +290,6 @@ export default function BuildingDetailsPanel({
       isMounted = false;
     };
   }, [building]);
-  
-  // Add refs to track current state without causing re-renders
-  const hoveredPolygonIdRef = useRef<string | null>(null);
-  const hoveredBuildingIdRef = useRef<string | null>(null);
-  const hoveredCanalPointRef = useRef<{lat: number, lng: number} | null>(null);
-  const hoveredBridgePointRef = useRef<{lat: number, lng: number} | null>(null);
-  const hoveredCitizenBuildingRef = useRef<string | null>(null);
-  const hoveredCitizenTypeRef = useRef<'home' | 'work' | null>(null);
   
   // Add this useEffect to get polygons from window if not provided as props
   useEffect(() => {
@@ -642,115 +498,6 @@ export default function BuildingDetailsPanel({
     }
   };
   
-  // Function to render a top-down view of the land
-  const renderLandTopView = (polygon: any, canvas: HTMLCanvasElement): void => {
-    if (!polygon.coordinates || polygon.coordinates.length < 3) return;
-    
-    // Set canvas size
-    canvas.width = 300;
-    canvas.height = 200;
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // Extract coordinates
-    const coords = polygon.coordinates;
-    
-    // Find min/max to scale the polygon to fit the canvas
-    let minLat = coords[0]?.lat || 0, maxLat = coords[0]?.lat || 0;
-    let minLng = coords[0]?.lng || 0, maxLng = coords[0]?.lng || 0;
-    
-    coords.forEach((coord: any) => {
-      if (coord) {
-        minLat = Math.min(minLat, coord.lat);
-        maxLat = Math.max(maxLat, coord.lat);
-        minLng = Math.min(minLng, coord.lng);
-        maxLng = Math.max(maxLng, coord.lng);
-      }
-    });
-    
-    // Add padding
-    const padding = 20;
-    const scaleX = (canvas.width - padding * 2) / (maxLng - minLng);
-    const scaleY = (canvas.height - padding * 2) / (maxLat - minLat);
-    
-    // Use the smaller scale to maintain aspect ratio
-    const scale = Math.min(scaleX, scaleY);
-    
-    // Center the polygon
-    const centerX = (canvas.width / 2) - ((minLng + maxLng) / 2) * scale;
-    const centerY = (canvas.height / 2) + ((minLat + maxLat) / 2) * scale;
-    
-    // Draw the polygon
-    ctx.beginPath();
-    coords.forEach((coord: any, index: number) => {
-      const x = (coord.lng * scale) + centerX;
-      const y = centerY - (coord.lat * scale);
-        
-      if (index === 0) {
-        ctx.moveTo(x, y);
-      } else {
-        ctx.lineTo(x, y);
-      }
-    });
-    ctx.closePath();
-      
-    // Fill with a sand color
-    ctx.fillStyle = '#f5e9c8';
-    ctx.fill();
-      
-    // Draw border
-    ctx.strokeStyle = '#8B4513';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    
-    // Mark the building position if available
-    if (building && building.position) {
-      try {
-        let position;
-        if (typeof building.position === 'string') {
-          position = JSON.parse(building.position);
-        } else {
-          position = building.position;
-        }
-        
-        if (position && position.lat && position.lng) {
-          const x = (position.lng * scale) + centerX;
-          const y = centerY - (position.lat * scale);
-          
-          // Draw a marker for the building
-          ctx.beginPath();
-          ctx.arc(x, y, 6, 0, Math.PI * 2);
-          ctx.fillStyle = '#FF5500';
-          ctx.fill();
-          ctx.strokeStyle = '#FFFFFF';
-          ctx.lineWidth = 1.5;
-          ctx.stroke();
-        }
-      } catch (error) {
-        console.error('Error parsing building position:', error);
-      }
-    }
-  };
-  
-  // Render land when data is available
-  useEffect(() => {
-    if (landData && canvasRef.current && !landRendered) {
-      renderLandTopView(landData, canvasRef.current);
-      setLandRendered(true);
-    }
-  }, [landData, landRendered, building]);
-  
-  // Reset landRendered when selectedBuildingId changes
-  useEffect(() => {
-    if (selectedBuildingId) {
-      setLandRendered(false);
-    }
-  }, [selectedBuildingId]);
-  
   // Show panel with animation when a building is selected
   useEffect(() => {
     if (selectedBuildingId) {
@@ -759,37 +506,6 @@ export default function BuildingDetailsPanel({
       setIsVisible(false);
     }
   }, [selectedBuildingId]);
-  
-  // Function to adjust date by subtracting 500 years
-  const adjustDate = (dateString: string): string => {
-    try {
-      const date = new Date(dateString);
-      date.setFullYear(date.getFullYear() - 500);
-      return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
-    } catch (error) {
-      console.error('Error adjusting date:', error);
-      return 'Unknown date';
-    }
-  };
-  
-  // Helper function to format building types for display
-  const formatBuildingType = (type: string): string => {
-    if (!type) return 'Building';
-    
-    // Replace underscores and hyphens with spaces
-    let formatted = type.replace(/[_-]/g, ' ');
-    
-    // Capitalize each word
-    formatted = formatted.split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-    
-    return formatted;
-  };
   
   // Early return if not visible or no selected building
   if (!visible || !selectedBuildingId) return null;
@@ -836,493 +552,88 @@ export default function BuildingDetailsPanel({
           </div>
         ) : !error && building ? (
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4 overflow-y-auto flex-grow" style={{ gridTemplateColumns: "1fr 1fr 1fr" }}>
-            {/* Column 1: RECIPES (wider column) */}
+            {/* Column 1: RECIPES */}
             <div className="col-span-1 md:col-span-1 lg:col-span-1 space-y-4">
               {/* Recipes */}
-              {buildingResources?.resources?.transformationRecipes && buildingResources.resources.transformationRecipes.length > 0 ? (
-                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                    </svg>
-                    RECIPES
-                  </h3>
-                  <div className="space-y-4">
-                    {buildingResources.resources.transformationRecipes.map((recipe: any, index: number) => (
-                      <div key={`recipe-${index}`} className="bg-amber-50 p-3 rounded-md border border-amber-100">
-                        {/* Recipe title with craft time */}
-                        <div className="flex justify-between items-center mb-2 pb-1 border-b border-amber-200">
-                          <span className="font-medium text-amber-800">Recipe #{index + 1}</span>
-                          {recipe.craftMinutes > 0 && (
-                            <span className="text-xs bg-amber-100 px-2 py-1 rounded-full text-amber-700">
-                              {formatCraftTime(recipe.craftMinutes)}
-                            </span>
-                          )}
-                        </div>
-                        
-                        {/* Recipe content in a grid */}
-                        <div className="grid grid-cols-3 gap-2">
-                          {/* Input resources */}
-                          <div className="col-span-1 border-r border-amber-200 pr-2">
-                            <div className="text-xs text-amber-600 mb-1 font-medium">INPUTS</div>
-                            {recipe.inputs && recipe.inputs.length > 0 ? (
-                              recipe.inputs.map((input: any) => (
-                                <div key={`input-${input.resourceType}`} className="flex items-center mb-1">
-                                  <div className="flex-shrink-0 w-6 h-6 mr-1">
-                                    <Image 
-                                      src={`/images/resources/${input.icon}`}
-                                      alt={input.name}
-                                      width={24}
-                                      height={24}
-                                      className="w-6 h-6 object-contain"
-                                      loading="lazy"
-                                      unoptimized={true}
-                                      onError={(e) => {
-                                        (e.target as HTMLImageElement).src = '/images/resources/default.png';
-                                      }}
-                                    />
-                                  </div>
-                                  <div className="flex-1">
-                                    <span className="text-xs capitalize">{input.name}</span>
-                                    <span className="text-xs text-amber-700 ml-1">x{input.amount}</span>
-                                  </div>
-                                </div>
-                              ))
-                            ) : (
-                              <div className="text-xs text-gray-500 italic">No inputs required</div>
-                            )}
-                          </div>
-                          
-                          {/* Arrow */}
-                          <div className="flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                            </svg>
-                          </div>
-                          
-                          {/* Output resources */}
-                          <div className="col-span-1">
-                            <div className="text-xs text-amber-600 mb-1 font-medium">OUTPUTS</div>
-                            {recipe.outputs && recipe.outputs.length > 0 ? (
-                              recipe.outputs.map((output: any) => (
-                                <div key={`output-${output.resourceType}`} className="flex items-center mb-1">
-                                  <div className="flex-shrink-0 w-6 h-6 mr-1">
-                                    <Image 
-                                      src={`/images/resources/${output.icon}`}
-                                      alt={output.name}
-                                      width={24}
-                                      height={24}
-                                      className="w-6 h-6 object-contain"
-                                      loading="lazy"
-                                      unoptimized={true}
-                                      onError={(e) => {
-                                        (e.target as HTMLImageElement).src = '/images/resources/default.png';
-                                      }}
-                                    />
-                                  </div>
-                                  <div className="flex-1">
-                                    <span className="text-xs capitalize">{output.name}</span>
-                                    <span className="text-xs text-green-600 ml-1">x{output.amount}</span>
-                                  </div>
-                                </div>
-                              ))
-                            ) : (
-                              <div className="text-xs text-gray-500 italic">No outputs produced</div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
+              <RecipeList recipes={buildingResources?.resources?.transformationRecipes || []} />
             </div>
             
             {/* Column 2: SELLS, BUYS, STORES */}
             <div className="col-span-1 md:col-span-1 lg:col-span-1 space-y-4">
-              {/* Resources Selling - moved to top of column 2 */}
-              {buildingResources?.resources?.sellable && buildingResources.resources.sellable.length > 0 ? (
-                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
-                    <FaStore className="mr-2" /> SELLS
-                  </h3>
-                  <div className="grid grid-cols-1 gap-2">
-                    {buildingResources.resources.sellable.map((resource: any) => (
-                      <div key={`sell-${resource.resourceType}`} className="flex items-center bg-green-50 p-2 rounded-md" title={resource.name}>
-                        <div className="relative w-8 h-8 mr-2">
-                          <Image 
-                            src={`/images/resources/${resource.icon}`}
-                            alt={resource.name}
-                            width={32}
-                            height={32}
-                            className="object-contain"
-                            loading="lazy"
-                            unoptimized={true}
-                            onError={(e) => {
-                              // Fallback to a default icon if the image fails to load
-                              (e.target as HTMLImageElement).src = '/images/resources/default.png';
-                            }}
-                          />
-                        </div>
-                        <span className="text-sm text-gray-700 capitalize">{resource.name}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
+              {/* Resources Selling */}
+              <ResourceList 
+                title="SELLS" 
+                resources={buildingResources?.resources?.sellable || []} 
+                type="sell" 
+              />
 
               {/* Resources Buying */}
-              {buildingResources?.resources?.bought && buildingResources.resources.bought.length > 0 ? (
-                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
-                    <FaBox className="mr-2 transform rotate-180" /> BUYS
-                  </h3>
-                  <div className="grid grid-cols-1 gap-2">
-                    {buildingResources.resources.bought.map((resource: any) => (
-                      <div key={`buy-${resource.resourceType}`} className="flex items-center bg-blue-50 p-2 rounded-md" title={resource.name}>
-                        <div className="relative w-8 h-8 mr-2">
-                          <Image 
-                            src={`/images/resources/${resource.icon}`}
-                            alt={resource.name}
-                            width={32}
-                            height={32}
-                            className="object-contain"
-                            loading="lazy"
-                            unoptimized={true}
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = '/images/resources/default.png';
-                            }}
-                          />
-                        </div>
-                        <div className="flex-1">
-                          <span className="text-sm text-gray-700 capitalize">{resource.name}</span>
-                          {resource.amount && <span className="text-xs text-gray-500 ml-2">x{resource.amount}</span>}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
+              <ResourceList 
+                title="BUYS" 
+                resources={buildingResources?.resources?.bought || []} 
+                type="buy" 
+              />
 
               {/* Resources Storage */}
-              {buildingResources?.resources?.storable && buildingResources.resources.storable.length > 0 ? (
-                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
-                    <FaWarehouse className="mr-2" /> STORES
-                  </h3>
-                  <div className="grid grid-cols-1 gap-2">
-                    {buildingResources.resources.storable.map((resource: any) => (
-                      <div key={`store-${resource.resourceType}`} className="flex items-center bg-amber-50 p-2 rounded-md" title={resource.name}>
-                        <div className="relative w-8 h-8 mr-2">
-                          <Image 
-                            src={`/images/resources/${resource.icon}`}
-                            alt={resource.name}
-                            width={32}
-                            height={32}
-                            className="object-contain"
-                            loading="lazy"
-                            unoptimized={true}
-                            onError={(e) => {
-                              // Fallback to a default icon if the image fails to load
-                              (e.target as HTMLImageElement).src = '/images/resources/default.png';
-                            }}
-                          />
-                        </div>
-                        <span className="text-sm text-gray-700 capitalize">{resource.name}</span>
-                      </div>
-                    ))}
-                  </div>
-                  {buildingResources.storageCapacity > 0 && (
-                    <div className="mt-2 text-sm text-gray-700">
-                      <span className="font-medium">Total Capacity:</span> {buildingResources.storageCapacity} units
-                    </div>
-                  )}
-                </div>
-              ) : null}
+              <ResourceList 
+                title="STORES" 
+                resources={buildingResources?.resources?.storable || []} 
+                type="store" 
+                storageCapacity={buildingResources?.storageCapacity} 
+              />
               
               {/* Current Inventory */}
-              {buildingResources?.resources?.stored && buildingResources.resources.stored.length > 0 ? (
-                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
-                    <FaBox className="mr-2" /> CURRENT INVENTORY
-                  </h3>
-                  <div className="grid grid-cols-1 gap-2">
-                    {buildingResources.resources.stored.map((resource: any) => (
-                      <div key={`inventory-${resource.type}`} className="flex items-center bg-purple-50 p-2 rounded-md" title={resource.name}>
-                        <div className="relative w-8 h-8 mr-2">
-                          <Image 
-                            src={`/images/resources/${resource.icon}`}
-                            alt={resource.name}
-                            width={32}
-                            height={32}
-                            className="object-contain"
-                            loading="lazy"
-                            unoptimized={true}
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = '/images/resources/default.png';
-                            }}
-                          />
-                        </div>
-                        <div className="flex-1">
-                          <span className="text-sm text-gray-700 capitalize">{resource.name}</span>
-                          <span className="text-sm font-medium text-purple-700 ml-2">{resource.count} units</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
+              <ResourceList 
+                title="CURRENT INVENTORY" 
+                resources={buildingResources?.resources?.stored || []} 
+                type="inventory" 
+              />
             </div>
             
             {/* Column 3: Name, Owner, Location, Maintenance, Detailed Info */}
             <div className="col-span-1 space-y-4">
               {/* Building Image and Name */}
               {buildingDefinition && (
-                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-                  <div className="relative w-full aspect-square overflow-hidden rounded-lg mb-3">
-                    <img 
-                      src={buildingImagePath}
-                      alt={buildingDefinition.name || formatBuildingType(building.type)}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        console.error('Error loading building image:', e);
-                        e.currentTarget.src = '/images/buildings/contract_stall.jpg';
-                      }}
-                    />
-                  </div>
-                  
-                  <h3 className="text-xl font-serif font-semibold text-amber-800 mb-2">
-                    {buildingDefinition.name || formatBuildingType(building.type)}
-                  </h3>
-                  
-                  {buildingDefinition.shortDescription && (
-                    <p className="text-gray-700 mb-3">{buildingDefinition.shortDescription}</p>
-                  )}
-                  
-                  {buildingDefinition.flavorText && (
-                    <p className="italic text-gray-600 border-l-4 border-amber-200 pl-3 py-1">
-                      "{buildingDefinition.flavorText}"
-                    </p>
-                  )}
-                </div>
+                <BuildingImage 
+                  buildingType={building.type}
+                  buildingVariant={building.variant}
+                  buildingName={buildingDefinition.name}
+                  shortDescription={buildingDefinition.shortDescription}
+                  flavorText={buildingDefinition.flavorText}
+                />
               )}
               
               {/* Owner information */}
-              <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-                <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Owner</h3>
-                {building.owner ? (
-                  <div className="flex items-center justify-center">
-                    <PlayerProfile 
-                      username={building.owner}
-                      walletAddress={building.owner}
-                      size="medium"
-                      className="mx-auto"
-                    />
-                  </div>
-                ) : (
-                  <p className="text-center text-gray-500 italic">No owner information</p>
-                )}
-              </div>
+              <BuildingOwner owner={building.owner} />
               
               {/* Location with point visualization */}
-              <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-                <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Location</h3>
-                
-                <div className="flex flex-col items-center">
-                  {/* Point name */}
-                  {pointData ? (
-                    <>
-                      {/* Street name or bridge/canal name */}
-                      <p className="font-serif text-lg font-semibold text-amber-800 mb-2">
-                        {pointData.streetName || pointData.connection?.historicalName || 'Building Location'}
-                      </p>
-                      
-                      {/* English name */}
-                      {(pointData.streetNameEnglish || pointData.connection?.englishName) && (
-                        <p className="text-gray-700 italic mb-2">
-                          {pointData.streetNameEnglish || pointData.connection?.englishName}
-                        </p>
-                      )}
-                      
-                      {/* Description */}
-                      {(pointData.streetDescription || pointData.connection?.historicalDescription) && (
-                        <p className="text-sm text-gray-600 mb-3">
-                          {pointData.streetDescription || pointData.connection?.historicalDescription}
-                        </p>
-                      )}
-                    </>
-                  ) : (
-                    landData ? (
-                      <p className="font-serif text-lg font-semibold text-amber-800 mb-2">
-                        {landData.historicalName || landData.englishName || 'Land Plot'}
-                      </p>
-                    ) : (
-                      <p className="text-gray-500 italic">Location details unavailable</p>
-                    )
-                  )}
-                  
-                  {/* Land coordinates */}
-                  {building?.position && (
-                    <p className="text-xs text-gray-500 mb-2">
-                      {typeof building.position === 'string' 
-                        ? String(building.position) 
-                        : `Lat: ${String(building.position.lat?.toFixed(6) || '')}, Lng: ${String(building.position.lng?.toFixed(6) || '')}`
-                      }
-                    </p>
-                  )}
-                  
-                  {/* Canvas for land visualization */}
-                  <canvas 
-                    ref={canvasRef} 
-                    className="w-full h-[200px] border border-amber-100 rounded-lg mb-2"
-                    style={{ maxWidth: '300px' }}
-                  />
-                </div>
-              </div>
+              <BuildingLocation 
+                building={building}
+                landData={landData}
+                pointData={pointData}
+              />
               
               {/* Maintenance Cost */}
-              {buildingDefinition?.maintenanceCost !== undefined && (
-                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Maintenance</h3>
-                  <div className="flex justify-between items-center bg-amber-50 p-2 rounded-lg">
-                    <span className="text-gray-700 font-medium">Daily Cost:</span>
-                    <span className="font-semibold text-amber-800">
-                      {typeof buildingDefinition.maintenanceCost === 'number' 
-                        ? `${buildingDefinition.maintenanceCost.toLocaleString()} ⚜️ ducats`
-                        : `${String(buildingDefinition.maintenanceCost || '')} ⚜️ ducats`}
-                    </span>
-                  </div>
-                </div>
-              )}
+              <BuildingMaintenance maintenanceCost={buildingDefinition?.maintenanceCost} />
   
-              {/* Financial Information - MOVED UP */}
-              {(building.lease_amount || building.rent_amount) && (
-                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Financial Details</h3>
-      
-                  {building.lease_amount !== undefined && (
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-gray-700">Lease Amount:</span>
-                      <span className="font-semibold text-amber-800">
-                        {typeof building.lease_amount === 'number' 
-                          ? `${building.lease_amount.toLocaleString()} ⚜️ ducats`
-                          : `${String(building.lease_amount || '')} ⚜️ ducats`}
-                      </span>
-                    </div>
-                  )}
-      
-                  {building.rent_amount !== undefined && (
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-700">Rent Amount:</span>
-                      <span className="font-semibold text-amber-800">
-                        {typeof building.rent_amount === 'number'
-                          ? `${building.rent_amount.toLocaleString()} ⚜️ ducats`
-                          : `${String(building.rent_amount)} ⚜️ ducats`}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              )}
+              {/* Financial Information */}
+              <BuildingFinancials 
+                leaseAmount={building.lease_amount} 
+                rentAmount={building.rent_amount} 
+              />
   
-              {/* Full Description (Always visible) - TEXT MADE SMALLER */}
-              {buildingDefinition?.fullDescription && (
-                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-3">Detailed Information</h3>
-      
-                  <div className="text-sm text-gray-700 border-t border-amber-200 pt-3">
-                    <p className="whitespace-pre-line">{buildingDefinition.fullDescription}</p>
-      
-                    {/* Creation details added here */}
-                    <div className="mt-4 pt-3 border-t border-amber-100">
-                      <h4 className="font-medium text-amber-700 mb-2">Creation Details</h4>
-                      <div className="text-xs">
-                        <p className="text-gray-700">
-                          Created: <span className="font-medium">
-                            {adjustDate(building.created_at)}
-                          </span>
-                        </p>
-                        {building.created_by && (
-                          <p className="text-gray-700 mt-1">
-                            Created by: <span className="font-medium">{building.created_by}</span>
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
+              {/* Full Description */}
+              <BuildingDescription 
+                fullDescription={buildingDefinition?.fullDescription}
+                createdAt={building.created_at}
+                createdBy={building.created_by}
+              />
               
               {/* Occupant Information */}
-              {building.occupant && (
-                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2">Occupant</h3>
-                  <div className="flex items-center justify-center">
-                    <PlayerProfile 
-                      username={building.occupant}
-                      walletAddress={building.occupant}
-                      size="medium"
-                      className="mx-auto"
-                    />
-                  </div>
-                </div>
-              )}
+              <BuildingOccupant occupant={building.occupant} />
               
               {/* Public Sale Contracts */}
-              {buildingResources?.resources?.publiclySold && buildingResources.resources.publiclySold.length > 0 ? (
-                <div className="bg-white rounded-lg p-4 shadow-md border border-amber-200">
-                  <h3 className="text-sm uppercase font-medium text-amber-600 mb-2 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                    PUBLIC SALE CONTRACTS
-                  </h3>
-                  <div className="space-y-3">
-                    {buildingResources.resources.publiclySold.map((contract: any) => (
-                      <div key={contract.id} className="bg-green-50 p-3 rounded-md border border-green-100">
-                        <div className="flex justify-between items-center mb-2">
-                          <div className="flex items-center">
-                            <div className="relative w-6 h-6 mr-2">
-                              <Image 
-                                src={`/images/resources/${contract.icon}`}
-                                alt={contract.name}
-                                width={24}
-                                height={24}
-                                className="w-6 h-6 object-contain"
-                                loading="lazy"
-                                unoptimized={true}
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).src = '/images/resources/default.png';
-                                }}
-                              />
-                            </div>
-                            <span className="font-medium text-green-800">{contract.name}</span>
-                          </div>
-                          <span className="text-xs bg-green-100 px-2 py-1 rounded-full text-green-700">
-                            Public Sale
-                          </span>
-                        </div>
-                        
-                        <div className="grid grid-cols-3 gap-2 text-sm">
-                          <div className="flex flex-col">
-                            <span className="text-gray-500">Hourly Amount</span>
-                            <span className="font-medium">{contract.hourlyAmount}</span>
-                          </div>
-                          
-                          <div className="flex flex-col">
-                            <span className="text-gray-500">Price</span>
-                            <span className="font-medium">{contract.price} ⚜️</span>
-                          </div>
-                          
-                          <div className="flex flex-col">
-                            <span className="text-gray-500">Transporter</span>
-                            <span className="font-medium">{contract.transporter || 'None'}</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <ContractList contracts={buildingResources?.resources?.publiclySold || []} />
             </div>
           </div>
         ) : (
