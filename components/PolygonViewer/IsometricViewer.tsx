@@ -29,7 +29,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [polygons, setPolygons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [landOwners, setLandOwners] = useState<Record<string, string>>({});
-  const [users, setUsers] = useState<Record<string, any>>({});
+  const [citizens, setCitizens] = useState<Record<string, any>>({});
   const [scale, setScale] = useState(3); // Start with a 3x zoom for a closer view
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   // Add refs to track previous state
@@ -1160,52 +1160,52 @@ number => {
     fetchLandOwners();
   }, []);
 
-  // Load users data
+  // Load citizens data
   useEffect(() => {
-    const loadUsers = async () => {
+    const loadCitizens = async () => {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-        const response = await fetch(`${apiUrl}/api/users`);
+        const response = await fetch(`${apiUrl}/api/citizens`);
         
         if (response.ok) {
           const data = await response.json();
           if (data && Array.isArray(data)) {
-            const usersMap: Record<string, any> = {};
-            data.forEach(user => {
-              if (user.user_name) {
-                usersMap[user.user_name] = user;
+            const citizensMap: Record<string, any> = {};
+            data.forEach(citizen => {
+              if (citizen.citizen_name) {
+                citizensMap[citizen.citizen_name] = citizen;
               }
             });
             
             // Ensure ConsiglioDeiDieci is always present
-            if (!usersMap['ConsiglioDeiDieci']) {
-              usersMap['ConsiglioDeiDieci'] = {
-                user_name: 'ConsiglioDeiDieci',
+            if (!citizensMap['ConsiglioDeiDieci']) {
+              citizensMap['ConsiglioDeiDieci'] = {
+                citizen_name: 'ConsiglioDeiDieci',
                 color: '#8B0000', // Dark red
                 coat_of_arms_image: null
               }
             }
             
-            setUsers(usersMap);
+            setCitizens(citizensMap);
           }
         }
       } catch (error) {
-        console.warn('Error loading users data:', error);
+        console.warn('Error loading citizens data:', error);
         
-        // Create a default ConsiglioDeiDieci user as fallback
-        const fallbackUsers = {
+        // Create a default ConsiglioDeiDieci citizen as fallback
+        const fallbackCitizens = {
           'ConsiglioDeiDieci': {
-            user_name: 'ConsiglioDeiDieci',
+            citizen_name: 'ConsiglioDeiDieci',
             color: '#8B0000', // Dark red
             coat_of_arms_image: null
           }
         };
         
-        setUsers(fallbackUsers);
+        setCitizens(fallbackCitizens);
       }
     };
     
-    loadUsers();
+    loadCitizens();
   }, []);
 
   // Load buildings regardless of active view
@@ -1905,7 +1905,7 @@ number => {
           if (data.error === 'Start or end point is not within any polygon') {
             console.log('Points not within polygons, attempting water-only pathfinding');
             
-            // Show a message to the user
+            // Show a message to the citizen
             alert('Points are not on land. Attempting to find a water route...');
             
             // Make a direct request to the water-only pathfinding endpoint
@@ -2119,9 +2119,9 @@ number => {
         } else if (polygon.id && landOwners[polygon.id]) {
           // Use owner color in land view
           const owner = landOwners[polygon.id];
-          const user = users[owner];
-          if (user && user.color) {
-            fillColor = user.color;
+          const citizen = citizens[owner];
+          if (citizen && citizen.color) {
+            fillColor = citizen.color;
           }
         }
       } 
@@ -2188,7 +2188,7 @@ number => {
         hasPublicDock        // Add this flag to identify polygons with public docks
       };
     }).filter(Boolean);
-  }, [polygons, landOwners, users, activeView, scale, offset, incomeData, incomeDataLoaded, landGroups, landGroupColors]);
+  }, [polygons, landOwners, citizens, activeView, scale, offset, incomeData, incomeDataLoaded, landGroups, landGroupColors]);
 
   // Update polygonsToRender when the dependencies of calculatePolygonsToRender change
   useEffect(() => {
@@ -2607,8 +2607,8 @@ number => {
 
       //console.log(`%c DRAWING BUILDINGS: ${buildingsWithValidPosition.length} of ${filteredBuildings.length} buildings have valid positions for drawing`, 'background: #9C27B0; color: white; padding: 4px 8px; font-weight: bold; border-radius: 4px;');
       
-      // Get current user identifier
-      const currentUser = getCurrentUserIdentifier();
+      // Get current citizen identifier
+      const currentCitizen = getCurrentCitizenIdentifier();
       
       filteredBuildings.forEach(building => {
         if (!building.position) return;
@@ -2674,14 +2674,14 @@ number => {
         // Determine if this building is selected
         const isSelected = selectedBuildingId !== null && selectedBuildingId === building.id;
         
-        // Determine if this building is owned by the current user
-        const isOwnedByCurrentUser = building.owner === currentUser;
+        // Determine if this building is owned by the current citizen
+        const isOwnedByCurrentCitizen = building.owner === currentCitizen;
         
         // Draw simple square for building with select state
         const squareSize = Math.max(size.width, size.depth) * scale * 0.6;
         
-        // If owned by current user, draw a halo first
-        if (isOwnedByCurrentUser) {
+        // If owned by current citizen, draw a halo first
+        if (isOwnedByCurrentCitizen) {
           ctx.beginPath();
           ctx.rect(
             isoPos.x - squareSize/2 - 3, 
@@ -3475,7 +3475,7 @@ number => {
     // This section is now handled above with consistent styling across all views
     
     
-  }, [loading, polygons, landOwners, users, activeView, buildings, scale, offset, incomeData, minIncome, maxIncome, selectedPolygonId, selectedBuildingId, emptyBuildingPoints, mousePosition, citizensLoaded, citizensByBuilding, incomeDataLoaded, polygonsToRender, getIncomeColor]);
+  }, [loading, polygons, landOwners, citizens, activeView, buildings, scale, offset, incomeData, minIncome, maxIncome, selectedPolygonId, selectedBuildingId, emptyBuildingPoints, mousePosition, citizensLoaded, citizensByBuilding, incomeDataLoaded, polygonsToRender, getIncomeColor]);
   
 
   // Handle window resize
@@ -3668,19 +3668,19 @@ number => {
     return getColorFromString(owner);
   }
 
-  // Function to get the current user's identifier
-  const getCurrentUserIdentifier = useCallback(() => {
+  // Function to get the current citizen's identifier
+  const getCurrentCitizenIdentifier = useCallback(() => {
     try {
-      // Try to get username from profile
-      const profileStr = localStorage.getItem('userProfile');
+      // Try to get citizenname from profile
+      const profileStr = localStorage.getItem('citizenProfile');
       if (profileStr) {
         const profile = JSON.parse(profileStr);
-        if (profile && profile.username) {
-          return profile.username;
+        if (profile && profile.citizenname) {
+          return profile.citizenname;
         }
       }
       
-      // If no username in profile, fall back to wallet address from localStorage
+      // If no citizenname in profile, fall back to wallet address from localStorage
       const walletAddress = localStorage.getItem('walletAddress');
       if (walletAddress) {
         return walletAddress;
@@ -3688,7 +3688,7 @@ number => {
       
       return null;
     } catch (error) {
-      console.error('Error getting current user identifier:', error);
+      console.error('Error getting current citizen identifier:', error);
       return null;
     }
   }, []);
@@ -3699,12 +3699,12 @@ number => {
       return buildings; // Return all buildings if filter is off
     }
     
-    // Get current user identifier
-    const currentUser = getCurrentUserIdentifier();
+    // Get current citizen identifier
+    const currentCitizen = getCurrentCitizenIdentifier();
     
-    // Filter buildings to only show those owned by the current user
-    return buildings.filter(building => building.owner === currentUser);
-  }, [buildings, showOnlyMyBuildings, getCurrentUserIdentifier]);
+    // Filter buildings to only show those owned by the current citizen
+    return buildings.filter(building => building.owner === currentCitizen);
+  }, [buildings, showOnlyMyBuildings, getCurrentCitizenIdentifier]);
 
   // Helper function to draw a building (simplified for 2D view)
   // This function is not currently used but kept for future reference
