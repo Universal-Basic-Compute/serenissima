@@ -287,23 +287,23 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
             return None
         
         # Extract the JSON from Kinos Engine's response
-        content = response.json().get("content", "")
+        content_text = response.json().get("content", "")
         
         # Find the JSON object in the response using a more robust approach
         try:
             # First try to parse the entire content as JSON
-            result_data = json.loads(content)
+            result_data = json.loads(content_text)
             log.info("Successfully parsed entire response as JSON")
         except json.JSONDecodeError:
             # Log the full response for debugging
-            log.error(f"Could not parse entire response as JSON. Full response: {content}")
+            log.error(f"Could not parse entire response as JSON. Full response: {content_text}")
             
             # If that fails, try to clean and extract the JSON
             import re
             
             # Remove potential comments (both // and /* */ style)
             # First remove // comments
-            content_no_comments = re.sub(r'//.*?$', '', content, flags=re.MULTILINE)
+            content_no_comments = re.sub(r'//.*?$', '', content_text, flags=re.MULTILINE)
             # Then remove /* */ comments
             content_no_comments = re.sub(r'/\*.*?\*/', '', content_no_comments, flags=re.DOTALL)
             
@@ -329,8 +329,8 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
                     # Last resort: try a more aggressive approach to extract just the fields we need
                     try:
                         # Look for the description and imagePrompt fields directly
-                        desc_match = re.search(r'"description"\s*:\s*"(.*?)"(?=,|})', content, re.DOTALL)
-                        img_match = re.search(r'"imagePrompt"\s*:\s*"(.*?)"(?=,|})', content, re.DOTALL)
+                        desc_match = re.search(r'"description"\s*:\s*"(.*?)"(?=,|})', content_text, re.DOTALL)
+                        img_match = re.search(r'"imagePrompt"\s*:\s*"(.*?)"(?=,|})', content_text, re.DOTALL)
                         
                         if desc_match and img_match:
                             # Manually construct a valid JSON object
@@ -347,7 +347,7 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
                         log.error(f"Failed in last-resort regex extraction: {regex_error}")
                         return None
             else:
-                log.error(f"Could not find JSON object markers in response: {content}")
+                log.error(f"Could not find JSON object markers in response: {content_text}")
                 return None
         
         log.info(f"Successfully generated new description and image prompt for {username}")
