@@ -3384,12 +3384,63 @@ export class TransportService {
       
       // Handle the case when the path is too short or empty
       if (enhancedPath.length <= 1 && startPolygon && endPolygon && startPolygon.id === endPolygon.id) {
-        console.log('Start and end points are in the same polygon but path is too short');
+        console.log('Start and end points are in the same polygon but path is too short, creating direct path');
+        
+        // Calculate direct distance
+        const directDistance = this.calculateDistance(startPoint, endPoint);
+        
+        // Create a direct path with intermediate points if needed
+        const directPath = [];
+        
+        // Add start point
+        directPath.push({
+          ...startPoint,
+          type: 'center',
+          polygonId: startPolygon.id,
+          transportMode: 'walking'
+        });
+        
+        // Add intermediate points for longer distances
+        if (directDistance > 20) {
+          const numPoints = Math.max(1, Math.floor(directDistance / 50));
+          for (let i = 1; i <= numPoints; i++) {
+            const fraction = i / (numPoints + 1);
+            // Add some randomness to create natural curves
+            const jitter = 0.00002 * (Math.random() * 2 - 1);
+            directPath.push({
+              lat: startPoint.lat + (endPoint.lat - startPoint.lat) * fraction + jitter,
+              lng: startPoint.lng + (endPoint.lng - startPoint.lng) * fraction + jitter,
+              type: 'center',
+              polygonId: startPolygon.id,
+              transportMode: 'walking',
+              isIntermediatePoint: true
+            });
+          }
+        }
+        
+        // Add end point
+        directPath.push({
+          ...endPoint,
+          type: 'center',
+          polygonId: endPolygon.id,
+          transportMode: 'walking'
+        });
+        
+        // Calculate time based on distance (walking at 5 km/h)
+        const timeHours = directDistance / 1000 / 5;
+        const timeMinutes = Math.round(timeHours * 60);
         
         return {
-          success: false,
-          error: 'Unable to create a valid path',
-          details: 'The start and end points are too close or in the same location'
+          success: true,
+          path: directPath,
+          distance: directDistance,
+          walkingDistance: directDistance,
+          waterDistance: 0,
+          estimatedTimeMinutes: timeMinutes,
+          startPolygon: startPolygon.id,
+          endPolygon: endPolygon.id,
+          // Add the roundTrip path by reversing the path and combining
+          roundTrip: [...directPath, ...directPath.slice().reverse().slice(1)]
         };
       }
       
