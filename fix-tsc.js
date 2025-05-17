@@ -177,7 +177,7 @@ Focus on adding proper type annotations and fixing type-related issues.
 
 // Process batches sequentially to avoid overwhelming Aider
 async function processBatches() {
-  // Process batches one at a time to avoid issues
+  // Process batches one at a time
   const PARALLEL_BATCHES = 1;
   
   // If no batches, return early
@@ -199,67 +199,35 @@ async function processBatches() {
     
     // Wait for all batches in this group to complete
     await Promise.all(batchPromises);
-    
-    // Run TypeScript compiler again to check overall progress
-    console.log('\nChecking overall progress after batch group...');
-    try {
-      execSync(`node tsc-to-json.js ${TS_ERRORS_FILE}`, { stdio: 'inherit' });
-      
-      // Read updated error count
-      const updatedErrorJson = fs.readFileSync(TS_ERRORS_FILE, 'utf8');
-      const updatedErrorData = JSON.parse(updatedErrorJson);
-      
-      console.log(`Remaining errors: ${updatedErrorData.totalErrors}`);
-      
-      // If all errors are fixed, we can exit early
-      if (updatedErrorData.totalErrors === 0) {
-        console.log('All TypeScript errors have been fixed! 🎉');
-        return;
-      }
-    } catch (error) {
-      // Continue even if there are still errors
-    }
   }
   
-  console.log('\nCompleted error fixing process.');
-  console.log('Run `node tsc-to-json.js` to check for any remaining errors.');
+  console.log('\nCompleted processing all batches in this iteration.');
 }
 
-// Main execution function
+// Main execution function - simplified to just loop continuously
 async function main() {
   let iteration = 1;
-  let remainingErrors = errorData.totalErrors;
+  const MAX_ITERATIONS = 500; // Hard limit to prevent infinite loops
   
-  // Continue looping until there are no more errors or we hit a safety limit
-  const ABSOLUTE_MAX_ITERATIONS = 50; // Safety limit to prevent infinite loops
-  
-  while (remainingErrors > 0 && iteration <= ABSOLUTE_MAX_ITERATIONS) {
-    console.log(`\n========== ITERATION ${iteration} OF ${ABSOLUTE_MAX_ITERATIONS} (MAX) ==========`);
-    console.log(`Starting with ${remainingErrors} TypeScript errors to fix.`);
+  while (iteration <= MAX_ITERATIONS) {
+    console.log(`\n========== ITERATION ${iteration} OF ${MAX_ITERATIONS} (MAX) ==========`);
     
-    // Process all batches
-    await processBatches();
-    
-    // Check if we still have errors
-    console.log(`\nCompleted iteration ${iteration}. Checking for remaining errors...`);
+    // Run TypeScript compiler to get current errors
     try {
       execSync(`node tsc-to-json.js ${TS_ERRORS_FILE}`, { stdio: 'inherit' });
       
       // Read updated error count
-      const updatedErrorJson = fs.readFileSync(TS_ERRORS_FILE, 'utf8');
-      const updatedErrorData = JSON.parse(updatedErrorJson);
+      const errorJson = fs.readFileSync(TS_ERRORS_FILE, 'utf8');
+      const errorData = JSON.parse(errorJson);
       
-      remainingErrors = updatedErrorData.totalErrors;
-      console.log(`Remaining errors after iteration ${iteration}: ${remainingErrors}`);
+      const remainingErrors = errorData.totalErrors;
+      console.log(`Starting iteration with ${remainingErrors} TypeScript errors to fix.`);
       
       // If all errors are fixed, we can exit early
       if (remainingErrors === 0) {
         console.log('All TypeScript errors have been fixed! 🎉');
         break;
       }
-      
-      // If we still have errors, prepare for next iteration
-      console.log(`Preparing for iteration ${iteration + 1}...`);
       
       // Reset batches with new errors
       batches = [];
@@ -268,7 +236,7 @@ async function main() {
       
       // Group errors by file again
       const errorsByFile = {};
-      updatedErrorData.errors.forEach(error => {
+      errorData.errors.forEach(error => {
         if (!errorsByFile[error.filePath]) {
           errorsByFile[error.filePath] = [];
         }
@@ -299,7 +267,10 @@ async function main() {
         batches.push(currentBatch);
       }
       
-      console.log(`Created ${batches.length} new batches for iteration ${iteration + 1}.`);
+      console.log(`Created ${batches.length} batches for iteration ${iteration}.`);
+      
+      // Process all batches
+      await processBatches();
       
     } catch (error) {
       console.error('Error checking TypeScript errors:', error);
@@ -309,16 +280,11 @@ async function main() {
     iteration++;
   }
   
-  if (remainingErrors > 0) {
-    if (iteration > ABSOLUTE_MAX_ITERATIONS) {
-      console.log(`\nReached maximum number of iterations (${ABSOLUTE_MAX_ITERATIONS}) with ${remainingErrors} errors remaining.`);
-      console.log('You may need to fix some errors manually or run this script again.');
-    } else {
-      console.log(`\nCompleted with ${remainingErrors} errors remaining.`);
-      console.log('Run this script again to continue fixing errors.');
-    }
+  if (iteration > MAX_ITERATIONS) {
+    console.log(`\nReached maximum number of iterations (${MAX_ITERATIONS}).`);
+    console.log('You may need to fix some errors manually or run this script again.');
   } else {
-    console.log('\nAll TypeScript errors have been successfully fixed!');
+    console.log('\nAll TypeScript errors have been successfully fixed or maximum iterations reached!');
   }
 }
 
