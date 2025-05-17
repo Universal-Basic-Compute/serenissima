@@ -3,6 +3,7 @@ import { hoverStateService, HoverState } from '@/lib/services/HoverStateService'
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 import { buildingService } from '@/lib/services/BuildingService';
 import { assetService } from '@/lib/services/AssetService';
+import { useRouter } from 'next/navigation';
 
 // Helper function to get current username
 const getCurrentUsername = (): string | null => {
@@ -28,6 +29,7 @@ interface HoverTooltipProps {
 }
 
 export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
+  const router = useRouter();
   const [hoverState, setHoverState] = useState<HoverState>(hoverStateService.getState());
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [tooltipData, setTooltipData] = useState<any>(null);
@@ -167,6 +169,19 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
     };
   }, []);
   
+  // Handle contract click
+  const handleContractClick = (resource: any) => {
+    if (resource.buildingId) {
+      // Set the selected building ID in the global state
+      window.dispatchEvent(new CustomEvent('showBuildingDetailsPanel', {
+        detail: { buildingId: resource.buildingId }
+      }));
+      
+      // Close the tooltip
+      hoverStateService.clearHoveredResource();
+    }
+  };
+  
   // Determine if we should show the tooltip
   const shouldShow = 
     hoverState.hoveredPolygonId !== null || 
@@ -293,7 +308,11 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
                 }
                 
                 return (
-                  <div key={resource.id} className="mb-2 pb-2 border-b border-amber-700/30 last:border-0">
+                  <div 
+                    key={resource.id} 
+                    className="mb-2 pb-2 border-b border-amber-700/30 last:border-0 hover:bg-amber-900/20 cursor-pointer transition-colors rounded px-1"
+                    onClick={() => handleContractClick(resource)}
+                  >
                     <div className="flex items-center">
                       <div className="w-6 h-6 mr-2 bg-amber-800/50 rounded overflow-hidden flex items-center justify-center">
                         <img 

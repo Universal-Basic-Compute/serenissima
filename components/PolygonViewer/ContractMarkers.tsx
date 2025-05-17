@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { contractService, Contract } from '@/lib/services/ContractService';
 import { hoverStateService } from '@/lib/services/HoverStateService';
+import { useRouter } from 'next/navigation';
 
 // Function to determine if a contract is active/being sold
 const isContractActive = (contract: Contract): boolean => {
@@ -23,6 +24,7 @@ export default function ContractMarkers({
   canvasWidth, 
   canvasHeight 
 }: ContractMarkersProps) {
+  const router = useRouter();
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [contractsByLocation, setContractsByLocation] = useState<Record<string, Contract[]>>({});
   const [hoveredLocation, setHoveredLocation] = useState<string | null>(null);
@@ -67,6 +69,16 @@ export default function ContractMarkers({
     setHoveredLocation(null);
     hoverStateService.clearHoveredResource();
   }, []);
+  
+  // Handle contract click
+  const handleContractClick = (contract: Contract) => {
+    if (contract.sellerBuilding) {
+      // Set the selected building ID in the global state
+      window.dispatchEvent(new CustomEvent('showBuildingDetailsPanel', {
+        detail: { buildingId: contract.sellerBuilding }
+      }));
+    }
+  };
   
   // Load contracts when component becomes visible
   useEffect(() => {
@@ -261,7 +273,7 @@ export default function ContractMarkers({
                   return (
                     <div 
                       key={contract.contractId}
-                      className="absolute bg-amber-800 rounded-lg overflow-hidden flex flex-col items-center justify-center shadow-lg"
+                      className="absolute bg-amber-800 rounded-lg overflow-hidden flex flex-col items-center justify-center shadow-lg cursor-pointer"
                       style={{ 
                         width: '96px', // Smaller size
                         height: '120px',
@@ -272,6 +284,7 @@ export default function ContractMarkers({
                         borderColor: borderColor,
                         opacity: isContractActive(contract) ? 1 : 0.5 // Apply transparency for inactive contracts
                       }}
+                      onClick={() => handleContractClick(contract)}
                     >
                       <div className="relative w-full h-full group">
                         {/* Image container with rounded corners */}
@@ -334,7 +347,11 @@ export default function ContractMarkers({
                 })}
                 
                 {/* Center indicator */}
-                <div className="w-8 h-8 bg-amber-700 border border-amber-500 rounded-full flex items-center justify-center text-white text-sm font-bold" style={{ borderWidth: '1px' }}>
+                <div 
+                  className="w-8 h-8 bg-amber-700 border border-amber-500 rounded-full flex items-center justify-center text-white text-sm font-bold cursor-pointer" 
+                  style={{ borderWidth: '1px' }}
+                  onClick={() => handleContractClick(locationContracts[0])}
+                >
                   {locationContracts.length}
                 </div>
               </div>
@@ -359,7 +376,7 @@ export default function ContractMarkers({
                     return (
                       <div 
                         key={contract.contractId}
-                        className="absolute bg-amber-800 rounded-lg overflow-hidden"
+                        className="absolute bg-amber-800 rounded-lg overflow-hidden cursor-pointer"
                         style={{ 
                           width: '54px', // Smaller size
                           height: '54px',
@@ -371,6 +388,7 @@ export default function ContractMarkers({
                           borderColor: borderColor,
                           opacity: isContractActive(contract) ? 1 : 0.5 // Apply transparency for inactive contracts
                         }}
+                        onClick={() => handleContractClick(contract)}
                       >
                         {/* Log resource type to help with debugging */}
                         {console.log(`Attempting to load resource image for: ${resourceType}`)}
