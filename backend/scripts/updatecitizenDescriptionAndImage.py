@@ -183,30 +183,30 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
         
         # Create a prompt for the Kinos Engine
         prompt = f"""
-        I need to update the description and image for citizen {first_name} {last_name}, a {social_class} who {workplace_info}.
+        After experiencing significant events and changes in your life in Venice, it's time to update your description and appearance to better reflect who you've become.
         
-        Based on all the information provided about this citizen's history, activities, and current status, please:
+        Based on your history, activities, and current status as {first_name} {last_name}, a {social_class} who {workplace_info}, YOU choose:
         
-        1. Generate a detailed and historically accurate description of this citizen, including:
-           - Personality traits that reflect their activities and social class
-           - Work ethic and skills demonstrated through their job history
-           - Social connections and relationships with other citizens
-           - Aspirations and motivations that align with their economic activities
-           - Notable achievements or events from their history in Venice
-           - Family background appropriate to their social class
-           - Daily routines and habits
+        1. YOUR new detailed and historically accurate description, including:
+           - YOUR personality traits that have developed through your experiences
+           - YOUR work ethic and skills demonstrated through your job history
+           - YOUR social connections and relationships with other citizens
+           - YOUR aspirations and motivations that align with your economic activities
+           - Notable achievements or events from YOUR history in Venice
+           - YOUR family background appropriate to your social class
+           - YOUR daily routines and habits
         
-        2. Create a detailed image prompt for Ideogram that will generate a portrait of this citizen that:
-           - Accurately reflects their social class ({social_class}) with appropriate status symbols
-           - Shows period-appropriate clothing and accessories for their specific profession
-           - Captures their personality traits mentioned in the description
+        2. A detailed image prompt for Ideogram that will generate a portrait of YOU that:
+           - Accurately reflects YOUR social class ({social_class}) with appropriate status symbols
+           - Shows period-appropriate clothing and accessories for YOUR specific profession
+           - Captures YOUR personality traits mentioned in the description
            - Features authentic Renaissance Venetian style, architecture, and setting
            - Includes appropriate lighting (Rembrandt-style for higher classes, natural light for lower)
-           - Uses a color palette appropriate to their social standing (rich colors for nobility, muted for lower classes)
-           - Incorporates symbols of their trade or profession
-           - Shows facial features and expression that reflect their character
+           - Uses a color palette appropriate to YOUR social standing
+           - Incorporates symbols of YOUR trade or profession
+           - Shows facial features and expression that reflect YOUR character
         
-        Current description: {current_description}
+        Your current description: {current_description}
         
         Please return your response in JSON format with two fields: "description" and "imagePrompt".
         """
