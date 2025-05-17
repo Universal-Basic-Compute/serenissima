@@ -392,15 +392,15 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
       const seed = dateString; // You could also use a message ID if available
       const formattedDate = timeDescriptionService.formatDate(dateString, seed);
       
-      // Return a JSX element with updated styling - grey, serif, and small
+      // Return a JSX element with updated styling - grey, serif, and extra small
       return (
-        <span className="text-gray-500 font-serif text-xs">
+        <span className="text-gray-500 font-serif text-[10px]">
           {formattedDate}
         </span>
       );
     } catch (error) {
       console.error('Error formatting date:', error);
-      return <span className="text-gray-500 font-serif text-xs">{dateString}</span>;
+      return <span className="text-gray-500 font-serif text-[10px]">{dateString}</span>;
     }
   };
 
