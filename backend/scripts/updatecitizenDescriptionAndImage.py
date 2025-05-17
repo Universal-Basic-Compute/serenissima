@@ -413,7 +413,7 @@ def generate_image(prompt: str, citizen_id: str) -> Optional[str]:
         log.info(f"Generated and saved image for citizen {citizen_id}")
         
         # Create the public URL path
-        public_image_url = f"/images/citizens/{citizen_id}.jpg"
+        public_image_url = f"/images/citizens/{citizen_username}.jpg"
         
         return public_image_url
     except Exception as e:
