@@ -125,6 +125,27 @@ async function saveRelevancies(
   allCitizens: any[] = []
 ): Promise<number> {
   try {
+    // Check if the RELEVANCIES table exists
+    try {
+      const tables = await base.tables();
+      const relevanciesTable = tables.find(table => table.name === AIRTABLE_RELEVANCIES_TABLE);
+      
+      if (!relevanciesTable) {
+        console.error(`Table ${AIRTABLE_RELEVANCIES_TABLE} does not exist in the Airtable base`);
+        throw new Error(`Table ${AIRTABLE_RELEVANCIES_TABLE} does not exist`);
+      }
+      
+      // Log the actual field names in the table to help debug
+      console.log(`Fields in ${AIRTABLE_RELEVANCIES_TABLE} table:`, relevanciesTable.fields.map(f => f.name));
+    } catch (error) {
+      console.error('Error checking RELEVANCIES table:', error);
+      // Continue anyway, as this is just a diagnostic check
+    }
+
+    // Log the field names we're using to help debug
+    console.log('Using the following field names for RELEVANCIES table:');
+    console.log('AssetID, AssetType, Category, Type, TargetCitizen, RelevantToCitizen, Score, TimeHorizon, Title, Description, Notes, Status, CreatedAt');
+    
     // Delete existing relevancy records for this AI to avoid duplicates
     const existingRecords = await base(AIRTABLE_RELEVANCIES_TABLE)
       .select({
@@ -148,6 +169,7 @@ async function saveRelevancies(
       if (data.assetType === 'land') {
         return {
           fields: {
+            RelevancyId: `${aiUsername}_${id}_${Date.now()}`, // Generate a unique ID
             AssetID: id,
             AssetType: data.assetType,
             Category: data.category,
@@ -171,6 +193,7 @@ async function saveRelevancies(
         
         return {
           fields: {
+            RelevancyId: `${aiUsername}_${id}_${Date.now()}`, // Generate a unique ID
             AssetID: id,
             AssetType: data.assetType,
             Category: data.category,
@@ -188,11 +211,30 @@ async function saveRelevancies(
         };
       }
     });
+    
+    // Add more detailed logging
+    console.log(`Preparing to create ${relevancyRecords.length} relevancy records for ${aiUsername}`);
+    
+    // Log the first record as an example (if available)
+    if (relevancyRecords.length > 0) {
+      console.log('Example relevancy record:');
+      console.log(JSON.stringify(relevancyRecords[0], null, 2));
+    }
       
     // Create records in batches of 10
     for (let i = 0; i < relevancyRecords.length; i += 10) {
       const batch = relevancyRecords.slice(i, i + 10);
-      await base(AIRTABLE_RELEVANCIES_TABLE).create(batch);
+      try {
+        const createdRecords = await base(AIRTABLE_RELEVANCIES_TABLE).create(batch);
+        console.log(`Successfully created batch of ${createdRecords.length} records`);
+      } catch (error) {
+        // Log the specific error and the first record that failed
+        console.error(`Error creating batch ${i/10 + 1}:`, error);
+        if (batch.length > 0) {
+          console.error('First record in failed batch:', JSON.stringify(batch[0], null, 2));
+        }
+        throw error; // Re-throw to be caught by the outer try/catch
+      }
     }
       
     console.log(`Created ${relevancyRecords.length} new relevancy records for ${aiUsername}`);

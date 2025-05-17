@@ -54,8 +54,8 @@ def create_admin_notification(tables, title: str, message: str) -> bool:
     """Create an admin notification in Airtable."""
     try:
         tables['notifications'].create({
-            'Title': title,
-            'Message': message,
+            'Content': title,  # Changed from 'Title' to 'Content'
+            'Details': message,  # Changed from 'Message' to 'Details'
             'Type': 'admin',
             'Status': 'unread',
             'CreatedAt': datetime.now().isoformat()
