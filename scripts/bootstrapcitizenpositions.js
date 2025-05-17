@@ -9,7 +9,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const axios = require('axios');
 require('dotenv').config();
 
 // Airtable configuration
@@ -22,7 +21,7 @@ if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
 }
 
 // Function to fetch all citizens from Airtable
-async function fetchCitizens() {
+async function fetchCitizens(axios) {
   try {
     console.log('Fetching citizens from Airtable...');
     
@@ -48,7 +47,7 @@ async function fetchCitizens() {
 }
 
 // Function to fetch polygon data from the API
-async function fetchPolygons() {
+async function fetchPolygons(axios) {
   try {
     console.log('Fetching polygons from API...');
     
@@ -86,6 +85,9 @@ function extractPolygonCenters(polygons) {
 // Function to update a citizen's position in Airtable
 async function updateCitizenPosition(citizenId, position) {
   try {
+    // Dynamically import axios for this function
+    const { default: axios } = await import('axios');
+    
     const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/CITIZENS/${citizenId}`;
     
     await axios.patch(url, {
@@ -109,9 +111,12 @@ async function updateCitizenPosition(citizenId, position) {
 // Main function
 async function bootstrapCitizenPositions() {
   try {
+    // Dynamically import axios
+    const { default: axios } = await import('axios');
+    
     // Fetch citizens and polygons
-    const citizens = await fetchCitizens();
-    const polygons = await fetchPolygons();
+    const citizens = await fetchCitizens(axios);
+    const polygons = await fetchPolygons(axios);
     
     if (citizens.length === 0 || polygons.length === 0) {
       console.error('Error: Could not fetch citizens or polygons');
