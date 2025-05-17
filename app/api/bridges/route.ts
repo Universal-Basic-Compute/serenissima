@@ -158,52 +158,9 @@ export async function GET(request: Request) {
         historicalDescription,
         distance: matchingBridgePoint && matchingBridgePoint.connection ? 
           matchingBridgePoint.connection.distance : 
-          (links.length === 2 ? await calculateDistanceBetweenPolygons(links[0], links[1]) : null)
+          null
       };
     }));
-    
-    // Helper function to calculate distance between two polygons
-    async function calculateDistanceBetweenPolygons(polygon1Id: string, polygon2Id: string): Promise<number | null> {
-      try {
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
-                      (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
-        
-        // Fetch both polygons
-        const polygon1Response = await fetch(new URL(`/api/polygons/${polygon1Id}`, baseUrl).toString());
-        const polygon2Response = await fetch(new URL(`/api/polygons/${polygon2Id}`, baseUrl).toString());
-        
-        if (!polygon1Response.ok || !polygon2Response.ok) {
-          return null;
-        }
-        
-        const polygon1 = await polygon1Response.json();
-        const polygon2 = await polygon2Response.json();
-        
-        // Use centers if available
-        if (polygon1.center && polygon2.center && 
-            polygon1.center.lat && polygon1.center.lng && 
-            polygon2.center.lat && polygon2.center.lng) {
-          
-          // Calculate distance using Haversine formula
-          const R = 6371000; // Earth radius in meters
-          const lat1 = polygon1.center.lat * Math.PI / 180;
-          const lat2 = polygon2.center.lat * Math.PI / 180;
-          const deltaLat = (polygon2.center.lat - polygon1.center.lat) * Math.PI / 180;
-          const deltaLng = (polygon2.center.lng - polygon1.center.lng) * Math.PI / 180;
-          
-          const a = Math.sin(deltaLat/2) * Math.sin(deltaLat/2) +
-                  Math.cos(lat1) * Math.cos(lat2) *
-                  Math.sin(deltaLng/2) * Math.sin(deltaLng/2);
-          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-          return R * c; // Distance in meters
-        }
-        
-        return null;
-      } catch (error) {
-        console.error('Error calculating distance between polygons:', error);
-        return null;
-      }
-    }
 
     return NextResponse.json({
       success: true,
