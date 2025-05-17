@@ -33,6 +33,7 @@ export async function GET(request: Request) {
           'LastName', 
           'CoatOfArmsImage',
           'IsAi',
+          'Ducats',
           'SocialClass',
           'Description',
           'Position',
@@ -41,9 +42,10 @@ export async function GET(request: Request) {
           'FamilyMotto',
           'Color',
           'GuildId',
-          'Preferences'
+          'Preferences',
+          'LastActiveAt'
         ],
-        sort: [{ field: 'Username', direction: 'asc' }]
+        sort: [{ field: 'LastActiveAt', direction: 'desc' }]
       })
       .all();
     
@@ -67,6 +69,7 @@ export async function GET(request: Request) {
         lastName: record.get('LastName') as string || '',
         coatOfArmsImage: record.get('CoatOfArmsImage') as string || null,
         isAi: record.get('IsAi') as boolean || false,
+        Ducats: record.get('Ducats') as number || 0,
         socialClass: record.get('SocialClass') as string || '',
         description: record.get('Description') as string || '',
         position: position, // Now this will be a parsed JSON object if valid
