@@ -219,6 +219,56 @@ const SocialClassArticle: React.FC<SocialClassArticleProps> = ({ onClose }) => {
             </p>
           </div>
           
+          <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
+            <h4 className="text-xl font-serif text-amber-800 mb-2">Building Access and Construction</h4>
+            
+            <p className="text-amber-800 mb-3">
+              Your social class determines which building tiers you can construct and operate:
+            </p>
+            
+            <div className="overflow-x-auto">
+              <table className="min-w-full bg-amber-50 border border-amber-200">
+                <thead>
+                  <tr className="bg-amber-200">
+                    <th className="px-4 py-2 text-left text-amber-900">Social Class</th>
+                    <th className="px-4 py-2 text-left text-amber-900">Building Tier Access</th>
+                    <th className="px-4 py-2 text-left text-amber-900">Example Buildings</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-t border-amber-200">
+                    <td className="px-4 py-2 font-medium">Nobili</td>
+                    <td className="px-4 py-2">All Tiers (1-4)</td>
+                    <td className="px-4 py-2">Palazzo, Grand Warehouse, Shipyard, Banking House</td>
+                  </tr>
+                  <tr className="border-t border-amber-200 bg-amber-100/50">
+                    <td className="px-4 py-2 font-medium">Cittadini</td>
+                    <td className="px-4 py-2">Tiers 1-3</td>
+                    <td className="px-4 py-2">Trading Post, Merchant Office, Glassworks</td>
+                  </tr>
+                  <tr className="border-t border-amber-200">
+                    <td className="px-4 py-2 font-medium">Popolani</td>
+                    <td className="px-4 py-2">Tiers 1-2</td>
+                    <td className="px-4 py-2">Workshop, Market Stall, Tavern</td>
+                  </tr>
+                  <tr className="border-t border-amber-200 bg-amber-100/50">
+                    <td className="px-4 py-2 font-medium">Facchini</td>
+                    <td className="px-4 py-2">Tier 1 only</td>
+                    <td className="px-4 py-2">Small Shop, Fisherman's Hut, Basic Crafting Station</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <p className="mt-3 text-amber-800">
+              This tiered access system ensures that social advancement provides tangible economic benefits, as higher-tier buildings typically offer greater income potential, more advanced production capabilities, and access to more valuable resources and contracts.
+            </p>
+            
+            <p className="mt-2 text-amber-800 italic">
+              Note: While your social class limits which buildings you can construct, you can still own buildings of any tier through purchase or inheritance, regardless of your social class.
+            </p>
+          </div>
+          
           <h3 className="text-2xl font-serif text-amber-700 mb-4">Historical Context: Social Classes in Renaissance Venice</h3>
           
           <p className="mb-4">
@@ -328,6 +378,7 @@ const SocialClassArticle: React.FC<SocialClassArticleProps> = ({ onClose }) => {
               <li><span className="font-medium">Investment Strategy</span> - Consider investing in businesses that can generate the high daily income needed to reach Cittadini status</li>
               <li><span className="font-medium">Prestige Building</span> - Look for opportunities to gain prestige through public works and cultural contributions to achieve Nobili status</li>
               <li><span className="font-medium">Housing Choices</span> - Balance the prestige of housing appropriate to your social class with the economic benefits of lower rent</li>
+              <li><span className="font-medium">Building Access</span> - Higher social classes unlock more advanced building tiers, allowing for more sophisticated economic activities</li>
             </ul>
             <p className="mt-4 text-amber-800">
               Remember that social advancement in La Serenissima, as in historical Venice, is a gradual process that rewards strategic thinking, economic acumen, and contribution to the city's prosperity. Plan your path carefully, and you may rise from humble beginnings to the highest echelons of Venetian society.
