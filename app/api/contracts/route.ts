@@ -81,13 +81,19 @@ export async function GET(request: Request) {
     // Process records to include location data
     const contractsWithLocation = await Promise.all(
       (records as any[]).map(async (record) => {
+        const resourceType = record.get('ResourceType') || 'unknown';
+        
+        // Format the resource type for the image URL (lowercase, replace spaces with underscores)
+        const formattedResourceType = resourceType.toLowerCase().replace(/\s+/g, '_');
+        
         const contractData = {
           id: record.id,
           contractId: record.get('ContractId'),
           type: record.get('Type'),
           buyer: record.get('Buyer'),
           seller: record.get('Seller'),
-          resourceType: record.get('ResourceType'),
+          resourceType: resourceType,
+          imageUrl: `/resources/${formattedResourceType}.png`, // Add the imageUrl field
           buyerBuilding: record.get('BuyerBuilding'),
           sellerBuilding: record.get('SellerBuilding'),
           price: record.get('PricePerResource'),
