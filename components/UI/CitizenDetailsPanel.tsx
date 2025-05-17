@@ -5,7 +5,22 @@ import remarkGfm from 'remark-gfm';
 import { FaSpinner, FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
 
 interface CitizenDetailsPanelProps {
-  citizen: Citizen;
+  citizen: {
+    citizenid: string;
+    firstname: string;
+    lastname: string;
+    socialclass: string;
+    imageurl?: string;
+    description?: string;
+    username?: string;
+    isai?: boolean;  // Add this property
+    isAi?: boolean;  // Add this as an alternative property name
+    ducats?: number;
+    createdat?: string;
+    worksFor?: string | null;
+    workplace?: any;
+    // Add any other properties needed
+  };
   onClose: () => void;
 }
 
@@ -461,7 +476,7 @@ Be historically accurate but engaging. Speak in first person as if you are this 
       
       // NEW CODE: If this is an AI citizen, send a POST request to initiate conversation
       // BUT ONLY if we haven't already sent an initial message to this citizen
-      if ((citizen.isai === true || citizen.isAi === true) && !initialMessageSentRef.current[citizen.citizenid]) {
+      if (((citizen.isai === true || citizen.isAi === true)) && !initialMessageSentRef.current[citizen.citizenid]) {
         // Mark that we've sent an initial message to this citizen
         initialMessageSentRef.current[citizen.citizenid] = true;
         
