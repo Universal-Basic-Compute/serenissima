@@ -11,6 +11,21 @@ const AIRTABLE_BUILDINGS_TABLE = process.env.AIRTABLE_BUILDINGS_TABLE || 'BUILDI
 const citizenCache = new Map<string, { data: any, timestamp: number }>();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
+// Utility function to convert field names to camelCase
+function toCamelCase(obj: Record<string, any>): Record<string, any> {
+  const result: Record<string, any> = {};
+  
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      // Convert first character to lowercase for the new key
+      const camelKey = key.charAt(0).toLowerCase() + key.slice(1);
+      result[camelKey] = obj[key];
+    }
+  }
+  
+  return result;
+}
+
 const initAirtable = () => {
   if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
     throw new Error('Airtable credentials not configured');
@@ -52,29 +67,11 @@ export async function GET(request: NextRequest) {
     const base = initAirtable();
 
     const queryCitizen = async (field: string, value: string) => {
+      // Remove the fields parameter to fetch all fields
       return await base(AIRTABLE_CITIZENS_TABLE)
         .select({
           filterByFormula: `{${field}} = "${value}"`,
-          fields: [
-            'Username', 
-            'FirstName', 
-            'LastName', 
-            'CoatOfArmsImage',
-            'IsAi',
-            'Ducats',
-            'SocialClass',
-            'Description',
-            'Position',
-            'Prestige',
-            'Wallet',
-            'FamilyMotto',
-            'Color',
-            'GuildId',
-            'Preferences',
-            'LastActiveAt',
-            'CreatedAt',
-            'UpdatedAt'
-          ],
+          // No fields parameter here to get all fields
         })
         .firstPage();
     };
@@ -87,45 +84,33 @@ export async function GET(request: NextRequest) {
 
     if (records.length > 0) {
       const record = records[0];
+      
+      // Get all fields from the record
+      const allFields = record.fields;
+      
+      // Convert all field names to camelCase
+      const camelCaseFields = toCamelCase(allFields);
+      
       // Parse position if it's a string
-      let position = record.get('Position') as string || '';
-      try {
-        if (typeof position === 'string' && (position.startsWith('{') || position.startsWith('['))) {
-          position = JSON.parse(position);
+      if (typeof camelCaseFields.position === 'string' && 
+          (camelCaseFields.position.startsWith('{') || camelCaseFields.position.startsWith('['))) {
+        try {
+          camelCaseFields.position = JSON.parse(camelCaseFields.position);
+        } catch (error) {
+          console.error('Error parsing position:', error);
+          // Keep it as a string if parsing fails
         }
-      } catch (error) {
-        console.error('Error parsing position:', error);
-        // Keep it as a string if parsing fails
       }
       
-      const citizenData = {
-        username: record.get('Username') as string,
-        firstName: record.get('FirstName') as string || '',
-        lastName: record.get('LastName') as string || '',
-        coatOfArmsImage: record.get('CoatOfArmsImage') as string || null,
-        isAi: record.get('IsAi') as boolean || false,
-        ducats: record.get('Ducats') as number || 0,
-        socialClass: record.get('SocialClass') as string || '',
-        description: record.get('Description') as string || '',
-        position: position,
-        prestige: record.get('Prestige') as number || 0,
-        walletAddress: record.get('Wallet') as string || '',
-        familyMotto: record.get('FamilyMotto') as string || '',
-        color: record.get('Color') as string || '',
-        guildId: record.get('GuildId') as string || null,
-        preferences: record.get('Preferences') as object || {},
-        lastActiveAt: record.get('LastActiveAt') as string || null,
-        createdAt: record.get('CreatedAt') as string || null,
-        updatedAt: record.get('UpdatedAt') as string || null,
-        worksFor: null, // Default value, will be populated if they work for someone
-        workplace: null
-      };
+      // Add default values for worksFor and workplace
+      camelCaseFields.worksFor = null;
+      camelCaseFields.workplace = null;
 
       // Find buildings where this citizen is an occupant
       try {
         const buildingRecords = await base(AIRTABLE_BUILDINGS_TABLE)
           .select({
-            filterByFormula: `AND({Occupant} = "${citizenData.username}", {Category} = "business")`,
+            filterByFormula: `AND({Occupant} = "${camelCaseFields.username}", {Category} = "business")`,
             fields: ['RunBy', 'Name', 'Type']
           })
           .firstPage();
@@ -135,10 +120,10 @@ export async function GET(request: NextRequest) {
           const runBy = building.get('RunBy') as string;
           
           if (runBy) {
-            citizenData.worksFor = runBy;
+            camelCaseFields.worksFor = runBy;
             
             // Add workplace details
-            citizenData.workplace = {
+            camelCaseFields.workplace = {
               name: building.get('Name') as string || '',
               type: building.get('Type') as string || ''
             };
@@ -149,9 +134,9 @@ export async function GET(request: NextRequest) {
         // Continue without the worksFor data if there's an error
       }
 
-      citizenCache.set(username, { data: citizenData, timestamp: now });
+      citizenCache.set(username, { data: camelCaseFields, timestamp: now });
 
-      return NextResponse.json({ success: true, citizen: citizenData });
+      return NextResponse.json({ success: true, citizen: camelCaseFields });
     }
 
     citizenCache.set(username, { data: null, timestamp: now });
