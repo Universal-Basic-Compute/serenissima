@@ -2397,37 +2397,50 @@ number => {
     if (activeView === 'transport' && waterRouteMode && waterRoutePath.length > 0) {
       // Draw the path
       ctx.beginPath();
-      
+        
       // Start at the first point
       const firstPoint = waterRoutePath[0];
       const firstX = (firstPoint.lng - 12.3326) * 20000;
       const firstY = (firstPoint.lat - 45.4371) * 20000;
-      
+        
       const firstIsoPos = {
         x: calculateIsoX(firstX, firstY, scale, offset, canvas.width),
         y: calculateIsoY(firstX, firstY, scale, offset, canvas.height)
       };
-      
+        
       ctx.moveTo(firstIsoPos.x, firstIsoPos.y);
-      
+        
       // Connect all points
       for (let i = 1; i < waterRoutePath.length; i++) {
         const point = waterRoutePath[i];
         const x = (point.lng - 12.3326) * 20000;
         const y = (point.lat - 45.4371) * 20000;
-        
+          
         const isoPos = {
           x: calculateIsoX(x, y, scale, offset, canvas.width),
           y: calculateIsoY(x, y, scale, offset, canvas.height)
         };
-        
+          
         ctx.lineTo(isoPos.x, isoPos.y);
       }
-      
-      // Style the path
+        
+      // Save context before applying dash pattern
+      ctx.save();
+        
+      // Style the path with dotted line
       ctx.strokeStyle = 'rgba(0, 150, 255, 0.8)';
       ctx.lineWidth = 2 * scale;
+      ctx.setLineDash([8 * scale, 6 * scale]); // Add dotted pattern
       ctx.stroke();
+        
+      // Add a second stroke with different pattern for emphasis
+      ctx.strokeStyle = 'rgba(0, 180, 220, 0.6)'; // Lighter blue
+      ctx.lineWidth = 1 * scale;
+      ctx.setLineDash([4 * scale, 10 * scale]);
+      ctx.stroke();
+        
+      // Restore context to remove dash pattern
+      ctx.restore();
       
       // Draw dots for intermediate points
       if (waterRouteIntermediatePoints.length > 0) {
@@ -3096,7 +3109,10 @@ number => {
 
             // For gondola paths, draw dotted lines with distinctive color
             if (point1.transportMode === 'gondola') {
-              // Draw a dotted path for gondolas
+              // Save the current context state
+              ctx.save();
+              
+              // Draw the main line
               ctx.beginPath();
               ctx.moveTo(localIsoX(x1, y1), localIsoY(x1, y1));
               ctx.lineTo(localIsoX(x2, y2), localIsoY(x2, y2));
@@ -3105,12 +3121,18 @@ number => {
               ctx.strokeStyle = 'rgba(0, 102, 153, 0.8)';
               ctx.lineWidth = 4 * scale;
               
-              // Set the line to be dotted
-              ctx.setLineDash([6 * scale, 4 * scale]); // Adjust the values to control dot size and spacing
+              // Set the line to be dotted - make the pattern more pronounced
+              ctx.setLineDash([8 * scale, 6 * scale]); // Larger values for more visible dots
               ctx.stroke();
               
-              // Reset the line dash to solid for other drawings
-              ctx.setLineDash([]);
+              // Draw a second stroke with a different color for emphasis
+              ctx.strokeStyle = 'rgba(0, 180, 220, 0.6)'; // Lighter blue
+              ctx.lineWidth = 2 * scale;
+              ctx.setLineDash([4 * scale, 10 * scale]); // Different pattern for contrast
+              ctx.stroke();
+              
+              // Restore the context to remove the dash pattern
+              ctx.restore();
             } else {
               // For walking paths, draw straight lines with texture
               ctx.beginPath();
@@ -3296,7 +3318,9 @@ number => {
             ctx.lineTo(legendX + 15, legendY + 140);
             ctx.strokeStyle = 'rgba(0, 102, 153, 0.8)';
             ctx.lineWidth = 3;
+            ctx.setLineDash([4, 3]); // Add dotted line to the legend
             ctx.stroke();
+            ctx.setLineDash([]); // Reset dash pattern
             ctx.fillStyle = '#FFFFFF';
             ctx.fillText('In gondola', legendX + 25, legendY + 143);
           }
