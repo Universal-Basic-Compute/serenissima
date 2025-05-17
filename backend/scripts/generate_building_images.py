@@ -247,10 +247,10 @@ def process_building(building: Dict[str, Any], force_regenerate: bool = False) -
     building_type = building.get('type', name)
     
     # Create a safe filename from the building name
-    safe_name = name.lower().replace(' ', '_').replace("'s", "_s_").replace("'", '').replace('"', '')
+    safe_name = name.lower().replace(' ', '_').replace("'s", "s_").replace("'", '').replace('"', '')
     
     # Create a safe filename from the building type as fallback
-    safe_type = building_type.lower().replace(' ', '_').replace("'s", "_s_").replace("'", '').replace('"', '')
+    safe_type = building_type.lower().replace(' ', '_').replace("'s", "s_").replace("'", '').replace('"', '')
     
     # Use the building ID if available, otherwise use the safe name
     building_id = building.get('id', safe_name)
