@@ -92,52 +92,53 @@ export async function GET(request: Request) {
       let historicalName = bridge.name || 'Bridge';
       let englishName = bridge.name || 'Bridge';
       let historicalDescription = '';
-      
+      let matchingBridgePoint = null; // Declare variable at this scope
+    
       // If bridge has a LandId, fetch the polygon data
       if (bridge.landId) {
         try {
           // Get API base URL from environment variables, with a default fallback
           const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
                         (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
-            
+          
           // Use URL constructor to ensure proper URL formatting
           const polygonUrl = new URL(`/api/polygons/${bridge.landId}`, baseUrl).toString();
           const response = await fetch(polygonUrl);
-            
+          
           if (response.ok) {
             const polygonData = await response.json();
-            
+          
             // Check if the polygon has bridgePoints with connection information
             if (polygonData.bridgePoints && Array.isArray(polygonData.bridgePoints)) {
               // Find the bridge point that matches this bridge's position
-              const matchingBridgePoint = polygonData.bridgePoints.find((bp: any) => {
+              matchingBridgePoint = polygonData.bridgePoints.find((bp: any) => {
                 if (!bp.edge || !bridge.position) return false;
-                
+              
                 // Use a small threshold for floating point comparison
                 const threshold = 0.0001;
                 return Math.abs(bp.edge.lat - bridge.position.lat) < threshold && 
                        Math.abs(bp.edge.lng - bridge.position.lng) < threshold;
               });
-              
+            
               // If we found a matching bridge point with connection info, add the polygon IDs to links
               if (matchingBridgePoint && matchingBridgePoint.connection) {
                 // Add the current polygon ID
                 links.push(bridge.landId);
-                
+              
                 // Add the target polygon ID
                 if (matchingBridgePoint.connection.targetPolygonId) {
                   links.push(matchingBridgePoint.connection.targetPolygonId);
                 }
-                
+              
                 // Extract historical information if available
                 if (matchingBridgePoint.connection.historicalName) {
                   historicalName = matchingBridgePoint.connection.historicalName;
                 }
-                
+              
                 if (matchingBridgePoint.connection.englishName) {
                   englishName = matchingBridgePoint.connection.englishName;
                 }
-                
+              
                 if (matchingBridgePoint.connection.historicalDescription) {
                   historicalDescription = matchingBridgePoint.connection.historicalDescription;
                 }
@@ -148,7 +149,7 @@ export async function GET(request: Request) {
           console.error(`Error fetching polygon data for bridge ${bridge.id}:`, error);
         }
       }
-      
+    
       // Return the enhanced bridge with links and historical information
       return {
         ...bridge,
