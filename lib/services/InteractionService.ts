@@ -289,44 +289,30 @@ export class InteractionService {
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
       
-      // Only update mouse position if it has changed significantly
-      if (Math.abs(mouseX - this.state.mousePosition.x) > 1 || 
-          Math.abs(mouseY - this.state.mousePosition.y) > 1) {
-        // Update internal state first
-        this.state.mousePosition = { x: mouseX, y: mouseY };
-        
-        // Then update component state
-        setters.setMousePosition({ x: mouseX, y: mouseY });
-      }
-      
-      // Log mouse position when in transport mode
-      if (transportMode) {
-        //console.log('Mouse position in transport mode:', { x: mouseX, y: mouseY });
-      }
+      // Update mouse position
+      this.state.mousePosition = { x: mouseX, y: mouseY };
+      setters.setMousePosition({ x: mouseX, y: mouseY });
       
       // Handle hover detection
       let hoverDetected = false;
-  
+      
       // Check for polygon hover - ONLY in land view
       if (data.polygonsToRender && activeView === 'land') {
         for (const { polygon, coords } of data.polygonsToRender) {
           if (RenderService.prototype.isPointInPolygon(mouseX, mouseY, coords)) {
-            // Only update if the hovered polygon has changed
-            if (this.hoveredPolygonIdRef !== polygon.id) {
-              hoverStateService.setHoveredPolygon(polygon.id);
-            }
+            hoverStateService.setHoveredPolygon(polygon.id);
             canvas.style.cursor = 'pointer';
             hoverDetected = true;
-            break; // Exit loop once we found a hover
+            break;
           }
         }
       }
-  
+      
       // Check for building hover if no polygon is hovered
       if (!hoverDetected && data.buildings) {
         for (const building of data.buildings) {
           if (!building.position) continue;
-      
+          
           let position;
           if (typeof building.position === 'string') {
             try {
@@ -337,7 +323,7 @@ export class InteractionService {
           } else {
             position = building.position;
           }
-      
+          
           // Convert lat/lng to isometric coordinates
           let x, y;
           if ('lat' in position && 'lng' in position) {
@@ -349,30 +335,24 @@ export class InteractionService {
           } else {
             continue;
           }
-      
+          
           const isoPos = {
             x: CoordinateService.worldToScreen(x, y, scale, offset, canvas.width, canvas.height).x,
             y: CoordinateService.worldToScreen(x, y, scale, offset, canvas.width, canvas.height).y
           };
-      
+          
           // Get building size
           const size = this.getBuildingSize(building.type);
           const squareSize = Math.max(size.width, size.depth) * scale * 0.6;
-      
-          // Add a larger buffer to the hit area to make hovering more stable
-          const buffer = 5; // 5 pixel buffer (increased from 2)
-      
-          // Check if mouse is over this building with buffer
+          
+          // Check if mouse is over this building
           if (
-            mouseX >= isoPos.x - squareSize/2 - buffer &&
-            mouseX <= isoPos.x + squareSize/2 + buffer &&
-            mouseY >= isoPos.y - squareSize/2 - buffer &&
-            mouseY <= isoPos.y + squareSize/2 + buffer
+            mouseX >= isoPos.x - squareSize/2 &&
+            mouseX <= isoPos.x + squareSize/2 &&
+            mouseY >= isoPos.y - squareSize/2 &&
+            mouseY <= isoPos.y + squareSize/2
           ) {
-            // Only update if the hovered building has changed
-            if (this.hoveredBuildingIdRef !== building.id) {
-              hoverStateService.setHoveredBuilding(building.id);
-            }
+            hoverStateService.setHoveredBuilding(building.id);
             canvas.style.cursor = 'pointer';
             hoverDetected = true;
             break;
@@ -572,7 +552,7 @@ export class InteractionService {
           canvas.style.cursor = 'grab';
         }
       }
-    }, 150); // Increased from 100ms to 150ms to further reduce flickering
+    }, 50); // Revert to original 50ms throttle time
     
     // Handle mouse click with debounce to prevent multiple rapid clicks
     const handleClick = debounce((e: MouseEvent) => {

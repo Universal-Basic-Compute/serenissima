@@ -233,8 +233,10 @@ export class HoverStateService {
     }
   }
   
-  // Add a debounce function for clearing hover states
-  private debouncedClearHoverStates = debounce(() => {
+  /**
+   * Clear all hover states
+   */
+  public clearAllHoverStates(): void {
     this.hoveredPolygonIdRef = null;
     this.hoveredBuildingIdRef = null;
     this.hoveredCanalPointIdRef = null;
@@ -264,26 +266,6 @@ export class HoverStateService {
     eventBus.emit(HOVER_STATE_CHANGED, {
       type: 'clear'
     });
-  }, 200); // 200ms delay before clearing hover states
-
-  /**
-   * Clear all hover states
-   */
-  public clearAllHoverStates(): void {
-    const hadHoverStates = 
-      this.hoveredPolygonIdRef !== null || 
-      this.hoveredBuildingIdRef !== null || 
-      this.hoveredCanalPointIdRef !== null || 
-      this.hoveredBridgePointIdRef !== null || 
-      this.hoveredCitizenBuildingRef !== null ||
-      this.hoveredResourceIdRef !== null ||
-      this.hoveredWaterPointIdRef !== null ||
-      this.hoveredBuildingPointRef !== null;
-    
-    if (hadHoverStates) {
-      // Use the debounced version to clear hover states with a longer delay
-      this.debouncedClearHoverStates();
-    }
   }
 }
 
