@@ -200,27 +200,42 @@ const GovernancePanel: React.FC<GovernancePanelProps> = ({ onClose, standalone =
             </p>
             
             <div className="bg-amber-100 p-4 rounded-lg border border-amber-300 mb-6">
-              <h4 className="text-xl font-serif text-amber-800 mb-2">Recent Proclamation: v0.3.0 Update</h4>
+              <h4 className="text-xl font-serif text-amber-800 mb-2">Recent Proclamation: Social Class System</h4>
               
               <p className="mb-4 text-amber-700">
-                The Council of Ten has approved significant improvements to the Republic's systems:
+                The Council of Ten has established a formal social class system that affects all citizens of La Serenissima:
               </p>
               
               <ul className="list-disc pl-5 space-y-2 text-amber-800">
                 <li>
-                  <span className="font-bold">Citizen Equality:</span> All citizens (both AI and human) are now equal in the eyes of the Republic, with humans displayed on the map and performing activities like housing and working just as AI citizens do.
+                  <span className="font-bold">Four Social Classes:</span> All citizens are now categorized into one of four social classes: Nobili (nobles), Cittadini (citizens), Popolani (common people), and Facchini (laborers).
                 </li>
                 <li>
-                  <span className="font-bold">Enhanced Pathfinding:</span> The pathfinding system has been enhanced to utilize the canal network, improving transportation efficiency throughout Venice.
+                  <span className="font-bold">Social Mobility:</span> Citizens can rise through the ranks based on their achievements:
+                  <ul className="list-circle pl-5 mt-1 space-y-1">
+                    <li>Citizens with Prestige > 10,000 become Nobili</li>
+                    <li>Citizens with Daily Income > 100,000 Ducats become Cittadini</li>
+                    <li>Business building owners are at least Popolani</li>
+                    <li>Entrepreneurs (who run buildings) are at least Popolani</li>
+                  </ul>
                 </li>
                 <li>
-                  <span className="font-bold">Citizen Communication:</span> A new communication system allows humans to directly converse with citizens, including the ability to negotiate with them.
+                  <span className="font-bold">Building Access:</span> Social class determines which building tiers citizens can construct:
+                  <ul className="list-circle pl-5 mt-1 space-y-1">
+                    <li>Nobili can build all tiers (1-5), with tier 5 requiring special decrees</li>
+                    <li>Cittadini can build tiers 1-3</li>
+                    <li>Popolani can build tiers 1-2</li>
+                    <li>Facchini can build tier 1 only</li>
+                  </ul>
+                </li>
+                <li>
+                  <span className="font-bold">Treasury Distribution:</span> The 10% of treasury redistributed daily is allocated based on social class: 40% to Nobili, 30% to Cittadini, 20% to Popolani, and 10% to Facchini.
                 </li>
               </ul>
               
               <div className="mt-4 bg-amber-50 p-3 rounded border border-amber-200">
                 <p className="italic text-amber-800">
-                  <span className="font-bold">Rationale:</span> To create a more immersive and realistic experience for all citizens of La Serenissima, and to foster greater interaction between humans and AI citizens.
+                  <span className="font-bold">Rationale:</span> This system creates a dynamic society where citizens can rise through the social ranks based on their economic achievements and contributions to the city, while maintaining the historical stratification that characterized Renaissance Venice.
                 </p>
               </div>
             </div>
