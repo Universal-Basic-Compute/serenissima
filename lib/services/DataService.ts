@@ -11,7 +11,7 @@ export class DataService {
   private polygonsCache: any[] = [];
   private buildingsCache: any[] = [];
   private landOwnersCache: Record<string, string> = {};
-  private citizensCache: Record<string, any> = {};
+  private citizensMapCache: Record<string, any> = {};
   private incomeDataCache: Record<string, number> = {};
   private citizensCache: any[] = [];
   private citizensByBuildingCache: Record<string, any[]> = {};
@@ -240,7 +240,7 @@ export class DataService {
    */
   public async loadCitizens(): Promise<Record<string, any>> {
     if (this.citizensLoaded) {
-      return this.citizensCache;
+      return this.citizensMapCache;
     }
     
     if (this.isLoadingCitizens) {
@@ -249,7 +249,7 @@ export class DataService {
         const checkInterval = setInterval(() => {
           if (!this.isLoadingCitizens) {
             clearInterval(checkInterval);
-            resolve(this.citizensCache);
+            resolve(this.citizensMapCache);
           }
         }, 100);
       });
@@ -280,12 +280,12 @@ export class DataService {
             }
           }
           
-          this.citizensCache = citizensMap;
+          this.citizensMapCache = citizensMap;
           this.citizensLoaded = true;
         }
       }
       
-      return this.citizensCache;
+      return this.citizensMapCache;
     } catch (error) {
       console.warn('Error loading citizens data:', error);
       
@@ -298,10 +298,10 @@ export class DataService {
         }
       };
       
-      this.citizensCache = fallbackCitizens;
+      this.citizensMapCache = fallbackCitizens;
       this.citizensLoaded = true;
       
-      return this.citizensCache;
+      return this.citizensMapCache;
     } finally {
       this.isLoadingCitizens = false;
     }
@@ -392,9 +392,9 @@ export class DataService {
   }
 
   /**
-   * Load citizens data
+   * Load citizens list data
    */
-  public async loadCitizens(): Promise<{
+  public async loadCitizensList(): Promise<{
     citizens: any[],
     citizensByBuilding: Record<string, any[]>
   }> {
@@ -554,16 +554,16 @@ export class DataService {
   }
   
   /**
-   * Get citizens
+   * Get citizens map
    */
-  public getCitizens(): Record<string, any> {
-    return this.citizensCache;
+  public getCitizensMap(): Record<string, any> {
+    return this.citizensMapCache;
   }
   
   /**
-   * Get citizens
+   * Get citizens list
    */
-  public getCitizens(): any[] {
+  public getCitizensList(): any[] {
     return this.citizensCache;
   }
   
