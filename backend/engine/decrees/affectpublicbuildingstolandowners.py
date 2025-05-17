@@ -99,11 +99,11 @@ def get_land_owners(tables) -> Dict[str, str]:
     try:
         lands = tables['lands'].all()
         
-        # Create a mapping of land IDs to owners
+        # Create a mapping of land IDs to owners (using Username)
         land_owners = {}
         for land in lands:
             land_id = land['fields'].get('LandId')
-            owner = land['fields'].get('Citizen')
+            owner = land['fields'].get('Citizen')  # This should already be the Username
             
             if land_id and owner:
                 land_owners[land_id] = owner
@@ -151,14 +151,14 @@ def create_notification(tables, citizen: str, building_type: str, building_name:
             "event_type": "building_assignment"
         }
         
-        # Create the notification record
+        # Create the notification record - use citizen username directly
         tables['notifications'].create({
             "Type": "decree_effect",
             "Content": content,
             "Details": json.dumps(details),
             "CreatedAt": datetime.datetime.now().isoformat(),
             "ReadAt": None,
-            "Citizen": citizen
+            "Citizen": citizen  # Use Username directly
         })
         
         log.info(f"Created notification for citizen {citizen} about {building_type} assignment on land {land_name}")
@@ -205,14 +205,15 @@ def assign_buildings_to_land_owners(dry_run: bool = False):
         # Check for both 'Land' and 'land_id' fields
         land_id = building['fields'].get('Land') or building['fields'].get('land_id')
         
-        current_citizen = building['fields'].get('Citizen')
+        # Get the current owner's username, not citizen ID
+        current_owner = building['fields'].get('Owner')
         
         if not land_id:
             log.warning(f"Building {building_id} ({building_type}) has no Land field, skipping")
             failed_count += 1
             continue
         
-        # Get the land owner
+        # Get the land owner's username
         land_owner = land_owners.get(land_id)
         if not land_owner:
             log.warning(f"No owner found for land {land_id}, skipping building {building_id}")
@@ -220,7 +221,7 @@ def assign_buildings_to_land_owners(dry_run: bool = False):
             continue
         
         # Check if the building is already assigned to the correct owner
-        if current_citizen == land_owner:
+        if current_owner == land_owner:
             log.info(f"Building {building_id} ({building_type}) already assigned to {land_owner}, skipping")
             already_assigned_count += 1
             continue
@@ -233,9 +234,9 @@ def assign_buildings_to_land_owners(dry_run: bool = False):
             assigned_count += 1
         else:
             try:
-                # Update the building record with the land owner
+                # Update the building record with the land owner's username
                 tables['buildings'].update(building_id, {
-                    "Citizen": land_owner
+                    "Owner": land_owner  # Use Username directly
                 })
                 
                 log.info(f"Assigned building {building_id} ({building_type}) to {land_owner}")
