@@ -1,5 +1,5 @@
 import { eventBus, EventTypes } from '../utils/eventBus';
-import { debounce } from '../utils/performanceUtils';
+import { debounce, throttle } from '../utils/performanceUtils';
 
 // Define the hover state changed event type
 const HOVER_STATE_CHANGED = 'HOVER_STATE_CHANGED';
