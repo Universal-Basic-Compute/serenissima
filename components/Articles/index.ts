@@ -8,3 +8,4 @@ export { default as BusinessOwnersGuideArticle } from './BusinessOwnersGuideArti
 export { default as HistoricalAccuracyArticle } from './HistoricalAccuracyArticle';
 export { default as VenetianGuildsArticle } from './VenetianGuildsArticle';
 export { default as GuildLeadershipArticle } from './GuildLeadershipArticle';
+export { default as UnifiedCitizenModelArticle } from './UnifiedCitizenModelArticle';
