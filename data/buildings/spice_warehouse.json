@@ -1,0 +1,103 @@
+{
+  "name": "Spice Warehouse",
+  "pointType": "building",
+  "category": "Commercial",
+  "subcategory": "Trade Facilities",
+  "tier": 3,
+  "size": "Medium",
+  "unlockCondition": "15,000,000 ducats total wealth, Eastern trade connections",
+  "canImport": true,
+  "calculationsAnalysis": "The Spice Warehouse represents specialized infrastructure for high-value Eastern goods. The construction cost of 3,500,000 ducats reflects the specialized storage and security requirements, while the income of 45,000 ducats (1.3% return) represents the premium handling fees for valuable spices. The maintenance cost of 25,000 ducats (55% of income) balances profitability with the reality of maintaining specialized climate-controlled storage. The employment capacity of 15 represents the specialized staff needed to handle, process, and secure valuable spices. The construction time of 8 days (691200000ms) represents a significant specialized construction project.",
+  "shortDescription": "Specialized facility for storing, processing, and trading valuable spices from the East.",
+  "fullDescription": "Critical to Venice's dominance in the spice trade, these specialized warehouses feature climate-controlled storage areas, grinding facilities, and secure vaults for the most valuable Eastern commodities. With specialized ventilation systems to manage powerful aromas and prevent spoilage, these buildings employ experts who can identify, grade, and blend spices from across Asia. The substantial security measures reflect the extraordinary value of their contents, which often trade by the gram rather than by volume.",
+  "flavorText": "The true wealth of Venice is measured not in gold but in peppercorns, nutmeg, and cinnamon—for while gold merely adorns, spices transform the mundane into the magnificent.",
+  "constructionCosts": {
+    "ducats": 3500000,
+    "timber": 150,
+    "bricks": 300,
+    "stone": 200,
+    "glass": 50,
+    "marble": 20
+  },
+  "maintenanceCost": 2500,
+  "constructionTime": 691200000,
+  "soundDesign": {
+    "ambientSound": "Spice grinding, exotic aromas, careful measuring",
+    "activitySounds": "Spice sacks being moved, scales weighing, quality discussions",
+    "musicTheme": "Mercante d'Oriente"
+  },
+  "seasonalEffects": {
+    "summer": "Increased ventilation to prevent spoilage",
+    "trading seasons": "Activity peaks with Eastern ship arrivals",
+    "monsoon season": "Strategic stockpiling before supply disruptions"
+  },
+  "aiInteractionPoints": [
+    "Spice grinding area",
+    "Climate-controlled storage",
+    "Secure vault for most valuable spices",
+    "Quality assessment station",
+    "Merchant negotiation room",
+    "Packaging area"
+  ],
+  "productionInformation": {
+    "Arti": [
+      {
+        "inputs": {
+          "spices": 2,
+          "wine": 1
+        },
+        "outputs": {
+          "spiced_wine": 2
+        },
+        "craftMinutes": 120
+      },
+      {
+        "inputs": {
+          "spices": 1,
+          "meat": 2
+        },
+        "outputs": {
+          "preserved_meat": 2
+        },
+        "craftMinutes": 180
+      },
+      {
+        "inputs": {
+          "spices": 1,
+          "fish": 2
+        },
+        "outputs": {
+          "preserved_fish": 2
+        },
+        "craftMinutes": 150
+      }
+    ],
+    "storageCapacity": 300,
+    "stores": [
+      "spices",
+      "wine",
+      "spiced_wine",
+      "meat",
+      "preserved_meat",
+      "fish",
+      "preserved_fish",
+      "pepper",
+      "cinnamon",
+      "nutmeg",
+      "cloves",
+      "ginger",
+      "saffron"
+    ],
+    "sells": [
+      "spiced_wine",
+      "preserved_meat",
+      "preserved_fish",
+      "pepper",
+      "cinnamon",
+      "nutmeg",
+      "cloves",
+      "ginger",
+      "saffron"
+    ]
+  }
+}

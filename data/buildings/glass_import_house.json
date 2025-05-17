@@ -1,0 +1,99 @@
+{
+  "name": "Glass Import House",
+  "pointType": "building",
+  "category": "Commercial",
+  "subcategory": "Trade Facilities",
+  "tier": 3,
+  "size": "Medium",
+  "unlockCondition": "15,000,000 ducats total wealth, Glassmakers Guild connection",
+  "canImport": true,
+  "calculationsAnalysis": "The Glass Import House represents specialized infrastructure for delicate materials. The construction cost of 3,200,000 ducats reflects the specialized handling and display facilities required, while the income of 38,000 ducats (1.19% return) represents the premium handling fees for valuable and fragile glass materials. The maintenance cost of 22,000 ducats (58% of income) balances profitability with the reality of maintaining specialized facilities. The employment capacity of 15 represents the specialized staff needed to handle, assess, and distribute delicate glass materials. The construction time of 7 days (604800000ms) represents a significant specialized construction project.",
+  "shortDescription": "Specialized facility for importing raw materials and finished products for Venice's renowned glass industry.",
+  "fullDescription": "Supporting Venice's world-famous glass industry, these specialized facilities handle both raw materials for production and imported finished glass products. Featuring carefully designed storage to prevent breakage, specialized display areas for finished products, and secure handling facilities for rare materials, these buildings employ glass experts who can assess quality and authenticity. The careful climate control and handling procedures reflect the extraordinary fragility and value of both raw materials and finished glass products.",
+  "flavorText": "From humble sand to crystalline masterpieces, the materials within these walls transform through fire and breath into Venice's most transparent form of genius.",
+  "constructionCosts": {
+    "ducats": 3200000,
+    "timber": 150,
+    "bricks": 300,
+    "stone": 200,
+    "glass": 100,
+    "marble": 20
+  },
+  "maintenanceCost": 2200,
+  "constructionTime": 604800000,
+  "soundDesign": {
+    "ambientSound": "Careful glass handling, quality discussions, delicate packing",
+    "activitySounds": "Glass materials being sorted, specialized crating, expert assessment",
+    "musicTheme": "Cristallo di Murano"
+  },
+  "seasonalEffects": {
+    "art exhibitions": "Showcase of finest imported pieces",
+    "production cycles": "Increased raw material handling during manufacturing peaks",
+    "winter": "Extra heating to prevent thermal shock to materials"
+  },
+  "aiInteractionPoints": [
+    "Raw materials storage",
+    "Finished product display area",
+    "Quality assessment station",
+    "Specialized packing area",
+    "Merchant negotiation room",
+    "Material testing laboratory"
+  ],
+  "productionInformation": {
+    "Arti": [
+      {
+        "inputs": {
+          "glass": 2,
+          "gold": 1
+        },
+        "outputs": {
+          "fine_glassware": 1
+        },
+        "craftMinutes": 180
+      },
+      {
+        "inputs": {
+          "sand": 2,
+          "soda_ash": 1
+        },
+        "outputs": {
+          "glass": 2
+        },
+        "craftMinutes": 240
+      },
+      {
+        "inputs": {
+          "glass": 1,
+          "tools": 1
+        },
+        "outputs": {
+          "mirrors": 1
+        },
+        "craftMinutes": 120
+      }
+    ],
+    "storageCapacity": 250,
+    "stores": [
+      "glass",
+      "gold",
+      "fine_glassware",
+      "sand",
+      "soda_ash",
+      "tools",
+      "mirrors",
+      "colored_glass",
+      "crystal",
+      "glass_beads",
+      "window_glass"
+    ],
+    "sells": [
+      "fine_glassware",
+      "glass",
+      "mirrors",
+      "colored_glass",
+      "crystal",
+      "glass_beads",
+      "window_glass"
+    ]
+  }
+}

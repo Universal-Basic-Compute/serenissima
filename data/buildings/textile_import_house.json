@@ -1,0 +1,101 @@
+{
+  "name": "Textile Import House",
+  "pointType": "building",
+  "category": "Commercial",
+  "subcategory": "Trade Facilities",
+  "tier": 3,
+  "size": "Large",
+  "unlockCondition": "20,000,000 ducats total wealth, Cloth Guild membership",
+  "canImport": true,
+  "calculationsAnalysis": "The Textile Import House represents specialized infrastructure for high-value fabric trade. The construction cost of 4,000,000 ducats reflects the specialized storage and display facilities required, while the income of 50,000 ducats (1.25% return) represents the premium handling fees for valuable textiles. The maintenance cost of 30,000 ducats (60% of income) balances profitability with the reality of maintaining specialized climate-controlled storage. The employment capacity of 25 represents the specialized staff needed to handle, assess, and market valuable fabrics. The construction time of 9 days (777600000ms) represents a significant specialized construction project.",
+  "shortDescription": "Specialized facility for importing, storing, and trading fine textiles from around the world.",
+  "fullDescription": "Supporting Venice's renowned textile industry, these specialized facilities handle imported fabrics from across Europe, North Africa, and Asia. Featuring climate-controlled storage to prevent damage from humidity, specialized display areas with optimal lighting, and secure vaults for the most valuable silks and brocades, these buildings employ fabric experts who can assess quality and authenticity. The substantial security measures reflect the extraordinary value of fine textiles, which often represented significant wealth in Renaissance society.",
+  "flavorText": "Between these walls lie the dreams of a thousand weavers, the heritage of ancient traditions, and the future of Venetian fashion—all measured by the yard and valued by the ounce.",
+  "constructionCosts": {
+    "ducats": 4000000,
+    "timber": 200,
+    "bricks": 350,
+    "stone": 250,
+    "glass": 80,
+    "marble": 30
+  },
+  "maintenanceCost": 3000,
+  "constructionTime": 777600000,
+  "soundDesign": {
+    "ambientSound": "Fabric being unfolded, quality discussions, careful measuring",
+    "activitySounds": "Textile bales being moved, cutting samples, merchant negotiations",
+    "musicTheme": "Tessuti Preziosi"
+  },
+  "seasonalEffects": {
+    "humidity changes": "Climate control systems adjusted",
+    "fashion seasons": "Display areas reconfigured for seasonal fabrics",
+    "trade fairs": "Special exhibitions of newest imports"
+  },
+  "aiInteractionPoints": [
+    "Fabric display area",
+    "Climate-controlled storage",
+    "Quality assessment station",
+    "Merchant negotiation room",
+    "Secure vault for precious textiles",
+    "Sample cutting area"
+  ],
+  "productionInformation": {
+    "Arti": [
+      {
+        "inputs": {
+          "raw_silk": 2,
+          "dyestuffs": 1
+        },
+        "outputs": {
+          "silk_fabric": 2
+        },
+        "craftMinutes": 180
+      },
+      {
+        "inputs": {
+          "cloth": 2,
+          "dyestuffs": 1
+        },
+        "outputs": {
+          "dyed_textiles": 2
+        },
+        "craftMinutes": 150
+      },
+      {
+        "inputs": {
+          "silk_fabric": 2,
+          "gold": 1
+        },
+        "outputs": {
+          "luxury_silk_garments": 1
+        },
+        "craftMinutes": 240
+      }
+    ],
+    "storageCapacity": 400,
+    "stores": [
+      "raw_silk",
+      "dyestuffs",
+      "silk_fabric",
+      "cloth",
+      "dyed_textiles",
+      "gold",
+      "luxury_silk_garments",
+      "wool",
+      "cotton",
+      "linen",
+      "velvet",
+      "brocade"
+    ],
+    "sells": [
+      "silk_fabric",
+      "dyed_textiles",
+      "luxury_silk_garments",
+      "wool",
+      "cotton",
+      "linen",
+      "velvet",
+      "brocade"
+    ]
+  }
+}
