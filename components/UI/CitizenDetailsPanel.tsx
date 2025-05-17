@@ -417,6 +417,9 @@ Be historically accurate but engaging. Speak in first person as if you are this 
     }
   };
   
+  // Add a ref to track which citizens we've already sent initial messages to
+  const initialMessageSentRef = useRef<{[citizenId: string]: boolean}>({});
+  
   useEffect(() => {
     // Animate in when component mounts
     setIsVisible(true);
@@ -442,7 +445,11 @@ Be historically accurate but engaging. Speak in first person as if you are this 
       }
       
       // NEW CODE: If this is an AI citizen, send a POST request to initiate conversation
-      if (citizen.isai === true || citizen.isAi === true) {
+      // BUT ONLY if we haven't already sent an initial message to this citizen
+      if ((citizen.isai === true || citizen.isAi === true) && !initialMessageSentRef.current[citizen.citizenid]) {
+        // Mark that we've sent an initial message to this citizen
+        initialMessageSentRef.current[citizen.citizenid] = true;
+        
         // Get current citizen from localStorage
         let currentUsername = 'visitor';
         let currentFullName = 'Visitor';
