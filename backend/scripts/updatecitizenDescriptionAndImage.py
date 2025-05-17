@@ -287,23 +287,23 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
             return None
         
         # Extract the JSON from Kinos Engine's response
-        content_text = response.json().get("content", "")
+        response_text = response.json().get("response", "")
         
         # Find the JSON object in the response using a more robust approach
         try:
             # First try to parse the entire content as JSON
-            result_data = json.loads(content_text)
+            result_data = json.loads(response_text)
             log.info("Successfully parsed entire response as JSON")
         except json.JSONDecodeError:
             # Log the full response for debugging
-            log.error(f"Could not parse entire response as JSON. Full response: {content_text}")
+            log.error(f"Could not parse entire response as JSON. Full response: {response_text}")
             
             # If that fails, try to clean and extract the JSON
             import re
             
             # Remove potential comments (both // and /* */ style)
             # First remove // comments
-            content_no_comments = re.sub(r'//.*?$', '', content_text, flags=re.MULTILINE)
+            content_no_comments = re.sub(r'//.*?$', '', response_text, flags=re.MULTILINE)
             # Then remove /* */ comments
             content_no_comments = re.sub(r'/\*.*?\*/', '', content_no_comments, flags=re.DOTALL)
             
