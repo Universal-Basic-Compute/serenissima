@@ -470,7 +470,7 @@ Be historically accurate but engaging. Speak in first person as if you are this 
       className={`fixed top-20 right-4 bg-amber-50 border-2 border-amber-700 rounded-lg p-6 shadow-lg max-w-5xl z-50 transition-all duration-300 pointer-events-auto ${
         isVisible ? 'opacity-100 transform translate-x-0' : 'opacity-0 transform translate-x-10'
       }`}
-      style={{ pointerEvents: 'auto', cursor: 'default' }} // Explicitly set pointer-events to auto and cursor to default
+      style={{ pointerEvents: 'auto', cursor: 'default' }}
     >
       
       <div className="flex justify-between items-center mb-4">
@@ -489,7 +489,7 @@ Be historically accurate but engaging. Speak in first person as if you are this 
         </button>
       </div>
       
-      {/* Replace the existing content with this two-column layout */}
+      {/* Two-column layout */}
       <div className="flex flex-row gap-6">
         {/* Left column - Conversation */}
         <div className="w-2/5">
