@@ -39,23 +39,23 @@ def get_ai_citizens(tables) -> List[Dict]:
         # Query citizens with IsAI=true, InVenice=true, and SocialClass is either Nobili or Cittadini
         formula = "AND({IsAI}=1, {InVenice}=1)"
         ai_citizens = tables["citizens"].all(formula=formula)
-        print(f"Found {len(ai_citizens)} AI citizens in Venice with Nobili or Cittadini social class")
+        print(f"Found {len(ai_citizens)} AI citizens in Venice")
         return ai_citizens
     except Exception as e:
         print(f"Error getting AI citizens: {str(e)}")
         return []
 
 def get_citizen_business_buildings(tables, username: str) -> List[Dict]:
-    """Get all buildings owned by a specific citizen that could potentially have wages set."""
+    """Get all buildings run by a specific citizen that could potentially have wages set."""
     try:
         formula = f"AND({{RunBy}}='{username}', {{Category}}='business')"
         buildings = tables["buildings"].all(formula=formula)
-        print(f"Found {len(buildings)} buildings owned by {username}")
+        print(f"Found {len(buildings)} buildings runned by {username}")
         
         # Log the building IDs for debugging
         building_ids = [building["fields"].get("BuildingId") for building in buildings 
                        if building["fields"].get("BuildingId")]
-        print(f"Building IDs owned by {username}: {building_ids}")
+        print(f"Building IDs runned by {username}: {building_ids}")
         
         return buildings
     except Exception as e:
