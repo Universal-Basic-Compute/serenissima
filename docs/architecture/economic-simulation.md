@@ -47,7 +47,7 @@ La Serenissima operates as a closed economic system where value circulates betwe
                                             ▼
                               ┌───────────────────────┐
                               │                       │
-                              │  Wealth Accumulation  │
+                              │  Ducats Accumulation  │
                               │  & New Development    │
                               │                       │
                               └───────────────────────┘
