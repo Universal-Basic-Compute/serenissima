@@ -353,8 +353,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     
     // Add more detailed logging about the citizen being hovered
     console.log('HOVER: Citizen hover details:', {
-      id: citizen.citizenid || citizen.CitizenId || citizen.id,
-      username: citizen.username,
+      username: citizen.username || citizen.citizenid || citizen.CitizenId || citizen.id,
       name: `${citizen.firstname || citizen.FirstName || ''} ${citizen.lastname || citizen.LastName || ''}`,
       socialClass: citizen.socialclass || citizen.SocialClass || citizen.socialClass || '',
       imageUrl: citizen.imageurl || citizen.profileimage || citizen.ImageUrl,
