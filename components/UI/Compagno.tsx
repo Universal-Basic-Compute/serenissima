@@ -28,7 +28,7 @@ interface Citizen {
 interface Message {
   id?: string;
   messageId?: string;
-  role?: 'citizen' | 'assistant';
+  role?: 'user' | 'assistant';
   sender?: string;
   receiver?: string;
   content: string;
