@@ -467,7 +467,7 @@ Be historically accurate but engaging. Speak in first person as if you are this 
   
   return (
     <div 
-      className={`fixed top-20 right-4 bg-amber-50 border-2 border-amber-700 rounded-lg p-6 shadow-lg max-w-2xl z-50 transition-all duration-300 pointer-events-auto ${
+      className={`fixed top-20 right-4 bg-amber-50 border-2 border-amber-700 rounded-lg p-6 shadow-lg max-w-5xl z-50 transition-all duration-300 pointer-events-auto ${
         isVisible ? 'opacity-100 transform translate-x-0' : 'opacity-0 transform translate-x-10'
       }`}
       style={{ pointerEvents: 'auto', cursor: 'default' }} // Explicitly set pointer-events to auto and cursor to default
@@ -489,7 +489,167 @@ Be historically accurate but engaging. Speak in first person as if you are this 
         </button>
       </div>
       
-      <div className="flex flex-col items-center mb-6">
+      {/* Replace the existing content with this two-column layout */}
+      <div className="flex flex-row gap-6">
+        {/* Left column - Conversation */}
+        <div className="w-2/5">
+          <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Conversation</h3>
+          
+          {/* Messages area */}
+          <div 
+            className="h-[500px] overflow-y-auto p-3 bg-amber-50 bg-opacity-80 rounded-lg mb-3"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E")`,
+              backgroundRepeat: 'repeat'
+            }}
+          >
+            {isLoadingHistory ? (
+              <div className="flex justify-center items-center h-full">
+                <FaSpinner className="animate-spin text-amber-600 text-2xl" />
+              </div>
+            ) : messages.length === 0 ? (
+              <div className="text-center py-8 text-gray-500 italic">
+                Start a conversation with {citizen.firstname}...
+              </div>
+            ) : (
+              <>
+                {messages.map((message) => (
+                  <div 
+                    key={message.id} 
+                    className={`mb-3 ${
+                      message.role === 'user' 
+                        ? 'text-right' 
+                        : 'text-left'
+                    }`}
+                  >
+                    <div 
+                      className={`inline-block p-3 rounded-lg max-w-[80%] ${
+                        message.role === 'user'
+                          ? 'bg-amber-100 text-amber-900 rounded-br-none'
+                          : 'bg-amber-700 text-white rounded-bl-none'
+                      }`}
+                    >
+                      <div className="markdown-content relative z-10">
+                        <ReactMarkdown 
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                            a: ({node, ...props}) => <a {...props} className="text-amber-300 underline hover:text-amber-100" target="_blank" rel="noopener noreferrer" />,
+                            code: ({node, ...props}) => <code {...props} className="bg-amber-800 px-1 py-0.5 rounded text-sm font-mono" />,
+                            pre: ({node, ...props}) => <pre {...props} className="bg-amber-800 p-2 rounded my-2 overflow-x-auto text-sm font-mono" />,
+                            ul: ({node, ...props}) => <ul {...props} className="list-disc pl-5 my-1" />,
+                            ol: ({node, ...props}) => <ol {...props} className="list-decimal pl-5 my-1" />,
+                            li: ({node, ...props}) => <li {...props} className="my-0.5" />,
+                            blockquote: ({node, ...props}) => <blockquote {...props} className="border-l-4 border-amber-500 pl-3 italic my-2" />,
+                            h1: ({node, ...props}) => <h1 {...props} className="text-lg font-bold my-2" />,
+                            h2: ({node, ...props}) => <h2 {...props} className="text-md font-bold my-2" />,
+                            h3: ({node, ...props}) => <h3 {...props} className="text-sm font-bold my-1" />,
+                            p: ({node, ...props}) => <p {...props} className="my-1" />
+                          }}
+                        >
+                          {message.content || "No content available"}
+                        </ReactMarkdown>
+                      </div>
+                      
+                      {/* Only show voice button for assistant messages */}
+                      {message.role === 'assistant' && (
+                        <button
+                          onClick={() => handleTextToSpeech(message)}
+                          className="mt-1 text-amber-300 hover:text-amber-100 transition-colors float-right"
+                          aria-label={playingMessageId === message.id ? "Stop speaking" : "Speak message"}
+                        >
+                          {playingMessageId === message.id ? (
+                            <FaVolumeMute className="w-4 h-4" />
+                          ) : (
+                            <FaVolumeUp className="w-4 h-4" />
+                          )}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                
+                {/* Typing indicator */}
+                {isTyping && (
+                  <div className="text-left mb-3">
+                    <div className="inline-block p-3 rounded-lg max-w-[80%] bg-amber-700 text-white rounded-bl-none">
+                      <div className="flex space-x-2">
+                        <div className="w-2 h-2 bg-amber-300 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                        <div className="w-2 h-2 bg-amber-300 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                        <div className="w-2 h-2 bg-amber-300 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                <div ref={messagesEndRef} />
+              </>
+            )}
+          </div>
+          
+          {/* Suggested questions */}
+          <div className="mb-3">
+            <p className="text-xs text-gray-500 mb-2">Suggested questions:</p>
+            <div className="flex flex-wrap gap-1">
+              <button
+                onClick={() => sendMessage(`Tell me about your life in Venice, ${citizen.firstname}.`)}
+                className="text-xs bg-amber-100 hover:bg-amber-200 text-amber-900 px-3 py-1.5 rounded-full border border-amber-300 transition-colors"
+              >
+                Tell me about your life in Venice
+              </button>
+              <button
+                onClick={() => sendMessage(`What is your profession, ${citizen.firstname}?`)}
+                className="text-xs bg-amber-100 hover:bg-amber-200 text-amber-900 px-3 py-1.5 rounded-full border border-amber-300 transition-colors"
+              >
+                What is your profession?
+              </button>
+              <button
+                onClick={() => sendMessage(`What do you think about the Doge?`)}
+                className="text-xs bg-amber-100 hover:bg-amber-200 text-amber-900 px-3 py-1.5 rounded-full border border-amber-300 transition-colors"
+              >
+                What do you think about the Doge?
+              </button>
+              <button
+                onClick={() => sendMessage(`How is life as a ${citizen.socialclass}?`)}
+                className="text-xs bg-amber-100 hover:bg-amber-200 text-amber-900 px-3 py-1.5 rounded-full border border-amber-300 transition-colors"
+              >
+                How is life as a {citizen.socialclass}?
+              </button>
+            </div>
+          </div>
+          
+          {/* Input area */}
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              sendMessage(inputValue);
+            }} 
+            className="flex"
+          >
+            <input
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder={`Message ${citizen.firstname}...`}
+              className="flex-1 p-2 border border-amber-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+              disabled={isTyping}
+            />
+            <button 
+              type="submit"
+              className={`px-4 rounded-r-lg transition-colors ${
+                isTyping || !inputValue.trim()
+                  ? 'bg-gray-400 text-white cursor-not-allowed'
+                  : 'bg-amber-700 text-white hover:bg-amber-600'
+              }`}
+              disabled={isTyping || !inputValue.trim()}
+            >
+              {isTyping ? <FaSpinner className="animate-spin" /> : 'Send'}
+            </button>
+          </form>
+        </div>
+        
+        {/* Right column - Citizen details */}
+        <div className="w-3/5">
+          <div className="flex flex-col items-center mb-6">
         {/* Much larger image */}
         <div className="w-48 h-48 mb-4 relative">
           {citizen.imageurl ? (
@@ -655,159 +815,8 @@ Be historically accurate but engaging. Speak in first person as if you are this 
         )}
       </div>
       
-      <div className="mt-6">
-        <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Conversation</h3>
-        
-        {/* Messages area */}
-        <div 
-          className="h-64 overflow-y-auto p-3 bg-amber-50 bg-opacity-80 rounded-lg mb-3"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E")`,
-            backgroundRepeat: 'repeat'
-          }}
-        >
-          {isLoadingHistory ? (
-            <div className="flex justify-center items-center h-full">
-              <FaSpinner className="animate-spin text-amber-600 text-2xl" />
-            </div>
-          ) : messages.length === 0 ? (
-            <div className="text-center py-8 text-gray-500 italic">
-              Start a conversation with {citizen.firstname}...
-            </div>
-          ) : (
-            <>
-              {messages.map((message) => (
-                <div 
-                  key={message.id} 
-                  className={`mb-3 ${
-                    message.role === 'user' 
-                      ? 'text-right' 
-                      : 'text-left'
-                  }`}
-                >
-                  <div 
-                    className={`inline-block p-3 rounded-lg max-w-[80%] ${
-                      message.role === 'user'
-                        ? 'bg-amber-100 text-amber-900 rounded-br-none'
-                        : 'bg-amber-700 text-white rounded-bl-none'
-                    }`}
-                  >
-                    <div className="markdown-content relative z-10">
-                      <ReactMarkdown 
-                        remarkPlugins={[remarkGfm]}
-                        components={{
-                          a: ({node, ...props}) => <a {...props} className="text-amber-300 underline hover:text-amber-100" target="_blank" rel="noopener noreferrer" />,
-                          code: ({node, ...props}) => <code {...props} className="bg-amber-800 px-1 py-0.5 rounded text-sm font-mono" />,
-                          pre: ({node, ...props}) => <pre {...props} className="bg-amber-800 p-2 rounded my-2 overflow-x-auto text-sm font-mono" />,
-                          ul: ({node, ...props}) => <ul {...props} className="list-disc pl-5 my-1" />,
-                          ol: ({node, ...props}) => <ol {...props} className="list-decimal pl-5 my-1" />,
-                          li: ({node, ...props}) => <li {...props} className="my-0.5" />,
-                          blockquote: ({node, ...props}) => <blockquote {...props} className="border-l-4 border-amber-500 pl-3 italic my-2" />,
-                          h1: ({node, ...props}) => <h1 {...props} className="text-lg font-bold my-2" />,
-                          h2: ({node, ...props}) => <h2 {...props} className="text-md font-bold my-2" />,
-                          h3: ({node, ...props}) => <h3 {...props} className="text-sm font-bold my-1" />,
-                          p: ({node, ...props}) => <p {...props} className="my-1" />
-                        }}
-                      >
-                        {message.content || "No content available"}
-                      </ReactMarkdown>
-                    </div>
-                    
-                    {/* Only show voice button for assistant messages */}
-                    {message.role === 'assistant' && (
-                      <button
-                        onClick={() => handleTextToSpeech(message)}
-                        className="mt-1 text-amber-300 hover:text-amber-100 transition-colors float-right"
-                        aria-label={playingMessageId === message.id ? "Stop speaking" : "Speak message"}
-                      >
-                        {playingMessageId === message.id ? (
-                          <FaVolumeMute className="w-4 h-4" />
-                        ) : (
-                          <FaVolumeUp className="w-4 h-4" />
-                        )}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-              
-              {/* Typing indicator */}
-              {isTyping && (
-                <div className="text-left mb-3">
-                  <div className="inline-block p-3 rounded-lg max-w-[80%] bg-amber-700 text-white rounded-bl-none">
-                    <div className="flex space-x-2">
-                      <div className="w-2 h-2 bg-amber-300 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                      <div className="w-2 h-2 bg-amber-300 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                      <div className="w-2 h-2 bg-amber-300 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-              <div ref={messagesEndRef} />
-            </>
-          )}
-        </div>
-        
-        {/* Suggested questions */}
-        <div className="mb-3">
-          <p className="text-xs text-gray-500 mb-2">Suggested questions:</p>
-          <div className="flex flex-wrap gap-1">
-            <button
-              onClick={() => sendMessage(`Tell me about your life in Venice, ${citizen.firstname}.`)}
-              className="text-xs bg-amber-100 hover:bg-amber-200 text-amber-900 px-3 py-1.5 rounded-full border border-amber-300 transition-colors"
-            >
-              Tell me about your life in Venice
-            </button>
-            <button
-              onClick={() => sendMessage(`What is your profession, ${citizen.firstname}?`)}
-              className="text-xs bg-amber-100 hover:bg-amber-200 text-amber-900 px-3 py-1.5 rounded-full border border-amber-300 transition-colors"
-            >
-              What is your profession?
-            </button>
-            <button
-              onClick={() => sendMessage(`What do you think about the Doge?`)}
-              className="text-xs bg-amber-100 hover:bg-amber-200 text-amber-900 px-3 py-1.5 rounded-full border border-amber-300 transition-colors"
-            >
-              What do you think about the Doge?
-            </button>
-            <button
-              onClick={() => sendMessage(`How is life as a ${citizen.socialclass}?`)}
-              className="text-xs bg-amber-100 hover:bg-amber-200 text-amber-900 px-3 py-1.5 rounded-full border border-amber-300 transition-colors"
-            >
-              How is life as a {citizen.socialclass}?
-            </button>
           </div>
         </div>
-        
-        {/* Input area */}
-        <form 
-          onSubmit={(e) => {
-            e.preventDefault();
-            sendMessage(inputValue);
-          }} 
-          className="flex"
-        >
-          <input
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            placeholder={`Message ${citizen.firstname}...`}
-            className="flex-1 p-2 border border-amber-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
-            disabled={isTyping}
-          />
-          <button 
-            type="submit"
-            className={`px-4 rounded-r-lg transition-colors ${
-              isTyping || !inputValue.trim()
-                ? 'bg-gray-400 text-white cursor-not-allowed'
-                : 'bg-amber-700 text-white hover:bg-amber-600'
-            }`}
-            disabled={isTyping || !inputValue.trim()}
-          >
-            {isTyping ? <FaSpinner className="animate-spin" /> : 'Send'}
-          </button>
-        </form>
       </div>
       
       <div className="mt-4 text-xs text-amber-500 italic text-center">
