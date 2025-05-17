@@ -329,8 +329,8 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
                     # Last resort: try a more aggressive approach to extract just the fields we need
                     try:
                         # Look for the description and imagePrompt fields directly
-                        desc_match = re.search(r'"description"\s*:\s*"(.*?)"(?=,|})', content_text, re.DOTALL)
-                        img_match = re.search(r'"imagePrompt"\s*:\s*"(.*?)"(?=,|})', content_text, re.DOTALL)
+                        desc_match = re.search(r'"description"\s*:\s*"(.*?)"(?=,|})', response_text, re.DOTALL)
+                        img_match = re.search(r'"imagePrompt"\s*:\s*"(.*?)"(?=,|})', response_text, re.DOTALL)
                         
                         if desc_match and img_match:
                             # Manually construct a valid JSON object
@@ -347,7 +347,7 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
                         log.error(f"Failed in last-resort regex extraction: {regex_error}")
                         return None
             else:
-                log.error(f"Could not find JSON object markers in response: {content_text}")
+                log.error(f"Could not find JSON object markers in response: {response_text}")
                 return None
         
         log.info(f"Successfully generated new description and image prompt for {username}")
@@ -413,7 +413,7 @@ def generate_image(prompt: str, citizen_id: str) -> Optional[str]:
         log.info(f"Generated and saved image for citizen {citizen_id}")
         
         # Create the public URL path
-        public_image_url = f"/images/citizens/{citizen_username}.jpg"
+        public_image_url = f"/images/citizens/{citizen_id}.jpg"
         
         return public_image_url
     except Exception as e:
