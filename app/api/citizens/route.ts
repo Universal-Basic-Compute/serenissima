@@ -114,7 +114,7 @@ const CITIZENS_TABLE = 'CITIZENS';
 
 // Helper function to format image URLs
 function formatImageUrl(url: string | undefined | null, citizenId?: string): string {
-  console.log(`Formatting image URL for citizen ${citizenId}:`, url);
+  //console.log(`Formatting image URL for citizen ${citizenId}:`, url);
   
   // If no URL is provided, use the CitizenId to construct the path
   if (!url) {
@@ -151,7 +151,7 @@ function formatImageUrl(url: string | undefined | null, citizenId?: string): str
   // Ensure the URL doesn't have any double slashes (except in http://)
   url = url.replace(/([^:])\/\//g, '$1/');
   
-  console.log(`Final formatted URL: ${url}`);
+  //console.log(`Final formatted URL: ${url}`);
   return url;
 }
 
@@ -450,8 +450,8 @@ export async function GET(request: Request) {
                   });
                   
                   selectedActivity = sortedActivities[0];
-                  initialProgress = Math.random(); // Random progress between 0 and 1
-                  console.log(`Using most recent activity for ${citizenId} with random progress ${initialProgress.toFixed(2)}`);
+                  initialProgress = 0;
+                  console.log(`Using most recent activity for ${citizenId} with  progress 0`);
                 }
                 
                 // Calculate position based on progress
