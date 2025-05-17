@@ -181,6 +181,7 @@ export class TransportService {
     if (mode) {
       this.setPathfindingMode(mode);
     }
+    
     try {
       // Set calculating state to true to show loading indicator
       this.calculatingPath = true;
@@ -314,142 +315,157 @@ export class TransportService {
         
         clearTimeout(timeoutId);
       
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Transport route calculated via API:', data);
-        
-        if (data.success && data.path) {
-          this.transportPath = data.path;
-          // Set water-only mode if the API indicates it's a water-only route
-          this.waterOnlyMode = !!data.waterOnly;
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Transport route calculated via API:', data);
           
-          // Emit event with the calculated path
-          eventBus.emit(EventTypes.TRANSPORT_ROUTE_CALCULATED, {
-            path: data.path,
-            waterOnly: this.waterOnlyMode
-          });
-          
-          // Log the path data for debugging
-          console.log(`Transport path calculated with ${data.path.length} points:`, {
-            firstPoint: data.path[0],
-            lastPoint: data.path[data.path.length - 1]
-          });
-          
-          // Create a custom event with the path data
-          const routeEvent = new CustomEvent('TRANSPORT_ROUTE_CALCULATED', {
-            detail: {
+          if (data.success && data.path) {
+            this.transportPath = data.path;
+            // Set water-only mode if the API indicates it's a water-only route
+            this.waterOnlyMode = !!data.waterOnly;
+            
+            // Emit event with the calculated path
+            eventBus.emit(EventTypes.TRANSPORT_ROUTE_CALCULATED, {
               path: data.path,
               waterOnly: this.waterOnlyMode
-            }
-          });
-          
-          // Dispatch the event
-          console.log('Dispatching TRANSPORT_ROUTE_CALCULATED event with path data');
-          window.dispatchEvent(routeEvent);
-          
-          // Log the event for debugging
-          console.log('Dispatched TRANSPORT_ROUTE_CALCULATED event with path data:', {
-            pathLength: data.path.length,
-            firstPoint: data.path[0],
-            lastPoint: data.path[data.path.length - 1]
-          });
-        } else {
-          console.error('Failed to calculate route:', data.error);
-          
-          // If the error is about points not being within polygons, try to use water-only pathfinding
-          if (data.error === 'Start or end point is not within any polygon') {
-            console.log('Points not within polygons, attempting water-only pathfinding');
-            
-            // Dispatch event instead of showing alert
-            eventBus.emit(EventTypes.TRANSPORT_ROUTE_ERROR, {
-              error: 'Points are not on land',
-              detail: 'Attempting to find a water route...',
-              severity: 'warning'
             });
             
-            // Make a direct request to the water-only pathfinding endpoint with timeout
-            const waterController = new AbortController();
-            const waterTimeoutId = setTimeout(() => waterController.abort(), 15000); // 15 second timeout
+            // Log the path data for debugging
+            console.log(`Transport path calculated with ${data.path.length} points:`, {
+              firstPoint: data.path[0],
+              lastPoint: data.path[data.path.length - 1]
+            });
             
-            try {
-              const waterResponse = await fetch(`${baseUrl}/api/transport/water-only`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  startPoint: start,
-                  endPoint: end
-                }),
-                signal: waterController.signal
+            // Create a custom event with the path data
+            const routeEvent = new CustomEvent('TRANSPORT_ROUTE_CALCULATED', {
+              detail: {
+                path: data.path,
+                waterOnly: this.waterOnlyMode
+              }
+            });
+            
+            // Dispatch the event
+            console.log('Dispatching TRANSPORT_ROUTE_CALCULATED event with path data');
+            window.dispatchEvent(routeEvent);
+            
+            // Log the event for debugging
+            console.log('Dispatched TRANSPORT_ROUTE_CALCULATED event with path data:', {
+              pathLength: data.path.length,
+              firstPoint: data.path[0],
+              lastPoint: data.path[data.path.length - 1]
+            });
+          } else {
+            console.error('Failed to calculate route:', data.error);
+            
+            // If the error is about points not being within polygons, try to use water-only pathfinding
+            if (data.error === 'Start or end point is not within any polygon') {
+              console.log('Points not within polygons, attempting water-only pathfinding');
+              
+              // Dispatch event instead of showing alert
+              eventBus.emit(EventTypes.TRANSPORT_ROUTE_ERROR, {
+                error: 'Points are not on land',
+                detail: 'Attempting to find a water route...',
+                severity: 'warning'
               });
               
-              clearTimeout(waterTimeoutId);
-            
-            if (waterResponse.ok) {
-              const waterData = await waterResponse.json();
+              // Make a direct request to the water-only pathfinding endpoint with timeout
+              const waterController = new AbortController();
+              const waterTimeoutId = setTimeout(() => waterController.abort(), 15000); // 15 second timeout
               
-              if (waterData.success && waterData.path) {
-                this.transportPath = waterData.path;
-                this.waterOnlyMode = true;
-                
-                // Emit event with the calculated path
-                eventBus.emit(EventTypes.TRANSPORT_ROUTE_CALCULATED, {
-                  path: waterData.path,
-                  waterOnly: true
+              try {
+                const waterResponse = await fetch(`${baseUrl}/api/transport/water-only`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    startPoint: start,
+                    endPoint: end
+                  }),
+                  signal: waterController.signal
                 });
                 
-                // Create a custom event with the path data
-                const routeEvent = new CustomEvent('TRANSPORT_ROUTE_CALCULATED', {
-                  detail: {
-                    path: waterData.path,
-                    waterOnly: true
+                clearTimeout(waterTimeoutId);
+              
+                if (waterResponse.ok) {
+                  const waterData = await waterResponse.json();
+                  
+                  if (waterData.success && waterData.path) {
+                    this.transportPath = waterData.path;
+                    this.waterOnlyMode = true;
+                    
+                    // Emit event with the calculated path
+                    eventBus.emit(EventTypes.TRANSPORT_ROUTE_CALCULATED, {
+                      path: waterData.path,
+                      waterOnly: true
+                    });
+                    
+                    // Create a custom event with the path data
+                    const routeEvent = new CustomEvent('TRANSPORT_ROUTE_CALCULATED', {
+                      detail: {
+                        path: waterData.path,
+                        waterOnly: true
+                      }
+                    });
+                    
+                    // Dispatch the event
+                    window.dispatchEvent(routeEvent);
+                    return;
                   }
-                });
+                }
                 
-                // Dispatch the event
-                window.dispatchEvent(routeEvent);
-                return;
+                // If we get here, water-only pathfinding failed
+                // Dispatch event instead of showing alert
+                eventBus.emit(EventTypes.TRANSPORT_ROUTE_ERROR, {
+                  error: 'No path could be found',
+                  detail: 'Could not find a water route',
+                  severity: 'error'
+                });
+                // Reset end point to allow trying again
+                this.transportEndPoint = null;
+              } catch (error) {
+                console.error('Error fetching water-only path:', error);
+                // Dispatch error event
+                eventBus.emit(EventTypes.TRANSPORT_ROUTE_ERROR, {
+                  error: 'Error calculating water route',
+                  detail: 'Please try again. ' + (error instanceof Error ? error.message : String(error)),
+                  severity: 'error'
+                });
+                this.transportEndPoint = null;
               }
+            } else {
+              // For other errors, just show the error message
+              eventBus.emit(EventTypes.TRANSPORT_ROUTE_ERROR, {
+                error: 'No path could be found',
+                detail: data.error || 'Unknown error',
+                severity: 'error'
+              });
+              // Reset end point to allow trying again
+              this.transportEndPoint = null;
             }
-          } catch (error) {
-            console.error('Error fetching water-only path:', error);
           }
-          
-          // If we get here, both regular and water-only pathfinding failed
+        } else {
+          console.error('API error:', response.status);
           // Dispatch event instead of showing alert
           eventBus.emit(EventTypes.TRANSPORT_ROUTE_ERROR, {
-            error: 'No path could be found',
-            detail: data.error || 'Unknown error',
+            error: 'Error calculating route',
+            detail: 'Please try again. API error: ' + response.status,
             severity: 'error'
           });
-          // Reset end point to allow trying again
           this.transportEndPoint = null;
         }
-      } else {
-        console.error('API error:', response.status);
-        // Dispatch event instead of showing alert
+      } catch (error) {
+        console.error('Error in API request:', error);
+        // Handle the error appropriately
         eventBus.emit(EventTypes.TRANSPORT_ROUTE_ERROR, {
           error: 'Error calculating route',
-          detail: 'Please try again. API error: ' + response.status,
+          detail: 'Please try again. ' + (error instanceof Error ? error.message : String(error)),
           severity: 'error'
         });
         this.transportEndPoint = null;
       }
     } catch (error) {
-      console.error('Error in API request:', error);
-      // Handle the error appropriately
-      eventBus.emit(EventTypes.TRANSPORT_ROUTE_ERROR, {
-        error: 'Error calculating route',
-        detail: 'Please try again. ' + (error instanceof Error ? error.message : String(error)),
-        severity: 'error'
-      });
-      this.transportEndPoint = null;
-    } catch (error) {
       console.error('Error calculating transport route:', error);
-      
-      // No fallback path creation - just log the error
-      console.error('Error calculating transport route - no path could be found:', error);
       
       // If all else fails, dispatch error event and reset
       eventBus.emit(EventTypes.TRANSPORT_ROUTE_ERROR, {
