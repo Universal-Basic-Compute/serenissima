@@ -1,3 +1,7 @@
+import BuildingDescription from './BuildingDetails/BuildingDescription';
+
+export { BuildingDescription };
+
 export function ResourceList({ 
   title, 
   resources, 
