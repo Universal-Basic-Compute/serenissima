@@ -96,14 +96,14 @@ def get_entrepreneurs_and_their_businesses(tables) -> tuple[List[Dict], Dict[str
                     entrepreneur_businesses[run_by] = []
                 entrepreneur_businesses[run_by].append(building)
         
-        # Get the entrepreneur citizens
-        entrepreneur_ids = list(entrepreneur_businesses.keys())
+        # Get the entrepreneur citizens by Username, not ID
+        entrepreneur_usernames = list(entrepreneur_businesses.keys())
         entrepreneurs = []
         
-        if entrepreneur_ids:
-            # Create a formula to get these citizens
-            citizen_conditions = [f"RECORD_ID()='{citizen_id}'" for citizen_id in entrepreneur_ids]
-            formula = f"OR({', '.join(citizen_conditions)})"
+        if entrepreneur_usernames:
+            # Create a formula to get these citizens by Username
+            username_conditions = [f"{{Username}}='{username}'" for username in entrepreneur_usernames]
+            formula = f"OR({', '.join(username_conditions)})"
             entrepreneurs = tables['citizens'].all(formula=formula)
         
         log.info(f"Found {len(entrepreneurs)} entrepreneurs running {len(run_by_buildings)} businesses")
