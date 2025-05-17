@@ -160,7 +160,7 @@ def create_transaction_record(tables, from_citizen: str, to_citizen: str, amount
         # Create the transaction record
         transaction = tables['transactions'].create({
             "Type": payment_type,
-            "AssetId": f"{payment_type}_{building_id}_{now}",
+            "AssetId": building_id,  # Use the BuildingId directly as the AssetId
             "Seller": from_citizen,  # Tenant/Business owner is the seller (paying)
             "Buyer": to_citizen,     # Building owner is the buyer (receiving)
             "Price": amount,
