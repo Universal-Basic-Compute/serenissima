@@ -166,7 +166,7 @@ def create_admin_summary(tables, update_summary) -> None:
             "Details": json.dumps(details),
             "CreatedAt": datetime.datetime.now().isoformat(),
             "ReadAt": None,
-            "Citizen": "NLR"  # Admin citizen
+            "Citizen": "ConsiglioDeiDieci"  # Admin citizen
         })
         
         log.info(f"Created admin summary notification")
