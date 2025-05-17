@@ -39,6 +39,31 @@ export async function GET(request: NextRequest) {
       buildingPoints: record.get('BuildingPoints') as number || 0
     }));
     
+    // Fetch land groups to determine connectivity
+    console.log('Fetching land groups for connectivity analysis...');
+    const landGroupsResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/land-groups?includeUnconnected=true&minSize=1`);
+    
+    let landGroups: Record<string, string> = {};
+    
+    if (landGroupsResponse.ok) {
+      const landGroupsData = await landGroupsResponse.json();
+      
+      if (landGroupsData.success && landGroupsData.landGroups) {
+        console.log(`Loaded ${landGroupsData.landGroups.length} land groups for connectivity analysis`);
+        
+        // Create a mapping of polygon ID to group ID
+        landGroupsData.landGroups.forEach((group: any) => {
+          if (group.lands && Array.isArray(group.lands)) {
+            group.lands.forEach((landId: string) => {
+              landGroups[landId] = group.groupId;
+            });
+          }
+        });
+      }
+    } else {
+      console.warn('Failed to fetch land groups, proceeding without connectivity data');
+    }
+    
     // If an AI username is specified, calculate relevancy only for that AI
     if (aiUsername) {
       console.log(`Calculating relevancy for AI: ${aiUsername}`);
