@@ -351,6 +351,44 @@ export default function ContractMarkers({
                   className="w-8 h-8 bg-amber-700 border border-amber-500 rounded-full flex items-center justify-center text-white text-sm font-bold cursor-pointer" 
                   style={{ borderWidth: '1px' }}
                   onClick={() => handleContractClick(locationContracts[0])}
+                  onMouseEnter={() => {
+                    // Create a summary of resources at this location
+                    const resourceTypes = [...new Set(locationContracts.map(c => c.resourceType))];
+                    const totalAmount = locationContracts.reduce((sum, c) => sum + (c.amount || 0), 0);
+                    const publicSellCount = locationContracts.filter(c => c.type === 'public_sell').length;
+                    const citizenSellCount = locationContracts.filter(c => c.seller === currentUsername).length;
+                    const citizenBuyCount = locationContracts.filter(c => c.buyer === currentUsername).length;
+                    
+                    // Use HoverStateService to set resource hover state
+                    const locationKey = `${locationContracts[0].location.lat.toFixed(6)}_${locationContracts[0].location.lng.toFixed(6)}`;
+                    const contractIds = locationContracts.map(c => c.contractId).join('_');
+                    
+                    hoverStateService.setHoveredResource(contractIds + '_summary', {
+                      locationKey,
+                      resources: [
+                        {
+                          id: 'contract_summary',
+                          name: 'Contract Summary',
+                          category: 'Contracts',
+                          description: `${locationContracts.length} contracts at this location`,
+                          icon: 'contract.png',
+                          amount: totalAmount,
+                          buildingId: locationContracts[0].sellerBuilding,
+                          location: locationContracts[0].location,
+                          rarity: 'common',
+                          contractSummary: true,
+                          resourceTypes,
+                          publicSellCount,
+                          citizenSellCount,
+                          citizenBuyCount
+                        }
+                      ],
+                      position: locationContracts[0].location
+                    });
+                  }}
+                  onMouseLeave={() => {
+                    hoverStateService.clearHoveredResource();
+                  }}
                 >
                   {locationContracts.length}
                 </div>
