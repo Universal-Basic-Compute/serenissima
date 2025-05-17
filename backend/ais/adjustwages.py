@@ -572,32 +572,26 @@ def process_ai_wage_adjustments(dry_run: bool = False):
         print("No AI citizens found, exiting")
         return
     
-    # Filter AI citizens to only those who own at least one building with an occupant
+    # Filter AI citizens to only those who run at least one business building
     filtered_ai_citizens = []
     for ai_citizen in ai_citizens:
-        ai_username = ai_citizen["fields"].get("Citizenname")
+        ai_username = ai_citizen["fields"].get("Username")
         if not ai_username:
             continue
             
-        # Get buildings owned by this AI
-        citizen_buildings = get_citizen_business_buildings(tables, ai_username)
+        # Get buildings run by this AI
+        citizen_business_buildings = get_citizen_business_buildings(tables, ai_username)
         
-        # Check if any building has an occupant
-        has_building_with_occupant = False
-        for building in citizen_buildings:
-            if building["fields"].get("Occupant"):
-                has_building_with_occupant = True
-                break
-                
-        if has_building_with_occupant:
+        # Check if they run any business buildings
+        if citizen_business_buildings:
             filtered_ai_citizens.append(ai_citizen)
-            print(f"AI citizen {ai_username} has buildings with occupants, including in processing")
+            print(f"AI citizen {ai_username} runs {len(citizen_business_buildings)} business buildings, including in processing")
         else:
-            print(f"AI citizen {ai_username} has no buildings with occupants, skipping")
-    
+            print(f"AI citizen {ai_username} doesn't run any business buildings, skipping")
+
     # Replace the original list with the filtered list
     ai_citizens = filtered_ai_citizens
-    print(f"Filtered down to {len(ai_citizens)} AI citizens with buildings that have occupants")
+    print(f"Filtered down to {len(ai_citizens)} AI citizens who run business buildings")
     
     if not ai_citizens:
         print("No AI citizens with buildings that have occupants, exiting")
