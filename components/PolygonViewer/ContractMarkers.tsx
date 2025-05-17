@@ -43,10 +43,8 @@ export default function ContractMarkers({
     throttle((locationKey: string, locationContracts: Contract[]) => {
       setHoveredLocation(locationKey);
       
-      // Use HoverStateService to set resource hover state
-      // Create a unique ID for this contract group
-      const contractIds = locationContracts.map(c => c.contractId).join('_');
-      hoverStateService.setHoveredResource(contractIds, {
+      // Use the new hover state system
+      hoverStateService.setHoverState('contract', locationKey, {
         locationKey,
         resources: locationContracts.map(contract => ({
           id: contract.contractId,
@@ -72,7 +70,7 @@ export default function ContractMarkers({
   const handleMouseLeave = useMemo(() => 
     throttle(() => {
       setHoveredLocation(null);
-      hoverStateService.clearHoveredResource();
+      hoverStateService.clearHoverState();
     }, 100), // 100ms throttle
     []
   );
@@ -375,7 +373,7 @@ export default function ContractMarkers({
                     const locationKey = `${locationContracts[0].location.lat.toFixed(6)}_${locationContracts[0].location.lng.toFixed(6)}`;
                     const contractIds = locationContracts.map(c => c.contractId).join('_');
                     
-                    hoverStateService.setHoveredResource(contractIds + '_summary', {
+                    hoverStateService.setHoverState('contract', contractIds + '_summary', {
                       locationKey,
                       resources: [
                         {
@@ -400,7 +398,7 @@ export default function ContractMarkers({
                     });
                   }}
                   onMouseLeave={() => {
-                    hoverStateService.clearHoveredResource();
+                    hoverStateService.clearHoverState();
                   }}
                 >
                   {locationContracts.length}
@@ -476,7 +474,7 @@ export default function ContractMarkers({
                       const locationKey = `${locationContracts[0].location.lat.toFixed(6)}_${locationContracts[0].location.lng.toFixed(6)}`;
                       const contractIds = locationContracts.map(c => c.contractId).join('_');
                       
-                      hoverStateService.setHoveredResource(contractIds + '_summary', {
+                      hoverStateService.setHoverState('contract', contractIds + '_summary', {
                         locationKey,
                         resources: [
                           {
@@ -501,7 +499,7 @@ export default function ContractMarkers({
                       });
                     }}
                     onMouseLeave={() => {
-                      hoverStateService.clearHoveredResource();
+                      hoverStateService.clearHoverState();
                     }}
                   >
                     {totalContracts}

@@ -77,7 +77,7 @@ export const EventTypes = {
   POLYGON_DELETED: 'polygonDeleted',
   POLYGON_UPDATED: 'polygonUpdated',
   POLYGON_OWNER_UPDATED: 'polygonOwnerUpdated',
-  
+    
   // Building events
   BUILDING_PLACED: 'buildingPlaced',
   BUILDING_SELECTED: 'buildingSelected',
@@ -90,6 +90,9 @@ export const EventTypes = {
   BUILDING_POINTS_LOADED: 'BUILDING_POINTS_LOADED',
   BUILDING_POINT_SELECTED: 'BUILDING_POINT_SELECTED',
   BUILDING_POSITIONS_CALCULATED: 'BUILDING_POSITIONS_CALCULATED',
+    
+  // Hover events
+  HOVER_STATE_CHANGED: 'HOVER_STATE_CHANGED',
   
   // Citizen events
   CITIZENS_DATA_LOADED: 'citizensDataLoaded',

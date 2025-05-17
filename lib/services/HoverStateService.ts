@@ -1,280 +1,195 @@
-import { eventBus, EventTypes } from '../utils/eventBus';
+import { eventBus } from '../utils/eventBus';
 import { debounce, throttle } from '../utils/performanceUtils';
 
 // Define the hover state changed event type
-const HOVER_STATE_CHANGED = 'HOVER_STATE_CHANGED';
+export const HOVER_STATE_CHANGED = 'HOVER_STATE_CHANGED';
 
+// Define a comprehensive hover target type
+export type HoverTargetType = 
+  | 'none'
+  | 'polygon'
+  | 'building'
+  | 'buildingPoint'
+  | 'canalPoint'
+  | 'bridgePoint'
+  | 'citizen'
+  | 'resource'
+  | 'waterPoint'
+  | 'contract';
+
+// Define a comprehensive hover state interface
 export interface HoverState {
-  hoveredPolygonId: string | null;
-  hoveredBuildingId: string | null;
-  hoveredCanalPointId: string | null;
-  hoveredBridgePointId: string | null;
-  hoveredCitizenBuilding: string | null;
-  hoveredCitizenType: 'home' | 'work' | null;
-  hoveredResourceId: string | null;
-  hoveredResourceData: any | null;
-  hoveredWaterPointId: string | null;
-  hoveredBuildingPoint: any | null;
-  // Add any other hover states you need
+  type: HoverTargetType;
+  id: string | null;
+  data: any | null;
+  position?: { x: number, y: number } | null;
+  timestamp: number;
 }
 
 export class HoverStateService {
-  private state: HoverState = {
-    hoveredPolygonId: null,
-    hoveredBuildingId: null,
-    hoveredCanalPointId: null,
-    hoveredBridgePointId: null,
-    hoveredCitizenBuilding: null,
-    hoveredCitizenType: null,
-    hoveredResourceId: null,
-    hoveredResourceData: null,
-    hoveredWaterPointId: null,
-    hoveredBuildingPoint: null
+  private currentState: HoverState = {
+    type: 'none',
+    id: null,
+    data: null,
+    position: null,
+    timestamp: 0
   };
   
-  // Add a debounced version of clearAllHoverStates
-  private debouncedClearHoverStates = debounce(() => {
-    // Only clear if something is actually hovered
-    if (this.hoveredPolygonIdRef !== null || 
-        this.hoveredBuildingIdRef !== null || 
-        this.hoveredCanalPointIdRef !== null || 
-        this.hoveredBridgePointIdRef !== null || 
-        this.hoveredCitizenBuildingRef !== null || 
-        this.hoveredCitizenTypeRef !== null || 
-        this.hoveredResourceIdRef !== null || 
-        this.hoveredWaterPointIdRef !== null || 
-        this.hoveredBuildingPointRef !== null) {
-      
-      this.hoveredPolygonIdRef = null;
-      this.hoveredBuildingIdRef = null;
-      this.hoveredCanalPointIdRef = null;
-      this.hoveredBridgePointIdRef = null;
-      this.hoveredCitizenBuildingRef = null;
-      this.hoveredCitizenTypeRef = null;
-      this.hoveredResourceIdRef = null;
-      this.hoveredResourceDataRef = null;
-      this.hoveredWaterPointIdRef = null;
-      this.hoveredBuildingPointRef = null;
-      
-      // Reset state
-      this.state = {
-        hoveredPolygonId: null,
-        hoveredBuildingId: null,
-        hoveredCanalPointId: null,
-        hoveredBridgePointId: null,
-        hoveredCitizenBuilding: null,
-        hoveredCitizenType: null,
-        hoveredResourceId: null,
-        hoveredResourceData: null,
-        hoveredWaterPointId: null,
-        hoveredBuildingPoint: null
-      };
-      
-      // Emit event
-      eventBus.emit(HOVER_STATE_CHANGED, {
-        type: 'clear'
-      });
-    }
-  }, 150); // Increased to 150ms debounce for better stability
+  private isHovering: boolean = false;
+  private lastEmitTime: number = 0;
+  private emitThrottleTime: number = 100; // ms
   
-  // Use refs to track current state without causing re-renders
-  private hoveredPolygonIdRef: string | null = null;
-  private hoveredBuildingIdRef: string | null = null;
-  private hoveredCanalPointIdRef: string | null = null;
-  private hoveredBridgePointIdRef: string | null = null;
-  private hoveredCitizenBuildingRef: string | null = null;
-  private hoveredCitizenTypeRef: 'home' | 'work' | null = null;
-  private hoveredResourceIdRef: string | null = null;
-  private hoveredResourceDataRef: any | null = null;
-  private hoveredWaterPointIdRef: string | null = null;
-  private hoveredBuildingPointRef: string | null = null;
+  // Throttled emit function to prevent too many events
+  private throttledEmit = throttle((state: HoverState) => {
+    eventBus.emit(HOVER_STATE_CHANGED, state);
+    this.lastEmitTime = Date.now();
+  }, this.emitThrottleTime);
   
   /**
-   * Get the current hover state
+   * Set hover state with throttling to prevent rapid changes
+   */
+  public setHoverState(type: HoverTargetType, id: string | null, data: any = null, position: { x: number, y: number } | null = null): void {
+    // Only update if something meaningful has changed
+    if (
+      this.currentState.type !== type || 
+      this.currentState.id !== id ||
+      JSON.stringify(this.currentState.data) !== JSON.stringify(data)
+    ) {
+      this.currentState = {
+        type,
+        id,
+        data,
+        position,
+        timestamp: Date.now()
+      };
+      
+      this.isHovering = type !== 'none';
+      this.throttledEmit(this.currentState);
+    }
+  }
+  
+  /**
+   * Clear hover state
+   */
+  public clearHoverState(): void {
+    // Only clear if we're actually hovering
+    if (this.isHovering) {
+      this.currentState = {
+        type: 'none',
+        id: null,
+        data: null,
+        position: null,
+        timestamp: Date.now()
+      };
+      
+      this.isHovering = false;
+      this.throttledEmit(this.currentState);
+    }
+  }
+  
+  /**
+   * Get current hover state
    */
   public getState(): HoverState {
-    return { ...this.state };
+    return { ...this.currentState };
   }
+  
+  /**
+   * Check if currently hovering
+   */
+  public isCurrentlyHovering(): boolean {
+    return this.isHovering;
+  }
+  
+  /**
+   * Get hover type
+   */
+  public getHoverType(): HoverTargetType {
+    return this.currentState.type;
+  }
+  
+  /**
+   * Get hover ID
+   */
+  public getHoverId(): string | null {
+    return this.currentState.id;
+  }
+  
+  // Backward compatibility methods
   
   /**
    * Update hover state for a polygon
    */
-  public setHoveredPolygon(polygonId: string | null): void {
-    // Only update if the state has changed
-    if (this.hoveredPolygonIdRef !== polygonId) {
-      this.hoveredPolygonIdRef = polygonId;
-      this.state.hoveredPolygonId = polygonId;
-      
-      // Emit event with only the changed property
-      eventBus.emit(HOVER_STATE_CHANGED, {
-        type: 'polygon',
-        id: polygonId
-      });
-    }
+  public setHoveredPolygon(polygonId: string | null, data: any = null): void {
+    this.setHoverState('polygon', polygonId, data);
   }
   
   /**
    * Update hover state for a building
    */
-  public setHoveredBuilding(buildingId: string | null): void {
-    // Only update if the state has changed
-    if (this.hoveredBuildingIdRef !== buildingId) {
-      this.hoveredBuildingIdRef = buildingId;
-      this.state.hoveredBuildingId = buildingId;
-      
-      // Emit event with only the changed property
-      eventBus.emit(HOVER_STATE_CHANGED, {
-        type: 'building',
-        id: buildingId
-      });
-    }
+  public setHoveredBuilding(buildingId: string | null, data: any = null): void {
+    this.setHoverState('building', buildingId, data);
   }
   
   /**
    * Update hover state for a canal point
    */
-  public setHoveredCanalPoint(pointId: string | null): void {
-    // Only update if the state has changed
-    if (this.hoveredCanalPointIdRef !== pointId) {
-      this.hoveredCanalPointIdRef = pointId;
-      this.state.hoveredCanalPointId = pointId;
-      
-      // Emit event with only the changed property
-      eventBus.emit(HOVER_STATE_CHANGED, {
-        type: 'canalPoint',
-        id: pointId
-      });
-    }
+  public setHoveredCanalPoint(pointId: string | null, data: any = null): void {
+    this.setHoverState('canalPoint', pointId, data);
   }
   
   /**
    * Update hover state for a bridge point
    */
-  public setHoveredBridgePoint(pointId: string | null): void {
-    // Only update if the state has changed
-    if (this.hoveredBridgePointIdRef !== pointId) {
-      this.hoveredBridgePointIdRef = pointId;
-      this.state.hoveredBridgePointId = pointId;
-      
-      // Emit event with only the changed property
-      eventBus.emit(HOVER_STATE_CHANGED, {
-        type: 'bridgePoint',
-        id: pointId
-      });
-    }
+  public setHoveredBridgePoint(pointId: string | null, data: any = null): void {
+    this.setHoverState('bridgePoint', pointId, data);
   }
   
   /**
    * Update hover state for a citizen
    */
-  public setHoveredCitizen(citizen: any, buildingId: string | null, type: 'home' | 'work' | null): void {
-    console.log('HOVER_SERVICE: setHoveredCitizen called with:', {
-      citizen: citizen ? {
-        username: citizen.username || citizen.citizenid || citizen.CitizenId || citizen.id,
-        name: `${citizen.firstname || citizen.FirstName || ''} ${citizen.lastname || citizen.LastName || ''}`,
-        socialClass: citizen.socialclass || citizen.SocialClass || citizen.socialClass || '',
-        imageUrl: citizen.imageurl || citizen.profileimage || citizen.ImageUrl || citizen.image
-      } : null,
-      buildingId,
-      type
+  public setHoveredCitizen(buildingId: string | null, type: 'home' | 'work' | null, citizen: any = null): void {
+    this.setHoverState('citizen', buildingId, { 
+      citizen, 
+      buildingId, 
+      citizenType: type 
     });
-
-    // Only update if the state has changed
-    if (this.hoveredCitizenBuildingRef !== buildingId || this.hoveredCitizenTypeRef !== type) {
-      this.hoveredCitizenBuildingRef = buildingId;
-      this.hoveredCitizenTypeRef = type;
-      this.state.hoveredCitizenBuilding = buildingId;
-      this.state.hoveredCitizenType = type;
-      
-      // Emit event with only the changed property and include the citizen data
-      console.log('HOVER_SERVICE: Emitting hover state changed event for citizen');
-      eventBus.emit(HOVER_STATE_CHANGED, {
-        type: 'citizen',
-        citizen: citizen, // Include the full citizen object
-        buildingId,
-        citizenType: type
-      });
-    }
   }
   
   /**
    * Update hover state for a resource
    */
-  public setHoveredResource = throttle((resourceId: string | null, resourceData: any | null): void => {
-    // Only update if the state has changed
-    if (this.hoveredResourceIdRef !== resourceId) {
-      this.hoveredResourceIdRef = resourceId;
-      this.hoveredResourceDataRef = resourceData;
-      this.state.hoveredResourceId = resourceId;
-      this.state.hoveredResourceData = resourceData;
-      
-      // Emit event with only the changed property
-      eventBus.emit(HOVER_STATE_CHANGED, {
-        type: 'resource',
-        id: resourceId,
-        data: resourceData
-      });
-    }
-  }, 100); // 100ms throttle
-  
-  /**
-   * Clear resource hover state
-   */
-  public clearHoveredResource(): void {
-    if (this.hoveredResourceIdRef !== null) {
-      this.hoveredResourceIdRef = null;
-      this.hoveredResourceDataRef = null;
-      this.state.hoveredResourceId = null;
-      this.state.hoveredResourceData = null;
-      
-      // Emit event with only the changed property
-      eventBus.emit(HOVER_STATE_CHANGED, {
-        type: 'resource',
-        id: null,
-        data: null
-      });
-    }
+  public setHoveredResource(resourceId: string | null, resourceData: any = null): void {
+    this.setHoverState('resource', resourceId, resourceData);
   }
   
   /**
    * Update hover state for a water point
    */
-  public setHoveredWaterPoint(pointId: string | null): void {
-    // Only update if the state has changed
-    if (this.hoveredWaterPointIdRef !== pointId) {
-      this.hoveredWaterPointIdRef = pointId;
-      this.state.hoveredWaterPointId = pointId;
-      
-      // Emit event with only the changed property
-      eventBus.emit(HOVER_STATE_CHANGED, {
-        type: 'waterPoint',
-        id: pointId
-      });
-    }
+  public setHoveredWaterPoint(pointId: string | null, data: any = null): void {
+    this.setHoverState('waterPoint', pointId, data);
+  }
+  
+  /**
+   * Update hover state for a building point
+   */
+  public setHoveredBuildingPoint(pointId: string | null, point: any = null): void {
+    this.setHoverState('buildingPoint', pointId, point);
   }
   
   /**
    * Get the current hovered water point ID
    */
   public getHoveredWaterPointId(): string | null {
-    return this.hoveredWaterPointIdRef;
+    return this.currentState.type === 'waterPoint' ? this.currentState.id : null;
   }
   
   /**
-   * Update hover state for a building point
+   * Clear resource hover state
    */
-  public setHoveredBuildingPoint(pointId: string | null, point: any | null): void {
-    // Only update if the state has changed
-    if (this.hoveredBuildingPointRef !== pointId) {
-      this.hoveredBuildingPointRef = pointId;
-      this.state.hoveredBuildingPoint = point;
-      
-      // Emit event with only the changed property
-      eventBus.emit(HOVER_STATE_CHANGED, {
-        type: 'buildingPoint',
-        id: pointId,
-        point: point
-      });
+  public clearHoveredResource(): void {
+    if (this.currentState.type === 'resource') {
+      this.clearHoverState();
     }
   }
   
@@ -282,8 +197,7 @@ export class HoverStateService {
    * Clear all hover states
    */
   public clearAllHoverStates(): void {
-    // Use the debounced version instead of immediate clearing
-    this.debouncedClearHoverStates();
+    this.clearHoverState();
   }
 }
 

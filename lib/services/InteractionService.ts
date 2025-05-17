@@ -296,15 +296,17 @@ export class InteractionService {
       
       // Handle hover detection
       let hoverDetected = false;
+      let hoverType: 'none' | 'polygon' | 'building' | 'buildingPoint' | 'canalPoint' | 'bridgePoint' | 'citizen' | 'resource' | 'waterPoint' = 'none';
+      let hoverId: string | null = null;
+      let hoverData: any = null;
       
       // Check for polygon hover - ONLY in land view
       if (data.polygonsToRender && activeView === 'land') {
         for (const { polygon, coords } of data.polygonsToRender) {
           if (RenderService.prototype.isPointInPolygon(mouseX, mouseY, coords)) {
-            // Only update if the hovered polygon has changed
-            if (this.hoveredPolygonIdRef !== polygon.id) {
-              hoverStateService.setHoveredPolygon(polygon.id);
-            }
+            hoverType = 'polygon';
+            hoverId = polygon.id;
+            hoverData = polygon;
             canvas.style.cursor = 'pointer';
             hoverDetected = true;
             break;
@@ -356,10 +358,9 @@ export class InteractionService {
             mouseY >= isoPos.y - squareSize/2 - 2 && // Add 2px buffer
             mouseY <= isoPos.y + squareSize/2 + 2    // Add 2px buffer
           ) {
-            // Only update if the hovered building has changed
-            if (this.hoveredBuildingIdRef !== building.id) {
-              hoverStateService.setHoveredBuilding(building.id);
-            }
+            hoverType = 'building';
+            hoverId = building.id;
+            hoverData = building;
             canvas.style.cursor = 'pointer';
             hoverDetected = true;
             break;
@@ -393,11 +394,10 @@ export class InteractionService {
             mouseY >= isoPos.y - pointSize - buffer && 
             mouseY <= isoPos.y + pointSize + buffer
           ) {
-            // Only update if the hovered building point has changed
             const pointId = `point-${point.lat}-${point.lng}`;
-            if (this.hoveredBuildingPointRef !== pointId) {
-              hoverStateService.setHoveredBuildingPoint(pointId, point);
-            }
+            hoverType = 'buildingPoint';
+            hoverId = pointId;
+            hoverData = point;
             canvas.style.cursor = 'pointer';
             hoverDetected = true;
             break;
@@ -421,7 +421,13 @@ export class InteractionService {
             const homeRadius = homeCitizens.length > 1 ? 25 : 20;
             
             if (Math.sqrt(Math.pow(mouseX - homeX, 2) + Math.pow(mouseY - homeY, 2)) <= homeRadius) {
-              hoverStateService.setHoveredCitizen(buildingId, 'home');
+              hoverType = 'citizen';
+              hoverId = buildingId;
+              hoverData = { 
+                buildingId, 
+                citizenType: 'home',
+                citizen: homeCitizens.length === 1 ? homeCitizens[0] : null
+              };
               canvas.style.cursor = 'pointer';
               hoverDetected = true;
               break;
@@ -437,7 +443,13 @@ export class InteractionService {
             const workRadius = workCitizens.length > 1 ? 25 : 20;
             
             if (Math.sqrt(Math.pow(mouseX - workX, 2) + Math.pow(mouseY - workY, 2)) <= workRadius) {
-              hoverStateService.setHoveredCitizen(buildingId, 'work');
+              hoverType = 'citizen';
+              hoverId = buildingId;
+              hoverData = { 
+                buildingId, 
+                citizenType: 'work',
+                citizen: workCitizens.length === 1 ? workCitizens[0] : null
+              };
               canvas.style.cursor = 'pointer';
               hoverDetected = true;
               break;
@@ -554,13 +566,13 @@ export class InteractionService {
         }
       }
       
-      // If no hover was detected, only clear hover states if we previously had something hovered
-      if (!hoverDetected) {
-        // Only clear if we were previously hovering over something
-        if (this.isHoveringRef) {
-          hoverStateService.clearAllHoverStates();
-          this.isHoveringRef = false;
-        }
+      // Update hover state based on what was detected
+      if (hoverDetected) {
+        hoverStateService.setHoverState(hoverType, hoverId, hoverData, { x: mouseX, y: mouseY });
+        this.isHoveringRef = true;
+      } else if (hoverStateService.isCurrentlyHovering()) {
+        hoverStateService.clearHoverState();
+        this.isHoveringRef = false;
         
         // Set cursor based on dragging state
         if (this.isDraggingRef) {
@@ -568,9 +580,6 @@ export class InteractionService {
         } else {
           canvas.style.cursor = 'grab';
         }
-      } else {
-        // We detected a hover, update the flag
-        this.isHoveringRef = true;
       }
     }, 200); // Increase from 150ms to 200ms throttle time to further reduce flickering
     

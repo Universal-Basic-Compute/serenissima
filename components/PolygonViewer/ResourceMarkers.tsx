@@ -50,10 +50,8 @@ export default function ResourceMarkers({
     throttle((locationKey: string, locationResources: any[]) => {
       setHoveredLocation(locationKey);
       
-      // Use HoverStateService to set resource hover state
-      // Create a unique ID for this resource group
-      const resourceIds = locationResources.map(r => r.id).join('_');
-      hoverStateService.setHoveredResource(resourceIds, {
+      // Use the new hover state system
+      hoverStateService.setHoverState('resource', locationKey, {
         locationKey,
         resources: locationResources,
         position: {
@@ -69,7 +67,7 @@ export default function ResourceMarkers({
   const handleMouseLeave = useMemo(() => 
     throttle(() => {
       setHoveredLocation(null);
-      hoverStateService.clearHoveredResource();
+      hoverStateService.clearHoverState();
     }, 100), // 100ms throttle
     []
   );

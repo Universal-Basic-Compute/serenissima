@@ -1,10 +1,9 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { hoverStateService, HoverState } from '@/lib/services/HoverStateService';
-import { eventBus, EventTypes } from '@/lib/utils/eventBus';
+import React, { useEffect, useState } from 'react';
+import { hoverStateService, HOVER_STATE_CHANGED, HoverState } from '@/lib/services/HoverStateService';
+import { eventBus } from '@/lib/utils/eventBus';
 import { buildingService } from '@/lib/services/BuildingService';
 import { assetService } from '@/lib/services/AssetService';
-import { useRouter } from 'next/navigation';
-import { throttle, debounce } from '@/lib/utils/performanceUtils';
+import { throttle } from '@/lib/utils/performanceUtils';
 
 // Helper function to get current username
 const getCurrentUsername = (): string | null => {
@@ -25,136 +24,37 @@ const getCurrentUsername = (): string | null => {
   }
 };
 
-interface HoverTooltipProps {
-  // Any props you need
-}
-
-export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
-  const router = useRouter();
+export const HoverTooltip: React.FC = () => {
   const [hoverState, setHoverState] = useState<HoverState>(hoverStateService.getState());
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [tooltipData, setTooltipData] = useState<any>(null);
   const [buildingImagePath, setBuildingImagePath] = useState<string | null>(null);
   
   useEffect(() => {
-    const handleHoverStateChanged = throttle((data: any) => {
-      console.log('TOOLTIP: Hover state changed event received:', data);
-      setHoverState(hoverStateService.getState());
+    const handleHoverStateChanged = throttle((newState: HoverState) => {
+      console.log('TOOLTIP: Hover state changed event received:', newState);
+      setHoverState(newState);
       
-      // Fetch additional data based on what's being hovered
-      if (data.type === 'building' && data.id) {
-        // Fetch building data
-        console.log('TOOLTIP: Fetching building data for:', data.id);
-        
-        fetch(`/api/buildings/${data.id}`)
-          .then(res => {
-            if (!res.ok) {
-              console.error(`Error fetching building data: HTTP ${res.status}`);
-              return null;
-            }
-            return res.json();
-          })
-          .then(async buildingData => {
-            if (buildingData) {
-              console.log('Building data received:', buildingData);
-              
-              // Handle different response formats
-              const actualBuildingData = buildingData.building || buildingData;
-              
-              // Get building image path
-              const imagePath = await assetService.getBuildingImagePath(actualBuildingData.type);
-              setBuildingImagePath(imagePath);
-              
-              setTooltipData({
-                type: 'building',
-                name: actualBuildingData.name || (actualBuildingData.type ? buildingService.formatBuildingType(actualBuildingData.type) : 'Unknown Building'),
-                buildingType: actualBuildingData.type,
-                owner: actualBuildingData.owner
-              });
-            } else {
-              // Set default tooltip data if building data couldn't be fetched
-              setTooltipData({
-                type: 'building',
-                name: 'Building',
-                buildingType: 'Unknown',
-                owner: 'Unknown'
-              });
-            }
-          })
-          .catch(err => {
-            console.error('Error fetching building data:', err);
-            // Set default tooltip data on error
-            setTooltipData({
-              type: 'building',
-              name: 'Building',
-              buildingType: 'Unknown',
-              owner: 'Unknown'
-            });
-          });
-      } else if (data.type === 'polygon' && data.id) {
-        // Fetch polygon data
-        fetch(`/api/polygons/${data.id}`)
-          .then(res => res.ok ? res.json() : null)
-          .then(polygonData => {
-            if (polygonData) {
-              setTooltipData({
-                type: 'polygon',
-                name: polygonData.historicalName || polygonData.id,
-                owner: polygonData.owner
-              });
-            }
-          })
-          .catch(err => console.error('Error fetching polygon data:', err));
-      } else if (data.type === 'citizen') {
-        // For citizens, we need to use the citizen data directly from the event
-        console.log('TOOLTIP: Citizen hover data received:', data);
-        
-        if (data.citizen) {
-          // If the citizen data is already provided in the event
-          console.log('TOOLTIP: Citizen data available in event:', {
-            name: `${data.citizen.firstname || data.citizen.FirstName || ''} ${data.citizen.lastname || data.citizen.LastName || ''}`,
-            socialClass: data.citizen.socialclass || data.citizen.SocialClass || data.citizen.socialClass || '',
-            imageUrl: data.citizen.imageurl || data.citizen.profileimage || data.citizen.ImageUrl
-          });
-          
-          setTooltipData({
-            type: 'citizen',
-            citizen: data.citizen,
-            buildingId: data.buildingId,
-            citizenType: data.citizenType
-          });
-        } else {
-          // If we only have the buildingId, we'll need to fetch the citizen data
-          console.log('TOOLTIP: No citizen data in event, only buildingId:', data.buildingId);
-          setTooltipData({
-            type: 'citizen',
-            buildingId: data.buildingId,
-            citizenType: data.citizenType
-          });
-        }
-      } else if (data.type === 'canalPoint') {
+      // Fetch additional data based on hover type
+      if (newState.type === 'building' && newState.id) {
+        fetchBuildingData(newState.id);
+      } else if (newState.type === 'polygon' && newState.id) {
+        fetchPolygonData(newState.id);
+      } else if (newState.type === 'citizen') {
+        handleCitizenHover(newState);
+      } else if (newState.type === 'resource') {
+        handleResourceHover(newState);
+      } else if (newState.type === 'canalPoint' && newState.id) {
         setTooltipData({
           type: 'canalPoint',
-          id: data.id
+          id: newState.id
         });
-      } else if (data.type === 'bridgePoint') {
+      } else if (newState.type === 'bridgePoint' && newState.id) {
         setTooltipData({
           type: 'bridgePoint',
-          id: data.id
+          id: newState.id
         });
-      } else if (data.type === 'resource') {
-        // For resources, use the data provided in the event
-        if (data.id && data.data) {
-          setTooltipData({
-            type: 'resource',
-            resources: data.data.resources,
-            locationKey: data.data.locationKey,
-            position: data.data.position
-          });
-        } else {
-          setTooltipData(null);
-        }
-      } else if (data.type === 'clear') {
+      } else if (newState.type === 'none') {
         setTooltipData(null);
       }
     }, 100); // 100ms throttle
@@ -163,28 +63,102 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
       setPosition({ x: e.clientX, y: e.clientY });
     };
     
-    // Assuming EventTypes.HOVER_STATE_CHANGED should be a valid event type
-    // If it doesn't exist in EventTypes, you need to add it there
-    const hoverStateChangedEvent = 'HOVER_STATE_CHANGED';
-    eventBus.subscribe(hoverStateChangedEvent, handleHoverStateChanged);
+    // Subscribe to events
+    eventBus.subscribe(HOVER_STATE_CHANGED, handleHoverStateChanged);
     window.addEventListener('mousemove', handleMouseMove);
     
     return () => {
-      // Use the same event name as above
-      const hoverStateChangedEvent = 'HOVER_STATE_CHANGED';
-      // Use the public method to unsubscribe
-      eventBus.subscribe(hoverStateChangedEvent, handleHoverStateChanged).unsubscribe();
+      eventBus.subscribe(HOVER_STATE_CHANGED, handleHoverStateChanged).unsubscribe();
       window.removeEventListener('mousemove', handleMouseMove);
       
       // Cancel throttled functions
       if (typeof handleHoverStateChanged.cancel === 'function') {
         handleHoverStateChanged.cancel();
       }
-      if (typeof handleMouseMove.cancel === 'function') {
-        handleMouseMove.cancel();
-      }
     };
   }, []);
+  
+  // Helper functions for fetching data
+  const fetchBuildingData = async (buildingId: string) => {
+    try {
+      console.log('TOOLTIP: Fetching building data for:', buildingId);
+      const response = await fetch(`/api/buildings/${buildingId}`);
+      if (!response.ok) {
+        console.error(`Error fetching building data: HTTP ${response.status}`);
+        return;
+      }
+      
+      const buildingData = await response.json();
+      if (buildingData) {
+        console.log('Building data received:', buildingData);
+        
+        // Handle different response formats
+        const actualBuildingData = buildingData.building || buildingData;
+        
+        // Get building image path
+        const imagePath = await assetService.getBuildingImagePath(actualBuildingData.type);
+        setBuildingImagePath(imagePath);
+        
+        setTooltipData({
+          type: 'building',
+          name: actualBuildingData.name || (actualBuildingData.type ? buildingService.formatBuildingType(actualBuildingData.type) : 'Unknown Building'),
+          buildingType: actualBuildingData.type,
+          owner: actualBuildingData.owner
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching building data:', error);
+    }
+  };
+  
+  const fetchPolygonData = async (polygonId: string) => {
+    try {
+      const response = await fetch(`/api/polygons/${polygonId}`);
+      if (!response.ok) return;
+      
+      const polygonData = await response.json();
+      if (polygonData) {
+        setTooltipData({
+          type: 'polygon',
+          name: polygonData.historicalName || polygonId,
+          owner: polygonData.owner
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching polygon data:', error);
+    }
+  };
+  
+  const handleCitizenHover = (state: HoverState) => {
+    if (state.data && state.data.citizen) {
+      console.log('TOOLTIP: Citizen data available:', state.data.citizen);
+      const citizen = state.data.citizen;
+      setTooltipData({
+        type: 'citizen',
+        citizen,
+        buildingId: state.data.buildingId,
+        citizenType: state.data.citizenType
+      });
+    } else if (state.data) {
+      console.log('TOOLTIP: No citizen data, only buildingId:', state.data.buildingId);
+      setTooltipData({
+        type: 'citizen',
+        buildingId: state.data.buildingId,
+        citizenType: state.data.citizenType
+      });
+    }
+  };
+  
+  const handleResourceHover = (state: HoverState) => {
+    if (state.data) {
+      setTooltipData({
+        type: 'resource',
+        resources: state.data.resources,
+        locationKey: state.data.locationKey,
+        position: state.data.position
+      });
+    }
+  };
   
   // Handle contract click
   const handleContractClick = (resource: any) => {
@@ -195,20 +169,14 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
       }));
       
       // Close the tooltip
-      hoverStateService.clearHoveredResource();
+      hoverStateService.clearHoverState();
     }
   };
   
   // Determine if we should show the tooltip
-  const shouldShow = 
-    hoverState.hoveredPolygonId !== null || 
-    hoverState.hoveredBuildingId !== null || 
-    hoverState.hoveredCanalPointId !== null || 
-    hoverState.hoveredBridgePointId !== null || 
-    hoverState.hoveredCitizenBuilding !== null ||
-    hoverState.hoveredResourceId !== null;
+  const shouldShow = hoverState.type !== 'none' && tooltipData !== null;
   
-  if (!shouldShow || !tooltipData) return null;
+  if (!shouldShow) return null;
   
   // Render different tooltip content based on what's hovered
   let tooltipContent = null;
