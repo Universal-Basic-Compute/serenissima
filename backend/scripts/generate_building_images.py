@@ -162,7 +162,8 @@ def generate_image(prompt: str, output_path: str) -> bool:
             json={
                 "prompt": prompt,
                 "style_type": "REALISTIC",
-                "rendering_speed": "DEFAULT"
+                "rendering_speed": "DEFAULT",
+                "model":"V_3"
             }
         )
         
