@@ -27,14 +27,14 @@ export async function GET(request: Request) {
     // Fetch citizens from Airtable
     const records = await base(AIRTABLE_CITIZENS_TABLE)
       .select({
-        fields: ['Citizenname', 'FirstName', 'LastName', 'CoatOfArmsImage'],
-        sort: [{ field: 'Citizenname', direction: 'asc' }]
+        fields: ['Username', 'FirstName', 'LastName', 'CoatOfArmsImage'],
+        sort: [{ field: 'Username', direction: 'asc' }]
       })
       .all();
     
     // Transform Airtable records to our citizen format
     const citizens = records.map(record => ({
-      citizenname: record.get('Citizenname') as string,
+      username: record.get('Username') as string,
       firstName: record.get('FirstName') as string || '',
       lastName: record.get('LastName') as string || '',
       coatOfArmsImage: record.get('CoatOfArmsImage') as string || null
@@ -51,19 +51,19 @@ export async function GET(request: Request) {
     // Return a fallback with sample citizens
     const sampleCitizens = [
       {
-        citizenname: 'compagno',
+        username: 'compagno',
         firstName: 'Compagno',
         lastName: 'Bot',
         coatOfArmsImage: null
       },
       {
-        citizenname: 'marco_polo',
+        username: 'marco_polo',
         firstName: 'Marco',
         lastName: 'Polo',
         coatOfArmsImage: null
       },
       {
-        citizenname: 'doge_venice',
+        username: 'doge_venice',
         firstName: 'Doge',
         lastName: 'of Venice',
         coatOfArmsImage: null
