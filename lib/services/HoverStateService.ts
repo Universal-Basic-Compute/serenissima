@@ -121,7 +121,7 @@ export class HoverStateService {
   public setHoveredCitizen(citizen: any, buildingId: string | null, type: 'home' | 'work' | null): void {
     console.log('HOVER_SERVICE: setHoveredCitizen called with:', {
       citizen: citizen ? {
-        id: citizen.citizenid || citizen.CitizenId || citizen.id,
+        username: citizen.username || citizen.citizenid || citizen.CitizenId || citizen.id,
         name: `${citizen.firstname || citizen.FirstName || ''} ${citizen.lastname || citizen.LastName || ''}`,
         socialClass: citizen.socialclass || citizen.SocialClass || citizen.socialClass || ''
       } : null,
