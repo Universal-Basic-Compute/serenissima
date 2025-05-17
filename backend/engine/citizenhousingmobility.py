@@ -244,7 +244,7 @@ def send_notifications(tables, citizen: Dict, old_building: Dict, new_building: 
     
     # Notification for old landlord
     if old_landlord and old_landlord != 'Unknown':
-        content = f"{citizen_name} has moved out of your property {old_building_name}"
+        content = f"🏠 **{citizen_name}** has moved out of your property **{old_building_name}**"
         details = {
             "event_type": "tenant_moved_out",
             "citizen_id": citizen['id'],
@@ -257,7 +257,7 @@ def send_notifications(tables, citizen: Dict, old_building: Dict, new_building: 
     
     # Notification for new landlord
     if new_landlord and new_landlord != 'Unknown':
-        content = f"{citizen_name} has moved into your property {new_building_name}"
+        content = f"🏠 **{citizen_name}** has moved into your property **{new_building_name}**"
         details = {
             "event_type": "tenant_moved_in",
             "citizen_id": citizen['id'],
@@ -269,7 +269,9 @@ def send_notifications(tables, citizen: Dict, old_building: Dict, new_building: 
         create_notification(tables, new_landlord, content, details)
     
     # Notification for citizen
-    content = f"You have moved from {old_building_name} to {new_building_name}, saving {old_rent - new_rent} ⚜️ Ducats in rent"
+    savings = old_rent - new_rent
+    formatted_savings = f"{savings:,.0f}" if savings >= 1000 else f"{savings:.1f}"
+    content = f"🏠 You have moved from **{old_building_name}** to **{new_building_name}**, saving **{formatted_savings} ⚜️ Ducats** in rent"
     details = {
         "event_type": "housing_changed",
         "old_building_id": old_building['id'],
@@ -286,7 +288,7 @@ def create_admin_summary(tables, mobility_summary) -> None:
     """Create a summary notification for the admin."""
     try:
         # Create notification content
-        content = f"Housing mobility report: {mobility_summary['total_moved']} citizens moved to cheaper housing"
+        content = f"🏠 **Housing Mobility Report**: **{mobility_summary['total_moved']}** citizens moved to cheaper housing"
         
         # Create detailed information
         details = {
