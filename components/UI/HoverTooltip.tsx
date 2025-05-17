@@ -157,7 +157,7 @@ export const HoverTooltip: React.FC<HoverTooltipProps> = (props) => {
       } else if (data.type === 'clear') {
         setTooltipData(null);
       }
-    };
+    },
     
     const handleMouseMove = (e: MouseEvent) => {
       setPosition({ x: e.clientX, y: e.clientY });
