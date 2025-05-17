@@ -32,6 +32,21 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
   const [playingMessageId, setPlayingMessageId] = useState<string | null>(null);
   
+  // Function to check if the current user is ConsiglioDeiDieci
+  const isConsiglioDeiDieci = () => {
+    try {
+      const profileStr = localStorage.getItem('citizenProfile');
+      if (profileStr) {
+        const profile = JSON.parse(profileStr);
+        return profile.username === 'ConsiglioDeiDieci';
+      }
+      return false;
+    } catch (error) {
+      console.error('Error checking if user is ConsiglioDeiDieci:', error);
+      return false;
+    }
+  };
+  
   // Add function to fetch citizen activities
   const fetchCitizenActivities = async (citizenId: string) => {
     if (!citizenId) return;

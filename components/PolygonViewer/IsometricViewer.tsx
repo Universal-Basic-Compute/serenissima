@@ -4510,36 +4510,38 @@ number => {
             {transportMode ? 'Disable Transport Mode' : 'Enable Transport Mode'}
           </button>
           
-          {/* Water Point Mode Toggle - only visible in transport view */}
-          <button
-            onClick={() => {
-              console.log('Toggling water point mode from:', waterPointMode);
-              setWaterPointMode(!waterPointMode);
-              if (transportMode) {
-                // Disable transport mode when enabling water point mode
-                setTransportMode(false);
-              }
-              if (waterRouteMode) {
-                // Disable water route mode when enabling water point mode
-                setWaterRouteMode(false);
-              }
-              // Load existing water points when enabling
-              if (!waterPointMode) {
-                fetchWaterPoints();
-              }
-            }}
-            className={`absolute bottom-52 left-20 ${
-              waterPointMode ? 'bg-blue-600' : 'bg-amber-600'
-            } text-white px-3 py-1 rounded text-sm flex items-center`}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12a8 8 0 01-8 8m0 0a8 8 0 01-8-8m8 8a8 8 0 018-8m-8 0a8 8 0 00-8 8m8-8v14m0-14v14" />
-            </svg>
-            {waterPointMode ? 'Disable Water Point Mode' : 'Enable Water Point Mode'}
-          </button>
+          {/* Water Point Mode Toggle - only visible in transport view for ConsiglioDeiDieci */}
+          {isConsiglioDeiDieci() && (
+            <button
+              onClick={() => {
+                console.log('Toggling water point mode from:', waterPointMode);
+                setWaterPointMode(!waterPointMode);
+                if (transportMode) {
+                  // Disable transport mode when enabling water point mode
+                  setTransportMode(false);
+                }
+                if (waterRouteMode) {
+                  // Disable water route mode when enabling water point mode
+                  setWaterRouteMode(false);
+                }
+                // Load existing water points when enabling
+                if (!waterPointMode) {
+                  fetchWaterPoints();
+                }
+              }}
+              className={`absolute bottom-52 left-20 ${
+                waterPointMode ? 'bg-blue-600' : 'bg-amber-600'
+              } text-white px-3 py-1 rounded text-sm flex items-center`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12a8 8 0 01-8 8m0 0a8 8 0 01-8-8m8 8a8 8 0 018-8m-8 0a8 8 0 00-8 8m8-8v14m0-14v14" />
+              </svg>
+              {waterPointMode ? 'Disable Water Point Mode' : 'Enable Water Point Mode'}
+            </button>
+          )}
           
-          {/* Water Route Mode Toggle - only visible in transport view */}
-          {activeView === 'transport' && (
+          {/* Water Route Mode Toggle - only visible in transport view for ConsiglioDeiDieci */}
+          {activeView === 'transport' && isConsiglioDeiDieci() && (
             <button
               onClick={() => {
                 console.log('Toggling water route mode from:', waterRouteMode);
@@ -4574,8 +4576,8 @@ number => {
             </button>
           )}
           
-          {/* Water Route Cancel Button - only visible when creating a route */}
-          {activeView === 'transport' && waterRouteMode && waterRouteStartPoint && (
+          {/* Water Route Cancel Button - only visible when creating a route for ConsiglioDeiDieci */}
+          {activeView === 'transport' && waterRouteMode && waterRouteStartPoint && isConsiglioDeiDieci() && (
             <button
               onClick={() => {
                 console.log('Canceling water route creation');
@@ -4594,8 +4596,8 @@ number => {
             </button>
           )}
           
-          {/* Water Route Status - only visible in water route mode */}
-          {activeView === 'transport' && waterRouteMode && (
+          {/* Water Route Status - only visible in water route mode for ConsiglioDeiDieci */}
+          {activeView === 'transport' && waterRouteMode && isConsiglioDeiDieci() && (
             <div className="absolute top-20 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded text-sm">
               {!waterRouteStartPoint ? (
                 <span>Click on a water point to start the route</span>
