@@ -370,6 +370,11 @@ export async function GET(request: NextRequest) {
     console.log(`- Storable resources: ${storableResources.length}`);
     console.log(`- Transformation recipes: ${transformationRecipes.length}`);
     
+    // Calculate total storage used
+    const totalStorageUsed = enhancedStoredResources.reduce((sum, resource) => {
+      return sum + (resource.amount || 0);
+    }, 0);
+    
     // 7. Return the comprehensive building resource information
     return NextResponse.json({
       success: true,
@@ -385,7 +390,10 @@ export async function GET(request: NextRequest) {
         storable: storableResources,
         transformationRecipes
       },
-      storageCapacity: buildingDefinition?.productionInformation?.storageCapacity || 0
+      storage: {
+        used: totalStorageUsed,
+        capacity: buildingDefinition?.productionInformation?.storageCapacity || 0
+      }
     });
     
   } catch (error) {
