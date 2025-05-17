@@ -1892,7 +1892,23 @@ number => {
         setTransportStartPoint,
         setTransportEndPoint,
         setTransportPath,
-        setSelectedCitizen,
+        setSelectedCitizen: (citizen) => {
+          // Ensure we're not passing the raw citizen object directly to React components
+          if (citizen) {
+            // Create a safe version with only the properties we need
+            const safeCitizen = {
+              id: citizen.CitizenId || citizen.citizenId || citizen.citizenid || citizen.id || '',
+              firstName: citizen.FirstName || citizen.firstName || citizen.firstname || '',
+              lastName: citizen.LastName || citizen.lastName || citizen.lastname || '',
+              socialClass: citizen.SocialClass || citizen.socialClass || citizen.socialclass || '',
+              imageUrl: citizen.ImageUrl || citizen.imageUrl || '',
+              // Add any other properties you need
+            };
+            setSelectedCitizen(safeCitizen);
+          } else {
+            setSelectedCitizen(null);
+          }
+        },
         setShowCitizenDetailsPanel,
         calculateTransportRoute,
         findBuildingPosition,

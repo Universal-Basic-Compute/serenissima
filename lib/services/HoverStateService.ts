@@ -161,8 +161,21 @@ export class HoverStateService {
    * Update hover state for a citizen
    */
   public setHoveredCitizen(buildingId: string | null, type: 'home' | 'work' | null, citizen: any = null): void {
+    // Create a safe version of the citizen object with only the properties we need
+    let safeCitizen = null;
+    if (citizen) {
+      safeCitizen = {
+        id: citizen.CitizenId || citizen.citizenId || citizen.citizenid || citizen.id || '',
+        firstName: citizen.FirstName || citizen.firstName || citizen.firstname || '',
+        lastName: citizen.LastName || citizen.lastName || citizen.lastname || '',
+        socialClass: citizen.SocialClass || citizen.socialClass || citizen.socialclass || '',
+        imageUrl: citizen.ImageUrl || citizen.imageUrl || '',
+        // Add any other properties you need
+      };
+    }
+    
     this.setHoverState('citizen', buildingId, { 
-      citizen, 
+      citizen: safeCitizen, 
       buildingId, 
       citizenType: type 
     });
