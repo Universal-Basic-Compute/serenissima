@@ -162,6 +162,28 @@ Every day at 2:00 PM UTC, the housing mobility system simulates citizens looking
 
 This process creates a dynamic housing contract with citizens seeking better economic opportunities, simulating the mobility of Renaissance Venice's population.
 
+### Social Class Updates (1:00 PM UTC)
+
+**Script**: `backend/engine/updateSocialClass.py`
+
+Every day at 1:00 PM UTC, the social class update system evaluates citizens for potential social mobility:
+
+1. The script checks all citizens and updates their social class based on:
+   - Entrepreneur status (citizens who run at least one building)
+   - Daily income (citizens with >100000 Ducats daily income become Cittadini)
+   - Prestige (citizens with >10000 Prestige become Nobili)
+2. The system applies rules in order of precedence:
+   - Highest priority: Citizens with Prestige > 10000 become Nobili
+   - Second priority: Citizens with DailyIncome > 100000 become Cittadini (if not already Nobili)
+   - Third priority: Entrepreneurs must be at least Popolani
+3. When a citizen's social class changes:
+   - Their citizen record is updated with the new social class
+   - A notification is sent explaining their elevation in status
+   - The reason for the change is included in the notification details
+4. The system tracks social mobility statistics and sends a summary notification to administrators
+
+This process simulates the social mobility of Renaissance Venice, where wealth, entrepreneurship, and prestige could elevate a citizen's social standing. It creates a dynamic society where citizens can rise through the social ranks based on their economic achievements and contributions to the city.
+
 ### Work Mobility (4:00 PM UTC)
 
 **Script**: `backend/engine/citizenworkmobility.py`

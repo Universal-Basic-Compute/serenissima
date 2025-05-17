@@ -42,6 +42,7 @@ def run_scheduled_tasks():
                 11: ("engine/immigration.py", "Immigration"),
                 12: ("engine/househomelesscitizens.py", "Housing homeless citizens"),
                 13: ("engine/decrees/affectpublicbuildingstolandowners.py", "Public buildings assignment"),
+                13: ("engine/updateSocialClass.py", "Social class updates"),
                 14: ("engine/citizenhousingmobility.py", "Citizen housing mobility"),
                 15: ("engine/dailyloanpayments.py", "Daily loan payments"),
                 16: ("engine/citizenworkmobility.py", "Citizen work mobility"),
