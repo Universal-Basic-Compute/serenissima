@@ -5,6 +5,7 @@ import Airtable from 'airtable';
 const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
 const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
 const AIRTABLE_CITIZENS_TABLE = process.env.AIRTABLE_CITIZENS_TABLE || 'CITIZENS';
+const AIRTABLE_BUILDINGS_TABLE = process.env.AIRTABLE_BUILDINGS_TABLE || 'BUILDINGS';
 
 // Cache for citizen data to reduce Airtable API calls
 const citizenCache = new Map<string, { data: any, timestamp: number }>();
@@ -75,7 +76,36 @@ export async function GET(request: NextRequest) {
         familyMotto: record.get('FamilyMotto') as string ?? null,
         walletAddress: record.get('Wallet') as string ?? null,
         ducats: record.get('Ducats') as number ?? 0,
+        worksFor: null, // Default value, will be populated if they work for someone
       };
+
+      // Find buildings where this citizen is an occupant
+      try {
+        const buildingRecords = await base(AIRTABLE_BUILDINGS_TABLE)
+          .select({
+            filterByFormula: `AND({Occupant} = "${citizenData.username}", {Category} = "business")`,
+            fields: ['RunBy', 'Name', 'Type']
+          })
+          .firstPage();
+
+        if (buildingRecords.length > 0) {
+          const building = buildingRecords[0];
+          const runBy = building.get('RunBy') as string;
+          
+          if (runBy) {
+            citizenData.worksFor = runBy;
+            
+            // Optionally, you could add more details about the workplace
+            citizenData.workplace = {
+              name: building.get('Name') as string,
+              type: building.get('Type') as string
+            };
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching building data:', error);
+        // Continue without the worksFor data if there's an error
+      }
 
       citizenCache.set(username, { data: citizenData, timestamp: now });
 
