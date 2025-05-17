@@ -164,7 +164,8 @@ def generate_image(prompt: str, citizen_id: str) -> Optional[str]:
             log.error(f"Failed to download image: {image_response.status_code} {image_response.reason}")
             return None
         
-        # Save the image to the public folder
+        # Save the image to the public folder using the username directly
+        # No need to look up the username - citizen_id is already the username
         image_path = os.path.join(CITIZENS_IMAGE_DIR, f"{citizen_id}.jpg")
         with open(image_path, 'wb') as f:
             for chunk in image_response.iter_content(chunk_size=8192):
@@ -227,10 +228,13 @@ def process_citizen(tables, citizen: Dict) -> bool:
     # Enhance the prompt
     enhanced_prompt = enhance_image_prompt(citizen)
     
+    # Get the citizen's username
+    citizen_username = citizen['fields'].get('Username', citizen_id)
+    
     # Generate the image
-    image_url = generate_image(enhanced_prompt, citizen_id)
+    image_url = generate_image(enhanced_prompt, citizen_username)
     if not image_url:
-        log.warning(f"Failed to generate image for citizen {citizen_id}")
+        log.warning(f"Failed to generate image for citizen {citizen_username}")
         return False
     
     # Update Airtable with the image URL
@@ -246,7 +250,7 @@ def process_specific_citizen(tables, citizen_id: str, image_prompt: str) -> bool
         log.warning(f"No image prompt provided for citizen {citizen_id}")
         return False
     
-    # Generate the image
+    # Generate the image - citizen_id should be the username here
     image_url = generate_image(image_prompt, citizen_id)
     if not image_url:
         log.warning(f"Failed to generate image for citizen {citizen_id}")
