@@ -114,7 +114,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
       if (response.ok) {
         const data = await response.json();
         if (Array.isArray(data)) {
-          setCitizens(data);
+          setCitizensList(data);
           
           // Remove building grouping completely
           setCitizensByBuilding({});
@@ -128,7 +128,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   }, []);
   
   // Citizen-related state
-  const [citizens, setCitizens] = useState<any[]>([]);
+  const [citizensList, setCitizensList] = useState<any[]>([]);
   const [citizensByBuilding, setCitizensByBuilding] = useState<Record<string, any[]>>({});
   const [citizensLoaded, setCitizensLoaded] = useState<boolean>(false);
   const [selectedCitizen, setSelectedCitizen] = useState<any>(null);
@@ -1410,9 +1410,9 @@ number => {
     }
     
     // Check a few citizen images
-    if (citizens.length > 0) {
-      for (let i = 0; i < Math.min(5, citizens.length); i++) {
-        const citizen = citizens[i];
+    if (citizensList.length > 0) {
+      for (let i = 0; i < Math.min(5, citizensList.length); i++) {
+        const citizen = citizensList[i];
         // Skip citizens without valid IDs
         if (!citizen || !citizen.citizenid) {
           console.warn('Skipping citizen without valid ID:', citizen);
@@ -1448,7 +1448,7 @@ number => {
     if (activeView === 'citizens' && citizensLoaded) {
       checkImagePaths();
     }
-  }, [activeView, citizensLoaded, citizens]);
+  }, [activeView, citizensLoaded, citizensList]);
   
   
   // Listen for loadCitizens event
@@ -4064,10 +4064,10 @@ number => {
               console.log('Citizen images check result:', data);
               
               // Also check a few specific citizen images
-              if (citizens.length > 0) {
+              if (citizensList.length > 0) {
                 console.log('Checking specific citizen images...');
-                for (let i = 0; i < Math.min(3, citizens.length); i++) {
-                  const citizen = citizens[i];
+                for (let i = 0; i < Math.min(3, citizensList.length); i++) {
+                  const citizen = citizensList[i];
                   
                   // Try multiple possible paths for each citizen
                   const urlsToTry = [
