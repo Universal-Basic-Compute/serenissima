@@ -106,26 +106,26 @@ def get_business_building_owners(tables) -> List[str]:
         log.error(f"Error fetching business building owners: {e}")
         return []
 
-def get_land_owners(tables) -> List[str]:
-    """Fetch citizens who own at least one land plot."""
-    log.info("Fetching land owners...")
+def get_land_users(tables) -> List[str]:
+    """Fetch citizens who use at least one land plot."""
+    log.info("Fetching land users...")
     
     try:
-        # Get all lands with non-empty Owner field
-        formula = "NOT(OR({Owner} = '', {Owner} = BLANK()))"
+        # Get all lands with non-empty User field
+        formula = "NOT(OR({User} = '', {User} = BLANK()))"
         lands = tables['lands'].all(formula=formula)
         
-        # Extract unique citizen IDs who own lands
-        land_owner_ids = set()
+        # Extract unique citizen IDs who use lands
+        land_user_ids = set()
         for land in lands:
-            owner = land['fields'].get('Owner')
-            if owner:
-                land_owner_ids.add(owner)
+            user = land['fields'].get('User')
+            if user:
+                land_user_ids.add(user)
         
-        log.info(f"Found {len(land_owner_ids)} citizens who own land")
-        return list(land_owner_ids)
+        log.info(f"Found {len(land_user_ids)} citizens who use land")
+        return list(land_user_ids)
     except Exception as e:
-        log.error(f"Error fetching land owners: {e}")
+        log.error(f"Error fetching land users: {e}")
         return []
 
 def get_all_citizens(tables) -> List[Dict]:
@@ -172,7 +172,7 @@ def create_admin_summary(tables, update_summary) -> None:
             "updates_by_reason": {
                 "entrepreneur": update_summary['by_reason']['entrepreneur'],
                 "business_owner": update_summary['by_reason']['business_owner'],
-                "land_owner": update_summary['by_reason']['land_owner'],
+                "land_user": update_summary['by_reason']['land_user'],
                 "daily_income": update_summary['by_reason']['daily_income'],
                 "prestige": update_summary['by_reason']['prestige']
             },
@@ -211,9 +211,9 @@ def update_social_class(dry_run: bool = False):
     business_owner_ids = get_business_building_owners(tables)
     log.info(f"Found {len(business_owner_ids)} business building owners: {business_owner_ids}")
     
-    # Get all land owners
-    land_owner_ids = get_land_owners(tables)
-    log.info(f"Found {len(land_owner_ids)} land owners: {land_owner_ids}")
+    # Get all land users
+    land_user_ids = get_land_users(tables)
+    log.info(f"Found {len(land_user_ids)} land users: {land_user_ids}")
     
     # Get all citizens
     citizens = get_all_citizens(tables)
@@ -252,7 +252,7 @@ def update_social_class(dry_run: bool = False):
         "by_reason": {
             "entrepreneur": 0,
             "business_owner": 0,
-            "land_owner": 0,
+            "land_user": 0,
             "daily_income": 0,
             "prestige": 0
         },
@@ -279,15 +279,15 @@ def update_social_class(dry_run: bool = False):
         new_social_class = current_social_class
         update_reason = None
         
-        # Check if citizen is an entrepreneur, business owner, or land owner by Username
+        # Check if citizen is an entrepreneur, business owner, or land user by Username
         is_entrepreneur = username in entrepreneur_ids
         is_business_owner = username in business_owner_ids
-        is_land_owner = username in land_owner_ids
+        is_land_user = username in land_user_ids
         
-        # Add detailed logging for entrepreneurs, business owners, and land owners
-        if is_entrepreneur or is_business_owner or is_land_owner:
+        # Add detailed logging for entrepreneurs, business owners, and land users
+        if is_entrepreneur or is_business_owner or is_land_user:
             log.info(f"Processing citizen {citizen_id} - Current class: '{current_social_class}'")
-            log.info(f"  Is entrepreneur: {is_entrepreneur}, Is business owner: {is_business_owner}, Is land owner: {is_land_owner}")
+            log.info(f"  Is entrepreneur: {is_entrepreneur}, Is business owner: {is_business_owner}, Is land user: {is_land_user}")
             log.info(f"  Daily income: {daily_income}, Prestige: {prestige}")
         
         try:
@@ -314,19 +314,19 @@ def update_social_class(dry_run: bool = False):
                 update_reason = "daily_income"
                 log.info(f"  Promoting {citizen_id} to Cittadini due to daily income > 100000")
             
-            # Rule 3: Land owners must be at least Cittadini
-            elif is_land_owner:
+            # Rule 3: Land users must be at least Cittadini
+            elif is_land_user:
                 current_index = SOCIAL_CLASSES.index(current_social_class)
                 cittadini_index = SOCIAL_CLASSES.index("Cittadini")
                 
-                log.info(f"  Land owner check - Current index: {current_index}, Cittadini index: {cittadini_index}")
+                log.info(f"  Land user check - Current index: {current_index}, Cittadini index: {cittadini_index}")
                 
                 if current_index < cittadini_index:
                     new_social_class = "Cittadini"
-                    update_reason = "land_owner"
-                    log.info(f"  Promoting land owner {citizen_id} from {current_social_class} to Cittadini")
+                    update_reason = "land_user"
+                    log.info(f"  Promoting land user {citizen_id} from {current_social_class} to Cittadini")
                 else:
-                    log.info(f"  No promotion needed for land owner {citizen_id}, already {current_social_class}")
+                    log.info(f"  No promotion needed for land user {citizen_id}, already {current_social_class}")
             
             # Rule 4: Business building owners must be at least Popolani
             elif is_business_owner:
