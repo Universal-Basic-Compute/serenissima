@@ -237,6 +237,7 @@ def get_citizen_relevancies(tables, username: str) -> List[Dict]:
 
 def get_building_tier(building_type: str, building_types: Dict) -> int:
     """Determine the tier of a building type."""
+    # First check if the tier is explicitly defined in the building_types data
     if building_type in building_types and "tier" in building_types[building_type]:
         return building_types[building_type]["tier"]
     
@@ -244,22 +245,37 @@ def get_building_tier(building_type: str, building_types: Dict) -> int:
     tier_mapping = {
         # Tier 5 (Nobili only)
         "doge_palace": 5, "basilica": 5, "arsenal_gate": 5, "grand_canal_palace": 5,
+        "procuratie": 5, "ducal_chapel": 5, "state_archives": 5, "senate_hall": 5,
         
         # Tier 4 (Nobili only)
         "mint": 4, "arsenal": 4, "customs_house": 4, "grand_theater": 4,
+        "admiralty": 4, "treasury": 4, "council_chamber": 4, "embassy": 4,
+        "magistrate": 4, "naval_academy": 4, "opera_house": 4,
         
         # Tier 3 (Cittadini and above)
         "fondaco": 3, "shipyard": 3, "eastern_merchant_house": 3, "bank": 3,
+        "trading_house": 3, "counting_house": 3, "merchant_guild": 3, "spice_warehouse": 3,
+        "silk_exchange": 3, "glass_factory": 3, "printing_press": 3, "apothecary": 3,
         
         # Tier 2 (Popolani and above)
         "bottega": 2, "glassblower": 2, "merceria": 2, "canal_house": 2,
+        "artisan_workshop": 2, "sculptor_studio": 2, "goldsmith": 2, "lace_maker": 2,
+        "mask_maker": 2, "weaver": 2, "carpenter": 2, "stonemason": 2, "painter_studio": 2,
         
         # Tier 1 (All classes)
         "market_stall": 1, "fisherman_cottage": 1, "blacksmith": 1, "bakery": 1,
-        "dock": 1, "bridge": 1, "workshop": 1, "tavern": 1
+        "dock": 1, "bridge": 1, "workshop": 1, "tavern": 1, "gondola_station": 1,
+        "small_shop": 1, "fishmonger": 1, "butcher": 1, "cobbler": 1, "tailor": 1,
+        "barber": 1, "inn": 1, "laundry": 1, "water_well": 1, "vegetable_garden": 1
     }
     
-    return tier_mapping.get(building_type.lower(), 1)  # Default to tier 1 if unknown
+    # Check if the building type is in our mapping
+    if building_type.lower() in tier_mapping:
+        return tier_mapping[building_type.lower()]
+    
+    # If not found in the mapping, default to tier 5 (most restrictive)
+    # This ensures unknown building types are only available to Nobili
+    return 5  # Default to tier 5 if unknown to ensure proper restrictions
 
 def get_building_types_from_api() -> Dict:
     """Get information about different building types from the API."""
