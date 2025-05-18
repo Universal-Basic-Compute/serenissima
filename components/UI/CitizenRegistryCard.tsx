@@ -66,7 +66,7 @@ const CitizenRegistryCard: React.FC<CitizenRegistryCardProps> = ({
       {/* Current user indicator */}
       {isCurrentUser && (
         <div className="absolute -top-2 -right-2 bg-purple-600 text-white text-xs px-2 py-1 rounded-full">
-          Tu
+          You
         </div>
       )}
       
@@ -131,11 +131,11 @@ const CitizenRegistryCard: React.FC<CitizenRegistryCardProps> = ({
       {/* Action buttons */}
       <div className="mt-3 pt-2 border-t border-amber-100 flex justify-between">
         <button className="text-xs text-amber-700 hover:text-amber-900 transition-colors">
-          Visualizza Profilo
+          View Profile
         </button>
         {!isCurrentUser && (
           <button className="text-xs text-amber-700 hover:text-amber-900 transition-colors">
-            Invia Messaggio
+            Send Message
           </button>
         )}
       </div>

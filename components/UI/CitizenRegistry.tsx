@@ -195,7 +195,7 @@ const CitizenRegistry: React.FC<CitizenRegistryProps> = ({ onClose }) => {
         {activeTab === 'registro' ? (
           <>
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-              <h3 className="text-xl font-serif text-amber-900">Cittadini di Venezia</h3>
+              <h3 className="text-xl font-serif text-amber-900">Citizens of Venice</h3>
               
               {/* Search and filter controls */}
               <div className="flex flex-col md:flex-row gap-3">
@@ -203,7 +203,7 @@ const CitizenRegistry: React.FC<CitizenRegistryProps> = ({ onClose }) => {
                 <div className="relative">
                   <input
                     type="text"
-                    placeholder="Cerca cittadino..."
+                    placeholder="Search citizen..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10 pr-4 py-2 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
@@ -219,9 +219,9 @@ const CitizenRegistry: React.FC<CitizenRegistryProps> = ({ onClose }) => {
                   onChange={(e) => setSortOption(e.target.value as 'wealth' | 'name' | 'class')}
                   className="px-4 py-2 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
                 >
-                  <option value="wealth">Ordina per Ricchezza</option>
-                  <option value="name">Ordina per Nome</option>
-                  <option value="class">Ordina per Classe Sociale</option>
+                  <option value="wealth">Sort by Wealth</option>
+                  <option value="name">Sort by Name</option>
+                  <option value="class">Sort by Social Class</option>
                 </select>
                 
                 {/* Class filter dropdown */}
@@ -230,7 +230,7 @@ const CitizenRegistry: React.FC<CitizenRegistryProps> = ({ onClose }) => {
                   onChange={(e) => setFilterClass(e.target.value)}
                   className="px-4 py-2 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
                 >
-                  <option value="all">Tutte le Classi</option>
+                  <option value="all">All Classes</option>
                   {socialClasses.map(socialClass => (
                     <option key={socialClass} value={socialClass}>{socialClass}</option>
                   ))}
@@ -240,11 +240,11 @@ const CitizenRegistry: React.FC<CitizenRegistryProps> = ({ onClose }) => {
             
             {isLoading ? (
               <div className="flex justify-center items-center h-64">
-                <div className="text-amber-800">Caricamento del registro...</div>
+                <div className="text-amber-800">Loading registry...</div>
               </div>
             ) : filteredAndSortedCitizens.length === 0 ? (
               <div className="flex justify-center items-center h-64">
-                <div className="text-amber-800">Nessun cittadino trovato</div>
+                <div className="text-amber-800">No citizens found</div>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -270,7 +270,7 @@ const CitizenRegistry: React.FC<CitizenRegistryProps> = ({ onClose }) => {
                         <div className="mt-2 bg-amber-50 border border-amber-200 rounded-lg overflow-hidden">
                           <details className="group">
                             <summary className="flex justify-between items-center p-3 bg-amber-100 cursor-pointer">
-                              <span className="font-medium text-amber-800">Relazioni ({citizenRelevancies.length})</span>
+                              <span className="font-medium text-amber-800">Relations ({citizenRelevancies.length})</span>
                               <svg className="w-5 h-5 text-amber-700 group-open:rotate-180 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                 <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                               </svg>
@@ -311,12 +311,12 @@ const CitizenRegistry: React.FC<CitizenRegistryProps> = ({ onClose }) => {
             
             {/* Results count */}
             <div className="mt-4 text-sm text-amber-700">
-              Mostrando {filteredAndSortedCitizens.length} di {citizens.length} cittadini
+              Showing {filteredAndSortedCitizens.length} of {citizens.length} citizens
             </div>
           </>
         ) : (
           <div className="flex justify-center items-center h-64">
-            <div className="text-amber-800 italic">La Carta Mercantile sarà disponibile presto...</div>
+            <div className="text-amber-800 italic">The Merchant's Map will be available soon...</div>
           </div>
         )}
       </div>
