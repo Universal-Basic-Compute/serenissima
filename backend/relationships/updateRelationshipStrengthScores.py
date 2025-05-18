@@ -71,33 +71,32 @@ def create_admin_notification(tables, title: str, message: str) -> bool:
         log.error(f"Failed to create admin notification: {e}")
         return False
 
-def get_ai_citizens(tables) -> List[Dict]:
-    """Get all AI citizens from Airtable."""
+def get_all_citizens(tables) -> List[Dict]:
+    """Get all citizens from Airtable."""
     try:
-        log.info("Fetching AI citizens from Airtable...")
+        log.info("Fetching all citizens from Airtable...")
         
-        # Get all citizens marked as AI
-        ai_citizens = tables['citizens'].all(
-            formula="{IsAI} = TRUE()",
+        # Get all citizens (not just AI citizens)
+        citizens = tables['citizens'].all(
             fields=["Username", "FirstName", "LastName"]
         )
         
-        log.info(f"Found {len(ai_citizens)} AI citizens")
-        return ai_citizens
+        log.info(f"Found {len(citizens)} citizens")
+        return citizens
     except Exception as e:
-        log.error(f"Error fetching AI citizens: {e}")
+        log.error(f"Error fetching citizens: {e}")
         return []
 
-def get_recent_relevancies(tables, ai_username: str) -> List[Dict]:
-    """Get recent relevancies for an AI citizen."""
+def get_recent_relevancies(tables, username: str) -> List[Dict]:
+    """Get recent relevancies for a citizen."""
     try:
-        log.info(f"Fetching recent relevancies for AI citizen: {ai_username}")
+        log.info(f"Fetching recent relevancies for citizen: {username}")
         
         # Calculate timestamp for 24 hours ago
         twenty_four_hours_ago = (datetime.now() - timedelta(hours=24)).isoformat()
         
-        # Fetch relevancies created in the last 24 hours for this AI
-        formula = f"AND({{RelevantToCitizen}} = '{ai_username}', IS_AFTER({{CreatedAt}}, '{twenty_four_hours_ago}'))"
+        # Fetch relevancies created in the last 24 hours for this citizen
+        formula = f"AND({{RelevantToCitizen}} = '{username}', IS_AFTER({{CreatedAt}}, '{twenty_four_hours_ago}'))"
         
         relevancies = tables['relevancies'].all(
             formula=formula,
@@ -106,19 +105,19 @@ def get_recent_relevancies(tables, ai_username: str) -> List[Dict]:
             max_records=1000  # Limit to last 1000 relevancies
         )
         
-        log.info(f"Found {len(relevancies)} recent relevancies for {ai_username}")
+        log.info(f"Found {len(relevancies)} recent relevancies for {username}")
         return relevancies
     except Exception as e:
-        log.error(f"Error fetching relevancies for {ai_username}: {e}")
+        log.error(f"Error fetching relevancies for {username}: {e}")
         return []
 
-def get_existing_relationships(tables, ai_username: str) -> Dict[str, Dict]:
-    """Get existing relationships for an AI citizen."""
+def get_existing_relationships(tables, username: str) -> Dict[str, Dict]:
+    """Get existing relationships for a citizen."""
     try:
-        log.info(f"Fetching existing relationships for AI citizen: {ai_username}")
+        log.info(f"Fetching existing relationships for citizen: {username}")
         
-        # Fetch relationships where this AI is the source
-        formula = f"{{AICitizen}} = '{ai_username}'"
+        # Fetch relationships where this citizen is the source
+        formula = f"{{AICitizen}} = '{username}'"
         
         relationships = tables['relationships'].all(
             formula=formula,
@@ -136,17 +135,17 @@ def get_existing_relationships(tables, ai_username: str) -> Dict[str, Dict]:
                     'lastUpdated': record['fields'].get('LastUpdated')
                 }
         
-        log.info(f"Found {len(relationship_map)} existing relationships for {ai_username}")
+        log.info(f"Found {len(relationship_map)} existing relationships for {username}")
         return relationship_map
     except Exception as e:
-        log.error(f"Error fetching relationships for {ai_username}: {e}")
+        log.error(f"Error fetching relationships for {username}: {e}")
         return {}
 
-def update_relationship_scores(tables, ai_citizen: Dict, relevancies: List[Dict], existing_relationships: Dict[str, Dict]) -> Dict[str, float]:
+def update_relationship_scores(tables, citizen: Dict, relevancies: List[Dict], existing_relationships: Dict[str, Dict]) -> Dict[str, float]:
     """Update relationship strength scores based on relevancies."""
     try:
-        ai_username = ai_citizen['fields']['Username']
-        log.info(f"Updating relationship scores for {ai_username}")
+        username = citizen['fields']['Username']
+        log.info(f"Updating relationship scores for {username}")
         
         # Track new scores for each target citizen
         new_scores = {}
@@ -155,8 +154,8 @@ def update_relationship_scores(tables, ai_citizen: Dict, relevancies: List[Dict]
         for relevancy in relevancies:
             target_citizen = relevancy['fields'].get('TargetCitizen')
             
-            # Skip if no target citizen or if target is the AI itself
-            if not target_citizen or target_citizen == ai_username:
+            # Skip if no target citizen or if target is the citizen itself
+            if not target_citizen or target_citizen == username:
                 continue
             
             # Get the relevancy score
@@ -195,7 +194,7 @@ def update_relationship_scores(tables, ai_citizen: Dict, relevancies: List[Dict]
             else:
                 # Create new relationship
                 tables['relationships'].create({
-                    'AICitizen': ai_username,
+                    'AICitizen': username,  # Keep the field name as is for compatibility
                     'TargetCitizen': target_citizen,
                     'StrengthScore': score,
                     'LastUpdated': datetime.now().isoformat()
@@ -203,10 +202,10 @@ def update_relationship_scores(tables, ai_citizen: Dict, relevancies: List[Dict]
                 
                 created_count += 1
         
-        log.info(f"Updated {updated_count} and created {created_count} relationships for {ai_username}")
+        log.info(f"Updated {updated_count} and created {created_count} relationships for {username}")
         return new_scores
     except Exception as e:
-        log.error(f"Error updating relationship scores for {ai_username}: {e}")
+        log.error(f"Error updating relationship scores for {username}: {e}")
         return {}
 
 def update_relationship_strength_scores():
@@ -215,45 +214,45 @@ def update_relationship_strength_scores():
         # Initialize Airtable
         tables = initialize_airtable()
         
-        # Get all AI citizens
-        ai_citizens = get_ai_citizens(tables)
+        # Get all citizens
+        citizens = get_all_citizens(tables)
         
-        if not ai_citizens:
-            log.warning("No AI citizens found, nothing to do")
+        if not citizens:
+            log.warning("No citizens found, nothing to do")
             return
         
         # Track statistics for notification
         stats = {
-            'total_ai_citizens': len(ai_citizens),
+            'total_citizens': len(citizens),
             'total_relevancies_processed': 0,
             'total_relationships_updated': 0,
             'total_relationships_created': 0,
-            'ai_details': {}
+            'citizen_details': {}
         }
         
-        # Process each AI citizen
-        for ai_citizen in ai_citizens:
-            ai_username = ai_citizen['fields']['Username']
+        # Process each citizen
+        for citizen in citizens:
+            username = citizen['fields']['Username']
             
-            # Get recent relevancies for this AI
-            relevancies = get_recent_relevancies(tables, ai_username)
+            # Get recent relevancies for this citizen
+            relevancies = get_recent_relevancies(tables, username)
             stats['total_relevancies_processed'] += len(relevancies)
             
-            # Get existing relationships for this AI
-            existing_relationships = get_existing_relationships(tables, ai_username)
+            # Get existing relationships for this citizen
+            existing_relationships = get_existing_relationships(tables, username)
             
             # Update relationship scores
-            new_scores = update_relationship_scores(tables, ai_citizen, relevancies, existing_relationships)
+            new_scores = update_relationship_scores(tables, citizen, relevancies, existing_relationships)
             
             # Update statistics
-            stats['ai_details'][ai_username] = {
+            stats['citizen_details'][username] = {
                 'relevancies_processed': len(relevancies),
                 'relationships_updated': len(set(existing_relationships.keys()) & set(new_scores.keys())),
                 'relationships_created': len(set(new_scores.keys()) - set(existing_relationships.keys()))
             }
             
-            stats['total_relationships_updated'] += stats['ai_details'][ai_username]['relationships_updated']
-            stats['total_relationships_created'] += stats['ai_details'][ai_username]['relationships_created']
+            stats['total_relationships_updated'] += stats['citizen_details'][username]['relationships_updated']
+            stats['total_relationships_created'] += stats['citizen_details'][username]['relationships_created']
             
             # Add a small delay to avoid rate limiting
             time.sleep(0.5)
@@ -261,16 +260,16 @@ def update_relationship_strength_scores():
         # Create admin notification with summary
         notification_title = "Relationship Strength Scores Updated"
         notification_message = (
-            f"Updated relationship strength scores for {stats['total_ai_citizens']} AI citizens.\n"
+            f"Updated relationship strength scores for {stats['total_citizens']} citizens.\n"
             f"Processed {stats['total_relevancies_processed']} relevancies.\n"
             f"Updated {stats['total_relationships_updated']} existing relationships.\n"
             f"Created {stats['total_relationships_created']} new relationships.\n\n"
-            "Details by AI citizen:\n"
+            "Details by citizen:\n"
         )
         
-        for ai_username, details in stats['ai_details'].items():
+        for username, details in stats['citizen_details'].items():
             notification_message += (
-                f"- {ai_username}: Processed {details['relevancies_processed']} relevancies, "
+                f"- {username}: Processed {details['relevancies_processed']} relevancies, "
                 f"updated {details['relationships_updated']} relationships, "
                 f"created {details['relationships_created']} new relationships.\n"
             )

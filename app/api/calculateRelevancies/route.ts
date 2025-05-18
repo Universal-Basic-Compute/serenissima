@@ -9,33 +9,32 @@ const AIRTABLE_LANDS_TABLE = process.env.AIRTABLE_LANDS_TABLE || 'LANDS';
 const AIRTABLE_CITIZENS_TABLE = process.env.AIRTABLE_CITIZENS_TABLE || 'CITIZENS';
 const AIRTABLE_RELEVANCIES_TABLE = 'RELEVANCIES';
 
-// Helper function to get all AI citizens who own lands
-async function getAllAiCitizensWithLands(base: any): Promise<string[]> {
+// Helper function to get all citizens who own lands
+async function getAllCitizensWithLands(base: any): Promise<string[]> {
   try {
-    console.log('Fetching AI citizens who own lands...');
+    console.log('Fetching citizens who own lands...');
     
-    // First get all AI citizens
-    const aiCitizens = await base(AIRTABLE_CITIZENS_TABLE)
+    // Get all citizens (not just AI citizens)
+    const citizens = await base(AIRTABLE_CITIZENS_TABLE)
       .select({
-        filterByFormula: '{IsAI} = TRUE()',
         fields: ['Username']
       })
       .all();
     
-    const aiUsernames = aiCitizens.map(citizen => citizen.get('Username')).filter(Boolean);
+    const usernames = citizens.map(citizen => citizen.get('Username')).filter(Boolean);
     
-    if (aiUsernames.length === 0) {
-      console.log('No AI citizens found');
+    if (usernames.length === 0) {
+      console.log('No citizens found');
       return [];
     }
     
-    console.log(`Found ${aiUsernames.length} AI citizens`);
+    console.log(`Found ${usernames.length} citizens`);
     
-    // Now check which of these AI citizens own lands
-    const aiOwnersWithLands = [];
+    // Now check which of these citizens own lands
+    const ownersWithLands = [];
     
-    for (const username of aiUsernames) {
-      // Check if this AI owns any lands
+    for (const username of usernames) {
+      // Check if this citizen owns any lands
       const landsOwned = await base(AIRTABLE_LANDS_TABLE)
         .select({
           filterByFormula: `{Owner} = '${username}'`,
@@ -45,14 +44,14 @@ async function getAllAiCitizensWithLands(base: any): Promise<string[]> {
         .firstPage();
       
       if (landsOwned.length > 0) {
-        aiOwnersWithLands.push(username);
+        ownersWithLands.push(username);
       }
     }
     
-    console.log(`Found ${aiOwnersWithLands.length} AI citizens who own lands`);
-    return aiOwnersWithLands;
+    console.log(`Found ${ownersWithLands.length} citizens who own lands`);
+    return ownersWithLands;
   } catch (error) {
-    console.error('Error fetching AI citizens with lands:', error);
+    console.error('Error fetching citizens with lands:', error);
     return [];
   }
 }
@@ -345,11 +344,11 @@ export async function GET(request: NextRequest) {
     
     // Get query parameters
     const { searchParams } = new URL(request.url);
-    const aiUsername = searchParams.get('ai');
+    const username = searchParams.get('username') || searchParams.get('ai'); // Support both parameters
     const calculateAll = searchParams.get('calculateAll') === 'true';
     const typeFilter = searchParams.get('type');
     
-    console.log(`Request parameters: aiUsername=${aiUsername}, calculateAll=${calculateAll}, typeFilter=${typeFilter}`);
+    console.log(`Request parameters: username=${username}, calculateAll=${calculateAll}, typeFilter=${typeFilter}`);
     
     // Fetch all lands from Airtable
     console.log('Fetching all lands from Airtable...');
@@ -365,18 +364,18 @@ export async function GET(request: NextRequest) {
     // Fetch land groups data
     const landGroups = await fetchLandGroups();
     
-    // If calculateAll is true, calculate for all AI citizens who own lands
+    // If calculateAll is true, calculate for all citizens who own lands
     if (calculateAll) {
-      console.log('Calculating relevancies for all AI citizens who own lands');
+      console.log('Calculating relevancies for all citizens who own lands');
       
-      // Get all AI citizens who own lands
-      const aiOwnersWithLands = await getAllAiCitizensWithLands(base);
+      // Get all citizens who own lands
+      const ownersWithLands = await getAllCitizensWithLands(base);
       
-      if (aiOwnersWithLands.length === 0) {
-        console.log('No AI citizens with lands found');
+      if (ownersWithLands.length === 0) {
+        console.log('No citizens with lands found');
         return NextResponse.json({
           success: true,
-          message: 'No AI citizens with lands found'
+          message: 'No citizens with lands found'
         });
       }
       
@@ -393,31 +392,31 @@ export async function GET(request: NextRequest) {
       const results = {};
       let totalRelevanciesCreated = 0;
       
-      // Calculate and save relevancies for each AI citizen
-      for (const aiOwner of aiOwnersWithLands) {
-        console.log(`Calculating relevancies for AI: ${aiOwner}`);
+      // Calculate and save relevancies for each citizen
+      for (const owner of ownersWithLands) {
+        console.log(`Calculating relevancies for citizen: ${owner}`);
         
-        // Get lands owned by this AI
-        const aiLands = allLands.filter(land => land.owner === aiOwner);
+        // Get lands owned by this citizen
+        const ownerLands = allLands.filter(land => land.owner === owner);
         
-        if (aiLands.length === 0) {
-          console.log(`No lands found for AI: ${aiOwner}, but will still calculate land domination relevancy`);
+        if (ownerLands.length === 0) {
+          console.log(`No lands found for citizen: ${owner}, but will still calculate land domination relevancy`);
           
-          // For AIs with no lands, we only calculate land domination relevancy
+          // For citizens with no lands, we only calculate land domination relevancy
           try {
             // Save land domination relevancies to Airtable
-            const relevanciesCreated = await saveRelevancies(base, aiOwner, landDominationRelevancies, allLands, allCitizens);
+            const relevanciesCreated = await saveRelevancies(base, owner, landDominationRelevancies, allLands, allCitizens);
             
             totalRelevanciesCreated += relevanciesCreated;
             
             // Store results
-            results[aiOwner] = {
+            results[owner] = {
               ownedLandCount: 0,
               relevanciesCreated
             };
           } catch (error) {
-            console.warn(`Could not save to RELEVANCIES table for ${aiOwner}:`, error.message);
-            results[aiOwner] = {
+            console.warn(`Could not save to RELEVANCIES table for ${owner}:`, error.message);
+            results[owner] = {
               ownedLandCount: 0,
               error: error.message
             };
@@ -429,7 +428,7 @@ export async function GET(request: NextRequest) {
         // Calculate land proximity relevancy with connectivity data
         // Use batch processing for better performance with large datasets
         const proximityRelevancies = relevancyService.calculateRelevancyInBatches(
-          aiLands, 
+          ownerLands, 
           allLands, 
           landGroups,
           100 // Process in batches of 100 lands
@@ -443,46 +442,46 @@ export async function GET(request: NextRequest) {
         
         try {
           // Save relevancies to Airtable
-          const relevanciesCreated = await saveRelevancies(base, aiOwner, combinedRelevancies, allLands, allCitizens);
+          const relevanciesCreated = await saveRelevancies(base, owner, combinedRelevancies, allLands, allCitizens);
           
           totalRelevanciesCreated += relevanciesCreated;
           
           // Store results
-          results[aiOwner] = {
-            ownedLandCount: aiLands.length,
+          results[owner] = {
+            ownedLandCount: ownerLands.length,
             relevanciesCreated
           };
         } catch (error) {
-          console.warn(`Could not save to RELEVANCIES table for ${aiOwner}:`, error.message);
-          results[aiOwner] = {
-            ownedLandCount: aiLands.length,
+          console.warn(`Could not save to RELEVANCIES table for ${owner}:`, error.message);
+          results[owner] = {
+            ownedLandCount: ownerLands.length,
             error: error.message
           };
         }
       }
       
-      console.log(`Completed calculating relevancies for all AI citizens. Total relevancies created: ${totalRelevanciesCreated}`);
+      console.log(`Completed calculating relevancies for all citizens. Total relevancies created: ${totalRelevanciesCreated}`);
       return NextResponse.json({
         success: true,
-        aiCount: Object.keys(results).length,
+        citizenCount: Object.keys(results).length,
         totalRelevanciesCreated,
         results
       });
     }
     
-    // If an AI username is specified, calculate relevancy only for that AI
-    if (aiUsername) {
-      console.log(`Calculating relevancy for AI: ${aiUsername}`);
+    // If a username is specified, calculate relevancy only for that citizen
+    if (username) {
+      console.log(`Calculating relevancy for citizen: ${username}`);
       
-      // Get lands owned by this AI
-      const aiLands = allLands.filter(land => land.owner === aiUsername);
+      // Get lands owned by this citizen
+      const citizenLands = allLands.filter(land => land.owner === username);
       
       // Fetch all citizens for land domination relevancy
       const allCitizens = await fetchAllCitizens(base);
       
-      // Even if the AI doesn't own lands, we should still calculate land domination relevancy
-      if (aiLands.length === 0) {
-        console.log(`AI ${aiUsername} does not own any lands, but will still calculate land domination relevancy`);
+      // Even if the citizen doesn't own lands, we should still calculate land domination relevancy
+      if (citizenLands.length === 0) {
+        console.log(`Citizen ${username} does not own any lands, but will still calculate land domination relevancy`);
         
         // Calculate land domination relevancy only
         const landDominationRelevancies = relevancyService.calculateLandDominationRelevancy(allCitizens, allLands);
@@ -495,7 +494,7 @@ export async function GET(request: NextRequest) {
         
         return NextResponse.json({
           success: true,
-          ai: aiUsername,
+          username: username,
           ownedLandCount: 0,
           relevancyScores: simpleScores,
           detailedRelevancy: landDominationRelevancies
@@ -504,8 +503,8 @@ export async function GET(request: NextRequest) {
       
       // Calculate land proximity relevancy with connectivity data and type filter
       const relevancyScores = typeFilter 
-        ? relevancyService.calculateRelevancyByType(aiLands, allLands, landGroups, typeFilter)
-        : relevancyService.calculateLandProximityRelevancy(aiLands, allLands, landGroups);
+        ? relevancyService.calculateRelevancyByType(citizenLands, allLands, landGroups, typeFilter)
+        : relevancyService.calculateLandProximityRelevancy(citizenLands, allLands, landGroups);
       
       // Format the response to include both simple scores and detailed data
       const simpleScores: Record<string, number> = {};
@@ -515,49 +514,48 @@ export async function GET(request: NextRequest) {
       
       return NextResponse.json({
         success: true,
-        ai: aiUsername,
-        ownedLandCount: aiLands.length,
+        username: username,
+        ownedLandCount: citizenLands.length,
         relevancyScores: simpleScores,
         detailedRelevancy: relevancyScores
       });
     }
     
-    // If no AI specified, calculate for all AI citizens
-    console.log('Fetching AI citizens from Airtable...');
-    const aiCitizens = await base(AIRTABLE_CITIZENS_TABLE)
+    // If no username specified, calculate for all citizens
+    console.log('Fetching citizens from Airtable...');
+    const citizens = await base(AIRTABLE_CITIZENS_TABLE)
       .select({
-        filterByFormula: '{IsAI} = TRUE()',
         fields: ['Username']
       })
       .all();
     
     const results = {};
     
-    // Calculate relevancy for each AI citizen
-    for (const aiCitizen of aiCitizens) {
-      const username = aiCitizen.get('Username') as string;
+    // Calculate relevancy for each citizen
+    for (const citizen of citizens) {
+      const username = citizen.get('Username') as string;
       if (!username) continue;
       
-      // Get lands owned by this AI
-      const aiLands = allLands.filter(land => land.owner === username);
+      // Get lands owned by this citizen
+      const citizenLands = allLands.filter(land => land.owner === username);
       
-      // Skip AIs with no lands
-      if (aiLands.length === 0) continue;
+      // Skip citizens with no lands
+      if (citizenLands.length === 0) continue;
       
       // Calculate land proximity relevancy with connectivity data
-      const relevancyScores = relevancyService.calculateLandProximityRelevancy(aiLands, allLands, landGroups);
+      const relevancyScores = relevancyService.calculateLandProximityRelevancy(citizenLands, allLands, landGroups);
       
       // Store results
       results[username] = {
-        ownedLandCount: aiLands.length,
+        ownedLandCount: citizenLands.length,
         relevancyScores
       };
     }
     
-    console.log(`Completed calculating relevancies for ${Object.keys(results).length} AI citizens`);
+    console.log(`Completed calculating relevancies for ${Object.keys(results).length} citizens`);
     return NextResponse.json({
       success: true,
-      aiCount: Object.keys(results).length,
+      citizenCount: Object.keys(results).length,
       results
     });
     

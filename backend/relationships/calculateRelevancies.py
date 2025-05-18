@@ -65,43 +65,42 @@ def create_admin_notification(tables, title: str, message: str) -> bool:
         log.error(f"Failed to create admin notification: {e}")
         return False
 
-def get_ai_citizens_with_lands(tables) -> List[str]:
-    """Get a list of AI citizens who own lands."""
+def get_citizens_with_lands(tables) -> List[str]:
+    """Get a list of citizens who own lands."""
     try:
-        # Get all AI citizens
-        ai_citizens = tables['citizens'].all(
-            formula="{IsAI} = TRUE()",
+        # Get all citizens (not just AI citizens)
+        citizens = tables['citizens'].all(
             fields=["Username"]
         )
         
-        ai_usernames = [citizen['fields'].get('Username') for citizen in ai_citizens if 'Username' in citizen['fields']]
+        citizen_usernames = [citizen['fields'].get('Username') for citizen in citizens if 'Username' in citizen['fields']]
         
-        if not ai_usernames:
-            log.info("No AI citizens found")
+        if not citizen_usernames:
+            log.info("No citizens found")
             return []
         
-        log.info(f"Found {len(ai_usernames)} AI citizens")
-        return ai_usernames
+        log.info(f"Found {len(citizen_usernames)} citizens")
+        return citizen_usernames
     except Exception as e:
-        log.error(f"Error getting AI citizens: {e}")
+        log.error(f"Error getting citizens: {e}")
         return []
 
 import json
 import traceback
 
-def calculate_relevancies_for_ai(ai_username: str, base_url: str, type_filter: Optional[str] = None) -> Dict:
-    """Calculate relevancies for a specific AI citizen with optional type filter."""
+def calculate_relevancies_for_ai(username: str, base_url: str, type_filter: Optional[str] = None) -> Dict:
+    """Calculate relevancies for a specific citizen with optional type filter."""
     try:
-        log.info(f"Calculating relevancies for AI: {ai_username}" + 
+        log.info(f"Calculating relevancies for citizen: {username}" + 
                 (f" with type filter: {type_filter}" if type_filter else ""))
         
         # Use the new proximity endpoint
         api_url = f"{base_url}/api/relevancies/proximity"
-        log.info(f"Calling API: {api_url} for AI: {ai_username}")
+        log.info(f"Calling API: {api_url} for citizen: {username}")
         
         # Prepare the request payload
         payload = {
-            "aiUsername": ai_username
+            "aiUsername": username  # Keep the parameter name for compatibility
         }
         
         # Add type filter if provided
@@ -117,7 +116,7 @@ def calculate_relevancies_for_ai(ai_username: str, base_url: str, type_filter: O
         log.info(f"API response status: {response.status_code}")
         
         if not response.ok:
-            log.error(f"API call failed for {ai_username} with status {response.status_code}: {response.text}")
+            log.error(f"API call failed for {username} with status {response.status_code}: {response.text}")
             return {
                 "success": False,
                 "error": f"API error: {response.status_code} - {response.text}"
@@ -127,10 +126,10 @@ def calculate_relevancies_for_ai(ai_username: str, base_url: str, type_filter: O
         data = response.json()
         
         # Log a summary of the response
-        log.info(f"API response for {ai_username}: success={data.get('success')}, ownedLandCount={data.get('ownedLandCount')}, relevancyScores count={len(data.get('relevancyScores', {}))}")
+        log.info(f"API response for {username}: success={data.get('success')}, ownedLandCount={data.get('ownedLandCount')}, relevancyScores count={len(data.get('relevancyScores', {}))}")
         
         if not data.get('success'):
-            log.error(f"API returned error for {ai_username}: {data.get('error')}")
+            log.error(f"API returned error for {username}: {data.get('error')}")
             return {
                 "success": False,
                 "error": data.get('error', 'Unknown error')
@@ -144,7 +143,7 @@ def calculate_relevancies_for_ai(ai_username: str, base_url: str, type_filter: O
             "saved": data.get('saved', False)
         }
     except Exception as e:
-        log.error(f"Error calculating relevancies for {ai_username}: {e}")
+        log.error(f"Error calculating relevancies for {username}: {e}")
         log.error(traceback.format_exc())  # Print the full traceback
         return {
             "success": False,
@@ -152,7 +151,7 @@ def calculate_relevancies_for_ai(ai_username: str, base_url: str, type_filter: O
         }
 
 def calculate_relevancies(type_filter: Optional[str] = None) -> bool:
-    """Calculate relevancy scores for all AI citizens who own lands."""
+    """Calculate relevancy scores for all citizens who own lands."""
     try:
         # Initialize Airtable
         tables = initialize_airtable()
@@ -164,45 +163,45 @@ def calculate_relevancies(type_filter: Optional[str] = None) -> bool:
         if type_filter:
             log.info(f"Using type filter: {type_filter}")
         
-        # Get all AI citizens
-        ai_usernames = get_ai_citizens_with_lands(tables)
+        # Get all citizens
+        citizen_usernames = get_citizens_with_lands(tables)
         
-        if not ai_usernames:
-            log.info("No AI citizens found, nothing to do")
+        if not citizen_usernames:
+            log.info("No citizens found, nothing to do")
             return True
         
-        # Process each AI citizen individually to avoid timeouts
+        # Process each citizen individually to avoid timeouts
         results = {}
         total_relevancies = 0
         
-        for ai_username in ai_usernames:
+        for username in citizen_usernames:
             # Add a small delay between requests to avoid rate limiting
             if results:  # Skip delay for the first request
                 time.sleep(2)
             
-            result = calculate_relevancies_for_ai(ai_username, base_url, type_filter)
-            results[ai_username] = result
+            result = calculate_relevancies_for_ai(username, base_url, type_filter)
+            results[username] = result
             
             if result.get('success'):
                 total_relevancies += result.get('relevanciesCreated', 0)
-                log.info(f"Successfully calculated {result.get('relevanciesCreated', 0)} relevancies for {ai_username}")
+                log.info(f"Successfully calculated {result.get('relevanciesCreated', 0)} relevancies for {username}")
                 
                 # Check if relevancies were saved to Airtable
                 if result.get('saved', False):
-                    log.info(f"Relevancies for {ai_username} were saved to Airtable")
+                    log.info(f"Relevancies for {username} were saved to Airtable")
                 else:
-                    log.warning(f"Relevancies for {ai_username} were calculated but NOT saved to Airtable")
+                    log.warning(f"Relevancies for {username} were calculated but NOT saved to Airtable")
             else:
-                log.error(f"Failed to calculate relevancies for {ai_username}: {result.get('error')}")
+                log.error(f"Failed to calculate relevancies for {username}: {result.get('error')}")
         
         # Create a detailed message for the notification
         details = []
-        for ai, result in results.items():
+        for citizen, result in results.items():
             if not result.get('success'):
-                details.append(f"- {ai}: Error - {result.get('error', 'Unknown error')}")
+                details.append(f"- {citizen}: Error - {result.get('error', 'Unknown error')}")
             else:
                 saved_status = "saved to Airtable" if result.get('saved', False) else "NOT saved to Airtable"
-                details.append(f"- {ai}: {result.get('relevanciesCreated', 0)} relevancies created (owns {result.get('ownedLandCount', 0)} lands) - {saved_status}")
+                details.append(f"- {citizen}: {result.get('relevanciesCreated', 0)} relevancies created (owns {result.get('ownedLandCount', 0)} lands) - {saved_status}")
         
         details_text = "\n".join(details)
         
@@ -210,7 +209,7 @@ def calculate_relevancies(type_filter: Optional[str] = None) -> bool:
         notification_created = create_admin_notification(
             tables,
             "Relevancy Calculation Complete",
-            f"Calculated relevancies for {len(ai_usernames)} AI citizens.\n"
+            f"Calculated relevancies for {len(citizen_usernames)} citizens.\n"
             f"Created {total_relevancies} relevancy records.\n\n"
             f"Details:\n{details_text}"
         )

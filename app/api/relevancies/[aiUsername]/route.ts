@@ -12,10 +12,10 @@ export async function GET(
 ) {
   const { params } = context;
   try {
-    const aiUsername = params.aiUsername;
+    const username = params.aiUsername;
     
-    if (!aiUsername) {
-      return NextResponse.json({ error: 'AI username is required' }, { status: 400 });
+    if (!username) {
+      return NextResponse.json({ error: 'Username is required' }, { status: 400 });
     }
     
     // Initialize Airtable
@@ -33,7 +33,7 @@ export async function GET(
     const typeFilter = searchParams.get('type');
     
     // Prepare filter formula
-    let filterFormula = `{RelevantToCitizen} = '${aiUsername}'`;
+    let filterFormula = `{RelevantToCitizen} = '${username}'`;
     
     // Add type filter if specified
     if (typeFilter) {
@@ -68,7 +68,7 @@ export async function GET(
     
     return NextResponse.json({
       success: true,
-      aiUsername,
+      username,
       relevancies,
       count: relevancies.length
     });

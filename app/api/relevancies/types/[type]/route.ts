@@ -29,14 +29,14 @@ export async function GET(
     
     // Get URL parameters
     const { searchParams } = new URL(request.url);
-    const aiUsername = searchParams.get('ai');
+    const username = searchParams.get('username') || searchParams.get('ai'); // Support both parameters
     
     // Prepare filter formula
     let filterFormula = `{Type} = '${type}'`;
     
-    // Add AI filter if specified
-    if (aiUsername) {
-      filterFormula = `AND(${filterFormula}, {RelevantToCitizen} = '${aiUsername}')`;
+    // Add username filter if specified
+    if (username) {
+      filterFormula = `AND(${filterFormula}, {RelevantToCitizen} = '${username}')`;
     }
     
     // Fetch relevancies from Airtable

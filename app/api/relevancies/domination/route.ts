@@ -45,13 +45,14 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Get the AI username from the request body
+    // Get the username from the request body
     const body = await request.json();
     const { aiUsername } = body;
+    const username = aiUsername; // Keep parameter name for compatibility
     
-    if (!aiUsername) {
+    if (!username) {
       return NextResponse.json(
-        { error: 'AI username is required' },
+        { error: 'Username is required' },
         { status: 400 }
       );
     }
@@ -80,10 +81,10 @@ export async function POST(request: NextRequest) {
       simpleScores[citizenId] = data.score;
     });
     
-    // Save to Airtable - only save once for this AI
+    // Save to Airtable - only save once for this citizen
     let saved = false;
     try {
-      await saveRelevancies(aiUsername, landDominationRelevancies, allLands, allCitizens);
+      await saveRelevancies(username, landDominationRelevancies, allLands, allCitizens);
       saved = true;
     } catch (error) {
       console.error('Error saving relevancies to Airtable:', error);
@@ -91,7 +92,7 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: true,
-      ai: aiUsername,
+      username: username,
       relevancyScores: simpleScores,
       detailedRelevancy: landDominationRelevancies,
       saved

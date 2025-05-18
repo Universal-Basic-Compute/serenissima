@@ -6,20 +6,20 @@ export async function GET(request: NextRequest) {
   try {
     // Get URL parameters
     const { searchParams } = new URL(request.url);
-    const aiUsername = searchParams.get('ai');
+    const username = searchParams.get('username') || searchParams.get('ai'); // Support both parameters
     const typeFilter = searchParams.get('type'); // 'connected' or 'geographic'
     
-    if (!aiUsername) {
-      return NextResponse.json({ error: 'AI username is required' }, { status: 400 });
+    if (!username) {
+      return NextResponse.json({ error: 'Username is required' }, { status: 400 });
     }
     
-    // Fetch lands owned by the AI
-    const aiLands = await relevancyService.fetchLands(aiUsername);
+    // Fetch lands owned by the citizen
+    const citizenLands = await relevancyService.fetchLands(username);
     
-    if (aiLands.length === 0) {
+    if (citizenLands.length === 0) {
       return NextResponse.json({
         success: true,
-        message: `AI ${aiUsername} does not own any lands`,
+        message: `Citizen ${username} does not own any lands`,
         relevancyScores: {}
       });
     }
@@ -32,8 +32,8 @@ export async function GET(request: NextRequest) {
     
     // Calculate relevancy scores with optional type filter
     const relevancyScores = typeFilter
-      ? relevancyService.calculateRelevancyByType(aiLands, allLands, landGroups, typeFilter)
-      : relevancyService.calculateLandProximityRelevancy(aiLands, allLands, landGroups);
+      ? relevancyService.calculateRelevancyByType(citizenLands, allLands, landGroups, typeFilter)
+      : relevancyService.calculateLandProximityRelevancy(citizenLands, allLands, landGroups);
     
     // Format the response to include both simple scores and detailed data
     const simpleScores: Record<string, number> = {};
@@ -43,8 +43,8 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({
       success: true,
-      ai: aiUsername,
-      ownedLandCount: aiLands.length,
+      username: username,
+      ownedLandCount: citizenLands.length,
       relevancyScores: simpleScores,
       detailedRelevancy: relevancyScores
     });
@@ -60,13 +60,14 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Get the AI username and type filter from the request body
+    // Get the username and type filter from the request body
     const body = await request.json();
     const { aiUsername, typeFilter } = body;
+    const username = aiUsername; // Keep parameter name for compatibility
     
-    if (!aiUsername) {
+    if (!username) {
       return NextResponse.json(
-        { error: 'AI username is required' },
+        { error: 'Username is required' },
         { status: 400 }
       );
     }
@@ -77,14 +78,14 @@ export async function POST(request: NextRequest) {
     const allCitizens = citizensData.citizens || [];
     
     // Calculate relevancy scores using the service
-    const aiLands = await relevancyService.fetchLands(aiUsername);
+    const citizenLands = await relevancyService.fetchLands(username);
     const allLands = await relevancyService.fetchLands();
     const landGroups = await relevancyService.fetchLandGroups();
     
     // Calculate with optional type filter
     const relevancyScores = typeFilter
-      ? relevancyService.calculateRelevancyByType(aiLands, allLands, landGroups, typeFilter)
-      : relevancyService.calculateLandProximityRelevancy(aiLands, allLands, landGroups);
+      ? relevancyService.calculateRelevancyByType(citizenLands, allLands, landGroups, typeFilter)
+      : relevancyService.calculateLandProximityRelevancy(citizenLands, allLands, landGroups);
     
     // Format the response
     const simpleScores: Record<string, number> = {};
@@ -95,7 +96,7 @@ export async function POST(request: NextRequest) {
     // Save to Airtable
     let saved = false;
     try {
-      await saveRelevancies(aiUsername, relevancyScores, allLands, allCitizens);
+      await saveRelevancies(username, relevancyScores, allLands, allCitizens);
       saved = true;
     } catch (error) {
       console.error('Error saving relevancies to Airtable:', error);
@@ -103,8 +104,8 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: true,
-      ai: aiUsername,
-      ownedLandCount: aiLands.length,
+      username: username,
+      ownedLandCount: citizenLands.length,
       relevancyScores: simpleScores,
       detailedRelevancy: relevancyScores,
       saved
