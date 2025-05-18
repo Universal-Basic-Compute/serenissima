@@ -114,15 +114,18 @@ export async function GET(request: Request) {
         id: landId,
         owner: record.get('Owner') || null,
         buildingPointsCount: record.get('BuildingPointsCount') || 0,
-        historicalName: record.get('HistoricalName') || null,
-        // Use land data if available, otherwise use polygon data
-        position: position || polygonData.position,
-        center: center || polygonData.center || polygonData.centroid,
-        coordinates: coordinates || polygonData.coordinates || [],
-        // Include additional polygon data
+        historicalName: record.get('HistoricalName') || polygonData.historicalName || null,
+        englishName: record.get('EnglishName') || polygonData.englishName || null,
+        historicalDescription: record.get('HistoricalDescription') || polygonData.historicalDescription || null,
+        // Use polygon data for coordinates, building points, etc.
+        coordinates: polygonData.coordinates || coordinates || [],
+        center: center || polygonData.center || polygonData.centroid || null,
         buildingPoints: polygonData.buildingPoints || [],
         bridgePoints: polygonData.bridgePoints || [],
-        canalPoints: polygonData.canalPoints || []
+        canalPoints: polygonData.canalPoints || [],
+        // Include any additional fields from the polygon data
+        areaInSquareMeters: polygonData.areaInSquareMeters || record.get('AreaInSquareMeters') || null,
+        nameConfidence: polygonData.nameConfidence || record.get('NameConfidence') || null
       };
     });
     
