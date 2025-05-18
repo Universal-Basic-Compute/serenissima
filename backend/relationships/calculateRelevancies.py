@@ -101,7 +101,7 @@ def calculate_land_domination_relevancies(base_url: str) -> Dict:
         # This will calculate and save domination relevancies for all citizens
         response = requests.post(
             api_url,
-            json={},  # Empty payload as the endpoint handles all citizens
+            json={"aiUsername": "all"},  # Use "all" as a special value to indicate all citizens
             timeout=120
         )
         

@@ -50,12 +50,7 @@ export async function POST(request: NextRequest) {
     const { aiUsername } = body;
     const username = aiUsername; // Keep parameter name for compatibility
     
-    if (!username) {
-      return NextResponse.json(
-        { error: 'Username is required' },
-        { status: 400 }
-      );
-    }
+    // Username is now optional - removed the check
     
     // Fetch all lands
     const allLands = await relevancyService.fetchLands();
@@ -84,7 +79,15 @@ export async function POST(request: NextRequest) {
     // Save to Airtable - only save once for this citizen
     let saved = false;
     try {
-      await saveRelevancies(username, landDominationRelevancies, allLands, allCitizens);
+      // If username is provided, save for that user, otherwise save for all users
+      if (username) {
+        await saveRelevancies(username, landDominationRelevancies, allLands, allCitizens);
+      } else {
+        // For global domination, save for all citizens who own lands
+        for (const citizenId of Object.keys(landDominationRelevancies)) {
+          await saveRelevancies(citizenId, landDominationRelevancies, allLands, allCitizens);
+        }
+      }
       saved = true;
     } catch (error) {
       console.error('Error saving relevancies to Airtable:', error);
@@ -92,7 +95,7 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: true,
-      username: username,
+      username: username || 'all',
       relevancyScores: simpleScores,
       detailedRelevancy: landDominationRelevancies,
       saved
