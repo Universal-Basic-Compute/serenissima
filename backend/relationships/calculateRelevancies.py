@@ -223,9 +223,19 @@ def calculate_relevancies(type_filter: Optional[str] = None) -> bool:
             log.info("No citizens found, nothing to do")
             return True
         
+        # Calculate global land domination relevancies FIRST
+        log.info("Calculating global land domination relevancies")
+        domination_result = calculate_land_domination_relevancies(base_url)
+        
+        total_relevancies = 0
+        if domination_result.get('success'):
+            total_relevancies += domination_result.get('relevanciesCreated', 0)
+            log.info(f"Successfully calculated {domination_result.get('relevanciesCreated', 0)} land domination relevancies")
+        else:
+            log.error(f"Failed to calculate land domination relevancies: {domination_result.get('error')}")
+        
         # Process each citizen individually to avoid timeouts
         results = {}
-        total_relevancies = 0
         
         for username in citizen_usernames:
             # Add a small delay between requests to avoid rate limiting
@@ -247,30 +257,22 @@ def calculate_relevancies(type_filter: Optional[str] = None) -> bool:
             else:
                 log.error(f"Failed to calculate relevancies for {username}: {result.get('error')}")
         
-        # Calculate global land domination relevancies
-        log.info("Calculating global land domination relevancies")
-        domination_result = calculate_land_domination_relevancies(base_url)
-        
-        if domination_result.get('success'):
-            total_relevancies += domination_result.get('relevanciesCreated', 0)
-            log.info(f"Successfully calculated {domination_result.get('relevanciesCreated', 0)} land domination relevancies")
-        else:
-            log.error(f"Failed to calculate land domination relevancies: {domination_result.get('error')}")
-        
         # Create a detailed message for the notification
         details = []
+        
+        # Add domination relevancies to the details FIRST
+        if domination_result.get('success'):
+            details.append(f"- Global land domination relevancies: {domination_result.get('relevanciesCreated', 0)} created")
+        else:
+            details.append(f"- Global land domination relevancies: Error - {domination_result.get('error', 'Unknown error')}")
+        
+        # Then add individual citizen results
         for citizen, result in results.items():
             if not result.get('success'):
                 details.append(f"- {citizen}: Error - {result.get('error', 'Unknown error')}")
             else:
                 saved_status = "saved to Airtable" if result.get('saved', False) else "NOT saved to Airtable"
                 details.append(f"- {citizen}: {result.get('relevanciesCreated', 0)} relevancies created (owns {result.get('ownedLandCount', 0)} lands) - {saved_status}")
-        
-        # Add domination relevancies to the details
-        if domination_result.get('success'):
-            details.append(f"- Global land domination relevancies: {domination_result.get('relevanciesCreated', 0)} created")
-        else:
-            details.append(f"- Global land domination relevancies: Error - {domination_result.get('error', 'Unknown error')}")
         
         details_text = "\n".join(details)
         
