@@ -1954,10 +1954,9 @@ number => {
                 if (key === 'workplace' && safeCitizen[key]) {
                   try {
                     // For workplace, create a safe copy with string properties
-                    safeCitizen[key] = {
-                      name: (safeCitizen[key].name || safeCitizen[key].Name || '').toString(),
-                      type: (safeCitizen[key].type || safeCitizen[key].Type || '').toString()
-                    };
+                    const name = String(safeCitizen[key].name || safeCitizen[key].Name || '');
+                    const type = String(safeCitizen[key].type || safeCitizen[key].Type || '');
+                    safeCitizen[key] = { name, type };
                   } catch (e) {
                     // If there's any error processing the workplace object, set to null
                     console.error('Error processing workplace object:', e);
@@ -2000,8 +1999,35 @@ number => {
         },
         setHoveredCitizen: (buildingId, type, citizen) => {
           if (citizen) {
+            // Create a safe version of the citizen object with only the properties we need
+            let safeCitizen = null;
+            if (citizen) {
+              // Convert all possible property formats to a consistent format
+              safeCitizen = {
+                id: citizen.CitizenId || citizen.citizenId || citizen.citizenid || citizen.id || '',
+                firstName: citizen.FirstName || citizen.firstName || citizen.firstname || '',
+                lastName: citizen.LastName || citizen.lastName || citizen.lastname || '',
+                socialClass: citizen.SocialClass || citizen.socialClass || citizen.socialclass || '',
+                imageUrl: citizen.ImageUrl || citizen.imageUrl || citizen.imageurl || '',
+                // Add any other properties you need, but ensure they're primitive values
+              };
+              
+              // Ensure all properties are primitive values (strings, numbers, booleans)
+              Object.keys(safeCitizen).forEach(key => {
+                if (typeof safeCitizen[key] === 'object' && safeCitizen[key] !== null) {
+                  // Convert objects to strings to prevent rendering objects directly
+                  safeCitizen[key] = JSON.stringify(safeCitizen[key]);
+                } else if (safeCitizen[key] === undefined || safeCitizen[key] === null) {
+                  // Set default values for undefined or null properties
+                  if (['id', 'firstName', 'lastName', 'socialClass', 'imageUrl'].includes(key)) {
+                    safeCitizen[key] = '';
+                  }
+                }
+              });
+            }
+            
             // Use the HoverStateService to handle citizen hover state
-            hoverStateService.setHoveredCitizen(buildingId, type, citizen);
+            hoverStateService.setHoveredCitizen(buildingId, type, safeCitizen);
           } else {
             // Clear hover state when no citizen is hovered
             hoverStateService.clearHoveredResource();
