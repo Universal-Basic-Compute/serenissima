@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { citizenService } from '@/lib/services/CitizenService';
 import CitizenRegistryCard from '@/components/UI/CitizenRegistryCard';
 
@@ -29,6 +29,9 @@ const CitizenRegistry: React.FC<CitizenRegistryProps> = ({ onClose }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [relevancies, setRelevancies] = useState<Record<string, Relevancy[]>>({});
   const [currentUsername, setCurrentUsername] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [sortOption, setSortOption] = useState<'wealth' | 'name' | 'class'>('wealth');
+  const [filterClass, setFilterClass] = useState<string>('all');
 
   // Get current username from localStorage
   useEffect(() => {
@@ -91,20 +94,62 @@ const CitizenRegistry: React.FC<CitizenRegistryProps> = ({ onClose }) => {
       }
       
       const allCitizens = citizenService.getCitizens();
-      
-      // Sort citizens by Ducats in descending order
-      const sortedCitizens = [...allCitizens].sort((a, b) => {
-        const ducatsA = a.Ducats || a.ducats || 0;
-        const ducatsB = b.Ducats || b.ducats || 0;
-        return ducatsB - ducatsA;
-      });
-      
-      setCitizens(sortedCitizens);
+      setCitizens(allCitizens);
       setIsLoading(false);
     };
     
     loadCitizens();
   }, []);
+
+  // Filter and sort citizens
+  const filteredAndSortedCitizens = useMemo(() => {
+    // First filter by search term and social class
+    let result = citizens.filter(citizen => {
+      const firstName = citizen.firstName || citizen.firstname || citizen.FirstName || '';
+      const lastName = citizen.lastName || citizen.lastname || citizen.LastName || '';
+      const username = citizen.username || '';
+      const socialClass = (citizen.socialClass || citizen.socialclass || citizen.SocialClass || '').toLowerCase();
+      
+      const matchesSearch = searchTerm === '' || 
+        firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        username.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesClass = filterClass === 'all' || socialClass.includes(filterClass.toLowerCase());
+      
+      return matchesSearch && matchesClass;
+    });
+    
+    // Then sort based on selected option
+    return result.sort((a, b) => {
+      if (sortOption === 'wealth') {
+        const ducatsA = a.Ducats || a.ducats || 0;
+        const ducatsB = b.Ducats || b.ducats || 0;
+        return ducatsB - ducatsA;
+      } else if (sortOption === 'name') {
+        const nameA = `${a.firstName || a.firstname || a.FirstName || ''} ${a.lastName || a.lastname || a.LastName || ''}`.trim().toLowerCase();
+        const nameB = `${b.firstName || b.firstname || b.FirstName || ''} ${b.lastName || b.lastname || b.LastName || ''}`.trim().toLowerCase();
+        return nameA.localeCompare(nameB);
+      } else if (sortOption === 'class') {
+        const classA = (a.socialClass || a.socialclass || a.SocialClass || '').toLowerCase();
+        const classB = (b.socialClass || b.socialclass || b.SocialClass || '').toLowerCase();
+        return classA.localeCompare(classB);
+      }
+      return 0;
+    });
+  }, [citizens, searchTerm, sortOption, filterClass]);
+
+  // Get unique social classes for filter dropdown
+  const socialClasses = useMemo(() => {
+    const classes = new Set<string>();
+    citizens.forEach(citizen => {
+      const socialClass = citizen.socialClass || citizen.socialclass || citizen.SocialClass;
+      if (socialClass) {
+        classes.add(socialClass);
+      }
+    });
+    return Array.from(classes);
+  }, [citizens]);
 
   return (
     <div className="absolute top-20 left-20 right-20 bottom-20 bg-amber-50 border-2 border-amber-700 rounded-lg shadow-xl z-40 overflow-hidden flex flex-col">
@@ -149,15 +194,61 @@ const CitizenRegistry: React.FC<CitizenRegistryProps> = ({ onClose }) => {
       <div className="flex-1 overflow-auto p-6 bg-amber-100">
         {activeTab === 'registro' ? (
           <>
-            <h3 className="text-xl font-serif text-amber-900 mb-4">Cittadini di Venezia (ordinati per ricchezza)</h3>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+              <h3 className="text-xl font-serif text-amber-900">Cittadini di Venezia</h3>
+              
+              {/* Search and filter controls */}
+              <div className="flex flex-col md:flex-row gap-3">
+                {/* Search box */}
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Cerca cittadino..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 pr-4 py-2 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  />
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 absolute left-3 top-2.5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                
+                {/* Sort dropdown */}
+                <select
+                  value={sortOption}
+                  onChange={(e) => setSortOption(e.target.value as 'wealth' | 'name' | 'class')}
+                  className="px-4 py-2 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
+                >
+                  <option value="wealth">Ordina per Ricchezza</option>
+                  <option value="name">Ordina per Nome</option>
+                  <option value="class">Ordina per Classe Sociale</option>
+                </select>
+                
+                {/* Class filter dropdown */}
+                <select
+                  value={filterClass}
+                  onChange={(e) => setFilterClass(e.target.value)}
+                  className="px-4 py-2 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
+                >
+                  <option value="all">Tutte le Classi</option>
+                  {socialClasses.map(socialClass => (
+                    <option key={socialClass} value={socialClass}>{socialClass}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
             
             {isLoading ? (
               <div className="flex justify-center items-center h-64">
                 <div className="text-amber-800">Caricamento del registro...</div>
               </div>
+            ) : filteredAndSortedCitizens.length === 0 ? (
+              <div className="flex justify-center items-center h-64">
+                <div className="text-amber-800">Nessun cittadino trovato</div>
+              </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {citizens.map((citizen) => {
+                {filteredAndSortedCitizens.map((citizen) => {
                   const username = citizen.username;
                   const citizenRelevancies = relevancies[username] || [];
                   
@@ -171,6 +262,7 @@ const CitizenRegistry: React.FC<CitizenRegistryProps> = ({ onClose }) => {
                         familyMotto={citizen.familyMotto}
                         Ducats={citizen.Ducats || citizen.ducats}
                         socialClass={citizen.socialClass || citizen.socialclass || citizen.SocialClass}
+                        isCurrentUser={citizen.username === currentUsername}
                       />
                       
                       {/* Relevancies Section */}
@@ -216,6 +308,11 @@ const CitizenRegistry: React.FC<CitizenRegistryProps> = ({ onClose }) => {
                 })}
               </div>
             )}
+            
+            {/* Results count */}
+            <div className="mt-4 text-sm text-amber-700">
+              Mostrando {filteredAndSortedCitizens.length} di {citizens.length} cittadini
+            </div>
           </>
         ) : (
           <div className="flex justify-center items-center h-64">

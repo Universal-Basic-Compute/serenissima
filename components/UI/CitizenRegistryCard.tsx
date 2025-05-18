@@ -9,6 +9,7 @@ interface CitizenRegistryCardProps {
   familyMotto?: string;
   Ducats?: number;
   socialClass?: string;
+  isCurrentUser?: boolean;
 }
 
 const CitizenRegistryCard: React.FC<CitizenRegistryCardProps> = ({
@@ -18,7 +19,8 @@ const CitizenRegistryCard: React.FC<CitizenRegistryCardProps> = ({
   coatOfArmsImage,
   familyMotto,
   Ducats = 0,
-  socialClass = 'Popolani'
+  socialClass = 'Popolani',
+  isCurrentUser = false
 }) => {
   // Format the Ducats without decimal places
   const formattedDucats = Math.floor(Ducats).toLocaleString();
@@ -40,8 +42,34 @@ const CitizenRegistryCard: React.FC<CitizenRegistryCardProps> = ({
     return 'text-gray-700'; // Default color
   };
 
+  // Get social class background color for the card
+  const getSocialClassBgColor = (socialClass: string): string => {
+    const baseClass = socialClass?.toLowerCase() || '';
+    
+    if (baseClass.includes('nobili')) {
+      return 'bg-gradient-to-br from-white to-amber-100'; // Subtle gold gradient for nobility
+    } else if (baseClass.includes('cittadini')) {
+      return 'bg-gradient-to-br from-white to-blue-50'; // Subtle blue gradient for citizens
+    } else if (baseClass.includes('popolani')) {
+      return 'bg-white'; // White for common people
+    } else if (baseClass.includes('laborer') || baseClass.includes('facchini')) {
+      return 'bg-gradient-to-br from-white to-gray-100'; // Subtle gray gradient for laborers
+    }
+    
+    return 'bg-white'; // Default background
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 border border-amber-200 hover:shadow-lg transition-shadow">
+    <div className={`${getSocialClassBgColor(socialClass)} rounded-lg shadow-md p-4 border ${
+      isCurrentUser ? 'border-purple-400 ring-2 ring-purple-300' : 'border-amber-200'
+    } hover:shadow-lg transition-shadow relative`}>
+      {/* Current user indicator */}
+      {isCurrentUser && (
+        <div className="absolute -top-2 -right-2 bg-purple-600 text-white text-xs px-2 py-1 rounded-full">
+          Tu
+        </div>
+      )}
+      
       <div className="flex items-start">
         {/* Main citizen image - larger */}
         <div className="w-24 h-24 mr-4 rounded-lg border-2 border-amber-600 shadow-md overflow-hidden flex-shrink-0">
@@ -99,6 +127,18 @@ const CitizenRegistryCard: React.FC<CitizenRegistryCardProps> = ({
           "{familyMotto}"
         </div>
       )}
+      
+      {/* Action buttons */}
+      <div className="mt-3 pt-2 border-t border-amber-100 flex justify-between">
+        <button className="text-xs text-amber-700 hover:text-amber-900 transition-colors">
+          Visualizza Profilo
+        </button>
+        {!isCurrentUser && (
+          <button className="text-xs text-amber-700 hover:text-amber-900 transition-colors">
+            Invia Messaggio
+          </button>
+        )}
+      </div>
     </div>
   );
 };
