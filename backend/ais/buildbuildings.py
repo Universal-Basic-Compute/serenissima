@@ -23,6 +23,20 @@ def get_allowed_building_tiers(social_class: str) -> List[int]:
     else:  # Facchini or any other class
         return [1]  # Facchini can only build tier 1
 
+def filter_building_types_by_social_class(building_types: Dict, allowed_tiers: List[int]) -> Dict:
+    """Filter building types to only include those allowed for the AI's social class."""
+    filtered_types = {}
+    
+    for building_type, data in building_types.items():
+        # Get the tier for this building type
+        tier = get_building_tier(building_type, building_types)
+        
+        # Only include building types that are within the allowed tiers
+        if tier in allowed_tiers:
+            filtered_types[building_type] = data
+    
+    return filtered_types
+
 def initialize_airtable():
     """Initialize connection to Airtable."""
     load_dotenv()
@@ -260,7 +274,12 @@ def prepare_ai_building_strategy(ai_citizen: Dict, citizen_lands: List[Dict], ci
         relevancies_data.append(relevancy_info)
     
     # Get building types information from API
-    building_types = get_building_types_from_api()
+    all_building_types = get_building_types_from_api()
+    
+    # Filter building types based on social class
+    building_types = filter_building_types_by_social_class(all_building_types, allowed_tiers)
+    
+    print(f"Filtered building types for {username} ({social_class}): {len(building_types)} of {len(all_building_types)} types available")
     
     # Create a summary of buildings by type
     building_summary = {}
@@ -294,7 +313,7 @@ def prepare_ai_building_strategy(ai_citizen: Dict, citizen_lands: List[Dict], ci
         "lands": lands_data,
         "buildings": buildings_data,
         "relevancies": relevancies_data,  # Add the relevancies data
-        "building_types": building_types,
+        "building_types": building_types,  # Now contains only the filtered building types
         "timestamp": datetime.now().isoformat()
     }
     
@@ -330,7 +349,6 @@ Here's your current situation:
 - You have {len(data_package['buildings'])} buildings
 - Your current net income is {data_package['citizen']['financial']['net_income']} ducats
 - You have {data_package['citizen']['ducats']} ducats available
-- Your social class ({data_package['citizen']['social_class']}) allows you to build tiers {', '.join(map(str, data_package['citizen']['allowed_building_tiers']))}
 
 What building would you like to construct next to maximize your income? Consider:
 1. Your current building portfolio
@@ -338,7 +356,6 @@ What building would you like to construct next to maximize your income? Consider
 3. Which lands would be best for new construction (you can build on any land, not just ones you own)
 4. The rent amounts of existing buildings on potential lands
 5. How to prioritize your building plan based on your available ducats
-6. ONLY select building types that your social class allows you to build
 
 Focus on maximizing your income while maintaining sustainable maintenance costs.
 
@@ -365,6 +382,7 @@ Here is the complete data about your current situation:
 {json.dumps(data_package, indent=2)}
 
 Your social class is {data_package['citizen']['social_class']}, which means you can only construct buildings of tiers {', '.join(map(str, data_package['citizen']['allowed_building_tiers']))}.
+The building_types section only includes buildings that you are allowed to construct based on your social class.
 
 The relevancies section contains important information about lands and citizens that are relevant to you. 
 These relevancies indicate:
@@ -383,7 +401,6 @@ When developing your building strategy:
 7. Take into account the relevancies to make strategic building decisions
 8. You can build on any land, not just lands you own
 9. Consider the rent amounts of existing buildings on potential lands
-10. IMPORTANT: Only select building types that are allowed for your social class tier
 
 Your decision should be specific, data-driven, and focused on maximizing your income.
 
