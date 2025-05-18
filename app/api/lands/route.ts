@@ -34,15 +34,7 @@ export async function GET(request: Request) {
     console.log('Fetching lands from Airtable...');
     const landsRecords = await base(AIRTABLE_LANDS_TABLE)
       .select({
-        filterByFormula: filterFormula || '',
-        fields: [
-          'Owner', 
-          'BuildingPointsCount', 
-          'HistoricalName', 
-          'Position', 
-          'Center',
-          'Coordinates'
-        ]
+        filterByFormula: filterFormula || ''
       })
       .all();
     
