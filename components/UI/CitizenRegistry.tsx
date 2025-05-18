@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { citizenService } from '@/lib/services/CitizenService';
 import CitizenRegistryCard from '@/components/UI/CitizenRegistryCard';
+import CitizenDetailsPanel from '@/components/UI/CitizenDetailsPanel';
 
 interface CitizenRegistryProps {
   onClose: () => void;
