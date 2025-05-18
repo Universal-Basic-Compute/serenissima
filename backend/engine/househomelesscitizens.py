@@ -277,7 +277,74 @@ def house_homeless_citizens(dry_run: bool = False):
         "total": 0
     }
     
-    # Process each homeless citizen
+    # FIRST PASS: Prioritize citizens who own buildings of Category 'home'
+    log.info("First pass: Prioritizing citizens who own homes")
+    
+    # Get all buildings with Category 'home'
+    try:
+        home_buildings = tables['buildings'].all(
+            formula="AND({Category} = 'home', OR({Occupant} = '', {Occupant} = BLANK()))"
+        )
+        log.info(f"Found {len(home_buildings)} unoccupied home buildings")
+    except Exception as e:
+        log.error(f"Error fetching home buildings: {e}")
+        home_buildings = []
+    
+    # Create a map of owner username to their owned home buildings
+    owner_home_map = {}
+    for building in home_buildings:
+        owner = building['fields'].get('Owner')
+        if owner:
+            if owner not in owner_home_map:
+                owner_home_map[owner] = []
+            owner_home_map[owner].append(building)
+    
+    # First, house citizens in their own buildings
+    for citizen in homeless_citizens[:]:  # Create a copy to safely remove from original
+        citizen_username = citizen['fields'].get('Username', '')
+        
+        # Skip if no username
+        if not citizen_username:
+            continue
+        
+        # Check if this citizen owns any home buildings
+        if citizen_username in owner_home_map and owner_home_map[citizen_username]:
+            # Get the first available home building owned by this citizen
+            building = owner_home_map[citizen_username][0]
+            
+            citizen_name = f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}"
+            building_name = building['fields'].get('Name', building['fields'].get('Type', 'Unknown building'))
+            
+            log.info(f"Prioritizing {citizen_name} to live in their own building: {building_name}")
+            
+            if dry_run:
+                log.info(f"[DRY RUN] Would assign {citizen_name} to their own building {building_name}")
+            else:
+                # Assign the citizen to their own building
+                success = assign_citizen_to_building(tables, citizen, building)
+                if success:
+                    log.info(f"Successfully housed {citizen_name} in their own building {building_name}")
+                    
+                    # Update housing summary counters
+                    housing_summary["total"] = housing_summary.get("total", 0) + 1
+                    building_type = building['fields'].get('Type', 'unknown')
+                    housing_summary[building_type] = housing_summary.get(building_type, 0) + 1
+                    
+                    # Remove this citizen from the homeless list
+                    homeless_citizens.remove(citizen)
+                    
+                    # Remove this building from the owner's available buildings
+                    owner_home_map[citizen_username].remove(building)
+                else:
+                    log.error(f"Failed to house {citizen_name} in their own building {building_name}")
+    
+    # SECOND PASS: Process remaining homeless citizens as before
+    log.info(f"Second pass: Processing {len(homeless_citizens)} remaining homeless citizens")
+    
+    # Sort remaining homeless citizens by wealth (descending)
+    homeless_citizens.sort(key=lambda c: float(c['fields'].get('Ducats', 0) or 0), reverse=True)
+    
+    # Process each remaining homeless citizen
     for citizen in homeless_citizens:
         citizen_name = f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}"
         social_class = citizen['fields'].get('SocialClass', '')
