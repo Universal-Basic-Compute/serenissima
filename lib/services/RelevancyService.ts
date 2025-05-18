@@ -322,8 +322,21 @@ export class RelevancyService {
     
     allLands.forEach(land => {
       if (land.owner) {
+        // Count lands
         citizenLandCounts[land.owner] = (citizenLandCounts[land.owner] || 0) + 1;
-        citizenBuildingPoints[land.owner] = (citizenBuildingPoints[land.owner] || 0) + (land.buildingPoints || 0);
+        
+        // Count building points - use the length of buildingPoints array if available
+        let buildingPointsCount = 0;
+        if (land.buildingPoints && Array.isArray(land.buildingPoints)) {
+          // If buildingPoints is an array, use its length
+          buildingPointsCount = land.buildingPoints.length;
+        } else if (typeof land.buildingPoints === 'number') {
+          // If buildingPoints is already a number, use it directly
+          buildingPointsCount = land.buildingPoints;
+        }
+        
+        // Add to the citizen's total
+        citizenBuildingPoints[land.owner] = (citizenBuildingPoints[land.owner] || 0) + buildingPointsCount;
       }
     });
     
