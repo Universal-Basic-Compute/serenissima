@@ -12,6 +12,17 @@ from pyairtable import Api, Table
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app.citizen_utils import find_citizen_by_identifier
 
+def get_allowed_building_tiers(social_class: str) -> List[int]:
+    """Determine which building tiers an AI can construct based on their social class."""
+    if social_class == 'Nobili':
+        return [1, 2, 3, 4, 5]  # Nobili can build all tiers
+    elif social_class == 'Cittadini':
+        return [1, 2, 3]  # Cittadini can build tiers 1-3
+    elif social_class == 'Popolani':
+        return [1, 2]  # Popolani can build tiers 1-2
+    else:  # Facchini or any other class
+        return [1]  # Facchini can only build tier 1
+
 def initialize_airtable():
     """Initialize connection to Airtable."""
     load_dotenv()
@@ -99,6 +110,32 @@ def get_citizen_relevancies(tables, username: str) -> List[Dict]:
         print(f"Error getting relevancies for citizen {username}: {str(e)}")
         return []
 
+def get_building_tier(building_type: str, building_types: Dict) -> int:
+    """Determine the tier of a building type."""
+    if building_type in building_types and "tier" in building_types[building_type]:
+        return building_types[building_type]["tier"]
+    
+    # Default tiers based on building type if not specified in the API data
+    tier_mapping = {
+        # Tier 5 (Nobili only)
+        "doge_palace": 5, "basilica": 5, "arsenal_gate": 5, "grand_canal_palace": 5,
+        
+        # Tier 4 (Nobili only)
+        "mint": 4, "arsenal": 4, "customs_house": 4, "grand_theater": 4,
+        
+        # Tier 3 (Cittadini and above)
+        "fondaco": 3, "shipyard": 3, "eastern_merchant_house": 3, "bank": 3,
+        
+        # Tier 2 (Popolani and above)
+        "bottega": 2, "glassblower": 2, "merceria": 2, "canal_house": 2,
+        
+        # Tier 1 (All classes)
+        "market_stall": 1, "fisherman_cottage": 1, "blacksmith": 1, "bakery": 1,
+        "dock": 1, "bridge": 1, "workshop": 1, "tavern": 1
+    }
+    
+    return tier_mapping.get(building_type.lower(), 1)  # Default to tier 1 if unknown
+
 def get_building_types_from_api() -> Dict:
     """Get information about different building types from the API."""
     try:
@@ -172,7 +209,10 @@ def prepare_ai_building_strategy(ai_citizen: Dict, citizen_lands: List[Dict], ci
     # Extract citizen information
     username = ai_citizen["fields"].get("Username", "")
     ducats = ai_citizen["fields"].get("Ducats", 0)
-    social_class = ai_citizen["fields"].get("SocialClass", "Citizen")
+    social_class = ai_citizen["fields"].get("SocialClass", "Facchini")  # Default to lowest class if not specified
+    
+    # Determine allowed building tiers based on social class
+    allowed_tiers = get_allowed_building_tiers(social_class)
     
     # Process lands data
     lands_data = []
@@ -241,6 +281,7 @@ def prepare_ai_building_strategy(ai_citizen: Dict, citizen_lands: List[Dict], ci
             "username": username,
             "ducats": ducats,
             "social_class": social_class,
+            "allowed_building_tiers": allowed_tiers,
             "total_lands": len(lands_data),
             "total_buildings": len(buildings_data),
             "financial": {
@@ -282,13 +323,14 @@ def send_building_strategy_request(ai_username: str, data_package: Dict) -> Opti
         
         # Create a detailed prompt that addresses the AI directly as the decision-maker
         prompt = f"""
-As a citizen in La Serenissima, you need to decide on your next building investment.
+As a citizen in La Serenissima with social class {data_package['citizen']['social_class']}, you need to decide on your next building investment.
 
 Here's your current situation:
 - You own {len(data_package['lands'])} lands
 - You have {len(data_package['buildings'])} buildings
 - Your current net income is {data_package['citizen']['financial']['net_income']} ducats
 - You have {data_package['citizen']['ducats']} ducats available
+- Your social class ({data_package['citizen']['social_class']}) allows you to build tiers {', '.join(map(str, data_package['citizen']['allowed_building_tiers']))}
 
 What building would you like to construct next to maximize your income? Consider:
 1. Your current building portfolio
@@ -296,6 +338,7 @@ What building would you like to construct next to maximize your income? Consider
 3. Which lands would be best for new construction (you can build on any land, not just ones you own)
 4. The rent amounts of existing buildings on potential lands
 5. How to prioritize your building plan based on your available ducats
+6. ONLY select building types that your social class allows you to build
 
 Focus on maximizing your income while maintaining sustainable maintenance costs.
 
@@ -321,6 +364,8 @@ You are {ai_username}, an AI citizen in La Serenissima. You make your own decisi
 Here is the complete data about your current situation:
 {json.dumps(data_package, indent=2)}
 
+Your social class is {data_package['citizen']['social_class']}, which means you can only construct buildings of tiers {', '.join(map(str, data_package['citizen']['allowed_building_tiers']))}.
+
 The relevancies section contains important information about lands and citizens that are relevant to you. 
 These relevancies indicate:
 - Lands that are geographically close to your properties
@@ -338,6 +383,7 @@ When developing your building strategy:
 7. Take into account the relevancies to make strategic building decisions
 8. You can build on any land, not just lands you own
 9. Consider the rent amounts of existing buildings on potential lands
+10. IMPORTANT: Only select building types that are allowed for your social class tier
 
 Your decision should be specific, data-driven, and focused on maximizing your income.
 
@@ -637,6 +683,30 @@ def send_building_placement_request(ai_username: str, decision: Dict, polygon_da
         land_id = decision["land_id"]
         
         print(f"Processing building placement for {ai_username}: {building_type} on land {land_id}")
+        
+        # Verify the AI can build this type of building based on social class
+        if tables:
+            try:
+                # Get the AI's social class
+                citizen_record = find_citizen_by_identifier(tables["citizens"], ai_username)
+                if not citizen_record:
+                    print(f"Citizen {ai_username} not found, cannot verify social class")
+                    return False
+                
+                social_class = citizen_record["fields"].get("SocialClass", "Facchini")
+                allowed_tiers = get_allowed_building_tiers(social_class)
+                building_tier = get_building_tier(building_type, building_types)
+                
+                if building_tier not in allowed_tiers:
+                    print(f"AI {ai_username} with social class {social_class} cannot build {building_type} (tier {building_tier})")
+                    print(f"Allowed tiers for {social_class}: {allowed_tiers}")
+                    return False
+                
+                print(f"Building tier {building_tier} is allowed for {ai_username} with social class {social_class}")
+            except Exception as e:
+                print(f"Error verifying social class restrictions: {str(e)}")
+                print(f"Exception traceback: {traceback.format_exc()}")
+                # Continue even if verification fails
         
         # Determine which point type is needed for this building
         point_type = "land"  # Default for most buildings
