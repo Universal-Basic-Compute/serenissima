@@ -626,7 +626,7 @@ def get_available_building_points(polygons: List[Dict], existing_buildings: List
         return {"land": [], "canal": [], "bridge": []}
 
 def send_building_placement_request(ai_username: str, decision: Dict, polygon_data: List[Dict], 
-                                   available_points: Dict[str, List[Dict]], building_types: Dict) -> bool:
+                                   available_points: Dict[str, List[Dict]], building_types: Dict, tables=None) -> bool:
     """Send a second request to the AI to choose a specific point for building placement."""
     try:
         if not decision or "building_type" not in decision or "land_id" not in decision:
@@ -908,10 +908,12 @@ Your response must be a JSON object with:
                                 if land_id and ai_username:
                                     # Get the land owner
                                     land_owner = None
-                                    for land in citizen_lands:
-                                        if land["fields"].get("LandId") == land_id:
-                                            land_owner = land["fields"].get("Owner")
-                                            break
+                                    # Fetch the land record directly from Airtable
+                                    land_records = tables["lands"].all(
+                                        formula=f"{{LandId}} = '{land_id}'"
+                                    )
+                                    if land_records:
+                                        land_owner = land_records[0]["fields"].get("Owner")
                                     
                                     # If land owner is different from building owner, notify them
                                     if land_owner and land_owner != ai_username:
@@ -1089,7 +1091,8 @@ def process_ai_building_strategies(dry_run: bool = False):
                         decision, 
                         polygon_data, 
                         available_points,
-                        building_types
+                        building_types,
+                        tables
                     )
                     
                     ai_strategy_results[ai_username] = placement_success
