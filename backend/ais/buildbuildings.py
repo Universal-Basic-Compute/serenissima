@@ -50,19 +50,10 @@ def get_ai_citizens(tables) -> List[Dict]:
 def get_citizen_lands(tables, username: str) -> List[Dict]:
     """Get all lands owned by a specific citizen or all lands if the citizen owns none."""
     try:
-        # Query lands where the citizen is the owner
-        formula = f"{{Owner}}='{username}'"
-        lands = tables["lands"].all(formula=formula)
-        
-        if lands:
-            print(f"Found {len(lands)} lands owned by {username}")
-            return lands
-        else:
-            print(f"No lands owned by {username}, returning all lands")
-            # If the citizen doesn't own any lands, return all lands
-            all_lands = tables["lands"].all()
-            print(f"Returning {len(all_lands)} total lands")
-            return all_lands
+        # Return all lands - no longer filtering by ownership
+        all_lands = tables["lands"].all()
+        print(f"Returning {len(all_lands)} total lands for {username} to consider for building")
+        return all_lands
     except Exception as e:
         print(f"Error getting lands for citizen {username}: {str(e)}")
         return []
@@ -302,8 +293,9 @@ Here's your current situation:
 What building would you like to construct next to maximize your income? Consider:
 1. Your current building portfolio
 2. Opportunities for new buildings that would increase your income
-3. Which of your lands would be best for new construction
-4. How to prioritize your building plan based on your available ducats
+3. Which lands would be best for new construction (you can build on any land, not just ones you own)
+4. The rent amounts of existing buildings on potential lands
+5. How to prioritize your building plan based on your available ducats
 
 Focus on maximizing your income while maintaining sustainable maintenance costs.
 
@@ -337,13 +329,15 @@ These relevancies indicate:
 - Strategic opportunities for expansion
 
 When developing your building strategy:
-1. Analyze which of your lands have the most building potential (consider building points and water access)
+1. Analyze which lands have the most building potential (consider building points and water access)
 2. Evaluate which building types would generate the most income for you
 3. Consider the maintenance costs of different building types
 4. Prioritize buildings that have the best income-to-maintenance ratio
 5. Create a specific, actionable plan with building types and target lands
 6. Consider your available ducats when making decisions
 7. Take into account the relevancies to make strategic building decisions
+8. You can build on any land, not just lands you own
+9. Consider the rent amounts of existing buildings on potential lands
 
 Your decision should be specific, data-driven, and focused on maximizing your income.
 
