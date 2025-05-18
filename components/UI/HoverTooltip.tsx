@@ -246,7 +246,7 @@ export const HoverTooltip: React.FC = () => {
     if (citizen) {
       // If we have the citizen data, display it
       // Ensure we have the correct property names for image and social class
-      const imageUrl = citizen.imageUrl || `/images/citizens/${citizen.id || 'default'}.jpg`;
+      const imageUrl = citizen.imageUrl || `/images/citizens/${citizen.username || 'default'}.jpg`;
     
       console.log('TOOLTIP: Using image URL:', imageUrl);
     
