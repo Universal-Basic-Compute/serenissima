@@ -31,6 +31,9 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
   const [playingMessageId, setPlayingMessageId] = useState<string | null>(null);
+  // Add state for relevancies
+  const [relevancies, setRelevancies] = useState<any[]>([]);
+  const [isLoadingRelevancies, setIsLoadingRelevancies] = useState<boolean>(false);
   
   // Function to check if the current user is ConsiglioDeiDieci
   const isConsiglioDeiDieci = () => {

@@ -32,6 +32,7 @@ const CitizenRegistry: React.FC<CitizenRegistryProps> = ({ onClose }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [sortOption, setSortOption] = useState<'wealth' | 'name' | 'class'>('wealth');
   const [filterClass, setFilterClass] = useState<string>('all');
+  const [selectedRegistryCitizen, setSelectedRegistryCitizen] = useState<any>(null);
 
   // Get current username from localStorage
   useEffect(() => {
