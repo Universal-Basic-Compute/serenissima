@@ -63,42 +63,9 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     };
   }, [scale, offset, canvasWidth, canvasHeight]);
   
-  // Add function to calculate position along a path based on progress
+  // Use the ActivityPathService for path calculations
   const calculatePositionAlongPath = useCallback((path: {lat: number, lng: number}[], progress: number) => {
-    if (!path || path.length < 2) return null;
-    
-    // Calculate total path length
-    let totalDistance = 0;
-    const segments: {start: number, end: number, distance: number}[] = [];
-    
-    for (let i = 0; i < path.length - 1; i++) {
-      const distance = calculateDistance(path[i], path[i+1]);
-      segments.push({
-        start: totalDistance,
-        end: totalDistance + distance,
-        distance
-      });
-      totalDistance += distance;
-    }
-    
-    // Find the segment where the progress falls
-    const targetDistance = progress * totalDistance;
-    const segment = segments.find(seg => targetDistance >= seg.start && targetDistance <= seg.end);
-    
-    if (!segment) return path[0]; // Default to start if no segment found
-    
-    // Calculate position within the segment
-    const segmentProgress = (targetDistance - segment.start) / segment.distance;
-    const segmentIndex = segments.indexOf(segment);
-    
-    const p1 = path[segmentIndex];
-    const p2 = path[segmentIndex + 1];
-    
-    // Interpolate between the two points
-    return {
-      lat: p1.lat + (p2.lat - p1.lat) * segmentProgress,
-      lng: p1.lng + (p2.lng - p1.lng) * segmentProgress
-    };
+    return activityPathService.calculatePositionAlongPath(path, progress);
   }, []);
   
   // Create a callback for animation updates
