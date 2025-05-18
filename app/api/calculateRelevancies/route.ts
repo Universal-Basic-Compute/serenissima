@@ -192,23 +192,6 @@ async function saveRelevancies(
 ): Promise<number> {
   try {
     console.log(`Saving relevancies for ${aiUsername} to Airtable...`);
-    
-    // Check if the RELEVANCIES table exists
-    try {
-      // Instead of trying to get table metadata, just check if we can access the table
-      // by making a simple query that will return minimal data
-      const testQuery = await base(AIRTABLE_RELEVANCIES_TABLE)
-        .select({
-          maxRecords: 1,
-          fields: ['RelevancyId'] // Just request a single field
-        })
-        .all();
-      
-      console.log(`Successfully connected to ${AIRTABLE_RELEVANCIES_TABLE} table, found ${testQuery.length} records in test query`);
-    } catch (error) {
-      console.error(`Error accessing ${AIRTABLE_RELEVANCIES_TABLE} table:`, error);
-      // Continue anyway, as this is just a diagnostic check
-    }
 
     // Log the field names we're using to help debug
     console.log('Using the following field names for RELEVANCIES table:');
