@@ -401,16 +401,14 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   
   // Helper function to render citizen markers
   function renderCitizenMarkers() {
-    return (
-  
-  // Don't render anything until positions are initialized
-  if (!positionsInitialized && Object.keys(activityPaths).length > 0) {
-    return (
-      <div className="absolute top-20 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-lg">
-        Calculating citizen positions...
-      </div>
-    );
-  }
+    // Don't render anything until positions are initialized
+    if (!positionsInitialized && Object.keys(activityPaths).length > 0) {
+      return (
+        <div className="absolute top-20 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-lg">
+          Calculating citizen positions...
+        </div>
+      );
+    }
   
   return (
     <>
