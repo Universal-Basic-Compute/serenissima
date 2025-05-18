@@ -133,9 +133,19 @@ export const HoverTooltip: React.FC = () => {
     if (state.data && state.data.citizen) {
       console.log('TOOLTIP: Citizen data available:', state.data.citizen);
       const citizen = state.data.citizen;
+      
+      // Ensure citizen data is safe for rendering
+      const safeCitizen = {
+        firstName: typeof citizen.firstName === 'string' ? citizen.firstName : '',
+        lastName: typeof citizen.lastName === 'string' ? citizen.lastName : '',
+        socialClass: typeof citizen.socialClass === 'string' ? citizen.socialClass : '',
+        imageUrl: typeof citizen.imageUrl === 'string' ? citizen.imageUrl : '',
+        id: typeof citizen.id === 'string' ? citizen.id : ''
+      };
+      
       setTooltipData({
         type: 'citizen',
-        citizen,
+        citizen: safeCitizen,
         buildingId: state.data.buildingId,
         citizenType: state.data.citizenType
       });
@@ -236,14 +246,13 @@ export const HoverTooltip: React.FC = () => {
     if (citizen) {
       // If we have the citizen data, display it
       // Ensure we have the correct property names for image and social class
-      const imageUrl = citizen.imageurl || citizen.profileimage || citizen.ImageUrl || citizen.image || 
-                     `/images/citizens/${citizen.username || citizen.citizenid || citizen.CitizenId || 'default'}.jpg`;
+      const imageUrl = typeof citizen.imageUrl === 'string' ? citizen.imageUrl : '/images/citizens/default.jpg';
     
       console.log('TOOLTIP: Using image URL:', imageUrl);
     
-      const firstName = citizen.firstname || citizen.FirstName || citizen.firstName || '';
-      const lastName = citizen.lastname || citizen.LastName || citizen.lastName || '';
-      const socialClass = citizen.socialclass || citizen.SocialClass || citizen.socialClass || 'Citizen';
+      const firstName = typeof citizen.firstName === 'string' ? citizen.firstName : '';
+      const lastName = typeof citizen.lastName === 'string' ? citizen.lastName : '';
+      const socialClass = typeof citizen.socialClass === 'string' ? citizen.socialClass : 'Citizen';
       
       console.log('TOOLTIP: Citizen display info:', { firstName, lastName, socialClass });
       

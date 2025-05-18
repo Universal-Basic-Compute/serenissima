@@ -164,14 +164,28 @@ export class HoverStateService {
     // Create a safe version of the citizen object with only the properties we need
     let safeCitizen = null;
     if (citizen) {
+      // Convert all possible property formats to a consistent format
       safeCitizen = {
         id: citizen.CitizenId || citizen.citizenId || citizen.citizenid || citizen.id || '',
         firstName: citizen.FirstName || citizen.firstName || citizen.firstname || '',
         lastName: citizen.LastName || citizen.lastName || citizen.lastname || '',
         socialClass: citizen.SocialClass || citizen.socialClass || citizen.socialclass || '',
-        imageUrl: citizen.ImageUrl || citizen.imageUrl || '',
-        // Add any other properties you need
+        imageUrl: citizen.ImageUrl || citizen.imageUrl || citizen.imageurl || '',
+        // Add any other properties you need, but ensure they're primitive values
       };
+      
+      // Ensure all properties are primitive values (strings, numbers, booleans)
+      Object.keys(safeCitizen).forEach(key => {
+        if (typeof safeCitizen[key] === 'object' && safeCitizen[key] !== null) {
+          // Convert objects to strings to prevent rendering objects directly
+          safeCitizen[key] = JSON.stringify(safeCitizen[key]);
+        } else if (safeCitizen[key] === undefined || safeCitizen[key] === null) {
+          // Set default values for undefined or null properties
+          if (['id', 'firstName', 'lastName', 'socialClass', 'imageUrl'].includes(key)) {
+            safeCitizen[key] = '';
+          }
+        }
+      });
     }
     
     this.setHoverState('citizen', buildingId, { 

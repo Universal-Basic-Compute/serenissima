@@ -1938,7 +1938,7 @@ number => {
             
             // Convert any undefined values to appropriate defaults to prevent rendering objects
             Object.keys(safeCitizen).forEach(key => {
-              if (safeCitizen[key] === undefined) {
+              if (safeCitizen[key] === undefined || safeCitizen[key] === null) {
                 // Use empty string for text fields, 0 for numbers, false for booleans
                 if (['ducats', 'prestige', 'dailyIncome'].includes(key)) {
                   safeCitizen[key] = 0;
@@ -1952,20 +1952,43 @@ number => {
               } else if (typeof safeCitizen[key] === 'object' && safeCitizen[key] !== null) {
                 // Convert objects to strings to prevent rendering objects directly
                 if (key === 'workplace' && safeCitizen[key]) {
-                  // For workplace, create a safe copy with string properties
-                  safeCitizen[key] = {
-                    name: safeCitizen[key].name || safeCitizen[key].Name || '',
-                    type: safeCitizen[key].type || safeCitizen[key].Type || ''
-                  };
+                  try {
+                    // For workplace, create a safe copy with string properties
+                    safeCitizen[key] = {
+                      name: (safeCitizen[key].name || safeCitizen[key].Name || '').toString(),
+                      type: (safeCitizen[key].type || safeCitizen[key].Type || '').toString()
+                    };
+                  } catch (e) {
+                    // If there's any error processing the workplace object, set to null
+                    console.error('Error processing workplace object:', e);
+                    safeCitizen[key] = null;
+                  }
                 } else if (key === 'position' && safeCitizen[key]) {
-                  // For position, create a safe copy with numeric properties
-                  safeCitizen[key] = {
-                    lat: parseFloat(safeCitizen[key].lat || safeCitizen[key].Lat || 0),
-                    lng: parseFloat(safeCitizen[key].lng || safeCitizen[key].Lng || 0)
-                  };
+                  try {
+                    // For position, create a safe copy with numeric properties
+                    const lat = parseFloat(safeCitizen[key].lat || safeCitizen[key].Lat || 0);
+                    const lng = parseFloat(safeCitizen[key].lng || safeCitizen[key].Lng || 0);
+                    
+                    // Only use the position if both lat and lng are valid numbers
+                    if (!isNaN(lat) && !isNaN(lng)) {
+                      safeCitizen[key] = { lat, lng };
+                    } else {
+                      safeCitizen[key] = null;
+                    }
+                  } catch (e) {
+                    // If there's any error processing the position object, set to null
+                    console.error('Error processing position object:', e);
+                    safeCitizen[key] = null;
+                  }
                 } else {
-                  // For other objects, stringify them
-                  safeCitizen[key] = JSON.stringify(safeCitizen[key]);
+                  try {
+                    // For other objects, stringify them
+                    safeCitizen[key] = JSON.stringify(safeCitizen[key]);
+                  } catch (e) {
+                    // If stringification fails, use a placeholder
+                    console.error(`Error stringifying ${key} object:`, e);
+                    safeCitizen[key] = `[Complex ${key} object]`;
+                  }
                 }
               }
             });
