@@ -213,6 +213,10 @@ async function saveRelevancies(
     // Log the field names we're using to help debug
     console.log('Using the following field names for RELEVANCIES table:');
     console.log('RelevancyId, AssetID, AssetType, Category, Type, TargetCitizen, RelevantToCitizen, Score, TimeHorizon, Title, Description, Notes, Status, CreatedAt');
+
+    // Log the field names we're using to help debug
+    console.log('Using the following field names for RELEVANCIES table:');
+    console.log('RelevancyId, AssetID, AssetType, Category, Type, TargetCitizen, RelevantToCitizen, Score, TimeHorizon, Title, Description, Notes, Status, CreatedAt');
     
     // Delete existing relevancy records for this AI to avoid duplicates
     const existingRecords = await base(AIRTABLE_RELEVANCIES_TABLE)
