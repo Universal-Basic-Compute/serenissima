@@ -298,8 +298,8 @@ Focus on maximizing your income while maintaining sustainable maintenance costs.
 After your analysis, provide your building decision in this JSON format:
 ```json
 {{
-  "building_type": "type-of-building-to-build",
-  "land_id": "id-of-land-to-build-on",
+  "building_type": "type_of_building_to_build",
+  "land_id": "id_of_land_to_build_on",
   "reason": "brief explanation of why this building"
 }}
 ```
