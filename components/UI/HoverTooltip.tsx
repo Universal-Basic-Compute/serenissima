@@ -139,7 +139,7 @@ export const HoverTooltip: React.FC = () => {
         firstName: typeof citizen.firstName === 'string' ? citizen.firstName : '',
         lastName: typeof citizen.lastName === 'string' ? citizen.lastName : '',
         socialClass: typeof citizen.socialClass === 'string' ? citizen.socialClass : '',
-        imageUrl: typeof citizen.imageUrl === 'string' ? citizen.imageUrl : '',
+        imageUrl: typeof citizen.imageUrl === 'string' && citizen.imageUrl !== '' ? citizen.imageUrl : null,
         id: typeof citizen.id === 'string' ? citizen.id : ''
       };
       
@@ -246,7 +246,7 @@ export const HoverTooltip: React.FC = () => {
     if (citizen) {
       // If we have the citizen data, display it
       // Ensure we have the correct property names for image and social class
-      const imageUrl = typeof citizen.imageUrl === 'string' ? citizen.imageUrl : '/images/citizens/default.jpg';
+      const imageUrl = citizen.imageUrl || `/images/citizens/${citizen.id || 'default'}.jpg`;
     
       console.log('TOOLTIP: Using image URL:', imageUrl);
     
