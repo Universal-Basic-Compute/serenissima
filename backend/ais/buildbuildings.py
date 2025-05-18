@@ -181,6 +181,7 @@ def prepare_ai_building_strategy(ai_citizen: Dict, citizen_lands: List[Dict], ci
     # Extract citizen information
     username = ai_citizen["fields"].get("Username", "")
     ducats = ai_citizen["fields"].get("Ducats", 0)
+    social_class = ai_citizen["fields"].get("SocialClass", "Citizen")
     
     # Process lands data
     lands_data = []
@@ -248,6 +249,7 @@ def prepare_ai_building_strategy(ai_citizen: Dict, citizen_lands: List[Dict], ci
         "citizen": {
             "username": username,
             "ducats": ducats,
+            "social_class": social_class,
             "total_lands": len(lands_data),
             "total_buildings": len(buildings_data),
             "financial": {
@@ -289,7 +291,7 @@ def send_building_strategy_request(ai_username: str, data_package: Dict) -> Opti
         
         # Create a detailed prompt that addresses the AI directly as the decision-maker
         prompt = f"""
-As a landowner in La Serenissima, you need to decide on your next building investment.
+As a citizen in La Serenissima, you need to decide on your next building investment.
 
 Here's your current situation:
 - You own {len(data_package['lands'])} lands
@@ -322,7 +324,7 @@ If you decide not to build anything at this time, return an empty JSON object:
         
         # Create system instructions with the detailed data
         system_instructions = f"""
-You are {ai_username}, an AI landowner in La Serenissima. You make your own decisions about building strategy.
+You are {ai_username}, an AI citizen in La Serenissima. You make your own decisions about building strategy.
 
 Here is the complete data about your current situation:
 {json.dumps(data_package, indent=2)}
@@ -733,7 +735,7 @@ Respond with a JSON object containing your selection:
         
         # Create system instructions with the detailed data including relevancies and existing buildings
         system_instructions = f"""
-You are {ai_username}, an AI landowner in La Serenissima.
+You are {ai_username}, an AI citizen in La Serenissima.
 
 You previously decided to build a {building_type_info['name']} ({building_type}) on land {land_id}.
 
