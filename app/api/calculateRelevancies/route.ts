@@ -275,10 +275,37 @@ async function saveRelevancies(
       console.log('Example relevancy record:');
       console.log(JSON.stringify(relevancyRecords[0], null, 2));
     }
+    
+    // Group relevancies by type
+    const relevanciesByType: Record<string, any[]> = {};
+    relevancyRecords.forEach(record => {
+      const type = record.fields.Type;
+      if (!relevanciesByType[type]) {
+        relevanciesByType[type] = [];
+      }
+      relevanciesByType[type].push(record);
+    });
+    
+    // For each type, sort by score and keep only the top 10
+    const topRelevancies: any[] = [];
+    Object.keys(relevanciesByType).forEach(type => {
+      const sortedRelevancies = relevanciesByType[type].sort((a, b) => 
+        b.fields.Score - a.fields.Score
+      );
+      
+      // Take only the top 10 for each type
+      const topForType = sortedRelevancies.slice(0, 10);
+      topRelevancies.push(...topForType);
+    });
+    
+    console.log(`Filtered to top 10 relevancies per type: ${topRelevancies.length} records from original ${relevancyRecords.length}`);
+    
+    // Replace relevancyRecords with the filtered topRelevancies for saving to Airtable
+    const recordsToSave = topRelevancies;
       
     // Create records in batches of 10
-    for (let i = 0; i < relevancyRecords.length; i += 10) {
-      const batch = relevancyRecords.slice(i, i + 10);
+    for (let i = 0; i < recordsToSave.length; i += 10) {
+      const batch = recordsToSave.slice(i, i + 10);
       try {
         const createdRecords = await base(AIRTABLE_RELEVANCIES_TABLE).create(batch);
         console.log(`Successfully created batch of ${createdRecords.length} records`);
@@ -292,8 +319,8 @@ async function saveRelevancies(
       }
     }
       
-    console.log(`Created ${relevancyRecords.length} new relevancy records for ${aiUsername}`);
-    return relevancyRecords.length;
+    console.log(`Created ${recordsToSave.length} new relevancy records for ${aiUsername}`);
+    return recordsToSave.length;
   } catch (error) {
     console.warn('Could not save to RELEVANCIES table:', error.message);
     throw error;
