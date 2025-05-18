@@ -88,6 +88,59 @@ def get_citizens_with_lands(tables) -> List[str]:
 import json
 import traceback
 
+def calculate_land_domination_relevancies(base_url: str) -> Dict:
+    """Calculate land domination relevancies for all citizens."""
+    try:
+        log.info("Calculating land domination relevancies")
+        
+        # Use the domination endpoint
+        api_url = f"{base_url}/api/relevancies/domination"
+        log.info(f"Calling API: {api_url}")
+        
+        # Make a POST request to the domination endpoint
+        # This will calculate and save domination relevancies for all citizens
+        response = requests.post(
+            api_url,
+            json={},  # Empty payload as the endpoint handles all citizens
+            timeout=120
+        )
+        
+        log.info(f"Domination API response status: {response.status_code}")
+        
+        if not response.ok:
+            log.error(f"Domination API call failed with status {response.status_code}: {response.text}")
+            return {
+                "success": False,
+                "error": f"API error: {response.status_code} - {response.text}"
+            }
+        
+        # Parse the response
+        data = response.json()
+        
+        # Log a summary of the response
+        log.info(f"Domination API response: success={data.get('success')}, relevancyScores count={len(data.get('relevancyScores', {}))}")
+        
+        if not data.get('success'):
+            log.error(f"Domination API returned error: {data.get('error')}")
+            return {
+                "success": False,
+                "error": data.get('error', 'Unknown error')
+            }
+        
+        # Return the results
+        return {
+            "success": True,
+            "relevanciesCreated": len(data.get('relevancyScores', {})),
+            "saved": data.get('saved', False)
+        }
+    except Exception as e:
+        log.error(f"Error calculating land domination relevancies: {e}")
+        log.error(traceback.format_exc())
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
 def calculate_relevancies_for_ai(username: str, base_url: str, type_filter: Optional[str] = None) -> Dict:
     """Calculate relevancies for a specific citizen with optional type filter."""
     try:
@@ -194,6 +247,16 @@ def calculate_relevancies(type_filter: Optional[str] = None) -> bool:
             else:
                 log.error(f"Failed to calculate relevancies for {username}: {result.get('error')}")
         
+        # Calculate global land domination relevancies
+        log.info("Calculating global land domination relevancies")
+        domination_result = calculate_land_domination_relevancies(base_url)
+        
+        if domination_result.get('success'):
+            total_relevancies += domination_result.get('relevanciesCreated', 0)
+            log.info(f"Successfully calculated {domination_result.get('relevanciesCreated', 0)} land domination relevancies")
+        else:
+            log.error(f"Failed to calculate land domination relevancies: {domination_result.get('error')}")
+        
         # Create a detailed message for the notification
         details = []
         for citizen, result in results.items():
@@ -203,6 +266,12 @@ def calculate_relevancies(type_filter: Optional[str] = None) -> bool:
                 saved_status = "saved to Airtable" if result.get('saved', False) else "NOT saved to Airtable"
                 details.append(f"- {citizen}: {result.get('relevanciesCreated', 0)} relevancies created (owns {result.get('ownedLandCount', 0)} lands) - {saved_status}")
         
+        # Add domination relevancies to the details
+        if domination_result.get('success'):
+            details.append(f"- Global land domination relevancies: {domination_result.get('relevanciesCreated', 0)} created")
+        else:
+            details.append(f"- Global land domination relevancies: Error - {domination_result.get('error', 'Unknown error')}")
+        
         details_text = "\n".join(details)
         
         # Create an admin notification with the results
@@ -210,7 +279,7 @@ def calculate_relevancies(type_filter: Optional[str] = None) -> bool:
             tables,
             "Relevancy Calculation Complete",
             f"Calculated relevancies for {len(citizen_usernames)} citizens.\n"
-            f"Created {total_relevancies} relevancy records.\n\n"
+            f"Created {total_relevancies} relevancy records (including land domination relevancies).\n\n"
             f"Details:\n{details_text}"
         )
         
