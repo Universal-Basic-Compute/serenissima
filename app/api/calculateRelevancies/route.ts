@@ -195,18 +195,18 @@ async function saveRelevancies(
     
     // Check if the RELEVANCIES table exists
     try {
-      const tables = await base.tables();
-      const relevanciesTable = tables.find(table => table.name === AIRTABLE_RELEVANCIES_TABLE);
+      // Instead of trying to get table metadata, just check if we can access the table
+      // by making a simple query that will return minimal data
+      const testQuery = await base(AIRTABLE_RELEVANCIES_TABLE)
+        .select({
+          maxRecords: 1,
+          fields: ['RelevancyId'] // Just request a single field
+        })
+        .all();
       
-      if (!relevanciesTable) {
-        console.error(`Table ${AIRTABLE_RELEVANCIES_TABLE} does not exist in the Airtable base`);
-        throw new Error(`Table ${AIRTABLE_RELEVANCIES_TABLE} does not exist`);
-      }
-      
-      // Log the actual field names in the table to help debug
-      console.log(`Fields in ${AIRTABLE_RELEVANCIES_TABLE} table:`, relevanciesTable.fields.map(f => f.name));
+      console.log(`Successfully connected to ${AIRTABLE_RELEVANCIES_TABLE} table, found ${testQuery.length} records in test query`);
     } catch (error) {
-      console.error('Error checking RELEVANCIES table:', error);
+      console.error(`Error accessing ${AIRTABLE_RELEVANCIES_TABLE} table:`, error);
       // Continue anyway, as this is just a diagnostic check
     }
 
