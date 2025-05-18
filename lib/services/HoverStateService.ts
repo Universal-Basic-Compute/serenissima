@@ -161,11 +161,11 @@ export class HoverStateService {
   /**
    * Update hover state for a citizen
    */
-  public setHoveredCitizen(buildingId: string | null, type: 'home' | 'work' | null, citizen: any = null): void {
+  public setHoveredCitizen(citizen: any, buildingId: string | null = null, type: 'home' | 'work' | null = null): void {
     // Use the CitizenRenderService to sanitize the citizen object
     const safeCitizen = citizen ? CitizenRenderService.sanitizeCitizen(citizen) : null;
     
-    this.setHoverState('citizen', buildingId, { 
+    this.setHoverState('citizen', buildingId || safeCitizen?.id || null, { 
       citizen: safeCitizen, 
       buildingId, 
       citizenType: type 

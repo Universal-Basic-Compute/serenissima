@@ -4,39 +4,7 @@ import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 import { CoordinateService } from '@/lib/services/CoordinateService';
 import CitizenDetailsPanel from '@/components/UI/CitizenDetailsPanel';
 import { hoverStateService } from '@/lib/services/HoverStateService';
-
-// Helper function to calculate distance between two geographic points using the Haversine formula
-const calculateDistance = (point1: {lat: number, lng: number}, point2: {lat: number, lng: number}): number => {
-  const R = 6371000; // Earth radius in meters
-  const lat1 = point1.lat * Math.PI / 180;
-  const lat2 = point2.lat * Math.PI / 180;
-  const deltaLat = (point2.lat - point1.lat) * Math.PI / 180;
-  const deltaLng = (point2.lng - point1.lng) * Math.PI / 180;
-
-  const a = Math.sin(deltaLat/2) * Math.sin(deltaLat/2) +
-          Math.cos(lat1) * Math.cos(lat2) *
-          Math.sin(deltaLng/2) * Math.sin(deltaLng/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  return R * c;
-};
-
-interface ActivityPath {
-  id: string;
-  citizenId: string;
-  path: {lat: number, lng: number}[];
-  type: string;
-  startTime: string;
-  endTime?: string;
-}
-
-interface AnimatedCitizen {
-  citizen: any;
-  currentPosition: {lat: number, lng: number};
-  pathIndex: number;
-  currentPath: ActivityPath | null;
-  progress: number;
-  speed: number; // meters per second
-}
+import { citizenAnimationService, ActivityPath, AnimatedCitizen } from '@/lib/services/CitizenAnimationService';
 
 interface CitizenMarkersProps {
   isVisible: boolean;
@@ -368,28 +336,9 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
       return;
     }
     
-    // Add more detailed logging about the citizen being hovered
-    console.log('HOVER: Citizen hover details:', {
-      username: citizen.username || citizen.citizenid || citizen.CitizenId || citizen.id,
-      name: `${citizen.firstname || citizen.FirstName || ''} ${citizen.lastname || citizen.LastName || ''}`,
-      socialClass: citizen.socialclass || citizen.SocialClass || citizen.socialClass || '',
-      imageUrl: citizen.imageurl || citizen.profileimage || citizen.ImageUrl,
-      position: citizen.position
-    });
-    
     // Parse home and work building coordinates
     const homeCoords = parseBuildingCoordinates(citizen.home);
     const workCoords = parseBuildingCoordinates(citizen.work);
-    
-    // Log more detailed information for debugging
-    console.log('HOVER: Citizen hover connections:', {
-      citizen: citizen.firstname + ' ' + citizen.lastname,
-      home: citizen.home,
-      work: citizen.work,
-      homeCoords,
-      workCoords,
-      position: citizen.position
-    });
     
     // Calculate connections
     const connections = {
@@ -398,43 +347,19 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
       workPosition: workCoords ? latLngToScreen(workCoords.lat, workCoords.lng) : undefined
     };
     
-    // Log the calculated screen positions
-    if (homeCoords || workCoords) {
-      console.log('HOVER: Connection screen positions:', {
-        homePosition: connections.homePosition,
-        workPosition: connections.workPosition,
-        citizenScreenPos: latLngToScreen(citizen.position.lat, citizen.position.lng)
-      });
-    }
-    
     // Set connections even if we only have one valid position
     if (connections.homePosition || connections.workPosition) {
       setHoveredConnections(connections);
-      console.log('HOVER: Set hovered connections:', connections);
-    } else {
-      console.log('HOVER: No valid connections found for citizen:', citizen);
     }
     
     // Set hovered citizen paths - use username first, then fall back to other IDs
     const citizenId = citizen.username || citizen.citizenid || citizen.CitizenId || citizen.id;
     const paths = activityPaths[citizenId] || [];
-    
-    console.log(`HOVER: Citizen hover: ${citizenId} has ${paths.length} activity paths`);
-    if (paths.length > 0) {
-      console.log(`HOVER: First path has ${paths[0].path.length} points`);
-    }
-    
     setHoveredCitizenPaths(paths);
     
     // Update the hover state service with the citizen data
-    // Make sure to pass the complete citizen object
-    console.log('HOVER: Setting hovered citizen in hoverStateService:', citizen);
-    hoverStateService.setHoveredCitizen(citizen, null, null);
-    
-    // Log the paths for debugging
-    if (paths.length > 0) {
-      console.log(`Found ${paths.length} activity paths for citizen ${citizenId}`);
-    }
+    // The service will handle sanitizing the citizen object
+    hoverStateService.setHoveredCitizen(citizen);
   };
   
   // Add a function to handle mouse leave
@@ -570,96 +495,13 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     
     console.log('Initializing animated citizens with paths...');
     
-    // Initialize animated citizens from the activity paths
-    const initialAnimatedCitizens: Record<string, AnimatedCitizen> = {};
+    // Use the CitizenAnimationService to initialize animated citizens
+    const initialAnimatedCitizens = citizenAnimationService.initializeAnimatedCitizens(
+      citizens,
+      activityPaths
+    );
     
-    Object.entries(activityPaths).forEach(([citizenId, paths]) => {
-      if (paths.length === 0) return;
-      
-      // Find the citizen object - first try by username, then by other IDs
-      const citizen = citizens.find(c => 
-        c.username === citizenId || 
-        c.citizenid === citizenId || 
-        c.CitizenId === citizenId || 
-        c.id === citizenId
-      );
-      if (!citizen) return;
-      
-      // Find the most appropriate path based on time
-      const now = new Date();
-      let selectedPath: ActivityPath | null = null;
-      let initialProgress = 0;
-      
-      // First, check for paths that are currently in progress (between start and end dates)
-      for (const path of paths) {
-        if (!path.path || path.path.length < 2) continue;
-        
-        const startTime = path.startTime ? new Date(path.startTime) : null;
-        const endTime = path.endTime ? new Date(path.endTime) : null;
-        
-        // Skip paths without a valid start time
-        if (!startTime) continue;
-        
-        // If the path has both start and end times, check if we're within that timeframe
-        if (startTime && endTime) {
-          if (now >= startTime && now <= endTime) {
-            // This path is currently active - calculate progress based on elapsed time
-            const totalDuration = endTime.getTime() - startTime.getTime();
-            const elapsedTime = now.getTime() - startTime.getTime();
-            initialProgress = Math.min(Math.max(elapsedTime / totalDuration, 0), 1);
-            selectedPath = path;
-            console.log(`Found active path for ${citizenId} with progress ${initialProgress.toFixed(2)}`);
-            break; // Found an active path, no need to check others
-          }
-        } 
-        // If the path only has a start time (no end time), check if it started in the last hour
-        else if (startTime) {
-          const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
-          if (startTime >= oneHourAgo) {
-            // This path started recently - estimate progress based on typical speed
-            // Assume a typical activity takes about 1 hour to complete
-            const elapsedTime = now.getTime() - startTime.getTime();
-            initialProgress = Math.min(Math.max(elapsedTime / (60 * 60 * 1000), 0), 1);
-            selectedPath = path;
-            console.log(`Found recent path for ${citizenId} with estimated progress ${initialProgress.toFixed(2)}`);
-            break; // Found a recent path, no need to check others
-          }
-        }
-      }
-      
-      // If no active or recent path was found, just use the first path with random progress
-      if (!selectedPath && paths.length > 0) {
-        selectedPath = paths[0];
-        initialProgress = Math.random(); // Random progress between 0 and 1
-        console.log(`Using random progress ${initialProgress.toFixed(2)} for ${citizenId} with no active paths`);
-      }
-      
-      // Skip if no suitable path was found
-      if (!selectedPath || !selectedPath.path || selectedPath.path.length < 2) return;
-      
-      // Calculate position based on progress
-      const initialPosition = calculatePositionAlongPath(selectedPath.path, initialProgress) || selectedPath.path[0];
-      
-      // Random speed between 1-5 m/s (walking to running)
-      // Adjust speed based on activity type - slower for work, faster for transport
-      let speed = 1 + Math.random() * 4;
-      if (selectedPath.type.toLowerCase().includes('work')) {
-        speed = 0.5 + Math.random() * 1.5; // Slower for work activities
-      } else if (selectedPath.type.toLowerCase().includes('transport')) {
-        speed = 3 + Math.random() * 3; // Faster for transport activities
-      }
-      
-      initialAnimatedCitizens[citizenId] = {
-        citizen,
-        currentPosition: initialPosition,
-        pathIndex: paths.indexOf(selectedPath),
-        currentPath: selectedPath,
-        progress: initialProgress,
-        speed
-      };
-    });
-    
-    // Update state only once with all initialized citizens
+    // Update state with the initialized citizens
     setAnimatedCitizens(initialAnimatedCitizens);
     console.log(`Initialized ${Object.keys(initialAnimatedCitizens).length} animated citizens`);
     
@@ -668,21 +510,14 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     
     // Start animation loop immediately
     if (animationActive && Object.keys(initialAnimatedCitizens).length > 0) {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-      lastFrameTimeRef.current = 0;
-      animationFrameRef.current = requestAnimationFrame(animateCitizens);
+      citizenAnimationService.startAnimation(handleAnimationUpdate);
     }
     
     // Cleanup animation loop on unmount
     return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-        animationFrameRef.current = null;
-      }
+      citizenAnimationService.stopAnimation();
     };
-  }, [activityPaths, citizens, animationActive, animateCitizens, calculatePositionAlongPath]);
+  }, [activityPaths, citizens, animationActive, handleAnimationUpdate]);
   
   // Add effect to start/stop animation when view changes
   useEffect(() => {
@@ -691,31 +526,23 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     setAnimationActive(shouldAnimate);
     
     if (shouldAnimate) {
-      if (!animationFrameRef.current) {
-        lastFrameTimeRef.current = 0;
-        animationFrameRef.current = requestAnimationFrame(animateCitizens);
-      }
-    } else if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-      animationFrameRef.current = null;
+      citizenAnimationService.startAnimation(handleAnimationUpdate);
+    } else {
+      citizenAnimationService.stopAnimation();
     }
     
     return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-        animationFrameRef.current = null;
-      }
+      citizenAnimationService.stopAnimation();
     };
-  }, [activeView, animateCitizens]);
+  }, [activeView, handleAnimationUpdate]);
   
   // Add this effect to start animation immediately after initialization
   useEffect(() => {
-    if (positionsInitialized && animationActive && !animationFrameRef.current) {
+    if (positionsInitialized && animationActive) {
       console.log('Starting animation loop immediately after initialization');
-      lastFrameTimeRef.current = 0;
-      animationFrameRef.current = requestAnimationFrame(animateCitizens);
+      citizenAnimationService.startAnimation(handleAnimationUpdate);
     }
-  }, [positionsInitialized, animationActive, animateCitizens]);
+  }, [positionsInitialized, animationActive, handleAnimationUpdate]);
   
   const handleCitizenClick = (citizen: any) => {
     // Ensure we have a valid citizen object before setting it

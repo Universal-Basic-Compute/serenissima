@@ -312,16 +312,7 @@ number => {
   
   // Helper function to calculate the total distance of a path
   const calculateTotalDistance = useCallback((path: any[]) => {
-    let totalDistance = 0;
-    for (let i = 0; i < path.length - 1; i++) {
-      const pt1 = path[i];
-      const pt2 = path[i + 1];
-      totalDistance += calculateDistance(
-        { lat: pt1.lat, lng: pt1.lng },
-        { lat: pt2.lat, lng: pt2.lng }
-      );
-    }
-    return totalDistance;
+    return citizenAnimationService.calculateTotalDistance(path);
   }, []);
   
   // Function to save a water route
@@ -1919,35 +1910,9 @@ number => {
         },
         setHoveredCitizen: (buildingId, type, citizen) => {
           if (citizen) {
-            // Create a safe version of the citizen object with only the properties we need
-            let safeCitizen = null;
-            if (citizen) {
-              // Convert all possible property formats to a consistent format
-              safeCitizen = {
-                id: citizen.CitizenId || citizen.citizenId || citizen.citizenid || citizen.id || '',
-                firstName: citizen.FirstName || citizen.firstName || citizen.firstname || '',
-                lastName: citizen.LastName || citizen.lastName || citizen.lastname || '',
-                socialClass: citizen.SocialClass || citizen.socialClass || citizen.socialclass || '',
-                imageUrl: citizen.ImageUrl || citizen.imageUrl || citizen.imageurl || '',
-                // Add any other properties you need, but ensure they're primitive values
-              };
-              
-              // Ensure all properties are primitive values (strings, numbers, booleans)
-              Object.keys(safeCitizen).forEach(key => {
-                if (typeof safeCitizen[key] === 'object' && safeCitizen[key] !== null) {
-                  // Convert objects to strings to prevent rendering objects directly
-                  safeCitizen[key] = JSON.stringify(safeCitizen[key]);
-                } else if (safeCitizen[key] === undefined || safeCitizen[key] === null) {
-                  // Set default values for undefined or null properties
-                  if (['id', 'firstName', 'lastName', 'socialClass', 'imageUrl'].includes(key)) {
-                    safeCitizen[key] = '';
-                  }
-                }
-              });
-            }
-            
             // Use the HoverStateService to handle citizen hover state
-            hoverStateService.setHoveredCitizen(buildingId, type, safeCitizen);
+            // The service will sanitize the citizen object
+            hoverStateService.setHoveredCitizen(citizen, buildingId, type);
           } else {
             // Clear hover state when no citizen is hovered
             hoverStateService.clearHoveredResource();
