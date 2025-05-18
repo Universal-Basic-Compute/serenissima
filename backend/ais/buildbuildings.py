@@ -878,6 +878,32 @@ Your response must be a JSON object with:
                                     "Ducats": consiglio_ducats + construction_cost
                                 })
                                 
+                                # Create a transaction record for the payment
+                                try:
+                                    transactions_table = Table(
+                                        tables["citizens"].api_key, 
+                                        tables["citizens"].base_id, 
+                                        "TRANSACTIONS"
+                                    )
+                                    
+                                    transaction_record = {
+                                        "Type": "building_construction",
+                                        "AssetId": building_id,
+                                        "Seller": "ConsiglioDeiDieci",
+                                        "Buyer": ai_username,
+                                        "Price": construction_cost,
+                                        "CreatedAt": datetime.now().isoformat(),
+                                        "UpdatedAt": datetime.now().isoformat(),
+                                        "ExecutedAt": datetime.now().isoformat(),
+                                        "Notes": f"Payment for {building_type} construction"
+                                    }
+                                    
+                                    transactions_table.create(transaction_record)
+                                    print(f"Created transaction record for {construction_cost} ducats payment from {ai_username} to ConsiglioDeiDieci")
+                                except Exception as transaction_error:
+                                    print(f"Error creating transaction record: {str(transaction_error)}")
+                                    # Continue even if transaction record creation fails
+                                
                                 print(f"Transferred {construction_cost} ducats from {ai_username} to ConsiglioDeiDieci")
                                 
                                 # 4. Create the building record
