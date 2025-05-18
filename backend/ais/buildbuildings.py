@@ -81,60 +81,6 @@ def get_citizen_buildings(tables, username: str) -> List[Dict]:
         print(f"Error getting buildings for citizen {username}: {str(e)}")
         return []
 
-def get_building_types_info() -> Dict:
-    """Get information about different building types and their income potential."""
-    # This could be loaded from a JSON file or database in the future
-    return {
-        "house": {
-            "type": "house",
-            "name": "House",
-            "shortDescription": "Basic housing for citizens",
-            "constructionCost": 5000
-        },
-        "workshop": {
-            "type": "workshop",
-            "name": "Workshop",
-            "shortDescription": "Small production facility for crafts and goods",
-            "constructionCost": 7500
-        },
-        "market-stall": {
-            "type": "market-stall",
-            "name": "Contract Stall",
-            "shortDescription": "Small commercial space for selling goods",
-            "constructionCost": 3000
-        },
-        "warehouse": {
-            "type": "warehouse",
-            "name": "Warehouse",
-            "shortDescription": "Storage facility for goods and resources",
-            "constructionCost": 10000
-        },
-        "tavern": {
-            "type": "tavern",
-            "name": "Tavern",
-            "shortDescription": "Establishment for food, drink, and socializing",
-            "constructionCost": 8000
-        },
-        "dock": {
-            "type": "dock",
-            "name": "Dock",
-            "shortDescription": "Maritime facility for loading/unloading ships",
-            "constructionCost": 12000
-        },
-        "church": {
-            "type": "church",
-            "name": "Church",
-            "shortDescription": "Religious building that provides community benefits",
-            "constructionCost": 15000
-        },
-        "palace": {
-            "type": "palace",
-            "name": "Palace",
-            "shortDescription": "Prestigious building for nobility and governance",
-            "constructionCost": 25000
-        }
-    }
-
 def get_building_types_from_api() -> Dict:
     """Get information about different building types from the API."""
     try:
@@ -181,17 +127,17 @@ def get_building_types_from_api() -> Dict:
                 print(f"Unexpected API response format: {response_data}")
                 # Fall back to the hardcoded building types
                 print("Using fallback building types data due to unexpected response format")
-                return get_building_types_info()
+                return error
         else:
             print(f"Error fetching building types from API: {response.status_code} - {response.text}")
             # Fall back to the hardcoded building types
             print("Using fallback building types data")
-            return get_building_types_info()
+            return error
     except Exception as e:
         print(f"Exception fetching building types from API: {str(e)}")
         # Fall back to the hardcoded building types
         print("Using fallback building types data due to exception")
-        return get_building_types_info()
+        return error
 
 def get_kinos_api_key() -> str:
     """Get the Kinos API key from environment variables."""
