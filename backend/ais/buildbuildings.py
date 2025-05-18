@@ -7,10 +7,74 @@ from typing import Dict, List, Optional, Tuple, Any
 import requests
 from dotenv import load_dotenv
 from pyairtable import Api, Table
+import colorama
+from colorama import Fore, Back, Style
+from pprint import pformat
+import textwrap
+
+# Initialize colorama
+colorama.init(autoreset=True)
 
 # Add the parent directory to the path to import citizen_utils
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app.citizen_utils import find_citizen_by_identifier
+
+# Logging functions
+def log_header(message):
+    """Print a header message with a colorful border."""
+    border = "=" * 80
+    print(f"\n{Fore.CYAN}{border}")
+    print(f"{Fore.CYAN}{Style.BRIGHT}{message.center(80)}")
+    print(f"{Fore.CYAN}{border}{Style.RESET_ALL}\n")
+
+def log_section(message):
+    """Print a section header with a colorful border."""
+    border = "-" * 80
+    print(f"\n{Fore.YELLOW}{border}")
+    print(f"{Fore.YELLOW}{Style.BRIGHT}{message.center(80)}")
+    print(f"{Fore.YELLOW}{border}{Style.RESET_ALL}\n")
+
+def log_success(message):
+    """Print a success message."""
+    print(f"{Fore.GREEN}✓ {message}{Style.RESET_ALL}")
+
+def log_info(message):
+    """Print an info message."""
+    print(f"{Fore.BLUE}ℹ {message}{Style.RESET_ALL}")
+
+def log_warning(message):
+    """Print a warning message."""
+    print(f"{Fore.YELLOW}⚠ {message}{Style.RESET_ALL}")
+
+def log_error(message):
+    """Print an error message."""
+    print(f"{Fore.RED}✗ {message}{Style.RESET_ALL}")
+
+def log_data(label, data, indent=2):
+    """Pretty print data with a label."""
+    print(f"{Fore.MAGENTA}{label}:{Style.RESET_ALL}")
+    formatted_data = pformat(data, indent=indent, width=100)
+    indented_data = textwrap.indent(formatted_data, ' ' * indent)
+    print(indented_data)
+
+def log_table(headers, rows):
+    """Print data in a table format."""
+    # Calculate column widths
+    col_widths = [len(h) for h in headers]
+    for row in rows:
+        for i, cell in enumerate(row):
+            col_widths[i] = max(col_widths[i], len(str(cell)))
+    
+    # Print headers
+    header_row = " | ".join(f"{h.ljust(col_widths[i])}" for i, h in enumerate(headers))
+    separator = "-+-".join("-" * w for w in col_widths)
+    print(f"{Fore.CYAN}{header_row}{Style.RESET_ALL}")
+    print(f"{Fore.CYAN}{separator}{Style.RESET_ALL}")
+    
+    # Print rows
+    for row in rows:
+        row_str = " | ".join(f"{str(cell).ljust(col_widths[i])}" for i, cell in enumerate(row))
+        print(row_str)
 
 def get_allowed_building_tiers(social_class: str) -> List[int]:
     """Determine which building tiers an AI can construct based on their social class."""
@@ -66,10 +130,10 @@ def get_ai_citizens(tables) -> List[Dict]:
         # Query citizens with IsAI=true, InVenice=true, and Ducats >= 150000
         formula = "AND({IsAI}=1, {InVenice}=1, {Ducats}>=150000)"
         ai_citizens = tables["citizens"].all(formula=formula)
-        print(f"Found {len(ai_citizens)} AI citizens in Venice with at least 150,000 Ducats")
+        log_success(f"Found {len(ai_citizens)} AI citizens in Venice with at least 150,000 Ducats")
         return ai_citizens
     except Exception as e:
-        print(f"Error getting AI citizens: {str(e)}")
+        log_error(f"Error getting AI citizens: {str(e)}")
         return []
 
 def get_citizen_lands(tables, username: str) -> List[Dict]:
@@ -77,20 +141,20 @@ def get_citizen_lands(tables, username: str) -> List[Dict]:
     try:
         # Return all lands - no longer filtering by ownership
         all_lands = tables["lands"].all()
-        print(f"Returning {len(all_lands)} total lands for {username} to consider for building")
+        log_info(f"Returning {len(all_lands)} total lands for {username} to consider for building")
         return all_lands
     except Exception as e:
-        print(f"Error getting lands for citizen {username}: {str(e)}")
+        log_error(f"Error getting lands for citizen {username}: {str(e)}")
         return []
 
 def get_all_buildings(tables) -> List[Dict]:
     """Get all buildings from Airtable."""
     try:
         buildings = tables["buildings"].all()
-        print(f"Found {len(buildings)} buildings in total")
+        log_info(f"Found {len(buildings)} buildings in total")
         return buildings
     except Exception as e:
-        print(f"Error getting buildings: {str(e)}")
+        log_error(f"Error getting buildings: {str(e)}")
         return []
 
 def get_citizen_buildings(tables, username: str) -> List[Dict]:
@@ -100,10 +164,10 @@ def get_citizen_buildings(tables, username: str) -> List[Dict]:
         # Use "Owner" instead of "owner" for the field name
         formula = f"{{Owner}}='{username}'"
         buildings = tables["buildings"].all(formula=formula)
-        print(f"Found {len(buildings)} buildings owned by {username}")
+        log_info(f"Found {len(buildings)} buildings owned by {username}")
         return buildings
     except Exception as e:
-        print(f"Error getting buildings for citizen {username}: {str(e)}")
+        log_error(f"Error getting buildings for citizen {username}: {str(e)}")
         return []
 
 def get_citizen_relevancies(tables, username: str) -> List[Dict]:
@@ -118,10 +182,10 @@ def get_citizen_relevancies(tables, username: str) -> List[Dict]:
             max_records=100
         )
         
-        print(f"Found {len(relevancies)} relevancies for {username} (including global 'all' relevancies)")
+        log_info(f"Found {len(relevancies)} relevancies for {username} (including global 'all' relevancies)")
         return relevancies
     except Exception as e:
-        print(f"Error getting relevancies for citizen {username}: {str(e)}")
+        log_error(f"Error getting relevancies for citizen {username}: {str(e)}")
         return []
 
 def get_building_tier(building_type: str, building_types: Dict) -> int:
@@ -159,7 +223,7 @@ def get_building_types_from_api() -> Dict:
         # Construct the API URL
         url = f"{api_base_url}/api/building-types"
         
-        print(f"Fetching building types from API: {url}")
+        log_info(f"Fetching building types from API: {url}")
         
         # Make the API request
         response = requests.get(url)
@@ -171,7 +235,7 @@ def get_building_types_from_api() -> Dict:
             # Check if the response has the expected structure
             if "success" in response_data and response_data["success"] and "buildingTypes" in response_data:
                 building_types = response_data["buildingTypes"]
-                print(f"Successfully fetched {len(building_types)} building types from API")
+                log_success(f"Successfully fetched {len(building_types)} building types from API")
                 
                 # Transform the data into the format we need - include type, name, shortDescription and constructionCosts.ducats
                 transformed_types = {}
@@ -193,19 +257,19 @@ def get_building_types_from_api() -> Dict:
                 
                 return transformed_types
             else:
-                print(f"Unexpected API response format: {response_data}")
+                log_warning(f"Unexpected API response format: {response_data}")
                 # Return empty dictionary instead of undefined 'error'
-                print("Using empty dictionary due to unexpected response format")
+                log_warning("Using empty dictionary due to unexpected response format")
                 return {}
         else:
-            print(f"Error fetching building types from API: {response.status_code} - {response.text}")
+            log_error(f"Error fetching building types from API: {response.status_code} - {response.text}")
             # Return empty dictionary instead of undefined 'error'
-            print("Using empty dictionary due to API error")
+            log_warning("Using empty dictionary due to API error")
             return {}
     except Exception as e:
-        print(f"Exception fetching building types from API: {str(e)}")
+        log_error(f"Exception fetching building types from API: {str(e)}")
         # Return empty dictionary instead of undefined 'error'
-        print("Using empty dictionary due to exception")
+        log_warning("Using empty dictionary due to exception")
         return {}
 
 def get_kinos_api_key() -> str:
@@ -279,7 +343,7 @@ def prepare_ai_building_strategy(ai_citizen: Dict, citizen_lands: List[Dict], ci
     # Filter building types based on social class
     building_types = filter_building_types_by_social_class(all_building_types, allowed_tiers)
     
-    print(f"Filtered building types for {username} ({social_class}): {len(building_types)} of {len(all_building_types)} types available")
+    log_info(f"Filtered building types for {username} ({social_class}): {len(building_types)} of {len(all_building_types)} types available")
     
     # Create a summary of buildings by type
     building_summary = {}
@@ -288,6 +352,13 @@ def prepare_ai_building_strategy(ai_citizen: Dict, citizen_lands: List[Dict], ci
         if building_type not in building_summary:
             building_summary[building_type] = 0
         building_summary[building_type] += 1
+        
+    # Log building summary as a table if there are any buildings
+    if building_summary:
+        log_section("Building Summary")
+        headers = ["Building Type", "Count"]
+        rows = [[building_type, count] for building_type, count in building_summary.items()]
+        log_table(headers, rows)
     
     # Calculate financial metrics
     total_income = sum(building["fields"].get("Income", 0) for building in citizen_buildings)
@@ -466,9 +537,9 @@ If you decide not to build anything at this time, return an empty JSON object.
                                 "reason": reason
                             }
                             
-                            print(f"AI {ai_username} decision: {json.dumps(decision)}")
-                            print(f"AI {ai_username} wants to build a {building_type} on land {land_id}")
-                            print(f"Reason: {reason}")
+                            log_data(f"AI {ai_username} decision", decision)
+                            log_success(f"AI {ai_username} wants to build a {building_type} on land {land_id}")
+                            log_info(f"Reason: {reason}")
                             
                             return decision
                     
@@ -907,8 +978,8 @@ Your response must be a JSON object with:
                         if 0 <= selected_index < len(filtered_points):
                             selected_point = filtered_points[selected_index]
                             
-                            print(f"AI {ai_username} selected point {selected_index} at position {selected_point['lat']}, {selected_point['lng']}")
-                            print(f"Reason: {reason}")
+                            log_success(f"AI {ai_username} selected point {selected_index} at position {selected_point['lat']}, {selected_point['lng']}")
+                            log_info(f"Reason: {reason}")
                             
                             # Validate the index
                             if 0 <= selected_index < len(filtered_points):
@@ -921,7 +992,7 @@ Your response must be a JSON object with:
                                 # Now we need to create the building
                                 # 1. Get the construction cost for this building type
                                 construction_cost = building_type_info.get("constructionCost", 0)
-                                print(f"Construction cost for {building_type}: {construction_cost} ducats")
+                                log_info(f"Construction cost for {building_type}: {construction_cost} ducats")
                                 
                                 # 2. Check if the citizen has enough ducats
                                 from app.citizen_utils import find_citizen_by_identifier
@@ -936,10 +1007,10 @@ Your response must be a JSON object with:
                                     return False
                                 
                                 citizen_ducats = citizen_record["fields"].get("Ducats", 0)
-                                print(f"Citizen {ai_username} has {citizen_ducats} ducats")
+                                log_info(f"Citizen {ai_username} has {citizen_ducats} ducats")
                                 
                                 if citizen_ducats < construction_cost:
-                                    print(f"Citizen {ai_username} does not have enough ducats to build {building_type}. Required: {construction_cost}, Available: {citizen_ducats}")
+                                    log_error(f"Citizen {ai_username} does not have enough ducats to build {building_type}. Required: {construction_cost}, Available: {citizen_ducats}")
                                     return False
                                 
                                 # 3. Transfer ducats from citizen to ConsiglioDeiDieci
@@ -951,16 +1022,16 @@ Your response must be a JSON object with:
                                 
                                 consiglio_record = consiglio_records[0]
                                 consiglio_ducats = consiglio_record["fields"].get("Ducats", 0)
-                                print(f"ConsiglioDeiDieci has {consiglio_ducats} ducats before transfer")
+                                log_info(f"ConsiglioDeiDieci has {consiglio_ducats} ducats before transfer")
                                 
                                 # Update citizen's ducats
-                                print(f"Updating {ai_username}'s ducats from {citizen_ducats} to {citizen_ducats - construction_cost}")
+                                log_info(f"Updating {ai_username}'s ducats from {citizen_ducats} to {citizen_ducats - construction_cost}")
                                 tables["citizens"].update(citizen_record["id"], {
                                     "Ducats": citizen_ducats - construction_cost
                                 })
                                 
                                 # Update ConsiglioDeiDieci's ducats
-                                print(f"Updating ConsiglioDeiDieci's ducats from {consiglio_ducats} to {consiglio_ducats + construction_cost}")
+                                log_info(f"Updating ConsiglioDeiDieci's ducats from {consiglio_ducats} to {consiglio_ducats + construction_cost}")
                                 tables["citizens"].update(consiglio_record["id"], {
                                     "Ducats": consiglio_ducats + construction_cost
                                 })
@@ -991,12 +1062,12 @@ Your response must be a JSON object with:
                                     }
                                     
                                     transactions_table.create(transaction_record)
-                                    print(f"Created transaction record for {construction_cost} ducats payment from {ai_username} to ConsiglioDeiDieci")
+                                    log_success(f"Created transaction record for {construction_cost} ducats payment from {ai_username} to ConsiglioDeiDieci")
                                 except Exception as transaction_error:
-                                    print(f"Error creating transaction record: {str(transaction_error)}")
+                                    log_error(f"Error creating transaction record: {str(transaction_error)}")
                                     # Continue even if transaction record creation fails
                                 
-                                print(f"Transferred {construction_cost} ducats from {ai_username} to ConsiglioDeiDieci")
+                                log_success(f"Transferred {construction_cost} ducats from {ai_username} to ConsiglioDeiDieci")
                                 
                                 # Generate a point ID if not present
                                 point_id = selected_point.get("id", f"point-{selected_point['lat']}-{selected_point['lng']}")
@@ -1016,16 +1087,16 @@ Your response must be a JSON object with:
                                     "CreatedAt": datetime.now().isoformat()
                                 }
                                 
-                                print(f"Creating building record: {json.dumps(building_record)}")
+                                log_data("Creating building record", building_record)
                                 
                                 # Add the building to Airtable
                                 try:
                                     new_building = tables["buildings"].create(building_record)
-                                    print(f"Created new building: {building_id} of type {building_type} for {ai_username} on land {land_id}")
-                                    print(f"Building record ID: {new_building['id']}")
+                                    log_success(f"Created new building: {building_id} of type {building_type} for {ai_username} on land {land_id}")
+                                    log_info(f"Building record ID: {new_building['id']}")
                                 except Exception as building_error:
-                                    print(f"Error creating building record: {str(building_error)}")
-                                    print(f"Exception traceback: {traceback.format_exc()}")
+                                    log_error(f"Error creating building record: {str(building_error)}")
+                                    log_error(f"Exception traceback: {traceback.format_exc()}")
                                     return False
                                 
                                 # 5. Create a notification for the citizen
@@ -1049,9 +1120,9 @@ Your response must be a JSON object with:
                                 
                                 try:
                                     tables["notifications"].create(notification)
-                                    print(f"Created notification for {ai_username} about new building")
+                                    log_success(f"Created notification for {ai_username} about new building")
                                 except Exception as notification_error:
-                                    print(f"Error creating notification: {str(notification_error)}")
+                                    log_error(f"Error creating notification: {str(notification_error)}")
                                     # Continue even if notification creation fails
                                 
                                 # 6. Create a notification for the land owner if different from the building owner
@@ -1084,9 +1155,9 @@ Your response must be a JSON object with:
                                         
                                         try:
                                             tables["notifications"].create(land_owner_notification)
-                                            print(f"Created notification for land owner {land_owner} about new building requiring wage setting")
+                                            log_success(f"Created notification for land owner {land_owner} about new building requiring wage setting")
                                         except Exception as notification_error:
-                                            print(f"Error creating notification for land owner: {str(notification_error)}")
+                                            log_error(f"Error creating notification for land owner: {str(notification_error)}")
                                             # Continue even if notification creation fails
                                 
                                 return True
@@ -1116,7 +1187,7 @@ Your response must be a JSON object with:
 
 def process_ai_building_strategies(dry_run: bool = False):
     """Main function to process AI building strategies."""
-    print(f"Starting AI building strategy process (dry_run={dry_run})")
+    log_header(f"AI Building Strategy Process (dry_run={dry_run})")
     
     # Import traceback for detailed error logging
     import traceback
@@ -1124,19 +1195,19 @@ def process_ai_building_strategies(dry_run: bool = False):
     # Initialize Airtable connection
     try:
         tables = initialize_airtable()
-        print("Successfully initialized Airtable connection")
+        log_success("Successfully initialized Airtable connection")
     except Exception as e:
-        print(f"Failed to initialize Airtable: {str(e)}")
-        print(f"Exception traceback: {traceback.format_exc()}")
+        log_error(f"Failed to initialize Airtable: {str(e)}")
+        log_error(f"Exception traceback: {traceback.format_exc()}")
         return
     
     # Get AI citizens
     try:
         ai_citizens = get_ai_citizens(tables)
         if not ai_citizens:
-            print("No AI citizens found, exiting")
+            log_warning("No AI citizens found, exiting")
             return
-        print(f"Successfully retrieved {len(ai_citizens)} AI citizens")
+        log_success(f"Successfully retrieved {len(ai_citizens)} AI citizens")
         
         # Filter AI citizens to only those with sufficient ducats for building (minimum 1,000,000)
         filtered_ai_citizens = []
@@ -1145,27 +1216,27 @@ def process_ai_building_strategies(dry_run: bool = False):
             ducats = ai_citizen["fields"].get("Ducats", 0)
             
             filtered_ai_citizens.append(ai_citizen)
-            print(f"AI citizen {ai_username} has {ducats} ducats, including in processing")
+            log_info(f"AI citizen {ai_username} has {ducats} ducats, including in processing")
 
         # Replace the original list with the filtered list
         ai_citizens = filtered_ai_citizens
-        print(f"Filtered down to {len(ai_citizens)} AI citizens with sufficient ducats for building")
+        log_success(f"Filtered down to {len(ai_citizens)} AI citizens with sufficient ducats for building")
         
         if not ai_citizens:
-            print("No AI citizens with sufficient ducats for building, exiting")
+            log_warning("No AI citizens with sufficient ducats for building, exiting")
             return
     except Exception as e:
-        print(f"Failed to get AI citizens: {str(e)}")
-        print(f"Exception traceback: {traceback.format_exc()}")
+        log_error(f"Failed to get AI citizens: {str(e)}")
+        log_error(f"Exception traceback: {traceback.format_exc()}")
         return
     
     # Get all buildings for reference
     try:
         all_buildings = get_all_buildings(tables)
-        print(f"Successfully retrieved {len(all_buildings)} buildings")
+        log_success(f"Successfully retrieved {len(all_buildings)} buildings")
     except Exception as e:
-        print(f"Failed to get all buildings: {str(e)}")
-        print(f"Exception traceback: {traceback.format_exc()}")
+        log_error(f"Failed to get all buildings: {str(e)}")
+        log_error(f"Exception traceback: {traceback.format_exc()}")
         return
     
     # Track results for each AI
@@ -1178,27 +1249,25 @@ def process_ai_building_strategies(dry_run: bool = False):
             print("Skipping AI citizen with no username")
             continue
         
-        print(f"\n{'='*80}")
-        print(f"Processing AI citizen: {ai_username}")
-        print(f"{'='*80}")
+        log_header(f"Processing AI citizen: {ai_username}")
         
         try:
             # Get lands owned by this AI
             citizen_lands = get_citizen_lands(tables, ai_username)
-            print(f"Retrieved {len(citizen_lands)} lands for {ai_username}")
+            log_info(f"Retrieved {len(citizen_lands)} lands for {ai_username}")
             
             if not citizen_lands:
-                print(f"AI citizen {ai_username} has no lands, skipping")
+                log_warning(f"AI citizen {ai_username} has no lands, skipping")
                 ai_strategy_results[ai_username] = False
                 continue
             
             # Get buildings owned by this AI
             citizen_buildings = get_citizen_buildings(tables, ai_username)
-            print(f"Retrieved {len(citizen_buildings)} buildings for {ai_username}")
+            log_info(f"Retrieved {len(citizen_buildings)} buildings for {ai_username}")
             
             # Get relevancies for this AI
             citizen_relevancies_records = get_citizen_relevancies(tables, ai_username)
-            print(f"Retrieved {len(citizen_relevancies_records)} relevancies for {ai_username}")
+            log_info(f"Retrieved {len(citizen_relevancies_records)} relevancies for {ai_username}")
             
             # Process relevancies into a more usable format
             citizen_relevancies = []
@@ -1220,37 +1289,33 @@ def process_ai_building_strategies(dry_run: bool = False):
             
             # Get polygon data for this citizen's lands
             polygon_data = get_polygon_data_for_citizen(ai_username, citizen_lands)
-            print(f"Retrieved polygon data for {len(polygon_data)} lands")
+            log_info(f"Retrieved polygon data for {len(polygon_data)} lands")
             
             # Get available building points
             available_points = get_available_building_points(polygon_data, citizen_buildings)
             
             # Check if there are any available building points
             total_points = sum(len(points) for points in available_points.values())
-            print(f"Found {total_points} total available building points for {ai_username}")
+            log_info(f"Found {total_points} total available building points for {ai_username}")
             
             if total_points == 0:
-                print(f"No available building points for AI citizen {ai_username}, skipping")
+                log_warning(f"No available building points for AI citizen {ai_username}, skipping")
                 ai_strategy_results[ai_username] = False
                 continue
             
             # Prepare the data package for the AI
             data_package = prepare_ai_building_strategy(ai_citizen, citizen_lands, citizen_buildings, all_buildings, citizen_relevancies)
-            print(f"Prepared data package for {ai_username}")
+            log_success(f"Prepared data package for {ai_username}")
             
             # Send the building strategy request to the AI
             if not dry_run:
-                print(f"\n{'-'*80}")
-                print(f"STEP 1: Get building decision for {ai_username}")
-                print(f"{'-'*80}")
+                log_section(f"STEP 1: Get building decision for {ai_username}")
                 
                 # First call: Get building decision
                 decision = send_building_strategy_request(ai_username, data_package)
                 
                 if decision is not None:
-                    print(f"\n{'-'*80}")
-                    print(f"STEP 2: Get placement decision for {ai_username}")
-                    print(f"{'-'*80}")
+                    log_section(f"STEP 2: Get placement decision for {ai_username}")
                     
                     # Second call: Get placement decision
                     building_types = get_building_types_from_api()
@@ -1265,19 +1330,23 @@ def process_ai_building_strategies(dry_run: bool = False):
                     )
                     
                     ai_strategy_results[ai_username] = placement_success
-                    print(f"Building strategy for {ai_username} completed with result: {'SUCCESS' if placement_success else 'FAILED'}")
+                    if placement_success:
+                        log_success(f"Building strategy for {ai_username} completed successfully")
+                    else:
+                        log_error(f"Building strategy for {ai_username} failed")
                 else:
-                    print(f"No valid building decision received for {ai_username}")
+                    log_warning(f"No valid building decision received for {ai_username}")
                     ai_strategy_results[ai_username] = False
             else:
                 # In dry run mode, just log what would happen
-                print(f"[DRY RUN] Would send building strategy request to AI citizen {ai_username}")
-                print(f"[DRY RUN] Data package summary:")
-                print(f"  - Citizen: {data_package['citizen']['username']}")
-                print(f"  - Lands: {len(data_package['lands'])}")
-                print(f"  - Buildings: {len(data_package['buildings'])}")
-                print(f"  - Net Income: {data_package['citizen']['financial']['net_income']}")
-                print(f"  - Available building points: {total_points}")
+                log_info(f"[DRY RUN] Would send building strategy request to AI citizen {ai_username}")
+                log_data("Data package summary", {
+                    "Citizen": data_package['citizen']['username'],
+                    "Lands": len(data_package['lands']),
+                    "Buildings": len(data_package['buildings']),
+                    "Net Income": data_package['citizen']['financial']['net_income'],
+                    "Available building points": total_points
+                })
                 ai_strategy_results[ai_username] = True
         except Exception as e:
             print(f"Error processing AI citizen {ai_username}: {str(e)}")
@@ -1303,15 +1372,16 @@ def process_ai_building_strategies(dry_run: bool = False):
             print(f"Error creating admin notification: {str(e)}")
             print(f"Exception traceback: {traceback.format_exc()}")
     else:
-        print(f"[DRY RUN] Would create admin notification with strategy results: {ai_strategy_results}")
+        log_info(f"[DRY RUN] Would create admin notification with strategy results")
+        log_data("Strategy results", ai_strategy_results)
     
     # Print final summary
-    print("\nAI Building Strategy Results Summary:")
-    for ai_name, success in ai_strategy_results.items():
-        status = "SUCCESS" if success else "FAILED"
-        print(f"- {ai_name}: {status}")
+    log_section("AI Building Strategy Results Summary")
+    headers = ["AI Citizen", "Status"]
+    rows = [[ai_name, "SUCCESS" if success else "FAILED"] for ai_name, success in ai_strategy_results.items()]
+    log_table(headers, rows)
     
-    print("\nAI building strategy process completed")
+    log_success("AI building strategy process completed")
 
 if __name__ == "__main__":
     # Check if this is a dry run
