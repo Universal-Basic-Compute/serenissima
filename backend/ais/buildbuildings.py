@@ -628,7 +628,8 @@ def get_available_building_points(polygons: List[Dict], existing_buildings: List
         return {"land": [], "canal": [], "bridge": []}
 
 def send_building_placement_request(ai_username: str, decision: Dict, polygon_data: List[Dict], 
-                                   available_points: Dict[str, List[Dict]], building_types: Dict, tables=None) -> bool:
+                                   available_points: Dict[str, List[Dict]], building_types: Dict, 
+                                   tables=None, citizen_relevancies=None) -> bool:
     """Send a second request to the AI to choose a specific point for building placement."""
     try:
         if not decision or "building_type" not in decision or "land_id" not in decision:
@@ -681,6 +682,26 @@ def send_building_placement_request(ai_username: str, decision: Dict, polygon_da
         
         print(f"Building type info: {json.dumps(building_type_info)}")
         
+        # NEW: Get existing buildings on this land
+        existing_buildings_on_land = []
+        if tables:
+            try:
+                buildings_formula = f"{{LandId}} = '{land_id}'"
+                land_buildings = tables["buildings"].all(formula=buildings_formula)
+                
+                for building in land_buildings:
+                    existing_buildings_on_land.append({
+                        "id": building.get("fields", {}).get("BuildingId", ""),
+                        "type": building.get("fields", {}).get("Type", ""),
+                        "owner": building.get("fields", {}).get("Owner", ""),
+                        "position": building.get("fields", {}).get("Position", ""),
+                        "notes": building.get("fields", {}).get("Notes", "")
+                    })
+                
+                print(f"Found {len(existing_buildings_on_land)} existing buildings on land {land_id}")
+            except Exception as e:
+                print(f"Error fetching existing buildings on land: {str(e)}")
+        
         api_key = get_kinos_api_key()
         blueprint = "serenissima-ai"
         
@@ -710,7 +731,7 @@ Respond with a JSON object containing your selection:
 ```
 """
         
-        # Create system instructions with the detailed data
+        # Create system instructions with the detailed data including relevancies and existing buildings
         system_instructions = f"""
 You are {ai_username}, an AI landowner in La Serenissima.
 
@@ -719,9 +740,22 @@ You previously decided to build a {building_type_info['name']} ({building_type})
 Here is information about the land:
 {json.dumps([p for p in polygon_data if p.get("id") == land_id], indent=2)}
 
+Here are the existing buildings on this land:
+{json.dumps(existing_buildings_on_land, indent=2)}
+
 Here are the available building points for this land (for {point_type} type buildings):
 {json.dumps(filtered_points, indent=2)}
 
+"""
+
+        # Add relevancies if provided
+        if citizen_relevancies:
+            system_instructions += f"""
+Here are relevancies that might influence your decision:
+{json.dumps(citizen_relevancies, indent=2)}
+"""
+
+        system_instructions += f"""
 There are {len(filtered_points)} available points. Choose the best location for your {building_type_info['name']} by selecting the index of one of these points (0 to {len(filtered_points)-1}).
 
 Your response must be a JSON object with:
@@ -1049,8 +1083,26 @@ def process_ai_building_strategies(dry_run: bool = False):
             print(f"Retrieved {len(citizen_buildings)} buildings for {ai_username}")
             
             # Get relevancies for this AI
-            citizen_relevancies = get_citizen_relevancies(tables, ai_username)
-            print(f"Retrieved {len(citizen_relevancies)} relevancies for {ai_username}")
+            citizen_relevancies_records = get_citizen_relevancies(tables, ai_username)
+            print(f"Retrieved {len(citizen_relevancies_records)} relevancies for {ai_username}")
+            
+            # Process relevancies into a more usable format
+            citizen_relevancies = []
+            for relevancy in citizen_relevancies_records:
+                relevancy_info = {
+                    "asset_id": relevancy["fields"].get("AssetID", ""),
+                    "asset_type": relevancy["fields"].get("AssetType", ""),
+                    "category": relevancy["fields"].get("Category", ""),
+                    "type": relevancy["fields"].get("Type", ""),
+                    "target_citizen": relevancy["fields"].get("TargetCitizen", ""),
+                    "score": relevancy["fields"].get("Score", 0),
+                    "time_horizon": relevancy["fields"].get("TimeHorizon", ""),
+                    "title": relevancy["fields"].get("Title", ""),
+                    "description": relevancy["fields"].get("Description", ""),
+                    "status": relevancy["fields"].get("Status", ""),
+                    "created_at": relevancy["fields"].get("CreatedAt", "")
+                }
+                citizen_relevancies.append(relevancy_info)
             
             # Get polygon data for this citizen's lands
             polygon_data = get_polygon_data_for_citizen(ai_username, citizen_lands)
@@ -1094,7 +1146,8 @@ def process_ai_building_strategies(dry_run: bool = False):
                         polygon_data, 
                         available_points,
                         building_types,
-                        tables
+                        tables,
+                        citizen_relevancies  # Pass the relevancies here
                     )
                     
                     ai_strategy_results[ai_username] = placement_success
