@@ -325,13 +325,19 @@ export class RelevancyService {
         // Count lands
         citizenLandCounts[land.owner] = (citizenLandCounts[land.owner] || 0) + 1;
         
-        // Count building points - use the length of buildingPoints array if available
+        // Count building points - use BuildingPointsCount if available
         let buildingPointsCount = 0;
-        if (land.buildingPoints && Array.isArray(land.buildingPoints)) {
-          // If buildingPoints is an array, use its length
+        if (land.BuildingPointsCount !== undefined) {
+          // If BuildingPointsCount is available, use it directly
+          buildingPointsCount = land.BuildingPointsCount;
+        } else if (land.buildingPointsCount !== undefined) {
+          // Try camelCase version
+          buildingPointsCount = land.buildingPointsCount;
+        } else if (land.buildingPoints && Array.isArray(land.buildingPoints)) {
+          // Fallback to array length if available
           buildingPointsCount = land.buildingPoints.length;
         } else if (typeof land.buildingPoints === 'number') {
-          // If buildingPoints is already a number, use it directly
+          // Fallback to direct number if available
           buildingPointsCount = land.buildingPoints;
         }
         
