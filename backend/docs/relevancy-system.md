@@ -132,6 +132,7 @@ Calculate relevancy scores for a specific AI or all AIs.
 **Query Parameters:**
 - `ai`: (Optional) Username of the AI to calculate relevancies for
 - `calculateAll`: (Optional) Set to "true" to calculate for all AIs who own lands
+- `type`: (Optional) Filter relevancies by type (e.g., 'connected', 'geographic')
 
 **Response:**
 ```json
@@ -155,7 +156,8 @@ Calculate and save relevancy scores for a specific AI.
 **Request Body:**
 ```json
 {
-  "aiUsername": "ai_citizen_name"
+  "aiUsername": "ai_citizen_name",
+  "typeFilter": "connected" // Optional: Filter by type
 }
 ```
 
@@ -171,4 +173,17 @@ Calculate and save relevancy scores for a specific AI.
   },
   "saved": true
 }
+```
+
+### Command Line Usage
+
+```bash
+# Calculate all relevancies
+python backend/ais/calculateRelevancies.py
+
+# Calculate only connected relevancies
+python backend/ais/calculateRelevancies.py --type connected
+
+# Calculate only geographic relevancies
+python backend/ais/calculateRelevancies.py --type geographic
 ```
