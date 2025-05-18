@@ -38,7 +38,7 @@ def get_ai_citizens(tables) -> List[Dict]:
     """Get all citizens that are marked as AI, are in Venice, and have appropriate social class."""
     try:
         # Query citizens with IsAI=true, InVenice=true, and SocialClass is either Nobili or Cittadini
-        formula = "AND({IsAI}=1, {InVenice}=1, OR({SocialClass}='Nobili', {SocialClass}='Cittadini'))"
+        formula = "AND({IsAI}=1, {InVenice}=1)" --> add Ducats >=150 000
         ai_citizens = tables["citizens"].all(formula=formula)
         print(f"Found {len(ai_citizens)} AI citizens in Venice with Nobili or Cittadini social class")
         return ai_citizens
@@ -300,8 +300,8 @@ If you decide not to build anything at this time, return an empty JSON object.
         payload = {
             "message": prompt,
             "addSystem": system_instructions,
-            "min_files": 5,
-            "max_files": 15
+            "min_files": 4,
+            "max_files": 8
         }
         
         # Make the API request
@@ -907,12 +907,9 @@ def process_ai_building_strategies(dry_run: bool = False):
             ai_username = ai_citizen["fields"].get("Citizenname")
             ducats = ai_citizen["fields"].get("Ducats", 0)
             
-            if ducats >= 1000000:
-                filtered_ai_citizens.append(ai_citizen)
-                print(f"AI citizen {ai_username} has {ducats} ducats, including in processing")
-            else:
-                print(f"AI citizen {ai_username} has insufficient ducats ({ducats}) for building, skipping")
-        
+            filtered_ai_citizens.append(ai_citizen)
+            print(f"AI citizen {ai_username} has {ducats} ducats, including in processing")
+
         # Replace the original list with the filtered list
         ai_citizens = filtered_ai_citizens
         print(f"Filtered down to {len(ai_citizens)} AI citizens with sufficient ducats for building")
