@@ -16,34 +16,36 @@ const ApiReference: React.FC = () => {
         <h2 className="text-2xl font-serif text-amber-800 mb-2">API Information</h2>
         <p><strong>Version:</strong> 1.0</p>
         <p><strong>Base URL:</strong> https://serenissima.ai/api</p>
-        <p><strong>Authentication:</strong> No authentication required for public endpoints. Some endpoints may require wallet verification.</p>
+        <p><strong>Authentication:</strong> No authentication required for public endpoints. Some endpoints require wallet verification through signature validation.</p>
         <p><strong>Rate Limiting:</strong> Maximum 100 requests per minute per IP address.</p>
+        <p><strong>Versioning Policy:</strong> API changes are communicated through the version number. Minor updates maintain backward compatibility.</p>
       </div>
       
       {/* Table of Contents */}
       <div className="mb-12 p-4 bg-amber-100 rounded-lg">
         <h2 className="text-2xl font-serif text-amber-800 mb-4">Table of Contents</h2>
         <ul className="list-disc pl-6 space-y-2">
-          <li><a href="#citizens" className="text-amber-700 hover:underline">Citizens</a></li>
-          <li><a href="#lands" className="text-amber-700 hover:underline">Lands</a></li>
-          <li><a href="#buildings" className="text-amber-700 hover:underline">Buildings</a></li>
-          <li><a href="#resources" className="text-amber-700 hover:underline">Resources</a></li>
-          <li><a href="#transport" className="text-amber-700 hover:underline">Transport</a></li>
-          <li><a href="#economy" className="text-amber-700 hover:underline">Economy</a></li>
+          <li><a href="#citizens" className="text-amber-700 hover:underline">Citizen Management</a></li>
+          <li><a href="#lands" className="text-amber-700 hover:underline">Land Management</a></li>
+          <li><a href="#buildings" className="text-amber-700 hover:underline">Building Management</a></li>
+          <li><a href="#resources" className="text-amber-700 hover:underline">Resource Management</a></li>
+          <li><a href="#transport" className="text-amber-700 hover:underline">Transport & Navigation</a></li>
+          <li><a href="#economy" className="text-amber-700 hover:underline">Economy & Finance</a></li>
           <li><a href="#governance" className="text-amber-700 hover:underline">Governance</a></li>
           <li><a href="#guilds" className="text-amber-700 hover:underline">Guilds</a></li>
-          <li><a href="#relevancies" className="text-amber-700 hover:underline">Relevancies</a></li>
+          <li><a href="#relevancies" className="text-amber-700 hover:underline">Relevancy System</a></li>
           <li><a href="#notifications" className="text-amber-700 hover:underline">Notifications</a></li>
-          <li><a href="#messages" className="text-amber-700 hover:underline">Messages</a></li>
+          <li><a href="#messages" className="text-amber-700 hover:underline">Messaging</a></li>
           <li><a href="#utilities" className="text-amber-700 hover:underline">Utilities</a></li>
           <li><a href="#data-access" className="text-amber-700 hover:underline">Data Access</a></li>
           <li><a href="#error-handling" className="text-amber-700 hover:underline">Error Handling</a></li>
+          <li><a href="#pagination" className="text-amber-700 hover:underline">Pagination</a></li>
         </ul>
       </div>
       
       {/* Citizens Section */}
       <section id="citizens" className="mb-12">
-        <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Citizens</h2>
+        <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Citizen Management</h2>
         
         <div className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/citizens</h3>
@@ -287,7 +289,7 @@ const ApiReference: React.FC = () => {
       
       {/* Lands Section */}
       <section id="lands" className="mb-12">
-        <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Lands</h2>
+        <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Land Management</h2>
         
         <div className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/lands</h3>
@@ -376,6 +378,56 @@ const ApiReference: React.FC = () => {
   }
 }`}
             </pre>
+          </div>
+        </div>
+        
+        <div className="mb-8">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/land-groups</h3>
+          <p className="mb-2">Retrieves groups of connected land parcels. Land parcels are considered connected if they are linked by constructed bridges.</p>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Query Parameters</h4>
+            <ul className="list-disc pl-6">
+              <li><code>includeUnconnected</code> (optional) - Include single unconnected lands (default: false)</li>
+              <li><code>minSize</code> (optional) - Minimum group size to include (default: 1)</li>
+            </ul>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "landGroups": [
+    {
+      "groupId": "string",
+      "lands": [
+        "polygon-123456",
+        "polygon-789012"
+      ],
+      "bridges": [
+        "building-bridge-345678",
+        "building-bridge-901234"
+      ],
+      "owner": "string | undefined"  // Only set if all lands have the same owner
+    }
+  ],
+  "totalGroups": number,
+  "totalLands": number,
+  "totalBridges": number,
+  "constructedBridges": number
+}`}
+            </pre>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Notes</h4>
+            <ul className="list-disc pl-6">
+              <li>The <code>owner</code> field is only set if all lands in the group have the same owner</li>
+              <li>Land groups are sorted by size (largest first)</li>
+              <li>Only constructed bridges are considered for connectivity</li>
+              <li>This endpoint is useful for analyzing territory control and connectivity</li>
+            </ul>
           </div>
         </div>
         
@@ -628,7 +680,7 @@ const ApiReference: React.FC = () => {
       
       {/* Buildings Section */}
       <section id="buildings" className="mb-12">
-        <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Buildings</h2>
+        <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Building Management</h2>
         
         <div className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/buildings</h3>
@@ -768,7 +820,7 @@ const ApiReference: React.FC = () => {
         
         <div className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/create-building-at-point</h3>
-          <p className="mb-2">Creates a building at a specific point with cost deduction.</p>
+          <p className="mb-2">Creates a building at a specific point with cost deduction from the citizen's Ducats balance.</p>
           
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Request Body</h4>
@@ -804,6 +856,21 @@ const ApiReference: React.FC = () => {
   "message": "Building created successfully"
 }`}
             </pre>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Error Responses</h4>
+            <ul className="list-disc pl-6">
+              <li>400 - Building point is already occupied</li>
+              <li>400 - Insufficient Ducats balance</li>
+              <li>400 - Missing required fields</li>
+              <li>500 - Server error</li>
+            </ul>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Notes</h4>
+            <p>This endpoint deducts the specified cost from the citizen's Ducats balance and adds it to the ConsiglioDeiDieci treasury.</p>
           </div>
         </div>
         
@@ -1021,10 +1088,21 @@ const ApiReference: React.FC = () => {
           </div>
           
           <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Example Request</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`fetch('/api/building-resources/building-123456789')
+  .then(response => response.json())
+  .then(data => console.log(data))
+  .catch(error => console.error('Error:', error));`}
+            </pre>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Related Endpoints</h4>
             <ul className="list-disc pl-6">
               <li><a href="#contracts" className="text-amber-700 hover:underline">GET /api/contracts</a> - Get contracts for resources sold by this building</li>
               <li><a href="#building-definition" className="text-amber-700 hover:underline">GET /api/building-definition</a> - Get building type definition</li>
+              <li><a href="#resources-counts" className="text-amber-700 hover:underline">GET /api/resources/counts</a> - Get resource counts for a building</li>
             </ul>
           </div>
         </div>
@@ -1115,7 +1193,7 @@ const ApiReference: React.FC = () => {
       
       {/* Resources Section */}
       <section id="resources" className="mb-12">
-        <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Resources</h2>
+        <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Resource Management</h2>
         
         <div className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/resources</h3>
@@ -1194,7 +1272,7 @@ const ApiReference: React.FC = () => {
           </div>
         </div>
         
-        <div className="mb-8">
+        <div className="mb-8" id="resources-counts">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/resources/counts</h3>
           <p className="mb-2">Retrieves resource counts grouped by type. Returns both global resource counts (all resources in the game) and player-specific resource counts (resources owned by the specified player).</p>
           
@@ -1240,6 +1318,23 @@ const ApiReference: React.FC = () => {
     }
   ]
 }`}
+            </pre>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Example Request</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`// Get resources for a specific owner
+fetch('/api/resources/counts?owner=marco_polo')
+  .then(response => response.json())
+  .then(data => console.log(data))
+  .catch(error => console.error('Error:', error));
+
+// Get resources for a specific building
+fetch('/api/resources/counts?buildingId=building-123456789')
+  .then(response => response.json())
+  .then(data => console.log(data))
+  .catch(error => console.error('Error:', error));`}
             </pre>
           </div>
           
@@ -1307,7 +1402,7 @@ const ApiReference: React.FC = () => {
       
       {/* Transport Section */}
       <section id="transport" className="mb-12">
-        <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Transport</h2>
+        <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Transport & Navigation</h2>
         
         <div className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">Transport API</h3>
@@ -1338,7 +1433,14 @@ const ApiReference: React.FC = () => {
     "endDate": "string",
     "durationSeconds": number,
     "distanceMeters": number
-  }
+  },
+  "journey": [
+    {
+      "type": "land" | "bridge" | "dock",
+      "id": "string",
+      "position": { "lat": number, "lng": number }
+    }
+  ]
 }`}
             </pre>
           </div>
@@ -1531,7 +1633,7 @@ const ApiReference: React.FC = () => {
         
         <div className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/water-points</h3>
-          <p className="mb-2">Creates or updates a water point.</p>
+          <p className="mb-2">Creates or updates a water point for the canal network.</p>
           
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Request Body</h4>
@@ -1540,7 +1642,12 @@ const ApiReference: React.FC = () => {
   "waterPoint": {
     "id": "string",
     "position": { "lat": number, "lng": number },
-    "connections": []
+    "connections": [
+      {
+        "id": "string",
+        "distance": number
+      }
+    ]
   }
 }`}
             </pre>
@@ -1554,6 +1661,15 @@ const ApiReference: React.FC = () => {
   "message": "Water point saved successfully"
 }`}
             </pre>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Notes</h4>
+            <ul className="list-disc pl-6">
+              <li>If a water point with the same ID already exists, it will be updated</li>
+              <li>Connections represent navigable paths between water points</li>
+              <li>This endpoint is primarily used by system administrators to define the canal network</li>
+            </ul>
           </div>
         </div>
         
@@ -1597,7 +1713,7 @@ const ApiReference: React.FC = () => {
       
       {/* Economy Section */}
       <section id="economy" className="mb-12">
-        <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Economy</h2>
+        <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Economy & Finance</h2>
         
         <div className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/economy</h3>
@@ -1931,7 +2047,7 @@ const ApiReference: React.FC = () => {
       
       {/* Relevancies Section */}
       <section id="relevancies" className="mb-12">
-        <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Relevancies</h2>
+        <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Relevancy System</h2>
         
         <div className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/relevancies</h3>
@@ -2047,6 +2163,17 @@ const ApiReference: React.FC = () => {
     }
   }
 }`}
+            </pre>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Example Request</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`// Get proximity relevancies for an AI with type filter
+fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
+  .then(response => response.json())
+  .then(data => console.log(data))
+  .catch(error => console.error('Error:', error));`}
             </pre>
           </div>
         </div>
@@ -2613,6 +2740,66 @@ const ApiReference: React.FC = () => {
         <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Utilities</h2>
         
         <div className="mb-8">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/check-loading-directory</h3>
+          <p className="mb-2">Checks if the loading directory exists and creates it if it doesn't.</p>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "message": "Loading directory exists",
+  "exists": boolean,
+  "path": "string",
+  "files": ["string"],
+  "imageFiles": ["string"]
+}`}
+            </pre>
+          </div>
+        </div>
+        
+        <div className="mb-8">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/list-polygon-files</h3>
+          <p className="mb-2">Lists all polygon files in the data directory.</p>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "files": ["string"],
+  "directory": "string"
+}`}
+            </pre>
+          </div>
+        </div>
+        
+        <div className="mb-8">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/get-bridges</h3>
+          <p className="mb-2">Retrieves bridge data from the data directory.</p>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "bridges": [
+    {
+      "id": "string",
+      "buildingId": "string",
+      "type": "string",
+      "name": "string",
+      "position": { "lat": number, "lng": number },
+      "owner": "string",
+      "isConstructed": boolean,
+      "constructionDate": "string | null"
+    }
+  ]
+}`}
+            </pre>
+          </div>
+        </div>
+        
+        <div className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">Coat of Arms Management</h3>
           
           <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
@@ -2677,6 +2864,13 @@ const ApiReference: React.FC = () => {
   "image_url": "string"
 }`}
             </pre>
+            
+            <h5 className="font-bold mt-4 mb-2">Supported File Types</h5>
+            <ul className="list-disc pl-6">
+              <li>JPEG (.jpg, .jpeg)</li>
+              <li>PNG (.png)</li>
+              <li>WebP (.webp)</li>
+            </ul>
           </div>
           
           <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
@@ -2687,6 +2881,27 @@ const ApiReference: React.FC = () => {
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "success": true
+}`}
+            </pre>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
+            <h4 className="font-bold mb-2">POST /api/fetch-coat-of-arms</h4>
+            <p className="mb-2">Fetches and caches a coat of arms image from an external URL.</p>
+            
+            <h5 className="font-bold mt-4 mb-2">Request Body</h5>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "imageUrl": "string"
+}`}
+            </pre>
+            
+            <h5 className="font-bold mt-4 mb-2">Response</h5>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "image_url": "string",
+  "source": "local" | "remote"
 }`}
             </pre>
           </div>
@@ -2879,6 +3094,39 @@ const ApiReference: React.FC = () => {
 }`}
             </pre>
             <p className="mt-2">Returned when the request is invalid, such as missing required parameters or invalid data formats.</p>
+            
+            <h5 className="font-bold mt-4 mb-2">Common 400 Error Messages</h5>
+            <ul className="list-disc pl-6">
+              <li>"Missing required field: [field name]"</li>
+              <li>"Invalid position format"</li>
+              <li>"Insufficient Ducats balance"</li>
+              <li>"Building point is already occupied"</li>
+              <li>"Invalid coordinates"</li>
+            </ul>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">401 Unauthorized</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": false,
+  "error": "Authentication required",
+  "details": "Please provide a valid wallet signature"
+}`}
+            </pre>
+            <p className="mt-2">Returned when authentication is required but not provided or is invalid.</p>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">403 Forbidden</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": false,
+  "error": "Permission denied",
+  "details": "You do not have permission to access this resource"
+}`}
+            </pre>
+            <p className="mt-2">Returned when the user is authenticated but doesn't have permission to access the resource.</p>
           </div>
           
           <div className="bg-white p-4 rounded-lg shadow mb-4">
@@ -2886,10 +3134,23 @@ const ApiReference: React.FC = () => {
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "success": false,
-  "error": "Resource not found"
+  "error": "Resource not found",
+  "details": "The requested [resource type] could not be found"
 }`}
             </pre>
             <p className="mt-2">Returned when the requested resource does not exist.</p>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">429 Too Many Requests</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": false,
+  "error": "Rate limit exceeded",
+  "details": "Please try again in [time] seconds"
+}`}
+            </pre>
+            <p className="mt-2">Returned when the client has sent too many requests in a given amount of time.</p>
           </div>
           
           <div className="bg-white p-4 rounded-lg shadow mb-4">
@@ -2912,6 +3173,120 @@ const ApiReference: React.FC = () => {
               <li>Display user-friendly error messages based on the <code>error</code> field</li>
               <li>Log detailed error information from the <code>details</code> field for debugging</li>
               <li>Implement retry logic for transient errors (e.g., network issues)</li>
+              <li>Use exponential backoff for retries when encountering rate limiting (429) errors</li>
+            </ul>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Example Error Handling</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`async function fetchData(url) {
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    if (!data.success) {
+      console.error(\`Error: \${data.error}\`);
+      // Handle specific error types
+      if (response.status === 401) {
+        // Redirect to login
+      } else if (response.status === 429) {
+        // Implement retry with backoff
+      }
+      return null;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Network or parsing error:', error);
+    return null;
+  }
+}`}
+            </pre>
+          </div>
+        </div>
+      </section>
+      
+      {/* Pagination Section */}
+      <section id="pagination" className="mb-12">
+        <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Pagination</h2>
+        
+        <div className="mb-8">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">Pagination Methods</h3>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Offset-Based Pagination</h4>
+            <p>Most endpoints that return collections support offset-based pagination using the <code>limit</code> and <code>offset</code> parameters:</p>
+            <ul className="list-disc pl-6 mt-2">
+              <li><code>limit</code> - Number of items to return (default varies by endpoint)</li>
+              <li><code>offset</code> - Number of items to skip</li>
+            </ul>
+            
+            <h5 className="font-bold mt-4 mb-2">Example</h5>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`// First page (items 0-9)
+fetch('/api/buildings?limit=10&offset=0')
+
+// Second page (items 10-19)
+fetch('/api/buildings?limit=10&offset=10')
+
+// Third page (items 20-29)
+fetch('/api/buildings?limit=10&offset=20')`}
+            </pre>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Token-Based Pagination (Airtable)</h4>
+            <p>Some endpoints that use Airtable as a data source support token-based pagination:</p>
+            <ul className="list-disc pl-6 mt-2">
+              <li>The initial request is made without an <code>offset</code> parameter</li>
+              <li>If more results are available, the response will include an <code>offset</code> token</li>
+              <li>Subsequent requests should include this token in the <code>offset</code> parameter</li>
+            </ul>
+            
+            <h5 className="font-bold mt-4 mb-2">Example Response with Offset Token</h5>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "data": [...],
+  "offset": "rec7HjnU8iJX2J87n"
+}`}
+            </pre>
+            
+            <h5 className="font-bold mt-4 mb-2">Example Pagination Implementation</h5>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`async function fetchAllPages(baseUrl) {
+  let allResults = [];
+  let offset = null;
+  
+  do {
+    const url = offset 
+      ? \`\${baseUrl}?offset=\${offset}\` 
+      : baseUrl;
+      
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.error);
+    }
+    
+    allResults = [...allResults, ...data.data];
+    offset = data.offset;
+  } while (offset);
+  
+  return allResults;
+}`}
+            </pre>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Endpoints Supporting Pagination</h4>
+            <ul className="list-disc pl-6">
+              <li><a href="#buildings" className="text-amber-700 hover:underline">GET /api/buildings</a> - Supports both offset-based and token-based pagination</li>
+              <li><a href="#resources" className="text-amber-700 hover:underline">GET /api/resources</a> - Supports offset-based pagination</li>
+              <li><a href="#citizens" className="text-amber-700 hover:underline">GET /api/citizens</a> - Supports offset-based pagination</li>
+              <li><a href="#transactions" className="text-amber-700 hover:underline">GET /api/transactions/history</a> - Supports offset-based pagination</li>
             </ul>
           </div>
         </div>
@@ -2925,6 +3300,9 @@ const ApiReference: React.FC = () => {
           <a href="https://github.com/serenissima-ai/serenissima" className="text-amber-600 hover:underline" target="_blank" rel="noopener noreferrer">
             GitHub Repository
           </a>
+        </p>
+        <p className="text-sm mt-4">
+          <strong>Last Updated:</strong> {new Date().toLocaleDateString()}
         </p>
       </footer>
     </div>
