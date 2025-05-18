@@ -4,7 +4,8 @@ import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 import { CoordinateService } from '@/lib/services/CoordinateService';
 import CitizenDetailsPanel from '@/components/UI/CitizenDetailsPanel';
 import { hoverStateService } from '@/lib/services/HoverStateService';
-import { citizenAnimationService, ActivityPath, AnimatedCitizen } from '@/lib/services/CitizenAnimationService';
+import { citizenAnimationService, AnimatedCitizen } from '@/lib/services/CitizenAnimationService';
+import { ActivityPath, activityPathService } from '@/lib/services/ActivityPathService';
 
 interface CitizenMarkersProps {
   isVisible: boolean;
@@ -100,87 +101,10 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     };
   }, []);
   
-  // Add animation loop function
-  const animateCitizens = useCallback((timestamp: number) => {
-    if (!lastFrameTimeRef.current) {
-      lastFrameTimeRef.current = timestamp;
-      animationFrameRef.current = requestAnimationFrame(animateCitizens);
-      return;
-    }
-    
-    // Calculate time delta in seconds
-    const deltaTime = (timestamp - lastFrameTimeRef.current) / 1000;
-    lastFrameTimeRef.current = timestamp;
-    
-    // Update each animated citizen
-    setAnimatedCitizens(prev => {
-      const updated = {...prev};
-      let hasChanges = false;
-      
-      Object.keys(updated).forEach(citizenId => {
-        const citizen = updated[citizenId];
-        
-        // Skip if no current path
-        if (!citizen.currentPath || !citizen.currentPath.path || citizen.currentPath.path.length < 2) return;
-        
-        // Update progress based on speed and time
-        const pathLength = citizen.currentPath.path.reduce((total, point, index, array) => {
-          if (index === 0) return total;
-          return total + calculateDistance(array[index-1], point);
-        }, 0);
-        
-        // Calculate progress increment based on speed and path length
-        const progressIncrement = (citizen.speed * deltaTime) / pathLength;
-        let newProgress = citizen.progress + progressIncrement;
-        
-        // If path is complete, move to next path or reset
-        if (newProgress >= 1) {
-          // Find the next path for this citizen
-          const citizenPaths = activityPaths[citizenId] || [];
-          const currentPathIndex = citizenPaths.findIndex(p => p.id === citizen.currentPath?.id);
-          
-          if (currentPathIndex >= 0 && currentPathIndex < citizenPaths.length - 1) {
-            // Move to next path
-            const nextPath = citizenPaths[currentPathIndex + 1];
-            updated[citizenId] = {
-              ...citizen,
-              currentPath: nextPath,
-              progress: 0,
-              pathIndex: currentPathIndex + 1
-            };
-          } else {
-            // Reset to beginning of current path or a random path
-            const randomPathIndex = Math.floor(Math.random() * citizenPaths.length);
-            updated[citizenId] = {
-              ...citizen,
-              currentPath: citizenPaths[randomPathIndex] || null,
-              progress: 0,
-              pathIndex: randomPathIndex
-            };
-          }
-        } else {
-          // Update position along the path
-          const newPosition = calculatePositionAlongPath(citizen.currentPath.path, newProgress);
-          
-          if (newPosition) {
-            updated[citizenId] = {
-              ...citizen,
-              currentPosition: newPosition,
-              progress: newProgress
-            };
-            hasChanges = true;
-          }
-        }
-      });
-      
-      return hasChanges ? updated : prev;
-    });
-    
-    // Continue animation loop regardless of mouse movement
-    if (animationActive) {
-      animationFrameRef.current = requestAnimationFrame(animateCitizens);
-    }
-  }, [animationActive, activityPaths, calculatePositionAlongPath]);
+  // Create a callback for animation updates
+  const handleAnimationUpdate = useCallback((updatedCitizens: Record<string, AnimatedCitizen>) => {
+    setAnimatedCitizens(updatedCitizens);
+  }, []);
   
   // Add a function to parse building coordinates from building ID
   const parseBuildingCoordinates = (buildingId: string): {lat: number, lng: number} | null => {
@@ -204,89 +128,20 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   // Function to fetch activity paths
   const fetchActivityPaths = async () => {
     setIsLoadingPaths(true);
-    console.log('Fetching recent activity paths with routes...');
+    console.log('Fetching activity paths using ActivityPathService...');
     
     try {
-      // Instead of fetching by citizen IDs, just get the most recent activities with paths
-      const response = await fetch(`/api/activities?limit=100&hasPath=true`);
+      // Use the ActivityPathService to fetch paths
+      const pathsMap = await activityPathService.fetchActivityPaths();
       
-      if (response.ok) {
-        const data = await response.json();
-        
-        if (data.activities && Array.isArray(data.activities)) {
-          // Process activities with paths
-          const pathsMap: Record<string, ActivityPath[]> = {};
-          const allPaths: ActivityPath[] = []; // Collect all paths in a single array
-          
-          data.activities.forEach((activity: any) => {
-            if (activity.Path) {
-              let path;
-              try {
-                // Parse path if it's a string
-                path = typeof activity.Path === 'string' ? JSON.parse(activity.Path) : activity.Path;
-                
-                // Log the parsed path for debugging
-                console.log(`Parsed path for activity ${activity.ActivityId || 'unknown'}, citizen ${activity.Citizen || activity.CitizenId}:`, 
-                  path.length > 0 ? `${path.length} points, first: ${JSON.stringify(path[0])}` : 'empty path');
-              
-                // Skip activities without valid paths
-                if (!Array.isArray(path) || path.length < 2) {
-                  console.warn(`Skipping invalid path for activity ${activity.ActivityId || 'unknown'}: not an array or too short`);
-                  return;
-                }
-              
-                // Validate each point in the path
-                const validPath = path.filter(point => 
-                  point && typeof point === 'object' && 
-                  'lat' in point && 'lng' in point &&
-                  typeof point.lat === 'number' && typeof point.lng === 'number'
-                );
-              
-                if (validPath.length < 2) {
-                  console.warn(`Skipping path with insufficient valid points: ${validPath.length} valid out of ${path.length}`);
-                  return;
-                }
-              
-                // Use Citizen (Username) field first, then fall back to CitizenId
-                const citizenId = activity.Citizen || activity.CitizenId;
-              
-                if (!citizenId) {
-                  console.warn(`Activity ${activity.ActivityId || 'unknown'} has no Citizen or CitizenId field, skipping`);
-                  return;
-                }
-                
-                if (!pathsMap[citizenId]) {
-                  pathsMap[citizenId] = [];
-                }
-                
-                const activityPath = {
-                  id: activity.ActivityId || `activity-${Math.random()}`,
-                  citizenId,
-                  path: validPath, // Use the validated path
-                  type: activity.Type || 'unknown',
-                  startTime: activity.StartDate || activity.CreatedAt,
-                  endTime: activity.EndDate
-                };
-                
-                pathsMap[citizenId].push(activityPath);
-                allPaths.push(activityPath); // Add to the all paths array
-              } catch (e) {
-                console.warn(`Failed to parse activity path for ${activity.ActivityId || 'unknown'}:`, e);
-                return;
-              }
-            }
-          });
-          
-          console.log(`Loaded activity paths for ${Object.keys(pathsMap).length} citizens, total paths: ${allPaths.length}`);
-          setActivityPaths(pathsMap);
-          setVisiblePaths(allPaths); // Set all paths to be visible
-          
-          // Log the first few paths for debugging
-          if (allPaths.length > 0) {
-            console.log('Sample paths:', allPaths.slice(0, 3));
-          }
-        }
-      }
+      // Update state with the fetched paths
+      setActivityPaths(pathsMap);
+      
+      // Set all paths to be visible
+      const allPaths = Object.values(pathsMap).flat();
+      setVisiblePaths(allPaths);
+      
+      console.log(`Loaded ${allPaths.length} activity paths for ${Object.keys(pathsMap).length} citizens`);
     } catch (error) {
       console.error('Error fetching activity paths:', error);
     } finally {
@@ -294,7 +149,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     }
   };
 
-  // Add a function to get path color based on activity type
+  // Use the ActivityPathService for path coloring
   const getActivityPathColor = (activity: ActivityPath): string => {
     // Find the citizen for this activity
     const citizen = citizens.find(c => 
@@ -304,27 +159,13 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
       c.id === activity.citizenId
     );
   
-    if (citizen) {
-      // Get the social class
-      const socialClass = citizen.socialclass || citizen.SocialClass || citizen.socialClass || '';
-      // Return the color based on social class
-      return citizenService.getSocialClassColor(socialClass);
-    }
-  
-    // Fallback to default colors if citizen not found
-    const lowerType = activity.type.toLowerCase();
-  
-    if (lowerType.includes('transport') || lowerType.includes('move')) {
-      return '#4b70e2'; // Blue
-    } else if (lowerType.includes('trade') || lowerType.includes('buy') || lowerType.includes('sell')) {
-      return '#e27a4b'; // Orange
-    } else if (lowerType.includes('work') || lowerType.includes('labor')) {
-      return '#4be27a'; // Green
-    } else if (lowerType.includes('craft') || lowerType.includes('create') || lowerType.includes('produce')) {
-      return '#e24b7a'; // Pink
-    }
-  
-    return '#aaaaaa'; // Default gray
+    // Get the social class if citizen is found
+    const socialClass = citizen ? 
+      (citizen.socialclass || citizen.SocialClass || citizen.socialClass || '') : 
+      '';
+    
+    // Use the ActivityPathService to get the color
+    return activityPathService.getActivityPathColor(activity, socialClass);
   };
   
   

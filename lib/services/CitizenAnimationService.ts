@@ -1,28 +1,6 @@
 import { throttle } from '../utils/performanceUtils';
-
-// Helper function to calculate distance between two geographic points using the Haversine formula
-const calculateDistance = (point1: {lat: number, lng: number}, point2: {lat: number, lng: number}): number => {
-  const R = 6371000; // Earth radius in meters
-  const lat1 = point1.lat * Math.PI / 180;
-  const lat2 = point2.lat * Math.PI / 180;
-  const deltaLat = (point2.lat - point1.lat) * Math.PI / 180;
-  const deltaLng = (point2.lng - point1.lng) * Math.PI / 180;
-
-  const a = Math.sin(deltaLat/2) * Math.sin(deltaLat/2) +
-          Math.cos(lat1) * Math.cos(lat2) *
-          Math.sin(deltaLng/2) * Math.sin(deltaLng/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  return R * c;
-};
-
-export interface ActivityPath {
-  id: string;
-  citizenId: string;
-  path: {lat: number, lng: number}[];
-  type: string;
-  startTime: string;
-  endTime?: string;
-}
+import { calculateDistance } from '../utils/hoverDetectionUtils';
+import { ActivityPath, activityPathService } from './ActivityPathService';
 
 export interface AnimatedCitizen {
   citizen: any;
@@ -62,10 +40,7 @@ export class CitizenAnimationService {
       if (!citizen.currentPath || !citizen.currentPath.path || citizen.currentPath.path.length < 2) return;
       
       // Update progress based on speed and time
-      const pathLength = citizen.currentPath.path.reduce((total, point, index, array) => {
-        if (index === 0) return total;
-        return total + calculateDistance(array[index-1], point);
-      }, 0);
+      const pathLength = activityPathService.calculateTotalDistance(citizen.currentPath.path);
       
       // Calculate progress increment based on speed and path length
       const progressIncrement = (citizen.speed * deltaTime) / pathLength;
@@ -73,15 +48,33 @@ export class CitizenAnimationService {
       
       // If path is complete, move to next path or reset
       if (newProgress >= 1) {
-        // For now, just reset to beginning of current path
-        // In a real implementation, you would move to the next path
-        this.animatedCitizens[citizenId] = {
-          ...citizen,
-          progress: 0
-        };
+        // Get all paths for this citizen
+        const citizenPaths = activityPathService.getPathsForCitizen(citizenId);
+        
+        if (citizenPaths.length > 0) {
+          // Find the current path index
+          const currentIndex = citizenPaths.findIndex(p => p.id === citizen.currentPath?.id);
+          
+          // Move to the next path or loop back to the first
+          const nextIndex = (currentIndex + 1) % citizenPaths.length;
+          const nextPath = citizenPaths[nextIndex];
+          
+          this.animatedCitizens[citizenId] = {
+            ...citizen,
+            currentPath: nextPath,
+            pathIndex: nextIndex,
+            progress: 0
+          };
+        } else {
+          // Just reset progress if no other paths available
+          this.animatedCitizens[citizenId] = {
+            ...citizen,
+            progress: 0
+          };
+        }
       } else {
         // Update position along the path
-        const newPosition = this.calculatePositionAlongPath(citizen.currentPath.path, newProgress);
+        const newPosition = activityPathService.calculatePositionAlongPath(citizen.currentPath.path, newProgress);
         
         if (newPosition) {
           this.animatedCitizens[citizenId] = {
@@ -106,54 +99,11 @@ export class CitizenAnimationService {
   }, 16); // Aim for 60fps (16ms)
   
   /**
-   * Calculate position along a path based on progress (0-1)
-   */
-  public calculatePositionAlongPath(path: {lat: number, lng: number}[], progress: number): {lat: number, lng: number} | null {
-    if (!path || path.length < 2) return null;
-    
-    // Calculate total path length
-    let totalDistance = 0;
-    const segments: {start: number, end: number, distance: number}[] = [];
-    
-    for (let i = 0; i < path.length - 1; i++) {
-      const distance = calculateDistance(path[i], path[i+1]);
-      segments.push({
-        start: totalDistance,
-        end: totalDistance + distance,
-        distance
-      });
-      totalDistance += distance;
-    }
-    
-    // Find the segment where the progress falls
-    const targetDistance = progress * totalDistance;
-    const segment = segments.find(seg => targetDistance >= seg.start && targetDistance <= seg.end);
-    
-    if (!segment) return path[0]; // Default to start if no segment found
-    
-    // Calculate position within the segment
-    const segmentProgress = (targetDistance - segment.start) / segment.distance;
-    const segmentIndex = segments.indexOf(segment);
-    
-    const p1 = path[segmentIndex];
-    const p2 = path[segmentIndex + 1];
-    
-    // Interpolate between the two points
-    return {
-      lat: p1.lat + (p2.lat - p1.lat) * segmentProgress,
-      lng: p1.lng + (p2.lng - p1.lng) * segmentProgress
-    };
-  }
-  
-  /**
    * Calculate the total distance of a path
+   * @deprecated Use activityPathService.calculateTotalDistance instead
    */
   public calculateTotalDistance(path: {lat: number, lng: number}[]): number {
-    let totalDistance = 0;
-    for (let i = 0; i < path.length - 1; i++) {
-      totalDistance += calculateDistance(path[i], path[i + 1]);
-    }
-    return totalDistance;
+    return activityPathService.calculateTotalDistance(path);
   }
   
   /**
@@ -227,7 +177,7 @@ export class CitizenAnimationService {
       if (!selectedPath || !selectedPath.path || selectedPath.path.length < 2) return;
       
       // Calculate position based on progress
-      const initialPosition = this.calculatePositionAlongPath(selectedPath.path, initialProgress) || selectedPath.path[0];
+      const initialPosition = activityPathService.calculatePositionAlongPath(selectedPath.path, initialProgress) || selectedPath.path[0];
       
       // Random speed between 1-5 m/s (walking to running)
       // Adjust speed based on activity type - slower for work, faster for transport
@@ -311,7 +261,7 @@ export class CitizenAnimationService {
     if (!path || !path.path || path.path.length < 2) return;
     
     // Calculate initial position
-    const initialPosition = this.calculatePositionAlongPath(path.path, initialProgress) || path.path[0];
+    const initialPosition = activityPathService.calculatePositionAlongPath(path.path, initialProgress) || path.path[0];
     
     // Determine speed based on activity type
     let speed = 1 + Math.random() * 4; // Default random speed
