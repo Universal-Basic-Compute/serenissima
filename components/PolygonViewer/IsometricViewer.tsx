@@ -1975,6 +1975,15 @@ number => {
             setSelectedCitizen(null);
           }
         },
+        setHoveredCitizen: (buildingId, type, citizen) => {
+          if (citizen) {
+            // Use the HoverStateService to handle citizen hover state
+            hoverStateService.setHoveredCitizen(buildingId, type, citizen);
+          } else {
+            // Clear hover state when no citizen is hovered
+            hoverStateService.clearHoveredResource();
+          }
+        },
         setShowCitizenDetailsPanel,
         calculateTransportRoute,
         findBuildingPosition,
@@ -2336,7 +2345,7 @@ number => {
     };
 
     // Get color based on social class
-    const fillColor = getSocialClassColor(socialClass);
+    const fillColor = getSocialClassColor(safeSocialClass);
 
     // Draw a circular background with color based on social class
     ctx.beginPath();
@@ -2356,8 +2365,8 @@ number => {
     ctx.textBaseline = 'middle';
     
     // Get the first letters of the first and last name
-    const firstInitial = firstName.charAt(0).toUpperCase() || '?';
-    const lastInitial = lastName.charAt(0).toUpperCase() || '?';
+    const firstInitial = safeFirstName.charAt(0).toUpperCase() || '?';
+    const lastInitial = safeLastName.charAt(0).toUpperCase() || '?';
     ctx.fillText(firstInitial + lastInitial, x, y);
   };
 
