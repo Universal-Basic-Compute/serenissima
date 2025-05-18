@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
       simpleScores[citizenId] = data.score;
     });
     
-    // Save to Airtable
+    // Save to Airtable - only save once for this AI
     let saved = false;
     try {
       await saveRelevancies(aiUsername, landDominationRelevancies, allLands, allCitizens);

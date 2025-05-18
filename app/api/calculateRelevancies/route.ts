@@ -253,7 +253,7 @@ async function saveRelevancies(
             AssetType: data.assetType,
             Category: data.category,
             Type: data.type,
-            TargetCitizen: id, // The citizen this relevancy is about
+            TargetCitizen: data.targetCitizen || id, // Use data.targetCitizen if provided (which will be "all")
             RelevantToCitizen: aiUsername,
             Score: data.score,
             TimeHorizon: data.timeHorizon || 'medium',

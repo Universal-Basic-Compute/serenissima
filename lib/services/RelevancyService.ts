@@ -506,7 +506,8 @@ export class RelevancyService {
         title,
         description,
         timeHorizon: 'medium',
-        status
+        status,
+        targetCitizen: "all" // Use "all" instead of individual citizens
       };
     });
     
