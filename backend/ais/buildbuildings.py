@@ -904,6 +904,39 @@ Your response must be a JSON object with:
                                     print(f"Error creating notification: {str(notification_error)}")
                                     # Continue even if notification creation fails
                                 
+                                # 6. Create a notification for the land owner if different from the building owner
+                                if land_id and ai_username:
+                                    # Get the land owner
+                                    land_owner = None
+                                    for land in citizen_lands:
+                                        if land["fields"].get("LandId") == land_id:
+                                            land_owner = land["fields"].get("Owner")
+                                            break
+                                    
+                                    # If land owner is different from building owner, notify them
+                                    if land_owner and land_owner != ai_username:
+                                        land_owner_notification = {
+                                            "Citizen": land_owner,
+                                            "Type": "building_created",
+                                            "Content": f"{ai_username} has built a {building_type_info['name']} on your land {land_id}. Please set a wage for this building.",
+                                            "CreatedAt": datetime.now().isoformat(),
+                                            "ReadAt": None,
+                                            "Details": json.dumps({
+                                                "building_id": building_id,
+                                                "building_type": building_type,
+                                                "land_id": land_id,
+                                                "owner": ai_username,
+                                                "action_required": "set_wage"
+                                            })
+                                        }
+                                        
+                                        try:
+                                            tables["notifications"].create(land_owner_notification)
+                                            print(f"Created notification for land owner {land_owner} about new building requiring wage setting")
+                                        except Exception as notification_error:
+                                            print(f"Error creating notification for land owner: {str(notification_error)}")
+                                            # Continue even if notification creation fails
+                                
                                 return True
                             else:
                                 print(f"Invalid point index {selected_index}, must be between 0 and {len(filtered_points)-1}")
