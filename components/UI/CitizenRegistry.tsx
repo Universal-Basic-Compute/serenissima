@@ -263,6 +263,7 @@ const CitizenRegistry: React.FC<CitizenRegistryProps> = ({ onClose }) => {
                         Ducats={citizen.Ducats || citizen.ducats}
                         socialClass={citizen.socialClass || citizen.socialclass || citizen.SocialClass}
                         isCurrentUser={citizen.username === currentUsername}
+                        onViewProfile={(citizen) => setSelectedRegistryCitizen(citizen)}
                       />
                       
                       {/* Relevancies Section */}
@@ -321,6 +322,14 @@ const CitizenRegistry: React.FC<CitizenRegistryProps> = ({ onClose }) => {
         )}
       </div>
     </div>
+    
+    {/* Render the CitizenDetailsPanel when a citizen is selected */}
+    {selectedRegistryCitizen && (
+      <CitizenDetailsPanel 
+        citizen={selectedRegistryCitizen} 
+        onClose={() => setSelectedRegistryCitizen(null)} 
+      />
+    )}
   );
 };
 

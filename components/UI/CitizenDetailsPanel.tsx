@@ -98,6 +98,56 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
       isMounted = false;
     };
   };
+  
+  // Add function to fetch relevancies
+  const fetchRelevancies = async (targetCitizen: string) => {
+    if (!targetCitizen) return;
+    
+    setIsLoadingRelevancies(true);
+    
+    try {
+      // Get current username from localStorage
+      let currentUsername = null;
+      try {
+        const profileStr = localStorage.getItem('citizenProfile');
+        if (profileStr) {
+          const profile = JSON.parse(profileStr);
+          if (profile && profile.username) {
+            currentUsername = profile.username;
+          }
+        }
+      } catch (error) {
+        console.error('Error getting current username:', error);
+      }
+      
+      if (!currentUsername) {
+        console.warn('No current username found, cannot fetch relevancies');
+        setIsLoadingRelevancies(false);
+        return;
+      }
+      
+      // Fetch relevancies where targetCitizen = opened citizen's username
+      // and relevantToCitizen = current user's username or "all"
+      const response = await fetch(`/api/relevancies?targetCitizen=${targetCitizen}&relevantToCitizen=${currentUsername},all`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.relevancies) {
+          setRelevancies(data.relevancies);
+        } else {
+          setRelevancies([]);
+        }
+      } else {
+        console.error('Failed to fetch relevancies:', response.status, response.statusText);
+        setRelevancies([]);
+      }
+    } catch (error) {
+      console.error('Error fetching relevancies:', error);
+      setRelevancies([]);
+    } finally {
+      setIsLoadingRelevancies(false);
+    }
+  };
   // Function to fetch message history
   const fetchMessageHistory = async () => {
     if (!citizen || !citizen.citizenid) return;
@@ -459,6 +509,11 @@ Be historically accurate but engaging. Speak in first person as if you are this 
         fetchCitizenActivities(citizen.citizenid);
       }
       
+      // Fetch relevancies for this citizen
+      if (citizen.username) {
+        fetchRelevancies(citizen.username);
+      }
+      
       // NEW CODE: If this is an AI citizen, send a POST request to initiate conversation
       // BUT ONLY if we haven't already sent an initial message to this citizen
       if (((citizen.isai === true || citizen.isAi === true)) && !initialMessageSentRef.current[citizen.citizenid]) {
@@ -675,6 +730,20 @@ Be historically accurate but engaging. Speak in first person as if you are this 
       .join(' ');
     
     return formatted;
+  };
+  
+  // Add a helper function to get color based on time horizon
+  const getTimeHorizonColor = (timeHorizon: string): string => {
+    switch (timeHorizon.toLowerCase()) {
+      case 'short-term':
+        return 'bg-blue-100 text-blue-800 border-blue-300';
+      case 'medium-term':
+        return 'bg-amber-100 text-amber-800 border-amber-300';
+      case 'long-term':
+        return 'bg-green-100 text-green-800 border-green-300';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-300';
+    }
   };
   
   // Add a helper function to format date in a readable way
@@ -1085,6 +1154,37 @@ Be historically accurate but engaging. Speak in first person as if you are this 
         <div className="mb-6">
           <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">About</h3>
           <p className="text-amber-700 italic">{citizen.description || 'No description available.'}</p>
+        </div>
+        
+        {/* Relevancies Section */}
+        <div className="mb-6">
+          <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Relevancies</h3>
+          
+          {isLoadingRelevancies ? (
+            <div className="flex justify-center py-4">
+              <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : relevancies.length > 0 ? (
+            <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
+              {relevancies.map((relevancy, index) => (
+                <div key={relevancy.relevancyId || index} className="bg-amber-100 rounded-lg p-3 text-sm">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className={`px-2 py-0.5 rounded-full text-xs font-medium ${getTimeHorizonColor(relevancy.timeHorizon)}`}>
+                      {relevancy.timeHorizon}
+                    </div>
+                    <div className="font-medium text-amber-800">
+                      {relevancy.title}
+                    </div>
+                  </div>
+                  <div className="text-xs text-amber-700 mt-1">
+                    {relevancy.description}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-amber-700 italic">No relevancies found.</p>
+          )}
         </div>
         
         {/* Recent Activities Section */}

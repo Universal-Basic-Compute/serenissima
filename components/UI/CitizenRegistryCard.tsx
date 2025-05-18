@@ -10,6 +10,7 @@ interface CitizenRegistryCardProps {
   Ducats?: number;
   socialClass?: string;
   isCurrentUser?: boolean;
+  onViewProfile?: (citizen: any) => void; // Add this prop
 }
 
 const CitizenRegistryCard: React.FC<CitizenRegistryCardProps> = ({
@@ -20,7 +21,8 @@ const CitizenRegistryCard: React.FC<CitizenRegistryCardProps> = ({
   familyMotto,
   Ducats = 0,
   socialClass = 'Popolani',
-  isCurrentUser = false
+  isCurrentUser = false,
+  onViewProfile // Add this prop
 }) => {
   // Format the Ducats without decimal places
   const formattedDucats = Math.floor(Ducats).toLocaleString();
@@ -130,7 +132,19 @@ const CitizenRegistryCard: React.FC<CitizenRegistryCardProps> = ({
       
       {/* Action buttons */}
       <div className="mt-3 pt-2 border-t border-amber-100 flex justify-between">
-        <button className="text-xs text-amber-700 hover:text-amber-900 transition-colors">
+        <button 
+          className="text-xs text-amber-700 hover:text-amber-900 transition-colors"
+          onClick={() => onViewProfile && onViewProfile({
+            username,
+            firstName,
+            lastName,
+            coatOfArmsImage,
+            familyMotto,
+            Ducats,
+            socialClass,
+            isCurrentUser
+          })}
+        >
           View Profile
         </button>
         {!isCurrentUser && (
