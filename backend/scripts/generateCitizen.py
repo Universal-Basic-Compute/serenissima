@@ -18,6 +18,7 @@ import time
 from typing import Dict, Optional, Any
 import requests
 from dotenv import load_dotenv
+from pyairtable import Api, Table
 
 # Set up logging
 logging.basicConfig(
@@ -28,6 +29,40 @@ log = logging.getLogger("citizen_generator")
 
 # Load environment variables
 load_dotenv()
+
+def initialize_airtable():
+    """Initialize Airtable connection."""
+    api_key = os.environ.get('AIRTABLE_API_KEY')
+    base_id = os.environ.get('AIRTABLE_BASE_ID')
+    
+    if not api_key or not base_id:
+        log.error("Missing Airtable credentials. Set AIRTABLE_API_KEY and AIRTABLE_BASE_ID environment variables.")
+        return None
+    
+    try:
+        # Return a dictionary of table objects using pyairtable
+        return {
+            'citizens': Table(api_key, base_id, 'CITIZENS')
+        }
+    except Exception as e:
+        log.error(f"Failed to initialize Airtable: {e}")
+        return None
+
+def username_exists(tables, username: str) -> bool:
+    """Check if a username already exists in the CITIZENS table."""
+    try:
+        # Query Airtable for citizens with this username
+        matching_citizens = tables['citizens'].all(
+            formula=f"{{Username}} = '{username}'",
+            fields=["Username"]
+        )
+        
+        # If any records are returned, the username exists
+        return len(matching_citizens) > 0
+    except Exception as e:
+        log.error(f"Error checking if username exists: {e}")
+        # If there's an error, assume it might exist to be safe
+        return True
 
 def generate_citizen(social_class: str) -> Optional[Dict[str, Any]]:
     """Generate a new citizen using Kinos Engine API.
@@ -64,7 +99,7 @@ def generate_citizen(social_class: str) -> Optional[Dict[str, Any]]:
                 "content": prompt,
                 "model": "claude-3-7-sonnet-latest",
                 "mode": "creative",
-                "addSystem": "You are a historical expert on Renaissance Venice (1400-1600) helping to create a citizen for a historically accurate economic simulation game called La Serenissima. Create 1 unique Venetian citizen of the Facchini social class (unskilled workers, servants, gondoliers, and the working poor) with historically accurate name, description, and characteristics. Your response MUST be a valid JSON object with EXACTLY this format:\n\n```json\n{\n  \"FirstName\": \"string\",\n  \"LastName\": \"string\",\n  \"Description\": \"string\",\n  \"ImagePrompt\": \"string\",\n  \"Ducats\": number\n}\n```\n\nDo not include any text before or after the JSON. The Ducats value should be between 10,000-100,000. Don't use the same names and tropes than the previous generations."
+                "addSystem": "You are a historical expert on Renaissance Venice (1400-1600) helping to create a citizen for a historically accurate economic simulation game called La Serenissima. Create 1 unique Venetian citizen of the Facchini social class (unskilled workers, servants, gondoliers, and the working poor) with historically accurate name, description, and characteristics. Your response MUST be a valid JSON object with EXACTLY this format:\n\n```json\n{\n  \"FirstName\": \"string\",\n  \"LastName\": \"string\",\n  \"Username\": \"string\",\n  \"Description\": \"string\",\n  \"ImagePrompt\": \"string\",\n  \"Ducats\": number\n}\n```\n\nThe Username should be a realistic, human-like username that someone might choose based on their name or characteristics (like 'marco_polo' or 'gondolier42'). Make it lowercase with only letters, numbers and underscores. Do not include any text before or after the JSON. The Ducats value should be between 10,000-100,000. Don't use the same names and tropes than the previous generations."
             }
         )
         
@@ -105,6 +140,35 @@ def generate_citizen(social_class: str) -> Optional[Dict[str, Any]]:
             lowercase_data[key.lower()] = value
         
         citizen_data = lowercase_data
+        
+        # Find a unique username if the generated one is taken
+        if 'username' in citizen_data:
+            base_username = citizen_data['username'].lower()
+            # Initialize Airtable tables if not already done
+            tables = initialize_airtable()
+            
+            if tables:
+                # Check if username exists and modify if needed
+                current_username = base_username
+                counter = 1
+                
+                while username_exists(tables, current_username):
+                    log.info(f"Username '{current_username}' already exists, trying alternative")
+                    current_username = f"{base_username}{counter}"
+                    counter += 1
+                
+                # Update the username in citizen_data
+                citizen_data['username'] = current_username
+                log.info(f"Final username: {current_username}")
+            else:
+                log.warning("Could not check for username uniqueness, using generated username as-is")
+        else:
+            # If no username was generated, create one from first and last name
+            first = citizen_data.get('firstname', '').lower()
+            last = citizen_data.get('lastname', '').lower()
+            if first and last:
+                citizen_data['username'] = f"{first}_{last}"
+                log.info(f"Created username from name: {citizen_data['username']}")
         
         log.info(f"Successfully generated citizen: {citizen_data['firstname']} {citizen_data['lastname']}")
         return citizen_data
