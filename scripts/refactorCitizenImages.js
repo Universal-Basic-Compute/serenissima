@@ -42,8 +42,8 @@ async function refactorCitizenImages() {
     console.log('Fetching AI citizens from Airtable...');
     const records = await base(AIRTABLE_CITIZENS_TABLE)
       .select({
-        fields: ['CitizenId', 'Username', 'IsAi'],
-        filterByFormula: '{IsAi} = TRUE()'
+        fields: ['CitizenId', 'Username', 'IsAI'],
+        filterByFormula: '{IsAI} = TRUE()'
       })
       .all();
     
