@@ -11,6 +11,15 @@ const ApiReference: React.FC = () => {
         These APIs can be used to interact with various aspects of the virtual Venice.
       </p>
       
+      {/* API Version Information */}
+      <div className="mb-8 p-4 bg-amber-100 rounded-lg">
+        <h2 className="text-2xl font-serif text-amber-800 mb-2">API Information</h2>
+        <p><strong>Version:</strong> 1.0</p>
+        <p><strong>Base URL:</strong> https://serenissima.ai/api</p>
+        <p><strong>Authentication:</strong> No authentication required for public endpoints. Some endpoints may require wallet verification.</p>
+        <p><strong>Rate Limiting:</strong> Maximum 100 requests per minute per IP address.</p>
+      </div>
+      
       {/* Table of Contents */}
       <div className="mb-12 p-4 bg-amber-100 rounded-lg">
         <h2 className="text-2xl font-serif text-amber-800 mb-4">Table of Contents</h2>
@@ -27,6 +36,8 @@ const ApiReference: React.FC = () => {
           <li><a href="#notifications" className="text-amber-700 hover:underline">Notifications</a></li>
           <li><a href="#messages" className="text-amber-700 hover:underline">Messages</a></li>
           <li><a href="#utilities" className="text-amber-700 hover:underline">Utilities</a></li>
+          <li><a href="#data-access" className="text-amber-700 hover:underline">Data Access</a></li>
+          <li><a href="#error-handling" className="text-amber-700 hover:underline">Error Handling</a></li>
         </ul>
       </div>
       
@@ -426,7 +437,7 @@ const ApiReference: React.FC = () => {
         
         <div className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/land-groups</h3>
-          <p className="mb-2">Retrieves groups of connected land parcels.</p>
+          <p className="mb-2">Retrieves groups of connected land parcels. Land parcels are considered connected if they are linked by constructed bridges.</p>
           
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Query Parameters</h4>
@@ -444,9 +455,15 @@ const ApiReference: React.FC = () => {
   "landGroups": [
     {
       "groupId": "string",
-      "lands": ["string"],
-      "bridges": ["string"],
-      "owner": "string | undefined"
+      "lands": [
+        "polygon-123456",
+        "polygon-789012"
+      ],
+      "bridges": [
+        "building-bridge-345678",
+        "building-bridge-901234"
+      ],
+      "owner": "string | undefined"  // Only set if all lands have the same owner
     }
   ],
   "totalGroups": number,
@@ -456,11 +473,29 @@ const ApiReference: React.FC = () => {
 }`}
             </pre>
           </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Notes</h4>
+            <ul className="list-disc pl-6">
+              <li>The <code>owner</code> field is only set if all lands in the group have the same owner</li>
+              <li>Land groups are sorted by size (largest first)</li>
+              <li>Only constructed bridges are considered for connectivity</li>
+              <li>This endpoint is useful for analyzing territory control and connectivity</li>
+            </ul>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Related Endpoints</h4>
+            <ul className="list-disc pl-6">
+              <li><a href="#bridges" className="text-amber-700 hover:underline">GET /api/bridges</a> - Get all bridges</li>
+              <li><a href="#get-land-owners" className="text-amber-700 hover:underline">GET /api/get-land-owners</a> - Get land ownership information</li>
+            </ul>
+          </div>
         </div>
         
         <div className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/get-polygons</h3>
-          <p className="mb-2">Retrieves polygon data for land parcels.</p>
+          <p className="mb-2">Retrieves polygon data for land parcels, including coordinates, building points, and historical information.</p>
           
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Query Parameters</h4>
@@ -480,9 +515,32 @@ const ApiReference: React.FC = () => {
       "coordinates": [{ "lat": number, "lng": number }],
       "centroid": { "lat": number, "lng": number },
       "center": { "lat": number, "lng": number },
-      "bridgePoints": [],
-      "canalPoints": [],
-      "buildingPoints": [],
+      "bridgePoints": [
+        {
+          "id": "string",
+          "edge": { "lat": number, "lng": number },
+          "connection": {
+            "targetPolygonId": "string",
+            "distance": number,
+            "historicalName": "string",
+            "englishName": "string",
+            "historicalDescription": "string"
+          }
+        }
+      ],
+      "canalPoints": [
+        {
+          "id": "string",
+          "edge": { "lat": number, "lng": number }
+        }
+      ],
+      "buildingPoints": [
+        {
+          "id": "string",
+          "lat": number,
+          "lng": number
+        }
+      ],
       "historicalName": "string",
       "englishName": "string",
       "historicalDescription": "string",
@@ -492,6 +550,21 @@ const ApiReference: React.FC = () => {
   ]
 }`}
             </pre>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Essential Mode</h4>
+            <p>When <code>essential=true</code>, the response includes only:</p>
+            <ul className="list-disc pl-6">
+              <li>id</li>
+              <li>coordinates</li>
+              <li>centroid</li>
+              <li>center</li>
+              <li>bridgePoints</li>
+              <li>canalPoints</li>
+              <li>buildingPoints</li>
+            </ul>
+            <p>This is useful for reducing payload size when historical information is not needed.</p>
           </div>
         </div>
         
@@ -559,12 +632,12 @@ const ApiReference: React.FC = () => {
         
         <div className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/buildings</h3>
-          <p className="mb-2">Retrieves a list of all buildings.</p>
+          <p className="mb-2">Retrieves a list of all buildings. Supports filtering by type and pagination.</p>
           
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Query Parameters</h4>
             <ul className="list-disc pl-6">
-              <li><code>type</code> (optional) - Filter buildings by type</li>
+              <li><code>type</code> (optional) - Filter buildings by type (e.g., "market-stall", "house")</li>
               <li><code>limit</code> (optional) - Limit the number of buildings returned (default: 1000)</li>
               <li><code>offset</code> (optional) - Offset for pagination (default: 0)</li>
             </ul>
@@ -586,9 +659,31 @@ const ApiReference: React.FC = () => {
       "created_at": "string",
       "lease_amount": number,
       "rent_amount": number,
-      "occupant": "string"
+      "occupant": "string",
+      "point_id": "string | null"
     }
   ]
+}`}
+            </pre>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Notes on Pagination</h4>
+            <p>The API supports two types of pagination:</p>
+            <ol className="list-decimal pl-6">
+              <li>Using <code>offset</code> as a numeric value to skip a number of records</li>
+              <li>Using <code>offset</code> as a token returned from a previous request (Airtable pagination)</li>
+            </ol>
+            <p>For large datasets, token-based pagination is more efficient.</p>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Error Responses</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": false,
+  "error": "Failed to fetch buildings",
+  "details": "Error message"
 }`}
             </pre>
           </div>
@@ -816,7 +911,7 @@ const ApiReference: React.FC = () => {
         
         <div className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/building-resources/:buildingId</h3>
-          <p className="mb-2">Retrieves comprehensive resource information for a building.</p>
+          <p className="mb-2">Retrieves comprehensive resource information for a building, including stored resources, resources for sale, and production capabilities.</p>
           
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Parameters</h4>
@@ -835,12 +930,87 @@ const ApiReference: React.FC = () => {
   "buildingName": "string",
   "owner": "string",
   "resources": {
-    "stored": [],
-    "publiclySold": [],
-    "bought": [],
-    "sellable": [],
-    "storable": [],
-    "transformationRecipes": []
+    "stored": [
+      {
+        "id": "string",
+        "type": "string",
+        "name": "string",
+        "category": "string",
+        "subcategory": "string",
+        "count": number,
+        "icon": "string",
+        "description": "string",
+        "rarity": "string"
+      }
+    ],
+    "publiclySold": [
+      {
+        "id": "string",
+        "resourceType": "string",
+        "name": "string",
+        "category": "string",
+        "hourlyAmount": number,
+        "price": number,
+        "transporter": "string",
+        "icon": "string",
+        "description": "string",
+        "contractType": "string"
+      }
+    ],
+    "bought": [
+      {
+        "resourceType": "string",
+        "name": "string",
+        "category": "string",
+        "amount": number,
+        "icon": "string",
+        "description": "string"
+      }
+    ],
+    "sellable": [
+      {
+        "resourceType": "string",
+        "name": "string",
+        "category": "string",
+        "icon": "string",
+        "description": "string"
+      }
+    ],
+    "storable": [
+      {
+        "resourceType": "string",
+        "name": "string",
+        "category": "string",
+        "icon": "string",
+        "description": "string"
+      }
+    ],
+    "transformationRecipes": [
+      {
+        "id": "string",
+        "inputs": [
+          {
+            "resourceType": "string",
+            "name": "string",
+            "category": "string",
+            "amount": number,
+            "icon": "string",
+            "description": "string"
+          }
+        ],
+        "outputs": [
+          {
+            "resourceType": "string",
+            "name": "string",
+            "category": "string",
+            "amount": number,
+            "icon": "string",
+            "description": "string"
+          }
+        ],
+        "craftMinutes": number
+      }
+    ]
   },
   "storage": {
     "used": number,
@@ -848,6 +1018,14 @@ const ApiReference: React.FC = () => {
   }
 }`}
             </pre>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Related Endpoints</h4>
+            <ul className="list-disc pl-6">
+              <li><a href="#contracts" className="text-amber-700 hover:underline">GET /api/contracts</a> - Get contracts for resources sold by this building</li>
+              <li><a href="#building-definition" className="text-amber-700 hover:underline">GET /api/building-definition</a> - Get building type definition</li>
+            </ul>
           </div>
         </div>
         
@@ -1018,12 +1196,13 @@ const ApiReference: React.FC = () => {
         
         <div className="mb-8">
           <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/resources/counts</h3>
-          <p className="mb-2">Retrieves resource counts grouped by type.</p>
+          <p className="mb-2">Retrieves resource counts grouped by type. Returns both global resource counts (all resources in the game) and player-specific resource counts (resources owned by the specified player).</p>
           
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h4 className="font-bold mb-2">Query Parameters</h4>
             <ul className="list-disc pl-6">
-              <li><code>owner</code> (optional) - Filter resources by owner</li>
+              <li><code>owner</code> (optional) - Filter resources by owner username</li>
+              <li><code>buildingId</code> (optional) - Filter resources by building ID</li>
             </ul>
           </div>
           
@@ -1062,6 +1241,19 @@ const ApiReference: React.FC = () => {
   ]
 }`}
             </pre>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Resource Categories</h4>
+            <ul className="list-disc pl-6">
+              <li><code>raw_materials</code> - Basic resources like wood, stone, clay</li>
+              <li><code>food</code> - Food items like grain, fish, meat</li>
+              <li><code>textiles</code> - Cloth, fabric, and related materials</li>
+              <li><code>spices</code> - Spices and seasonings</li>
+              <li><code>tools</code> - Tools and equipment</li>
+              <li><code>building_materials</code> - Processed materials for construction</li>
+              <li><code>luxury_goods</code> - High-value items like gold, silk, gems</li>
+            </ul>
           </div>
         </div>
         
@@ -1118,11 +1310,14 @@ const ApiReference: React.FC = () => {
         <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Transport</h2>
         
         <div className="mb-8">
-          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/transport</h3>
-          <p className="mb-2">Finds a path between two points.</p>
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">Transport API</h3>
+          <p className="mb-2">The Transport API provides pathfinding capabilities between points in Venice, considering both land and water routes.</p>
           
-          <div className="bg-white p-4 rounded-lg shadow mb-4">
-            <h4 className="font-bold mb-2">Query Parameters</h4>
+          <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
+            <h4 className="font-bold mb-2">GET /api/transport</h4>
+            <p className="mb-2">Finds a path between two points using query parameters.</p>
+            
+            <h5 className="font-bold mt-4 mb-2">Query Parameters</h5>
             <ul className="list-disc pl-6">
               <li><code>startLat</code> - Latitude of the starting point</li>
               <li><code>startLng</code> - Longitude of the starting point</li>
@@ -1130,10 +1325,8 @@ const ApiReference: React.FC = () => {
               <li><code>endLng</code> - Longitude of the ending point</li>
               <li><code>startDate</code> (optional) - Start date for the journey</li>
             </ul>
-          </div>
-          
-          <div className="bg-white p-4 rounded-lg shadow mb-4">
-            <h4 className="font-bold mb-2">Response</h4>
+            
+            <h5 className="font-bold mt-4 mb-2">Response</h5>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "success": true,
@@ -1149,14 +1342,12 @@ const ApiReference: React.FC = () => {
 }`}
             </pre>
           </div>
-        </div>
-        
-        <div className="mb-8">
-          <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/transport</h3>
-          <p className="mb-2">Finds a path between two points with more options.</p>
           
-          <div className="bg-white p-4 rounded-lg shadow mb-4">
-            <h4 className="font-bold mb-2">Request Body</h4>
+          <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
+            <h4 className="font-bold mb-2">POST /api/transport</h4>
+            <p className="mb-2">Finds a path between two points with more options using JSON request body.</p>
+            
+            <h5 className="font-bold mt-4 mb-2">Request Body</h5>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "startPoint": { "lat": number, "lng": number },
@@ -1165,10 +1356,8 @@ const ApiReference: React.FC = () => {
   "pathfindingMode": "real" | "all"
 }`}
             </pre>
-          </div>
-          
-          <div className="bg-white p-4 rounded-lg shadow mb-4">
-            <h4 className="font-bold mb-2">Response</h4>
+            
+            <h5 className="font-bold mt-4 mb-2">Response</h5>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "success": true,
@@ -1188,6 +1377,68 @@ const ApiReference: React.FC = () => {
       "position": { "lat": number, "lng": number }
     }
   ]
+}`}
+            </pre>
+            
+            <h5 className="font-bold mt-4 mb-2">Pathfinding Modes</h5>
+            <ul className="list-disc pl-6">
+              <li><code>real</code> - Only use constructed bridges and existing paths</li>
+              <li><code>all</code> - Include all possible paths, even if bridges aren't constructed</li>
+            </ul>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
+            <h4 className="font-bold mb-2">POST /api/transport/water-only</h4>
+            <p className="mb-2">Finds a water-only path between two points.</p>
+            
+            <h5 className="font-bold mt-4 mb-2">Request Body</h5>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "startPoint": { "lat": number, "lng": number },
+  "endPoint": { "lat": number, "lng": number }
+}`}
+            </pre>
+            
+            <h5 className="font-bold mt-4 mb-2">Response</h5>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "path": [
+    { "lat": number, "lng": number, "type": "string", "nodeId": "string" }
+  ]
+}`}
+            </pre>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
+            <h4 className="font-bold mb-2">GET /api/transport/debug</h4>
+            <p className="mb-2">Provides debug information about the transport graph.</p>
+            
+            <h5 className="font-bold mt-4 mb-2">Query Parameters</h5>
+            <ul className="list-disc pl-6">
+              <li><code>mode</code> (optional) - Pathfinding mode ('real' or 'all', default: 'real')</li>
+            </ul>
+            
+            <h5 className="font-bold mt-4 mb-2">Response</h5>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "graphInfo": {
+    "totalNodes": number,
+    "totalEdges": number,
+    "nodesByType": {},
+    "connectedComponents": number,
+    "componentSizes": {},
+    "pathfindingMode": "string",
+    "polygonsLoaded": boolean,
+    "polygonCount": number,
+    "canalNetworkSegments": number
+  },
+  "bridges": [],
+  "docks": [],
+  "bridgeCount": number,
+  "dockCount": number,
+  "requestedMode": "string"
 }`}
             </pre>
           </div>
@@ -2050,20 +2301,21 @@ const ApiReference: React.FC = () => {
         </div>
         
         <div className="mb-8">
-          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/calculateRelevancies</h3>
-          <p className="mb-2">Calculates relevancies for AIs.</p>
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">Relevancy Calculation API</h3>
+          <p className="mb-2">The Relevancy Calculation API calculates and manages relevancy scores for AI citizens. Relevancies represent the importance of various assets (lands, citizens, etc.) to an AI.</p>
           
-          <div className="bg-white p-4 rounded-lg shadow mb-4">
-            <h4 className="font-bold mb-2">Query Parameters</h4>
+          <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
+            <h4 className="font-bold mb-2">GET /api/calculateRelevancies</h4>
+            <p className="mb-2">Calculates relevancies for AIs without saving them to the database.</p>
+            
+            <h5 className="font-bold mt-4 mb-2">Query Parameters</h5>
             <ul className="list-disc pl-6">
-              <li><code>ai</code> (optional) - Calculate for a specific AI</li>
-              <li><code>calculateAll</code> (optional) - Calculate for all AIs</li>
-              <li><code>type</code> (optional) - Filter by relevancy type</li>
+              <li><code>ai</code> (optional) - Calculate for a specific AI username</li>
+              <li><code>calculateAll</code> (optional) - Set to 'true' to calculate for all AIs</li>
+              <li><code>type</code> (optional) - Filter by relevancy type ('proximity', 'connected', 'geographic', 'domination')</li>
             </ul>
-          </div>
-          
-          <div className="bg-white p-4 rounded-lg shadow mb-4">
-            <h4 className="font-bold mb-2">Response</h4>
+            
+            <h5 className="font-bold mt-4 mb-2">Response</h5>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "success": true,
@@ -2078,24 +2330,20 @@ const ApiReference: React.FC = () => {
 }`}
             </pre>
           </div>
-        </div>
-        
-        <div className="mb-8">
-          <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/calculateRelevancies</h3>
-          <p className="mb-2">Calculates and saves relevancies for an AI.</p>
           
-          <div className="bg-white p-4 rounded-lg shadow mb-4">
-            <h4 className="font-bold mb-2">Request Body</h4>
+          <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
+            <h4 className="font-bold mb-2">POST /api/calculateRelevancies</h4>
+            <p className="mb-2">Calculates and saves relevancies for an AI to the database.</p>
+            
+            <h5 className="font-bold mt-4 mb-2">Request Body</h5>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "aiUsername": "string",
-  "typeFilter": "string" // Optional
+  "typeFilter": "string" // Optional - 'proximity', 'connected', 'geographic', 'domination'
 }`}
             </pre>
-          </div>
-          
-          <div className="bg-white p-4 rounded-lg shadow mb-4">
-            <h4 className="font-bold mb-2">Response</h4>
+            
+            <h5 className="font-bold mt-4 mb-2">Response</h5>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "success": true,
@@ -2112,12 +2360,34 @@ const ApiReference: React.FC = () => {
       "assetType": "string",
       "timeHorizon": "string",
       "title": "string",
-      "description": "string"
+      "description": "string",
+      "distance": number,        // For proximity relevancies
+      "isConnected": boolean,    // For proximity relevancies
+      "closestLandId": "string"  // For proximity relevancies
     }
   },
   "saved": boolean
 }`}
             </pre>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Relevancy Types</h4>
+            <ul className="list-disc pl-6">
+              <li><code>proximity</code> - Based on geographic distance between lands</li>
+              <li><code>connected</code> - Based on connectivity via bridges</li>
+              <li><code>geographic</code> - Based on pure geographic distance</li>
+              <li><code>domination</code> - Based on land ownership patterns</li>
+            </ul>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Related Endpoints</h4>
+            <ul className="list-disc pl-6">
+              <li><a href="#relevancies-proximity" className="text-amber-700 hover:underline">GET /api/relevancies/proximity/:aiUsername</a> - Get proximity relevancies for an AI</li>
+              <li><a href="#relevancies-domination" className="text-amber-700 hover:underline">GET /api/relevancies/domination/:aiUsername</a> - Get domination relevancies for an AI</li>
+              <li><a href="#relevancies-types" className="text-amber-700 hover:underline">GET /api/relevancies/types/:type</a> - Get relevancies of a specific type</li>
+            </ul>
           </div>
         </div>
       </section>
@@ -2343,70 +2613,47 @@ const ApiReference: React.FC = () => {
         <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Utilities</h2>
         
         <div className="mb-8">
-          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/data/:path</h3>
-          <p className="mb-2">Serves files from the data directory.</p>
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">Coat of Arms Management</h3>
           
-          <div className="bg-white p-4 rounded-lg shadow mb-4">
-            <h4 className="font-bold mb-2">Parameters</h4>
-            <ul className="list-disc pl-6">
-              <li><code>path</code> - Path to the file in the data directory</li>
-            </ul>
-          </div>
-          
-          <div className="bg-white p-4 rounded-lg shadow mb-4">
-            <h4 className="font-bold mb-2">Response</h4>
-            <p>Returns the file content with appropriate content type headers.</p>
-          </div>
-        </div>
-        
-        <div className="mb-8">
-          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/coat-of-arms/:path</h3>
-          <p className="mb-2">Serves coat of arms images.</p>
-          
-          <div className="bg-white p-4 rounded-lg shadow mb-4">
-            <h4 className="font-bold mb-2">Parameters</h4>
-            <ul className="list-disc pl-6">
-              <li><code>path</code> - Path to the coat of arms image</li>
-            </ul>
-          </div>
-          
-          <div className="bg-white p-4 rounded-lg shadow mb-4">
-            <h4 className="font-bold mb-2">Response</h4>
-            <p>Returns the image with appropriate content type headers.</p>
-          </div>
-        </div>
-        
-        <div className="mb-8">
-          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/get-coat-of-arms</h3>
-          <p className="mb-2">Retrieves coat of arms data for all citizens.</p>
-          
-          <div className="bg-white p-4 rounded-lg shadow mb-4">
-            <h4 className="font-bold mb-2">Response</h4>
+          <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
+            <h4 className="font-bold mb-2">GET /api/get-coat-of-arms</h4>
+            <p className="mb-2">Retrieves coat of arms data for all citizens.</p>
+            
+            <h5 className="font-bold mt-4 mb-2">Response</h5>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "coatOfArms": {
-    "username": "string"
+    "username": "string"  // URL to coat of arms image
   }
 }`}
             </pre>
           </div>
-        </div>
-        
-        <div className="mb-8">
-          <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/fetch-coat-of-arms</h3>
-          <p className="mb-2">Fetches and caches a coat of arms image from an external URL.</p>
           
-          <div className="bg-white p-4 rounded-lg shadow mb-4">
-            <h4 className="font-bold mb-2">Request Body</h4>
+          <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
+            <h4 className="font-bold mb-2">GET /api/coat-of-arms/:path</h4>
+            <p className="mb-2">Serves coat of arms images.</p>
+            
+            <h5 className="font-bold mt-4 mb-2">Parameters</h5>
+            <ul className="list-disc pl-6">
+              <li><code>path</code> - Path to the coat of arms image</li>
+            </ul>
+            
+            <h5 className="font-bold mt-4 mb-2">Response</h5>
+            <p>Returns the image with appropriate content type headers.</p>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
+            <h4 className="font-bold mb-2">POST /api/fetch-coat-of-arms</h4>
+            <p className="mb-2">Fetches and caches a coat of arms image from an external URL.</p>
+            
+            <h5 className="font-bold mt-4 mb-2">Request Body</h5>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "imageUrl": "string"
 }`}
             </pre>
-          </div>
-          
-          <div className="bg-white p-4 rounded-lg shadow mb-4">
-            <h4 className="font-bold mb-2">Response</h4>
+            
+            <h5 className="font-bold mt-4 mb-2">Response</h5>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "success": true,
@@ -2415,19 +2662,15 @@ const ApiReference: React.FC = () => {
 }`}
             </pre>
           </div>
-        </div>
-        
-        <div className="mb-8">
-          <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/upload-coat-of-arms</h3>
-          <p className="mb-2">Uploads a coat of arms image.</p>
           
-          <div className="bg-white p-4 rounded-lg shadow mb-4">
-            <h4 className="font-bold mb-2">Request Body</h4>
+          <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
+            <h4 className="font-bold mb-2">POST /api/upload-coat-of-arms</h4>
+            <p className="mb-2">Uploads a coat of arms image.</p>
+            
+            <h5 className="font-bold mt-4 mb-2">Request Body</h5>
             <p>FormData with an 'image' file field.</p>
-          </div>
-          
-          <div className="bg-white p-4 rounded-lg shadow mb-4">
-            <h4 className="font-bold mb-2">Response</h4>
+            
+            <h5 className="font-bold mt-4 mb-2">Response</h5>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "success": true,
@@ -2435,14 +2678,28 @@ const ApiReference: React.FC = () => {
 }`}
             </pre>
           </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
+            <h4 className="font-bold mb-2">POST /api/create-coat-of-arms-dir</h4>
+            <p className="mb-2">Creates the coat of arms directory if it doesn't exist.</p>
+            
+            <h5 className="font-bold mt-4 mb-2">Response</h5>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true
+}`}
+            </pre>
+          </div>
         </div>
         
         <div className="mb-8">
-          <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/tts</h3>
-          <p className="mb-2">Converts text to speech.</p>
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">Audio and Media</h3>
           
-          <div className="bg-white p-4 rounded-lg shadow mb-4">
-            <h4 className="font-bold mb-2">Request Body</h4>
+          <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
+            <h4 className="font-bold mb-2">POST /api/tts</h4>
+            <p className="mb-2">Converts text to speech using the Kinos Engine API.</p>
+            
+            <h5 className="font-bold mt-4 mb-2">Request Body</h5>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "text": "string",
@@ -2450,35 +2707,33 @@ const ApiReference: React.FC = () => {
   "model": "string" // Optional, defaults to "eleven_flash_v2_5"
 }`}
             </pre>
-          </div>
-          
-          <div className="bg-white p-4 rounded-lg shadow mb-4">
-            <h4 className="font-bold mb-2">Response</h4>
+            
+            <h5 className="font-bold mt-4 mb-2">Response</h5>
             <p>Returns the audio data or a URL to the audio file.</p>
           </div>
-        </div>
-        
-        <div className="mb-8">
-          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/music-tracks</h3>
-          <p className="mb-2">Retrieves available music tracks.</p>
           
-          <div className="bg-white p-4 rounded-lg shadow mb-4">
-            <h4 className="font-bold mb-2">Response</h4>
+          <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
+            <h4 className="font-bold mb-2">GET /api/music-tracks</h4>
+            <p className="mb-2">Retrieves available music tracks.</p>
+            
+            <h5 className="font-bold mt-4 mb-2">Response</h5>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "success": true,
-  "tracks": ["string"]
+  "tracks": ["string"]  // Array of music track URLs
 }`}
             </pre>
           </div>
         </div>
         
         <div className="mb-8">
-          <h3 className="text-2xl font-serif text-amber-700 mb-2">POST /api/flush-cache</h3>
-          <p className="mb-2">Flushes the server-side cache.</p>
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">Cache Management</h3>
           
-          <div className="bg-white p-4 rounded-lg shadow mb-4">
-            <h4 className="font-bold mb-2">Response</h4>
+          <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
+            <h4 className="font-bold mb-2">POST /api/flush-cache</h4>
+            <p className="mb-2">Flushes the server-side cache.</p>
+            
+            <h5 className="font-bold mt-4 mb-2">Response</h5>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "success": true,
@@ -2487,19 +2742,177 @@ const ApiReference: React.FC = () => {
 }`}
             </pre>
           </div>
-        </div>
-        
-        <div className="mb-8">
-          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/flush-cache</h3>
-          <p className="mb-2">Gets the timestamp of the last cache flush.</p>
           
-          <div className="bg-white p-4 rounded-lg shadow mb-4">
-            <h4 className="font-bold mb-2">Response</h4>
+          <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
+            <h4 className="font-bold mb-2">GET /api/flush-cache</h4>
+            <p className="mb-2">Gets the timestamp of the last cache flush.</p>
+            
+            <h5 className="font-bold mt-4 mb-2">Response</h5>
             <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
 {`{
   "lastFlushed": number
 }`}
             </pre>
+          </div>
+        </div>
+        
+        <div className="mb-8">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">System Utilities</h3>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
+            <h4 className="font-bold mb-2">GET /api/check-loading-directory</h4>
+            <p className="mb-2">Checks if the loading directory exists and creates it if it doesn't.</p>
+            
+            <h5 className="font-bold mt-4 mb-2">Response</h5>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "message": "Loading directory exists",
+  "exists": boolean,
+  "path": "string",
+  "files": ["string"],
+  "imageFiles": ["string"]
+}`}
+            </pre>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-amber-500">
+            <h4 className="font-bold mb-2">GET /api/list-polygon-files</h4>
+            <p className="mb-2">Lists all polygon files in the data directory.</p>
+            
+            <h5 className="font-bold mt-4 mb-2">Response</h5>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "files": ["string"],
+  "directory": "string"
+}`}
+            </pre>
+          </div>
+        </div>
+      </section>
+      
+      {/* Data Access Section */}
+      <section id="data-access" className="mb-12">
+        <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Data Access</h2>
+        
+        <div className="mb-8">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/data/:path</h3>
+          <p className="mb-2">Serves files from the data directory with appropriate content type headers.</p>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Parameters</h4>
+            <ul className="list-disc pl-6">
+              <li><code>path</code> - Path to the file in the data directory (can include subdirectories)</li>
+            </ul>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response</h4>
+            <p>Returns the file content with appropriate content type headers based on file extension:</p>
+            <ul className="list-disc pl-6">
+              <li><code>.json</code> - application/json</li>
+              <li><code>.txt</code> - text/plain</li>
+              <li><code>.csv</code> - text/csv</li>
+              <li>Other - application/octet-stream</li>
+            </ul>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Error Responses</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "error": "No path provided"
+}
+
+{
+  "error": "File not found",
+  "path": "string"
+}
+
+{
+  "error": "Failed to serve file",
+  "details": "string"
+}`}
+            </pre>
+          </div>
+        </div>
+        
+        <div className="mb-8">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">GET /api/building-points</h3>
+          <p className="mb-2">Retrieves all building, canal, and bridge points.</p>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Response</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": true,
+  "buildingPoints": {
+    "point-id": { "lat": number, "lng": number }
+  },
+  "canalPoints": {
+    "canal-id": { "lat": number, "lng": number }
+  },
+  "bridgePoints": {
+    "bridge-id": { "lat": number, "lng": number }
+  },
+  "totalPoints": number
+}`}
+            </pre>
+          </div>
+        </div>
+      </section>
+      
+      {/* Error Handling Section */}
+      <section id="error-handling" className="mb-12">
+        <h2 className="text-3xl font-serif text-amber-800 mb-4 border-b border-amber-300 pb-2">Error Handling</h2>
+        
+        <div className="mb-8">
+          <h3 className="text-2xl font-serif text-amber-700 mb-2">Common Error Responses</h3>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">400 Bad Request</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": false,
+  "error": "Description of the validation error"
+}`}
+            </pre>
+            <p className="mt-2">Returned when the request is invalid, such as missing required parameters or invalid data formats.</p>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">404 Not Found</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": false,
+  "error": "Resource not found"
+}`}
+            </pre>
+            <p className="mt-2">Returned when the requested resource does not exist.</p>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">500 Internal Server Error</h4>
+            <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm">
+{`{
+  "success": false,
+  "error": "An error occurred while processing the request",
+  "details": "Optional error details"
+}`}
+            </pre>
+            <p className="mt-2">Returned when an unexpected error occurs on the server.</p>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow mb-4">
+            <h4 className="font-bold mb-2">Error Handling Best Practices</h4>
+            <ul className="list-disc pl-6">
+              <li>Always check the <code>success</code> field in the response to determine if the request was successful</li>
+              <li>Handle HTTP status codes appropriately in your client application</li>
+              <li>Display user-friendly error messages based on the <code>error</code> field</li>
+              <li>Log detailed error information from the <code>details</code> field for debugging</li>
+              <li>Implement retry logic for transient errors (e.g., network issues)</li>
+            </ul>
           </div>
         </div>
       </section>
@@ -2508,6 +2921,11 @@ const ApiReference: React.FC = () => {
       <footer className="mt-12 pt-8 border-t border-amber-300 text-center text-amber-700">
         <p>La Serenissima API Documentation</p>
         <p className="text-sm mt-2">© {new Date().getFullYear()} La Serenissima</p>
+        <p className="text-sm mt-1">
+          <a href="https://github.com/serenissima-ai/serenissima" className="text-amber-600 hover:underline" target="_blank" rel="noopener noreferrer">
+            GitHub Repository
+          </a>
+        </p>
       </footer>
     </div>
   );
