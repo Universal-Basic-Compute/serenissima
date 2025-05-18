@@ -66,7 +66,7 @@ const CitizenRegistryCard: React.FC<CitizenRegistryCardProps> = ({
               </p>
               
               {/* Username */}
-              <p className="text-xs text-gray-500 mt-1">@{username}</p>
+              <p className="text-xs text-gray-500 mt-1">{username}</p>
             </div>
             
             {/* Coat of arms - smaller */}
