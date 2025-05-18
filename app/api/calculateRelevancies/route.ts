@@ -347,8 +347,9 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const aiUsername = searchParams.get('ai');
     const calculateAll = searchParams.get('calculateAll') === 'true';
+    const typeFilter = searchParams.get('type');
     
-    console.log(`Request parameters: aiUsername=${aiUsername}, calculateAll=${calculateAll}`);
+    console.log(`Request parameters: aiUsername=${aiUsername}, calculateAll=${calculateAll}, typeFilter=${typeFilter}`);
     
     // Fetch all lands from Airtable
     console.log('Fetching all lands from Airtable...');
@@ -501,8 +502,10 @@ export async function GET(request: NextRequest) {
         });
       }
       
-      // Calculate land proximity relevancy with connectivity data
-      const relevancyScores = relevancyService.calculateLandProximityRelevancy(aiLands, allLands, landGroups);
+      // Calculate land proximity relevancy with connectivity data and type filter
+      const relevancyScores = typeFilter 
+        ? relevancyService.calculateRelevancyByType(aiLands, allLands, landGroups, typeFilter)
+        : relevancyService.calculateLandProximityRelevancy(aiLands, allLands, landGroups);
       
       // Format the response to include both simple scores and detailed data
       const simpleScores: Record<string, number> = {};
@@ -583,11 +586,11 @@ export async function POST(request: NextRequest) {
     // Initialize Airtable
     const base = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
     
-    // Get the AI username from the request body
+    // Get the AI username and type filter from the request body
     const body = await request.json();
-    const { aiUsername } = body;
+    const { aiUsername, typeFilter } = body;
     
-    console.log(`POST request for AI: ${aiUsername}`);
+    console.log(`POST request for AI: ${aiUsername}, typeFilter: ${typeFilter || 'none'}`);
     
     if (!aiUsername) {
       console.error('AI username is required');
@@ -600,8 +603,15 @@ export async function POST(request: NextRequest) {
     // Fetch all citizens for land domination relevancy
     const allCitizens = await fetchAllCitizens(base);
     
-    // Calculate relevancy scores using the new method
-    const relevancyScores = await relevancyService.calculateRelevancyWithApiData(aiUsername);
+    // Calculate relevancy scores using the new method with optional type filter
+    const relevancyScores = typeFilter 
+      ? await relevancyService.calculateRelevancyByType(
+          await relevancyService.fetchLands(aiUsername), 
+          await relevancyService.fetchLands(), 
+          await relevancyService.fetchLandGroups(),
+          typeFilter
+        )
+      : await relevancyService.calculateRelevancyWithApiData(aiUsername);
     
     // Calculate land domination relevancy
     // For this, we need to fetch all lands first

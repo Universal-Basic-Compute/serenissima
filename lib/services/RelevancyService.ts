@@ -96,7 +96,7 @@ export class RelevancyService {
   /**
    * Fetch land groups for connectivity analysis
    */
-  private async fetchLandGroups(): Promise<Record<string, string>> {
+  public async fetchLandGroups(): Promise<Record<string, string>> {
     try {
       const baseUrl = typeof window !== 'undefined' 
         ? window.location.origin 
@@ -540,6 +540,39 @@ export class RelevancyService {
     }
     
     return relevancyScores;
+  }
+
+  /**
+   * Calculate relevancy scores for a specific type
+   * @param aiLands - Lands owned by the AI
+   * @param allLands - All lands in the system
+   * @param landGroups - Land connectivity groups
+   * @param typeFilter - The specific type to filter by (e.g., 'connected', 'geographic')
+   */
+  public calculateRelevancyByType(
+    aiLands: LandData[],
+    allLands: LandData[],
+    landGroups?: Record<string, string>,
+    typeFilter?: string
+  ): Record<string, RelevancyScore> {
+    // Get all relevancy scores first
+    const allRelevancies = this.calculateLandProximityRelevancy(aiLands, allLands, landGroups);
+    
+    // If no type filter is provided, return all relevancies
+    if (!typeFilter) {
+      return allRelevancies;
+    }
+    
+    // Filter relevancies by the specified type
+    const filteredRelevancies: Record<string, RelevancyScore> = {};
+    
+    Object.entries(allRelevancies).forEach(([landId, relevancy]) => {
+      if (relevancy.type === typeFilter) {
+        filteredRelevancies[landId] = relevancy;
+      }
+    });
+    
+    return filteredRelevancies;
   }
 }
 

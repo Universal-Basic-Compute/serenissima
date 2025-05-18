@@ -89,18 +89,28 @@ def get_ai_citizens_with_lands(tables) -> List[str]:
 import json
 import traceback
 
-def calculate_relevancies_for_ai(ai_username: str, base_url: str) -> Dict:
-    """Calculate relevancies for a specific AI citizen."""
+def calculate_relevancies_for_ai(ai_username: str, base_url: str, type_filter: Optional[str] = None) -> Dict:
+    """Calculate relevancies for a specific AI citizen with optional type filter."""
     try:
-        log.info(f"Calculating relevancies for AI: {ai_username}")
+        log.info(f"Calculating relevancies for AI: {ai_username}" + 
+                (f" with type filter: {type_filter}" if type_filter else ""))
         
         # Make the API call
         api_url = f"{base_url}/api/calculateRelevancies"
         log.info(f"Calling API: {api_url} for AI: {ai_username}")
         
+        # Prepare the request payload
+        payload = {
+            "aiUsername": ai_username
+        }
+        
+        # Add type filter if provided
+        if type_filter:
+            payload["typeFilter"] = type_filter
+        
         response = requests.post(
             api_url,
-            json={"aiUsername": ai_username},
+            json=payload,
             timeout=120  # Increased timeout for larger calculations
         )
         
@@ -141,7 +151,7 @@ def calculate_relevancies_for_ai(ai_username: str, base_url: str) -> Dict:
             "error": str(e)
         }
 
-def calculate_relevancies() -> bool:
+def calculate_relevancies(type_filter: Optional[str] = None) -> bool:
     """Calculate relevancy scores for all AI citizens who own lands."""
     try:
         # Initialize Airtable
@@ -150,6 +160,9 @@ def calculate_relevancies() -> bool:
         # Get the base URL from environment or use default
         base_url = os.environ.get('NEXT_PUBLIC_BASE_URL', 'http://localhost:3000')
         log.info(f"Using base URL: {base_url}")
+        
+        if type_filter:
+            log.info(f"Using type filter: {type_filter}")
         
         # Get all AI citizens
         ai_usernames = get_ai_citizens_with_lands(tables)
@@ -167,7 +180,7 @@ def calculate_relevancies() -> bool:
             if results:  # Skip delay for the first request
                 time.sleep(2)
             
-            result = calculate_relevancies_for_ai(ai_username, base_url)
+            result = calculate_relevancies_for_ai(ai_username, base_url, type_filter)
             results[ai_username] = result
             
             if result.get('success'):
@@ -227,5 +240,12 @@ def calculate_relevancies() -> bool:
         return False
 
 if __name__ == "__main__":
-    success = calculate_relevancies()
+    import argparse
+    
+    parser = argparse.ArgumentParser(description="Calculate relevancy scores for AI citizens")
+    parser.add_argument("--type", help="Filter relevancies by type (e.g., 'connected', 'geographic')")
+    
+    args = parser.parse_args()
+    
+    success = calculate_relevancies(type_filter=args.type)
     sys.exit(0 if success else 1)
