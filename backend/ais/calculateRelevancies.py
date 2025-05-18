@@ -95,8 +95,8 @@ def calculate_relevancies_for_ai(ai_username: str, base_url: str, type_filter: O
         log.info(f"Calculating relevancies for AI: {ai_username}" + 
                 (f" with type filter: {type_filter}" if type_filter else ""))
         
-        # Make the API call
-        api_url = f"{base_url}/api/calculateRelevancies"
+        # Use the new proximity endpoint
+        api_url = f"{base_url}/api/relevancies/proximity"
         log.info(f"Calling API: {api_url} for AI: {ai_username}")
         
         # Prepare the request payload
