@@ -183,7 +183,35 @@ def get_citizen_relevancies(tables, username: str) -> List[Dict]:
         )
         
         log_info(f"Found {len(relevancies)} relevancies for {username} (including global 'all' relevancies)")
-        return relevancies
+        
+        # Process relevancies to ensure all fields are properly handled
+        processed_relevancies = []
+        for relevancy in relevancies:
+            # Ensure all fields are properly handled
+            fields = relevancy.get('fields', {})
+            
+            # Make sure we're not trying to call string methods on non-string fields
+            processed_relevancy = {
+                'id': relevancy.get('id', ''),
+                'fields': {
+                    'RelevancyId': str(fields.get('RelevancyId', '')),
+                    'AssetID': str(fields.get('AssetID', '')),
+                    'AssetType': str(fields.get('AssetType', '')),
+                    'Category': str(fields.get('Category', '')),
+                    'Type': str(fields.get('Type', '')),
+                    'TargetCitizen': str(fields.get('TargetCitizen', '')),
+                    'RelevantToCitizen': str(fields.get('RelevantToCitizen', '')),
+                    'Score': float(fields.get('Score', 0)),
+                    'TimeHorizon': str(fields.get('TimeHorizon', '')),
+                    'Title': str(fields.get('Title', '')),
+                    'Description': str(fields.get('Description', '')),
+                    'Status': str(fields.get('Status', '')),
+                    'CreatedAt': str(fields.get('CreatedAt', ''))
+                }
+            }
+            processed_relevancies.append(processed_relevancy)
+        
+        return processed_relevancies
     except Exception as e:
         log_error(f"Error getting relevancies for citizen {username}: {str(e)}")
         return []
@@ -406,10 +434,10 @@ def send_building_strategy_request(ai_username: str, data_package: Dict) -> Opti
         }
         
         # Log the API request details
-        print(f"Sending building strategy request to AI citizen {ai_username}")
-        print(f"API URL: {url}")
-        print(f"Citizen has {data_package['citizen']['ducats']} ducats")
-        print(f"Citizen owns {len(data_package['lands'])} lands and {len(data_package['buildings'])} buildings")
+        log_info(f"Sending building strategy request to AI citizen {ai_username}")
+        log_info(f"API URL: {url}")
+        log_info(f"Citizen has {data_package['citizen']['ducats']} ducats")
+        log_info(f"Citizen owns {len(data_package['lands'])} lands and {len(data_package['buildings'])} buildings")
         
         # Create a detailed prompt that addresses the AI directly as the decision-maker
         prompt = f"""
@@ -489,27 +517,33 @@ If you decide not to build anything at this time, return an empty JSON object.
         }
         
         # Make the API request
-        print(f"Making API request to Kinos for {ai_username}...")
+        log_info(f"Making API request to Kinos for {ai_username}...")
         response = requests.post(url, headers=headers, json=payload)
         
         # Log the API response details
-        print(f"API response status code: {response.status_code}")
+        log_info(f"API response status code: {response.status_code}")
         
         # Check if the request was successful
         if response.status_code == 200 or response.status_code == 201:
             response_data = response.json()
             status = response_data.get("status")
             
-            print(f"API response status: {status}")
-            print(f"Full API response: {json.dumps(response_data)}")
+            log_info(f"API response status: {status}")
+            
+            # Log the full response data in a readable format
+            log_data(f"Full API response for {ai_username}", response_data)
             
             if status == "completed":
-                print(f"Successfully sent building strategy request to AI citizen {ai_username}")
+                log_success(f"Successfully sent building strategy request to AI citizen {ai_username}")
                 
                 # The response content is in the response field of response_data
                 content = response_data.get('response', '')
-                print(f"AI {ai_username} response length: {len(content)} characters")
-                print(f"AI {ai_username} response preview: {content[:200]}...")
+                log_info(f"AI {ai_username} response length: {len(content)} characters")
+                
+                # Log the full AI response
+                log_section(f"AI {ai_username} Full Response")
+                print(content)
+                print("\n" + "=" * 80 + "\n")
                 
                 # Try to extract the JSON decision from the response
                 try:
@@ -544,25 +578,22 @@ If you decide not to build anything at this time, return an empty JSON object.
                             return decision
                     
                     # If we get here, no valid decision was found
-                    print(f"No valid building decision found in AI response. Full response:")
-                    print(content)
+                    log_warning(f"No valid building decision found in AI response.")
                     return None
                 except Exception as e:
-                    print(f"Error extracting decision from AI response: {str(e)}")
-                    print(f"Full response content that caused the error:")
-                    print(content)
+                    log_error(f"Error extracting decision from AI response: {str(e)}")
                     return None
                 
                 return None
             else:
-                print(f"Error processing building strategy request for AI citizen {ai_username}: {response_data}")
+                log_error(f"Error processing building strategy request for AI citizen {ai_username}: {response_data}")
                 return None
         else:
-            print(f"Error from Kinos API: {response.status_code} - {response.text}")
+            log_error(f"Error from Kinos API: {response.status_code} - {response.text}")
             return None
     except Exception as e:
-        print(f"Error sending building strategy request to AI citizen {ai_username}: {str(e)}")
-        print(f"Exception traceback: {traceback.format_exc()}")
+        log_error(f"Error sending building strategy request to AI citizen {ai_username}: {str(e)}")
+        log_error(f"Exception traceback: {traceback.format_exc()}")
         return None
 
 def create_admin_notification(tables, ai_strategy_results: Dict[str, bool]) -> None:
@@ -942,26 +973,30 @@ Your response must be a JSON object with:
         }
         
         # Make the API request
-        print(f"Making building placement API request to Kinos for {ai_username}...")
+        log_info(f"Making building placement API request to Kinos for {ai_username}...")
         response = requests.post(url, headers=headers, json=payload)
-        
+                
         # Log the API response details
-        print(f"Building placement API response status code: {response.status_code}")
-        
+        log_info(f"Building placement API response status code: {response.status_code}")
+                
         # Check if the request was successful
         if response.status_code == 200 or response.status_code == 201:
             response_data = response.json()
             status = response_data.get("status")
-            
-            print(f"Building placement API response status: {status}")
-            
+                    
+            log_info(f"Building placement API response status: {status}")
+                    
             if status == "completed":
-                print(f"Successfully sent building placement request to AI citizen {ai_username}")
-                
+                log_success(f"Successfully sent building placement request to AI citizen {ai_username}")
+                        
                 # The response content is in the response field of response_data
                 content = response_data.get('response', '')
-                print(f"AI {ai_username} placement response length: {len(content)} characters")
-                print(f"AI {ai_username} placement response preview: {content[:200]}...")
+                log_info(f"AI {ai_username} placement response length: {len(content)} characters")
+                        
+                # Log the full AI response
+                log_section(f"AI {ai_username} Full Placement Response")
+                print(content)
+                print("\n" + "=" * 80 + "\n")
                 
                 # Try to extract the JSON decision from the response
                 try:
