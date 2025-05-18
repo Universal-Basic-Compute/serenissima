@@ -754,6 +754,11 @@ Here are relevancies that might influence your decision:
         system_instructions += f"""
 There are {len(filtered_points)} available points. Choose the best location for your {building_type_info['name']} by selecting the index of one of these points (0 to {len(filtered_points)-1}).
 
+When choosing a location, consider:
+1. Proximity to other buildings of similar type
+2. Rent amounts of existing buildings on this land
+3. Strategic positioning for maximum visibility and income
+
 Your response must be a JSON object with:
 1. selected_point_index: The index of your chosen point (0 to {len(filtered_points)-1})
 2. reason: A brief explanation of why you chose this location
