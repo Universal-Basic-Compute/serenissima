@@ -878,19 +878,22 @@ Your response must be a JSON object with:
                                     "Ducats": consiglio_ducats + construction_cost
                                 })
                                 
+                                # 4. Create the building record
+                                # Generate a unique building ID
+                                import uuid
+                                building_id = f"building-{uuid.uuid4()}"
+                                
                                 # Create a transaction record for the payment
                                 try:
-                                    # Move this code after building_id is defined
                                     transactions_table = Table(
                                         tables["citizens"].api_key, 
                                         tables["citizens"].base_id, 
                                         "TRANSACTIONS"
                                     )
                                     
-                                    # Now building_id is defined and can be used
                                     transaction_record = {
                                         "Type": "building_construction",
-                                        "AssetId": building_id,  # This is now defined
+                                        "AssetId": building_id,
                                         "Seller": "ConsiglioDeiDieci",
                                         "Buyer": ai_username,
                                         "Price": construction_cost,
@@ -907,11 +910,6 @@ Your response must be a JSON object with:
                                     # Continue even if transaction record creation fails
                                 
                                 print(f"Transferred {construction_cost} ducats from {ai_username} to ConsiglioDeiDieci")
-                                
-                                # 4. Create the building record
-                                # Generate a unique building ID
-                                import uuid
-                                building_id = f"building-{uuid.uuid4()}"
                                 
                                 # Generate a point ID if not present
                                 point_id = selected_point.get("id", f"point-{selected_point['lat']}-{selected_point['lng']}")
