@@ -190,23 +190,42 @@ def get_citizen_relevancies(tables, username: str) -> List[Dict]:
             # Ensure all fields are properly handled
             fields = relevancy.get('fields', {})
             
-            # Make sure we're not trying to call string methods on non-string fields
+            # Create a safe version of the fields dictionary with proper type handling
+            safe_fields = {}
+            for key, value in fields.items():
+                # Convert all values to strings to avoid type errors
+                if value is None:
+                    safe_fields[key] = ""
+                elif isinstance(value, (int, float)):
+                    safe_fields[key] = value  # Keep numbers as is
+                elif isinstance(value, dict):
+                    safe_fields[key] = json.dumps(value)  # Convert dict to JSON string
+                elif isinstance(value, list):
+                    safe_fields[key] = json.dumps(value)  # Convert list to JSON string
+                else:
+                    # Try to convert to string, with fallback
+                    try:
+                        safe_fields[key] = str(value)
+                    except:
+                        safe_fields[key] = ""
+            
+            # Create the processed relevancy with safe fields
             processed_relevancy = {
                 'id': relevancy.get('id', ''),
                 'fields': {
-                    'RelevancyId': str(fields.get('RelevancyId', '')),
-                    'AssetID': str(fields.get('AssetID', '')),
-                    'AssetType': str(fields.get('AssetType', '')),
-                    'Category': str(fields.get('Category', '')),
-                    'Type': str(fields.get('Type', '')),
-                    'TargetCitizen': str(fields.get('TargetCitizen', '')),
-                    'RelevantToCitizen': str(fields.get('RelevantToCitizen', '')),
-                    'Score': float(fields.get('Score', 0)),
-                    'TimeHorizon': str(fields.get('TimeHorizon', '')),
-                    'Title': str(fields.get('Title', '')),
-                    'Description': str(fields.get('Description', '')),
-                    'Status': str(fields.get('Status', '')),
-                    'CreatedAt': str(fields.get('CreatedAt', ''))
+                    'RelevancyId': safe_fields.get('RelevancyId', ''),
+                    'AssetID': safe_fields.get('AssetID', ''),
+                    'AssetType': safe_fields.get('AssetType', ''),
+                    'Category': safe_fields.get('Category', ''),
+                    'Type': safe_fields.get('Type', ''),
+                    'TargetCitizen': safe_fields.get('TargetCitizen', ''),
+                    'RelevantToCitizen': safe_fields.get('RelevantToCitizen', ''),
+                    'Score': float(safe_fields.get('Score', 0)) if safe_fields.get('Score') not in (None, '') else 0,
+                    'TimeHorizon': safe_fields.get('TimeHorizon', ''),
+                    'Title': safe_fields.get('Title', ''),
+                    'Description': safe_fields.get('Description', ''),
+                    'Status': safe_fields.get('Status', ''),
+                    'CreatedAt': safe_fields.get('CreatedAt', '')
                 }
             }
             processed_relevancies.append(processed_relevancy)
