@@ -1938,7 +1938,7 @@ number => {
             
             // Convert any undefined values to appropriate defaults to prevent rendering objects
             Object.keys(safeCitizen).forEach(key => {
-              if (safeCitizen[key] === undefined || safeCitizen[key] === null) {
+              if (safeCitizen[key] === undefined) {
                 // Use empty string for text fields, 0 for numbers, false for booleans
                 if (['ducats', 'prestige', 'dailyIncome'].includes(key)) {
                   safeCitizen[key] = 0;
@@ -1948,6 +1948,24 @@ number => {
                   safeCitizen[key] = null;
                 } else {
                   safeCitizen[key] = '';
+                }
+              } else if (typeof safeCitizen[key] === 'object' && safeCitizen[key] !== null) {
+                // Convert objects to strings to prevent rendering objects directly
+                if (key === 'workplace' && safeCitizen[key]) {
+                  // For workplace, create a safe copy with string properties
+                  safeCitizen[key] = {
+                    name: safeCitizen[key].name || safeCitizen[key].Name || '',
+                    type: safeCitizen[key].type || safeCitizen[key].Type || ''
+                  };
+                } else if (key === 'position' && safeCitizen[key]) {
+                  // For position, create a safe copy with numeric properties
+                  safeCitizen[key] = {
+                    lat: parseFloat(safeCitizen[key].lat || safeCitizen[key].Lat || 0),
+                    lng: parseFloat(safeCitizen[key].lng || safeCitizen[key].Lng || 0)
+                  };
+                } else {
+                  // For other objects, stringify them
+                  safeCitizen[key] = JSON.stringify(safeCitizen[key]);
                 }
               }
             });
