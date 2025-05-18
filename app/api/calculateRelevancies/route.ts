@@ -597,76 +597,23 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Fetch all lands from Airtable
-    console.log(`Calculating and saving relevancies for AI: ${aiUsername}`);
-    const landsRecords = await base(AIRTABLE_LANDS_TABLE).select().all();
-    console.log(`Fetched ${landsRecords.length} land records from Airtable`);
-    
-    // Fetch polygon data from get-polygons API
-    const polygons = await fetchPolygonData();
-    
-    // Merge land data with polygon data
-    const allLands = await mergeLandDataWithPolygons(landsRecords, polygons);
-    
     // Fetch all citizens for land domination relevancy
     const allCitizens = await fetchAllCitizens(base);
     
-    // Fetch land groups data
-    const landGroups = await fetchLandGroups();
-    
-    // Get lands owned by this AI
-    const aiLands = allLands.filter(land => land.owner === aiUsername);
-    
-    // Even if the AI doesn't own lands, we should still calculate land domination relevancy
-    if (aiLands.length === 0) {
-      console.log(`AI ${aiUsername} does not own any lands, but will still calculate land domination relevancy`);
-      
-      // Calculate land domination relevancy only
-      const landDominationRelevancies = relevancyService.calculateLandDominationRelevancy(allCitizens, allLands);
-      
-      // Format the response to include both simple scores and detailed data
-      const simpleScores: Record<string, number> = {};
-      Object.entries(landDominationRelevancies).forEach(([id, data]) => {
-        simpleScores[id] = data.score;
-      });
-      
-      try {
-        // Save relevancies to Airtable
-        await saveRelevancies(base, aiUsername, landDominationRelevancies, allLands, allCitizens);
-        
-        return NextResponse.json({
-          success: true,
-          ai: aiUsername,
-          ownedLandCount: 0,
-          relevancyScores: simpleScores,
-          detailedRelevancy: landDominationRelevancies,
-          saved: true
-        });
-      } catch (error) {
-        return NextResponse.json({
-          success: false,
-          ai: aiUsername,
-          ownedLandCount: 0,
-          relevancyScores: simpleScores,
-          detailedRelevancy: landDominationRelevancies,
-          saved: false,
-          error: error.message
-        });
-      }
-    }
-    
-    // Calculate land proximity relevancy with connectivity data
-    const proximityRelevancies = relevancyService.calculateLandProximityRelevancy(aiLands, allLands, landGroups);
+    // Calculate relevancy scores using the new method
+    const relevancyScores = await relevancyService.calculateRelevancyWithApiData(aiUsername);
     
     // Calculate land domination relevancy
+    // For this, we need to fetch all lands first
+    const allLands = await relevancyService.fetchLands();
     const landDominationRelevancies = relevancyService.calculateLandDominationRelevancy(allCitizens, allLands);
     
     // Combine both types of relevancies
     const combinedRelevancies = {
-      ...proximityRelevancies,
+      ...relevancyScores,
       ...landDominationRelevancies
     };
-      
+    
     // Format the response to include both simple scores and detailed data
     const simpleScores: Record<string, number> = {};
     Object.entries(combinedRelevancies).forEach(([id, data]) => {
@@ -681,7 +628,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         ai: aiUsername,
-        ownedLandCount: aiLands.length,
+        ownedLandCount: (await relevancyService.fetchLands(aiUsername)).length,
         relevancyScores: simpleScores,
         detailedRelevancy: combinedRelevancies,
         saved: true
@@ -691,7 +638,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: false,
         ai: aiUsername,
-        ownedLandCount: aiLands.length,
+        ownedLandCount: (await relevancyService.fetchLands(aiUsername)).length,
         relevancyScores: simpleScores,
         detailedRelevancy: combinedRelevancies,
         saved: false,

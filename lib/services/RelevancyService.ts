@@ -28,6 +28,112 @@ interface RelevancyScore {
 
 export class RelevancyService {
   /**
+   * Fetch all lands from the API
+   */
+  public async fetchLands(owner?: string): Promise<LandData[]> {
+    try {
+      // Construct the URL with optional owner filter
+      const baseUrl = typeof window !== 'undefined' 
+        ? window.location.origin 
+        : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+      
+      const url = owner 
+        ? `${baseUrl}/api/lands?owner=${encodeURIComponent(owner)}` 
+        : `${baseUrl}/api/lands`;
+      
+      console.log(`Fetching lands from API: ${url}`);
+      
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch lands: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.success && Array.isArray(data.lands)) {
+        console.log(`Successfully fetched ${data.lands.length} lands from API`);
+        return data.lands;
+      } else {
+        console.error('Invalid response format from lands API:', data);
+        return [];
+      }
+    } catch (error) {
+      console.error('Error fetching lands:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Calculate relevancy scores using the API data
+   */
+  public async calculateRelevancyWithApiData(aiUsername: string): Promise<Record<string, RelevancyScore>> {
+    try {
+      // Fetch lands owned by the AI
+      const aiLands = await this.fetchLands(aiUsername);
+      
+      if (aiLands.length === 0) {
+        console.log(`AI ${aiUsername} does not own any lands`);
+        return {};
+      }
+      
+      // Fetch all lands
+      const allLands = await this.fetchLands();
+      
+      // Fetch land groups for connectivity analysis
+      const landGroups = await this.fetchLandGroups();
+      
+      // Calculate relevancy scores
+      const relevancyScores = this.calculateLandProximityRelevancy(aiLands, allLands, landGroups);
+      
+      return relevancyScores;
+    } catch (error) {
+      console.error('Error calculating relevancy with API data:', error);
+      return {};
+    }
+  }
+
+  /**
+   * Fetch land groups for connectivity analysis
+   */
+  private async fetchLandGroups(): Promise<Record<string, string>> {
+    try {
+      const baseUrl = typeof window !== 'undefined' 
+        ? window.location.origin 
+        : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+      
+      const response = await fetch(`${baseUrl}/api/land-groups?includeUnconnected=true&minSize=1`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch land groups: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.success && data.landGroups) {
+        console.log(`Loaded ${data.landGroups.length} land groups for connectivity analysis`);
+        
+        // Create a mapping of polygon ID to group ID
+        const groupMapping: Record<string, string> = {};
+        data.landGroups.forEach((group: any) => {
+          if (group.lands && Array.isArray(group.lands)) {
+            group.lands.forEach((landId: string) => {
+              groupMapping[landId] = group.groupId;
+            });
+          }
+        });
+        
+        return groupMapping;
+      }
+      
+      return {};
+    } catch (error) {
+      console.error('Error fetching land groups:', error);
+      return {};
+    }
+  }
+
+  /**
    * Calculate proximity-based relevancy scores for lands relative to an AI owner
    */
   public calculateLandProximityRelevancy(
