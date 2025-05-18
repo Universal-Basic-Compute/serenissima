@@ -600,33 +600,44 @@ def get_polygon_data_for_citizen(username: str, citizen_lands: List[Dict]) -> Li
     try:
         polygon_data = []
         
-        # Get the data directory path
-        data_dir = os.path.join(os.getcwd(), 'data')
+        # Get land IDs from citizen lands
+        land_ids = [land["fields"].get("LandId", "") for land in citizen_lands if land["fields"].get("LandId")]
         
-        # For each land owned by the citizen, try to find the corresponding polygon file
-        for land in citizen_lands:
-            land_id = land["fields"].get("LandId", "")
-            if not land_id:
-                continue
-            
-            # Try to find the polygon file
-            polygon_file_path = os.path.join(data_dir, f"{land_id}.json")
-            if os.path.exists(polygon_file_path):
-                try:
-                    with open(polygon_file_path, 'r', encoding='utf-8') as f:
-                        polygon = json.load(f)
-                    
-                    # Add the polygon to the list
-                    polygon_data.append(polygon)
-                    print(f"Found polygon data for land {land_id}")
-                except Exception as e:
-                    print(f"Error reading polygon file for land {land_id}: {str(e)}")
+        if not land_ids:
+            log_info(f"No land IDs found for citizen {username}")
+            return []
+        
+        # Fetch polygon data from API
+        api_base_url = os.getenv("API_BASE_URL", "https://serenissima.ai")
+        log_info(f"Fetching polygon data from API: {api_base_url}/api/get-polygons")
+        
+        response = requests.get(f"{api_base_url}/api/get-polygons?essential=true")
+        
+        if response.status_code != 200:
+            log_error(f"Failed to fetch polygons from API: {response.status_code} {response.text}")
+            return []
+        
+        api_data = response.json()
+        
+        if 'polygons' not in api_data or not isinstance(api_data['polygons'], list):
+            log_error(f"Invalid response format from API: {api_data}")
+            return []
+        
+        # Create a map of polygon IDs to polygon data
+        polygon_map = {polygon['id']: polygon for polygon in api_data['polygons'] if 'id' in polygon}
+        
+        # Match land IDs with polygon data
+        for land_id in land_ids:
+            if land_id in polygon_map:
+                polygon_data.append(polygon_map[land_id])
+                log_success(f"Found polygon data for land {land_id}")
             else:
-                print(f"Polygon file not found for land {land_id}")
+                log_warning(f"Polygon data not found for land {land_id}")
         
+        log_info(f"Retrieved polygon data for {len(polygon_data)} lands")
         return polygon_data
     except Exception as e:
-        print(f"Error getting polygon data for citizen {username}: {str(e)}")
+        log_error(f"Error getting polygon data for citizen {username}: {str(e)}")
         return []
 
 def get_available_building_points(polygons: List[Dict], existing_buildings: List[Dict]) -> Dict[str, List[Dict]]:
