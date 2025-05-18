@@ -37,10 +37,10 @@ def initialize_airtable():
 def get_ai_citizens(tables) -> List[Dict]:
     """Get all citizens that are marked as AI, are in Venice, and have appropriate social class."""
     try:
-        # Query citizens with IsAI=true, InVenice=true, and SocialClass is either Nobili or Cittadini
-        formula = "AND({IsAI}=1, {InVenice}=1)" --> add Ducats >=150 000
+        # Query citizens with IsAI=true, InVenice=true, and Ducats >= 150000
+        formula = "AND({IsAI}=1, {InVenice}=1, {Ducats}>=150000)"
         ai_citizens = tables["citizens"].all(formula=formula)
-        print(f"Found {len(ai_citizens)} AI citizens in Venice with Nobili or Cittadini social class")
+        print(f"Found {len(ai_citizens)} AI citizens in Venice with at least 150,000 Ducats")
         return ai_citizens
     except Exception as e:
         print(f"Error getting AI citizens: {str(e)}")
