@@ -48,13 +48,21 @@ def get_ai_citizens(tables) -> List[Dict]:
         return []
 
 def get_citizen_lands(tables, username: str) -> List[Dict]:
-    """Get all lands owned by a specific citizen."""
+    """Get all lands owned by a specific citizen or all lands if the citizen owns none."""
     try:
         # Query lands where the citizen is the owner
         formula = f"{{Owner}}='{username}'"
         lands = tables["lands"].all(formula=formula)
-        print(f"Found {len(lands)} lands owned by {username}")
-        return lands
+        
+        if lands:
+            print(f"Found {len(lands)} lands owned by {username}")
+            return lands
+        else:
+            print(f"No lands owned by {username}, returning all lands")
+            # If the citizen doesn't own any lands, return all lands
+            all_lands = tables["lands"].all()
+            print(f"Returning {len(all_lands)} total lands")
+            return all_lands
     except Exception as e:
         print(f"Error getting lands for citizen {username}: {str(e)}")
         return []
