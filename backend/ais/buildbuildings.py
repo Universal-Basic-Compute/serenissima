@@ -29,7 +29,8 @@ def initialize_airtable():
         "citizens": Table(airtable_api_key, airtable_base_id, "CITIZENS"),
         "lands": Table(airtable_api_key, airtable_base_id, "LANDS"),
         "buildings": Table(airtable_api_key, airtable_base_id, "BUILDINGS"),
-        "notifications": Table(airtable_api_key, airtable_base_id, "NOTIFICATIONS")
+        "notifications": Table(airtable_api_key, airtable_base_id, "NOTIFICATIONS"),
+        "relevancies": Table(airtable_api_key, airtable_base_id, "RELEVANCIES")
     }
     
     return tables
@@ -79,6 +80,22 @@ def get_citizen_buildings(tables, username: str) -> List[Dict]:
         return buildings
     except Exception as e:
         print(f"Error getting buildings for citizen {username}: {str(e)}")
+        return []
+
+def get_citizen_relevancies(tables, username: str) -> List[Dict]:
+    """Get the last 100 relevancies for a specific citizen."""
+    try:
+        # Query relevancies where the citizen is the relevant citizen
+        formula = f"{{RelevantToCitizen}}='{username}'"
+        relevancies = tables["relevancies"].all(
+            formula=formula,
+            sort=[{"field": "CreatedAt", "direction": "desc"}],
+            max_records=100
+        )
+        print(f"Found {len(relevancies)} recent relevancies for {username}")
+        return relevancies
+    except Exception as e:
+        print(f"Error getting relevancies for citizen {username}: {str(e)}")
         return []
 
 def get_building_types_from_api() -> Dict:
@@ -148,7 +165,7 @@ def get_kinos_api_key() -> str:
         sys.exit(1)
     return api_key
 
-def prepare_ai_building_strategy(ai_citizen: Dict, citizen_lands: List[Dict], citizen_buildings: List[Dict], all_buildings: List[Dict]) -> Dict:
+def prepare_ai_building_strategy(ai_citizen: Dict, citizen_lands: List[Dict], citizen_buildings: List[Dict], all_buildings: List[Dict], citizen_relevancies: List[Dict]) -> Dict:
     """Prepare a comprehensive data package for the AI to make building decisions."""
     
     # Extract citizen information
@@ -182,6 +199,24 @@ def prepare_ai_building_strategy(ai_citizen: Dict, citizen_lands: List[Dict], ci
         }
         buildings_data.append(building_info)
     
+    # Process relevancies data
+    relevancies_data = []
+    for relevancy in citizen_relevancies:
+        relevancy_info = {
+            "asset_id": relevancy["fields"].get("AssetID", ""),
+            "asset_type": relevancy["fields"].get("AssetType", ""),
+            "category": relevancy["fields"].get("Category", ""),
+            "type": relevancy["fields"].get("Type", ""),
+            "target_citizen": relevancy["fields"].get("TargetCitizen", ""),
+            "score": relevancy["fields"].get("Score", 0),
+            "time_horizon": relevancy["fields"].get("TimeHorizon", ""),
+            "title": relevancy["fields"].get("Title", ""),
+            "description": relevancy["fields"].get("Description", ""),
+            "status": relevancy["fields"].get("Status", ""),
+            "created_at": relevancy["fields"].get("CreatedAt", "")
+        }
+        relevancies_data.append(relevancy_info)
+    
     # Get building types information from API
     building_types = get_building_types_from_api()
     
@@ -214,6 +249,7 @@ def prepare_ai_building_strategy(ai_citizen: Dict, citizen_lands: List[Dict], ci
         },
         "lands": lands_data,
         "buildings": buildings_data,
+        "relevancies": relevancies_data,  # Add the relevancies data
         "building_types": building_types,
         "timestamp": datetime.now().isoformat()
     }
@@ -281,6 +317,13 @@ You are {ai_username}, an AI landowner in La Serenissima. You make your own deci
 Here is the complete data about your current situation:
 {json.dumps(data_package, indent=2)}
 
+The relevancies section contains important information about lands and citizens that are relevant to you. 
+These relevancies indicate:
+- Lands that are geographically close to your properties
+- Lands that are connected to your properties by bridges
+- Other citizens who own significant amounts of land
+- Strategic opportunities for expansion
+
 When developing your building strategy:
 1. Analyze which of your lands have the most building potential (consider building points and water access)
 2. Evaluate which building types would generate the most income for you
@@ -288,6 +331,7 @@ When developing your building strategy:
 4. Prioritize buildings that have the best income-to-maintenance ratio
 5. Create a specific, actionable plan with building types and target lands
 6. Consider your available ducats when making decisions
+7. Take into account the relevancies to make strategic building decisions
 
 Your decision should be specific, data-driven, and focused on maximizing your income.
 
@@ -959,6 +1003,10 @@ def process_ai_building_strategies(dry_run: bool = False):
             citizen_buildings = get_citizen_buildings(tables, ai_username)
             print(f"Retrieved {len(citizen_buildings)} buildings for {ai_username}")
             
+            # Get relevancies for this AI
+            citizen_relevancies = get_citizen_relevancies(tables, ai_username)
+            print(f"Retrieved {len(citizen_relevancies)} relevancies for {ai_username}")
+            
             # Get polygon data for this citizen's lands
             polygon_data = get_polygon_data_for_citizen(ai_username, citizen_lands)
             print(f"Retrieved polygon data for {len(polygon_data)} lands")
@@ -976,7 +1024,7 @@ def process_ai_building_strategies(dry_run: bool = False):
                 continue
             
             # Prepare the data package for the AI
-            data_package = prepare_ai_building_strategy(ai_citizen, citizen_lands, citizen_buildings, all_buildings)
+            data_package = prepare_ai_building_strategy(ai_citizen, citizen_lands, citizen_buildings, all_buildings, citizen_relevancies)
             print(f"Prepared data package for {ai_username}")
             
             # Send the building strategy request to the AI
