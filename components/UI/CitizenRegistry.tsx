@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { citizenService } from '@/lib/services/CitizenService';
-import PlayerProfile from '@/components/UI/PlayerProfile';
+import CitizenRegistryCard from '@/components/UI/CitizenRegistryCard';
 
 interface CitizenRegistryProps {
   onClose: () => void;
@@ -87,17 +87,16 @@ const CitizenRegistry: React.FC<CitizenRegistryProps> = ({ onClose }) => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {citizens.map((citizen) => (
-                  <div key={citizen.id || citizen.citizenId || citizen.username} className="bg-white rounded-lg shadow-md p-4 border border-amber-200">
-                    <PlayerProfile
-                      username={citizen.username}
-                      firstName={citizen.firstName || citizen.firstname || citizen.FirstName}
-                      lastName={citizen.lastName || citizen.lastname || citizen.LastName}
-                      coatOfArmsImage={citizen.coatOfArmsImage}
-                      familyMotto={citizen.familyMotto}
-                      Ducats={citizen.Ducats || citizen.ducats}
-                      size="medium"
-                    />
-                  </div>
+                  <CitizenRegistryCard
+                    key={citizen.id || citizen.citizenId || citizen.username}
+                    username={citizen.username}
+                    firstName={citizen.firstName || citizen.firstname || citizen.FirstName}
+                    lastName={citizen.lastName || citizen.lastname || citizen.LastName}
+                    coatOfArmsImage={citizen.coatOfArmsImage || `/coat-of-arms/${citizen.username}.png`}
+                    familyMotto={citizen.familyMotto}
+                    Ducats={citizen.Ducats || citizen.ducats}
+                    socialClass={citizen.socialClass || citizen.socialclass || citizen.SocialClass}
+                  />
                 ))}
               </div>
             )}
