@@ -6,6 +6,36 @@ const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
 const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
 const AIRTABLE_LANDS_TABLE = process.env.AIRTABLE_LANDS_TABLE || 'LANDS';
 
+// Function to fetch polygon data from the get-polygons API
+async function fetchPolygonData(): Promise<Record<string, any>> {
+  try {
+    console.log('Fetching polygon data from get-polygons API...');
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/get-polygons?essential=true`);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch polygons: ${response.status} ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    
+    // Create a map of polygon ID to polygon data for quick lookup
+    const polygonMap: Record<string, any> = {};
+    if (data.polygons && Array.isArray(data.polygons)) {
+      console.log(`Fetched ${data.polygons.length} polygons from get-polygons API`);
+      data.polygons.forEach(polygon => {
+        if (polygon.id) {
+          polygonMap[polygon.id] = polygon;
+        }
+      });
+    }
+    
+    return polygonMap;
+  } catch (error) {
+    console.error('Error fetching polygon data:', error);
+    return {};
+  }
+}
+
 export async function GET(request: Request) {
   try {
     // Check if Airtable credentials are configured
@@ -40,7 +70,10 @@ export async function GET(request: Request) {
     
     console.log(`Fetched ${landsRecords.length} land records from Airtable`);
     
-    // Transform records to a more usable format
+    // Fetch polygon data
+    const polygonMap = await fetchPolygonData();
+    
+    // Transform records to a more usable format and merge with polygon data
     const lands = landsRecords.map(record => {
       // Parse position and coordinates if they're strings
       let position = record.get('Position');
@@ -70,14 +103,26 @@ export async function GET(request: Request) {
         }
       }
       
+      // Get the land ID
+      const landId = record.id;
+      
+      // Get polygon data for this land
+      const polygonData = polygonMap[landId] || {};
+      
+      // Merge land data with polygon data
       return {
-        id: record.id,
+        id: landId,
         owner: record.get('Owner') || null,
         buildingPointsCount: record.get('BuildingPointsCount') || 0,
         historicalName: record.get('HistoricalName') || null,
-        position,
-        center,
-        coordinates
+        // Use land data if available, otherwise use polygon data
+        position: position || polygonData.position,
+        center: center || polygonData.center || polygonData.centroid,
+        coordinates: coordinates || polygonData.coordinates || [],
+        // Include additional polygon data
+        buildingPoints: polygonData.buildingPoints || [],
+        bridgePoints: polygonData.bridgePoints || [],
+        canalPoints: polygonData.canalPoints || []
       };
     });
     
