@@ -880,15 +880,17 @@ Your response must be a JSON object with:
                                 
                                 # Create a transaction record for the payment
                                 try:
+                                    # Move this code after building_id is defined
                                     transactions_table = Table(
                                         tables["citizens"].api_key, 
                                         tables["citizens"].base_id, 
                                         "TRANSACTIONS"
                                     )
                                     
+                                    # Now building_id is defined and can be used
                                     transaction_record = {
                                         "Type": "building_construction",
-                                        "AssetId": building_id,
+                                        "AssetId": building_id,  # This is now defined
                                         "Seller": "ConsiglioDeiDieci",
                                         "Buyer": ai_username,
                                         "Price": construction_cost,
