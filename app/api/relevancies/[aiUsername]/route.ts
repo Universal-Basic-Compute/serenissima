@@ -8,8 +8,9 @@ const AIRTABLE_RELEVANCIES_TABLE = 'RELEVANCIES';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { aiUsername: string } }
+  context: { params: { aiUsername: string } }
 ) {
+  const { params } = context;
   try {
     const aiUsername = params.aiUsername;
     
