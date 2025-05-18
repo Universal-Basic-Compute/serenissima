@@ -125,19 +125,19 @@ def get_building_types_from_api() -> Dict:
                 return transformed_types
             else:
                 print(f"Unexpected API response format: {response_data}")
-                # Fall back to the hardcoded building types
-                print("Using fallback building types data due to unexpected response format")
-                return error
+                # Return empty dictionary instead of undefined 'error'
+                print("Using empty dictionary due to unexpected response format")
+                return {}
         else:
             print(f"Error fetching building types from API: {response.status_code} - {response.text}")
-            # Fall back to the hardcoded building types
-            print("Using fallback building types data")
-            return error
+            # Return empty dictionary instead of undefined 'error'
+            print("Using empty dictionary due to API error")
+            return {}
     except Exception as e:
         print(f"Exception fetching building types from API: {str(e)}")
-        # Fall back to the hardcoded building types
-        print("Using fallback building types data due to exception")
-        return error
+        # Return empty dictionary instead of undefined 'error'
+        print("Using empty dictionary due to exception")
+        return {}
 
 def get_kinos_api_key() -> str:
     """Get the Kinos API key from environment variables."""
