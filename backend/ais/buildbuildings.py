@@ -93,38 +93,17 @@ def get_citizen_buildings(tables, username: str) -> List[Dict]:
 def get_citizen_relevancies(tables, username: str) -> List[Dict]:
     """Get the last 100 relevancies for a specific citizen, including global relevancies."""
     try:
-        # First, query relevancies where the citizen is the relevant citizen
-        formula = f"{{RelevantToCitizen}}='{username}'"
-        citizen_relevancies = tables["relevancies"].all(
+        # Query relevancies where the citizen is the relevant citizen OR RelevantToCitizen is "all"
+        formula = f"OR({{RelevantToCitizen}}='{username}', {{RelevantToCitizen}}='all')"
+        
+        relevancies = tables["relevancies"].all(
             formula=formula,
             sort=[{"field": "CreatedAt", "direction": "desc"}],
             max_records=100
         )
         
-        # Next, query global relevancies where RelevantToCitizen is "all"
-        global_formula = "({RelevantToCitizen}='all')"
-        global_relevancies = tables["relevancies"].all(
-            formula=global_formula,
-            sort=[{"field": "CreatedAt", "direction": "desc"}],
-            max_records=50  # Limit to 50 global relevancies
-        )
-        
-        # Combine both sets of relevancies
-        all_relevancies = citizen_relevancies + global_relevancies
-        
-        # Sort by CreatedAt in descending order
-        all_relevancies.sort(
-            key=lambda x: x["fields"].get("CreatedAt", ""), 
-            reverse=True
-        )
-        
-        # Limit to 100 most recent relevancies after combining
-        all_relevancies = all_relevancies[:100]
-        
-        print(f"Found {len(citizen_relevancies)} personal relevancies and {len(global_relevancies)} global relevancies for {username}")
-        print(f"Returning {len(all_relevancies)} combined relevancies (limited to 100)")
-        
-        return all_relevancies
+        print(f"Found {len(relevancies)} relevancies for {username} (including global 'all' relevancies)")
+        return relevancies
     except Exception as e:
         print(f"Error getting relevancies for citizen {username}: {str(e)}")
         return []
