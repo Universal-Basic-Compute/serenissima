@@ -1,5 +1,6 @@
 import { eventBus } from '../utils/eventBus';
 import { debounce, throttle } from '../utils/performanceUtils';
+import { CitizenRenderService } from './CitizenRenderService';
 
 // Define the hover state changed event type
 export const HOVER_STATE_CHANGED = 'HOVER_STATE_CHANGED';
@@ -161,32 +162,8 @@ export class HoverStateService {
    * Update hover state for a citizen
    */
   public setHoveredCitizen(buildingId: string | null, type: 'home' | 'work' | null, citizen: any = null): void {
-    // Create a safe version of the citizen object with only the properties we need
-    let safeCitizen = null;
-    if (citizen) {
-      // Convert all possible property formats to a consistent format
-      safeCitizen = {
-        id: citizen.CitizenId || citizen.citizenId || citizen.citizenid || citizen.id || '',
-        firstName: citizen.FirstName || citizen.firstName || citizen.firstname || '',
-        lastName: citizen.LastName || citizen.lastName || citizen.lastname || '',
-        socialClass: citizen.SocialClass || citizen.socialClass || citizen.socialclass || '',
-        imageUrl: citizen.ImageUrl || citizen.imageUrl || citizen.imageurl || '',
-        // Add any other properties you need, but ensure they're primitive values
-      };
-      
-      // Ensure all properties are primitive values (strings, numbers, booleans)
-      Object.keys(safeCitizen).forEach(key => {
-        if (typeof safeCitizen[key] === 'object' && safeCitizen[key] !== null) {
-          // Convert objects to strings to prevent rendering objects directly
-          safeCitizen[key] = JSON.stringify(safeCitizen[key]);
-        } else if (safeCitizen[key] === undefined || safeCitizen[key] === null) {
-          // Set default values for undefined or null properties
-          if (['id', 'firstName', 'lastName', 'socialClass', 'imageUrl'].includes(key)) {
-            safeCitizen[key] = '';
-          }
-        }
-      });
-    }
+    // Use the CitizenRenderService to sanitize the citizen object
+    const safeCitizen = citizen ? CitizenRenderService.sanitizeCitizen(citizen) : null;
     
     this.setHoverState('citizen', buildingId, { 
       citizen: safeCitizen, 

@@ -7,6 +7,7 @@ import { fetchCoatOfArmsImage } from '@/app/utils/coatOfArmsUtils';
 import { buildingPointsService } from '@/lib/services/BuildingPointsService';
 import { interactionService } from '@/lib/services/InteractionService';
 import { hoverStateService } from '@/lib/services/HoverStateService';
+import { CitizenRenderService } from '@/lib/services/CitizenRenderService';
 import LandDetailsPanel from './LandDetailsPanel';
 import BuildingDetailsPanel from './BuildingDetailsPanel';
 import CitizenDetailsPanel from '../UI/CitizenDetailsPanel';
@@ -1908,90 +1909,9 @@ number => {
         setTransportEndPoint,
         setTransportPath,
         setSelectedCitizen: (citizen) => {
-          // Ensure we're not passing the raw citizen object directly to React components
+          // Use the CitizenRenderService to sanitize the citizen object
           if (citizen) {
-            // Create a safe version with only the properties we need
-            const safeCitizen = {
-              citizenid: citizen.CitizenId || citizen.citizenId || citizen.citizenid || citizen.id || '',
-              firstname: citizen.FirstName || citizen.firstName || citizen.firstname || '',
-              lastname: citizen.LastName || citizen.lastName || citizen.lastname || '',
-              socialclass: citizen.SocialClass || citizen.socialClass || citizen.socialclass || '',
-              imageurl: citizen.ImageUrl || citizen.imageUrl || citizen.imageurl || '',
-              description: citizen.Description || citizen.description || '',
-              username: citizen.Username || citizen.username || '',
-              isai: citizen.IsAI || citizen.isAI || citizen.isai || false,
-              ducats: citizen.Ducats || citizen.ducats || citizen.wealth || 0,
-              createdat: citizen.CreatedAt || citizen.createdat || new Date().toISOString(),
-              worksFor: citizen.WorksFor || citizen.worksFor || null,
-              workplace: citizen.Workplace || citizen.workplace || null,
-              // Additional properties
-              color: citizen.Color || citizen.color || '',
-              secondaryColor: citizen.SecondaryColor || citizen.secondaryColor || '',
-              prestige: citizen.Prestige || citizen.prestige || 0,
-              updatedAt: citizen.UpdatedAt || citizen.updatedAt || '',
-              lastActiveAt: citizen.LastActiveAt || citizen.lastActiveAt || '',
-              position: citizen.Position || citizen.position || null,
-              familyMotto: citizen.FamilyMotto || citizen.familyMotto || '',
-              coatOfArmsImage: citizen.CoatOfArmsImage || citizen.coatOfArmsImage || '',
-              dailyIncome: citizen.DailyIncome || citizen.dailyIncome || 0
-            };
-            
-            // Convert any undefined values to appropriate defaults to prevent rendering objects
-            Object.keys(safeCitizen).forEach(key => {
-              if (safeCitizen[key] === undefined || safeCitizen[key] === null) {
-                // Use empty string for text fields, 0 for numbers, false for booleans
-                if (['ducats', 'prestige', 'dailyIncome'].includes(key)) {
-                  safeCitizen[key] = 0;
-                } else if (key === 'isai') {
-                  safeCitizen[key] = false;
-                } else if (['worksFor', 'workplace', 'position'].includes(key)) {
-                  safeCitizen[key] = null;
-                } else {
-                  safeCitizen[key] = '';
-                }
-              } else if (typeof safeCitizen[key] === 'object' && safeCitizen[key] !== null) {
-                // Convert objects to strings to prevent rendering objects directly
-                if (key === 'workplace' && safeCitizen[key]) {
-                  try {
-                    // For workplace, create a safe copy with string properties
-                    const name = String(safeCitizen[key].name || safeCitizen[key].Name || '');
-                    const type = String(safeCitizen[key].type || safeCitizen[key].Type || '');
-                    safeCitizen[key] = { name, type };
-                  } catch (e) {
-                    // If there's any error processing the workplace object, set to null
-                    console.error('Error processing workplace object:', e);
-                    safeCitizen[key] = null;
-                  }
-                } else if (key === 'position' && safeCitizen[key]) {
-                  try {
-                    // For position, create a safe copy with numeric properties
-                    const lat = parseFloat(safeCitizen[key].lat || safeCitizen[key].Lat || 0);
-                    const lng = parseFloat(safeCitizen[key].lng || safeCitizen[key].Lng || 0);
-                    
-                    // Only use the position if both lat and lng are valid numbers
-                    if (!isNaN(lat) && !isNaN(lng)) {
-                      safeCitizen[key] = { lat, lng };
-                    } else {
-                      safeCitizen[key] = null;
-                    }
-                  } catch (e) {
-                    // If there's any error processing the position object, set to null
-                    console.error('Error processing position object:', e);
-                    safeCitizen[key] = null;
-                  }
-                } else {
-                  try {
-                    // For other objects, stringify them
-                    safeCitizen[key] = JSON.stringify(safeCitizen[key]);
-                  } catch (e) {
-                    // If stringification fails, use a placeholder
-                    console.error(`Error stringifying ${key} object:`, e);
-                    safeCitizen[key] = `[Complex ${key} object]`;
-                  }
-                }
-              }
-            });
-            
+            const safeCitizen = CitizenRenderService.sanitizeCitizen(citizen);
             setSelectedCitizen(safeCitizen);
           } else {
             setSelectedCitizen(null);
@@ -2350,73 +2270,8 @@ number => {
     citizen: any,
     size: number = 20
   ) => {
-    // Ensure we have the required properties for display
-    // Try to extract data from various possible property names
-    const firstName = citizen?.FirstName || citizen?.firstName || citizen?.firstname || '';
-    const lastName = citizen?.LastName || citizen?.lastName || citizen?.lastname || '';
-    const socialClass = citizen?.SocialClass || citizen?.socialClass || citizen?.socialclass || '';
-    const citizenId = citizen?.CitizenId || citizen?.citizenId || citizen?.citizenid || citizen?.id || '';
-    
-    // Ensure all values are strings to prevent rendering objects
-    const safeFirstName = typeof firstName === 'string' ? firstName : '';
-    const safeLastName = typeof lastName === 'string' ? lastName : '';
-    const safeSocialClass = typeof socialClass === 'string' ? socialClass : '';
-    const safeCitizenId = typeof citizenId === 'string' ? citizenId : '';
-    
-    // Log citizen data for debugging with more details
-    console.log(`Creating citizen marker for:`, {
-      citizenId: safeCitizenId,
-      name: `${safeFirstName} ${safeLastName}`,
-      socialClass: safeSocialClass
-    });
-
-    // Determine color based on social class
-    const getSocialClassColor = (socialClass: string): string => {
-      const baseClass = socialClass?.toLowerCase() || '';
-      
-      // Base colors for different social classes
-      if (baseClass.includes('nobili')) {
-        // Gold/yellow for nobility
-        return 'rgba(218, 165, 32, 0.8)';
-      } else if (baseClass.includes('cittadini')) {
-        // Blue for citizens
-        return 'rgba(70, 130, 180, 0.8)';
-      } else if (baseClass.includes('popolani')) {
-        // Brown/amber for common people
-        return 'rgba(205, 133, 63, 0.8)';
-      } else if (baseClass.includes('laborer') || baseClass.includes('facchini')) {
-        // Gray for laborers
-        return 'rgba(128, 128, 128, 0.8)';
-      }
-      
-      // Default color if social class is unknown or not matched
-      return 'rgba(100, 150, 255, 0.8)';
-    };
-
-    // Get color based on social class
-    const fillColor = getSocialClassColor(safeSocialClass);
-
-    // Draw a circular background with color based on social class
-    ctx.beginPath();
-    ctx.arc(x, y, size, 0, Math.PI * 2);
-    ctx.fillStyle = fillColor;
-    ctx.fill();
-    
-    // Add a white border
-    ctx.strokeStyle = '#FFFFFF';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    
-    // Add the citizen's initials
-    ctx.font = `bold ${size * 0.6}px Arial`;
-    ctx.fillStyle = '#FFFFFF';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    
-    // Get the first letters of the first and last name
-    const firstInitial = safeFirstName.charAt(0).toUpperCase() || '?';
-    const lastInitial = safeLastName.charAt(0).toUpperCase() || '?';
-    ctx.fillText(firstInitial + lastInitial, x, y);
+    // Use the service to create the marker
+    CitizenRenderService.createCitizenMarker(ctx, x, y, citizen, size);
   };
 
   // Define isometric projection functions at the component level
