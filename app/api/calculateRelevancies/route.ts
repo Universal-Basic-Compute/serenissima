@@ -116,6 +116,72 @@ async function fetchAllCitizens(base: any): Promise<any[]> {
   }
 }
 
+// Helper function to fetch polygon data from get-polygons API
+async function fetchPolygonData(): Promise<any[]> {
+  try {
+    console.log('Fetching polygon data from get-polygons API...');
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/get-polygons`);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch polygons: ${response.status} ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    console.log(`Fetched ${data.polygons?.length || 0} polygons from get-polygons API`);
+    return data.polygons || [];
+  } catch (error) {
+    console.error('Error fetching polygon data:', error);
+    return [];
+  }
+}
+
+// Helper function to merge land data with polygon data
+async function mergeLandDataWithPolygons(landsRecords: any[], polygons: any[]): Promise<any[]> {
+  console.log(`Merging ${landsRecords.length} land records with ${polygons.length} polygons...`);
+  
+  // Create a map of polygon IDs to polygon data for quick lookup
+  const polygonMap: Record<string, any> = {};
+  polygons.forEach(polygon => {
+    if (polygon.id) {
+      polygonMap[polygon.id] = polygon;
+    }
+  });
+  
+  // Merge land records with polygon data
+  const mergedLands = landsRecords.map(record => {
+    const landId = record.id;
+    const owner = record.get('Owner') as string;
+    
+    // Find matching polygon data
+    const polygon = polygonMap[landId];
+    
+    if (polygon) {
+      console.log(`Found matching polygon for land ${landId} owned by ${owner}`);
+      return {
+        id: landId,
+        owner: owner,
+        center: polygon.center || null,
+        coordinates: polygon.coordinates || [],
+        historicalName: polygon.historicalName || null,
+        buildingPoints: (polygon.buildingPoints || []).length || 0
+      };
+    } else {
+      console.warn(`No matching polygon found for land ${landId} owned by ${owner}`);
+      return {
+        id: landId,
+        owner: owner,
+        center: null,
+        coordinates: [],
+        historicalName: null,
+        buildingPoints: 0
+      };
+    }
+  });
+  
+  console.log(`Successfully merged ${mergedLands.length} land records with polygon data`);
+  return mergedLands;
+}
+
 // Helper function to save relevancies to Airtable
 async function saveRelevancies(
   base: any, 
@@ -125,6 +191,8 @@ async function saveRelevancies(
   allCitizens: any[] = []
 ): Promise<number> {
   try {
+    console.log(`Saving relevancies for ${aiUsername} to Airtable...`);
+    
     // Check if the RELEVANCIES table exists
     try {
       const tables = await base.tables();
@@ -144,7 +212,7 @@ async function saveRelevancies(
 
     // Log the field names we're using to help debug
     console.log('Using the following field names for RELEVANCIES table:');
-    console.log('AssetID, AssetType, Category, Type, TargetCitizen, RelevantToCitizen, Score, TimeHorizon, Title, Description, Notes, Status, CreatedAt');
+    console.log('RelevancyId, AssetID, AssetType, Category, Type, TargetCitizen, RelevantToCitizen, Score, TimeHorizon, Title, Description, Notes, Status, CreatedAt');
     
     // Delete existing relevancy records for this AI to avoid duplicates
     const existingRecords = await base(AIRTABLE_RELEVANCIES_TABLE)
@@ -247,8 +315,11 @@ async function saveRelevancies(
 
 export async function GET(request: NextRequest) {
   try {
+    console.log('GET /api/calculateRelevancies request received');
+    
     // Check if Airtable credentials are configured
     if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
+      console.error('Airtable credentials not configured');
       return NextResponse.json(
         { error: 'Airtable credentials not configured' },
         { status: 500 }
@@ -263,19 +334,18 @@ export async function GET(request: NextRequest) {
     const aiUsername = searchParams.get('ai');
     const calculateAll = searchParams.get('calculateAll') === 'true';
     
+    console.log(`Request parameters: aiUsername=${aiUsername}, calculateAll=${calculateAll}`);
+    
     // Fetch all lands from Airtable
     console.log('Fetching all lands from Airtable...');
     const landsRecords = await base(AIRTABLE_LANDS_TABLE).select().all();
+    console.log(`Fetched ${landsRecords.length} land records from Airtable`);
     
-    // Transform land records to a more usable format
-    const allLands = landsRecords.map(record => ({
-      id: record.id,
-      owner: record.get('Owner') as string,
-      center: record.get('Center') as { lat: number, lng: number } | null,
-      coordinates: record.get('Coordinates') as { lat: number, lng: number }[] || [],
-      historicalName: record.get('HistoricalName') as string || null,
-      buildingPoints: record.get('BuildingPoints') as number || 0
-    }));
+    // Fetch polygon data from get-polygons API
+    const polygons = await fetchPolygonData();
+    
+    // Merge land data with polygon data
+    const allLands = await mergeLandDataWithPolygons(landsRecords, polygons);
     
     // Fetch land groups data
     const landGroups = await fetchLandGroups();
@@ -288,6 +358,7 @@ export async function GET(request: NextRequest) {
       const aiOwnersWithLands = await getAllAiCitizensWithLands(base);
       
       if (aiOwnersWithLands.length === 0) {
+        console.log('No AI citizens with lands found');
         return NextResponse.json({
           success: true,
           message: 'No AI citizens with lands found'
@@ -315,7 +386,28 @@ export async function GET(request: NextRequest) {
         const aiLands = allLands.filter(land => land.owner === aiOwner);
         
         if (aiLands.length === 0) {
-          console.log(`No lands found for AI: ${aiOwner}, skipping`);
+          console.log(`No lands found for AI: ${aiOwner}, but will still calculate land domination relevancy`);
+          
+          // For AIs with no lands, we only calculate land domination relevancy
+          try {
+            // Save land domination relevancies to Airtable
+            const relevanciesCreated = await saveRelevancies(base, aiOwner, landDominationRelevancies, allLands, allCitizens);
+            
+            totalRelevanciesCreated += relevanciesCreated;
+            
+            // Store results
+            results[aiOwner] = {
+              ownedLandCount: 0,
+              relevanciesCreated
+            };
+          } catch (error) {
+            console.warn(`Could not save to RELEVANCIES table for ${aiOwner}:`, error.message);
+            results[aiOwner] = {
+              ownedLandCount: 0,
+              error: error.message
+            };
+          }
+          
           continue;
         }
         
@@ -354,6 +446,7 @@ export async function GET(request: NextRequest) {
         }
       }
       
+      console.log(`Completed calculating relevancies for all AI citizens. Total relevancies created: ${totalRelevanciesCreated}`);
       return NextResponse.json({
         success: true,
         aiCount: Object.keys(results).length,
@@ -444,6 +537,7 @@ export async function GET(request: NextRequest) {
       };
     }
     
+    console.log(`Completed calculating relevancies for ${Object.keys(results).length} AI citizens`);
     return NextResponse.json({
       success: true,
       aiCount: Object.keys(results).length,
@@ -461,8 +555,11 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('POST /api/calculateRelevancies request received');
+    
     // Check if Airtable credentials are configured
     if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
+      console.error('Airtable credentials not configured');
       return NextResponse.json(
         { error: 'Airtable credentials not configured' },
         { status: 500 }
@@ -476,7 +573,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { aiUsername } = body;
     
+    console.log(`POST request for AI: ${aiUsername}`);
+    
     if (!aiUsername) {
+      console.error('AI username is required');
       return NextResponse.json(
         { error: 'AI username is required' },
         { status: 400 }
@@ -486,16 +586,13 @@ export async function POST(request: NextRequest) {
     // Fetch all lands from Airtable
     console.log(`Calculating and saving relevancies for AI: ${aiUsername}`);
     const landsRecords = await base(AIRTABLE_LANDS_TABLE).select().all();
+    console.log(`Fetched ${landsRecords.length} land records from Airtable`);
     
-    // Transform land records
-    const allLands = landsRecords.map(record => ({
-      id: record.id,
-      owner: record.get('Owner') as string,
-      center: record.get('Center') as { lat: number, lng: number } | null,
-      coordinates: record.get('Coordinates') as { lat: number, lng: number }[] || [],
-      historicalName: record.get('HistoricalName') as string || null,
-      buildingPoints: record.get('BuildingPoints') as number || 0
-    }));
+    // Fetch polygon data from get-polygons API
+    const polygons = await fetchPolygonData();
+    
+    // Merge land data with polygon data
+    const allLands = await mergeLandDataWithPolygons(landsRecords, polygons);
     
     // Fetch all citizens for land domination relevancy
     const allCitizens = await fetchAllCitizens(base);
@@ -566,6 +663,7 @@ export async function POST(request: NextRequest) {
       // Save relevancies to Airtable
       await saveRelevancies(base, aiUsername, combinedRelevancies, allLands, allCitizens);
       
+      console.log(`Successfully saved relevancies for AI: ${aiUsername}`);
       return NextResponse.json({
         success: true,
         ai: aiUsername,
@@ -575,6 +673,7 @@ export async function POST(request: NextRequest) {
         saved: true
       });
     } catch (error) {
+      console.error(`Failed to save relevancies for AI: ${aiUsername}`, error);
       return NextResponse.json({
         success: false,
         ai: aiUsername,

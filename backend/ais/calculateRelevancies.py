@@ -86,6 +86,9 @@ def get_ai_citizens_with_lands(tables) -> List[str]:
         log.error(f"Error getting AI citizens: {e}")
         return []
 
+import json
+import traceback
+
 def calculate_relevancies_for_ai(ai_username: str, base_url: str) -> Dict:
     """Calculate relevancies for a specific AI citizen."""
     try:
@@ -93,21 +96,28 @@ def calculate_relevancies_for_ai(ai_username: str, base_url: str) -> Dict:
         
         # Make the API call
         api_url = f"{base_url}/api/calculateRelevancies"
+        log.info(f"Calling API: {api_url} for AI: {ai_username}")
+        
         response = requests.post(
             api_url,
             json={"aiUsername": ai_username},
             timeout=120  # Increased timeout for larger calculations
         )
         
+        log.info(f"API response status: {response.status_code}")
+        
         if not response.ok:
             log.error(f"API call failed for {ai_username} with status {response.status_code}: {response.text}")
             return {
                 "success": False,
-                "error": f"API error: {response.status_code}"
+                "error": f"API error: {response.status_code} - {response.text}"
             }
         
         # Parse the response
         data = response.json()
+        
+        # Log a summary of the response
+        log.info(f"API response for {ai_username}: success={data.get('success')}, ownedLandCount={data.get('ownedLandCount')}, relevancyScores count={len(data.get('relevancyScores', {}))}")
         
         if not data.get('success'):
             log.error(f"API returned error for {ai_username}: {data.get('error')}")
@@ -120,10 +130,12 @@ def calculate_relevancies_for_ai(ai_username: str, base_url: str) -> Dict:
         return {
             "success": True,
             "ownedLandCount": data.get('ownedLandCount', 0),
-            "relevanciesCreated": len(data.get('relevancyScores', {}))
+            "relevanciesCreated": len(data.get('relevancyScores', {})),
+            "saved": data.get('saved', False)
         }
     except Exception as e:
         log.error(f"Error calculating relevancies for {ai_username}: {e}")
+        log.error(traceback.format_exc())  # Print the full traceback
         return {
             "success": False,
             "error": str(e)
@@ -137,6 +149,7 @@ def calculate_relevancies() -> bool:
         
         # Get the base URL from environment or use default
         base_url = os.environ.get('NEXT_PUBLIC_BASE_URL', 'http://localhost:3000')
+        log.info(f"Using base URL: {base_url}")
         
         # Get all AI citizens
         ai_usernames = get_ai_citizens_with_lands(tables)
@@ -159,6 +172,15 @@ def calculate_relevancies() -> bool:
             
             if result.get('success'):
                 total_relevancies += result.get('relevanciesCreated', 0)
+                log.info(f"Successfully calculated {result.get('relevanciesCreated', 0)} relevancies for {ai_username}")
+                
+                # Check if relevancies were saved to Airtable
+                if result.get('saved', False):
+                    log.info(f"Relevancies for {ai_username} were saved to Airtable")
+                else:
+                    log.warning(f"Relevancies for {ai_username} were calculated but NOT saved to Airtable")
+            else:
+                log.error(f"Failed to calculate relevancies for {ai_username}: {result.get('error')}")
         
         # Create a detailed message for the notification
         details = []
@@ -166,12 +188,13 @@ def calculate_relevancies() -> bool:
             if not result.get('success'):
                 details.append(f"- {ai}: Error - {result.get('error', 'Unknown error')}")
             else:
-                details.append(f"- {ai}: {result.get('relevanciesCreated', 0)} relevancies created (owns {result.get('ownedLandCount', 0)} lands)")
+                saved_status = "saved to Airtable" if result.get('saved', False) else "NOT saved to Airtable"
+                details.append(f"- {ai}: {result.get('relevanciesCreated', 0)} relevancies created (owns {result.get('ownedLandCount', 0)} lands) - {saved_status}")
         
         details_text = "\n".join(details)
         
         # Create an admin notification with the results
-        create_admin_notification(
+        notification_created = create_admin_notification(
             tables,
             "Relevancy Calculation Complete",
             f"Calculated relevancies for {len(ai_usernames)} AI citizens.\n"
@@ -179,10 +202,16 @@ def calculate_relevancies() -> bool:
             f"Details:\n{details_text}"
         )
         
+        if notification_created:
+            log.info("Created admin notification with calculation results")
+        else:
+            log.warning("Failed to create admin notification")
+        
         return True
     
     except Exception as e:
         log.error(f"Error calculating relevancies: {e}")
+        log.error(traceback.format_exc())  # Print the full traceback
         
         # Try to create an admin notification about the error
         try:
@@ -190,7 +219,7 @@ def calculate_relevancies() -> bool:
             create_admin_notification(
                 tables,
                 "Relevancy Calculation Error",
-                f"An error occurred while calculating relevancies: {str(e)}"
+                f"An error occurred while calculating relevancies: {str(e)}\n\n{traceback.format_exc()}"
             )
         except:
             log.error("Could not create error notification")
