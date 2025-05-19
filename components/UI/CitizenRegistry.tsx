@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { citizenService } from '@/lib/services/CitizenService';
 import CitizenRegistryCard from '@/components/UI/CitizenRegistryCard';
 import CitizenDetailsPanel from '@/components/UI/CitizenDetailsPanel';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface CitizenRegistryProps {
   onClose: () => void;
@@ -286,7 +288,16 @@ const CitizenRegistry: React.FC<CitizenRegistryProps> = ({ onClose }) => {
                                       <span className="font-medium text-amber-900">{relevancy.title}</span>
                                       <span className="text-amber-700">Score: {relevancy.score}</span>
                                     </div>
-                                    <p className="text-gray-700 mt-1">{relevancy.description}</p>
+                                    <p className="text-gray-700 mt-1">
+                                      <ReactMarkdown 
+                                        remarkPlugins={[remarkGfm]}
+                                        components={{
+                                          p: ({node, ...props}) => <p {...props} className="my-1" />
+                                        }}
+                                      >
+                                        {relevancy.description}
+                                      </ReactMarkdown>
+                                    </p>
                                     <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
                                       <div><span className="text-amber-800">Type:</span> {relevancy.type}</div>
                                       <div><span className="text-amber-800">Category:</span> {relevancy.category}</div>

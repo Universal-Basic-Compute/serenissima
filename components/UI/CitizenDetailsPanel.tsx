@@ -916,7 +916,14 @@ Be historically accurate but engaging. Speak in first person as if you are this 
                     </div>
                   </div>
                   <div className="text-xs text-amber-700 mt-1">
-                    {relevancy.description}
+                    <ReactMarkdown 
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        p: ({node, ...props}) => <p {...props} className="my-1" />
+                      }}
+                    >
+                      {relevancy.description}
+                    </ReactMarkdown>
                   </div>
                 </div>
               ))}
