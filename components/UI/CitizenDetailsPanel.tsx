@@ -909,8 +909,8 @@ Be historically accurate but engaging. Speak in first person as if you are this 
                       {relevancy.title}
                     </div>
                     {/* Score displayed as a nice badge */}
-                    <div className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-200 text-amber-800">
-                      Score: {relevancy.score}
+                    <div className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-200 text-amber-800 text-center">
+                      <span className="font-bold">Score {relevancy.score}</span>
                     </div>
                   </div>
                   <div className="text-xs text-amber-700 mt-1">
@@ -1159,8 +1159,8 @@ Be historically accurate but engaging. Speak in first person as if you are this 
               {citizen.socialclass}
             </div>
             
-            <div className="text-amber-700 text-sm font-medium">
-              Ducats: {formatDucats(citizen.Ducats || citizen.wealth || citizen.ducats)}
+            <div className="text-amber-700 text-lg font-bold">
+              {formatDucats(citizen.Ducats || citizen.wealth || citizen.ducats)}
             </div>
           </div>
         </div>
