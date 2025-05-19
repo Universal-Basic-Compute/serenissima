@@ -1426,8 +1426,7 @@ def process_ai_building_strategies(dry_run: bool = False):
             # Also fetch building ownership relevancies
             building_ownership_relevancies = []
             
-            # Add building ownership relevancies to the data package
-            data_package["building_ownership_relevancies"] = building_ownership_relevancies
+            # We'll add these to the data package later when it's created
             try:
                 # Get API base URL from environment variables, with a default fallback
                 api_base_url = os.getenv("API_BASE_URL", "http://localhost:3000")
@@ -1476,6 +1475,10 @@ def process_ai_building_strategies(dry_run: bool = False):
             
             # Prepare the data package for the AI
             data_package = prepare_ai_building_strategy(ai_citizen, citizen_lands, citizen_buildings, all_buildings)
+            
+            # Add building ownership relevancies to the data package
+            data_package["building_ownership_relevancies"] = building_ownership_relevancies
+            
             log_success(f"Prepared data package for {ai_username}")
             
             # Send the building strategy request to the AI
