@@ -42,7 +42,10 @@ export async function GET(request: NextRequest) {
       .map(building => building.get('Occupant') as string);
     
     const homelessCitizens = citizensResponse
-      .filter(citizen => !occupiedHomes.includes(citizen.get('Username') as string));
+      .filter(citizen => {
+        const username = citizen.get('Username') as string;
+        return username && !occupiedHomes.includes(username);
+      });
     
     // Count vacant homes (home buildings with no Occupant)
     const vacantHomes = homeBuildingsResponse
@@ -185,7 +188,10 @@ export async function POST(request: NextRequest) {
       .map(building => building.get('Occupant') as string);
     
     const homelessCitizens = citizensResponse
-      .filter(citizen => !occupiedHomes.includes(citizen.get('Username') as string));
+      .filter(citizen => {
+        const username = citizen.get('Username') as string;
+        return username && !occupiedHomes.includes(username);
+      });
     
     // Count vacant homes (home buildings with no Occupant)
     const vacantHomes = homeBuildingsResponse
