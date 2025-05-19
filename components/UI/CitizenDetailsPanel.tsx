@@ -709,8 +709,9 @@ Be historically accurate but engaging. Speak in first person as if you are this 
     // Check if it's a valid number
     if (isNaN(numericAmount)) return 'Unknown';
     
-    // Format without decimal places
-    return Math.floor(numericAmount) + ' ⚜️'; // Using lys emoji instead of ₫
+    // Format without decimal places and add spaces between thousands
+    const formattedAmount = Math.floor(numericAmount).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    return formattedAmount + ' ⚜️'; // Using lys emoji instead of ₫
   };
   
   const formatDate = (dateString: string) => {
