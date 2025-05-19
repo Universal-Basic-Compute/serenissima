@@ -14,7 +14,7 @@ import logging
 import requests
 import json
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 from pyairtable import Table
 from dotenv import load_dotenv
 import argparse
