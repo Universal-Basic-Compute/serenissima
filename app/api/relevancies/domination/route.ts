@@ -110,7 +110,8 @@ export async function POST(request: NextRequest) {
       username: username || 'all',
       relevancyScores: simpleScores,
       detailedRelevancy: landDominationRelevancies,
-      saved
+      saved,
+      relevanciesSavedCount // Add this for better feedback
     });
     
   } catch (error) {
