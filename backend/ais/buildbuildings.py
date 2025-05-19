@@ -1240,6 +1240,9 @@ Your response must be a JSON object with:
                                 # Generate a point ID if not present
                                 point_id = selected_point.get("id", f"point-{selected_point['lat']}-{selected_point['lng']}")
                                 
+                                # Get the category from building type info
+                                building_category = building_type_info.get("category", "unknown")
+                                
                                 # Create the building record
                                 building_record = {
                                     "BuildingId": building_id,
@@ -1249,6 +1252,7 @@ Your response must be a JSON object with:
                                     "Variant": "model",
                                     "Owner": ai_username,
                                     "Point": point_id,
+                                    "Category": building_category,  # Add the Category field
                                     # Store position data in Notes field instead
                                     "Notes": json.dumps({"position": {"lat": selected_point["lat"], "lng": selected_point["lng"]}}),
                                     "RentAmount": 0,
