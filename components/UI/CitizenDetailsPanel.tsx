@@ -1082,96 +1082,116 @@ Be historically accurate but engaging. Speak in first person as if you are this 
         
         {/* Third column - Citizen details */}
         <div className="w-1/3">
-          <div className="flex flex-col items-center mb-6">
-          {/* Much larger image */}
-          <div className="w-48 h-48 mb-4 relative">
-            {citizen.imageurl || citizen.profileimage || citizen.ImageUrl ? (
-              <img 
-                src={citizen.imageurl || citizen.profileimage || citizen.ImageUrl} 
-                alt={`${citizen.firstname} ${citizen.lastname}`} 
-                className="w-full h-full object-cover rounded-lg border-2 border-amber-600 shadow-lg"
-                onError={(e) => {
-                  console.error(`Failed to load citizen image: ${(e.target as HTMLImageElement).src}`);
-                  
-                  // Try fallback to username-based path
-                  if (citizen.username) {
-                    const fallbackSrc = `/images/citizens/${citizen.username}.jpg`;
-                    console.log(`Trying fallback image: ${fallbackSrc}`);
-                    (e.target as HTMLImageElement).src = fallbackSrc;
+          <div className="w-full mb-6">
+            {/* Full-width image container with relative positioning for the coat of arms overlay */}
+            <div className="w-full h-64 relative mb-4 overflow-hidden rounded-lg border-2 border-amber-600 shadow-lg">
+              {/* Main citizen image */}
+              {citizen.imageurl || citizen.profileimage || citizen.ImageUrl ? (
+                <img 
+                  src={citizen.imageurl || citizen.profileimage || citizen.ImageUrl} 
+                  alt={`${citizen.firstname} ${citizen.lastname}`} 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    console.error(`Failed to load citizen image: ${(e.target as HTMLImageElement).src}`);
                     
-                    // Add a second error handler for the fallback
-                    (e.target as HTMLImageElement).onerror = () => {
-                      console.error(`Fallback image also failed: ${fallbackSrc}`);
-                      // Replace with placeholder
+                    // Try fallback to username-based path
+                    if (citizen.username) {
+                      const fallbackSrc = `/images/citizens/${citizen.username}.jpg`;
+                      console.log(`Trying fallback image: ${fallbackSrc}`);
+                      (e.target as HTMLImageElement).src = fallbackSrc;
+                      
+                      // Add a second error handler for the fallback
+                      (e.target as HTMLImageElement).onerror = () => {
+                        console.error(`Fallback image also failed: ${fallbackSrc}`);
+                        // Replace with placeholder
+                        const parent = (e.target as HTMLImageElement).parentElement;
+                        if (parent) {
+                          parent.innerHTML = `
+                            <div class="w-full h-full bg-amber-200 flex items-center justify-center text-amber-800">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                              </svg>
+                            </div>
+                          `;
+                        }
+                      };
+                    } else {
+                      // Replace with placeholder immediately if no username
                       const parent = (e.target as HTMLImageElement).parentElement;
                       if (parent) {
                         parent.innerHTML = `
-                          <div class="w-full h-full bg-amber-200 rounded-lg border-2 border-amber-600 flex items-center justify-center text-amber-800">
+                          <div class="w-full h-full bg-amber-200 flex items-center justify-center text-amber-800">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
                           </div>
                         `;
                       }
-                    };
-                  } else {
-                    // Replace with placeholder immediately if no username
-                    const parent = (e.target as HTMLImageElement).parentElement;
-                    if (parent) {
-                      parent.innerHTML = `
-                        <div class="w-full h-full bg-amber-200 rounded-lg border-2 border-amber-600 flex items-center justify-center text-amber-800">
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                          </svg>
-                        </div>
-                      `;
-                    }
-                  }
-                }}
-              />
-            ) : (
-              // Try username-based path directly if no imageurl
-              citizen.username ? (
-                <img 
-                  src={`/images/citizens/${citizen.username}.jpg`}
-                  alt={`${citizen.firstname} ${citizen.lastname}`} 
-                  className="w-full h-full object-cover rounded-lg border-2 border-amber-600 shadow-lg"
-                  onError={(e) => {
-                    console.error(`Failed to load citizen image: ${(e.target as HTMLImageElement).src}`);
-                    // Replace with placeholder
-                    const parent = (e.target as HTMLImageElement).parentElement;
-                    if (parent) {
-                      parent.innerHTML = `
-                        <div class="w-full h-full bg-amber-200 rounded-lg border-2 border-amber-600 flex items-center justify-center text-amber-800">
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                          </svg>
-                        </div>
-                      `;
                     }
                   }}
                 />
               ) : (
-                // Placeholder if no image sources available
-                <div className="w-full h-full bg-amber-200 rounded-lg border-2 border-amber-600 flex items-center justify-center text-amber-800">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
+                // Try username-based path directly if no imageurl
+                citizen.username ? (
+                  <img 
+                    src={`/images/citizens/${citizen.username}.jpg`}
+                    alt={`${citizen.firstname} ${citizen.lastname}`} 
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      console.error(`Failed to load citizen image: ${(e.target as HTMLImageElement).src}`);
+                      // Replace with placeholder
+                      const parent = (e.target as HTMLImageElement).parentElement;
+                      if (parent) {
+                        parent.innerHTML = `
+                          <div class="w-full h-full bg-amber-200 flex items-center justify-center text-amber-800">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                          </div>
+                        `;
+                      }
+                    }}
+                  />
+                ) : (
+                  // Placeholder if no image sources available
+                  <div className="w-full h-full bg-amber-200 flex items-center justify-center text-amber-800">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                )
+              )}
+              
+              {/* Coat of arms overlay in the bottom right corner */}
+              {citizen.coatOfArmsImageUrl && (
+                <div className="absolute bottom-3 right-3 w-16 h-16 rounded-full overflow-hidden border-2 border-amber-600 shadow-lg bg-amber-100">
+                  <img 
+                    src={citizen.coatOfArmsImageUrl}
+                    alt="Coat of Arms"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      // Fallback to default coat of arms
+                      (e.target as HTMLImageElement).src = '/coat-of-arms/default.png';
+                    }}
+                  />
                 </div>
-              )
-            )}
-          </div>
-        
-          {/* Social class and wealth info */}
-          <div className="text-center">
-            <div className={`px-3 py-1.5 rounded-full text-sm font-medium inline-block mb-2 ${socialClassStyle}`}>
-              {citizen.socialclass}
+              )}
+              
+              {/* Name and social class overlay at the bottom */}
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                <h3 className="text-white text-xl font-serif font-bold">
+                  {citizen.firstname} {citizen.lastname}
+                </h3>
+                <div className="flex justify-between items-center">
+                  <div className={`px-3 py-1 rounded-full text-sm font-medium inline-block ${socialClassStyle}`}>
+                    {citizen.socialclass}
+                  </div>
+                  <div className="text-white text-lg font-bold">
+                    {formatDucats(citizen.Ducats || citizen.wealth || citizen.ducats)}
+                  </div>
+                </div>
+              </div>
             </div>
-            
-            <div className="text-amber-700 text-lg font-bold">
-              {formatDucats(citizen.Ducats || citizen.wealth || citizen.ducats)}
-            </div>
-          </div>
         </div>
         
         {/* Add max-height and scrolling to the details section */}
