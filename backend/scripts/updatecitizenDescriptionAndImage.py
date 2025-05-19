@@ -142,13 +142,31 @@ def get_citizen_info(tables, username: str) -> Optional[Dict]:
         
         # NEW: Get relevancies where this citizen is the target
         try:
-            relevancies_formula = f"{{TargetCitizen}}='{username}'"
-            relevancies = tables['relevancies'].all(
-                formula=relevancies_formula,
-                sort=[{"field": "CreatedAt", "direction": "desc"}],
-                max_records=100  # Limit to last 100 relevancies
-            )
-            log.info(f"Found {len(relevancies)} relevancies where {username} is the target")
+            # Get API base URL from environment variables, with a default fallback
+            api_base_url = os.environ.get('API_BASE_URL', 'http://localhost:3000')
+        
+            # Construct the API URL with the targetCitizen parameter
+            url = f"{api_base_url}/api/relevancies?targetCitizen={username}"
+        
+            log.info(f"Fetching relevancies for {username} from API: {url}")
+        
+            # Make the API request
+            response = requests.get(url)
+        
+            # Check if the request was successful
+            if response.ok:
+                data = response.json()
+            
+                # Check if the response has the expected structure
+                if "success" in data and data["success"] and "relevancies" in data:
+                    relevancies = data["relevancies"]
+                    log.info(f"Found {len(relevancies)} relevancies where {username} is the target")
+                else:
+                    log.warning(f"Unexpected API response format: {data}")
+                    relevancies = []
+            else:
+                log.warning(f"Failed to fetch relevancies from API: {response.status_code} {response.text}")
+                relevancies = []
         except Exception as e:
             log.warning(f"Error fetching relevancies for {username}: {e}")
             relevancies = []  # Use empty list if there's an error
