@@ -324,6 +324,50 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
     }
   }, [username, lastFetchTime, notifications.length, isOpen, activeTab]);
 
+  // Mark citizen messages as read
+  const markCitizenMessagesAsRead = useCallback(async (messageIds: string[]) => {
+    if (!username || messageIds.length === 0) return;
+
+    try {
+      const response = await fetch('/api/messages/mark-read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ citizen: username, messageIds }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to mark messages as read');
+      }
+
+      // Update local state optimistically or based on success
+      setCitizenMessages(prevMessages =>
+        prevMessages.map(msg =>
+          msg.messageId && messageIds.includes(msg.messageId)
+            ? { ...msg, readAt: new Date().toISOString() }
+            : msg
+        )
+      );
+
+      // Refresh unread messages count for the badge
+      fetchUnreadMessagesCount();
+
+    } catch (error) {
+      console.error('Error marking citizen messages as read:', error);
+      // Optionally, implement more robust error handling or user feedback here
+      // For now, we'll still update local state as a fallback if API call fails, so UI reflects "read"
+      setCitizenMessages(prevMessages =>
+        prevMessages.map(msg =>
+          msg.messageId && messageIds.includes(msg.messageId)
+            ? { ...msg, readAt: new Date().toISOString() }
+            : msg
+        )
+      );
+      fetchUnreadMessagesCount(); // Still refresh, might show 0 if local update worked
+    }
+  }, [username, fetchUnreadMessagesCount]);
+
+
   // Fetch citizens
   const fetchCitizens = useCallback(async () => {
     if (!isOpen || activeTab !== 'chats') return;
@@ -417,6 +461,20 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
         });
         
         setCitizenMessages(processedMessages);
+
+        // After setting messages, identify unread ones and mark them as read
+        const unreadReceivedMessages = processedMessages.filter(
+          (msg: Message) => msg.receiver === username && !msg.readAt && msg.messageId
+        );
+
+        if (unreadReceivedMessages.length > 0) {
+          const unreadMessageIds = unreadReceivedMessages.map(msg => msg.messageId!);
+          if (unreadMessageIds.length > 0) {
+            // Call this without await if you don't want to block UI updates
+            // or if markCitizenMessagesAsRead handles its own loading/error states appropriately.
+            markCitizenMessagesAsRead(unreadMessageIds);
+          }
+        }
       } else {
         // Set empty array if no messages found
         setCitizenMessages([]);
@@ -428,7 +486,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
     } finally {
       setIsLoadingCitizenMessages(false);
     }
-  }, [username]);
+  }, [username, markCitizenMessagesAsRead]);
 
   // Send message to selected citizen
   const sendCitizenMessage = async (content: string, messageType: string = 'message') => {
