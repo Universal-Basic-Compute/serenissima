@@ -314,7 +314,7 @@ def assign_jobs_to_citizens(dry_run: bool = False, noupdate: bool = False):
             continue
         
         # Get this entrepreneur's businesses
-        their_businesses = entrepreneur_businesses.get(citizen_id, [])
+        their_businesses = entrepreneur_businesses.get(citizen_username, [])
         
         # Filter to only unoccupied businesses
         available_own_businesses = [b for b in their_businesses if not b['fields'].get('Occupant')]
