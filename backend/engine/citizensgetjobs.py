@@ -295,6 +295,13 @@ def assign_jobs_to_citizens(dry_run: bool = False, noupdate: bool = False):
     formula = "NOT(OR({Occupant} = '', {Occupant} = BLANK()))"
     occupied_businesses = tables['buildings'].all(formula=formula)
     
+    # Create a set of already employed entrepreneurs for faster lookup
+    already_employed_entrepreneurs = set()
+    for business in occupied_businesses:
+        occupant = business['fields'].get('Occupant')
+        if occupant:
+            already_employed_entrepreneurs.add(occupant)
+    
     # Process entrepreneurs first
     log.info("Processing entrepreneurs first...")
     for entrepreneur in entrepreneurs:
@@ -303,13 +310,7 @@ def assign_jobs_to_citizens(dry_run: bool = False, noupdate: bool = False):
         citizen_name = f"{entrepreneur['fields'].get('FirstName', '')} {entrepreneur['fields'].get('LastName', '')}"
         
         # Check if this entrepreneur is already employed
-        is_employed = False
-        for business in occupied_businesses:
-            if business['fields'].get('Occupant') == citizen_username:
-                is_employed = True
-                break
-        
-        if is_employed:
+        if citizen_username in already_employed_entrepreneurs:
             log.info(f"Entrepreneur {citizen_name} is already employed, skipping")
             continue
         
