@@ -17,6 +17,8 @@ import ContractMarkers from '@/components/PolygonViewer/ContractMarkers';
 import { HoverTooltip } from '../UI/HoverTooltip';
 import TransportDebugPanel from '../UI/TransportDebugPanel';
 import TransportErrorMessage from '../UI/TransportErrorMessage';
+import ProblemMarkers from './ProblemMarkers';
+import ProblemDetailsPanel from '../UI/ProblemDetailsPanel';
 
 interface IsometricViewerProps {
   activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'contracts' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
@@ -76,6 +78,8 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   }[]>([]);
   const [emptyBuildingPoints, setEmptyBuildingPoints] = useState<{lat: number, lng: number}[]>([]);
   const [showTransportDebugPanel, setShowTransportDebugPanel] = useState<boolean>(false);
+  const [selectedProblemId, setSelectedProblemId] = useState<string | null>(null);
+  const [showProblemDetailsPanel, setShowProblemDetailsPanel] = useState<boolean>(false);
   
   // Add handler function for closing the transport debug panel
   const handleTransportDebugPanelClose = () => {
@@ -3806,6 +3810,22 @@ number => {
     };
   }, []);
   
+  // Listen for problem details panel events
+  useEffect(() => {
+    const handleShowProblemDetailsPanel = (event: CustomEvent) => {
+      if (event.detail && event.detail.problemId) {
+        setSelectedProblemId(event.detail.problemId);
+        setShowProblemDetailsPanel(true);
+      }
+    };
+    
+    window.addEventListener('showProblemDetailsPanel', handleShowProblemDetailsPanel as EventListener);
+    
+    return () => {
+      window.removeEventListener('showProblemDetailsPanel', handleShowProblemDetailsPanel as EventListener);
+    };
+  }, []);
+
   // Listen for hover state changes
   useEffect(() => {
     const handleHoverStateChanged = (data: any) => {
@@ -4224,6 +4244,16 @@ number => {
         canvasWidth={canvasRef.current?.width || window.innerWidth}
         canvasHeight={canvasRef.current?.height || window.innerHeight}
       />
+      
+      {/* Problem Markers - visible in all views */}
+      <ProblemMarkers 
+        isVisible={true} 
+        scale={scale}
+        offset={offset}
+        canvasWidth={canvasRef.current?.width || window.innerWidth}
+        canvasHeight={canvasRef.current?.height || window.innerHeight}
+        activeView={activeView}
+      />
     
       {/* Add the hover tooltip */}
       <HoverTooltip />
@@ -4581,6 +4611,17 @@ number => {
         <TransportDebugPanel 
           visible={showTransportDebugPanel}
           onClose={handleTransportDebugPanelClose}
+        />
+      )}
+      
+      {/* Problem Details Panel */}
+      {showProblemDetailsPanel && selectedProblemId && (
+        <ProblemDetailsPanel
+          problemId={selectedProblemId}
+          onClose={() => {
+            setShowProblemDetailsPanel(false);
+            setSelectedProblemId(null);
+          }}
         />
       )}
     </div>

@@ -14,6 +14,8 @@ import type { TransportService as TransportServiceType } from '@/lib/services/Tr
 // Import the actual service instances
 import { interactionService as interactionServiceInstance } from '@/lib/services/InteractionService';
 import { transportService as transportServiceInstance } from '@/lib/services/TransportService';
+import ProblemMarkers from './ProblemMarkers';
+import ProblemDetailsPanel from '../UI/ProblemDetailsPanel';
 
 // Define interfaces for the data structures
 interface PolygonData {
@@ -400,6 +402,22 @@ export default function ViewportCanvas({
     };
   }, [activeView, scale, offset, transportMode, onOffsetChange]);
   
+  // Listen for problem details panel events
+  useEffect(() => {
+    const handleShowProblemDetailsPanel = (event: CustomEvent) => {
+      if (event.detail && event.detail.problemId) {
+        setSelectedProblemId(event.detail.problemId);
+        setShowProblemDetailsPanel(true);
+      }
+    };
+    
+    window.addEventListener('showProblemDetailsPanel', handleShowProblemDetailsPanel as EventListener);
+    
+    return () => {
+      window.removeEventListener('showProblemDetailsPanel', handleShowProblemDetailsPanel as EventListener);
+    };
+  }, []);
+
   // Add this effect to update the interaction service when data changes
   useEffect(() => {
     interactionService.updatePolygons({
@@ -557,10 +575,33 @@ export default function ViewportCanvas({
   }, [activeView]); // Only depend on activeView to avoid frequent re-creation
 
   return (
-    <canvas 
-      ref={canvasRef} 
-      className="w-full h-full"
-      style={{ cursor: interactionService.getState().isDragging ? 'grabbing' : 'grab' }}
-    />
+    <>
+      <canvas 
+        ref={canvasRef} 
+        className="w-full h-full"
+        style={{ cursor: interactionService.getState().isDragging ? 'grabbing' : 'grab' }}
+      />
+      
+      {/* Problem Markers - visible in all views */}
+      <ProblemMarkers 
+        isVisible={true} 
+        scale={scale}
+        offset={offset}
+        canvasWidth={canvasRef.current?.width || window.innerWidth}
+        canvasHeight={canvasRef.current?.height || window.innerHeight}
+        activeView={activeView}
+      />
+      
+      {/* Problem Details Panel */}
+      {showProblemDetailsPanel && selectedProblemId && (
+        <ProblemDetailsPanel
+          problemId={selectedProblemId}
+          onClose={() => {
+            setShowProblemDetailsPanel(false);
+            setSelectedProblemId(null);
+          }}
+        />
+      )}
+    </>
   );
 }

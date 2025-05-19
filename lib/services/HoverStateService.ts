@@ -16,7 +16,8 @@ export type HoverTargetType =
   | 'citizen'
   | 'resource'
   | 'waterPoint'
-  | 'contract';
+  | 'contract'
+  | 'problem';
 
 // Define a comprehensive hover state interface
 export interface HoverState {
@@ -207,6 +208,20 @@ export class HoverStateService {
     if (this.currentState.type === 'resource') {
       this.clearHoverState();
     }
+  }
+  
+  /**
+   * Update hover state for a problem
+   */
+  public setHoveredProblem(problemId: string | null, data: any = null): void {
+    this.setHoverState('problem', problemId, data);
+  }
+  
+  /**
+   * Get the current hovered problem ID
+   */
+  public getHoveredProblemId(): string | null {
+    return this.currentState.type === 'problem' ? this.currentState.id : null;
   }
   
   /**

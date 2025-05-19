@@ -54,6 +54,11 @@ export const HoverTooltip: React.FC = () => {
           type: 'bridgePoint',
           id: newState.id
         });
+      } else if (newState.type === 'problem' && newState.data) {
+        setTooltipData({
+          type: 'problem',
+          problem: newState.data
+        });
       } else if (newState.type === 'none') {
         setTooltipData(null);
       }
@@ -499,6 +504,38 @@ export const HoverTooltip: React.FC = () => {
           </div>
         );
       }
+    } else if (tooltipData.type === 'problem') {
+      const problem = tooltipData.problem;
+      
+      // Get severity color
+      const getSeverityColor = (severity: string): string => {
+        switch (severity.toLowerCase()) {
+          case 'critical': return 'text-red-600';
+          case 'high': return 'text-orange-500';
+          case 'medium': return 'text-yellow-500';
+          case 'low': return 'text-green-500';
+          default: return 'text-yellow-500';
+        }
+      };
+      
+      tooltipContent = (
+        <div>
+          <div className="font-bold text-lg mb-1">{problem.title}</div>
+          <div className="flex items-center mb-2">
+            <span className={`font-medium ${getSeverityColor(problem.severity)}`}>
+              {problem.severity.toUpperCase()} Severity
+            </span>
+            <span className="mx-2">•</span>
+            <span className="text-amber-300">{problem.location || 'Unknown location'}</span>
+          </div>
+          <div className="text-sm mb-2 line-clamp-3">
+            {problem.description}
+          </div>
+          <div className="text-xs text-amber-300 mt-2">
+            Click for details
+          </div>
+        </div>
+      );
     }
   }
   
