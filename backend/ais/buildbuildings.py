@@ -554,29 +554,27 @@ If you decide not to build anything at this time, return an empty JSON object.
                 
                 # Try to extract the JSON decision from the response
                 try:
-                    # Simple direct string extraction for the key fields
-                    import re
+                    # Find the first opening brace and the last closing brace
+                    start_index = content.find('{')
+                    end_index = content.rfind('}')
                     
-                    # Extract building_type
-                    building_type_match = re.search(r'"building_type"\s*:\s*"([^"]+)"', content)
-                    if building_type_match:
-                        building_type = building_type_match.group(1)
+                    if start_index != -1 and end_index != -1 and start_index < end_index:
+                        # Extract the JSON content
+                        json_content = content[start_index:end_index+1]
                         
-                        # Extract land_id
-                        land_id_match = re.search(r'"land_id"\s*:\s*"([^"]+)"', content)
-                        if land_id_match:
-                            land_id = land_id_match.group(1)
-                            
-                            # Extract reason (optional)
-                            reason_match = re.search(r'"reason"\s*:\s*"([^"]+)"', content)
-                            reason = reason_match.group(1) if reason_match else "No reason provided"
-                            
-                            # Create the decision dictionary
-                            decision = {
-                                "building_type": building_type,
-                                "land_id": land_id,
-                                "reason": reason
-                            }
+                        # Clean the content (remove any markdown code block markers)
+                        json_content = json_content.replace('```json', '').replace('```', '')
+                        
+                        log_info(f"Extracted JSON content: {json_content}")
+                        
+                        # Parse the JSON
+                        decision = json.loads(json_content)
+                        
+                        # Check if we have the required fields
+                        if "building_type" in decision and "land_id" in decision:
+                            building_type = decision["building_type"]
+                            land_id = decision["land_id"]
+                            reason = decision.get("reason", "No reason provided")
                             
                             log_data(f"AI {ai_username} decision", decision)
                             log_success(f"AI {ai_username} wants to build a {building_type} on land {land_id}")
@@ -1007,40 +1005,35 @@ Your response must be a JSON object with:
                 
                 # Try to extract the JSON decision from the response
                 try:
-                    # Simple direct string extraction for the key fields
-                    import re
+                    # Find the first opening brace and the last closing brace
+                    start_index = content.find('{')
+                    end_index = content.rfind('}')
                     
-                    # Extract selected_point_index
-                    index_match = re.search(r'"selected_point_index"\s*:\s*(\d+)', content)
-                    if index_match:
-                        selected_index = int(index_match.group(1))
+                    if start_index != -1 and end_index != -1 and start_index < end_index:
+                        # Extract the JSON content
+                        json_content = content[start_index:end_index+1]
                         
-                        # Extract reason (optional)
-                        reason_match = re.search(r'"reason"\s*:\s*"([^"]+)"', content)
-                        reason = reason_match.group(1) if reason_match else "No reason provided"
+                        # Clean the content (remove any markdown code block markers)
+                        json_content = json_content.replace('```json', '').replace('```', '')
                         
-                        # Create the placement decision dictionary
-                        placement_decision = {
-                            "selected_point_index": selected_index,
-                            "reason": reason
-                        }
+                        log_info(f"Extracted JSON content: {json_content}")
                         
-                        print(f"AI {ai_username} placement decision: {json.dumps(placement_decision)}")
+                        # Parse the JSON
+                        placement_decision = json.loads(json_content)
                         
-                        # Validate the index
-                        if 0 <= selected_index < len(filtered_points):
-                            selected_point = filtered_points[selected_index]
+                        # Check if we have the required fields
+                        if "selected_point_index" in placement_decision:
+                            selected_index = placement_decision["selected_point_index"]
+                            reason = placement_decision.get("reason", "No reason provided")
                             
-                            log_success(f"AI {ai_username} selected point {selected_index} at position {selected_point['lat']}, {selected_point['lng']}")
-                            log_info(f"Reason: {reason}")
+                            print(f"AI {ai_username} placement decision: {json.dumps(placement_decision)}")
                             
                             # Validate the index
                             if 0 <= selected_index < len(filtered_points):
                                 selected_point = filtered_points[selected_index]
-                                reason = placement_decision.get("reason", "No reason provided")
                                 
-                                print(f"AI {ai_username} selected point {selected_index} at position {selected_point['lat']}, {selected_point['lng']}")
-                                print(f"Reason: {reason}")
+                                log_success(f"AI {ai_username} selected point {selected_index} at position {selected_point['lat']}, {selected_point['lng']}")
+                                log_info(f"Reason: {reason}")
                                 
                                 # Now we need to create the building
                                 # 1. Get the construction cost for this building type
