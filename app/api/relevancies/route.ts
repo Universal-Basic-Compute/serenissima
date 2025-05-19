@@ -36,20 +36,25 @@ export async function GET(request: Request) {
     let filterFormula = '';
     
     // Handle the case where we want relevancies for a specific target citizen
-    if (targetCitizen && relevantToCitizen) {
-      // Parse the relevantToCitizen parameter which might be a comma-separated list
-      const relevantToCitizens = relevantToCitizen.split(',');
+    if (targetCitizen) {
+      filterFormula = `{TargetCitizen} = '${targetCitizen}'`;
       
-      // Create an OR condition for each relevantToCitizen value
-      const relevantToConditions = relevantToCitizens.map(citizen => 
-        `{RelevantToCitizen} = '${citizen}'`
-      );
-      
-      // Add condition for 'all' which should be visible to everyone
-      relevantToConditions.push(`{RelevantToCitizen} = 'all'`);
-      
-      // Combine with AND for targetCitizen
-      filterFormula = `AND({TargetCitizen} = '${targetCitizen}', OR(${relevantToConditions.join(', ')}))`;
+      // If relevantToCitizen is also specified, add that condition
+      if (relevantToCitizen) {
+        // Parse the relevantToCitizen parameter which might be a comma-separated list
+        const relevantToCitizens = relevantToCitizen.split(',');
+        
+        // Create an OR condition for each relevantToCitizen value
+        const relevantToConditions = relevantToCitizens.map(citizen => 
+          `{RelevantToCitizen} = '${citizen}'`
+        );
+        
+        // Add condition for 'all' which should be visible to everyone
+        relevantToConditions.push(`{RelevantToCitizen} = 'all'`);
+        
+        // Combine with AND for targetCitizen
+        filterFormula = `AND(${filterFormula}, OR(${relevantToConditions.join(', ')}))`;
+      }
     }
     // Handle the case where we want all relevancies for a specific citizen
     else if (relevantToCitizen && assetType) {
