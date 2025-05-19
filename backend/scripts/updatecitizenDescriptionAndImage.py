@@ -172,7 +172,8 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
         last_name = citizen['fields'].get('LastName', '')
         social_class = citizen['fields'].get('SocialClass', '')
         current_description = citizen['fields'].get('Description', '')
-        
+        username = citizen['fields'].get('Username', '')
+
         # Get current workplace information
         workplace_info = "unemployed"
         if citizen_info["current_workplace"]:
@@ -185,14 +186,12 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
         prompt = f"""
         After experiencing significant events and changes in your life in Venice, it's time to update your description and appearance to better reflect who you've become.
         
-        Based on your history, activities, and current status as {first_name} {last_name}, a {social_class} who {workplace_info}, YOU choose:
+        Based on your history, activities, and current status as {first_name} {last_name} ({username}), a {social_class} who {workplace_info}, YOU choose:
         
-        1. your new detailed and historically accurate description, including:
+        1. your new historically accurate description, including:
            - your personality traits that have developed through your experiences
-           - your work ethic and skills demonstrated through your job history
-           - your social connections and relationships with other citizens
            - your aspirations and motivations that align with your economic activities
-           - Notable achievements or events from your history in Venice
+           - Notable achievements or events from your history in Venice (if present in the data)
            - your family background appropriate to your social class
            - your daily routines and habits
         
