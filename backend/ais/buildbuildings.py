@@ -1267,7 +1267,7 @@ Your response must be a JSON object with:
                                 
                                 # Get the category from building type info
                                 # Default to "business" if category is not specified in the API response
-                                building_category = building_type_info.get("category", "business")
+                                building_category = building_type_info.get("category", "unknown")
                                 
                                 # Create the building record
                                 building_record = {
