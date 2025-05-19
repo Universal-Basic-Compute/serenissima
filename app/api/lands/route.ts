@@ -103,15 +103,21 @@ export async function GET(request: Request) {
         }
       }
       
-      // Get the land ID
-      const landId = record.id;
+      // Get the Airtable record ID and the LandId field
+      const recordId = record.id;
+      const landId = record.get('LandId') || recordId; // Use LandId if available, fall back to record ID
       
-      // Get polygon data for this land
+      // Get polygon data using the LandId field
       const polygonData = polygonMap[landId] || {};
+      
+      if (Object.keys(polygonData).length === 0) {
+        console.warn(`No polygon data found for land ${landId} (record ID: ${recordId})`);
+      }
       
       // Merge land data with polygon data
       return {
-        id: landId,
+        id: recordId,
+        landId: landId, // Include the landId in the response
         owner: record.get('Owner') || null,
         buildingPointsCount: record.get('BuildingPointsCount') || 0,
         historicalName: record.get('HistoricalName') || polygonData.historicalName || null,
