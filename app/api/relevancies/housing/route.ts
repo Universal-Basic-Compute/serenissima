@@ -303,20 +303,38 @@ ${getHousingRecommendation(homelessCount, vacantCount, relevancyScore)}
     // Save to Airtable as a global relevancy
     let saved = false;
     try {
-      // Create a modified housing relevancy with relevantToCitizen set to 'all'
+      // Create a modified housing relevancy with targetCitizen and relevantToCitizen set to 'all'
       const globalHousingRelevancy = {
         ...housingRelevancy,
-        relevantToCitizen: 'all'  // This makes it a global relevancy
+        targetCitizen: 'all',
+        relevantToCitizen: 'all'
       };
       
-      // Create a map with the single relevancy
-      const relevancies: Record<string, any> = {
-        'venice_housing': globalHousingRelevancy
-      };
+      // Initialize Airtable directly to bypass the deletion logic in saveRelevancies
+      const base = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
+      const AIRTABLE_RELEVANCIES_TABLE = 'RELEVANCIES';
       
-      // Save only once with the ConsiglioDeiDieci as the relevant citizen
-      await saveRelevancies('all', relevancies, [], citizensResponse);
-      console.log('Successfully saved global housing relevancy');
+      // Create a unique ID for this relevancy
+      const relevancyId = `global_housing_${Date.now()}`;
+      
+      // Create the relevancy record directly
+      await base(AIRTABLE_RELEVANCIES_TABLE).create({
+        RelevancyId: relevancyId,
+        AssetID: 'venice_housing',
+        AssetType: 'city',
+        Category: 'housing',
+        Type: 'housing_situation',
+        TargetCitizen: 'all',
+        RelevantToCitizen: 'all',
+        Score: globalHousingRelevancy.score,
+        TimeHorizon: globalHousingRelevancy.timeHorizon,
+        Title: globalHousingRelevancy.title,
+        Description: globalHousingRelevancy.description,
+        Status: globalHousingRelevancy.status,
+        CreatedAt: new Date().toISOString()
+      });
+      
+      console.log('Successfully saved global housing relevancy directly to Airtable');
       saved = true;
     } catch (error) {
       console.error('Error saving housing relevancy to Airtable:', error);
