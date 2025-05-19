@@ -350,12 +350,25 @@ def assign_jobs_to_citizens(dry_run: bool = False, noupdate: bool = False):
                 if best_business in available_businesses:
                     available_businesses.remove(best_business)
     
+    # Create a set to track which entrepreneurs have already been assigned jobs
+    assigned_entrepreneurs = set()
+    for entrepreneur in entrepreneurs:
+        citizen_username = entrepreneur['fields'].get('Username', '')
+        if citizen_username in already_employed_entrepreneurs:
+            assigned_entrepreneurs.add(citizen_username)
+            
     # Process each unemployed citizen
     for citizen in unemployed_citizens:
         citizen_username = citizen['fields'].get('Username', '')
         citizen_name = f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}"
+                
+        # Skip if this citizen is an entrepreneur who was already assigned
+        if citizen_username in assigned_entrepreneurs:
+            log.info(f"Skipping citizen {citizen_name} as they are an entrepreneur already assigned to a business")
+            continue
+                
         log.info(f"Processing citizen: {citizen_name}")
-        
+                
         # Check if this citizen is already employed (might have been missed in the initial filtering)
         if citizen_username in already_employed_entrepreneurs:
             log.info(f"Citizen {citizen_name} is already employed elsewhere, skipping")
