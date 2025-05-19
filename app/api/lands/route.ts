@@ -132,7 +132,8 @@ export async function GET(request: Request) {
         
       // Merge with polygon data, also with de-capitalized keys
       return {
-        ...baseObject,
+        ...baseObject, // baseObject contains id (Airtable recordId) and landId (poly_123 style ID)
+        polygonId: baseObject.landId, // Add polygonId, taking value from baseObject.landId (poly_123 style ID)
         // Override with processed values and polygon data
         owner: record.get('Owner') || null,
         buildingPointsCount: record.get('BuildingPointsCount') || 0,
