@@ -203,6 +203,39 @@ def get_citizen_relevancies(username: str) -> List[Dict]:
         log_error(f"Error getting relevancies for citizen {username}: {str(e)}")
         return []
 
+def get_relevancies_for_target_citizen(username: str) -> List[Dict]:
+    """Get relevancies where the citizen is the target."""
+    try:
+        log_info(f"Fetching relevancies where {username} is the target from API")
+        
+        # Get API base URL from environment variables, with a default fallback
+        api_base_url = os.getenv("API_BASE_URL", "http://localhost:3000")
+        
+        # Construct the API URL with the targetCitizen parameter
+        url = f"{api_base_url}/api/relevancies?targetCitizen={username}"
+        
+        # Make the API request
+        response = requests.get(url)
+        
+        # Check if the request was successful
+        if response.status_code == 200:
+            response_data = response.json()
+            
+            # Check if the response has the expected structure
+            if "success" in response_data and response_data["success"] and "relevancies" in response_data:
+                relevancies = response_data["relevancies"]
+                log_info(f"Retrieved {len(relevancies)} relevancies where {username} is the target")
+                return relevancies
+            else:
+                log_warning(f"Unexpected API response format: {response_data}")
+                return []
+        else:
+            log_error(f"Error fetching relevancies from API: {response.status_code} - {response.text}")
+            return []
+    except Exception as e:
+        log_error(f"Error getting relevancies for target citizen {username}: {str(e)}")
+        return []
+
 def get_building_tier(building_type: str, building_types: Dict) -> int:
     """Determine the tier of a building type."""
     # First check if the tier is explicitly defined in the building_types data
@@ -372,6 +405,27 @@ def prepare_ai_building_strategy(ai_citizen: Dict, citizen_lands: List[Dict], ci
         }
         relevancies_data.append(relevancy_info)
     
+    # Get relevancies where this citizen is the target
+    target_relevancies = get_relevancies_for_target_citizen(username)
+    
+    # Process target relevancies data
+    target_relevancies_data = []
+    for relevancy in target_relevancies:
+        relevancy_info = {
+            "asset_id": relevancy.get("assetId", ""),
+            "asset_type": relevancy.get("assetType", ""),
+            "category": relevancy.get("category", ""),
+            "type": relevancy.get("type", ""),
+            "relevant_to_citizen": relevancy.get("relevantToCitizen", ""),
+            "score": relevancy.get("score", 0),
+            "time_horizon": relevancy.get("timeHorizon", ""),
+            "title": relevancy.get("title", ""),
+            "description": relevancy.get("description", ""),
+            "status": relevancy.get("status", ""),
+            "created_at": relevancy.get("createdAt", "")
+        }
+        target_relevancies_data.append(relevancy_info)
+    
     # Get building types information from API
     all_building_types = get_building_types_from_api()
     
@@ -419,6 +473,7 @@ def prepare_ai_building_strategy(ai_citizen: Dict, citizen_lands: List[Dict], ci
         "lands": lands_data,
         "buildings": buildings_data,
         "relevancies": relevancies_data,  # Add the relevancies data
+        "target_relevancies": target_relevancies_data,  # Add the target relevancies data
         "building_types": building_types,  # Now contains only the filtered building types
         "timestamp": datetime.now().isoformat()
     }
@@ -497,6 +552,11 @@ These relevancies indicate:
 - Other citizens who own significant amounts of land
 - Strategic opportunities for expansion
 
+The target_relevancies section contains information about how other citizens view you:
+- These are relevancies where you are the target
+- They indicate how important you are to other citizens
+- They can help you understand your position in the Venetian economy and society
+
 When developing your building strategy:
 1. Analyze which lands have the most building potential (consider building points and water access)
 2. Evaluate which building types would generate the most income for you
@@ -507,6 +567,7 @@ When developing your building strategy:
 7. Take into account the relevancies to make strategic building decisions
 8. You can build on any land, not just lands you own
 9. Consider the rent amounts of existing buildings on potential lands
+10. Consider how your building decisions might affect your relationships with other citizens
 
 Your decision should be specific, data-driven, and focused on maximizing your income.
 
@@ -955,6 +1016,14 @@ Here are the available building points for this land (for {point_type} type buil
 Here are relevancies that might influence your decision:
 {json.dumps(citizen_relevancies, indent=2)}
 """
+            
+        # Get and add target relevancies
+        target_relevancies = get_relevancies_for_target_citizen(ai_username)
+        if target_relevancies:
+            system_instructions += f"""
+Here are relevancies where you are the target:
+{json.dumps(target_relevancies, indent=2)}
+"""
 
         system_instructions += f"""
 There are {len(filtered_points)} available points. Choose the best location for your {building_type_info['name']} by selecting the index of one of these points (0 to {len(filtered_points)-1}).
@@ -963,6 +1032,7 @@ When choosing a location, consider:
 1. Proximity to other buildings of similar type
 2. Rent amounts of existing buildings on this land
 3. Strategic positioning for maximum visibility and income
+4. How your building placement might affect your relationships with other citizens
 
 Your response must be a JSON object with:
 1. selected_point_index: The index of your chosen point (0 to {len(filtered_points)-1})
