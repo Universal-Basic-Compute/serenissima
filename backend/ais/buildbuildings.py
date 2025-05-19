@@ -313,7 +313,8 @@ def get_building_types_from_api() -> Dict:
                             "name": building["name"],
                             "shortDescription": building.get("shortDescription", ""),
                             "constructionCost": ducats_cost,
-                            "tier": building.get("tier", 5)  # Default to tier 5 if not specified
+                            "tier": building.get("tier", 5),  # Default to tier 5 if not specified
+                            "category": building.get("category", "business")  # Include the category field
                         }
                 
                 return transformed_types
