@@ -162,6 +162,8 @@ export default function ViewportCanvas({
   const [transportPath, setTransportPath] = useState<any[]>([]);
   const [coatOfArmsImageUrls, setCoatOfArmsImageUrls] = useState<Record<string, HTMLImageElement>>({});
   const renderedCoatOfArmsCache = useRef<Record<string, {image: HTMLImageElement | null, x: number, y: number, size: number}>>({});
+  const [selectedProblemId, setSelectedProblemId] = useState<string | null>(null);
+  const [showProblemDetailsPanel, setShowProblemDetailsPanel] = useState<boolean>(false);
   
   // Load data
   useEffect(() => {
