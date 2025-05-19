@@ -31,19 +31,36 @@ log = logging.getLogger("calculate_specific_relevancy")
 load_dotenv()
 
 # --- Airtable Initialization and Notification ---
-def initialize_airtable_notifications():
-    """Initialize Airtable connection for notifications."""
+def initialize_airtable_table(table_name: str):
+    """Initialize Airtable connection for a specific table."""
     api_key = os.environ.get('AIRTABLE_API_KEY')
     base_id = os.environ.get('AIRTABLE_BASE_ID')
     
     if not api_key or not base_id:
-        log.error("Missing Airtable credentials for notifications. Set AIRTABLE_API_KEY and AIRTABLE_BASE_ID.")
+        log.error(f"Missing Airtable credentials for {table_name}. Set AIRTABLE_API_KEY and AIRTABLE_BASE_ID.")
         return None
     
     try:
-        return Table(api_key, base_id, 'NOTIFICATIONS')
+        return Table(api_key, base_id, table_name)
     except Exception as e:
-        log.error(f"Failed to initialize Airtable notifications table: {e}")
+        log.error(f"Failed to initialize Airtable table {table_name}: {e}")
+        return None
+
+def get_all_land_owners(lands_table) -> Optional[List[str]]:
+    """Fetch all unique land owners from the LANDS table."""
+    if not lands_table:
+        log.error("LANDS table not initialized. Cannot fetch land owners.")
+        return None
+    try:
+        all_lands = lands_table.all(fields=['Owner'])
+        owners = set()
+        for record in all_lands:
+            if 'Owner' in record['fields'] and record['fields']['Owner']:
+                owners.add(record['fields']['Owner'])
+        log.info(f"Found {len(owners)} unique land owners.")
+        return list(owners)
+    except Exception as e:
+        log.error(f"Error fetching land owners: {e}")
         return None
 
 def create_admin_notification(notifications_table, title: str, message: str) -> bool:
@@ -73,7 +90,7 @@ def calculate_specific_relevancy(
     type_filter: Optional[str] = None
 ) -> bool:
     """Calculate and save a specific type of relevancy."""
-    notifications_table = initialize_airtable_notifications()
+    notifications_table = initialize_airtable_table('NOTIFICATIONS')
     
     base_url = os.environ.get('NEXT_PUBLIC_BASE_URL', 'http://localhost:3000')
     log.info(f"Using base URL: {base_url}")
@@ -81,18 +98,70 @@ def calculate_specific_relevancy(
     api_url = ""
     payload: Dict[str, any] = {}
     request_timeout = 120 # Default timeout
+    multi_user_results = [] # For proximity with no username
 
     if relevancy_type == "proximity":
-        if not username:
-            log.error("Username is required for proximity relevancy.")
-            create_admin_notification(notifications_table, "Proximity Relevancy Error", "Username not provided.")
-            return False
         api_url = f"{base_url}/api/relevancies/proximity"
-        payload = {"aiUsername": username}
-        if type_filter:
-            payload["typeFilter"] = type_filter
-        log.info(f"Requesting proximity relevancy for user: {username}, filter: {type_filter or 'none'}")
-    
+        if username:
+            # Single user proximity calculation
+            payload = {"aiUsername": username}
+            if type_filter:
+                payload["typeFilter"] = type_filter
+            log.info(f"Requesting proximity relevancy for user: {username}, filter: {type_filter or 'none'}")
+        else:
+            # All landowners proximity calculation
+            log.info(f"Requesting proximity relevancy for all landowners, filter: {type_filter or 'none'}")
+            lands_table = initialize_airtable_table('LANDS')
+            land_owners = get_all_land_owners(lands_table)
+
+            if land_owners is None:
+                create_admin_notification(notifications_table, "Proximity Relevancy Error", "Failed to fetch landowners.")
+                return False
+            if not land_owners:
+                create_admin_notification(notifications_table, "Proximity Relevancy Info", "No landowners found to process.")
+                return True # No error, just nothing to do
+
+            for owner_username in land_owners:
+                import time
+                time.sleep(1) # Small delay between API calls
+                log.info(f"Processing proximity for landowner: {owner_username}")
+                current_payload = {"aiUsername": owner_username}
+                if type_filter:
+                    current_payload["typeFilter"] = type_filter
+                
+                try:
+                    response = requests.post(api_url, json=current_payload, timeout=request_timeout)
+                    if not response.ok:
+                        error_message = f"API call failed for {owner_username} with status {response.status_code}: {response.text}"
+                        log.error(error_message)
+                        multi_user_results.append(f"- {owner_username}: Error - {response.status_code}")
+                        continue
+                    data = response.json()
+                    if not data.get('success'):
+                        error_detail = data.get('error', 'Unknown API error')
+                        log.error(f"API returned error for {owner_username}: {error_detail}")
+                        multi_user_results.append(f"- {owner_username}: API Error - {error_detail}")
+                        continue
+                    
+                    relevancies_created_count = data.get('relevanciesCreated', 0)
+                    if isinstance(data.get('relevancyScores'), dict): # API returns relevancyScores as dict
+                         relevancies_created_count = len(data.get('relevancyScores', {}))
+
+                    multi_user_results.append(f"- {owner_username}: {relevancies_created_count} relevancies created.")
+                except requests.exceptions.RequestException as e_req:
+                    log.error(f"Request failed for {owner_username}: {e_req}")
+                    multi_user_results.append(f"- {owner_username}: Request Error - {e_req}")
+                except Exception as e_exc:
+                    log.error(f"Unexpected error for {owner_username}: {e_exc}")
+                    multi_user_results.append(f"- {owner_username}: Unexpected Error - {e_exc}")
+            
+            # All users processed (or attempted), create summary notification
+            summary_title = "Proximity Relevancy Calculation Complete (All Landowners)"
+            summary_message = "Proximity relevancy calculation process finished for all landowners.\n\nResults:\n" + "\n".join(multi_user_results)
+            create_admin_notification(notifications_table, summary_title, summary_message)
+            log.info("Finished processing proximity relevancies for all landowners.")
+            return True # Overall process completed
+
     elif relevancy_type == "domination":
         api_url = f"{base_url}/api/relevancies/domination"
         # If username is provided, it's for a specific user. Otherwise, "all" for global.
@@ -131,6 +200,7 @@ def calculate_specific_relevancy(
         return False
 
     try:
+        # This block is for single-user calls or non-proximity types
         log.info(f"Calling API: POST {api_url} with payload: {json.dumps(payload)}")
         response = requests.post(api_url, json=payload, timeout=request_timeout)
         
@@ -150,28 +220,37 @@ def calculate_specific_relevancy(
             create_admin_notification(notifications_table, f"{relevancy_type.capitalize()} Relevancy Error", f"API error: {error_detail}")
             return False
 
-        # Success notification
+        # Success notification for single user or non-proximity types
         saved_status = "saved" if data.get('saved', False) else "NOT saved (or saving not applicable)"
-        relevancies_created = data.get('relevanciesCreated', data.get('relevancyScores', {}))
-        if isinstance(relevancies_created, dict): # if it's the scores dict
-            relevancies_created = len(relevancies_created)
         
+        # Adjust how relevancies_created is determined based on typical API responses
+        relevancies_created_count = 0
+        if 'relevanciesCreated' in data: # Explicit count from API
+            relevancies_created_count = data['relevanciesCreated']
+        elif 'relevancyScores' in data and isinstance(data['relevancyScores'], dict): # Proximity, Domination
+            relevancies_created_count = len(data['relevancyScores'])
+        elif relevancy_type in ["housing", "jobs"] and data.get('success'): # Housing, Jobs create 1 global
+            relevancies_created_count = 1
+
+
         notification_title = f"{relevancy_type.capitalize()} Relevancy Calculation Complete"
         notification_details = [
             f"Successfully calculated {relevancy_type} relevancies.",
             f"Status: {saved_status}.",
         ]
-        if username:
+        if username: # This will be true for single user calls
             notification_details.append(f"User: {username}")
-        if 'ownedLandCount' in data:
+        
+        if 'ownedLandCount' in data: # Specific to proximity and some others
              notification_details.append(f"Owned Land Count: {data.get('ownedLandCount')}")
-        if relevancies_created is not None:
-            notification_details.append(f"Relevancies Processed/Created: {relevancies_created}")
-        if 'statistics' in data:
+        
+        notification_details.append(f"Relevancies Processed/Created: {relevancies_created_count}")
+
+        if 'statistics' in data: # Specific to housing, jobs
             notification_details.append(f"Statistics: {json.dumps(data.get('statistics'), indent=2)}")
         
         create_admin_notification(notifications_table, notification_title, "\n".join(notification_details))
-        log.info(f"Successfully processed {relevancy_type} relevancies.")
+        log.info(f"Successfully processed {relevancy_type} relevancies for {username or 'global context'}.")
         return True
 
     except requests.exceptions.RequestException as e:
@@ -195,7 +274,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--username", 
-        help="Username of the citizen (required for proximity, building_ownership; optional for domination)."
+        help="Username of the citizen (required for building_ownership; optional for proximity and domination). If not provided for proximity, runs for all landowners."
     )
     parser.add_argument(
         "--type_filter", 
@@ -205,8 +284,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Validate username requirement for certain types
-    if args.type in ["proximity", "building_ownership"] and not args.username:
+    if args.type == "building_ownership" and not args.username:
         parser.error(f"--username is required for relevancy type '{args.type}'.")
+    # Proximity username is now optional. Domination username is also optional.
 
     success = calculate_specific_relevancy(
         relevancy_type=args.type,
