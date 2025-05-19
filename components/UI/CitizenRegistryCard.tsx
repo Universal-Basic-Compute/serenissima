@@ -5,7 +5,7 @@ interface CitizenRegistryCardProps {
   username?: string;
   firstName?: string;
   lastName?: string;
-  coatOfArmsImage?: string | null;
+  coatOfArmsImageUrl?: string | null;
   familyMotto?: string;
   Ducats?: number;
   socialClass?: string;
@@ -17,7 +17,7 @@ const CitizenRegistryCard: React.FC<CitizenRegistryCardProps> = ({
   username,
   firstName,
   lastName,
-  coatOfArmsImage,
+  coatOfArmsImageUrl,
   familyMotto,
   Ducats = 0,
   socialClass = 'Popolani',
@@ -100,10 +100,10 @@ const CitizenRegistryCard: React.FC<CitizenRegistryCardProps> = ({
             </div>
             
             {/* Coat of arms - smaller */}
-            {coatOfArmsImage && (
+            {coatOfArmsImageUrl && (
               <div className="w-12 h-12 rounded-full border border-amber-300 overflow-hidden ml-2">
                 <img 
-                  src={coatOfArmsImage}
+                  src={coatOfArmsImageUrl}
                   alt="Coat of Arms"
                   className="w-full h-full object-cover"
                   onError={(e) => {
@@ -138,7 +138,7 @@ const CitizenRegistryCard: React.FC<CitizenRegistryCardProps> = ({
             username,
             firstName,
             lastName,
-            coatOfArmsImage,
+            coatOfArmsImageUrl,
             familyMotto,
             Ducats,
             socialClass,

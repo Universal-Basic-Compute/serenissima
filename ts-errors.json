@@ -1,193 +1,129 @@
 {
-  "totalErrors": 22,
+  "totalErrors": 14,
   "totalWarnings": 0,
   "exitCode": 1,
-  "timestamp": "2025-05-17T22:18:55.425Z",
+  "timestamp": "2025-05-18T20:59:08.508Z",
   "errors": [
     {
-      "filePath": "components/UI/TransportDebugPanel.tsx",
-      "line": 601,
-      "column": 76,
-      "code": "TS2322",
-      "message": "Type 'unknown' is not assignable to type 'ReactNode'.",
+      "filePath": "app/api/calculateRelevancies/route.ts",
+      "line": 363,
+      "column": 54,
+      "code": "TS2345",
+      "message": "Argument of type 'Records<FieldSet>' is not assignable to parameter of type 'any[]'.",
       "type": "error"
     },
     {
-      "filePath": "components/UI/TransportDebugPanel.tsx",
-      "line": 618,
-      "column": 76,
-      "code": "TS2322",
-      "message": "Type 'unknown' is not assignable to type 'ReactNode'.",
+      "filePath": "components/PolygonViewer/IsometricViewer.tsx",
+      "line": 315,
+      "column": 12,
+      "code": "TS2304",
+      "message": "Cannot find name 'citizenAnimationService'.",
       "type": "error"
     },
     {
-      "filePath": "components/UI/WalletStatus.tsx",
-      "line": 22,
-      "column": 19,
-      "code": "TS2339",
-      "message": "Property 'getCitizenService' does not exist on type 'typeof import(\"C:/Users/reyno/serenissima/lib/services/CitizenService\")'.",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/services/DataService.ts",
-      "line": 25,
-      "column": 11,
-      "code": "TS2300",
-      "message": "Duplicate identifier 'citizensLoaded'.",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/services/DataService.ts",
-      "line": 33,
-      "column": 11,
-      "code": "TS2300",
-      "message": "Duplicate identifier 'isLoadingCitizens'.",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/services/DataService.ts",
-      "line": 644,
-      "column": 7,
-      "code": "TS2740",
-      "message": "Type '{}' is missing the following properties from type 'any[]': length, pop, push, concat, and 35 more.",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/services/InteractionService.ts",
-      "line": 313,
-      "column": 17,
-      "code": "TS2322",
-      "message": "Type '\"polygon\"' is not assignable to type '\"none\"'.",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/services/InteractionService.ts",
-      "line": 369,
-      "column": 17,
-      "code": "TS2322",
-      "message": "Type '\"building\"' is not assignable to type '\"none\"'.",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/services/InteractionService.ts",
-      "line": 408,
-      "column": 15,
-      "code": "TS2322",
-      "message": "Type '\"buildingPoint\"' is not assignable to type '\"none\"'.",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/services/InteractionService.ts",
-      "line": 436,
-      "column": 17,
-      "code": "TS2322",
-      "message": "Type '\"citizen\"' is not assignable to type '\"none\"'.",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/services/InteractionService.ts",
-      "line": 460,
-      "column": 17,
-      "code": "TS2322",
-      "message": "Type '\"citizen\"' is not assignable to type '\"none\"'.",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/services/InteractionService.ts",
-      "line": 502,
-      "column": 26,
-      "code": "TS2551",
-      "message": "Property 'hoveredCanalPointIdRef' does not exist on type 'InteractionService'. Did you mean 'hoveredCanalPointRef'?",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/services/InteractionService.ts",
-      "line": 506,
-      "column": 19,
-      "code": "TS2322",
-      "message": "Type '\"canalPoint\"' is not assignable to type '\"none\"'.",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/services/InteractionService.ts",
-      "line": 546,
-      "column": 26,
-      "code": "TS2551",
-      "message": "Property 'hoveredBridgePointIdRef' does not exist on type 'InteractionService'. Did you mean 'hoveredBridgePointRef'?",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/services/InteractionService.ts",
-      "line": 550,
-      "column": 19,
-      "code": "TS2322",
-      "message": "Type '\"bridgePoint\"' is not assignable to type '\"none\"'.",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/services/InteractionService.ts",
-      "line": 588,
-      "column": 15,
-      "code": "TS2322",
-      "message": "Type '\"waterPoint\"' is not assignable to type '\"none\"'.",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/services/RenderService.ts",
-      "line": 564,
-      "column": 36,
-      "code": "TS2339",
-      "message": "Property 'hoveredPolygonId' does not exist on type 'HoverState'.",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/services/RenderService.ts",
-      "line": 607,
-      "column": 38,
-      "code": "TS2339",
-      "message": "Property 'hoveredBuildingId' does not exist on type 'HoverState'.",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/services/RenderService.ts",
-      "line": 710,
-      "column": 40,
-      "code": "TS2339",
-      "message": "Property 'hoveredCanalPointId' does not exist on type 'HoverState'.",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/services/RenderService.ts",
-      "line": 759,
-      "column": 40,
-      "code": "TS2339",
-      "message": "Property 'hoveredBridgePointId' does not exist on type 'HoverState'.",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/services/TransactionService.ts",
-      "line": 13,
-      "column": 45,
-      "code": "TS2307",
-      "message": "Cannot find module '../store/contractStore' or its corresponding type declarations.",
-      "type": "error"
-    },
-    {
-      "filePath": "lib/services/TransactionService.ts",
-      "line": 792,
+      "filePath": "components/PolygonViewer/IsometricViewer.tsx",
+      "line": 1911,
       "column": 9,
       "code": "TS2353",
-      "message": "Object literal may only specify known properties, and 'listingId' does not exist in type 'ExtendedOffer'.",
+      "message": "Object literal may only specify known properties, and 'setHoveredCitizen' does not exist in type '{ setMousePosition: (position: { x: number; y: number; }) => void; setSelectedPolygonId: (id: string) => void; setShowLandDetailsPanel: (show: boolean) => void; setSelectedBuildingId: (id: string) => void; ... 11 more ...; handleWaterRouteClick?: (point: { ...; }, isWaterPoint: boolean, waterPointId?: string) => voi...'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/services/CitizenRenderService.ts",
+      "line": 45,
+      "column": 23,
+      "code": "TS2339",
+      "message": "Property 'position' does not exist on type '{ id: string; firstName: string; lastName: string; socialClass: string; imageUrl: string; description: string; username: string; isAi: boolean; ducats: number; createdat: string; worksFor: string; ... 9 more ...; work: string; }'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/services/CitizenRenderService.ts",
+      "line": 50,
+      "column": 23,
+      "code": "TS2339",
+      "message": "Property 'position' does not exist on type '{ id: string; firstName: string; lastName: string; socialClass: string; imageUrl: string; description: string; username: string; isAi: boolean; ducats: number; createdat: string; worksFor: string; ... 9 more ...; work: string; }'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/services/CitizenRenderService.ts",
+      "line": 53,
+      "column": 21,
+      "code": "TS2339",
+      "message": "Property 'position' does not exist on type '{ id: string; firstName: string; lastName: string; socialClass: string; imageUrl: string; description: string; username: string; isAi: boolean; ducats: number; createdat: string; worksFor: string; ... 9 more ...; work: string; }'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/services/CitizenRenderService.ts",
+      "line": 56,
+      "column": 19,
+      "code": "TS2339",
+      "message": "Property 'position' does not exist on type '{ id: string; firstName: string; lastName: string; socialClass: string; imageUrl: string; description: string; username: string; isAi: boolean; ducats: number; createdat: string; worksFor: string; ... 9 more ...; work: string; }'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/services/CitizenRenderService.ts",
+      "line": 62,
+      "column": 21,
+      "code": "TS2339",
+      "message": "Property 'workplace' does not exist on type '{ id: string; firstName: string; lastName: string; socialClass: string; imageUrl: string; description: string; username: string; isAi: boolean; ducats: number; createdat: string; worksFor: string; ... 9 more ...; work: string; }'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/services/CitizenRenderService.ts",
+      "line": 67,
+      "column": 21,
+      "code": "TS2339",
+      "message": "Property 'workplace' does not exist on type '{ id: string; firstName: string; lastName: string; socialClass: string; imageUrl: string; description: string; username: string; isAi: boolean; ducats: number; createdat: string; worksFor: string; ... 9 more ...; work: string; }'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/services/CitizenRenderService.ts",
+      "line": 70,
+      "column": 19,
+      "code": "TS2339",
+      "message": "Property 'workplace' does not exist on type '{ id: string; firstName: string; lastName: string; socialClass: string; imageUrl: string; description: string; username: string; isAi: boolean; ducats: number; createdat: string; worksFor: string; ... 9 more ...; work: string; }'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/services/RelevancyService.ts",
+      "line": 436,
+      "column": 18,
+      "code": "TS2551",
+      "message": "Property 'BuildingPointsCount' does not exist on type 'LandData'. Did you mean 'buildingPoints'?",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/services/RelevancyService.ts",
+      "line": 438,
+      "column": 38,
+      "code": "TS2551",
+      "message": "Property 'BuildingPointsCount' does not exist on type 'LandData'. Did you mean 'buildingPoints'?",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/services/RelevancyService.ts",
+      "line": 439,
+      "column": 25,
+      "code": "TS2551",
+      "message": "Property 'buildingPointsCount' does not exist on type 'LandData'. Did you mean 'buildingPoints'?",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/services/RelevancyService.ts",
+      "line": 441,
+      "column": 38,
+      "code": "TS2551",
+      "message": "Property 'buildingPointsCount' does not exist on type 'LandData'. Did you mean 'buildingPoints'?",
       "type": "error"
     }
   ],
-  "rawOutputLines": 23,
+  "rawOutputLines": 16,
   "firstFewLines": [
-    "components/UI/TransportDebugPanel.tsx(601,76): error TS2322: Type 'unknown' is not assignable to type 'ReactNode'.\r",
-    "components/UI/TransportDebugPanel.tsx(618,76): error TS2322: Type 'unknown' is not assignable to type 'ReactNode'.\r",
-    "components/UI/WalletStatus.tsx(22,19): error TS2339: Property 'getCitizenService' does not exist on type 'typeof import(\"C:/Users/reyno/serenissima/lib/services/CitizenService\")'.\r",
-    "lib/services/DataService.ts(25,11): error TS2300: Duplicate identifier 'citizensLoaded'.\r",
-    "lib/services/DataService.ts(33,11): error TS2300: Duplicate identifier 'isLoadingCitizens'.\r"
+    "app/api/calculateRelevancies/route.ts(363,54): error TS2345: Argument of type 'Records<FieldSet>' is not assignable to parameter of type 'any[]'.\r",
+    "  The type 'Records<FieldSet>' is 'readonly' and cannot be assigned to the mutable type 'any[]'.\r",
+    "components/PolygonViewer/IsometricViewer.tsx(315,12): error TS2304: Cannot find name 'citizenAnimationService'.\r",
+    "components/PolygonViewer/IsometricViewer.tsx(1911,9): error TS2353: Object literal may only specify known properties, and 'setHoveredCitizen' does not exist in type '{ setMousePosition: (position: { x: number; y: number; }) => void; setSelectedPolygonId: (id: string) => void; setShowLandDetailsPanel: (show: boolean) => void; setSelectedBuildingId: (id: string) => void; ... 11 more ...; handleWaterRouteClick?: (point: { ...; }, isWaterPoint: boolean, waterPointId?: string) => voi...'.\r",
+    "lib/services/CitizenRenderService.ts(45,23): error TS2339: Property 'position' does not exist on type '{ id: string; firstName: string; lastName: string; socialClass: string; imageUrl: string; description: string; username: string; isAi: boolean; ducats: number; createdat: string; worksFor: string; ... 9 more ...; work: string; }'.\r"
   ],
   "compilerExitCode": 1
 }

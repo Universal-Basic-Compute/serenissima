@@ -10,7 +10,7 @@ interface GuildMember {
   username: string;
   firstName: string;
   lastName: string;
-  coatOfArmsImage: string | null;
+  coatOfArmsImageUrl: string | null;
   color: string | null;
 }
 
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
       username: record.get('CitizenName') as string,
       firstName: record.get('FirstName') as string,
       lastName: record.get('LastName') as string,
-      coatOfArmsImage: record.get('CoatOfArmsImage') as string || null,
+      coatOfArmsImageUrl: record.get('CoatOfArmsImageUrl') as string || null,
       color: record.get('Color') as string || null,
     }));
 

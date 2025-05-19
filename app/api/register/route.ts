@@ -42,7 +42,7 @@ export async function POST(request: Request) {
           firstName: citizen.fields.FirstName || null,
           lastName: citizen.fields.LastName || null,
           ducats: citizen.fields.Ducats || 0,
-          coatOfArmsImage: citizen.fields.CoatOfArmsImage || null,
+          coatOfArmsImageUrl: citizen.fields.CoatOfArmsImageUrl || null,
           familyMotto: citizen.fields.FamilyMotto || null,
           createdAt: citizen.fields.CreatedAt || null
         },
@@ -66,7 +66,7 @@ export async function POST(request: Request) {
         firstName: null,
         lastName: null,
         ducats: newCitizen.fields.Ducats || 100,
-        coatOfArmsImage: null,
+        coatOfArmsImageUrl: null,
         familyMotto: null,
         createdAt: newCitizen.fields.CreatedAt
       },

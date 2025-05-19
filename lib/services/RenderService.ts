@@ -495,7 +495,7 @@ export class RenderService {
     incomeData: Record<string, number>,
     citizensByBuilding: Record<string, any[]>,
     citizensLoaded: boolean,
-    coatOfArmsImages: Record<string, HTMLImageElement>,
+    coatOfArmsImageUrls: Record<string, HTMLImageElement>,
     renderedCoatOfArmsCache: Record<string, {image: HTMLImageElement | null, x: number, y: number, size: number}>
   ): void {
     // Get current hover state
@@ -518,7 +518,7 @@ export class RenderService {
     
     // Draw coat of arms for lands with owners (only in land view)
     if (activeView === 'land') {
-      this.drawCoatOfArms(ctx, polygonsToRender, coatOfArmsImages, renderedCoatOfArmsCache);
+      this.drawCoatOfArms(ctx, polygonsToRender, coatOfArmsImageUrls, renderedCoatOfArmsCache);
     }
     
     // Draw buildings
@@ -936,7 +936,7 @@ export class RenderService {
   private drawCoatOfArms(
     ctx: CanvasRenderingContext2D,
     polygonsToRender: any[],
-    coatOfArmsImages: Record<string, HTMLImageElement>,
+    coatOfArmsImageUrls: Record<string, HTMLImageElement>,
     renderedCoatOfArmsCache: Record<string, {image: HTMLImageElement | null, x: number, y: number, size: number}>
   ): void {
     polygonsToRender.forEach(({ polygon, centerX, centerY }) => {
@@ -962,13 +962,13 @@ export class RenderService {
         }
       } else {
         // Check if we have a coat of arms image for this owner
-        if (ownerUsername in coatOfArmsImages && coatOfArmsImages[ownerUsername]) {
+        if (ownerUsername in coatOfArmsImageUrls && coatOfArmsImageUrls[ownerUsername]) {
           // Draw circular coat of arms with error handling
           try {
-            this.createCircularImage(ctx, coatOfArmsImages[ownerUsername], centerX, centerY, size);
+            this.createCircularImage(ctx, coatOfArmsImageUrls[ownerUsername], centerX, centerY, size);
             // Cache the result
             renderedCoatOfArmsCache[cacheKey] = {
-              image: coatOfArmsImages[ownerUsername],
+              image: coatOfArmsImageUrls[ownerUsername],
               x: centerX,
               y: centerY,
               size

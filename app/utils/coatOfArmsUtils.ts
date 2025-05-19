@@ -4,7 +4,7 @@
  * @param username Username to use for the filename
  * @returns Promise resolving to the URL of the generated image
  */
-export async function generateCoatOfArmsImage(description: string, username?: string): Promise<string> {
+export async function generateCoatOfArmsImageUrl(description: string, username?: string): Promise<string> {
   if (!description.trim()) {
     throw new Error('Please provide a description for the coat of arms');
   }
@@ -84,7 +84,7 @@ export async function generateCoatOfArmsImage(description: string, username?: st
  * @param imageUrl The URL of the coat of arms image
  * @returns Promise resolving to the local URL of the image
  */
-export async function fetchCoatOfArmsImage(imageUrl: string): Promise<string> {
+export async function fetchCoatOfArmsImageUrl(imageUrl: string): Promise<string> {
   if (!imageUrl) {
     throw new Error('Please provide a coat of arms image URL');
   }

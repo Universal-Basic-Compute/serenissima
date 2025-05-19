@@ -9,14 +9,14 @@ import { eventBus, EventTypes } from '../utils/eventBus';
 EventTypes.COAT_OF_ARMS_LOADED = 'COAT_OF_ARMS_LOADED';
 
 export class AssetService {
-  private coatOfArmsImages: Record<string, HTMLImageElement> = {};
+  private coatOfArmsImageUrls: Record<string, HTMLImageElement> = {};
   private buildingImages: Record<string, string> = {};
   private isLoadingCoatOfArms: boolean = false;
   
   /**
    * Load coat of arms images
    */
-  public async loadCoatOfArmsImages(ownerCoatOfArmsMap: Record<string, string>): Promise<Record<string, HTMLImageElement>> {
+  public async loadCoatOfArmsImageUrls(ownerCoatOfArmsMap: Record<string, string>): Promise<Record<string, HTMLImageElement>> {
     this.isLoadingCoatOfArms = true;
     
     try {
@@ -31,7 +31,7 @@ export class AssetService {
       const targetSize = 100; // Slightly larger than display size for better quality
       
       // Create a copy of the current images to avoid modifying state directly
-      const updatedImages = {...this.coatOfArmsImages};
+      const updatedImages = {...this.coatOfArmsImageUrls};
       let hasNewImages = false;
       
       Object.entries(ownerCoatOfArmsMap).forEach(([owner, url]) => {
@@ -145,18 +145,18 @@ export class AssetService {
       
       // Only update state if we have new images
       if (hasNewImages) {
-        this.coatOfArmsImages = updatedImages;
+        this.coatOfArmsImageUrls = updatedImages;
         
         // Emit event
         eventBus.emit(EventTypes.COAT_OF_ARMS_LOADED, {
-          coatOfArmsImages: this.coatOfArmsImages
+          coatOfArmsImageUrls: this.coatOfArmsImageUrls
         });
       }
       
-      return this.coatOfArmsImages;
+      return this.coatOfArmsImageUrls;
     } catch (error) {
       console.error('Error loading coat of arms images:', error);
-      return this.coatOfArmsImages;
+      return this.coatOfArmsImageUrls;
     } finally {
       this.isLoadingCoatOfArms = false;
     }
@@ -333,14 +333,14 @@ export class AssetService {
   /**
    * Get coat of arms images
    */
-  public getCoatOfArmsImages(): Record<string, HTMLImageElement> {
-    return this.coatOfArmsImages;
+  public getCoatOfArmsImageUrls(): Record<string, HTMLImageElement> {
+    return this.coatOfArmsImageUrls;
   }
   
   /**
    * Check if coat of arms images are loading
    */
-  public isLoadingCoatOfArmsImages(): boolean {
+  public isLoadingCoatOfArmsImageUrls(): boolean {
     return this.isLoadingCoatOfArms;
   }
 }

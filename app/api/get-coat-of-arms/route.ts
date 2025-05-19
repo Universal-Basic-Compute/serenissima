@@ -40,11 +40,11 @@ export async function GET() {
     
     records.forEach(record => {
       const username = record.get('Username');
-      const coatOfArmsImage = record.get('CoatOfArmsImage');
+      const coatOfArmsImageUrl = record.get('CoatOfArmsImageUrl');
       
-      if (username && coatOfArmsImage) {
+      if (username && coatOfArmsImageUrl) {
         // Ensure the URL is properly formatted for production
-        let imageUrl = coatOfArmsImage as string;
+        let imageUrl = coatOfArmsImageUrl as string;
           
         // Add the production domain
         imageUrl = `https://serenissima.ai${imageUrl}`;

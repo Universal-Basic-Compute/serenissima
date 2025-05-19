@@ -59,7 +59,7 @@ interface InteractionServiceDependencies {
 }
 
 // Define the type for the initializeInteractions method's last parameter
-type CoatOfArmsImagesType = Record<string, HTMLImageElement>;
+type CoatOfArmsImageUrlsType = Record<string, HTMLImageElement>;
 
 // Interface for updating polygon data in the interaction service
 interface UpdatePolygonsParams {
@@ -85,7 +85,7 @@ interface InteractionService {
     offset: { x: number, y: number },
     transportMode: boolean,
     params: InitializeInteractionsParams,
-    coatOfArmsImages: CoatOfArmsImagesType
+    coatOfArmsImageUrls: CoatOfArmsImageUrlsType
   ): () => void;
   setState(state: Partial<InteractionState>): void;
   getState(): InteractionState;
@@ -158,7 +158,7 @@ export default function ViewportCanvas({
   const [citizensLoaded, setCitizensLoaded] = useState<boolean>(false);
   const [transportMode, setTransportMode] = useState<boolean>(false);
   const [transportPath, setTransportPath] = useState<any[]>([]);
-  const [coatOfArmsImages, setCoatOfArmsImages] = useState<Record<string, HTMLImageElement>>({});
+  const [coatOfArmsImageUrls, setCoatOfArmsImageUrls] = useState<Record<string, HTMLImageElement>>({});
   const renderedCoatOfArmsCache = useRef<Record<string, {image: HTMLImageElement | null, x: number, y: number, size: number}>>({});
   
   // Load data
@@ -214,8 +214,8 @@ export default function ViewportCanvas({
         }
         
         // Load coat of arms images
-        const ownerCoatOfArmsMap = await assetService.loadCoatOfArmsImages(landOwnersData);
-        setCoatOfArmsImages(ownerCoatOfArmsMap);
+        const ownerCoatOfArmsMap = await assetService.loadCoatOfArmsImageUrls(landOwnersData);
+        setCoatOfArmsImageUrls(ownerCoatOfArmsMap);
       } catch (error) {
         console.error('Error loading data:', error);
       } finally {
@@ -341,7 +341,7 @@ export default function ViewportCanvas({
         transportStartPoint: transportService.getStartPoint() || null,
         transportEndPoint: transportService.getEndPoint() || null
       },
-      coatOfArmsImages
+      coatOfArmsImageUrls
     );
     
     // Subscribe to events from InteractionService
@@ -488,7 +488,7 @@ export default function ViewportCanvas({
         scale,
         offset,
         citizensByBuilding,
-        coatOfArmsImages,
+        coatOfArmsImageUrls,
         renderedCoatOfArmsCache.current
       );
     }
@@ -498,7 +498,7 @@ export default function ViewportCanvas({
     if (renderTime > 16) {
       console.debug(`Scene rendering took ${renderTime.toFixed(2)}ms (${(1000/renderTime).toFixed(1)} fps)`);
     }
-  }, [polygonsToRender, buildings, emptyBuildingPoints, activeView, scale, offset, citizensByBuilding, citizensLoaded, transportPath, polygons, incomeData, loading, coatOfArmsImages]);
+  }, [polygonsToRender, buildings, emptyBuildingPoints, activeView, scale, offset, citizensByBuilding, citizensLoaded, transportPath, polygons, incomeData, loading, coatOfArmsImageUrls]);
   
   // Separate animation logic to prevent continuous re-renders
   useEffect(() => {
@@ -540,7 +540,7 @@ export default function ViewportCanvas({
             scale,
             offset,
             citizensByBuilding,
-            coatOfArmsImages,
+            coatOfArmsImageUrls,
             renderedCoatOfArmsCache.current
           );
         }

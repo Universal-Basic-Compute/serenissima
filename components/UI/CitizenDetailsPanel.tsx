@@ -131,7 +131,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
       
       // Fetch relevancies where targetCitizen = opened citizen's username
       // and relevantToCitizen = current user's username or "all"
-      const response = await fetch(`/api/relevancies?targetCitizen=${targetCitizen}&relevantToCitizen=${currentUsername},all`);
+      const response = await fetch(`/api/relevancies?targetCitizen=${targetCitizen}&relevantToCitizen=${currentUsername}`);
       
       if (response.ok) {
         const data = await response.json();

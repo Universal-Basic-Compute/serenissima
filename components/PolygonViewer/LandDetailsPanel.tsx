@@ -725,7 +725,7 @@ export default function LandDetailsPanel({ selectedPolygonId, onClose, polygons,
                   username={ownerDetails?.username || owner}
                   firstName={ownerDetails?.firstName}
                   lastName={ownerDetails?.lastName}
-                  coatOfArmsImage={ownerDetails?.coatOfArmsImage}
+                  coatOfArmsImageUrl={ownerDetails?.coatOfArmsImageUrl}
                   familyMotto={ownerDetails?.familyMotto}
                   walletAddress={ownerDetails?.walletAddress || owner}
                   Ducats={ownerDetails?.ducats}

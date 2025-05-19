@@ -16,7 +16,7 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({ onClose, onSuccess }) => 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [familyMotto, setFamilyMotto] = useState('');
-  const [coatOfArmsImage, setCoatOfArmsImage] = useState('');
+  const [coatOfArmsImageUrl, setCoatOfArmsImageUrl] = useState('');
   
   // Initialize form with current citizen data
   useEffect(() => {
@@ -25,7 +25,7 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({ onClose, onSuccess }) => 
       setFirstName(citizenProfile.firstName || '');
       setLastName(citizenProfile.lastName || '');
       setFamilyMotto(citizenProfile.familyMotto || '');
-      setCoatOfArmsImage(citizenProfile.coatOfArmsImage || '');
+      setCoatOfArmsImageUrl(citizenProfile.coatOfArmsImageUrl || '');
     }
   }, [citizenProfile]);
   
@@ -52,7 +52,7 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({ onClose, onSuccess }) => 
           firstName,
           lastName,
           familyMotto,
-          coatOfArmsImage
+          coatOfArmsImageUrl
         }),
       });
       
@@ -165,14 +165,14 @@ const ProfileEditor: React.FC<ProfileEditorProps> = ({ onClose, onSuccess }) => 
           </div>
           
           <div className="mb-6">
-            <label htmlFor="coatOfArmsImage" className="block text-amber-800 font-medium mb-1">
+            <label htmlFor="coatOfArmsImageUrl" className="block text-amber-800 font-medium mb-1">
               Coat of Arms Image URL
             </label>
             <input
               type="text"
-              id="coatOfArmsImage"
-              value={coatOfArmsImage}
-              onChange={(e) => setCoatOfArmsImage(e.target.value)}
+              id="coatOfArmsImageUrl"
+              value={coatOfArmsImageUrl}
+              onChange={(e) => setCoatOfArmsImageUrl(e.target.value)}
               className="w-full p-2 border border-amber-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
               placeholder="https://example.com/your-image.jpg"
             />

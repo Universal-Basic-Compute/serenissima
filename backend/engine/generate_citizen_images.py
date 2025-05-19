@@ -67,8 +67,8 @@ def fetch_citizens_needing_images(tables) -> List[Dict]:
     
     try:
         # Get citizens without an ImageUrl field or with empty ImageUrl field
-        # OR citizens with FamilyCoatOfArms but no CoatOfArmsImage
-        formula = "OR(OR({ImageUrl} = '', {ImageUrl} = BLANK()), AND(NOT({FamilyCoatOfArms} = ''), OR({CoatOfArmsImage} = '', {CoatOfArmsImage} = BLANK())))"
+        # OR citizens with CoatOfArms but no CoatOfArmsImageUrl
+        formula = "OR(OR({ImageUrl} = '', {ImageUrl} = BLANK()), AND(NOT({CoatOfArms} = ''), OR({CoatOfArmsImageUrl} = '', {CoatOfArmsImageUrl} = BLANK())))"
         citizens = tables['citizens'].all(formula=formula)
         
         log.info(f"Found {len(citizens)} citizens needing images or coat of arms")
@@ -119,7 +119,7 @@ def update_airtable_image_url(tables, citizen_id: str, image_url: str, coat_of_a
         
         # Add coat of arms URL if provided
         if coat_of_arms_url:
-            update_data["CoatOfArmsImage"] = coat_of_arms_url
+            update_data["CoatOfArmsImageUrl"] = coat_of_arms_url
             log.info(f"Also updating coat of arms image URL: {coat_of_arms_url}")
         
         # Update the record
@@ -316,7 +316,7 @@ def process_citizen(tables, citizen: Dict) -> bool:
         return False
     
     # Check if we need to generate a coat of arms
-    coat_of_arms_description = citizen['fields'].get('FamilyCoatOfArms', '')
+    coat_of_arms_description = citizen['fields'].get('CoatOfArms', '')
     coat_of_arms_url = None
     
     if coat_of_arms_description:
@@ -375,7 +375,7 @@ def generate_citizen_images(limit: int = 0):
                     tables, 
                     citizen_id, 
                     citizen_data.get('imagePrompt', ''),
-                    citizen_data.get('familyCoatOfArms', '')
+                    citizen_data.get('coatOfArms', '')
                 )
                 log.info(f"Processed citizen {citizen_id} with result: {'success' if success else 'failed'}")
                 return

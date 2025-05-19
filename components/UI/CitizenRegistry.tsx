@@ -261,7 +261,7 @@ const CitizenRegistry: React.FC<CitizenRegistryProps> = ({ onClose }) => {
                           username={citizen.username}
                           firstName={citizen.firstName || citizen.firstname || citizen.FirstName}
                           lastName={citizen.lastName || citizen.lastname || citizen.LastName}
-                          coatOfArmsImage={citizen.coatOfArmsImage || `/coat-of-arms/${citizen.username}.png`}
+                          coatOfArmsImageUrl={citizen.coatOfArmsImageUrl || `/coat-of-arms/${citizen.username}.png`}
                           familyMotto={citizen.familyMotto}
                           Ducats={citizen.Ducats || citizen.ducats}
                           socialClass={citizen.socialClass || citizen.socialclass || citizen.SocialClass}
@@ -334,7 +334,6 @@ const CitizenRegistry: React.FC<CitizenRegistryProps> = ({ onClose }) => {
         />
       )}
     </>
-  );
   );
 };
 

@@ -202,13 +202,13 @@ async def store_wallet(wallet_data: WalletRequest):
                 update_fields["Email"] = wallet_data.email
                 
             if wallet_data.family_coat_of_arms:
-                update_fields["FamilyCoatOfArms"] = wallet_data.family_coat_of_arms
+                update_fields["CoatOfArms"] = wallet_data.family_coat_of_arms
                 
             if wallet_data.family_motto:
                 update_fields["FamilyMotto"] = wallet_data.family_motto
                 
             if wallet_data.coat_of_arms_image:
-                update_fields["CoatOfArmsImage"] = wallet_data.coat_of_arms_image
+                update_fields["CoatOfArmsImageUrl"] = wallet_data.coat_of_arms_image
                 
             # Always update color field if provided, even if null/empty
             if wallet_data.color is not None:
@@ -228,9 +228,9 @@ async def store_wallet(wallet_data: WalletRequest):
                 "first_name": record["fields"].get("FirstName", None),
                 "last_name": record["fields"].get("LastName", None),
                 "email": record["fields"].get("Email", None),
-                "family_coat_of_arms": record["fields"].get("FamilyCoatOfArms", None),
+                "family_coat_of_arms": record["fields"].get("CoatOfArms", None),
                 "family_motto": record["fields"].get("FamilyMotto", None),
-                "coat_of_arms_image": record["fields"].get("CoatOfArmsImage", None),
+                "coat_of_arms_image": record["fields"].get("CoatOfArmsImageUrl", None),
                 "color": record["fields"].get("Color", "#8B4513")
             }
         
@@ -255,13 +255,13 @@ async def store_wallet(wallet_data: WalletRequest):
             fields["Email"] = wallet_data.email
             
         if wallet_data.family_coat_of_arms:
-            fields["FamilyCoatOfArms"] = wallet_data.family_coat_of_arms
+            fields["CoatOfArms"] = wallet_data.family_coat_of_arms
             
         if wallet_data.family_motto:
             fields["FamilyMotto"] = wallet_data.family_motto
             
         if wallet_data.coat_of_arms_image:
-            fields["CoatOfArmsImage"] = wallet_data.coat_of_arms_image
+            fields["CoatOfArmsImageUrl"] = wallet_data.coat_of_arms_image
         
         # Always include color field if provided, even if null/empty
         if wallet_data.color is not None:
@@ -284,9 +284,9 @@ async def store_wallet(wallet_data: WalletRequest):
             "first_name": record["fields"].get("FirstName", None),
             "last_name": record["fields"].get("LastName", None),
             "email": record["fields"].get("Email", None),
-            "family_coat_of_arms": record["fields"].get("FamilyCoatOfArms", None),
+            "family_coat_of_arms": record["fields"].get("CoatOfArms", None),
             "family_motto": record["fields"].get("FamilyMotto", None),
-            "coat_of_arms_image": record["fields"].get("CoatOfArmsImage", None),
+            "coat_of_arms_image": record["fields"].get("CoatOfArmsImageUrl", None),
             "color": record["fields"].get("Color", "#8B4513")
         }
     except Exception as e:
@@ -324,9 +324,9 @@ async def get_wallet(wallet_address: str):
             "first_name": record["fields"].get("FirstName", None),
             "last_name": record["fields"].get("LastName", None),
             "email": record["fields"].get("Email", None),
-            "family_coat_of_arms": record["fields"].get("FamilyCoatOfArms", None),
+            "family_coat_of_arms": record["fields"].get("CoatOfArms", None),
             "family_motto": record["fields"].get("FamilyMotto", None),
-            "coat_of_arms_image": record["fields"].get("CoatOfArmsImage", None)
+            "coat_of_arms_image": record["fields"].get("CoatOfArmsImageUrl", None)
         }
     except HTTPException:
         raise
@@ -402,7 +402,7 @@ async def transfer_compute_endpoint(wallet_data: WalletRequest):
                 "citizen_name": updated_record["fields"].get("Username", None),
                 "email": updated_record["fields"].get("Email", None),
                 "family_motto": updated_record["fields"].get("FamilyMotto", None),
-                "coat_of_arms_image": updated_record["fields"].get("CoatOfArmsImage", None)
+                "coat_of_arms_image": updated_record["fields"].get("CoatOfArmsImageUrl", None)
             }
         else:
             # Create new record
@@ -492,7 +492,7 @@ async def withdraw_compute(wallet_data: WalletRequest):
             "citizen_name": updated_record["fields"].get("Username", None),
             "email": updated_record["fields"].get("Email", None),
             "family_motto": updated_record["fields"].get("FamilyMotto", None),
-            "coat_of_arms_image": updated_record["fields"].get("CoatOfArmsImage", None)
+            "coat_of_arms_image": updated_record["fields"].get("CoatOfArmsImageUrl", None)
         }
     except HTTPException:
         raise
@@ -1573,7 +1573,7 @@ async def transfer_compute_solana(wallet_data: WalletRequest):
                 "citizen_name": updated_record["fields"].get("Username", None),
                 "email": updated_record["fields"].get("Email", None),
                 "family_motto": updated_record["fields"].get("FamilyMotto", None),
-                "coat_of_arms_image": updated_record["fields"].get("CoatOfArmsImage", None),
+                "coat_of_arms_image": updated_record["fields"].get("CoatOfArmsImageUrl", None),
                 "transaction_signature": signature,
                 "block_time": transfer_result.get("blockTime")
             }
@@ -1804,7 +1804,7 @@ async def withdraw_compute_solana(wallet_data: WalletRequest):
                     "citizen_name": updated_record["fields"].get("Username", None),
                     "email": updated_record["fields"].get("Email", None),
                     "family_motto": updated_record["fields"].get("FamilyMotto", None),
-                    "coat_of_arms_image": updated_record["fields"].get("CoatOfArmsImage", None),
+                    "coat_of_arms_image": updated_record["fields"].get("CoatOfArmsImageUrl", None),
                     "transaction_signature": signature,
                     "transaction_details": {
                         "from_wallet": wallet_data.wallet_address,
@@ -1840,7 +1840,7 @@ async def withdraw_compute_solana(wallet_data: WalletRequest):
             "citizen_name": updated_record["fields"].get("Username", None),
             "email": updated_record["fields"].get("Email", None),
             "family_motto": updated_record["fields"].get("FamilyMotto", None),
-            "coat_of_arms_image": updated_record["fields"].get("CoatOfArmsImage", None),
+            "coat_of_arms_image": updated_record["fields"].get("CoatOfArmsImageUrl", None),
             "transaction_signature": signature,
             "transaction_details": {
                 "from_wallet": wallet_data.wallet_address,
@@ -1870,12 +1870,12 @@ async def get_citizens_coat_of_arms():
         citizens = []
         for record in records:
             fields = record['fields']
-            if 'CoatOfArmsImage' in fields:
+            if 'CoatOfArmsImageUrl' in fields:
                 citizen_data = {
                     'citizen_name': fields.get('Username', ''),
                     'first_name': fields.get('FirstName', ''),
                     'last_name': fields.get('LastName', ''),
-                    'coat_of_arms_image': fields.get('CoatOfArmsImage', '')
+                    'coat_of_arms_image': fields.get('CoatOfArmsImageUrl', '')
                 }
                 citizens.append(citizen_data)
         
@@ -1907,7 +1907,7 @@ async def get_citizens():
                 'wallet_address': fields.get('Wallet', ''),
                 'ducats': fields.get('Ducats', 0),
                 'family_motto': fields.get('FamilyMotto', ''),
-                'coat_of_arms_image': fields.get('CoatOfArmsImage', '')
+                'coat_of_arms_image': fields.get('CoatOfArmsImageUrl', '')
             }
             citizens.append(citizen_data)
         
@@ -2608,7 +2608,7 @@ async def inject_compute_complete(data: dict):
                 "citizen_name": updated_record["fields"].get("Username", None),
                 "email": updated_record["fields"].get("Email", None),
                 "family_motto": updated_record["fields"].get("FamilyMotto", None),
-                "coat_of_arms_image": updated_record["fields"].get("CoatOfArmsImage", None),
+                "coat_of_arms_image": updated_record["fields"].get("CoatOfArmsImageUrl", None),
                 "transaction_signature": data["transaction_signature"]
             }
         else:

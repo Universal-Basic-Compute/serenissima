@@ -50,9 +50,9 @@ export function useWallet() {
               username: data.citizen_name,
               firstName: data.first_name || data.citizen_name.split(' ')[0] || '',
               lastName: data.last_name || data.citizen_name.split(' ').slice(1).join(' ') || '',
-              coatOfArmsImage: data.coat_of_arms_image,
+              coatOfArmsImageUrl: data.coat_of_arms_image,
               familyMotto: data.family_motto,
-              familyCoatOfArms: data.family_coat_of_arms,
+              coatOfArms: data.family_coat_of_arms,
               Ducats: data.ducats,
               color: data.color || '#8B4513',
               walletAddress: storedWallet
@@ -195,7 +195,7 @@ export function useWallet() {
               username: citizenData.citizen_name,
               firstName: citizenData.first_name || citizenData.citizen_name.split(' ')[0] || '',
               lastName: citizenData.last_name || citizenData.citizen_name.split(' ').slice(1).join(' ') || '',
-              coatOfArmsImage: citizenData.coat_of_arms_image,
+              coatOfArmsImageUrl: citizenData.coat_of_arms_image,
               familyMotto: citizenData.family_motto,
               Ducats: citizenData.ducats,
               walletAddress: address

@@ -31,9 +31,9 @@ export interface CitizenProfile {
   username: string;
   firstName: string;
   lastName: string;
-  coatOfArmsImage: string | null;
+  coatOfArmsImageUrl: string | null;
   familyMotto?: string;
-  familyCoatOfArms?: string;
+  coatOfArms?: string;
   color?: string;
   Ducats?: number;
   walletAddress?: string;

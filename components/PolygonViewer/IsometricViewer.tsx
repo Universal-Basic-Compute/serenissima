@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { debounce, throttle } from 'lodash';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
-import { fetchCoatOfArmsImage } from '@/app/utils/coatOfArmsUtils';
+import { fetchCoatOfArmsImageUrl } from '@/app/utils/coatOfArmsUtils';
 import { buildingPointsService } from '@/lib/services/BuildingPointsService';
 import { interactionService } from '@/lib/services/InteractionService';
 import { hoverStateService } from '@/lib/services/HoverStateService';
@@ -53,7 +53,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [landGroups, setLandGroups] = useState<Record<string, string>>({});
   const [landGroupColors, setLandGroupColors] = useState<Record<string, string>>({});
   const [ownerCoatOfArmsMap, setOwnerCoatOfArmsMap] = useState<Record<string, string>>({});
-  const [coatOfArmsImages, setCoatOfArmsImages] = useState<Record<string, HTMLImageElement>>({});
+  const [coatOfArmsImageUrls, setCoatOfArmsImageUrls] = useState<Record<string, HTMLImageElement>>({});
   const [loadingCoatOfArms, setLoadingCoatOfArms] = useState<boolean>(false);
   const [selectedPolygonId, setSelectedPolygonId] = useState<string | null>(null);
   const [showLandDetailsPanel, setShowLandDetailsPanel] = useState<boolean>(false);
@@ -967,7 +967,7 @@ number => {
               loadingImagesRef.current = true;
               
               // Create a copy of the current images to avoid modifying state directly
-              const updatedImages = {...coatOfArmsImages};
+              const updatedImages = {...coatOfArmsImageUrls};
               let hasNewImages = false;
               
               // Process each coat of arms entry sequentially to avoid too many parallel requests
@@ -1054,7 +1054,7 @@ number => {
               
               // Only update state if we have new images
               if (hasNewImages) {
-                setCoatOfArmsImages(updatedImages);
+                setCoatOfArmsImageUrls(updatedImages);
               }
               
               loadingImagesRef.current = false;
@@ -2707,13 +2707,13 @@ number => {
           }
         } else {
           // Check if we have a coat of arms image for this owner
-          if (owner in coatOfArmsImages && coatOfArmsImages[owner]) {
+          if (owner in coatOfArmsImageUrls && coatOfArmsImageUrls[owner]) {
             // Draw circular coat of arms with error handling
             try {
-              createCircularImage(ctx, coatOfArmsImages[owner], centerX, centerY, size);
+              createCircularImage(ctx, coatOfArmsImageUrls[owner], centerX, centerY, size);
               // Cache the result
               renderedCoatOfArmsCache.current[cacheKey] = {
-                image: coatOfArmsImages[owner],
+                image: coatOfArmsImageUrls[owner],
                 x: centerX,
                 y: centerY,
                 size

@@ -25,7 +25,7 @@ export class CitizenRenderService {
       updatedAt: this.getStringValue(citizen, ['UpdatedAt', 'updatedAt']),
       lastActiveAt: this.getStringValue(citizen, ['LastActiveAt', 'lastActiveAt']),
       familyMotto: this.getStringValue(citizen, ['FamilyMotto', 'familyMotto']),
-      coatOfArmsImage: this.getStringValue(citizen, ['CoatOfArmsImage', 'coatOfArmsImage']),
+      coatOfArmsImageUrl: this.getStringValue(citizen, ['CoatOfArmsImageUrl', 'coatOfArmsImageUrl']),
       dailyIncome: this.getNumberValue(citizen, ['DailyIncome', 'dailyIncome']),
       home: this.getStringValue(citizen, ['Home', 'home']),
       work: this.getStringValue(citizen, ['Work', 'work']),

@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
         firstName: citizen.fields.FirstName || null,
         lastName: citizen.fields.LastName || null,
         ducats: citizen.fields.Ducats || 0,
-        coatOfArmsImage: citizen.fields.CoatOfArmsImage || null,
+        coatOfArmsImageUrl: citizen.fields.CoatOfArmsImageUrl || null,
         familyMotto: citizen.fields.FamilyMotto || null,
         createdAt: citizen.fields.CreatedAt || null
       }

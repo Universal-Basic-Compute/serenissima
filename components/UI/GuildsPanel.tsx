@@ -21,7 +21,7 @@ interface GuildMember {
   username: string;
   firstName: string;
   lastName: string;
-  coatOfArmsImage: string | null;
+  coatOfArmsImageUrl: string | null;
   color: string | null;
 }
 
@@ -366,9 +366,9 @@ function GuildDetails({ guild, onBack, formatDate, getLandName }: GuildDetailsPr
                 <div className="space-y-2 max-h-40 overflow-y-auto">
                   {members.map(member => (
                     <div key={member.citizenId} className="flex items-center space-x-2">
-                      {member.coatOfArmsImage ? (
+                      {member.coatOfArmsImageUrl ? (
                         <img 
-                          src={member.coatOfArmsImage} 
+                          src={member.coatOfArmsImageUrl} 
                           alt={`${member.firstName} ${member.lastName}'s coat of arms`}
                           className="w-8 h-8 rounded-full object-cover"
                           style={{ backgroundColor: member.color || '#8B4513' }}

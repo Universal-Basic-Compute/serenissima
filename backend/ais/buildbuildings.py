@@ -79,7 +79,7 @@ def log_table(headers, rows):
 def get_allowed_building_tiers(social_class: str) -> List[int]:
     """Determine which building tiers an AI can construct based on their social class."""
     if social_class == 'Nobili':
-        return [1, 2, 3, 4, 5]  # Nobili can build all tiers
+        return [1, 2, 3, 4]  # Nobili can build all tiers
     elif social_class == 'Cittadini':
         return [1, 2, 3]  # Cittadini can build tiers 1-3
     elif social_class == 'Popolani':
@@ -668,7 +668,7 @@ def get_polygon_data_for_citizen(username: str, citizen_lands: List[Dict]) -> Li
         for land_id in land_ids:
             if land_id in polygon_map:
                 polygon_data.append(polygon_map[land_id])
-                log_success(f"Found polygon data for land {land_id}")
+                # log_success(f"Found polygon data for land {land_id}")
             else:
                 log_warning(f"Polygon data not found for land {land_id}")
         

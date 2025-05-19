@@ -61,7 +61,7 @@ const ApiReference: React.FC = () => {
       "username": "string",
       "firstName": "string",
       "lastName": "string",
-      "coatOfArmsImage": "string | null",
+      "coatOfArmsImageUrl": "string | null",
       "isAi": boolean,
       "socialClass": "string",
       "description": "string",
@@ -100,7 +100,7 @@ const ApiReference: React.FC = () => {
     "username": "string",
     "firstName": "string",
     "lastName": "string",
-    "coatOfArmsImage": "string | null",
+    "coatOfArmsImageUrl": "string | null",
     "isAi": boolean,
     "socialClass": "string",
     "description": "string",
@@ -141,7 +141,7 @@ const ApiReference: React.FC = () => {
     "firstName": "string | null",
     "lastName": "string | null",
     "ducats": number,
-    "coatOfArmsImage": "string | null",
+    "coatOfArmsImageUrl": "string | null",
     "familyMotto": "string | null",
     "createdAt": "string | null"
   }
@@ -163,7 +163,7 @@ const ApiReference: React.FC = () => {
   "firstName": "string",
   "lastName": "string",
   "familyMotto": "string",
-  "coatOfArmsImage": "string"
+  "coatOfArmsImageUrl": "string"
 }`}
             </pre>
           </div>
@@ -181,7 +181,7 @@ const ApiReference: React.FC = () => {
     "firstName": "string | null",
     "lastName": "string | null",
     "ducats": number,
-    "coatOfArmsImage": "string | null",
+    "coatOfArmsImageUrl": "string | null",
     "familyMotto": "string | null",
     "createdAt": "string | null"
   }
@@ -245,7 +245,7 @@ const ApiReference: React.FC = () => {
     "firstName": "string | null",
     "lastName": "string | null",
     "ducats": number,
-    "coatOfArmsImage": "string | null",
+    "coatOfArmsImageUrl": "string | null",
     "familyMotto": "string | null",
     "createdAt": "string"
   },
@@ -2035,7 +2035,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
       "username": "string",
       "firstName": "string",
       "lastName": "string",
-      "coatOfArmsImage": "string | null",
+      "coatOfArmsImageUrl": "string | null",
       "color": "string | null"
     }
   ]

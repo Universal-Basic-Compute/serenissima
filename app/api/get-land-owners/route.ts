@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { fetchCoatOfArmsImage } from '@/app/utils/coatOfArmsUtils';
+import { fetchCoatOfArmsImageUrl } from '@/app/utils/coatOfArmsUtils';
 import path from 'path';
 import fs from 'fs/promises';
 import Airtable from 'airtable';
@@ -48,7 +48,7 @@ async function fetchCitizensData(base: any) {
     const records = await new Promise((resolve, reject) => {
       const allRecords: any[] = [];
       citizensTable.select({
-        fields: ['Username', 'CoatOfArmsImage', 'Ducats', 'FirstName', 'LastName', 'FamilyMotto'] // Added new fields
+        fields: ['Username', 'CoatOfArmsImageUrl', 'Ducats', 'FirstName', 'LastName', 'FamilyMotto'] // Added new fields
       }).eachPage(
         function page(records, fetchNextPage) {
           allRecords.push(...records);
@@ -69,7 +69,7 @@ async function fetchCitizensData(base: any) {
     (records as any[]).forEach(record => {
       if (record.fields.Username) {
         citizensMap.set(record.fields.Username, {
-          coat_of_arms_image: record.fields.CoatOfArmsImage || null,
+          coat_of_arms_image: record.fields.CoatOfArmsImageUrl || null,
           ducats: record.fields.Ducats || 0,
           first_name: record.fields.FirstName || null,
           last_name: record.fields.LastName || null,
@@ -181,7 +181,7 @@ export async function GET(request: Request) {
           id: record.fields.LandId || record.id,
           owner: owner,
           // Use coat of arms from citizen data if available, otherwise use from land record
-          coat_of_arms_image: citizenData?.coat_of_arms_image || record.fields.CoatOfArmsImage || null,
+          coat_of_arms_image: citizenData?.coat_of_arms_image || record.fields.CoatOfArmsImageUrl || null,
           // Add the new fields from citizen data
           ducats: citizenData?.ducats || 0,
           first_name: citizenData?.first_name || null,

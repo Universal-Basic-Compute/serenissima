@@ -99,9 +99,9 @@ def extract_coat_of_arms_urls(citizens: List[Dict]) -> Dict[str, str]:
     
     # Define all possible field names for coat of arms
     possible_field_names = [
-        'CoatOfArmsImage', 
+        'CoatOfArmsImageUrl', 
         'coat_of_arms_image',
-        'coatOfArmsImage',
+        'coatOfArmsImageUrl',
         'coat_of_arms',
         'coatOfArms',
         'coat_of_arms_url',

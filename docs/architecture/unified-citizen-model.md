@@ -93,8 +93,8 @@ interface Citizen {
   home?: string;  // Reference to housing building
   work?: string;  // Reference to workplace
   familyMotto?: string;
-  familyCoatOfArms?: string;
-  coatOfArmsImage?: string;
+  coatOfArms?: string;
+  coatOfArmsImageUrl?: string;
   color?: string;
   // Additional properties...
 }

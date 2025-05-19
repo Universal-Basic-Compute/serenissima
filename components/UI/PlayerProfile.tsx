@@ -5,7 +5,7 @@ interface PlayerProfileProps {
   username?: string;
   firstName?: string;
   lastName?: string;
-  coatOfArmsImage?: string | null;
+  coatOfArmsImageUrl?: string | null;
   familyMotto?: string;
   walletAddress?: string; // Add wallet address prop
   Ducats?: number; // Add this property
@@ -24,7 +24,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
   username,
   firstName,
   lastName,
-  coatOfArmsImage,
+  coatOfArmsImageUrl,
   familyMotto,
   walletAddress, // New prop
   Ducats, // New prop
@@ -40,7 +40,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
     username: string;
     firstName: string;
     lastName: string;
-    coatOfArmsImage: string | null;
+    coatOfArmsImageUrl: string | null;
     familyMotto?: string;
     Ducats?: number; // Add this to the state
   } | null>(null);
@@ -58,7 +58,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
         username,
         firstName,
         lastName,
-        coatOfArmsImage: coatOfArmsImage || null,
+        coatOfArmsImageUrl: coatOfArmsImageUrl || null,
         familyMotto,
         Ducats // Include the Ducats if provided directly
       });
@@ -76,7 +76,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
           username: event.detail.citizen_name || username || 'Unknown',
           firstName: event.detail.first_name || event.detail.citizen_name?.split(' ')[0] || firstName || 'Unknown',
           lastName: event.detail.last_name || event.detail.citizen_name?.split(' ').slice(1).join(' ') || lastName || 'Citizen',
-          coatOfArmsImage: event.detail.coat_of_arms_image || coatOfArmsImage,
+          coatOfArmsImageUrl: event.detail.coat_of_arms_image || coatOfArmsImageUrl,
           familyMotto: event.detail.family_motto || familyMotto,
           Ducats: event.detail.ducats
         });
@@ -89,7 +89,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
       window.removeEventListener('citizenProfileUpdated', handleProfileUpdate as EventListener);
     };
     
-  }, [walletAddress, username, firstName, lastName, coatOfArmsImage]);
+  }, [walletAddress, username, firstName, lastName, coatOfArmsImageUrl]);
 
   // Determine sizes based on the size prop
   const dimensions = {
@@ -147,7 +147,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
     username: username || 'Unknown',
     firstName: firstName || 'Unknown',
     lastName: lastName || 'Citizen',
-    coatOfArmsImage: coatOfArmsImage,
+    coatOfArmsImageUrl: coatOfArmsImageUrl,
     Ducats: Ducats !== undefined ? Ducats : 0,
     // Don't add any default color here
   };
@@ -160,14 +160,14 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
       {/* Create a flex container for the content */}
       <div className="w-full flex flex-col items-center">
         {/* Coat of Arms or Initials */}
-        {displayData.coatOfArmsImage ? (
+        {displayData.coatOfArmsImageUrl ? (
           <div className="rounded-full border-3 border-amber-600 overflow-hidden bg-amber-50 flex items-center justify-center shadow-md mx-auto">
             <img 
-              src={displayData.coatOfArmsImage} 
+              src={displayData.coatOfArmsImageUrl} 
               alt={`${displayData.username}'s Coat of Arms`}
               className={`${dim.image} object-cover`}
               onError={(e) => {
-                console.error('Error loading coat of arms image in PlayerProfile:', displayData.coatOfArmsImage);
+                console.error('Error loading coat of arms image in PlayerProfile:', displayData.coatOfArmsImageUrl);
                 // Fallback to initials if image fails to load
                 (e.target as HTMLImageElement).style.display = 'none';
                 const parent = (e.target as HTMLImageElement).parentElement;

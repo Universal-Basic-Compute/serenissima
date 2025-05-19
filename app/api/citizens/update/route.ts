@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     if (data.firstName !== undefined) updateFields.FirstName = data.firstName;
     if (data.lastName !== undefined) updateFields.LastName = data.lastName;
     if (data.familyMotto !== undefined) updateFields.FamilyMotto = data.familyMotto;
-    if (data.coatOfArmsImage !== undefined) updateFields.CoatOfArmsImage = data.coatOfArmsImage;
+    if (data.coatOfArmsImageUrl !== undefined) updateFields.CoatOfArmsImageUrl = data.coatOfArmsImageUrl;
     
     // Only proceed if there are fields to update
     if (Object.keys(updateFields).length === 0) {
@@ -92,8 +92,8 @@ export async function POST(request: Request) {
           };
           
           // Add image URL if coat of arms is available
-          if (updatedRecord.fields.CoatOfArmsImage) {
-            citizenFields.ImageUrl = updatedRecord.fields.CoatOfArmsImage;
+          if (updatedRecord.fields.CoatOfArmsImageUrl) {
+            citizenFields.ImageUrl = updatedRecord.fields.CoatOfArmsImageUrl;
           }
           
           // Create the citizen record
@@ -117,7 +117,7 @@ export async function POST(request: Request) {
         firstName: updatedRecord.fields.FirstName || null,
         lastName: updatedRecord.fields.LastName || null,
         ducats: updatedRecord.fields.Ducats || 0,
-        coatOfArmsImage: updatedRecord.fields.CoatOfArmsImage || null,
+        coatOfArmsImageUrl: updatedRecord.fields.CoatOfArmsImageUrl || null,
         familyMotto: updatedRecord.fields.FamilyMotto || null,
         createdAt: updatedRecord.fields.CreatedAt || null
       }

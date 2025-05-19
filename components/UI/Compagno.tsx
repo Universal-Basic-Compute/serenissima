@@ -22,7 +22,7 @@ interface Citizen {
   username: string;
   firstName: string;
   lastName: string;
-  coatOfArmsImage: string | null;
+  coatOfArmsImageUrl: string | null;
 }
 
 interface Message {
@@ -305,7 +305,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
             username: 'compagno',
             firstName: 'Compagno',
             lastName: 'Bot',
-            coatOfArmsImage: null
+            coatOfArmsImageUrl: null
           });
         }
         
@@ -316,7 +316,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
           username: 'compagno',
           firstName: 'Compagno',
           lastName: 'Bot',
-          coatOfArmsImage: null
+          coatOfArmsImageUrl: null
         }]);
       }
     } catch (error) {
@@ -327,7 +327,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
         username: 'compagno',
         firstName: 'Compagno',
         lastName: 'Bot',
-        coatOfArmsImage: null
+        coatOfArmsImageUrl: null
       }]);
     } finally {
       setIsLoadingCitizens(false);
@@ -1183,9 +1183,9 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                             }`}
                           >
                             <div className="w-8 h-8 rounded-full bg-amber-300 flex items-center justify-center mr-2 text-amber-800">
-                              {citizen.coatOfArmsImage ? (
+                              {citizen.coatOfArmsImageUrl ? (
                                 <img 
-                                  src={citizen.coatOfArmsImage} 
+                                  src={citizen.coatOfArmsImageUrl} 
                                   alt="" 
                                   className="w-8 h-8 rounded-full object-cover"
                                   onError={(e) => {

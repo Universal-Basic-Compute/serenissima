@@ -18,7 +18,7 @@ export interface Polygon {
   nameConfidence?: string;
   owner?: string;
   areaInSquareMeters?: number; // Add area field
-  coatOfArmsImage?: string; // Add coat of arms image URL
+  coatOfArmsImageUrl?: string; // Add coat of arms image URL
   lastIncome?: number; // Add this property for income-based coloring
   buildingPoints?: {
     lat: number;

@@ -41,9 +41,9 @@ export interface CitizenProfile {
   username: string;
   firstName: string;
   lastName: string;
-  coatOfArmsImage: string | null;
+  coatOfArmsImageUrl: string | null;
   familyMotto?: string;
-  familyCoatOfArms?: string;
+  coatOfArms?: string;
   color?: string;
   Ducats?: number;
   walletAddress?: string;
@@ -87,7 +87,7 @@ export class CitizenService {
         log.info(`Restored citizen profile from storage: ${this.currentCitizen?.username}`);
         log.debug('Citizen profile details:', { 
           username: this.currentCitizen?.username,
-          hasCoatOfArms: !!this.currentCitizen?.coatOfArmsImage,
+          hasCoatOfArms: !!this.currentCitizen?.coatOfArmsImageUrl,
           hasMotto: !!this.currentCitizen?.familyMotto
         });
         
@@ -485,9 +485,9 @@ export class CitizenService {
           username: data.citizen_name,
           firstName: data.first_name || data.citizen_name.split(' ')[0] || '',
           lastName: data.last_name || data.citizen_name.split(' ').slice(1).join(' ') || '',
-          coatOfArmsImage: data.coat_of_arms_image,
+          coatOfArmsImageUrl: data.coat_of_arms_image,
           familyMotto: data.family_motto,
-          familyCoatOfArms: data.family_coat_of_arms,
+          coatOfArms: data.family_coat_of_arms,
           Ducats: data.ducats,
           color: data.color || '#8B4513',
           walletAddress: address
@@ -502,9 +502,9 @@ export class CitizenService {
           citizen_name: this.currentCitizen.username,
           first_name: this.currentCitizen.firstName,
           last_name: this.currentCitizen.lastName,
-          coat_of_arms_image: this.currentCitizen.coatOfArmsImage,
+          coat_of_arms_image: this.currentCitizen.coatOfArmsImageUrl,
           family_motto: this.currentCitizen.familyMotto,
-          family_coat_of_arms: this.currentCitizen.familyCoatOfArms,
+          family_coat_of_arms: this.currentCitizen.coatOfArms,
           ducats: this.currentCitizen.Ducats,
           color: this.currentCitizen.color,
           wallet_address: address
@@ -635,9 +635,9 @@ export class CitizenService {
         citizen_name: profile.username || this.currentCitizen?.username,
         first_name: profile.firstName || this.currentCitizen?.firstName,
         last_name: profile.lastName || this.currentCitizen?.lastName,
-        family_coat_of_arms: profile.familyCoatOfArms || this.currentCitizen?.familyCoatOfArms,
+        family_coat_of_arms: profile.coatOfArms || this.currentCitizen?.coatOfArms,
         family_motto: profile.familyMotto || this.currentCitizen?.familyMotto,
-        coat_of_arms_image: profile.coatOfArmsImage || this.currentCitizen?.coatOfArmsImage,
+        coat_of_arms_image: profile.coatOfArmsImageUrl || this.currentCitizen?.coatOfArmsImageUrl,
         color: profile.color || this.currentCitizen?.color
       };
       
@@ -709,9 +709,9 @@ export class CitizenService {
           citizen_name: this.currentCitizen.username,
           first_name: this.currentCitizen.firstName,
           last_name: this.currentCitizen.lastName,
-          coat_of_arms_image: this.currentCitizen.coatOfArmsImage,
+          coat_of_arms_image: this.currentCitizen.coatOfArmsImageUrl,
           family_motto: this.currentCitizen.familyMotto,
-          family_coat_of_arms: this.currentCitizen.familyCoatOfArms,
+          family_coat_of_arms: this.currentCitizen.coatOfArms,
           ducats: this.currentCitizen.Ducats,
           color: this.currentCitizen.color,
           wallet_address: this.walletAddress
