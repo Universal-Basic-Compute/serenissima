@@ -196,7 +196,12 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
            - your family background appropriate to your social class
            - your daily routines and habits
         
-        2. A detailed image prompt for Ideogram that will generate a portrait of YOU that:
+        2. A concise core personality (2-3 sentences) that captures your:
+           - fundamental character traits
+           - core values and beliefs
+           - general temperament and outlook on life
+        
+        3. A detailed image prompt for Ideogram that will generate a portrait of YOU that:
            - Accurately reflects your social class ({social_class}) with appropriate status symbols
            - Shows period-appropriate clothing and accessories for your specific profession
            - Captures your personality traits mentioned in the description
@@ -208,7 +213,7 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
         
         Your current description: {current_description}
         
-        Please return your response in JSON format with two fields: "description" and "imagePrompt".
+        Please return your response in JSON format with three fields: "description", "corePersonality", and "imagePrompt".
         """
         
         # Prepare system context with all the citizen data
@@ -278,7 +283,7 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
                 "content": prompt,
                 "model": "claude-3-7-sonnet-latest",
                 "mode": "creative",
-                "addSystem": f"You are a historical expert on Renaissance Venice (1400-1600) helping to update a citizen profile for a historically accurate economic simulation game called La Serenissima. You have access to the following information about the citizen: {system_context_str}. Your response MUST be a valid JSON object with EXACTLY this format:\n\n```json\n{{\n  \"description\": \"string\",\n  \"imagePrompt\": \"string\"\n}}\n```\n\nDo not include any text before or after the JSON."
+                "addSystem": f"You are a historical expert on Renaissance Venice (1400-1600) helping to update a citizen profile for a historically accurate economic simulation game called La Serenissima. You have access to the following information about the citizen: {system_context_str}. Your response MUST be a valid JSON object with EXACTLY this format:\n\n```json\n{{\n  \"description\": \"string\",\n  \"corePersonality\": \"string\",\n  \"imagePrompt\": \"string\"\n}}\n```\n\nDo not include any text before or after the JSON."
             }
         )
         
@@ -420,8 +425,8 @@ def generate_image(prompt: str, citizen_id: str) -> Optional[str]:
         log.error(f"Error generating image for citizen {citizen_id}: {e}")
         return None
 
-def update_citizen_record(tables, username: str, description: str, image_prompt: str, image_url: str) -> bool:
-    """Update the citizen record with new description, image prompt, and image URL."""
+def update_citizen_record(tables, username: str, description: str, core_personality: str, image_prompt: str, image_url: str) -> bool:
+    """Update the citizen record with new description, core personality, image prompt, and image URL."""
     log.info(f"Updating citizen record for {username}")
     
     try:
@@ -435,12 +440,23 @@ def update_citizen_record(tables, username: str, description: str, image_prompt:
         
         citizen = citizens[0]
         
-        # Update the citizen record
-        tables['citizens'].update(citizen['id'], {
+        # Check if CorePersonality is empty
+        current_core_personality = citizen['fields'].get('CorePersonality', '')
+        
+        # Prepare update data
+        update_data = {
             "Description": description,
             "ImagePrompt": image_prompt,
             "ImageUrl": image_url
-        })
+        }
+        
+        # Only update CorePersonality if it's empty
+        if not current_core_personality and core_personality:
+            log.info(f"CorePersonality is empty, updating with new value: {core_personality[:50]}...")
+            update_data["CorePersonality"] = core_personality
+        
+        # Update the citizen record
+        tables['citizens'].update(citizen['id'], update_data)
         
         log.info(f"Successfully updated citizen record for {username}")
         return True
@@ -501,11 +517,13 @@ def update_citizen_description_and_image(username: str, dry_run: bool = False):
         return False
     
     new_description = result.get("description", "")
+    new_core_personality = result.get("corePersonality", "")
     new_image_prompt = result.get("imagePrompt", "")
     
     if dry_run:
         log.info(f"[DRY RUN] Would update citizen {username} with:")
         log.info(f"[DRY RUN] New description: {new_description}")
+        log.info(f"[DRY RUN] New core personality: {new_core_personality}")
         log.info(f"[DRY RUN] New image prompt: {new_image_prompt}")
         return True
     
@@ -517,7 +535,7 @@ def update_citizen_description_and_image(username: str, dry_run: bool = False):
     
     # Update citizen record
     old_description = citizen_info["citizen"]['fields'].get('Description', '')
-    success = update_citizen_record(tables, username, new_description, new_image_prompt, image_url or "")
+    success = update_citizen_record(tables, username, new_description, new_core_personality, new_image_prompt, image_url or "")
     if not success:
         log.error(f"Failed to update citizen record for {username}")
         return False
