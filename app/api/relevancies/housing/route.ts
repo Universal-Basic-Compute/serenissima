@@ -324,7 +324,7 @@ ${getHousingRecommendation(homelessCount, vacantCount, relevancyScore)}
         AssetType: 'city',
         Category: 'housing',
         Type: 'housing_situation',
-        TargetCitizen: 'all',
+        TargetCitizen: 'ConsiglioDeiDieci',
         RelevantToCitizen: 'all',
         Score: globalHousingRelevancy.score,
         TimeHorizon: globalHousingRelevancy.timeHorizon,
