@@ -1178,15 +1178,28 @@ Your response must be a JSON object with:
                                 consiglio_ducats = consiglio_record["fields"].get("Ducats", 0)
                                 log_info(f"ConsiglioDeiDieci has {consiglio_ducats} ducats before transfer")
                                 
-                                # Update citizen's ducats
+                                # Look up the citizen's record ID from Airtable using Username
+                                citizen_records = tables["citizens"].all(formula=f"{{Username}}='{ai_username}'")
+                                if not citizen_records:
+                                    log_error(f"Could not find Airtable record for citizen {ai_username}")
+                                    return False
+                                
+                                citizen_airtable_id = citizen_records[0]["id"]
+                                log_info(f"Found Airtable record ID for {ai_username}: {citizen_airtable_id}")
+                                
+                                # Update citizen's ducats using the Airtable record ID
                                 log_info(f"Updating {ai_username}'s ducats from {citizen_ducats} to {citizen_ducats - construction_cost}")
-                                tables["citizens"].update(citizen_record["id"], {
+                                tables["citizens"].update(citizen_airtable_id, {
                                     "Ducats": citizen_ducats - construction_cost
                                 })
                                 
+                                # Get ConsiglioDeiDieci's Airtable record ID
+                                consiglio_airtable_id = consiglio_record["id"]
+                                log_info(f"Found Airtable record ID for ConsiglioDeiDieci: {consiglio_airtable_id}")
+                                
                                 # Update ConsiglioDeiDieci's ducats
                                 log_info(f"Updating ConsiglioDeiDieci's ducats from {consiglio_ducats} to {consiglio_ducats + construction_cost}")
-                                tables["citizens"].update(consiglio_record["id"], {
+                                tables["citizens"].update(consiglio_airtable_id, {
                                     "Ducats": consiglio_ducats + construction_cost
                                 })
                                 
