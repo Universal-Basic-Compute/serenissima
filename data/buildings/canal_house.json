@@ -1,7 +1,7 @@
 {
   "name": "Canal House",
   "pointType": "canal",
-  "category": "Residential",
+  "category": "home",
   "subcategory": "Basic Residences",
   "tier": 2,
   "size": "Medium",
@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Canal House represents specialized waterfront residential property with direct transportation access. The construction cost of 2,000,000 ducats reflects the premium waterfront location and specialized water-level construction, while the income of 35,000 ducats (1.75% return) represents the premium rent such properties commanded. The maintenance cost of 11,000 ducats (31% of income) shows an increased maintenance ratio, reflecting the challenges of maintaining structures in direct contact with water. The residentsCapacity of 8 represents a prosperous family with servants. The construction time of 5 days (432000000ms) reflects the specialized waterfront construction requirements. This building creates a strategic residential option with transportation advantages, reflecting Venice's unique water-based urban structure.",
   "shortDescription": "Multi-story residence with direct canal access for convenient transportation.",
   "fullDescription": "A practical yet prestigious home with a private water entrance (porta d'acqua) directly on a canal. These versatile buildings allow residents to receive goods and visitors directly by boat. The water-level entrance typically includes a small private dock and storage area, with living quarters above.",
-  "flavorText": "In Venice, a door to the water is worth more than a door to the street\u2014for water is the true street of the Serenissima.",
+  "flavorText": "In Venice, a door to the water is worth more than a door to the street—for water is the true street of the Serenissima.",
   "constructionCosts": {
     "ducats": 2000000,
     "timber": 90,

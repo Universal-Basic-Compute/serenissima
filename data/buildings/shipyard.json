@@ -1,7 +1,7 @@
 {
   "name": "Shipyard",
   "pointType": "canal",
-  "category": "Production",
+  "category": "business",
   "subcategory": "Shipbuilding Industry",
   "tier": 3,
   "size": "Extra Large",
@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Shipyard represents major maritime industrial infrastructure with substantial returns. The construction cost of 6,000,000 ducats reflects the extensive facilities and specialized equipment required, while the income of 70,000 ducats (1.17% return) represents the high-value vessels produced. The maintenance cost of 75,000 ducats exceeds income, creating a realistic scenario where shipbuilding required substantial ongoing investment but provided strategic maritime capabilities. The employment capacity of 40 represents the shipwrights, carpenters, and laborers needed. The construction time of 14 days (1209600000ms) reflects the major industrial project. This building creates a strategic investment in maritime production with appropriate guild and location requirements reflecting the historical importance of shipbuilding to Venice's commercial and naval power, where private shipyards complemented the state-run Arsenal.",
   "shortDescription": "Facility for construction and repair of maritime vessels, from small boats to trading ships.",
   "fullDescription": "The backbone of Venice's maritime power, private shipyards construct and maintain the merchant fleet that drives the city's commerce. Featuring slipways for vessel construction, specialized workshops for component fabrication, and direct water access, these industrial facilities require substantial space and resources. While not as large as the state-run Arsenal, private shipyards are vital to maintaining Venice's commercial fleet.",
-  "flavorText": "From oak and pitch and canvas, we conjure vessels that will challenge the Mediterranean and return laden with the world's riches\u2014or consign their investors to bankruptcy.",
+  "flavorText": "From oak and pitch and canvas, we conjure vessels that will challenge the Mediterranean and return laden with the world's riches—or consign their investors to bankruptcy.",
   "constructionCosts": {
     "ducats": 6000000,
     "timber": 300,

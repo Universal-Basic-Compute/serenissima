@@ -1,7 +1,7 @@
 {
   "name": "Boat Workshop",
   "pointType": "canal",
-  "category": "Production",
+  "category": "business",
   "subcategory": "Transportation Industry",
   "tier": 2,
   "size": "Medium",
@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Boat Workshop represents specialized maritime production with modest returns. The construction cost of 2,000,000 ducats reflects the specialized equipment and waterfront facilities required, while the income of 25,000 ducats (1.25% return) represents sales of various watercraft. The maintenance cost of 20,000 ducats (80% of income) creates a modest profit margin appropriate for specialized production. The employment capacity of 8 represents the boat builders, apprentices, and assistants needed. The construction time of 5 days (432000000ms) reflects the specialized construction requirements. This building creates a strategic investment in transportation infrastructure that supports Venice's unique water-based mobility needs.",
   "shortDescription": "Specialized workshop for building and repairing small watercraft for Venice's canals and lagoon.",
   "fullDescription": "Essential to Venice's water-based transportation system, boat workshops construct and maintain the diverse fleet of small vessels that navigate the city's canals. Featuring covered construction areas, specialized tools, wood steaming equipment, and direct water access, these facilities combine traditional craftsmanship with practical functionality. From simple sandoli to elegant gondolas, these workshops produce the watercraft that define Venetian mobility.",
-  "flavorText": "In a city where streets are made of water, the boat builder is as essential as the baker\u2014for while one feeds the body, the other enables every aspect of Venetian life to flow.",
+  "flavorText": "In a city where streets are made of water, the boat builder is as essential as the baker—for while one feeds the body, the other enables every aspect of Venetian life to flow.",
   "constructionCosts": {
     "ducats": 2000000,
     "timber": 150,

@@ -1,7 +1,7 @@
 {
   "name": "Mint",
   "pointType": "building",
-  "category": "Production",
+  "category": "business",
   "subcategory": "Metallurgy Industry",
   "tier": 4,
   "size": "Large",
@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Mint represents specialized monetary infrastructure with strategic rather than commercial value. The construction cost of 10,000,000 ducats reflects the secure facilities and specialized equipment required, while generating no direct income reflects its governmental rather than private commercial purpose. The maintenance cost of 100,000 ducats creates a substantial ongoing expense justified by the critical currency production capabilities provided. The employment capacity of 50 represents the metalworkers, engravers, and security staff needed. The construction time of 30 days (2592000000ms) reflects the specialized construction requirements. This building creates a strategic economic asset with appropriate government restrictions reflecting the historical importance of currency production to Venice's commercial system, where the consistent quality of Venetian ducats was a key factor in the city's trading power.",
   "shortDescription": "Official facility for producing Venetian coinage from precious metals under strict government oversight.",
   "fullDescription": "The literal economic engine of Venice, the mint (Zecca) transforms gold and silver into the ducats and other coins that power commerce. Operating under the strictest security and quality control, this heavily guarded facility features specialized workshops for metal purification, coin striking, and verification. The consistent quality of Venetian currency was a key factor in the city's commercial dominance.",
-  "flavorText": "All wealth flows from these walls\u2014but never forget that each coin bears not just gold, but the very authority of the Republic itself.",
+  "flavorText": "All wealth flows from these walls—but never forget that each coin bears not just gold, but the very authority of the Republic itself.",
   "constructionCosts": {
     "ducats": 10000000,
     "timber": 150,

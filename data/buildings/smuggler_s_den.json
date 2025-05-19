@@ -1,7 +1,7 @@
 {
   "name": "Smuggler's Den",
   "pointType": "building",
-  "category": "Criminal",
+  "category": "business",
   "subcategory": "Illicit Operations",
   "tier": 2,
   "size": "Medium",
@@ -10,7 +10,7 @@
   "calculationsAnalysis": "The Smuggler's Den represents specialized contraband handling with high risk and high reward. The construction cost of 2,500,000 ducats reflects the specialized storage and security measures required, while the income of 35,000 ducats (1.4% return) represents the markup on smuggled goods. The maintenance cost of 25,000 ducats (71.4% of income) creates a reasonable profit margin appropriate for this high-risk venture. The employment capacity of 8 represents the minimal crew needed for operations. The construction time of 5 days (432000000ms) reflects the need for discreet construction. This building creates a strategic investment in contraband movement with appropriate location requirements reflecting Venice's historical position as a smuggling hub due to its complex waterways and position between East and West.",
   "shortDescription": "Concealed facility for storing and moving contraband through Venice's complex waterways.",
   "fullDescription": "Taking advantage of Venice's labyrinthine canals and lagoon, smuggler's dens serve as hubs for moving illegal goods into and through the city. Featuring hidden docks, concealed storage, lookout positions, and often disguised entrances, these facilities enable the shadow economy that operates beneath Venice's legitimate trade. Their strategic locations provide quick access to both city canals and lagoon escape routes.",
-  "flavorText": "The customs officer sees only what passes through the gate, but the smuggler knows that in Venice, every canal is a highway and every water door a potential customs house\u2014if you know whom to pay.",
+  "flavorText": "The customs officer sees only what passes through the gate, but the smuggler knows that in Venice, every canal is a highway and every water door a potential customs house—if you know whom to pay.",
   "constructionCosts": {
     "ducats": 2500000,
     "timber": 80,

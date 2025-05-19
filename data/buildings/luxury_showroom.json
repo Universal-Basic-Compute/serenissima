@@ -1,14 +1,14 @@
 {
   "name": "Luxury Showroom",
   "pointType": "building",
-  "category": "Commercial",
+  "category": "business",
   "subcategory": "Retail Shops",
   "tier": 3,
   "size": "Large",
   "unlockCondition": "15,000,000 ducats total wealth, Noble connections, Merchant Guild membership",
   "calculationsAnalysis": "The Luxury Showroom represents high-end retail with substantial investment and returns. The construction cost of 3,000,000 ducats reflects the premium materials and prestigious location required, while the income of 35,000 ducats (1.2% return) represents the high margins on luxury goods. The maintenance cost of 20,000 ducats (57% of income) reflects the high standards of upkeep and security required. The employment capacity of 5 represents the specialized staff needed to serve elite clientele. The construction time of 5 days (432000000ms) creates a meaningful progression tier for advanced players. This building creates a strategic choice to invest in high-end retail with appropriate wealth and connection requirements reflecting the exclusive nature of luxury commerce in Renaissance Venice.",
   "shortDescription": "High-end display space for luxury goods catering to nobility and wealthy merchants.",
-  "fullDescription": "The pinnacle of Venetian retail, these elegant spaces showcase the finest products Venice has to offer. Unlike crowded contract shops, luxury showrooms feature carefully curated displays, private consultation areas, and by-appointment service for elite clients. Often specializing in a particular luxury good\u2014Murano glass, jewelry, imported rarities\u2014these establishments cultivate an exclusive atmosphere that justifies premium prices.",
+  "fullDescription": "The pinnacle of Venetian retail, these elegant spaces showcase the finest products Venice has to offer. Unlike crowded contract shops, luxury showrooms feature carefully curated displays, private consultation areas, and by-appointment service for elite clients. Often specializing in a particular luxury good—Murano glass, jewelry, imported rarities—these establishments cultivate an exclusive atmosphere that justifies premium prices.",
   "flavorText": "Here we do not simply sell objects, but rather the very essence of refinement and distinction that separates the truly cultured from the merely wealthy.",
   "constructionCosts": {
     "ducats": 3000000,

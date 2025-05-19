@@ -1,7 +1,7 @@
 {
   "name": "Arsenal Workshop",
   "pointType": "building",
-  "category": "Military & Defense",
+  "category": "business",
   "subcategory": "Naval Facilities",
   "tier": 4,
   "size": "Extra Large",
@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Arsenal Workshop represents Venice's revolutionary naval production system with strategic rather than commercial value. The construction cost of 12,500,000 ducats reflects the massive industrial facilities and specialized equipment required, while generating no direct income reflects its military rather than commercial purpose. The maintenance cost of 100,000 ducats creates a substantial ongoing expense justified by the critical naval production capabilities provided. The employment capacity of 80 represents the shipwrights, craftsmen, and laborers needed for industrial-scale production. The construction time of 40 days (3456000000ms) reflects the massive industrial project. This building creates a strategic military asset with appropriate government restrictions reflecting the historical Arsenal's status as a state-controlled facility that was the largest industrial complex in pre-industrial Europe and key to Venice's naval dominance.",
   "shortDescription": "Specialized production facility within the Arsenal complex for building naval vessels and equipment.",
   "fullDescription": "The industrial heart of Venice's naval power, Arsenal workshops represent the world's first standardized ship production facilities. Featuring specialized construction areas, material processing stations, equipment fabrication, and assembly zones, these massive structures enabled Venice to build ships at unprecedented speed and quality. Their advanced organization and scale astounded foreign visitors and projected Venetian power throughout the Mediterranean.",
-  "flavorText": "What other nations do in months, the Arsenal does in days; what they build individually, we create in series\u2014for Venice's navy is not merely ships, but the perfected system that produces them.",
+  "flavorText": "What other nations do in months, the Arsenal does in days; what they build individually, we create in series—for Venice's navy is not merely ships, but the perfected system that produces them.",
   "constructionCosts": {
     "ducats": 12500000,
     "timber": 500,

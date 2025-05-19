@@ -121,7 +121,8 @@ export async function GET(request: NextRequest) {
       assetType: 'city',
       category: 'housing',
       type: 'housing_situation',
-      targetCitizen: 'all',
+      targetCitizen: 'ConsiglioDeiDieci',
+      relevantToCitizen: 'all',
       title: `Housing Situation in Venice`,
       description: `
 ### Venice Housing Report
@@ -276,7 +277,8 @@ export async function POST(request: NextRequest) {
       assetType: 'city',
       category: 'housing',
       type: 'housing_situation',
-      targetCitizen: 'all',
+      targetCitizen: 'ConsiglioDeiDieci',
+      relevantToCitizen: 'all',
       title: `Housing Situation in Venice`,
       description: `
 ### Venice Housing Report
@@ -301,10 +303,10 @@ ${getHousingRecommendation(homelessCount, vacantCount, relevancyScore)}
     // Save to Airtable as a global relevancy
     let saved = false;
     try {
-      // Create a modified housing relevancy with targetCitizen set to 'all'
+      // Create a modified housing relevancy with relevantToCitizen set to 'all'
       const globalHousingRelevancy = {
         ...housingRelevancy,
-        targetCitizen: 'all'  // This makes it a global relevancy
+        relevantToCitizen: 'all'  // This makes it a global relevancy
       };
       
       // Create a map with the single relevancy

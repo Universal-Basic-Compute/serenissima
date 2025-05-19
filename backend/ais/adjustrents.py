@@ -466,7 +466,7 @@ def process_ai_rent_adjustments(dry_run: bool = False):
     # Filter AI citizens to only those who own at least one building that can be rented out
     filtered_ai_citizens = []
     for ai_citizen in ai_citizens:
-        ai_username = ai_citizen["fields"].get("Citizenname")
+        ai_username = ai_citizen["fields"].get("Username")
         if not ai_username:
             continue
             

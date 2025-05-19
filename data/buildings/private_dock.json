@@ -1,7 +1,7 @@
 {
   "name": "Private Dock",
   "pointType": "canal",
-  "category": "Infrastructure",
+  "category": "business",
   "subcategory": "Transportation Facilities",
   "tier": 2,
   "size": "Medium",
@@ -10,7 +10,7 @@
   "calculationsAnalysis": "The Private Dock represents premium personal infrastructure with modest direct and significant indirect benefits. The construction cost of 2,000,000 ducats reflects the high-quality materials and security features required, while the income of 5,000 ducats (0.25% return) represents minimal fees from occasional third-party usage. The maintenance cost of 22,500 ducats (450% of income) creates a significant ongoing expense justified by convenience and status benefits. The employment capacity of 3 represents the boatmen and guards needed. The construction time of 4 days (345600000ms) reflects the quality construction requirements. This building creates a strategic personal infrastructure option that enhances property value and transportation efficiency, reflecting the historical importance of private water access for wealthy Venetians in a city where boats were the primary transportation method.",
   "shortDescription": "Exclusive water access facility for personal or business use with enhanced security and privacy.",
   "fullDescription": "A mark of status and practicality, private docks provide dedicated water access for wealthy residences or businesses. Featuring secure moorings, covered boat storage, and often a small gatehouse, these facilities offer convenience and privacy for owners while demonstrating their status. Often architecturally integrated with the associated building, private docks represent significant investment in waterfront infrastructure.",
-  "flavorText": "The private dock speaks volumes before its owner utters a word\u2014it declares to Venice that one has not merely wealth, but the wisdom to navigate the city on one's own terms.",
+  "flavorText": "The private dock speaks volumes before its owner utters a word—it declares to Venice that one has not merely wealth, but the wisdom to navigate the city on one's own terms.",
   "constructionCosts": {
     "ducats": 2000000,
     "timber": 150,

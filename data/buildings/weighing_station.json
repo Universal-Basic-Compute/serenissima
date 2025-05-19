@@ -1,7 +1,7 @@
 {
   "name": "Weighing Station",
   "pointType": "building",
-  "category": "Commercial",
+  "category": "business",
   "subcategory": "Trade Facilities",
   "tier": 2,
   "size": "Medium",
@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Weighing Station balances government service with modest revenue generation. The construction cost of 1,900,000 ducats reflects the specialized equipment and official infrastructure required, while the income of 25,000 ducats (1.32% return) represents the fees collected for standardized measurements. The maintenance cost of 13,500 ducats (54% of income) creates a modest profit margin appropriate for a semi-governmental service. The employment capacity of 8 represents the officials and workers needed to operate measurement equipment and maintain records. The construction time of 3 days (259200000ms) reflects the specialized construction requirements. This building creates a strategic investment in commercial infrastructure that benefits the entire trading system while generating modest direct returns, reflecting Venice's sophisticated approach to standardization and commercial regulation.",
   "shortDescription": "Official product measurement facility ensuring accurate weights and measures for commerce.",
   "fullDescription": "Accuracy in commerce was essential to Venice's reputation, and these official stations provided standardized weights and measures for all significant transactions. Featuring precisely calibrated scales, volume measures, and length standards, these government-regulated facilities prevented fraud while collecting small fees for their services. The official certification they provided gave merchants confidence in their transactions.",
-  "flavorText": "A gram too light or an inch too short may seem trivial, until one calculates the difference across a thousand transactions\u2014then one understands why the Republic is so precise in its measures.",
+  "flavorText": "A gram too light or an inch too short may seem trivial, until one calculates the difference across a thousand transactions—then one understands why the Republic is so precise in its measures.",
   "constructionCosts": {
     "ducats": 1900000,
     "timber": 65,

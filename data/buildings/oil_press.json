@@ -1,14 +1,14 @@
 {
   "name": "Oil Press",
   "pointType": "building",
-  "category": "Production",
+  "category": "business",
   "subcategory": "Food Processing",
   "tier": 2,
   "size": "Medium",
   "unlockCondition": "3,000,000 ducats total wealth, access to olive supply",
   "shortDescription": "Facility for extracting oil from olives through pressing.",
   "fullDescription": "This specialized workshop houses large wooden or stone presses used to extract valuable oil from olives. The process involves crushing olives into a paste, then pressing them to separate the oil from the solids and water. The resulting olive oil is a staple of Venetian cuisine and an important trade commodity.",
-  "flavorText": "From humble fruit to liquid gold\u2014the press transforms nature's bounty into Venice's culinary treasure.",
+  "flavorText": "From humble fruit to liquid gold—the press transforms nature's bounty into Venice's culinary treasure.",
   "constructionCosts": {
     "ducats": 800000,
     "timber": 60,

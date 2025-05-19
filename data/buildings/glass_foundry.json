@@ -1,7 +1,7 @@
 {
   "name": "Glass Foundry",
   "pointType": "building",
-  "category": "Production",
+  "category": "business",
   "subcategory": "Glass Industry",
   "tier": 2,
   "size": "Large",
@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Glass Foundry's economic profile reflects both historical importance and gameplay balance. The high construction cost (2,800,000 ducats) represents the specialized infrastructure required for glassmaking, while the substantial maintenance cost (60,000 ducats) reflects the constant fuel needs and skilled labor. With an income of 38,000 ducats, the foundry provides only a 1.36% return per cycle, but unlocks the highly profitable Venetian glass industry chain. This intentionally creates a strategic choice for players: significant upfront investment for long-term industry development. Historically accurate restrictions to Murano island add geographical strategy to placement decisions.",
   "shortDescription": "Primary facility for melting raw materials into glass. Requires substantial fuel and produces significant heat.",
   "fullDescription": "The heart of Venetian glassmaking, foundries convert sand, soda ash, and minerals into the famed cristallo glass. Due to fire risks and to protect trade secrets, glass foundries are strictly limited to Murano island by order of the Republic. These specialized facilities feature massive furnaces that operate continuously at extreme temperatures.",
-  "flavorText": "The furnaces of Murano burn day and night, crafting transparency from mere sand\u2014perhaps the closest mortal men come to performing true alchemy.",
+  "flavorText": "The furnaces of Murano burn day and night, crafting transparency from mere sand—perhaps the closest mortal men come to performing true alchemy.",
   "constructionCosts": {
     "ducats": 2800000,
     "timber": 110,

@@ -231,7 +231,7 @@ def process_ai_land_bidding(dry_run: bool = False):
     # Filter AI citizens to only those with sufficient ducats for bidding (minimum 2,500,000)
     filtered_ai_citizens = []
     for ai_citizen in ai_citizens:
-        ai_username = ai_citizen["fields"].get("Citizenname")
+        ai_username = ai_citizen["fields"].get("Username")
         ducats = ai_citizen["fields"].get("Ducats", 0)
         
         if ducats >= 2500000:

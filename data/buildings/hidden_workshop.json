@@ -1,7 +1,7 @@
 {
   "name": "Hidden Workshop",
   "pointType": "building",
-  "category": "Criminal",
+  "category": "business",
   "subcategory": "Illicit Production",
   "tier": 3,
   "size": "Small",
@@ -9,7 +9,7 @@
   "calculationsAnalysis": "The Hidden Workshop represents specialized illicit production with high risk and high reward. The construction cost of 3,000,000 ducats reflects the specialized equipment and secrecy measures required, while the income of 45,000 ducats (1.5% return) represents the premium prices commanded by illegal goods. The maintenance cost of 30,000 ducats (66.7% of income) creates a substantial profit margin appropriate for high-risk criminal enterprise. The employment capacity of 5 represents the minimal trusted staff needed for security. The construction time of 7 days (604800000ms) reflects the need for discreet construction. This building creates a strategic investment in criminal production with appropriate underworld requirements reflecting the historical reality of Venice's shadow economy.",
   "shortDescription": "Concealed facility for producing illegal goods and contraband, hidden from authorities.",
   "fullDescription": "Operating in the shadows of Venice's economy, hidden workshops produce a variety of illegal or restricted goods. Featuring specialized equipment, security measures, and discreet access, these facilities maintain a low profile while serving criminal networks. Their locations are carefully chosen to minimize detection, often disguised as legitimate businesses or tucked away in obscure locations.",
-  "flavorText": "The most profitable workshops in Venice are those that appear on no tax record and bear no guild sign\u2014for what the law forbids, the contract often desires most desperately.",
+  "flavorText": "The most profitable workshops in Venice are those that appear on no tax record and bear no guild sign—for what the law forbids, the contract often desires most desperately.",
   "constructionCosts": {
     "ducats": 3000000,
     "timber": 50,

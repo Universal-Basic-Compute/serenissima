@@ -1,7 +1,7 @@
 {
   "name": "Eastern Merchant House",
   "pointType": "building",
-  "category": "Commercial",
+  "category": "business",
   "subcategory": "Trade Facilities",
   "tier": 3,
   "size": "Large",
@@ -10,7 +10,7 @@
   "calculationsAnalysis": "The Eastern Merchant House balances substantial investment with lucrative Eastern trade returns. The construction cost of 5,000,000 ducats reflects the specialized architecture and prestigious location required, while the income of 60,000 ducats (1.2% return) represents the high-value Eastern luxury goods trade. The maintenance cost of 30,000 ducats (50% of income) reflects the costs of maintaining cultural specialists and exotic goods handling. The employment capacity of 20 represents the staff needed to manage complex Eastern trade relationships. The construction time of 10 days (864000000ms) represents a significant project for advanced players. This building creates a strategic investment in the lucrative Eastern trade routes that were historically crucial to Venice's commercial dominance, with appropriate requirements reflecting the specialized knowledge and connections needed.",
   "shortDescription": "Trading post specialized in Eastern goods, combining warehouse, offices, and cultural showcase.",
   "fullDescription": "Venice's gateway to the riches of the East, these specialized trading houses focus on goods from the Ottoman Empire, Persia, and beyond. Featuring architecture and decoration influenced by Eastern styles, these buildings provide both commercial facilities and cultural spaces where Eastern and Western merchants can negotiate. Often housing translators and cultural experts, they facilitate the flow of exotic goods that made Venice wealthy.",
-  "flavorText": "Here the silk road reaches its final destination, as do the dreams of a thousand caravans\u2014and the nightmares of Venice's competitors.",
+  "flavorText": "Here the silk road reaches its final destination, as do the dreams of a thousand caravans—and the nightmares of Venice's competitors.",
   "constructionCosts": {
     "ducats": 5000000,
     "timber": 200,

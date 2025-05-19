@@ -492,7 +492,7 @@ def process_ai_lease_adjustments(dry_run: bool = False):
     # Filter AI citizens to only those whose lands have buildings owned by others
     filtered_ai_citizens = []
     for ai_citizen in ai_citizens:
-        ai_username = ai_citizen["fields"].get("Citizenname")
+        ai_username = ai_citizen["fields"].get("Username")
         if not ai_username:
             continue
             
