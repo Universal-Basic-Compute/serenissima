@@ -139,7 +139,7 @@ def detect_no_buildings_problems(username: str, base_url: str) -> Dict:
         }
 
 def detect_problems():
-    """Detect problems for all citizens who own lands."""
+    """Detect problems for all lands."""
     try:
         # Initialize Airtable
         tables = initialize_airtable()
@@ -148,46 +148,68 @@ def detect_problems():
         base_url = os.environ.get('NEXT_PUBLIC_BASE_URL', 'http://localhost:3000')
         log.info(f"Using base URL: {base_url}")
         
-        # Get all citizens
-        citizen_usernames = get_citizens_with_lands(tables)
+        # Process all lands (no username specified)
+        log.info("Detecting lands with no buildings for all lands")
         
-        if not citizen_usernames:
-            log.info("No citizens found, nothing to do")
-            return True
+        # Call the no-buildings endpoint without a specific username
+        api_url = f"{base_url}/api/problems/no-buildings"
+        log.info(f"Calling API: {api_url} for all lands")
         
-        # Process each citizen individually
-        results = {}
-        total_problems = 0
+        # Make a POST request to the no-buildings endpoint
+        response = requests.post(
+            api_url,
+            json={},  # Empty body to process all lands
+            timeout=120  # Longer timeout for processing all lands
+        )
         
-        for username in citizen_usernames:
-            # Add a small delay between requests to avoid rate limiting
-            if results:  # Skip delay for the first request
-                time.sleep(1)
+        log.info(f"API response status: {response.status_code}")
+        
+        if not response.ok:
+            log.error(f"API call failed with status {response.status_code}: {response.text}")
             
-            result = detect_no_buildings_problems(username, base_url)
-            results[username] = result
+            # Create an admin notification about the error
+            create_admin_notification(
+                tables,
+                "Problem Detection Error",
+                f"API call failed with status {response.status_code}: {response.text}"
+            )
             
-            if result.get('success'):
-                total_problems += result.get('problemCount', 0)
-                log.info(f"Successfully detected {result.get('problemCount', 0)} problems for {username}")
-                
-                # Check if problems were saved to Airtable
-                if result.get('saved', False):
-                    log.info(f"Problems for {username} were saved to Airtable")
-                else:
-                    log.warning(f"Problems for {username} were detected but NOT saved to Airtable")
-            else:
-                log.error(f"Failed to detect problems for {username}: {result.get('error')}")
+            return False
+        
+        # Parse the response
+        data = response.json()
+        
+        # Log a summary of the response
+        log.info(f"API response: success={data.get('success')}, problemCount={data.get('problemCount')}")
+        
+        if not data.get('success'):
+            log.error(f"API returned error: {data.get('error')}")
+            
+            # Create an admin notification about the error
+            create_admin_notification(
+                tables,
+                "Problem Detection Error",
+                f"API returned error: {data.get('error', 'Unknown error')}"
+            )
+            
+            return False
+        
+        # Group problems by citizen for the notification
+        problems_by_citizen = {}
+        
+        for problem_id, problem in data.get('problems', {}).items():
+            citizen = problem.get('citizen', 'Unknown')
+            
+            if citizen not in problems_by_citizen:
+                problems_by_citizen[citizen] = 0
+            
+            problems_by_citizen[citizen] += 1
         
         # Create a detailed message for the notification
         details = []
         
-        for citizen, result in results.items():
-            if not result.get('success'):
-                details.append(f"- {citizen}: Error - {result.get('error', 'Unknown error')}")
-            else:
-                saved_status = "saved to Airtable" if result.get('saved', False) else "NOT saved to Airtable"
-                details.append(f"- {citizen}: {result.get('problemCount', 0)} problems detected - {saved_status}")
+        for citizen, count in problems_by_citizen.items():
+            details.append(f"- {citizen}: {count} problems detected")
         
         details_text = "\n".join(details)
         
@@ -195,9 +217,10 @@ def detect_problems():
         notification_created = create_admin_notification(
             tables,
             "Problem Detection Complete",
-            f"Detected problems for {len(citizen_usernames)} citizens.\n"
-            f"Found {total_problems} problems in total.\n\n"
-            f"Details:\n{details_text}"
+            f"Detected {data.get('problemCount', 0)} problems across {len(problems_by_citizen)} citizens.\n\n"
+            f"Details:\n{details_text}\n\n"
+            f"Problems saved to Airtable: {data.get('saved', False)}\n"
+            f"Number of problems saved: {data.get('savedCount', 0)}"
         )
         
         if notification_created:

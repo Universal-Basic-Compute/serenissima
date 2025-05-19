@@ -19,10 +19,14 @@ export class ProblemService {
   /**
    * Detect lands with no buildings
    */
-  public async detectLandsWithNoBuildings(username: string): Promise<Record<string, any>> {
+  public async detectLandsWithNoBuildings(username: string = ''): Promise<Record<string, any>> {
     try {
-      // Fetch lands owned by the citizen
-      const landsResponse = await fetch(`${this.getBaseUrl()}/api/lands?owner=${encodeURIComponent(username)}`);
+      // Fetch all lands or lands owned by the specified username if provided
+      const apiUrl = username 
+        ? `${this.getBaseUrl()}/api/lands?owner=${encodeURIComponent(username)}`
+        : `${this.getBaseUrl()}/api/lands`;
+      
+      const landsResponse = await fetch(apiUrl);
       if (!landsResponse.ok) {
         throw new Error(`Failed to fetch lands: ${landsResponse.status}`);
       }
@@ -31,7 +35,7 @@ export class ProblemService {
       const lands = landsData.lands || [];
       
       if (lands.length === 0) {
-        console.log(`Citizen ${username} does not own any lands`);
+        console.log('No lands found');
         return {};
       }
       
@@ -59,6 +63,7 @@ export class ProblemService {
       
       lands.forEach(land => {
         const landId = land.id;
+        const landOwner = land.owner || 'Unknown';
         const buildingsOnLand = buildingsByLand[landId] || [];
         
         if (buildingsOnLand.length === 0) {
@@ -67,7 +72,7 @@ export class ProblemService {
           
           problems[problemId] = {
             problemId,
-            citizen: username,
+            citizen: landOwner, // Use the land owner as the citizen
             assetType: 'land',
             assetId: landId,
             severity: 'medium',

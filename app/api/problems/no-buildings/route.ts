@@ -34,18 +34,11 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Get the username from the request body
+    // Get the username from the request body (optional now)
     const body = await request.json();
     const { username } = body;
     
-    if (!username) {
-      return NextResponse.json(
-        { error: 'Username is required' },
-        { status: 400 }
-      );
-    }
-    
-    // Detect lands with no buildings
+    // Detect lands with no buildings (for all lands if username is not provided)
     const problems = await problemService.detectLandsWithNoBuildings(username);
     
     // Add Center as Position for each problem
@@ -62,7 +55,33 @@ export async function POST(request: NextRequest) {
     let savedCount = 0;
     
     try {
-      savedCount = await saveProblems(username, problems);
+      // If username is provided, save problems for that user only
+      // Otherwise, save all problems
+      if (username) {
+        savedCount = await saveProblems(username, problems);
+      } else {
+        // Group problems by citizen
+        const problemsByCitizen: Record<string, Record<string, any>> = {};
+        
+        for (const problemId in problems) {
+          const problem = problems[problemId];
+          const citizen = problem.citizen;
+          
+          if (!problemsByCitizen[citizen]) {
+            problemsByCitizen[citizen] = {};
+          }
+          
+          problemsByCitizen[citizen][problemId] = problem;
+        }
+        
+        // Save problems for each citizen
+        for (const citizen in problemsByCitizen) {
+          const citizenProblems = problemsByCitizen[citizen];
+          const count = await saveProblems(citizen, citizenProblems);
+          savedCount += count;
+        }
+      }
+      
       saved = true;
     } catch (error) {
       console.error('Error saving problems to Airtable:', error);
@@ -70,7 +89,7 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: true,
-      username,
+      username: username || 'all',
       problemCount: Object.keys(problems).length,
       problems,
       saved,
