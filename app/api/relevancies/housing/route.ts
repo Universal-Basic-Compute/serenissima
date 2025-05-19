@@ -298,23 +298,24 @@ ${getHousingRecommendation(homelessCount, vacantCount, relevancyScore)}
       'venice_housing': housingRelevancy
     };
     
-    // Save to Airtable - either for a specific user or for all citizens
+    // Save to Airtable as a global relevancy
     let saved = false;
     try {
-      if (aiUsername) {
-        // Save for specific user
-        await saveRelevancies(aiUsername, relevancies, [], citizensResponse);
-        saved = true;
-      } else {
-        // Save for all citizens
-        for (const citizen of citizensResponse) {
-          const username = citizen.get('Username');
-          if (username) {
-            await saveRelevancies(username, relevancies, [], citizensResponse);
-          }
-        }
-        saved = true;
-      }
+      // Create a modified housing relevancy with targetCitizen set to 'all'
+      const globalHousingRelevancy = {
+        ...housingRelevancy,
+        targetCitizen: 'all'  // This makes it a global relevancy
+      };
+      
+      // Create a map with the single relevancy
+      const relevancies: Record<string, any> = {
+        'venice_housing': globalHousingRelevancy
+      };
+      
+      // Save only once with the ConsiglioDeiDieci as the relevant citizen
+      await saveRelevancies('ConsiglioDeiDieci', relevancies, [], citizensResponse);
+      console.log('Successfully saved global housing relevancy');
+      saved = true;
     } catch (error) {
       console.error('Error saving housing relevancy to Airtable:', error);
     }
