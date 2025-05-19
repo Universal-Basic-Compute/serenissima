@@ -219,8 +219,8 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
             const profile = JSON.parse(savedProfile);
             if (profile.username) {
               citizenToFetch = profile.username;
-              // Update the component state
-              setUsername(profile.username);
+              // The component's main username state should be set by the dedicated useEffect,
+              // not directly within this fetch function.
             }
           } catch (error) {
             console.error('Error parsing citizen profile:', error);
