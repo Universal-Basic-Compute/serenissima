@@ -354,6 +354,13 @@ def prepare_ai_building_strategy(ai_citizen: Dict, citizen_lands: List[Dict], ci
     ducats = ai_citizen["fields"].get("Ducats", 0)
     social_class = ai_citizen["fields"].get("SocialClass", "Facchini")  # Default to lowest class if not specified
     
+    # Add the additional citizen fields
+    description = ai_citizen["fields"].get("Description", "")
+    core_personality = ai_citizen["fields"].get("CorePersonality", "")
+    image_prompt = ai_citizen["fields"].get("ImagePrompt", "")
+    family_motto = ai_citizen["fields"].get("FamilyMotto", "")
+    coat_of_arms = ai_citizen["fields"].get("CoatOfArms", "")
+    
     # Determine allowed building tiers based on social class
     allowed_tiers = get_allowed_building_tiers(social_class)
     
@@ -460,6 +467,11 @@ def prepare_ai_building_strategy(ai_citizen: Dict, citizen_lands: List[Dict], ci
             "username": username,
             "ducats": ducats,
             "social_class": social_class,
+            "description": description,  # Add description
+            "core_personality": core_personality,  # Add core personality
+            "image_prompt": image_prompt,  # Add image prompt
+            "family_motto": family_motto,  # Add family motto
+            "coat_of_arms": coat_of_arms,  # Add coat of arms
             "allowed_building_tiers": allowed_tiers,
             "total_lands": len(lands_data),
             "total_buildings": len(buildings_data),
