@@ -141,13 +141,17 @@ def get_citizen_info(tables, username: str) -> Optional[Dict]:
         log.info(f"Found {len(recent_notifications)} recent notifications for {username}")
         
         # NEW: Get relevancies where this citizen is the target
-        relevancies_formula = f"{{TargetCitizen}}='{username}'"
-        relevancies = tables['relevancies'].all(
-            formula=relevancies_formula,
-            sort=[{"field": "CreatedAt", "direction": "desc"}],
-            max_records=100  # Limit to last 100 relevancies
-        )
-        log.info(f"Found {len(relevancies)} relevancies where {username} is the target")
+        try:
+            relevancies_formula = f"{{TargetCitizen}}='{username}'"
+            relevancies = tables['relevancies'].all(
+                formula=relevancies_formula,
+                sort=[{"field": "CreatedAt", "direction": "desc"}],
+                max_records=100  # Limit to last 100 relevancies
+            )
+            log.info(f"Found {len(relevancies)} relevancies where {username} is the target")
+        except Exception as e:
+            log.warning(f"Error fetching relevancies for {username}: {e}")
+            relevancies = []  # Use empty list if there's an error
         
         # Compile all information
         citizen_info = {
@@ -158,7 +162,21 @@ def get_citizen_info(tables, username: str) -> Optional[Dict]:
             "recent_resources": resources,
             "recent_activities": recent_activities,
             "recent_notifications": recent_notifications,
-            "relevancies": relevancies  # Add the relevancies to the citizen info
+            "relevancies": [
+                {
+                    "asset_id": r.get('fields', {}).get('AssetID', ''),
+                    "asset_type": r.get('fields', {}).get('AssetType', ''),
+                    "category": r.get('fields', {}).get('Category', ''),
+                    "type": r.get('fields', {}).get('Type', ''),
+                    "relevant_to_citizen": r.get('fields', {}).get('RelevantToCitizen', ''),
+                    "score": r.get('fields', {}).get('Score', 0),
+                    "title": r.get('fields', {}).get('Title', ''),
+                    "description": r.get('fields', {}).get('Description', ''),
+                    "time_horizon": r.get('fields', {}).get('TimeHorizon', ''),
+                    "status": r.get('fields', {}).get('Status', ''),
+                    "created_at": r.get('fields', {}).get('CreatedAt', '')
+                } for r in relevancies
+            ]  # Add properly formatted relevancies to the citizen info
         }
         
         return citizen_info
