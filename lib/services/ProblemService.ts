@@ -22,14 +22,20 @@ export class ProblemService {
   public async detectLandsWithNoBuildings(username: string): Promise<Record<string, any>> {
     try {
       // Fetch lands owned by the citizen
-      const lands = await this.fetchLands(username);
+      const landsResponse = await fetch(`${this.getBaseUrl()}/api/lands?owner=${encodeURIComponent(username)}`);
+      if (!landsResponse.ok) {
+        throw new Error(`Failed to fetch lands: ${landsResponse.status}`);
+      }
+      
+      const landsData = await landsResponse.json();
+      const lands = landsData.lands || [];
       
       if (lands.length === 0) {
         console.log(`Citizen ${username} does not own any lands`);
         return {};
       }
       
-      // Fetch buildings on these lands
+      // Fetch all buildings
       const buildingsResponse = await fetch(`${this.getBaseUrl()}/api/buildings`);
       if (!buildingsResponse.ok) {
         throw new Error(`Failed to fetch buildings: ${buildingsResponse.status}`);
@@ -38,7 +44,7 @@ export class ProblemService {
       const buildingsData = await buildingsResponse.json();
       const buildings = buildingsData.buildings || [];
       
-      // Group buildings by land_id
+      // Group buildings by land_id for quick lookup
       const buildingsByLand: Record<string, any[]> = {};
       buildings.forEach((building: any) => {
         const landId = building.land_id;
@@ -48,7 +54,7 @@ export class ProblemService {
         buildingsByLand[landId].push(building);
       });
       
-      // Find lands with no buildings
+      // Create problems for lands with no buildings
       const problems: Record<string, any> = {};
       
       lands.forEach(land => {
@@ -72,7 +78,7 @@ export class ProblemService {
             title: `No Buildings on Land`,
             description: this.generateNoBuildingsDescription(land),
             solutions: this.generateNoBuildingsSolutions(land),
-            notes: `Land has ${land.buildingPoints || 0} building points available`,
+            notes: `Land has ${land.buildingPoints?.length || 0} building points available`,
             center: land.center // Include the center field from the land data
           };
         }
@@ -85,38 +91,6 @@ export class ProblemService {
     }
   }
   
-  /**
-   * Fetch lands owned by a citizen
-   */
-  private async fetchLands(owner?: string): Promise<any[]> {
-    try {
-      // Construct the URL with optional owner filter
-      const url = owner 
-        ? `${this.getBaseUrl()}/api/lands?owner=${encodeURIComponent(owner)}` 
-        : `${this.getBaseUrl()}/api/lands`;
-      
-      console.log(`Fetching lands from API: ${url}`);
-      
-      const response = await fetch(url);
-      
-      if (!response.ok) {
-        throw new Error(`Failed to fetch lands: ${response.status} ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      
-      if (data.success && Array.isArray(data.lands)) {
-        console.log(`Successfully fetched ${data.lands.length} lands from API`);
-        return data.lands;
-      } else {
-        console.error('Invalid response format from lands API:', data);
-        return [];
-      }
-    } catch (error) {
-      console.error('Error fetching lands:', error);
-      return [];
-    }
-  }
   
   /**
    * Generate description for no buildings problem
