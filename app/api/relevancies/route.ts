@@ -98,6 +98,16 @@ export async function GET(request: Request) {
       };
     });
     
+    // Sort the relevancies by score in descending order before returning
+    relevancies.sort((a, b) => {
+      // Convert scores to numbers to ensure proper comparison
+      const scoreA = typeof a.score === 'number' ? a.score : parseFloat(a.score);
+      const scoreB = typeof b.score === 'number' ? b.score : parseFloat(b.score);
+      
+      // Sort in descending order (highest scores first)
+      return scoreB - scoreA;
+    });
+    
     // Return the relevancies data
     return NextResponse.json({
       success: true,
