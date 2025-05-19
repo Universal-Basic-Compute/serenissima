@@ -333,16 +333,23 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
                     
                     # Last resort: try a more aggressive approach to extract just the fields we need
                     try:
-                        # Look for the description and imagePrompt fields directly
+                        # Look for the description, corePersonality, and imagePrompt fields directly
                         desc_match = re.search(r'"description"\s*:\s*"(.*?)"(?=,|})', response_text, re.DOTALL)
+                        core_match = re.search(r'"corePersonality"\s*:\s*"(.*?)"(?=,|})', response_text, re.DOTALL)
                         img_match = re.search(r'"imagePrompt"\s*:\s*"(.*?)"(?=,|})', response_text, re.DOTALL)
-                        
+                    
                         if desc_match and img_match:
                             # Manually construct a valid JSON object
                             description = desc_match.group(1).replace('\\', '\\\\').replace('"', '\\"')
                             image_prompt = img_match.group(1).replace('\\', '\\\\').replace('"', '\\"')
-                            
-                            manual_json = f'{{"description": "{description}", "imagePrompt": "{image_prompt}"}}'
+                        
+                            # Add corePersonality if found
+                            if core_match:
+                                core_personality = core_match.group(1).replace('\\', '\\\\').replace('"', '\\"')
+                                manual_json = f'{{"description": "{description}", "corePersonality": "{core_personality}", "imagePrompt": "{image_prompt}"}}'
+                            else:
+                                manual_json = f'{{"description": "{description}", "imagePrompt": "{image_prompt}"}}'
+                        
                             result_data = json.loads(manual_json)
                             log.info("Successfully extracted JSON using regex field extraction")
                         else:
