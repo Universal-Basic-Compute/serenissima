@@ -1,8 +1,25 @@
 import { NextResponse } from 'next/server';
-import { relevancyService } from '@/lib/services/RelevancyService';
+import Airtable from 'airtable';
 
 export async function GET(request: Request) {
   try {
+    // Get Airtable credentials from environment variables
+    const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
+    const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
+    const AIRTABLE_RELEVANCIES_TABLE = process.env.AIRTABLE_RELEVANCIES_TABLE || 'RELEVANCIES';
+
+    // Check if Airtable credentials are configured
+    if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
+      console.error('Airtable credentials not configured');
+      return NextResponse.json(
+        { success: false, error: 'Airtable credentials not configured' },
+        { status: 500 }
+      );
+    }
+
+    // Initialize Airtable
+    const base = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
+
     // Get URL parameters
     const { searchParams } = new URL(request.url);
     const calculateAll = searchParams.get('calculateAll') === 'true';
@@ -15,157 +32,76 @@ export async function GET(request: Request) {
       return NextResponse.redirect(new URL('/api/calculateRelevancies?calculateAll=true', request.url));
     }
     
-    // Handle the new targetCitizen parameter
+    // Prepare filter formula based on parameters
+    let filterFormula = '';
+    
+    // Handle the case where we want relevancies for a specific target citizen
     if (targetCitizen && relevantToCitizen) {
       // Parse the relevantToCitizen parameter which might be a comma-separated list
       const relevantToCitizens = relevantToCitizen.split(',');
       
-      // In a real implementation, you would fetch this data from a database
-      // For now, we'll return mock data
-      const mockRelevancies = [
-        {
-          relevancyId: "rel_001",
-          assetId: "ctz_001",
-          assetType: "citizen",
-          category: "social",
-          type: "friendship",
-          targetCitizen: targetCitizen,
-          relevantToCitizen: relevantToCitizens[0],
-          score: 0.85,
-          timeHorizon: "long-term",
-          title: "Amico Fidato",
-          description: "Un'amicizia di lunga data che ha resistito alla prova del tempo.",
-          notes: "Frequenti incontri al Caffè Florian",
-          createdAt: "2023-05-15T10:30:00Z",
-          status: "active"
-        },
-        {
-          relevancyId: "rel_002",
-          assetId: "ctz_002",
-          assetType: "citizen",
-          category: "business",
-          type: "rivalry",
-          targetCitizen: targetCitizen,
-          relevantToCitizen: "all",
-          score: 0.65,
-          timeHorizon: "medium-term",
-          title: "Rivale Commerciale",
-          description: "Competizione nel commercio di spezie dall'Oriente.",
-          notes: "Tensione crescente negli ultimi mesi",
-          createdAt: "2023-06-20T14:45:00Z",
-          status: "active"
-        },
-        {
-          relevancyId: "rel_003",
-          assetId: "ctz_003",
-          assetType: "citizen",
-          category: "political",
-          type: "alliance",
-          targetCitizen: targetCitizen,
-          relevantToCitizen: relevantToCitizens[0],
-          score: 0.92,
-          timeHorizon: "short-term",
-          title: "Alleanza Politica",
-          description: "Supporto reciproco nelle questioni del Consiglio dei Dieci.",
-          notes: "Alleanza formata durante la crisi di Cipro",
-          createdAt: "2023-04-10T09:15:00Z",
-          status: "active"
-        }
-      ];
-      
-      // Filter relevancies to only include those that are relevant to the specified citizens
-      const filteredRelevancies = mockRelevancies.filter(r => 
-        r.targetCitizen === targetCitizen && 
-        (relevantToCitizens.includes(r.relevantToCitizen) || r.relevantToCitizen === "all")
+      // Create an OR condition for each relevantToCitizen value
+      const relevantToConditions = relevantToCitizens.map(citizen => 
+        `{RelevantToCitizen} = '${citizen}'`
       );
       
-      return NextResponse.json({
-        success: true,
-        relevancies: filteredRelevancies
-      });
-    }
-    
-    // If requesting citizen relevancies
-    if (relevantToCitizen && assetType === 'citizen') {
-      // In a real implementation, you would fetch this data from a database
-      // For now, we'll return mock data
-      const mockRelevancies = [
-        {
-          relevancyId: "rel_001",
-          assetId: "ctz_001",
-          assetType: "citizen",
-          category: "social",
-          type: "friendship",
-          targetCitizen: "Marco_Polo",
-          relevantToCitizen: relevantToCitizen,
-          score: 0.85,
-          timeHorizon: "long-term",
-          title: "Amico Fidato",
-          description: "Un'amicizia di lunga data che ha resistito alla prova del tempo.",
-          notes: "Frequenti incontri al Caffè Florian",
-          createdAt: "2023-05-15T10:30:00Z",
-          status: "active"
-        },
-        {
-          relevancyId: "rel_002",
-          assetId: "ctz_002",
-          assetType: "citizen",
-          category: "business",
-          type: "rivalry",
-          targetCitizen: "Antonio_Vivaldi",
-          relevantToCitizen: relevantToCitizen,
-          score: 0.65,
-          timeHorizon: "medium-term",
-          title: "Rivale Commerciale",
-          description: "Competizione nel commercio di spezie dall'Oriente.",
-          notes: "Tensione crescente negli ultimi mesi",
-          createdAt: "2023-06-20T14:45:00Z",
-          status: "active"
-        },
-        {
-          relevancyId: "rel_003",
-          assetId: "ctz_003",
-          assetType: "citizen",
-          category: "political",
-          type: "alliance",
-          targetCitizen: "Caterina_Cornaro",
-          relevantToCitizen: relevantToCitizen,
-          score: 0.92,
-          timeHorizon: "long-term",
-          title: "Alleanza Politica",
-          description: "Supporto reciproco nelle questioni del Consiglio dei Dieci.",
-          notes: "Alleanza formata durante la crisi di Cipro",
-          createdAt: "2023-04-10T09:15:00Z",
-          status: "active"
-        }
-      ];
+      // Add condition for 'all' which should be visible to everyone
+      relevantToConditions.push(`{RelevantToCitizen} = 'all'`);
       
-      return NextResponse.json({
-        success: true,
-        relevancies: mockRelevancies
-      });
+      // Combine with AND for targetCitizen
+      filterFormula = `AND({TargetCitizen} = '${targetCitizen}', OR(${relevantToConditions.join(', ')}))`;
+    }
+    // Handle the case where we want all relevancies for a specific citizen
+    else if (relevantToCitizen && assetType) {
+      filterFormula = `AND({RelevantToCitizen} = '${relevantToCitizen}', {AssetType} = '${assetType}')`;
+    }
+    // If no specific filters, return a limited set
+    else if (relevantToCitizen) {
+      filterFormula = `{RelevantToCitizen} = '${relevantToCitizen}'`;
     }
     
-    // Return available relevancy types
+    console.log(`Fetching relevancies with filter: ${filterFormula}`);
+    
+    // Fetch relevancies from Airtable with the constructed filter
+    const relevanciesRecords = await base(AIRTABLE_RELEVANCIES_TABLE)
+      .select({
+        filterByFormula: filterFormula || '',
+        maxRecords: 100
+      })
+      .all();
+    
+    console.log(`Fetched ${relevanciesRecords.length} relevancy records from Airtable`);
+    
+    // Transform records to a more usable format
+    const relevancies = relevanciesRecords.map(record => {
+      return {
+        relevancyId: record.id,
+        assetId: record.get('AssetId') || '',
+        assetType: record.get('AssetType') || '',
+        category: record.get('Category') || '',
+        type: record.get('Type') || '',
+        targetCitizen: record.get('TargetCitizen') || '',
+        relevantToCitizen: record.get('RelevantToCitizen') || '',
+        score: record.get('Score') || 0,
+        timeHorizon: record.get('TimeHorizon') || 'medium-term',
+        title: record.get('Title') || '',
+        description: record.get('Description') || '',
+        notes: record.get('Notes') || '',
+        createdAt: record.get('CreatedAt') || new Date().toISOString(),
+        status: record.get('Status') || 'active'
+      };
+    });
+    
+    // Return the relevancies data
     return NextResponse.json({
       success: true,
-      availableTypes: [
-        {
-          name: 'proximity',
-          description: 'Land proximity relevancy based on geographic distance and connectivity',
-          subtypes: ['connected', 'geographic']
-        },
-        {
-          name: 'domination',
-          description: 'Land domination relevancy based on ownership and building points',
-          subtypes: ['landowner']
-        }
-      ]
+      relevancies
     });
+    
   } catch (error) {
     console.error('Error in relevancies endpoint:', error);
     return NextResponse.json(
-      { error: 'Failed to process relevancies request', details: error.message },
+      { success: false, error: 'Failed to process relevancies request', details: error.message },
       { status: 500 }
     );
   }
