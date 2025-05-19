@@ -860,10 +860,41 @@ Be historically accurate but engaging. Speak in first person as if you are this 
         </button>
       </div>
       
-      {/* Two-column layout */}
-      <div className="flex flex-row gap-6">
-        {/* Left column - Conversation */}
-        <div className="w-2/5">
+      {/* Three-column layout */}
+      <div className="flex flex-row gap-4">
+        {/* First column - Relevancies */}
+        <div className="w-1/3">
+          <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Relevancies</h3>
+          
+          {isLoadingRelevancies ? (
+            <div className="flex justify-center py-4">
+              <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : relevancies.length > 0 ? (
+            <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
+              {relevancies.map((relevancy, index) => (
+                <div key={relevancy.relevancyId || index} className="bg-amber-100 rounded-lg p-3 text-sm">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className={`px-2 py-0.5 rounded-full text-xs font-medium ${getTimeHorizonColor(relevancy.timeHorizon)}`}>
+                      {relevancy.timeHorizon}
+                    </div>
+                    <div className="font-medium text-amber-800">
+                      {relevancy.title}
+                    </div>
+                  </div>
+                  <div className="text-xs text-amber-700 mt-1">
+                    {relevancy.description}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-amber-700 italic">No relevancies found.</p>
+          )}
+        </div>
+        
+        {/* Second column - Conversation */}
+        <div className="w-1/3">
           <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Conversation</h3>
           
           {/* Messages area */}
@@ -1009,8 +1040,8 @@ Be historically accurate but engaging. Speak in first person as if you are this 
           </form>
         </div>
         
-        {/* Right column - Citizen details */}
-        <div className="w-3/5">
+        {/* Third column - Citizen details */}
+        <div className="w-1/3">
           <div className="flex flex-col items-center mb-6">
           {/* Much larger image */}
           <div className="w-48 h-48 mb-4 relative">
