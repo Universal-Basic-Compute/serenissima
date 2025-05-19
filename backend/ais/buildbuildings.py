@@ -1340,7 +1340,7 @@ def process_ai_building_strategies(dry_run: bool = False):
         # Filter AI citizens to only those with sufficient ducats for building (minimum 1,000,000)
         filtered_ai_citizens = []
         for ai_citizen in ai_citizens:
-            ai_username = ai_citizen["fields"].get("Citizenname")
+            ai_username = ai_citizen["fields"].get("Username")
             ducats = ai_citizen["fields"].get("Ducats", 0)
             
             filtered_ai_citizens.append(ai_citizen)
