@@ -200,8 +200,16 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
            - fundamental character traits
            - core values and beliefs
            - general temperament and outlook on life
+
+        3. A family motto that reflects your values and aspirations (if you don't already have one)
+
+        4. A coat of arms description (if you don't already have one) that:
+           - Is historically appropriate for your social class
+           - Includes symbolic elements that represent your profession, values, and family history
+           - Follows heraldic conventions of Renaissance Venice
+           - Uses colors and symbols that reflect your status and aspirations
         
-        3. A detailed image prompt for Ideogram that will generate a portrait of YOU that:
+        5. A detailed image prompt for Ideogram that will generate a portrait of YOU that:
            - Accurately reflects your social class ({social_class}) with appropriate status symbols
            - Shows period-appropriate clothing and accessories for your specific profession
            - Captures your personality traits mentioned in the description
@@ -213,7 +221,7 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
         
         Your current description: {current_description}
         
-        Please return your response in JSON format with three fields: "description", "corePersonality", and "imagePrompt".
+        Please return your response in JSON format with these fields: "description", "corePersonality", "familyMotto", "coatOfArms", and "imagePrompt".
         """
         
         # Prepare system context with all the citizen data
@@ -283,7 +291,7 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
                 "content": prompt,
                 "model": "claude-3-7-sonnet-latest",
                 "mode": "creative",
-                "addSystem": f"You are a historical expert on Renaissance Venice (1400-1600) helping to update a citizen profile for a historically accurate economic simulation game called La Serenissima. You have access to the following information about the citizen: {system_context_str}. Your response MUST be a valid JSON object with EXACTLY this format:\n\n```json\n{{\n  \"description\": \"string\",\n  \"corePersonality\": \"string\",\n  \"imagePrompt\": \"string\"\n}}\n```\n\nDo not include any text before or after the JSON."
+                "addSystem": f"You are a historical expert on Renaissance Venice (1400-1600) helping to update a citizen profile for a historically accurate economic simulation game called La Serenissima. You have access to the following information about the citizen: {system_context_str}. Your response MUST be a valid JSON object with EXACTLY this format:\n\n```json\n{{\n  \"description\": \"string\",\n  \"corePersonality\": \"string\",\n  \"familyMotto\": \"string\",\n  \"coatOfArms\": \"string\",\n  \"imagePrompt\": \"string\"\n}}\n```\n\nDo not include any text before or after the JSON."
             }
         )
         
@@ -333,22 +341,31 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
                     
                     # Last resort: try a more aggressive approach to extract just the fields we need
                     try:
-                        # Look for the description, corePersonality, and imagePrompt fields directly
+                        # Look for the description, corePersonality, familyMotto, coatOfArms, and imagePrompt fields directly
                         desc_match = re.search(r'"description"\s*:\s*"(.*?)"(?=,|})', response_text, re.DOTALL)
                         core_match = re.search(r'"corePersonality"\s*:\s*"(.*?)"(?=,|})', response_text, re.DOTALL)
+                        motto_match = re.search(r'"familyMotto"\s*:\s*"(.*?)"(?=,|})', response_text, re.DOTALL)
+                        coat_match = re.search(r'"coatOfArms"\s*:\s*"(.*?)"(?=,|})', response_text, re.DOTALL)
                         img_match = re.search(r'"imagePrompt"\s*:\s*"(.*?)"(?=,|})', response_text, re.DOTALL)
                     
                         if desc_match and img_match:
                             # Manually construct a valid JSON object
                             description = desc_match.group(1).replace('\\', '\\\\').replace('"', '\\"')
                             image_prompt = img_match.group(1).replace('\\', '\\\\').replace('"', '\\"')
-                        
-                            # Add corePersonality if found
+                            
+                            # Add other fields if found
+                            core_personality = ""
+                            family_motto = ""
+                            coat_of_arms = ""
+                            
                             if core_match:
                                 core_personality = core_match.group(1).replace('\\', '\\\\').replace('"', '\\"')
-                                manual_json = f'{{"description": "{description}", "corePersonality": "{core_personality}", "imagePrompt": "{image_prompt}"}}'
-                            else:
-                                manual_json = f'{{"description": "{description}", "imagePrompt": "{image_prompt}"}}'
+                            if motto_match:
+                                family_motto = motto_match.group(1).replace('\\', '\\\\').replace('"', '\\"')
+                            if coat_match:
+                                coat_of_arms = coat_match.group(1).replace('\\', '\\\\').replace('"', '\\"')
+                            
+                            manual_json = f'{{"description": "{description}", "corePersonality": "{core_personality}", "familyMotto": "{family_motto}", "coatOfArms": "{coat_of_arms}", "imagePrompt": "{image_prompt}"}}'
                         
                             result_data = json.loads(manual_json)
                             log.info("Successfully extracted JSON using regex field extraction")
@@ -432,8 +449,75 @@ def generate_image(prompt: str, citizen_id: str) -> Optional[str]:
         log.error(f"Error generating image for citizen {citizen_id}: {e}")
         return None
 
-def update_citizen_record(tables, username: str, description: str, core_personality: str, image_prompt: str, image_url: str) -> bool:
-    """Update the citizen record with new description, core personality, image prompt, and image URL."""
+def generate_coat_of_arms_image(prompt: str, username: str) -> Optional[str]:
+    """Generate coat of arms image using Ideogram API."""
+    log.info(f"Generating coat of arms for {username}: {prompt[:100]}...")
+    
+    # Get Ideogram API key from environment
+    ideogram_api_key = os.environ.get('IDEOGRAM_API_KEY')
+    if not ideogram_api_key:
+        log.error("IDEOGRAM_API_KEY environment variable is not set")
+        return None
+    
+    # Enhance the prompt for better coat of arms generation
+    enhanced_prompt = f"A heraldic coat of arms shield with the following description: {prompt}. Renaissance Venetian style, detailed, ornate, historically accurate, centered composition, on a transparent background."
+    
+    try:
+        # Call the Ideogram API
+        response = requests.post(
+            "https://api.ideogram.ai/v1/ideogram-v3/generate",
+            headers={
+                "Api-Key": ideogram_api_key,
+                "Content-Type": "application/json"
+            },
+            json={
+                "prompt": enhanced_prompt,
+                "style_type": "REALISTIC",
+                "rendering_speed": "DEFAULT",
+                "model":"V_3"
+            }
+        )
+        
+        if response.status_code != 200:
+            log.error(f"Error from Ideogram API for coat of arms: {response.status_code} {response.text}")
+            return None
+        
+        # Extract image URL from response
+        result = response.json()
+        image_url = result.get("data", [{}])[0].get("url", "")
+        
+        if not image_url:
+            log.error("No coat of arms image URL in response")
+            return None
+        
+        # Download the image
+        image_response = requests.get(image_url, stream=True)
+        if not image_response.ok:
+            log.error(f"Failed to download coat of arms image: {image_response.status_code} {image_response.reason}")
+            return None
+        
+        # Ensure the coat of arms directory exists
+        coat_of_arms_dir = os.path.join(os.getcwd(), 'public', 'coat-of-arms')
+        os.makedirs(coat_of_arms_dir, exist_ok=True)
+        
+        # Save the image to the coat of arms folder using the username
+        image_path = os.path.join(coat_of_arms_dir, f"{username}.png")
+        with open(image_path, 'wb') as f:
+            for chunk in image_response.iter_content(chunk_size=8192):
+                f.write(chunk)
+        
+        log.info(f"Generated and saved coat of arms for {username}")
+        
+        # Create the public URL path
+        public_image_url = f"/coat-of-arms/{username}.png"
+        
+        return public_image_url
+    except Exception as e:
+        log.error(f"Error generating coat of arms for {username}: {e}")
+        return None
+
+def update_citizen_record(tables, username: str, description: str, core_personality: str, family_motto: str, coat_of_arms: str, image_prompt: str, image_url: str, coat_of_arms_url: str = None) -> bool:
+    """Update the citizen record with new description, core personality, family motto, coat of arms, image prompt, and image URLs."""
     log.info(f"Updating citizen record for {username}")
     
     try:
@@ -447,8 +531,10 @@ def update_citizen_record(tables, username: str, description: str, core_personal
         
         citizen = citizens[0]
         
-        # Check if CorePersonality is empty
+        # Check which fields are empty
         current_core_personality = citizen['fields'].get('CorePersonality', '')
+        current_family_motto = citizen['fields'].get('FamilyMotto', '')
+        current_coat_of_arms = citizen['fields'].get('CoatOfArms', '')
         
         # Prepare update data
         update_data = {
@@ -461,6 +547,21 @@ def update_citizen_record(tables, username: str, description: str, core_personal
         if not current_core_personality and core_personality:
             log.info(f"CorePersonality is empty, updating with new value: {core_personality[:50]}...")
             update_data["CorePersonality"] = core_personality
+        
+        # Only update FamilyMotto if it's empty
+        if not current_family_motto and family_motto:
+            log.info(f"FamilyMotto is empty, updating with new value: {family_motto}")
+            update_data["FamilyMotto"] = family_motto
+        
+        # Only update CoatOfArms if it's empty
+        if not current_coat_of_arms and coat_of_arms:
+            log.info(f"CoatOfArms is empty, updating with new value: {coat_of_arms[:50]}...")
+            update_data["CoatOfArms"] = coat_of_arms
+            
+            # If we have a coat of arms URL, update that too
+            if coat_of_arms_url:
+                log.info(f"Updating CoatOfArmsImageUrl with: {coat_of_arms_url}")
+                update_data["CoatOfArmsImageUrl"] = coat_of_arms_url
         
         # Update the citizen record
         tables['citizens'].update(citizen['id'], update_data)
@@ -525,12 +626,16 @@ def update_citizen_description_and_image(username: str, dry_run: bool = False):
     
     new_description = result.get("description", "")
     new_core_personality = result.get("corePersonality", "")
+    new_family_motto = result.get("familyMotto", "")
+    new_coat_of_arms = result.get("coatOfArms", "")
     new_image_prompt = result.get("imagePrompt", "")
     
     if dry_run:
         log.info(f"[DRY RUN] Would update citizen {username} with:")
         log.info(f"[DRY RUN] New description: {new_description}")
         log.info(f"[DRY RUN] New core personality: {new_core_personality}")
+        log.info(f"[DRY RUN] New family motto: {new_family_motto}")
+        log.info(f"[DRY RUN] New coat of arms: {new_coat_of_arms}")
         log.info(f"[DRY RUN] New image prompt: {new_image_prompt}")
         return True
     
@@ -540,9 +645,27 @@ def update_citizen_description_and_image(username: str, dry_run: bool = False):
         log.error(f"Failed to generate image for citizen {username}")
         # Continue anyway, as we can still update the description
     
+    # Generate coat of arms image if we have a description and the citizen doesn't already have one
+    coat_of_arms_url = None
+    if new_coat_of_arms and not citizen_info["citizen"]['fields'].get('CoatOfArmsImageUrl'):
+        coat_of_arms_url = generate_coat_of_arms_image(new_coat_of_arms, username)
+        if not coat_of_arms_url:
+            log.warning(f"Failed to generate coat of arms image for citizen {username}")
+            # Continue anyway, as we can still update the other fields
+    
     # Update citizen record
     old_description = citizen_info["citizen"]['fields'].get('Description', '')
-    success = update_citizen_record(tables, username, new_description, new_core_personality, new_image_prompt, image_url or "")
+    success = update_citizen_record(
+        tables, 
+        username, 
+        new_description, 
+        new_core_personality, 
+        new_family_motto, 
+        new_coat_of_arms, 
+        new_image_prompt, 
+        image_url or "", 
+        coat_of_arms_url
+    )
     if not success:
         log.error(f"Failed to update citizen record for {username}")
         return False
