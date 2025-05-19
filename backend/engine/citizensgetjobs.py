@@ -299,7 +299,7 @@ def assign_jobs_to_citizens(dry_run: bool = False, noupdate: bool = False):
     log.info("Processing entrepreneurs first...")
     for entrepreneur in entrepreneurs:
         citizen_id = entrepreneur['fields'].get('CitizenId', entrepreneur['id'])
-        citizen_username = entrepreneur['fields'].get('Username', entrepreneur['username'])
+        citizen_username = entrepreneur['fields'].get('Username', '')
         citizen_name = f"{entrepreneur['fields'].get('FirstName', '')} {entrepreneur['fields'].get('LastName', '')}"
         
         # Check if this entrepreneur is already employed
