@@ -225,31 +225,50 @@ def calculate_specific_relevancy(
         
         # Adjust how relevancies_created is determined based on typical API responses
         relevancies_created_count = 0
-        if 'relevanciesCreated' in data: # Explicit count from API
+        if 'relevanciesSavedCount' in data: # Explicit count from API (domination route now returns this)
+            relevancies_created_count = data['relevanciesSavedCount']
+        elif 'relevanciesCreated' in data: # Explicit count from API (older routes might use this)
             relevancies_created_count = data['relevanciesCreated']
-        elif 'relevancyScores' in data and isinstance(data['relevancyScores'], dict): # Proximity, Domination
+        elif 'relevancyScores' in data and isinstance(data['relevancyScores'], dict) and relevancy_type == "proximity": # Proximity
             relevancies_created_count = len(data['relevancyScores'])
         elif relevancy_type in ["housing", "jobs"] and data.get('success'): # Housing, Jobs create 1 global
             relevancies_created_count = 1
+        elif relevancy_type == "domination" and not username and data.get('success'): # Global domination creates 1 record
+             relevancies_created_count = 1 # The API returns relevanciesSavedCount = 1
+        elif relevancy_type == "domination" and username and 'relevancyScores' in data and isinstance(data['relevancyScores'], dict): # Domination for specific user
+            relevancies_created_count = len(data['relevancyScores'])
 
 
         notification_title = f"{relevancy_type.capitalize()} Relevancy Calculation Complete"
-        notification_details = [
+        details_for_notification = [
             f"Successfully calculated {relevancy_type} relevancies.",
             f"Status: {saved_status}.",
         ]
-        if username: # This will be true for single user calls
-            notification_details.append(f"User: {username}")
         
-        if 'ownedLandCount' in data: # Specific to proximity and some others
-             notification_details.append(f"Owned Land Count: {data.get('ownedLandCount')}")
+        target_user_info = username
+        if relevancy_type == "domination" and not username:
+            target_user_info = "all (Global Report)"
+        elif not username and relevancy_type not in ["housing", "jobs"]: # e.g. proximity for all
+             target_user_info = "all landowners"
+
+
+        if target_user_info:
+            details_for_notification.append(f"Target: {target_user_info}")
         
-        notification_details.append(f"Relevancies Processed/Created: {relevancies_created_count}")
+        if 'ownedLandCount' in data: # Specific to proximity
+             details_for_notification.append(f"Owned Land Count (for proximity user): {data.get('ownedLandCount')}")
+        
+        details_for_notification.append(f"Relevancy Records Saved: {relevancies_created_count}")
 
         if 'statistics' in data: # Specific to housing, jobs
-            notification_details.append(f"Statistics: {json.dumps(data.get('statistics'), indent=2)}")
+            details_for_notification.append(f"Statistics: {json.dumps(data.get('statistics'), indent=2)}")
         
-        create_admin_notification(notifications_table, notification_title, "\n".join(notification_details))
+        if relevancy_type == "domination" and not username and 'detailedRelevancy' in data:
+            top_landowners = sorted(data['detailedRelevancy'].items(), key=lambda item: item[1]['score'], reverse=True)[:5]
+            summary = "\nTop 5 Dominant Landowners:\n" + "\n".join([f"- {item[1]['title'].replace('Land Domination: ', '')}: {item[1]['score']}" for item in top_landowners])
+            details_for_notification.append(summary)
+
+        create_admin_notification(notifications_table, notification_title, "\n".join(details_for_notification))
         log.info(f"Successfully processed {relevancy_type} relevancies for {username or 'global context'}.")
         return True
 

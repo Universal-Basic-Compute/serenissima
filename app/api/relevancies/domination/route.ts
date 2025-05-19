@@ -82,36 +82,89 @@ export async function POST(request: NextRequest) {
     // Save to Airtable
     let saved = false;
     let relevanciesSavedCount = 0;
+    const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
+    const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
+    const AIRTABLE_RELEVANCIES_TABLE = 'RELEVANCIES';
+
+    if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
+      throw new Error('Airtable credentials not configured for saving domination relevancy');
+    }
+    const airtableBase = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
+
     try {
-      // If username is provided (and not "all"), save relevancies for that specific user
       if (username) {
+        // Specific user: save the list of all dominant players TO this user's relevancies
         relevanciesSavedCount = await saveRelevancies(username, landDominationRelevancies, allLands, allCitizens);
+        saved = true;
       } else {
-        // If username is null (i.e., aiUsername was "all" or not provided),
-        // save the full set of domination relevancies for each citizen who owns land.
-        // This means each citizen gets a list of how dominant everyone else is.
-        for (const citizenId of Object.keys(landDominationRelevancies)) {
-          // The landDominationRelevancies object is keyed by the citizen the score is *about*.
-          // We are saving these scores *to* the `citizenId`'s relevancy list.
-          const count = await saveRelevancies(citizenId, landDominationRelevancies, allLands, allCitizens);
-          relevanciesSavedCount += count; // This might be an overcount if saveRelevancies returns total saved for that user.
-                                          // For simplicity, let's assume it's the number of records related to this call.
+        // Global calculation (username is null, meaning aiUsername was "all")
+        // Create a single global relevancy record summarizing land domination.
+        
+        // Sort landowners by score
+        const sortedLandowners = Object.entries(landDominationRelevancies)
+          .map(([citizenId, data]) => ({ citizenId, ...data }))
+          .sort((a, b) => b.score - a.score);
+
+        // Take top N (e.g., 10) for the summary
+        const topN = 10;
+        const topLandownersSummary = sortedLandowners.slice(0, topN).map((owner, index) => 
+          `${index + 1}. ${owner.title.replace('Land Domination: ', '')} (Score: ${owner.score})`
+        ).join('\n');
+
+        const globalTitle = "Overall Land Domination in Venice";
+        const globalDescription = `A summary of the most dominant landowners in Venice based on land count and building potential.\n\n**Top ${topN} Landowners:**\n${topLandownersSummary}\n\nThis report provides a strategic overview of the land ownership landscape.`;
+        
+        const relevancyId = `global_land_domination_${Date.now()}`;
+        const globalRecord = {
+          fields: {
+            RelevancyId: relevancyId,
+            AssetID: "venice_land_domination",
+            AssetType: "city_metric", 
+            Category: "domination",
+            Type: "overall_land_dominance",
+            TargetCitizen: "ConsiglioDeiDieci", 
+            RelevantToCitizen: "all",
+            Score: 100, // Represents the completeness of this global report
+            TimeHorizon: "long",
+            Title: globalTitle,
+            Description: globalDescription,
+            Status: "active",
+            CreatedAt: new Date().toISOString()
+          }
+        };
+        
+        // Delete existing global land domination record
+        const existingGlobalRecords = await airtableBase(AIRTABLE_RELEVANCIES_TABLE)
+          .select({ filterByFormula: `{AssetID} = "venice_land_domination"` })
+          .all();
+        if (existingGlobalRecords.length > 0) {
+          await airtableBase(AIRTABLE_RELEVANCIES_TABLE).destroy(existingGlobalRecords.map(r => r.id));
+          console.log(`Deleted ${existingGlobalRecords.length} existing global land domination relevancy records.`);
         }
-        // A more accurate count for "all" would be complex as saveRelevancies filters top 10 per type.
-        // For now, we'll just mark as saved.
+
+        await airtableBase(AIRTABLE_RELEVANCIES_TABLE).create([globalRecord]);
+        relevanciesSavedCount = 1;
+        saved = true;
+        console.log('Successfully saved global land domination relevancy to Airtable.');
       }
-      saved = true;
     } catch (error) {
-      console.error('Error saving relevancies to Airtable:', error);
+      console.error('Error saving domination relevancies to Airtable:', error);
+      // For global, even if saving fails, we might still want to return the calculated scores.
+      // For specific user, saveRelevancies throws and is caught by the main try/catch.
+      if (!username) { // If it was a global calculation, set saved to false
+        saved = false;
+      } else { // If specific user, rethrow to be handled by outer catch
+        throw error;
+      }
     }
     
     return NextResponse.json({
       success: true,
-      username: username || 'all',
-      relevancyScores: simpleScores,
-      detailedRelevancy: landDominationRelevancies,
+      username: username || 'all', // 'all' indicates a global record was made/attempted
+      relevancyScores: simpleScores, // This is the full list of scores for all landowners
+      detailedRelevancy: landDominationRelevancies, // Full details for all landowners
       saved,
-      relevanciesSavedCount // Add this for better feedback
+      relevanciesSavedCount 
     });
     
   } catch (error) {

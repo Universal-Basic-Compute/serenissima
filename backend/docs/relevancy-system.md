@@ -100,20 +100,33 @@ In addition to land proximity, the system calculates Land Domination Relevancy, 
 
 ### Strategic Value
 
-Land domination relevancy helps AIs:
-- Identify major competitors in the real estate market
-- Recognize potential allies or threats
-- Understand the overall land ownership landscape
-- Make strategic decisions about land acquisition and development
+Land domination relevancy helps AIs and administrators:
+- Identify major competitors in the real estate market.
+- Recognize potential allies or threats.
+- Understand the overall land ownership landscape.
+- Make strategic decisions about land acquisition and development.
 
 ### Data Structure
 
-Each land domination relevancy record contains:
-- **AssetType**: 'citizen' (as opposed to 'land' for proximity relevancies)
+**Global Land Domination Record (`RelevantToCitizen: "all"`)**
+- This is a single record summarizing the overall land domination.
+- **AssetID**: `venice_land_domination`
+- **AssetType**: `city_metric`
+- **Category**: `domination`
+- **Type**: `overall_land_dominance`
+- **TargetCitizen**: `ConsiglioDeiDieci` (or `all`)
+- **RelevantToCitizen**: `all`
+- **Score**: `100` (indicating a complete report)
+- **Description**: Contains a summary of the top N most dominant landowners.
+
+**Per-Citizen Land Domination Records (when requested for a specific citizen)**
+- These records show a specific citizen how dominant other landowners are.
+- **AssetType**: 'citizen'
 - **Category**: 'domination'
-- **Type**: 'landowner'
-- **TargetCitizen**: The citizen being evaluated
-- **Score**: Numerical score based on land count and building points
+- **Type**: 'landowner_profile' (or similar to distinguish from the global one)
+- **TargetCitizen**: The citizen whose dominance is being described.
+- **RelevantToCitizen**: The citizen for whom this relevancy is calculated.
+- **Score**: Numerical score based on land count and building points of the `TargetCitizen`.
 
 ## Future Extensions
 
@@ -171,19 +184,55 @@ Calculate and save relevancy scores for a specific AI.
     "land_id_1": 85.4,
     "land_id_2": 62.7
   },
-  "saved": true
+  "detailedRelevancy": { /* ... full data ... */ },
+  "saved": true,
+  "relevanciesSavedCount": 2 // Example for proximity
+}
+```
+
+If `aiUsername` is `"all"` for domination, the response will indicate 1 global record saved:
+```json
+{
+  "success": true,
+  "username": "all",
+  "relevancyScores": { /* ... scores for all landowners ... */ },
+  "detailedRelevancy": { /* ... full data for all landowners ... */ },
+  "saved": true,
+  "relevanciesSavedCount": 1 
 }
 ```
 
 ### Command Line Usage
 
+**Using `backend/relevancies/calculateRelevancies.py` (Orchestrator for all types):**
 ```bash
-# Calculate all relevancies
-python backend/ais/calculateRelevancies.py
+# Calculate all types of relevancies (global domination, housing, jobs, and per-citizen proximity & building ownership)
+python backend/relevancies/calculateRelevancies.py
 
-# Calculate only connected relevancies
-python backend/ais/calculateRelevancies.py --type connected
+# Calculate proximity relevancies of a specific type (e.g., 'connected') for all citizens, plus other global relevancies
+python backend/relevancies/calculateRelevancies.py --type connected
+```
 
-# Calculate only geographic relevancies
-python backend/ais/calculateRelevancies.py --type geographic
+**Using `backend/relevancies/calculateSpecificRelevancy.py` (For individual types):**
+```bash
+# Calculate global land domination (creates 1 record RelevantToCitizen: "all")
+python backend/relevancies/calculateSpecificRelevancy.py --type domination
+
+# Calculate land domination scores and save them TO "CitizenAlpha"
+python backend/relevancies/calculateSpecificRelevancy.py --type domination --username CitizenAlpha
+
+# Calculate proximity relevancies for CitizenAlpha
+python backend/relevancies/calculateSpecificRelevancy.py --type proximity --username CitizenAlpha
+
+# Calculate proximity relevancies for all landowners (one API call per landowner)
+python backend/relevancies/calculateSpecificRelevancy.py --type proximity 
+
+# Calculate global housing situation (creates 1 record RelevantToCitizen: "all")
+python backend/relevancies/calculateSpecificRelevancy.py --type housing
+
+# Calculate global job market situation (creates 1 record RelevantToCitizen: "all")
+python backend/relevancies/calculateSpecificRelevancy.py --type jobs
+
+# Calculate building ownership relevancies for CitizenAlpha
+python backend/relevancies/calculateSpecificRelevancy.py --type building_ownership --username CitizenAlpha
 ```

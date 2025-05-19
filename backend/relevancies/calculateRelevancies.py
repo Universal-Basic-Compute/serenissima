@@ -399,22 +399,31 @@ def calculate_relevancies(type_filter: Optional[str] = None) -> bool:
         log.info("Calculating job market situation relevancies")
         job_market_result = calculate_job_market_relevancies(base_url)
         
-        total_relevancies = 0
+        total_relevancies_saved = 0 # More accurate naming
+        
         if domination_result.get('success'):
-            total_relevancies += domination_result.get('relevanciesCreated', 0)
-            log.info(f"Successfully calculated {domination_result.get('relevanciesCreated', 0)} land domination relevancies")
+            # The API for global domination now returns relevanciesSavedCount: 1
+            # For specific user, it would be len(scores)
+            num_domination_saved = domination_result.get('relevanciesSavedCount', 0)
+            if num_domination_saved == 0 and 'relevanciesCreated' in domination_result: # fallback for older interpretation
+                 num_domination_saved = domination_result.get('relevanciesCreated',0)
+
+            total_relevancies_saved += num_domination_saved
+            log.info(f"Successfully processed land domination relevancies, records saved: {num_domination_saved}")
         else:
             log.error(f"Failed to calculate land domination relevancies: {domination_result.get('error')}")
         
         if housing_result.get('success'):
-            total_relevancies += housing_result.get('relevanciesCreated', 0)
-            log.info(f"Successfully calculated housing situation relevancies")
+            num_housing_saved = housing_result.get('relevanciesSavedCount', housing_result.get('relevanciesCreated', 0))
+            total_relevancies_saved += num_housing_saved
+            log.info(f"Successfully processed housing situation relevancies, records saved: {num_housing_saved}")
         else:
             log.error(f"Failed to calculate housing situation relevancies: {housing_result.get('error')}")
         
         if job_market_result.get('success'):
-            total_relevancies += job_market_result.get('relevanciesCreated', 0)
-            log.info(f"Successfully calculated job market situation relevancies")
+            num_job_market_saved = job_market_result.get('relevanciesSavedCount', job_market_result.get('relevanciesCreated', 0))
+            total_relevancies_saved += num_job_market_saved
+            log.info(f"Successfully processed job market situation relevancies, records saved: {num_job_market_saved}")
         else:
             log.error(f"Failed to calculate job market situation relevancies: {job_market_result.get('error')}")
         
@@ -426,20 +435,20 @@ def calculate_relevancies(type_filter: Optional[str] = None) -> bool:
             if results:  # Skip delay for the first request
                 time.sleep(2)
             
-            result = calculate_relevancies_for_ai(username, base_url, type_filter)
+            result = calculate_relevancies_for_ai(username, base_url, type_filter) # Proximity
             results[username] = result
             
             if result.get('success'):
-                total_relevancies += result.get('relevanciesCreated', 0)
-                log.info(f"Successfully calculated {result.get('relevanciesCreated', 0)} relevancies for {username}")
+                num_proximity_saved = result.get('relevanciesSavedCount', result.get('relevanciesCreated', 0))
+                total_relevancies_saved += num_proximity_saved
+                log.info(f"Successfully processed proximity relevancies for {username}, records saved: {num_proximity_saved}")
                 
-                # Check if relevancies were saved to Airtable
                 if result.get('saved', False):
-                    log.info(f"Relevancies for {username} were saved to Airtable")
+                    log.info(f"Proximity relevancies for {username} were saved to Airtable")
                 else:
-                    log.warning(f"Relevancies for {username} were calculated but NOT saved to Airtable")
+                    log.warning(f"Proximity relevancies for {username} were calculated but NOT saved to Airtable")
             else:
-                log.error(f"Failed to calculate relevancies for {username}: {result.get('error')}")
+                log.error(f"Failed to calculate proximity relevancies for {username}: {result.get('error')}")
                 
         # Calculate building ownership relevancies for each citizen
         building_ownership_results = {}
@@ -451,8 +460,9 @@ def calculate_relevancies(type_filter: Optional[str] = None) -> bool:
             building_ownership_results[username] = result
             
             if result.get('success'):
-                total_relevancies += result.get('relevanciesCreated', 0)
-                log.info(f"Successfully calculated {result.get('relevanciesCreated', 0)} building ownership relevancies for {username}")
+                num_bo_saved = result.get('relevanciesSavedCount', result.get('relevanciesCreated', 0))
+                total_relevancies_saved += num_bo_saved
+                log.info(f"Successfully processed building ownership relevancies for {username}, records saved: {num_bo_saved}")
             else:
                 log.error(f"Failed to calculate building ownership relevancies for {username}: {result.get('error')}")
         
@@ -461,14 +471,16 @@ def calculate_relevancies(type_filter: Optional[str] = None) -> bool:
         
         # Add domination relevancies to the details FIRST
         if domination_result.get('success'):
-            details.append(f"- Global land domination relevancies: {domination_result.get('relevanciesCreated', 0)} created")
+            num_dom_saved = domination_result.get('relevanciesSavedCount', domination_result.get('relevanciesCreated', 0))
+            details.append(f"- Global land domination relevancy: {num_dom_saved} record saved (summarizing all landowners)")
         else:
-            details.append(f"- Global land domination relevancies: Error - {domination_result.get('error', 'Unknown error')}")
+            details.append(f"- Global land domination relevancy: Error - {domination_result.get('error', 'Unknown error')}")
         
         # Add housing relevancies to the details
         if housing_result.get('success'):
             stats = housing_result.get('statistics', {})
-            details.append(f"- Housing situation relevancies: Created for all citizens")
+            num_housing_saved = housing_result.get('relevanciesSavedCount', housing_result.get('relevanciesCreated', 0))
+            details.append(f"- Housing situation relevancy: {num_housing_saved} global record saved")
             details.append(f"  - Homeless citizens: {stats.get('homelessCount', 'N/A')}")
             details.append(f"  - Vacant homes: {stats.get('vacantCount', 'N/A')}")
             details.append(f"  - Homelessness rate: {stats.get('homelessRate', 'N/A')}%")
@@ -479,7 +491,8 @@ def calculate_relevancies(type_filter: Optional[str] = None) -> bool:
         # Add job market relevancies to the details
         if job_market_result.get('success'):
             stats = job_market_result.get('statistics', {})
-            details.append(f"- Job market situation relevancies: Created for all citizens")
+            num_job_saved = job_market_result.get('relevanciesSavedCount', job_market_result.get('relevanciesCreated', 0))
+            details.append(f"- Job market situation relevancy: {num_job_saved} global record saved")
             details.append(f"  - Unemployed citizens: {stats.get('unemployedCount', 'N/A')}")
             details.append(f"  - Vacant jobs: {stats.get('vacantCount', 'N/A')}")
             details.append(f"  - Unemployment rate: {stats.get('unemploymentRate', 'N/A')}%")
@@ -491,19 +504,21 @@ def calculate_relevancies(type_filter: Optional[str] = None) -> bool:
         # Then add individual citizen results
         for citizen, result in results.items():
             if not result.get('success'):
-                details.append(f"- {citizen}: Error - {result.get('error', 'Unknown error')}")
+                details.append(f"- {citizen} (Proximity): Error - {result.get('error', 'Unknown error')}")
             else:
-                saved_status = "saved to Airtable" if result.get('saved', False) else "NOT saved to Airtable"
-                details.append(f"- {citizen}: {result.get('relevanciesCreated', 0)} relevancies created (owns {result.get('ownedLandCount', 0)} lands) - {saved_status}")
+                num_prox_saved = result.get('relevanciesSavedCount', result.get('relevanciesCreated', 0))
+                saved_status = "saved" if result.get('saved', False) else "NOT saved"
+                details.append(f"- {citizen} (Proximity): {num_prox_saved} records {saved_status} (owns {result.get('ownedLandCount', 0)} lands)")
         
         # Add building ownership results to the details
-        details.append("\nBuilding Ownership Relevancies:")
+        details.append("\nBuilding Ownership Relevancies (per citizen):")
         for citizen, result in building_ownership_results.items():
             if not result.get('success'):
                 details.append(f"- {citizen}: Error - {result.get('error', 'Unknown error')}")
             else:
-                saved_status = "saved to Airtable" if result.get('saved', False) else "NOT saved to Airtable"
-                details.append(f"- {citizen}: {result.get('relevanciesCreated', 0)} relevancies created - {saved_status}")
+                num_bo_saved = result.get('relevanciesSavedCount', result.get('relevanciesCreated', 0))
+                saved_status = "saved" if result.get('saved', False) else "NOT saved"
+                details.append(f"- {citizen}: {num_bo_saved} records {saved_status}")
         
         details_text = "\n".join(details)
         
@@ -511,9 +526,9 @@ def calculate_relevancies(type_filter: Optional[str] = None) -> bool:
         notification_created = create_admin_notification(
             tables,
             "Relevancy Calculation Complete",
-            f"Calculated relevancies for {len(citizen_usernames)} citizens.\n"
-            f"Created {total_relevancies} relevancy records (including land domination, housing, and job market relevancies).\n\n"
-            f"Details:\n{details_text}"
+            f"Processed relevancies for {len(citizen_usernames)} citizens.\n"
+            f"Total relevancy records saved: {total_relevancies_saved} (includes global and per-citizen records).\n\n"
+            f"Summary:\n{details_text}"
         )
         
         if notification_created:
