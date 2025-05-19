@@ -15,10 +15,6 @@ import textwrap
 # Initialize colorama
 colorama.init(autoreset=True)
 
-# Add the parent directory to the path to import citizen_utils
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from app.citizen_utils import find_citizen_by_identifier
-
 # Logging functions
 def log_header(message):
     """Print a header message with a colorful border."""
@@ -898,25 +894,41 @@ def send_building_placement_request(ai_username: str, decision: Dict, polygon_da
         # Verify the AI can build this type of building based on social class
         if tables:
             try:
-                # Get the AI's social class
-                citizen_record = find_citizen_by_identifier(tables["citizens"], ai_username)
-                if not citizen_record:
-                    print(f"Citizen {ai_username} not found, cannot verify social class")
+                # Get the AI's social class by calling the API instead of using find_citizen_by_identifier
+                api_base_url = os.getenv("API_BASE_URL", "http://localhost:3000")
+                citizen_url = f"{api_base_url}/api/citizens/{ai_username}"
+                
+                log_info(f"Fetching citizen data from API: {citizen_url}")
+                response = requests.get(citizen_url)
+                
+                if response.status_code != 200:
+                    log_error(f"Failed to fetch citizen data: {response.status_code} {response.text}")
                     return False
                 
-                social_class = citizen_record["fields"].get("SocialClass", "Facchini")
+                citizen_data = response.json()
+                
+                if not citizen_data.get("success"):
+                    log_error(f"API returned error: {citizen_data.get('error', 'Unknown error')}")
+                    return False
+                
+                citizen_record = citizen_data.get("citizen")
+                if not citizen_record:
+                    log_error(f"Citizen {ai_username} not found in API response")
+                    return False
+                
+                social_class = citizen_record.get("socialClass", "Facchini")
                 allowed_tiers = get_allowed_building_tiers(social_class)
                 building_tier = get_building_tier(building_type, building_types)
                 
                 if building_tier not in allowed_tiers:
-                    print(f"AI {ai_username} with social class {social_class} cannot build {building_type} (tier {building_tier})")
-                    print(f"Allowed tiers for {social_class}: {allowed_tiers}")
+                    log_error(f"AI {ai_username} with social class {social_class} cannot build {building_type} (tier {building_tier})")
+                    log_error(f"Allowed tiers for {social_class}: {allowed_tiers}")
                     return False
                 
-                print(f"Building tier {building_tier} is allowed for {ai_username} with social class {social_class}")
+                log_success(f"Building tier {building_tier} is allowed for {ai_username} with social class {social_class}")
             except Exception as e:
-                print(f"Error verifying social class restrictions: {str(e)}")
-                print(f"Exception traceback: {traceback.format_exc()}")
+                log_error(f"Error verifying social class restrictions: {str(e)}")
+                log_error(f"Exception traceback: {traceback.format_exc()}")
                 # Continue even if verification fails
         
         # Determine which point type is needed for this building
@@ -1126,18 +1138,32 @@ Your response must be a JSON object with:
                                 log_info(f"Construction cost for {building_type}: {construction_cost} ducats")
                                 
                                 # 2. Check if the citizen has enough ducats
-                                from app.citizen_utils import find_citizen_by_identifier
-                                
                                 # Get the tables from the function parameters
                                 tables = initialize_airtable()
                                 
-                                # Find the citizen record by username
-                                citizen_record = find_citizen_by_identifier(tables["citizens"], ai_username)
-                                if not citizen_record:
-                                    print(f"Citizen {ai_username} not found, cannot create building")
+                                # Get citizen data from API
+                                api_base_url = os.getenv("API_BASE_URL", "http://localhost:3000")
+                                citizen_url = f"{api_base_url}/api/citizens/{ai_username}"
+                                
+                                log_info(f"Fetching citizen data from API: {citizen_url}")
+                                response = requests.get(citizen_url)
+                                
+                                if response.status_code != 200:
+                                    log_error(f"Failed to fetch citizen data: {response.status_code} {response.text}")
                                     return False
                                 
-                                citizen_ducats = citizen_record["fields"].get("Ducats", 0)
+                                citizen_data = response.json()
+                                
+                                if not citizen_data.get("success"):
+                                    log_error(f"API returned error: {citizen_data.get('error', 'Unknown error')}")
+                                    return False
+                                
+                                citizen_record = citizen_data.get("citizen")
+                                if not citizen_record:
+                                    log_error(f"Citizen {ai_username} not found in API response")
+                                    return False
+                                
+                                citizen_ducats = citizen_record.get("ducats", 0)
                                 log_info(f"Citizen {ai_username} has {citizen_ducats} ducats")
                                 
                                 if citizen_ducats < construction_cost:
