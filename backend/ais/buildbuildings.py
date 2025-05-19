@@ -877,10 +877,7 @@ def send_building_placement_request(ai_username: str, decision: Dict, polygon_da
                                    available_points: Dict[str, List[Dict]], building_types: Dict, 
                                    tables=None, citizen_relevancies=None) -> bool:
     """Send a second request to the AI to choose a specific point for building placement."""
-    try:
-        # Import the function here to ensure it's available in this scope
-        from app.citizen_utils import find_citizen_by_identifier
-        
+    try:      
         if not decision or "building_type" not in decision or "land_id" not in decision:
             print(f"No valid building decision from AI {ai_username}, skipping placement request")
             print(f"Decision data: {json.dumps(decision)}")
