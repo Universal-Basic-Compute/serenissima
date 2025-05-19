@@ -31,27 +31,34 @@ const ResourceItem: React.FC<ResourceItemProps> = ({ resource, type = 'store' })
 
   // Get icon path
   const getIconPath = () => {
-    if (!resource.icon) {
-      // Remove any existing file extension before adding .png
+    if (!resource.icon && resource.resourceType) {
+      // Fallback: resource.icon is falsy, use resource.resourceType
       const baseResourceType = resource.resourceType.toLowerCase().replace(/\s+/g, '_').replace(/\.png$/, '');
-      return `/images/resources/${baseResourceType}.png`;
+      return `/images/resources/${baseResourceType}.png`; // e.g. /images/resources/stone_block.png
+    } else if (!resource.icon) {
+      // If both icon and resourceType are missing, use default
+      return '/images/resources/default.png';
     }
     
-    if (resource.icon.startsWith('/')) {
-      return resource.icon;
+    // resource.icon is truthy
+    if (resource.icon.startsWith('/')) { 
+      return resource.icon; // e.g. /images/custom/my_icon.png or /already_absolute_path.png
     }
     
-    // Remove any existing file extension before adding .png
-    const baseIcon = resource.icon.replace(/\.png$/, '');
+    // resource.icon is relative, e.g., "foo.png" or "resources/foo.png" or "Iron Ore" or "Iron Ore.png"
+    // Remove .png suffix for consistent processing before re-adding it.
+    const baseIconString = resource.icon.replace(/\.png$/, ''); // "foo" or "resources/foo" or "Iron Ore"
     
-    // Ensure path starts with /images/
-    if (baseIcon.startsWith('resources/')) {
-      return `/images/${baseIcon}.png`;
-    } else if (!baseIcon.includes('/')) {
-      return `/images/resources/${baseIcon}.png`;
-    } else {
-      // If it has slashes but doesn't start with /images/, add /images/ prefix
-      return `/images/${baseIcon}.png`;
+    if (baseIconString.startsWith('resources/')) { // e.g. icon was "resources/foo.png" -> baseIconString is "resources/foo"
+      return `/images/${baseIconString}.png`; // -> /images/resources/foo.png
+    } else if (!baseIconString.includes('/')) { // e.g. icon was "foo.png" or "Iron Ore" or "Iron Ore.png"
+      // Sanitize simple names: lowercase and replace spaces with underscores.
+      const sanitizedBaseIcon = baseIconString.toLowerCase().replace(/\s+/g, '_'); // "foo" or "iron_ore"
+      return `/images/resources/${sanitizedBaseIcon}.png`; // -> /images/resources/foo.png or /images/resources/iron_ore.png
+    } else { 
+      // e.g. icon was "category/foo.png" -> baseIconString is "category/foo"
+      // Assumes if resource.icon contains '/', it's a well-formed relative path fragment.
+      return `/images/${baseIconString}.png`; // -> /images/category/foo.png
     }
   };
 
@@ -86,15 +93,11 @@ const ResourceItem: React.FC<ResourceItemProps> = ({ resource, type = 'store' })
           loading="lazy"
           unoptimized={true}
           onError={(e) => {
-            console.log(`Failed to load resource image: ${getIconPath()}, trying fallback paths`);
-            // Try alternative paths if the first one fails
-            (e.target as HTMLImageElement).src = `/resources/${resource.resourceType.toLowerCase().replace(/\s+/g, '_')}.png`;
-            (e.target as HTMLImageElement).onerror = () => {
-              (e.target as HTMLImageElement).src = '/images/resources/default.png';
-              (e.target as HTMLImageElement).onerror = () => {
-                (e.target as HTMLImageElement).src = '/resources/default.png';
-              };
-            };
+            const currentSrc = (e.target as HTMLImageElement).src;
+            console.error(`Failed to load resource image: ${currentSrc}. Falling back to default.`);
+            (e.target as HTMLImageElement).src = '/images/resources/default.png';
+            // Prevent infinite loops if default.png also fails by removing the onerror handler.
+            (e.target as HTMLImageElement).onerror = null; 
           }}
         />
       </div>
