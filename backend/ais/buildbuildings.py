@@ -1210,11 +1210,12 @@ Your response must be a JSON object with:
                                 
                                 # Create a transaction record for the payment
                                 try:
-                                    transactions_table = Table(
-                                        tables["citizens"].api_key, 
-                                        tables["citizens"].base_id, 
-                                        "TRANSACTIONS"
-                                    )
+                                    # Get the API key and base ID from environment variables
+                                    airtable_api_key = os.getenv("AIRTABLE_API_KEY")
+                                    airtable_base_id = os.getenv("AIRTABLE_BASE_ID")
+                                    
+                                    # Create the transactions table directly
+                                    transactions_table = Table(airtable_api_key, airtable_base_id, "TRANSACTIONS")
                                     
                                     transaction_record = {
                                         "Type": "building_construction",
