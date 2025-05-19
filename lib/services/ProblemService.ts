@@ -72,7 +72,8 @@ export class ProblemService {
             title: `No Buildings on Land`,
             description: this.generateNoBuildingsDescription(land),
             solutions: this.generateNoBuildingsSolutions(land),
-            notes: `Land has ${land.buildingPoints || 0} building points available`
+            notes: `Land has ${land.buildingPoints || 0} building points available`,
+            center: land.center // Include the center field from the land data
           };
         }
       });

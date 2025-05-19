@@ -54,7 +54,8 @@ export async function saveProblems(
         Title: problem.title,
         Description: problem.description,
         Solutions: problem.solutions,
-        Notes: problem.notes || ''
+        Notes: problem.notes || '',
+        Position: problem.position || '' // Add the position field
       }
     }));
     

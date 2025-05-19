@@ -48,6 +48,19 @@ export async function POST(request: NextRequest) {
     // Detect lands with no buildings
     const problems = await problemService.detectLandsWithNoBuildings(username);
     
+    // Add Center as Position for each problem
+    for (const problemId in problems) {
+      const problem = problems[problemId];
+      // If the problem has an assetId (land id), add the center as position
+      if (problem.assetId) {
+        // The center is already included in the problem from the land data
+        // We just need to stringify it if it exists
+        if (problem.center) {
+          problem.position = JSON.stringify(problem.center);
+        }
+      }
+    }
+    
     // Save to Airtable
     let saved = false;
     let savedCount = 0;
