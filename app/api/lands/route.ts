@@ -84,7 +84,7 @@ export async function GET(request: Request) {
           position = null;
         }
       }
-      
+        
       let coordinates = record.get('Coordinates');
       if (typeof coordinates === 'string') {
         try {
@@ -93,7 +93,7 @@ export async function GET(request: Request) {
           coordinates = [];
         }
       }
-      
+        
       let center = record.get('Center');
       if (typeof center === 'string') {
         try {
@@ -102,34 +102,48 @@ export async function GET(request: Request) {
           center = null;
         }
       }
-      
+        
       // Get the Airtable record ID and the LandId field
       const recordId = record.id;
       const landId = record.get('LandId') || recordId; // Use LandId if available, fall back to record ID
-      
+        
       // Get polygon data using the LandId field
       const polygonData = polygonMap[landId] || {};
-      
+        
       if (Object.keys(polygonData).length === 0) {
         console.warn(`No polygon data found for land ${landId} (record ID: ${recordId})`);
       }
-      
-      // Merge land data with polygon data
-      return {
+        
+      // Get all fields from the record
+      const fields = record._rawJson.fields;
+        
+      // Create a base object with de-capitalized field names
+      const baseObject: Record<string, any> = {
         id: recordId,
-        landId: landId, // Include the landId in the response
+        landId: landId
+      };
+        
+      // Add all fields from Airtable with de-capitalized first letter
+      for (const [key, value] of Object.entries(fields)) {
+        // De-capitalize the first letter of the key
+        const newKey = key.charAt(0).toLowerCase() + key.slice(1);
+        baseObject[newKey] = value;
+      }
+        
+      // Merge with polygon data, also with de-capitalized keys
+      return {
+        ...baseObject,
+        // Override with processed values and polygon data
         owner: record.get('Owner') || null,
         buildingPointsCount: record.get('BuildingPointsCount') || 0,
         historicalName: record.get('HistoricalName') || polygonData.historicalName || null,
         englishName: record.get('EnglishName') || polygonData.englishName || null,
         historicalDescription: record.get('HistoricalDescription') || polygonData.historicalDescription || null,
-        // Use polygon data for coordinates, building points, etc.
         coordinates: polygonData.coordinates || coordinates || [],
         center: center || polygonData.center || polygonData.centroid || null,
         buildingPoints: polygonData.buildingPoints || [],
         bridgePoints: polygonData.bridgePoints || [],
         canalPoints: polygonData.canalPoints || [],
-        // Include any additional fields from the polygon data
         areaInSquareMeters: polygonData.areaInSquareMeters || record.get('AreaInSquareMeters') || null,
         nameConfidence: polygonData.nameConfidence || record.get('NameConfidence') || null
       };
