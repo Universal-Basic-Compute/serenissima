@@ -39,6 +39,8 @@ export class ProblemService {
         return {};
       }
       
+      console.log(`Found ${lands.length} lands to check for buildings`);
+      
       // Fetch all buildings
       const buildingsResponse = await fetch(`${this.getBaseUrl()}/api/buildings`);
       if (!buildingsResponse.ok) {
@@ -47,6 +49,8 @@ export class ProblemService {
       
       const buildingsData = await buildingsResponse.json();
       const buildings = buildingsData.buildings || [];
+      
+      console.log(`Found ${buildings.length} buildings total`);
       
       // Group buildings by land_id for quick lookup
       const buildingsByLand: Record<string, any[]> = {};
@@ -58,17 +62,29 @@ export class ProblemService {
         buildingsByLand[landId].push(building);
       });
       
+      console.log(`Grouped buildings by land_id, found ${Object.keys(buildingsByLand).length} lands with buildings`);
+      
+      // Debug: Log the first few land IDs and their building counts
+      const landIds = Object.keys(buildingsByLand).slice(0, 5);
+      landIds.forEach(landId => {
+        console.log(`Land ${landId} has ${buildingsByLand[landId].length} buildings`);
+      });
+      
       // Create problems for lands with no buildings
       const problems: Record<string, any> = {};
       
       lands.forEach(land => {
-        const landId = land.id;
-        const landOwner = land.owner || 'Unknown';
-        const buildingsOnLand = buildingsByLand[landId] || [];
+        // We need to check both the record ID and the landId field
+        const recordId = land.id;
+        const landId = land.landId || recordId;
+        
+        // Check if there are buildings on this land using both IDs
+        const buildingsOnLand = buildingsByLand[recordId] || buildingsByLand[landId] || [];
         
         if (buildingsOnLand.length === 0) {
           // Create a problem for this land
           const problemId = `no_buildings_${landId}_${Date.now()}`;
+          const landOwner = land.owner || 'Unknown';
           
           problems[problemId] = {
             problemId,
@@ -88,6 +104,8 @@ export class ProblemService {
           };
         }
       });
+      
+      console.log(`Created ${Object.keys(problems).length} problems for lands with no buildings`);
       
       return problems;
     } catch (error) {
