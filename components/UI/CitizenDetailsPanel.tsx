@@ -1212,10 +1212,7 @@ Be historically accurate but engaging. Speak in first person as if you are this 
                     {citizen.workplace && (
                       <>
                         <p className="text-amber-700 text-sm">
-                          {citizen.workplace.name || 'Unknown workplace'}
-                        </p>
-                        <p className="text-amber-600 text-xs">
-                          {formatBuildingType(citizen.workplace.type || '')}
+                          {citizen.workplace.name || 'Luxury Showroom'}
                         </p>
                       </>
                     )}
