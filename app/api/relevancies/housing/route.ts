@@ -46,7 +46,15 @@ export async function GET(request: NextRequest) {
     
     // Count vacant homes (home buildings with no Occupant)
     const vacantHomes = homeBuildingsResponse
-      .filter(building => !building.get('Occupant'));
+      .filter(building => {
+        const occupant = building.get('Occupant');
+        // Consider a home vacant only if Occupant field is empty, null, or undefined
+        return !occupant || occupant === '';
+      });
+    
+    console.log(`Found ${homeBuildingsResponse.length} total homes`);
+    console.log(`Found ${vacantHomes.length} vacant homes`);
+    console.log(`Found ${homelessCitizens.length} homeless citizens out of ${citizensResponse.length} total citizens`);
     
     // Calculate housing statistics
     const totalCitizens = citizensResponse.length;
@@ -181,7 +189,15 @@ export async function POST(request: NextRequest) {
     
     // Count vacant homes (home buildings with no Occupant)
     const vacantHomes = homeBuildingsResponse
-      .filter(building => !building.get('Occupant'));
+      .filter(building => {
+        const occupant = building.get('Occupant');
+        // Consider a home vacant only if Occupant field is empty, null, or undefined
+        return !occupant || occupant === '';
+      });
+    
+    console.log(`Found ${homeBuildingsResponse.length} total homes`);
+    console.log(`Found ${vacantHomes.length} vacant homes`);
+    console.log(`Found ${homelessCitizens.length} homeless citizens out of ${citizensResponse.length} total citizens`);
     
     // Calculate housing statistics
     const totalCitizens = citizensResponse.length;
