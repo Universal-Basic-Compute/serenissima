@@ -107,41 +107,20 @@ export async function saveRelevancies(
           }
         };
       }
-    }).filter(Boolean);
-    
-    // Group relevancies by type
-    const relevanciesByType: Record<string, any[]> = {};
-    relevancyRecords.forEach(record => {
-      const type = record.fields.Type;
-      if (!relevanciesByType[type]) {
-        relevanciesByType[type] = [];
-      }
-      relevanciesByType[type].push(record);
-    });
-    
-    // For each type, sort by score and keep only the top 10
-    const topRelevancies: any[] = [];
-    Object.keys(relevanciesByType).forEach(type => {
-      const sortedRelevancies = relevanciesByType[type].sort((a, b) => 
-        b.fields.Score - a.fields.Score
-      );
-      
-      // Take only the top 10 for each type
-      const topForType = sortedRelevancies.slice(0, 10);
-      topRelevancies.push(...topForType);
-    });
-    
-    console.log(`Filtered to top 10 relevancies per type: ${topRelevancies.length} records from original ${relevancyRecords.length}`);
+    }).filter(Boolean); // Ensure we only have valid records
     
     // Create records in batches of 10
-    for (let i = 0; i < topRelevancies.length; i += 10) {
-      const batch = topRelevancies.slice(i, i + 10);
+    // The relevancyRecords array now contains all records to be saved, without top 10 filtering.
+    console.log(`Preparing to save ${relevancyRecords.length} relevancy records for ${aiUsername} (no top 10 filtering).`);
+
+    for (let i = 0; i < relevancyRecords.length; i += 10) {
+      const batch = relevancyRecords.slice(i, i + 10);
       try {
         const createdRecords = await base(AIRTABLE_RELEVANCIES_TABLE).create(batch);
         console.log(`Successfully created batch of ${createdRecords.length} records`);
       } catch (error) {
         // Log the specific error and the first record that failed
-        console.error(`Error creating batch ${i/10 + 1}:`, error);
+        console.error(`Error creating batch ${Math.floor(i/10) + 1}:`, error);
         if (batch.length > 0) {
           console.error('First record in failed batch:', JSON.stringify(batch[0], null, 2));
         }
@@ -149,8 +128,8 @@ export async function saveRelevancies(
       }
     }
       
-    console.log(`Created ${topRelevancies.length} new relevancy records for ${aiUsername}`);
-    return topRelevancies.length;
+    console.log(`Created ${relevancyRecords.length} new relevancy records for ${aiUsername}`);
+    return relevancyRecords.length;
   } catch (error) {
     console.warn('Could not save to RELEVANCIES table:', error.message);
     throw error;
