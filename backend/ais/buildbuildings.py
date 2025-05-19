@@ -170,67 +170,35 @@ def get_citizen_buildings(tables, username: str) -> List[Dict]:
         log_error(f"Error getting buildings for citizen {username}: {str(e)}")
         return []
 
-def get_citizen_relevancies(tables, username: str) -> List[Dict]:
-    """Get the last 100 relevancies for a specific citizen, including global relevancies."""
+def get_citizen_relevancies(username: str) -> List[Dict]:
+    """Get relevancies for a specific citizen using the API endpoint."""
     try:
-        # Query relevancies where the citizen is the relevant citizen OR RelevantToCitizen is "all"
-        formula = f"OR({{RelevantToCitizen}}='{username}', {{RelevantToCitizen}}='all')"
+        log_info(f"Fetching relevancies for citizen {username} from API")
         
-        relevancies = tables["relevancies"].all(
-            formula=formula,
-            sort=[{"field": "CreatedAt", "direction": "desc"}],
-            max_records=100
-        )
+        # Get API base URL from environment variables, with a default fallback
+        api_base_url = os.getenv("API_BASE_URL", "http://localhost:3000")
         
-        log_info(f"Found {len(relevancies)} relevancies for {username} (including global 'all' relevancies)")
+        # Construct the API URL with the relevantToCitizen parameter
+        url = f"{api_base_url}/api/relevancies?relevantToCitizen={username}"
         
-        # Process relevancies to ensure all fields are properly handled
-        processed_relevancies = []
-        for relevancy in relevancies:
-            # Ensure all fields are properly handled
-            fields = relevancy.get('fields', {})
+        # Make the API request
+        response = requests.get(url)
+        
+        # Check if the request was successful
+        if response.status_code == 200:
+            response_data = response.json()
             
-            # Create a safe version of the fields dictionary with proper type handling
-            safe_fields = {}
-            for key, value in fields.items():
-                # Convert all values to strings to avoid type errors
-                if value is None:
-                    safe_fields[key] = ""
-                elif isinstance(value, (int, float)):
-                    safe_fields[key] = value  # Keep numbers as is
-                elif isinstance(value, dict):
-                    safe_fields[key] = json.dumps(value)  # Convert dict to JSON string
-                elif isinstance(value, list):
-                    safe_fields[key] = json.dumps(value)  # Convert list to JSON string
-                else:
-                    # Try to convert to string, with fallback
-                    try:
-                        safe_fields[key] = str(value)
-                    except:
-                        safe_fields[key] = ""
-            
-            # Create the processed relevancy with safe fields
-            processed_relevancy = {
-                'id': relevancy.get('id', ''),
-                'fields': {
-                    'RelevancyId': safe_fields.get('RelevancyId', ''),
-                    'AssetID': safe_fields.get('AssetID', ''),
-                    'AssetType': safe_fields.get('AssetType', ''),
-                    'Category': safe_fields.get('Category', ''),
-                    'Type': safe_fields.get('Type', ''),
-                    'TargetCitizen': safe_fields.get('TargetCitizen', ''),
-                    'RelevantToCitizen': safe_fields.get('RelevantToCitizen', ''),
-                    'Score': float(safe_fields.get('Score', 0)) if safe_fields.get('Score') not in (None, '') else 0,
-                    'TimeHorizon': safe_fields.get('TimeHorizon', ''),
-                    'Title': safe_fields.get('Title', ''),
-                    'Description': safe_fields.get('Description', ''),
-                    'Status': safe_fields.get('Status', ''),
-                    'CreatedAt': safe_fields.get('CreatedAt', '')
-                }
-            }
-            processed_relevancies.append(processed_relevancy)
-        
-        return processed_relevancies
+            # Check if the response has the expected structure
+            if "success" in response_data and response_data["success"] and "relevancies" in response_data:
+                relevancies = response_data["relevancies"]
+                log_info(f"Retrieved {len(relevancies)} relevancies for {username}")
+                return relevancies
+            else:
+                log_warning(f"Unexpected API response format: {response_data}")
+                return []
+        else:
+            log_error(f"Error fetching relevancies from API: {response.status_code} - {response.text}")
+            return []
     except Exception as e:
         log_error(f"Error getting relevancies for citizen {username}: {str(e)}")
         return []
@@ -300,7 +268,7 @@ def get_building_types_from_api() -> Dict:
                 building_types = response_data["buildingTypes"]
                 log_success(f"Successfully fetched {len(building_types)} building types from API")
                 
-                # Transform the data into the format we need - include type, name, shortDescription and constructionCosts.ducats
+                # Transform the data into the format we need - include type, name, tier, and constructionCosts.ducats
                 transformed_types = {}
                 for building in building_types:
                     if "type" in building and "name" in building:
@@ -315,7 +283,8 @@ def get_building_types_from_api() -> Dict:
                             "type": building_type,
                             "name": building["name"],
                             "shortDescription": building.get("shortDescription", ""),
-                            "constructionCost": ducats_cost
+                            "constructionCost": ducats_cost,
+                            "tier": building.get("tier", 5)  # Default to tier 5 if not specified
                         }
                 
                 return transformed_types
@@ -344,7 +313,7 @@ def get_kinos_api_key() -> str:
         sys.exit(1)
     return api_key
 
-def prepare_ai_building_strategy(ai_citizen: Dict, citizen_lands: List[Dict], citizen_buildings: List[Dict], all_buildings: List[Dict], citizen_relevancies: List[Dict]) -> Dict:
+def prepare_ai_building_strategy(ai_citizen: Dict, citizen_lands: List[Dict], citizen_buildings: List[Dict], all_buildings: List[Dict]) -> Dict:
     """Prepare a comprehensive data package for the AI to make building decisions."""
     
     # Extract citizen information
@@ -382,21 +351,24 @@ def prepare_ai_building_strategy(ai_citizen: Dict, citizen_lands: List[Dict], ci
         }
         buildings_data.append(building_info)
     
+    # Get relevancies for this citizen from the API
+    relevancies = get_citizen_relevancies(username)
+    
     # Process relevancies data
     relevancies_data = []
-    for relevancy in citizen_relevancies:
+    for relevancy in relevancies:
         relevancy_info = {
-            "asset_id": relevancy["fields"].get("AssetID", ""),
-            "asset_type": relevancy["fields"].get("AssetType", ""),
-            "category": relevancy["fields"].get("Category", ""),
-            "type": relevancy["fields"].get("Type", ""),
-            "target_citizen": relevancy["fields"].get("TargetCitizen", ""),
-            "score": relevancy["fields"].get("Score", 0),
-            "time_horizon": relevancy["fields"].get("TimeHorizon", ""),
-            "title": relevancy["fields"].get("Title", ""),
-            "description": relevancy["fields"].get("Description", ""),
-            "status": relevancy["fields"].get("Status", ""),
-            "created_at": relevancy["fields"].get("CreatedAt", "")
+            "asset_id": relevancy.get("assetId", ""),
+            "asset_type": relevancy.get("assetType", ""),
+            "category": relevancy.get("category", ""),
+            "type": relevancy.get("type", ""),
+            "target_citizen": relevancy.get("targetCitizen", ""),
+            "score": relevancy.get("score", 0),
+            "time_horizon": relevancy.get("timeHorizon", ""),
+            "title": relevancy.get("title", ""),
+            "description": relevancy.get("description", ""),
+            "status": relevancy.get("status", ""),
+            "created_at": relevancy.get("createdAt", "")
         }
         relevancies_data.append(relevancy_info)
     
@@ -1385,7 +1357,7 @@ def process_ai_building_strategies(dry_run: bool = False):
                 continue
             
             # Prepare the data package for the AI
-            data_package = prepare_ai_building_strategy(ai_citizen, citizen_lands, citizen_buildings, all_buildings, citizen_relevancies)
+            data_package = prepare_ai_building_strategy(ai_citizen, citizen_lands, citizen_buildings, all_buildings)
             log_success(f"Prepared data package for {ai_username}")
             
             # Send the building strategy request to the AI
@@ -1407,7 +1379,7 @@ def process_ai_building_strategies(dry_run: bool = False):
                         available_points,
                         building_types,
                         tables,
-                        citizen_relevancies  # Pass the relevancies here
+                        get_citizen_relevancies(ai_username)  # Get relevancies directly from API
                     )
                     
                     ai_strategy_results[ai_username] = placement_success
