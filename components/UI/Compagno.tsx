@@ -68,6 +68,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState<number>(0); // New state for unread messages
   const [activeTab, setActiveTab] = useState<'notifications' | 'chats'>('notifications');
   const [lastFetchTime, setLastFetchTime] = useState<number>(Date.now());
   const [isMobile, setIsMobile] = useState<boolean>(false);
@@ -138,6 +139,50 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
       console.error('Error fetching unread notification count:', error);
     }
   }, [username, isOpen]);
+
+  // Fetch unread messages count
+  const fetchUnreadMessagesCount = useCallback(async () => {
+    if (isOpen && activeTab === 'chats') return; // Don't fetch if chat is open and active, as messages might be read
+
+    try {
+      let citizenToFetch = username;
+      if (!citizenToFetch || citizenToFetch === DEFAULT_CITIZENNAME) {
+        const savedProfile = localStorage.getItem('citizenProfile');
+        if (savedProfile) {
+          try {
+            const profile = JSON.parse(savedProfile);
+            if (profile.username) {
+              citizenToFetch = profile.username;
+            }
+          } catch (error) {
+            console.error('Error parsing citizen profile for messages count:', error);
+          }
+        }
+      }
+
+      if (!citizenToFetch) {
+        citizenToFetch = DEFAULT_CITIZENNAME;
+      }
+
+      const apiUrl = `/api/messages/unread-count`;
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ citizen: citizenToFetch }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch unread messages count: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.success && typeof data.unreadMessagesCount === 'number') {
+        setUnreadMessagesCount(data.unreadMessagesCount);
+      }
+    } catch (error) {
+      console.error('Error fetching unread messages count:', error);
+    }
+  }, [username, isOpen, activeTab]);
 
   // Fetch notifications
   const fetchNotifications = useCallback(async (forceRefresh = false) => {
@@ -581,12 +626,20 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
       const unreadCountInterval = setInterval(() => {
         fetchUnreadCount();
       }, 120000); // 2 minutes
+
+      // Fetch unread messages count immediately
+      fetchUnreadMessagesCount();
+      // Set up polling for unread messages count every 2 minutes
+      const unreadMessagesInterval = setInterval(() => {
+        fetchUnreadMessagesCount();
+      }, 120000); // 2 minutes
       
       return () => {
         clearInterval(unreadCountInterval);
+        clearInterval(unreadMessagesInterval);
       };
     }
-  }, [fetchUnreadCount, isOpen]);
+  }, [fetchUnreadCount, fetchUnreadMessagesCount, isOpen]);
 
   // Set up notification polling
   useEffect(() => {
@@ -641,7 +694,11 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
     if (isOpen && activeTab === 'chats' && selectedCitizen === 'compagno') {
       fetchMessageHistory();
     }
-  }, [isOpen, activeTab, selectedCitizen]);
+    // When chats tab is opened, refresh unread messages count
+    if (isOpen && activeTab === 'chats') {
+      fetchUnreadMessagesCount();
+    }
+  }, [isOpen, activeTab, selectedCitizen, fetchUnreadMessagesCount]);
 
   // Scroll to bottom of messages when new ones are added
   useEffect(() => {
@@ -962,8 +1019,17 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
             
             {/* Notification badge - Changed to purple */}
             {unreadCount > 0 && (
-              <div className="absolute top-0 right-0 bg-purple-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold animate-pulse">
+              <div className="absolute top-0 right-0 bg-purple-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold animate-pulse z-10">
                 {unreadCount}
+              </div>
+            )}
+            {/* Unread messages badge - Blue */}
+            {unreadMessagesCount > 0 && (
+              <div 
+                className="absolute top-7 right-0 bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold animate-pulse z-10"
+                title={`${unreadMessagesCount} unread messages`}
+              >
+                {unreadMessagesCount}
               </div>
             )}
           </div>
