@@ -71,7 +71,8 @@ export async function GET(request: Request) {
     const relevanciesRecords = await base(AIRTABLE_RELEVANCIES_TABLE)
       .select({
         filterByFormula: filterFormula || '',
-        maxRecords: 100
+        maxRecords: 100,
+        sort: [{ field: 'CreatedAt', direction: 'desc' }]  // Sort by CreatedAt in descending order
       })
       .all();
     
@@ -90,8 +91,8 @@ export async function GET(request: Request) {
         score: record.get('Score') || 0,
         timeHorizon: record.get('TimeHorizon') || 'medium-term',
         title: record.get('Title') || '',
-        description: record.get('Description') || '',
-        notes: record.get('Notes') || '',
+        description: record.get('Description') || '',  // Preserves markdown formatting
+        notes: record.get('Notes') || '',  // Preserves markdown formatting
         createdAt: record.get('CreatedAt') || new Date().toISOString(),
         status: record.get('Status') || 'active'
       };
