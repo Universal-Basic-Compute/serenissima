@@ -313,9 +313,17 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
             # If that fails, try to clean and extract the JSON
             import re
             
+            # Fix common JSON issues, particularly with quotes in values
+            # Look for the problematic pattern in family motto - quotes within quotes
+            fixed_text = response_text
+            
+            # Fix family motto with quotes inside
+            motto_pattern = r'"familyMotto"\s*:\s*"([^"]*)"([^"]*)"'
+            fixed_text = re.sub(motto_pattern, lambda m: f'"familyMotto": "{m.group(1)} {m.group(2)}"', fixed_text)
+            
             # Remove potential comments (both // and /* */ style)
             # First remove // comments
-            content_no_comments = re.sub(r'//.*?$', '', response_text, flags=re.MULTILINE)
+            content_no_comments = re.sub(r'//.*?$', '', fixed_text, flags=re.MULTILINE)
             # Then remove /* */ comments
             content_no_comments = re.sub(r'/\*.*?\*/', '', content_no_comments, flags=re.DOTALL)
             
@@ -343,7 +351,27 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
                         # Look for the description, corePersonality, familyMotto, coatOfArms, and imagePrompt fields directly
                         desc_match = re.search(r'"description"\s*:\s*"(.*?)"(?=,|})', response_text, re.DOTALL)
                         core_match = re.search(r'"corePersonality"\s*:\s*"(.*?)"(?=,|})', response_text, re.DOTALL)
-                        motto_match = re.search(r'"familyMotto"\s*:\s*"(.*?)"(?=,|})', response_text, re.DOTALL)
+                        
+                        # More careful extraction for familyMotto which might contain quotes
+                        motto_match = re.search(r'"familyMotto"\s*:\s*"(.*?)(?:"|(?=,|}))', response_text, re.DOTALL)
+                        motto_value = ""
+                        if motto_match:
+                            # Find the next comma or closing brace after the motto field
+                            motto_end = response_text.find(',', motto_match.end())
+                            if motto_end == -1:
+                                motto_end = response_text.find('}', motto_match.end())
+                            
+                            if motto_end != -1:
+                                # Extract everything between the field name and the next structural character
+                                full_motto_field = response_text[motto_match.start():motto_end]
+                                # Extract just the value part
+                                motto_value = full_motto_field.split(':', 1)[1].strip()
+                                # Remove starting and ending quotes if present
+                                if motto_value.startswith('"'):
+                                    motto_value = motto_value[1:]
+                                if motto_value.endswith('"'):
+                                    motto_value = motto_value[:-1]
+                        
                         coat_match = re.search(r'"coatOfArms"\s*:\s*"(.*?)"(?=,|})', response_text, re.DOTALL)
                         img_match = re.search(r'"imagePrompt"\s*:\s*"(.*?)"(?=,|})', response_text, re.DOTALL)
                     
@@ -360,7 +388,7 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
                             if core_match:
                                 core_personality = core_match.group(1).replace('\\', '\\\\').replace('"', '\\"')
                             if motto_match:
-                                family_motto = motto_match.group(1).replace('\\', '\\\\').replace('"', '\\"')
+                                family_motto = motto_value.replace('\\', '\\\\').replace('"', '\\"')
                             if coat_match:
                                 coat_of_arms = coat_match.group(1).replace('\\', '\\\\').replace('"', '\\"')
                             
