@@ -341,28 +341,38 @@ export class RelevancyService {
   }
   
   /**
-   * Generate a title for the relevancy
+   * Generate a title for the relevancy with better formatting
    */
   private generateRelevancyTitle(land: LandData, distance: number, isConnected: boolean): string {
+    const landName = land.historicalName ? land.historicalName : 'Land';
+    
     return isConnected 
-      ? `Connected Land (${Math.round(distance)}m)` 
-      : `Nearby Land (${Math.round(distance)}m)`;
+      ? `Connected: ${landName} (${Math.round(distance)}m)` 
+      : `Nearby: ${landName} (${Math.round(distance)}m)`;
   }
   
   /**
-   * Generate a descriptive text for the relevancy
+   * Generate a descriptive text for the relevancy with markdown formatting
    */
   private generateRelevancyDescription(land: LandData, distance: number, isConnected: boolean): string {
     const landName = land.historicalName 
-      ? `${land.historicalName}` 
-      : 'This land';
+      ? `**${land.historicalName}**` 
+      : '**This land**';
     
-    const distanceText = `${Math.round(distance)} meters from your nearest property`;
+    const distanceText = `**${Math.round(distance)} meters** from your nearest property`;
     
     if (isConnected) {
-      return `${landName} is ${distanceText} and is connected to your existing properties by bridges. Acquiring this land would strengthen your presence in this district.`;
+      return `${landName} is ${distanceText} and is **connected to your existing properties by bridges**.\n\n` +
+             `### Strategic Value\n` +
+             `- Acquiring this land would **strengthen your presence** in this district\n` +
+             `- Connected lands allow for **easier resource transport**\n` +
+             `- Provides **contiguous territory** for your holdings`;
     } else {
-      return `${landName} is ${distanceText}. Acquiring this land would expand your influence to a new area.`;
+      return `${landName} is ${distanceText}.\n\n` +
+             `### Strategic Value\n` +
+             `- Acquiring this land would **expand your influence** to a new area\n` +
+             `- Creates a **new foothold** in this district\n` +
+             `- Potential for **future connections** to your existing properties`;
     }
   }
   
@@ -488,9 +498,14 @@ export class RelevancyService {
       const lastName = citizen?.lastName || citizen?.LastName || '';
       const fullName = firstName && lastName ? `${firstName} ${lastName}` : username;
       
-      // Generate title and description
+      // Generate title and description with markdown formatting
       const title = `Land Domination: ${fullName}`;
-      const description = `${fullName} owns ${citizenLandCounts[username]} lands with ${citizenBuildingPoints[username]} building points, making them a significant landowner in Venice.`;
+      const description = `**${fullName}** owns **${citizenLandCounts[username]} lands** with **${citizenBuildingPoints[username]} building points**.\n\n` +
+                         `### Strategic Assessment\n` +
+                         `- This makes them a **significant landowner** in Venice\n` +
+                         `- Their holdings represent **${Math.round((citizenLandCounts[username] / maxLandCount) * 100)}%** of the most extensive land portfolio\n` +
+                         `- Their building capacity is **${Math.round((citizenBuildingPoints[username] / maxBuildingPoints) * 100)}%** of the largest building portfolio\n\n` +
+                         `Consider their influence when making strategic land acquisition decisions.`;
       
       // Create the relevancy score object
       relevancyScores[username] = {
