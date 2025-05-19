@@ -893,9 +893,9 @@ Be historically accurate but engaging. Speak in first person as if you are this 
       
       {/* Three-column layout */}
       <div className="flex flex-row gap-4">
-        {/* First column - Relevancies */}
+        {/* First column - Opportunities */}
         <div className="w-1/3">
-          <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Relevancies</h3>
+          <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Opportunities</h3>
           
           {isLoadingRelevancies ? (
             <div className="flex justify-center py-4">
@@ -922,7 +922,7 @@ Be historically accurate but engaging. Speak in first person as if you are this 
               ))}
             </div>
           ) : (
-            <p className="text-amber-700 italic">No relevancies found.</p>
+            <p className="text-amber-700 italic">No notable opportunities with this citizen at present. Future ventures may arise as your paths cross in Venetian society.</p>
           )}
         </div>
         
