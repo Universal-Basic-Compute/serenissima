@@ -904,12 +904,13 @@ Be historically accurate but engaging. Speak in first person as if you are this 
             <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1 custom-scrollbar">
               {relevancies.map((relevancy, index) => (
                 <div key={relevancy.relevancyId || index} className="bg-amber-100 rounded-lg p-3 text-sm">
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className={`px-2 py-0.5 rounded-full text-xs font-medium ${getTimeHorizonColor(relevancy.timeHorizon)}`}>
-                      {relevancy.timeHorizon}
-                    </div>
+                  <div className="flex items-center justify-between mb-1">
                     <div className="font-medium text-amber-800">
                       {relevancy.title}
+                    </div>
+                    {/* Score displayed as a nice badge */}
+                    <div className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-200 text-amber-800">
+                      Score: {relevancy.score}
                     </div>
                   </div>
                   <div className="text-xs text-amber-700 mt-1">
