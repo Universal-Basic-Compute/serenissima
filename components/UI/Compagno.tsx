@@ -507,60 +507,103 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
   };
 
   // Mark notifications as read
-  const markNotificationsAsRead = async (notificationIds: string[]) => {
-    try {
-      const apiUrl = `/api/notifications/mark-read`;
-      
-      console.log(`Marking notifications as read at: ${apiUrl}`);
-      
-      const response = await fetch(
-        apiUrl,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            citizen: username,
-            notificationIds
-          }),
+  const markNotificationsAsRead = async (notificationIdsToProcess: string[]) => {
+    if (!notificationIdsToProcess || notificationIdsToProcess.length === 0) {
+      return;
+    }
+
+    const validApiNotificationIds = notificationIdsToProcess.filter(id => !id.startsWith('dummy-'));
+    const dummyNotificationIds = notificationIdsToProcess.filter(id => id.startsWith('dummy-'));
+    
+    let allProcessedIdsMarkedRead: string[] = [];
+
+    // 1. Handle dummy notifications locally
+    if (dummyNotificationIds.length > 0) {
+      let actualDummiesMarkedUnread = 0;
+      setNotifications(prevNotifications => 
+        prevNotifications.map(notif => {
+          if (dummyNotificationIds.includes(notif.notificationId)) {
+            if (!notif.readAt) { // Check if it was actually unread before marking
+              actualDummiesMarkedUnread++;
+            }
+            return { ...notif, readAt: new Date().toISOString() };
+          }
+          return notif;
+        })
+      );
+      if (actualDummiesMarkedUnread > 0) {
+        setUnreadCount(prev => Math.max(0, prev - actualDummiesMarkedUnread));
+      }
+      allProcessedIdsMarkedRead.push(...dummyNotificationIds);
+    }
+
+    // 2. Handle valid notifications via API
+    if (validApiNotificationIds.length > 0) {
+      try {
+        const apiUrl = `/api/notifications/mark-read`;
+        console.log(`Marking notifications as read via API for citizen: ${username}, IDs: ${validApiNotificationIds.join(', ')}`);
+        
+        const response = await fetch(
+          apiUrl,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              citizen: username,
+              notificationIds: validApiNotificationIds 
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.text(); // Try to get more error details
+          throw new Error(`Failed to mark notifications as read via API: ${response.status} - ${errorData}`);
         }
-      );
 
-      if (!response.ok) {
-        throw new Error(`Failed to mark notifications as read: ${response.status}`);
-      }
+        // API call successful, update local state for valid IDs
+        let actualValidMarkedUnread = 0;
+        setNotifications(prevNotifications => 
+          prevNotifications.map(notif => {
+            if (validApiNotificationIds.includes(notif.notificationId)) {
+              if (!notif.readAt) {
+                actualValidMarkedUnread++;
+              }
+              return { ...notif, readAt: new Date().toISOString() };
+            }
+            return notif;
+          })
+        );
+        if (actualValidMarkedUnread > 0) {
+          setUnreadCount(prev => Math.max(0, prev - actualValidMarkedUnread));
+        }
+        allProcessedIdsMarkedRead.push(...validApiNotificationIds);
 
-      // Update local state
-      setNotifications(prev => 
-        prev.map(notif => 
-          notificationIds.includes(notif.notificationId) 
-            ? { ...notif, readAt: new Date().toISOString() } 
-            : notif
-        )
-      );
-      
-      // Update unread count
-      setUnreadCount(prev => Math.max(0, prev - notificationIds.length));
-      
-      // Call the callback if provided
-      if (onNotificationsRead) {
-        onNotificationsRead(notificationIds);
+      } catch (error) {
+        console.error('Error marking notifications as read via API, using fallback:', error);
+        
+        // Fallback: Update local state for valid IDs even if API call fails, so UI reflects "read"
+        let actualValidMarkedUnreadFallback = 0;
+        setNotifications(prevNotifications => 
+          prevNotifications.map(notif => {
+            if (validApiNotificationIds.includes(notif.notificationId)) {
+              if (!notif.readAt) {
+                actualValidMarkedUnreadFallback++;
+              }
+              return { ...notif, readAt: new Date().toISOString() };
+            }
+            return notif;
+          })
+        );
+        if (actualValidMarkedUnreadFallback > 0) {
+          setUnreadCount(prev => Math.max(0, prev - actualValidMarkedUnreadFallback));
+        }
+        allProcessedIdsMarkedRead.push(...validApiNotificationIds); // Considered "read" by client due to fallback
       }
-    } catch (error) {
-      console.error('Error marking notifications as read:', error);
-      
-      // Fallback: Update local state even if the API call fails
-      setNotifications(prev => 
-        prev.map(notif => 
-          notificationIds.includes(notif.notificationId) 
-            ? { ...notif, readAt: new Date().toISOString() } 
-            : notif
-        )
-      );
-      
-      // Update unread count
-      setUnreadCount(prev => Math.max(0, prev - notificationIds.length));
+    }
+
+    // 3. Call the callback if provided and any IDs were processed and marked read (locally or via API)
+    if (onNotificationsRead && allProcessedIdsMarkedRead.length > 0) {
+      onNotificationsRead(allProcessedIdsMarkedRead);
     }
   };
 
