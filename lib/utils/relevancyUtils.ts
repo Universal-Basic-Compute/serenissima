@@ -52,7 +52,7 @@ export async function saveRelevancies(
             AssetType: data.assetType,
             Category: data.category,
             Type: data.type,
-            TargetCitizen: data.closestLandId ? allLands.find(land => land.id === data.closestLandId)?.owner || '' : '',
+            TargetCitizen: data.targetCitizen || '', // Owner of the target land
             RelevantToCitizen: aiUsername,
             Score: data.score,
             TimeHorizon: data.timeHorizon || 'medium',

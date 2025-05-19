@@ -219,9 +219,11 @@ export class RelevancyService {
     const status = this.determineStatus(numericScore);
     const timeHorizon = isConnected ? 'short' : 'medium';
     
+    const landOwnerName = land.owner || '';
+
     // Generate title and description
-    const title = this.generateRelevancyTitle(land, minDistance, isConnected);
-    const description = this.generateRelevancyDescription(land, minDistance, isConnected);
+    const title = this.generateRelevancyTitle(land, minDistance, isConnected, landOwnerName);
+    const description = this.generateRelevancyDescription(land, minDistance, isConnected, landOwnerName);
     
     // Return the complete relevancy score object
     return {
@@ -237,7 +239,8 @@ export class RelevancyService {
       title,
       description,
       timeHorizon,
-      status
+      status,
+      targetCitizen: landOwnerName // Owner of the target land
     };
   }
   
@@ -343,32 +346,34 @@ export class RelevancyService {
   /**
    * Generate a title for the relevancy with better formatting
    */
-  private generateRelevancyTitle(land: LandData, distance: number, isConnected: boolean): string {
+  private generateRelevancyTitle(land: LandData, distance: number, isConnected: boolean, landOwnerName?: string): string {
     const landName = land.historicalName ? land.historicalName : 'Land';
+    const ownerInfo = landOwnerName ? ` (Owned by ${landOwnerName})` : '';
     
     return isConnected 
-      ? `Connected: ${landName} (${Math.round(distance)}m)` 
-      : `Nearby: ${landName} (${Math.round(distance)}m)`;
+      ? `Connected: ${landName}${ownerInfo} (${Math.round(distance)}m)` 
+      : `Nearby: ${landName}${ownerInfo} (${Math.round(distance)}m)`;
   }
   
   /**
    * Generate a descriptive text for the relevancy with markdown formatting
    */
-  private generateRelevancyDescription(land: LandData, distance: number, isConnected: boolean): string {
+  private generateRelevancyDescription(land: LandData, distance: number, isConnected: boolean, landOwnerName?: string): string {
     const landName = land.historicalName 
       ? `**${land.historicalName}**` 
       : '**This land**';
+    const ownerInfo = landOwnerName ? `, owned by **${landOwnerName}**,` : '';
     
     const distanceText = `**${Math.round(distance)} meters** from your nearest property`;
     
     if (isConnected) {
-      return `${landName} is ${distanceText} and is **connected to your existing properties by bridges**.\n\n` +
+      return `${landName}${ownerInfo} is ${distanceText} and is **connected to your existing properties by bridges**.\n\n` +
              `### Strategic Value\n` +
              `- Acquiring this land would **strengthen your presence** in this district\n` +
              `- Connected lands allow for **easier resource transport**\n` +
              `- Provides **contiguous territory** for your holdings`;
     } else {
-      return `${landName} is ${distanceText}.\n\n` +
+      return `${landName}${ownerInfo} is ${distanceText}.\n\n` +
              `### Strategic Value\n` +
              `- Acquiring this land would **expand your influence** to a new area\n` +
              `- Creates a **new foothold** in this district\n` +
