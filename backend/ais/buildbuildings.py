@@ -482,7 +482,6 @@ def prepare_ai_building_strategy(ai_citizen: Dict, citizen_lands: List[Dict], ci
         "buildings": buildings_data,
         "relevancies": relevancies_data,  # Add the relevancies data
         "target_relevancies": target_relevancies_data,  # Add the target relevancies data
-        "building_ownership_relevancies": building_ownership_relevancies,  # Add building ownership relevancies
         "building_types": building_types,  # Now contains only the filtered building types
         "timestamp": datetime.now().isoformat()
     }
@@ -1429,7 +1428,13 @@ def process_ai_building_strategies(dry_run: bool = False):
             
             # Also fetch building ownership relevancies
             building_ownership_relevancies = []
+            
+            # Add building ownership relevancies to the data package
+            data_package["building_ownership_relevancies"] = building_ownership_relevancies
             try:
+                # Get API base URL from environment variables, with a default fallback
+                api_base_url = os.getenv("API_BASE_URL", "http://localhost:3000")
+                
                 building_ownership_response = requests.get(
                     f"{api_base_url}/api/relevancies/building-ownership?username={ai_username}"
                 )
