@@ -65,7 +65,8 @@ def initialize_airtable():
             'buildings': Table(api_key, base_id, 'BUILDINGS'),
             'resources': Table(api_key, base_id, 'RESOURCES'),
             'activities': Table(api_key, base_id, 'ACTIVITIES'),
-            'notifications': Table(api_key, base_id, 'NOTIFICATIONS')
+            'notifications': Table(api_key, base_id, 'NOTIFICATIONS'),
+            'relevancies': Table(api_key, base_id, 'RELEVANCIES')  # Add the RELEVANCIES table
         }
     except Exception as e:
         log.error(f"Failed to initialize Airtable: {e}")
@@ -139,6 +140,15 @@ def get_citizen_info(tables, username: str) -> Optional[Dict]:
         recent_notifications = notifications[:50]
         log.info(f"Found {len(recent_notifications)} recent notifications for {username}")
         
+        # NEW: Get relevancies where this citizen is the target
+        relevancies_formula = f"{{TargetCitizen}}='{username}'"
+        relevancies = tables['relevancies'].all(
+            formula=relevancies_formula,
+            sort=[{"field": "CreatedAt", "direction": "desc"}],
+            max_records=100  # Limit to last 100 relevancies
+        )
+        log.info(f"Found {len(relevancies)} relevancies where {username} is the target")
+        
         # Compile all information
         citizen_info = {
             "citizen": citizen,
@@ -147,7 +157,8 @@ def get_citizen_info(tables, username: str) -> Optional[Dict]:
             "current_workplace": current_workplace,
             "recent_resources": resources,
             "recent_activities": recent_activities,
-            "recent_notifications": recent_notifications
+            "recent_notifications": recent_notifications,
+            "relevancies": relevancies  # Add the relevancies to the citizen info
         }
         
         return citizen_info
@@ -273,6 +284,21 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
                     "type": r['fields'].get('Type', ''),
                     "count": r['fields'].get('Count', 0)
                 } for r in citizen_info["recent_resources"]
+            ],
+            "relevancies": [  # Add the relevancies to the system context
+                {
+                    "asset_id": r['fields'].get('AssetID', ''),
+                    "asset_type": r['fields'].get('AssetType', ''),
+                    "category": r['fields'].get('Category', ''),
+                    "type": r['fields'].get('Type', ''),
+                    "relevant_to_citizen": r['fields'].get('RelevantToCitizen', ''),
+                    "score": r['fields'].get('Score', 0),
+                    "title": r['fields'].get('Title', ''),
+                    "description": r['fields'].get('Description', ''),
+                    "time_horizon": r['fields'].get('TimeHorizon', ''),
+                    "status": r['fields'].get('Status', ''),
+                    "created_at": r['fields'].get('CreatedAt', '')
+                } for r in citizen_info["relevancies"]
             ]
         }
         
