@@ -52,11 +52,21 @@ export async function GET(request: NextRequest) {
       .filter(building => {
         const occupant = building.get('Occupant');
         // Consider a home vacant only if Occupant field is empty, null, or undefined
-        return !occupant || occupant === '';
+        return occupant === null || occupant === undefined || occupant === '' || 
+               (typeof occupant === 'string' && occupant.trim() === '');
       });
     
     console.log(`Found ${homeBuildingsResponse.length} total homes`);
     console.log(`Found ${vacantHomes.length} vacant homes`);
+    
+    // Add detailed logging to help diagnose occupancy issues
+    console.log(`Detailed home occupancy analysis:`);
+    homeBuildingsResponse.forEach(building => {
+      const buildingId = building.get('BuildingId');
+      const occupant = building.get('Occupant');
+      const occupantType = typeof occupant;
+      console.log(`Building ${buildingId}: Occupant=${occupant}, Type=${occupantType}, IsEmpty=${!occupant || occupant === ''}`);
+    });
     console.log(`Found ${homelessCitizens.length} homeless citizens out of ${citizensResponse.length} total citizens`);
     
     // Calculate housing statistics
