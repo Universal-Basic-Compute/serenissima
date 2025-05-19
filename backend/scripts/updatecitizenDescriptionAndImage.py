@@ -229,9 +229,10 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
            - your daily routines and habits
         
         2. A concise core personality (2-3 sentences) that captures your:
-           - fundamental character traits
+           - fundamental character traits (both positive and negative)
            - core values and beliefs
            - general temperament and outlook on life
+           - notable flaws, vices, or weaknesses (such as cunning, greed, pride, impatience, etc.)
 
         3. A family motto that reflects your values and aspirations (if you don't already have one)
 
