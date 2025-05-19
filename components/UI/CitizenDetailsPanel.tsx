@@ -910,7 +910,8 @@ Be historically accurate but engaging. Speak in first person as if you are this 
                     </div>
                     {/* Score displayed as a nice badge */}
                     <div className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-200 text-amber-800 text-center">
-                      <span className="font-bold">Score {relevancy.score}</span>
+                      <span className="font-bold text-lg">{relevancy.score}</span>
+                      <span className="text-gray-500 text-[10px] ml-1">score</span>
                     </div>
                   </div>
                   <div className="text-xs text-amber-700 mt-1">
