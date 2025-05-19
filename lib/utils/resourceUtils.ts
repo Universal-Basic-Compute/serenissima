@@ -1,4 +1,42 @@
 export interface ResourceNode {
+  id: string;
+  name: string;
+  category: string;
+  subcategory?: string;
+  description?: string;
+  longDescription?: string;
+  icon: string;
+  baseValue?: number;
+  weight?: number;
+  volume?: number;
+  rarity?: 'common' | 'uncommon' | 'rare' | 'exotic';
+  inputs?: string[];
+  outputs?: string[];
+  buildings?: string[];
+  varieties?: any[];
+  qualityVariations?: any;
+  productionProperties?: any;
+  transportProperties?: any;
+  storageProperties?: any;
+  contractDynamics?: any;
+  historicalNotes?: any;
+  stackSize?: number;
+  baseProperties?: Record<string, any>;
+  sourceProperties?: {
+    source?: string;
+    harvestMethod?: string;
+    availability?: string;
+    seasonality?: string;
+    locations?: string[];
+    [key: string]: any;
+  };
+  perishable?: boolean;
+  substitutes?: any[];
+  complements?: string[];
+  producedFrom?: any[];
+  usedIn?: any[];
+  // Add any other properties that might be in the resource files
+}
 
 export function getNormalizedResourceIconPath(iconFieldName?: string, resourceTypeName?: string): string {
   const defaultPath = '/images/resources/default.png';
@@ -63,44 +101,6 @@ export function getNormalizedResourceIconPath(iconFieldName?: string, resourceTy
     const sanitizedBaseIcon = baseIconString.toLowerCase().replace(/\s+/g, '_');
     return `/images/resources/${sanitizedBaseIcon}.png`;
   }
-}
-  id: string;
-  name: string;
-  category: string;
-  subcategory?: string;
-  description?: string;
-  longDescription?: string;
-  icon: string;
-  baseValue?: number;
-  weight?: number;
-  volume?: number;
-  rarity?: 'common' | 'uncommon' | 'rare' | 'exotic';
-  inputs?: string[];
-  outputs?: string[];
-  buildings?: string[];
-  varieties?: any[];
-  qualityVariations?: any;
-  productionProperties?: any;
-  transportProperties?: any;
-  storageProperties?: any;
-  contractDynamics?: any;
-  historicalNotes?: any;
-  stackSize?: number;
-  baseProperties?: Record<string, any>;
-  sourceProperties?: {
-    source?: string;
-    harvestMethod?: string;
-    availability?: string;
-    seasonality?: string;
-    locations?: string[];
-    [key: string]: any;
-  };
-  perishable?: boolean;
-  substitutes?: any[];
-  complements?: string[];
-  producedFrom?: any[];
-  usedIn?: any[];
-  // Add any other properties that might be in the resource files
 }
 
 // Add this function to fetch resource counts
