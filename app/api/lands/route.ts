@@ -138,14 +138,11 @@ export async function GET(request: Request) {
         buildingPointsCount: record.get('BuildingPointsCount') || 0,
         historicalName: record.get('HistoricalName') || polygonData.historicalName || null,
         englishName: record.get('EnglishName') || polygonData.englishName || null,
-        historicalDescription: record.get('HistoricalDescription') || polygonData.historicalDescription || null,
         coordinates: polygonData.coordinates || coordinates || [],
         center: center || polygonData.center || polygonData.centroid || null,
         buildingPoints: polygonData.buildingPoints || [],
         bridgePoints: polygonData.bridgePoints || [],
         canalPoints: polygonData.canalPoints || [],
-        areaInSquareMeters: polygonData.areaInSquareMeters || record.get('AreaInSquareMeters') || null,
-        nameConfidence: polygonData.nameConfidence || record.get('NameConfidence') || null
       };
     });
     
