@@ -4,12 +4,42 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { FaSpinner, FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
 
+// Add global styles for custom scrollbar
+const scrollbarStyles = `
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(255, 248, 230, 0.1);
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(180, 120, 60, 0.3);
+    border-radius: 20px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(180, 120, 60, 0.5);
+  }
+`;
+
 interface CitizenDetailsPanelProps {
   citizen: any; // Use 'any' type instead of the detailed interface
   onClose: () => void;
 }
 
 const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onClose }) => {
+  // Add the styles to the document
+  useEffect(() => {
+    // Create style element
+    const styleElement = document.createElement('style');
+    styleElement.innerHTML = scrollbarStyles;
+    document.head.appendChild(styleElement);
+    
+    // Clean up on unmount
+    return () => {
+      document.head.removeChild(styleElement);
+    };
+  }, []);
+
   const [isVisible, setIsVisible] = useState(false);
   // Add state for home and work buildings
   const [homeBuilding, setHomeBuilding] = useState<any>(null);
@@ -871,7 +901,7 @@ Be historically accurate but engaging. Speak in first person as if you are this 
               <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin"></div>
             </div>
           ) : relevancies.length > 0 ? (
-            <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
+            <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1 custom-scrollbar">
               {relevancies.map((relevancy, index) => (
                 <div key={relevancy.relevancyId || index} className="bg-amber-100 rounded-lg p-3 text-sm">
                   <div className="flex items-center gap-2 mb-1">
@@ -899,7 +929,7 @@ Be historically accurate but engaging. Speak in first person as if you are this 
           
           {/* Messages area */}
           <div 
-            className="h-[500px] overflow-y-auto p-3 bg-amber-50 bg-opacity-80 rounded-lg mb-3"
+            className="h-[500px] overflow-y-auto p-3 bg-amber-50 bg-opacity-80 rounded-lg mb-3 custom-scrollbar"
             style={{
               backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E")`,
               backgroundRepeat: 'repeat'
@@ -1134,144 +1164,147 @@ Be historically accurate but engaging. Speak in first person as if you are this 
           </div>
         </div>
         
-        {/* Add Home and Work section */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <div>
-            <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Home</h3>
-            <div className="bg-amber-100 p-3 rounded-lg">
-              {isLoadingBuildings ? (
-                <p className="text-amber-700 italic">Loading...</p>
-              ) : homeBuilding ? (
-                <div>
-                  <p className="text-amber-800 font-medium">{homeBuilding.name || formatBuildingType(homeBuilding.type)}</p>
-                  <p className="text-amber-700 text-sm">{formatBuildingType(homeBuilding.type)}</p>
-                </div>
-              ) : (
-                <p className="text-amber-700 italic">Homeless</p>
-              )}
+        {/* Add max-height and scrolling to the details section */}
+        <div className="max-h-[400px] overflow-y-auto pr-1 custom-scrollbar">
+          {/* Home and Work section */}
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div>
+              <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Home</h3>
+              <div className="bg-amber-100 p-3 rounded-lg">
+                {isLoadingBuildings ? (
+                  <p className="text-amber-700 italic">Loading...</p>
+                ) : homeBuilding ? (
+                  <div>
+                    <p className="text-amber-800 font-medium">{homeBuilding.name || formatBuildingType(homeBuilding.type)}</p>
+                    <p className="text-amber-700 text-sm">{formatBuildingType(homeBuilding.type)}</p>
+                  </div>
+                ) : (
+                  <p className="text-amber-700 italic">Homeless</p>
+                )}
+              </div>
+            </div>
+              
+            <div>
+              <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Work</h3>
+              <div className="bg-amber-100 p-3 rounded-lg">
+                {isLoadingBuildings ? (
+                  <p className="text-amber-700 italic">Loading...</p>
+                ) : workBuilding ? (
+                  <div>
+                    <p className="text-amber-800 font-medium">{workBuilding.name || formatBuildingType(workBuilding.type)}</p>
+                    <p className="text-amber-700 text-sm">{formatBuildingType(workBuilding.type)}</p>
+                  </div>
+                ) : citizen.worksFor ? (
+                  <div>
+                    <p className="text-amber-800 font-medium">
+                      Works for: <span className="font-bold">{citizen.worksFor}</span>
+                    </p>
+                    {citizen.workplace && (
+                      <>
+                        <p className="text-amber-700 text-sm">
+                          {citizen.workplace.name || 'Unknown workplace'}
+                        </p>
+                        <p className="text-amber-600 text-xs">
+                          {formatBuildingType(citizen.workplace.type || '')}
+                        </p>
+                      </>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-amber-700 italic">Unemployed</p>
+                )}
+              </div>
             </div>
           </div>
-          
-          <div>
-            <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Work</h3>
-            <div className="bg-amber-100 p-3 rounded-lg">
-              {isLoadingBuildings ? (
-                <p className="text-amber-700 italic">Loading...</p>
-              ) : workBuilding ? (
-                <div>
-                  <p className="text-amber-800 font-medium">{workBuilding.name || formatBuildingType(workBuilding.type)}</p>
-                  <p className="text-amber-700 text-sm">{formatBuildingType(workBuilding.type)}</p>
-                </div>
-              ) : citizen.worksFor ? (
-                <div>
-                  <p className="text-amber-800 font-medium">
-                    Works for: <span className="font-bold">{citizen.worksFor}</span>
-                  </p>
-                  {citizen.workplace && (
-                    <>
-                      <p className="text-amber-700 text-sm">
-                        {citizen.workplace.name || 'Unknown workplace'}
-                      </p>
-                      <p className="text-amber-600 text-xs">
-                        {formatBuildingType(citizen.workplace.type || '')}
-                      </p>
-                    </>
-                  )}
-                </div>
-              ) : (
-                <p className="text-amber-700 italic">Unemployed</p>
-              )}
-            </div>
+            
+          <div className="mb-6">
+            <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">About</h3>
+            <p className="text-amber-700 italic text-sm">{citizen.description || 'No description available.'}</p>
           </div>
-        </div>
-        
-        <div className="mb-6">
-          <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">About</h3>
-          <p className="text-amber-700 italic">{citizen.description || 'No description available.'}</p>
-        </div>
-        
-        {/* Relevancies Section */}
-        <div className="mb-6">
-          <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Relevancies</h3>
-          
-          {isLoadingRelevancies ? (
-            <div className="flex justify-center py-4">
-              <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin"></div>
-            </div>
-          ) : relevancies.length > 0 ? (
-            <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
-              {relevancies.map((relevancy, index) => (
-                <div key={relevancy.relevancyId || index} className="bg-amber-100 rounded-lg p-3 text-sm">
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className={`px-2 py-0.5 rounded-full text-xs font-medium ${getTimeHorizonColor(relevancy.timeHorizon)}`}>
-                      {relevancy.timeHorizon}
+            
+          {/* Relevancies Section */}
+          <div className="mb-6">
+            <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Relevancies</h3>
+              
+            {isLoadingRelevancies ? (
+              <div className="flex justify-center py-4">
+                <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            ) : relevancies.length > 0 ? (
+              <div className="space-y-3 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
+                {relevancies.map((relevancy, index) => (
+                  <div key={relevancy.relevancyId || index} className="bg-amber-100 rounded-lg p-3 text-sm">
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className={`px-2 py-0.5 rounded-full text-xs font-medium ${getTimeHorizonColor(relevancy.timeHorizon)}`}>
+                        {relevancy.timeHorizon}
+                      </div>
+                      <div className="font-medium text-amber-800">
+                        {relevancy.title}
+                      </div>
                     </div>
-                    <div className="font-medium text-amber-800">
-                      {relevancy.title}
+                    <div className="text-xs text-amber-700 mt-1">
+                      {relevancy.description}
                     </div>
                   </div>
-                  <div className="text-xs text-amber-700 mt-1">
-                    {relevancy.description}
+                ))}
+              </div>
+            ) : (
+              <p className="text-amber-700 italic">No relevancies found.</p>
+            )}
+          </div>
+            
+          {/* Recent Activities Section */}
+          <div className="mb-6">
+            <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Recent Activities</h3>
+              
+            {isLoadingActivities ? (
+              <div className="flex justify-center py-4">
+                <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            ) : activities.length > 0 ? (
+              <div className="space-y-2 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
+                {activities.map((activity, index) => (
+                  <div key={activity.ActivityId || index} className="bg-amber-100 rounded-lg p-2 text-sm">
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="text-amber-700">
+                        {getActivityIcon(activity.Type)}
+                      </div>
+                      <div className="font-medium text-amber-800">
+                        {formatActivityType(activity.Type)}
+                      </div>
+                      <div className="ml-auto text-xs text-amber-600">
+                        {formatActivityDate(activity.EndDate || activity.StartDate || activity.CreatedAt)}
+                      </div>
+                    </div>
+                      
+                    {activity.FromBuilding && activity.ToBuilding && (
+                      <div className="flex items-center text-xs text-amber-700 mb-1">
+                        <span className="font-medium">{activity.FromBuilding}</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mx-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                        <span className="font-medium">{activity.ToBuilding}</span>
+                      </div>
+                    )}
+                      
+                    {activity.ResourceId && activity.Amount && (
+                      <div className="text-xs text-amber-700 mb-1">
+                        <span className="font-medium">{activity.Amount}</span> units of <span className="font-medium">{activity.ResourceId}</span>
+                      </div>
+                    )}
+                      
+                    {activity.Notes && (
+                      <div className="text-xs italic text-amber-600 mt-1">
+                        {activity.Notes}
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-amber-700 italic">No relevancies found.</p>
-          )}
-        </div>
-        
-        {/* Recent Activities Section */}
-        <div className="mb-6">
-          <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Recent Activities</h3>
-          
-          {isLoadingActivities ? (
-            <div className="flex justify-center py-4">
-              <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin"></div>
-            </div>
-          ) : activities.length > 0 ? (
-            <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
-              {activities.map((activity, index) => (
-                <div key={activity.ActivityId || index} className="bg-amber-100 rounded-lg p-2 text-sm">
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="text-amber-700">
-                      {getActivityIcon(activity.Type)}
-                    </div>
-                    <div className="font-medium text-amber-800">
-                      {formatActivityType(activity.Type)}
-                    </div>
-                    <div className="ml-auto text-xs text-amber-600">
-                      {formatActivityDate(activity.EndDate || activity.StartDate || activity.CreatedAt)}
-                    </div>
-                  </div>
-                  
-                  {activity.FromBuilding && activity.ToBuilding && (
-                    <div className="flex items-center text-xs text-amber-700 mb-1">
-                      <span className="font-medium">{activity.FromBuilding}</span>
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mx-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                      </svg>
-                      <span className="font-medium">{activity.ToBuilding}</span>
-                    </div>
-                  )}
-                  
-                  {activity.ResourceId && activity.Amount && (
-                    <div className="text-xs text-amber-700 mb-1">
-                      <span className="font-medium">{activity.Amount}</span> units of <span className="font-medium">{activity.ResourceId}</span>
-                    </div>
-                  )}
-                  
-                  {activity.Notes && (
-                    <div className="text-xs italic text-amber-600 mt-1">
-                      {activity.Notes}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-amber-700 italic">No recent activities found.</p>
-          )}
+                ))}
+              </div>
+            ) : (
+              <p className="text-amber-700 italic">No recent activities found.</p>
+            )}
+          </div>
         </div>
       </div>
     </div>
