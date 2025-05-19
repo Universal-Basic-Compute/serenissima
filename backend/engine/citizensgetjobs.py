@@ -351,9 +351,15 @@ def assign_jobs_to_citizens(dry_run: bool = False, noupdate: bool = False):
     
     # Process each unemployed citizen
     for citizen in unemployed_citizens:
+        citizen_username = citizen['fields'].get('Username', '')
         citizen_name = f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}"
         log.info(f"Processing citizen: {citizen_name}")
         
+        # Check if this citizen is already employed (might have been missed in the initial filtering)
+        if citizen_username in already_employed_entrepreneurs:
+            log.info(f"Citizen {citizen_name} is already employed elsewhere, skipping")
+            continue
+            
         # Stop if we've run out of available businesses
         if not available_businesses:
             log.info("No more available businesses. Stopping job assignment process.")
