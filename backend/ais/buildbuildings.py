@@ -1266,7 +1266,8 @@ Your response must be a JSON object with:
                                 point_id = selected_point.get("id", f"point-{selected_point['lat']}-{selected_point['lng']}")
                                 
                                 # Get the category from building type info
-                                building_category = building_type_info.get("category", "unknown")
+                                # Default to "business" if category is not specified in the API response
+                                building_category = building_type_info.get("category", "business")
                                 
                                 # Create the building record
                                 building_record = {
