@@ -68,7 +68,7 @@ export async function saveRelevancies(
         const citizen = allCitizens.find(c => 
           (c.username === id) || (c.Username === id)
         );
-        
+      
         return {
           fields: {
             RelevancyId: `${aiUsername}_${id}_${Date.now()}`, // Generate a unique ID
@@ -83,6 +83,25 @@ export async function saveRelevancies(
             Title: data.title || `Citizen Relevancy: ${id}`,
             Description: data.description || `Relevancy information about citizen ${id}`,
             Notes: citizen ? `${citizen.firstName || ''} ${citizen.lastName || ''}`.trim() : '',
+            Status: data.status || 'active',
+            CreatedAt: new Date().toISOString()
+          }
+        };
+      } else if (data.assetType === 'city') {
+        return {
+          fields: {
+            RelevancyId: `global_${id}_${Date.now()}`, // Generate a unique ID with 'global' prefix
+            AssetID: id,
+            AssetType: data.assetType,
+            Category: data.category,
+            Type: data.type,
+            TargetCitizen: data.targetCitizen || 'all', // Use 'all' for global relevancies
+            RelevantToCitizen: aiUsername,
+            Score: data.score,
+            TimeHorizon: data.timeHorizon || 'medium',
+            Title: data.title || `City Relevancy: ${id}`,
+            Description: data.description || `Relevancy information about the city`,
+            Notes: data.notes || '',
             Status: data.status || 'active',
             CreatedAt: new Date().toISOString()
           }
