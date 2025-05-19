@@ -141,6 +141,62 @@ def calculate_land_domination_relevancies(base_url: str) -> Dict:
             "error": str(e)
         }
 
+def calculate_building_ownership_relevancies(username: str, base_url: str) -> Dict:
+    """Calculate building ownership relevancies for a specific citizen."""
+    try:
+        log.info(f"Calculating building ownership relevancies for citizen: {username}")
+        
+        # Use the building-ownership endpoint
+        api_url = f"{base_url}/api/relevancies/building-ownership"
+        log.info(f"Calling API: {api_url} for citizen: {username}")
+        
+        # Prepare the request payload
+        payload = {
+            "aiUsername": username
+        }
+        
+        response = requests.post(
+            api_url,
+            json=payload,
+            timeout=60
+        )
+        
+        log.info(f"Building ownership API response status: {response.status_code}")
+        
+        if not response.ok:
+            log.error(f"Building ownership API call failed for {username} with status {response.status_code}: {response.text}")
+            return {
+                "success": False,
+                "error": f"API error: {response.status_code} - {response.text}"
+            }
+        
+        # Parse the response
+        data = response.json()
+        
+        # Log a summary of the response
+        log.info(f"Building ownership API response for {username}: success={data.get('success')}, relevancyScores count={len(data.get('relevancyScores', {}))}")
+        
+        if not data.get('success'):
+            log.error(f"Building ownership API returned error for {username}: {data.get('error')}")
+            return {
+                "success": False,
+                "error": data.get('error', 'Unknown error')
+            }
+        
+        # Return the results
+        return {
+            "success": True,
+            "relevanciesCreated": len(data.get('relevancyScores', {})),
+            "saved": data.get('saved', False)
+        }
+    except Exception as e:
+        log.error(f"Error calculating building ownership relevancies for {username}: {e}")
+        log.error(traceback.format_exc())
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
 def calculate_relevancies_for_ai(username: str, base_url: str, type_filter: Optional[str] = None) -> Dict:
     """Calculate relevancies for a specific citizen with optional type filter."""
     try:
@@ -256,6 +312,21 @@ def calculate_relevancies(type_filter: Optional[str] = None) -> bool:
                     log.warning(f"Relevancies for {username} were calculated but NOT saved to Airtable")
             else:
                 log.error(f"Failed to calculate relevancies for {username}: {result.get('error')}")
+                
+        # Calculate building ownership relevancies for each citizen
+        building_ownership_results = {}
+        for username in citizen_usernames:
+            # Add a small delay between requests to avoid rate limiting
+            time.sleep(1)
+            
+            result = calculate_building_ownership_relevancies(username, base_url)
+            building_ownership_results[username] = result
+            
+            if result.get('success'):
+                total_relevancies += result.get('relevanciesCreated', 0)
+                log.info(f"Successfully calculated {result.get('relevanciesCreated', 0)} building ownership relevancies for {username}")
+            else:
+                log.error(f"Failed to calculate building ownership relevancies for {username}: {result.get('error')}")
         
         # Create a detailed message for the notification
         details = []
@@ -273,6 +344,15 @@ def calculate_relevancies(type_filter: Optional[str] = None) -> bool:
             else:
                 saved_status = "saved to Airtable" if result.get('saved', False) else "NOT saved to Airtable"
                 details.append(f"- {citizen}: {result.get('relevanciesCreated', 0)} relevancies created (owns {result.get('ownedLandCount', 0)} lands) - {saved_status}")
+        
+        # Add building ownership results to the details
+        details.append("\nBuilding Ownership Relevancies:")
+        for citizen, result in building_ownership_results.items():
+            if not result.get('success'):
+                details.append(f"- {citizen}: Error - {result.get('error', 'Unknown error')}")
+            else:
+                saved_status = "saved to Airtable" if result.get('saved', False) else "NOT saved to Airtable"
+                details.append(f"- {citizen}: {result.get('relevanciesCreated', 0)} relevancies created - {saved_status}")
         
         details_text = "\n".join(details)
         

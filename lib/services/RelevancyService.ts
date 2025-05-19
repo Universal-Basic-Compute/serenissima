@@ -590,6 +590,137 @@ export class RelevancyService {
     
     return filteredRelevancies;
   }
+
+  /**
+   * Calculate building-land ownership relevancy scores
+   * This identifies when a citizen owns buildings on land owned by other citizens
+   */
+  public async calculateBuildingLandOwnershipRelevancy(
+    username: string
+  ): Promise<Record<string, RelevancyScore>> {
+    try {
+      // Fetch buildings owned by this citizen
+      const baseUrl = typeof window !== 'undefined' 
+        ? window.location.origin 
+        : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+      
+      const buildingsResponse = await fetch(`${baseUrl}/api/buildings?owner=${encodeURIComponent(username)}`);
+      
+      if (!buildingsResponse.ok) {
+        console.error(`Failed to fetch buildings: ${buildingsResponse.status}`);
+        return {};
+      }
+      
+      const buildingsData = await buildingsResponse.json();
+      const buildings = buildingsData.buildings || [];
+      
+      // Skip if no buildings
+      if (!buildings.length) {
+        console.log(`Citizen ${username} does not own any buildings`);
+        return {};
+      }
+      
+      // Fetch all lands to get owner information
+      const landsResponse = await fetch(`${baseUrl}/api/lands`);
+      
+      if (!landsResponse.ok) {
+        console.error(`Failed to fetch lands: ${landsResponse.status}`);
+        return {};
+      }
+      
+      const landsData = await landsResponse.json();
+      const lands = landsData.lands || [];
+      
+      // Create a map of land ID to land data for quick lookup
+      const landMap: Record<string, LandData> = {};
+      lands.forEach((land: LandData) => {
+        landMap[land.id] = land;
+      });
+      
+      // Calculate relevancy for each building on land owned by another citizen
+      const relevancyScores: Record<string, RelevancyScore> = {};
+      
+      buildings.forEach(building => {
+        const landId = building.land_id;
+        if (!landId) return;
+        
+        const land = landMap[landId];
+        if (!land) return;
+        
+        // Skip if land has no owner or is owned by the same citizen
+        if (!land.owner || land.owner === username) return;
+        
+        // Create a unique ID for this relevancy
+        const relevancyId = `${building.id}_${landId}`;
+        
+        // Calculate score based on building type and importance
+        // Base score of 70 for all buildings on others' land
+        let score = 70;
+        
+        // Adjust score based on building type if needed
+        // For example, business buildings might be more important
+        if (building.category === 'business') {
+          score += 15;
+        }
+        
+        // Cap score at 100
+        score = Math.min(100, score);
+        
+        // Generate title and description
+        const buildingType = this.formatBuildingType(building.type);
+        const title = `Your ${buildingType} on ${land.owner}'s Land`;
+        
+        const description = `You own a **${buildingType}** (ID: ${building.id}) on land owned by **${land.owner}**.\n\n` +
+                           `### Strategic Considerations\n` +
+                           `- You pay lease fees to this landowner\n` +
+                           `- Your building operations depend on this relationship\n` +
+                           `- Consider maintaining good relations with this landowner`;
+        
+        // Determine status based on score
+        const status = this.determineStatus(score);
+        
+        // Create the relevancy score object
+        relevancyScores[relevancyId] = {
+          score: parseFloat(score.toFixed(2)),
+          assetId: building.id,
+          assetType: 'building',
+          category: 'ownership',
+          type: 'building_on_others_land',
+          distance: 0, // Not applicable for this relevancy type
+          closestLandId: landId,
+          isConnected: false, // Not applicable for this relevancy type
+          connectivityBonus: 0, // Not applicable for this relevancy type
+          title,
+          description,
+          timeHorizon: 'medium',
+          status,
+          targetCitizen: land.owner
+        };
+      });
+      
+      return relevancyScores;
+    } catch (error) {
+      console.error('Error calculating building-land ownership relevancy:', error);
+      return {};
+    }
+  }
+
+  /**
+   * Format building type for display
+   */
+  private formatBuildingType(type: string): string {
+    if (!type) return 'Building';
+    
+    // Replace underscores and hyphens with spaces
+    let formatted = type.replace(/[_-]/g, ' ');
+    
+    // Capitalize each word
+    formatted = formatted.split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+    
+    return formatted;
+  }
 }
 
 // Export a singleton instance

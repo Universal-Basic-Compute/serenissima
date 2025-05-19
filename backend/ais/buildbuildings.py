@@ -482,6 +482,7 @@ def prepare_ai_building_strategy(ai_citizen: Dict, citizen_lands: List[Dict], ci
         "buildings": buildings_data,
         "relevancies": relevancies_data,  # Add the relevancies data
         "target_relevancies": target_relevancies_data,  # Add the target relevancies data
+        "building_ownership_relevancies": building_ownership_relevancies,  # Add building ownership relevancies
         "building_types": building_types,  # Now contains only the filtered building types
         "timestamp": datetime.now().isoformat()
     }
@@ -1425,6 +1426,35 @@ def process_ai_building_strategies(dry_run: bool = False):
             # Get citizen relevancies directly from the API
             citizen_relevancies = get_citizen_relevancies(ai_username)
             log_info(f"Retrieved {len(citizen_relevancies)} relevancies for {ai_username}")
+            
+            # Also fetch building ownership relevancies
+            building_ownership_relevancies = []
+            try:
+                building_ownership_response = requests.get(
+                    f"{api_base_url}/api/relevancies/building-ownership?username={ai_username}"
+                )
+                
+                if building_ownership_response.ok:
+                    building_ownership_data = building_ownership_response.json()
+                    if building_ownership_data.get("success") and building_ownership_data.get("detailedRelevancy"):
+                        for _, relevancy in building_ownership_data.get("detailedRelevancy", {}).items():
+                            building_ownership_relevancies.append({
+                                "asset_id": relevancy.get("assetId", ""),
+                                "asset_type": relevancy.get("assetType", ""),
+                                "category": relevancy.get("category", ""),
+                                "type": relevancy.get("type", ""),
+                                "target_citizen": relevancy.get("targetCitizen", ""),
+                                "score": relevancy.get("score", 0),
+                                "time_horizon": relevancy.get("timeHorizon", ""),
+                                "title": relevancy.get("title", ""),
+                                "description": relevancy.get("description", ""),
+                                "status": relevancy.get("status", "")
+                            })
+                    log_info(f"Retrieved {len(building_ownership_relevancies)} building ownership relevancies for {ai_username}")
+                else:
+                    log_warning(f"Failed to fetch building ownership relevancies: {building_ownership_response.status_code}")
+            except Exception as e:
+                log_warning(f"Error fetching building ownership relevancies: {str(e)}")
             
             # Get polygon data for this citizen's lands
             polygon_data = get_polygon_data_for_citizen(ai_username, citizen_lands)
