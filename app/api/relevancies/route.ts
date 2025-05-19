@@ -53,11 +53,11 @@ export async function GET(request: Request) {
     }
     // Handle the case where we want all relevancies for a specific citizen
     else if (relevantToCitizen && assetType) {
-      filterFormula = `AND({RelevantToCitizen} = '${relevantToCitizen}', {AssetType} = '${assetType}')`;
+      filterFormula = `AND(OR({RelevantToCitizen} = '${relevantToCitizen}', {RelevantToCitizen} = 'all'), {AssetType} = '${assetType}')`;
     }
     // If no specific filters, return a limited set
     else if (relevantToCitizen) {
-      filterFormula = `{RelevantToCitizen} = '${relevantToCitizen}'`;
+      filterFormula = `OR({RelevantToCitizen} = '${relevantToCitizen}', {RelevantToCitizen} = 'all')`;
     }
     
     console.log(`Fetching relevancies with filter: ${filterFormula}`);
