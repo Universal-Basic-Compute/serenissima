@@ -310,30 +310,20 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
             # Log the full response for debugging
             log.error(f"Could not parse entire response as JSON. Full response: {response_text}")
             
-            # If that fails, try to clean and extract the JSON
-            import re
-            
-            # Fix common JSON issues, particularly with quotes in values
-            # Look for the problematic pattern in family motto - quotes within quotes
-            fixed_text = response_text
-            
-            # Fix family motto with quotes inside
-            motto_pattern = r'"familyMotto"\s*:\s*"([^"]*)"([^"]*)"'
-            fixed_text = re.sub(motto_pattern, lambda m: f'"familyMotto": "{m.group(1)} {m.group(2)}"', fixed_text)
-            
-            # Remove potential comments (both // and /* */ style)
-            # First remove // comments
-            content_no_comments = re.sub(r'//.*?$', '', fixed_text, flags=re.MULTILINE)
-            # Then remove /* */ comments
-            content_no_comments = re.sub(r'/\*.*?\*/', '', content_no_comments, flags=re.DOTALL)
-            
             # Find the first { and last } in the content
-            first_brace = content_no_comments.find('{')
-            last_brace = content_no_comments.rfind('}')
+            first_brace = response_text.find('{')
+            last_brace = response_text.rfind('}')
             
             if first_brace != -1 and last_brace != -1 and first_brace < last_brace:
                 # Extract the JSON string
-                json_str = content_no_comments[first_brace:last_brace+1]
+                json_str = response_text[first_brace:last_brace+1]
+                
+                # Remove comments (both // and /* */ style)
+                import re
+                # Remove // comments
+                json_str = re.sub(r'//.*?$', '', json_str, flags=re.MULTILINE)
+                # Remove /* */ comments
+                json_str = re.sub(r'/\*.*?\*/', '', json_str, flags=re.DOTALL)
                 
                 # Remove any trailing commas before closing braces or brackets (common JSON error)
                 json_str = re.sub(r',\s*}', '}', json_str)
@@ -341,66 +331,44 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
                 
                 try:
                     result_data = json.loads(json_str)
-                    log.info(f"Successfully extracted and parsed JSON after cleaning")
+                    log.info("Successfully parsed JSON after cleaning")
                 except json.JSONDecodeError as e:
-                    log.error(f"Failed to parse extracted JSON after cleaning: {e}")
-                    log.error(f"Cleaned JSON content: {json_str}")
+                    log.error(f"Failed to parse JSON after cleaning: {e}")
                     
-                    # Last resort: try a more aggressive approach to extract just the fields we need
+                    # Try a more aggressive approach - manually extract each field
                     try:
-                        # Look for the description, corePersonality, familyMotto, coatOfArms, and imagePrompt fields directly
-                        desc_match = re.search(r'"description"\s*:\s*"(.*?)"(?=,|})', response_text, re.DOTALL)
-                        core_match = re.search(r'"corePersonality"\s*:\s*"(.*?)"(?=,|})', response_text, re.DOTALL)
+                        # Extract each field using regex
+                        description_match = re.search(r'"description"\s*:\s*"(.*?)"(?=,|})', json_str, re.DOTALL)
+                        core_match = re.search(r'"corePersonality"\s*:\s*"(.*?)"(?=,|})', json_str, re.DOTALL)
                         
-                        # More careful extraction for familyMotto which might contain quotes
-                        motto_match = re.search(r'"familyMotto"\s*:\s*"(.*?)(?:"|(?=,|}))', response_text, re.DOTALL)
-                        motto_value = ""
-                        if motto_match:
-                            # Find the next comma or closing brace after the motto field
-                            motto_end = response_text.find(',', motto_match.end())
-                            if motto_end == -1:
-                                motto_end = response_text.find('}', motto_match.end())
-                            
-                            if motto_end != -1:
-                                # Extract everything between the field name and the next structural character
-                                full_motto_field = response_text[motto_match.start():motto_end]
-                                # Extract just the value part
-                                motto_value = full_motto_field.split(':', 1)[1].strip()
-                                # Remove starting and ending quotes if present
-                                if motto_value.startswith('"'):
-                                    motto_value = motto_value[1:]
-                                if motto_value.endswith('"'):
-                                    motto_value = motto_value[:-1]
-                        
-                        coat_match = re.search(r'"coatOfArms"\s*:\s*"(.*?)"(?=,|})', response_text, re.DOTALL)
-                        img_match = re.search(r'"imagePrompt"\s*:\s*"(.*?)"(?=,|})', response_text, re.DOTALL)
-                    
-                        if desc_match and img_match:
-                            # Manually construct a valid JSON object
-                            description = desc_match.group(1).replace('\\', '\\\\').replace('"', '\\"')
-                            image_prompt = img_match.group(1).replace('\\', '\\\\').replace('"', '\\"')
-                            
-                            # Add other fields if found
-                            core_personality = ""
-                            family_motto = ""
-                            coat_of_arms = ""
-                            
-                            if core_match:
-                                core_personality = core_match.group(1).replace('\\', '\\\\').replace('"', '\\"')
-                            if motto_match:
-                                family_motto = motto_value.replace('\\', '\\\\').replace('"', '\\"')
-                            if coat_match:
-                                coat_of_arms = coat_match.group(1).replace('\\', '\\\\').replace('"', '\\"')
-                            
-                            manual_json = f'{{"description": "{description}", "corePersonality": "{core_personality}", "familyMotto": "{family_motto}", "coatOfArms": "{coat_of_arms}", "imagePrompt": "{image_prompt}"}}'
-                        
-                            result_data = json.loads(manual_json)
-                            log.info("Successfully extracted JSON using regex field extraction")
+                        # Special handling for family motto which might contain quotes
+                        motto_start = json_str.find('"familyMotto"')
+                        if motto_start != -1:
+                            motto_colon = json_str.find(':', motto_start)
+                            motto_value_start = json_str.find('"', motto_colon) + 1
+                            # Find the next field or closing brace
+                            next_field = json_str.find('",', motto_value_start)
+                            if next_field == -1:
+                                next_field = json_str.find('"}', motto_value_start)
+                            motto_value = json_str[motto_value_start:next_field]
                         else:
-                            log.error("Could not extract required fields using regex")
-                            return None
-                    except Exception as regex_error:
-                        log.error(f"Failed in last-resort regex extraction: {regex_error}")
+                            motto_value = ""
+                        
+                        coat_match = re.search(r'"coatOfArms"\s*:\s*"(.*?)"(?=,|})', json_str, re.DOTALL)
+                        img_match = re.search(r'"imagePrompt"\s*:\s*"(.*?)"(?=,|})', json_str, re.DOTALL)
+                        
+                        # Create a new JSON object with the extracted values
+                        result_data = {
+                            "description": description_match.group(1) if description_match else "",
+                            "corePersonality": core_match.group(1) if core_match else "",
+                            "familyMotto": motto_value,
+                            "coatOfArms": coat_match.group(1) if coat_match else "",
+                            "imagePrompt": img_match.group(1) if img_match else ""
+                        }
+                        
+                        log.info("Successfully extracted JSON fields manually")
+                    except Exception as ex:
+                        log.error(f"Failed to extract JSON fields manually: {ex}")
                         return None
             else:
                 log.error(f"Could not find JSON object markers in response: {response_text}")
