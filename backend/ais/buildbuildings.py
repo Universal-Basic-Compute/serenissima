@@ -535,10 +535,11 @@ Here's your current situation:
 When making your decision, carefully consider:
 1. Your current building portfolio
 2. EXISTING BUILDINGS on each land (not just yours) - aim for complementary structures
-3. Opportunities for new buildings that would increase your income
-4. Which lands would be best for new construction (you can build on any land, not just ones you own)
-5. The rent amounts of existing buildings on potential lands
-6. How to prioritize your building plan based on your available ducats
+3. Supply chains and resource flows - build structures that work together efficiently
+4. Opportunities for new buildings that would increase your income
+5. Which lands would be best for new construction (you can build on any land, not just ones you own)
+6. The rent amounts of existing buildings on potential lands
+7. How to prioritize your building plan based on your available ducats
 
 Focus on maximizing your income while maintaining sustainable maintenance costs. Consider building diversity and how new buildings will complement existing structures.
 
