@@ -1128,7 +1128,7 @@ Your response must be a JSON object with:
                                 # Get the tables from the function parameters
                                 tables = initialize_airtable()
                                 
-                                # Find the citizen record
+                                # Find the citizen record by username
                                 citizen_record = find_citizen_by_identifier(tables["citizens"], ai_username)
                                 if not citizen_record:
                                     print(f"Citizen {ai_username} not found, cannot create building")
