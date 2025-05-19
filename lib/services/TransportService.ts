@@ -1080,7 +1080,6 @@ export class TransportService {
       
       // Try multiple possible paths for the water graph file
       const pathsToTry = [
-        `${baseUrl}/data/watergraph.json`,
         `${baseUrl}/api/water-points`, // Try the API endpoint
         `${baseUrl}/api/water-graph`, // Try another possible API endpoint
         `${baseUrl}/watergraph.json` // Try root path
