@@ -315,7 +315,7 @@ ${getHousingRecommendation(homelessCount, vacantCount, relevancyScore)}
       };
       
       // Save only once with the ConsiglioDeiDieci as the relevant citizen
-      await saveRelevancies('ConsiglioDeiDieci', relevancies, [], citizensResponse);
+      await saveRelevancies('all', relevancies, [], citizensResponse);
       console.log('Successfully saved global housing relevancy');
       saved = true;
     } catch (error) {
