@@ -573,6 +573,8 @@ When deciding where to build and what to build:
 2. Look for complementary buildings - choose buildings that work well with existing structures
 3. Consider the economic ecosystem - different building types can support each other
 4. Balance the building types across the land - diverse buildings create a more resilient economy
+5. Analyze supply chains - build structures that can provide resources to or consume resources from existing buildings
+6. Consider resource flows - ensure efficient movement of resources between your buildings
 
 The relevancies section contains important information about lands and citizens that are relevant to you. 
 These relevancies indicate:
@@ -597,6 +599,7 @@ When developing your building strategy:
 8. You can build on any land, not just lands you own
 9. Consider the rent amounts of existing buildings on potential lands
 10. Consider how your building decisions might affect your relationships with other citizens
+11. Evaluate how new buildings will fit into existing supply chains and resource networks
 
 Your decision should be specific, data-driven, and focused on maximizing your income.
 
