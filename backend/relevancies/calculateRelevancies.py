@@ -195,6 +195,60 @@ def calculate_housing_relevancies(base_url: str) -> Dict:
             "error": str(e)
         }
 
+def calculate_job_market_relevancies(base_url: str) -> Dict:
+    """Calculate job market situation relevancies for all citizens."""
+    try:
+        log.info("Calculating job market situation relevancies")
+        
+        # Use the jobs endpoint
+        api_url = f"{base_url}/api/relevancies/jobs"
+        log.info(f"Calling API: {api_url}")
+        
+        # Make a POST request to the jobs endpoint
+        # This will calculate and save job market relevancies for all citizens
+        response = requests.post(
+            api_url,
+            json={},  # Empty payload to calculate for all citizens
+            timeout=60
+        )
+        
+        log.info(f"Job Market API response status: {response.status_code}")
+        
+        if not response.ok:
+            log.error(f"Job Market API call failed with status {response.status_code}: {response.text}")
+            return {
+                "success": False,
+                "error": f"API error: {response.status_code} - {response.text}"
+            }
+        
+        # Parse the response
+        data = response.json()
+        
+        # Log a summary of the response
+        log.info(f"Job Market API response: success={data.get('success')}, statistics={data.get('statistics', {})}")
+        
+        if not data.get('success'):
+            log.error(f"Job Market API returned error: {data.get('error')}")
+            return {
+                "success": False,
+                "error": data.get('error', 'Unknown error')
+            }
+        
+        # Return the results
+        return {
+            "success": True,
+            "relevanciesCreated": 1,  # One relevancy per citizen
+            "saved": data.get('saved', False),
+            "statistics": data.get('statistics', {})
+        }
+    except Exception as e:
+        log.error(f"Error calculating job market relevancies: {e}")
+        log.error(traceback.format_exc())
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
 def calculate_building_ownership_relevancies(username: str, base_url: str) -> Dict:
     """Calculate building ownership relevancies for a specific citizen."""
     try:
@@ -341,6 +395,10 @@ def calculate_relevancies(type_filter: Optional[str] = None) -> bool:
         log.info("Calculating housing situation relevancies")
         housing_result = calculate_housing_relevancies(base_url)
         
+        # Calculate job market situation relevancies
+        log.info("Calculating job market situation relevancies")
+        job_market_result = calculate_job_market_relevancies(base_url)
+        
         total_relevancies = 0
         if domination_result.get('success'):
             total_relevancies += domination_result.get('relevanciesCreated', 0)
@@ -353,6 +411,12 @@ def calculate_relevancies(type_filter: Optional[str] = None) -> bool:
             log.info(f"Successfully calculated housing situation relevancies")
         else:
             log.error(f"Failed to calculate housing situation relevancies: {housing_result.get('error')}")
+        
+        if job_market_result.get('success'):
+            total_relevancies += job_market_result.get('relevanciesCreated', 0)
+            log.info(f"Successfully calculated job market situation relevancies")
+        else:
+            log.error(f"Failed to calculate job market situation relevancies: {job_market_result.get('error')}")
         
         # Process each citizen individually to avoid timeouts
         results = {}
@@ -412,6 +476,18 @@ def calculate_relevancies(type_filter: Optional[str] = None) -> bool:
         else:
             details.append(f"- Housing situation relevancies: Error - {housing_result.get('error', 'Unknown error')}")
         
+        # Add job market relevancies to the details
+        if job_market_result.get('success'):
+            stats = job_market_result.get('statistics', {})
+            details.append(f"- Job market situation relevancies: Created for all citizens")
+            details.append(f"  - Unemployed citizens: {stats.get('unemployedCount', 'N/A')}")
+            details.append(f"  - Vacant jobs: {stats.get('vacantCount', 'N/A')}")
+            details.append(f"  - Unemployment rate: {stats.get('unemploymentRate', 'N/A')}%")
+            details.append(f"  - Job vacancy rate: {stats.get('vacancyRate', 'N/A')}%")
+            details.append(f"  - Average wages: {stats.get('averageWages', 'N/A')} Ducats")
+        else:
+            details.append(f"- Job market situation relevancies: Error - {job_market_result.get('error', 'Unknown error')}")
+        
         # Then add individual citizen results
         for citizen, result in results.items():
             if not result.get('success'):
@@ -436,7 +512,7 @@ def calculate_relevancies(type_filter: Optional[str] = None) -> bool:
             tables,
             "Relevancy Calculation Complete",
             f"Calculated relevancies for {len(citizen_usernames)} citizens.\n"
-            f"Created {total_relevancies} relevancy records (including land domination and housing relevancies).\n\n"
+            f"Created {total_relevancies} relevancy records (including land domination, housing, and job market relevancies).\n\n"
             f"Details:\n{details_text}"
         )
         

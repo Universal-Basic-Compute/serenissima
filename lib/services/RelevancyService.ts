@@ -622,6 +622,36 @@ export class RelevancyService {
   }
 
   /**
+   * Calculate job market situation relevancy for all citizens
+   */
+  public async calculateJobMarketRelevancy(): Promise<any> {
+    try {
+      const baseUrl = typeof window !== 'undefined' 
+        ? window.location.origin 
+        : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+      
+      const response = await fetch(`${baseUrl}/api/relevancies/jobs`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch job market relevancy: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        console.log('Successfully calculated job market relevancy');
+        return data.jobMarketRelevancy;
+      } else {
+        console.error('Error calculating job market relevancy:', data.error);
+        return null;
+      }
+    } catch (error) {
+      console.error('Error calculating job market relevancy:', error);
+      return null;
+    }
+  }
+
+  /**
    * Calculate building-land ownership relevancy scores
    * This identifies when a citizen owns buildings on land owned by other citizens
    */
