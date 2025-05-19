@@ -444,7 +444,7 @@ def send_building_strategy_request(ai_username: str, data_package: Dict) -> Opti
         log_info(f"Sending building strategy request to AI citizen {ai_username}")
         log_info(f"API URL: {url}")
         log_info(f"Citizen has {data_package['citizen']['ducats']} ducats")
-        log_info(f"Citizen owns {len(data_package['lands'])} lands and {len(data_package['buildings'])} buildings")
+        log_info(f"Citizen has access to {len(data_package['lands'])} lands and {len(data_package['buildings'])} buildings")
         
         # Create a detailed prompt that addresses the AI directly as the decision-maker
         prompt = f"""
