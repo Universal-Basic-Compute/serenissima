@@ -141,6 +141,60 @@ def calculate_land_domination_relevancies(base_url: str) -> Dict:
             "error": str(e)
         }
 
+def calculate_housing_relevancies(base_url: str) -> Dict:
+    """Calculate housing situation relevancies for all citizens."""
+    try:
+        log.info("Calculating housing situation relevancies")
+        
+        # Use the housing endpoint
+        api_url = f"{base_url}/api/relevancies/housing"
+        log.info(f"Calling API: {api_url}")
+        
+        # Make a POST request to the housing endpoint
+        # This will calculate and save housing relevancies for all citizens
+        response = requests.post(
+            api_url,
+            json={},  # Empty payload to calculate for all citizens
+            timeout=60
+        )
+        
+        log.info(f"Housing API response status: {response.status_code}")
+        
+        if not response.ok:
+            log.error(f"Housing API call failed with status {response.status_code}: {response.text}")
+            return {
+                "success": False,
+                "error": f"API error: {response.status_code} - {response.text}"
+            }
+        
+        # Parse the response
+        data = response.json()
+        
+        # Log a summary of the response
+        log.info(f"Housing API response: success={data.get('success')}, statistics={data.get('statistics', {})}")
+        
+        if not data.get('success'):
+            log.error(f"Housing API returned error: {data.get('error')}")
+            return {
+                "success": False,
+                "error": data.get('error', 'Unknown error')
+            }
+        
+        # Return the results
+        return {
+            "success": True,
+            "relevanciesCreated": 1,  # One relevancy per citizen
+            "saved": data.get('saved', False),
+            "statistics": data.get('statistics', {})
+        }
+    except Exception as e:
+        log.error(f"Error calculating housing relevancies: {e}")
+        log.error(traceback.format_exc())
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
 def calculate_building_ownership_relevancies(username: str, base_url: str) -> Dict:
     """Calculate building ownership relevancies for a specific citizen."""
     try:
@@ -283,12 +337,22 @@ def calculate_relevancies(type_filter: Optional[str] = None) -> bool:
         log.info("Calculating global land domination relevancies")
         domination_result = calculate_land_domination_relevancies(base_url)
         
+        # Calculate housing situation relevancies
+        log.info("Calculating housing situation relevancies")
+        housing_result = calculate_housing_relevancies(base_url)
+        
         total_relevancies = 0
         if domination_result.get('success'):
             total_relevancies += domination_result.get('relevanciesCreated', 0)
             log.info(f"Successfully calculated {domination_result.get('relevanciesCreated', 0)} land domination relevancies")
         else:
             log.error(f"Failed to calculate land domination relevancies: {domination_result.get('error')}")
+        
+        if housing_result.get('success'):
+            total_relevancies += housing_result.get('relevanciesCreated', 0)
+            log.info(f"Successfully calculated housing situation relevancies")
+        else:
+            log.error(f"Failed to calculate housing situation relevancies: {housing_result.get('error')}")
         
         # Process each citizen individually to avoid timeouts
         results = {}
@@ -337,6 +401,17 @@ def calculate_relevancies(type_filter: Optional[str] = None) -> bool:
         else:
             details.append(f"- Global land domination relevancies: Error - {domination_result.get('error', 'Unknown error')}")
         
+        # Add housing relevancies to the details
+        if housing_result.get('success'):
+            stats = housing_result.get('statistics', {})
+            details.append(f"- Housing situation relevancies: Created for all citizens")
+            details.append(f"  - Homeless citizens: {stats.get('homelessCount', 'N/A')}")
+            details.append(f"  - Vacant homes: {stats.get('vacantCount', 'N/A')}")
+            details.append(f"  - Homelessness rate: {stats.get('homelessRate', 'N/A')}%")
+            details.append(f"  - Vacancy rate: {stats.get('vacancyRate', 'N/A')}%")
+        else:
+            details.append(f"- Housing situation relevancies: Error - {housing_result.get('error', 'Unknown error')}")
+        
         # Then add individual citizen results
         for citizen, result in results.items():
             if not result.get('success'):
@@ -361,7 +436,7 @@ def calculate_relevancies(type_filter: Optional[str] = None) -> bool:
             tables,
             "Relevancy Calculation Complete",
             f"Calculated relevancies for {len(citizen_usernames)} citizens.\n"
-            f"Created {total_relevancies} relevancy records (including land domination relevancies).\n\n"
+            f"Created {total_relevancies} relevancy records (including land domination and housing relevancies).\n\n"
             f"Details:\n{details_text}"
         )
         

@@ -592,6 +592,36 @@ export class RelevancyService {
   }
 
   /**
+   * Calculate housing situation relevancy for all citizens
+   */
+  public async calculateHousingRelevancy(): Promise<any> {
+    try {
+      const baseUrl = typeof window !== 'undefined' 
+        ? window.location.origin 
+        : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+      
+      const response = await fetch(`${baseUrl}/api/relevancies/housing`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch housing relevancy: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        console.log('Successfully calculated housing relevancy');
+        return data.housingRelevancy;
+      } else {
+        console.error('Error calculating housing relevancy:', data.error);
+        return null;
+      }
+    } catch (error) {
+      console.error('Error calculating housing relevancy:', error);
+      return null;
+    }
+  }
+
+  /**
    * Calculate building-land ownership relevancy scores
    * This identifies when a citizen owns buildings on land owned by other citizens
    */
