@@ -1,4 +1,69 @@
 export interface ResourceNode {
+
+export function getNormalizedResourceIconPath(iconFieldName?: string, resourceTypeName?: string): string {
+  const defaultPath = '/images/resources/default.png';
+
+  let iconToProcess: string | undefined = iconFieldName;
+
+  // Fallback to resourceTypeName if iconFieldName is not available or empty
+  if (!iconToProcess && resourceTypeName) {
+    let baseName = resourceTypeName;
+    // Sanitize and remove all .png suffixes from resourceTypeName
+    while (baseName.toLowerCase().endsWith('.png')) {
+      baseName = baseName.substring(0, baseName.length - 4);
+    }
+    // Further sanitize (lowercase, replace spaces with underscores)
+    baseName = baseName.toLowerCase().replace(/\s+/g, '_');
+    return `/images/resources/${baseName}.png`;
+  }
+
+  // If no iconToProcess by this point, return default
+  if (!iconToProcess) {
+    return defaultPath;
+  }
+
+  // If iconToProcess starts with '/', assume it's an absolute path.
+  // Clean up potential multiple .png suffixes.
+  if (iconToProcess.startsWith('/')) {
+    const parts = iconToProcess.split('/');
+    const filenameWithExt = parts.pop() || ''; 
+    
+    if (filenameWithExt === "" && iconToProcess.endsWith('/')) { // Path is a directory like /images/
+        return iconToProcess; // Or handle as an error/default
+    }
+
+    let baseFilename = filenameWithExt;
+    while (baseFilename.toLowerCase().endsWith('.png')) {
+      baseFilename = baseFilename.substring(0, baseFilename.length - 4);
+    }
+    
+    // Add back one .png suffix.
+    const finalFilename = baseFilename + '.png';
+    return (parts.length > 0 ? parts.join('/') + '/' : '/') + finalFilename;
+  }
+
+  // Handle relative icon paths: "foo.png", "resources/foo.png", "Iron Ore", "foo.png.png"
+  let baseIconString = iconToProcess;
+  // Strip all .png suffixes
+  while (baseIconString.toLowerCase().endsWith('.png')) {
+    baseIconString = baseIconString.substring(0, baseIconString.length - 4);
+  }
+  // Now baseIconString is like "foo", "resources/foo", "Iron Ore"
+
+  if (baseIconString.startsWith('resources/')) {
+    // icon was "resources/foo.png..." -> baseIconString is "resources/foo"
+    // Prepend /images/ if it's not already structured like /images/resources/foo
+    return `/images/${baseIconString}.png`; 
+  } else if (baseIconString.includes('/')) {
+    // This case is for paths like "category/foo.png..." -> baseIconString is "category/foo"
+    // It implies the image is at /images/category/foo.png
+    return `/images/${baseIconString}.png`;
+  } else {
+    // This case is for simple names like "foo.png..." or "Iron Ore" -> baseIconString is "foo" or "Iron Ore"
+    const sanitizedBaseIcon = baseIconString.toLowerCase().replace(/\s+/g, '_');
+    return `/images/resources/${sanitizedBaseIcon}.png`;
+  }
+}
   id: string;
   name: string;
   category: string;
