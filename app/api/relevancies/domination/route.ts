@@ -47,10 +47,13 @@ export async function POST(request: NextRequest) {
   try {
     // Get the username from the request body
     const body = await request.json();
-    const { aiUsername } = body;
-    const username = aiUsername; // Keep parameter name for compatibility
+    const { aiUsername } = body; // Can be "specific_user" or "all"
+    let username = aiUsername; 
     
-    // Username is now optional - removed the check
+    // If aiUsername is "all", treat it as a global calculation (username becomes null)
+    if (username === "all") {
+      username = null; 
+    }
     
     // Fetch all lands
     const allLands = await relevancyService.fetchLands();
@@ -76,17 +79,26 @@ export async function POST(request: NextRequest) {
       simpleScores[citizenId] = data.score;
     });
     
-    // Save to Airtable - only save once for this citizen
+    // Save to Airtable
     let saved = false;
+    let relevanciesSavedCount = 0;
     try {
-      // If username is provided, save for that user, otherwise save for all users
+      // If username is provided (and not "all"), save relevancies for that specific user
       if (username) {
-        await saveRelevancies(username, landDominationRelevancies, allLands, allCitizens);
+        relevanciesSavedCount = await saveRelevancies(username, landDominationRelevancies, allLands, allCitizens);
       } else {
-        // For global domination, save for all citizens who own lands
+        // If username is null (i.e., aiUsername was "all" or not provided),
+        // save the full set of domination relevancies for each citizen who owns land.
+        // This means each citizen gets a list of how dominant everyone else is.
         for (const citizenId of Object.keys(landDominationRelevancies)) {
-          await saveRelevancies(citizenId, landDominationRelevancies, allLands, allCitizens);
+          // The landDominationRelevancies object is keyed by the citizen the score is *about*.
+          // We are saving these scores *to* the `citizenId`'s relevancy list.
+          const count = await saveRelevancies(citizenId, landDominationRelevancies, allLands, allCitizens);
+          relevanciesSavedCount += count; // This might be an overcount if saveRelevancies returns total saved for that user.
+                                          // For simplicity, let's assume it's the number of records related to this call.
         }
+        // A more accurate count for "all" would be complex as saveRelevancies filters top 10 per type.
+        // For now, we'll just mark as saved.
       }
       saved = true;
     } catch (error) {
