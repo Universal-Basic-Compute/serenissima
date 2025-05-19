@@ -3,7 +3,7 @@
 Treasury Redistribution Script for La Serenissima.
 
 This script:
-1. Calculates 10% of the Ducats from the ConsiglioDeiDieci treasury
+1. Calculates 1% of the Ducats from the ConsiglioDeiDieci treasury
 2. Redistributes this amount to all citizens based on social class:
    - 40% to Nobili (nobili)
    - 30% to Cittadini
@@ -46,8 +46,8 @@ REDISTRIBUTION_PERCENTAGES = {
     "Facchini": 0.10    # 10% to Facchini
 }
 
-# Percentage of treasury to redistribute (10%)
-TREASURY_PERCENTAGE = 0.10
+# Percentage of treasury to redistribute (1%)
+TREASURY_PERCENTAGE = 0.01
 
 # Get Telegram credentials
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN')
@@ -382,7 +382,7 @@ def redistribute_treasury(dry_run: bool = False):
     
     # Calculate amount to redistribute (10% of treasury)
     redistribution_amount = consiglio_balance * TREASURY_PERCENTAGE
-    log.info(f"Amount to redistribute: {redistribution_amount} ⚜️ Ducats (10% of treasury)")
+    log.info(f"Amount to redistribute: {redistribution_amount} ⚜️ Ducats (1% of treasury)")
     
     # Get citizens by social class
     citizens_by_class = get_citizens_by_social_class(tables)
