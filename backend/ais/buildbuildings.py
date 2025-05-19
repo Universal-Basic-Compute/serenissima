@@ -363,6 +363,9 @@ def prepare_ai_building_strategy(ai_citizen: Dict, citizen_lands: List[Dict], ci
     # Process lands data
     lands_data = []
     for land in citizen_lands:
+        # Get all buildings on this land (not just owned by the AI)
+        buildings_on_land = [b for b in all_buildings if b["fields"].get("LandId") == land["fields"].get("LandId")]
+        
         land_info = {
             "id": land["fields"].get("LandId", ""),
             "historical_name": land["fields"].get("HistoricalName", ""),
@@ -370,7 +373,17 @@ def prepare_ai_building_strategy(ai_citizen: Dict, citizen_lands: List[Dict], ci
             "last_income": land["fields"].get("LastIncome", 0),
             "building_points_count": land["fields"].get("BuildingPointsCount", 0),
             "has_water_access": land["fields"].get("HasWaterAccess", False),
-            "district": land["fields"].get("District", "")
+            "district": land["fields"].get("District", ""),
+            "existing_buildings": [
+                {
+                    "id": b["fields"].get("BuildingId", ""),
+                    "type": b["fields"].get("Type", ""),
+                    "owner": b["fields"].get("Owner", ""),
+                    "income": b["fields"].get("Income", 0),
+                    "maintenance_cost": b["fields"].get("MaintenanceCost", 0)
+                }
+                for b in buildings_on_land
+            ]
         }
         lands_data.append(land_info)
     
@@ -519,14 +532,15 @@ Here's your current situation:
 - Your current net income is {data_package['citizen']['financial']['net_income']} ducats
 - You have {data_package['citizen']['ducats']} ducats available
 
-What building would you like to construct next to maximize your income? Consider:
+When making your decision, carefully consider:
 1. Your current building portfolio
-2. Opportunities for new buildings that would increase your income
-3. Which lands would be best for new construction (you can build on any land, not just ones you own)
-4. The rent amounts of existing buildings on potential lands
-5. How to prioritize your building plan based on your available ducats
+2. EXISTING BUILDINGS on each land (not just yours) - aim for complementary structures
+3. Opportunities for new buildings that would increase your income
+4. Which lands would be best for new construction (you can build on any land, not just ones you own)
+5. The rent amounts of existing buildings on potential lands
+6. How to prioritize your building plan based on your available ducats
 
-Focus on maximizing your income while maintaining sustainable maintenance costs.
+Focus on maximizing your income while maintaining sustainable maintenance costs. Consider building diversity and how new buildings will complement existing structures.
 
 After your analysis, provide your building decision in this JSON format:
 ```json
@@ -552,6 +566,13 @@ Here is the complete data about your current situation:
 
 Your social class is {data_package['citizen']['social_class']}, which means you can only construct buildings of tiers {', '.join(map(str, data_package['citizen']['allowed_building_tiers']))}.
 The building_types section only includes buildings that you are allowed to construct based on your social class.
+
+IMPORTANT: For each land, carefully review the "existing_buildings" field to see what structures are already present. 
+When deciding where to build and what to build:
+1. Avoid redundancy - don't build the same type of building if similar ones already exist on the land
+2. Look for complementary buildings - choose buildings that work well with existing structures
+3. Consider the economic ecosystem - different building types can support each other
+4. Balance the building types across the land - diverse buildings create a more resilient economy
 
 The relevancies section contains important information about lands and citizens that are relevant to you. 
 These relevancies indicate:
