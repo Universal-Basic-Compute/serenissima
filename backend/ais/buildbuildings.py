@@ -1318,27 +1318,9 @@ def process_ai_building_strategies(dry_run: bool = False):
             citizen_buildings = get_citizen_buildings(tables, ai_username)
             log_info(f"Retrieved {len(citizen_buildings)} buildings for {ai_username}")
             
-            # Get relevancies for this AI
-            citizen_relevancies_records = get_citizen_relevancies(tables, ai_username)
-            log_info(f"Retrieved {len(citizen_relevancies_records)} relevancies for {ai_username}")
-            
-            # Process relevancies into a more usable format
-            citizen_relevancies = []
-            for relevancy in citizen_relevancies_records:
-                relevancy_info = {
-                    "asset_id": relevancy["fields"].get("AssetID", ""),
-                    "asset_type": relevancy["fields"].get("AssetType", ""),
-                    "category": relevancy["fields"].get("Category", ""),
-                    "type": relevancy["fields"].get("Type", ""),
-                    "target_citizen": relevancy["fields"].get("TargetCitizen", ""),
-                    "score": relevancy["fields"].get("Score", 0),
-                    "time_horizon": relevancy["fields"].get("TimeHorizon", ""),
-                    "title": relevancy["fields"].get("Title", ""),
-                    "description": relevancy["fields"].get("Description", ""),
-                    "status": relevancy["fields"].get("Status", ""),
-                    "created_at": relevancy["fields"].get("CreatedAt", "")
-                }
-                citizen_relevancies.append(relevancy_info)
+            # Get citizen relevancies directly from the API
+            citizen_relevancies = get_citizen_relevancies(ai_username)
+            log_info(f"Retrieved {len(citizen_relevancies)} relevancies for {ai_username}")
             
             # Get polygon data for this citizen's lands
             polygon_data = get_polygon_data_for_citizen(ai_username, citizen_lands)
