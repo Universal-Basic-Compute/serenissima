@@ -850,7 +850,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
                     <p className="text-xs text-amber-700 mb-3">{relationship.Description}</p>
                   )}
                   <div className="flex justify-around text-center">
-                    <div>
+                    <div title="Entwinement (Strength Score): Quantifies the relationship's strength based on shared relevancies and common interests. A higher score indicates more shared ground or potential for mutual benefit. Useful for understanding alignment and potential for collaboration.">
                       <div className={`px-3 py-1 rounded-full text-xl font-bold ${
                         relationship.strengthScore > 75 ? 'bg-green-200 text-green-800' :
                         relationship.strengthScore > 25 ? 'bg-amber-200 text-amber-800' :
@@ -861,7 +861,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
                       <p className="text-xs text-amber-600 mt-1">Entwinement</p>
                     </div>
                     {typeof relationship.trustScore !== 'undefined' && (
-                      <div>
+                      <div title="Trust Score: Quantifies the level of trust built through direct positive interactions (messages, loans, contracts, transactions). A higher score suggests a more reliable and positive direct relationship history. Useful for gauging reliability in direct dealings.">
                         <div className={`px-3 py-1 rounded-full text-xl font-bold ${
                           relationship.trustScore > 75 ? 'bg-sky-200 text-sky-800' : // Using sky for trust
                           relationship.trustScore > 25 ? 'bg-orange-200 text-orange-800' :
