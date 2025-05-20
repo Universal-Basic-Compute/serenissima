@@ -611,24 +611,25 @@ def create_or_update_import_contract(
         import_price = resource_types.get(resource_type, {}).get("importPrice", 0)
         
         # Check if there's an existing contract for this building and resource
-        existing_contract = None
-        for contract in existing_contracts:
-            if (contract["buyer_building"] == building_id and 
-                contract["resource_type"] == resource_type and
-                contract["fields"].get("Seller") == "Italia"):
-                existing_contract = contract
+        contract_to_update = None # Renamed to avoid confusion, this will hold the Airtable record
+        for airtable_contract_record in existing_contracts: # existing_contracts are raw Airtable records
+            fields = airtable_contract_record.get("fields", {})
+            if (fields.get("BuyerBuilding") == building_id and
+                fields.get("ResourceType") == resource_type and
+                fields.get("Seller") == "Italia"): # Ensure it's an import contract from Italia
+                contract_to_update = airtable_contract_record # This is the Airtable record
                 break
         
         now = datetime.now().isoformat()
         end_date = (datetime.now() + timedelta(weeks=1)).isoformat()  # Contract ends in 1 week
         
-        if existing_contract:
+        if contract_to_update:
             # Update the existing contract
-            contract_id = existing_contract["id"]
+            contract_airtable_id = contract_to_update["id"] # Airtable record ID
             
-            updated_contract = tables["contracts"].update(contract_id, {
+            updated_contract_result = tables["contracts"].update(contract_airtable_id, {
                 "HourlyAmount": hourly_amount,
-                "PricePerResource": import_price,
+                "PricePerResource": import_price, # Correct field name for Airtable
                 "UpdatedAt": now,
                 "EndAt": end_date,
                 "Notes": json.dumps({
