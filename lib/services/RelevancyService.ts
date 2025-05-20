@@ -1124,10 +1124,10 @@ export class RelevancyService {
           const score = 50 + Math.min(occupants.length * 2, 20); // Adjusted cap for group score
           const status = this.determineStatus(score);
 
-          const title = `Voisin : %TARGETCITIZEN% sur ${landName}`;
-          const description = `Vous et %TARGETCITIZEN% êtes voisins, habitant tous deux sur **${landName}**.\n\n` +
-                             `Habiter à proximité favorise les interactions locales et les intérêts communs.\n\n` +
-                             `Autres voisins sur ce terrain : ${occupants.join(', ')}.`;
+          const title = `Neighbor: %TARGETCITIZEN% on ${landName}`;
+          const description = `You and %TARGETCITIZEN% are neighbors, both living on **${landName}**.\n\n` +
+                             `Living in close proximity fosters local interactions and shared interests.\n\n` +
+                             `Other neighbors on this land: ${occupants.join(', ')}.`;
           
           createdRelevancies.push({
             score: parseFloat(score.toFixed(2)),
@@ -1258,10 +1258,10 @@ export class RelevancyService {
           const score = 60 + Math.min(memberUsernames.length * 2, 20); // Score increases slightly with more members, capped
           const status = this.determineStatus(score);
 
-          const title = `Membre de la Guilde : %TARGETCITIZEN% dans la Guilde ${guildName}`;
-          const description = `Vous et %TARGETCITIZEN% êtes membres de la **Guilde ${guildName}**.\n\n` +
-                             `Être dans la même guilde favorise la collaboration et les objectifs communs.\n\n` +
-                             `Autres membres de cette guilde : ${memberUsernames.join(', ')}.`;
+          const title = `Guild Member: %TARGETCITIZEN% in the ${guildName}`;
+          const description = `You and %TARGETCITIZEN% are members of the **${guildName}**.\n\n` +
+                             `Being in the same guild fosters collaboration and shared goals.\n\n` +
+                             `Other members of this guild: ${memberUsernames.join(', ')}.`;
           
           createdRelevancies.push({
             score: parseFloat(score.toFixed(2)),
