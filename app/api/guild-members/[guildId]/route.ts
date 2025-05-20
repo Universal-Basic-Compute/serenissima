@@ -57,8 +57,8 @@ export async function GET(request: NextRequest) {
 
     const members: GuildMember[] = records.map(record => ({
       citizenId: record.get('CitizenId') as string,
-      // Use CitizenName, fallback to CitizenId if CitizenName is not available
-      username: (record.get('CitizenName') as string) || (record.get('CitizenId') as string),
+      // Use Username, fallback to CitizenId if Username is not available
+      username: (record.get('Username') as string) || (record.get('CitizenId') as string),
       firstName: record.get('FirstName') as string,
       lastName: record.get('LastName') as string,
       // familyMotto and imageUrl are not part of the GuildMember interface, so they are removed here.

@@ -72,9 +72,9 @@ def generate_image_with_ideogram(prompt: str, aspect_ratio: str, guild_identifie
         return None
 
     # Add aspect ratio guidance to the prompt
-    full_prompt = f"{prompt}, {aspect_ratio} aspect ratio, digital art, fantasy style."
+    full_prompt = f"{prompt}, {aspect_ratio} aspect ratio, realistic, historically accurate."
     if image_type == "emblem":
-        full_prompt = f"A heraldic emblem or sigil representing a guild in Venice XV century. {prompt}. Centered, iconic, {aspect_ratio} aspect ratio, on a transparent background if possible."
+        full_prompt = f"A heraldic emblem or sigil representing a guild in Venice XV century. {prompt}. Centered, iconic, {aspect_ratio} aspect ratio"
     elif image_type == "banner":
         full_prompt = f"A wide banner or flag for a guild in Venice XV century. {prompt}. Landscape orientation, {aspect_ratio} aspect ratio, detailed, epic."
 
@@ -184,7 +184,7 @@ def process_guild_images(dry_run: bool = False):
         if emblem_prompt and not emblem_prompt.startswith('/'):
             log.info(f"GuildEmblem for {guild_name} is a prompt: '{emblem_prompt[:50]}...'")
             if not dry_run:
-                new_emblem_url = generate_image_with_ideogram(emblem_prompt, "1:1", guild_id_for_filename, "emblem", guild_name)
+                new_emblem_url = generate_image_with_ideogram(emblem_prompt, "1x1", guild_id_for_filename, "emblem", guild_name)
                 if new_emblem_url:
                     update_guild_record(tables, guild_record_id, 'GuildEmblem', new_emblem_url)
                 else:
@@ -203,7 +203,7 @@ def process_guild_images(dry_run: bool = False):
         if banner_prompt and not banner_prompt.startswith('/'):
             log.info(f"GuildBanner for {guild_name} is a prompt: '{banner_prompt[:50]}...'")
             if not dry_run:
-                new_banner_url = generate_image_with_ideogram(banner_prompt, "ASPECT_16_9", guild_id_for_filename, "banner", guild_name)
+                new_banner_url = generate_image_with_ideogram(banner_prompt, "16x9", guild_id_for_filename, "banner", guild_name)
                 if new_banner_url:
                     update_guild_record(tables, guild_record_id, 'GuildBanner', new_banner_url)
                 else:

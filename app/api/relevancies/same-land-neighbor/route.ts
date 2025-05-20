@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       const fieldsToSave = {
         RelevancyId: stableRelevancyId,
         AssetID: relevancy.assetId, // LandId (e.g. polygon-xxxx)
-        AssetType: relevancy.assetType, // 'land_group'
+        AssetType: relevancy.assetType, // 'land'
         Category: relevancy.category,   // 'neighborhood'
         Type: relevancy.type,           // 'same_land_neighbor'
         Score: relevancy.score,

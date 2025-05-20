@@ -335,7 +335,7 @@ This type of relevancy identifies communities of residents living on the same `L
 
 ### Data Structure
 - **AssetID**: The `LandId` of the land/land parcel.
-- **AssetType**: `land_group` (a new type representing a geographical grouping of land or an land).
+- **AssetType**: `land`
 - **Category**: `neighborhood`.
 - **Type**: `same_land_neighbor`.
 - **RelevantToCitizen**: An array of Airtable Record IDs of all citizens residing on this `LandId`.

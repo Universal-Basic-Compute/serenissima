@@ -1132,7 +1132,7 @@ export class RelevancyService {
           createdRelevancies.push({
             score: parseFloat(score.toFixed(2)),
             assetId: landIdKey, 
-            assetType: 'land_group', 
+            assetType: 'land', 
             category: 'neighborhood',
             type: 'same_land_neighbor',
             distance: 0,

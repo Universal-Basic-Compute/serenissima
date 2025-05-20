@@ -37,7 +37,7 @@ export async function POST(request: Request) {
       
       // Find the citizen record
       const citizenRecords = await base(AIRTABLE_CITIZENS_TABLE).select({
-        filterByFormula: `{CitizenName} = '${username}'`
+        filterByFormula: `{Username} = '${username}'`
       }).all();
       
       if (citizenRecords.length === 0) {

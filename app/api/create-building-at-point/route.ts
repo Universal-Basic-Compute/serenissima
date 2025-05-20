@@ -219,7 +219,7 @@ export async function POST(request: Request) {
       try {
         const consiglioDeiDieciRecord = await new Promise((resolve, reject) => {
           (base!('CITIZENS') as unknown as AirtableTable).select({
-            filterByFormula: `{CitizenName} = 'ConsiglioDeiDieci'`
+            filterByFormula: `{Username} = 'ConsiglioDeiDieci'`
           }).firstPage((err, records) => {
             if (err) {
               reject(err);

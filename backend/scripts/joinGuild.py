@@ -132,7 +132,6 @@ Available guilds:
             json={
                 "message": prompt,
                 "addSystem": system_prompt,
-                "model": "claude-3-haiku-latest", # Using a faster model for simple choice
             },
         )
         response.raise_for_status()

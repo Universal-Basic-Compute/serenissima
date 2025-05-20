@@ -43,7 +43,7 @@ export async function GET() {
     
     // Transform Airtable records to our Guild interface format
     const guilds: Guild[] = records.map(record => ({
-      guildId: record.id,
+      guildId: record.get('GuildId'),
       guildName: record.get('GuildName') as string,
       createdAt: record.get('CreatedAt') as string,
       primaryLocation: record.get('PrimaryLocation') as string,
