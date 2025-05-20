@@ -34,7 +34,7 @@ interface BuildingData {
   owner?: string;
   runBy?: string;
   occupant?: string;
-  landId?: string;
+  land_id?: string; // Changed from landId
   category?: string;
   type?: string;
   // Add other building fields if needed by relevancy calculations
@@ -741,7 +741,7 @@ export class RelevancyService {
         }
 
         console.log(`[RelevancyService] Processing building ${building.buildingId} (type: ${building.type}) for building owner: ${username}`);
-        const landId = building.landId; // This should be the landId like 'poly_xxx'
+        const landId = building.land_id; // This should be the landId like 'poly_xxx'
         if (!landId) {
           console.log(`[RelevancyService] Building ${building.buildingId} has no land_id. Skipping.`);
           return;
@@ -914,7 +914,7 @@ export class RelevancyService {
             category: 'operator_relations',
             type: 'operator_in_your_building', 
             distance: 0,
-            closestLandId: building.landId || '',
+            closestLandId: building.land_id || '',
             isConnected: false,
             connectivityBonus: 0,
             title: `${buildingOperator} Operates Your ${buildingType}`,
@@ -936,7 +936,7 @@ export class RelevancyService {
             category: 'operator_relations',
             type: 'running_in_others_building', 
             distance: 0,
-            closestLandId: building.landId || '',
+            closestLandId: building.land_id || '',
             isConnected: false,
             connectivityBonus: 0,
             title: `You Operate ${buildingOwner}'s ${buildingType}`,
@@ -1003,7 +1003,7 @@ export class RelevancyService {
           if (buildingCategory === 'business') {
             createdRelevancies.push({
               score, assetId: building.id, assetType: 'building', category: 'occupancy_relations', type: 'employer_to_employee',
-              distance: 0, closestLandId: building.landId || '', isConnected: false, connectivityBonus: 0,
+              distance: 0, closestLandId: building.land_id || '', isConnected: false, connectivityBonus: 0,
               title: `You Employ ${buildingOccupant} at Your ${buildingType}`,
               description: `**${buildingOccupant}** works at your **${buildingType}**.\n\n` +
                            `### Employer-Employee Relationship:\n` +
@@ -1014,7 +1014,7 @@ export class RelevancyService {
           } else if (buildingCategory === 'home') {
             createdRelevancies.push({
               score, assetId: building.id, assetType: 'building', category: 'occupancy_relations', type: 'landlord_to_renter',
-              distance: 0, closestLandId: building.landId || '', isConnected: false, connectivityBonus: 0,
+              distance: 0, closestLandId: building.land_id || '', isConnected: false, connectivityBonus: 0,
               title: `${buildingOccupant} Rents Your ${buildingType}`,
               description: `**${buildingOccupant}** is renting your **${buildingType}**.\n\n` +
                            `### Landlord-Renter Relationship:\n` +
@@ -1029,7 +1029,7 @@ export class RelevancyService {
           if (buildingCategory === 'business') {
             createdRelevancies.push({
               score, assetId: building.id, assetType: 'building', category: 'occupancy_relations', type: 'employee_to_employer',
-              distance: 0, closestLandId: building.landId || '', isConnected: false, connectivityBonus: 0,
+              distance: 0, closestLandId: building.land_id || '', isConnected: false, connectivityBonus: 0,
               title: `You Work for ${buildingRunBy} at Their ${buildingType}`,
               description: `You are employed at the **${buildingType}** run by **${buildingRunBy}**.\n\n` +
                            `### Employee-Employer Relationship:\n` +
@@ -1040,7 +1040,7 @@ export class RelevancyService {
           } else if (buildingCategory === 'home') {
             createdRelevancies.push({
               score, assetId: building.id, assetType: 'building', category: 'occupancy_relations', type: 'renter_to_landlord',
-              distance: 0, closestLandId: building.landId || '', isConnected: false, connectivityBonus: 0,
+              distance: 0, closestLandId: building.land_id || '', isConnected: false, connectivityBonus: 0,
               title: `You Rent a ${buildingType} from ${buildingRunBy}`,
               description: `You are renting a **${buildingType}** from **${buildingRunBy}**.\n\n` +
                            `### Renter-Landlord Relationship:\n` +
@@ -1087,13 +1087,13 @@ export class RelevancyService {
       // Group occupants by LandId for home category buildings
       const occupantsByLandId: Record<string, string[]> = {};
       allBuildings.forEach(building => {
-        if (building.category?.toLowerCase() === 'home' && building.occupant && building.landId) {
-          if (!occupantsByLandId[building.landId]) {
-            occupantsByLandId[building.landId] = [];
+        if (building.category?.toLowerCase() === 'home' && building.occupant && building.land_id) {
+          if (!occupantsByLandId[building.land_id]) {
+            occupantsByLandId[building.land_id] = [];
           }
           // Avoid duplicate occupants if one person somehow occupies multiple homes on the same landId
-          if (!occupantsByLandId[building.landId].includes(building.occupant)) {
-            occupantsByLandId[building.landId].push(building.occupant);
+          if (!occupantsByLandId[building.land_id].includes(building.occupant)) {
+            occupantsByLandId[building.land_id].push(building.occupant);
           }
         }
       });
