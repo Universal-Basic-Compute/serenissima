@@ -1232,6 +1232,11 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
               }`}
             >
               Correspondence
+              {unreadMessagesCount > 0 && (
+                <span className="absolute top-1 right-2 bg-blue-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
+                  {unreadMessagesCount}
+                </span>
+              )}
             </button>
           </div>
           
