@@ -297,28 +297,14 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
           }));
           setMessages(formattedMessages);
         } else {
-          // If no messages found or API returns success:false, set a welcome message
-          setMessages([
-            {
-              id: 'welcome',
-              role: 'assistant',
-              content: `Buongiorno! I am ${citizen.firstname} ${citizen.lastname}. How may I assist you today?`,
-              timestamp: new Date().toISOString()
-            }
-          ]);
+          // No messages from API, or API indicated no messages (e.g. success:true, messages:[])
+          // or API indicated failure to get messages (e.g. success:false)
+          setMessages([]); // Set to empty array, removing the automatic "Buongiorno" message
         }
     } catch (error) {
       console.error('Error fetching message history:', error);
       setMessagesFetchFailed(true); // Indicate that fetching failed
-      // If we can't fetch history, start with a welcome message
-      setMessages([
-        {
-          id: 'welcome',
-          role: 'assistant',
-          content: `Buongiorno! I am ${citizen.firstname} ${citizen.lastname}. How may I assist you today?`,
-          timestamp: new Date().toISOString()
-        }
-      ]);
+      setMessages([]); // Set to empty array on error too
     } finally {
       setIsLoadingHistory(false);
     }
@@ -857,14 +843,8 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
                     Unable to load conversation history with {citizen.firstname}.
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center h-full">
-                    <div className="bg-amber-700 text-white p-3 rounded-lg rounded-bl-none inline-block mb-4">
-                      <div className="flex space-x-2">
-                        <div className="w-2 h-2 bg-amber-300 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                        <div className="w-2 h-2 bg-amber-300 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                        <div className="w-2 h-2 bg-amber-300 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                      </div>
-                    </div>
+                  <div className="flex flex-col items-center justify-center h-full text-amber-700 italic">
+                    No correspondence yet. Send a message to begin.
                   </div>
                 )}
               </div>
