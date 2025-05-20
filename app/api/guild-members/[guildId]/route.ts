@@ -18,9 +18,9 @@ export async function GET(request: NextRequest) {
   try {
     // Extract guildId from the URL
     const url = request.nextUrl;
-    const pathname = url.pathname; // e.g., /api/guild-members/rec123456
+    const pathname = url.pathname; // e.g., /api/guild-members/umbra_lucrum_invenit
     const parts = pathname.split('/');
-    const guildId = parts[parts.length - 1]; // rec123456
+    const guildId = parts[parts.length - 1]; // umbra_lucrum_invenit
 
     if (!guildId) {
       return NextResponse.json({ error: 'Missing guildId in path' }, { status: 400 });
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     const base = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
 
     const guildRecords = await base('GUILDS').select({
-      filterByFormula: `RECORD_ID() = '${guildId}'`,
+      filterByFormula: `GuildId = '${guildId}'`,
       fields: ['GuildId']
     }).all();
 
@@ -56,10 +56,12 @@ export async function GET(request: NextRequest) {
     }).all();
 
     const members: GuildMember[] = records.map(record => ({
-      citizenId: record.id,
+      citizenId: record.get('CitizenId') as string,
       username: record.get('CitizenName') as string,
       firstName: record.get('FirstName') as string,
       lastName: record.get('LastName') as string,
+      familyMotto: record.get('FamilyMotto') as string,
+      imageUrl: record.get('ImageUrl') as string,
       coatOfArmsImageUrl: record.get('CoatOfArmsImageUrl') as string || null,
       color: record.get('Color') as string || null,
     }));
