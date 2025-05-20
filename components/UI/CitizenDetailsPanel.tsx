@@ -830,40 +830,55 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
             </div>
           ) : relationship && typeof relationship.strengthScore !== 'undefined' ? (
             <div className="bg-amber-100 rounded-lg p-3 text-sm mb-4">
-              <div className="flex items-center justify-between mb-1">
-                <div className="font-medium text-amber-800">
-                  {relationship.type === "Self" ? "Self-Regard" : "Bond Strength"}
+              {relationship.type === "Self" ? (
+                <div className="flex items-center justify-between mb-1">
+                  <div className="font-medium text-amber-800">Self-Regard</div>
+                  <div className={`px-3 py-1 rounded-full text-lg font-bold text-center ${
+                    relationship.strengthScore >= 75 ? 'bg-green-200 text-green-800' : // Adjusted for self-regard potentially being 100
+                    relationship.strengthScore > 25 ? 'bg-amber-200 text-amber-800' :
+                    'bg-red-200 text-red-800'
+                  }`}>
+                    {Math.round(relationship.strengthScore)}
+                  </div>
                 </div>
-                <div className={`px-3 py-1 rounded-full text-lg font-bold text-center ${
-                  relationship.strengthScore > 75 ? 'bg-green-200 text-green-800' :
-                  relationship.strengthScore > 25 ? 'bg-amber-200 text-amber-800' :
-                  'bg-red-200 text-red-800'
-                }`}>
-                  {relationship.strengthScore}{relationship.type === "Self" ? "" : "/100"}
-                </div>
-              </div>
-              {relationship.type !== "Self" && (
+              ) : (
                 <>
                   {relationship.Title && (
-                    <p className="text-sm text-amber-800 mt-2 font-semibold">{relationship.Title}</p>
+                    <p className="text-sm text-amber-800 mb-2 font-semibold">{relationship.Title}</p>
                   )}
                   {relationship.Description && (
-                    <p className="text-xs text-amber-700 mt-1">{relationship.Description}</p>
+                    <p className="text-xs text-amber-700 mb-3">{relationship.Description}</p>
                   )}
-                  <div className="grid grid-cols-2 gap-x-4 mt-2">
+                  <div className="flex justify-around text-center">
+                    <div>
+                      <div className={`px-3 py-1 rounded-full text-xl font-bold ${
+                        relationship.strengthScore > 75 ? 'bg-green-200 text-green-800' :
+                        relationship.strengthScore > 25 ? 'bg-amber-200 text-amber-800' :
+                        'bg-red-200 text-red-800'
+                      }`}>
+                        {Math.round(relationship.strengthScore)}
+                      </div>
+                      <p className="text-xs text-amber-600 mt-1">Entwinement</p>
+                    </div>
                     {typeof relationship.trustScore !== 'undefined' && (
                       <div>
-                        <p className="text-xs text-amber-600">Trust Score</p>
-                        <p className="text-sm font-medium text-amber-800">{relationship.trustScore}/100</p>
-                      </div>
-                    )}
-                    {relationship.Tier && (
-                      <div>
-                        <p className="text-xs text-amber-600">Tier</p>
-                        <p className="text-sm font-medium text-amber-800">{relationship.Tier}</p>
+                        <div className={`px-3 py-1 rounded-full text-xl font-bold ${
+                          relationship.trustScore > 75 ? 'bg-sky-200 text-sky-800' : // Using sky for trust
+                          relationship.trustScore > 25 ? 'bg-orange-200 text-orange-800' :
+                          'bg-rose-200 text-rose-800'
+                        }`}>
+                          {Math.round(relationship.trustScore)}
+                        </div>
+                        <p className="text-xs text-amber-600 mt-1">Trust</p>
                       </div>
                     )}
                   </div>
+                  {relationship.Tier && (
+                    <div className="text-center mt-3">
+                      <p className="text-xs text-amber-600">Tier</p>
+                      <p className="text-sm font-medium text-amber-800">{relationship.Tier}</p>
+                    </div>
+                  )}
                 </>
               )}
             </div>
