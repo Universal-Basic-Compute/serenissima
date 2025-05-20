@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import dynamic from 'next/dynamic'; // Import dynamic
 import { citizenService } from '@/lib/services/CitizenService';
 import CitizenRegistryCard from '@/components/UI/CitizenRegistryCard';
-import RelationshipGraph from '@/components/UI/RelationshipGraph'; // Import the new component
+// Dynamically import RelationshipGraph with SSR turned off
+const RelationshipGraph = dynamic(() => import('@/components/UI/RelationshipGraph'), {
+  ssr: false,
+  loading: () => <p className="text-amber-800 italic">Loading Merchant's Map...</p> // Optional loading component
+});
 import CitizenDetailsPanel from '@/components/UI/CitizenDetailsPanel';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
