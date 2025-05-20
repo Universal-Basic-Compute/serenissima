@@ -24,6 +24,8 @@ interface RelevancyScore {
   description: string;
   timeHorizon: string;
   status: string;
+  targetCitizen?: string; // The primary citizen/asset this relevancy is about
+  relevantToCitizen?: string; // The citizen for whom this relevancy is generated/saved
 }
 
 export class RelevancyService {
@@ -661,10 +663,11 @@ export class RelevancyService {
    * This identifies when a citizen owns buildings on land owned by other citizens
    */
   public async calculateBuildingLandOwnershipRelevancy(
-    username: string
-  ): Promise<Record<string, RelevancyScore>> {
+    username: string // This is the building owner being processed
+  ): Promise<RelevancyScore[]> {
+    const createdRelevancies: RelevancyScore[] = [];
     try {
-      // Fetch buildings owned by this citizen
+      // Fetch buildings owned by this citizen (username)
       const baseUrl = typeof window !== 'undefined' 
         ? window.location.origin 
         : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
@@ -715,10 +718,9 @@ export class RelevancyService {
       console.log(`[RelevancyService] landMap created with ${Object.keys(landMap).length} entries for user ${username}.`);
       
       // Calculate relevancy for each building on land owned by another citizen
-      const relevancyScores: Record<string, RelevancyScore> = {};
       
       buildings.forEach(building => {
-        console.log(`[RelevancyService] Processing building ${building.buildingId} (type: ${building.type}) for ${username}`);
+        console.log(`[RelevancyService] Processing building ${building.buildingId} (type: ${building.type}) for building owner: ${username}`);
         const landId = building.landId; // This should be the landId like 'poly_xxx'
         if (!landId) {
           console.log(`[RelevancyService] Building ${building.buildingId} has no land_id. Skipping.`);
@@ -773,30 +775,59 @@ export class RelevancyService {
         // Determine status based on score
         const status = this.determineStatus(score);
         
-        // Create the relevancy score object
-        relevancyScores[relevancyId] = {
+        // 1. Relevancy for the Building Owner (username)
+        createdRelevancies.push({
           score: parseFloat(score.toFixed(2)),
           assetId: building.buildingId, // ID of the building
           assetType: 'building',
-          category: 'ownership',
+          category: 'ownership_conflict',
           type: 'building_on_others_land',
-          distance: 0, // Not applicable for this relevancy type
+          distance: 0, 
           closestLandId: landId, // ID of the land the building is on
-          isConnected: false, // Not applicable for this relevancy type
-          connectivityBonus: 0, // Not applicable for this relevancy type
-          title,
+          isConnected: false, 
+          connectivityBonus: 0, 
+          title, // "Your ${buildingType} on ${land.owner}'s Land"
           description,
           timeHorizon: 'medium',
           status,
-          targetCitizen: land.owner // The owner of the land
-        };
+          targetCitizen: land.owner, // The owner of the land
+          relevantToCitizen: username // This relevancy is FOR the building owner
+        });
+
+        // 2. Relevancy for the Land Owner (land.owner)
+        const landOwnerScore = score; // Score can be the same or adjusted
+        const landOwnerStatus = status;
+        const landOwnerTitle = `${username}'s ${buildingType} on Your Land`;
+        const landOwnerDescription = `**${username}** owns a **${buildingType}** (ID: ${building.buildingId}) on your land (ID: ${landId}).\n\n` +
+                                     `### Strategic Considerations\n` +
+                                     `- You likely receive lease fees from this building owner.\n` +
+                                     `- Their building operations are on your property.\n` +
+                                     `- Monitor this situation for any changes or opportunities.`;
+        
+        createdRelevancies.push({
+          score: parseFloat(landOwnerScore.toFixed(2)),
+          assetId: building.buildingId, // The asset is still the building
+          assetType: 'building',
+          category: 'ownership_conflict',
+          type: 'others_building_on_your_land', // Different type for landowner's perspective
+          distance: 0,
+          closestLandId: landId,
+          isConnected: false,
+          connectivityBonus: 0,
+          title: landOwnerTitle,
+          description: landOwnerDescription,
+          timeHorizon: 'medium',
+          status: landOwnerStatus,
+          targetCitizen: username, // The owner of the building
+          relevantToCitizen: land.owner // This relevancy is FOR the land owner
+        });
       });
       
-      console.log(`[RelevancyService] Generated ${Object.keys(relevancyScores).length} building ownership relevancies for ${username}.`);
-      return relevancyScores;
+      console.log(`[RelevancyService] Generated ${createdRelevancies.length} building/land ownership relevancy objects originating from building owner ${username} (includes relevancies for landowners).`);
+      return createdRelevancies;
     } catch (error) {
-      console.error(`[RelevancyService] Error calculating building-land ownership relevancy for ${username}:`, error);
-      return {};
+      console.error(`[RelevancyService] Error calculating building-land ownership relevancy for building owner ${username}:`, error);
+      return [];
     }
   }
 
