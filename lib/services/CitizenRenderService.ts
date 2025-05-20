@@ -30,6 +30,7 @@ export class CitizenRenderService {
       dailyIncome: this.getNumberValue(citizen, ['DailyIncome', 'dailyIncome']),
       home: this.getStringValue(citizen, ['Home', 'home']),
       work: this.getStringValue(citizen, ['Work', 'work']),
+      corePersonality: this.getArrayValue(citizen, ['CorePersonality', 'corePersonality']),
     };
     
     // Handle special objects that need to be processed differently
@@ -118,6 +119,38 @@ export class CitizenRenderService {
     }
     
     return false;
+  }
+
+  /**
+   * Helper method to get an array value from multiple possible property names,
+   * parsing from string if necessary.
+   */
+  private static getArrayValue(obj: any, propertyNames: string[]): string[] | null {
+    if (!obj) return null;
+    for (const prop of propertyNames) {
+      const value = obj[prop];
+      if (value !== undefined && value !== null) {
+        if (Array.isArray(value)) { // Already an array
+          return value.every(item => typeof item === 'string') ? value : null;
+        }
+        if (typeof value === 'string') { // String representation of an array
+          try {
+            const parsed = JSON.parse(value);
+            // Expecting an array of 3 strings for CorePersonality
+            if (Array.isArray(parsed) && parsed.length === 3 && parsed.every(item => typeof item === 'string')) {
+              return parsed;
+            }
+            // console.warn(`Parsed value for ${prop} is not a valid string array:`, parsed);
+            return null;
+          } catch (e) {
+            // console.warn(`Failed to parse array string for ${prop}:`, value, e);
+            return null;
+          }
+        }
+        return null; // Not an array or a parsable string
+      }
+    }
+    return null;
   }
   
   /**

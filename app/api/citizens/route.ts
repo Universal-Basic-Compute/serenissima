@@ -93,16 +93,38 @@ export async function GET(request: Request) {
       
       // Simple position parsing - assume it works
       if (typeof position === 'string' && (position.startsWith('{') || position.startsWith('['))) {
-        position = JSON.parse(position);
+        try {
+          position = JSON.parse(position);
+        } catch (e) {
+          console.warn(`Failed to parse position for citizen ${record.get('Username')}: ${position}`, e);
+          // position remains as string or becomes null depending on desired error handling
+        }
       }
 
       const username = record.get('Username') as string;
+      
+      // Parse CorePersonality
+      let corePersonalityArray: string[] | null = null;
+      const corePersonalityString = record.get('CorePersonality') as string;
+      if (typeof corePersonalityString === 'string') {
+        try {
+          const parsed = JSON.parse(corePersonalityString);
+          if (Array.isArray(parsed) && parsed.length === 3 && parsed.every(item => typeof item === 'string')) {
+            corePersonalityArray = parsed;
+          } else {
+            console.warn(`CorePersonality for citizen ${username} is not a valid 3-string array: ${corePersonalityString}`);
+          }
+        } catch (e) {
+          console.warn(`Failed to parse CorePersonality for citizen ${username}: ${corePersonalityString}`, e);
+        }
+      }
       
       // Create citizen object with all fields from the record
       const citizen = {
         ...fields,  // Include all fields with camelCase keys
         username: username,
         position: position, // Use the parsed position
+        corePersonality: corePersonalityArray, // Add parsed core personality
         worksFor: employmentMap[username] || null,
         workplace: workplaceMap[username] || null,
         home: homeMap[username] || null // Add home buildingId

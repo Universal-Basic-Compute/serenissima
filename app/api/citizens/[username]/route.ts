@@ -101,6 +101,26 @@ export async function GET(request: NextRequest) {
           // Keep it as a string if parsing fails
         }
       }
+
+      // Parse CorePersonality
+      if (typeof camelCaseFields.corePersonality === 'string') {
+        try {
+          const parsed = JSON.parse(camelCaseFields.corePersonality);
+          if (Array.isArray(parsed) && parsed.length === 3 && parsed.every(item => typeof item === 'string')) {
+            camelCaseFields.corePersonality = parsed;
+          } else {
+            console.warn(`CorePersonality for citizen ${username} is not a valid 3-string array: ${camelCaseFields.corePersonality}`);
+            camelCaseFields.corePersonality = null; // Set to null if not valid
+          }
+        } catch (e) {
+          console.warn(`Failed to parse CorePersonality for citizen ${username}: ${camelCaseFields.corePersonality}`, e);
+          camelCaseFields.corePersonality = null; // Set to null on parsing error
+        }
+      } else if (camelCaseFields.corePersonality !== undefined && !Array.isArray(camelCaseFields.corePersonality)) {
+        // If it exists but is not a string and not an array, it's an invalid format.
+        console.warn(`CorePersonality for citizen ${username} has an unexpected format:`, camelCaseFields.corePersonality);
+        camelCaseFields.corePersonality = null;
+      }
       
       // Add default values for worksFor and workplace
       camelCaseFields.worksFor = null;

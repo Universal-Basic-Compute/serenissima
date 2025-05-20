@@ -1294,10 +1294,22 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
               <p className="text-amber-700 italic">No recent activities found.</p>
             )}
           </div>
+
+          {/* Core Personality Section */}
+          {citizen.corePersonality && Array.isArray(citizen.corePersonality) && citizen.corePersonality.length === 3 && (
+            <div className="mb-6">
+              <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Core Traits</h3>
+              <div className="bg-amber-100 p-3 rounded-lg text-sm space-y-1">
+                <p><span className="font-medium text-amber-900">Strength:</span> <span className="text-amber-700">{citizen.corePersonality[0]}</span></p>
+                <p><span className="font-medium text-amber-900">Flaw:</span> <span className="text-amber-700">{citizen.corePersonality[1]}</span></p>
+                <p><span className="font-medium text-amber-900">Driver:</span> <span className="text-amber-700">{citizen.corePersonality[2]}</span></p>
+              </div>
+            </div>
+          )}
             
           {/* Personality Section */}
           <div className="mb-6">
-            <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Personality</h3>
+            <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Personality Narrative</h3>
             <p className="text-amber-700 italic text-sm">{citizen.personality || 'No personality description available.'}</p>
           </div>
 
