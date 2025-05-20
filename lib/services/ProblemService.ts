@@ -52,22 +52,22 @@ export class ProblemService {
       
       console.log(`Found ${buildings.length} buildings total`);
       
-      // Group buildings by land_id for quick lookup
+      // Group buildings by landId for quick lookup
       const buildingsByLand: Record<string, any[]> = {};
       buildings.forEach((building: any) => {
-        const landId = building.land_id; // This is the field from the BUILDING record (e.g., "L001")
+        const landId = building.landId; // This is the field from the BUILDING record (e.g., "L001")
         if (landId && typeof landId === 'string') { // Ensure landId is a valid string
           if (!buildingsByLand[landId]) {
             buildingsByLand[landId] = [];
           }
           buildingsByLand[landId].push(building);
         } else {
-          // Optionally log buildings with missing or invalid land_id
-           console.warn(`Building ${building.id || building.Name || 'Unknown ID'} (Type: ${building.Type}) has missing or invalid land_id: '${landId}'`);
+          // Optionally log buildings with missing or invalid landId
+           console.warn(`Building ${building.id || building.Name || 'Unknown ID'} (Type: ${building.Type}) has missing or invalid landId: '${landId}'`);
         }
       });
       
-      console.log(`Grouped buildings by land_id, found ${Object.keys(buildingsByLand).length} distinct land_ids with buildings`);
+      console.log(`Grouped buildings by landId, found ${Object.keys(buildingsByLand).length} distinct landIds with buildings`);
       
       // Debug: Log the first few land IDs and their building counts
       const landIds = Object.keys(buildingsByLand).slice(0, 5);
@@ -83,7 +83,7 @@ export class ProblemService {
         const airtableRecordId = land.id; // Airtable record ID, for fallback asset ID
 
         // Use customLandId for lookup if available.
-        // buildingsByLand is keyed by building.land_id, which should be the custom LandId.
+        // buildingsByLand is keyed by building.landId, which should be the custom LandId.
         const buildingsOnLand = customLandId ? (buildingsByLand[customLandId] || []) : [];
         
         if (buildingsOnLand.length === 0) {
