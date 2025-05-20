@@ -195,8 +195,13 @@ export class ProblemService {
   public async detectHomelessCitizens(username?: string): Promise<Record<string, any>> {
     try {
       const allFetchedCitizens = await this.fetchAllCitizens(username);
+      console.log(`[ProblemService] detectHomelessCitizens: Starting with ${allFetchedCitizens.length} fetched citizens (user: ${username || 'all'}).`);
+      if (allFetchedCitizens.length > 0) {
+        console.log(`[ProblemService] detectHomelessCitizens: Sample of first 2 fetched citizens before filtering: ${JSON.stringify(allFetchedCitizens.slice(0, 2), null, 2)}`);
+      }
+
       if (allFetchedCitizens.length === 0) {
-        console.log(`No citizens found to check for homelessness (user: ${username || 'all'})`);
+        console.log(`No citizens found to check for homelessness (user: ${username || 'all'}) - fetchAllCitizens returned empty or API provided no citizens.`);
         return {};
       }
 
@@ -287,8 +292,13 @@ export class ProblemService {
   public async detectWorklessCitizens(username?: string): Promise<Record<string, any>> {
     try {
       const allFetchedCitizens = await this.fetchAllCitizens(username);
+      console.log(`[ProblemService] detectWorklessCitizens: Starting with ${allFetchedCitizens.length} fetched citizens (user: ${username || 'all'}).`);
+      if (allFetchedCitizens.length > 0) {
+        console.log(`[ProblemService] detectWorklessCitizens: Sample of first 2 fetched citizens before filtering: ${JSON.stringify(allFetchedCitizens.slice(0, 2), null, 2)}`);
+      }
+      
       if (allFetchedCitizens.length === 0) {
-        console.log(`No citizens found to check for worklessness (user: ${username || 'all'})`);
+        console.log(`No citizens found to check for worklessness (user: ${username || 'all'}) - fetchAllCitizens returned empty or API provided no citizens.`);
         return {};
       }
 
@@ -357,8 +367,14 @@ export class ProblemService {
       throw new Error(`Failed to fetch citizens: ${response.status} ${await response.text()}`);
     }
     const data = await response.json();
-    if (username && data.citizen) return [data.citizen]; // API returns single citizen under 'citizen' key
-    return data.citizens || []; // API returns multiple citizens under 'citizens' key
+    const citizensList = username && data.citizen ? [data.citizen] : (data.citizens || []);
+
+    console.log(`[ProblemService] fetchAllCitizens: Received ${citizensList.length} citizen records from API.`);
+    if (citizensList.length > 0) {
+      console.log(`[ProblemService] fetchAllCitizens: Sample of first 2 citizen records (raw from API): ${JSON.stringify(citizensList.slice(0, 2), null, 2)}`);
+    }
+
+    return citizensList;
   }
 
   private async fetchAllBuildings(): Promise<any[]> { // Using any for now for building structure
