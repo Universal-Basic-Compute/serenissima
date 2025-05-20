@@ -1192,7 +1192,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
               
               {/* Coat of arms overlay in the bottom right corner */}
               {citizen.coatOfArmsImageUrl && (
-                <div className="absolute bottom-3 right-3 w-16 h-16 rounded-full overflow-hidden border-2 border-amber-600 shadow-lg bg-amber-100">
+                <div className="absolute bottom-3 right-3 w-20 h-20 rounded-full overflow-hidden border-2 border-amber-600 shadow-lg bg-amber-100 z-10"> {/* Increased size and added z-10 */}
                   <img 
                     src={citizen.coatOfArmsImageUrl}
                     alt="Coat of Arms"
