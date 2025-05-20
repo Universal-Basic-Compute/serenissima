@@ -52,7 +52,11 @@ def initialize_airtable():
             'citizens': Table(None, base, 'CITIZENS'),
             'relevancies': Table(None, base, 'RELEVANCIES'),
             'relationships': Table(None, base, 'RELATIONSHIPS'),
-            'notifications': Table(None, base, 'NOTIFICATIONS')
+            'notifications': Table(None, base, 'NOTIFICATIONS'),
+            'messages': Table(None, base, 'MESSAGES'),
+            'loans': Table(None, base, 'LOANS'),
+            'contracts': Table(None, base, 'CONTRACTS'),
+            'transactions': Table(None, base, 'TRANSACTIONS')
         }
         log.info("Connexion à Airtable initialisée avec des objets Base et Table explicites.")
         return tables
@@ -180,7 +184,7 @@ def get_existing_relationships(tables, username: str) -> Dict[str, Dict]:
         
         relationships = tables['relationships'].all(
             formula=formula,
-            fields=["Citizen1", "Citizen2", "StrengthScore", "LastInteraction", "Notes"] 
+            fields=["Citizen1", "Citizen2", "StrengthScore", "TrustScore", "LastInteraction", "Notes"]
         )
         
         # Create a dictionary mapping the *other* citizen in the relationship to their record details
@@ -197,9 +201,10 @@ def get_existing_relationships(tables, username: str) -> Dict[str, Dict]:
             if other_citizen:
                 relationship_map[other_citizen] = {
                     'id': record['id'],
-                    'StrengthScore': record['fields'].get('StrengthScore', 0), 
+                    'StrengthScore': record['fields'].get('StrengthScore', 0),
+                    'TrustScore': record['fields'].get('TrustScore', 0),
                     'LastInteraction': record['fields'].get('LastInteraction'),
-                    'notes': record['fields'].get('Notes', '') 
+                    'notes': record['fields'].get('Notes', '')
                 }
         
         log.info(f"Found {len(relationship_map)} existing relationships involving {username}")
@@ -208,14 +213,112 @@ def get_existing_relationships(tables, username: str) -> Dict[str, Dict]:
         log.error(f"Error fetching relationships for {username}: {e}")
         return {}
 
+def _calculate_trust_score_contributions_from_interactions(
+    tables: Dict[str, Table],
+    username1: str,
+    username2: str
+) -> tuple[float, set[str]]:
+    """Calculate trust score contributions from various interactions between two citizens."""
+    trust_score_addition = 0.0
+    interaction_types = set()
+    twenty_four_hours_ago = datetime.now(timezone.utc) - timedelta(hours=24)
+    now_utc = datetime.now(timezone.utc)
+
+    # Helper to safely get float from record
+    def safe_float(value, default=0.0):
+        try:
+            return float(value) if value is not None else default
+        except (ValueError, TypeError):
+            return default
+
+    # 1. Messages in the last 24 hours
+    try:
+        message_formula = (
+            f"AND(OR(AND({{Sender}}='{username1}',{{Receiver}}='{username2}'),"
+            f"AND({{Sender}}='{username2}',{{Receiver}}='{username1}')),"
+            f"IS_AFTER({{CreatedAt}}, DATETIME_PARSE('{twenty_four_hours_ago.isoformat()}')))"
+        )
+        recent_messages = tables['messages'].all(formula=message_formula, fields=['id'])
+        if recent_messages:
+            trust_score_addition += len(recent_messages) * 1.0
+            interaction_types.add("messages_interaction")
+            log.debug(f"Found {len(recent_messages)} recent messages between {username1} and {username2}.")
+    except Exception as e:
+        log.error(f"Error fetching messages between {username1} and {username2}: {e}")
+
+    # 2. Active Loans
+    try:
+        loan_formula = (
+            f"AND({{Status}}='active',OR(AND({{LenderUsername}}='{username1}',{{BorrowerUsername}}='{username2}'),"
+            f"AND({{LenderUsername}}='{username2}',{{BorrowerUsername}}='{username1}')))"
+        )
+        active_loans = tables['loans'].all(formula=loan_formula, fields=['PrincipalAmount'])
+        for loan in active_loans:
+            principal = safe_float(loan['fields'].get('PrincipalAmount'))
+            trust_score_addition += principal / 100000.0
+            interaction_types.add("loans_interaction")
+            log.debug(f"Active loan found between {username1} and {username2} with principal {principal}.")
+    except Exception as e:
+        log.error(f"Error fetching loans between {username1} and {username2}: {e}")
+
+    # 3. Active Contracts
+    try:
+        # We need to fetch and then filter EndAt client-side as IS_AFTER might be tricky with future dates in Airtable formulas
+        contract_formula = (
+            f"OR(AND({{Buyer}}='{username1}',{{Seller}}='{username2}'),"
+            f"AND({{Buyer}}='{username2}',{{Seller}}='{username1}'))"
+        )
+        all_contracts_between_pair = tables['contracts'].all(
+            formula=contract_formula,
+            fields=['PricePerResource', 'HourlyAmount', 'EndAt', 'Status']
+        )
+        active_future_contracts_count = 0
+        for contract in all_contracts_between_pair:
+            end_at_str = contract['fields'].get('EndAt')
+            status = contract['fields'].get('Status')
+            if end_at_str and status == 'active': # Check status as well
+                try:
+                    end_at_dt = datetime.fromisoformat(end_at_str.replace('Z', '+00:00'))
+                    if end_at_dt > now_utc:
+                        price_per_resource = safe_float(contract['fields'].get('PricePerResource'))
+                        hourly_amount = safe_float(contract['fields'].get('HourlyAmount'))
+                        trust_score_addition += (price_per_resource * hourly_amount) / 100.0
+                        active_future_contracts_count +=1
+                except ValueError:
+                    log.warning(f"Could not parse EndAt date: {end_at_str} for contract {contract['id']}")
+        if active_future_contracts_count > 0:
+            interaction_types.add("contracts_interaction")
+            log.debug(f"Found {active_future_contracts_count} active future contracts between {username1} and {username2}.")
+    except Exception as e:
+        log.error(f"Error fetching contracts between {username1} and {username2}: {e}")
+
+    # 4. Transactions in the last 24 hours
+    try:
+        transaction_formula = (
+            f"AND(OR(AND({{Seller}}='{username1}',{{Buyer}}='{username2}'),"
+            f"AND({{Seller}}='{username2}',{{Buyer}}='{username1}')),"
+            f"IS_AFTER({{ExecutedAt}}, DATETIME_PARSE('{twenty_four_hours_ago.isoformat()}')))"
+        )
+        recent_transactions = tables['transactions'].all(formula=transaction_formula, fields=['Price'])
+        for transaction in recent_transactions:
+            price = safe_float(transaction['fields'].get('Price'))
+            trust_score_addition += price / 10000.0
+            interaction_types.add("transactions_interaction")
+            log.debug(f"Recent transaction found between {username1} and {username2} with price {price}.")
+    except Exception as e:
+        log.error(f"Error fetching transactions between {username1} and {username2}: {e}")
+        
+    log.info(f"Calculated trust score addition of {trust_score_addition} for {username1}-{username2} from types: {interaction_types}")
+    return trust_score_addition, interaction_types
+
 def update_relationship_scores(
-    tables, 
-    source_citizen_record: Dict, 
-    relevancies: List[Dict], 
+    tables: Dict[str, Table],
+    source_citizen_record: Dict,
+    relevancies: List[Dict],
     existing_relationships: Dict[str, Dict],
     record_id_to_username_map: Dict[str, str]
 ) -> Dict[str, float]:
-    """Update relationship strength scores based on relevancies."""
+    """Update relationship strength and trust scores."""
     try:
         source_username = source_citizen_record['fields']['Username']
         log.info(f"Updating relationship scores for source citizen: {source_username}")
@@ -276,36 +379,62 @@ def update_relationship_scores(
                 record = existing_relationships[target_username]
                 record_id = record['id']
                 
-                # Apply 25% decay to existing score
-                existing_score = float(record.get('StrengthScore', 0.0)) * 0.75 
-                updated_score = existing_score + score_to_add
+                # === StrengthScore Calculation (from relevancies) ===
+                existing_strength_score = float(record.get('StrengthScore', 0.0)) * 0.75
+                updated_strength_score = existing_strength_score + score_to_add # score_to_add is from relevancies
 
-                # Handle Notes: append new types to existing notes if any, avoiding duplicates
-                existing_notes = record.get('notes', '') 
-                existing_types_set = set()
-                if existing_notes and existing_notes.startswith("Sources: "):
-                    try:
-                        existing_types_str = existing_notes.replace("Sources: ", "")
-                        existing_types_set.update(t.strip() for t in existing_types_str.split(','))
-                    except Exception: 
-                        log.warning(f"Could not parse existing notes for {source_username}-{target_username}: {existing_notes}")
+                # === TrustScore Calculation (from interactions) ===
+                existing_trust_score = float(record.get('TrustScore', 0.0)) * 0.75
+                trust_additions, trust_interaction_types = _calculate_trust_score_contributions_from_interactions(
+                    tables, source_username, target_username
+                )
+                updated_trust_score = existing_trust_score + trust_additions
 
-                combined_types = existing_types_set.union(new_relevancy_types_set)
-                if combined_types:
-                    notes_string = f"Sources: {', '.join(sorted(list(combined_types)))}"
+                # === Notes Update ===
+                existing_notes_str = record.get('notes', '')
+                current_strength_source_types = set(new_relevancy_types_set) # new_relevancy_types_set is from current relevancy
                 
-                # final_strength_score = min(100.0, updated_score) # Cap the score at 100 - REMOVED
+                # Parse existing notes for previous source types
+                # This simple parsing assumes "Sources: type1,type2"
+                # A more robust parser might be needed if Notes format varies
+                parsed_existing_types = set()
+                if existing_notes_str and existing_notes_str.startswith("Sources: "):
+                    try:
+                        types_part = existing_notes_str.replace("Sources: ", "")
+                        parsed_existing_types.update(t.strip() for t in types_part.split(','))
+                    except Exception:
+                        log.warning(f"Could not parse existing notes for {source_username}-{target_username}: {existing_notes_str}")
+                
+                # Combine all source types: old, new strength-related, new trust-related
+                all_source_types = parsed_existing_types.union(current_strength_source_types).union(trust_interaction_types)
+                if all_source_types:
+                    notes_string = f"Sources: {', '.join(sorted(list(all_source_types)))}"
                 
                 tables['relationships'].update(record_id, {
-                    'StrengthScore': updated_score, # Use updated_score directly
-                    'LastInteraction': datetime.now().isoformat(), 
+                    'StrengthScore': updated_strength_score,
+                    'TrustScore': updated_trust_score,
+                    'LastInteraction': datetime.now(timezone.utc).isoformat(),
                     'Notes': notes_string
                 })
                 updated_count += 1
             else:
                 # Create new relationship
-                if new_relevancy_types_set:
-                    notes_string = f"Sources: {', '.join(sorted(list(new_relevancy_types_set)))}"
+                # StrengthScore comes from relevancy (score_to_add)
+                new_strength_score = score_to_add
+
+                # TrustScore is calculated from interactions (base is 0, so no decay needed for new record)
+                trust_additions, trust_interaction_types = _calculate_trust_score_contributions_from_interactions(
+                    tables, source_username, target_username
+                )
+                new_trust_score = trust_additions
+                
+                # Combine notes sources
+                all_source_types = new_relevancy_types_set.union(trust_interaction_types)
+                if all_source_types:
+                    notes_string = f"Sources: {', '.join(sorted(list(all_source_types)))}"
+                else:
+                    notes_string = ""
+
 
                 # Ensure Citizen1 and Citizen2 are stored alphabetically
                 c1, c2 = tuple(sorted((source_username, target_username)))
@@ -313,8 +442,9 @@ def update_relationship_scores(
                 tables['relationships'].create({
                     'Citizen1': c1,
                     'Citizen2': c2,
-                    'StrengthScore': score_to_add, # Use score_to_add directly
-                    'LastInteraction': datetime.now().isoformat(), 
+                    'StrengthScore': new_strength_score,
+                    'TrustScore': new_trust_score,
+                    'LastInteraction': datetime.now(timezone.utc).isoformat(),
                     'Notes': notes_string
                 })
                 created_count += 1
