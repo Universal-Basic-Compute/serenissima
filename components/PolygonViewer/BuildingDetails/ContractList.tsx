@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { getNormalizedResourceIconPath } from '../../../../lib/utils/resourceUtils';
 
 interface ContractListProps {
   contracts: any[];
@@ -22,7 +23,7 @@ const ContractList: React.FC<ContractListProps> = ({ contracts }) => {
               <div className="flex items-center">
                 <div className="relative w-6 h-6 mr-2">
                   <Image 
-                    src={`/images/resources/${contract.icon}`}
+                    src={getNormalizedResourceIconPath(contract.icon, contract.resourceType || contract.name)}
                     alt={contract.name}
                     width={24}
                     height={24}

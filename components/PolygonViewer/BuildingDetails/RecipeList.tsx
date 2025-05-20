@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { getNormalizedResourceIconPath } from '../../../../lib/utils/resourceUtils';
 
 // Helper function to format craft time in minutes to a more readable format
 const formatCraftTime = (minutes: number): string => {
@@ -66,7 +67,7 @@ const RecipeList: React.FC<RecipeListProps> = ({ recipes }) => {
                     <div key={`input-${input.resourceType}`} className="flex items-center mb-1">
                       <div className="flex-shrink-0 w-6 h-6 mr-1">
                         <Image 
-                          src={`/images/resources/${input.icon}`}
+                          src={getNormalizedResourceIconPath(input.icon, input.resourceType || input.name)}
                           alt={input.name}
                           width={24}
                           height={24}
@@ -104,7 +105,7 @@ const RecipeList: React.FC<RecipeListProps> = ({ recipes }) => {
                     <div key={`output-${output.resourceType}`} className="flex items-center mb-1">
                       <div className="flex-shrink-0 w-6 h-6 mr-1">
                         <Image 
-                          src={`/images/resources/${output.icon}`}
+                          src={getNormalizedResourceIconPath(output.icon, output.resourceType || output.name)}
                           alt={output.name}
                           width={24}
                           height={24}
