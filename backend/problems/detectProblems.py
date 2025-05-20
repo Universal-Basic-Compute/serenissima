@@ -119,37 +119,7 @@ def detect_problems():
         total_problems_saved = 0
         all_problem_details_summary = [] # To store summary lines for notification
 
-        # 1. Detect lands with no buildings
-        log.info("--- Detecting Lands with No Buildings ---")
-        no_buildings_api_url = f"{base_url}/api/problems/no-buildings"
-        log.info(f"Calling API: {no_buildings_api_url} for all lands")
-        no_buildings_response = requests.post(no_buildings_api_url, json={}, timeout=180) # Increased timeout
-        log.info(f"No Buildings API response status: {no_buildings_response.status_code}")
-
-        if no_buildings_response.ok:
-            no_buildings_data = no_buildings_response.json()
-            log.info(f"No Buildings API response: success={no_buildings_data.get('success')}, problemCount={no_buildings_data.get('problemCount')}")
-            if no_buildings_data.get('success'):
-                count = no_buildings_data.get('problemCount', 0)
-                saved_count = no_buildings_data.get('savedCount', 0)
-                total_problems_detected += count
-                total_problems_saved += saved_count
-                all_problem_details_summary.append(f"- Lands w/o Buildings: {count} detected, {saved_count} saved.")
-                
-                problems_by_citizen_no_buildings = {}
-                for problem_id, problem in no_buildings_data.get('problems', {}).items():
-                    citizen = problem.get('citizen', 'Unknown')
-                    problems_by_citizen_no_buildings[citizen] = problems_by_citizen_no_buildings.get(citizen, 0) + 1
-                if problems_by_citizen_no_buildings:
-                    all_problem_details_summary.append("  Affected citizens (No Buildings): " + ", ".join([f"{c}({num})" for c, num in problems_by_citizen_no_buildings.items()]))
-            else:
-                log.error(f"No Buildings API returned error: {no_buildings_data.get('error')}")
-                all_problem_details_summary.append(f"- Lands w/o Buildings: API Error - {no_buildings_data.get('error', 'Unknown')}")
-        else:
-            log.error(f"No Buildings API call failed: {no_buildings_response.status_code} - {no_buildings_response.text}")
-            all_problem_details_summary.append(f"- Lands w/o Buildings: API Call Failed ({no_buildings_response.status_code})")
-
-        # 2. Detect homeless citizens
+        # 1. Detect homeless citizens
         log.info("--- Detecting Homeless Citizens ---")
         homeless_data = detect_homeless_problems(base_url)
         if homeless_data.get('success'):
@@ -169,7 +139,7 @@ def detect_problems():
             log.error(f"Homeless detection failed: {homeless_data.get('error')}")
             all_problem_details_summary.append(f"- Homeless Citizens: Detection Error - {homeless_data.get('error', 'Unknown')}")
 
-        # 3. Detect workless citizens
+        # 2. Detect workless citizens
         log.info("--- Detecting Workless Citizens ---")
         workless_data = detect_workless_problems(base_url)
         if workless_data.get('success'):
@@ -189,7 +159,7 @@ def detect_problems():
             log.error(f"Workless detection failed: {workless_data.get('error')}")
             all_problem_details_summary.append(f"- Workless Citizens: Detection Error - {workless_data.get('error', 'Unknown')}")
 
-        # 4. Detect vacant buildings (homes/businesses)
+        # 3. Detect vacant buildings (homes/businesses)
         log.info("--- Detecting Vacant Buildings ---")
         vacant_buildings_api_url = f"{base_url}/api/problems/vacant-buildings"
         log.info(f"Calling API: {vacant_buildings_api_url} for all owners")
@@ -219,7 +189,7 @@ def detect_problems():
             log.error(f"Vacant Buildings API call failed: {vacant_buildings_response.status_code} - {vacant_buildings_response.text}")
             all_problem_details_summary.append(f"- Vacant Buildings: API Call Failed ({vacant_buildings_response.status_code})")
 
-        # 5. Detect business buildings with no active contracts
+        # 4. Detect business buildings with no active contracts
         log.info("--- Detecting Business Buildings with No Active Contracts ---")
         no_contracts_api_url = f"{base_url}/api/problems/no-active-contracts"
         log.info(f"Calling API: {no_contracts_api_url} for all relevant business buildings/owners")

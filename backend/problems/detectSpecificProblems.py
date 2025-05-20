@@ -78,7 +78,6 @@ def detect_specific_problems(
     log.info(f"Using base URL: {base_url}")
 
     api_url_path_map = {
-        "no_buildings": "/api/problems/no-buildings",
         "homeless": "/api/problems/homeless",
         "workless": "/api/problems/workless",
         "vacant_buildings": "/api/problems/vacant-buildings",
@@ -169,7 +168,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--type", 
         required=True, 
-        choices=["no_buildings", "homeless", "workless", "vacant_buildings", "no_active_contracts"],
+        choices=["homeless", "workless", "vacant_buildings", "no_active_contracts"],
         help="The type of problem to detect."
     )
     parser.add_argument(

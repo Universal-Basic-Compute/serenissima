@@ -33,7 +33,7 @@ Here are the types of problems currently managed by the system:
     -   Ensure sufficient funds to pay rent.
     -   Wait for automatic housing assignment by the daily script (if applicable).
 
-### 3. Homeless Employee Impact
+### 2. Homeless Employee Impact
 
 -   **Description**: This problem is reported to an employer if one of their employees is homeless.
 -   **Detection**: When a citizen is identified as homeless (see above), the system checks if they have a job. If so, and if the employer (`ranBy` in the professional buildings table) is different from the employee, a problem is created for the employer.
@@ -43,7 +43,7 @@ Here are the types of problems currently managed by the system:
     -   Provide assistance if possible.
     -   Monitor performance and consider recruitment alternatives.
 
-### 4. Workless Citizen
+### 3. Workless Citizen
 
 -   **Description**: A citizen is considered unemployed if they are not listed as an occupant of any "commercial" (business) category building.
 -   **Detection**: The system checks each citizen (except system accounts like `ConsiglioDeiDieci` or `SerenissimaBank`) to ensure they are the occupant (`Occupant`) of at least one building whose category (`Category`) is "business".
@@ -53,7 +53,7 @@ Here are the types of problems currently managed by the system:
     -   Improve skills or social standing.
     -   Wait for automatic job assignment by the daily script (if applicable).
 
-### 5. Vacant Home
+### 4. Vacant Home
 
 -   **Description**: This problem is reported when a residential building (category "home") has an owner but no occupant.
 -   **Detection**: The system identifies buildings with `Category` = "home", a valid `Owner`, but an empty `Occupant` field.
@@ -64,7 +64,7 @@ Here are the types of problems currently managed by the system:
     -   Maintain the property.
     -   Sell the property.
 
-### 6. Vacant Business Premises
+### 5. Vacant Business Premises
 
 -   **Description**: This problem is reported when a commercial building (category "business") has an owner but no occupant (worker).
 -   **Detection**: The system identifies buildings with `Category` = "business", a valid `Owner`, but an empty `Occupant` field.
@@ -75,7 +75,7 @@ Here are the types of problems currently managed by the system:
     -   Ensure the property is suitable for common business types.
     -   Sell the property.
 
-### 7. No Active Contracts
+### 6. No Active Contracts
 
 -   **Description**: This problem is reported for "commercial" (business) category buildings that are not involved in any active contracts (neither as a buyer `BuyerBuilding` nor as a seller `SellerBuilding`).
 -   **Detection**: The system retrieves all "business" category buildings. Then, it retrieves all active contracts (where the current date is between `CreatedAt` and `EndAt`). It then identifies commercial buildings that do not appear as `BuyerBuilding` or `SellerBuilding` in these active contracts.
