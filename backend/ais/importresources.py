@@ -194,6 +194,7 @@ def get_kinos_api_key() -> str:
     return api_key
 
 def prepare_import_strategy_data(
+    tables: Dict[str, Table], # Added tables parameter
     ai_citizen: Dict, 
     citizen_buildings: List[Dict], 
     citizen_resources: List[Dict],
@@ -856,6 +857,7 @@ def process_ai_import_strategies(dry_run: bool = False):
         
         # Prepare the data package for the AI
         data_package = prepare_import_strategy_data(
+            tables, # Pass tables object
             ai_citizen, 
             citizen_buildings, 
             citizen_resources,
