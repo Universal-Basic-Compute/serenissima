@@ -410,8 +410,8 @@ export class ProblemService {
             } else {
               console.log(`[ProblemService] Conditions not met for employer problem for citizen '${citizen.Username}' at workplace ${workplaceId}. RanBy: '${workplaceBuilding.ranBy}', EmployerDifferent: ${isEmployerDifferent}`);
             }
-          }
-          } else { // This 'else' corresponds to 'if (workplaceBuilding)'
+          // The extra '}' that prematurely closed 'if (workplaceBuilding)' was on the line above this comment and has been removed.
+          } else { // This 'else' now correctly corresponds to 'if (workplaceBuilding)'
             console.log(`[ProblemService] Citizen '${citizen.Username}' has no identifiable workplace (neither via citizen.workplace.buildingId nor inference). Skipping employer problem.`);
           }
         }
