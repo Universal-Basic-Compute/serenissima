@@ -718,6 +718,7 @@ def create_public_sell_contract(
                 "Buyer": "public",  # Public contract
                 "Type": "public_sell",
                 "ResourceType": resource_type,
+                "Transporter": "public", # Set Transporter to "public"
                 "SellerBuilding": building_id,
                 "BuyerBuilding": None, # No specific buyer building for public sells
                 "hourlyAmount": hourly_amount, # Assuming this is the Airtable field name
