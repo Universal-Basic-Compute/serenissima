@@ -171,7 +171,7 @@ export default function GuildsPanel({ onClose, standalone = false }: GuildsPanel
                     className="h-48 w-full bg-cover bg-center" 
                     style={{ 
                       backgroundColor: guild.color || '#8B4513',
-                      backgroundImage: guild.guildBanner ? `url(/images/guilds/banner/${guild.guildBanner})` : 'none',
+                      backgroundImage: guild.guildBanner ? `url(${guild.guildBanner})` : 'none',
                       position: 'relative'
                     }}
                   >
@@ -179,7 +179,7 @@ export default function GuildsPanel({ onClose, standalone = false }: GuildsPanel
                     {guild.guildEmblem && (
                       <div className="absolute inset-0 flex items-center justify-center">
                         <img 
-                          src={`/images/guilds/emblems/${guild.guildEmblem}`} 
+                          src={guild.guildEmblem} 
                           alt={`${guild.guildName} emblem`} 
                           className="h-24 w-24 object-contain"
                         />
@@ -293,7 +293,7 @@ function GuildDetails({ guild, onBack, formatDate, getLandName }: GuildDetailsPr
         className="h-48 bg-cover bg-center relative"
         style={{ 
           backgroundColor: guild.color || '#8B4513',
-          backgroundImage: guild.guildBanner ? `url(/images/guilds/banner/${guild.guildBanner})` : 'none'
+          backgroundImage: guild.guildBanner ? `url(${guild.guildBanner})` : 'none'
         }}
       >
         {/* Back button */}
@@ -310,7 +310,7 @@ function GuildDetails({ guild, onBack, formatDate, getLandName }: GuildDetailsPr
         {guild.guildEmblem && (
           <div className="absolute top-4 right-4 h-20 w-20 bg-white/80 rounded-full p-2 flex items-center justify-center">
             <img 
-              src={`/images/guilds/emblems/${guild.guildEmblem}`} 
+              src={guild.guildEmblem} 
               alt={`${guild.guildName} emblem`} 
               className="max-h-full max-w-full object-contain"
             />
