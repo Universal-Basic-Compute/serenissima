@@ -978,6 +978,59 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
           ) : (
             <p className="text-amber-700 italic">No active problems reported for this citizen. A sign of good fortune, or perhaps, discretion.</p>
           )}
+
+          {/* Recent Activities Section - Moved here */}
+          <div className="mt-4"> {/* Use mt-4 for spacing similar to other top-level sections */}
+            <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Recent Activities</h3>
+              
+            {isLoadingActivities ? (
+              <div className="flex justify-center py-4">
+                <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            ) : activities.length > 0 ? (
+              <div className="space-y-2 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
+                {activities.map((activity, index) => (
+                  <div key={activity.ActivityId || index} className="bg-amber-100 rounded-lg p-2 text-sm">
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="text-amber-700">
+                        {getActivityIcon(activity.Type)}
+                      </div>
+                      <div className="font-medium text-amber-800">
+                        {formatActivityType(activity.Type)}
+                      </div>
+                      <div className="ml-auto text-xs text-amber-600">
+                        {formatActivityDate(activity.EndDate || activity.StartDate || activity.CreatedAt)}
+                      </div>
+                    </div>
+                      
+                    {activity.FromBuilding && activity.ToBuilding && (
+                      <div className="flex items-center text-xs text-amber-700 mb-1">
+                        <span className="font-medium">{activity.FromBuilding}</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mx-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                        <span className="font-medium">{activity.ToBuilding}</span>
+                      </div>
+                    )}
+                      
+                    {activity.ResourceId && activity.Amount && (
+                      <div className="text-xs text-amber-700 mb-1">
+                        <span className="font-medium">{activity.Amount}</span> units of <span className="font-medium">{activity.ResourceId}</span>
+                      </div>
+                    )}
+                      
+                    {activity.Notes && (
+                      <div className="text-xs italic text-amber-600 mt-1">
+                        {activity.Notes}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-amber-700 italic">No recent activities found.</p>
+            )}
+          </div>
         </div>
         
         {/* Second column - Correspondance */}
@@ -1273,59 +1326,6 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
                 )}
               </div>
             </div>
-          </div>
-          
-          {/* Recent Activities Section - Moved before About */}
-          <div className="mb-6">
-            <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Recent Activities</h3>
-              
-            {isLoadingActivities ? (
-              <div className="flex justify-center py-4">
-                <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin"></div>
-              </div>
-            ) : activities.length > 0 ? (
-              <div className="space-y-2 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
-                {activities.map((activity, index) => (
-                  <div key={activity.ActivityId || index} className="bg-amber-100 rounded-lg p-2 text-sm">
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className="text-amber-700">
-                        {getActivityIcon(activity.Type)}
-                      </div>
-                      <div className="font-medium text-amber-800">
-                        {formatActivityType(activity.Type)}
-                      </div>
-                      <div className="ml-auto text-xs text-amber-600">
-                        {formatActivityDate(activity.EndDate || activity.StartDate || activity.CreatedAt)}
-                      </div>
-                    </div>
-                      
-                    {activity.FromBuilding && activity.ToBuilding && (
-                      <div className="flex items-center text-xs text-amber-700 mb-1">
-                        <span className="font-medium">{activity.FromBuilding}</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mx-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                        </svg>
-                        <span className="font-medium">{activity.ToBuilding}</span>
-                      </div>
-                    )}
-                      
-                    {activity.ResourceId && activity.Amount && (
-                      <div className="text-xs text-amber-700 mb-1">
-                        <span className="font-medium">{activity.Amount}</span> units of <span className="font-medium">{activity.ResourceId}</span>
-                      </div>
-                    )}
-                      
-                    {activity.Notes && (
-                      <div className="text-xs italic text-amber-600 mt-1">
-                        {activity.Notes}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-amber-700 italic">No recent activities found.</p>
-            )}
           </div>
             
           {/* Personality Section */}
