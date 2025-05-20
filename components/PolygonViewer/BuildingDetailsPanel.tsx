@@ -12,6 +12,23 @@ import {
   ContractList
 } from './BuildingDetails';
 
+// Add global styles for custom scrollbar
+const scrollbarStyles = `
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(255, 248, 230, 0.1); /* Light amber track */
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(180, 120, 60, 0.3); /* Darker amber thumb */
+    border-radius: 20px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(180, 120, 60, 0.5); /* Darker amber thumb on hover */
+  }
+`;
+
 // Storage Progress Bar Component
 const StorageProgressBar = ({ used, capacity }) => {
   if (!capacity || capacity <= 0) return null;
@@ -75,6 +92,17 @@ export default function BuildingDetailsPanel({
   const [buildingResources, setBuildingResources] = useState<any>(null);
   const [isLoadingResources, setIsLoadingResources] = useState<boolean>(false);
   const [currentUsername, setCurrentUsername] = useState<string | null>(null);
+
+  // Add the scrollbar styles to the document
+  useEffect(() => {
+    const styleElement = document.createElement('style');
+    styleElement.innerHTML = scrollbarStyles;
+    document.head.appendChild(styleElement);
+    
+    return () => {
+      document.head.removeChild(styleElement);
+    };
+  }, []);
   
   // Add this useEffect to debug the building resources data
   useEffect(() => {
@@ -580,7 +608,7 @@ export default function BuildingDetailsPanel({
     >
       <div className="h-full flex flex-col">
         {/* Header with improved styling */}
-        <div className="flex justify-between items-center mb-6 border-b-2 border-amber-300 pb-3">
+        <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-serif font-semibold text-amber-800">
             {!isLoading && !error && building ? `${building.type} Details` : 'Building Details'}
           </h2>
@@ -613,15 +641,15 @@ export default function BuildingDetailsPanel({
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-600"></div>
           </div>
         ) : !error && building ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4 overflow-y-auto flex-grow" style={{ gridTemplateColumns: "1fr 1fr 1fr" }}>
+          <div className="flex flex-row gap-4 flex-grow overflow-hidden">
             {/* Column 1: RECIPES */}
-            <div className="col-span-1 md:col-span-1 lg:col-span-1 space-y-4">
+            <div className="w-1/3 h-full overflow-y-auto custom-scrollbar space-y-4 pr-2">
               {/* Recipes */}
               <RecipeList recipes={buildingResources?.resources?.transformationRecipes || []} />
             </div>
             
             {/* Column 2: SELLS, BUYS, STORES */}
-            <div className="col-span-1 md:col-span-1 lg:col-span-1 space-y-4">
+            <div className="w-1/3 h-full overflow-y-auto custom-scrollbar space-y-4 pr-2">
               {/* Add Storage Progress Bar */}
               {buildingResources?.storage && (
                 <StorageProgressBar 
@@ -670,7 +698,7 @@ export default function BuildingDetailsPanel({
             </div>
             
             {/* Column 3: Name, Owner, Location, Maintenance, Detailed Info */}
-            <div className="col-span-1 space-y-4">
+            <div className="w-1/3 h-full overflow-y-auto custom-scrollbar space-y-4 pr-2">
               {/* Building Image and Name */}
               {buildingDefinition && (
                 <BuildingImage 
