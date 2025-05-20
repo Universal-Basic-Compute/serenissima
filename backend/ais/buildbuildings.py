@@ -387,7 +387,7 @@ def get_kinos_api_key() -> str:
         sys.exit(1)
     return api_key
 
-def prepare_ai_building_strategy(ai_citizen: Dict, citizen_lands: List[Dict], citizen_buildings: List[Dict], all_buildings: List[Dict]) -> Dict:
+def prepare_ai_building_strategy(tables: Dict[str, Table], ai_citizen: Dict, citizen_lands: List[Dict], citizen_buildings: List[Dict], all_buildings: List[Dict]) -> Dict:
     """Prepare a comprehensive data package for the AI to make building decisions."""
     
     # Extract citizen information
@@ -1587,7 +1587,7 @@ def process_ai_building_strategies(dry_run: bool = False, citizen_username_arg: 
             # Prepare the data package for the AI.
             # citizen_buildings_owned is for AI's general context.
             # all_buildings is for context of what's on all lands (filtered by prepare_ai_building_strategy for relevant lands).
-            data_package = prepare_ai_building_strategy(ai_citizen, citizen_lands, citizen_buildings_owned, all_buildings)
+            data_package = prepare_ai_building_strategy(tables, ai_citizen, citizen_lands, citizen_buildings_owned, all_buildings)
             
             # Fetch and add building ownership relevancies (if any)
             # This part can remain as is, as it's contextual information for the AI.
