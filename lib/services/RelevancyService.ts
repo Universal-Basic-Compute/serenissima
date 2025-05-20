@@ -720,6 +720,14 @@ export class RelevancyService {
       // Calculate relevancy for each building on land owned by another citizen
       
       buildings.forEach(building => {
+        // Safeguard: Ensure the building being processed is actually owned by the 'username'
+        // for whom this function was called. This protects against issues if the upstream
+        // /api/buildings?owner=X filter isn't perfect.
+        if (building.owner !== username) {
+          console.warn(`[RelevancyService] Safeguard: Building ${building.buildingId} (owner: ${building.owner}) does not match current processing user (${username}). Skipping.`);
+          return;
+        }
+
         console.log(`[RelevancyService] Processing building ${building.buildingId} (type: ${building.type}) for building owner: ${username}`);
         const landId = building.landId; // This should be the landId like 'poly_xxx'
         if (!landId) {
