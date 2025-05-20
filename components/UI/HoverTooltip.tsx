@@ -520,16 +520,16 @@ export const HoverTooltip: React.FC = () => {
       
       tooltipContent = (
         <div>
-          <div className="font-bold text-lg mb-1">{problem.title}</div>
+          <div className="font-bold text-lg mb-1">{problem.title || problem.problemId || 'Problem Details'}</div>
           <div className="flex items-center mb-2">
             <span className={`font-medium ${getSeverityColor(problem.severity)}`}>
-              {problem.severity.toUpperCase()} Severity
+              {(problem.severity || 'medium').toUpperCase()} Severity
             </span>
             <span className="mx-2">•</span>
             <span className="text-amber-300">{problem.location || 'Unknown location'}</span>
           </div>
           <div className="text-sm mb-2 line-clamp-3">
-            {problem.description}
+            {problem.description || 'No additional details available for this problem.'}
           </div>
           <div className="text-xs text-amber-300 mt-2">
             Click for details
