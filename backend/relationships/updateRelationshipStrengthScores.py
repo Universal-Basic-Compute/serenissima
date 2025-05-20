@@ -251,8 +251,8 @@ def _calculate_trust_score_contributions_from_interactions(
     # 2. Active Loans
     try:
         loan_formula = (
-            f"AND({{Status}}='active',OR(AND({{LenderUsername}}='{username1}',{{BorrowerUsername}}='{username2}'),"
-            f"AND({{LenderUsername}}='{username2}',{{BorrowerUsername}}='{username1}')))"
+            f"AND({{Status}}='active',OR(AND({{Lender}}='{username1}',{{Borrower}}='{username2}'),"
+            f"AND({{Lender}}='{username2}',{{Borrower}}='{username1}')))"
         )
         active_loans = tables['loans'].all(formula=loan_formula, fields=['PrincipalAmount'])
         for loan in active_loans:
