@@ -263,8 +263,13 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
       const data = await response.json();
       
       console.log('%c[DEBUG] Received notifications data:', 'color: #ff69b4', data);
+
+      if (!data.success) {
+        // If the API indicates failure, throw an error to be caught by the client-side catch block
+        throw new Error(data.error || data.details || 'API returned success:false');
+      }
       
-      if (data.success && data.notifications && Array.isArray(data.notifications)) {
+      if (data.notifications && Array.isArray(data.notifications)) {
         console.log('%c[DEBUG] Setting notifications:', 'color: #ff69b4', data.notifications.length);
         
         // Get the unread notification IDs

@@ -98,48 +98,27 @@ export async function POST(request: Request) {
       });
       
     } catch (error) {
-      console.error('\x1b[35m%s\x1b[0m', '[DEBUG] Error fetching notifications from Airtable:', error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('\x1b[35m%s\x1b[0m', '[DEBUG] Error fetching notifications from Airtable:', errorMessage);
       
-      // Fallback to sample notifications if Airtable fetch fails
-      console.log('\x1b[35m%s\x1b[0m', `[DEBUG] Creating sample notifications as fallback`);
-      
-      const sampleNotifications = [
-        {
-          notificationId: `${citizen}-notification-1`,
-          type: 'System',
-          citizen: citizen,
-          content: 'Welcome to La Serenissima! Explore the city and discover its wonders.',
-          createdAt: new Date().toISOString(),
-          readAt: null
-        },
-        {
-          notificationId: `${citizen}-notification-2`,
-          type: 'Contract',
-          citizen: citizen,
-          content: 'A new land parcel is available for purchase in San Marco district.',
-          createdAt: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
-          readAt: null
-        },
-        {
-          notificationId: `${citizen}-notification-3`,
-          type: 'Governance',
-          citizen: citizen,
-          content: 'The Council of Ten has issued a new decree regarding building regulations.',
-          createdAt: new Date(Date.now() - 7200000).toISOString(), // 2 hours ago
-          readAt: null
-        }
-      ];
-      
+      // Return an error response instead of fallback data
       return NextResponse.json({
-        success: true,
-        notifications: sampleNotifications
-      });
+        success: false,
+        error: 'Failed to fetch notifications from Airtable',
+        details: errorMessage,
+        notifications: [] // Ensure notifications is an empty array on error
+      }, { status: 500 }); // It's an internal server error if Airtable fetch fails
     }
     
   } catch (error) {
-    console.error('\x1b[35m%s\x1b[0m', '[DEBUG] Error processing notifications request:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('\x1b[35m%s\x1b[0m', '[DEBUG] Error processing notifications request:', errorMessage);
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch notifications' },
+      { 
+        success: false, 
+        error: 'Failed to process notifications request',
+        details: errorMessage
+      },
       { status: 500 }
     );
   }
