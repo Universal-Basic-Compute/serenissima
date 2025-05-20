@@ -223,12 +223,17 @@ def prepare_import_strategy_data(
     username = ai_citizen["fields"].get("Username", "")
     ducats = ai_citizen["fields"].get("Ducats", 0)
     
-    # Find buildings that can import resources
+    # Find buildings that can import resources (must be 'business' category)
     importable_buildings = []
     for building in citizen_buildings:
         building_id = building["fields"].get("BuildingId", "")
         building_type = building["fields"].get("Type", "")
-        
+        building_category = building["fields"].get("Category", "").lower()
+
+        # Only consider 'business' category buildings for import capabilities
+        if building_category != 'business':
+            continue
+            
         # Check if this building type can import resources
         building_def = building_types.get(building_type, {})
         can_import = building_def.get("canImport", False)
@@ -597,10 +602,9 @@ def create_or_update_import_contract(
     tables, 
     ai_username: str, 
     decision: Dict, 
-    resource_types: Dict,
-    existing_contracts: List[Dict]
+    resource_types: Dict
 ) -> bool:
-    """Create or update an import contract based on the AI's decision."""
+    """Create or update an import contract based on the AI's decision using a deterministic ContractId."""
     try:
         building_id = decision["building_id"]
         resource_type = decision["resource_type"]
@@ -610,85 +614,54 @@ def create_or_update_import_contract(
         # Get the import price for this resource
         import_price = resource_types.get(resource_type, {}).get("importPrice", 0)
         
-        # Check if there's an existing contract for this building and resource
-        contract_to_update = None # Renamed to avoid confusion, this will hold the Airtable record
-        for airtable_contract_record in existing_contracts: # existing_contracts are raw Airtable records
-            fields = airtable_contract_record.get("fields", {})
-            if (fields.get("BuyerBuilding") == building_id and
-                fields.get("ResourceType") == resource_type and
-                fields.get("Seller") == "Italia"): # Ensure it's an import contract from Italia
-                contract_to_update = airtable_contract_record # This is the Airtable record
-                break
+        # Generate deterministic ContractId
+        # Format: contract-import-{BUYER_BUILDING_ID}-{RESOURCE_TYPE}
+        # Ensure building_id and resource_type are sanitized for use in an ID if necessary (e.g., no spaces, special chars)
+        # For now, assuming they are simple strings/IDs.
+        custom_contract_id = f"contract-import-{building_id}-{resource_type}"
         
         now = datetime.now().isoformat()
         end_date = (datetime.now() + timedelta(weeks=1)).isoformat()  # Contract ends in 1 week
-        
-        if contract_to_update:
+
+        # Check if a contract with this custom_contract_id already exists
+        existing_contract_record = None
+        try:
+            formula = f"{{ContractId}}='{_escape_airtable_value(custom_contract_id)}'"
+            records = tables["contracts"].all(formula=formula, max_records=1)
+            if records:
+                existing_contract_record = records[0]
+        except Exception as e:
+            print(f"Error checking for existing contract {custom_contract_id}: {e}")
+            # Proceed as if not found, or handle error more gracefully
+
+        if existing_contract_record:
             # Update the existing contract
-            contract_airtable_id = contract_to_update["id"] # Airtable record ID
+            airtable_record_id = existing_contract_record["id"]
             
-            updated_contract_result = tables["contracts"].update(contract_airtable_id, {
+            tables["contracts"].update(airtable_record_id, {
                 "HourlyAmount": hourly_amount,
-                "PricePerResource": import_price, # Correct field name for Airtable
+                "PricePerResource": import_price,
                 "UpdatedAt": now,
-                "EndAt": end_date,
+                "EndAt": end_date, # Refresh EndAt
                 "Notes": json.dumps({
                     "reason": reason,
                     "updated_by": "AI Import Strategy",
-                    "updated_at": now
+                    "updated_at": now,
+                    "previous_ContractId_logic": "deterministic_overwrite" 
                 })
             })
-            
-            print(f"Updated import contract for {resource_type} at building {building_id}: {hourly_amount} units/hour")
-            
-            # After successfully updating the contract, create or update a resource record
-            try:
-                # Check if a resource of this type already exists for this building
-                resource_formula = f"AND({{Type}}='import', {{ResourceType}}='{resource_type}', {{BuildingId}}='{building_id}')"
-                existing_resources = tables["resources"].all(formula=resource_formula)
-                
-                resource_data = {
-                    "Type": "import",
-                    "ResourceType": resource_type,
-                    "BuildingId": building_id,
-                    "Owner": ai_username,
-                    "Count": 0,  # Start with 0 count
-                    "UpdatedAt": now
-                }
-                
-                if existing_resources:
-                    # Update existing resource
-                    resource_id = existing_resources[0]["id"]
-                    tables["resources"].update(resource_id, resource_data)
-                    print(f"Updated import resource record for {resource_type} at building {building_id}")
-                else:
-                    # Create new resource record
-                    import uuid
-                    resource_id = f"resource-{uuid.uuid4()}"
-                    resource_data["ResourceId"] = resource_id
-                    resource_data["CreatedAt"] = now
-                    
-                    tables["resources"].create(resource_data)
-                    print(f"Created new import resource record for {resource_type} at building {building_id}")
-                    
-            except Exception as e:
-                print(f"Error creating/updating resource record: {str(e)}")
-                # Continue execution even if resource creation fails
-            
-            return True
+            print(f"Updated import contract {custom_contract_id} for {resource_type} at building {building_id}: {hourly_amount} units/hour")
         else:
             # Create a new contract
-            import uuid
-            contract_id = f"contract-{uuid.uuid4()}"
-            
-            new_contract = {
-                "ContractId": contract_id,
+            new_contract_data = {
+                "ContractId": custom_contract_id, # Use the deterministic ID
+                "Type": "import", # Explicitly set Type to 'import'
                 "Buyer": ai_username,
-                "Seller": "Italia",
+                "Seller": "Italia", # Standard seller for imports
                 "ResourceType": resource_type,
-                "Transporter": "Italia",
+                "Transporter": "Italia", # Standard transporter for imports
                 "BuyerBuilding": building_id,
-                "SellerBuilding": None,
+                "SellerBuilding": None, # No seller building for imports from "Italia"
                 "HourlyAmount": hourly_amount,
                 "PricePerResource": import_price,
                 "Priority": 1,  # Default priority
@@ -697,51 +670,46 @@ def create_or_update_import_contract(
                 "Notes": json.dumps({
                     "reason": reason,
                     "created_by": "AI Import Strategy",
-                    "created_at": now
+                    "created_at": now,
+                    "ContractId_logic": "deterministic"
                 })
             }
+            tables["contracts"].create(new_contract_data)
+            print(f"Created new import contract {custom_contract_id} for {resource_type} at building {building_id}: {hourly_amount} units/hour")
+
+        # After successfully creating or updating the contract, create or update a resource record
+        # This part ensures the AI has a "resource" entry to track this import flow, even if actual count is 0 initially.
+        try:
+            resource_formula = f"AND({{Type}}='import', {{ResourceType}}='{_escape_airtable_value(resource_type)}', {{BuildingId}}='{_escape_airtable_value(building_id)}', {{Owner}}='{_escape_airtable_value(ai_username)}')"
+            existing_resources = tables["resources"].all(formula=resource_formula, max_records=1)
             
-            tables["contracts"].create(new_contract)
+            resource_data_fields = {
+                "Type": "import",
+                "ResourceType": resource_type,
+                "BuildingId": building_id,
+                "Owner": ai_username,
+                "Count": 0,  # Imports start with 0 count, actual processing script will increment
+                "UpdatedAt": now
+            }
             
-            print(f"Created new import contract for {resource_type} at building {building_id}: {hourly_amount} units/hour")
-            
-            # After successfully creating or updating the contract, create or update a resource record
-            try:
-                # Check if a resource of this type already exists for this building
-                resource_formula = f"AND({{Type}}='import', {{ResourceType}}='{resource_type}', {{BuildingId}}='{building_id}')"
-                existing_resources = tables["resources"].all(formula=resource_formula)
+            if existing_resources:
+                resource_airtable_id = existing_resources[0]["id"]
+                tables["resources"].update(resource_airtable_id, resource_data_fields)
+                print(f"Updated import-tracking resource record for {resource_type} at building {building_id}")
+            else:
+                import uuid # Keep for ResourceId if needed
+                resource_data_fields["ResourceId"] = f"resource-{uuid.uuid4()}" # Still generate a unique ResourceId for the table's primary key
+                resource_data_fields["CreatedAt"] = now
+                tables["resources"].create(resource_data_fields)
+                print(f"Created new import-tracking resource record for {resource_type} at building {building_id}")
                 
-                resource_data = {
-                    "Type": "import",
-                    "ResourceType": resource_type,
-                    "BuildingId": building_id,
-                    "Owner": ai_username,
-                    "Count": 0,  # Start with 0 count
-                    "UpdatedAt": now
-                }
-                
-                if existing_resources:
-                    # Update existing resource
-                    resource_id = existing_resources[0]["id"]
-                    tables["resources"].update(resource_id, resource_data)
-                    print(f"Updated import resource record for {resource_type} at building {building_id}")
-                else:
-                    # Create new resource record
-                    import uuid
-                    resource_id = f"resource-{uuid.uuid4()}"
-                    resource_data["ResourceId"] = resource_id
-                    resource_data["CreatedAt"] = now
-                    
-                    tables["resources"].create(resource_data)
-                    print(f"Created new import resource record for {resource_type} at building {building_id}")
-                    
-            except Exception as e:
-                print(f"Error creating/updating resource record: {str(e)}")
-                # Continue execution even if resource creation fails
-            
-            return True
-    except Exception as e:
-        print(f"Error creating/updating import contract: {str(e)}")
+        except Exception as e_res:
+            print(f"Error creating/updating import-tracking resource record: {str(e_res)}")
+            # Continue execution even if resource creation/update fails, contract is the main goal.
+        
+        return True
+    except Exception as e_contract:
+        print(f"Error creating/updating import contract {decision.get('building_id', 'N/A')}-{decision.get('resource_type', 'N/A')}: {str(e_contract)}")
         print(f"Exception traceback: {traceback.format_exc()}")
         return False
 
@@ -905,12 +873,12 @@ def process_ai_import_strategies(dry_run: bool = False):
                     # Validate the import decision
                     if validate_import_decision(decision, importable_buildings, resource_types):
                         # Create or update the import contract
+                        # The citizen_contracts list is not needed by the new version of create_or_update_import_contract
                         success = create_or_update_import_contract(
                             tables, 
                             ai_username, 
                             decision, 
-                            resource_types,
-                            citizen_contracts
+                            resource_types
                         )
                         
                         if success:
