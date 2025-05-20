@@ -31,6 +31,8 @@ log = logging.getLogger("update_relationship_strength_scores")
 # Load environment variables
 load_dotenv()
 
+BASE_URL = os.environ.get('NEXT_PUBLIC_BASE_URL', 'http://localhost:3000')
+
 def initialize_airtable():
     """Initialize Airtable connection."""
     api_key = os.environ.get('AIRTABLE_API_KEY')
@@ -97,49 +99,68 @@ def get_all_citizens(tables) -> tuple[List[Dict], Dict[str, str], Dict[str, str]
         log.error(f"Error fetching citizens: {e}")
         return [], {}, {}
 
-def get_recent_relevancies(tables, username: str, username_record_id: Optional[str]) -> List[Dict]:
-    """Get recent relevancies for a citizen, filtering in Python for robustness."""
+def get_recent_relevancies(username: str) -> List[Dict]:
+    """Get recent relevancies for a citizen by calling the Next.js API."""
     try:
-        log.info(f"Fetching recent relevancies for citizen: {username} (Record ID: {username_record_id})")
+        log.info(f"Fetching recent relevancies for citizen: {username} via API")
         
-        twenty_four_hours_ago = (datetime.now() - timedelta(hours=24)).isoformat()
+        # The API /api/relevancies already filters by CreatedAt (desc) and limits records.
+        # It also handles 'RelevantToCitizen' = 'all' and JSON array matching.
+        api_url = f"{BASE_URL}/api/relevancies?relevantToCitizen={username}"
         
-        # Simplified formula: fetch all relevancies created recently, not for 'all'
-        formula = f"AND(IS_AFTER({{CreatedAt}}, '{twenty_four_hours_ago}'), NOT({{RelevantToCitizen}} = 'all'))"
+        response = requests.get(api_url, timeout=60)
+        response.raise_for_status() # Raise an exception for HTTP errors
         
-        all_recent_relevancies = tables['relevancies'].all(
-            formula=formula,
-            fields=["RelevancyId", "AssetID", "AssetType", "TargetCitizen", "Score", "CreatedAt", "RelevantToCitizen", "Type"],
-            sort=[{"field": "CreatedAt", "direction": "desc"}],
-            max_records=2000 # Increased limit as we filter in Python
-        )
+        data = response.json()
         
-        filtered_relevancies = []
-        for r in all_recent_relevancies:
-            rt_citizen_val = r['fields'].get('RelevantToCitizen')
+        if data.get('success') and isinstance(data.get('relevancies'), list):
+            # Filter for relevancies created in the last 24 hours client-side,
+            # as the API might not filter by date for this specific query.
+            # However, the API sorts by CreatedAt desc, so we can optimize.
+            twenty_four_hours_ago_dt = datetime.now() - timedelta(hours=24)
             
-            # Case 1: RelevantToCitizen is a string (single username or JSON array of usernames)
-            if isinstance(rt_citizen_val, str):
-                if rt_citizen_val == username: # Direct match
-                    filtered_relevancies.append(r)
-                    continue
-                # Check if it's a JSON array string containing the username
-                # Ensure to look for the username quoted, e.g., "username"
-                # Also ensure rt_citizen_val is not None or empty before calling startswith
-                if rt_citizen_val and rt_citizen_val.startswith('[') and rt_citizen_val.endswith(']') and f'"{username}"' in rt_citizen_val:
-                    filtered_relevancies.append(r)
-                    continue
+            recent_api_relevancies = []
+            for r_api in data['relevancies']:
+                created_at_str = r_api.get('createdAt')
+                if created_at_str:
+                    try:
+                        # Airtable's ISO format often includes 'Z'
+                        created_at_dt = datetime.fromisoformat(created_at_str.replace('Z', '+00:00'))
+                        # Ensure it's timezone-aware for comparison if needed, or make both naive
+                        if created_at_dt.tzinfo is None: # If API returns naive datetime
+                             created_at_dt = created_at_dt.replace(tzinfo=timezone.utc) # Assume UTC if naive
+                        
+                        # Make twenty_four_hours_ago_dt timezone-aware (UTC) for comparison
+                        # This depends on how your system handles timezones. Assuming UTC for consistency.
+                        # If datetime.now() is naive, this will be naive.
+                        # If datetime.now() is aware, this will be aware.
+                        # For simplicity, if created_at_dt is aware, make twenty_four_hours_ago_dt aware too.
+                        # Or, convert both to naive UTC timestamps for comparison.
+                        
+                        # Simplest: if API returns ISO string, parse and compare
+                        if created_at_dt >= twenty_four_hours_ago_dt.replace(tzinfo=created_at_dt.tzinfo): # Match timezone awareness
+                            recent_api_relevancies.append(r_api)
+                        else:
+                            # Since API sorts by CreatedAt desc, we can stop once we hit older records
+                            break 
+                    except ValueError:
+                        log.warning(f"Could not parse createdAt date: {created_at_str} for relevancy {r_api.get('relevancyId')}")
+                else:
+                    # If no createdAt, include it by default or decide on a policy
+                    recent_api_relevancies.append(r_api)
+
+
+            log.info(f"Fetched {len(data['relevancies'])} relevancies from API, filtered to {len(recent_api_relevancies)} recent ones for {username}")
+            return recent_api_relevancies
+        else:
+            log.error(f"API call to fetch relevancies for {username} was not successful or data format is wrong: {data.get('error', 'No error message')}")
+            return []
             
-            # Case 2: RelevantToCitizen is a list (assumed to be Airtable record IDs from a linked field)
-            elif isinstance(rt_citizen_val, list) and username_record_id:
-                if username_record_id in rt_citizen_val:
-                    filtered_relevancies.append(r)
-                    continue
-        
-        log.info(f"Found {len(all_recent_relevancies)} recent relevancies, filtered to {len(filtered_relevancies)} for {username}")
-        return filtered_relevancies
+    except requests.exceptions.RequestException as e_req:
+        log.error(f"Request failed while fetching relevancies for {username} from API: {e_req}")
+        return []
     except Exception as e:
-        log.error(f"Error fetching relevancies for {username}: {e}")
+        log.error(f"Error fetching or processing relevancies for {username} from API: {e}")
         return []
 
 def get_existing_relationships(tables, username: str) -> Dict[str, Dict]:
@@ -189,11 +210,11 @@ def update_relationship_scores(
         # The value will be a tuple: (accumulated_score, set_of_relevancy_types)
         accumulated_data_for_targets: Dict[str, tuple[float, set[str]]] = {}
     
-        # Process each relevancy
+        # Process each relevancy (structure is now flat from API)
         for relevancy in relevancies:
-            raw_target_value = relevancy['fields'].get('TargetCitizen')
-            relevancy_score = float(relevancy['fields'].get('Score', 0))
-            relevancy_type = relevancy['fields'].get('Type', 'unknown_type')
+            raw_target_value = relevancy.get('targetCitizen') # Adjusted access
+            relevancy_score = float(relevancy.get('score', 0)) # Adjusted access
+            relevancy_type = relevancy.get('type', 'unknown_type') # Adjusted access
         
             potential_target_usernames: set[str] = set()
 
@@ -316,10 +337,10 @@ def update_relationship_strength_scores():
                 continue
             
             stats['total_citizens_processed'] += 1
-            username_record_id = username_to_record_id_map.get(username)
+            # username_record_id is no longer needed for get_recent_relevancies
             
-            # Get recent relevancies for this citizen
-            relevancies = get_recent_relevancies(tables, username, username_record_id)
+            # Get recent relevancies for this citizen via API
+            relevancies = get_recent_relevancies(username)
             stats['total_relevancies_fetched'] += len(relevancies)
             
             # Get existing relationships for this citizen
