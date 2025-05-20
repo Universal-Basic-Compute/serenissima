@@ -241,11 +241,16 @@ def calculate_specific_relevancy(
                         multi_user_results.append(f"- {owner_username}: API Error - {error_detail}")
                         continue
                     
+                    log.debug(f"API response data for {owner_username} (building_ownership): {json.dumps(data, indent=2)}")
+
                     relevancies_created_count = 0
                     if 'relevancyScores' in data and isinstance(data.get('relevancyScores'), dict):
                          relevancies_created_count = len(data.get('relevancyScores', {}))
                     elif 'relevanciesSavedCount' in data: # Some routes might return this
                         relevancies_created_count = data.get('relevanciesSavedCount',0)
+                    
+                    if relevancies_created_count == 0:
+                        log.info(f"No building ownership relevancies found or created for {owner_username} based on API response.")
 
 
                     multi_user_results.append(f"- {owner_username}: {relevancies_created_count} building ownership relevancies created.")
