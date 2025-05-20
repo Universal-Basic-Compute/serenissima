@@ -1258,7 +1258,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
                 ) : citizen.worksFor ? (
                   <div>
                     <p className="text-amber-800 font-medium">
-                      Works for: <span className="font-bold">{citizen.worksFor}</span>
+                      <span className="font-bold">{citizen.worksFor}</span>
                     </p>
                     {citizen.workplace && (
                       <>
