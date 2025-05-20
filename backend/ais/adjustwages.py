@@ -163,7 +163,7 @@ def get_kinos_api_key() -> str:
         sys.exit(1)
     return api_key
 
-def prepare_wage_analysis_data(ai_citizen: Dict, citizen_business_buildings: List[Dict], citizens_info: Dict[str, Dict]) -> Dict:
+def prepare_wage_analysis_data(tables: Dict[str, Table], ai_citizen: Dict, citizen_business_buildings: List[Dict], citizens_info: Dict[str, Dict]) -> Dict:
     """Prepare a comprehensive data package for the AI to analyze wage situations."""
     
     # Extract citizen information
@@ -699,7 +699,7 @@ def process_ai_wage_adjustments(dry_run: bool = False):
             print(f"Error getting all citizens: {str(e)}")
         
         # Prepare the data package for the AI
-        data_package = prepare_wage_analysis_data(ai_citizen, citizen_business_buildings, all_citizens)
+        data_package = prepare_wage_analysis_data(tables, ai_citizen, citizen_business_buildings, all_citizens)
         
         # Send the wage adjustment request to the AI
         if not dry_run:
