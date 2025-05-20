@@ -67,6 +67,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
   // Add state for relationship
   const [relationship, setRelationship] = useState<any>(null);
   const [isLoadingRelationship, setIsLoadingRelationship] = useState<boolean>(false);
+  const [noRelationshipMessage, setNoRelationshipMessage] = useState<string>('');
   
   // Function to check if the current user is ConsiglioDeiDieci
   const isConsiglioDeiDieci = () => {
@@ -753,6 +754,21 @@ Be historically accurate but engaging. Speak in first person as if you are this 
       window.removeEventListener('keydown', handleEscKey);
     };
   }, [citizen, onClose]); // Only depend on citizen and onClose
+
+  // Effect to set a random "no relationship" message
+  useEffect(() => {
+    if (!isLoadingRelationship && !relationship && citizen && citizen.firstname) {
+      const messages = [
+        `Your connection with ${citizen.firstname} is yet to be recorded in the city's annals.`,
+        `The nature of your acquaintance with ${citizen.firstname} remains unchronicled.`,
+        `No formal ties with ${citizen.firstname} have been noted by the scribes.`,
+        `Details of your relationship with ${citizen.firstname} are not yet known.`,
+        `The ledger shows no established connection with ${citizen.firstname} at this time.`
+      ];
+      const randomIndex = Math.floor(Math.random() * messages.length);
+      setNoRelationshipMessage(messages[randomIndex]);
+    }
+  }, [isLoadingRelationship, relationship, citizen]);
   
   // Scroll to bottom of messages when new ones are added
   useEffect(() => {
@@ -1009,7 +1025,7 @@ Be historically accurate but engaging. Speak in first person as if you are this 
             </div>
           ) : (
             <p className="text-amber-700 italic text-sm mb-4">
-              The threads of fate between you and {citizen.firstname} are yet to be clearly woven, or perhaps the scribes have not yet noted your connection.
+              {noRelationshipMessage}
             </p>
           )}
 
