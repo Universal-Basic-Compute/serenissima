@@ -680,12 +680,13 @@ def create_or_update_import_contract(
         # After successfully creating or updating the contract, create or update a resource record
         # This part ensures the AI has a "resource" entry to track this import flow, even if actual count is 0 initially.
         try:
-            resource_formula = f"AND({{Type}}='import', {{ResourceType}}='{_escape_airtable_value(resource_type)}', {{BuildingId}}='{_escape_airtable_value(building_id)}', {{Owner}}='{_escape_airtable_value(ai_username)}')"
+            # Assuming the field in Airtable is "Resource Type" (with a space)
+            resource_formula = f"AND({{Type}}='import', {{Resource Type}}='{_escape_airtable_value(resource_type)}', {{BuildingId}}='{_escape_airtable_value(building_id)}', {{Owner}}='{_escape_airtable_value(ai_username)}')"
             existing_resources = tables["resources"].all(formula=resource_formula, max_records=1)
             
             resource_data_fields = {
                 "Type": "import",
-                "ResourceType": resource_type,
+                "Resource Type": resource_type, # Changed field name
                 "BuildingId": building_id,
                 "Owner": ai_username,
                 "Count": 0,  # Imports start with 0 count, actual processing script will increment
