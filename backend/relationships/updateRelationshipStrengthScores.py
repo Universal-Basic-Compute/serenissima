@@ -72,31 +72,33 @@ def create_admin_notification(tables, title: str, message: str) -> bool:
         log.error(f"Failed to create admin notification: {e}")
         return False
 
-def get_all_citizens(tables) -> tuple[List[Dict], Dict[str, str]]:
-    """Get all citizens from Airtable and a map of record_id to username."""
+def get_all_citizens(tables) -> tuple[List[Dict], Dict[str, str], Dict[str, str]]:
+    """Get all citizens from Airtable, a map of record_id to username, and username to record_id."""
     citizens_list = []
     record_id_to_username_map = {}
+    username_to_record_id_map = {}
     try:
         log.info("Fetching all citizens from Airtable...")
         
-        # Get all citizens (not just AI citizens), including their Airtable record ID
         all_citizen_records = tables['citizens'].all(
-            fields=["Username", "FirstName", "LastName"] # pyairtable automatically includes record.id
+            fields=["Username", "FirstName", "LastName"] 
         )
         
         for record in all_citizen_records:
             citizens_list.append(record)
-            if 'Username' in record['fields']:
-                record_id_to_username_map[record['id']] = record['fields']['Username']
+            username_val = record['fields'].get('Username')
+            if username_val:
+                record_id_to_username_map[record['id']] = username_val
+                username_to_record_id_map[username_val] = record['id']
         
-        log.info(f"Found {len(citizens_list)} citizens. Mapped {len(record_id_to_username_map)} record IDs to usernames.")
-        return citizens_list, record_id_to_username_map
+        log.info(f"Found {len(citizens_list)} citizens. Mapped {len(record_id_to_username_map)} record IDs and {len(username_to_record_id_map)} usernames.")
+        return citizens_list, record_id_to_username_map, username_to_record_id_map
     except Exception as e:
         log.error(f"Error fetching citizens: {e}")
-        return [], {}
+        return [], {}, {}
 
-def get_recent_relevancies(tables, username: str) -> List[Dict]:
-    """Get recent relevancies for a citizen, including those where username is in a RelevantToCitizen array."""
+def get_recent_relevancies(tables, username: str, username_record_id: Optional[str]) -> List[Dict]:
+    """Get recent relevancies for a citizen, filtering in Python for robustness."""
     try:
         log.info(f"Fetching recent relevancies for citizen: {username}")
         
@@ -145,7 +147,7 @@ def get_existing_relationships(tables, username: str) -> Dict[str, Dict]:
         
         relationships = tables['relationships'].all(
             formula=formula,
-            fields=["AICitizen", "TargetCitizen", "StrengthScore", "LastUpdated", "Notes"] # Added "Notes"
+            fields=["AICitizen", "TargetCitizen", "strengthScore", "lastUpdated", "Notes"] # Changed to camelCase
         )
         
         # Create a dictionary mapping target citizens to their relationship records
@@ -155,9 +157,9 @@ def get_existing_relationships(tables, username: str) -> Dict[str, Dict]:
             if target_citizen:
                 relationship_map[target_citizen] = {
                     'id': record['id'],
-                    'strengthScore': record['fields'].get('StrengthScore', 0),
-                    'lastUpdated': record['fields'].get('LastUpdated'),
-                    'notes': record['fields'].get('Notes', '') # Added notes
+                    'strengthScore': record['fields'].get('strengthScore', 0), # Changed to camelCase
+                    'lastUpdated': record['fields'].get('lastUpdated'),       # Changed to camelCase
+                    'notes': record['fields'].get('Notes', '') 
                 }
         
         log.info(f"Found {len(relationship_map)} existing relationships for {username}")
@@ -285,8 +287,8 @@ def update_relationship_strength_scores():
         # Initialize Airtable
         tables = initialize_airtable()
         
-        # Get all citizens and the record_id to username map
-        all_citizen_records, record_id_to_username_map = get_all_citizens(tables)
+        # Get all citizens and the necessary maps
+        all_citizen_records, record_id_to_username_map, username_to_record_id_map = get_all_citizens(tables)
         
         if not all_citizen_records:
             log.warning("No citizens found, nothing to do")
@@ -309,9 +311,10 @@ def update_relationship_strength_scores():
                 continue
             
             stats['total_citizens_processed'] += 1
+            username_record_id = username_to_record_id_map.get(username)
             
             # Get recent relevancies for this citizen
-            relevancies = get_recent_relevancies(tables, username)
+            relevancies = get_recent_relevancies(tables, username, username_record_id)
             stats['total_relevancies_fetched'] += len(relevancies)
             
             # Get existing relationships for this citizen
