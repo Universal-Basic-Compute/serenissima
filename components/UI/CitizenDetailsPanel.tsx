@@ -924,16 +924,26 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
                   problem.severity === 'medium' ? 'bg-yellow-50 border-yellow-200' :
                   'bg-green-50 border-green-200'
                 }`}>
-                  <div className="flex items-center justify-between mb-1">
-                    <div className={`font-medium ${
+                  <div className="flex items-start justify-between mb-2">
+                    <h4 className={`font-semibold text-md ${
                       problem.severity === 'high' ? 'text-red-800' :
                       problem.severity === 'medium' ? 'text-yellow-800' :
                       'text-green-800'
                     }`}>
-                      Severity: {problem.severity && typeof problem.severity === 'string' ? problem.severity.charAt(0).toUpperCase() + problem.severity.slice(1) : 'Unknown'}
+                      {problem.title || "Untitled Problem"}
+                    </h4>
+                    <div className="text-right">
+                      <span className={`px-2 py-0.5 inline-block rounded-full text-xs font-medium ${
+                        problem.severity === 'high' ? 'bg-red-200 text-red-900' :
+                        problem.severity === 'medium' ? 'bg-yellow-200 text-yellow-900' :
+                        'bg-green-200 text-green-900'
+                      }`}>
+                        {problem.severity && typeof problem.severity === 'string' ? problem.severity.charAt(0).toUpperCase() + problem.severity.slice(1) : 'Unknown'}
+                      </span>
+                      <p className="text-xs text-gray-500 mt-0.5">Severity</p>
                     </div>
                   </div>
-                  <div className={`text-xs mt-1 ${
+                  <div className={`text-sm mt-1 ${
                     problem.severity === 'high' ? 'text-red-700' :
                     problem.severity === 'medium' ? 'text-yellow-700' :
                     'text-green-700'
