@@ -888,7 +888,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
             </p>
           )}
 
-          <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Relevancies</h3>
+          <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Connections</h3>
           
           {isLoadingRelevancies ? (
             <div className="flex justify-center py-4">
