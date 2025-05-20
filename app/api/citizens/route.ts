@@ -48,28 +48,38 @@ export async function GET(request: Request) {
       })
       .all();
     
-    // Fetch all business buildings to determine employment relationships
-    const businessBuildings = await base(AIRTABLE_BUILDINGS_TABLE)
+    // Fetch all buildings to determine employment and housing relationships
+    const allBuildings = await base(AIRTABLE_BUILDINGS_TABLE)
       .select({
-        fields: ['Occupant', 'RunBy', 'Type'],
-        filterByFormula: '{Category} = "business"'
+        fields: ['Occupant', 'RunBy', 'Type', 'Category', 'BuildingId'] // Added Category and BuildingId
       })
       .all();
     
-    // Create a map of occupant to employer (RunBy)
-    const employmentMap = {};
-    const workplaceMap = {};
+    // Create maps for employment, workplace, and home
+    const employmentMap: Record<string, string> = {};
+    const workplaceMap: Record<string, { name: string; type: string; buildingId: string }> = {};
+    const homeMap: Record<string, string> = {};
     
-    businessBuildings.forEach(building => {
+    allBuildings.forEach(building => {
       const occupant = building.get('Occupant') as string;
       const runBy = building.get('RunBy') as string;
-      
-      if (occupant && runBy) {
-        employmentMap[occupant] = runBy;
-        workplaceMap[occupant] = {
-          name: building.get('Type') as string || 'Unknown Building',
-          type: building.get('Type') as string
-        };
+      const category = building.get('Category') as string;
+      const buildingId = building.get('BuildingId') as string;
+      const buildingType = building.get('Type') as string || 'Unknown Building';
+
+      if (occupant && buildingId) {
+        if (category === 'business') {
+          if (runBy) {
+            employmentMap[occupant] = runBy;
+          }
+          workplaceMap[occupant] = {
+            name: buildingType,
+            type: buildingType,
+            buildingId: buildingId 
+          };
+        } else if (category === 'home') {
+          homeMap[occupant] = buildingId;
+        }
       }
     });
     
@@ -94,7 +104,8 @@ export async function GET(request: Request) {
         username: username,
         position: position, // Use the parsed position
         worksFor: employmentMap[username] || null,
-        workplace: workplaceMap[username] || null
+        workplace: workplaceMap[username] || null,
+        home: homeMap[username] || null // Add home buildingId
       };
       
       return citizen;
