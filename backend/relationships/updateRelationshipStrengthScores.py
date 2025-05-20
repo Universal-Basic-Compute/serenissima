@@ -71,36 +71,59 @@ def create_admin_notification(tables, title: str, message: str) -> bool:
         log.error(f"Failed to create admin notification: {e}")
         return False
 
-def get_all_citizens(tables) -> List[Dict]:
-    """Get all citizens from Airtable."""
+def get_all_citizens(tables) -> tuple[List[Dict], Dict[str, str]]:
+    """Get all citizens from Airtable and a map of record_id to username."""
+    citizens_list = []
+    record_id_to_username_map = {}
     try:
         log.info("Fetching all citizens from Airtable...")
         
-        # Get all citizens (not just AI citizens)
-        citizens = tables['citizens'].all(
-            fields=["Username", "FirstName", "LastName"]
+        # Get all citizens (not just AI citizens), including their Airtable record ID
+        all_citizen_records = tables['citizens'].all(
+            fields=["Username", "FirstName", "LastName"] # pyairtable automatically includes record.id
         )
         
-        log.info(f"Found {len(citizens)} citizens")
-        return citizens
+        for record in all_citizen_records:
+            citizens_list.append(record)
+            if 'Username' in record['fields']:
+                record_id_to_username_map[record['id']] = record['fields']['Username']
+        
+        log.info(f"Found {len(citizens_list)} citizens. Mapped {len(record_id_to_username_map)} record IDs to usernames.")
+        return citizens_list, record_id_to_username_map
     except Exception as e:
         log.error(f"Error fetching citizens: {e}")
-        return []
+        return [], {}
 
 def get_recent_relevancies(tables, username: str) -> List[Dict]:
-    """Get recent relevancies for a citizen."""
+    """Get recent relevancies for a citizen, including those where username is in a RelevantToCitizen array."""
     try:
         log.info(f"Fetching recent relevancies for citizen: {username}")
         
         # Calculate timestamp for 24 hours ago
         twenty_four_hours_ago = (datetime.now() - timedelta(hours=24)).isoformat()
         
-        # Fetch relevancies created in the last 24 hours for this citizen
-        formula = f"AND({{RelevantToCitizen}} = '{username}', IS_AFTER({{CreatedAt}}, '{twenty_four_hours_ago}'))"
+        # Formula to fetch relevancies:
+        # 1. Created in the last 24 hours
+        # 2. AND (RelevantToCitizen is exactly username OR RelevantToCitizen is a JSON array string containing username)
+        # 3. AND RelevantToCitizen is NOT the literal string "all"
+        # Note: FIND is case-sensitive. Usernames are generally case-sensitive.
+        # The '"{username}"' ensures we match the username as it would appear in a JSON string array.
+        formula = (
+            f"AND("
+            f"  IS_AFTER({{CreatedAt}}, '{twenty_four_hours_ago}'),"
+            f"  OR("
+            f"    {{RelevantToCitizen}} = '{username}',"
+            f"    FIND('\"{username}\"', {{RelevantToCitizen}})"  # Looks for "username" inside a string field
+            f"  ),"
+            f"  NOT({{RelevantToCitizen}} = 'all')"
+            f")"
+        )
+        
+        log.info(f"Using formula for get_recent_relevancies: {formula}")
         
         relevancies = tables['relevancies'].all(
             formula=formula,
-            fields=["RelevancyId", "AssetID", "AssetType", "TargetCitizen", "Score", "CreatedAt"],
+            fields=["RelevancyId", "AssetID", "AssetType", "TargetCitizen", "Score", "CreatedAt", "RelevantToCitizen"],
             sort=[{"field": "CreatedAt", "direction": "desc"}],
             max_records=1000  # Limit to last 1000 relevancies
         )
@@ -112,7 +135,7 @@ def get_recent_relevancies(tables, username: str) -> List[Dict]:
         return []
 
 def get_existing_relationships(tables, username: str) -> Dict[str, Dict]:
-    """Get existing relationships for a citizen."""
+    """Get existing relationships for a citizen (where username is AICitizen)."""
     try:
         log.info(f"Fetching existing relationships for citizen: {username}")
         
@@ -141,71 +164,93 @@ def get_existing_relationships(tables, username: str) -> Dict[str, Dict]:
         log.error(f"Error fetching relationships for {username}: {e}")
         return {}
 
-def update_relationship_scores(tables, citizen: Dict, relevancies: List[Dict], existing_relationships: Dict[str, Dict]) -> Dict[str, float]:
+def update_relationship_scores(
+    tables, 
+    source_citizen_record: Dict, 
+    relevancies: List[Dict], 
+    existing_relationships: Dict[str, Dict],
+    record_id_to_username_map: Dict[str, str]
+) -> Dict[str, float]:
     """Update relationship strength scores based on relevancies."""
-    try:
-        username = citizen['fields']['Username']
-        log.info(f"Updating relationship scores for {username}")
+    source_username = source_citizen_record['fields']['Username']
+    log.info(f"Updating relationship scores for source citizen: {source_username}")
+    
+    # Track new scores to be added for each target citizen
+    accumulated_scores_for_targets: Dict[str, float] = {}
+    
+    # Process each relevancy
+    for relevancy in relevancies:
+        raw_target_value = relevancy['fields'].get('TargetCitizen')
+        relevancy_score = float(relevancy['fields'].get('Score', 0))
         
-        # Track new scores for each target citizen
-        new_scores = {}
+        potential_target_usernames: set[str] = set()
+
+        if isinstance(raw_target_value, str):
+            # Could be a single username, or a JSON string array of usernames
+            try:
+                if raw_target_value.startswith('[') and raw_target_value.endswith(']'):
+                    parsed_targets = json.loads(raw_target_value)
+                    if isinstance(parsed_targets, list):
+                        potential_target_usernames.update(str(t) for t in parsed_targets)
+                    else: # Should not happen if JSON is a list, but as a fallback
+                        potential_target_usernames.add(raw_target_value)
+                else: # Assume it's a single username string
+                    potential_target_usernames.add(raw_target_value)
+            except json.JSONDecodeError:
+                # Not a valid JSON string, treat as a single username
+                potential_target_usernames.add(raw_target_value)
+        elif isinstance(raw_target_value, list):
+            # Assumed to be a list of Airtable Record IDs (from a linked field)
+            for rec_id in raw_target_value:
+                mapped_username = record_id_to_username_map.get(rec_id)
+                if mapped_username:
+                    potential_target_usernames.add(mapped_username)
         
-        # Process each relevancy
-        for relevancy in relevancies:
-            target_citizen = relevancy['fields'].get('TargetCitizen')
-            
-            # Skip if no target citizen or if target is the citizen itself
-            if not target_citizen or target_citizen == username:
+        for target_username in potential_target_usernames:
+            # Skip if no valid target username or if target is the source citizen itself
+            if not target_username or target_username == source_username:
                 continue
             
-            # Get the relevancy score
-            relevancy_score = float(relevancy['fields'].get('Score', 0))
+            # Add relevancy score to this target
+            accumulated_scores_for_targets[target_username] = \
+                accumulated_scores_for_targets.get(target_username, 0.0) + relevancy_score
             
-            # Add to the new score for this target
-            if target_citizen in new_scores:
-                new_scores[target_citizen] += relevancy_score
-            else:
-                new_scores[target_citizen] = relevancy_score
-        
-        # Now update or create relationships in Airtable
-        updated_count = 0
-        created_count = 0
-        
-        for target_citizen, score in new_scores.items():
-            # Check if relationship already exists
-            if target_citizen in existing_relationships:
-                # Get existing record
-                record = existing_relationships[target_citizen]
+    # Now update or create relationships in Airtable
+    updated_count = 0
+    created_count = 0
+    
+    for target_username, score_to_add in accumulated_scores_for_targets.items():
+        if target_username in existing_relationships:
+            # Update existing relationship
+            record = existing_relationships[target_username]
                 record_id = record['id']
                 
                 # Apply 25% decay to existing score
-                existing_score = float(record['strengthScore']) * 0.75
+                existing_score = float(record.get('strengthScore', 0.0)) * 0.75
                 
-                # Add new score
-                updated_score = existing_score + score
+                # Add new score_to_add
+                updated_score = existing_score + score_to_add
                 
                 # Update the record
                 tables['relationships'].update(record_id, {
                     'StrengthScore': updated_score,
                     'LastUpdated': datetime.now().isoformat()
                 })
-                
                 updated_count += 1
             else:
                 # Create new relationship
                 tables['relationships'].create({
-                    'AICitizen': username,  # Keep the field name as is for compatibility
-                    'TargetCitizen': target_citizen,
-                    'StrengthScore': score,
+                    'AICitizen': source_username,
+                    'TargetCitizen': target_username,
+                    'StrengthScore': score_to_add, # New relationships start with the accumulated score from recent relevancies
                     'LastUpdated': datetime.now().isoformat()
                 })
-                
                 created_count += 1
         
-        log.info(f"Updated {updated_count} and created {created_count} relationships for {username}")
-        return new_scores
+        log.info(f"For source {source_username}: Updated {updated_count} and created {created_count} relationships.")
+        return accumulated_scores_for_targets # Return the scores that were processed
     except Exception as e:
-        log.error(f"Error updating relationship scores for {username}: {e}")
+        log.error(f"Error updating relationship scores for source {source_username}: {e}")
         return {}
 
 def update_relationship_strength_scores():
@@ -214,45 +259,64 @@ def update_relationship_strength_scores():
         # Initialize Airtable
         tables = initialize_airtable()
         
-        # Get all citizens
-        citizens = get_all_citizens(tables)
+        # Get all citizens and the record_id to username map
+        all_citizen_records, record_id_to_username_map = get_all_citizens(tables)
         
-        if not citizens:
+        if not all_citizen_records:
             log.warning("No citizens found, nothing to do")
-            return
+            return True # No error, just nothing to process
         
         # Track statistics for notification
         stats = {
-            'total_citizens': len(citizens),
-            'total_relevancies_processed': 0,
+            'total_citizens_processed': 0,
+            'total_relevancies_fetched': 0,
             'total_relationships_updated': 0,
             'total_relationships_created': 0,
             'citizen_details': {}
         }
         
         # Process each citizen
-        for citizen in citizens:
-            username = citizen['fields']['Username']
+        for citizen_record in all_citizen_records:
+            username = citizen_record['fields'].get('Username')
+            if not username:
+                log.warning(f"Skipping citizen record {citizen_record['id']} due to missing Username.")
+                continue
+            
+            stats['total_citizens_processed'] += 1
             
             # Get recent relevancies for this citizen
             relevancies = get_recent_relevancies(tables, username)
-            stats['total_relevancies_processed'] += len(relevancies)
+            stats['total_relevancies_fetched'] += len(relevancies)
             
             # Get existing relationships for this citizen
             existing_relationships = get_existing_relationships(tables, username)
             
             # Update relationship scores
-            new_scores = update_relationship_scores(tables, citizen, relevancies, existing_relationships)
+            processed_target_scores = update_relationship_scores(
+                tables, 
+                citizen_record, 
+                relevancies, 
+                existing_relationships,
+                record_id_to_username_map
+            )
             
-            # Update statistics
+            # Update statistics based on what was actually processed
+            current_updated = 0
+            current_created = 0
+            for target, _ in processed_target_scores.items():
+                if target in existing_relationships:
+                    current_updated +=1
+                else:
+                    current_created +=1
+            
             stats['citizen_details'][username] = {
-                'relevancies_processed': len(relevancies),
-                'relationships_updated': len(set(existing_relationships.keys()) & set(new_scores.keys())),
-                'relationships_created': len(set(new_scores.keys()) - set(existing_relationships.keys()))
+                'relevancies_fetched': len(relevancies),
+                'relationships_updated': current_updated,
+                'relationships_created': current_created
             }
             
-            stats['total_relationships_updated'] += stats['citizen_details'][username]['relationships_updated']
-            stats['total_relationships_created'] += stats['citizen_details'][username]['relationships_created']
+            stats['total_relationships_updated'] += current_updated
+            stats['total_relationships_created'] += current_created
             
             # Add a small delay to avoid rate limiting
             time.sleep(0.5)
