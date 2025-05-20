@@ -3,7 +3,7 @@ import { citizenService } from '@/lib/services/CitizenService';
 import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 import { CoordinateService } from '@/lib/services/CoordinateService';
 import CitizenDetailsPanel from '@/components/UI/CitizenDetailsPanel';
-import CitizenRegistry from '@/components/UI/CitizenRegistry';
+// CitizenRegistry import removed as it's handled by app/page.tsx
 import { hoverStateService } from '@/lib/services/HoverStateService';
 import { citizenAnimationService, AnimatedCitizen } from '@/lib/services/CitizenAnimationService';
 import { ActivityPath, activityPathService } from '@/lib/services/ActivityPathService';
@@ -34,8 +34,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     homePosition?: {x: number, y: number};
     workPosition?: {x: number, y: number};
   } | null>(null);
-  // Add state for showing the citizen registry
-  const [showRegistry, setShowRegistry] = useState<boolean>(false);
+  // showRegistry state removed
   const [currentUsername, setCurrentUsername] = useState<string | null>(null);
   const [activityPaths, setActivityPaths] = useState<Record<string, ActivityPath[]>>({});
   const [isLoadingPaths, setIsLoadingPaths] = useState<boolean>(false);
@@ -376,26 +375,8 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     setSelectedCitizenPaths([]);
   }, []);
   
-  // Show registry button when in citizens view
-  if (isVisible && activeView === 'citizens' && !selectedCitizen) {
-    return (
-      <>
-        {showRegistry ? (
-          <CitizenRegistry onClose={() => setShowRegistry(false)} />
-        ) : (
-          <button
-            onClick={() => setShowRegistry(true)}
-            className="absolute top-20 right-20 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg shadow-md z-30 transition-colors"
-          >
-            Registro dei Cittadini
-          </button>
-        )}
-        
-        {/* Render the rest of the component */}
-        {renderCitizenMarkers()}
-      </>
-    );
-  }
+  // The logic for showing a local CitizenRegistry and its button has been removed.
+  // CitizenRegistry is now handled as a modal by app/page.tsx.
   
   if (!isVisible || activeView === 'land') return null;
   
