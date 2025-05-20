@@ -89,10 +89,10 @@ export async function POST(request: NextRequest) {
       saved: true 
     });
 
-  } catch (error)
-[guild-member route] Error calculating and saving guild member relevancies:', error);
+  } catch (error) {
+    console.error('[guild-member route] Error calculating and saving guild member relevancies:', error);
     return NextResponse.json(
-      { error: 'Failed to calculate and save guild member relevancies', details: error.message },
+      { error: 'Failed to calculate and save guild member relevancies', details: (error as Error).message },
       { status: 500 }
     );
   }
