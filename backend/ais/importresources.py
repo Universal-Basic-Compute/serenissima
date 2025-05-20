@@ -30,10 +30,28 @@ def initialize_airtable():
         "buildings": Table(airtable_api_key, airtable_base_id, "BUILDINGS"),
         "resources": Table(airtable_api_key, airtable_base_id, "RESOURCES"),
         "contracts": Table(airtable_api_key, airtable_base_id, "CONTRACTS"),
-        "notifications": Table(airtable_api_key, airtable_base_id, "NOTIFICATIONS")
+        "notifications": Table(airtable_api_key, airtable_base_id, "NOTIFICATIONS"),
+        "problems": Table(airtable_api_key, airtable_base_id, "PROBLEMS")
     }
     
     return tables
+
+def _escape_airtable_value(value: str) -> str:
+    """Échappe les apostrophes pour les formules Airtable."""
+    return value.replace("'", "\\'")
+
+def _get_no_active_contracts_problems(tables: Dict[str, Table], username: str, limit: int = 50) -> List[Dict]:
+    """Get Latest 50 PROBLEMS where Type='no_active_contracts' and Citizen=Username."""
+    try:
+        safe_username = _escape_airtable_value(username)
+        formula = f"AND({{Type}}='no_active_contracts', {{Citizen}}='{safe_username}')"
+        # Assuming 'CreatedAt' field exists for sorting
+        records = tables["problems"].all(formula=formula, sort=['-CreatedAt'], max_records=limit)
+        print(f"Found {len(records)} 'no_active_contracts' problems for citizen {username}")
+        return [{'id': r['id'], 'fields': r['fields']} for r in records]
+    except Exception as e:
+        print(f"Error fetching 'no_active_contracts' problems for {username}: {e}")
+        return []
 
 def get_ai_citizens(tables) -> List[Dict]:
     """Get all citizens that are marked as AI, are in Venice."""
@@ -250,6 +268,9 @@ def prepare_import_strategy_data(
             "current_amount": resources_by_type.get(resource_id, 0)
         }
     
+    # Fetch "no_active_contracts" problems
+    no_active_contracts_problems = _get_no_active_contracts_problems(tables, username)
+
     # Prepare the complete data package
     data_package = {
         "citizen": {
@@ -262,6 +283,7 @@ def prepare_import_strategy_data(
         "resources": resources_by_type,
         "resource_info": resource_info,
         "existing_contracts": existing_contracts,
+        "latest_no_active_contracts_problems": no_active_contracts_problems,
         "timestamp": datetime.now().isoformat()
     }
     
@@ -354,6 +376,9 @@ You are {ai_username}, an AI building owner in La Serenissima. You make your own
 
 Here is the complete data about your current situation:
 {serialized_data}
+
+Contextual data available:
+- `latest_no_active_contracts_problems`: Shows recent problems where your buildings lack active buy/sell contracts. This might indicate a need for specific resources to kickstart production or that a building is currently inactive and might not need imports.
 
 When developing your import strategy:
 1. Analyze which buildings can import which resources (check the "stores" array for each building)
