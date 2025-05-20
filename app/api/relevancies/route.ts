@@ -34,35 +34,58 @@ export async function GET(request: Request) {
     
     // Prepare filter formula based on parameters
     let filterFormula = '';
-    
-    // Handle the case where we want relevancies for a specific target citizen
+    const filterFormulaParts: string[] = [];
+
+    // Helper function to escape single quotes in usernames for Airtable formulas
+    const escapeAirtableString = (str: string) => str.replace(/'/g, "\\'");
+
     if (targetCitizen) {
-      filterFormula = `{TargetCitizen} = '${targetCitizen}'`;
-      
-      // If relevantToCitizen is also specified, add that condition
-      if (relevantToCitizen) {
-        // Parse the relevantToCitizen parameter which might be a comma-separated list
-        const relevantToCitizens = relevantToCitizen.split(',');
-        
-        // Create an OR condition for each relevantToCitizen value
-        const relevantToConditions = relevantToCitizens.map(citizen => 
-          `{RelevantToCitizen} = '${citizen}'`
-        );
-        
-        // Add condition for 'all' which should be visible to everyone
-        relevantToConditions.push(`{RelevantToCitizen} = 'all'`);
-        
-        // Combine with AND for targetCitizen
-        filterFormula = `AND(${filterFormula}, OR(${relevantToConditions.join(', ')}))`;
+      const safeTargetCitizen = escapeAirtableString(targetCitizen);
+      // Condition for TargetCitizen: exact match OR found within a JSON string array
+      const targetCondition = `OR({TargetCitizen} = '${safeTargetCitizen}', FIND('"${safeTargetCitizen}"', {TargetCitizen}) > 0)`;
+      filterFormulaParts.push(targetCondition);
+    }
+
+    if (relevantToCitizen) {
+      const relevantToUsernames = relevantToCitizen.split(',');
+      const relevantToOrConditions: string[] = relevantToUsernames.flatMap(username => {
+        const safeUsername = escapeAirtableString(username.trim());
+        return [
+          `{RelevantToCitizen} = '${safeUsername}'`, // Exact match
+          `FIND('"${safeUsername}"', {RelevantToCitizen}) > 0` // Found within a JSON string array
+        ];
+      });
+      // Always include relevancies where RelevantToCitizen is 'all'
+      relevantToOrConditions.push(`{RelevantToCitizen} = 'all'`);
+      filterFormulaParts.push(`OR(${relevantToOrConditions.join(', ')})`);
+    }
+
+    if (assetType) {
+      // Only add assetType filter if there are other citizen-based filters,
+      // or adjust if assetType can be a standalone filter.
+      // Current logic implies assetType is an additional filter to citizen filters.
+      if (relevantToCitizen || targetCitizen) { // Add assetType if we have citizen filters
+        filterFormulaParts.push(`{AssetType} = '${escapeAirtableString(assetType)}'`);
+      } else {
+        // If only assetType is provided, you might want a different logic or ensure this case is handled.
+        // For now, sticking to original behavior where assetType is usually combined.
+        // If you want to filter by assetType alone:
+        // filterFormulaParts.push(`{AssetType} = '${escapeAirtableString(assetType)}'`);
       }
     }
-    // Handle the case where we want all relevancies for a specific citizen
-    else if (relevantToCitizen && assetType) {
-      filterFormula = `AND(OR({RelevantToCitizen} = '${relevantToCitizen}', {RelevantToCitizen} = 'all'), {AssetType} = '${assetType}')`;
-    }
-    // If no specific filters, return a limited set
-    else if (relevantToCitizen) {
-      filterFormula = `OR({RelevantToCitizen} = '${relevantToCitizen}', {RelevantToCitizen} = 'all')`;
+    
+    if (filterFormulaParts.length > 0) {
+      if (filterFormulaParts.length === 1) {
+        filterFormula = filterFormulaParts[0]; // Avoid AND() for a single condition
+      } else {
+        filterFormula = `AND(${filterFormulaParts.join(', ')})`;
+      }
+    } else {
+      // No specific filters provided by URL parameters, fetch all (will be limited by maxRecords)
+      // Or, if you prefer to return nothing if no relevantToCitizen is specified:
+      // filterFormula = "FALSE()"; // This would return no records
+      // Keeping original behavior: empty filter means fetch recent (sorted, limited)
+      filterFormula = ''; 
     }
     
     console.log(`Fetching relevancies with filter: ${filterFormula}`);
