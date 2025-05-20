@@ -28,10 +28,56 @@ def initialize_airtable():
     tables = {
         "buildings": Table(airtable_api_key, airtable_base_id, "BUILDINGS"),
         "citizens": Table(airtable_api_key, airtable_base_id, "CITIZENS"),
-        "notifications": Table(airtable_api_key, airtable_base_id, "NOTIFICATIONS")
+        "notifications": Table(airtable_api_key, airtable_base_id, "NOTIFICATIONS"),
+        "relevancies": Table(airtable_api_key, airtable_base_id, "RELEVANCIES"),
+        "relationships": Table(airtable_api_key, airtable_base_id, "RELATIONSHIPS"),
+        "problems": Table(airtable_api_key, airtable_base_id, "PROBLEMS")
     }
     
     return tables
+
+def _escape_airtable_value(value: str) -> str:
+    """Échappe les apostrophes pour les formules Airtable."""
+    return value.replace("'", "\\'")
+
+def _get_building_relevancies_for_citizen(tables: Dict[str, Table], username: str, limit: int = 50) -> List[Dict]:
+    """Get latest 50 RELEVANCIES where AssetType='building' AND RelevantToCitizen=Username."""
+    try:
+        safe_username = _escape_airtable_value(username)
+        formula = f"AND({{AssetType}}='building', {{RelevantToCitizen}}='{safe_username}')"
+        # Assuming 'CreatedAt' field exists for sorting, similar to answertomessages.py
+        records = tables["relevancies"].all(formula=formula, sort=['-CreatedAt'], max_records=limit)
+        print(f"Found {len(records)} building relevancies for citizen {username}")
+        return [{'id': r['id'], 'fields': r['fields']} for r in records]
+    except Exception as e:
+        print(f"Error fetching building relevancies for {username}: {e}")
+        return []
+
+def _get_top_relationships_for_citizen(tables: Dict[str, Table], username: str, limit: int = 20) -> List[Dict]:
+    """Get TrustScore DESC LIMIT 20 Relationships for the citizen."""
+    try:
+        safe_username = _escape_airtable_value(username)
+        # Relationships involve two citizens, Citizen1 and Citizen2
+        formula = f"OR({{Citizen1}}='{safe_username}', {{Citizen2}}='{safe_username}')"
+        records = tables["relationships"].all(formula=formula, sort=['-TrustScore'], max_records=limit)
+        print(f"Found {len(records)} top relationships for citizen {username}")
+        return [{'id': r['id'], 'fields': r['fields']} for r in records]
+    except Exception as e:
+        print(f"Error fetching top relationships for {username}: {e}")
+        return []
+
+def _get_building_problems_for_citizen(tables: Dict[str, Table], username: str, limit: int = 50) -> List[Dict]:
+    """Get Latest 50 PROBLEMS where AssetType='building' and Citizen=Username."""
+    try:
+        safe_username = _escape_airtable_value(username)
+        formula = f"AND({{AssetType}}='building', {{Citizen}}='{safe_username}')"
+        # Assuming 'CreatedAt' field exists for sorting
+        records = tables["problems"].all(formula=formula, sort=['-CreatedAt'], max_records=limit)
+        print(f"Found {len(records)} building problems for citizen {username}")
+        return [{'id': r['id'], 'fields': r['fields']} for r in records]
+    except Exception as e:
+        print(f"Error fetching building problems for {username}: {e}")
+        return []
 
 def get_ai_citizens(tables) -> List[Dict]:
     """Get all citizens that are marked as AI, are in Venice, and have appropriate social class."""
@@ -171,6 +217,11 @@ def prepare_wage_analysis_data(ai_citizen: Dict, citizen_business_buildings: Lis
     total_rent_paid = sum(building["fields"].get("RentAmount", 0) for building in citizen_business_buildings)
     net_income = total_income - total_wages_paid - total_rent_paid
     
+    # Fetch additional context data
+    building_relevancies = _get_building_relevancies_for_citizen(tables, username)
+    top_relationships = _get_top_relationships_for_citizen(tables, username)
+    building_problems = _get_building_problems_for_citizen(tables, username)
+
     # Prepare the complete data package
     data_package = {
         "citizen": {
@@ -185,6 +236,9 @@ def prepare_wage_analysis_data(ai_citizen: Dict, citizen_business_buildings: Lis
             }
         },
         "businesses": businesses_data,
+        "latest_building_relevancies": building_relevancies,
+        "top_relationships_by_trust": top_relationships,
+        "latest_building_problems": building_problems,
         "timestamp": datetime.now().isoformat()
     }
     
@@ -266,6 +320,11 @@ You are {ai_username}, an AI building owner in La Serenissima. You make your own
 
 Here is the complete data about your current situation:
 {json.dumps(data_package, indent=2)}
+
+Contextual data available:
+- `latest_building_relevancies`: Shows recent building-related opportunities or information relevant to you.
+- `top_relationships_by_trust`: Lists your most trusted relationships, which might influence who you hire or how you treat employees.
+- `latest_building_problems`: Highlights recent issues with buildings (potentially yours or others) that might affect your business strategy.
 
 When developing your wage adjustment strategy:
 1. Analyze each building's profitability (income minus expenses)
