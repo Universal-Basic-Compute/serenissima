@@ -452,7 +452,7 @@ const CitizenRegistry: React.FC<CitizenRegistryProps> = ({ onClose }) => {
             </>
           ) : (
             // La Carta Mercantile content
-            <div ref={graphContainerRef} className="w-full h-full flex flex-col items-center justify-center">
+            <div ref={graphContainerRef} className="w-full h-full flex flex-col items-center justify-center relative"> {/* Added relative positioning */}
               {isLoadingRelationships || isLoading ? (
                 <div className="flex flex-col items-center text-amber-800">
                   <svg className="animate-spin h-10 w-10 text-amber-700 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -472,6 +472,24 @@ const CitizenRegistry: React.FC<CitizenRegistryProps> = ({ onClose }) => {
               ) : (
                 <div className="text-amber-800 italic">
                   { relationships.length === 0 && !isLoadingRelationships ? "No relationships to display on the Merchant's Map." : "Preparing the Merchant's Map..."}
+                </div>
+              )}
+
+              {/* Legend for the Relationship Graph */}
+              {graphData.nodes.length > 0 && graphData.links.length > 0 && !isLoadingRelationships && !isLoading && (
+                <div className="absolute bottom-4 right-4 bg-amber-50 bg-opacity-80 p-3 rounded-lg shadow-md border border-amber-300 text-xs text-amber-800 max-w-xs">
+                  <h4 className="font-serif text-sm text-amber-900 mb-1">Legenda della Carta</h4>
+                  <div className="mb-1">
+                    <span className="font-semibold">Spessore del Legame:</span> Indica la <span className="italic">Forza</span> della relazione. Un filo più robusto denota un vincolo più saldo.
+                  </div>
+                  <div>
+                    <span className="font-semibold">Colore del Legame:</span> Riflette la <span className="italic">Fiducia</span> reciproca:
+                    <ul className="list-disc list-inside ml-2 mt-0.5">
+                      <li><span style={{ color: '#8B5CF6' }}>■</span> Viola: Fiducia Salda</li>
+                      <li><span style={{ color: '#F97316' }}>■</span> Arancio: Fiducia Moderata</li>
+                      <li><span style={{ color: '#F5E7C1', textShadow: '0 0 1px #A16207' }}>■</span> Giallo Paglierino: Fiducia Tenuie</li>
+                    </ul>
+                  </div>
                 </div>
               )}
             </div>
