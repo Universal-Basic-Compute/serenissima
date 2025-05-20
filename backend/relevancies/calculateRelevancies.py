@@ -405,7 +405,7 @@ def calculate_relevancies(type_filter: Optional[str] = None) -> bool:
             # For global domination, API now returns relevanciesSavedCount = number of landowners
             num_domination_saved = domination_result.get('relevanciesSavedCount', 0)
             total_relevancies_saved += num_domination_saved
-            log.info(f"Successfully processed self-domination profiles, records saved: {num_domination_saved}")
+            log.info(f"Successfully processed global landowner profiles, records saved: {num_domination_saved}")
         else:
             log.error(f"Failed to calculate land domination relevancies: {domination_result.get('error')}")
         
@@ -468,9 +468,9 @@ def calculate_relevancies(type_filter: Optional[str] = None) -> bool:
         # Add domination relevancies to the details FIRST
         if domination_result.get('success'):
             num_dom_saved = domination_result.get('relevanciesSavedCount', domination_result.get('relevanciesCreated', 0))
-            details.append(f"- Self-Domination Profiles: {num_dom_saved} records saved (one per landowner)")
+            details.append(f"- Global Landowner Profiles: {num_dom_saved} records saved (one per landowner, relevant to 'all')")
         else:
-            details.append(f"- Self-Domination Profiles: Error - {domination_result.get('error', 'Unknown error')}")
+            details.append(f"- Global Landowner Profiles: Error - {domination_result.get('error', 'Unknown error')}")
         
         # Add housing relevancies to the details
         if housing_result.get('success'):

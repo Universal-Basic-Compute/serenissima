@@ -108,27 +108,27 @@ Land domination relevancy helps AIs and administrators:
 
 ### Data Structure
 
-**Self-Domination Profile Records (Global Calculation - `citizenUsername: "all"`)**
-- When global domination is calculated, one record is created *for each landowner*, detailing their own dominance.
-- **RelevantToCitizen**: The landowner themselves (e.g., `CitizenAlpha`)
-- **AssetID**: The landowner themselves (e.g., `CitizenAlpha`)
+**Global Landowner Profile Records (Global Domination Calculation - `citizenUsername: "all"`)**
+- When global domination is calculated (e.g., via `POST /api/relevancies/domination` with `citizenUsername: "all"`), one record is created *for each landowner*. These records are relevant to "all" (or a global entity like `ConsiglioDeiDieci`).
+- **RelevantToCitizen**: `"all"` (or `ConsiglioDeiDieci`)
+- **TargetCitizen**: The landowner being profiled (e.g., `CitizenAlpha`)
+- **AssetID**: The landowner being profiled (e.g., `CitizenAlpha`)
 - **AssetType**: `citizen`
 - **Category**: `domination`
-- **Type**: `self_land_dominance_profile`
-- **TargetCitizen**: The landowner themselves (e.g., `CitizenAlpha`)
-- **Score**: Numerical score of the landowner's dominance.
-- **Description**: Details of the landowner's land holdings and building points.
-- **Title**: e.g., "Your Land Domination Profile"
+- **Type**: `global_landowner_profile`
+- **Score**: Numerical score of `CitizenAlpha`'s dominance.
+- **Description**: Details of `CitizenAlpha`'s land holdings and building points.
+- **Title**: e.g., "Land Domination: CitizenAlpha"
 
-**Per-Citizen Land Domination Records (Specific User Request - `citizenUsername: "CitizenAlpha"`)**
-- When a specific citizen (e.g., `CitizenAlpha`) requests domination scores, they receive a list of relevancies detailing how dominant *other* landowners are.
-- **RelevantToCitizen**: The requesting citizen (e.g., `CitizenAlpha`)
-- **AssetID**: The other landowner being profiled (e.g., `CitizenBeta`)
+**Peer Domination Profile Records (Specific User Request - `citizenUsername: "UserA"`)**
+- When a specific citizen (e.g., `UserA`) requests domination scores (via `POST /api/relevancies/domination` with `citizenUsername: "UserA"`), they receive a list of relevancies. Each relevancy in this list details how dominant *another* landowner (`UserB`, `UserC`, etc.) is. These are saved via the `saveRelevancies` utility.
+- **RelevantToCitizen**: The requesting citizen (e.g., `UserA`)
+- **AssetID**: The other landowner being profiled (e.g., `UserB`)
 - **AssetType**: `citizen`
 - **Category**: `domination`
-- **Type**: `landowner_profile` (or similar, to distinguish from self-profile)
-- **TargetCitizen**: The other landowner being profiled (e.g., `CitizenBeta`)
-- **Score**: Numerical score of `CitizenBeta`'s dominance.
+- **Type**: `peer_dominance_profile` (or the default type used by `saveRelevancies` for citizen assets)
+- **TargetCitizen**: The other landowner being profiled (e.g., `UserB`)
+- **Score**: Numerical score of `UserB`'s dominance.
 
 ## Future Extensions
 
@@ -189,7 +189,7 @@ Calculates and saves relevancy scores (proximity and land domination) for a spec
 }
 ```
 
-If `citizenUsername` is `"all"` for domination (when calling `/api/relevancies/domination` POST), the response will indicate N self-domination profiles were saved (where N is the number of landowners):
+If `citizenUsername` is `"all"` for domination (when calling `/api/relevancies/domination` POST), the response will indicate N global landowner profiles were saved (where N is the number of landowners):
 ```json
 {
   "success": true,
@@ -206,21 +206,21 @@ If `citizenUsername` is `"all"` for domination (when calling `/api/relevancies/d
 **Using `backend/relevancies/calculateRelevancies.py` (Orchestrator for all types):**
 ```bash
 # Calculate all types of relevancies:
-# - Self-domination profiles (one per landowner)
+# - Global landowner profiles (one per landowner, relevant to "all")
 # - Global housing & job market reports
 # - Per-citizen proximity & building ownership relevancies
 python backend/relevancies/calculateRelevancies.py
 
-# Calculate proximity relevancies of a specific type (e.g., 'connected') for all citizens, plus other global/self relevancies
+# Calculate proximity relevancies of a specific type (e.g., 'connected') for all citizens, plus other global profiles
 python backend/relevancies/calculateRelevancies.py --type connected
 ```
 
 **Using `backend/relevancies/calculateSpecificRelevancy.py` (For individual types):**
 ```bash
-# Calculate self-domination profiles (creates one record per landowner, relevant to themselves)
+# Calculate global landowner profiles (creates one record per landowner, relevant to "all")
 python backend/relevancies/calculateSpecificRelevancy.py --type domination
 
-# Calculate land domination scores and save them TO "CitizenAlpha" (so CitizenAlpha sees how dominant others are)
+# Calculate peer domination profiles and save them TO "CitizenAlpha" (so CitizenAlpha sees how dominant others are)
 python backend/relevancies/calculateSpecificRelevancy.py --type domination --username CitizenAlpha
 
 # Calculate proximity relevancies for CitizenAlpha

@@ -252,8 +252,8 @@ def calculate_specific_relevancy(
         log_context_message = f"for citizen: {username}"
 
         if relevancy_type == "domination" and not username:
-            target_user_info = "all landowners (Self-Domination Profiles)"
-            log_context_message = "for all landowners (self-domination profiles)"
+            target_user_info = "all (Global Landowner Profiles)"
+            log_context_message = "for all (global landowner profiles)"
         elif relevancy_type in ["housing", "jobs"] and not username: # These are always global
             target_user_info = "all (Global Report)"
             log_context_message = f"for global {relevancy_type} context"

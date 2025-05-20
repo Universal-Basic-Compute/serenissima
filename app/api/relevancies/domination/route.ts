@@ -99,46 +99,50 @@ export async function POST(request: NextRequest) {
         saved = true;
       } else {
         // Global calculation (usernameForProcessing is null, meaning citizenUsername was "all")
-        // Create one relevancy record FOR EACH landowner, detailing THEIR OWN domination.
+        // Create one relevancy record PER LANDOWNER, relevant to "all", detailing that landowner's domination.
         relevanciesSavedCount = 0;
         const recordsToCreate = [];
+        const relevantToGlobal = "all"; // Or "ConsiglioDeiDieci"
+
+        // First, delete all existing global landowner profiles to prevent duplicates
+        const existingGlobalLandownerProfiles = await airtableBase(AIRTABLE_RELEVANCIES_TABLE)
+          .select({
+            filterByFormula: `AND({RelevantToCitizen} = '${relevantToGlobal}', {Category} = 'domination', {Type} = 'global_landowner_profile')`
+          })
+          .all();
+
+        if (existingGlobalLandownerProfiles.length > 0) {
+          const idsToDelete = existingGlobalLandownerProfiles.map(r => r.id);
+          for (let i = 0; i < idsToDelete.length; i += 10) {
+            const batch = idsToDelete.slice(i, i + 10);
+            await airtableBase(AIRTABLE_RELEVANCIES_TABLE).destroy(batch);
+          }
+          console.log(`Deleted ${existingGlobalLandownerProfiles.length} existing global landowner profile(s).`);
+        }
 
         for (const [landownerUsername, dominationData] of Object.entries(landDominationRelevancies)) {
-          // dominationData is a RelevancyScore object
-          // Delete existing self-domination profile for this landowner
-          const existingSelfDominationRecords = await airtableBase(AIRTABLE_RELEVANCIES_TABLE)
-            .select({ 
-              filterByFormula: `AND({RelevantToCitizen} = '${landownerUsername}', {AssetID} = '${landownerUsername}', {Category} = 'domination', {Type} = 'self_land_dominance_profile')` 
-            })
-            .all();
+          // dominationData is a RelevancyScore object from relevancyService.calculateLandDominationRelevancy
+          // dominationData.title is already "Land Domination: FullName"
+          // dominationData.description is already about the specific landowner
 
-          if (existingSelfDominationRecords.length > 0) {
-            await airtableBase(AIRTABLE_RELEVANCIES_TABLE).destroy(existingSelfDominationRecords.map(r => r.id));
-            console.log(`Deleted ${existingSelfDominationRecords.length} existing self-domination profile(s) for ${landownerUsername}.`);
-          }
-          
-          // dominationData.title is like "Land Domination: PlayerName"
-          // We want the title for the self-record to be more direct.
-          const selfProfileTitle = `Your Land Domination Profile`;
-
-          const selfDominationRecord = {
+          const globalLandownerProfileRecord = {
             fields: {
-              RelevancyId: `self_domination_${landownerUsername}_${Date.now()}`,
-              AssetID: landownerUsername, // The landowner themselves
-              AssetType: "citizen", // dominationData.assetType is 'citizen'
-              Category: "domination", // dominationData.category is 'domination'
-              Type: "self_land_dominance_profile", // New specific type
+              RelevancyId: `global_domination_${landownerUsername}_${Date.now()}`,
+              AssetID: landownerUsername, // The landowner being profiled
+              AssetType: "citizen",       // dominationData.assetType is 'citizen'
+              Category: "domination",     // dominationData.category is 'domination'
+              Type: "global_landowner_profile", // Specific type for these global profiles
               TargetCitizen: landownerUsername, // The record is about this landowner
-              RelevantToCitizen: landownerUsername, // The record is for this landowner
+              RelevantToCitizen: relevantToGlobal, // The record is for global view
               Score: dominationData.score,
               TimeHorizon: dominationData.timeHorizon,
-              Title: selfProfileTitle,
-              Description: dominationData.description, // This description is already about the specific landowner
+              Title: dominationData.title, // e.g., "Land Domination: Giovanni Contarini"
+              Description: dominationData.description,
               Status: dominationData.status,
               CreatedAt: new Date().toISOString()
             }
           };
-          recordsToCreate.push(selfDominationRecord);
+          recordsToCreate.push(globalLandownerProfileRecord);
         }
 
         if (recordsToCreate.length > 0) {
@@ -146,12 +150,12 @@ export async function POST(request: NextRequest) {
           for (let i = 0; i < recordsToCreate.length; i += 10) {
             const batch = recordsToCreate.slice(i, i + 10);
             await airtableBase(AIRTABLE_RELEVANCIES_TABLE).create(batch);
-            console.log(`Created batch of ${batch.length} self-domination profiles.`);
+            console.log(`Created batch of ${batch.length} global landowner profiles.`);
           }
           relevanciesSavedCount = recordsToCreate.length;
         }
-        saved = true; // Mark as saved if the process completed, even if 0 records if no landowners
-        console.log(`Successfully processed self-domination profiles for ${relevanciesSavedCount} landowners.`);
+        saved = true; // Mark as saved if the process completed
+        console.log(`Successfully processed global landowner profiles for ${relevanciesSavedCount} landowners.`);
       }
     } catch (error) {
       console.error('Error saving self-domination relevancies to Airtable:', error);
