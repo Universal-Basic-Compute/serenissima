@@ -163,7 +163,7 @@ export async function GET(request: NextRequest) {
           const building = {
             id: buildingId,
             type: fields.Type || 'Unknown',
-            land_id: fields.Land || '',
+            land_id: fields.LandId || fields.Land || '', // Prioritize LandId if it exists, fallback to Land
             variant: fields.Variant || '',
             position: fields.Position || '',
             rotation: fields.Rotation || 0,
