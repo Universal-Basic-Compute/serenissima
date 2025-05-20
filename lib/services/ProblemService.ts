@@ -212,18 +212,40 @@ export class ProblemService {
         console.log(`No citizens with valid Usernames to check for homelessness (user: ${username || 'all'}). Original count: ${allFetchedCitizens.length}`);
         return {};
       }
+      console.log(`[ProblemService] detectHomelessCitizens: Processing ${citizens.length} citizens with valid usernames.`);
 
       const buildings = await this.fetchAllBuildings();
+      console.log(`[ProblemService] detectHomelessCitizens: Fetched ${buildings.length} buildings.`);
+
       const homesByOccupant: Record<string, boolean> = {};
+      let homeBuildingCount = 0;
       buildings.forEach(building => {
-        if (building.Category?.toLowerCase() === 'home' && building.Occupant) {
-          homesByOccupant[building.Occupant] = true;
+        // Ensure building.Occupant is a non-empty string before using it
+        const occupantKey = building.Occupant && typeof building.Occupant === 'string' ? building.Occupant.trim() : null;
+        if (building.Category?.toLowerCase() === 'home' && occupantKey) {
+          homesByOccupant[occupantKey] = true;
+          homeBuildingCount++;
+        } else if (building.Category?.toLowerCase() === 'home' && !occupantKey) {
+          console.warn(`[ProblemService] detectHomelessCitizens: Building ${building.id || building.Name || 'Unknown ID'} is 'home' category but has invalid/missing Occupant: '${building.Occupant}'`);
         }
       });
+      console.log(`[ProblemService] detectHomelessCitizens: Populated homesByOccupant with ${Object.keys(homesByOccupant).length} entries from ${homeBuildingCount} relevant home buildings.`);
+      if (Object.keys(homesByOccupant).length > 0) {
+        console.log(`[ProblemService] detectHomelessCitizens: Sample homesByOccupant keys: ${Object.keys(homesByOccupant).slice(0, 5).join(', ')}`);
+      }
 
       const problems: Record<string, any> = {};
+      let citizensChecked = 0;
       citizens.forEach(citizen => {
-        if (!homesByOccupant[citizen.Username]) {
+        // Ensure citizen.Username is a valid string before using it as a key
+        const usernameKey = citizen.Username && typeof citizen.Username === 'string' ? citizen.Username.trim() : null;
+
+        if (citizensChecked < 5) { // Log for the first 5 citizens
+          console.log(`[ProblemService] detectHomelessCitizens: Checking citizen ${citizensChecked + 1}/${citizens.length}: Username='${usernameKey}', In homesByOccupant: ${usernameKey ? !!homesByOccupant[usernameKey] : 'N/A (invalid username)'}`);
+        }
+        citizensChecked++;
+
+        if (usernameKey && !homesByOccupant[usernameKey]) {
           const problemId = `homeless_${citizen.CitizenId || citizen.id}_${Date.now()}`;
           problems[problemId] = {
             problemId,
@@ -244,7 +266,14 @@ export class ProblemService {
         }
       });
 
-      console.log(`Created ${Object.keys(problems).length} problems for homeless citizens (user: ${username || 'all'})`);
+      const finalProblemCount = Object.keys(problems).length;
+      console.log(`[ProblemService] detectHomelessCitizens: Created ${finalProblemCount} problems for homeless citizens (user: ${username || 'all'})`);
+      if (citizens.length > 0 && finalProblemCount === 0) {
+        console.warn(`[ProblemService] detectHomelessCitizens: No homeless problems created, but processed ${citizens.length} citizens. This implies all processed citizens were found in homesByOccupant.`);
+      } else if (citizens.length > 0 && finalProblemCount === citizens.length && citizens.length > Object.keys(homesByOccupant).length) {
+        // Added a more specific condition for the "all homeless" warning
+        console.warn(`[ProblemService] detectHomelessCitizens: All ${citizens.length} processed citizens were marked as homeless. This implies homesByOccupant (size: ${Object.keys(homesByOccupant).length}) might be empty or not matching citizen usernames.`);
+      }
       return problems;
     } catch (error) {
       console.error('Error detecting homeless citizens:', error);
