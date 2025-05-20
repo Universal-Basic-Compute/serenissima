@@ -662,6 +662,90 @@ export class ProblemService {
            `- Improve skills or social standing to access better jobs.\n` +
            `- The daily job assignment script (10:00 AM UTC) may assign a job if available and criteria are met.`;
   }
+
+  /**
+   * Detect businesses without managers
+   */
+  public async detectBusinessesWithoutManagers(username?: string): Promise<Record<string, any>> {
+    try {
+      const buildings = await this.fetchAllBuildings();
+      console.log(`[ProblemService] detectBusinessesWithoutManagers: Fetched ${buildings.length} buildings to check for missing managers.`);
+      if (buildings.length > 0) {
+        console.log(`[ProblemService] detectBusinessesWithoutManagers: Sample of first 2 buildings: ${JSON.stringify(buildings.slice(0, 2).map(b => ({ id: b.id, buildingId: b.buildingId, name: b.name, category: b.category, owner: b.owner, ranBy: b.ranBy })), null, 2)}`);
+      }
+
+      const problems: Record<string, any> = {};
+      let businessBuildingsChecked = 0;
+
+      buildings.forEach(building => {
+        // Filter for businesses only
+        if (building.category?.toLowerCase() !== 'business') {
+          return;
+        }
+
+        // If a username is provided, only check businesses owned by that user
+        if (username && building.owner !== username) {
+          return;
+        }
+        
+        businessBuildingsChecked++;
+
+        // Check if 'ranBy' is null, undefined, or an empty string
+        const ranBy = building.ranBy; // ranBy is already camelCased by fetchAllBuildings
+        const isMissingManager = ranBy === null || ranBy === undefined || (typeof ranBy === 'string' && ranBy.trim() === '');
+
+        if (isMissingManager) {
+          const buildingId = building.buildingId || building.id; // Prefer custom BuildingId
+          const buildingName = building.name || `Business ${buildingId}`;
+          const buildingOwner = building.owner || 'Unknown Owner';
+
+          const problemId = `no_manager_${buildingId}_${Date.now()}`;
+          problems[problemId] = {
+            problemId,
+            citizen: buildingOwner, // The problem is for the owner of the business
+            assetType: 'business_operation',
+            assetId: buildingId,
+            severity: 'medium',
+            status: 'active',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            location: buildingName,
+            title: 'Business Without Manager',
+            description: this.generateNoManagerDescription(building),
+            solutions: this.generateNoManagerSolutions(building),
+            notes: `Business ID: ${buildingId}, Owner: ${buildingOwner}. The 'ranBy' field is empty.`,
+            position: building.position || null, // Use building.position (object) or null
+          };
+          if (businessBuildingsChecked <= 5) {
+            console.log(`[ProblemService] detectBusinessesWithoutManagers: Created 'Business Without Manager' problem for Building ID ${buildingId}, Owner: ${buildingOwner}`);
+          }
+        }
+      });
+
+      console.log(`[ProblemService] detectBusinessesWithoutManagers: Checked ${businessBuildingsChecked} business buildings. Created ${Object.keys(problems).length} 'Business Without Manager' problems (Filter: ${username || 'all owners'}).`);
+      return problems;
+    } catch (error) {
+      console.error('Error detecting businesses without managers:', error);
+      return {};
+    }
+  }
+
+  private generateNoManagerDescription(building: any): string {
+    const buildingName = `**${building.name || building.buildingId || building.id}**`;
+    const buildingOwner = building.owner || 'Unknown Owner';
+    return `The business ${buildingName}, owned by **${buildingOwner}**, does not have an assigned manager (the 'RanBy' field is empty). 
+            Without a designated manager, the business may suffer from a lack of direction, operational inefficiencies, and an inability to execute crucial tasks or strategies. 
+            This can impact its productivity, profitability, and overall contribution to the Venetian economy.`;
+  }
+
+  private generateNoManagerSolutions(building: any): string {
+    const buildingName = `**${building.name || building.buildingId || building.id}**`;
+    return `### Recommended Solutions for ${buildingName}\n` +
+           `- **Assign a Manager**: Identify a suitable citizen and assign them to manage this business by updating the 'RanBy' field for this building record.
+            - **Consider Skills**: Choose a manager whose skills and traits align with the needs of the business.
+            - **Ensure Availability**: Verify that the chosen citizen is not already overburdened with other responsibilities.
+            - **Review Business Performance**: Once a manager is assigned, monitor the business's performance to ensure the choice was effective.`;
+  }
 }
 
 // Export a singleton instance
