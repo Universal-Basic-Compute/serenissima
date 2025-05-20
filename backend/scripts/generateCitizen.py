@@ -90,7 +90,7 @@ def generate_citizen(social_class: str) -> Optional[Dict[str, Any]]:
         
         # Call Kinos Engine API
         response = requests.post(
-            "https://api.kinos-engine.ai/v2/blueprints/serenissima-ai/kins/ConsiglioDeiDieci/messages/channels/immigration",
+            "https://api.kinos-engine.ai/v2/blueprints/serenissima-ai/kins/ConsiglioDeiDieci/channels/immigration/messages",
             headers={
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {kinos_api_key}"
@@ -226,8 +226,9 @@ if __name__ == "__main__":
     social_classes = {k: v for k, v in social_classes.items() if v > 0}
     
     if not social_classes:
-        print("Please specify at least one social class to generate")
-        sys.exit(1)
+        # If no social classes were specified via arguments, default to generating one Facchini
+        print("No social class specified via arguments, defaulting to generating 1 Facchini.")
+        social_classes = {"Facchini": 1}
     
     citizens = generate_citizen_batch(social_classes)
     
