@@ -238,7 +238,9 @@ def _calculate_trust_score_contributions_from_interactions(
             f"AND({{Sender}}='{username2}',{{Receiver}}='{username1}')),"
             f"IS_AFTER({{CreatedAt}}, DATETIME_PARSE('{twenty_four_hours_ago.isoformat()}')))"
         )
-        recent_messages = tables['messages'].all(formula=message_formula, fields=['id'])
+        # Removed fields=['id'] as it caused an UNKNOWN_FIELD_NAME error.
+        # The primary field will be returned by default, and len() will work correctly.
+        recent_messages = tables['messages'].all(formula=message_formula)
         if recent_messages:
             trust_score_addition += len(recent_messages) * 1.0
             interaction_types.add("messages_interaction")
