@@ -19,7 +19,7 @@ import json
 import requests # Added import for requests
 from datetime import datetime, timedelta, timezone # Added import for timezone
 from typing import Dict, List, Optional, Any
-from pyairtable import Api, Table
+from pyairtable import Api, Base, Table # Import Base
 from dotenv import load_dotenv
 
 # Set up logging
@@ -44,13 +44,18 @@ def initialize_airtable():
         sys.exit(1)
     
     try:
+        api = Api(api_key)
+        base = Base(api, base_id) # Create a Base object
+        
         # Return a dictionary of table objects using pyairtable
-        return {
-            'citizens': Table(api_key, base_id, 'CITIZENS'),
-            'relevancies': Table(api_key, base_id, 'RELEVANCIES'),
-            'relationships': Table(api_key, base_id, 'RELATIONSHIPS'),
-            'notifications': Table(api_key, base_id, 'NOTIFICATIONS') # Add notifications table
+        tables = {
+            'citizens': Table(None, base, 'CITIZENS'),
+            'relevancies': Table(None, base, 'RELEVANCIES'),
+            'relationships': Table(None, base, 'RELATIONSHIPS'),
+            'notifications': Table(None, base, 'NOTIFICATIONS')
         }
+        log.info("Connexion à Airtable initialisée avec des objets Base et Table explicites.")
+        return tables
     except Exception as e:
         log.error(f"Failed to initialize Airtable: {e}")
         sys.exit(1)

@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 import requests
 from dotenv import load_dotenv
-from pyairtable import Api, Table
+from pyairtable import Api, Base, Table # Import Base
 
 # Add the parent directory to the path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -27,16 +27,17 @@ def initialize_airtable():
         sys.exit(1)
     
     api = Api(airtable_api_key)
+    base = Base(api, airtable_base_id) # Create a Base object
     
     tables = {
-        "citizens": Table(airtable_api_key, airtable_base_id, "CITIZENS"),
-        "messages": Table(airtable_api_key, airtable_base_id, "MESSAGES"),
-        "notifications": Table(airtable_api_key, airtable_base_id, "NOTIFICATIONS"),
-        "relationships": Table(airtable_api_key, airtable_base_id, "RELATIONSHIPS"),
-        "relevancies": Table(airtable_api_key, airtable_base_id, "RELEVANCIES"),
-        "problems": Table(airtable_api_key, airtable_base_id, "PROBLEMS") # Ajout de la table PROBLEMS
+        "citizens": Table(None, base, "CITIZENS"),
+        "messages": Table(None, base, "MESSAGES"),
+        "notifications": Table(None, base, "NOTIFICATIONS"),
+        "relationships": Table(None, base, "RELATIONSHIPS"),
+        "relevancies": Table(None, base, "RELEVANCIES"),
+        "problems": Table(None, base, "PROBLEMS")
     }
-    
+    print("Connexion à Airtable initialisée avec des objets Base et Table explicites.")
     return tables
 
 def get_ai_citizens(tables) -> List[Dict]:
