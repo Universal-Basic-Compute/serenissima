@@ -313,7 +313,7 @@ if __name__ == "__main__":
                     # 'personality' from Kinos maps to 'Description' in Airtable
                     # 'corepersonality' from Kinos maps to 'CorePersonality' (JSON string)
                     airtable_payload = {
-                        "CitizenId": citizen_data.get("id"),
+                        "CitizenId": citizen_data.get("username"),
                         "Username": citizen_data.get("username"),
                         "SocialClass": citizen_data.get("socialclass"), # Already 'Facchini'
                         "FirstName": citizen_data.get("firstname"),
