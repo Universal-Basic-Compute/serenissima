@@ -124,7 +124,7 @@ def get_recent_relevancies(tables, username: str) -> List[Dict]:
         
         relevancies = tables['relevancies'].all(
             formula=formula,
-            fields=["RelevancyId", "AssetID", "AssetType", "TargetCitizen", "Score", "CreatedAt", "RelevantToCitizen"],
+            fields=["RelevancyId", "AssetID", "AssetType", "TargetCitizen", "Score", "CreatedAt", "RelevantToCitizen", "Type"], # Added "Type"
             sort=[{"field": "CreatedAt", "direction": "desc"}],
             max_records=1000  # Limit to last 1000 relevancies
         )
@@ -145,7 +145,7 @@ def get_existing_relationships(tables, username: str) -> Dict[str, Dict]:
         
         relationships = tables['relationships'].all(
             formula=formula,
-            fields=["AICitizen", "TargetCitizen", "StrengthScore", "LastUpdated"]
+            fields=["AICitizen", "TargetCitizen", "StrengthScore", "LastUpdated", "Notes"] # Added "Notes"
         )
         
         # Create a dictionary mapping target citizens to their relationship records
@@ -156,7 +156,8 @@ def get_existing_relationships(tables, username: str) -> Dict[str, Dict]:
                 relationship_map[target_citizen] = {
                     'id': record['id'],
                     'strengthScore': record['fields'].get('StrengthScore', 0),
-                    'lastUpdated': record['fields'].get('LastUpdated')
+                    'lastUpdated': record['fields'].get('LastUpdated'),
+                    'notes': record['fields'].get('Notes', '') # Added notes
                 }
         
         log.info(f"Found {len(relationship_map)} existing relationships for {username}")
@@ -176,15 +177,17 @@ def update_relationship_scores(
     try:
         source_username = source_citizen_record['fields']['Username']
         log.info(f"Updating relationship scores for source citizen: {source_username}")
-        
-        # Track new scores to be added for each target citizen
-        accumulated_scores_for_targets: Dict[str, float] = {}
-        
+    
+        # Track new scores and relevancy types for each target citizen
+        # The value will be a tuple: (accumulated_score, set_of_relevancy_types)
+        accumulated_data_for_targets: Dict[str, tuple[float, set[str]]] = {}
+    
         # Process each relevancy
         for relevancy in relevancies:
             raw_target_value = relevancy['fields'].get('TargetCitizen')
             relevancy_score = float(relevancy['fields'].get('Score', 0))
-            
+            relevancy_type = relevancy['fields'].get('Type', 'unknown_type')
+        
             potential_target_usernames: set[str] = set()
 
             if isinstance(raw_target_value, str):
