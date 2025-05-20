@@ -66,184 +66,158 @@ def create_admin_notification(tables, title: str, message: str) -> bool:
         log.error(f"Failed to create admin notification: {e}")
         return False
 
-def get_citizens_with_lands(tables) -> List[str]:
-    """Get a list of citizens who own lands."""
+def detect_homeless_problems(base_url: str) -> Dict:
+    """Detect homeless citizens for all citizens."""
     try:
-        # Get all citizens (not just AI citizens)
-        citizens = tables['citizens'].all(
-            fields=["Username"]
-        )
+        log.info(f"Detecting homeless citizens for all citizens")
+        api_url = f"{base_url}/api/problems/homeless"
+        log.info(f"Calling API: {api_url}")
         
-        citizen_usernames = [citizen['fields'].get('Username') for citizen in citizens if 'Username' in citizen['fields']]
-        
-        if not citizen_usernames:
-            log.info("No citizens found")
-            return []
-        
-        log.info(f"Found {len(citizen_usernames)} citizens")
-        return citizen_usernames
-    except Exception as e:
-        log.error(f"Error getting citizens: {e}")
-        return []
-
-def detect_no_buildings_problems(username: str, base_url: str) -> Dict:
-    """Detect lands with no buildings for a specific citizen."""
-    try:
-        log.info(f"Detecting lands with no buildings for citizen: {username}")
-        
-        # Use the no-buildings endpoint
-        api_url = f"{base_url}/api/problems/no-buildings"
-        log.info(f"Calling API: {api_url} for citizen: {username}")
-        
-        # Make a POST request to the no-buildings endpoint
-        response = requests.post(
-            api_url,
-            json={"username": username},
-            timeout=60
-        )
-        
-        log.info(f"API response status: {response.status_code}")
+        response = requests.post(api_url, json={}, timeout=180) # Empty JSON body, increased timeout
+        log.info(f"API response status for homeless detection: {response.status_code}")
         
         if not response.ok:
-            log.error(f"API call failed for {username} with status {response.status_code}: {response.text}")
-            return {
-                "success": False,
-                "error": f"API error: {response.status_code} - {response.text}"
-            }
+            log.error(f"Homeless API call failed with status {response.status_code}: {response.text}")
+            return {"success": False, "error": f"API error: {response.status_code} - {response.text}", "problemCount": 0, "savedCount": 0, "problems": {}}
         
-        # Parse the response
         data = response.json()
-        
-        # Log a summary of the response
-        log.info(f"API response for {username}: success={data.get('success')}, problemCount={data.get('problemCount')}")
-        
-        if not data.get('success'):
-            log.error(f"API returned error for {username}: {data.get('error')}")
-            return {
-                "success": False,
-                "error": data.get('error', 'Unknown error')
-            }
-        
-        # Return the results
-        return {
-            "success": True,
-            "problemCount": data.get('problemCount', 0),
-            "saved": data.get('saved', False),
-            "savedCount": data.get('savedCount', 0)
-        }
+        log.info(f"Homeless API response: success={data.get('success')}, problemCount={data.get('problemCount')}, savedCount={data.get('savedCount')}")
+        return data
     except Exception as e:
-        log.error(f"Error detecting no buildings problems for {username}: {e}")
-        return {
-            "success": False,
-            "error": str(e)
-        }
+        log.error(f"Error detecting homeless problems: {e}")
+        return {"success": False, "error": str(e), "problemCount": 0, "savedCount": 0, "problems": {}}
+
+def detect_workless_problems(base_url: str) -> Dict:
+    """Detect workless citizens for all citizens."""
+    try:
+        log.info(f"Detecting workless citizens for all citizens")
+        api_url = f"{base_url}/api/problems/workless"
+        log.info(f"Calling API: {api_url}")
+        
+        response = requests.post(api_url, json={}, timeout=180) # Empty JSON body, increased timeout
+        log.info(f"API response status for workless detection: {response.status_code}")
+        
+        if not response.ok:
+            log.error(f"Workless API call failed with status {response.status_code}: {response.text}")
+            return {"success": False, "error": f"API error: {response.status_code} - {response.text}", "problemCount": 0, "savedCount": 0, "problems": {}}
+        
+        data = response.json()
+        log.info(f"Workless API response: success={data.get('success')}, problemCount={data.get('problemCount')}, savedCount={data.get('savedCount')}")
+        return data
+    except Exception as e:
+        log.error(f"Error detecting workless problems: {e}")
+        return {"success": False, "error": str(e), "problemCount": 0, "savedCount": 0, "problems": {}}
 
 def detect_problems():
-    """Detect problems for all lands."""
+    """Detect various problems for citizens and lands."""
     try:
-        # Initialize Airtable
         tables = initialize_airtable()
-        
-        # Get the base URL from environment or use default
         base_url = os.environ.get('NEXT_PUBLIC_BASE_URL', 'http://localhost:3000')
         log.info(f"Using base URL: {base_url}")
-        
-        # Process all lands (no username specified)
-        log.info("Detecting lands with no buildings for all lands")
-        
-        # Call the no-buildings endpoint without a specific username
-        api_url = f"{base_url}/api/problems/no-buildings"
-        log.info(f"Calling API: {api_url} for all lands")
-        
-        # Make a POST request to the no-buildings endpoint
-        response = requests.post(
-            api_url,
-            json={},  # Empty body to process all lands
-            timeout=120  # Longer timeout for processing all lands
-        )
-        
-        log.info(f"API response status: {response.status_code}")
-        
-        if not response.ok:
-            log.error(f"API call failed with status {response.status_code}: {response.text}")
-            
-            # Create an admin notification about the error
-            create_admin_notification(
-                tables,
-                "Problem Detection Error",
-                f"API call failed with status {response.status_code}: {response.text}"
-            )
-            
-            return False
-        
-        # Parse the response
-        data = response.json()
-        
-        # Log a summary of the response
-        log.info(f"API response: success={data.get('success')}, problemCount={data.get('problemCount')}")
-        
-        if not data.get('success'):
-            log.error(f"API returned error: {data.get('error')}")
-            
-            # Create an admin notification about the error
-            create_admin_notification(
-                tables,
-                "Problem Detection Error",
-                f"API returned error: {data.get('error', 'Unknown error')}"
-            )
-            
-            return False
-        
-        # Group problems by citizen for the notification
-        problems_by_citizen = {}
-        
-        for problem_id, problem in data.get('problems', {}).items():
-            citizen = problem.get('citizen', 'Unknown')
-            
-            if citizen not in problems_by_citizen:
-                problems_by_citizen[citizen] = 0
-            
-            problems_by_citizen[citizen] += 1
-        
-        # Create a detailed message for the notification
-        details = []
-        
-        for citizen, count in problems_by_citizen.items():
-            details.append(f"- {citizen}: {count} problems detected")
-        
-        details_text = "\n".join(details)
-        
-        # Create an admin notification with the results
-        notification_created = create_admin_notification(
-            tables,
-            "Problem Detection Complete",
-            f"Detected {data.get('problemCount', 0)} problems across {len(problems_by_citizen)} citizens.\n\n"
-            f"Details:\n{details_text}\n\n"
-            f"Problems saved to Airtable: {data.get('saved', False)}\n"
-            f"Number of problems saved: {data.get('savedCount', 0)}"
-        )
-        
-        if notification_created:
-            log.info("Created admin notification with detection results")
+
+        total_problems_detected = 0
+        total_problems_saved = 0
+        all_problem_details_summary = [] # To store summary lines for notification
+
+        # 1. Detect lands with no buildings
+        log.info("--- Detecting Lands with No Buildings ---")
+        no_buildings_api_url = f"{base_url}/api/problems/no-buildings"
+        log.info(f"Calling API: {no_buildings_api_url} for all lands")
+        no_buildings_response = requests.post(no_buildings_api_url, json={}, timeout=180) # Increased timeout
+        log.info(f"No Buildings API response status: {no_buildings_response.status_code}")
+
+        if no_buildings_response.ok:
+            no_buildings_data = no_buildings_response.json()
+            log.info(f"No Buildings API response: success={no_buildings_data.get('success')}, problemCount={no_buildings_data.get('problemCount')}")
+            if no_buildings_data.get('success'):
+                count = no_buildings_data.get('problemCount', 0)
+                saved_count = no_buildings_data.get('savedCount', 0)
+                total_problems_detected += count
+                total_problems_saved += saved_count
+                all_problem_details_summary.append(f"- Lands w/o Buildings: {count} detected, {saved_count} saved.")
+                
+                problems_by_citizen_no_buildings = {}
+                for problem_id, problem in no_buildings_data.get('problems', {}).items():
+                    citizen = problem.get('citizen', 'Unknown')
+                    problems_by_citizen_no_buildings[citizen] = problems_by_citizen_no_buildings.get(citizen, 0) + 1
+                if problems_by_citizen_no_buildings:
+                    all_problem_details_summary.append("  Affected citizens (No Buildings): " + ", ".join([f"{c}({num})" for c, num in problems_by_citizen_no_buildings.items()]))
+            else:
+                log.error(f"No Buildings API returned error: {no_buildings_data.get('error')}")
+                all_problem_details_summary.append(f"- Lands w/o Buildings: API Error - {no_buildings_data.get('error', 'Unknown')}")
         else:
-            log.warning("Failed to create admin notification")
+            log.error(f"No Buildings API call failed: {no_buildings_response.status_code} - {no_buildings_response.text}")
+            all_problem_details_summary.append(f"- Lands w/o Buildings: API Call Failed ({no_buildings_response.status_code})")
+
+        # 2. Detect homeless citizens
+        log.info("--- Detecting Homeless Citizens ---")
+        homeless_data = detect_homeless_problems(base_url)
+        if homeless_data.get('success'):
+            count = homeless_data.get('problemCount', 0)
+            saved_count = homeless_data.get('savedCount', 0)
+            total_problems_detected += count
+            total_problems_saved += saved_count
+            all_problem_details_summary.append(f"- Homeless Citizens: {count} detected, {saved_count} saved.")
+            
+            problems_by_citizen_homeless = {}
+            for problem_id, problem in homeless_data.get('problems', {}).items(): # Ensure 'problems' key exists
+                citizen = problem.get('citizen', 'Unknown')
+                problems_by_citizen_homeless[citizen] = problems_by_citizen_homeless.get(citizen, 0) + 1
+            if problems_by_citizen_homeless:
+                 all_problem_details_summary.append("  Affected citizens (Homeless): " + ", ".join([f"{c}({num})" for c, num in problems_by_citizen_homeless.items()]))
+        else:
+            log.error(f"Homeless detection failed: {homeless_data.get('error')}")
+            all_problem_details_summary.append(f"- Homeless Citizens: Detection Error - {homeless_data.get('error', 'Unknown')}")
+
+        # 3. Detect workless citizens
+        log.info("--- Detecting Workless Citizens ---")
+        workless_data = detect_workless_problems(base_url)
+        if workless_data.get('success'):
+            count = workless_data.get('problemCount', 0)
+            saved_count = workless_data.get('savedCount', 0)
+            total_problems_detected += count
+            total_problems_saved += saved_count
+            all_problem_details_summary.append(f"- Workless Citizens: {count} detected, {saved_count} saved.")
+
+            problems_by_citizen_workless = {}
+            for problem_id, problem in workless_data.get('problems', {}).items(): # Ensure 'problems' key exists
+                citizen = problem.get('citizen', 'Unknown')
+                problems_by_citizen_workless[citizen] = problems_by_citizen_workless.get(citizen, 0) + 1
+            if problems_by_citizen_workless:
+                 all_problem_details_summary.append("  Affected citizens (Workless): " + ", ".join([f"{c}({num})" for c, num in problems_by_citizen_workless.items()]))
+        else:
+            log.error(f"Workless detection failed: {workless_data.get('error')}")
+            all_problem_details_summary.append(f"- Workless Citizens: Detection Error - {workless_data.get('error', 'Unknown')}")
         
+        # Create admin notification
+        details_text = "\n".join(all_problem_details_summary)
+        notification_title = "Daily Problem Detection Summary"
+        notification_message = (
+            f"Problem detection process completed.\n\n"
+            f"Total Problems Detected: {total_problems_detected}\n"
+            f"Total Problems Saved to Airtable: {total_problems_saved}\n\n"
+            f"Breakdown:\n{details_text}"
+        )
+        
+        notification_created = create_admin_notification(tables, notification_title, notification_message)
+        if notification_created:
+            log.info("Created admin notification with comprehensive detection results.")
+        else:
+            log.warning("Failed to create admin notification for problem detection.")
+            
         return True
-    
+
     except Exception as e:
-        log.error(f"Error detecting problems: {e}")
-        
-        # Try to create an admin notification about the error
+        log.error(f"Error in detect_problems main function: {e}")
         try:
-            tables = initialize_airtable()
+            tables = initialize_airtable() # Ensure tables is initialized for error notification
             create_admin_notification(
                 tables,
-                "Problem Detection Error",
-                f"An error occurred while detecting problems: {str(e)}"
+                "Problem Detection Script Error",
+                f"An critical error occurred in the problem detection script: {str(e)}"
             )
-        except:
-            log.error("Could not create error notification")
-        
+        except Exception as notif_e:
+            log.error(f"Could not create critical error notification: {notif_e}")
         return False
 
 if __name__ == "__main__":
