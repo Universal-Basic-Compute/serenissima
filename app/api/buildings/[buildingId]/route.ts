@@ -190,6 +190,7 @@ export async function GET(request: NextRequest) {
           .firstPage();
 
         if (records.length > 0) {
+          const fields = records[0].fields as Airtable.FieldSet; // Define fields here
           const buildingRaw = {
             id: fields.BuildingId as string || buildingId,
             type: fields.Type as string || 'Unknown',
