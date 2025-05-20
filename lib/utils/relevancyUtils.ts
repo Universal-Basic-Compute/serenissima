@@ -52,25 +52,43 @@ export async function saveRelevancies(
           }
         };
       } else if (data.assetType === 'citizen') {
-        // Find citizen details
-        const citizen = allCitizens.find(c => 
-          (c.username === id) || (c.Username === id)
+        // Find citizen details for notes
+        const primaryTargetCitizenInfo = Array.isArray(data.targetCitizen) ? data.targetCitizen[0] : data.targetCitizen;
+        const citizenForNotes = allCitizens.find(c => 
+          (c.username === primaryTargetCitizenInfo) || (c.Username === id) // id is the key of relevancyScores
         );
-      
+
+        let targetCitizenIds: string[] = [];
+        if (Array.isArray(data.targetCitizen)) {
+          targetCitizenIds = data.targetCitizen.map((username: string) => {
+            const c = allCitizens.find(ac => ac.username === username || ac.Username === username);
+            return c ? c.id : null; // c.id is Airtable Record ID
+          }).filter(Boolean) as string[];
+        } else if (typeof data.targetCitizen === 'string') {
+          const c = allCitizens.find(ac => ac.username === data.targetCitizen || ac.Username === data.targetCitizen);
+          if (c) targetCitizenIds = [c.id];
+        } else { // Fallback if data.targetCitizen is not set, use 'id' from relevancyScores key
+          const c = allCitizens.find(ac => ac.username === id || ac.Username === id);
+          if (c) targetCitizenIds = [c.id];
+        }
+        
+        const relevantToCitizenRecord = allCitizens.find(c => c.username === Citizen || c.Username === Citizen);
+        const relevantToCitizenIdArray = relevantToCitizenRecord ? [relevantToCitizenRecord.id] : [];
+
         return {
           fields: {
             RelevancyId: `${Citizen}_${id}_${Date.now()}`, // Generate a unique ID
-            AssetID: id,
+            AssetID: id, // This 'id' is often the username of the target citizen or an asset identifier
             AssetType: data.assetType,
             Category: data.category,
             Type: data.type,
-            TargetCitizen: id, // The citizen this relevancy is about
-            RelevantToCitizen: Citizen,
+            TargetCitizen: targetCitizenIds, // Array of Airtable Record IDs
+            RelevantToCitizen: relevantToCitizenIdArray, // Array of Airtable Record IDs (for the single citizen)
             Score: data.score,
             TimeHorizon: data.timeHorizon || 'medium',
             Title: data.title || `Citizen Relevancy: ${id}`,
             Description: data.description || `Relevancy information about citizen ${id}`,
-            Notes: citizen ? `${citizen.firstName || ''} ${citizen.lastName || ''}`.trim() : '',
+            Notes: citizenForNotes ? `${citizenForNotes.firstName || ''} ${citizenForNotes.lastName || ''}`.trim() : '',
             Status: data.status || 'active',
             CreatedAt: new Date().toISOString()
           }

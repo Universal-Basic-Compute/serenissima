@@ -24,8 +24,20 @@ interface RelevancyScore {
   description: string;
   timeHorizon: string;
   status: string;
-  targetCitizen?: string; // The primary citizen/asset this relevancy is about
-  relevantToCitizen?: string; // The citizen for whom this relevancy is generated/saved
+  targetCitizen?: string | string[]; // The primary citizen(s)/asset this relevancy is about
+  relevantToCitizen?: string | string[]; // The citizen(s) for whom this relevancy is generated/saved
+}
+
+interface BuildingData {
+  id: string; // Airtable record ID of the building
+  buildingId?: string; // Custom BuildingId field if exists
+  owner?: string;
+  runBy?: string;
+  occupant?: string;
+  landId?: string;
+  category?: string;
+  type?: string;
+  // Add other building fields if needed by relevancy calculations
 }
 
 export class RelevancyService {
@@ -1044,6 +1056,90 @@ export class RelevancyService {
       return createdRelevancies;
     } catch (error) {
       console.error(`[RelevancyService] Error calculating building/occupant relationship relevancy for ${citizenUsername}:`, error);
+      return [];
+    }
+  }
+
+  /**
+   * Calculate "same island neighbor" relevancy.
+   * Identifies groups of citizens living on the same LandId.
+   * Returns an array of RelevancyScore objects, one for each island/land with multiple occupants.
+   */
+  public async calculateSameIslandNeighborRelevancy(): Promise<RelevancyScore[]> {
+    const createdRelevancies: RelevancyScore[] = [];
+    try {
+      const baseUrl = typeof window !== 'undefined' 
+        ? window.location.origin 
+        : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+      
+      console.log(`[RelevancyService] Calculating same island neighbor relevancy`);
+      
+      // Fetch all buildings. Ensure API returns LandId, Occupant, Category.
+      const buildingsResponse = await fetch(`${baseUrl}/api/buildings`); 
+      if (!buildingsResponse.ok) {
+        console.error(`[RelevancyService] Failed to fetch buildings for same island neighbor relevancy: ${buildingsResponse.status}`);
+        return [];
+      }
+      const buildingsData = await buildingsResponse.json();
+      const allBuildings: BuildingData[] = buildingsData.buildings || [];
+      console.log(`[RelevancyService] Fetched ${allBuildings.length} total buildings for same island neighbor relevancy.`);
+
+      // Group occupants by LandId for home category buildings
+      const occupantsByLandId: Record<string, string[]> = {};
+      allBuildings.forEach(building => {
+        if (building.category?.toLowerCase() === 'home' && building.occupant && building.landId) {
+          if (!occupantsByLandId[building.landId]) {
+            occupantsByLandId[building.landId] = [];
+          }
+          // Avoid duplicate occupants if one person somehow occupies multiple homes on the same landId
+          if (!occupantsByLandId[building.landId].includes(building.occupant)) {
+            occupantsByLandId[building.landId].push(building.occupant);
+          }
+        }
+      });
+
+      // Create relevancy for each LandId with multiple occupants
+      for (const landId in occupantsByLandId) {
+        const occupants = occupantsByLandId[landId];
+        if (occupants.length > 1) { // Only create relevancy if there are actual neighbors
+          const score = 50 + Math.min(occupants.length * 2, 30); // Score increases slightly with more neighbors, capped
+          const status = this.determineStatus(score);
+          const buildingType = "Island Community"; // Generic term
+          
+          // Fetch land details for better title/description if possible (optional enhancement)
+          // For now, use LandId
+          const landName = `Island/Land ${landId}`;
+
+          const title = `Neighbors on ${landName}`;
+          const description = `You share **${landName}** with other residents, fostering a local community.\n\n` +
+                             `### Community Members:\n` +
+                             `- ${occupants.join('\n- ')}\n\n` +
+                             `Living in close proximity offers opportunities for interaction and shared local interests.`;
+          
+          createdRelevancies.push({
+            score: parseFloat(score.toFixed(2)),
+            assetId: landId, // The LandId is the asset
+            assetType: 'land_group', // New asset type
+            category: 'neighborhood',
+            type: 'same_island_neighbor',
+            distance: 0,
+            closestLandId: landId,
+            isConnected: true, // Assuming living on the same land implies connection
+            connectivityBonus: 0, // Not distance-based
+            title,
+            description,
+            timeHorizon: 'ongoing',
+            status,
+            relevantToCitizen: occupants, // Array of usernames living on this land
+            targetCitizen: occupants,   // Array of usernames (the group itself)
+          });
+        }
+      }
+      
+      console.log(`[RelevancyService] Generated ${createdRelevancies.length} 'same_island_neighbor' group relevancy objects.`);
+      return createdRelevancies;
+    } catch (error) {
+      console.error(`[RelevancyService] Error calculating 'same_island_neighbor' relevancy:`, error);
       return [];
     }
   }

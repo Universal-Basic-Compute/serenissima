@@ -316,4 +316,40 @@ python backend/relevancies/calculateSpecificRelevancy.py --type building_occupan
 
 # Calculate building occupant relationship relevancies for all citizens
 python backend/relevancies/calculateSpecificRelevancy.py --type building_occupant
+
+# Calculate same island neighbor relevancies for all islands/land groups
+python backend/relevancies/calculateSpecificRelevancy.py --type same_island_neighbor
 ```
+
+## Same Island Neighbor Relevancy
+
+This type of relevancy identifies communities of residents living on the same `LandId` (island or distinct land parcel). It aims to foster a sense of local community and highlight shared geographical context.
+
+### Calculation
+- The system fetches all buildings categorized as "home".
+- It groups the `Occupant` of these homes by their `LandId`.
+- For each `LandId` that has two or more occupants, a single relevancy record is created.
+
+### Data Structure
+- **AssetID**: The `LandId` of the island/land parcel.
+- **AssetType**: `land_group` (a new type representing a geographical grouping of land or an island).
+- **Category**: `neighborhood`.
+- **Type**: `same_island_neighbor`.
+- **RelevantToCitizen**: An array of Airtable Record IDs of all citizens residing on this `LandId`.
+- **TargetCitizen**: An array of Airtable Record IDs of all citizens residing on this `LandId` (representing the community group itself).
+- **Title**: Example: "Neighbors on Island/Land [LandId]".
+- **Description**: Example: "You share this island/land area with: [CitizenA], [CitizenB]. Living on the same land fosters local community and shared interests."
+- **Score**: A base score (e.g., 50), potentially increasing slightly with the number of neighbors.
+- **Status**: Typically "medium" or based on the score.
+- **TimeHorizon**: "ongoing".
+
+### Strategic Value
+- Highlights local communities to players.
+- Can be used by AI or game mechanics to simulate local interactions or events.
+- Provides context for players about who their immediate neighbors are.
+
+### API Endpoint
+- **POST `/api/relevancies/same-island-neighbor`**:
+    - Calculates and saves these group relevancies.
+    - Request Body: Empty (for global calculation).
+    - Response: Includes `success`, `relevanciesSavedCount` (number of island groups processed).
