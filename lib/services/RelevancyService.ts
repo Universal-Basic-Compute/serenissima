@@ -774,7 +774,7 @@ export class RelevancyService {
         const buildingType = this.formatBuildingType(building.type);
         const title = `Your ${buildingType} on ${land.owner}'s Land`;
         
-        const description = `You own a **${buildingType}** (ID: ${building.buildingId}) on land owned by **${land.owner}**.\n\n` +
+        const description = `You own a **${buildingType}** on land owned by **${land.owner}**.\n\n` +
                            `### Strategic Considerations\n` +
                            `- You pay lease fees to this landowner\n` +
                            `- Your building operations depend on this relationship\n` +
@@ -806,7 +806,7 @@ export class RelevancyService {
         const landOwnerScore = score; // Score can be the same or adjusted
         const landOwnerStatus = status;
         const landOwnerTitle = `${username}'s ${buildingType} on Your Land`;
-        const landOwnerDescription = `**${username}** owns a **${buildingType}** (ID: ${building.buildingId}) on your land (ID: ${landId}).\n\n` +
+        const landOwnerDescription = `**${username}** owns a **${buildingType}** on your land.\n\n` +
                                      `### Strategic Considerations\n` +
                                      `- You likely receive lease fees from this building owner.\n` +
                                      `- Their building operations are on your property.\n` +
