@@ -81,7 +81,7 @@ const RelationshipGraph: React.FC<RelationshipGraphProps> = ({ nodes, links, wid
     if (fg) {
       // Configure forces once for layout
       fg.d3Force('charge').strength(-250); // Increased repulsion for more space
-      fg.d3Force('link').distance(120);    // Increased link distance for more spread
+      fg.d3Force('link').distance(80);    // Reduced link distance for shorter links
 
       // Add collision detection to prevent node overlap
       const nodeSize = 24; // Visual size of the node
