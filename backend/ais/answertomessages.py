@@ -8,9 +8,12 @@ import requests
 from dotenv import load_dotenv
 from pyairtable import Api, Table
 
-# Add the parent directory to the path to import citizen_utils
+# Add the parent directory to the path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from app.citizen_utils import find_citizen_by_identifier
+# find_citizen_by_identifier was unused
+
+# Configuration for API calls
+BASE_URL = os.getenv('NEXT_PUBLIC_BASE_URL', 'http://localhost:3000')
 
 def initialize_airtable():
     """Initialize connection to Airtable."""
@@ -57,17 +60,30 @@ def get_unread_messages_for_ai(tables, ai_username: str) -> List[Dict]:
         print(f"Error getting unread messages for AI citizen {ai_username}: {str(e)}")
         return []
 
-def mark_message_as_read(tables, message_id: str) -> bool:
-    """Mark a message as read."""
+def mark_messages_as_read_api(receiver_username: str, message_ids: List[str]) -> bool:
+    """Mark messages as read using the API."""
     try:
-        now = datetime.now().isoformat()
-        tables["messages"].update(message_id, {
-            "ReadAt": now
-        })
-        print(f"Marked message {message_id} as read")
-        return True
+        api_url = f"{BASE_URL}/api/messages/mark-read"
+        payload = {
+            "citizen": receiver_username,
+            "messageIds": message_ids
+        }
+        headers = {"Content-Type": "application/json"}
+        response = requests.post(api_url, headers=headers, json=payload, timeout=10)
+        response.raise_for_status() # Raise an exception for HTTP errors
+        
+        response_data = response.json()
+        if response_data.get("success"):
+            print(f"Successfully marked {len(message_ids)} messages as read for {receiver_username} via API")
+            return True
+        else:
+            print(f"API failed to mark messages as read for {receiver_username}: {response_data.get('error')}")
+            return False
+    except requests.exceptions.RequestException as e:
+        print(f"API request failed while marking messages as read for {receiver_username}: {e}")
+        return False
     except Exception as e:
-        print(f"Error marking message {message_id} as read: {str(e)}")
+        print(f"Error marking messages as read via API for {receiver_username}: {e}")
         return False
 
 def get_kinos_api_key() -> str:
@@ -81,6 +97,8 @@ def get_kinos_api_key() -> str:
 
 def generate_ai_response(ai_username: str, sender_username: str, message_content: str) -> Optional[str]:
     """Generate an AI response using the Kinos Engine API."""
+    # TODO: Check if Kinos API POST response already contains the assistant's message,
+    # to avoid the subsequent GET call for messages.
     try:
         api_key = get_kinos_api_key()
         blueprint = "serenissima-ai"
@@ -136,26 +154,32 @@ def generate_ai_response(ai_username: str, sender_username: str, message_content
         print(f"Error generating AI response: {str(e)}")
         return None
 
-def create_response_message(tables, ai_username: str, sender_username: str, response_content: str) -> bool:
-    """Create a response message from the AI to the sender."""
+def create_response_message_api(sender_username: str, receiver_username: str, content: str, message_type: str = "message") -> bool:
+    """Create a response message using the API."""
     try:
-        now = datetime.now().isoformat()
-        
-        # Create the message record
-        message = {
-            "Sender": ai_username,
-            "Receiver": sender_username,
-            "Content": response_content,
-            "CreatedAt": now,
-            "Type": "message"  # Add the Type field with value "message"
-            # Remove "UpdatedAt" field as it doesn't exist in the MESSAGES table
+        api_url = f"{BASE_URL}/api/messages/send"
+        payload = {
+            "sender": sender_username,
+            "receiver": receiver_username,
+            "content": content,
+            "type": message_type
         }
+        headers = {"Content-Type": "application/json"}
+        response = requests.post(api_url, headers=headers, json=payload, timeout=10)
+        response.raise_for_status() # Raise an exception for HTTP errors
         
-        tables["messages"].create(message)
-        print(f"Created response message from {ai_username} to {sender_username}")
-        return True
+        response_data = response.json()
+        if response_data.get("success"):
+            print(f"Successfully sent message from {sender_username} to {receiver_username} via API")
+            return True
+        else:
+            print(f"API failed to send message from {sender_username} to {receiver_username}: {response_data.get('error')}")
+            return False
+    except requests.exceptions.RequestException as e:
+        print(f"API request failed while sending message from {sender_username} to {receiver_username}: {e}")
+        return False
     except Exception as e:
-        print(f"Error creating response message: {str(e)}")
+        print(f"Error sending message via API from {sender_username} to {receiver_username}: {e}")
         return False
 
 def create_admin_notification(tables, ai_response_counts: Dict[str, int]) -> None:
@@ -195,82 +219,94 @@ def process_ai_messages(dry_run: bool = False):
     tables = initialize_airtable()
     
     # Get AI citizens
-    ai_citizens = get_ai_citizens(tables)
-    if not ai_citizens:
+    all_ai_citizens = get_ai_citizens(tables)
+    if not all_ai_citizens:
         print("No AI citizens found, exiting")
         return
-    
-    # Filter AI citizens to only those who have unread messages
-    filtered_ai_citizens = []
-    for ai_citizen in ai_citizens:
-        ai_username = ai_citizen["fields"].get("Username")
+
+    # Prepare a list of AI citizens with their unread messages
+    ai_citizens_with_messages = []
+    for ai_citizen_record in all_ai_citizens:
+        ai_username = ai_citizen_record["fields"].get("Username")
         if not ai_username:
+            print(f"Skipping AI citizen record {ai_citizen_record.get('id')} due to missing Username.")
             continue
-            
-        # Get unread messages for this AI
-        unread_messages = get_unread_messages_for_ai(tables, ai_username)
         
+        unread_messages = get_unread_messages_for_ai(tables, ai_username)
         if unread_messages:
-            filtered_ai_citizens.append(ai_citizen)
-            print(f"AI citizen {ai_username} has {len(unread_messages)} unread messages, including in processing")
+            ai_citizens_with_messages.append({
+                "username": ai_username,
+                "messages": unread_messages
+                # "record": ai_citizen_record # Store record if other fields are needed later
+            })
+            print(f"AI citizen {ai_username} has {len(unread_messages)} unread messages, queued for processing.")
         else:
-            print(f"AI citizen {ai_username} has no unread messages, skipping")
-    
-    # Replace the original list with the filtered list
-    ai_citizens = filtered_ai_citizens
-    print(f"Filtered down to {len(ai_citizens)} AI citizens with unread messages")
-    
-    if not ai_citizens:
+            print(f"AI citizen {ai_username} has no unread messages, skipping.")
+
+    if not ai_citizens_with_messages:
         print("No AI citizens with unread messages, exiting")
         return
-    
+
     # Track response counts for each AI
     ai_response_counts = {}
-    
-    # Process each AI citizen
-    for ai_citizen in ai_citizens:
-        ai_username = ai_citizen["fields"].get("Username")
-        if not ai_username:
-            continue
+
+    # Process each AI citizen who has messages
+    for ai_data in ai_citizens_with_messages:
+        ai_username = ai_data["username"]
+        unread_messages = ai_data["messages"]
         
         print(f"Processing AI citizen: {ai_username}")
         ai_response_counts[ai_username] = 0
         
-        # Get unread messages for this AI
-        unread_messages = get_unread_messages_for_ai(tables, ai_username)
-        
         # Process each unread message
-        for message in unread_messages:
-            message_id = message["id"]
-            sender = message["fields"].get("Sender")
-            content = message["fields"].get("Content", "")
+        for message_record in unread_messages:
+            message_id = message_record["id"]
+            sender_username = message_record["fields"].get("Sender")
+            message_content = message_record["fields"].get("Content", "")
             
-            print(f"Processing message from {sender} to {ai_username}: {content[:50]}...")
+            if not sender_username:
+                print(f"Skipping message {message_id} for AI {ai_username} due to missing Sender.")
+                continue
+
+            print(f"Processing message ID {message_id} from {sender_username} to {ai_username}: {message_content[:50]}...")
             
-            # Generate AI response
             if not dry_run:
-                # Mark the message as read
-                mark_message_as_read(tables, message_id)
+                # Mark the message as read using API
+                # The API expects the receiver of the original message (the AI)
+                marked_read = mark_messages_as_read_api(receiver_username=ai_username, message_ids=[message_id])
                 
-                # Generate and send response
-                response_content = generate_ai_response(ai_username, sender, content)
-                
-                if response_content:
-                    # Create response message
-                    success = create_response_message(tables, ai_username, sender, response_content)
-                    if success:
-                        ai_response_counts[ai_username] += 1
+                if marked_read:
+                    # Generate AI response
+                    response_content = generate_ai_response(ai_username, sender_username, message_content)
+                    
+                    if response_content:
+                        # Create response message using API
+                        # Sender is AI, Receiver is the original sender
+                        sent_success = create_response_message_api(sender_username=ai_username, 
+                                                                   receiver_username=sender_username, 
+                                                                   content=response_content)
+                        if sent_success:
+                            ai_response_counts[ai_username] += 1
+                    else:
+                        print(f"No response generated by Kinos for message {message_id} from {sender_username} to {ai_username}.")
+                else:
+                    print(f"Failed to mark message {message_id} as read for {ai_username}, skipping response generation.")
             else:
                 # In dry run mode, just log what would happen
-                print(f"[DRY RUN] Would mark message {message_id} as read")
-                print(f"[DRY RUN] Would generate response from {ai_username} to {sender}")
-                ai_response_counts[ai_username] += 1
+                print(f"[DRY RUN] Would mark message {message_id} as read for {ai_username} (receiver) via API")
+                print(f"[DRY RUN] Would generate response from {ai_username} to {sender_username} using Kinos")
+                # Simulate response generation for counting purposes
+                ai_response_counts[ai_username] += 1 
+                print(f"[DRY RUN] Would send response from {ai_username} (sender) to {sender_username} (receiver) via API")
     
     # Create admin notification with summary
-    if not dry_run and sum(ai_response_counts.values()) > 0:
+    total_responses = sum(ai_response_counts.values())
+    if not dry_run and total_responses > 0:
         create_admin_notification(tables, ai_response_counts)
-    else:
+    elif dry_run and total_responses > 0 : # Also show for dry run if responses would have been made
         print(f"[DRY RUN] Would create admin notification with response counts: {ai_response_counts}")
+    elif total_responses == 0:
+        print("No responses were made by any AI.")
     
     print("AI message response process completed")
 
