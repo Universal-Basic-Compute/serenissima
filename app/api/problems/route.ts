@@ -54,6 +54,17 @@ export async function GET(request: NextRequest) {
     
     // Transform records to a more usable format
     const problems = problemsRecords.map(record => {
+      let position = record.get('Position');
+      if (typeof position === 'string') {
+        try {
+          position = JSON.parse(position);
+        } catch (error) {
+          console.error('Error parsing position for problem:', record.id, error);
+          // Keep original string or set to null if parsing fails
+          // position = null; // Or keep as string: position = record.get('Position');
+        }
+      }
+
       return {
         id: record.id,
         problemId: record.get('ProblemId') || '',
@@ -65,7 +76,7 @@ export async function GET(request: NextRequest) {
         createdAt: record.get('CreatedAt') || '',
         updatedAt: record.get('UpdatedAt') || '',
         location: record.get('Location') || '',
-        position: record.get('Position') || '',
+        position: position || '', // Use the parsed or original position
         title: record.get('Title') || '',
         description: record.get('Description') || '',
         solutions: record.get('Solutions') || '',
