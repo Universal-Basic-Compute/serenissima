@@ -379,13 +379,23 @@ export class ProblemService {
             
             // At this point, workplaceBuilding should be a 'business' where citizen is 'occupant'.
             // The primary remaining checks are for 'ranBy'.
-            const hasRanBy = workplaceBuilding.ranBy && typeof workplaceBuilding.ranBy === 'string' && workplaceBuilding.ranBy.trim() !== '';
-            const isEmployerDifferent = hasRanBy && workplaceBuilding.ranBy.trim() !== citizen.Username;
+            const employerUsernameRaw = workplaceBuilding.ranBy;
+            const employerUsernameTrimmed = employerUsernameRaw && typeof employerUsernameRaw === 'string' ? employerUsernameRaw.trim() : null;
+            
+            const hasValidEmployerField = employerUsernameRaw !== undefined && employerUsernameRaw !== null;
+            const employerIsNonEmptyString = !!(employerUsernameTrimmed && employerUsernameTrimmed !== ''); // Ensure boolean
+            const employerIsDifferentFromEmployee = employerIsNonEmptyString && employerUsernameTrimmed !== citizen.Username;
 
-            console.log(`[ProblemService] Employer problem conditions for ${citizen.Username} at workplace ${workplaceId}: hasRanBy=${hasRanBy} ('${workplaceBuilding.ranBy}'), isEmployerDifferent=${isEmployerDifferent}`);
+            console.log(`[ProblemService] Employer Check for ${citizen.Username} at workplace ${workplaceId}:`);
+            console.log(`  - Raw 'ranBy' from building: '${employerUsernameRaw}' (type: ${typeof employerUsernameRaw})`);
+            console.log(`  - Trimmed 'ranBy': '${employerUsernameTrimmed}'`);
+            console.log(`  - citizen.Username for comparison: '${citizen.Username}'`);
+            console.log(`  - Condition 'hasValidEmployerField' (ranBy is not null/undefined): ${hasValidEmployerField}`);
+            console.log(`  - Condition 'employerIsNonEmptyString' (ranBy is non-empty string after trim): ${employerIsNonEmptyString}`);
+            console.log(`  - Condition 'employerIsDifferentFromEmployee': ${employerIsDifferentFromEmployee}`);
 
-            if (hasRanBy && isEmployerDifferent) {
-              const employerUsername = workplaceBuilding.ranBy;
+            if (employerIsNonEmptyString && employerIsDifferentFromEmployee) {
+              const employerUsername = employerUsernameTrimmed!; // employerUsernameTrimmed is guaranteed to be a non-empty string here
               // Use normalized citizen.FirstName and citizen.LastName
               const employeeName = `${citizen.FirstName || citizen.Username} ${citizen.LastName || ''}`.trim();
               const employerProblemId = `homeless_employee_impact_${employerUsername}_${citizen.Username}_${Date.now()}`;
@@ -408,10 +418,9 @@ export class ProblemService {
               };
               console.log(`[ProblemService] CREATED 'Homeless Employee Impact' problem for employer '${employerUsername}' regarding employee '${citizen.Username}'.`);
             } else {
-              console.log(`[ProblemService] Conditions not met for employer problem for citizen '${citizen.Username}' at workplace ${workplaceId}. RanBy: '${workplaceBuilding.ranBy}', EmployerDifferent: ${isEmployerDifferent}`);
+              console.log(`[ProblemService] Conditions not met for employer problem for citizen '${citizen.Username}' at workplace ${workplaceId}. Detailed: hasValidEmployerField=${hasValidEmployerField}, employerIsNonEmptyString=${employerIsNonEmptyString}, employerIsDifferentFromEmployee=${employerIsDifferentFromEmployee}.`);
             }
-          // The extra '}' that prematurely closed 'if (workplaceBuilding)' was on the line above this comment and has been removed.
-          } else { // This 'else' now correctly corresponds to 'if (workplaceBuilding)'
+          } else { // This 'else' corresponds to 'if (workplaceBuilding)'
             console.log(`[ProblemService] Citizen '${citizen.Username}' has no identifiable workplace (neither via citizen.workplace.buildingId nor inference). Skipping employer problem.`);
           }
         }
