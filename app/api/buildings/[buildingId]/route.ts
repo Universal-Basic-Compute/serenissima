@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Airtable from 'airtable';
 import path from 'path';
-import fs from 'fs'; // Ensure fs is imported if not already
 import fs from 'fs';
 
 // Airtable config
