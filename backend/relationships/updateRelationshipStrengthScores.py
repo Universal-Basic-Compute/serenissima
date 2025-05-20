@@ -217,15 +217,18 @@ def update_relationship_scores(
                 if not target_username or target_username == source_username:
                     continue
                 
-                # Add relevancy score to this target
-                accumulated_scores_for_targets[target_username] = \
-                    accumulated_scores_for_targets.get(target_username, 0.0) + relevancy_score
+                # Add relevancy score and type to this target
+                current_score, current_types = accumulated_data_for_targets.get(target_username, (0.0, set()))
+                current_score += relevancy_score
+                current_types.add(relevancy_type)
+                accumulated_data_for_targets[target_username] = (current_score, current_types)
                 
         # Now update or create relationships in Airtable
         updated_count = 0
         created_count = 0
-        
-        for target_username, score_to_add in accumulated_scores_for_targets.items():
+    
+        for target_username, (score_to_add, new_relevancy_types_set) in accumulated_data_for_targets.items():
+            notes_string = ""
             if target_username in existing_relationships:
                 # Update existing relationship
                 record = existing_relationships[target_username]
@@ -233,28 +236,45 @@ def update_relationship_scores(
                 
                 # Apply 25% decay to existing score
                 existing_score = float(record.get('strengthScore', 0.0)) * 0.75
-                
-                # Add new score_to_add
                 updated_score = existing_score + score_to_add
+
+                # Handle Notes: append new types to existing notes if any, avoiding duplicates
+                existing_notes = record.get('notes', '') # Assuming 'notes' is the field name in Airtable
+                existing_types_set = set()
+                if existing_notes and existing_notes.startswith("Sources: "):
+                    try:
+                        existing_types_str = existing_notes.replace("Sources: ", "")
+                        existing_types_set.update(t.strip() for t in existing_types_str.split(','))
+                    except Exception: # Fallback if parsing fails
+                        log.warning(f"Could not parse existing notes for {source_username}-{target_username}: {existing_notes}")
+
+                combined_types = existing_types_set.union(new_relevancy_types_set)
+                if combined_types:
+                    notes_string = f"Sources: {', '.join(sorted(list(combined_types)))}"
                 
-                # Update the record
                 tables['relationships'].update(record_id, {
                     'StrengthScore': updated_score,
-                    'LastUpdated': datetime.now().isoformat()
+                    'LastUpdated': datetime.now().isoformat(),
+                    'Notes': notes_string
                 })
                 updated_count += 1
             else:
-                    # Create new relationship
-                    tables['relationships'].create({
-                        'AICitizen': source_username,
-                        'TargetCitizen': target_username,
-                        'StrengthScore': score_to_add, # New relationships start with the accumulated score from recent relevancies
-                        'LastUpdated': datetime.now().isoformat()
-                    })
-                    created_count += 1
+                # Create new relationship
+                if new_relevancy_types_set:
+                    notes_string = f"Sources: {', '.join(sorted(list(new_relevancy_types_set)))}"
+
+                tables['relationships'].create({
+                    'AICitizen': source_username,
+                    'TargetCitizen': target_username,
+                    'StrengthScore': score_to_add, # New relationships start with the accumulated score from recent relevancies
+                    'LastUpdated': datetime.now().isoformat(),
+                    'Notes': notes_string
+                })
+                created_count += 1
             
         log.info(f"For source {source_username}: Updated {updated_count} and created {created_count} relationships.")
-        return accumulated_scores_for_targets # Return the scores that were processed
+        # Return a dictionary of target_username to score_to_add for stats calculation
+        return {target: data[0] for target, data in accumulated_data_for_targets.items()}
     except Exception as e:
         log.error(f"Error updating relationship scores for source {source_username}: {e}")
         return {}
