@@ -48,28 +48,28 @@ def initialize_airtable():
         return {
             'citizens': Table(api_key, base_id, 'CITIZENS'),
             'relevancies': Table(api_key, base_id, 'RELEVANCIES'),
-            'relationships': Table(api_key, base_id, 'RELATIONSHIPS')
+            'relationships': Table(api_key, base_id, 'RELATIONSHIPS'),
+            'notifications': Table(api_key, base_id, 'NOTIFICATIONS') # Add notifications table
         }
     except Exception as e:
         log.error(f"Failed to initialize Airtable: {e}")
         sys.exit(1)
 
-def create_admin_notification(tables, title: str, message: str) -> bool:
+def create_admin_notification(notifications_table: Table, title: str, message: str) -> bool:
     """Create an admin notification in Airtable."""
+    if not notifications_table:
+        log.error("Notifications table not provided. Cannot create admin notification.")
+        return False
     try:
-        notifications_table = Table(
-            tables['citizens'].api_key, 
-            tables['citizens'].base_id, 
-            'NOTIFICATIONS'
-        )
-        
         notifications_table.create({
             'Content': title,
             'Details': message,
             'Type': 'admin',
             'Status': 'unread',
-            'CreatedAt': datetime.now().isoformat()
+            'CreatedAt': datetime.now().isoformat(),
+            'Citizen': 'ConsiglioDeiDieci' # Or a relevant system user
         })
+        log.info(f"Admin notification created: {title}")
         return True
     except Exception as e:
         log.error(f"Failed to create admin notification: {e}")
@@ -385,8 +385,8 @@ def update_relationship_strength_scores():
         # Create admin notification with summary
         notification_title = "Relationship Strength Scores Updated"
         notification_message = (
-            f"Updated relationship strength scores for {stats['total_citizens']} citizens.\n"
-            f"Processed {stats['total_relevancies_processed']} relevancies.\n"
+            f"Updated relationship strength scores for {stats['total_citizens_processed']} citizens.\n" # Corrected key
+            f"Processed {stats['total_relevancies_fetched']} relevancies.\n" # Corrected key
             f"Updated {stats['total_relationships_updated']} existing relationships.\n"
             f"Created {stats['total_relationships_created']} new relationships.\n\n"
             "Details by citizen:\n"
@@ -394,12 +394,12 @@ def update_relationship_strength_scores():
         
         for username, details in stats['citizen_details'].items():
             notification_message += (
-                f"- {username}: Processed {details['relevancies_processed']} relevancies, "
+                f"- {username}: Processed {details['relevancies_fetched']} relevancies, " # Corrected key
                 f"updated {details['relationships_updated']} relationships, "
                 f"created {details['relationships_created']} new relationships.\n"
             )
         
-        create_admin_notification(tables, notification_title, notification_message)
+        create_admin_notification(tables['notifications'], notification_title, notification_message) # Pass notifications table
         
         log.info("Successfully updated relationship strength scores")
         return True
@@ -408,14 +408,23 @@ def update_relationship_strength_scores():
         
         # Try to create an admin notification about the error
         try:
-            tables = initialize_airtable()
-            create_admin_notification(
-                tables,
-                "Relationship Strength Score Update Error",
-                f"An error occurred while updating relationship strength scores: {str(e)}"
-            )
-        except:
-            log.error("Could not create error notification")
+            # tables should already be initialized if we reached this point from the main try block
+            if 'notifications' in tables:
+                create_admin_notification(
+                    tables['notifications'], # Pass notifications table
+                    "Relationship Strength Score Update Error",
+                    f"An error occurred while updating relationship strength scores: {str(e)}"
+                )
+            else: # Fallback if tables somehow not fully initialized
+                temp_tables = initialize_airtable()
+                if temp_tables and 'notifications' in temp_tables:
+                    create_admin_notification(
+                        temp_tables['notifications'],
+                        "Relationship Strength Score Update Error",
+                        f"An error occurred while updating relationship strength scores: {str(e)}"
+                    )
+        except Exception as notify_e:
+            log.error(f"Could not create error notification: {notify_e}")
         
         return False
 
