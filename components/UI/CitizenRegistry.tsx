@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { citizenService } from '@/lib/services/CitizenService';
 import CitizenRegistryCard from '@/components/UI/CitizenRegistryCard';
+import RelationshipGraph from '@/components/UI/RelationshipGraph'; // Import the new component
 import CitizenDetailsPanel from '@/components/UI/CitizenDetailsPanel';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -26,10 +27,26 @@ interface Relevancy {
   status: string;
 }
 
+interface Relationship {
+  id: string;
+  citizen1: string;
+  citizen2: string;
+  strengthScore: number;
+  trustScore: number;
+  // Add other relationship fields if needed by the graph or for tooltips
+  title?: string;
+  description?: string;
+  tier?: string;
+}
+
 const CitizenRegistry: React.FC<CitizenRegistryProps> = ({ onClose }) => {
   const [activeTab, setActiveTab] = useState<'registro' | 'carta'>('registro');
   const [citizens, setCitizens] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [relationships, setRelationships] = useState<Relationship[]>([]);
+  const [isLoadingRelationships, setIsLoadingRelationships] = useState<boolean>(false);
+  const graphContainerRef = useRef<HTMLDivElement>(null); // Ref for graph dimensions
+  const [graphDimensions, setGraphDimensions] = useState({ width: 0, height: 0 });
   const [relevancies, setRelevancies] = useState<Record<string, Relevancy[]>>({});
   const [currentUsername, setCurrentUsername] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -105,7 +122,94 @@ const CitizenRegistry: React.FC<CitizenRegistryProps> = ({ onClose }) => {
     loadCitizens();
   }, []);
 
-  // Filter and sort citizens
+  // Fetch relationships for the graph
+  useEffect(() => {
+    const fetchRelationships = async () => {
+      if (activeTab !== 'carta') return;
+      setIsLoadingRelationships(true);
+      try {
+        const response = await fetch('/api/relationships'); // Fetches top 100 strongest
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.relationships) {
+            setRelationships(data.relationships);
+          } else {
+            console.error('Failed to parse relationships:', data.error);
+            setRelationships([]);
+          }
+        } else {
+          console.error('Failed to fetch relationships:', response.statusText);
+          setRelationships([]);
+        }
+      } catch (error) {
+        console.error('Error fetching relationships:', error);
+        setRelationships([]);
+      }
+      setIsLoadingRelationships(false);
+    };
+
+    fetchRelationships();
+  }, [activeTab]);
+  
+  // Update graph dimensions when the container resizes
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (graphContainerRef.current) {
+        setGraphDimensions({
+          width: graphContainerRef.current.offsetWidth,
+          height: graphContainerRef.current.offsetHeight,
+        });
+      }
+    };
+
+    if (activeTab === 'carta') {
+      updateDimensions(); // Initial update
+      window.addEventListener('resize', updateDimensions);
+      return () => window.removeEventListener('resize', updateDimensions);
+    }
+  }, [activeTab]);
+
+  // Prepare data for the RelationshipGraph
+  const graphData = useMemo(() => {
+    if (activeTab !== 'carta' || !citizens.length || !relationships.length) {
+      return { nodes: [], links: [] };
+    }
+
+    const citizenMap = new Map(citizens.map(c => [c.username, c]));
+    const graphNodesSet = new Set<string>();
+
+    relationships.forEach(rel => {
+      graphNodesSet.add(rel.citizen1);
+      graphNodesSet.add(rel.citizen2);
+    });
+
+    const graphNodes = Array.from(graphNodesSet)
+      .map(username => {
+        const citizen = citizenMap.get(username);
+        if (!citizen) return null;
+        return {
+          id: username, // id must be unique string for react-force-graph
+          username: username,
+          firstName: citizen.firstName || citizen.firstname || citizen.FirstName,
+          lastName: citizen.lastName || citizen.lastname || citizen.LastName,
+          coatOfArmsImageUrl: citizen.coatOfArmsImageUrl || `/coat-of-arms/${username}.png`,
+        };
+      })
+      .filter(node => node !== null) as { id: string; username: string; firstName?: string; lastName?: string; coatOfArmsImageUrl?: string | null; }[];
+
+    const graphLinks = relationships
+      .filter(rel => citizenMap.has(rel.citizen1) && citizenMap.has(rel.citizen2)) // Ensure both citizens exist
+      .map(rel => ({
+        source: rel.citizen1,
+        target: rel.citizen2,
+        strengthScore: rel.strengthScore || 50, // Default if undefined
+        trustScore: rel.trustScore || 50,     // Default if undefined
+      }));
+
+    return { nodes: graphNodes, links: graphLinks };
+  }, [activeTab, citizens, relationships]);
+
+  // Filter and sort citizens for the registry list
   const filteredAndSortedCitizens = useMemo(() => {
     // First filter by search term and social class
     let result = citizens.filter(citizen => {
@@ -330,8 +434,28 @@ const CitizenRegistry: React.FC<CitizenRegistryProps> = ({ onClose }) => {
               </div>
             </>
           ) : (
-            <div className="flex justify-center items-center h-64">
-              <div className="text-amber-800 italic">The Merchant's Map will be available soon...</div>
+            // La Carta Mercantile content
+            <div ref={graphContainerRef} className="w-full h-full flex flex-col items-center justify-center">
+              {isLoadingRelationships || isLoading ? (
+                <div className="flex flex-col items-center text-amber-800">
+                  <svg className="animate-spin h-10 w-10 text-amber-700 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Loading Merchant's Map...
+                </div>
+              ) : graphData.nodes.length > 0 && graphData.links.length > 0 && graphDimensions.width > 0 && graphDimensions.height > 0 ? (
+                <RelationshipGraph
+                  nodes={graphData.nodes}
+                  links={graphData.links}
+                  width={graphDimensions.width}
+                  height={graphDimensions.height}
+                />
+              ) : (
+                <div className="text-amber-800 italic">
+                  { relationships.length === 0 && !isLoadingRelationships ? "No relationships to display on the Merchant's Map." : "Preparing the Merchant's Map..."}
+                </div>
+              )}
             </div>
           )}
         </div>
