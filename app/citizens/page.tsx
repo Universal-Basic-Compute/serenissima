@@ -1,28 +1,25 @@
 'use client';
 
-import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import CitizenRegistry from '@/components/UI/CitizenRegistry'; // Import the component
 
 export default function CitizensPage() {
   const router = useRouter();
-  
-  useEffect(() => {
-    // Set a flag to indicate this was a direct navigation to /citizens
-    if (typeof window !== 'undefined') {
-      window.__directNavigation = true;
-      
-      // Navigate to the main page, which will detect the flag and open citizens view
-      router.push('/');
-    }
-  }, [router]);
-  
-  // Return a loading state while redirecting
+
+  const handleCloseRegistry = () => {
+    router.push('/'); // Navigate to home page when registry is closed
+  };
+
+  // Render the CitizenRegistry directly
+  // The CitizenRegistry itself is a modal-like component that will overlay the current page.
+  // To make it appear as if it's the only thing on the page, we can render a minimal background
+  // or rely on the CitizenRegistry's own styling to cover the screen.
+  // For simplicity, we'll render it directly. If a background is needed, it can be added here.
   return (
-    <div className="h-screen w-screen flex items-center justify-center bg-amber-50">
-      <div className="text-center">
-        <h1 className="text-2xl font-serif text-amber-800 mb-4">Loading Citizens View...</h1>
-        <div className="w-16 h-16 border-4 border-amber-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-      </div>
-    </div>
+    <>
+      {/* Optional: A minimal background if CitizenRegistry doesn't cover everything or for visual consistency */}
+      {/* <div className="h-screen w-screen bg-amber-50 fixed inset-0 -z-10" /> */}
+      <CitizenRegistry onClose={handleCloseRegistry} />
+    </>
   );
 }
