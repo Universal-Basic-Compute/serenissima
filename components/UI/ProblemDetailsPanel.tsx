@@ -166,14 +166,6 @@ export default function ProblemDetailsPanel({ problemId, onClose }: ProblemDetai
               )}
               
               {/* Position */}
-              {problem.position && (
-                <div>
-                  <div className="text-sm text-amber-800 font-medium">Coordinates</div>
-                  <div className="font-mono text-sm">
-                    Lat: {problem.position.lat.toFixed(6)}, Lng: {problem.position.lng.toFixed(6)}
-                  </div>
-                </div>
-              )}
             </div>
           ) : (
             <div className="text-center text-gray-500 py-8">
