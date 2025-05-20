@@ -63,6 +63,23 @@ def get_all_land_owners(lands_table) -> Optional[List[str]]:
         log.error(f"Error fetching land owners: {e}")
         return None
 
+def get_all_building_owners(buildings_table) -> Optional[List[str]]:
+    """Fetch all unique building owners from the BUILDINGS table."""
+    if not buildings_table:
+        log.error("BUILDINGS table not initialized. Cannot fetch building owners.")
+        return None
+    try:
+        all_buildings = buildings_table.all(fields=['Owner'])
+        owners = set()
+        for record in all_buildings:
+            if 'Owner' in record['fields'] and record['fields']['Owner']:
+                owners.add(record['fields']['Owner'])
+        log.info(f"Found {len(owners)} unique building owners.")
+        return list(owners)
+    except Exception as e:
+        log.error(f"Error fetching building owners: {e}")
+        return None
+
 def create_admin_notification(notifications_table, title: str, message: str) -> bool:
     """Create an admin notification in Airtable."""
     if not notifications_table:
@@ -185,14 +202,65 @@ def calculate_specific_relevancy(
         request_timeout = 60
 
     elif relevancy_type == "building_ownership":
-        if not username:
-            log.error("Username is required for building ownership relevancy.")
-            create_admin_notification(notifications_table, "Building Ownership Relevancy Error", "Username not provided.")
-            return False
         api_url = f"{base_url}/api/relevancies/building-ownership"
-        payload = {"citizenUsername": username}
-        log.info(f"Requesting building ownership relevancy for user: {username}")
         request_timeout = 60
+        if username:
+            # Single user building_ownership calculation
+            payload = {"citizenUsername": username}
+            log.info(f"Requesting building ownership relevancy for user: {username}")
+        else:
+            # All building_owners building_ownership calculation
+            log.info("Requesting building ownership relevancy for all building owners.")
+            buildings_table = initialize_airtable_table('BUILDINGS') # Assuming table name is BUILDINGS
+            building_owners = get_all_building_owners(buildings_table)
+
+            if building_owners is None:
+                create_admin_notification(notifications_table, "Building Ownership Relevancy Error", "Failed to fetch building owners.")
+                return False
+            if not building_owners:
+                create_admin_notification(notifications_table, "Building Ownership Relevancy Info", "No building owners found to process.")
+                return True # No error, just nothing to do
+
+            for owner_username in building_owners:
+                import time
+                time.sleep(1) # Small delay between API calls
+                log.info(f"Processing building ownership for: {owner_username}")
+                current_payload = {"citizenUsername": owner_username}
+                
+                try:
+                    response = requests.post(api_url, json=current_payload, timeout=request_timeout)
+                    if not response.ok:
+                        error_message = f"API call failed for {owner_username} (building_ownership) with status {response.status_code}: {response.text}"
+                        log.error(error_message)
+                        multi_user_results.append(f"- {owner_username}: Error - {response.status_code}")
+                        continue
+                    data = response.json()
+                    if not data.get('success'):
+                        error_detail = data.get('error', 'Unknown API error')
+                        log.error(f"API returned error for {owner_username} (building_ownership): {error_detail}")
+                        multi_user_results.append(f"- {owner_username}: API Error - {error_detail}")
+                        continue
+                    
+                    relevancies_created_count = 0
+                    if 'relevancyScores' in data and isinstance(data.get('relevancyScores'), dict):
+                         relevancies_created_count = len(data.get('relevancyScores', {}))
+                    elif 'relevanciesSavedCount' in data: # Some routes might return this
+                        relevancies_created_count = data.get('relevanciesSavedCount',0)
+
+
+                    multi_user_results.append(f"- {owner_username}: {relevancies_created_count} building ownership relevancies created.")
+                except requests.exceptions.RequestException as e_req:
+                    log.error(f"Request failed for {owner_username} (building_ownership): {e_req}")
+                    multi_user_results.append(f"- {owner_username}: Request Error - {e_req}")
+                except Exception as e_exc:
+                    log.error(f"Unexpected error for {owner_username} (building_ownership): {e_exc}")
+                    multi_user_results.append(f"- {owner_username}: Unexpected Error - {e_exc}")
+            
+            summary_title = "Building Ownership Relevancy Complete (All Owners)"
+            summary_message = "Building ownership relevancy calculation process finished for all building owners.\n\nResults:\n" + "\n".join(multi_user_results)
+            create_admin_notification(notifications_table, summary_title, summary_message)
+            log.info("Finished processing building ownership relevancies for all building owners.")
+            return True # Overall process completed
         
     else:
         log.error(f"Unknown relevancy type: {relevancy_type}")
@@ -240,6 +308,8 @@ def calculate_specific_relevancy(
              relevancies_created_count = data.get('relevanciesSavedCount', 0) # API returns count of landowners processed
         elif relevancy_type == "domination" and username and 'relevancyScores' in data and isinstance(data['relevancyScores'], dict): # Domination for specific user
             relevancies_created_count = len(data['relevancyScores']) # Number of other players' profiles saved to this user
+        elif relevancy_type == "building_ownership" and username and 'relevancyScores' in data and isinstance(data['relevancyScores'], dict):
+            relevancies_created_count = len(data['relevancyScores'])
 
 
         notification_title = f"{relevancy_type.capitalize()} Relevancy Calculation Complete"
@@ -254,6 +324,9 @@ def calculate_specific_relevancy(
         if relevancy_type == "domination" and not username:
             target_user_info = "all (Global Landowner Profiles)"
             log_context_message = "for all (global landowner profiles)"
+        elif relevancy_type == "building_ownership" and not username:
+            target_user_info = "all building owners"
+            log_context_message = "for all building owners"
         elif relevancy_type in ["housing", "jobs"] and not username: # These are always global
             target_user_info = "all (Global Report)"
             log_context_message = f"for global {relevancy_type} context"
@@ -303,7 +376,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--username", 
-        help="Username of the citizen (required for building_ownership; optional for proximity and domination). If not provided for proximity, runs for all landowners."
+        help="Username of the citizen (optional for proximity, domination, and building_ownership). If not provided for these types, runs for all relevant owners."
     )
     parser.add_argument(
         "--type_filter", 
@@ -312,10 +385,8 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
 
-    # Validate username requirement for certain types
-    if args.type == "building_ownership" and not args.username:
-        parser.error(f"--username is required for relevancy type '{args.type}'.")
-    # Proximity username is now optional. Domination username is also optional.
+    # Username is now optional for proximity, domination, and building_ownership.
+    # No specific validation needed here for those types regarding username presence.
 
     success = calculate_specific_relevancy(
         relevancy_type=args.type,
