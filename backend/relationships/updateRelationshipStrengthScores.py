@@ -125,7 +125,8 @@ def get_recent_relevancies(tables, username: str, username_record_id: Optional[s
                     continue
                 # Check if it's a JSON array string containing the username
                 # Ensure to look for the username quoted, e.g., "username"
-                if rt_citizen_val.startswith('[') and rt_citizen_val.endswith(']') and f'"{username}"' in rt_citizen_val:
+                # Also ensure rt_citizen_val is not None or empty before calling startswith
+                if rt_citizen_val and rt_citizen_val.startswith('[') and rt_citizen_val.endswith(']') and f'"{username}"' in rt_citizen_val:
                     filtered_relevancies.append(r)
                     continue
             
