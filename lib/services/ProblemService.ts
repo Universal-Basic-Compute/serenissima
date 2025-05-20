@@ -206,9 +206,28 @@ export class ProblemService {
       }
 
       const citizens = allFetchedCitizens.filter(c => {
-        if (!c.Username || typeof c.Username !== 'string' || c.Username.trim() === '') {
-          console.warn(`[ProblemService] detectHomelessCitizens: Citizen ${c.CitizenId || c.id || 'Unknown ID'} has invalid or missing Username ('${c.Username}'). Excluding from homeless check.`);
+        let effectiveUsername: string | undefined = undefined;
+        const originalPascalUsername = c.Username; // Store original for logging
+        const camelUsername = (c as any).username;
+
+        if (c.Username && typeof c.Username === 'string' && c.Username.trim() !== '') {
+          effectiveUsername = c.Username.trim();
+        } else if (camelUsername && typeof camelUsername === 'string' && camelUsername.trim() !== '') {
+          effectiveUsername = camelUsername.trim();
+          c.Username = effectiveUsername; // Normalize to PascalCase for consistent use
+        }
+
+        const citizenIdentifier = c.CitizenId || (c as any).citizenId || c.id || 'Unknown ID';
+
+        if (!effectiveUsername) {
+          console.warn(`[ProblemService] detectHomelessCitizens: Citizen ${citizenIdentifier} has invalid or missing Username. Checked Username (PascalCase): '${originalPascalUsername}', username (camelCase): '${camelUsername}'. Excluding from homeless check.`);
           return false;
+        }
+
+        // Normalize CitizenId: if c.CitizenId is missing but c.citizenId (camelCase) exists, use it.
+        if (!c.CitizenId && (c as any).citizenId && typeof (c as any).citizenId === 'string' && (c as any).citizenId.trim() !== '') {
+          c.CitizenId = (c as any).citizenId.trim();
+          // console.log(`[ProblemService] detectHomelessCitizens: Normalized CitizenId from camelCase for citizen ${c.CitizenId}`);
         }
         return true;
       });
@@ -303,9 +322,28 @@ export class ProblemService {
       }
 
       const citizens = allFetchedCitizens.filter(c => {
-        if (!c.Username || typeof c.Username !== 'string' || c.Username.trim() === '') {
-          console.warn(`[ProblemService] detectWorklessCitizens: Citizen ${c.CitizenId || c.id || 'Unknown ID'} has invalid or missing Username ('${c.Username}'). Excluding from workless check.`);
+        let effectiveUsername: string | undefined = undefined;
+        const originalPascalUsername = c.Username; // Store original for logging
+        const camelUsername = (c as any).username;
+
+        if (c.Username && typeof c.Username === 'string' && c.Username.trim() !== '') {
+          effectiveUsername = c.Username.trim();
+        } else if (camelUsername && typeof camelUsername === 'string' && camelUsername.trim() !== '') {
+          effectiveUsername = camelUsername.trim();
+          c.Username = effectiveUsername; // Normalize to PascalCase for consistent use
+        }
+        
+        const citizenIdentifier = c.CitizenId || (c as any).citizenId || c.id || 'Unknown ID';
+
+        if (!effectiveUsername) {
+          console.warn(`[ProblemService] detectWorklessCitizens: Citizen ${citizenIdentifier} has invalid or missing Username. Checked Username (PascalCase): '${originalPascalUsername}', username (camelCase): '${camelUsername}'. Excluding from workless check.`);
           return false;
+        }
+
+        // Normalize CitizenId: if c.CitizenId is missing but c.citizenId (camelCase) exists, use it.
+        if (!c.CitizenId && (c as any).citizenId && typeof (c as any).citizenId === 'string' && (c as any).citizenId.trim() !== '') {
+          c.CitizenId = (c as any).citizenId.trim();
+          // console.log(`[ProblemService] detectWorklessCitizens: Normalized CitizenId from camelCase for citizen ${c.CitizenId}`);
         }
         return true;
       });
