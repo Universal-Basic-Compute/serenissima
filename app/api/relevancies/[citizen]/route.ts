@@ -31,14 +31,32 @@ export async function GET(
     // Get URL parameters
     const { searchParams } = new URL(request.url);
     const typeFilter = searchParams.get('type');
+
+    // Helper function to escape single quotes in strings for Airtable formulas
+    const escapeAirtableString = (str: string) => str.replace(/'/g, "\\'");
+    const safeUsername = escapeAirtableString(username);
+
+    // Conditions for RelevantToCitizen:
+    // 1. Exact match for the username
+    // 2. Username found within a JSON array string
+    // 3. Exact match for "all"
+    // 4. "all" found within a JSON array string
+    const relevantToConditions = [
+      `{RelevantToCitizen} = '${safeUsername}'`,
+      `FIND('"${safeUsername}"', {RelevantToCitizen}) > 0`,
+      `{RelevantToCitizen} = 'all'`,
+      `FIND('"all"', {RelevantToCitizen}) > 0`
+    ];
     
-    // Prepare filter formula
-    let filterFormula = `{RelevantToCitizen} = '${username}'`;
+    let filterFormula = `OR(${relevantToConditions.join(', ')})`;
     
     // Add type filter if specified
     if (typeFilter) {
-      filterFormula = `AND(${filterFormula}, {Type} = '${typeFilter}')`;
+      const safeTypeFilter = escapeAirtableString(typeFilter);
+      filterFormula = `AND(${filterFormula}, {Type} = '${safeTypeFilter}')`;
     }
+    
+    console.log(`Fetching relevancies for ${username} with filter: ${filterFormula}`);
     
     // Fetch relevancies from Airtable
     const records = await base(AIRTABLE_RELEVANCIES_TABLE)
