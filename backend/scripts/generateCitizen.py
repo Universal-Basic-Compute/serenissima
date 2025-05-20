@@ -266,6 +266,7 @@ if __name__ == "__main__":
     parser.add_argument("--facchini", type=int, default=0, help="Number of facchini to generate")
     parser.add_argument("--output", type=str, help="Output JSON file path")
     parser.add_argument("--add-prompt", type=str, help="Additional text to append to the generation prompt for Kinos API.")
+    parser.add_argument("--dry-run", action="store_true", help="Simulate the script execution without making any changes to Airtable.")
     
     args = parser.parse_args()
     
