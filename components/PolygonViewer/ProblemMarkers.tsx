@@ -164,7 +164,7 @@ export default function ProblemMarkers({
             style={{
               left: x,
               top: y,
-              transform: 'translate(-50%, -50%)'
+              transform: 'translate(-40%, -60%)' // Décalé vers le haut et la droite
             }}
             onClick={() => handleProblemClick(problem)}
             onMouseEnter={() => handleProblemHover(problem)}
@@ -174,10 +174,10 @@ export default function ProblemMarkers({
             <div className="relative">
               {/* Base marker */}
               <div 
-                className="w-4 h-4 rounded-full flex items-center justify-center z-10 relative"
+                className="w-3 h-3 rounded-full flex items-center justify-center z-10 relative" // Taille réduite
                 style={{ backgroundColor: getSeverityColor(problem.severity) }}
               >
-                <span className="text-white text-[9px] font-bold">!</span>
+                <span className="text-white text-[7px] font-bold">!</span> {/* Taille de texte réduite */}
               </div>
               
               {/* Pulsing effect */}
