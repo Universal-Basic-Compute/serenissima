@@ -180,11 +180,7 @@ export default function ProblemMarkers({
                 <span className="text-white text-[7px] font-bold">!</span> {/* Taille de texte réduite */}
               </div>
               
-              {/* Pulsing effect */}
-              <div 
-                className="absolute inset-0 rounded-full animate-ping opacity-50"
-                style={{ backgroundColor: getSeverityColor(problem.severity) }}
-              ></div>
+              {/* Pulsing effect removed */}
             </div>
           </div>
         );
