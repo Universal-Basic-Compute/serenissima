@@ -256,13 +256,11 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     
     setIsLoadingHistory(true);
     try {
-      // Check if this is an AI citizen or a regular citizen
-      if (citizen.isai === false) {
-        // For non-AI citizens, use the regular messages API
-        console.log(`Fetching messages for non-AI citizen ${citizen.citizenid} using messages API`);
-        
-        // Get current citizen from localStorage
-        let currentUsername = 'visitor';
+      // Always use the regular messages API
+      console.log(`Fetching messages for citizen ${citizen.username || citizen.citizenid} using /api/messages`);
+
+      // Get current citizen from localStorage
+      let currentUsername = 'visitor';
         const savedProfile = localStorage.getItem('citizenProfile');
         if (savedProfile) {
           try {
@@ -274,7 +272,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
             console.error('Error parsing citizen profile:', error);
           }
         }
-        
+
         const response = await fetch('/api/messages', {
           method: 'POST',
           headers: {
@@ -282,28 +280,26 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
           },
           body: JSON.stringify({
             currentCitizen: currentUsername,
-            otherCitizen: citizen.username || citizen.citizenid
+            otherCitizen: citizen.username || citizen.citizenid // Use username if available, otherwise citizenid
           })
         });
-        
+
         if (!response.ok) {
           throw new Error(`Failed to fetch message history: ${response.status}`);
         }
-        
+
         const data = await response.json();
-        
+
         if (data.success && data.messages) {
-          // Convert the message format to match what the component expects
-          const formattedMessages = data.messages.map(msg => ({
+          const formattedMessages = data.messages.map((msg: any) => ({
             id: msg.messageId,
-            role: msg.sender === currentUsername ? 'citizen' : 'assistant',
+            role: msg.sender === currentUsername ? 'user' : 'assistant', // 'user' for sender, 'assistant' for receiver
             content: msg.content,
             timestamp: msg.createdAt
           }));
-          
           setMessages(formattedMessages);
         } else {
-          // If no messages found, set a welcome message
+          // If no messages found or API returns success:false, set a welcome message
           setMessages([
             {
               id: 'welcome',
@@ -313,65 +309,9 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
             }
           ]);
         }
-      } else {
-        // For AI citizens, use the Kinos Engine API with channels
-        
-        // Get current citizen from localStorage for channel ID
-        let currentUsername = 'visitor';
-        const savedProfile = localStorage.getItem('citizenProfile');
-        if (savedProfile) {
-          try {
-            const profile = JSON.parse(savedProfile);
-            if (profile.username) {
-              currentUsername = profile.username;
-            }
-          } catch (error) {
-            console.error('Error parsing citizen profile:', error);
-          }
-        }
-        
-        // Use username as channel ID
-        const channelId = currentUsername;
-        
-        console.log(`Fetching messages for AI citizen ${citizen.citizenid} using channel ${channelId}`);
-        
-        const response = await fetch(
-          `https://api.kinos-engine.ai/v2/blueprints/serenissima-ai/kins/${citizen.citizenid}/channels/${channelId}/messages?limit=25`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          }
-        );
-
-        // Check for 404 specifically
-        if (response.status === 404) {
-          console.log(`No message history found for citizen ${citizen.citizenid} in channel ${channelId}`);
-          // Set a welcome message instead of re-fetching
-          setMessages([
-            {
-              id: 'welcome',
-              role: 'assistant',
-              content: `Buongiorno! I am ${citizen.firstname} ${citizen.lastname}. How may I assist you today?`,
-              timestamp: new Date().toISOString(),
-              channel_id: channelId
-            }
-          ]);
-          setIsLoadingHistory(false);
-          return; // Exit early to prevent re-fetching
-        }
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch message history: ${response.status}`);
-        }
-
-        const data = await response.json();
-        
-        setMessages(data.messages || []);
-      }
     } catch (error) {
       console.error('Error fetching message history:', error);
+      setMessagesFetchFailed(true); // Indicate that fetching failed
       // If we can't fetch history, start with a welcome message
       setMessages([
         {
@@ -415,85 +355,50 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     setMessages(prev => [...prev, citizenMessage]);
     setInputValue('');
     setIsTyping(true);
-    
+
     try {
-      // Check if this is an AI citizen or a regular citizen
-      if (citizen.isai === false) {
-        // For non-AI citizens, use the regular messages API
-        console.log(`Sending message to non-AI citizen ${citizen.citizenid} using messages API`);
-        
-        const response = await fetch('/api/messages/send', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            sender: currentUsername,
-            receiver: citizen.username || citizen.citizenid,
-            content: content,
-            type: 'message'
-          })
-        });
-        
-        if (!response.ok) {
-          throw new Error(`Failed to send message: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        if (data.success && data.message) {
-          // Add the message to the UI
-          setMessages(prev => [...prev, {
-            id: data.message.messageId,
-            role: 'assistant',
-            content: `I've received your message. I'll respond when I'm available.`,
-            timestamp: new Date().toISOString()
-          }]);
-        }
-      } else {
-        // For AI citizens, use the Kinos Engine API with channels
-        
-        // Use username as channel ID
-        const channelId = currentUsername;
-        
-        console.log(`Sending message to AI citizen ${citizen.citizenid} using channel ${channelId}`);
-        
-        // Default system prompt for AI citizens
-        const systemPrompt = `You are ${citizen.firstname} ${citizen.lastname}, a ${citizen.socialclass} citizen of Renaissance Venice. 
-Your description: ${citizen.description}
-Respond in character, with the personality, knowledge, and perspective of a ${citizen.socialclass} in 16th century Venice.
-Be historically accurate but engaging. Speak in first person as if you are this character.`;
-        
-        const response = await fetch(
-          `https://api.kinos-engine.ai/v2/blueprints/serenissima-ai/kins/${citizen.citizenid}/channels/${channelId}/messages`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              content: content,
-              model: 'claude-3-7-sonnet-latest',
-              mode: 'creative',
-              addSystem: systemPrompt
-            }),
-          }
-        );
+      // Always use the /api/messages/send endpoint
+      console.log(`Sending message to ${citizen.username || citizen.citizenid} using /api/messages/send`);
 
-        if (!response.ok) {
-          throw new Error(`Failed to send message: ${response.status}`);
-        }
+      const response = await fetch('/api/messages/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sender: currentUsername,
+          receiver: citizen.username || citizen.citizenid, // Use username if available
+          content: content,
+          type: 'message' // Ensure type is 'message'
+        })
+      });
 
-        const data = await response.json();
-        
-        // Add the assistant's response to the messages
+      if (!response.ok) {
+        throw new Error(`Failed to send message: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success && data.message) {
+        // The message is sent. The receiver will see it when they fetch messages.
+        // For now, we can add a confirmation or simply let the optimistic update stand.
+        // To avoid duplicate messages if the receiver is the current user,
+        // we might not add an "assistant" response here.
+        // The optimistic update of the user's own message is already done.
+        // If you want a confirmation message from the system:
+        /*
         setMessages(prev => [...prev, {
-          id: data.id,
-          role: 'assistant',
-          content: data.content,
-          timestamp: data.timestamp,
-          channel_id: channelId
+          id: `conf-${data.message.messageId}`,
+          role: 'assistant', // Or a system role
+          content: `Message sent to ${citizen.firstname}.`,
+          timestamp: new Date().toISOString()
         }]);
+        */
+        // Let's remove the automatic "I've received your message" as it's not from the actual recipient.
+        // The message will appear for the recipient when they open their chat with the sender.
+      } else {
+        // Handle cases where data.success is false or message is not in response
+        throw new Error(data.error || 'Failed to send message, no specific error returned.');
       }
     } catch (error) {
       console.error('Error sending message:', error);
@@ -507,71 +412,6 @@ Be historically accurate but engaging. Speak in first person as if you are this 
       }]);
     } finally {
       setIsTyping(false);
-    }
-  };
-
-  // Function to handle text-to-speech
-  const handleTextToSpeech = async (message: any) => {
-    try {
-      // If already playing this message, stop it
-      if (playingMessageId === message.id) {
-        if (audioElement) {
-          audioElement.pause();
-          audioElement.currentTime = 0;
-        }
-        setPlayingMessageId(null);
-        return;
-      }
-      
-      // Stop any currently playing audio
-      if (audioElement) {
-        audioElement.pause();
-        audioElement.currentTime = 0;
-      }
-      
-      // Set the current message as playing
-      setPlayingMessageId(message.id);
-      
-      // Call the Kinos Engine API directly to get the audio file
-      const response = await fetch('https://api.kinos-engine.ai/v2/tts', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          text: message.content,
-          voice_id: 'IKne3meq5aSn9XLyUdCD', // Default ElevenLabs voice ID
-          model: 'eleven_flash_v2_5'
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Failed to generate speech: ${response.status}`);
-      }
-      
-      // Get the audio blob directly from the response
-      const audioBlob = await response.blob();
-      
-      // Create a URL for the blob
-      const audioUrl = URL.createObjectURL(audioBlob);
-      
-      // Create a new audio element
-      const audio = new Audio(audioUrl);
-      setAudioElement(audio);
-      
-      // Play the audio
-      audio.play();
-      
-      // When audio ends, reset the playing state and revoke the blob URL
-      audio.onended = () => {
-        setPlayingMessageId(null);
-        URL.revokeObjectURL(audioUrl); // Clean up the blob URL
-      };
-      
-    } catch (error) {
-      console.error('Error generating speech:', error);
-      setPlayingMessageId(null);
-      alert('Failed to generate speech. Please try again.');
     }
   };
   
@@ -610,87 +450,7 @@ Be historically accurate but engaging. Speak in first person as if you are this 
         fetchRelationship(citizen.username); // Fetch relationship data
       }
       
-      // NEW CODE: If this is an AI citizen, send a POST request to initiate conversation
-      // BUT ONLY if we haven't already sent an initial message to this citizen
-      if (((citizen.isai === true || citizen.isAi === true)) && !initialMessageSentRef.current[citizen.citizenid]) {
-        // Mark that we've sent an initial message to this citizen
-        initialMessageSentRef.current[citizen.citizenid] = true;
-        
-        // Get current citizen from localStorage
-        let currentUsername = 'visitor';
-        let currentFullName = 'Visitor';
-        let currentSocialClass = 'Visitor';
-        
-        const savedProfile = localStorage.getItem('citizenProfile');
-        if (savedProfile) {
-          try {
-            const profile = JSON.parse(savedProfile);
-            if (profile.username) {
-              currentUsername = profile.username;
-              currentFullName = `${profile.firstName || ''} ${profile.lastName || ''}`.trim();
-              currentSocialClass = profile.socialClass || 'Citizen';
-            }
-          } catch (error) {
-            console.error('Error parsing citizen profile:', error);
-          }
-        }
-        
-        // Use username as channel ID
-        const channelId = currentUsername;
-        
-        // Create system message for AI to initiate conversation
-        const systemMessage = `[SYSTEM]You just bumped into ${currentFullName} (${currentUsername} - ${currentSocialClass}) in the streets of Venice. Engage the conversation on relevant topics, if possible game-related[/SYSTEM]`;
-        
-        // Create system prompt with AI citizen info
-        const systemPrompt = `You are ${citizen.firstname} ${citizen.lastname}, a ${citizen.socialclass} citizen of Renaissance Venice. 
-Your description: ${citizen.description}
-Respond in character, with the personality, knowledge, and perspective of a ${citizen.socialclass} in 16th century Venice.
-Be historically accurate but engaging. Speak in first person as if you are this character.`;
-        
-        console.log(`Sending initial message to AI citizen ${citizen.citizenid} using channel ${channelId}`);
-        
-        // Send POST request to Kinos
-        fetch(
-          `https://api.kinos-engine.ai/v2/blueprints/serenissima-ai/kins/${citizen.citizenid}/channels/${channelId}/messages`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              content: systemMessage,
-              model: 'claude-3-7-sonnet-latest',
-              mode: 'creative',
-              addSystem: systemPrompt
-            }),
-          }
-        )
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`Failed to send initial message: ${response.status}`);
-          }
-          return response.json();
-        })
-        .then(data => {
-          console.log('AI citizen initiated conversation:', data);
-          
-          // Add the assistant's response to the messages
-          setMessages(prev => [...prev, {
-            id: data.id,
-            role: 'assistant',
-            content: data.content,
-            timestamp: data.timestamp,
-            channel_id: channelId
-          }]);
-          
-          // Set isTyping to false in case it was set
-          setIsTyping(false);
-        })
-        .catch(error => {
-          console.error('Error sending initial message to AI citizen:', error);
-          // Don't add a fallback message here, as we already have a welcome message
-        });
-      }
+      // Removed Kinos-specific initial message logic
     }
     
     // Add escape key handler
@@ -1067,9 +827,9 @@ Be historically accurate but engaging. Speak in first person as if you are this 
           )}
         </div>
         
-        {/* Second column - Conversation */}
+        {/* Second column - Correspondance */}
         <div className="w-1/3">
-          <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Conversation</h3>
+          <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Correspondance</h3>
           
           {/* Messages area */}
           <div 
@@ -1114,14 +874,14 @@ Be historically accurate but engaging. Speak in first person as if you are this 
                   <div 
                     key={message.id || `msg-${Date.now()}-${Math.random()}`} 
                     className={`mb-3 ${
-                      message.role === 'citizen' 
+                      message.role === 'user' // Changed from 'citizen' to 'user' for sent messages
                         ? 'text-right' 
                         : 'text-left'
                     }`}
                   >
                     <div 
                       className={`inline-block p-3 rounded-lg max-w-[80%] ${
-                        message.role === 'citizen'
+                        message.role === 'user' // Changed from 'citizen' to 'user'
                           ? 'bg-amber-100 text-amber-900 rounded-br-none'
                           : 'bg-amber-700 text-white rounded-bl-none'
                       }`}
@@ -1147,20 +907,7 @@ Be historically accurate but engaging. Speak in first person as if you are this 
                         </ReactMarkdown>
                       </div>
                       
-                      {/* Only show voice button for assistant messages */}
-                      {message.role === 'assistant' && (
-                        <button
-                          onClick={() => handleTextToSpeech(message)}
-                          className="mt-1 text-amber-300 hover:text-amber-100 transition-colors float-right"
-                          aria-label={playingMessageId === message.id ? "Stop speaking" : "Speak message"}
-                        >
-                          {playingMessageId === message.id ? (
-                            <FaVolumeMute className="w-4 h-4" />
-                          ) : (
-                            <FaVolumeUp className="w-4 h-4" />
-                          )}
-                        </button>
-                      )}
+                      {/* Removed voice button as Kinos TTS is no longer used */}
                     </div>
                   </div>
                 ))}
