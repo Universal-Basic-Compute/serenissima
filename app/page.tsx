@@ -13,6 +13,7 @@ import Settings from '@/components/UI/Settings';
 import GovernancePanel from '@/components/UI/GovernancePanel';
 import GuildsPanel from '@/components/UI/GuildsPanel';
 import KnowledgeRepository from '@/components/Knowledge/KnowledgeRepository';
+import CitizenRegistry from '@/components/UI/CitizenRegistry'; // Import CitizenRegistry
 import LoanMarketplace from '@/components/Loans/LoanMarketplace';
 import LoanManagementDashboard from '@/components/Loans/LoanManagementDashboard';
 import { 
@@ -45,6 +46,7 @@ export default function TwoDPage() {
   const [showGovernancePanel, setShowGovernancePanel] = useState<boolean>(false);
   const [showGuildsPanel, setShowGuildsPanel] = useState<boolean>(false);
   const [showKnowledgePanel, setShowKnowledgePanel] = useState<boolean>(false);
+  const [showCitizenRegistry, setShowCitizenRegistry] = useState<boolean>(false); // State for CitizenRegistry
   const [transportMode, setTransportMode] = useState<boolean>(false);
   const [selectedArticle, setSelectedArticle] = useState<string | null>(null);
   
@@ -74,6 +76,12 @@ export default function TwoDPage() {
   const handleKnowledgePanelClose = () => {
     setShowKnowledgePanel(false);
     setSelectedArticle(null); // Clear any selected article
+    // Reset the active view to buildings when closing the panel
+    setActiveView('buildings');
+  };
+
+  const handleCitizenRegistryClose = () => {
+    setShowCitizenRegistry(false);
     // Reset the active view to buildings when closing the panel
     setActiveView('buildings');
   };
@@ -414,6 +422,7 @@ export default function TwoDPage() {
     const handleOpenGovernancePanel = () => setShowGovernancePanel(true);
     const handleOpenGuildsPanel = () => setShowGuildsPanel(true);
     const handleOpenKnowledgePanel = () => setShowKnowledgePanel(true);
+    const handleOpenCitizenRegistry = () => setShowCitizenRegistry(true); // Handler to open CitizenRegistry
     const handleOpenLoanPanel = () => setShowLoanPanel(true);
     const handleShowTransportDebug = () => setShowTransportDebugPanel(true);
     
@@ -434,6 +443,7 @@ export default function TwoDPage() {
     window.addEventListener('openGovernancePanel', handleOpenGovernancePanel);
     window.addEventListener('openGuildsPanel', handleOpenGuildsPanel);
     window.addEventListener('openKnowledgePanel', handleOpenKnowledgePanel);
+    window.addEventListener('openCitizenRegistry', handleOpenCitizenRegistry); // Listen for openCitizenRegistry
     window.addEventListener('openLoanPanel', handleOpenLoanPanel);
     window.addEventListener('showTransportDebug', handleShowTransportDebug);
     window.addEventListener('closeGovernancePanel', handleCloseGovernancePanel);
@@ -447,6 +457,7 @@ export default function TwoDPage() {
       window.removeEventListener('openGovernancePanel', handleOpenGovernancePanel);
       window.removeEventListener('openGuildsPanel', handleOpenGuildsPanel);
       window.removeEventListener('openKnowledgePanel', handleOpenKnowledgePanel);
+      window.removeEventListener('openCitizenRegistry', handleOpenCitizenRegistry); // Remove listener
       window.removeEventListener('openLoanPanel', handleOpenLoanPanel);
       window.removeEventListener('showTransportDebug', handleShowTransportDebug);
       window.removeEventListener('closeGovernancePanel', handleCloseGovernancePanel);
@@ -567,6 +578,8 @@ export default function TwoDPage() {
       setShowGuildsPanel(true);
     } else if (activeView === 'knowledge') {
       setShowKnowledgePanel(true);
+    } else if (activeView === 'citizens') { // Ensure this doesn't conflict if already handled by event
+      setShowCitizenRegistry(true);
     } else if (activeView === 'loans') {
       setShowLoanPanel(true);
     }
@@ -763,6 +776,11 @@ export default function TwoDPage() {
       {/* Governance Panel */}
       {showGovernancePanel && (
         <GovernancePanel onClose={handleGovernancePanelClose} />
+      )}
+
+      {/* Citizen Registry Panel */}
+      {showCitizenRegistry && (
+        <CitizenRegistry onClose={handleCitizenRegistryClose} />
       )}
       
       {/* Guilds Panel */}
