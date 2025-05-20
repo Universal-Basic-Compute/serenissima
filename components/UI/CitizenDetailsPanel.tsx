@@ -68,6 +68,10 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
   const [isLoadingRelationship, setIsLoadingRelationship] = useState<boolean>(false);
   const [cachedRelationships, setCachedRelationships] = useState<Record<string, any>>({});
   const [noRelationshipMessage, setNoRelationshipMessage] = useState<string>('');
+  // Add state for problems
+  const [problems, setProblems] = useState<any[]>([]);
+  const [isLoadingProblems, setIsLoadingProblems] = useState<boolean>(false);
+  const [cachedProblems, setCachedProblems] = useState<Record<string, any[]>>({});
   
   // Function to check if the current user is ConsiglioDeiDieci
   const isConsiglioDeiDieci = () => {
@@ -187,6 +191,36 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
       setCachedRelevancies(prev => ({ ...prev, [targetCitizen]: [] })); // Cache empty on error
     } finally {
       setIsLoadingRelevancies(false);
+    }
+  };
+
+  // Function to fetch problems for a citizen
+  const fetchProblems = async (citizenUsername: string) => {
+    if (!citizenUsername) return;
+
+    setIsLoadingProblems(true);
+    try {
+      const response = await fetch(`/api/problems?citizen=${citizenUsername}&status=active`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.problems) {
+          setProblems(data.problems);
+          setCachedProblems(prev => ({ ...prev, [citizenUsername]: data.problems }));
+        } else {
+          setProblems([]);
+          setCachedProblems(prev => ({ ...prev, [citizenUsername]: [] }));
+        }
+      } else {
+        console.error('Failed to fetch problems:', response.status, response.statusText);
+        setProblems([]);
+        setCachedProblems(prev => ({ ...prev, [citizenUsername]: [] }));
+      }
+    } catch (error) {
+      console.error('Error fetching problems:', error);
+      setProblems([]);
+      setCachedProblems(prev => ({ ...prev, [citizenUsername]: [] }));
+    } finally {
+      setIsLoadingProblems(false);
     }
   };
 
@@ -449,6 +483,15 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
             setRelationship(null); // Clear data from previous citizen
             fetchRelationship(citizen.username); // This will manage its own loading state and self-view
         }
+
+        // --- Problems ---
+        if (cachedProblems.hasOwnProperty(citizen.username)) {
+            setProblems(cachedProblems[citizen.username]);
+            setIsLoadingProblems(false);
+        } else {
+            setProblems([]); // Clear data from previous citizen
+            fetchProblems(citizen.username); // This will manage its own loading state
+        }
         
         // --- Message History (existing logic with fetch-once ref) ---
         if (!messagesFetchAttemptedRef.current[citizen.citizenid]) {
@@ -475,6 +518,8 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
         setIsLoadingRelevancies(false);
         setRelationship(null);
         setIsLoadingRelationship(false);
+        setProblems([]);
+        setIsLoadingProblems(false);
         setActivities([]);
         setIsLoadingActivities(false); // Ensure loading state is reset
         setMessages([]);
@@ -863,6 +908,45 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
             </div>
           ) : (
             <p className="text-amber-700 italic">No notable opportunities with this citizen at present. Future ventures may arise as your paths cross in Venetian society.</p>
+          )}
+
+          {/* Problems Section */}
+          <h3 className="text-lg font-serif text-amber-800 mt-4 mb-2 border-b border-amber-200 pb-1">Problems</h3>
+          {isLoadingProblems ? (
+            <div className="flex justify-center py-4">
+              <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : problems.length > 0 ? (
+            <div className="space-y-3 max-h-[200px] overflow-y-auto pr-1 custom-scrollbar">
+              {problems.map((problem, index) => (
+                <div key={problem.problemId || index} className={`rounded-lg p-3 text-sm border ${
+                  problem.Severity === 'high' ? 'bg-red-50 border-red-200' :
+                  problem.Severity === 'medium' ? 'bg-yellow-50 border-yellow-200' :
+                  'bg-green-50 border-green-200'
+                }`}>
+                  <div className="flex items-center justify-between mb-1">
+                    <div className={`font-medium ${
+                      problem.Severity === 'high' ? 'text-red-800' :
+                      problem.Severity === 'medium' ? 'text-yellow-800' :
+                      'text-green-800'
+                    }`}>
+                      Severity: {problem.Severity.charAt(0).toUpperCase() + problem.Severity.slice(1)}
+                    </div>
+                  </div>
+                  <div className={`text-xs mt-1 ${
+                    problem.Severity === 'high' ? 'text-red-700' :
+                    problem.Severity === 'medium' ? 'text-yellow-700' :
+                    'text-green-700'
+                  }`}>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {problem.Description || "No description provided."}
+                    </ReactMarkdown>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-amber-700 italic">No active problems reported for this citizen. A sign of good fortune, or perhaps, discretion.</p>
           )}
         </div>
         
