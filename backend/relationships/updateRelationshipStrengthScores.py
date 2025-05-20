@@ -16,7 +16,8 @@ import sys
 import logging
 import time
 import json
-from datetime import datetime, timedelta
+import requests # Added import for requests
+from datetime import datetime, timedelta, timezone # Added import for timezone
 from typing import Dict, List, Optional, Any
 from pyairtable import Api, Table
 from dotenv import load_dotenv
