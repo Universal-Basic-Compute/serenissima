@@ -141,9 +141,8 @@ def _get_notifications_data(tables: Dict[str, Table], username: str, limit: int 
     try:
         safe_username = _escape_airtable_value(username)
         formula = f"{{Citizen}} = '{safe_username}'"
-        # Tentative de suppression du tri pour diagnostiquer l'erreur 'tuple' object has no attribute 'startswith'
-        print(f"Récupération des notifications pour {username} sans tri (diagnostique)")
-        records = tables["notifications"].all(formula=formula, max_records=limit)
+        # Rétablissement du tri
+        records = tables["notifications"].all(formula=formula, sort=[('-CreatedAt', 'desc')], max_records=limit)
         return [{'id': r['id'], 'fields': r['fields']} for r in records]
     except Exception as e:
         print(f"Erreur lors de la récupération des notifications pour {username}: {e}")
@@ -159,9 +158,8 @@ def _get_relevancies_data(tables: Dict[str, Table], relevant_to_username: str, t
             f"OR({{TargetCitizen}} = '{safe_target_username}', FIND('\"{safe_target_username}\"', {{TargetCitizen}}) > 0)"
             f")"
         )
-        # Tentative de suppression du tri pour diagnostiquer l'erreur 'tuple' object has no attribute 'startswith'
-        print(f"Récupération des pertinences pour {relevant_to_username} -> {target_username} sans tri (diagnostique)")
-        records = tables["relevancies"].all(formula=formula, max_records=limit)
+        # Rétablissement du tri
+        records = tables["relevancies"].all(formula=formula, sort=[('-CreatedAt', 'desc')], max_records=limit)
         return [{'id': r['id'], 'fields': r['fields']} for r in records]
     except Exception as e:
         print(f"Erreur lors de la récupération des pertinences pour {relevant_to_username} ciblant {target_username}: {e}")
@@ -172,9 +170,8 @@ def _get_problems_data(tables: Dict[str, Table], username1: str, username2: str,
         safe_username1 = _escape_airtable_value(username1)
         safe_username2 = _escape_airtable_value(username2)
         formula = f"OR({{Citizen}} = '{safe_username1}', {{Citizen}} = '{safe_username2}')"
-        # Tentative de suppression du tri pour diagnostiquer l'erreur 'tuple' object has no attribute 'startswith'
-        print(f"Récupération des problèmes pour {username1}, {username2} sans tri (diagnostique)")
-        records = tables["problems"].all(formula=formula, max_records=limit)
+        # Rétablissement du tri
+        records = tables["problems"].all(formula=formula, sort=[('-CreatedAt', 'desc')], max_records=limit)
         return [{'id': r['id'], 'fields': r['fields']} for r in records]
     except Exception as e:
         print(f"Erreur lors de la récupération des problèmes pour {username1} ou {username2}: {e}")
