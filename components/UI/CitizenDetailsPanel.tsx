@@ -64,6 +64,9 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
   // Add state for relevancies
   const [relevancies, setRelevancies] = useState<any[]>([]);
   const [isLoadingRelevancies, setIsLoadingRelevancies] = useState<boolean>(false);
+  // Add state for relationship
+  const [relationship, setRelationship] = useState<any>(null);
+  const [isLoadingRelationship, setIsLoadingRelationship] = useState<boolean>(false);
   
   // Function to check if the current user is ConsiglioDeiDieci
   const isConsiglioDeiDieci = () => {
@@ -181,6 +184,62 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
       setIsLoadingRelevancies(false);
     }
   };
+
+  // Function to fetch relationship data
+  const fetchRelationship = async (viewedCitizenUsername: string) => {
+    if (!viewedCitizenUsername) return;
+
+    let currentUsername = null;
+    try {
+      const profileStr = localStorage.getItem('citizenProfile');
+      if (profileStr) {
+        const profile = JSON.parse(profileStr);
+        if (profile && profile.username) {
+          currentUsername = profile.username;
+        }
+      }
+    } catch (error) {
+      console.error('Error getting current username for relationship:', error);
+    }
+
+    if (!currentUsername) {
+      console.warn('No current username found, cannot fetch relationship');
+      setRelationship(null); 
+      return;
+    }
+
+    // Avoid fetching relationship with oneself, or handle as a special case
+    if (currentUsername === viewedCitizenUsername) {
+      // Display a special state for self-view, e.g., perfect relationship or hide section
+      setRelationship({ StrengthScore: 100, type: "Self", Sentiment: 0 }); // Example for self
+      return;
+    }
+
+    setIsLoadingRelationship(true);
+    try {
+      // API should handle finding relationship regardless of (citizen1, citizen2) order
+      const response = await fetch(`/api/relationships?citizen1=${currentUsername}&citizen2=${viewedCitizenUsername}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.relationships && data.relationships.length > 0) {
+          setRelationship(data.relationships[0]);
+        } else if (data.success && data.relationship) { // If API returns a single relationship object
+          setRelationship(data.relationship);
+        } else {
+          setRelationship(null); // No specific relationship found
+        }
+      } else {
+        console.warn(`Failed to fetch relationship: ${response.status} ${response.statusText}`);
+        setRelationship(null);
+      }
+    } catch (error) {
+      console.error('Error fetching relationship:', error);
+      setRelationship(null);
+    } finally {
+      setIsLoadingRelationship(false);
+    }
+  };
+
   // Function to fetch message history
   const fetchMessageHistory = async () => {
     if (!citizen || !citizen.citizenid) return;
@@ -527,6 +586,8 @@ Be historically accurate but engaging. Speak in first person as if you are this 
     setWorkBuilding(null);
     setIsLoadingBuildings(false);
     setActivities([]);
+    setRelationship(null);
+    setIsLoadingRelationship(false);
     
     // Reset the message fetch attempted flag when citizen changes
     if (citizen && citizen.citizenid) {
@@ -545,6 +606,7 @@ Be historically accurate but engaging. Speak in first person as if you are this 
       // Fetch relevancies for this citizen
       if (citizen.username) {
         fetchRelevancies(citizen.username);
+        fetchRelationship(citizen.username); // Fetch relationship data
       }
       
       // NEW CODE: If this is an AI citizen, send a POST request to initiate conversation
@@ -906,8 +968,51 @@ Be historically accurate but engaging. Speak in first person as if you are this 
       
       {/* Three-column layout */}
       <div className="flex flex-row gap-4">
-        {/* First column - Opportunities */}
+        {/* First column - Relationship & Opportunities */}
         <div className="w-1/3">
+          {/* Relationship Section */}
+          <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Relationship</h3>
+          {isLoadingRelationship ? (
+            <div className="flex justify-center py-4">
+              <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : relationship && typeof relationship.StrengthScore !== 'undefined' ? (
+            <div className="bg-amber-100 rounded-lg p-3 text-sm mb-4">
+              <div className="flex items-center justify-between mb-1">
+                <div className="font-medium text-amber-800">
+                  {relationship.type === "Self" ? "Self-Regard" : "Bond Strength"}
+                </div>
+                <div className={`px-3 py-1 rounded-full text-lg font-bold text-center ${
+                  relationship.StrengthScore > 75 ? 'bg-green-200 text-green-800' :
+                  relationship.StrengthScore > 25 ? 'bg-amber-200 text-amber-800' :
+                  'bg-red-200 text-red-800'
+                }`}>
+                  {relationship.StrengthScore}{relationship.type === "Self" ? "" : "/100"}
+                </div>
+              </div>
+              {relationship.type && relationship.type !== "Self" && (
+                <p className="text-xs text-amber-700 mt-1">Type: <span className="font-medium">{relationship.type}</span></p>
+              )}
+              {typeof relationship.Sentiment !== 'undefined' && relationship.type !== "Self" && (
+                <p className="text-xs text-amber-700 mt-1">
+                  Sentiment: <span className={`font-medium ${
+                    relationship.Sentiment > 0.2 ? 'text-green-700' :
+                    relationship.Sentiment < -0.2 ? 'text-red-700' :
+                    'text-amber-700'
+                  }`}>
+                    {relationship.Sentiment > 0.2 ? `Positive (${relationship.Sentiment.toFixed(2)})` : 
+                     relationship.Sentiment < -0.2 ? `Negative (${relationship.Sentiment.toFixed(2)})` : 
+                     `Neutral (${relationship.Sentiment.toFixed(2)})`}
+                  </span>
+                </p>
+              )}
+            </div>
+          ) : (
+            <p className="text-amber-700 italic text-sm mb-4">
+              The threads of fate between you and {citizen.firstname} are yet to be clearly woven, or perhaps the scribes have not yet noted your connection.
+            </p>
+          )}
+
           <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Opportunities</h3>
           
           {isLoadingRelevancies ? (
@@ -1096,8 +1201,8 @@ Be historically accurate but engaging. Speak in first person as if you are this 
         {/* Third column - Citizen details */}
         <div className="w-1/3">
           <div className="w-full mb-6">
-            {/* Full-width image container with relative positioning for the coat of arms overlay */}
-            <div className="w-full h-64 relative mb-4 overflow-hidden rounded-lg border-2 border-amber-600 shadow-lg">
+            {/* Full-width image container with relative positioning for the coat of arms overlay, now square */}
+            <div className="w-full aspect-square relative mb-4 overflow-hidden rounded-lg border-2 border-amber-600 shadow-lg">
               {/* Main citizen image */}
               {citizen.imageurl || citizen.profileimage || citizen.ImageUrl ? (
                 <img 
