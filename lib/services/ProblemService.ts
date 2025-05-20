@@ -78,15 +78,46 @@ export class ProblemService {
       // Create problems for lands with no buildings
       const problems: Record<string, any> = {};
       
+      // Enhanced logging for debugging
+      console.log(`[ProblemService] Sample of first 3 land objects from API: ${JSON.stringify(lands.slice(0,3).map(l => ({ id: l.id, landId: l.landId, LandId: (l as any).LandId, owner: l.owner, historicalName: l.historicalName })), null, 2)}`);
+      console.log(`[ProblemService] Sample of first 3 building objects (relevant fields) used to build buildingsByLand: ${JSON.stringify(buildings.slice(0,3).map(b => ({id: b.id, land_id: b.land_id, type: b.type})), null, 2)}`);
+      const buildingsByLandKeysSample = Object.keys(buildingsByLand).slice(0,10);
+      console.log(`[ProblemService] Sample keys in buildingsByLand map (${buildingsByLandKeysSample.length} sample keys): ${buildingsByLandKeysSample.join(', ')}`);
+      if (buildingsByLandKeysSample.length > 0 && buildingsByLand[buildingsByLandKeysSample[0]]) {
+        console.log(`[ProblemService] Example: buildingsByLand['${buildingsByLandKeysSample[0]}'] has ${buildingsByLand[buildingsByLandKeysSample[0]].length} buildings.`);
+      }
+
+
       lands.forEach(land => {
-        const customLandId = land.landId; // The custom ID like "L001", or undefined
+        // Attempt to get the custom land ID, checking common property names/casing
+        // land.landId (expected camelCase from a well-structured API)
+        // (land as any).LandId (PascalCase, as it might be named in Airtable and directly passed by a simpler API)
+        const customLandId = land.landId || (land as any).LandId; 
         const airtableRecordId = land.id; // Airtable record ID, for fallback asset ID
 
+        if (!customLandId) {
+          console.warn(`[ProblemService] Land with Airtable ID ${airtableRecordId} is missing its custom land identifier (checked land.landId and land.LandId). Owner: ${land.owner}. HistoricalName: ${land.historicalName}`);
+        }
+        
         // Use customLandId for lookup if available.
-        // buildingsByLand is keyed by building.landId, which should be the custom LandId.
+        // buildingsByLand is keyed by building.land_id, which should be the custom LandId.
         const buildingsOnLand = customLandId ? (buildingsByLand[customLandId] || []) : [];
         
-        if (buildingsOnLand.length === 0) {
+        // Log details for each land processed for easier debugging
+        // console.log(`[ProblemService] Processing Land (Airtable ID: ${airtableRecordId}, Custom ID used: '${customLandId}', Owner: ${land.owner}): Found ${buildingsOnLand.length} buildings via buildingsByLand map.`);
+
+        if (!customLandId || buildingsOnLand.length === 0) {
+          if (customLandId && buildingsOnLand.length === 0) {
+            // This means customLandId was found on the land record, but no matching entry in buildingsByLand
+            // Check for potential case-insensitivity or whitespace issues if this log appears often
+            const lowerCustomLandId = customLandId.toLowerCase().trim();
+            const foundCaseInsensitive = Object.keys(buildingsByLand).find(k => k.toLowerCase().trim() === lowerCustomLandId);
+            if (foundCaseInsensitive && foundCaseInsensitive !== customLandId) {
+                console.warn(`[ProblemService] Potential case/whitespace mismatch for landId '${customLandId}'. Found similar key '${foundCaseInsensitive}' in buildingsByLand map.`);
+            } else if (!foundCaseInsensitive) {
+                // console.log(`[ProblemService] Land with customLandId '${customLandId}' had 0 buildings. No case-insensitive match found in buildingsByLand keys either.`);
+            }
+          }
           // Determine the assetId for the problem. Prefer customLandId, fallback to airtableRecordId.
           const problemAssetId = customLandId || airtableRecordId;
           const problemId = `no_buildings_${problemAssetId}_${Date.now()}`;
