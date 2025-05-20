@@ -89,14 +89,14 @@ export default function ProblemDetailsPanel({ problemId, onClose }: ProblemDetai
   const formatDate = (dateString: string): string => {
     try {
       const date = new Date(dateString);
-      return `${date.toLocaleDateString()} (${formatDistanceToNow(date, { addSuffix: true })})`;
+      return formatDistanceToNow(date, { addSuffix: true });
     } catch (error) {
       return dateString || 'Unknown';
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="bg-amber-50 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="bg-amber-800 text-white px-6 py-4 flex justify-between items-center">
@@ -128,20 +128,8 @@ export default function ProblemDetailsPanel({ problemId, onClose }: ProblemDetai
               {/* Problem metadata */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <div className="text-sm text-amber-800 font-medium">Problem ID</div>
-                  <div className="font-mono text-sm">{problem.problemId}</div>
-                </div>
-                <div>
                   <div className="text-sm text-amber-800 font-medium">Location</div>
                   <div>{problem.location || 'Unknown location'}</div>
-                </div>
-                <div>
-                  <div className="text-sm text-amber-800 font-medium">Asset Type</div>
-                  <div className="capitalize">{problem.assetType.replace(/_/g, ' ')}</div>
-                </div>
-                <div>
-                  <div className="text-sm text-amber-800 font-medium">Asset ID</div>
-                  <div className="font-mono text-sm truncate">{problem.assetId}</div>
                 </div>
                 <div>
                   <div className="text-sm text-amber-800 font-medium">Severity</div>
@@ -150,18 +138,8 @@ export default function ProblemDetailsPanel({ problemId, onClose }: ProblemDetai
                   </div>
                 </div>
                 <div>
-                  <div className="text-sm text-amber-800 font-medium">Status</div>
-                  <div className={`inline-block px-2 py-1 rounded text-xs font-medium ${getStatusColor(problem.status)}`}>
-                    {problem.status.toUpperCase()}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm text-amber-800 font-medium">Created</div>
-                  <div className="text-sm">{formatDate(problem.createdAt)}</div>
-                </div>
-                <div>
-                  <div className="text-sm text-amber-800 font-medium">Updated</div>
-                  <div className="text-sm">{formatDate(problem.updatedAt)}</div>
+                  <div className="text-sm text-amber-800 font-medium">Since</div>
+                  <div className="text-sm text-gray-500 font-serif">{formatDate(problem.createdAt)}</div>
                 </div>
               </div>
               
@@ -182,18 +160,6 @@ export default function ProblemDetailsPanel({ problemId, onClose }: ProblemDetai
                   <div className="bg-green-50 p-4 rounded-lg border border-green-200 prose prose-green max-w-none">
                     <ReactMarkdown>
                       {problem.solutions}
-                    </ReactMarkdown>
-                  </div>
-                </div>
-              )}
-              
-              {/* Notes */}
-              {problem.notes && (
-                <div>
-                  <div className="text-amber-800 font-medium mb-2">Notes</div>
-                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 prose prose-blue max-w-none">
-                    <ReactMarkdown>
-                      {problem.notes}
                     </ReactMarkdown>
                   </div>
                 </div>
