@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Airtable from 'airtable';
 import path from 'path';
+import fs from 'fs'; // Ensure fs is imported if not already
 import fs from 'fs';
 
 // Airtable config
@@ -107,6 +108,34 @@ async function findBuildingFile(buildingId: string): Promise<any | null> {
   return null;
 }
 
+// Helper function to ensure building ID and position are correctly populated
+function ensureBuildingDataIntegrity(building: any, buildingIdFromPath: string): any {
+  let modifiableBuilding = { ...building };
+
+  // Ensure 'id' field is present, using buildingIdFromPath if necessary
+  if (!modifiableBuilding.id && buildingIdFromPath) {
+    modifiableBuilding.id = buildingIdFromPath;
+  }
+
+  // Populate 'position' if empty and ID matches coordinate pattern
+  if ((!modifiableBuilding.position || modifiableBuilding.position === "") && modifiableBuilding.id) {
+    // Regex for building_LAT_LNG pattern (allows for optional negative signs and decimals)
+    const idPattern = /^building_(-?[0-9]+(?:\.[0-9]+)?)_(-?[0-9]+(?:\.[0-9]+)?)$/;
+    const idMatch = String(modifiableBuilding.id).match(idPattern);
+    
+    if (idMatch) {
+      const lat = parseFloat(idMatch[1]);
+      const lng = parseFloat(idMatch[2]); // Second captured group for longitude
+      
+      if (!isNaN(lat) && !isNaN(lng)) {
+        modifiableBuilding.position = JSON.stringify({ lat, lng });
+        console.log(`Populated position for ${modifiableBuilding.id} from ID: {"lat":${lat},"lng":${lng}}`);
+      }
+    }
+  }
+  return modifiableBuilding;
+}
+
 // ✅ Handler compatible with Next.js App Router
 export async function GET(request: NextRequest) {
   try {
@@ -146,9 +175,11 @@ export async function GET(request: NextRequest) {
             rent_amount: fields.RentAmount || 0,
             occupant: fields.Occupant || ''
           };
+          
+          const finalBuildingFromAirtable = ensureBuildingDataIntegrity(building, buildingId);
 
           console.log(`Building ${buildingId} from Airtable - Citizen field: '${fields.Citizen}', Occupant field: '${fields.Occupant}'`);
-          return NextResponse.json({ building });
+          return NextResponse.json({ building: finalBuildingFromAirtable });
         }
       } catch (err) {
         console.error('Airtable error:', err);
@@ -171,8 +202,11 @@ export async function GET(request: NextRequest) {
         });
       }
       
-      console.log(`Building ${buildingId} from local file - owner field: '${buildingData.owner}', occupant field: '${buildingData.occupant}'`);
-      return NextResponse.json({ building: buildingData });
+      // Ensure buildingData has an ID and position if applicable
+      const finalBuildingFromFile = ensureBuildingDataIntegrity(buildingData, buildingId);
+
+      console.log(`Building ${buildingId} from local file - owner field: '${finalBuildingFromFile.owner}', occupant field: '${finalBuildingFromFile.occupant}'`);
+      return NextResponse.json({ building: finalBuildingFromFile });
     }
 
     return NextResponse.json({ error: `Building not found: ${buildingId}` }, { status: 404 });
