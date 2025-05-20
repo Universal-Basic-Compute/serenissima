@@ -108,8 +108,8 @@ Land domination relevancy helps AIs and administrators:
 
 ### Data Structure
 
-**Global Landowner Profile Records (Global Domination Calculation - `citizenUsername: "all"`)**
-- When global domination is calculated (e.g., via `POST /api/relevancies/domination` with `citizenUsername: "all"`), one record is created *for each landowner*. These records are relevant to "all" (or a global entity like `ConsiglioDeiDieci`).
+**Global Landowner Profile Records (Global Domination Calculation - `Citizen: "all"`)**
+- When global domination is calculated (e.g., via `POST /api/relevancies/domination` with `Citizen: "all"`), one record is created *for each landowner*. These records are relevant to "all" (or a global entity like `ConsiglioDeiDieci`).
 - **RelevantToCitizen**: `"all"` (or `ConsiglioDeiDieci`)
 - **TargetCitizen**: The landowner being profiled (e.g., `CitizenAlpha`)
 - **AssetID**: The landowner being profiled (e.g., `CitizenAlpha`)
@@ -120,8 +120,8 @@ Land domination relevancy helps AIs and administrators:
 - **Description**: Details of `CitizenAlpha`'s land holdings and building points.
 - **Title**: e.g., "Land Domination: CitizenAlpha"
 
-**Peer Domination Profile Records (Specific User Request - `citizenUsername: "UserA"`)**
-- When a specific citizen (e.g., `UserA`) requests domination scores (via `POST /api/relevancies/domination` with `citizenUsername: "UserA"`), they receive a list of relevancies. Each relevancy in this list details how dominant *another* landowner (`UserB`, `UserC`, etc.) is. These are saved via the `saveRelevancies` utility.
+**Peer Domination Profile Records (Specific User Request - `Citizen: "UserA"`)**
+- When a specific citizen (e.g., `UserA`) requests domination scores (via `POST /api/relevancies/domination` with `Citizen: "UserA"`), they receive a list of relevancies. Each relevancy in this list details how dominant *another* landowner (`UserB`, `UserC`, etc.) is. These are saved via the `saveRelevancies` utility.
 - **RelevantToCitizen**: The requesting citizen (e.g., `UserA`)
 - **AssetID**: The other landowner being profiled (e.g., `UserB`)
 - **AssetType**: `citizen`
@@ -168,7 +168,7 @@ Calculates and saves relevancy scores (proximity and land domination) for a spec
 **Request Body:**
 ```json
 {
-  "citizenUsername": "citizen_name",
+  "Citizen": "citizen_name",
   "typeFilter": "connected" // Optional: Filter by type for proximity
 }
 ```
@@ -189,7 +189,7 @@ Calculates and saves relevancy scores (proximity and land domination) for a spec
 }
 ```
 
-If `citizenUsername` is `"all"` for domination (when calling `/api/relevancies/domination` POST), the response will indicate N global landowner profiles were saved (where N is the number of landowners):
+If `Citizen` is `"all"` for domination (when calling `/api/relevancies/domination` POST), the response will indicate N global landowner profiles were saved (where N is the number of landowners):
 ```json
 {
   "success": true,

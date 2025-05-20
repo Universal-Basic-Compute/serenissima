@@ -101,7 +101,7 @@ def calculate_land_domination_relevancies(base_url: str) -> Dict:
         # This will calculate and save domination relevancies for all citizens
         response = requests.post(
             api_url,
-            json={"citizenUsername": "all"},  # Use "all" as a special value to indicate all citizens
+            json={"Citizen": "all"},  # Use "all" as a special value to indicate all citizens
             timeout=120
         )
         
@@ -260,7 +260,7 @@ def calculate_building_ownership_relevancies(username: str, base_url: str) -> Di
         
         # Prepare the request payload
         payload = {
-            "citizenUsername": username
+            "Citizen": username
         }
         
         response = requests.post(
@@ -317,7 +317,7 @@ def calculate_relevancies_for_ai(username: str, base_url: str, type_filter: Opti
         
         # Prepare the request payload
         payload = {
-            "citizenUsername": username
+            "Citizen": username
         }
         
         # Add type filter if provided
