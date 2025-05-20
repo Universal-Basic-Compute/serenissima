@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
-import PlayerProfile from '../../UI/PlayerProfile';
 
 interface CitizenProfileData {
   username: string;
   firstName?: string;
   lastName?: string;
-  coatOfArmsImageUrl?: string | null; // This corresponds to PlayerProfile's coatOfArmsImageUrl
-  imageUrl?: string | null; // General image URL, if different
-  // Add other fields if needed, like Ducats, familyMotto, etc.
+  coatOfArmsImageUrl?: string | null;
+  imageUrl?: string | null;
+  familyMotto?: string | null;
 }
 
 interface BuildingOwnerProps {
@@ -51,8 +50,9 @@ const BuildingOwner: React.FC<BuildingOwnerProps> = ({ owner }) => {
               firstName: data.citizen.FirstName || data.citizen.firstName,
               lastName: data.citizen.LastName || data.citizen.lastName,
               // PlayerProfile uses coatOfArmsImageUrl, ensure your API provides this or an equivalent
-              coatOfArmsImageUrl: data.citizen.CoatOfArmsImageUrl || data.citizen.coatOfArmsImageUrl || data.citizen.imageUrl,
-              imageUrl: data.citizen.ImageUrl || data.citizen.imageUrl // A more general image if available
+              coatOfArmsImageUrl: data.citizen.CoatOfArmsImageUrl || data.citizen.coatOfArmsImageUrl,
+              imageUrl: data.citizen.ImageUrl || data.citizen.imageUrl, // A more general image if available
+              familyMotto: data.citizen.FamilyMotto || data.citizen.familyMotto
             });
           } else {
             throw new Error(data.error || 'Owner profile data is not in expected format.');
@@ -86,17 +86,45 @@ const BuildingOwner: React.FC<BuildingOwnerProps> = ({ owner }) => {
         <p className="text-center text-red-500 italic">{error}</p>
       )}
       {!isLoading && !error && ownerProfile && (
-        <div className="flex items-center justify-center">
-          <PlayerProfile
-            username={ownerProfile.username}
-            firstName={ownerProfile.firstName}
-            lastName={ownerProfile.lastName}
-            coatOfArmsImageUrl={ownerProfile.coatOfArmsImageUrl || ownerProfile.imageUrl}
-            // walletAddress could be ownerProfile.username or a specific wallet field if available
-            walletAddress={ownerProfile.username} 
-            size="medium"
-            className="mx-auto"
-          />
+        <div className="flex flex-col items-center space-y-3">
+          <div className="flex space-x-4 items-start">
+            {/* Main Image */}
+            {ownerProfile.imageUrl && (
+              <div className="w-24 h-24 rounded-lg overflow-hidden border-2 border-amber-400 shadow-md">
+                <img 
+                  src={ownerProfile.imageUrl} 
+                  alt={`${ownerProfile.firstName} ${ownerProfile.lastName}`} 
+                  className="w-full h-full object-cover"
+                  onError={(e) => (e.currentTarget.style.display = 'none')} 
+                />
+              </div>
+            )}
+            {/* Coat of Arms */}
+            {ownerProfile.coatOfArmsImageUrl && (
+              <div className="w-20 h-20 rounded-md overflow-hidden border border-amber-300 shadow-sm">
+                <img 
+                  src={ownerProfile.coatOfArmsImageUrl} 
+                  alt="Coat of Arms" 
+                  className="w-full h-full object-contain"
+                  onError={(e) => (e.currentTarget.style.display = 'none')} 
+                />
+              </div>
+            )}
+          </div>
+          
+          <div className="text-center">
+            <p className="text-lg font-semibold text-amber-800">
+              {ownerProfile.firstName} {ownerProfile.lastName}
+            </p>
+            <p className="text-sm text-amber-600">
+              @{ownerProfile.username}
+            </p>
+            {ownerProfile.familyMotto && (
+              <p className="text-xs italic text-gray-500 mt-1">
+                "{ownerProfile.familyMotto}"
+              </p>
+            )}
+          </div>
         </div>
       )}
       {!isLoading && !error && !ownerProfile && !owner && (
