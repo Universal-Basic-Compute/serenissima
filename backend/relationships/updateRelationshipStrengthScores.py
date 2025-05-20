@@ -172,81 +172,83 @@ def update_relationship_scores(
     record_id_to_username_map: Dict[str, str]
 ) -> Dict[str, float]:
     """Update relationship strength scores based on relevancies."""
-    source_username = source_citizen_record['fields']['Username']
-    log.info(f"Updating relationship scores for source citizen: {source_username}")
-    
-    # Track new scores to be added for each target citizen
-    accumulated_scores_for_targets: Dict[str, float] = {}
-    
-    # Process each relevancy
-    for relevancy in relevancies:
-        raw_target_value = relevancy['fields'].get('TargetCitizen')
-        relevancy_score = float(relevancy['fields'].get('Score', 0))
+    try:
+        source_username = source_citizen_record['fields']['Username']
+        log.info(f"Updating relationship scores for source citizen: {source_username}")
         
-        potential_target_usernames: set[str] = set()
+        # Track new scores to be added for each target citizen
+        accumulated_scores_for_targets: Dict[str, float] = {}
+        
+        # Process each relevancy
+        for relevancy in relevancies:
+            raw_target_value = relevancy['fields'].get('TargetCitizen')
+            relevancy_score = float(relevancy['fields'].get('Score', 0))
+            
+            potential_target_usernames: set[str] = set()
 
-        if isinstance(raw_target_value, str):
-            # Could be a single username, or a JSON string array of usernames
-            try:
-                if raw_target_value.startswith('[') and raw_target_value.endswith(']'):
-                    parsed_targets = json.loads(raw_target_value)
-                    if isinstance(parsed_targets, list):
-                        potential_target_usernames.update(str(t) for t in parsed_targets)
-                    else: # Should not happen if JSON is a list, but as a fallback
+            if isinstance(raw_target_value, str):
+                # Could be a single username, or a JSON string array of usernames
+                try:
+                    if raw_target_value.startswith('[') and raw_target_value.endswith(']'):
+                        # import json # Already imported at the top of the file
+                        parsed_targets = json.loads(raw_target_value)
+                        if isinstance(parsed_targets, list):
+                            potential_target_usernames.update(str(t) for t in parsed_targets)
+                        else: # Should not happen if JSON is a list, but as a fallback
+                            potential_target_usernames.add(raw_target_value)
+                    else: # Assume it's a single username string
                         potential_target_usernames.add(raw_target_value)
-                else: # Assume it's a single username string
+                except json.JSONDecodeError:
+                    # Not a valid JSON string, treat as a single username
                     potential_target_usernames.add(raw_target_value)
-            except json.JSONDecodeError:
-                # Not a valid JSON string, treat as a single username
-                potential_target_usernames.add(raw_target_value)
-        elif isinstance(raw_target_value, list):
-            # Assumed to be a list of Airtable Record IDs (from a linked field)
-            for rec_id in raw_target_value:
-                mapped_username = record_id_to_username_map.get(rec_id)
-                if mapped_username:
-                    potential_target_usernames.add(mapped_username)
-        
-        for target_username in potential_target_usernames:
-            # Skip if no valid target username or if target is the source citizen itself
-            if not target_username or target_username == source_username:
-                continue
+            elif isinstance(raw_target_value, list):
+                # Assumed to be a list of Airtable Record IDs (from a linked field)
+                for rec_id in raw_target_value:
+                    mapped_username = record_id_to_username_map.get(rec_id)
+                    if mapped_username:
+                        potential_target_usernames.add(mapped_username)
             
-            # Add relevancy score to this target
-            accumulated_scores_for_targets[target_username] = \
-                accumulated_scores_for_targets.get(target_username, 0.0) + relevancy_score
-            
-    # Now update or create relationships in Airtable
-    updated_count = 0
-    created_count = 0
-    
-    for target_username, score_to_add in accumulated_scores_for_targets.items():
-        if target_username in existing_relationships:
-            # Update existing relationship
-            record = existing_relationships[target_username]
-            record_id = record['id']
+            for target_username in potential_target_usernames:
+                # Skip if no valid target username or if target is the source citizen itself
+                if not target_username or target_username == source_username:
+                    continue
                 
-            # Apply 25% decay to existing score
-            existing_score = float(record.get('strengthScore', 0.0)) * 0.75
-            
-            # Add new score_to_add
-            updated_score = existing_score + score_to_add
-            
-            # Update the record
-            tables['relationships'].update(record_id, {
-                'StrengthScore': updated_score,
-                'LastUpdated': datetime.now().isoformat()
-            })
-            updated_count += 1
-        else:
-                # Create new relationship
-                tables['relationships'].create({
-                    'AICitizen': source_username,
-                    'TargetCitizen': target_username,
-                    'StrengthScore': score_to_add, # New relationships start with the accumulated score from recent relevancies
+                # Add relevancy score to this target
+                accumulated_scores_for_targets[target_username] = \
+                    accumulated_scores_for_targets.get(target_username, 0.0) + relevancy_score
+                
+        # Now update or create relationships in Airtable
+        updated_count = 0
+        created_count = 0
+        
+        for target_username, score_to_add in accumulated_scores_for_targets.items():
+            if target_username in existing_relationships:
+                # Update existing relationship
+                record = existing_relationships[target_username]
+                record_id = record['id']
+                
+                # Apply 25% decay to existing score
+                existing_score = float(record.get('strengthScore', 0.0)) * 0.75
+                
+                # Add new score_to_add
+                updated_score = existing_score + score_to_add
+                
+                # Update the record
+                tables['relationships'].update(record_id, {
+                    'StrengthScore': updated_score,
                     'LastUpdated': datetime.now().isoformat()
                 })
-                created_count += 1
-        
+                updated_count += 1
+            else:
+                    # Create new relationship
+                    tables['relationships'].create({
+                        'AICitizen': source_username,
+                        'TargetCitizen': target_username,
+                        'StrengthScore': score_to_add, # New relationships start with the accumulated score from recent relevancies
+                        'LastUpdated': datetime.now().isoformat()
+                    })
+                    created_count += 1
+            
         log.info(f"For source {source_username}: Updated {updated_count} and created {created_count} relationships.")
         return accumulated_scores_for_targets # Return the scores that were processed
     except Exception as e:
