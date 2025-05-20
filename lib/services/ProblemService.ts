@@ -206,45 +206,49 @@ export class ProblemService {
       }
 
       const citizens = allFetchedCitizens.filter(c => {
-        const fields = c.fields || {}; // Ensure fields object exists
         let effectiveUsername: string | undefined = undefined;
-        const originalPascalUsername = fields.Username;
-        const camelUsername = (fields as any).username;
+        // Access Username directly from 'c' or '(c as any)'
+        const originalPascalUsername = c.Username;
+        const camelUsername = (c as any).username;
 
-        if (fields.Username && typeof fields.Username === 'string' && fields.Username.trim() !== '') {
-          effectiveUsername = fields.Username.trim();
+        if (c.Username && typeof c.Username === 'string' && c.Username.trim() !== '') {
+          effectiveUsername = c.Username.trim();
         } else if (camelUsername && typeof camelUsername === 'string' && camelUsername.trim() !== '') {
           effectiveUsername = camelUsername.trim();
+          // Normalize to PascalCase for consistent use if found as camelCase
+          c.Username = effectiveUsername; 
         }
 
-        // Normalize Username onto the citizen object 'c'
-        if (effectiveUsername) {
-          c.Username = effectiveUsername;
-        } else {
-          // Construct an identifier for logging even if username is missing
-          const logIdentifier = fields.CitizenId || (fields as any).citizenId || c.id || 'Unknown ID (no Username, CitizenId, or record id)';
+        // Construct an identifier for logging
+        // Access CitizenId directly from 'c' or '(c as any)'
+        const logIdentifier = c.CitizenId || (c as any).citizenId || c.id || 'Unknown ID (no Username, CitizenId, or record id)';
+
+        if (!effectiveUsername) {
           console.warn(`[ProblemService] detectHomelessCitizens: Citizen ${logIdentifier} has invalid or missing Username. Checked Username (PascalCase): '${originalPascalUsername}', username (camelCase): '${camelUsername}'. Excluding from homeless check.`);
           return false;
         }
+        // If effectiveUsername was found (and potentially normalized to c.Username), we can proceed.
 
         // Normalize CitizenId onto the citizen object 'c'
-        const originalPascalCitizenId = fields.CitizenId;
-        const camelCitizenId = (fields as any).citizenId;
+        // Access CitizenId directly from 'c' or '(c as any)'
+        const originalPascalCitizenId = c.CitizenId;
+        const camelCitizenId = (c as any).citizenId;
         let effectiveCitizenId: string | undefined = undefined;
 
-        if (fields.CitizenId && typeof fields.CitizenId === 'string' && fields.CitizenId.trim() !== '') {
-          effectiveCitizenId = fields.CitizenId.trim();
+        if (c.CitizenId && typeof c.CitizenId === 'string' && c.CitizenId.trim() !== '') {
+          effectiveCitizenId = c.CitizenId.trim();
         } else if (camelCitizenId && typeof camelCitizenId === 'string' && camelCitizenId.trim() !== '') {
           effectiveCitizenId = camelCitizenId.trim();
+          // Normalize to PascalCase for consistent use if found as camelCase
+          c.CitizenId = effectiveCitizenId;
         }
         
-        if (effectiveCitizenId) {
-          c.CitizenId = effectiveCitizenId;
-        } else {
+        if (!effectiveCitizenId) {
            // If no effective CitizenId, c.CitizenId remains as it was (likely undefined).
            // The problem creation logic `citizen.CitizenId || citizen.id` will handle this by falling back to c.id.
            console.warn(`[ProblemService] detectHomelessCitizens: Citizen (Username: ${c.Username}, AirtableID: ${c.id}) missing effective CitizenId (checked CitizenId: '${originalPascalCitizenId}', citizenId: '${camelCitizenId}'). Will use Airtable record ID as fallback assetId.`);
         }
+        // c.CitizenId is now either the original PascalCase, the normalized camelCase, or undefined.
         return true;
       });
 
@@ -340,43 +344,47 @@ export class ProblemService {
       }
 
       const citizens = allFetchedCitizens.filter(c => {
-        const fields = c.fields || {}; // Ensure fields object exists
         let effectiveUsername: string | undefined = undefined;
-        const originalPascalUsername = fields.Username;
-        const camelUsername = (fields as any).username;
+        // Access Username directly from 'c' or '(c as any)'
+        const originalPascalUsername = c.Username;
+        const camelUsername = (c as any).username;
 
-        if (fields.Username && typeof fields.Username === 'string' && fields.Username.trim() !== '') {
-          effectiveUsername = fields.Username.trim();
+        if (c.Username && typeof c.Username === 'string' && c.Username.trim() !== '') {
+          effectiveUsername = c.Username.trim();
         } else if (camelUsername && typeof camelUsername === 'string' && camelUsername.trim() !== '') {
           effectiveUsername = camelUsername.trim();
-        }
-
-        // Normalize Username onto the citizen object 'c'
-        if (effectiveUsername) {
+          // Normalize to PascalCase for consistent use if found as camelCase
           c.Username = effectiveUsername;
-        } else {
-          // Construct an identifier for logging even if username is missing
-          const logIdentifier = fields.CitizenId || (fields as any).citizenId || c.id || 'Unknown ID (no Username, CitizenId, or record id)';
+        }
+        
+        // Construct an identifier for logging
+        // Access CitizenId directly from 'c' or '(c as any)'
+        const logIdentifier = c.CitizenId || (c as any).citizenId || c.id || 'Unknown ID (no Username, CitizenId, or record id)';
+
+        if (!effectiveUsername) {
           console.warn(`[ProblemService] detectWorklessCitizens: Citizen ${logIdentifier} has invalid or missing Username. Checked Username (PascalCase): '${originalPascalUsername}', username (camelCase): '${camelUsername}'. Excluding from workless check.`);
           return false;
         }
+        // If effectiveUsername was found (and potentially normalized to c.Username), we can proceed.
 
         // Normalize CitizenId onto the citizen object 'c'
-        const originalPascalCitizenId = fields.CitizenId;
-        const camelCitizenId = (fields as any).citizenId;
+        // Access CitizenId directly from 'c' or '(c as any)'
+        const originalPascalCitizenId = c.CitizenId;
+        const camelCitizenId = (c as any).citizenId;
         let effectiveCitizenId: string | undefined = undefined;
 
-        if (fields.CitizenId && typeof fields.CitizenId === 'string' && fields.CitizenId.trim() !== '') {
-          effectiveCitizenId = fields.CitizenId.trim();
+        if (c.CitizenId && typeof c.CitizenId === 'string' && c.CitizenId.trim() !== '') {
+          effectiveCitizenId = c.CitizenId.trim();
         } else if (camelCitizenId && typeof camelCitizenId === 'string' && camelCitizenId.trim() !== '') {
           effectiveCitizenId = camelCitizenId.trim();
+          // Normalize to PascalCase for consistent use if found as camelCase
+          c.CitizenId = effectiveCitizenId;
         }
         
-        if (effectiveCitizenId) {
-          c.CitizenId = effectiveCitizenId;
-        } else {
+        if (!effectiveCitizenId) {
            console.warn(`[ProblemService] detectWorklessCitizens: Citizen (Username: ${c.Username}, AirtableID: ${c.id}) missing effective CitizenId (checked CitizenId: '${originalPascalCitizenId}', citizenId: '${camelCitizenId}'). Will use Airtable record ID as fallback assetId.`);
         }
+        // c.CitizenId is now either the original PascalCase, the normalized camelCase, or undefined.
         return true;
       });
 
