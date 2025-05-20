@@ -80,7 +80,8 @@ def get_all_buildings_by_land(tables: Dict[str, Table]) -> Dict[str, List[Dict[s
     buildings_by_land = {}
     try:
         log_info("Fetching all buildings from Airtable...")
-        all_buildings = tables["buildings"].all(fields=["LandId", "Type", "Point", "Position"])
+        # Removed "Position" from fields as it does not exist in the Airtable table
+        all_buildings = tables["buildings"].all(fields=["LandId", "Type", "Point"])
         log_success(f"Fetched {len(all_buildings)} total building records.")
         for building_record in all_buildings:
             land_id = building_record.get("fields", {}).get("LandId")
@@ -118,24 +119,51 @@ def get_polygon_data_for_land(land_id: str) -> Optional[Dict[str, Any]]:
         log_error(f"An unexpected error occurred while fetching polygon data for land {land_id}: {e}")
         return None
 
+def parse_point_string_to_coords(point_string: Optional[str]) -> Optional[Dict[str, float]]:
+    """
+    Parses a point string in the format 'type_lat_lng' or 'type_lat_lng_index'
+    and returns a dictionary with lat and lng.
+    Returns None if parsing fails.
+    """
+    if not point_string:
+        return None
+    parts = point_string.split('_')
+    # We need at least 3 parts for type, lat, lng.
+    if len(parts) >= 3:
+        try:
+            lat = float(parts[1])
+            lng = float(parts[2])
+            return {"lat": lat, "lng": lng}
+        except ValueError:
+            # Latitude or longitude are not valid floats
+            log_warning(f"Could not parse lat/lng from point string: {point_string}")
+            return None
+    log_warning(f"Point string format not recognized for coordinate parsing: {point_string}")
+    return None
+
 def is_point_occupied(point_coords: Dict[str, float], point_id: Optional[str], existing_buildings_on_land: List[Dict[str, Any]]) -> bool:
     """Check if a given point (by coordinates or ID) is already occupied by an existing building."""
     for building in existing_buildings_on_land:
-        # Check by Point ID first if available
-        if point_id and building.get("Point") == point_id:
+        existing_building_point_value = building.get("Point")
+
+        # Check 1: Direct match of point_id (e.g., polygon point ID stored in building's "Point" field)
+        if point_id and existing_building_point_value == point_id:
+            log_info(f"Point ID {point_id} is occupied (direct match with existing building's Point field).")
             return True
         
-        # Check by coordinates
-        building_pos_str = building.get("Position")
-        if building_pos_str:
-            try:
-                building_pos = json.loads(building_pos_str)
+        # Check 2: Coordinate comparison by parsing the existing building's "Point" field
+        # This handles cases where "Point" field stores a string like "building_lat_lng"
+        if existing_building_point_value:
+            parsed_coords = parse_point_string_to_coords(existing_building_point_value)
+            if parsed_coords:
                 # Compare with a small tolerance for float precision
-                if (abs(building_pos.get("lat", 0.0) - point_coords.get("lat", 1.0)) < 0.00001 and
-                    abs(building_pos.get("lng", 0.0) - point_coords.get("lng", 1.0)) < 0.00001):
+                if (abs(parsed_coords["lat"] - point_coords["lat"]) < 0.00001 and
+                    abs(parsed_coords["lng"] - point_coords["lng"]) < 0.00001):
+                    log_info(f"Point at {point_coords} is occupied (coordinate match with existing building's Point field: {existing_building_point_value}).")
                     return True
-            except json.JSONDecodeError:
-                log_warning(f"Could not parse Position JSON for building: {building.get('BuildingId', 'Unknown')}")
+            # else: The point string was not in a parsable coordinate format, or was null.
+            # This is fine, it just means this specific check didn't find a match.
+            
     return False
 
 def find_available_point(
@@ -271,8 +299,9 @@ def main(dry_run: bool):
                         # Add a placeholder to existing_buildings_on_this_land if not dry_run to prevent using the same point for a dock
                         if not dry_run:
                              existing_buildings_on_this_land.append({
-                                "Type": PUBLIC_WELL_TYPE, "Point": available_building_point["id"],
-                                "Position": json.dumps({"lat": available_building_point["lat"], "lng": available_building_point["lng"]})
+                                "Type": PUBLIC_WELL_TYPE, 
+                                "Point": available_building_point["id"] 
+                                # "Position" field is not added here as it's not used for checking occupancy from existing_buildings_on_this_land
                             })
                 else:
                     log_warning(f"No available building points found for '{PUBLIC_WELL_TYPE}' on land {land_name}.")
