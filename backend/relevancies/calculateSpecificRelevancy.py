@@ -381,16 +381,16 @@ def calculate_specific_relevancy(
             log.info("Finished processing building occupant relationship relevancies for all citizens.")
             return True
 
-    elif relevancy_type == "same_island_neighbor":
-        api_url = f"{base_url}/api/relevancies/same-island-neighbor"
+    elif relevancy_type == "same_land_neighbor":
+        api_url = f"{base_url}/api/relevancies/same-land-neighbor"
         payload = {} # Global calculation, username not typically used for this one.
         if username: # If a username is passed, the API might support it for a specific view, but primary is global.
             payload["Citizen"] = username
-            log.info(f"Requesting same island neighbor relevancy (context: {username}).")
+            log.info(f"Requesting same land neighbor relevancy (context: {username}).")
         else:
-            log.info("Requesting same island neighbor relevancy (global for all islands).")
-        request_timeout = 180 # Might take longer if many islands/occupants
-        # This type of relevancy is handled by its own API POST which saves one record per island group.
+            log.info("Requesting same land neighbor relevancy (global for all lands).")
+        request_timeout = 180 # Might take longer if many lands/occupants
+        # This type of relevancy is handled by its own API POST which saves one record per land group.
         # The multi_user_results logic is not directly applicable here in the same way as proximity for all landowners.
         # The API response will indicate success/failure and count of groups processed.
         
@@ -446,8 +446,8 @@ def calculate_specific_relevancy(
             relevancies_created_count = data.get('relevanciesSavedCount', len(data.get('relevancyScores', {})))
         elif relevancy_type == "building_occupant" and username: # For specific user
             relevancies_created_count = data.get('relevanciesSavedCount', len(data.get('relevancyScores', {})))
-        elif relevancy_type == "same_island_neighbor": # Global calculation
-            relevancies_created_count = data.get('relevanciesSavedCount', 0) # API returns count of island groups processed
+        elif relevancy_type == "same_land_neighbor": # Global calculation
+            relevancies_created_count = data.get('relevanciesSavedCount', 0) # API returns count of land groups processed
 
 
         notification_title = f"{relevancy_type.replace('_', ' ').capitalize()} Relevancy Calculation Complete"
@@ -474,9 +474,9 @@ def calculate_specific_relevancy(
         elif relevancy_type in ["housing", "jobs"] and not username: # These are always global
             target_user_info = "all (Global Report)"
             log_context_message = f"for global {relevancy_type} context"
-        elif relevancy_type == "same_island_neighbor" and not username:
-            target_user_info = "all islands"
-            log_context_message = "for all island communities"
+        elif relevancy_type == "same_land_neighbor" and not username:
+            target_user_info = "all lands"
+            log_context_message = "for all land communities"
         elif not username and relevancy_type == "proximity": # Proximity for all landowners
              target_user_info = "all landowners"
              log_context_message = "for all landowners (proximity)"
@@ -518,7 +518,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--type", 
         required=True, 
-        choices=["proximity", "domination", "housing", "jobs", "building_ownership", "building_operator", "building_occupant", "same_island_neighbor"],
+        choices=["proximity", "domination", "housing", "jobs", "building_ownership", "building_operator", "building_occupant", "same_land_neighbor"],
         help="The type of relevancy to calculate."
     )
     parser.add_argument(

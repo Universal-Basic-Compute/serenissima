@@ -103,12 +103,12 @@ export function ResourceList({
               <div className="flex items-center">
                 <div className="w-8 h-8 mr-2 flex-shrink-0 bg-amber-200 rounded overflow-hidden">
                   <img 
-                    src={`/resources/${(resource.icon || resource.resourceType || resource.name || 'default').toLowerCase().replace(/\s+/g, '_')}.png`}
+                    src={`/resources/${(resource.icon || resource.resourceType || resource.name || 'default').toLowerCase().replace(/\s+/g, '_').replace(".png", "")}.png`}
                     alt={resource.name || resource.resourceType}
                     className="w-full h-full object-contain"
                     onError={(e) => {
                       // Try alternative paths if the first one fails
-                      (e.target as HTMLImageElement).src = `/images/resources/${(resource.icon || resource.resourceType || resource.name || 'default').toLowerCase().replace(/\s+/g, '_')}.png`;
+                      (e.target as HTMLImageElement).src = `/images/resources/${(resource.icon || resource.resourceType || resource.name || 'default').toLowerCase().replace(/\s+/g, '_').replace(".png", "")}.png`;
                       (e.target as HTMLImageElement).onerror = () => {
                         (e.target as HTMLImageElement).src = '/images/resources/default.png';
                       };

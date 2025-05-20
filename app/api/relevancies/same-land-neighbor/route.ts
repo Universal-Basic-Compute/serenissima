@@ -39,13 +39,13 @@ export async function POST(request: NextRequest) {
     // const body = await request.json(); // Optional: if you want to pass citizen for specific calculation
     // const { Citizen: specificCitizen } = body;
 
-    // For "same_island_neighbor", we typically calculate for all islands globally.
-    const groupRelevancies = await relevancyService.calculateSameIslandNeighborRelevancy();
+    // For "same_land_neighbor", we typically calculate for all lands globally.
+    const groupRelevancies = await relevancyService.calculateSameLandNeighborRelevancy();
 
     if (!groupRelevancies || groupRelevancies.length === 0) {
       return NextResponse.json({
         success: true,
-        message: 'No same island neighbor relevancies to create.',
+        message: 'No same land neighbor relevancies to create.',
         relevanciesSavedCount: 0,
         saved: true
       });
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
 
     for (const relevancy of groupRelevancies) {
       const landId = relevancy.assetId;
-      const stableRelevancyId = `same_island_neighbor_${landId}`;
+      const stableRelevancyId = `same_land_neighbor_${landId}`;
 
       // Map usernames to Airtable Record IDs for RelevantToCitizen and TargetCitizen
       const relevantToCitizenRecordIds = (Array.isArray(relevancy.relevantToCitizen) ? relevancy.relevantToCitizen : [relevancy.relevantToCitizen])
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
         Status: relevancy.status,
         RelevantToCitizen: relevantToCitizenRecordIds, // Array of Record IDs
         TargetCitizen: targetCitizenRecordIds,     // Array of Record IDs
-        Notes: `Island community on ${landId}`,
+        Notes: `Land community on ${landId}`,
         CreatedAt: new Date().toISOString()
       };
 
@@ -104,24 +104,24 @@ export async function POST(request: NextRequest) {
         // Create the new record
         await airtableBase(AIRTABLE_RELEVANCIES_TABLE).create([{ fields: fieldsToSave }]);
         relevanciesSavedCount++;
-        console.log(`Saved 'same_island_neighbor' relevancy for LandId ${landId}.`);
+        console.log(`Saved 'same_land_neighbor' relevancy for LandId ${landId}.`);
       } catch (error) {
-        console.error(`Error saving 'same_island_neighbor' relevancy for LandId ${landId}:`, error);
+        console.error(`Error saving 'same_land_neighbor' relevancy for LandId ${landId}:`, error);
         // Decide if one error should stop the whole process or just log and continue
       }
     }
 
     return NextResponse.json({
       success: true,
-      message: `Processed same island neighbor relevancies.`,
+      message: `Processed same land neighbor relevancies.`,
       relevanciesSavedCount,
       saved: true 
     });
 
   } catch (error) {
-    console.error('Error calculating and saving same island neighbor relevancies:', error);
+    console.error('Error calculating and saving same land neighbor relevancies:', error);
     return NextResponse.json(
-      { error: 'Failed to calculate and save same island neighbor relevancies', details: error.message },
+      { error: 'Failed to calculate and save same land neighbor relevancies', details: error.message },
       { status: 500 }
     );
   }

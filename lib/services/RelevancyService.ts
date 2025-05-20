@@ -1061,28 +1061,28 @@ export class RelevancyService {
   }
 
   /**
-   * Calculate "same island neighbor" relevancy.
+   * Calculate "same land neighbor" relevancy.
    * Identifies groups of citizens living on the same LandId.
-   * Returns an array of RelevancyScore objects, one for each island/land with multiple occupants.
+   * Returns an array of RelevancyScore objects, one for each land/land with multiple occupants.
    */
-  public async calculateSameIslandNeighborRelevancy(): Promise<RelevancyScore[]> {
+  public async calculateSameLandNeighborRelevancy(): Promise<RelevancyScore[]> {
     const createdRelevancies: RelevancyScore[] = [];
     try {
       const baseUrl = typeof window !== 'undefined' 
         ? window.location.origin 
         : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
       
-      console.log(`[RelevancyService] Calculating same island neighbor relevancy`);
+      console.log(`[RelevancyService] Calculating same land neighbor relevancy`);
       
       // Fetch all buildings. Ensure API returns LandId, Occupant, Category.
       const buildingsResponse = await fetch(`${baseUrl}/api/buildings`); 
       if (!buildingsResponse.ok) {
-        console.error(`[RelevancyService] Failed to fetch buildings for same island neighbor relevancy: ${buildingsResponse.status}`);
+        console.error(`[RelevancyService] Failed to fetch buildings for same land neighbor relevancy: ${buildingsResponse.status}`);
         return [];
       }
       const buildingsData = await buildingsResponse.json();
       const allBuildings: BuildingData[] = buildingsData.buildings || [];
-      console.log(`[RelevancyService] Fetched ${allBuildings.length} total buildings for same island neighbor relevancy.`);
+      console.log(`[RelevancyService] Fetched ${allBuildings.length} total buildings for same land neighbor relevancy.`);
 
       // Group occupants by LandId for home category buildings
       const occupantsByLandId: Record<string, string[]> = {};
@@ -1104,11 +1104,11 @@ export class RelevancyService {
         if (occupants.length > 1) { // Only create relevancy if there are actual neighbors
           const score = 50 + Math.min(occupants.length * 2, 30); // Score increases slightly with more neighbors, capped
           const status = this.determineStatus(score);
-          const buildingType = "Island Community"; // Generic term
+          const buildingType = "Land Community"; // Generic term
           
           // Fetch land details for better title/description if possible (optional enhancement)
           // For now, use LandId
-          const landName = `Island/Land ${landId}`;
+          const landName = `Land/Land ${landId}`;
 
           const title = `Neighbors on ${landName}`;
           const description = `You share **${landName}** with other residents, fostering a local community.\n\n` +
@@ -1121,7 +1121,7 @@ export class RelevancyService {
             assetId: landId, // The LandId is the asset
             assetType: 'land_group', // New asset type
             category: 'neighborhood',
-            type: 'same_island_neighbor',
+            type: 'same_land_neighbor',
             distance: 0,
             closestLandId: landId,
             isConnected: true, // Assuming living on the same land implies connection
@@ -1136,10 +1136,10 @@ export class RelevancyService {
         }
       }
       
-      console.log(`[RelevancyService] Generated ${createdRelevancies.length} 'same_island_neighbor' group relevancy objects.`);
+      console.log(`[RelevancyService] Generated ${createdRelevancies.length} 'same_land_neighbor' group relevancy objects.`);
       return createdRelevancies;
     } catch (error) {
-      console.error(`[RelevancyService] Error calculating 'same_island_neighbor' relevancy:`, error);
+      console.error(`[RelevancyService] Error calculating 'same_land_neighbor' relevancy:`, error);
       return [];
     }
   }

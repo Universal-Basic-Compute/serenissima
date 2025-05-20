@@ -62,8 +62,8 @@ export async function POST(request: NextRequest) {
   try {
     // Get the username and type filter from the request body
     const body = await request.json();
-    const { citizenUsername, typeFilter } = body; // Changed from aiUsername
-    const username = citizenUsername; 
+    const { Citizen, typeFilter } = body; // Changed from aiUsername
+    const username = Citizen; 
     
     if (!username) {
       return NextResponse.json(
