@@ -309,6 +309,40 @@ export class ProblemService {
             notes: `Citizen ${citizen.Username} has no building with Category 'home' where they are listed as Occupant.`,
             position: citizen.position || null // Use citizen.position (object) or null
           };
+
+          // Check if this homeless citizen is employed and create a problem for the employer
+          if (citizen.workplace && typeof citizen.workplace === 'string') {
+            const workplaceId = citizen.workplace; // Assuming citizen.workplace is the BuildingId
+            const workplaceBuilding = buildings.find(b => b.id === workplaceId || b.buildingId === workplaceId);
+
+            if (workplaceBuilding && 
+                workplaceBuilding.occupant === citizen.Username && // Confirm this citizen is the occupant
+                workplaceBuilding.ranBy && 
+                typeof workplaceBuilding.ranBy === 'string' &&
+                workplaceBuilding.ranBy !== citizen.Username) { // Employer is not the citizen themselves
+              
+              const employerUsername = workplaceBuilding.ranBy;
+              const employeeName = `${citizen.FirstName || citizen.Username} ${citizen.LastName || ''}`.trim();
+              const employerProblemId = `homeless_employee_impact_${employerUsername}_${citizen.Username}_${Date.now()}`;
+              
+              problems[employerProblemId] = {
+                problemId: employerProblemId,
+                citizen: employerUsername, // Problem is for the employer
+                assetType: 'employee_performance',
+                assetId: citizen.CitizenId || citizen.id, // Asset is the homeless employee
+                severity: 'low',
+                status: 'active',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                location: workplaceBuilding.name || workplaceBuilding.id, // Workplace location
+                title: 'Homeless Employee Impact',
+                description: `Your employee, **${employeeName}**, is currently homeless. Homelessness can lead to instability and may result in up to a 50% reduction in productivity.`,
+                solutions: `Consider discussing housing options with **${employeeName}** or providing assistance if possible. Monitor their work performance and consider recruitment alternatives if productivity is significantly impacted.`,
+                notes: `Homeless Employee: ${citizen.Username} (ID: ${citizen.CitizenId || citizen.id}), Workplace: ${workplaceBuilding.name || workplaceId} (ID: ${workplaceId})`,
+                position: workplaceBuilding.position || null // Workplace position
+              };
+            }
+          }
         }
       });
 

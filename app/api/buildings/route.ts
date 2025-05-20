@@ -442,6 +442,7 @@ export async function GET(request: Request) {
         owner: fields.owner, // Ensure owner is explicitly passed
         occupant: fields.occupant, // Ensure occupant is explicitly passed (camelCased from Occupant)
         category: fields.category, // Ensure category is explicitly passed (camelCased from Category)
+        ranBy: fields.ranBy, // Ensure ranBy is explicitly passed (camelCased from RanBy)
         position: position,
         // Include other important fields that might be directly accessed by services
         name: fields.name,
