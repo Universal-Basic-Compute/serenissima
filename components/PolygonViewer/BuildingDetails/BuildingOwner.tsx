@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { eventBus } from '@/lib/utils/eventBus'; // Import eventBus
 
 interface CitizenProfileData {
   username: string;
@@ -86,7 +87,16 @@ const BuildingOwner: React.FC<BuildingOwnerProps> = ({ owner }) => {
         <p className="text-center text-red-500 italic">{error}</p>
       )}
       {!isLoading && !error && ownerProfile && (
-        <div className="flex flex-col items-center space-y-3">
+        <div 
+          className="flex flex-col items-center space-y-3 cursor-pointer hover:bg-amber-100 p-2 rounded-md transition-colors duration-150"
+          onClick={() => {
+            if (ownerProfile) {
+              console.log('Emitting showCitizenPanelEvent with owner profile:', ownerProfile);
+              eventBus.emit('showCitizenPanelEvent', ownerProfile);
+            }
+          }}
+          title={`View details for ${ownerProfile.firstName} ${ownerProfile.lastName}`}
+        >
           <div className="flex space-x-4 items-start">
             {/* Main Image */}
             {ownerProfile.imageUrl && (

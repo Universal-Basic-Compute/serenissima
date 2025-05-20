@@ -16,6 +16,7 @@ import KnowledgeRepository from '@/components/Knowledge/KnowledgeRepository';
 import CitizenRegistry from '@/components/UI/CitizenRegistry'; // Import CitizenRegistry
 import LoanMarketplace from '@/components/Loans/LoanMarketplace';
 import LoanManagementDashboard from '@/components/Loans/LoanManagementDashboard';
+import CitizenDetailsPanel from '@/components/UI/CitizenDetailsPanel'; // Import CitizenDetailsPanel
 import { 
   StrategiesArticle, 
   BeginnersGuideArticle, 
@@ -49,6 +50,10 @@ export default function TwoDPage() {
   const [showCitizenRegistry, setShowCitizenRegistry] = useState<boolean>(false); // State for CitizenRegistry
   const [transportMode, setTransportMode] = useState<boolean>(false);
   const [selectedArticle, setSelectedArticle] = useState<string | null>(null);
+
+  // State for CitizenDetailsPanel opened from non-map contexts
+  const [showCitizenDetailsPanelDirect, setShowCitizenDetailsPanelDirect] = useState<boolean>(false);
+  const [citizenForPanelDirect, setCitizenForPanelDirect] = useState<any | null>(null);
   
   // Data state
   const [polygons, setPolygons] = useState<any[]>([]);
@@ -466,8 +471,23 @@ export default function TwoDPage() {
       window.removeEventListener('closeLoanPanel', handleCloseLoanPanel);
       window.removeEventListener('loadLoans', handleLoadLoans);
     };
-  }, [activeView, transportMode]);
+  }, [activeView, transportMode, fetchLandGroups]); // Added fetchLandGroups to dependency array as it's a useCallback
   
+  // Event listener for showing CitizenDetailsPanel directly
+  useEffect(() => {
+    const handleShowCitizenPanel = (citizenData: any) => {
+      console.log('Received showCitizenPanelEvent, citizen data:', citizenData);
+      setCitizenForPanelDirect(citizenData);
+      setShowCitizenDetailsPanelDirect(true);
+    };
+
+    eventBus.on('showCitizenPanelEvent', handleShowCitizenPanel);
+
+    return () => {
+      eventBus.off('showCitizenPanelEvent', handleShowCitizenPanel);
+    };
+  }, []);
+
   // Set up event listener for ensureBuildingsVisible
   useEffect(() => {
     // Create a function to calculate empty building points
@@ -831,6 +851,17 @@ export default function TwoDPage() {
             </div>
           </div>
         </div>
+      )}
+      
+      {/* Citizen Details Panel (Directly managed) */}
+      {showCitizenDetailsPanelDirect && citizenForPanelDirect && (
+        <CitizenDetailsPanel
+          citizen={citizenForPanelDirect}
+          onClose={() => {
+            setShowCitizenDetailsPanelDirect(false);
+            setCitizenForPanelDirect(null);
+          }}
+        />
       )}
       
       {/* Loan Panel */}
