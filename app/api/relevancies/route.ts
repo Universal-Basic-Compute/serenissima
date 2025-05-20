@@ -26,6 +26,7 @@ export async function GET(request: Request) {
     const relevantToCitizen = searchParams.get('relevantToCitizen');
     const assetType = searchParams.get('assetType');
     const targetCitizen = searchParams.get('targetCitizen');
+    const excludeAll = searchParams.get('excludeAll') === 'true'; // Added excludeAll parameter
     
     if (calculateAll) {
       // Redirect to the calculateAll endpoint
@@ -47,17 +48,22 @@ export async function GET(request: Request) {
     }
 
     if (relevantToCitizen) {
-      const relevantToUsernames = relevantToCitizen.split(',');
-      const relevantToOrConditions: string[] = relevantToUsernames.flatMap(username => {
-        const safeUsername = escapeAirtableString(username.trim());
-        return [
-          `{RelevantToCitizen} = '${safeUsername}'`, // Exact match
-          `FIND('"${safeUsername}"', {RelevantToCitizen}) > 0` // Found within a JSON string array
-        ];
-      });
-      // Always include relevancies where RelevantToCitizen is 'all'
-      relevantToOrConditions.push(`{RelevantToCitizen} = 'all'`);
-      filterFormulaParts.push(`OR(${relevantToOrConditions.join(', ')})`);
+      const relevantToUsernames = relevantToCitizen.split(',')
+        .map(username => username.trim())
+        .filter(username => username.length > 0); // Filter out empty strings after trimming
+
+      if (relevantToUsernames.length > 0) {
+        const relevantToOrConditions: string[] = relevantToUsernames.flatMap(username => {
+          const safeUsername = escapeAirtableString(username);
+          return [
+            `{RelevantToCitizen} = '${safeUsername}'`, 
+            `FIND('"${safeUsername}"', {RelevantToCitizen}) > 0` 
+          ];
+        });
+        // Do NOT add '{RelevantToCitizen} = 'all'' here if specific citizens are requested
+        filterFormulaParts.push(`OR(${relevantToOrConditions.join(', ')})`);
+      }
+      // If relevantToUsernames is empty (e.g., relevantToCitizen=" , "), no OR condition for RelevantToCitizen is added.
     }
 
     if (assetType) {
@@ -72,6 +78,10 @@ export async function GET(request: Request) {
         // If you want to filter by assetType alone:
         // filterFormulaParts.push(`{AssetType} = '${escapeAirtableString(assetType)}'`);
       }
+    }
+
+    if (excludeAll) {
+      filterFormulaParts.push(`NOT({RelevantToCitizen} = 'all')`);
     }
     
     if (filterFormulaParts.length > 0) {
