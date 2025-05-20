@@ -1,0 +1,224 @@
+import os
+import sys
+import logging
+import argparse
+import json
+import time
+import requests
+from typing import Dict, List, Optional, Any
+from pyairtable import Api, Table
+from dotenv import load_dotenv
+
+# Set up logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+log = logging.getLogger("generate_guild_images")
+
+# Load environment variables
+load_dotenv()
+
+# Constants
+PUBLIC_DIR = os.path.join(os.getcwd(), 'public')
+EMBLEMS_DIR = os.path.join(PUBLIC_DIR, 'images', 'guilds', 'emblems')
+BANNERS_DIR = os.path.join(PUBLIC_DIR, 'images', 'guilds', 'banners')
+
+# Ensure the image directories exist
+os.makedirs(EMBLEMS_DIR, exist_ok=True)
+os.makedirs(BANNERS_DIR, exist_ok=True)
+
+def initialize_airtable() -> Optional[Dict[str, Table]]:
+    """Initialize Airtable connection."""
+    api_key = os.environ.get('AIRTABLE_API_KEY')
+    base_id = os.environ.get('AIRTABLE_BASE_ID')
+    
+    if not api_key or not base_id:
+        log.error("Missing Airtable credentials. Set AIRTABLE_API_KEY and AIRTABLE_BASE_ID environment variables.")
+        return None
+    
+    try:
+        api = Api(api_key)
+        tables = {
+            'guilds': api.table(base_id, 'GUILDS'),
+        }
+        log.info("Successfully initialized Airtable connection.")
+        return tables
+    except Exception as e:
+        log.error(f"Failed to initialize Airtable: {e}")
+        return None
+
+def get_guilds(tables: Dict[str, Table]) -> List[Dict]:
+    """Fetch all guilds from Airtable."""
+    try:
+        guilds_table = tables['guilds']
+        all_guilds = guilds_table.all()
+        log.info(f"Fetched {len(all_guilds)} guilds from Airtable.")
+        return all_guilds
+    except Exception as e:
+        log.error(f"Error fetching guilds: {e}")
+        return []
+
+def generate_image_with_ideogram(prompt: str, aspect_ratio: str, guild_id: str, image_type: str) -> Optional[str]:
+    """
+    Generate an image using Ideogram API.
+    image_type: "emblem" or "banner"
+    """
+    log.info(f"Generating {image_type} for guild {guild_id} with aspect ratio {aspect_ratio}. Prompt: {prompt[:100]}...")
+    
+    ideogram_api_key = os.environ.get('IDEOGRAM_API_KEY')
+    if not ideogram_api_key:
+        log.error("IDEOGRAM_API_KEY environment variable is not set.")
+        return None
+
+    # Add aspect ratio guidance to the prompt
+    full_prompt = f"{prompt}, {aspect_ratio} aspect ratio, digital art, fantasy style."
+    if image_type == "emblem":
+        full_prompt = f"A heraldic emblem or sigil representing a guild. {prompt}. Centered, iconic, 1:1 aspect ratio, on a transparent background if possible."
+    elif image_type == "banner":
+        full_prompt = f"A wide banner or flag for a guild. {prompt}. Landscape orientation, 2:1 aspect ratio, detailed, epic."
+
+    try:
+        response = requests.post(
+            "https://api.ideogram.ai/v1/ideogram-v3/generate", # Assuming v3, adjust if needed
+            headers={
+                "Api-Key": ideogram_api_key,
+                "Content-Type": "application/json"
+            },
+            json={
+                "prompt": full_prompt,
+                "style_type": "REALISTIC", # Or another appropriate style
+                "rendering_speed": "DEFAULT",
+                "model": "V_3" # Assuming v3
+            }
+        )
+        response.raise_for_status() # Raise an exception for HTTP errors
+
+        result = response.json()
+        image_url = result.get("data", [{}])[0].get("url")
+
+        if not image_url:
+            log.error(f"No image URL in Ideogram response for guild {guild_id} ({image_type}).")
+            return None
+
+        # Download the image
+        image_response = requests.get(image_url, stream=True)
+        image_response.raise_for_status()
+
+        # Determine save path
+        if image_type == "emblem":
+            save_dir = EMBLEMS_DIR
+            file_extension = "png" # Emblems often benefit from transparency
+        else: # banner
+            save_dir = BANNERS_DIR
+            file_extension = "png" # Banners can also be png
+
+        image_filename = f"{guild_id}.{file_extension}"
+        image_path = os.path.join(save_dir, image_filename)
+
+        with open(image_path, 'wb') as f:
+            for chunk in image_response.iter_content(chunk_size=8192):
+                f.write(chunk)
+        
+        log.info(f"Saved {image_type} for guild {guild_id} to {image_path}")
+        
+        # Return the public URL path
+        public_image_url = f"/images/guilds/{image_type}s/{image_filename}"
+        return public_image_url
+
+    except requests.exceptions.RequestException as e:
+        log.error(f"Error calling Ideogram API for guild {guild_id} ({image_type}): {e}")
+    except KeyError:
+        log.error(f"Unexpected response structure from Ideogram API for guild {guild_id} ({image_type}).")
+    except Exception as e:
+        log.error(f"Error generating or saving {image_type} for guild {guild_id}: {e}")
+    
+    return None
+
+def update_guild_record(tables: Dict[str, Table], guild_record_id: str, field_name: str, new_value: str) -> bool:
+    """Update a specific field in a guild's Airtable record."""
+    try:
+        guilds_table = tables['guilds']
+        guilds_table.update(guild_record_id, {field_name: new_value})
+        log.info(f"Updated guild {guild_record_id}: set {field_name} to {new_value}")
+        return True
+    except Exception as e:
+        log.error(f"Error updating guild {guild_record_id} field {field_name}: {e}")
+        return False
+
+def process_guild_images(dry_run: bool = False):
+    """Main function to process guild emblems and banners."""
+    log.info(f"Starting guild image generation process (Dry Run: {dry_run})")
+
+    tables = initialize_airtable()
+    if not tables:
+        return
+
+    guilds = get_guilds(tables)
+    if not guilds:
+        log.info("No guilds found to process.")
+        return
+
+    for guild in guilds:
+        guild_id = guild['id']
+        guild_name = guild['fields'].get('GuildName', guild_id)
+        log.info(f"\nProcessing guild: {guild_name} (ID: {guild_id})")
+
+        # Process Guild Emblem
+        emblem_prompt = guild['fields'].get('GuildEmblem')
+        if emblem_prompt and not emblem_prompt.startswith('/'):
+            log.info(f"GuildEmblem for {guild_name} is a prompt: '{emblem_prompt[:50]}...'")
+            if not dry_run:
+                new_emblem_url = generate_image_with_ideogram(emblem_prompt, "1:1", guild_id, "emblem")
+                if new_emblem_url:
+                    update_guild_record(tables, guild_id, 'GuildEmblem', new_emblem_url)
+                else:
+                    log.error(f"Failed to generate emblem for {guild_name}.")
+            else:
+                log.info(f"[DRY RUN] Would generate emblem for {guild_name} with prompt: {emblem_prompt}")
+                log.info(f"[DRY RUN] Would save to public/images/guilds/emblems/{guild_id}.png")
+                log.info(f"[DRY RUN] Would update GuildEmblem field to /images/guilds/emblems/{guild_id}.png")
+        elif emblem_prompt and emblem_prompt.startswith('/'):
+            log.info(f"GuildEmblem for {guild_name} is already a path: {emblem_prompt}. Skipping.")
+        else:
+            log.info(f"No GuildEmblem prompt for {guild_name}. Skipping emblem.")
+
+        # Process Guild Banner
+        banner_prompt = guild['fields'].get('GuildBanner')
+        if banner_prompt and not banner_prompt.startswith('/'):
+            log.info(f"GuildBanner for {guild_name} is a prompt: '{banner_prompt[:50]}...'")
+            if not dry_run:
+                new_banner_url = generate_image_with_ideogram(banner_prompt, "2:1", guild_id, "banner")
+                if new_banner_url:
+                    update_guild_record(tables, guild_id, 'GuildBanner', new_banner_url)
+                else:
+                    log.error(f"Failed to generate banner for {guild_name}.")
+            else:
+                log.info(f"[DRY RUN] Would generate banner for {guild_name} with prompt: {banner_prompt}")
+                log.info(f"[DRY RUN] Would save to public/images/guilds/banners/{guild_id}.png")
+                log.info(f"[DRY RUN] Would update GuildBanner field to /images/guilds/banners/{guild_id}.png")
+        elif banner_prompt and banner_prompt.startswith('/'):
+            log.info(f"GuildBanner for {guild_name} is already a path: {banner_prompt}. Skipping.")
+        else:
+            log.info(f"No GuildBanner prompt for {guild_name}. Skipping banner.")
+            
+    log.info("Guild image generation process finished.")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Generate emblems and banners for guilds.")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Simulate the process without making changes to Airtable or saving files.",
+    )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Enable verbose logging."
+    )
+    args = parser.parse_args()
+
+    if args.verbose:
+        log.setLevel(logging.DEBUG)
+
+    process_guild_images(args.dry_run)
