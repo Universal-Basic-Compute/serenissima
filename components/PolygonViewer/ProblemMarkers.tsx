@@ -174,15 +174,15 @@ export default function ProblemMarkers({
             <div className="relative">
               {/* Base marker */}
               <div 
-                className="w-6 h-6 rounded-full flex items-center justify-center z-10 relative"
+                className="w-4 h-4 rounded-full flex items-center justify-center z-10 relative"
                 style={{ backgroundColor: getSeverityColor(problem.severity) }}
               >
-                <span className="text-white text-xs font-bold">!</span>
+                <span className="text-white text-[9px] font-bold">!</span>
               </div>
               
               {/* Pulsing effect */}
               <div 
-                className="absolute inset-0 rounded-full animate-ping opacity-75"
+                className="absolute inset-0 rounded-full animate-ping opacity-50"
                 style={{ backgroundColor: getSeverityColor(problem.severity) }}
               ></div>
             </div>
