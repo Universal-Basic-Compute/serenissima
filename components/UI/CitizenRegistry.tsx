@@ -283,7 +283,7 @@ const CitizenRegistry: React.FC<CitizenRegistryProps> = ({ onClose }) => {
 
   return (
     <>
-      <div className="absolute top-20 left-20 right-20 bottom-20 bg-amber-50 border-2 border-amber-700 rounded-lg shadow-xl z-40 overflow-hidden flex flex-col">
+      <div className="absolute top-20 left-20 right-20 bottom-20 bg-amber-50 border-2 border-amber-700 rounded-lg shadow-xl z-40 overflow-hidden flex flex-col" data-ui-panel="true">
         {/* Header */}
         <div className="bg-amber-700 text-white p-4 flex justify-between items-center">
           <h2 className="text-2xl font-serif">Registro dei Cittadini</h2>
