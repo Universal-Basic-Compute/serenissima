@@ -40,12 +40,55 @@ export class HoverStateService {
   private isHovering: boolean = false;
   private lastEmitTime: number = 0;
   private emitThrottleTime: number = 100; // ms
+  private throttledHandleMouseMoveDocument: (event: MouseEvent) => void;
   
   // Throttled emit function to prevent too many events
   private throttledEmit = throttle((state: HoverState) => {
     eventBus.emit(HOVER_STATE_CHANGED, state);
     this.lastEmitTime = Date.now();
   }, this.emitThrottleTime);
+
+  constructor() {
+    if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+      // Bind methods to ensure 'this' context is correct
+      this.handleMouseLeaveDocument = this.handleMouseLeaveDocument.bind(this);
+      this.handleMouseMoveDocument = this.handleMouseMoveDocument.bind(this);
+
+      // Throttle mousemove for performance
+      this.throttledHandleMouseMoveDocument = throttle(this.handleMouseMoveDocument, 100); // 100ms throttle
+
+      document.documentElement.addEventListener('mouseleave', this.handleMouseLeaveDocument);
+      document.documentElement.addEventListener('mousemove', this.throttledHandleMouseMoveDocument);
+    }
+  }
+
+  private handleMouseLeaveDocument(): void {
+    this.clearHoverState();
+  }
+
+  private handleMouseMoveDocument(event: MouseEvent): void {
+    let target = event.target as HTMLElement | null;
+    let isOverUIPanel = false;
+    while (target) {
+      if (target.dataset && target.dataset.uiPanel === 'true') {
+        isOverUIPanel = true;
+        break;
+      }
+      // Check for common panel wrapper classes as a fallback, can be expanded
+      if (target.classList && (
+          target.classList.contains('modal-wrapper') || // Example class
+          target.classList.contains('sidebar-panel')    // Example class
+      )) {
+        isOverUIPanel = true;
+        break;
+      }
+      target = target.parentElement;
+    }
+
+    if (isOverUIPanel) {
+      this.clearHoverState();
+    }
+  }
   
   /**
    * Set hover state with throttling to prevent rapid changes

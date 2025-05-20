@@ -96,7 +96,7 @@ export default function ProblemDetailsPanel({ problemId, onClose }: ProblemDetai
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center" data-ui-panel="true">
       <div className="bg-amber-50 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="bg-amber-800 text-white px-6 py-4 flex justify-between items-center">
