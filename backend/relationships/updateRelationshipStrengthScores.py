@@ -272,13 +272,13 @@ def _calculate_trust_score_contributions_from_interactions(
         )
         all_contracts_between_pair = tables['contracts'].all(
             formula=contract_formula,
-            fields=['PricePerResource', 'HourlyAmount', 'EndAt', 'Status']
+            fields=['PricePerResource', 'HourlyAmount', 'EndAt'] # Removed 'Status'
         )
         active_future_contracts_count = 0
         for contract in all_contracts_between_pair:
             end_at_str = contract['fields'].get('EndAt')
-            status = contract['fields'].get('Status')
-            if end_at_str and status == 'active': # Check status as well
+            # Removed status check as the 'Status' field does not exist in the CONTRACTS table
+            if end_at_str: 
                 try:
                     end_at_dt = datetime.fromisoformat(end_at_str.replace('Z', '+00:00'))
                     if end_at_dt > now_utc:
