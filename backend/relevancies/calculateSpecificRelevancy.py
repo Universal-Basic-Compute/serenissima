@@ -241,7 +241,7 @@ def calculate_specific_relevancy(
                         multi_user_results.append(f"- {owner_username}: API Error - {error_detail}")
                         continue
                     
-                    log.debug(f"API response data for {owner_username} (building_ownership): {json.dumps(data, indent=2)}")
+                    log.info(f"API response data for {owner_username} (building_ownership): {json.dumps(data, indent=2)}")
 
                     relevancies_created_count = 0
                     if 'relevancyScores' in data and isinstance(data.get('relevancyScores'), dict):

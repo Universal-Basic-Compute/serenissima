@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
     
     // Calculate building-land ownership relevancy
     const relevancyScores = await relevancyService.calculateBuildingLandOwnershipRelevancy(username);
+    console.log(`[API building-ownership POST for ${username}] Calculated relevancyScores:`, JSON.stringify(relevancyScores, null, 2));
     
     // Format the response
     const simpleScores: Record<string, number> = {};

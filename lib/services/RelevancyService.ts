@@ -669,19 +669,21 @@ export class RelevancyService {
         ? window.location.origin 
         : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
       
+      console.log(`[RelevancyService] Calculating building/land ownership for ${username}`);
       const buildingsResponse = await fetch(`${baseUrl}/api/buildings?owner=${encodeURIComponent(username)}`);
       
       if (!buildingsResponse.ok) {
-        console.error(`Failed to fetch buildings: ${buildingsResponse.status}`);
+        console.error(`[RelevancyService] Failed to fetch buildings for ${username}: ${buildingsResponse.status}`);
         return {};
       }
       
       const buildingsData = await buildingsResponse.json();
       const buildings = buildingsData.buildings || [];
+      console.log(`[RelevancyService] Fetched ${buildings.length} buildings for ${username}`);
       
       // Skip if no buildings
       if (!buildings.length) {
-        console.log(`Citizen ${username} does not own any buildings`);
+        console.log(`[RelevancyService] Citizen ${username} does not own any buildings. No building ownership relevancies.`);
         return {};
       }
       
@@ -689,32 +691,53 @@ export class RelevancyService {
       const landsResponse = await fetch(`${baseUrl}/api/lands`);
       
       if (!landsResponse.ok) {
-        console.error(`Failed to fetch lands: ${landsResponse.status}`);
+        console.error(`[RelevancyService] Failed to fetch all lands: ${landsResponse.status}`);
         return {};
       }
       
       const landsData = await landsResponse.json();
       const lands = landsData.lands || [];
+      console.log(`[RelevancyService] Fetched ${lands.length} total lands for checking ownership.`);
       
       // Create a map of land ID to land data for quick lookup
       const landMap: Record<string, LandData> = {};
       lands.forEach((land: LandData) => {
-        landMap[land.id] = land;
+        // Ensure land.id is the polygonId (e.g. poly_xxx) if that's what building.land_id refers to.
+        // Assuming building.land_id refers to the primary ID used in the lands API (polygonId).
+        const idToUse = land.polygonId || land.id; 
+        landMap[idToUse] = land;
       });
       
       // Calculate relevancy for each building on land owned by another citizen
       const relevancyScores: Record<string, RelevancyScore> = {};
       
       buildings.forEach(building => {
-        const landId = building.land_id;
-        if (!landId) return;
+        console.log(`[RelevancyService] Processing building ${building.id} (type: ${building.type}) for ${username}`);
+        const landId = building.land_id; // This should be the polygonId like 'poly_xxx'
+        if (!landId) {
+          console.log(`[RelevancyService] Building ${building.id} has no land_id. Skipping.`);
+          return;
+        }
         
         const land = landMap[landId];
-        if (!land) return;
+        if (!land) {
+          console.log(`[RelevancyService] Land ${landId} for building ${building.id} not found in landMap. Skipping.`);
+          return;
+        }
         
+        console.log(`[RelevancyService] Building ${building.id} is on land ${landId} (Owner: ${land.owner}, PolygonID: ${land.polygonId}, RecordID: ${land.id})`);
+
         // Skip if land has no owner or is owned by the same citizen
-        if (!land.owner || land.owner === username) return;
+        if (!land.owner) {
+          console.log(`[RelevancyService] Land ${landId} for building ${building.id} has no owner. Skipping.`);
+          return;
+        }
+        if (land.owner === username) {
+          console.log(`[RelevancyService] Land ${landId} for building ${building.id} is owned by the same user (${username}). Skipping.`);
+          return;
+        }
         
+        console.log(`[RelevancyService] CREATING relevancy for building ${building.id} on land ${landId} (owned by ${land.owner}, building owner ${username})`);
         // Create a unique ID for this relevancy
         const relevancyId = `${building.id}_${landId}`;
         
@@ -747,25 +770,26 @@ export class RelevancyService {
         // Create the relevancy score object
         relevancyScores[relevancyId] = {
           score: parseFloat(score.toFixed(2)),
-          assetId: building.id,
+          assetId: building.id, // ID of the building
           assetType: 'building',
           category: 'ownership',
           type: 'building_on_others_land',
           distance: 0, // Not applicable for this relevancy type
-          closestLandId: landId,
+          closestLandId: landId, // ID of the land the building is on
           isConnected: false, // Not applicable for this relevancy type
           connectivityBonus: 0, // Not applicable for this relevancy type
           title,
           description,
           timeHorizon: 'medium',
           status,
-          targetCitizen: land.owner
+          targetCitizen: land.owner // The owner of the land
         };
       });
       
+      console.log(`[RelevancyService] Generated ${Object.keys(relevancyScores).length} building ownership relevancies for ${username}.`);
       return relevancyScores;
     } catch (error) {
-      console.error('Error calculating building-land ownership relevancy:', error);
+      console.error(`[RelevancyService] Error calculating building-land ownership relevancy for ${username}:`, error);
       return {};
     }
   }
