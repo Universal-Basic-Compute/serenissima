@@ -44,8 +44,8 @@ export async function GET(request: NextRequest) {
       .select({
         filterByFormula: filterFormula,
         sort: [
+          { field: 'CreatedAt', direction: 'desc' },
           { field: 'Severity', direction: 'desc' },
-          { field: 'CreatedAt', direction: 'desc' }
         ]
       })
       .all();
@@ -65,6 +65,7 @@ export async function GET(request: NextRequest) {
         createdAt: record.get('CreatedAt') || '',
         updatedAt: record.get('UpdatedAt') || '',
         location: record.get('Location') || '',
+        position: record.get('Position') || '',
         title: record.get('Title') || '',
         description: record.get('Description') || '',
         solutions: record.get('Solutions') || '',
