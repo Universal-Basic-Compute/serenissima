@@ -269,7 +269,7 @@ def prepare_import_strategy_data(
                 "id": contract["fields"].get("ContractId", ""),
                 "resource_type": contract["fields"].get("ResourceType", ""),
                 "buyer_building": contract["fields"].get("BuyerBuilding", ""),
-                "hourly_amount": contract["fields"].get("hourlyAmount", 0),
+                "hourly_amount": contract["fields"].get("HourlyAmount", 0),
                 "price": contract["fields"].get("Price", 0)
             })
     
@@ -627,7 +627,7 @@ def create_or_update_import_contract(
             contract_id = existing_contract["id"]
             
             updated_contract = tables["contracts"].update(contract_id, {
-                "hourlyAmount": hourly_amount,
+                "HourlyAmount": hourly_amount,
                 "PricePerResource": import_price,
                 "UpdatedAt": now,
                 "EndAt": end_date,
@@ -688,7 +688,7 @@ def create_or_update_import_contract(
                 "Transporter": "Italia",
                 "BuyerBuilding": building_id,
                 "SellerBuilding": None,
-                "hourlyAmount": hourly_amount,
+                "HourlyAmount": hourly_amount,
                 "PricePerResource": import_price,
                 "Priority": 1,  # Default priority
                 "CreatedAt": now,
