@@ -1203,8 +1203,14 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
             )}
           </div>
             
+          {/* Personality Section */}
           <div className="mb-6">
-            <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">About</h3>
+            <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Personality</h3>
+            <p className="text-amber-700 italic text-sm">{citizen.corePersonality || 'No personality description available.'}</p>
+          </div>
+
+          <div className="mb-6">
+            <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">About {citizen.firstname}</h3>
             <p className="text-amber-700 italic text-sm">{citizen.description || 'No description available.'}</p>
           </div>
         </div>
