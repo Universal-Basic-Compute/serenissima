@@ -25,7 +25,8 @@ export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenu
     } else if (view === 'knowledge') {
       window.dispatchEvent(new CustomEvent('openKnowledgePanel'));
     } else if (view === 'citizens') {
-      router.push('/citizens'); // Navigate to the citizens page
+      // Dispatch an event to open the CitizenRegistry, similar to GovernancePanel
+      window.dispatchEvent(new CustomEvent('openCitizenRegistry'));
       // The existing event dispatch for loadCitizens can remain if other components listen to it.
     } else {
       // Close all panels if switching to other views
