@@ -940,7 +940,6 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
                       }`}>
                         {problem.severity && typeof problem.severity === 'string' ? problem.severity.charAt(0).toUpperCase() + problem.severity.slice(1) : 'Unknown'}
                       </span>
-                      <p className="text-xs text-gray-500 mt-0.5">Severity</p>
                     </div>
                   </div>
                   <div className={`text-sm mt-1 ${
@@ -1319,7 +1318,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
             
           {/* Personality Section */}
           <div className="mb-6">
-            <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Personality Narrative</h3>
+            <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Personality</h3>
             <p className="text-amber-700 italic text-sm">{citizen.personality || 'No personality description available.'}</p>
           </div>
 
