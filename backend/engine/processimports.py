@@ -279,8 +279,13 @@ def generate_new_citizen(tables) -> Optional[Dict]:
     log.info("Generating a new citizen for import delivery...")
     
     try:
-        # Import the generate_citizen module
-        from generate_citizen import generate_citizen
+        # Add the scripts directory to sys.path to allow importing generateCitizen
+        scripts_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'scripts')
+        if scripts_dir not in sys.path:
+            sys.path.append(scripts_dir)
+            
+        # Import the generate_citizen function from the generateCitizen module
+        from generateCitizen import generate_citizen
         
         # Generate a new citizen (using Popolani as default class for delivery personnel)
         citizen_data = generate_citizen("Popolani")
