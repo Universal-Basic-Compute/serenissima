@@ -25,7 +25,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
-log = logging.getLogger("citizen_generator")
+log = logging.getLogger("generate_citizen")
 
 # Load environment variables
 load_dotenv()
