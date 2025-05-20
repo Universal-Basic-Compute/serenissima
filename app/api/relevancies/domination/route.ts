@@ -48,10 +48,10 @@ export async function POST(request: NextRequest) {
   try {
     // Get the username from the request body
     const body = await request.json();
-    const { citizenUsername } = body; // Can be "specific_user" or "all"
-    let usernameForProcessing = citizenUsername; 
+    const { Citizen } = body; // Can be "specific_user" or "all"
+    let usernameForProcessing = Citizen; 
     
-    // If citizenUsername is "all", treat it as a global calculation (usernameForProcessing becomes null)
+    // If Citizen is "all", treat it as a global calculation (usernameForProcessing becomes null)
     if (usernameForProcessing === "all") {
       usernameForProcessing = null; 
     }
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
         relevanciesSavedCount = await saveRelevancies(usernameForProcessing, landDominationRelevancies, allLands, allCitizens);
         saved = true;
       } else {
-        // Global calculation (usernameForProcessing is null, meaning citizenUsername was "all")
+        // Global calculation (usernameForProcessing is null, meaning Citizen was "all")
         // Create one relevancy record PER LANDOWNER, relevant to "all", detailing that landowner's domination.
         relevanciesSavedCount = 0;
         const recordsToCreate = [];

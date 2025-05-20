@@ -9,13 +9,13 @@ const AIRTABLE_RELEVANCIES_TABLE = 'RELEVANCIES';
  * Save relevancies to Airtable
  */
 export async function saveRelevancies(
-  citizenUsername: string, 
+  Citizen: string, 
   relevancyScores: Record<string, any>,
   allLands: any[],
   allCitizens: any[] = []
 ): Promise<number> {
   try {
-    console.log(`Saving relevancies for ${citizenUsername} to Airtable...`);
+    console.log(`Saving relevancies for ${Citizen} to Airtable...`);
 
     // Initialize Airtable
     if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
@@ -27,7 +27,7 @@ export async function saveRelevancies(
     // Delete existing relevancy records for this citizen to avoid duplicates
     const existingRecords = await base(AIRTABLE_RELEVANCIES_TABLE)
       .select({
-        filterByFormula: `{RelevantToCitizen} = '${citizenUsername}'`
+        filterByFormula: `{RelevantToCitizen} = '${Citizen}'`
       })
       .all();
       
@@ -38,7 +38,7 @@ export async function saveRelevancies(
         const batch = recordIds.slice(i, i + 10);
         await base(AIRTABLE_RELEVANCIES_TABLE).destroy(batch);
       }
-      console.log(`Deleted ${existingRecords.length} existing relevancy records for ${citizenUsername}`);
+      console.log(`Deleted ${existingRecords.length} existing relevancy records for ${Citizen}`);
     }
       
     // Create new relevancy records
@@ -47,13 +47,13 @@ export async function saveRelevancies(
       if (data.assetType === 'land') {
         return {
           fields: {
-            RelevancyId: `${citizenUsername}_${id}_${Date.now()}`, // Generate a unique ID
+            RelevancyId: `${Citizen}_${id}_${Date.now()}`, // Generate a unique ID
             AssetID: id,
             AssetType: data.assetType,
             Category: data.category,
             Type: data.type,
             TargetCitizen: data.targetCitizen || '', // Owner of the target land
-            RelevantToCitizen: citizenUsername,
+            RelevantToCitizen: Citizen,
             Score: data.score,
             TimeHorizon: data.timeHorizon || 'medium',
             Title: data.title || `Nearby Land (${data.distance}m)`,
@@ -71,13 +71,13 @@ export async function saveRelevancies(
       
         return {
           fields: {
-            RelevancyId: `${citizenUsername}_${id}_${Date.now()}`, // Generate a unique ID
+            RelevancyId: `${Citizen}_${id}_${Date.now()}`, // Generate a unique ID
             AssetID: id,
             AssetType: data.assetType,
             Category: data.category,
             Type: data.type,
             TargetCitizen: id, // The citizen this relevancy is about
-            RelevantToCitizen: citizenUsername,
+            RelevantToCitizen: Citizen,
             Score: data.score,
             TimeHorizon: data.timeHorizon || 'medium',
             Title: data.title || `Citizen Relevancy: ${id}`,
@@ -96,7 +96,7 @@ export async function saveRelevancies(
             Category: data.category,
             Type: data.type,
             TargetCitizen: data.targetCitizen || 'all', // Use 'all' for global relevancies
-            RelevantToCitizen: citizenUsername, // For global relevancies saved TO a specific user (e.g. admin)
+            RelevantToCitizen: Citizen, // For global relevancies saved TO a specific user (e.g. admin)
             Score: data.score,
             TimeHorizon: data.timeHorizon || 'medium',
             Title: data.title || `City Relevancy: ${id}`,
@@ -110,13 +110,13 @@ export async function saveRelevancies(
         // Handle building ownership relevancy (building on others' land)
         return {
           fields: {
-            RelevancyId: `${citizenUsername}_${data.assetId}_${data.closestLandId}_${Date.now()}`, // Unique ID: buildingOwner_buildingId_landId_timestamp
+            RelevancyId: `${Citizen}_${data.assetId}_${data.closestLandId}_${Date.now()}`, // Unique ID: buildingOwner_buildingId_landId_timestamp
             AssetID: data.assetId, // This is the building's ID
             AssetType: data.assetType, // 'building'
             Category: data.category, // 'ownership'
             Type: data.type, // 'building_on_others_land'
             TargetCitizen: data.targetCitizen, // The owner of the land
-            RelevantToCitizen: citizenUsername, // The owner of the building
+            RelevantToCitizen: Citizen, // The owner of the building
             Score: data.score,
             TimeHorizon: data.timeHorizon || 'medium',
             Title: data.title || `Building on Land of ${data.targetCitizen}`,
@@ -131,7 +131,7 @@ export async function saveRelevancies(
     
     // Create records in batches of 10
     // The relevancyRecords array now contains all records to be saved, without top 10 filtering.
-    console.log(`Preparing to save ${relevancyRecords.length} relevancy records for ${citizenUsername} (no top 10 filtering).`);
+    console.log(`Preparing to save ${relevancyRecords.length} relevancy records for ${Citizen} (no top 10 filtering).`);
 
     for (let i = 0; i < relevancyRecords.length; i += 10) {
       const batch = relevancyRecords.slice(i, i + 10);
@@ -148,7 +148,7 @@ export async function saveRelevancies(
       }
     }
       
-    console.log(`Created ${relevancyRecords.length} new relevancy records for ${citizenUsername}`);
+    console.log(`Created ${relevancyRecords.length} new relevancy records for ${Citizen}`);
     return relevancyRecords.length;
   } catch (error) {
     console.warn('Could not save to RELEVANCIES table:', error.message);
