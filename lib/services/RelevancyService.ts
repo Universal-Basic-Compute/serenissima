@@ -1072,7 +1072,7 @@ export class RelevancyService {
         ? window.location.origin 
         : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
       
-      console.log(`[RelevancyService] Calculating same land neighbor relevancy`);
+      console.log(`[RelevancyService] Calculating same land neighbor relevancy (single record per land, templated for UI)`);
       
       // Fetch all buildings. Ensure API returns LandId, Occupant, Category.
       const buildingsResponse = await fetch(`${baseUrl}/api/buildings`); 
@@ -1084,59 +1084,66 @@ export class RelevancyService {
       const allBuildings: BuildingData[] = buildingsData.buildings || [];
       console.log(`[RelevancyService] Fetched ${allBuildings.length} total buildings for same land neighbor relevancy.`);
 
+      // Fetch all lands to get historicalName
+      const allLandsData = await this.fetchLands(); 
+      const landDetailsMap: Record<string, { historicalName?: string | null }> = {};
+      allLandsData.forEach(land => {
+        const key = land.landId || land.id; // Prefer landId (polygon-id), fallback to Airtable record ID
+        if (key) {
+          landDetailsMap[key] = { historicalName: land.historicalName };
+        }
+      });
+
       // Group occupants by LandId for home category buildings
-      const occupantsByLandId: Record<string, string[]> = {};
+      const occupantsByLandId: Record<string, string[]> = {}; // Key: landId (polygon-id), Value: array of occupant usernames
       allBuildings.forEach(building => {
         if (building.category?.toLowerCase() === 'home' && building.occupant && building.landId) {
           if (!occupantsByLandId[building.landId]) {
             occupantsByLandId[building.landId] = [];
           }
-          // Avoid duplicate occupants if one person somehow occupies multiple homes on the same landId
           if (!occupantsByLandId[building.landId].includes(building.occupant)) {
             occupantsByLandId[building.landId].push(building.occupant);
           }
         }
       });
 
-      // Create relevancy for each LandId with multiple occupants
-      for (const landId in occupantsByLandId) {
-        const occupants = occupantsByLandId[landId];
-        if (occupants.length > 1) { // Only create relevancy if there are actual neighbors
-          const score = 50 + Math.min(occupants.length * 2, 30); // Score increases slightly with more neighbors, capped
-          const status = this.determineStatus(score);
-          const buildingType = "Land Community"; // Generic term
+      // Create one relevancy record per LandId with multiple occupants
+      for (const landIdKey in occupantsByLandId) { // landIdKey is the polygon-id
+        const occupants = occupantsByLandId[landIdKey];
+        if (occupants.length > 1) { 
+          const landDetail = landDetailsMap[landIdKey];
+          // Use historicalName if available, otherwise default to "Land [ID]" or a generic term
+          const landName = landDetail?.historicalName || `Land ${landIdKey}`;
           
-          // Fetch land details for better title/description if possible (optional enhancement)
-          // For now, use LandId
-          const landName = `Land/Land ${landId}`;
+          const score = 50 + Math.min(occupants.length * 2, 20); // Adjusted cap for group score
+          const status = this.determineStatus(score);
 
-          const title = `Neighbors on ${landName}`;
-          const description = `You share **${landName}** with other residents, fostering a local community.\n\n` +
-                             `### Community Members:\n` +
-                             `- ${occupants.join('\n- ')}\n\n` +
-                             `Living in close proximity offers opportunities for interaction and shared local interests.`;
+          const title = `Voisin : %TARGETCITIZEN% sur ${landName}`;
+          const description = `Vous et %TARGETCITIZEN% êtes voisins, habitant tous deux sur **${landName}**.\n\n` +
+                             `Habiter à proximité favorise les interactions locales et les intérêts communs.\n\n` +
+                             `Autres voisins sur ce terrain : ${occupants.join(', ')}.`;
           
           createdRelevancies.push({
             score: parseFloat(score.toFixed(2)),
-            assetId: landId, // The LandId is the asset
-            assetType: 'land_group', // New asset type
+            assetId: landIdKey, 
+            assetType: 'land_group', 
             category: 'neighborhood',
             type: 'same_land_neighbor',
             distance: 0,
-            closestLandId: landId,
-            isConnected: true, // Assuming living on the same land implies connection
-            connectivityBonus: 0, // Not distance-based
+            closestLandId: landIdKey,
+            isConnected: true, 
+            connectivityBonus: 0, 
             title,
             description,
             timeHorizon: 'ongoing',
             status,
-            relevantToCitizen: occupants, // Array of usernames living on this land
-            targetCitizen: occupants,   // Array of usernames (the group itself)
+            relevantToCitizen: occupants, // Array of all usernames on this land
+            targetCitizen: occupants,   // Array of all usernames on this land (UI will pick one for %TARGETCITIZEN%)
           });
         }
       }
       
-      console.log(`[RelevancyService] Generated ${createdRelevancies.length} 'same_land_neighbor' group relevancy objects.`);
+      console.log(`[RelevancyService] Generated ${createdRelevancies.length} 'same_land_neighbor' group relevancy objects (one per land).`);
       return createdRelevancies;
     } catch (error) {
       console.error(`[RelevancyService] Error calculating 'same_land_neighbor' relevancy:`, error);

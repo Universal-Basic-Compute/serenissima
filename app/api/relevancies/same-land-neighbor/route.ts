@@ -7,26 +7,9 @@ import { RelevancyScore } from '@/lib/services/RelevancyService'; // Adjust path
 const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
 const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
 const AIRTABLE_RELEVANCIES_TABLE = 'RELEVANCIES';
-const AIRTABLE_CITIZENS_TABLE = process.env.AIRTABLE_CITIZENS_TABLE || 'CITIZENS';
+const AIRTABLE_CITIZENS_TABLE = process.env.AIRTABLE_CITIZENS_TABLE || 'CITIZENS'; // Keep for potential future use, but not for ID mapping now
 
-async function getAllCitizenRecordIds(base: Airtable.Base): Promise<Record<string, string>> {
-  const citizenUsernamesToRecordIds: Record<string, string> = {};
-  try {
-    const records = await base(AIRTABLE_CITIZENS_TABLE).select({
-      fields: ['Username'] // Assuming 'Username' is the field storing unique usernames
-    }).all();
-    records.forEach(record => {
-      const username = record.fields.Username as string;
-      if (username) {
-        citizenUsernamesToRecordIds[username] = record.id;
-      }
-    });
-  } catch (error) {
-    console.error("Error fetching citizen record IDs:", error);
-    // Depending on strictness, you might want to throw error or return empty/partial map
-  }
-  return citizenUsernamesToRecordIds;
-}
+// Removed getAllCitizenRecordIds as we are using usernames directly
 
 export async function POST(request: NextRequest) {
   try {
@@ -36,10 +19,8 @@ export async function POST(request: NextRequest) {
     }
     const airtableBase = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
 
-    // const body = await request.json(); // Optional: if you want to pass citizen for specific calculation
-    // const { Citizen: specificCitizen } = body;
-
-    // For "same_land_neighbor", we typically calculate for all lands globally.
+    // For "same_land_neighbor", we calculate for all lands globally.
+    // The service now returns one relevancy object per land group.
     const groupRelevancies = await relevancyService.calculateSameLandNeighborRelevancy();
 
     if (!groupRelevancies || groupRelevancies.length === 0) {
@@ -51,41 +32,37 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const citizenUsernamesToRecordIds = await getAllCitizenRecordIds(airtableBase);
     let relevanciesSavedCount = 0;
 
     for (const relevancy of groupRelevancies) {
-      const landId = relevancy.assetId;
-      const stableRelevancyId = `same_land_neighbor_${landId}`;
+      const landId = relevancy.assetId; // This is the LandId (e.g., polygon-xxxx)
+      // stableRelevancyId is per land, as there's one relevancy record per land group
+      const stableRelevancyId = `same_land_neighbor_${landId}`; 
 
-      // Map usernames to Airtable Record IDs for RelevantToCitizen and TargetCitizen
-      const relevantToCitizenRecordIds = (Array.isArray(relevancy.relevantToCitizen) ? relevancy.relevantToCitizen : [relevancy.relevantToCitizen])
-        .map(username => citizenUsernamesToRecordIds[username as string])
-        .filter(Boolean) as string[];
-      
-      const targetCitizenRecordIds = (Array.isArray(relevancy.targetCitizen) ? relevancy.targetCitizen : [relevancy.targetCitizen])
-        .map(username => citizenUsernamesToRecordIds[username as string])
-        .filter(Boolean) as string[];
+      // relevancy.relevantToCitizen and relevancy.targetCitizen are arrays of usernames from the service
+      const relevantToCitizenUsernames = relevancy.relevantToCitizen as string[];
+      const targetCitizenUsernames = relevancy.targetCitizen as string[]; // Should be the same as relevantToCitizenUsernames
 
-      if (relevantToCitizenRecordIds.length === 0) {
-        console.warn(`Skipping relevancy for LandId ${landId} due to no valid citizen record IDs for RelevantToCitizen.`);
+      if (!relevantToCitizenUsernames || relevantToCitizenUsernames.length === 0) {
+        console.warn(`Skipping relevancy for LandId ${landId} due to no usernames for RelevantToCitizen.`);
         continue;
       }
       
       const fieldsToSave = {
         RelevancyId: stableRelevancyId,
-        AssetID: relevancy.assetId,
-        AssetType: relevancy.assetType,
-        Category: relevancy.category,
-        Type: relevancy.type,
+        AssetID: relevancy.assetId, // LandId (e.g. polygon-xxxx)
+        AssetType: relevancy.assetType, // 'land_group'
+        Category: relevancy.category,   // 'neighborhood'
+        Type: relevancy.type,           // 'same_land_neighbor'
         Score: relevancy.score,
-        Title: relevancy.title,
-        Description: relevancy.description,
+        Title: relevancy.title, // Contains %TARGETCITIZEN% and %LAND_NAME% (resolved by service)
+        Description: relevancy.description, // Contains %TARGETCITIZEN% and %LAND_NAME% (resolved by service)
         TimeHorizon: relevancy.timeHorizon,
         Status: relevancy.status,
-        RelevantToCitizen: JSON.stringify(relevantToCitizenRecordIds), // Stringified array of Record IDs
-        TargetCitizen: JSON.stringify(targetCitizenRecordIds),     // Stringified array of Record IDs
-        Notes: `Land community on ${landId}`,
+        // Store arrays of usernames as stringified JSON
+        RelevantToCitizen: JSON.stringify(relevantToCitizenUsernames), 
+        TargetCitizen: JSON.stringify(targetCitizenUsernames), 
+        Notes: `Land community on ${landId}. Neighbors: ${relevantToCitizenUsernames.join(', ')}`,
         CreatedAt: new Date().toISOString()
       };
 
@@ -93,7 +70,7 @@ export async function POST(request: NextRequest) {
         // Delete existing record with this stableRelevancyId
         const existingRecords = await airtableBase(AIRTABLE_RELEVANCIES_TABLE).select({
           filterByFormula: `{RelevancyId} = '${stableRelevancyId}'`,
-          fields: ['RelevancyId']
+          fields: ['RelevancyId'] // Only need one field to check existence
         }).all();
 
         if (existingRecords.length > 0) {
@@ -107,7 +84,8 @@ export async function POST(request: NextRequest) {
         console.log(`Saved 'same_land_neighbor' relevancy for LandId ${landId}.`);
       } catch (error) {
         console.error(`Error saving 'same_land_neighbor' relevancy for LandId ${landId}:`, error);
-        // Decide if one error should stop the whole process or just log and continue
+        // Log the failing record for easier debugging
+        console.error('Failing record data:', JSON.stringify(fieldsToSave, null, 2));
       }
     }
 
