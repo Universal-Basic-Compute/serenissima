@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { getNormalizedResourceIconPath } from '../../../../lib/utils/resourceUtils';
+import { getNormalizedResourceIconPath } from '../../../lib/utils/resourceUtils';
 
 interface ResourceItemProps {
   resource: {

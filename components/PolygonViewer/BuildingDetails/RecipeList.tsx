@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { getNormalizedResourceIconPath } from '../../../../lib/utils/resourceUtils';
+import { getNormalizedResourceIconPath } from '../../../lib/utils/resourceUtils';
 
 // Helper function to format craft time in minutes to a more readable format
 const formatCraftTime = (minutes: number): string => {
