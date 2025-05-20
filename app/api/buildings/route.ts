@@ -436,8 +436,20 @@ export async function GET(request: Request) {
       return {
         ...fields,
         // Override specific fields that need special handling
-        id: fields.buildingId || record.id,
-        position: position
+        id: fields.buildingId || record.id, // This is the custom BuildingId or Airtable record ID
+        type: fields.type, // Ensure type is explicitly passed
+        land_id: fields.landId, // Ensure landId is explicitly passed (camelCased from LandId)
+        owner: fields.owner, // Ensure owner is explicitly passed
+        occupant: fields.occupant, // Ensure occupant is explicitly passed (camelCased from Occupant)
+        category: fields.category, // Ensure category is explicitly passed (camelCased from Category)
+        position: position,
+        // Include other important fields that might be directly accessed by services
+        name: fields.name,
+        rentAmount: fields.rentAmount,
+        leaseAmount: fields.leaseAmount,
+        variant: fields.variant,
+        rotation: fields.rotation,
+        createdAt: fields.createdAt,
       };
     });
     

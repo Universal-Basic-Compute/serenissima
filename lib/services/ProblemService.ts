@@ -206,28 +206,44 @@ export class ProblemService {
       }
 
       const citizens = allFetchedCitizens.filter(c => {
+        const fields = c.fields || {}; // Ensure fields object exists
         let effectiveUsername: string | undefined = undefined;
-        const originalPascalUsername = c.Username; // Store original for logging
-        const camelUsername = (c as any).username;
+        const originalPascalUsername = fields.Username;
+        const camelUsername = (fields as any).username;
 
-        if (c.Username && typeof c.Username === 'string' && c.Username.trim() !== '') {
-          effectiveUsername = c.Username.trim();
+        if (fields.Username && typeof fields.Username === 'string' && fields.Username.trim() !== '') {
+          effectiveUsername = fields.Username.trim();
         } else if (camelUsername && typeof camelUsername === 'string' && camelUsername.trim() !== '') {
           effectiveUsername = camelUsername.trim();
-          c.Username = effectiveUsername; // Normalize to PascalCase for consistent use
         }
 
-        const citizenIdentifier = c.CitizenId || (c as any).citizenId || c.id || 'Unknown ID';
-
-        if (!effectiveUsername) {
-          console.warn(`[ProblemService] detectHomelessCitizens: Citizen ${citizenIdentifier} has invalid or missing Username. Checked Username (PascalCase): '${originalPascalUsername}', username (camelCase): '${camelUsername}'. Excluding from homeless check.`);
+        // Normalize Username onto the citizen object 'c'
+        if (effectiveUsername) {
+          c.Username = effectiveUsername;
+        } else {
+          // Construct an identifier for logging even if username is missing
+          const logIdentifier = fields.CitizenId || (fields as any).citizenId || c.id || 'Unknown ID (no Username, CitizenId, or record id)';
+          console.warn(`[ProblemService] detectHomelessCitizens: Citizen ${logIdentifier} has invalid or missing Username. Checked Username (PascalCase): '${originalPascalUsername}', username (camelCase): '${camelUsername}'. Excluding from homeless check.`);
           return false;
         }
 
-        // Normalize CitizenId: if c.CitizenId is missing but c.citizenId (camelCase) exists, use it.
-        if (!c.CitizenId && (c as any).citizenId && typeof (c as any).citizenId === 'string' && (c as any).citizenId.trim() !== '') {
-          c.CitizenId = (c as any).citizenId.trim();
-          // console.log(`[ProblemService] detectHomelessCitizens: Normalized CitizenId from camelCase for citizen ${c.CitizenId}`);
+        // Normalize CitizenId onto the citizen object 'c'
+        const originalPascalCitizenId = fields.CitizenId;
+        const camelCitizenId = (fields as any).citizenId;
+        let effectiveCitizenId: string | undefined = undefined;
+
+        if (fields.CitizenId && typeof fields.CitizenId === 'string' && fields.CitizenId.trim() !== '') {
+          effectiveCitizenId = fields.CitizenId.trim();
+        } else if (camelCitizenId && typeof camelCitizenId === 'string' && camelCitizenId.trim() !== '') {
+          effectiveCitizenId = camelCitizenId.trim();
+        }
+        
+        if (effectiveCitizenId) {
+          c.CitizenId = effectiveCitizenId;
+        } else {
+           // If no effective CitizenId, c.CitizenId remains as it was (likely undefined).
+           // The problem creation logic `citizen.CitizenId || citizen.id` will handle this by falling back to c.id.
+           console.warn(`[ProblemService] detectHomelessCitizens: Citizen (Username: ${c.Username}, AirtableID: ${c.id}) missing effective CitizenId (checked CitizenId: '${originalPascalCitizenId}', citizenId: '${camelCitizenId}'). Will use Airtable record ID as fallback assetId.`);
         }
         return true;
       });
@@ -244,13 +260,15 @@ export class ProblemService {
       const homesByOccupant: Record<string, boolean> = {};
       let homeBuildingCount = 0;
       buildings.forEach(building => {
-        // Ensure building.Occupant is a non-empty string before using it
-        const occupantKey = building.Occupant && typeof building.Occupant === 'string' ? building.Occupant.trim() : null;
-        if (building.Category?.toLowerCase() === 'home' && occupantKey) {
+        // Access fields using camelCase as returned by the API
+        const occupantKey = building.occupant && typeof building.occupant === 'string' ? building.occupant.trim() : null;
+        const category = building.category && typeof building.category === 'string' ? building.category.toLowerCase() : null;
+
+        if (category === 'home' && occupantKey) {
           homesByOccupant[occupantKey] = true;
           homeBuildingCount++;
-        } else if (building.Category?.toLowerCase() === 'home' && !occupantKey) {
-          console.warn(`[ProblemService] detectHomelessCitizens: Building ${building.id || building.Name || 'Unknown ID'} is 'home' category but has invalid/missing Occupant: '${building.Occupant}'`);
+        } else if (category === 'home' && !occupantKey) {
+          console.warn(`[ProblemService] detectHomelessCitizens: Building ${building.id || building.name || 'Unknown ID'} is 'home' category but has invalid/missing occupant: '${building.occupant}'`);
         }
       });
       console.log(`[ProblemService] detectHomelessCitizens: Populated homesByOccupant with ${Object.keys(homesByOccupant).length} entries from ${homeBuildingCount} relevant home buildings.`);
@@ -322,28 +340,42 @@ export class ProblemService {
       }
 
       const citizens = allFetchedCitizens.filter(c => {
+        const fields = c.fields || {}; // Ensure fields object exists
         let effectiveUsername: string | undefined = undefined;
-        const originalPascalUsername = c.Username; // Store original for logging
-        const camelUsername = (c as any).username;
+        const originalPascalUsername = fields.Username;
+        const camelUsername = (fields as any).username;
 
-        if (c.Username && typeof c.Username === 'string' && c.Username.trim() !== '') {
-          effectiveUsername = c.Username.trim();
+        if (fields.Username && typeof fields.Username === 'string' && fields.Username.trim() !== '') {
+          effectiveUsername = fields.Username.trim();
         } else if (camelUsername && typeof camelUsername === 'string' && camelUsername.trim() !== '') {
           effectiveUsername = camelUsername.trim();
-          c.Username = effectiveUsername; // Normalize to PascalCase for consistent use
         }
-        
-        const citizenIdentifier = c.CitizenId || (c as any).citizenId || c.id || 'Unknown ID';
 
-        if (!effectiveUsername) {
-          console.warn(`[ProblemService] detectWorklessCitizens: Citizen ${citizenIdentifier} has invalid or missing Username. Checked Username (PascalCase): '${originalPascalUsername}', username (camelCase): '${camelUsername}'. Excluding from workless check.`);
+        // Normalize Username onto the citizen object 'c'
+        if (effectiveUsername) {
+          c.Username = effectiveUsername;
+        } else {
+          // Construct an identifier for logging even if username is missing
+          const logIdentifier = fields.CitizenId || (fields as any).citizenId || c.id || 'Unknown ID (no Username, CitizenId, or record id)';
+          console.warn(`[ProblemService] detectWorklessCitizens: Citizen ${logIdentifier} has invalid or missing Username. Checked Username (PascalCase): '${originalPascalUsername}', username (camelCase): '${camelUsername}'. Excluding from workless check.`);
           return false;
         }
 
-        // Normalize CitizenId: if c.CitizenId is missing but c.citizenId (camelCase) exists, use it.
-        if (!c.CitizenId && (c as any).citizenId && typeof (c as any).citizenId === 'string' && (c as any).citizenId.trim() !== '') {
-          c.CitizenId = (c as any).citizenId.trim();
-          // console.log(`[ProblemService] detectWorklessCitizens: Normalized CitizenId from camelCase for citizen ${c.CitizenId}`);
+        // Normalize CitizenId onto the citizen object 'c'
+        const originalPascalCitizenId = fields.CitizenId;
+        const camelCitizenId = (fields as any).citizenId;
+        let effectiveCitizenId: string | undefined = undefined;
+
+        if (fields.CitizenId && typeof fields.CitizenId === 'string' && fields.CitizenId.trim() !== '') {
+          effectiveCitizenId = fields.CitizenId.trim();
+        } else if (camelCitizenId && typeof camelCitizenId === 'string' && camelCitizenId.trim() !== '') {
+          effectiveCitizenId = camelCitizenId.trim();
+        }
+        
+        if (effectiveCitizenId) {
+          c.CitizenId = effectiveCitizenId;
+        } else {
+           console.warn(`[ProblemService] detectWorklessCitizens: Citizen (Username: ${c.Username}, AirtableID: ${c.id}) missing effective CitizenId (checked CitizenId: '${originalPascalCitizenId}', citizenId: '${camelCitizenId}'). Will use Airtable record ID as fallback assetId.`);
         }
         return true;
       });
@@ -355,19 +387,41 @@ export class ProblemService {
 
       const buildings = await this.fetchAllBuildings();
       const workplacesByOccupant: Record<string, boolean> = {};
+      let businessBuildingCount = 0;
       buildings.forEach(building => {
-        if (building.Category?.toLowerCase() === 'business' && building.Occupant) {
-          workplacesByOccupant[building.Occupant] = true;
+        // Access fields using camelCase as returned by the API
+        const occupantKey = building.occupant && typeof building.occupant === 'string' ? building.occupant.trim() : null;
+        const category = building.category && typeof building.category === 'string' ? building.category.toLowerCase() : null;
+
+        if (category === 'business' && occupantKey) {
+          workplacesByOccupant[occupantKey] = true;
+          businessBuildingCount++;
+        } else if (category === 'business' && !occupantKey) {
+          console.warn(`[ProblemService] detectWorklessCitizens: Building ${building.id || building.name || 'Unknown ID'} is 'business' category but has invalid/missing occupant: '${building.occupant}'`);
         }
       });
+      console.log(`[ProblemService] detectWorklessCitizens: Populated workplacesByOccupant with ${Object.keys(workplacesByOccupant).length} entries from ${businessBuildingCount} relevant business buildings.`);
+      if (Object.keys(workplacesByOccupant).length > 0) {
+        console.log(`[ProblemService] detectWorklessCitizens: Sample workplacesByOccupant keys: ${Object.keys(workplacesByOccupant).slice(0, 5).join(', ')}`);
+      }
 
       const problems: Record<string, any> = {};
+      let worklessCitizensChecked = 0;
       citizens.forEach(citizen => {
         // Exclude system accounts from being flagged as workless
         if (citizen.Username === 'ConsiglioDeiDieci' || citizen.Username === 'SerenissimaBank') {
             return; 
         }
-        if (!workplacesByOccupant[citizen.Username]) {
+
+        // Ensure citizen.Username is a valid string before using it as a key
+        const usernameKey = citizen.Username && typeof citizen.Username === 'string' ? citizen.Username.trim() : null;
+
+        if (worklessCitizensChecked < 5) { // Log for the first 5 citizens
+            console.log(`[ProblemService] detectWorklessCitizens: Checking citizen ${worklessCitizensChecked + 1}/${citizens.length}: Username='${usernameKey}', In workplacesByOccupant: ${usernameKey ? !!workplacesByOccupant[usernameKey] : 'N/A (invalid username)'}`);
+        }
+        worklessCitizensChecked++;
+        
+        if (usernameKey && !workplacesByOccupant[usernameKey]) {
           const problemId = `workless_${citizen.CitizenId || citizen.id}_${Date.now()}`;
           problems[problemId] = {
             problemId,
