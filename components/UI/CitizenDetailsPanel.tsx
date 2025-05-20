@@ -888,7 +888,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
             </p>
           )}
 
-          <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Opportunities</h3>
+          <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Relevancies</h3>
           
           {isLoadingRelevancies ? (
             <div className="flex justify-center py-4">
@@ -898,17 +898,23 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
             <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1 custom-scrollbar">
               {relevancies.map((relevancy, index) => (
                 <div key={relevancy.relevancyId || index} className="bg-amber-100 rounded-lg p-3 text-sm">
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="font-medium text-amber-800">
+                  <div className="flex items-start justify-between mb-1"> {/* Changed items-center to items-start */}
+                    <div className="font-medium text-amber-800 flex-1 pr-2"> {/* Added flex-1 and pr-2 for spacing */}
                       {formatRelevancyText(relevancy.title, citizen)}
                     </div>
-                    {/* Score displayed as a nice badge */}
-                    <div className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-200 text-amber-800 text-center">
-                      <span className="font-bold text-lg">{relevancy.score}</span>
-                      <span className="text-gray-500 text-[10px] ml-1">score</span>
+                    {/* Opportunity score displayed similarly to relationship scores */}
+                    <div className="text-center">
+                      <div className={`px-3 py-1 rounded-full text-xl font-bold ${
+                        relevancy.score > 75 ? 'bg-teal-200 text-teal-800' : // Example: Teal for high opportunity
+                        relevancy.score > 25 ? 'bg-lime-200 text-lime-800' :   // Example: Lime for medium
+                        'bg-gray-200 text-gray-800' // Example: Gray for low
+                      }`}>
+                        {Math.round(relevancy.score)}
+                      </div>
+                      <p className="text-xs text-amber-600 mt-1">Opportunity</p>
                     </div>
                   </div>
-                  <div className="text-xs text-amber-700 mt-1">
+                  <div className="text-xs text-amber-700 mt-2"> {/* Increased mt-1 to mt-2 for better spacing */}
                     <ReactMarkdown 
                       remarkPlugins={[remarkGfm]}
                       components={{
@@ -922,7 +928,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
               ))}
             </div>
           ) : (
-            <p className="text-amber-700 italic">No notable opportunities with this citizen at present. Future ventures may arise as your paths cross in Venetian society.</p>
+            <p className="text-amber-700 italic">No notable relevancies with this citizen at present. Future ventures may arise as your paths cross in Venetian society.</p>
           )}
 
           {/* Problems Section */}
