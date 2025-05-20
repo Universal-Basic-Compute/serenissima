@@ -281,10 +281,10 @@ def update_relationship_scores(
                 if combined_types:
                     notes_string = f"Sources: {', '.join(sorted(list(combined_types)))}"
                 
-                final_strength_score = min(100.0, updated_score) # Cap the score at 100
+                # final_strength_score = min(100.0, updated_score) # Cap the score at 100 - REMOVED
                 
                 tables['relationships'].update(record_id, {
-                    'StrengthScore': final_strength_score, 
+                    'StrengthScore': updated_score, # Use updated_score directly
                     'LastInteraction': datetime.now().isoformat(), 
                     'Notes': notes_string
                 })
@@ -294,12 +294,12 @@ def update_relationship_scores(
                 if new_relevancy_types_set:
                     notes_string = f"Sources: {', '.join(sorted(list(new_relevancy_types_set)))}"
 
-                final_strength_score = min(100.0, score_to_add) # Cap the score at 100
+                # final_strength_score = min(100.0, score_to_add) # Cap the score at 100 - REMOVED
                 
                 tables['relationships'].create({
                     'Citizen1': source_username,
                     'Citizen2': target_username,
-                    'StrengthScore': final_strength_score, 
+                    'StrengthScore': score_to_add, # Use score_to_add directly
                     'LastInteraction': datetime.now().isoformat(), 
                     'Notes': notes_string
                 })
