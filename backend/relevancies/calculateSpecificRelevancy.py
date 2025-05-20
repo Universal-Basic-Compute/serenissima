@@ -393,6 +393,17 @@ def calculate_specific_relevancy(
         # This type of relevancy is handled by its own API POST which saves one record per land group.
         # The multi_user_results logic is not directly applicable here in the same way as proximity for all landowners.
         # The API response will indicate success/failure and count of groups processed.
+
+    elif relevancy_type == "guild_member":
+        api_url = f"{base_url}/api/relevancies/guild-member"
+        payload = {} # Global calculation
+        if username: # Username not typically used but pass if provided
+            payload["Citizen"] = username
+            log.info(f"Requesting guild member relevancy (context: {username}).")
+        else:
+            log.info("Requesting guild member relevancy (global for all guilds).")
+        request_timeout = 120 # Might take time if many guilds/members
+        # API response will indicate success/failure and count of guilds processed.
         
     else:
         log.error(f"Unknown relevancy type: {relevancy_type}")
@@ -448,6 +459,8 @@ def calculate_specific_relevancy(
             relevancies_created_count = data.get('relevanciesSavedCount', len(data.get('relevancyScores', {})))
         elif relevancy_type == "same_land_neighbor": # Global calculation
             relevancies_created_count = data.get('relevanciesSavedCount', 0) # API returns count of land groups processed
+        elif relevancy_type == "guild_member": # Global calculation
+            relevancies_created_count = data.get('relevanciesSavedCount', 0) # API returns count of guilds processed
 
 
         notification_title = f"{relevancy_type.replace('_', ' ').capitalize()} Relevancy Calculation Complete"
@@ -477,6 +490,9 @@ def calculate_specific_relevancy(
         elif relevancy_type == "same_land_neighbor" and not username:
             target_user_info = "all lands"
             log_context_message = "for all land communities"
+        elif relevancy_type == "guild_member" and not username:
+            target_user_info = "all guilds"
+            log_context_message = "for all guild communities"
         elif not username and relevancy_type == "proximity": # Proximity for all landowners
              target_user_info = "all landowners"
              log_context_message = "for all landowners (proximity)"
@@ -518,7 +534,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--type", 
         required=True, 
-        choices=["proximity", "domination", "housing", "jobs", "building_ownership", "building_operator", "building_occupant", "same_land_neighbor"],
+        choices=["proximity", "domination", "housing", "jobs", "building_ownership", "building_operator", "building_occupant", "same_land_neighbor", "guild_member"],
         help="The type of relevancy to calculate."
     )
     parser.add_argument(

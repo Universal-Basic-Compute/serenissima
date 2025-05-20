@@ -28,6 +28,12 @@ interface RelevancyScore {
   relevantToCitizen?: string | string[]; // The citizen(s) for whom this relevancy is generated/saved
 }
 
+interface GuildWithMembersData {
+  id: string; // Guild ID
+  name: string; // Guild Name
+  memberUsernames: string[]; // Array of member usernames
+}
+
 interface BuildingData {
   id: string; // Airtable record ID of the building
   buildingId?: string; // Custom BuildingId field if exists
@@ -1147,6 +1153,86 @@ export class RelevancyService {
       return createdRelevancies;
     } catch (error) {
       console.error(`[RelevancyService] Error calculating 'same_land_neighbor' relevancy:`, error);
+      return [];
+    }
+  }
+
+  /**
+   * Mocked/Placeholder: Fetch all guilds with their members.
+   * In a real scenario, this would call an API endpoint like `/api/guilds/all-with-members`.
+   */
+  private async fetchAllGuildsWithMembers(): Promise<GuildWithMembersData[]> {
+    // This is a placeholder. Replace with actual API call.
+    console.log(`[RelevancyService] fetchAllGuildsWithMembers: Fetching all guilds with members (using placeholder data).`);
+    // Example: const response = await fetch(`${baseUrl}/api/guilds/all-with-members`);
+    // const data = await response.json();
+    // return data.guilds; // Assuming the API returns { success: true, guilds: GuildWithMembersData[] }
+
+    // Placeholder data:
+    return [
+      { id: 'guild_artisans', name: 'Artisans Guild', memberUsernames: ['Alice', 'Bob', 'ConsiglioDeiDieci'] },
+      { id: 'guild_merchants', name: 'Merchants Guild', memberUsernames: ['Charlie', 'David', 'Eve'] },
+      { id: 'guild_explorers', name: 'Explorers Guild', memberUsernames: ['Bob', 'Fiona'] },
+      { id: 'guild_empty', name: 'Empty Guild', memberUsernames: [] },
+      { id: 'guild_solo', name: 'Solo Guild', memberUsernames: ['SoloPlayer'] },
+    ];
+  }
+
+  /**
+   * Calculate "guild member" relevancy.
+   * Identifies groups of citizens belonging to the same guild.
+   * Returns an array of RelevancyScore objects, one for each guild with multiple members.
+   */
+  public async calculateGuildMemberRelevancy(): Promise<RelevancyScore[]> {
+    const createdRelevancies: RelevancyScore[] = [];
+    try {
+      console.log(`[RelevancyService] Calculating guild member relevancy (single record per guild, templated for UI)`);
+      
+      const allGuildsData = await this.fetchAllGuildsWithMembers();
+      if (!allGuildsData || allGuildsData.length === 0) {
+        console.log(`[RelevancyService] No guild data found.`);
+        return [];
+      }
+      console.log(`[RelevancyService] Fetched ${allGuildsData.length} total guilds for guild member relevancy.`);
+
+      for (const guild of allGuildsData) {
+        const guildId = guild.id;
+        const guildName = guild.name;
+        const memberUsernames = guild.memberUsernames;
+
+        if (memberUsernames.length > 1) { // Only create relevancy if there are actual guildmates
+          const score = 60 + Math.min(memberUsernames.length * 2, 20); // Score increases slightly with more members, capped
+          const status = this.determineStatus(score);
+
+          const title = `Membre de la Guilde : %TARGETCITIZEN% dans la Guilde ${guildName}`;
+          const description = `Vous et %TARGETCITIZEN% êtes membres de la **Guilde ${guildName}**.\n\n` +
+                             `Être dans la même guilde favorise la collaboration et les objectifs communs.\n\n` +
+                             `Autres membres de cette guilde : ${memberUsernames.join(', ')}.`;
+          
+          createdRelevancies.push({
+            score: parseFloat(score.toFixed(2)),
+            assetId: guildId, 
+            assetType: 'guild', 
+            category: 'affiliation',
+            type: 'guild_member',
+            distance: 0, // Not applicable
+            closestLandId: '', // Not applicable
+            isConnected: true, // Assumed for guild members
+            connectivityBonus: 0, 
+            title,
+            description,
+            timeHorizon: 'ongoing',
+            status,
+            relevantToCitizen: memberUsernames, // Array of all member usernames in this guild
+            targetCitizen: memberUsernames,   // Array of all member usernames (UI will pick one for %TARGETCITIZEN%)
+          });
+        }
+      }
+      
+      console.log(`[RelevancyService] Generated ${createdRelevancies.length} 'guild_member' group relevancy objects (one per guild).`);
+      return createdRelevancies;
+    } catch (error) {
+      console.error(`[RelevancyService] Error calculating 'guild_member' relevancy:`, error);
       return [];
     }
   }

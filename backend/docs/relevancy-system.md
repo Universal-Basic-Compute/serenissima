@@ -319,6 +319,9 @@ python backend/relevancies/calculateSpecificRelevancy.py --type building_occupan
 
 # Calculate same land neighbor relevancies for all lands/land groups
 python backend/relevancies/calculateSpecificRelevancy.py --type same_land_neighbor
+
+# Calculate guild member relevancies for all guilds
+python backend/relevancies/calculateSpecificRelevancy.py --type guild_member
 ```
 
 ## Same Land Neighbor Relevancy
@@ -353,3 +356,35 @@ This type of relevancy identifies communities of residents living on the same `L
     - Calculates and saves these group relevancies.
     - Request Body: Empty (for global calculation).
     - Response: Includes `success`, `relevanciesSavedCount` (number of land groups processed).
+
+## Guild Member Relevancy
+
+This type of relevancy identifies communities of players belonging to the same guild. It aims to foster collaboration and highlight shared affiliations.
+
+### Calculation
+- The system fetches all guilds and their members.
+- For each guild with two or more members, a single relevancy record is created.
+
+### Data Structure
+- **AssetID**: The `GuildId`.
+- **AssetType**: `guild`.
+- **Category**: `affiliation`.
+- **Type**: `guild_member`.
+- **RelevantToCitizen**: A JSON stringified array of all member `Username`s in this guild.
+- **TargetCitizen**: A JSON stringified array of all member `Username`s in this guild (UI will use this to pick a `%TARGETCITIZEN%`).
+- **Title**: Example: "Membre de la Guilde : %TARGETCITIZEN% dans la Guilde [GuildName]".
+- **Description**: Example: "Vous et %TARGETCITIZEN% êtes membres de la **Guilde [GuildName]**.\n\nÊtre dans la même guilde favorise la collaboration et les objectifs communs.\n\nAutres membres de cette guilde : [Liste des membres]."
+- **Score**: A base score (e.g., 60), potentially increasing slightly with the number of members.
+- **Status**: Typically "medium" or based on the score.
+- **TimeHorizon**: "ongoing".
+
+### Strategic Value
+- Highlights guild affiliations to players.
+- Can be used by AI or game mechanics to simulate guild interactions or events.
+- Provides context for players about their guildmates.
+
+### API Endpoint
+- **POST `/api/relevancies/guild-member`**:
+    - Calculates and saves these group relevancies.
+    - Request Body: Empty (for global calculation).
+    - Response: Includes `success`, `relevanciesSavedCount` (number of guilds processed).
