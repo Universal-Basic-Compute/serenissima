@@ -235,11 +235,11 @@ def calculate_specific_relevancy(
         elif 'relevancyScores' in data and isinstance(data['relevancyScores'], dict) and relevancy_type == "proximity": # Proximity
             relevancies_created_count = len(data['relevancyScores'])
         elif relevancy_type in ["housing", "jobs"] and data.get('success'): # Housing, Jobs create 1 global
-            relevancies_created_count = 1
-        elif relevancy_type == "domination" and not username and data.get('success'): # Global domination creates 1 record
-             relevancies_created_count = 1 # The API returns relevanciesSavedCount = 1
+            relevancies_created_count = 1 # These APIs save 1 global record
+        elif relevancy_type == "domination" and not username and data.get('success'): # Global domination (now one per landowner)
+             relevancies_created_count = data.get('relevanciesSavedCount', 0) # API returns count of landowners processed
         elif relevancy_type == "domination" and username and 'relevancyScores' in data and isinstance(data['relevancyScores'], dict): # Domination for specific user
-            relevancies_created_count = len(data['relevancyScores'])
+            relevancies_created_count = len(data['relevancyScores']) # Number of other players' profiles saved to this user
 
 
         notification_title = f"{relevancy_type.capitalize()} Relevancy Calculation Complete"
@@ -252,8 +252,8 @@ def calculate_specific_relevancy(
         log_context_message = f"for citizen: {username}"
 
         if relevancy_type == "domination" and not username:
-            target_user_info = "all (Global Report)"
-            log_context_message = "for global domination context"
+            target_user_info = "all landowners (Self-Domination Profiles)"
+            log_context_message = "for all landowners (self-domination profiles)"
         elif relevancy_type in ["housing", "jobs"] and not username: # These are always global
             target_user_info = "all (Global Report)"
             log_context_message = f"for global {relevancy_type} context"

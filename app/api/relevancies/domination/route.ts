@@ -99,63 +99,66 @@ export async function POST(request: NextRequest) {
         saved = true;
       } else {
         // Global calculation (usernameForProcessing is null, meaning citizenUsername was "all")
-        // Create a single global relevancy record summarizing land domination.
-        
-        // Sort landowners by score
-        const sortedLandowners = Object.entries(landDominationRelevancies)
-          .map(([citizenId, data]) => ({ citizenId, ...data }))
-          .sort((a, b) => b.score - a.score);
+        // Create one relevancy record FOR EACH landowner, detailing THEIR OWN domination.
+        relevanciesSavedCount = 0;
+        const recordsToCreate = [];
 
-        // Take top N (e.g., 10) for the summary
-        const topN = 10;
-        const topLandownersSummary = sortedLandowners.slice(0, topN).map((owner, index) => 
-          `${index + 1}. ${owner.title.replace('Land Domination: ', '')} (Score: ${owner.score})`
-        ).join('\n');
+        for (const [landownerUsername, dominationData] of Object.entries(landDominationRelevancies)) {
+          // dominationData is a RelevancyScore object
+          // Delete existing self-domination profile for this landowner
+          const existingSelfDominationRecords = await airtableBase(AIRTABLE_RELEVANCIES_TABLE)
+            .select({ 
+              filterByFormula: `AND({RelevantToCitizen} = '${landownerUsername}', {AssetID} = '${landownerUsername}', {Category} = 'domination', {Type} = 'self_land_dominance_profile')` 
+            })
+            .all();
 
-        const globalTitle = "Overall Land Domination in Venice";
-        const globalDescription = `A summary of the most dominant landowners in Venice based on land count and building potential.\n\n**Top ${topN} Landowners:**\n${topLandownersSummary}\n\nThis report provides a strategic overview of the land ownership landscape.`;
-        
-        const relevancyId = `global_land_domination_${Date.now()}`;
-        const globalRecord = {
-          fields: {
-            RelevancyId: relevancyId,
-            AssetID: "venice_land_domination",
-            AssetType: "city_metric", 
-            Category: "domination",
-            Type: "overall_land_dominance",
-            TargetCitizen: "ConsiglioDeiDieci", 
-            RelevantToCitizen: "all",
-            Score: 100, // Represents the completeness of this global report
-            TimeHorizon: "long",
-            Title: globalTitle,
-            Description: globalDescription,
-            Status: "active",
-            CreatedAt: new Date().toISOString()
+          if (existingSelfDominationRecords.length > 0) {
+            await airtableBase(AIRTABLE_RELEVANCIES_TABLE).destroy(existingSelfDominationRecords.map(r => r.id));
+            console.log(`Deleted ${existingSelfDominationRecords.length} existing self-domination profile(s) for ${landownerUsername}.`);
           }
-        };
-        
-        // Delete existing global land domination record
-        const existingGlobalRecords = await airtableBase(AIRTABLE_RELEVANCIES_TABLE)
-          .select({ filterByFormula: `{AssetID} = "venice_land_domination"` })
-          .all();
-        if (existingGlobalRecords.length > 0) {
-          await airtableBase(AIRTABLE_RELEVANCIES_TABLE).destroy(existingGlobalRecords.map(r => r.id));
-          console.log(`Deleted ${existingGlobalRecords.length} existing global land domination relevancy records.`);
+          
+          // dominationData.title is like "Land Domination: PlayerName"
+          // We want the title for the self-record to be more direct.
+          const selfProfileTitle = `Your Land Domination Profile`;
+
+          const selfDominationRecord = {
+            fields: {
+              RelevancyId: `self_domination_${landownerUsername}_${Date.now()}`,
+              AssetID: landownerUsername, // The landowner themselves
+              AssetType: "citizen", // dominationData.assetType is 'citizen'
+              Category: "domination", // dominationData.category is 'domination'
+              Type: "self_land_dominance_profile", // New specific type
+              TargetCitizen: landownerUsername, // The record is about this landowner
+              RelevantToCitizen: landownerUsername, // The record is for this landowner
+              Score: dominationData.score,
+              TimeHorizon: dominationData.timeHorizon,
+              Title: selfProfileTitle,
+              Description: dominationData.description, // This description is already about the specific landowner
+              Status: dominationData.status,
+              CreatedAt: new Date().toISOString()
+            }
+          };
+          recordsToCreate.push(selfDominationRecord);
         }
 
-        await airtableBase(AIRTABLE_RELEVANCIES_TABLE).create([globalRecord]);
-        relevanciesSavedCount = 1;
-        saved = true;
-        console.log('Successfully saved global land domination relevancy to Airtable.');
+        if (recordsToCreate.length > 0) {
+          // Create records in batches of 10
+          for (let i = 0; i < recordsToCreate.length; i += 10) {
+            const batch = recordsToCreate.slice(i, i + 10);
+            await airtableBase(AIRTABLE_RELEVANCIES_TABLE).create(batch);
+            console.log(`Created batch of ${batch.length} self-domination profiles.`);
+          }
+          relevanciesSavedCount = recordsToCreate.length;
+        }
+        saved = true; // Mark as saved if the process completed, even if 0 records if no landowners
+        console.log(`Successfully processed self-domination profiles for ${relevanciesSavedCount} landowners.`);
       }
     } catch (error) {
-      console.error('Error saving domination relevancies to Airtable:', error);
-      // For global, even if saving fails, we might still want to return the calculated scores.
-      // For specific user, saveRelevancies throws and is caught by the main try/catch.
-      if (!usernameForProcessing) { // If it was a global calculation, set saved to false
-        saved = false;
-      } else { // If specific user, rethrow to be handled by outer catch
-        throw error;
+      console.error('Error saving self-domination relevancies to Airtable:', error);
+      if (!usernameForProcessing) { 
+        saved = false; // If global calculation failed during saving
+      } else { 
+        throw error; // If specific user, rethrow
       }
     }
     

@@ -402,14 +402,10 @@ def calculate_relevancies(type_filter: Optional[str] = None) -> bool:
         total_relevancies_saved = 0 # More accurate naming
         
         if domination_result.get('success'):
-            # The API for global domination now returns relevanciesSavedCount: 1
-            # For specific user, it would be len(scores)
+            # For global domination, API now returns relevanciesSavedCount = number of landowners
             num_domination_saved = domination_result.get('relevanciesSavedCount', 0)
-            if num_domination_saved == 0 and 'relevanciesCreated' in domination_result: # fallback for older interpretation
-                 num_domination_saved = domination_result.get('relevanciesCreated',0)
-
             total_relevancies_saved += num_domination_saved
-            log.info(f"Successfully processed land domination relevancies, records saved: {num_domination_saved}")
+            log.info(f"Successfully processed self-domination profiles, records saved: {num_domination_saved}")
         else:
             log.error(f"Failed to calculate land domination relevancies: {domination_result.get('error')}")
         
@@ -472,9 +468,9 @@ def calculate_relevancies(type_filter: Optional[str] = None) -> bool:
         # Add domination relevancies to the details FIRST
         if domination_result.get('success'):
             num_dom_saved = domination_result.get('relevanciesSavedCount', domination_result.get('relevanciesCreated', 0))
-            details.append(f"- Global land domination relevancy: {num_dom_saved} record saved (summarizing all landowners)")
+            details.append(f"- Self-Domination Profiles: {num_dom_saved} records saved (one per landowner)")
         else:
-            details.append(f"- Global land domination relevancy: Error - {domination_result.get('error', 'Unknown error')}")
+            details.append(f"- Self-Domination Profiles: Error - {domination_result.get('error', 'Unknown error')}")
         
         # Add housing relevancies to the details
         if housing_result.get('success'):
