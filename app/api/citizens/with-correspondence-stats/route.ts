@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     // 1. Fetch all citizens from the CITIZENS table
     const citizenRecords = await base(AIRTABLE_CITIZENS_TABLE)
       .select({
-        fields: ['Username', 'FirstName', 'LastName', 'CoatOfArmsImageURL'], // Adjust field names as per your Airtable schema
+        fields: ['Username', 'FirstName', 'LastName', 'CoatOfArmsImageUrl'], // Corrected field name
         filterByFormula: `NOT({Username} = '${currentCitizenUsername}')` // Exclude the current citizen
       })
       .all();
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
       username: record.get('Username') as string,
       firstName: record.get('FirstName') as string || '',
       lastName: record.get('LastName') as string || '',
-      coatOfArmsImageUrl: record.get('CoatOfArmsImageURL') as string || null,
+      coatOfArmsImageUrl: record.get('CoatOfArmsImageUrl') as string || null, // Corrected field name
     }));
     
     // 2. For each other citizen, get stats
