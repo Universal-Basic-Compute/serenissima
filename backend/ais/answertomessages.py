@@ -415,10 +415,10 @@ def process_ai_messages(dry_run: bool = False):
                         
                         if response_content:
                             # Create response message using API
-                        # Sender is AI, Receiver is the original sender
-                        sent_success = create_response_message_api(sender_username=ai_username, 
-                                                                   receiver_username=sender_username, 
-                                                                   content=response_content)
+                            # Sender is AI, Receiver is the original sender
+                            sent_success = create_response_message_api(sender_username=ai_username, 
+                                                                       receiver_username=sender_username, 
+                                                                       content=response_content)
                             if sent_success:
                                 ai_response_counts[ai_username] += 1
                         else:
