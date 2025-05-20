@@ -15,6 +15,7 @@ import os
 import sys
 import logging
 import time
+import json
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
 from pyairtable import Api, Table
