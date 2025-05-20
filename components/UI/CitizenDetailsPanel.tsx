@@ -62,9 +62,11 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
   // Add state for relevancies
   const [relevancies, setRelevancies] = useState<any[]>([]);
   const [isLoadingRelevancies, setIsLoadingRelevancies] = useState<boolean>(false);
+  const [cachedRelevancies, setCachedRelevancies] = useState<Record<string, any[]>>({});
   // Add state for relationship
   const [relationship, setRelationship] = useState<any>(null);
   const [isLoadingRelationship, setIsLoadingRelationship] = useState<boolean>(false);
+  const [cachedRelationships, setCachedRelationships] = useState<Record<string, any>>({});
   const [noRelationshipMessage, setNoRelationshipMessage] = useState<string>('');
   
   // Function to check if the current user is ConsiglioDeiDieci
@@ -169,16 +171,20 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
         const data = await response.json();
         if (data.success && data.relevancies) {
           setRelevancies(data.relevancies);
+          setCachedRelevancies(prev => ({ ...prev, [targetCitizen]: data.relevancies }));
         } else {
           setRelevancies([]);
+          setCachedRelevancies(prev => ({ ...prev, [targetCitizen]: [] })); // Cache empty result
         }
       } else {
         console.error('Failed to fetch relevancies:', response.status, response.statusText);
         setRelevancies([]);
+        setCachedRelevancies(prev => ({ ...prev, [targetCitizen]: [] })); // Cache empty on error
       }
     } catch (error) {
       console.error('Error fetching relevancies:', error);
       setRelevancies([]);
+      setCachedRelevancies(prev => ({ ...prev, [targetCitizen]: [] })); // Cache empty on error
     } finally {
       setIsLoadingRelevancies(false);
     }
@@ -186,8 +192,12 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
 
   // Function to fetch relationship data
   const fetchRelationship = async (viewedCitizenUsername: string) => {
-    if (!viewedCitizenUsername) return;
+    if (!viewedCitizenUsername) {
+      setIsLoadingRelationship(false); // Ensure loading is stopped if no username
+      return;
+    }
 
+    setIsLoadingRelationship(true);
     let currentUsername = null;
     try {
       const profileStr = localStorage.getItem('citizenProfile');
@@ -209,31 +219,40 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
 
     // Avoid fetching relationship with oneself, or handle as a special case
     if (currentUsername === viewedCitizenUsername) {
-      // Display a special state for self-view, e.g., perfect relationship or hide section
-      setRelationship({ StrengthScore: 100, type: "Self", Sentiment: 0 }); // Example for self
+      const selfRelationship = { StrengthScore: 100, type: "Self", Sentiment: 0 };
+      setRelationship(selfRelationship);
+      setCachedRelationships(prev => ({ ...prev, [viewedCitizenUsername]: selfRelationship }));
+      setIsLoadingRelationship(false);
       return;
     }
 
-    setIsLoadingRelationship(true);
+    // setIsLoadingRelationship(true); // Already set at the beginning of the function
     try {
       // API should handle finding relationship regardless of (citizen1, citizen2) order
       const response = await fetch(`/api/relationships?citizen1=${currentUsername}&citizen2=${viewedCitizenUsername}`);
       if (response.ok) {
         const data = await response.json();
-        if (data.success && data.relationships && data.relationships.length > 0) {
+        // Check if data.relationship exists, even if it's null (which means no relationship found)
+        if (data.success && data.hasOwnProperty('relationship')) {
+          setRelationship(data.relationship); // This could be an object or null
+          setCachedRelationships(prev => ({ ...prev, [viewedCitizenUsername]: data.relationship }));
+        } else if (data.success && data.relationships && data.relationships.length > 0) { // Legacy check if API returns array
           setRelationship(data.relationships[0]);
-        } else if (data.success && data.relationship) { // If API returns a single relationship object
-          setRelationship(data.relationship);
-        } else {
-          setRelationship(null); // No specific relationship found
+          setCachedRelationships(prev => ({ ...prev, [viewedCitizenUsername]: data.relationships[0] }));
+        }
+         else {
+          setRelationship(null); // No specific relationship found or unexpected format
+          setCachedRelationships(prev => ({ ...prev, [viewedCitizenUsername]: null }));
         }
       } else {
         console.warn(`Failed to fetch relationship: ${response.status} ${response.statusText}`);
         setRelationship(null);
+        setCachedRelationships(prev => ({ ...prev, [viewedCitizenUsername]: null })); // Cache null on error
       }
     } catch (error) {
       console.error('Error fetching relationship:', error);
       setRelationship(null);
+      setCachedRelationships(prev => ({ ...prev, [viewedCitizenUsername]: null })); // Cache null on error
     } finally {
       setIsLoadingRelationship(false);
     }
@@ -406,35 +425,60 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     // Animate in when component mounts
     setIsVisible(true);
     
-    // Reset states when citizen changes
+    // Reset states when citizen changes for non-cached items
     setHomeBuilding(null);
     setWorkBuilding(null);
     setIsLoadingBuildings(false);
-    setActivities([]);
-    setRelationship(null);
-    setIsLoadingRelationship(false);
-    
-    // Reset the message fetch attempted flag when citizen changes
-    if (citizen && citizen.citizenid) {
-      // Only reset for the new citizen, keep track of previous attempts
-      const newAttemptedRef = {...messagesFetchAttemptedRef.current};
-      // If we haven't attempted for this citizen yet, fetch messages
-      if (!newAttemptedRef[citizen.citizenid]) {
-        fetchMessageHistory();
-      }
+    // Activities and Messages are handled by their own fetch-once refs below.
+
+    if (citizen && citizen.citizenid && citizen.username) {
+        // --- Relevancies (Opportunities) ---
+        if (cachedRelevancies.hasOwnProperty(citizen.username)) {
+            setRelevancies(cachedRelevancies[citizen.username]);
+            setIsLoadingRelevancies(false);
+        } else {
+            setRelevancies([]); // Clear data from previous citizen
+            fetchRelevancies(citizen.username); // This will manage its own loading state
+        }
+
+        // --- Relationship ---
+        if (cachedRelationships.hasOwnProperty(citizen.username)) {
+            setRelationship(cachedRelationships[citizen.username]);
+            setIsLoadingRelationship(false);
+        } else {
+            setRelationship(null); // Clear data from previous citizen
+            fetchRelationship(citizen.username); // This will manage its own loading state and self-view
+        }
+        
+        // --- Message History (existing logic with fetch-once ref) ---
+        if (!messagesFetchAttemptedRef.current[citizen.citizenid]) {
+            fetchMessageHistory();
+        } else {
+            // If messages were already attempted, ensure loading is false if not actively fetching.
+            // fetchMessageHistory handles its own loading state. If we are here, it means
+            // messages were either fetched or an attempt was made.
+            // If messages are empty and not loading, the UI shows "No correspondence yet".
+        }
       
-      // Similarly, only fetch activities if we haven't tried yet for this citizen
-      if (!activitiesFetchAttemptedRef.current[citizen.citizenid]) {
-        fetchCitizenActivities(citizen.citizenid);
-      }
+        // --- Activities (existing logic with fetch-once ref) ---
+        if (!activitiesFetchAttemptedRef.current[citizen.citizenid]) {
+            setActivities([]); // Clear previous activities before fetching new ones
+            fetchCitizenActivities(citizen.citizenid);
+        } else {
+            // Similar to messages, if activities were attempted, their state is either populated or empty.
+            // fetchCitizenActivities handles its own loading state.
+        }
       
-      // Fetch relevancies for this citizen
-      if (citizen.username) {
-        fetchRelevancies(citizen.username);
-        fetchRelationship(citizen.username); // Fetch relationship data
-      }
-      
-      // Removed Kinos-specific initial message logic
+    } else {
+        // No citizen, or citizenid/username missing. Clear all relevant states.
+        setRelevancies([]);
+        setIsLoadingRelevancies(false);
+        setRelationship(null);
+        setIsLoadingRelationship(false);
+        setActivities([]);
+        setIsLoadingActivities(false); // Ensure loading state is reset
+        setMessages([]);
+        setIsLoadingHistory(false); // Ensure loading state is reset
     }
     
     // Add escape key handler
