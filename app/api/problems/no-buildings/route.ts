@@ -57,8 +57,9 @@ export async function POST(request: NextRequest) {
     try {
       // If username is provided, save problems for that user only
       // Otherwise, save all problems
+      const problemTitle = "No Buildings on Land"; // Define the title for this problem type
       if (username) {
-        savedCount = await saveProblems(username, problems);
+        savedCount = await saveProblems(username, problems, problemTitle);
       } else {
         // Group problems by citizen
         const problemsByCitizen: Record<string, Record<string, any>> = {};
@@ -77,11 +78,11 @@ export async function POST(request: NextRequest) {
         // Save problems for each citizen
         for (const citizen in problemsByCitizen) {
           const citizenProblems = problemsByCitizen[citizen];
-          const count = await saveProblems(citizen, citizenProblems);
+          const count = await saveProblems(citizen, citizenProblems, problemTitle);
           savedCount += count;
         }
       }
-      
+
       saved = true;
     } catch (error) {
       console.error('Error saving problems to Airtable:', error);

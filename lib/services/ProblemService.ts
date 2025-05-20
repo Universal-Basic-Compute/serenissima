@@ -151,6 +151,176 @@ export class ProblemService {
       ? window.location.origin 
       : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
   }
+
+  /**
+   * Detect homeless citizens
+   */
+  public async detectHomelessCitizens(username?: string): Promise<Record<string, any>> {
+    try {
+      const citizens = await this.fetchAllCitizens(username);
+      if (citizens.length === 0) {
+        console.log(`No citizens found to check for homelessness (user: ${username || 'all'})`);
+        return {};
+      }
+
+      const buildings = await this.fetchAllBuildings();
+      const homesByOccupant: Record<string, boolean> = {};
+      buildings.forEach(building => {
+        if (building.Category?.toLowerCase() === 'home' && building.Occupant) {
+          homesByOccupant[building.Occupant] = true;
+        }
+      });
+
+      const problems: Record<string, any> = {};
+      citizens.forEach(citizen => {
+        if (!homesByOccupant[citizen.Username]) {
+          const problemId = `homeless_${citizen.CitizenId || citizen.id}_${Date.now()}`;
+          problems[problemId] = {
+            problemId,
+            citizen: citizen.Username,
+            assetType: 'citizen',
+            assetId: citizen.CitizenId || citizen.id, // Prefer CitizenId
+            severity: 'medium',
+            status: 'active',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            location: this.getCitizenLocationString(citizen),
+            title: 'Homeless Citizen',
+            description: this.generateHomelessDescription(citizen),
+            solutions: this.generateHomelessSolutions(citizen),
+            notes: `Citizen ${citizen.Username} has no building with Category 'home' where they are listed as Occupant.`,
+            position: citizen.Position || '' // Assumes Position is a JSON string {lat, lng}
+          };
+        }
+      });
+
+      console.log(`Created ${Object.keys(problems).length} problems for homeless citizens (user: ${username || 'all'})`);
+      return problems;
+    } catch (error) {
+      console.error('Error detecting homeless citizens:', error);
+      return {};
+    }
+  }
+
+  /**
+   * Detect workless citizens
+   */
+  public async detectWorklessCitizens(username?: string): Promise<Record<string, any>> {
+    try {
+      const citizens = await this.fetchAllCitizens(username);
+      if (citizens.length === 0) {
+        console.log(`No citizens found to check for worklessness (user: ${username || 'all'})`);
+        return {};
+      }
+
+      const buildings = await this.fetchAllBuildings();
+      const workplacesByOccupant: Record<string, boolean> = {};
+      buildings.forEach(building => {
+        if (building.Category?.toLowerCase() === 'business' && building.Occupant) {
+          workplacesByOccupant[building.Occupant] = true;
+        }
+      });
+
+      const problems: Record<string, any> = {};
+      citizens.forEach(citizen => {
+        // Exclude system accounts from being flagged as workless
+        if (citizen.Username === 'ConsiglioDeiDieci' || citizen.Username === 'SerenissimaBank') {
+            return; 
+        }
+        if (!workplacesByOccupant[citizen.Username]) {
+          const problemId = `workless_${citizen.CitizenId || citizen.id}_${Date.now()}`;
+          problems[problemId] = {
+            problemId,
+            citizen: citizen.Username,
+            assetType: 'citizen',
+            assetId: citizen.CitizenId || citizen.id, // Prefer CitizenId
+            severity: 'low', 
+            status: 'active',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            location: this.getCitizenLocationString(citizen),
+            title: 'Workless Citizen',
+            description: this.generateWorklessDescription(citizen),
+            solutions: this.generateWorklessSolutions(citizen),
+            notes: `Citizen ${citizen.Username} has no building with Category 'business' where they are listed as Occupant.`,
+            position: citizen.Position || '' // Assumes Position is a JSON string {lat, lng}
+          };
+        }
+      });
+
+      console.log(`Created ${Object.keys(problems).length} problems for workless citizens (user: ${username || 'all'})`);
+      return problems;
+    } catch (error) {
+      console.error('Error detecting workless citizens:', error);
+      return {};
+    }
+  }
+
+  private async fetchAllCitizens(username?: string): Promise<any[]> { // Using any for now for citizen structure
+    const apiUrl = username
+      ? `${this.getBaseUrl()}/api/citizens?username=${encodeURIComponent(username)}`
+      : `${this.getBaseUrl()}/api/citizens`; // Fetches all citizens
+    const response = await fetch(apiUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch citizens: ${response.status} ${await response.text()}`);
+    }
+    const data = await response.json();
+    if (username && data.citizen) return [data.citizen]; // API returns single citizen under 'citizen' key
+    return data.citizens || []; // API returns multiple citizens under 'citizens' key
+  }
+
+  private async fetchAllBuildings(): Promise<any[]> { // Using any for now for building structure
+    const response = await fetch(`${this.getBaseUrl()}/api/buildings`); // Fetches all buildings
+    if (!response.ok) {
+      throw new Error(`Failed to fetch buildings: ${response.status} ${await response.text()}`);
+    }
+    const data = await response.json();
+    return data.buildings || [];
+  }
+
+  private getCitizenLocationString(citizen: any): string {
+    // Basic location string. Could be enhanced if Sestiere or more specific location data is available.
+    let location = "Venice";
+    if (citizen.Position) {
+        try {
+            const pos = JSON.parse(citizen.Position);
+            if (pos && pos.lat && pos.lng) {
+                location = `Near ${pos.lat.toFixed(4)}, ${pos.lng.toFixed(4)}`;
+            }
+        } catch (e) { /* ignore parsing error, use default */ }
+    }
+    return citizen.FirstName ? `${citizen.FirstName}'s last known area` : `${citizen.Username}'s last known area`;
+  }
+
+  private generateHomelessDescription(citizen: any): string {
+    const citizenName = `**${citizen.FirstName || citizen.Username} ${citizen.LastName || ''}**`.trim();
+    return `${citizenName} is currently without a registered home. This can lead to instability and difficulties in daily life.\n\n` +
+           `### Social Impact\n` +
+           `- Lack of stable housing affects well-being and social standing.\n` +
+           `- May face difficulties accessing services or participating in civic life.`;
+  }
+
+  private generateHomelessSolutions(citizen: any): string {
+    return `### Recommended Solutions\n` +
+           `- Seek available housing through the housing market (check vacant buildings with 'home' category).\n` +
+           `- Ensure sufficient funds to pay rent.\n` +
+           `- The daily housing assignment script (12:00 PM UTC) may assign housing if available and criteria are met.`;
+  }
+
+  private generateWorklessDescription(citizen: any): string {
+    const citizenName = `**${citizen.FirstName || citizen.Username} ${citizen.LastName || ''}**`.trim();
+    return `${citizenName} is currently without a registered place of work. This impacts their ability to earn income and contribute to the economy.\n\n` +
+           `### Economic Impact\n` +
+           `- No regular income from wages.\n` +
+           `- May struggle to afford housing, goods, and services.`;
+  }
+
+  private generateWorklessSolutions(citizen: any): string {
+    return `### Recommended Solutions\n` +
+           `- Seek employment opportunities at available businesses (check buildings with 'business' category for occupant vacancies).\n` +
+           `- Improve skills or social standing to access better jobs.\n` +
+           `- The daily job assignment script (10:00 AM UTC) may assign a job if available and criteria are met.`;
+  }
 }
 
 // Export a singleton instance

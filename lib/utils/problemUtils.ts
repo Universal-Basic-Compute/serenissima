@@ -9,11 +9,12 @@ const AIRTABLE_PROBLEMS_TABLE = 'PROBLEMS';
  * Save problems to Airtable
  */
 export async function saveProblems(
-  citizen: string, 
-  problems: Record<string, any>
+  citizen: string,
+  problems: Record<string, any>,
+  problemTitleToClear: string // New parameter, e.g., "No Buildings on Land", "Homeless Citizen"
 ): Promise<number> {
   try {
-    console.log(`Saving problems for ${citizen} to Airtable...`);
+    console.log(`Saving problems titled "${problemTitleToClear}" for ${citizen} to Airtable...`);
 
     // Initialize Airtable
     if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
@@ -22,13 +23,13 @@ export async function saveProblems(
     
     const base = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
 
-    // Delete existing problems for this citizen to avoid duplicates
+    // Delete existing problems for this citizen with the specific title and active status
     const existingRecords = await base(AIRTABLE_PROBLEMS_TABLE)
       .select({
-        filterByFormula: `AND({Citizen} = '${citizen}', {AssetType} = 'land', {Status} = 'active')`
+        filterByFormula: `AND({Citizen} = '${citizen}', {Title} = '${problemTitleToClear}', {Status} = 'active')`
       })
       .all();
-      
+
     if (existingRecords.length > 0) {
       // Delete in batches of 10 to avoid API limits
       const recordIds = existingRecords.map(record => record.id);
@@ -36,9 +37,9 @@ export async function saveProblems(
         const batch = recordIds.slice(i, i + 10);
         await base(AIRTABLE_PROBLEMS_TABLE).destroy(batch);
       }
-      console.log(`Deleted ${existingRecords.length} existing problem records for ${citizen}`);
+      console.log(`Deleted ${existingRecords.length} existing problem records titled "${problemTitleToClear}" for ${citizen}`);
     }
-      
+
     // Create new problem records
     const problemRecords = Object.values(problems).map(problem => ({
       fields: {
