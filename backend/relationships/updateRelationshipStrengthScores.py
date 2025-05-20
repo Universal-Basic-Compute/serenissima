@@ -223,10 +223,10 @@ def update_relationship_scores(
         if target_username in existing_relationships:
             # Update existing relationship
             record = existing_relationships[target_username]
-                record_id = record['id']
+            record_id = record['id']
                 
-                # Apply 25% decay to existing score
-                existing_score = float(record.get('strengthScore', 0.0)) * 0.75
+            # Apply 25% decay to existing score
+            existing_score = float(record.get('strengthScore', 0.0)) * 0.75
                 
                 # Add new score_to_add
                 updated_score = existing_score + score_to_add
