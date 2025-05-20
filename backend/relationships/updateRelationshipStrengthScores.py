@@ -100,39 +100,43 @@ def get_all_citizens(tables) -> tuple[List[Dict], Dict[str, str], Dict[str, str]
 def get_recent_relevancies(tables, username: str, username_record_id: Optional[str]) -> List[Dict]:
     """Get recent relevancies for a citizen, filtering in Python for robustness."""
     try:
-        log.info(f"Fetching recent relevancies for citizen: {username}")
+        log.info(f"Fetching recent relevancies for citizen: {username} (Record ID: {username_record_id})")
         
-        # Calculate timestamp for 24 hours ago
         twenty_four_hours_ago = (datetime.now() - timedelta(hours=24)).isoformat()
         
-        # Formula to fetch relevancies:
-        # 1. Created in the last 24 hours
-        # 2. AND (RelevantToCitizen is exactly username OR RelevantToCitizen is a JSON array string containing username)
-        # 3. AND RelevantToCitizen is NOT the literal string "all"
-        # Note: FIND is case-sensitive. Usernames are generally case-sensitive.
-        # The '"{username}"' ensures we match the username as it would appear in a JSON string array.
-        formula = (
-            f"AND("
-            f"  IS_AFTER({{CreatedAt}}, '{twenty_four_hours_ago}'),"
-            f"  OR("
-            f"    {{RelevantToCitizen}} = '{username}',"
-            f"    FIND('\"{username}\"', {{RelevantToCitizen}})"  # Looks for "username" inside a string field
-            f"  ),"
-            f"  NOT({{RelevantToCitizen}} = 'all')"
-            f")"
-        )
+        # Simplified formula: fetch all relevancies created recently, not for 'all'
+        formula = f"AND(IS_AFTER({{CreatedAt}}, '{twenty_four_hours_ago}'), NOT({{RelevantToCitizen}} = 'all'))"
         
-        log.info(f"Using formula for get_recent_relevancies: {formula}")
-        
-        relevancies = tables['relevancies'].all(
+        all_recent_relevancies = tables['relevancies'].all(
             formula=formula,
-            fields=["RelevancyId", "AssetID", "AssetType", "TargetCitizen", "Score", "CreatedAt", "RelevantToCitizen", "Type"], # Added "Type"
+            fields=["RelevancyId", "AssetID", "AssetType", "TargetCitizen", "Score", "CreatedAt", "RelevantToCitizen", "Type"],
             sort=[{"field": "CreatedAt", "direction": "desc"}],
-            max_records=1000  # Limit to last 1000 relevancies
+            max_records=2000 # Increased limit as we filter in Python
         )
         
-        log.info(f"Found {len(relevancies)} recent relevancies for {username}")
-        return relevancies
+        filtered_relevancies = []
+        for r in all_recent_relevancies:
+            rt_citizen_val = r['fields'].get('RelevantToCitizen')
+            
+            # Case 1: RelevantToCitizen is a string (single username or JSON array of usernames)
+            if isinstance(rt_citizen_val, str):
+                if rt_citizen_val == username: # Direct match
+                    filtered_relevancies.append(r)
+                    continue
+                # Check if it's a JSON array string containing the username
+                # Ensure to look for the username quoted, e.g., "username"
+                if rt_citizen_val.startswith('[') and rt_citizen_val.endswith(']') and f'"{username}"' in rt_citizen_val:
+                    filtered_relevancies.append(r)
+                    continue
+            
+            # Case 2: RelevantToCitizen is a list (assumed to be Airtable record IDs from a linked field)
+            elif isinstance(rt_citizen_val, list) and username_record_id:
+                if username_record_id in rt_citizen_val:
+                    filtered_relevancies.append(r)
+                    continue
+        
+        log.info(f"Found {len(all_recent_relevancies)} recent relevancies, filtered to {len(filtered_relevancies)} for {username}")
+        return filtered_relevancies
     except Exception as e:
         log.error(f"Error fetching relevancies for {username}: {e}")
         return []
@@ -237,17 +241,17 @@ def update_relationship_scores(
                 record_id = record['id']
                 
                 # Apply 25% decay to existing score
-                existing_score = float(record.get('strengthScore', 0.0)) * 0.75
+                existing_score = float(record.get('strengthScore', 0.0)) * 0.75 # Reading camelCase
                 updated_score = existing_score + score_to_add
 
                 # Handle Notes: append new types to existing notes if any, avoiding duplicates
-                existing_notes = record.get('notes', '') # Assuming 'notes' is the field name in Airtable
+                existing_notes = record.get('notes', '') 
                 existing_types_set = set()
                 if existing_notes and existing_notes.startswith("Sources: "):
                     try:
                         existing_types_str = existing_notes.replace("Sources: ", "")
                         existing_types_set.update(t.strip() for t in existing_types_str.split(','))
-                    except Exception: # Fallback if parsing fails
+                    except Exception: 
                         log.warning(f"Could not parse existing notes for {source_username}-{target_username}: {existing_notes}")
 
                 combined_types = existing_types_set.union(new_relevancy_types_set)
@@ -255,8 +259,8 @@ def update_relationship_scores(
                     notes_string = f"Sources: {', '.join(sorted(list(combined_types)))}"
                 
                 tables['relationships'].update(record_id, {
-                    'StrengthScore': updated_score,
-                    'LastUpdated': datetime.now().isoformat(),
+                    'strengthScore': updated_score, # Writing camelCase
+                    'lastUpdated': datetime.now().isoformat(), # Writing camelCase
                     'Notes': notes_string
                 })
                 updated_count += 1
@@ -268,8 +272,8 @@ def update_relationship_scores(
                 tables['relationships'].create({
                     'AICitizen': source_username,
                     'TargetCitizen': target_username,
-                    'StrengthScore': score_to_add, # New relationships start with the accumulated score from recent relevancies
-                    'LastUpdated': datetime.now().isoformat(),
+                    'strengthScore': score_to_add, # Writing camelCase
+                    'lastUpdated': datetime.now().isoformat(), # Writing camelCase
                     'Notes': notes_string
                 })
                 created_count += 1
