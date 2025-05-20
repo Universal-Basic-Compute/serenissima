@@ -1158,24 +1158,78 @@ export class RelevancyService {
   }
 
   /**
-   * Mocked/Placeholder: Fetch all guilds with their members.
-   * In a real scenario, this would call an API endpoint like `/api/guilds/all-with-members`.
+   * Fetch all guilds and their members via API calls.
    */
   private async fetchAllGuildsWithMembers(): Promise<GuildWithMembersData[]> {
-    // This is a placeholder. Replace with actual API call.
-    console.log(`[RelevancyService] fetchAllGuildsWithMembers: Fetching all guilds with members (using placeholder data).`);
-    // Example: const response = await fetch(`${baseUrl}/api/guilds/all-with-members`);
-    // const data = await response.json();
-    // return data.guilds; // Assuming the API returns { success: true, guilds: GuildWithMembersData[] }
+    const baseUrl = typeof window !== 'undefined' 
+      ? window.location.origin 
+      : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    
+    console.log(`[RelevancyService] fetchAllGuildsWithMembers: Fetching all guilds from API.`);
+    
+    try {
+      // 1. Fetch all guilds
+      const guildsListResponse = await fetch(`${baseUrl}/api/guilds`);
+      if (!guildsListResponse.ok) {
+        console.error(`[RelevancyService] Failed to fetch guilds list: ${guildsListResponse.status} ${guildsListResponse.statusText}`);
+        return [];
+      }
+      const guildsListData = await guildsListResponse.json();
+      // Assuming /api/guilds returns { guilds: [...] } based on your example output.
+      // If it has a "success" flag, the condition would be:
+      // if (!guildsListData.success || !Array.isArray(guildsListData.guilds))
+      if (!Array.isArray(guildsListData.guilds)) { 
+        console.error('[RelevancyService] Invalid guilds list API response format. Expected { guilds: [...] } Got:', guildsListData);
+        return [];
+      }
+      
+      const rawGuilds: any[] = guildsListData.guilds;
+      console.log(`[RelevancyService] Fetched ${rawGuilds.length} guilds from /api/guilds.`);
 
-    // Placeholder data:
-    return [
-      { guildId: 'guild_artisans', name: 'Artisans Guild', memberUsernames: ['Alice', 'Bob', 'ConsiglioDeiDieci'] },
-      { guildId: 'guild_merchants', name: 'Merchants Guild', memberUsernames: ['Charlie', 'David', 'Eve'] },
-      { guildId: 'guild_explorers', name: 'Explorers Guild', memberUsernames: ['Bob', 'Fiona'] },
-      { guildId: 'guild_empty', name: 'Empty Guild', memberUsernames: [] },
-      { guildId: 'guild_solo', name: 'Solo Guild', memberUsernames: ['SoloPlayer'] },
-    ];
+      const guildsWithMembers: GuildWithMembersData[] = [];
+
+      // 2. For each guild, fetch its members
+      for (const rawGuild of rawGuilds) {
+        const guildId = rawGuild.guildId;
+        const guildName = rawGuild.guildName;
+
+        if (!guildId || !guildName) {
+          console.warn('[RelevancyService] Guild missing guildId or guildName, skipping:', rawGuild);
+          continue;
+        }
+
+        console.log(`[RelevancyService] Fetching members for guild: ${guildName} (ID: ${guildId})`);
+        const membersResponse = await fetch(`${baseUrl}/api/guild-members/${guildId}`);
+        let memberUsernames: string[] = [];
+
+        if (membersResponse.ok) {
+          const membersData = await membersResponse.json();
+          // Based on app/api/guild-members/[guildId]/route.ts, the response is { members: GuildMember[] }
+          // where GuildMember has a 'username' field.
+          if (membersData && Array.isArray(membersData.members)) {
+             memberUsernames = membersData.members.map((member: any) => member.username).filter(Boolean);
+          } else {
+            console.warn(`[RelevancyService] No members found or invalid format for guild ${guildId}. Expected { members: [...] }, got:`, membersData);
+          }
+        } else {
+          console.warn(`[RelevancyService] Failed to fetch members for guild ${guildId}: ${membersResponse.status} ${membersResponse.statusText}`);
+        }
+        
+        console.log(`[RelevancyService] Guild ${guildName} (ID: ${guildId}) has ${memberUsernames.length} members.`);
+        guildsWithMembers.push({
+          guildId: guildId,
+          name: guildName,
+          memberUsernames: memberUsernames,
+        });
+      }
+      
+      console.log(`[RelevancyService] Successfully processed ${guildsWithMembers.length} guilds with their members.`);
+      return guildsWithMembers;
+
+    } catch (error) {
+      console.error('[RelevancyService] Error in fetchAllGuildsWithMembers:', error);
+      return [];
+    }
   }
 
   /**
