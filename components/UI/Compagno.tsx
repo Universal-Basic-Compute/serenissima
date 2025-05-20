@@ -23,6 +23,8 @@ interface Citizen {
   firstName: string;
   lastName: string;
   coatOfArmsImageUrl: string | null;
+  lastMessageTimestamp?: string | null; // For sorting correspondence
+  unreadMessagesFromCitizenCount?: number; // For unread badge per citizen
 }
 
 interface Message {
@@ -380,53 +382,52 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
     setIsLoadingCitizens(true);
     
     try {
-      const response = await fetch('/api/citizens');
+      const response = await fetch('/api/citizens/with-correspondence-stats', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentCitizenUsername: username })
+      });
       
       if (!response.ok) {
-        throw new Error(`Failed to fetch citizens: ${response.status}`);
+        throw new Error(`Failed to fetch citizens with stats: ${response.status}`);
       }
       
       const data = await response.json();
       
+      let citizensList: Citizen[] = [];
+      // Always add Compagno as the first citizen
+      citizensList.push({
+        username: 'compagno',
+        firstName: 'Compagno',
+        lastName: 'Bot',
+        coatOfArmsImageUrl: null,
+        // Compagno specific stats can be null or defaults as they are handled differently
+        lastMessageTimestamp: null, 
+        unreadMessagesFromCitizenCount: 0 
+      });
+
       if (data.success && data.citizens && Array.isArray(data.citizens)) {
-        // Add Compagno as the first citizen if not already present
-        const compagnoExists = data.citizens.some((citizen: Citizen) => citizen.username === 'compagno');
-        
-        let citizensList = [...data.citizens];
-        
-        if (!compagnoExists) {
-          citizensList.unshift({
-            username: 'compagno',
-            firstName: 'Compagno',
-            lastName: 'Bot',
-            coatOfArmsImageUrl: null
-          });
-        }
-        
-        setCitizens(citizensList);
-      } else {
-        // If no citizens returned but request was successful, just ensure Compagno is available
-        setCitizens([{
-          username: 'compagno',
-          firstName: 'Compagno',
-          lastName: 'Bot',
-          coatOfArmsImageUrl: null
-        }]);
+        // Append other citizens fetched from API
+        citizensList = [...citizensList, ...data.citizens];
       }
-    } catch (error) {
-      console.error('Error fetching citizens:', error);
       
-      // Just ensure Compagno is available when there's an error
+      setCitizens(citizensList);
+
+    } catch (error) {
+      console.error('Error fetching citizens with stats:', error);
+      // Fallback to just Compagno if there's an error
       setCitizens([{
         username: 'compagno',
         firstName: 'Compagno',
         lastName: 'Bot',
-        coatOfArmsImageUrl: null
+        coatOfArmsImageUrl: null,
+        lastMessageTimestamp: null,
+        unreadMessagesFromCitizenCount: 0
       }]);
     } finally {
       setIsLoadingCitizens(false);
     }
-  }, [isOpen, activeTab]);
+  }, [isOpen, activeTab, username]);
 
   // Fetch messages between current citizen and selected citizen
   const fetchCitizenMessages = useCallback(async (otherCitizen: string) => {
@@ -1382,8 +1383,13 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                               )}
                             </div>
                             <div>
-                              <div className="font-medium text-sm">
+                              <div className="font-medium text-sm flex items-center">
                                 {citizen.username === 'compagno' ? 'Compagno' : `${citizen.firstName} ${citizen.lastName}`}
+                                {citizen.unreadMessagesFromCitizenCount && citizen.unreadMessagesFromCitizenCount > 0 && citizen.username !== 'compagno' && (
+                                  <span className="ml-2 bg-blue-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
+                                    {citizen.unreadMessagesFromCitizenCount}
+                                  </span>
+                                )}
                               </div>
                               <div className="text-xs text-gray-500">
                                 {citizen.username === 'compagno' ? 'Virtual Assistant' : citizen.username}
