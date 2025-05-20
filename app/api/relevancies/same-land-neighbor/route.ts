@@ -83,8 +83,8 @@ export async function POST(request: NextRequest) {
         Description: relevancy.description,
         TimeHorizon: relevancy.timeHorizon,
         Status: relevancy.status,
-        RelevantToCitizen: relevantToCitizenRecordIds, // Array of Record IDs
-        TargetCitizen: targetCitizenRecordIds,     // Array of Record IDs
+        RelevantToCitizen: JSON.stringify(relevantToCitizenRecordIds), // Stringified array of Record IDs
+        TargetCitizen: JSON.stringify(targetCitizenRecordIds),     // Stringified array of Record IDs
         Notes: `Land community on ${landId}`,
         CreatedAt: new Date().toISOString()
       };
