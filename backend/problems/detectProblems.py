@@ -188,6 +188,36 @@ def detect_problems():
         else:
             log.error(f"Workless detection failed: {workless_data.get('error')}")
             all_problem_details_summary.append(f"- Workless Citizens: Detection Error - {workless_data.get('error', 'Unknown')}")
+
+        # 4. Detect vacant buildings (homes/businesses)
+        log.info("--- Detecting Vacant Buildings ---")
+        vacant_buildings_api_url = f"{base_url}/api/problems/vacant-buildings"
+        log.info(f"Calling API: {vacant_buildings_api_url} for all owners")
+        vacant_buildings_response = requests.post(vacant_buildings_api_url, json={}, timeout=180)
+        log.info(f"Vacant Buildings API response status: {vacant_buildings_response.status_code}")
+
+        if vacant_buildings_response.ok:
+            vacant_data = vacant_buildings_response.json()
+            log.info(f"Vacant Buildings API response: success={vacant_data.get('success')}, problemCount={vacant_data.get('problemCount')}")
+            if vacant_data.get('success'):
+                count = vacant_data.get('problemCount', 0)
+                saved_count = vacant_data.get('savedCount', 0)
+                total_problems_detected += count
+                total_problems_saved += saved_count
+                all_problem_details_summary.append(f"- Vacant Buildings: {count} detected, {saved_count} saved.")
+                
+                problems_by_citizen_vacant = {}
+                for problem_id, problem in vacant_data.get('problems', {}).items():
+                    citizen = problem.get('citizen', 'Unknown')
+                    problems_by_citizen_vacant[citizen] = problems_by_citizen_vacant.get(citizen, 0) + 1
+                if problems_by_citizen_vacant:
+                    all_problem_details_summary.append("  Affected owners (Vacant Buildings): " + ", ".join([f"{c}({num})" for c, num in problems_by_citizen_vacant.items()]))
+            else:
+                log.error(f"Vacant Buildings API returned error: {vacant_data.get('error')}")
+                all_problem_details_summary.append(f"- Vacant Buildings: API Error - {vacant_data.get('error', 'Unknown')}")
+        else:
+            log.error(f"Vacant Buildings API call failed: {vacant_buildings_response.status_code} - {vacant_buildings_response.text}")
+            all_problem_details_summary.append(f"- Vacant Buildings: API Call Failed ({vacant_buildings_response.status_code})")
         
         # Create admin notification
         details_text = "\n".join(all_problem_details_summary)

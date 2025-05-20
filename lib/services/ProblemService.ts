@@ -190,6 +190,92 @@ export class ProblemService {
   }
 
   /**
+   * Detect vacant buildings (homes or businesses without occupants)
+   */
+  public async detectVacantBuildings(username?: string): Promise<Record<string, any>> {
+    try {
+      const buildings = await this.fetchAllBuildings();
+      console.log(`[ProblemService] detectVacantBuildings: Fetched ${buildings.length} buildings to check for vacancy.`);
+      if (buildings.length === 0) {
+        return {};
+      }
+
+      const problems: Record<string, any> = {};
+      let processedCount = 0;
+
+      buildings.forEach(building => {
+        // Ensure building has an owner and no occupant
+        const owner = building.owner && typeof building.owner === 'string' ? building.owner.trim() : null;
+        const occupant = building.occupant && typeof building.occupant === 'string' ? building.occupant.trim() : null;
+        const category = building.category && typeof building.category === 'string' ? building.category.toLowerCase() : null;
+        const buildingId = building.id || building.buildingId || `unknown_building_${Date.now()}_${Math.random()}`;
+        const buildingName = building.name || building.type || 'Unnamed Building';
+
+        if (processedCount < 5) {
+            console.log(`[ProblemService] detectVacantBuildings: Checking Building ${buildingId} (Name: ${buildingName}, Owner: ${owner}, Occupant: ${occupant}, Category: ${category})`);
+        }
+        processedCount++;
+
+        if (owner && !occupant && (category === 'home' || category === 'business')) {
+          // If a specific username is provided, only create problems for that owner
+          if (username && owner !== username) {
+            return; // Skip if not owned by the specified user
+          }
+
+          const problemBaseId = `vacant_${category}_${buildingId}`;
+          const problemId = `${problemBaseId}_${Date.now()}`;
+          
+          let title = '';
+          let description = '';
+          let solutions = '';
+          let severity = 'low';
+
+          if (category === 'home') {
+            title = 'Vacant Home';
+            description = `Your residential property, **${buildingName}** (ID: ${buildingId}), is currently unoccupied. An empty home generates no rental income and may fall into disrepair if neglected.`;
+            solutions = `Consider the following actions:\n- List the property on the housing market to find a tenant.\n- Adjust the rent to attract occupants.\n- Ensure the property is well-maintained to be appealing.\n- If you no longer wish to manage it, consider selling the property.`;
+            severity = 'low';
+          } else if (category === 'business') {
+            title = 'Vacant Business Premises';
+            description = `Your commercial property, **${buildingName}** (ID: ${buildingId}), is currently unoccupied. A vacant business premises means no commercial activity, no income generation, and potential loss of economic value for the area.`;
+            solutions = `Consider the following actions:\n- Lease the premises to an entrepreneur or business.\n- Start a new business yourself in this location if you have the resources and a viable idea.\n- Ensure the property is suitable for common business types.\n- If development is not feasible, consider selling the property.`;
+            severity = 'medium';
+          }
+
+          problems[problemId] = {
+            problemId,
+            citizen: owner, // Problem is for the building owner
+            assetType: 'building',
+            assetId: buildingId,
+            severity,
+            status: 'active',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            location: buildingName, // Or a more specific location if available
+            title,
+            description,
+            solutions,
+            notes: `Building Category: ${category}. Owner: ${owner}. No occupant.`,
+            position: building.position || null // Use building.position or null
+          };
+        }
+      });
+
+      const numProblems = Object.keys(problems).length;
+      console.log(`[ProblemService] detectVacantBuildings: Created ${numProblems} problems for vacant buildings (target user: ${username || 'all'}).`);
+      if (buildings.length > 0 && numProblems === 0 && username) {
+        console.log(`[ProblemService] detectVacantBuildings: No vacant buildings found for user ${username}.`);
+      } else if (buildings.length > 0 && numProblems === 0 && !username) {
+        console.log(`[ProblemService] detectVacantBuildings: No vacant buildings found for any owner.`);
+      }
+      return problems;
+    } catch (error) {
+      console.error('Error detecting vacant buildings:', error);
+      return {};
+    }
+  }
+
+  /**
    * Detect homeless citizens
    */
   public async detectHomelessCitizens(username?: string): Promise<Record<string, any>> {
