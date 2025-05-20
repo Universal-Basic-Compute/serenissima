@@ -28,9 +28,39 @@ export async function GET(request: NextRequest) {
     const citizen1Param = searchParams.get('citizen1');
     const citizen2Param = searchParams.get('citizen2');
 
+    // If no citizen parameters are provided, fetch the top 100 strongest relationships
+    if (!citizen1Param && !citizen2Param) {
+      console.log('Fetching top 100 strongest relationships');
+      const records = await base(AIRTABLE_RELATIONSHIPS_TABLE)
+        .select({
+          sort: [{ field: 'StrengthScore', direction: 'desc' }],
+          maxRecords: 100,
+        })
+        .all();
+
+      const relationships = records.map(relationship => ({
+        id: relationship.id,
+        citizen1: relationship.get('Citizen1'),
+        citizen2: relationship.get('Citizen2'),
+        strengthScore: relationship.get('StrengthScore'),
+        sentiment: relationship.get('Sentiment'),
+        status: relationship.get('Status'),
+        startDate: relationship.get('StartDate'),
+        lastInteraction: relationship.get('LastInteraction'),
+        notes: relationship.get('Notes'),
+        createdAt: relationship.get('CreatedAt'),
+      }));
+
+      return NextResponse.json({
+        success: true,
+        relationships: relationships,
+      });
+    }
+
+    // If one or both citizen parameters are provided, proceed with existing logic
     if (!citizen1Param || !citizen2Param) {
       return NextResponse.json(
-        { success: false, error: 'Both citizen1 and citizen2 parameters are required' },
+        { success: false, error: 'Both citizen1 and citizen2 parameters are required if at least one is provided' },
         { status: 400 }
       );
     }
