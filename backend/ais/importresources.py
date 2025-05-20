@@ -57,7 +57,7 @@ def _get_citizen_building_problems(tables: Dict[str, Table], username: str, limi
 def _get_general_building_problems(tables: Dict[str, Table], limit: int = 100) -> List[Dict]:
     """Get latest 100 PROBLEMS where AssetType='building' for any citizen."""
     try:
-        formula = "{{AssetType}}='building'"
+        formula = "{AssetType}='building'" # Corrected: single curly braces
         # Assuming 'CreatedAt' field exists for sorting
         records = tables["problems"].all(formula=formula, sort=['-CreatedAt'], max_records=limit)
         print(f"Found {len(records)} general building problems.")
