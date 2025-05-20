@@ -331,6 +331,7 @@ def generate_new_citizen(tables: Dict[str, Table], dry_run: bool = False) -> Opt
             "CoatOfArms": citizen_data.get("coatofarms"),
             "Ducats": citizen_data.get("ducats"),
             "CreatedAt": citizen_data.get("createdat"),
+            "IsAI": citizen_data.get("isai", True), # Set IsAI from generated data
             "InVenice": False
         }
         citizen_record = tables['citizens'].create(citizen_payload)
