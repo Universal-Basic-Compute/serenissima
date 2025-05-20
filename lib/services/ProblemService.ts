@@ -249,6 +249,25 @@ export class ProblemService {
            console.warn(`[ProblemService] detectHomelessCitizens: Citizen (Username: ${c.Username}, AirtableID: ${c.id}) missing effective CitizenId (checked CitizenId: '${originalPascalCitizenId}', citizenId: '${camelCitizenId}'). Will use Airtable record ID as fallback assetId.`);
         }
         // c.CitizenId is now either the original PascalCase, the normalized camelCase, or undefined.
+
+        // Normalize FirstName
+        const originalPascalFirstName = c.FirstName;
+        const camelFirstName = (c as any).firstName;
+        if (camelFirstName && typeof camelFirstName === 'string' && camelFirstName.trim() !== '') {
+            c.FirstName = camelFirstName.trim();
+        } else if (originalPascalFirstName && typeof originalPascalFirstName === 'string' && originalPascalFirstName.trim() !== '') {
+            c.FirstName = originalPascalFirstName.trim();
+        } // else c.FirstName remains as is (could be undefined)
+
+        // Normalize LastName
+        const originalPascalLastName = c.LastName;
+        const camelLastName = (c as any).lastName;
+        if (camelLastName && typeof camelLastName === 'string' && camelLastName.trim() !== '') {
+            c.LastName = camelLastName.trim();
+        } else if (originalPascalLastName && typeof originalPascalLastName === 'string' && originalPascalLastName.trim() !== '') {
+            c.LastName = originalPascalLastName.trim();
+        } // else c.LastName remains as is (could be undefined)
+        
         return true;
       });
 
@@ -311,17 +330,27 @@ export class ProblemService {
           };
 
           // Check if this homeless citizen is employed and create a problem for the employer
-          if (citizen.workplace && typeof citizen.workplace === 'string') {
-            const workplaceId = citizen.workplace; // Assuming citizen.workplace is the BuildingId
-            const workplaceBuilding = buildings.find(b => b.id === workplaceId || b.buildingId === workplaceId);
+          console.log(`[ProblemService] Homeless citizen ${citizen.Username} (ID: ${citizen.CitizenId || citizen.id}, Name: ${citizen.FirstName} ${citizen.LastName}). Checking for employer problem. Original citizen.workplace: '${citizen.workplace}'`);
 
-            if (workplaceBuilding && 
-                workplaceBuilding.occupant === citizen.Username && // Confirm this citizen is the occupant
-                workplaceBuilding.ranBy && 
-                typeof workplaceBuilding.ranBy === 'string' &&
-                workplaceBuilding.ranBy !== citizen.Username) { // Employer is not the citizen themselves
-              
+          // Infer workplace by finding a 'business' category building where this citizen is the 'occupant'
+          const inferredWorkplaceBuilding = buildings.find(b => 
+            b.occupant === citizen.Username && 
+            b.category?.toLowerCase() === 'business'
+          );
+
+          if (inferredWorkplaceBuilding) {
+            const workplaceBuilding = inferredWorkplaceBuilding;
+            const workplaceId = workplaceBuilding.id || workplaceBuilding.buildingId || 'UnknownWorkplaceID';
+            console.log(`[ProblemService] Found inferred workplaceBuilding for ${citizen.Username}: ID='${workplaceId}', Name='${workplaceBuilding.name}', Occupant='${workplaceBuilding.occupant}', RanBy='${workplaceBuilding.ranBy}', Category='${workplaceBuilding.category}'`);
+            
+            const hasRanBy = workplaceBuilding.ranBy && typeof workplaceBuilding.ranBy === 'string';
+            const isEmployerDifferent = workplaceBuilding.ranBy !== citizen.Username;
+
+            console.log(`[ProblemService] Employer problem conditions for ${citizen.Username}: hasRanBy=${hasRanBy}, isEmployerDifferent=${isEmployerDifferent}`);
+
+            if (hasRanBy && isEmployerDifferent) {
               const employerUsername = workplaceBuilding.ranBy;
+              // Use normalized citizen.FirstName and citizen.LastName
               const employeeName = `${citizen.FirstName || citizen.Username} ${citizen.LastName || ''}`.trim();
               const employerProblemId = `homeless_employee_impact_${employerUsername}_${citizen.Username}_${Date.now()}`;
               
@@ -334,14 +363,19 @@ export class ProblemService {
                 status: 'active',
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
-                location: workplaceBuilding.name || workplaceBuilding.id, // Workplace location
+                location: workplaceBuilding.name || workplaceId, // Workplace location
                 title: 'Homeless Employee Impact',
                 description: `Your employee, **${employeeName}**, is currently homeless. Homelessness can lead to instability and may result in up to a 50% reduction in productivity.`,
                 solutions: `Consider discussing housing options with **${employeeName}** or providing assistance if possible. Monitor their work performance and consider recruitment alternatives if productivity is significantly impacted.`,
                 notes: `Homeless Employee: ${citizen.Username} (ID: ${citizen.CitizenId || citizen.id}), Workplace: ${workplaceBuilding.name || workplaceId} (ID: ${workplaceId})`,
                 position: workplaceBuilding.position || null // Workplace position
               };
+              console.log(`[ProblemService] CREATED 'Homeless Employee Impact' problem for employer '${employerUsername}' regarding employee '${citizen.Username}'.`);
+            } else {
+              console.log(`[ProblemService] Conditions not met for employer problem for citizen '${citizen.Username}'. RanBy: '${workplaceBuilding.ranBy}', EmployerDifferent: ${isEmployerDifferent}`);
             }
+          } else {
+            console.log(`[ProblemService] Citizen '${citizen.Username}' has no inferred workplace (business building where they are occupant). Skipping employer problem.`);
           }
         }
       });
@@ -419,6 +453,25 @@ export class ProblemService {
            console.warn(`[ProblemService] detectWorklessCitizens: Citizen (Username: ${c.Username}, AirtableID: ${c.id}) missing effective CitizenId (checked CitizenId: '${originalPascalCitizenId}', citizenId: '${camelCitizenId}'). Will use Airtable record ID as fallback assetId.`);
         }
         // c.CitizenId is now either the original PascalCase, the normalized camelCase, or undefined.
+
+        // Normalize FirstName
+        const originalPascalFirstName = c.FirstName;
+        const camelFirstName = (c as any).firstName;
+        if (camelFirstName && typeof camelFirstName === 'string' && camelFirstName.trim() !== '') {
+            c.FirstName = camelFirstName.trim();
+        } else if (originalPascalFirstName && typeof originalPascalFirstName === 'string' && originalPascalFirstName.trim() !== '') {
+            c.FirstName = originalPascalFirstName.trim();
+        } // else c.FirstName remains as is (could be undefined)
+
+        // Normalize LastName
+        const originalPascalLastName = c.LastName;
+        const camelLastName = (c as any).lastName;
+        if (camelLastName && typeof camelLastName === 'string' && camelLastName.trim() !== '') {
+            c.LastName = camelLastName.trim();
+        } else if (originalPascalLastName && typeof originalPascalLastName === 'string' && originalPascalLastName.trim() !== '') {
+            c.LastName = originalPascalLastName.trim();
+        } // else c.LastName remains as is (could be undefined)
+
         return true;
       });
 
