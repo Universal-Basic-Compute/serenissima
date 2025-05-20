@@ -253,7 +253,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
 
     // Avoid fetching relationship with oneself, or handle as a special case
     if (currentUsername === viewedCitizenUsername) {
-      const selfRelationship = { StrengthScore: 100, type: "Self" };
+      const selfRelationship = { strengthScore: 100, type: "Self" }; // Use camelCase
       setRelationship(selfRelationship);
       setCachedRelationships(prev => ({ ...prev, [viewedCitizenUsername]: selfRelationship }));
       setIsLoadingRelationship(false);
@@ -828,18 +828,18 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
             <div className="flex justify-center py-4">
               <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin"></div>
             </div>
-          ) : relationship && typeof relationship.StrengthScore !== 'undefined' ? (
+          ) : relationship && typeof relationship.strengthScore !== 'undefined' ? (
             <div className="bg-amber-100 rounded-lg p-3 text-sm mb-4">
               <div className="flex items-center justify-between mb-1">
                 <div className="font-medium text-amber-800">
                   {relationship.type === "Self" ? "Self-Regard" : "Bond Strength"}
                 </div>
                 <div className={`px-3 py-1 rounded-full text-lg font-bold text-center ${
-                  relationship.StrengthScore > 75 ? 'bg-green-200 text-green-800' :
-                  relationship.StrengthScore > 25 ? 'bg-amber-200 text-amber-800' :
+                  relationship.strengthScore > 75 ? 'bg-green-200 text-green-800' :
+                  relationship.strengthScore > 25 ? 'bg-amber-200 text-amber-800' :
                   'bg-red-200 text-red-800'
                 }`}>
-                  {relationship.StrengthScore}{relationship.type === "Self" ? "" : "/100"}
+                  {relationship.strengthScore}{relationship.type === "Self" ? "" : "/100"}
                 </div>
               </div>
               {relationship.type !== "Self" && (
@@ -851,10 +851,10 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
                     <p className="text-xs text-amber-700 mt-1">{relationship.Description}</p>
                   )}
                   <div className="grid grid-cols-2 gap-x-4 mt-2">
-                    {typeof relationship.TrustScore !== 'undefined' && (
+                    {typeof relationship.trustScore !== 'undefined' && (
                       <div>
                         <p className="text-xs text-amber-600">Trust Score</p>
-                        <p className="text-sm font-medium text-amber-800">{relationship.TrustScore}/100</p>
+                        <p className="text-sm font-medium text-amber-800">{relationship.trustScore}/100</p>
                       </div>
                     )}
                     {relationship.Tier && (
