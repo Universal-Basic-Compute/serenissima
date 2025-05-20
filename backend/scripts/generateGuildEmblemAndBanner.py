@@ -74,9 +74,9 @@ def generate_image_with_ideogram(prompt: str, aspect_ratio: str, guild_identifie
     # Add aspect ratio guidance to the prompt
     full_prompt = f"{prompt}, {aspect_ratio} aspect ratio, digital art, fantasy style."
     if image_type == "emblem":
-        full_prompt = f"A heraldic emblem or sigil representing a guild. {prompt}. Centered, iconic, 1:1 aspect ratio, on a transparent background if possible."
+        full_prompt = f"A heraldic emblem or sigil representing a guild in Venice XV century. {prompt}. Centered, iconic, 1:1 aspect ratio, on a transparent background if possible."
     elif image_type == "banner":
-        full_prompt = f"A wide banner or flag for a guild. {prompt}. Landscape orientation, 2:1 aspect ratio, detailed, epic."
+        full_prompt = f"A wide banner or flag for a guild in Venice XV century. {prompt}. Landscape orientation, 2:1 aspect ratio, detailed, epic."
 
     try:
         log.debug(f"Full prompt for Ideogram ({guild_name_for_logging} - {image_type}): {full_prompt}")
