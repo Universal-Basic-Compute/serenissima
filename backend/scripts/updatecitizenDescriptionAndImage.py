@@ -310,17 +310,17 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
             ],
             "relevancies": [  # Add the relevancies to the system context
                 {
-                    "asset_id": r['fields'].get('AssetID', ''),
-                    "asset_type": r['fields'].get('AssetType', ''),
-                    "category": r['fields'].get('Category', ''),
-                    "type": r['fields'].get('Type', ''),
-                    "relevant_to_citizen": r['fields'].get('RelevantToCitizen', ''),
-                    "score": r['fields'].get('Score', 0),
-                    "title": r['fields'].get('Title', ''),
-                    "description": r['fields'].get('Description', ''),
-                    "time_horizon": r['fields'].get('TimeHorizon', ''),
-                    "status": r['fields'].get('Status', ''),
-                    "created_at": r['fields'].get('CreatedAt', '')
+                    "asset_id": r.get('AssetID', ''),
+                    "asset_type": r.get('AssetType', ''),
+                    "category": r.get('Category', ''),
+                    "type": r.get('Type', ''),
+                    "relevant_to_citizen": r.get('RelevantToCitizen', ''),
+                    "score": r.get('Score', 0),
+                    "title": r.get('Title', ''),
+                    "description": r.get('Description', ''),
+                    "time_horizon": r.get('TimeHorizon', ''),
+                    "status": r.get('Status', ''),
+                    "created_at": r.get('CreatedAt', '')
                 } for r in citizen_info["relevancies"]
             ]
         }
