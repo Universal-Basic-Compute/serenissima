@@ -726,7 +726,10 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
       
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-serif text-amber-800">
-          {citizen.firstname} {citizen.lastname}
+          {citizen.firstname} {citizen.lastname} 
+          {citizen.username && (
+            <span className="text-sm text-amber-600 ml-2">({citizen.username})</span>
+          )}
         </h2>
         <button 
           onClick={onClose}
