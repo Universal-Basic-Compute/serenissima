@@ -166,31 +166,38 @@ def get_recent_relevancies(username: str) -> List[Dict]:
         return []
 
 def get_existing_relationships(tables, username: str) -> Dict[str, Dict]:
-    """Get existing relationships for a citizen (where username is Citizen1)."""
+    """Get existing relationships for a citizen, regardless of whether they are Citizen1 or Citizen2."""
     try:
         log.info(f"Fetching existing relationships for citizen: {username}")
         
-        # Fetch relationships where this citizen is Citizen1
-        formula = f"{{Citizen1}} = '{username}'"
+        # Fetch relationships where this citizen is either Citizen1 or Citizen2
+        formula = f"OR({{Citizen1}} = '{username}', {{Citizen2}} = '{username}')"
         
         relationships = tables['relationships'].all(
             formula=formula,
             fields=["Citizen1", "Citizen2", "StrengthScore", "LastInteraction", "Notes"] 
         )
         
-        # Create a dictionary mapping target citizens (Citizen2) to their relationship records
+        # Create a dictionary mapping the *other* citizen in the relationship to their record details
         relationship_map = {}
         for record in relationships:
-            citizen2 = record['fields'].get('Citizen2')
-            if citizen2:
-                relationship_map[citizen2] = {
+            c1 = record['fields'].get('Citizen1')
+            c2 = record['fields'].get('Citizen2')
+            other_citizen = None
+            if c1 == username:
+                other_citizen = c2
+            elif c2 == username:
+                other_citizen = c1
+            
+            if other_citizen:
+                relationship_map[other_citizen] = {
                     'id': record['id'],
                     'StrengthScore': record['fields'].get('StrengthScore', 0), 
                     'LastInteraction': record['fields'].get('LastInteraction'),
                     'notes': record['fields'].get('Notes', '') 
                 }
         
-        log.info(f"Found {len(relationship_map)} existing relationships for {username} (as Citizen1)")
+        log.info(f"Found {len(relationship_map)} existing relationships involving {username}")
         return relationship_map
     except Exception as e:
         log.error(f"Error fetching relationships for {username}: {e}")
@@ -295,11 +302,12 @@ def update_relationship_scores(
                 if new_relevancy_types_set:
                     notes_string = f"Sources: {', '.join(sorted(list(new_relevancy_types_set)))}"
 
-                # final_strength_score = min(100.0, score_to_add) # Cap the score at 100 - REMOVED
+                # Ensure Citizen1 and Citizen2 are stored alphabetically
+                c1, c2 = tuple(sorted((source_username, target_username)))
                 
                 tables['relationships'].create({
-                    'Citizen1': source_username,
-                    'Citizen2': target_username,
+                    'Citizen1': c1,
+                    'Citizen2': c2,
                     'StrengthScore': score_to_add, # Use score_to_add directly
                     'LastInteraction': datetime.now().isoformat(), 
                     'Notes': notes_string
