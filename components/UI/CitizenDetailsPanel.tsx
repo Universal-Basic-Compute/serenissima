@@ -939,7 +939,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
                     'text-green-700'
                   }`}>
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {problem.Description || "No description provided."}
+                      {problem.description || "No description provided."}
                     </ReactMarkdown>
                   </div>
                 </div>
