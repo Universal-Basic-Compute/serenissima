@@ -187,15 +187,19 @@ const CitizenRegistry: React.FC<CitizenRegistryProps> = ({ onClose }) => {
       .map(username => {
         const citizen = citizenMap.get(username);
         if (!citizen) return null;
+        
+        // Prioritize primary image URL, then specific citizen image fallback
+        const primaryImageUrl = citizen.imageUrl || citizen.profileimage || citizen.ImageUrl;
+
         return {
           id: username, // id must be unique string for react-force-graph
           username: username,
           firstName: citizen.firstName || citizen.firstname || citizen.FirstName,
           lastName: citizen.lastName || citizen.lastname || citizen.LastName,
-          coatOfArmsImageUrl: citizen.coatOfArmsImageUrl || `/coat-of-arms/${username}.png`,
+          imageUrl: primaryImageUrl || `/images/citizens/${username}.jpg`, // Use imageUrl field
         };
       })
-      .filter(node => node !== null) as { id: string; username: string; firstName?: string; lastName?: string; coatOfArmsImageUrl?: string | null; }[];
+      .filter(node => node !== null) as { id: string; username: string; firstName?: string; lastName?: string; imageUrl?: string | null; }[];
 
     const graphLinks = relationships
       .filter(rel => citizenMap.has(rel.citizen1) && citizenMap.has(rel.citizen2)) // Ensure both citizens exist

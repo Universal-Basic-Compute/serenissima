@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import ForceGraph2D, { NodeObject, LinkObject } from 'react-force-graph-2d';
+import * as d3Force from 'd3-force'; // Import d3-force for collision detection
 
 interface CitizenNode extends NodeObject {
   id: string;
@@ -7,7 +8,7 @@ interface CitizenNode extends NodeObject {
   firstName?: string;
   lastName?: string;
   img?: HTMLImageElement;
-  coatOfArmsImageUrl?: string | null;
+  imageUrl?: string | null; // Changed from coatOfArmsImageUrl to imageUrl
 }
 
 interface RelationshipLink extends LinkObject {
@@ -32,31 +33,25 @@ const RelationshipGraph: React.FC<RelationshipGraphProps> = ({ nodes, links, wid
     const loadImages = async () => {
       const imagePromises = nodes.map(node => {
         return new Promise<CitizenNode>(resolve => {
-          if (node.coatOfArmsImageUrl) {
-            const img = new Image();
-            img.src = node.coatOfArmsImageUrl;
-            img.onload = () => {
-              resolve({ ...node, img });
-            };
-            img.onerror = () => {
-              // Fallback image or handle error
-              const fallbackImg = new Image();
-              fallbackImg.src = '/coat-of-arms/default.png'; // Ensure you have a default image
-              fallbackImg.onload = () => resolve({ ...node, img: fallbackImg });
-              fallbackImg.onerror = () => resolve({ ...node, img: undefined }); // No image if fallback fails
-            };
-          } else {
-            // Fallback if no specific image URL
-            const fallbackImg = new Image();
-            fallbackImg.src = `/images/citizens/${node.username || 'default'}.jpg`;
-            fallbackImg.onload = () => resolve({ ...node, img: fallbackImg });
-            fallbackImg.onerror = () => {
-                const defaultImg = new Image();
-                defaultImg.src = '/images/citizens/default.jpg';
-                defaultImg.onload = () => resolve({ ...node, img: defaultImg });
-                defaultImg.onerror = () => resolve({ ...node, img: undefined });
-            };
-          }
+          const img = new Image();
+          // node.imageUrl should contain the primary URL or /images/citizens/username.jpg
+          // Final fallback to /images/citizens/default.jpg if node.imageUrl is null or fails
+          img.src = node.imageUrl || '/images/citizens/default.jpg';
+
+          img.onload = () => {
+            resolve({ ...node, img });
+          };
+          img.onerror = () => {
+            // If the provided node.imageUrl failed, try the absolute default if not already tried
+            if (img.src !== '/images/citizens/default.jpg') {
+              const defaultImg = new Image();
+              defaultImg.src = '/images/citizens/default.jpg';
+              defaultImg.onload = () => resolve({ ...node, img: defaultImg });
+              defaultImg.onerror = () => resolve({ ...node, img: undefined }); // Ultimate failure
+            } else {
+              resolve({ ...node, img: undefined }); // Default image itself failed
+            }
+          };
         });
       });
 
@@ -82,9 +77,24 @@ const RelationshipGraph: React.FC<RelationshipGraphProps> = ({ nodes, links, wid
   };
   
   useEffect(() => {
-    if (fgRef.current) {
-      // Zoom to fit all nodes
-      fgRef.current.zoomToFit(400, 100); // Adjust padding as needed
+    const fg = fgRef.current;
+    if (fg) {
+      // Configure forces once for layout
+      fg.d3Force('charge').strength(-250); // Increased repulsion for more space
+      fg.d3Force('link').distance(120);    // Increased link distance for more spread
+
+      // Add collision detection to prevent node overlap
+      const nodeSize = 24; // Visual size of the node
+      const collisionRadius = nodeSize / 2 + 6; // Radius for collision = nodeRadius + buffer
+      fg.d3Force('collide', d3Force.forceCollide(collisionRadius));
+    }
+  }, []); // Run once when component mounts and fgRef is available
+
+  useEffect(() => {
+    const fg = fgRef.current;
+    if (fg && processedNodes.length > 0) {
+      // Zoom to fit all nodes when data or dimensions change
+      fg.zoomToFit(400, 150); // Increased padding
     }
   }, [processedNodes, links, width, height]);
 
@@ -96,9 +106,9 @@ const RelationshipGraph: React.FC<RelationshipGraphProps> = ({ nodes, links, wid
       width={width}
       height={height}
       nodeLabel={getNodeLabel}
-      nodeVal={node => 20} // Size of the node area for image
+      nodeVal={24} // Consistent with visual size for physics calculations
       nodeCanvasObject={(node, ctx, globalScale) => {
-        const size = 24; // Increased size for better visibility
+        const size = 24; // Visual size of the node
         const fontSize = 10 / globalScale; // Adjust font size based on zoom
         const label = node.username;
 
@@ -139,14 +149,14 @@ const RelationshipGraph: React.FC<RelationshipGraphProps> = ({ nodes, links, wid
         ctx.fill();
       }}
       linkColor={(link: any) => getTrustScoreColor(link.trustScore)}
-      linkWidth={(link: any) => Math.max(1, (link.strengthScore / 100) * 8)} // Scale thickness from 1 to 8px
+      linkWidth={(link: any) => 1 + Math.log1p((link.strengthScore || 0) / 25) * 1.5} // Subtle log scale: 1 to ~3.4px
       linkDirectionalParticles={1}
-      linkDirectionalParticleWidth={(link: any) => Math.max(1, (link.strengthScore / 100) * 3)}
-      linkDirectionalParticleSpeed={(link: any) => (link.strengthScore / 100) * 0.01}
+      linkDirectionalParticleWidth={(link: any) => 0.5 + Math.log1p((link.strengthScore || 0) / 25) * 0.75} // Subtle particle width
+      linkDirectionalParticleSpeed={(link: any) => ((link.strengthScore || 0) / 100) * 0.005 + 0.002} // Slower particle speed
       cooldownTicks={100}
-      onEngineStop={() => fgRef.current.zoomToFit(400, 100)} // Zoom to fit after engine stops
+      onEngineStop={() => fgRef.current && processedNodes.length > 0 && fgRef.current.zoomToFit(400, 150)} // Zoom to fit after engine stops
       dagMode={null} // Disable DAG mode for a more organic layout
-      dagLevelDistance={100}
+      dagLevelDistance={150} // Increased distance if DAG mode were used
       d3AlphaDecay={0.0228} // Default value
       d3VelocityDecay={0.4} // Default value
       linkCurvature={0.1} // Slight curvature for aesthetics
