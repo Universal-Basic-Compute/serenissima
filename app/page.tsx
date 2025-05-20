@@ -578,8 +578,9 @@ export default function TwoDPage() {
       setShowGuildsPanel(true);
     } else if (activeView === 'knowledge') {
       setShowKnowledgePanel(true);
-    } else if (activeView === 'citizens') { // Ensure this doesn't conflict if already handled by event
-      setShowCitizenRegistry(true);
+    } else if (activeView === 'citizens') {
+      setShowCitizenRegistry(true); // Show the registry
+      window.dispatchEvent(new CustomEvent('loadCitizens')); // Also dispatch load event
     } else if (activeView === 'loans') {
       setShowLoanPanel(true);
     }
@@ -654,7 +655,10 @@ export default function TwoDPage() {
             </li>
             <li>
               <button
-                onClick={() => setActiveView('citizens')}
+                onClick={() => {
+                  setActiveView('citizens');
+                  setShowCitizenRegistry(true); // Directly show the registry
+                }}
                 className={`w-full flex items-center p-2 rounded-lg transition-colors ${
                   activeView === 'citizens' ? 'bg-amber-600 text-white' : 'text-gray-300 hover:bg-gray-700'
                 }`}
