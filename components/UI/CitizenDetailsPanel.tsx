@@ -219,7 +219,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
 
     // Avoid fetching relationship with oneself, or handle as a special case
     if (currentUsername === viewedCitizenUsername) {
-      const selfRelationship = { StrengthScore: 100, type: "Self", Sentiment: 0 };
+      const selfRelationship = { StrengthScore: 100, type: "Self" };
       setRelationship(selfRelationship);
       setCachedRelationships(prev => ({ ...prev, [viewedCitizenUsername]: selfRelationship }));
       setIsLoadingRelationship(false);
