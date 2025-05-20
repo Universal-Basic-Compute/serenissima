@@ -522,12 +522,8 @@ def process_import_contract(tables, contract: Dict, building_types: Dict, resour
         delivery_citizen = find_available_citizen(tables)
         
         if not delivery_citizen:
-            log.info("No available citizens found, generating a new one")
-            delivery_citizen = generate_new_citizen(tables)
-            
-            if not delivery_citizen:
-                log.error("Failed to generate a new citizen for delivery")
-                return False
+            log.warning("No available citizens found for delivery. As per new policy, not generating a new citizen. Skipping import for this contract.")
+            return False # Skip processing this contract if no citizen is found
         
         # 4. Create a delivery activity instead of directly creating/updating resources
         activity = create_delivery_activity(
