@@ -227,17 +227,17 @@ def update_relationship_scores(
                 
             # Apply 25% decay to existing score
             existing_score = float(record.get('strengthScore', 0.0)) * 0.75
-                
-                # Add new score_to_add
-                updated_score = existing_score + score_to_add
-                
-                # Update the record
-                tables['relationships'].update(record_id, {
-                    'StrengthScore': updated_score,
-                    'LastUpdated': datetime.now().isoformat()
-                })
-                updated_count += 1
-            else:
+            
+            # Add new score_to_add
+            updated_score = existing_score + score_to_add
+            
+            # Update the record
+            tables['relationships'].update(record_id, {
+                'StrengthScore': updated_score,
+                'LastUpdated': datetime.now().isoformat()
+            })
+            updated_count += 1
+        else:
                 # Create new relationship
                 tables['relationships'].create({
                     'AICitizen': source_username,
