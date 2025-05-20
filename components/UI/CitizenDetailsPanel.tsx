@@ -928,7 +928,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
               ))}
             </div>
           ) : (
-            <p className="text-amber-700 italic">No notable relevancies with this citizen at present. Future ventures may arise as your paths cross in Venetian society.</p>
+            <p className="text-amber-700 italic text-xs">No notable relevancies with this citizen at present. Future ventures may arise as your paths cross in Venetian society.</p> {/* Made text smaller */}
           )}
 
           {/* Problems Section */}
@@ -1028,7 +1028,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
                 ))}
               </div>
             ) : (
-              <p className="text-amber-700 italic">No recent activities found.</p>
+              <p className="text-amber-700 italic text-xs">The city's chronicles show no recent endeavors for this citizen.</p> {/* Made text smaller and more immersive */}
             )}
           </div>
         </div>
