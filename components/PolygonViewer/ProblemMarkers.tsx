@@ -164,7 +164,7 @@ export default function ProblemMarkers({
             style={{
               left: x,
               top: y,
-              transform: 'translate(-30%, -70%)' // Décalé davantage vers le haut et la droite
+              transform: 'translate(-10%, -90%)' // Décalé encore plus vers le haut et la droite (2x l'offset actuel)
             }}
             onClick={() => handleProblemClick(problem)}
             onMouseEnter={() => handleProblemHover(problem)}
