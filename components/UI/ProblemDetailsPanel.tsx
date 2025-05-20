@@ -168,8 +168,8 @@ export default function ProblemDetailsPanel({ problemId, onClose }: ProblemDetai
               {/* Description */}
               <div>
                 <div className="text-amber-800 font-medium mb-2">Description</div>
-                <div className="bg-amber-100 p-4 rounded-lg">
-                  <ReactMarkdown className="prose prose-amber max-w-none">
+                <div className="bg-amber-100 p-4 rounded-lg prose prose-amber max-w-none">
+                  <ReactMarkdown>
                     {problem.description}
                   </ReactMarkdown>
                 </div>
@@ -179,8 +179,8 @@ export default function ProblemDetailsPanel({ problemId, onClose }: ProblemDetai
               {problem.solutions && (
                 <div>
                   <div className="text-amber-800 font-medium mb-2">Possible Solutions</div>
-                  <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                    <ReactMarkdown className="prose prose-green max-w-none">
+                  <div className="bg-green-50 p-4 rounded-lg border border-green-200 prose prose-green max-w-none">
+                    <ReactMarkdown>
                       {problem.solutions}
                     </ReactMarkdown>
                   </div>
@@ -191,8 +191,8 @@ export default function ProblemDetailsPanel({ problemId, onClose }: ProblemDetai
               {problem.notes && (
                 <div>
                   <div className="text-amber-800 font-medium mb-2">Notes</div>
-                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                    <ReactMarkdown className="prose prose-blue max-w-none">
+                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 prose prose-blue max-w-none">
+                    <ReactMarkdown>
                       {problem.notes}
                     </ReactMarkdown>
                   </div>
