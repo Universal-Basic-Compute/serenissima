@@ -336,51 +336,55 @@ export class ProblemService {
           let workplaceBuilding: any = null;
           let workplaceSource: string = "";
 
-          // Attempt 1: Use citizen.workplace.buildingId if available
+          // Attempt 1: Use citizen.workplace.buildingId if available AND if it's a valid business workplace for this citizen
           if (citizen.workplace && typeof citizen.workplace === 'object' && citizen.workplace.buildingId) {
             const directWorkplaceId = citizen.workplace.buildingId;
-            workplaceBuilding = buildings.find(b => b.id === directWorkplaceId || b.buildingId === directWorkplaceId);
-            if (workplaceBuilding) {
-              workplaceSource = `direct lookup using citizen.workplace.buildingId ('${directWorkplaceId}')`;
-              console.log(`[ProblemService] Found workplace for ${citizen.Username} via ${workplaceSource}. Building ID: ${workplaceBuilding.id}`);
+            const candidateBuilding = buildings.find(b => b.id === directWorkplaceId || b.buildingId === directWorkplaceId);
+            if (candidateBuilding) {
+                // Validate if this candidate is actually their current business workplace
+                if (candidateBuilding.category?.toLowerCase() === 'business' && candidateBuilding.occupant === citizen.Username) {
+                    workplaceBuilding = candidateBuilding; // Valid workplace found directly
+                    workplaceSource = `direct lookup (validated citizen.workplace.buildingId '${directWorkplaceId}')`;
+                    console.log(`[ProblemService] Validated workplace for ${citizen.Username} via ${workplaceSource}. Building ID: ${workplaceBuilding.id}`);
+                } else {
+                    console.log(`[ProblemService] Building '${directWorkplaceId}' from citizen.workplace for ${citizen.Username} is not their current business workplace (Category: ${candidateBuilding.category}, Occupant: ${candidateBuilding.occupant}). Will attempt inference.`);
+                    // workplaceBuilding remains null, so inference will be attempted below
+                }
             } else {
-              console.log(`[ProblemService] Workplace buildingId '${directWorkplaceId}' from citizen.workplace not found in fetched buildings list for ${citizen.Username}.`);
+                console.log(`[ProblemService] Workplace buildingId '${directWorkplaceId}' from citizen.workplace not found. Will attempt inference.`);
+                // workplaceBuilding remains null
             }
           } else {
-            console.log(`[ProblemService] citizen.workplace.buildingId not available for ${citizen.Username}.`);
+            console.log(`[ProblemService] citizen.workplace.buildingId not available for ${citizen.Username}. Will attempt inference.`);
+            // workplaceBuilding remains null
           }
 
-          // Attempt 2: Fallback to inferring workplace if not found directly
+          // Attempt 2: Fallback to inferring workplace if not found and validated directly
           if (!workplaceBuilding) {
-            workplaceBuilding = buildings.find(b => 
+            const inferredBuilding = buildings.find(b => 
               b.occupant === citizen.Username && 
               b.category?.toLowerCase() === 'business'
             );
-            if (workplaceBuilding) {
+            if (inferredBuilding) {
+              workplaceBuilding = inferredBuilding;
               workplaceSource = `inference (occupant='${citizen.Username}', category='business')`;
               console.log(`[ProblemService] Found workplace for ${citizen.Username} via ${workplaceSource}. Building ID: ${workplaceBuilding.id}`);
             }
           }
 
+          // If a workplaceBuilding is identified (either directly validated or inferred)
           if (workplaceBuilding) {
             const workplaceId = workplaceBuilding.id || workplaceBuilding.buildingId || 'UnknownWorkplaceID';
             console.log(`[ProblemService] Processing workplace for ${citizen.Username} (Source: ${workplaceSource}): ID='${workplaceId}', Name='${workplaceBuilding.name}', Occupant='${workplaceBuilding.occupant}', RanBy='${workplaceBuilding.ranBy}', Category='${workplaceBuilding.category}'`);
             
-            // Validate the found/inferred workplace
-            const isBusinessCategory = workplaceBuilding.category?.toLowerCase() === 'business';
-            const isCorrectOccupant = workplaceBuilding.occupant === citizen.Username; // Important check if found via direct citizen.workplace.buildingId
+            // At this point, workplaceBuilding should be a 'business' where citizen is 'occupant'.
+            // The primary remaining checks are for 'ranBy'.
+            const hasRanBy = workplaceBuilding.ranBy && typeof workplaceBuilding.ranBy === 'string' && workplaceBuilding.ranBy.trim() !== '';
+            const isEmployerDifferent = hasRanBy && workplaceBuilding.ranBy.trim() !== citizen.Username;
 
-            if (!isBusinessCategory) {
-                console.log(`[ProblemService] Workplace ${workplaceId} for ${citizen.Username} is not 'business' category (Category: ${workplaceBuilding.category}). Skipping employer problem.`);
-            } else if (!isCorrectOccupant) {
-                console.log(`[ProblemService] Workplace ${workplaceId} occupant ('${workplaceBuilding.occupant}') does not match homeless citizen ('${citizen.Username}'). Skipping employer problem. This might indicate stale citizen.workplace data.`);
-            } else {
-                const hasRanBy = workplaceBuilding.ranBy && typeof workplaceBuilding.ranBy === 'string' && workplaceBuilding.ranBy.trim() !== '';
-                const isEmployerDifferent = hasRanBy && workplaceBuilding.ranBy.trim() !== citizen.Username;
+            console.log(`[ProblemService] Employer problem conditions for ${citizen.Username} at workplace ${workplaceId}: hasRanBy=${hasRanBy} ('${workplaceBuilding.ranBy}'), isEmployerDifferent=${isEmployerDifferent}`);
 
-                console.log(`[ProblemService] Employer problem conditions for ${citizen.Username} at workplace ${workplaceId}: hasRanBy=${hasRanBy} ('${workplaceBuilding.ranBy}'), isEmployerDifferent=${isEmployerDifferent}`);
-
-                if (hasRanBy && isEmployerDifferent) {
+            if (hasRanBy && isEmployerDifferent) {
               const employerUsername = workplaceBuilding.ranBy;
               // Use normalized citizen.FirstName and citizen.LastName
               const employeeName = `${citizen.FirstName || citizen.Username} ${citizen.LastName || ''}`.trim();
