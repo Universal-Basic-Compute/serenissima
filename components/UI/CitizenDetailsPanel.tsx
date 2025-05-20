@@ -779,6 +779,19 @@ Be historically accurate but engaging. Speak in first person as if you are this 
         return 'bg-gray-100 text-gray-800 border-gray-300';
     }
   };
+
+  // Helper function to replace placeholders in relevancy text
+  const formatRelevancyText = (text: string, currentCitizen: any): string => {
+    if (!text || !currentCitizen) return text;
+    let newText = text;
+    newText = newText.replace(/%TARGETCITIZEN%/g, `${currentCitizen.firstname || ''} ${currentCitizen.lastname || ''}`.trim());
+    newText = newText.replace(/%FIRSTNAME%/g, currentCitizen.firstname || '');
+    newText = newText.replace(/%LASTNAME%/g, currentCitizen.lastname || '');
+    newText = newText.replace(/%USERNAME%/g, currentCitizen.username || '');
+    newText = newText.replace(/%SOCIALCLASS%/g, currentCitizen.socialclass || '');
+    // Add more replacements here if needed, e.g., for %CURRENTUSER_FIRSTNAME%, etc.
+    return newText;
+  };
   
   // Add a helper function to format date in a readable way
   const formatActivityDate = (dateString: string): string => {
@@ -907,7 +920,7 @@ Be historically accurate but engaging. Speak in first person as if you are this 
                 <div key={relevancy.relevancyId || index} className="bg-amber-100 rounded-lg p-3 text-sm">
                   <div className="flex items-center justify-between mb-1">
                     <div className="font-medium text-amber-800">
-                      {relevancy.title}
+                      {formatRelevancyText(relevancy.title, citizen)}
                     </div>
                     {/* Score displayed as a nice badge */}
                     <div className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-200 text-amber-800 text-center">
@@ -922,7 +935,7 @@ Be historically accurate but engaging. Speak in first person as if you are this 
                         p: ({node, ...props}) => <p {...props} className="my-1" />
                       }}
                     >
-                      {relevancy.description}
+                      {formatRelevancyText(relevancy.description, citizen)}
                     </ReactMarkdown>
                   </div>
                 </div>
