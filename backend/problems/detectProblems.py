@@ -248,6 +248,36 @@ def detect_problems():
         else:
             log.error(f"No Active Imports API call failed: {no_imports_response.status_code} - {no_imports_response.text}")
             all_problem_details_summary.append(f"- No Active Imports: API Call Failed ({no_imports_response.status_code})")
+
+        # 6. Detect business buildings with no active contracts
+        log.info("--- Detecting Business Buildings with No Active Contracts ---")
+        no_contracts_api_url = f"{base_url}/api/problems/no-active-contracts"
+        log.info(f"Calling API: {no_contracts_api_url} for all relevant business buildings/owners")
+        no_contracts_response = requests.post(no_contracts_api_url, json={}, timeout=180)
+        log.info(f"No Active Contracts API response status: {no_contracts_response.status_code}")
+
+        if no_contracts_response.ok:
+            no_contracts_data = no_contracts_response.json()
+            log.info(f"No Active Contracts API response: success={no_contracts_data.get('success')}, problemCount={no_contracts_data.get('problemCount')}")
+            if no_contracts_data.get('success'):
+                count = no_contracts_data.get('problemCount', 0)
+                saved_count = no_contracts_data.get('savedCount', 0)
+                total_problems_detected += count
+                total_problems_saved += saved_count
+                all_problem_details_summary.append(f"- No Active Contracts (Businesses): {count} detected, {saved_count} saved.")
+                
+                problems_by_citizen_no_contracts = {}
+                for problem_id, problem in no_contracts_data.get('problems', {}).items():
+                    citizen = problem.get('citizen', 'Unknown')
+                    problems_by_citizen_no_contracts[citizen] = problems_by_citizen_no_contracts.get(citizen, 0) + 1
+                if problems_by_citizen_no_contracts:
+                    all_problem_details_summary.append("  Affected owners (No Active Contracts): " + ", ".join([f"{c}({num})" for c, num in problems_by_citizen_no_contracts.items()]))
+            else:
+                log.error(f"No Active Contracts API returned error: {no_contracts_data.get('error')}")
+                all_problem_details_summary.append(f"- No Active Contracts (Businesses): API Error - {no_contracts_data.get('error', 'Unknown')}")
+        else:
+            log.error(f"No Active Contracts API call failed: {no_contracts_response.status_code} - {no_contracts_response.text}")
+            all_problem_details_summary.append(f"- No Active Contracts (Businesses): API Call Failed ({no_contracts_response.status_code})")
         
         # Create admin notification
         details_text = "\n".join(all_problem_details_summary)

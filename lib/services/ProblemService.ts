@@ -715,6 +715,25 @@ export class ProblemService {
     return data.buildingTypes || [];
   }
 
+  private async fetchAllActiveContracts(): Promise<any[]> {
+    // Fetches all contracts and filters for active ones client-side.
+    const response = await fetch(`${this.getBaseUrl()}/api/contracts`, { cache: 'no-store' });
+    if (!response.ok) {
+      throw new Error(`Failed to fetch all contracts: ${response.status} ${await response.text()}`);
+    }
+    const data = await response.json();
+    const contracts = data.contracts || []; 
+
+    const now = new Date();
+    return contracts.filter(contract => {
+      const createdAt = new Date(contract.CreatedAt);
+      const endAt = new Date(contract.EndAt);
+      // Ensure Type exists and is a string before calling toLowerCase
+      const type = typeof contract.Type === 'string' ? contract.Type.toLowerCase() : '';
+      return createdAt <= now && endAt >= now && type !== 'expired'; // Also explicitly filter out 'expired' type if any
+    });
+  }
+
   private async fetchAllActiveImportContracts(): Promise<any[]> {
     // Assuming the contracts API might not support complex filtering via URL for "active" status based on dates.
     // Fetch all 'import' type contracts and filter by date client-side.
@@ -809,6 +828,76 @@ export class ProblemService {
 
     } catch (error) {
       console.error('[ProblemService] Error detecting no active imports:', error);
+      return {};
+    }
+  }
+
+  public async detectNoActiveContractsForBusinesses(username?: string): Promise<Record<string, Problem>> {
+    try {
+      console.log(`[ProblemService] detectNoActiveContractsForBusinesses: Starting detection (user: ${username || 'all'}).`);
+
+      const allBuildings = await this.fetchAllBuildings();
+      const businessBuildings = allBuildings.filter(b => {
+        const category = b.category && typeof b.category === 'string' ? b.category.toLowerCase() : null;
+        return category === 'business' &&
+               (!username || (b.owner && typeof b.owner === 'string' && b.owner.trim() === username));
+      });
+
+      if (businessBuildings.length === 0) {
+        console.log(`[ProblemService] detectNoActiveContractsForBusinesses: No business buildings found (user: ${username || 'all'}).`);
+        return {};
+      }
+      console.log(`[ProblemService] detectNoActiveContractsForBusinesses: Found ${businessBuildings.length} business buildings to check (user: ${username || 'all'}).`);
+
+      const activeContracts = await this.fetchAllActiveContracts();
+      const buildingsWithActiveContracts = new Set<string>();
+      activeContracts.forEach(contract => {
+        if (contract.BuyerBuilding) buildingsWithActiveContracts.add(contract.BuyerBuilding);
+        if (contract.SellerBuilding) buildingsWithActiveContracts.add(contract.SellerBuilding);
+      });
+      console.log(`[ProblemService] detectNoActiveContractsForBusinesses: Found ${activeContracts.length} active contracts. Buildings involved in active contracts: ${buildingsWithActiveContracts.size}`);
+
+      const problems: Record<string, Problem> = {};
+      let processedCount = 0;
+
+      businessBuildings.forEach(building => {
+        const buildingId = building.id || building.buildingId; // Prefer custom ID if available
+        const owner = building.owner && typeof building.owner === 'string' ? building.owner.trim() : null;
+
+        if (processedCount < 5) {
+            console.log(`[ProblemService] detectNoActiveContractsForBusinesses: Checking business building ${buildingId} (Owner: ${owner}, Type: ${building.type}). Has active contract: ${buildingsWithActiveContracts.has(buildingId)}`);
+        }
+        processedCount++;
+
+        if (owner && !buildingsWithActiveContracts.has(buildingId)) {
+          const problemId = `no_active_contracts_${buildingId}_${Date.now()}`;
+          const buildingName = building.name || building.type || 'Unnamed Business Building';
+
+          problems[problemId] = {
+            problemId,
+            citizen: owner,
+            assetType: 'building',
+            assetId: buildingId,
+            severity: 'medium',
+            status: 'active',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            location: buildingName,
+            title: 'No Active Contracts',
+            description: `Your business premises, **${buildingName}** (ID: ${buildingId}), currently has no active buy or sell contracts. This means it's not participating in the economy, potentially missing revenue opportunities or failing to secure necessary supplies.`,
+            solutions: `To resolve this:\n- Create 'sell' contracts for goods or services your business produces.\n- Create 'buy' contracts for raw materials or goods your business needs.\n- Review market prices and demand to set competitive contract terms.\n- Ensure your business is operational and has an assigned occupant (worker).`,
+            notes: `Building Type: ${building.type}. Owner: ${owner}. Category: Business. This building is not a BuyerBuilding or SellerBuilding in any active contract.`,
+            position: building.position || null,
+          };
+        }
+      });
+
+      const numProblems = Object.keys(problems).length;
+      console.log(`[ProblemService] detectNoActiveContractsForBusinesses: Created ${numProblems} 'No Active Contracts' problems (user: ${username || 'all'}).`);
+      return problems;
+
+    } catch (error) {
+      console.error('[ProblemService] Error detecting no active contracts for businesses:', error);
       return {};
     }
   }
