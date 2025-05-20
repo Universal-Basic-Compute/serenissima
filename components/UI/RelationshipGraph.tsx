@@ -23,9 +23,10 @@ interface RelationshipGraphProps {
   links: RelationshipLink[];
   width: number;
   height: number;
+  onNodeClick?: (node: CitizenNode) => void; // Add onNodeClick prop
 }
 
-const RelationshipGraph: React.FC<RelationshipGraphProps> = ({ nodes, links, width, height }) => {
+const RelationshipGraph: React.FC<RelationshipGraphProps> = ({ nodes, links, width, height, onNodeClick }) => {
   const fgRef = useRef<any>();
   const [processedNodes, setProcessedNodes] = useState<CitizenNode[]>([]);
 
@@ -165,6 +166,21 @@ const RelationshipGraph: React.FC<RelationshipGraphProps> = ({ nodes, links, wid
       enablePointerInteraction={true}
       minZoom={0.5}
       maxZoom={5}
+      onNodeClick={(node, event) => {
+        if (onNodeClick && node) {
+          // The node object from react-force-graph might have extra properties (x, y, vx, vy, index).
+          // We only care about the CitizenNode properties.
+          const citizenNode: CitizenNode = {
+            id: node.id as string, // id is typically string or number, ensure it's string
+            username: (node as CitizenNode).username,
+            firstName: (node as CitizenNode).firstName,
+            lastName: (node as CitizenNode).lastName,
+            imageUrl: (node as CitizenNode).imageUrl,
+            // img is an HTMLImageElement, not needed for the click handler logic itself
+          };
+          onNodeClick(citizenNode);
+        }
+      }}
     />
   );
 };

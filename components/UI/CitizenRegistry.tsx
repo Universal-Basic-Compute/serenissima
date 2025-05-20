@@ -213,6 +213,19 @@ const CitizenRegistry: React.FC<CitizenRegistryProps> = ({ onClose }) => {
     return { nodes: graphNodes, links: graphLinks };
   }, [activeTab, citizens, relationships]);
 
+  const handleGraphNodeClick = (node: { id: string; username: string; }) => {
+    if (!node || !node.username) return;
+    const clickedCitizen = citizens.find(c => c.username === node.username);
+    if (clickedCitizen) {
+      setSelectedRegistryCitizen(clickedCitizen);
+    } else {
+      console.warn(`Citizen with username ${node.username} not found in the main list.`);
+      // Optionally, you could try to fetch the citizen if not found,
+      // or create a minimal citizen object if enough info is in the node.
+      // For now, we only open the panel if the full citizen object is found.
+    }
+  };
+
   // Filter and sort citizens for the registry list
   const filteredAndSortedCitizens = useMemo(() => {
     // First filter by search term and social class
@@ -454,6 +467,7 @@ const CitizenRegistry: React.FC<CitizenRegistryProps> = ({ onClose }) => {
                   links={graphData.links}
                   width={graphDimensions.width}
                   height={graphDimensions.height}
+                  onNodeClick={handleGraphNodeClick} // Pass the click handler
                 />
               ) : (
                 <div className="text-amber-800 italic">
