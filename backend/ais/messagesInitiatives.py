@@ -29,16 +29,16 @@ def initialize_airtable() -> Optional[Dict[str, Table]]:
         sys.exit(1)
 
     try:
-        # api = Api(airtable_api_key) # Non utilisé directement si Table est utilisé partout
+        api = Api(airtable_api_key) # Créer un unique objet Api
         tables = {
-            "citizens": Table(airtable_api_key, airtable_base_id, "CITIZENS"),
-            "messages": Table(airtable_api_key, airtable_base_id, "MESSAGES"),
-            "notifications": Table(airtable_api_key, airtable_base_id, "NOTIFICATIONS"),
-            "relationships": Table(airtable_api_key, airtable_base_id, "RELATIONSHIPS"),
-            "relevancies": Table(airtable_api_key, airtable_base_id, "RELEVANCIES"),
-            "problems": Table(airtable_api_key, airtable_base_id, "PROBLEMS")
+            "citizens": Table(api, airtable_base_id, "CITIZENS"),
+            "messages": Table(api, airtable_base_id, "MESSAGES"),
+            "notifications": Table(api, airtable_base_id, "NOTIFICATIONS"),
+            "relationships": Table(api, airtable_base_id, "RELATIONSHIPS"),
+            "relevancies": Table(api, airtable_base_id, "RELEVANCIES"),
+            "problems": Table(api, airtable_base_id, "PROBLEMS")
         }
-        print("Connexion à Airtable initialisée.")
+        print("Connexion à Airtable initialisée avec un objet Api partagé.")
         return tables
     except Exception as e:
         print(f"Erreur lors de l'initialisation d'Airtable : {e}")
