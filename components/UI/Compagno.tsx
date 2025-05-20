@@ -1208,14 +1208,14 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
             <button
               onClick={() => {
                 setActiveTab('notifications');
-                // Fetch latest notifications when switching to notifications view
+                // Fetch latest bulletins when switching to bulletins view
                 fetchNotifications(true);
               }}
               className={`flex-1 py-2 text-sm font-medium relative ${
                 activeTab === 'notifications' ? 'bg-amber-200 text-amber-800' : 'text-amber-700 hover:bg-amber-50'
               }`}
             >
-              Notifications
+              Bulletins
               {unreadCount > 0 && (
                 <span className="absolute top-1 right-2 bg-purple-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
                   {unreadCount}
@@ -1231,7 +1231,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
                 activeTab === 'chats' ? 'bg-amber-200 text-amber-800' : 'text-amber-700 hover:bg-amber-50'
               }`}
             >
-              Chats
+              Correspondence
             </button>
           </div>
           
@@ -1245,13 +1245,13 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
               }}
             >
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-amber-800 font-serif text-lg">Notifications</h3>
+                <h3 className="text-amber-800 font-serif text-lg">Bulletins</h3>
                 <div className="flex items-center">
                   {/* Add refresh button */}
                   <button 
                     onClick={() => fetchNotifications(true)}
                     className="mr-3 text-amber-600 hover:text-amber-800 flex items-center"
-                    title="Refresh notifications"
+                    title="Refresh bulletins"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -1263,7 +1263,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
               
               {notifications.length === 0 ? (
                 <div className="text-center py-8 text-gray-500 italic">
-                  No notifications to display
+                  No bulletins to display
                 </div>
               ) : (
                 <>
