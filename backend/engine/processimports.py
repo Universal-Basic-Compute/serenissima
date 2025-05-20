@@ -275,12 +275,12 @@ def find_available_citizen(tables) -> Optional[Dict]:
         return None
 
 def generate_new_citizen(tables) -> Optional[Dict]:
-    """Generate a new citizen for import delivery using citizen_generator."""
+    """Generate a new citizen for import delivery using generate_citizen."""
     log.info("Generating a new citizen for import delivery...")
     
     try:
-        # Import the citizen_generator module
-        from citizen_generator import generate_citizen
+        # Import the generate_citizen module
+        from generate_citizen import generate_citizen
         
         # Generate a new citizen (using Popolani as default class for delivery personnel)
         citizen_data = generate_citizen("Popolani")
@@ -530,8 +530,12 @@ def process_import_contract(tables, contract: Dict, building_types: Dict, resour
         delivery_citizen = find_available_citizen(tables)
         
         if not delivery_citizen:
-            log.warning("No available citizens found for delivery. As per new policy, not generating a new citizen. Skipping import for this contract.")
-            return False # Skip processing this contract if no citizen is found
+            log.info("No available citizens found, generating a new one")
+            delivery_citizen = generate_new_citizen(tables)
+            
+            if not delivery_citizen:
+                log.error("Failed to generate a new citizen for delivery")
+                return False
         
         # 4. Create a delivery activity instead of directly creating/updating resources
         activity = create_delivery_activity(
