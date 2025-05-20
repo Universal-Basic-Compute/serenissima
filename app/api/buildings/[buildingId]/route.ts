@@ -147,6 +147,7 @@ export async function GET(request: NextRequest) {
             occupant: fields.Occupant || ''
           };
 
+          console.log(`Building ${buildingId} from Airtable - Citizen field: '${fields.Citizen}', Occupant field: '${fields.Occupant}'`);
           return NextResponse.json({ building });
         }
       } catch (err) {
@@ -169,7 +170,8 @@ export async function GET(request: NextRequest) {
           availableBuildings: buildingData.availableBuildings
         });
       }
-
+      
+      console.log(`Building ${buildingId} from local file - owner field: '${buildingData.owner}', occupant field: '${buildingData.occupant}'`);
       return NextResponse.json({ building: buildingData });
     }
 
