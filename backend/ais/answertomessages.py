@@ -435,10 +435,22 @@ def process_ai_messages(dry_run: bool = False):
                 if sender_citizen_data and sender_citizen_data.get('fields', {}).get('IsAI', False):
                     sender_is_ai = True
                 print(f"[DRY RUN] Would mark message {message_id} as read for {ai_username} (receiver) via API")
-                print(f"[DRY RUN] Would generate response from {ai_username} to {sender_username} using Kinos")
-                # Simulate response generation for counting purposes
-                ai_response_counts[ai_username] += 1 
-                print(f"[DRY RUN] Would send response from {ai_username} (sender) to {sender_username} (receiver) via API")
+                
+                dry_run_should_respond = True
+                if sender_is_ai:
+                    # Simulate the 25% chance for dry run logging consistency
+                    if random.random() > 0.25: # Using a new random roll for dry run simulation
+                        dry_run_should_respond = False
+                        print(f"[DRY RUN] Sender {sender_username} is an AI. {ai_username} would have chosen not to respond (75% chance).")
+                    else:
+                        print(f"[DRY RUN] Sender {sender_username} is an AI. {ai_username} would have responded (25% chance).")
+
+                if dry_run_should_respond:
+                    print(f"[DRY RUN] Would generate response from {ai_username} to {sender_username} using Kinos")
+                    # Simulate response generation for counting purposes
+                    ai_response_counts[ai_username] += 1 
+                    print(f"[DRY RUN] Would send response from {ai_username} (sender) to {sender_username} (receiver) via API")
+                # else: # No action if dry_run_should_respond is False
     
     # Create admin notification with summary
     total_responses = sum(ai_response_counts.values())
