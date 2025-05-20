@@ -274,53 +274,83 @@ def find_available_citizen(tables) -> Optional[Dict]:
         log.error(f"Error finding available citizen: {e}")
         return None
 
-def generate_new_citizen(tables) -> Optional[Dict]:
+def generate_new_citizen(tables: Dict[str, Table], dry_run: bool = False) -> Optional[Dict]:
     """Generate a new citizen for import delivery using generate_citizen."""
     log.info("Generating a new citizen for import delivery...")
     
     try:
-        # Add the scripts directory to sys.path to allow importing generateCitizen
+        # Add the scripts directory to sys.path to allow importing generateCitizen and updatecitizenDescriptionAndImage
         scripts_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'scripts')
         if scripts_dir not in sys.path:
             sys.path.append(scripts_dir)
             
-        # Import the generate_citizen function from the generateCitizen module
         from generateCitizen import generate_citizen
+        from updatecitizenDescriptionAndImage import update_citizen_description_and_image
         
-        # Generate a new citizen. The social class is hardcoded to Facchini in generate_citizen.
-        # Add specific context for the citizen being generated for import delivery.
         additional_prompt = "This citizen is a merchant sailor, arriving in Venice to deliver goods. They are not from Venice but are familiar with maritime trade."
-        citizen_data = generate_citizen(social_class=None, additional_prompt_text=additional_prompt) # Pass None for social_class as it's overridden
+        citizen_data = generate_citizen(social_class=None, additional_prompt_text=additional_prompt)
         
         if not citizen_data:
-            log.error("Failed to generate new citizen")
+            log.error("Failed to generate new citizen data from generate_citizen.")
             return None
         
+        new_citizen_username = citizen_data.get("username")
+        if not new_citizen_username:
+            log.error("Generated citizen data is missing a username.")
+            return None
+
+        if dry_run:
+            log.info(f"[DRY RUN] Would generate new citizen: {new_citizen_username}")
+            # In dry_run, we need to return a mock citizen record structure 
+            # that find_available_citizen would expect if it were to use it.
+            # Or, ensure the calling code handles a None return from generate_new_citizen in dry_run.
+            # For now, let's return a structure similar to what Airtable might give.
+            return {
+                "id": "dry_run_citizen_airtable_id",
+                "fields": {
+                    "Username": new_citizen_username,
+                    "CitizenId": citizen_data.get("id", f"dry_run_{new_citizen_username}"),
+                    # Add other essential fields if needed by subsequent logic in dry_run
+                }
+            }
+
         # Set InVenice to false for this new citizen
-        citizen_data["InVenice"] = False # This field might be set by generate_citizen, ensure it's False
+        citizen_data["InVenice"] = False
         
         # Save to Airtable
-        # Ensure keys match Airtable field names (PascalCase)
-        citizen_record = tables['citizens'].create({
-            "CitizenId": citizen_data.get("id"), # Use .get() for safety
-            "Username": citizen_data.get("username"), # Use .get() for safety, ensure it's lowercase from generate_citizen
-            "SocialClass": citizen_data.get("socialclass"), # This will be 'Facchini'
+        citizen_payload = {
+            "CitizenId": citizen_data.get("id"),
+            "Username": new_citizen_username,
+            "SocialClass": citizen_data.get("socialclass"),
             "FirstName": citizen_data.get("firstname"),
             "LastName": citizen_data.get("lastname"),
-            "Description": citizen_data.get("personality"), # 'personality' from generate_citizen maps to 'Description'
-            "CorePersonality": json.dumps(citizen_data.get("corepersonality", [])), # Store as JSON string
+            "Description": citizen_data.get("personality"),
+            "CorePersonality": json.dumps(citizen_data.get("corepersonality", [])),
             "ImagePrompt": citizen_data.get("imageprompt"),
             "FamilyMotto": citizen_data.get("familymotto"),
             "CoatOfArms": citizen_data.get("coatofarms"),
             "Ducats": citizen_data.get("ducats"),
             "CreatedAt": citizen_data.get("createdat"),
-            "InVenice": False # Explicitly set InVenice to False
-        })
+            "InVenice": False
+        }
+        citizen_record = tables['citizens'].create(citizen_payload)
         
-        log.info(f"👤 Successfully created new citizen for import delivery: **{citizen_data.get('firstname')} {citizen_data.get('lastname')}**")
+        log.info(f"👤 Successfully created new citizen in Airtable: **{citizen_data.get('firstname')} {citizen_data.get('lastname')}** (Username: {new_citizen_username})")
+
+        # After successfully creating the citizen, call update_citizen_description_and_image
+        try:
+            log.info(f"Attempting to update description and image for newly generated citizen: {new_citizen_username}")
+            update_success = update_citizen_description_and_image(username=new_citizen_username, dry_run=dry_run) # Pass dry_run status
+            if update_success:
+                log.info(f"Successfully initiated update for description and image for {new_citizen_username}.")
+            else:
+                log.warning(f"Failed to initiate update for description and image for {new_citizen_username}.")
+        except Exception as e_update:
+            log.error(f"Error calling update_citizen_description_and_image for {new_citizen_username}: {e_update}")
+            
         return citizen_record
     except Exception as e:
-        log.error(f"Error generating new citizen: {e}")
+        log.error(f"Error in generate_new_citizen: {e}")
         return None
 
 def create_delivery_activity(tables, citizen: Dict, contract: Dict, resource_type: str, 
@@ -543,7 +573,7 @@ def process_import_contract(tables, contract: Dict, building_types: Dict, resour
         
         if not delivery_citizen:
             log.info("No available citizens found, generating a new one")
-            delivery_citizen = generate_new_citizen(tables)
+            delivery_citizen = generate_new_citizen(tables, dry_run=dry_run) # Pass dry_run status
             
             if not delivery_citizen:
                 log.error("Failed to generate a new citizen for delivery")
