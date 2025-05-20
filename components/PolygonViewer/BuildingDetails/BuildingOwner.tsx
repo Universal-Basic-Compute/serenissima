@@ -19,14 +19,20 @@ const BuildingOwner: React.FC<BuildingOwnerProps> = ({ owner }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Log the received owner prop value
+  console.log('[BuildingOwner] Received owner prop:', owner);
+
   useEffect(() => {
-    if (owner) {
+    // Log when the effect runs and with what owner value
+    console.log('[BuildingOwner] useEffect triggered with owner:', owner);
+
+    if (owner && owner.trim() !== "") { // Check if owner is not null, undefined, or an empty/whitespace string
       setIsLoading(true);
-      setError(null);
+      setError(null); // Clear previous errors before a new fetch
       setOwnerProfile(null); // Reset previous profile
 
       // Assuming 'owner' is the username. Adjust if it's an ID.
-      fetch(`/api/citizens/${encodeURIComponent(owner)}`)
+      fetch(`/api/citizens/${encodeURIComponent(owner.trim())}`)
         .then(response => {
           if (!response.ok) {
             if (response.status === 404) {
@@ -60,9 +66,11 @@ const BuildingOwner: React.FC<BuildingOwnerProps> = ({ owner }) => {
           setIsLoading(false);
         });
     } else {
+      // Owner is null, undefined, or an empty/whitespace string
       setOwnerProfile(null);
       setIsLoading(false);
-      setError(null);
+      setError(null); // Clear any existing error if owner becomes invalid
+      console.log('[BuildingOwner] Owner prop is empty or invalid, clearing profile and error states.');
     }
   }, [owner]);
 
