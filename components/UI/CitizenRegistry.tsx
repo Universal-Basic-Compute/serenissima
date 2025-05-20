@@ -478,16 +478,16 @@ const CitizenRegistry: React.FC<CitizenRegistryProps> = ({ onClose }) => {
               {/* Legend for the Relationship Graph */}
               {graphData.nodes.length > 0 && graphData.links.length > 0 && !isLoadingRelationships && !isLoading && (
                 <div className="absolute bottom-4 right-4 bg-amber-50 bg-opacity-80 p-3 rounded-lg shadow-md border border-amber-300 text-xs text-amber-800 max-w-xs">
-                  <h4 className="font-serif text-sm text-amber-900 mb-1">Legenda della Carta</h4>
+                  <h4 className="font-serif text-sm text-amber-900 mb-1">The Merchant's Key</h4>
                   <div className="mb-1">
-                    <span className="font-semibold">Spessore del Legame:</span> Indica la <span className="italic">Forza</span> della relazione. Un filo più robusto denota un vincolo più saldo.
+                    <span className="font-semibold">Bond Thickness:</span> Signifies the <span className="italic">Strength</span> of the connection. A sturdier thread reveals a firmer tie.
                   </div>
                   <div>
-                    <span className="font-semibold">Colore del Legame:</span> Riflette la <span className="italic">Fiducia</span> reciproca:
+                    <span className="font-semibold">Bond Colour:</span> Reflects the mutual <span className="italic">Trust</span>:
                     <ul className="list-disc list-inside ml-2 mt-0.5">
-                      <li><span style={{ color: '#8B5CF6' }}>■</span> Viola: Fiducia Salda</li>
-                      <li><span style={{ color: '#F97316' }}>■</span> Arancio: Fiducia Moderata</li>
-                      <li><span style={{ color: '#F5E7C1', textShadow: '0 0 1px #A16207' }}>■</span> Giallo Paglierino: Fiducia Tenuie</li>
+                      <li><span style={{ color: '#8B5CF6' }}>■</span> Purple: Steadfast Trust</li>
+                      <li><span style={{ color: '#F97316' }}>■</span> Orange: Moderate Trust</li>
+                      <li><span style={{ color: '#F5E7C1', textShadow: '0 0 1px #A16207' }}>■</span> Parchment Yellow: Tenuous Trust</li>
                     </ul>
                   </div>
                 </div>
