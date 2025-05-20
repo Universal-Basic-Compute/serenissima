@@ -574,11 +574,11 @@ export default function BuildingDetailsPanel({
   
   return (
     <div 
-      className={`fixed top-0 right-0 h-full w-3/4 max-w-5xl bg-amber-50 shadow-xl transform transition-transform duration-300 ease-in-out z-20 border-l-4 border-amber-600 ${
-        isVisible ? 'translate-x-0' : 'translate-x-full'
+      className={`fixed top-20 left-20 right-4 bottom-4 bg-amber-50 border-2 border-amber-700 rounded-lg p-6 shadow-lg z-50 transition-all duration-300 pointer-events-auto ${
+        isVisible ? 'opacity-100 transform translate-x-0' : 'opacity-0 transform translate-x-10'
       }`}
     >
-      <div className="p-6 h-full flex flex-col">
+      <div className="h-full flex flex-col">
         {/* Header with improved styling */}
         <div className="flex justify-between items-center mb-6 border-b-2 border-amber-300 pb-3">
           <h2 className="text-2xl font-serif font-semibold text-amber-800">
