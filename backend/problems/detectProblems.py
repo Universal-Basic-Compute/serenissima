@@ -108,27 +108,6 @@ def detect_workless_problems(base_url: str) -> Dict:
         log.error(f"Error detecting workless problems: {e}")
         return {"success": False, "error": str(e), "problemCount": 0, "savedCount": 0, "problems": {}}
 
-def detect_no_manager_problems(base_url: str) -> Dict:
-    """Detect businesses without managers for all businesses."""
-    try:
-        log.info(f"Detecting businesses without managers for all businesses")
-        api_url = f"{base_url}/api/problems/no-manager"
-        log.info(f"Calling API: {api_url}")
-        
-        response = requests.post(api_url, json={}, timeout=180) # Empty JSON body, increased timeout
-        log.info(f"API response status for no_manager detection: {response.status_code}")
-        
-        if not response.ok:
-            log.error(f"No Manager API call failed with status {response.status_code}: {response.text}")
-            return {"success": False, "error": f"API error: {response.status_code} - {response.text}", "problemCount": 0, "savedCount": 0, "problems": {}}
-        
-        data = response.json()
-        log.info(f"No Manager API response: success={data.get('success')}, problemCount={data.get('problemCount')}, savedCount={data.get('savedCount')}")
-        return data
-    except Exception as e:
-        log.error(f"Error detecting no manager problems: {e}")
-        return {"success": False, "error": str(e), "problemCount": 0, "savedCount": 0, "problems": {}}
-
 def detect_problems():
     """Detect various problems for citizens and lands."""
     try:
@@ -209,27 +188,6 @@ def detect_problems():
         else:
             log.error(f"Workless detection failed: {workless_data.get('error')}")
             all_problem_details_summary.append(f"- Workless Citizens: Detection Error - {workless_data.get('error', 'Unknown')}")
-
-        # 4. Detect businesses without managers
-        log.info("--- Detecting Businesses Without Managers ---")
-        no_manager_data = detect_no_manager_problems(base_url)
-        if no_manager_data.get('success'):
-            count = no_manager_data.get('problemCount', 0)
-            saved_count = no_manager_data.get('savedCount', 0)
-            total_problems_detected += count
-            total_problems_saved += saved_count
-            all_problem_details_summary.append(f"- Businesses w/o Manager: {count} detected, {saved_count} saved.")
-            
-            problems_by_citizen_no_manager = {}
-            # Ensure 'problems' key exists and is a dictionary
-            for problem_id, problem in no_manager_data.get('problems', {}).items():
-                citizen = problem.get('citizen', 'Unknown Owner') # problem.citizen is the building owner
-                problems_by_citizen_no_manager[citizen] = problems_by_citizen_no_manager.get(citizen, 0) + 1
-            if problems_by_citizen_no_manager:
-                 all_problem_details_summary.append("  Affected owners (No Manager): " + ", ".join([f"{c}({num})" for c, num in problems_by_citizen_no_manager.items()]))
-        else:
-            log.error(f"No Manager detection failed: {no_manager_data.get('error')}")
-            all_problem_details_summary.append(f"- Businesses w/o Manager: Detection Error - {no_manager_data.get('error', 'Unknown')}")
         
         # Create admin notification
         details_text = "\n".join(all_problem_details_summary)
