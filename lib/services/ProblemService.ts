@@ -454,7 +454,7 @@ export class ProblemService {
     const apiUrl = username
       ? `${this.getBaseUrl()}/api/citizens?username=${encodeURIComponent(username)}`
       : `${this.getBaseUrl()}/api/citizens`; // Fetches all citizens
-    const response = await fetch(apiUrl);
+    const response = await fetch(apiUrl, { cache: 'no-store' });
     if (!response.ok) {
       throw new Error(`Failed to fetch citizens: ${response.status} ${await response.text()}`);
     }
@@ -470,7 +470,7 @@ export class ProblemService {
   }
 
   private async fetchAllBuildings(): Promise<any[]> { // Using any for now for building structure
-    const response = await fetch(`${this.getBaseUrl()}/api/buildings`); // Fetches all buildings
+    const response = await fetch(`${this.getBaseUrl()}/api/buildings`, { cache: 'no-store' }); // Fetches all buildings
     if (!response.ok) {
       throw new Error(`Failed to fetch buildings: ${response.status} ${await response.text()}`);
     }
