@@ -25,27 +25,34 @@ export async function GET(request: NextRequest) {
 
     // Get URL parameters
     const { searchParams } = new URL(request.url);
-    const citizen1Username = searchParams.get('citizen1');
-    const citizen2Username = searchParams.get('citizen2');
+    const citizen1Param = searchParams.get('citizen1');
+    const citizen2Param = searchParams.get('citizen2');
 
-    if (!citizen1Username || !citizen2Username) {
+    if (!citizen1Param || !citizen2Param) {
       return NextResponse.json(
         { success: false, error: 'Both citizen1 and citizen2 parameters are required' },
         { status: 400 }
       );
     }
 
-    const safeCitizen1 = escapeAirtableString(citizen1Username);
-    const safeCitizen2 = escapeAirtableString(citizen2Username);
+    // Determine alphabetical order for citizen usernames
+    let firstUsername: string, secondUsername: string;
+    if (citizen1Param.localeCompare(citizen2Param) <= 0) {
+      firstUsername = citizen1Param;
+      secondUsername = citizen2Param;
+    } else {
+      firstUsername = citizen2Param;
+      secondUsername = citizen1Param;
+    }
 
-    // Prepare filter formula
-    // Looks for (Citizen1 = c1 AND Citizen2 = c2) OR (Citizen1 = c2 AND Citizen2 = c1)
-    const filterFormula = `OR(
-      AND({Citizen1} = '${safeCitizen1}', {Citizen2} = '${safeCitizen2}'),
-      AND({Citizen1} = '${safeCitizen2}', {Citizen2} = '${safeCitizen1}')
-    )`;
+    const safeFirstUsername = escapeAirtableString(firstUsername);
+    const safeSecondUsername = escapeAirtableString(secondUsername);
 
-    console.log(`Fetching relationships with filter: ${filterFormula}`);
+    // Prepare filter formula assuming Citizen1 field stores the alphabetically first username.
+    // This relies on the convention that data in Airtable is stored with Citizen1 < Citizen2 alphabetically.
+    const filterFormula = `AND({Citizen1} = '${safeFirstUsername}', {Citizen2} = '${safeSecondUsername}')`;
+
+    console.log(`Fetching relationship for (${firstUsername}, ${secondUsername}) with filter: ${filterFormula}`);
 
     // Fetch relationships from Airtable
     const records = await base(AIRTABLE_RELATIONSHIPS_TABLE)
@@ -78,7 +85,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: true,
         relationship: null, // No relationship found
-        message: `No direct relationship found between ${citizen1Username} and ${citizen2Username}`
+        message: `No direct relationship found between ${citizen1Param} and ${citizen2Param}` // Use original params for message
       });
     }
 
