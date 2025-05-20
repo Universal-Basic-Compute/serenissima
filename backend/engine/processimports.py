@@ -444,7 +444,7 @@ def process_import_contract(tables, contract: Dict, building_types: Dict, resour
         buyer = fields.get('Buyer')
         resource_type = fields.get('ResourceType')
         buyer_building_id = fields.get('BuyerBuilding')
-        hourly_amount = float(fields.get('hourlyAmount', 0))
+        hourly_amount = float(fields.get('HourlyAmount', 0)) # Changed to HourlyAmount
         price_per_resource = float(fields.get('PricePerResource', 0))
         
         # Since we're running hourly, use the exact hourly amount
