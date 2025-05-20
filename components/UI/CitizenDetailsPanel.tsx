@@ -792,10 +792,11 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
   const socialClassStyle = getSocialClassColor(citizen.socialclass);
   
   return (
-    <div 
-      className={`fixed top-20 left-20 right-4 bg-amber-50 border-2 border-amber-700 rounded-lg p-6 shadow-lg z-50 transition-all duration-300 pointer-events-auto ${
-        isVisible ? 'opacity-100 transform translate-x-0' : 'opacity-0 transform translate-x-10'
-      }`}
+    <div
+      className={
+        `fixed top-20 left-20 right-4 bg-amber-50 border-2 border-amber-700 rounded-lg p-6 shadow-lg z-50 transition-all duration-300 pointer-events-auto ` +
+        `${isVisible ? 'opacity-100 transform translate-x-0' : 'opacity-0 transform translate-x-10'}`
+      }
       style={{ pointerEvents: 'auto', cursor: 'default' }}
     >
       
