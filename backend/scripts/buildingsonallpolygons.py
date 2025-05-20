@@ -225,8 +225,8 @@ def create_building_record(
         "Category": category,
         "LandId": land_id,
         "Owner": owner,
-        "Point": point_id,
-        "Position": json.dumps(position),
+        "Point": f"{building_type}_{position['lat']}_{position['lng']}", # Format: type_latitude_longitude
+        # "Position" field removed as it does not exist in Airtable and info is in "Point"
         "Variant": "model", # Default variant
         "Rotation": 0,      # Default rotation
         "LeaseAmount": 0,
