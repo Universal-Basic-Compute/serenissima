@@ -1189,14 +1189,14 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
               <button 
                 onClick={() => setIsOpen(false)} 
                 className="text-white hover:text-amber-200 transition-colors"
-                aria-label="Minimize chat"
+                aria-label="Minimize correspondence"
               >
                 <FaChevronDown />
               </button>
               <button 
                 onClick={() => setIsOpen(false)} 
                 className="ml-3 text-white hover:text-amber-200 transition-colors"
-                aria-label="Close chat"
+                aria-label="Close correspondence"
               >
                 <FaTimes />
               </button>
