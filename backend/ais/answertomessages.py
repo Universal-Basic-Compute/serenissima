@@ -126,7 +126,7 @@ def _get_notifications_data(tables: Dict[str, Table], username: str, limit: int 
     try:
         safe_username = _escape_airtable_value(username)
         formula = f"{{Citizen}} = '{safe_username}'"
-        records = tables["notifications"].all(formula=formula, sort=[('-CreatedAt', 'desc')], max_records=limit)
+        records = tables["notifications"].all(formula=formula, sort=['-CreatedAt'], max_records=limit) # Changed sort syntax
         return [{'id': r['id'], 'fields': r['fields']} for r in records]
     except Exception as e:
         print(f"Error fetching notifications for {username}: {e}")
@@ -144,7 +144,7 @@ def _get_relevancies_data(tables: Dict[str, Table], relevant_to_username: str, t
             f"OR({{TargetCitizen}} = '{safe_target_username}', FIND('\"{safe_target_username}\"', {{TargetCitizen}}) > 0)"
             f")"
         )
-        records = tables["relevancies"].all(formula=formula, sort=[('-CreatedAt', 'desc')], max_records=limit)
+        records = tables["relevancies"].all(formula=formula, sort=['-CreatedAt'], max_records=limit) # Changed sort syntax
         return [{'id': r['id'], 'fields': r['fields']} for r in records]
     except Exception as e:
         print(f"Error fetching relevancies for {relevant_to_username} targeting {target_username}: {e}")
@@ -156,7 +156,7 @@ def _get_problems_data(tables: Dict[str, Table], username1: str, username2: str,
         safe_username2 = _escape_airtable_value(username2)
         formula = f"OR({{Citizen}} = '{safe_username1}', {{Citizen}} = '{safe_username2}')"
         # Assumant que la table PROBLEMS a un champ 'Citizen' et 'CreatedAt'
-        records = tables["problems"].all(formula=formula, sort=[('-CreatedAt', 'desc')], max_records=limit)
+        records = tables["problems"].all(formula=formula, sort=['-CreatedAt'], max_records=limit) # Changed sort syntax
         return [{'id': r['id'], 'fields': r['fields']} for r in records]
     except Exception as e:
         print(f"Error fetching problems for {username1} or {username2}: {e}")
