@@ -701,12 +701,18 @@ export class RelevancyService {
       
       // Create a map of land ID to land data for quick lookup
       const landMap: Record<string, LandData> = {};
+      console.log(`[RelevancyService] Building landMap. Total lands fetched: ${lands.length} for user ${username}`);
       lands.forEach((land: LandData) => {
-        // Ensure land.id is the polygonId (e.g. poly_xxx) if that's what building.land_id refers to.
-        // Assuming building.land_id refers to the primary ID used in the lands API (polygonId).
         const idToUse = land.polygonId || land.id; 
+        if (!idToUse) {
+          console.warn(`[RelevancyService] Land record (Airtable ID: ${land.id}, PolygonID: ${land.polygonId}) has no usable ID for landMap for user ${username}. Skipping.`);
+          return;
+        }
+        // The following log can be very verbose if there are many lands. Enable if needed for deep debugging.
+        // console.log(`[RelevancyService] Adding to landMap for user ${username}: Key=${idToUse}, Owner=${land.owner}, PolygonID=${land.polygonId}, RecordID=${land.id}`);
         landMap[idToUse] = land;
       });
+      console.log(`[RelevancyService] landMap created with ${Object.keys(landMap).length} entries for user ${username}.`);
       
       // Calculate relevancy for each building on land owned by another citizen
       const relevancyScores: Record<string, RelevancyScore> = {};
