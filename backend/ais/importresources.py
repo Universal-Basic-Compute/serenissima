@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple, Any
 import requests
 from dotenv import load_dotenv
-from pyairtable import Api, Table
+from pyairtable import Api, Base, Table # Added Base
 
 # Add the parent directory to the path to import citizen_utils
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -24,14 +24,15 @@ def initialize_airtable():
         sys.exit(1)
     
     api = Api(airtable_api_key)
+    base = Base(api, airtable_base_id) # Create a Base object
     
     tables = {
-        "citizens": Table(airtable_api_key, airtable_base_id, "CITIZENS"),
-        "buildings": Table(airtable_api_key, airtable_base_id, "BUILDINGS"),
-        "resources": Table(airtable_api_key, airtable_base_id, "RESOURCES"),
-        "contracts": Table(airtable_api_key, airtable_base_id, "CONTRACTS"),
-        "notifications": Table(airtable_api_key, airtable_base_id, "NOTIFICATIONS"),
-        "problems": Table(airtable_api_key, airtable_base_id, "PROBLEMS")
+        "citizens": base.table("CITIZENS"),
+        "buildings": base.table("BUILDINGS"),
+        "resources": base.table("RESOURCES"),
+        "contracts": base.table("CONTRACTS"),
+        "notifications": base.table("NOTIFICATIONS"),
+        "problems": base.table("PROBLEMS")
     }
     
     return tables
@@ -57,7 +58,9 @@ def get_ai_citizens(tables) -> List[Dict]:
     """Get all citizens that are marked as AI, are in Venice."""
     try:
         # Query citizens with IsAI=true, InVenice=true
-        formula = "AND({IsAI}=1, {InVenice}=1"
+        # Corrected formula: added closing parenthesis.
+        # If IsAI and InVenice are boolean fields, AND({IsAI}=TRUE(), {InVenice}=TRUE()) might be more robust.
+        formula = "AND({IsAI}=1, {InVenice}=1)"
         ai_citizens = tables["citizens"].all(formula=formula)
         print(f"Found {len(ai_citizens)} AI citizens in Venice")
         return ai_citizens
