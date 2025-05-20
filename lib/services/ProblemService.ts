@@ -786,9 +786,9 @@ export class ProblemService {
             updatedAt: new Date().toISOString(),
             location: buildingName,
             title: 'No Active Contracts',
-            description: `Your business premises, **${buildingName}** (ID: ${buildingId}), currently has no active buy or sell contracts. This means it's not participating in the economy, potentially missing revenue opportunities or failing to secure necessary supplies.`,
+            description: `Your business premises, **${buildingName}**, currently has no active buy or sell contracts. This means it's not participating in the economy, potentially missing revenue opportunities or failing to secure necessary supplies.`,
             solutions: `To resolve this:\n- Create 'sell' contracts for goods or services your business produces.\n- Create 'buy' contracts for raw materials or goods your business needs.\n- Review market prices and demand to set competitive contract terms.\n- Ensure your business is operational and has an assigned occupant (worker).`,
-            notes: `Building Type: ${building.type}. Owner: ${owner}. Category: Business. This building is not a BuyerBuilding or SellerBuilding in any active contract.`,
+            notes: `Building Type: ${building.type}. Owner: ${owner}. Category: Business. This building is not a BuyerBuilding or SellerBuilding in any active contract. Building ID: ${buildingId}.`,
             position: building.position || null,
           };
         }
