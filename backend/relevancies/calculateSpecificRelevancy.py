@@ -104,7 +104,7 @@ def calculate_specific_relevancy(
         api_url = f"{base_url}/api/relevancies/proximity"
         if username:
             # Single user proximity calculation
-            payload = {"aiUsername": username}
+            payload = {"citizenUsername": username}
             if type_filter:
                 payload["typeFilter"] = type_filter
             log.info(f"Requesting proximity relevancy for user: {username}, filter: {type_filter or 'none'}")
@@ -125,7 +125,7 @@ def calculate_specific_relevancy(
                 import time
                 time.sleep(1) # Small delay between API calls
                 log.info(f"Processing proximity for landowner: {owner_username}")
-                current_payload = {"aiUsername": owner_username}
+                current_payload = {"citizenUsername": owner_username}
                 if type_filter:
                     current_payload["typeFilter"] = type_filter
                 
@@ -165,14 +165,14 @@ def calculate_specific_relevancy(
     elif relevancy_type == "domination":
         api_url = f"{base_url}/api/relevancies/domination"
         # If username is provided, it's for a specific user. Otherwise, "all" for global.
-        payload = {"aiUsername": username if username else "all"}
-        log.info(f"Requesting land domination relevancy for: {payload['aiUsername']}")
+        payload = {"citizenUsername": username if username else "all"}
+        log.info(f"Requesting land domination relevancy for: {payload['citizenUsername']}")
 
     elif relevancy_type == "housing":
         api_url = f"{base_url}/api/relevancies/housing"
-        payload = {} # Global, aiUsername is optional in the route
+        payload = {} # Global, citizenUsername is optional in the route
         if username: # Pass if provided, though route might ignore for global housing
-            payload["aiUsername"] = username 
+            payload["citizenUsername"] = username 
         log.info("Requesting housing situation relevancy.")
         request_timeout = 60
 
@@ -180,7 +180,7 @@ def calculate_specific_relevancy(
         api_url = f"{base_url}/api/relevancies/jobs"
         payload = {} # Global
         if username:
-            payload["aiUsername"] = username
+            payload["citizenUsername"] = username
         log.info("Requesting job market situation relevancy.")
         request_timeout = 60
 
@@ -190,7 +190,7 @@ def calculate_specific_relevancy(
             create_admin_notification(notifications_table, "Building Ownership Relevancy Error", "Username not provided.")
             return False
         api_url = f"{base_url}/api/relevancies/building-ownership"
-        payload = {"aiUsername": username}
+        payload = {"citizenUsername": username}
         log.info(f"Requesting building ownership relevancy for user: {username}")
         request_timeout = 60
         

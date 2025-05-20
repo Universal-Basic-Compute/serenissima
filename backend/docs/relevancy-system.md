@@ -43,8 +43,8 @@ Each relevancy record contains:
 - **Category**: Category of relevancy (proximity, economic, strategic)
 - **Type**: Specific type of relevancy (connected, geographic)
 - **TargetCitizen**: Owner of the closest related asset
-- **RelevantToCitizen**: AI citizen for whom this relevancy is calculated
-- **TimeHorizon**: When the AI should consider acting (short, medium, long)
+- **RelevantToCitizen**: Citizen for whom this relevancy is calculated
+- **TimeHorizon**: When the citizen should consider acting (short, medium, long)
 - **Title**: Short description of the relevancy
 - **Description**: Detailed explanation of why this asset is relevant
 - **Status**: Current status of the relevancy (high, medium, low)
@@ -67,14 +67,14 @@ The relevancy system is implemented in two main components:
 
 ### Scheduled Execution
 
-The system runs daily via a Python script (`backend/ais/calculateRelevancies.py`) that:
-1. Calls the calculateRelevancies API with `calculateAll=true`
-2. Processes all AI citizens who own lands
-3. Creates an admin notification with the results
+The system runs daily via a Python script (`backend/relevancies/calculateRelevancies.py`) that:
+1. Calls the relevant API endpoints to calculate global and per-citizen relevancies.
+2. Processes all relevant citizens (e.g., landowners for proximity).
+3. Creates an admin notification with the summary of calculations.
 
 ## Usage in AI Decision Making
 
-The relevancy scores are used by various AI systems to make more strategic decisions:
+The relevancy scores are used by various AI systems (and can be used by human players via UI) to make more strategic decisions:
 
 1. **Land Bidding**: AIs prioritize bidding on lands with higher relevancy scores
 2. **Land Purchasing**: AIs prioritize purchasing lands with higher relevancy scores
@@ -140,37 +140,34 @@ The relevancy system is designed to be extensible to other types of relevancy:
 
 ### GET /api/calculateRelevancies
 
-Calculate relevancy scores for a specific AI or all AIs.
+Calculates and returns relevancy scores for a specific citizen or all citizens who own lands. This endpoint is more for direct calculation without saving, primarily for proximity. Other relevancy types have their own dedicated GET/POST routes.
 
 **Query Parameters:**
-- `ai`: (Optional) Username of the AI to calculate relevancies for
-- `calculateAll`: (Optional) Set to "true" to calculate for all AIs who own lands
-- `type`: (Optional) Filter relevancies by type (e.g., 'connected', 'geographic')
+- `username`: (Optional) Username of the citizen to calculate relevancies for.
+- `ai`: (Optional, legacy) Same as `username`.
+- `calculateAll`: (Optional) Set to "true" to calculate for all citizens who own lands. (Note: This can be resource-intensive and might be better handled by specific calculation scripts).
+- `type`: (Optional) Filter relevancies by type (e.g., 'connected', 'geographic') for proximity calculations.
 
-**Response:**
+**Response (Example for a specific citizen):**
 ```json
 {
   "success": true,
-  "aiCount": 5,
-  "totalRelevanciesCreated": 120,
-  "results": {
-    "ai_username": {
-      "ownedLandCount": 3,
-      "relevanciesCreated": 24
-    }
-  }
+  "username": "citizen_name",
+  "ownedLandCount": 3,
+  "relevancyScores": { /* simple scores */ },
+  "detailedRelevancy": { /* detailed scores */ }
 }
 ```
 
 ### POST /api/calculateRelevancies
 
-Calculate and save relevancy scores for a specific AI.
+Calculates and saves relevancy scores (proximity and land domination) for a specific citizen.
 
 **Request Body:**
 ```json
 {
-  "aiUsername": "ai_citizen_name",
-  "typeFilter": "connected" // Optional: Filter by type
+  "citizenUsername": "citizen_name",
+  "typeFilter": "connected" // Optional: Filter by type for proximity
 }
 ```
 
@@ -178,7 +175,7 @@ Calculate and save relevancy scores for a specific AI.
 ```json
 {
   "success": true,
-  "ai": "ai_citizen_name",
+  "citizen": "citizen_name",
   "ownedLandCount": 3,
   "relevancyScores": {
     "land_id_1": 85.4,
@@ -190,11 +187,11 @@ Calculate and save relevancy scores for a specific AI.
 }
 ```
 
-If `aiUsername` is `"all"` for domination, the response will indicate 1 global record saved:
+If `citizenUsername` is `"all"` for domination (when calling `/api/relevancies/domination` POST), the response will indicate 1 global record saved:
 ```json
 {
   "success": true,
-  "username": "all",
+  "username": "all", 
   "relevancyScores": { /* ... scores for all landowners ... */ },
   "detailedRelevancy": { /* ... full data for all landowners ... */ },
   "saved": true,
@@ -218,13 +215,13 @@ python backend/relevancies/calculateRelevancies.py --type connected
 # Calculate global land domination (creates 1 record RelevantToCitizen: "all")
 python backend/relevancies/calculateSpecificRelevancy.py --type domination
 
-# Calculate land domination scores and save them TO "CitizenAlpha"
+# Calculate land domination scores and save them TO "CitizenAlpha" (so CitizenAlpha sees how dominant others are)
 python backend/relevancies/calculateSpecificRelevancy.py --type domination --username CitizenAlpha
 
 # Calculate proximity relevancies for CitizenAlpha
 python backend/relevancies/calculateSpecificRelevancy.py --type proximity --username CitizenAlpha
 
-# Calculate proximity relevancies for all landowners (one API call per landowner)
+# Calculate proximity relevancies for all landowners (iterates and makes one API call per landowner)
 python backend/relevancies/calculateSpecificRelevancy.py --type proximity 
 
 # Calculate global housing situation (creates 1 record RelevantToCitizen: "all")

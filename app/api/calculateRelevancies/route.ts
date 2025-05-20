@@ -184,13 +184,13 @@ async function mergeLandDataWithPolygons(landsRecords: any[], polygons: any[]): 
 // Helper function to save relevancies to Airtable
 async function saveRelevancies(
   base: any, 
-  aiUsername: string, 
+  citizenUsername: string, 
   relevancyScores: Record<string, any>,
   allLands: any[],
   allCitizens: any[] = []
 ): Promise<number> {
   try {
-    console.log(`Saving relevancies for ${aiUsername} to Airtable...`);
+    console.log(`Saving relevancies for ${citizenUsername} to Airtable...`);
 
     // Log the field names we're using to help debug
     console.log('Using the following field names for RELEVANCIES table:');
@@ -200,10 +200,10 @@ async function saveRelevancies(
     console.log('Using the following field names for RELEVANCIES table:');
     console.log('RelevancyId, AssetID, AssetType, Category, Type, TargetCitizen, RelevantToCitizen, Score, TimeHorizon, Title, Description, Notes, Status, CreatedAt');
     
-    // Delete existing relevancy records for this AI to avoid duplicates
+    // Delete existing relevancy records for this citizen to avoid duplicates
     const existingRecords = await base(AIRTABLE_RELEVANCIES_TABLE)
       .select({
-        filterByFormula: `{RelevantToCitizen} = '${aiUsername}'`
+        filterByFormula: `{RelevantToCitizen} = '${citizenUsername}'`
       })
       .all();
       
@@ -214,7 +214,7 @@ async function saveRelevancies(
         const batch = recordIds.slice(i, i + 10);
         await base(AIRTABLE_RELEVANCIES_TABLE).destroy(batch);
       }
-      console.log(`Deleted ${existingRecords.length} existing relevancy records for ${aiUsername}`);
+      console.log(`Deleted ${existingRecords.length} existing relevancy records for ${citizenUsername}`);
     }
       
     // Create new relevancy records
@@ -223,13 +223,13 @@ async function saveRelevancies(
       if (data.assetType === 'land') {
         return {
           fields: {
-            RelevancyId: `${aiUsername}_${id}_${Date.now()}`, // Generate a unique ID
+            RelevancyId: `${citizenUsername}_${id}_${Date.now()}`, // Generate a unique ID
             AssetID: id,
             AssetType: data.assetType,
             Category: data.category,
             Type: data.type,
             TargetCitizen: data.closestLandId ? allLands.find(land => land.id === data.closestLandId)?.owner || '' : '',
-            RelevantToCitizen: aiUsername,
+            RelevantToCitizen: citizenUsername,
             Score: data.score,
             TimeHorizon: data.timeHorizon || 'medium',
             Title: data.title || `Nearby Land (${data.distance}m)`,
@@ -247,13 +247,13 @@ async function saveRelevancies(
         
         return {
           fields: {
-            RelevancyId: `${aiUsername}_${id}_${Date.now()}`, // Generate a unique ID
+            RelevancyId: `${citizenUsername}_${id}_${Date.now()}`, // Generate a unique ID
             AssetID: id,
             AssetType: data.assetType,
             Category: data.category,
             Type: data.type,
             TargetCitizen: data.targetCitizen || id, // Use data.targetCitizen if provided (which will be "all")
-            RelevantToCitizen: aiUsername,
+            RelevantToCitizen: citizenUsername,
             Score: data.score,
             TimeHorizon: data.timeHorizon || 'medium',
             Title: data.title || `Citizen Relevancy: ${id}`,
@@ -267,7 +267,7 @@ async function saveRelevancies(
     });
     
     // Add more detailed logging
-    console.log(`Preparing to create ${relevancyRecords.length} relevancy records for ${aiUsername}`);
+    console.log(`Preparing to create ${relevancyRecords.length} relevancy records for ${citizenUsername}`);
     
     // Log the first record as an example (if available)
     if (relevancyRecords.length > 0) {
@@ -318,7 +318,7 @@ async function saveRelevancies(
       }
     }
       
-    console.log(`Created ${recordsToSave.length} new relevancy records for ${aiUsername}`);
+    console.log(`Created ${recordsToSave.length} new relevancy records for ${citizenUsername}`);
     return recordsToSave.length;
   } catch (error) {
     console.warn('Could not save to RELEVANCIES table:', error.message);
@@ -584,16 +584,16 @@ export async function POST(request: NextRequest) {
     // Initialize Airtable
     const base = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
     
-    // Get the AI username and type filter from the request body
+    // Get the citizen username and type filter from the request body
     const body = await request.json();
-    const { aiUsername, typeFilter } = body;
+    const { citizenUsername, typeFilter } = body;
     
-    console.log(`POST request for AI: ${aiUsername}, typeFilter: ${typeFilter || 'none'}`);
+    console.log(`POST request for citizen: ${citizenUsername}, typeFilter: ${typeFilter || 'none'}`);
     
-    if (!aiUsername) {
-      console.error('AI username is required');
+    if (!citizenUsername) {
+      console.error('Citizen username is required');
       return NextResponse.json(
-        { error: 'AI username is required' },
+        { error: 'Citizen username is required' },
         { status: 400 }
       );
     }
@@ -604,12 +604,12 @@ export async function POST(request: NextRequest) {
     // Calculate relevancy scores using the new method with optional type filter
     const relevancyScores = typeFilter 
       ? await relevancyService.calculateRelevancyByType(
-          await relevancyService.fetchLands(aiUsername), 
+          await relevancyService.fetchLands(citizenUsername), 
           await relevancyService.fetchLands(), 
           await relevancyService.fetchLandGroups(),
           typeFilter
         )
-      : await relevancyService.calculateRelevancyWithApiData(aiUsername);
+      : await relevancyService.calculateRelevancyWithApiData(citizenUsername);
     
     // Calculate land domination relevancy
     // For this, we need to fetch all lands first
@@ -630,23 +630,23 @@ export async function POST(request: NextRequest) {
     
     try {
       // Save relevancies to Airtable
-      await saveRelevancies(base, aiUsername, combinedRelevancies, allLands, allCitizens);
+      await saveRelevancies(base, citizenUsername, combinedRelevancies, allLands, allCitizens);
       
-      console.log(`Successfully saved relevancies for AI: ${aiUsername}`);
+      console.log(`Successfully saved relevancies for citizen: ${citizenUsername}`);
       return NextResponse.json({
         success: true,
-        ai: aiUsername,
-        ownedLandCount: (await relevancyService.fetchLands(aiUsername)).length,
+        citizen: citizenUsername,
+        ownedLandCount: (await relevancyService.fetchLands(citizenUsername)).length,
         relevancyScores: simpleScores,
         detailedRelevancy: combinedRelevancies,
         saved: true
       });
     } catch (error) {
-      console.error(`Failed to save relevancies for AI: ${aiUsername}`, error);
+      console.error(`Failed to save relevancies for citizen: ${citizenUsername}`, error);
       return NextResponse.json({
         success: false,
-        ai: aiUsername,
-        ownedLandCount: (await relevancyService.fetchLands(aiUsername)).length,
+        citizen: citizenUsername,
+        ownedLandCount: (await relevancyService.fetchLands(citizenUsername)).length,
         relevancyScores: simpleScores,
         detailedRelevancy: combinedRelevancies,
         saved: false,

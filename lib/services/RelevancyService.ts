@@ -67,13 +67,13 @@ export class RelevancyService {
   /**
    * Calculate relevancy scores using the API data
    */
-  public async calculateRelevancyWithApiData(aiUsername: string): Promise<Record<string, RelevancyScore>> {
+  public async calculateRelevancyWithApiData(citizenUsername: string): Promise<Record<string, RelevancyScore>> {
     try {
-      // Fetch lands owned by the AI
-      const aiLands = await this.fetchLands(aiUsername);
+      // Fetch lands owned by the citizen
+      const citizenLands = await this.fetchLands(citizenUsername);
       
-      if (aiLands.length === 0) {
-        console.log(`AI ${aiUsername} does not own any lands`);
+      if (citizenLands.length === 0) {
+        console.log(`Citizen ${citizenUsername} does not own any lands`);
         return {};
       }
       
@@ -84,11 +84,11 @@ export class RelevancyService {
       const landGroups = await this.fetchLandGroups();
       
       // Calculate relevancy scores
-      const relevancyScores = this.calculateLandProximityRelevancy(aiLands, allLands, landGroups);
+      const relevancyScores = this.calculateLandProximityRelevancy(citizenLands, allLands, landGroups);
       
       return relevancyScores;
     } catch (error) {
-      console.error('Error calculating relevancy with API data:', error);
+      console.error('Error calculating relevancy with API data for citizen:', citizenUsername, error);
       return {};
     }
   }

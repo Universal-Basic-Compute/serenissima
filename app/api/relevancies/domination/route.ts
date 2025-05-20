@@ -48,12 +48,12 @@ export async function POST(request: NextRequest) {
   try {
     // Get the username from the request body
     const body = await request.json();
-    const { aiUsername } = body; // Can be "specific_user" or "all"
-    let username = aiUsername; 
+    const { citizenUsername } = body; // Can be "specific_user" or "all"
+    let usernameForProcessing = citizenUsername; 
     
-    // If aiUsername is "all", treat it as a global calculation (username becomes null)
-    if (username === "all") {
-      username = null; 
+    // If citizenUsername is "all", treat it as a global calculation (usernameForProcessing becomes null)
+    if (usernameForProcessing === "all") {
+      usernameForProcessing = null; 
     }
     
     // Fetch all lands
@@ -93,12 +93,12 @@ export async function POST(request: NextRequest) {
     const airtableBase = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
 
     try {
-      if (username) {
+      if (usernameForProcessing) {
         // Specific user: save the list of all dominant players TO this user's relevancies
-        relevanciesSavedCount = await saveRelevancies(username, landDominationRelevancies, allLands, allCitizens);
+        relevanciesSavedCount = await saveRelevancies(usernameForProcessing, landDominationRelevancies, allLands, allCitizens);
         saved = true;
       } else {
-        // Global calculation (username is null, meaning aiUsername was "all")
+        // Global calculation (usernameForProcessing is null, meaning citizenUsername was "all")
         // Create a single global relevancy record summarizing land domination.
         
         // Sort landowners by score
@@ -152,7 +152,7 @@ export async function POST(request: NextRequest) {
       console.error('Error saving domination relevancies to Airtable:', error);
       // For global, even if saving fails, we might still want to return the calculated scores.
       // For specific user, saveRelevancies throws and is caught by the main try/catch.
-      if (!username) { // If it was a global calculation, set saved to false
+      if (!usernameForProcessing) { // If it was a global calculation, set saved to false
         saved = false;
       } else { // If specific user, rethrow to be handled by outer catch
         throw error;
@@ -161,7 +161,7 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: true,
-      username: username || 'all', // 'all' indicates a global record was made/attempted
+      username: usernameForProcessing || 'all', // 'all' indicates a global record was made/attempted
       relevancyScores: simpleScores, // This is the full list of scores for all landowners
       detailedRelevancy: landDominationRelevancies, // Full details for all landowners
       saved,

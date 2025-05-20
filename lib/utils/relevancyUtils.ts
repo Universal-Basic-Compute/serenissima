@@ -9,13 +9,13 @@ const AIRTABLE_RELEVANCIES_TABLE = 'RELEVANCIES';
  * Save relevancies to Airtable
  */
 export async function saveRelevancies(
-  aiUsername: string, 
+  citizenUsername: string, 
   relevancyScores: Record<string, any>,
   allLands: any[],
   allCitizens: any[] = []
 ): Promise<number> {
   try {
-    console.log(`Saving relevancies for ${aiUsername} to Airtable...`);
+    console.log(`Saving relevancies for ${citizenUsername} to Airtable...`);
 
     // Initialize Airtable
     if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
@@ -24,10 +24,10 @@ export async function saveRelevancies(
     
     const base = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
 
-    // Delete existing relevancy records for this AI to avoid duplicates
+    // Delete existing relevancy records for this citizen to avoid duplicates
     const existingRecords = await base(AIRTABLE_RELEVANCIES_TABLE)
       .select({
-        filterByFormula: `{RelevantToCitizen} = '${aiUsername}'`
+        filterByFormula: `{RelevantToCitizen} = '${citizenUsername}'`
       })
       .all();
       
@@ -38,7 +38,7 @@ export async function saveRelevancies(
         const batch = recordIds.slice(i, i + 10);
         await base(AIRTABLE_RELEVANCIES_TABLE).destroy(batch);
       }
-      console.log(`Deleted ${existingRecords.length} existing relevancy records for ${aiUsername}`);
+      console.log(`Deleted ${existingRecords.length} existing relevancy records for ${citizenUsername}`);
     }
       
     // Create new relevancy records
@@ -47,13 +47,13 @@ export async function saveRelevancies(
       if (data.assetType === 'land') {
         return {
           fields: {
-            RelevancyId: `${aiUsername}_${id}_${Date.now()}`, // Generate a unique ID
+            RelevancyId: `${citizenUsername}_${id}_${Date.now()}`, // Generate a unique ID
             AssetID: id,
             AssetType: data.assetType,
             Category: data.category,
             Type: data.type,
             TargetCitizen: data.targetCitizen || '', // Owner of the target land
-            RelevantToCitizen: aiUsername,
+            RelevantToCitizen: citizenUsername,
             Score: data.score,
             TimeHorizon: data.timeHorizon || 'medium',
             Title: data.title || `Nearby Land (${data.distance}m)`,
@@ -71,13 +71,13 @@ export async function saveRelevancies(
       
         return {
           fields: {
-            RelevancyId: `${aiUsername}_${id}_${Date.now()}`, // Generate a unique ID
+            RelevancyId: `${citizenUsername}_${id}_${Date.now()}`, // Generate a unique ID
             AssetID: id,
             AssetType: data.assetType,
             Category: data.category,
             Type: data.type,
             TargetCitizen: id, // The citizen this relevancy is about
-            RelevantToCitizen: aiUsername,
+            RelevantToCitizen: citizenUsername,
             Score: data.score,
             TimeHorizon: data.timeHorizon || 'medium',
             Title: data.title || `Citizen Relevancy: ${id}`,
@@ -96,7 +96,7 @@ export async function saveRelevancies(
             Category: data.category,
             Type: data.type,
             TargetCitizen: data.targetCitizen || 'all', // Use 'all' for global relevancies
-            RelevantToCitizen: aiUsername,
+            RelevantToCitizen: citizenUsername, // For global relevancies saved TO a specific user (e.g. admin)
             Score: data.score,
             TimeHorizon: data.timeHorizon || 'medium',
             Title: data.title || `City Relevancy: ${id}`,
@@ -111,7 +111,7 @@ export async function saveRelevancies(
     
     // Create records in batches of 10
     // The relevancyRecords array now contains all records to be saved, without top 10 filtering.
-    console.log(`Preparing to save ${relevancyRecords.length} relevancy records for ${aiUsername} (no top 10 filtering).`);
+    console.log(`Preparing to save ${relevancyRecords.length} relevancy records for ${citizenUsername} (no top 10 filtering).`);
 
     for (let i = 0; i < relevancyRecords.length; i += 10) {
       const batch = relevancyRecords.slice(i, i + 10);
@@ -128,7 +128,7 @@ export async function saveRelevancies(
       }
     }
       
-    console.log(`Created ${relevancyRecords.length} new relevancy records for ${aiUsername}`);
+    console.log(`Created ${relevancyRecords.length} new relevancy records for ${citizenUsername}`);
     return relevancyRecords.length;
   } catch (error) {
     console.warn('Could not save to RELEVANCIES table:', error.message);

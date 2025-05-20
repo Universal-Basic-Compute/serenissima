@@ -180,9 +180,9 @@ ${getJobMarketRecommendation(unemployedCount, vacantCount, relevancyScore, jobsB
 
 export async function POST(request: NextRequest) {
   try {
-    // Get the username from the request body (optional)
+    // Get the username from the request body (optional, for consistency if ever used)
     const body = await request.json();
-    const { aiUsername } = body;
+    const { citizenUsername } = body; // Changed from aiUsername
     
     // Initialize Airtable
     if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {

@@ -62,8 +62,8 @@ export async function POST(request: NextRequest) {
   try {
     // Get the username and type filter from the request body
     const body = await request.json();
-    const { aiUsername, typeFilter } = body;
-    const username = aiUsername; // Keep parameter name for compatibility
+    const { citizenUsername, typeFilter } = body; // Changed from aiUsername
+    const username = citizenUsername; 
     
     if (!username) {
       return NextResponse.json(
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Fetch all citizens for land domination relevancy
+    // Fetch all citizens for relevancy context (e.g. finding names)
     const citizensResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/citizens`);
     const citizensData = await citizensResponse.json();
     const allCitizens = citizensData.citizens || [];
