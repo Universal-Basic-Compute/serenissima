@@ -142,31 +142,31 @@ def get_recent_relevancies(tables, username: str, username_record_id: Optional[s
         return []
 
 def get_existing_relationships(tables, username: str) -> Dict[str, Dict]:
-    """Get existing relationships for a citizen (where username is AICitizen)."""
+    """Get existing relationships for a citizen (where username is Citizen1)."""
     try:
         log.info(f"Fetching existing relationships for citizen: {username}")
         
-        # Fetch relationships where this citizen is the source
-        formula = f"{{AICitizen}} = '{username}'"
+        # Fetch relationships where this citizen is Citizen1
+        formula = f"{{Citizen1}} = '{username}'"
         
         relationships = tables['relationships'].all(
             formula=formula,
-            fields=["AICitizen", "TargetCitizen", "strengthScore", "lastUpdated", "Notes"] # Changed to camelCase
+            fields=["Citizen1", "Citizen2", "StrengthScore", "LastInteraction", "Notes"] 
         )
         
-        # Create a dictionary mapping target citizens to their relationship records
+        # Create a dictionary mapping target citizens (Citizen2) to their relationship records
         relationship_map = {}
         for record in relationships:
-            target_citizen = record['fields'].get('TargetCitizen')
-            if target_citizen:
-                relationship_map[target_citizen] = {
+            citizen2 = record['fields'].get('Citizen2')
+            if citizen2:
+                relationship_map[citizen2] = {
                     'id': record['id'],
-                    'strengthScore': record['fields'].get('strengthScore', 0), # Changed to camelCase
-                    'lastUpdated': record['fields'].get('lastUpdated'),       # Changed to camelCase
+                    'StrengthScore': record['fields'].get('StrengthScore', 0), 
+                    'LastInteraction': record['fields'].get('LastInteraction'),
                     'notes': record['fields'].get('Notes', '') 
                 }
         
-        log.info(f"Found {len(relationship_map)} existing relationships for {username}")
+        log.info(f"Found {len(relationship_map)} existing relationships for {username} (as Citizen1)")
         return relationship_map
     except Exception as e:
         log.error(f"Error fetching relationships for {username}: {e}")
@@ -241,7 +241,7 @@ def update_relationship_scores(
                 record_id = record['id']
                 
                 # Apply 25% decay to existing score
-                existing_score = float(record.get('strengthScore', 0.0)) * 0.75 # Reading camelCase
+                existing_score = float(record.get('StrengthScore', 0.0)) * 0.75 
                 updated_score = existing_score + score_to_add
 
                 # Handle Notes: append new types to existing notes if any, avoiding duplicates
@@ -259,8 +259,8 @@ def update_relationship_scores(
                     notes_string = f"Sources: {', '.join(sorted(list(combined_types)))}"
                 
                 tables['relationships'].update(record_id, {
-                    'strengthScore': updated_score, # Writing camelCase
-                    'lastUpdated': datetime.now().isoformat(), # Writing camelCase
+                    'StrengthScore': updated_score, 
+                    'LastInteraction': datetime.now().isoformat(), 
                     'Notes': notes_string
                 })
                 updated_count += 1
@@ -270,10 +270,10 @@ def update_relationship_scores(
                     notes_string = f"Sources: {', '.join(sorted(list(new_relevancy_types_set)))}"
 
                 tables['relationships'].create({
-                    'AICitizen': source_username,
-                    'TargetCitizen': target_username,
-                    'strengthScore': score_to_add, # Writing camelCase
-                    'lastUpdated': datetime.now().isoformat(), # Writing camelCase
+                    'Citizen1': source_username,
+                    'Citizen2': target_username,
+                    'StrengthScore': score_to_add, 
+                    'LastInteraction': datetime.now().isoformat(), 
                     'Notes': notes_string
                 })
                 created_count += 1
