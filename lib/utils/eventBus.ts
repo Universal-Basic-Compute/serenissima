@@ -152,6 +152,7 @@ export const EventTypes = {
   CITIZEN_DETAILS_CLOSED: 'citizenDetailsClosed',
   CITIZEN_ADDED: 'citizenAdded',
   CITIZEN_REMOVED: 'citizenRemoved',
+  SHOW_CITIZEN_PANEL_EVENT: 'showCitizenPanelEvent', // Added for direct panel opening
   
   // Transport events
   TRANSPORT_MODE_CHANGED: 'TRANSPORT_MODE_CHANGED',
