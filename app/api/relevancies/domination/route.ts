@@ -104,21 +104,9 @@ export async function POST(request: NextRequest) {
         const recordsToCreate = [];
         const relevantToGlobal = "all"; // Or "ConsiglioDeiDieci"
 
-        // First, delete all existing global landowner profiles to prevent duplicates
-        const existingGlobalLandownerProfiles = await airtableBase(AIRTABLE_RELEVANCIES_TABLE)
-          .select({
-            filterByFormula: `AND({RelevantToCitizen} = '${relevantToGlobal}', {Category} = 'domination', {Type} = 'global_landowner_profile')`
-          })
-          .all();
-
-        if (existingGlobalLandownerProfiles.length > 0) {
-          const idsToDelete = existingGlobalLandownerProfiles.map(r => r.id);
-          for (let i = 0; i < idsToDelete.length; i += 10) {
-            const batch = idsToDelete.slice(i, i + 10);
-            await airtableBase(AIRTABLE_RELEVANCIES_TABLE).destroy(batch);
-          }
-          console.log(`Deleted ${existingGlobalLandownerProfiles.length} existing global landowner profile(s).`);
-        }
+        // Removed deletion of existing global landowner profiles.
+        // New global landowner profiles will be added. RelevancyId includes Date.now() for uniqueness.
+        console.log(`Proceeding to create new global landowner profiles without deleting existing ones.`);
 
         for (const [landownerUsername, dominationData] of Object.entries(landDominationRelevancies)) {
           // dominationData is a RelevancyScore object from relevancyService.calculateLandDominationRelevancy

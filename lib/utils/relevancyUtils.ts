@@ -24,22 +24,10 @@ export async function saveRelevancies(
     
     const base = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
 
-    // Delete existing relevancy records for this citizen to avoid duplicates
-    const existingRecords = await base(AIRTABLE_RELEVANCIES_TABLE)
-      .select({
-        filterByFormula: `{RelevantToCitizen} = '${Citizen}'`
-      })
-      .all();
-      
-    if (existingRecords.length > 0) {
-      // Delete in batches of 10 to avoid API limits
-      const recordIds = existingRecords.map(record => record.id);
-      for (let i = 0; i < recordIds.length; i += 10) {
-        const batch = recordIds.slice(i, i + 10);
-        await base(AIRTABLE_RELEVANCIES_TABLE).destroy(batch);
-      }
-      console.log(`Deleted ${existingRecords.length} existing relevancy records for ${Citizen}`);
-    }
+    // Removed deletion of existing relevancy records for the citizen.
+    // New records will now be added, potentially leading to duplicates if calculations are re-run
+    // without changes in the underlying data that would alter RelevancyId generation (which includes Date.now()).
+    console.log(`Proceeding to create new relevancy records for ${Citizen} without deleting existing ones.`);
       
     // Create new relevancy records
     const relevancyRecords = Object.entries(relevancyScores).map(([id, data]) => {
