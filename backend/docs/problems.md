@@ -13,17 +13,7 @@ This document describes the problem detection system within La Serenissima. This
 
 Here are the types of problems currently managed by the system:
 
-### 1. Unbuilt Lands (No Buildings on Land)
-
--   **Description**: This problem is reported when a citizen owns a plot of land but has not constructed any buildings on it.
--   **Detection**: The system compares the list of lands owned by a citizen with the list of buildings constructed on those lands. If a land has no associated buildings, a problem is created.
--   **Impact/Severity**: Medium. Undeveloped lands generate no income and may be subject to higher taxes (Vigesima Variabilis).
--   **Suggested Solutions**:
-    -   Construct buildings on the land.
-    -   Sell or lease the land if development is not planned.
--   **Note**: The problem indicates the number of available construction points on the land.
-
-### 2. Homeless Citizen
+### 1. Homeless Citizen
 
 -   **Description**: A citizen is considered homeless if they are not listed as an occupant of any "residential" (home) category building.
 -   **Detection**: The system checks each citizen to ensure they are the occupant (`Occupant`) of at least one building whose category (`Category`) is "home".
