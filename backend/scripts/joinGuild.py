@@ -48,13 +48,29 @@ def initialize_airtable() -> Optional[Dict[str, Table]]:
         return None
 
 # --- Data Fetching ---
-def get_ai_citizens(tables: Dict[str, Table]) -> List[Dict]:
-    """Get all AI citizens who are not already in a guild."""
+def get_ai_citizens(tables: Dict[str, Table], specific_username: Optional[str] = None) -> List[Dict]:
+    """Get AI citizens who are not already in a guild.
+    If specific_username is provided, fetches only that citizen if they meet the criteria.
+    """
     try:
-        # Query citizens with IsAI=true and GuildId is blank
-        formula = "AND({IsAI}=1, {GuildId}=BLANK())"
+        base_formula = "AND({IsAI}=1, {GuildId}=BLANK())"
+        if specific_username:
+            safe_username = _escape_airtable_formula_value(specific_username)
+            formula = f"AND({{Username}}='{safe_username}', {base_formula})"
+            print(f"Attempting to fetch specific AI citizen: {specific_username} not in a guild.")
+        else:
+            formula = base_formula
+            print("Fetching all AI citizens not currently in a guild.")
+
         ai_citizens = tables["citizens"].all(formula=formula)
-        print(f"Found {len(ai_citizens)} AI citizens not currently in a guild.")
+        
+        if specific_username and not ai_citizens:
+            print(f"Specific AI citizen {specific_username} not found or already in a guild.")
+        elif not ai_citizens:
+            print("No eligible AI citizens found.")
+        else:
+            print(f"Found {len(ai_citizens)} eligible AI citizen(s).")
+            
         return ai_citizens
     except Exception as e:
         print(f"Error getting AI citizens: {e}")
@@ -85,6 +101,10 @@ def citizen_decides_to_join(social_class: str) -> bool:
     """Determine if a citizen decides to join a guild based on social class."""
     chance = GUILD_JOIN_CHANCES.get(social_class, GUILD_JOIN_CHANCES["Default"])
     return random.random() < chance
+
+def _escape_airtable_formula_value(value: str) -> str:
+    """Escapes single quotes for Airtable formulas."""
+    return value.replace("'", "\\'")
 
 def ask_ai_to_choose_guild(ai_username: str, ai_social_class: str, guilds_data: List[Dict]) -> Optional[str]:
     """Ask the AI to choose a guild using Kinos Engine API."""
@@ -219,17 +239,20 @@ def create_admin_notification(tables: Dict[str, Table], joined_guilds_summary: L
         print(f"Error creating admin notification: {e}")
 
 # --- Main Processing Logic ---
-def process_ai_guild_joining(dry_run: bool = False):
-    """Main function to process AI citizens joining guilds."""
-    print(f"--- Starting AI Guild Joining Process (Dry Run: {dry_run}) ---")
+def process_ai_guild_joining(dry_run: bool = False, target_username: Optional[str] = None):
+    """Main function to process AI citizens joining guilds.
+    If target_username is provided, only that citizen will be processed.
+    """
+    process_target = target_username if target_username else "all eligible AI citizens"
+    print(f"--- Starting AI Guild Joining Process for {process_target} (Dry Run: {dry_run}) ---")
 
     tables = initialize_airtable()
     if not tables:
         return
 
-    ai_citizens = get_ai_citizens(tables)
+    ai_citizens = get_ai_citizens(tables, specific_username=target_username)
     if not ai_citizens:
-        print("No eligible AI citizens found. Exiting.")
+        # Message already printed by get_ai_citizens
         return
 
     guilds = get_guilds_from_api()
@@ -304,6 +327,12 @@ if __name__ == "__main__":
         action="store_true",
         help="Simulate the process without making changes to Airtable.",
     )
+    parser.add_argument(
+        "--username",
+        type=str,
+        help="Process guild joining for a specific citizen username.",
+        default=None
+    )
     args = parser.parse_args()
 
-    process_ai_guild_joining(args.dry_run)
+    process_ai_guild_joining(args.dry_run, target_username=args.username)
