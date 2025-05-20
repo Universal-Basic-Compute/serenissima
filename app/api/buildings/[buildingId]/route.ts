@@ -190,11 +190,6 @@ export async function GET(request: NextRequest) {
           .firstPage();
 
         if (records.length > 0) {
-          const fields = records[0].fields as Airtable.FieldSet; // Type assertion
-          console.log(`[API Building ${buildingId}] Airtable raw fields:`, JSON.stringify(fields));
-          const ownerFromAirtable = fields.Citizen as string || '';
-          console.log(`[API Building ${buildingId}] Owner from Airtable (fields.Citizen): '${fields.Citizen}', mapped to: '${ownerFromAirtable}'`);
-
           const buildingRaw = {
             id: fields.BuildingId as string || buildingId,
             type: fields.Type as string || 'Unknown',
@@ -203,7 +198,7 @@ export async function GET(request: NextRequest) {
             position: fields.Position || null, // Keep as is (string, object, or null from Airtable)
             point: fields.Point || null,       // Keep as is, will be processed by ensureBuildingDataIntegrity
             rotation: fields.Rotation as number || 0,
-            owner: ownerFromAirtable, // Use the explicitly logged variable
+            owner: fields.Owner as string || '',
             createdAt: fields.CreatedAt as string || new Date().toISOString(),
             createdBy: fields.CreatedBy as string || '',
             updatedAt: fields.UpdatedAt as string || new Date().toISOString(),
@@ -223,7 +218,6 @@ export async function GET(request: NextRequest) {
             delete processedBuilding.BuildingId;
           }
 
-          console.log(`Building ${buildingId} from Airtable - Citizen field: '${fields.Citizen}', Occupant field: '${fields.Occupant}'`);
           return NextResponse.json({ building: processedBuilding });
         }
       } catch (err) {
