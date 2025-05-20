@@ -91,9 +91,15 @@ def mark_messages_as_read_api(receiver_username: str, message_ids: List[str]) ->
         return False
 
 # --- Fonctions d'assistance pour récupérer les données contextuelles ---
+
+def _escape_airtable_value(value: str) -> str:
+    """Échappe les apostrophes pour les formules Airtable."""
+    return value.replace("'", "\\'")
+
 def _get_citizen_data(tables: Dict[str, Table], username: str) -> Optional[Dict]:
     try:
-        records = tables["citizens"].all(formula=f"{{Username}} = '{username}'", max_records=1)
+        safe_username = _escape_airtable_value(username)
+        records = tables["citizens"].all(formula=f"{{Username}} = '{safe_username}'", max_records=1)
         if records:
             return {'id': records[0]['id'], 'fields': records[0]['fields']}
         return None
@@ -103,8 +109,10 @@ def _get_citizen_data(tables: Dict[str, Table], username: str) -> Optional[Dict]
 
 def _get_relationship_data(tables: Dict[str, Table], username1: str, username2: str) -> Optional[Dict]:
     try:
+        safe_username1 = _escape_airtable_value(username1)
+        safe_username2 = _escape_airtable_value(username2)
         # Assurer l'ordre alphabétique pour la requête
-        c1, c2 = sorted((username1, username2))
+        c1, c2 = sorted((safe_username1, safe_username2))
         formula = f"AND({{Citizen1}} = '{c1}', {{Citizen2}} = '{c2}')"
         records = tables["relationships"].all(formula=formula, max_records=1)
         if records:
@@ -116,7 +124,8 @@ def _get_relationship_data(tables: Dict[str, Table], username1: str, username2: 
 
 def _get_notifications_data(tables: Dict[str, Table], username: str, limit: int = 50) -> List[Dict]:
     try:
-        formula = f"{{Citizen}} = '{username}'"
+        safe_username = _escape_airtable_value(username)
+        formula = f"{{Citizen}} = '{safe_username}'"
         records = tables["notifications"].all(formula=formula, sort=[('-CreatedAt', 'desc')], max_records=limit)
         return [{'id': r['id'], 'fields': r['fields']} for r in records]
     except Exception as e:
@@ -125,12 +134,14 @@ def _get_notifications_data(tables: Dict[str, Table], username: str, limit: int 
 
 def _get_relevancies_data(tables: Dict[str, Table], relevant_to_username: str, target_username: str, limit: int = 50) -> List[Dict]:
     try:
+        safe_relevant_to_username = _escape_airtable_value(relevant_to_username)
+        safe_target_username = _escape_airtable_value(target_username)
         # Formule pour trouver les relevances où RelevantToCitizen est l'IA (directement ou dans une liste JSON)
         # ET TargetCitizen est l'expéditeur (directement ou dans une liste JSON)
         formula = (
             f"AND("
-            f"OR({{RelevantToCitizen}} = '{relevant_to_username}', FIND('\"{relevant_to_username}\"', {{RelevantToCitizen}}) > 0),"
-            f"OR({{TargetCitizen}} = '{target_username}', FIND('\"{target_username}\"', {{TargetCitizen}}) > 0)"
+            f"OR({{RelevantToCitizen}} = '{safe_relevant_to_username}', FIND('\"{safe_relevant_to_username}\"', {{RelevantToCitizen}}) > 0),"
+            f"OR({{TargetCitizen}} = '{safe_target_username}', FIND('\"{safe_target_username}\"', {{TargetCitizen}}) > 0)"
             f")"
         )
         records = tables["relevancies"].all(formula=formula, sort=[('-CreatedAt', 'desc')], max_records=limit)
@@ -141,7 +152,9 @@ def _get_relevancies_data(tables: Dict[str, Table], relevant_to_username: str, t
 
 def _get_problems_data(tables: Dict[str, Table], username1: str, username2: str, limit: int = 50) -> List[Dict]:
     try:
-        formula = f"OR({{Citizen}} = '{username1}', {{Citizen}} = '{username2}')"
+        safe_username1 = _escape_airtable_value(username1)
+        safe_username2 = _escape_airtable_value(username2)
+        formula = f"OR({{Citizen}} = '{safe_username1}', {{Citizen}} = '{safe_username2}')"
         # Assumant que la table PROBLEMS a un champ 'Citizen' et 'CreatedAt'
         records = tables["problems"].all(formula=formula, sort=[('-CreatedAt', 'desc')], max_records=limit)
         return [{'id': r['id'], 'fields': r['fields']} for r in records]
