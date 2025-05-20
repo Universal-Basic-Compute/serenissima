@@ -272,8 +272,10 @@ def prepare_import_strategy_data(
             "current_amount": resources_by_type.get(resource_id, 0)
         }
     
-    # Fetch "no_active_contracts" problems
-    no_active_contracts_problems = _get_no_active_contracts_problems(tables, username)
+    # Fetch citizen-specific building problems
+    citizen_building_problems = _get_citizen_building_problems(tables, username)
+    # Fetch general building problems
+    general_building_problems = _get_general_building_problems(tables)
 
     # Prepare the complete data package
     data_package = {
@@ -287,7 +289,8 @@ def prepare_import_strategy_data(
         "resources": resources_by_type,
         "resource_info": resource_info,
         "existing_contracts": existing_contracts,
-        "latest_no_active_contracts_problems": no_active_contracts_problems,
+        "latest_citizen_building_problems": citizen_building_problems,
+        "latest_general_building_problems": general_building_problems,
         "timestamp": datetime.now().isoformat()
     }
     
@@ -382,7 +385,8 @@ Here is the complete data about your current situation:
 {serialized_data}
 
 Contextual data available:
-- `latest_no_active_contracts_problems`: Shows recent problems where your buildings lack active buy/sell contracts. This might indicate a need for specific resources to kickstart production or that a building is currently inactive and might not need imports.
+- `latest_citizen_building_problems`: Shows recent building-related problems specifically affecting you (e.g., your building lacks resources, is vacant, etc.). This can highlight urgent needs for imports.
+- `latest_general_building_problems`: Shows recent building-related problems affecting any citizen. This can give you insights into broader market demands or shortages that you might capitalize on or need to prepare for.
 
 When developing your import strategy:
 1. Analyze which buildings can import which resources (check the "stores" array for each building)
