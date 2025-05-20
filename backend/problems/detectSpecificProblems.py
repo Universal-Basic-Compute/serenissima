@@ -82,6 +82,7 @@ def detect_specific_problems(
         "homeless": "/api/problems/homeless",
         "workless": "/api/problems/workless",
         "vacant_buildings": "/api/problems/vacant-buildings",
+        "no_active_imports": "/api/problems/no-active-imports",
     }
 
     if problem_type not in api_url_path_map:
@@ -168,7 +169,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--type", 
         required=True, 
-        choices=["no_buildings", "homeless", "workless", "vacant_buildings"],
+        choices=["no_buildings", "homeless", "workless", "vacant_buildings", "no_active_imports"],
         help="The type of problem to detect."
     )
     parser.add_argument(

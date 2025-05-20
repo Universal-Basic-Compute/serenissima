@@ -218,6 +218,36 @@ def detect_problems():
         else:
             log.error(f"Vacant Buildings API call failed: {vacant_buildings_response.status_code} - {vacant_buildings_response.text}")
             all_problem_details_summary.append(f"- Vacant Buildings: API Call Failed ({vacant_buildings_response.status_code})")
+
+        # 5. Detect buildings with no active imports
+        log.info("--- Detecting Buildings with No Active Imports ---")
+        no_imports_api_url = f"{base_url}/api/problems/no-active-imports"
+        log.info(f"Calling API: {no_imports_api_url} for all relevant buildings/owners")
+        no_imports_response = requests.post(no_imports_api_url, json={}, timeout=180)
+        log.info(f"No Active Imports API response status: {no_imports_response.status_code}")
+
+        if no_imports_response.ok:
+            no_imports_data = no_imports_response.json()
+            log.info(f"No Active Imports API response: success={no_imports_data.get('success')}, problemCount={no_imports_data.get('problemCount')}")
+            if no_imports_data.get('success'):
+                count = no_imports_data.get('problemCount', 0)
+                saved_count = no_imports_data.get('savedCount', 0)
+                total_problems_detected += count
+                total_problems_saved += saved_count
+                all_problem_details_summary.append(f"- No Active Imports: {count} detected, {saved_count} saved.")
+                
+                problems_by_citizen_no_imports = {}
+                for problem_id, problem in no_imports_data.get('problems', {}).items():
+                    citizen = problem.get('citizen', 'Unknown')
+                    problems_by_citizen_no_imports[citizen] = problems_by_citizen_no_imports.get(citizen, 0) + 1
+                if problems_by_citizen_no_imports:
+                    all_problem_details_summary.append("  Affected owners (No Active Imports): " + ", ".join([f"{c}({num})" for c, num in problems_by_citizen_no_imports.items()]))
+            else:
+                log.error(f"No Active Imports API returned error: {no_imports_data.get('error')}")
+                all_problem_details_summary.append(f"- No Active Imports: API Error - {no_imports_data.get('error', 'Unknown')}")
+        else:
+            log.error(f"No Active Imports API call failed: {no_imports_response.status_code} - {no_imports_response.text}")
+            all_problem_details_summary.append(f"- No Active Imports: API Call Failed ({no_imports_response.status_code})")
         
         # Create admin notification
         details_text = "\n".join(all_problem_details_summary)

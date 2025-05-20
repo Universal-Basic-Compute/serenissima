@@ -705,6 +705,114 @@ export class ProblemService {
     return data.buildings || [];
   }
 
+  private async fetchAllBuildingTypes(): Promise<any[]> {
+    const response = await fetch(`${this.getBaseUrl()}/api/building-types`, { cache: 'no-store' });
+    if (!response.ok) {
+      throw new Error(`Failed to fetch building types: ${response.status} ${await response.text()}`);
+    }
+    const data = await response.json();
+    // The API returns { success: true, buildingTypes: [...] }
+    return data.buildingTypes || [];
+  }
+
+  private async fetchAllActiveImportContracts(): Promise<any[]> {
+    // Assuming the contracts API might not support complex filtering via URL for "active" status based on dates.
+    // Fetch all 'import' type contracts and filter by date client-side.
+    // If the API supports date filtering, this can be optimized.
+    const response = await fetch(`${this.getBaseUrl()}/api/contracts?Type=import`, { cache: 'no-store' });
+    if (!response.ok) {
+      throw new Error(`Failed to fetch import contracts: ${response.status} ${await response.text()}`);
+    }
+    const data = await response.json();
+    const contracts = data.contracts || []; // Assuming the API returns { success: true, contracts: [...] }
+
+    const now = new Date();
+    return contracts.filter(contract => {
+      const createdAt = new Date(contract.CreatedAt);
+      const endAt = new Date(contract.EndAt);
+      return contract.Type === 'import' && createdAt <= now && endAt >= now;
+    });
+  }
+
+  public async detectNoActiveImports(username?: string): Promise<Record<string, Problem>> {
+    try {
+      console.log(`[ProblemService] detectNoActiveImports: Starting detection (user: ${username || 'all'}).`);
+
+      const buildingTypes = await this.fetchAllBuildingTypes();
+      const importCapableBuildingTypes = buildingTypes
+        .filter(bt => bt.canImport === true)
+        .map(bt => bt.type); // Assuming 'type' is the field matching building.type
+
+      if (importCapableBuildingTypes.length === 0) {
+        console.log('[ProblemService] detectNoActiveImports: No building types are configured to import goods.');
+        return {};
+      }
+      console.log(`[ProblemService] detectNoActiveImports: Found ${importCapableBuildingTypes.length} import-capable building types: ${importCapableBuildingTypes.join(', ')}.`);
+
+      const allBuildings = await this.fetchAllBuildings();
+      const importCapableBuildings = allBuildings.filter(b => 
+        importCapableBuildingTypes.includes(b.type) && // b.type should be the building's type string
+        (!username || (b.owner && typeof b.owner === 'string' && b.owner.trim() === username)) // Filter by owner if username is provided
+      );
+
+      if (importCapableBuildings.length === 0) {
+        console.log(`[ProblemService] detectNoActiveImports: No import-capable buildings found (user: ${username || 'all'}).`);
+        return {};
+      }
+      console.log(`[ProblemService] detectNoActiveImports: Found ${importCapableBuildings.length} import-capable buildings to check (user: ${username || 'all'}).`);
+
+      const activeImportContracts = await this.fetchAllActiveImportContracts();
+      const buildingsWithActiveImports = new Set(
+        activeImportContracts.map(contract => contract.BuyerBuilding) // Assuming BuyerBuilding holds the BuildingId
+      );
+      console.log(`[ProblemService] detectNoActiveImports: Found ${activeImportContracts.length} active import contracts. Buildings with active imports: ${buildingsWithActiveImports.size}`);
+
+
+      const problems: Record<string, Problem> = {};
+      let processedCount = 0;
+
+      importCapableBuildings.forEach(building => {
+        const buildingId = building.id || building.buildingId; // Prefer custom ID if available
+        const owner = building.owner && typeof building.owner === 'string' ? building.owner.trim() : null;
+        
+        if (processedCount < 5) {
+            console.log(`[ProblemService] detectNoActiveImports: Checking building ${buildingId} (Owner: ${owner}, Type: ${building.type}). Has active import contract: ${buildingsWithActiveImports.has(buildingId)}`);
+        }
+        processedCount++;
+
+        if (owner && !buildingsWithActiveImports.has(buildingId)) {
+          const problemId = `no_active_imports_${buildingId}_${Date.now()}`;
+          const buildingName = building.name || building.type || 'Unnamed Building';
+
+          problems[problemId] = {
+            problemId,
+            citizen: owner,
+            assetType: 'building',
+            assetId: buildingId,
+            severity: 'low',
+            status: 'active',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            location: buildingName,
+            title: 'No Active Imports',
+            description: `Your building, **${buildingName}** (ID: ${buildingId}), is capable of importing goods but currently has no active import contracts. This may lead to missed trade opportunities or supply shortages for its operations.`,
+            solutions: `Review the market for necessary goods and establish import contracts. Ensure your building has sufficient storage and funds to manage imports. You can create new import contracts via the contracts interface.`,
+            notes: `Building Type: ${building.type}. Owner: ${owner}. This building can import but has no active 'import' type contracts where it is the BuyerBuilding.`,
+            position: building.position || null,
+          };
+        }
+      });
+
+      const numProblems = Object.keys(problems).length;
+      console.log(`[ProblemService] detectNoActiveImports: Created ${numProblems} 'No Active Imports' problems (user: ${username || 'all'}).`);
+      return problems;
+
+    } catch (error) {
+      console.error('[ProblemService] Error detecting no active imports:', error);
+      return {};
+    }
+  }
+
   private getCitizenLocationString(citizen: any): string {
     // Basic location string. Could be enhanced if Sestiere or more specific location data is available.
     let location = "Venice";
