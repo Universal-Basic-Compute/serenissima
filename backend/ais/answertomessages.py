@@ -31,7 +31,10 @@ def initialize_airtable():
     tables = {
         "citizens": Table(airtable_api_key, airtable_base_id, "CITIZENS"),
         "messages": Table(airtable_api_key, airtable_base_id, "MESSAGES"),
-        "notifications": Table(airtable_api_key, airtable_base_id, "NOTIFICATIONS")
+        "notifications": Table(airtable_api_key, airtable_base_id, "NOTIFICATIONS"),
+        "relationships": Table(airtable_api_key, airtable_base_id, "RELATIONSHIPS"),
+        "relevancies": Table(airtable_api_key, airtable_base_id, "RELEVANCIES"),
+        "problems": Table(airtable_api_key, airtable_base_id, "PROBLEMS") # Ajout de la table PROBLEMS
     }
     
     return tables
@@ -86,6 +89,65 @@ def mark_messages_as_read_api(receiver_username: str, message_ids: List[str]) ->
         print(f"Error marking messages as read via API for {receiver_username}: {e}")
         return False
 
+# --- Fonctions d'assistance pour récupérer les données contextuelles ---
+def _get_citizen_data(tables: Dict[str, Table], username: str) -> Optional[Dict]:
+    try:
+        records = tables["citizens"].all(formula=f"{{Username}} = '{username}'", max_records=1)
+        if records:
+            return {'id': records[0]['id'], 'fields': records[0]['fields']}
+        return None
+    except Exception as e:
+        print(f"Error fetching citizen data for {username}: {e}")
+        return None
+
+def _get_relationship_data(tables: Dict[str, Table], username1: str, username2: str) -> Optional[Dict]:
+    try:
+        # Assurer l'ordre alphabétique pour la requête
+        c1, c2 = sorted((username1, username2))
+        formula = f"AND({{Citizen1}} = '{c1}', {{Citizen2}} = '{c2}')"
+        records = tables["relationships"].all(formula=formula, max_records=1)
+        if records:
+            return {'id': records[0]['id'], 'fields': records[0]['fields']}
+        return None
+    except Exception as e:
+        print(f"Error fetching relationship data between {username1} and {username2}: {e}")
+        return None
+
+def _get_notifications_data(tables: Dict[str, Table], username: str, limit: int = 50) -> List[Dict]:
+    try:
+        formula = f"{{Citizen}} = '{username}'"
+        records = tables["notifications"].all(formula=formula, sort=[('-CreatedAt', 'desc')], max_records=limit)
+        return [{'id': r['id'], 'fields': r['fields']} for r in records]
+    except Exception as e:
+        print(f"Error fetching notifications for {username}: {e}")
+        return []
+
+def _get_relevancies_data(tables: Dict[str, Table], relevant_to_username: str, target_username: str, limit: int = 50) -> List[Dict]:
+    try:
+        # Formule pour trouver les relevances où RelevantToCitizen est l'IA (directement ou dans une liste JSON)
+        # ET TargetCitizen est l'expéditeur (directement ou dans une liste JSON)
+        formula = (
+            f"AND("
+            f"OR({{RelevantToCitizen}} = '{relevant_to_username}', FIND('\"{relevant_to_username}\"', {{RelevantToCitizen}}) > 0),"
+            f"OR({{TargetCitizen}} = '{target_username}', FIND('\"{target_username}\"', {{TargetCitizen}}) > 0)"
+            f")"
+        )
+        records = tables["relevancies"].all(formula=formula, sort=[('-CreatedAt', 'desc')], max_records=limit)
+        return [{'id': r['id'], 'fields': r['fields']} for r in records]
+    except Exception as e:
+        print(f"Error fetching relevancies for {relevant_to_username} targeting {target_username}: {e}")
+        return []
+
+def _get_problems_data(tables: Dict[str, Table], username1: str, username2: str, limit: int = 50) -> List[Dict]:
+    try:
+        formula = f"OR({{Citizen}} = '{username1}', {{Citizen}} = '{username2}')"
+        # Assumant que la table PROBLEMS a un champ 'Citizen' et 'CreatedAt'
+        records = tables["problems"].all(formula=formula, sort=[('-CreatedAt', 'desc')], max_records=limit)
+        return [{'id': r['id'], 'fields': r['fields']} for r in records]
+    except Exception as e:
+        print(f"Error fetching problems for {username1} or {username2}: {e}")
+        return []
+
 def get_kinos_api_key() -> str:
     """Get the Kinos API key from environment variables."""
     load_dotenv()
@@ -95,63 +157,105 @@ def get_kinos_api_key() -> str:
         sys.exit(1)
     return api_key
 
-def generate_ai_response(ai_username: str, sender_username: str, message_content: str) -> Optional[str]:
-    """Generate an AI response using the Kinos Engine API."""
-    # TODO: Check if Kinos API POST response already contains the assistant's message,
-    # to avoid the subsequent GET call for messages.
+def generate_ai_response(tables: Dict[str, Table], ai_username: str, sender_username: str, message_content: str) -> Optional[str]:
+    """Generate an AI response using the Kinos Engine API with enhanced context."""
     try:
         api_key = get_kinos_api_key()
         blueprint = "serenissima-ai"
         
+        # 1. Fetch all contextual data
+        ai_citizen_data = _get_citizen_data(tables, ai_username)
+        sender_citizen_data = _get_citizen_data(tables, sender_username)
+        relationship_data = _get_relationship_data(tables, ai_username, sender_username)
+        notifications_data = _get_notifications_data(tables, ai_username, limit=50)
+        relevancies_data = _get_relevancies_data(tables, ai_username, sender_username, limit=50)
+        problems_data = _get_problems_data(tables, ai_username, sender_username, limit=50)
+
+        # 2. Construct the addSystem JSON object
+        system_context_data = {
+            "ai_citizen_profile": ai_citizen_data,
+            "sender_citizen_profile": sender_citizen_data,
+            "relationship_with_sender": relationship_data,
+            "recent_notifications_for_ai": notifications_data,
+            "recent_relevancies_ai_to_sender": relevancies_data,
+            "recent_problems_involving_ai_or_sender": problems_data
+        }
+        add_system_json = json.dumps(system_context_data, indent=2)
+
+        # 3. Construct the prompt for the Kinos API
+        # Emphasize brevity, human-like tone, and no fluff multiple times.
+        ai_display_name = ai_citizen_data.get('fields', {}).get('FirstName', ai_username) if ai_citizen_data else ai_username
+        sender_display_name = sender_citizen_data.get('fields', {}).get('FirstName', sender_username) if sender_citizen_data else sender_username
+
+        kinos_prompt = (
+            f"You are {ai_display_name}, an AI citizen of Venice. You are responding to a message from {sender_display_name}.\n"
+            f"IMPORTANT: Your response MUST be VERY SHORT, human-like, and conversational. "
+            f"DO NOT use formal language, DO NOT write long paragraphs, DO NOT include any fluff or boilerplate. "
+            f"Be direct, natural, and concise. Imagine you're sending a quick, informal message.\n\n"
+            f"Use the structured context provided in the 'addSystem' field (detailed below) to inform your response. "
+            f"This context gives you information about yourself, the sender, your relationship, and recent events.\n\n"
+            f"Guide to 'addSystem' content:\n"
+            f"- 'ai_citizen_profile': Your own detailed profile (status, wealth, etc.).\n"
+            f"- 'sender_citizen_profile': The profile of {sender_display_name}.\n"
+            f"- 'relationship_with_sender': Your existing relationship status with {sender_display_name}.\n"
+            f"- 'recent_notifications_for_ai': Recent news/events you've received.\n"
+            f"- 'recent_relevancies_ai_to_sender': Why {sender_display_name} (or things related to them) are specifically relevant to you.\n"
+            f"- 'recent_problems_involving_ai_or_sender': Recent issues involving you or {sender_display_name}.\n\n"
+            f"--- USER'S MESSAGE TO YOU ---\n"
+            f"{message_content}\n"
+            f"--- END OF USER'S MESSAGE ---\n\n"
+            f"Remember: Your reply MUST be VERY SHORT, human-like, and conversational. NO FLUFF. Just a natural, brief response.\n"
+            f"Your response:"
+        )
+        
         # Construct the API URL
         url = f"https://api.kinos-engine.ai/v2/blueprints/{blueprint}/kins/{ai_username}/channels/{sender_username}/messages"
         
-        # Set up headers with API key
         headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json"
         }
         
-        # Prepare the request payload
         payload = {
-            "message": message_content
+            "message": kinos_prompt,
+            "addSystem": add_system_json # Adding the structured context
         }
         
         # Make the API request
-        response = requests.post(url, headers=headers, json=payload)
+        response = requests.post(url, headers=headers, json=payload, timeout=30) # Increased timeout
         
-        # Check if the request was successful
         if response.status_code == 200 or response.status_code == 201:
-            response_data = response.json()
-            
-            # Get the most recent message from the assistant
+            # Attempt to get the latest assistant message from the conversation history
+            # TODO: Check if Kinos API POST response already contains the assistant's message,
+            # to avoid the subsequent GET call for messages. This is still a valid TODO.
             messages_url = f"https://api.kinos-engine.ai/v2/blueprints/{blueprint}/kins/{ai_username}/channels/{sender_username}/messages"
-            messages_response = requests.get(messages_url, headers=headers)
+            messages_response = requests.get(messages_url, headers=headers, timeout=15)
             
             if messages_response.status_code == 200:
                 messages_data = messages_response.json()
-                
-                # Find the most recent assistant message
                 assistant_messages = [
                     msg for msg in messages_data.get("messages", [])
                     if msg.get("role") == "assistant"
                 ]
-                
                 if assistant_messages:
-                    # Sort by timestamp (newest first)
                     assistant_messages.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
-                    latest_message = assistant_messages[0]
-                    
-                    # Return the content of the latest assistant message
-                    return latest_message.get("content")
+                    return assistant_messages[0].get("content")
             
-            # Fallback: If we couldn't get the messages, return a generic response
-            return "Thank you for your message. I'll consider it carefully and respond appropriately."
+            # Fallback if history retrieval fails or no assistant message found
+            print(f"Kinos POST successful but couldn't retrieve specific assistant reply from history for {ai_username} to {sender_username}. Check Kinos logs.")
+            return "Thank you for your message. I will consider it." # Shorter fallback
         else:
-            print(f"Error from Kinos API: {response.status_code} - {response.text}")
+            print(f"Error from Kinos API for {ai_username} to {sender_username}: {response.status_code} - {response.text}")
+            try:
+                error_details = response.json()
+                print(f"Kinos error details: {error_details}")
+            except json.JSONDecodeError:
+                pass # No JSON in error response
             return None
     except Exception as e:
-        print(f"Error generating AI response: {str(e)}")
+        print(f"Error in generate_ai_response for {ai_username} to {sender_username}: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return None
 
 def create_response_message_api(sender_username: str, receiver_username: str, content: str, message_type: str = "message") -> bool:
@@ -276,8 +380,8 @@ def process_ai_messages(dry_run: bool = False):
                 marked_read = mark_messages_as_read_api(receiver_username=ai_username, message_ids=[message_id])
                 
                 if marked_read:
-                    # Generate AI response
-                    response_content = generate_ai_response(ai_username, sender_username, message_content)
+                    # Generate AI response, passing tables object
+                    response_content = generate_ai_response(tables, ai_username, sender_username, message_content)
                     
                     if response_content:
                         # Create response message using API
