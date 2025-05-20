@@ -56,15 +56,15 @@ export async function POST(request: Request) {
       );
     }
     
-    if (!data.land_id) {
+    if (!data.landId) { // Changed from land_id
       return NextResponse.json(
         { success: false, error: 'Land ID is required' },
         { status: 400 }
       );
     }
     
-    // Check if point_id is provided
-    const pointId = data.point_id;
+    // Check if pointId is provided
+    const pointId = data.pointId; // Changed from point_id
     
     // Ensure position is properly formatted if provided
     let position = data.position;
@@ -114,13 +114,13 @@ export async function POST(request: Request) {
     const buildingData: any = {
       BuildingId: data.id || `building-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
       Type: normalizedType,
-      LandId: data.land_id,
+      LandId: data.landId, // Changed from data.land_id
       Variant: data.variant || 'model',
       Rotation: data.rotation || 0,
-      Owner: data.owner || data.created_by || 'system',
-      CreatedAt: data.created_at || new Date().toISOString(),
-      LeaseAmount: data.lease_amount || 0,
-      RentAmount: data.rent_amount || 0,
+      Owner: data.owner || data.createdBy || 'system', // Changed from data.created_by
+      CreatedAt: data.createdAt || new Date().toISOString(), // Changed from data.created_at
+      LeaseAmount: data.leaseAmount || 0, // Changed from data.lease_amount
+      RentAmount: data.rentAmount || 0, // Changed from data.rent_amount
       Occupant: data.occupant || ''
     };
     
