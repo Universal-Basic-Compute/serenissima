@@ -42,8 +42,8 @@ export async function POST(request: NextRequest) {
   try {
     // Get the username from the request body
     const body = await request.json();
-    const { citizenUsername } = body; // Changed from aiUsername
-    const username = citizenUsername; // Use the new parameter
+    const { Citizen } = body; // Changed from aiUsername
+    const username = Citizen; // Use the new parameter
     
     if (!username) {
       return NextResponse.json(

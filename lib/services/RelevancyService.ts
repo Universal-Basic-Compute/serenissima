@@ -67,13 +67,13 @@ export class RelevancyService {
   /**
    * Calculate relevancy scores using the API data
    */
-  public async calculateRelevancyWithApiData(citizenUsername: string): Promise<Record<string, RelevancyScore>> {
+  public async calculateRelevancyWithApiData(Citizen: string): Promise<Record<string, RelevancyScore>> {
     try {
       // Fetch lands owned by the citizen
-      const citizenLands = await this.fetchLands(citizenUsername);
+      const citizenLands = await this.fetchLands(Citizen);
       
       if (citizenLands.length === 0) {
-        console.log(`Citizen ${citizenUsername} does not own any lands`);
+        console.log(`Citizen ${Citizen} does not own any lands`);
         return {};
       }
       
@@ -88,7 +88,7 @@ export class RelevancyService {
       
       return relevancyScores;
     } catch (error) {
-      console.error('Error calculating relevancy with API data for citizen:', citizenUsername, error);
+      console.error('Error calculating relevancy with API data for citizen:', Citizen, error);
       return {};
     }
   }
@@ -703,13 +703,13 @@ export class RelevancyService {
       const landMap: Record<string, LandData> = {};
       console.log(`[RelevancyService] Building landMap. Total lands fetched: ${lands.length} for user ${username}`);
       lands.forEach((land: LandData) => {
-        const idToUse = land.polygonId || land.id; 
+        const idToUse = land.landId || land.id; 
         if (!idToUse) {
-          console.warn(`[RelevancyService] Land record (Airtable ID: ${land.id}, PolygonID: ${land.polygonId}) has no usable ID for landMap for user ${username}. Skipping.`);
+          console.warn(`[RelevancyService] Land record (Airtable ID: ${land.id}, landId: ${land.landId}) has no usable ID for landMap for user ${username}. Skipping.`);
           return;
         }
         // The following log can be very verbose if there are many lands. Enable if needed for deep debugging.
-        // console.log(`[RelevancyService] Adding to landMap for user ${username}: Key=${idToUse}, Owner=${land.owner}, PolygonID=${land.polygonId}, RecordID=${land.id}`);
+        // console.log(`[RelevancyService] Adding to landMap for user ${username}: Key=${idToUse}, Owner=${land.owner}, landId=${land.landId}, RecordID=${land.id}`);
         landMap[idToUse] = land;
       });
       console.log(`[RelevancyService] landMap created with ${Object.keys(landMap).length} entries for user ${username}.`);
@@ -718,34 +718,34 @@ export class RelevancyService {
       const relevancyScores: Record<string, RelevancyScore> = {};
       
       buildings.forEach(building => {
-        console.log(`[RelevancyService] Processing building ${building.id} (type: ${building.type}) for ${username}`);
-        const landId = building.land_id; // This should be the polygonId like 'poly_xxx'
+        console.log(`[RelevancyService] Processing building ${building.buildingId} (type: ${building.type}) for ${username}`);
+        const landId = building.landId; // This should be the landId like 'poly_xxx'
         if (!landId) {
-          console.log(`[RelevancyService] Building ${building.id} has no land_id. Skipping.`);
+          console.log(`[RelevancyService] Building ${building.buildingId} has no land_id. Skipping.`);
           return;
         }
         
         const land = landMap[landId];
         if (!land) {
-          console.log(`[RelevancyService] Land ${landId} for building ${building.id} not found in landMap. Skipping.`);
+          console.log(`[RelevancyService] Land ${landId} for building ${building.buildingId} not found in landMap. Skipping.`);
           return;
         }
         
-        console.log(`[RelevancyService] Building ${building.id} is on land ${landId} (Owner: ${land.owner}, PolygonID: ${land.polygonId}, RecordID: ${land.id})`);
+        console.log(`[RelevancyService] Building ${building.buildingId} is on land ${landId} (Owner: ${land.owner}, landId: ${land.landId}, RecordID: ${land.id})`);
 
         // Skip if land has no owner or is owned by the same citizen
         if (!land.owner) {
-          console.log(`[RelevancyService] Land ${landId} for building ${building.id} has no owner. Skipping.`);
+          console.log(`[RelevancyService] Land ${landId} for building ${building.buildingId} has no owner. Skipping.`);
           return;
         }
         if (land.owner === username) {
-          console.log(`[RelevancyService] Land ${landId} for building ${building.id} is owned by the same user (${username}). Skipping.`);
+          console.log(`[RelevancyService] Land ${landId} for building ${building.buildingId} is owned by the same user (${username}). Skipping.`);
           return;
         }
         
-        console.log(`[RelevancyService] CREATING relevancy for building ${building.id} on land ${landId} (owned by ${land.owner}, building owner ${username})`);
+        console.log(`[RelevancyService] CREATING relevancy for building ${building.buildingId} on land ${landId} (owned by ${land.owner}, building owner ${username})`);
         // Create a unique ID for this relevancy
-        const relevancyId = `${building.id}_${landId}`;
+        const relevancyId = `${building.buildingId}_${landId}`;
         
         // Calculate score based on building type and importance
         // Base score of 70 for all buildings on others' land
@@ -764,7 +764,7 @@ export class RelevancyService {
         const buildingType = this.formatBuildingType(building.type);
         const title = `Your ${buildingType} on ${land.owner}'s Land`;
         
-        const description = `You own a **${buildingType}** (ID: ${building.id}) on land owned by **${land.owner}**.\n\n` +
+        const description = `You own a **${buildingType}** (ID: ${building.buildingId}) on land owned by **${land.owner}**.\n\n` +
                            `### Strategic Considerations\n` +
                            `- You pay lease fees to this landowner\n` +
                            `- Your building operations depend on this relationship\n` +
@@ -776,7 +776,7 @@ export class RelevancyService {
         // Create the relevancy score object
         relevancyScores[relevancyId] = {
           score: parseFloat(score.toFixed(2)),
-          assetId: building.id, // ID of the building
+          assetId: building.buildingId, // ID of the building
           assetType: 'building',
           category: 'ownership',
           type: 'building_on_others_land',
