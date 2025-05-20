@@ -797,21 +797,29 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
                   {relationship.StrengthScore}{relationship.type === "Self" ? "" : "/100"}
                 </div>
               </div>
-              {relationship.type && relationship.type !== "Self" && (
-                <p className="text-xs text-amber-700 mt-1">Type: <span className="font-medium">{relationship.type}</span></p>
-              )}
-              {typeof relationship.Sentiment !== 'undefined' && relationship.type !== "Self" && (
-                <p className="text-xs text-amber-700 mt-1">
-                  Sentiment: <span className={`font-medium ${
-                    relationship.Sentiment > 0.2 ? 'text-green-700' :
-                    relationship.Sentiment < -0.2 ? 'text-red-700' :
-                    'text-amber-700'
-                  }`}>
-                    {relationship.Sentiment > 0.2 ? `Positive (${relationship.Sentiment.toFixed(2)})` : 
-                     relationship.Sentiment < -0.2 ? `Negative (${relationship.Sentiment.toFixed(2)})` : 
-                     `Neutral (${relationship.Sentiment.toFixed(2)})`}
-                  </span>
-                </p>
+              {relationship.type !== "Self" && (
+                <>
+                  {relationship.Title && (
+                    <p className="text-sm text-amber-800 mt-2 font-semibold">{relationship.Title}</p>
+                  )}
+                  {relationship.Description && (
+                    <p className="text-xs text-amber-700 mt-1">{relationship.Description}</p>
+                  )}
+                  <div className="grid grid-cols-2 gap-x-4 mt-2">
+                    {typeof relationship.TrustScore !== 'undefined' && (
+                      <div>
+                        <p className="text-xs text-amber-600">Trust Score</p>
+                        <p className="text-sm font-medium text-amber-800">{relationship.TrustScore}/100</p>
+                      </div>
+                    )}
+                    {relationship.Tier && (
+                      <div>
+                        <p className="text-xs text-amber-600">Tier</p>
+                        <p className="text-sm font-medium text-amber-800">{relationship.Tier}</p>
+                      </div>
+                    )}
+                  </div>
+                </>
               )}
             </div>
           ) : (
