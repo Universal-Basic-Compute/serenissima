@@ -106,6 +106,26 @@ export async function saveRelevancies(
             CreatedAt: new Date().toISOString()
           }
         };
+      } else if (data.assetType === 'building') {
+        // Handle building ownership relevancy (building on others' land)
+        return {
+          fields: {
+            RelevancyId: `${citizenUsername}_${data.assetId}_${data.closestLandId}_${Date.now()}`, // Unique ID: buildingOwner_buildingId_landId_timestamp
+            AssetID: data.assetId, // This is the building's ID
+            AssetType: data.assetType, // 'building'
+            Category: data.category, // 'ownership'
+            Type: data.type, // 'building_on_others_land'
+            TargetCitizen: data.targetCitizen, // The owner of the land
+            RelevantToCitizen: citizenUsername, // The owner of the building
+            Score: data.score,
+            TimeHorizon: data.timeHorizon || 'medium',
+            Title: data.title || `Building on Land of ${data.targetCitizen}`,
+            Description: data.description || `Your building ${data.assetId} is on land owned by ${data.targetCitizen}.`,
+            Notes: `Building ID: ${data.assetId}, Land ID: ${data.closestLandId}`, // Add land_id to notes
+            Status: data.status || 'active',
+            CreatedAt: new Date().toISOString()
+          }
+        };
       }
     }).filter(Boolean); // Ensure we only have valid records
     
