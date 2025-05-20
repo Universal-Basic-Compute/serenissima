@@ -165,7 +165,7 @@ def calculate_specific_relevancy(
     elif relevancy_type == "domination":
         api_url = f"{base_url}/api/relevancies/domination"
         # If username is provided, it's for a specific user. Otherwise, "all" for global.
-        payload = {"citizenUsername": username if username else "all"}
+        payload = {"citizenUsername": username if username else "all"} # This was correct
         log.info(f"Requesting land domination relevancy for: {payload['citizenUsername']}")
 
     elif relevancy_type == "housing":
@@ -221,7 +221,10 @@ def calculate_specific_relevancy(
             return False
 
         # Success notification for single user or non-proximity types
-        saved_status = "saved" if data.get('saved', False) else "NOT saved (or saving not applicable)"
+        
+        # Determine saved status based on API response
+        api_saved_flag = data.get('saved', False)
+        saved_status_message = "saved to Airtable" if api_saved_flag else "NOT saved to Airtable (or saving not applicable)"
         
         # Adjust how relevancies_created is determined based on typical API responses
         relevancies_created_count = 0
@@ -242,34 +245,41 @@ def calculate_specific_relevancy(
         notification_title = f"{relevancy_type.capitalize()} Relevancy Calculation Complete"
         details_for_notification = [
             f"Successfully calculated {relevancy_type} relevancies.",
-            f"Status: {saved_status}.",
+            f"API Save Status: {saved_status_message}.", # Use the more descriptive status
         ]
         
         target_user_info = username
+        log_context_message = f"for citizen: {username}"
+
         if relevancy_type == "domination" and not username:
             target_user_info = "all (Global Report)"
-        elif not username and relevancy_type not in ["housing", "jobs"]: # e.g. proximity for all
+            log_context_message = "for global domination context"
+        elif relevancy_type in ["housing", "jobs"] and not username: # These are always global
+            target_user_info = "all (Global Report)"
+            log_context_message = f"for global {relevancy_type} context"
+        elif not username and relevancy_type == "proximity": # Proximity for all landowners
              target_user_info = "all landowners"
+             log_context_message = "for all landowners (proximity)"
 
 
-        if target_user_info:
+        if target_user_info: # Will be true unless it's a type that doesn't take username and isn't global
             details_for_notification.append(f"Target: {target_user_info}")
         
         if 'ownedLandCount' in data: # Specific to proximity
-             details_for_notification.append(f"Owned Land Count (for proximity user): {data.get('ownedLandCount')}")
+             details_for_notification.append(f"Owned Land Count (for proximity target): {data.get('ownedLandCount')}")
         
-        details_for_notification.append(f"Relevancy Records Saved: {relevancies_created_count}")
+        details_for_notification.append(f"Relevancy Records Saved/Processed by API: {relevancies_created_count}")
 
         if 'statistics' in data: # Specific to housing, jobs
             details_for_notification.append(f"Statistics: {json.dumps(data.get('statistics'), indent=2)}")
         
         if relevancy_type == "domination" and not username and 'detailedRelevancy' in data:
             top_landowners = sorted(data['detailedRelevancy'].items(), key=lambda item: item[1]['score'], reverse=True)[:5]
-            summary = "\nTop 5 Dominant Landowners:\n" + "\n".join([f"- {item[1]['title'].replace('Land Domination: ', '')}: {item[1]['score']}" for item in top_landowners])
+            summary = "\nTop 5 Dominant Landowners (from API response):\n" + "\n".join([f"- {item[1]['title'].replace('Land Domination: ', '')}: {item[1]['score']}" for item in top_landowners])
             details_for_notification.append(summary)
 
         create_admin_notification(notifications_table, notification_title, "\n".join(details_for_notification))
-        log.info(f"Successfully processed {relevancy_type} relevancies for {username or 'global context'}.")
+        log.info(f"Successfully processed {relevancy_type} relevancies {log_context_message}. API indicated saved: {api_saved_flag}.")
         return True
 
     except requests.exceptions.RequestException as e:
