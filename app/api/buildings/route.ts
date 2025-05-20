@@ -184,12 +184,12 @@ export async function POST(request: Request) {
       landId: typedRecord.fields.LandId, // Changed from land_id
       variant: typedRecord.fields.Variant || 'model',
       position: recordPosition,
-      point_id: typedRecord.fields.Point || null, // Include point_id in response
+      pointId: typedRecord.fields.Point || null, // Changed from point_id
       rotation: typedRecord.fields.Rotation || 0,
       owner: typedRecord.fields.Owner,
-      created_at: typedRecord.fields.CreatedAt,
-      lease_amount: typedRecord.fields.LeaseAmount,
-      rent_amount: typedRecord.fields.RentAmount,
+      createdAt: typedRecord.fields.CreatedAt, // Changed from created_at
+      leaseAmount: typedRecord.fields.LeaseAmount, // Changed from lease_amount
+      rentAmount: typedRecord.fields.RentAmount, // Changed from rent_amount
       occupant: typedRecord.fields.Occupant
     };
     
@@ -364,9 +364,9 @@ export async function GET(request: Request) {
       position: any;
       rotation: number;
       owner: string;
-      created_at: string;
-      lease_amount?: number;
-      rent_amount?: number;
+      createdAt: string; // Changed from created_at
+      leaseAmount?: number; // Changed from lease_amount
+      rentAmount?: number; // Changed from rent_amount
       occupant?: string;
     }
 
@@ -515,7 +515,7 @@ export async function GET(request: Request) {
       rotation: 0,
       variant: 'model',
       owner: 'ConsiglioDeiDieci',
-      created_at: '2025-05-10T02:07:00Z'
+      createdAt: '2025-05-10T02:07:00Z' // Changed from created_at
     };
       
     const debugBuilding2: Building = {
@@ -529,7 +529,7 @@ export async function GET(request: Request) {
       rotation: Math.PI / 4, // 45 degrees rotation
       variant: 'model',
       owner: 'ConsiglioDeiDieci',
-      created_at: '2025-05-10T02:07:00Z'
+      createdAt: '2025-05-10T02:07:00Z' // Changed from created_at
     };
       
     const debugBuilding3: Building = {
@@ -543,7 +543,7 @@ export async function GET(request: Request) {
       rotation: Math.PI / 2, // 90 degrees rotation
       variant: 'model',
       owner: 'ConsiglioDeiDieci',
-      created_at: '2025-05-10T02:07:00Z'
+      createdAt: '2025-05-10T02:07:00Z' // Changed from created_at
     };
       
     // Add a fourth building at a different position
@@ -558,7 +558,7 @@ export async function GET(request: Request) {
       rotation: Math.PI, // 180 degrees rotation
       variant: 'model',
       owner: 'ConsiglioDeiDieci',
-      created_at: '2025-05-10T02:07:00Z'
+      createdAt: '2025-05-10T02:07:00Z' // Changed from created_at
     };
       
     console.log('Adding debug buildings');
@@ -575,7 +575,7 @@ export async function GET(request: Request) {
       rotation: 0,
       variant: 'model',
       owner: 'ConsiglioDeiDieci',
-      created_at: '2025-05-10T02:07:00Z'
+      createdAt: '2025-05-10T02:07:00Z' // Changed from created_at
     };
     
     // Only add debug buildings in development mode if there are no buildings from Airtable
@@ -616,7 +616,7 @@ function getDebugBuildings() {
     position: any;
     rotation: number;
     owner: string;
-    created_at: string;
+    createdAt: string; // Changed from created_at
   }
 
   // Add your specific building for debugging - add multiple copies at different positions
@@ -631,7 +631,7 @@ function getDebugBuildings() {
     rotation: 0,
     variant: 'model',
     owner: 'ConsiglioDeiDieci',
-    created_at: '2025-05-10T02:07:00Z'
+    createdAt: '2025-05-10T02:07:00Z' // Changed from created_at
   };
     
   const debugBuilding2: Building = {
@@ -645,7 +645,7 @@ function getDebugBuildings() {
     rotation: Math.PI / 4, // 45 degrees rotation
     variant: 'model',
     owner: 'ConsiglioDeiDieci',
-    created_at: '2025-05-10T02:07:00Z'
+    createdAt: '2025-05-10T02:07:00Z' // Changed from created_at
   };
     
   const debugBuilding3: Building = {
@@ -659,7 +659,7 @@ function getDebugBuildings() {
     rotation: Math.PI / 2, // 90 degrees rotation
     variant: 'model',
     owner: 'ConsiglioDeiDieci',
-    created_at: '2025-05-10T02:07:00Z'
+    createdAt: '2025-05-10T02:07:00Z' // Changed from created_at
   };
     
   // Add a fourth building at a different position
@@ -674,7 +674,7 @@ function getDebugBuildings() {
     rotation: Math.PI, // 180 degrees rotation
     variant: 'model',
     owner: 'ConsiglioDeiDieci',
-    created_at: '2025-05-10T02:07:00Z'
+    createdAt: '2025-05-10T02:07:00Z' // Changed from created_at
   };
     
   // Add a fifth building with lat/lng coordinates
@@ -689,7 +689,7 @@ function getDebugBuildings() {
     rotation: 0,
     variant: 'model',
     owner: 'ConsiglioDeiDieci',
-    created_at: '2025-05-10T02:07:00Z'
+    createdAt: '2025-05-10T02:07:00Z' // Changed from created_at
   };
   
   return [debugBuilding1];

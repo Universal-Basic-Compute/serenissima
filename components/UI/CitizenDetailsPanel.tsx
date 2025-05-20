@@ -294,21 +294,21 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
 
   // Function to fetch message history
   const fetchMessageHistory = async () => {
-    if (!citizen || !citizen.citizenid) return;
+    if (!citizen || !citizen.citizenId) return; // Changed from citizenid
     
     // Check if we've already attempted to fetch messages for this citizen
-    if (messagesFetchAttemptedRef.current[citizen.citizenid]) {
-      console.log(`Already attempted to fetch messages for citizen ${citizen.citizenid}, skipping`);
+    if (messagesFetchAttemptedRef.current[citizen.citizenId]) { // Changed from citizenid
+      console.log(`Already attempted to fetch messages for citizen ${citizen.citizenId}, skipping`); // Changed from citizenid
       return;
     }
     
     // Mark that we've attempted to fetch messages for this citizen
-    messagesFetchAttemptedRef.current[citizen.citizenid] = true;
+    messagesFetchAttemptedRef.current[citizen.citizenId] = true; // Changed from citizenid
     
     setIsLoadingHistory(true);
     try {
       // Always use the regular messages API
-      console.log(`Fetching messages for citizen ${citizen.username || citizen.citizenid} using /api/messages`);
+      console.log(`Fetching messages for citizen ${citizen.username || citizen.citizenId} using /api/messages`); // Changed from citizenid
 
       // Get current citizen from localStorage
       let currentUsername = 'visitor';
@@ -331,7 +331,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
           },
           body: JSON.stringify({
             currentCitizen: currentUsername,
-            otherCitizen: citizen.username || citizen.citizenid // Use username if available, otherwise citizenid
+            otherCitizen: citizen.username || citizen.citizenId // Use username if available, otherwise citizenId
           })
         });
 
@@ -365,7 +365,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
 
   // Function to send messages
   const sendMessage = async (content: string) => {
-    if (!content.trim() || !citizen || !citizen.citizenid) return;
+    if (!content.trim() || !citizen || !citizen.citizenId) return; // Changed from citizenid
     
     // Get current citizen from localStorage
     let currentUsername = 'visitor';
@@ -395,7 +395,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
 
     try {
       // Always use the /api/messages/send endpoint
-      console.log(`Sending message to ${citizen.username || citizen.citizenid} using /api/messages/send`);
+      console.log(`Sending message to ${citizen.username || citizen.citizenId} using /api/messages/send`); // Changed from citizenid
 
       const response = await fetch('/api/messages/send', {
         method: 'POST',
@@ -404,7 +404,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
         },
         body: JSON.stringify({
           sender: currentUsername,
-          receiver: citizen.username || citizen.citizenid, // Use username if available
+          receiver: citizen.username || citizen.citizenId, // Use username if available, changed from citizenid
           content: content,
           type: 'message' // Ensure type is 'message'
         })
@@ -427,7 +427,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
         setMessages(prev => [...prev, {
           id: `conf-${data.message.messageId}`,
           role: 'assistant', // Or a system role
-          content: `Message sent to ${citizen.firstname}.`,
+          content: `Message sent to ${citizen.firstName}.`, // Changed from firstname
           timestamp: new Date().toISOString()
         }]);
         */
@@ -465,7 +465,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     setIsLoadingBuildings(false);
     // Activities and Messages are handled by their own fetch-once refs below.
 
-    if (citizen && citizen.citizenid && citizen.username) {
+    if (citizen && citizen.citizenId && citizen.username) { // Changed from citizenid
         // --- Relevancies (Opportunities) ---
         if (cachedRelevancies.hasOwnProperty(citizen.username)) {
             setRelevancies(cachedRelevancies[citizen.username]);
@@ -494,7 +494,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
         }
         
         // --- Message History (existing logic with fetch-once ref) ---
-        if (!messagesFetchAttemptedRef.current[citizen.citizenid]) {
+        if (!messagesFetchAttemptedRef.current[citizen.citizenId]) { // Changed from citizenid
             fetchMessageHistory();
         } else {
             // If messages were already attempted, ensure loading is false if not actively fetching.
@@ -504,9 +504,9 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
         }
       
         // --- Activities (existing logic with fetch-once ref) ---
-        if (!activitiesFetchAttemptedRef.current[citizen.citizenid]) {
+        if (!activitiesFetchAttemptedRef.current[citizen.citizenId]) { // Changed from citizenid
             setActivities([]); // Clear previous activities before fetching new ones
-            fetchCitizenActivities(citizen.citizenid);
+            fetchCitizenActivities(citizen.citizenId); // Changed from citizenid
         } else {
             // Similar to messages, if activities were attempted, their state is either populated or empty.
             // fetchCitizenActivities handles its own loading state.
@@ -577,7 +577,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     let isMounted = true;
     
     // Only fetch building data if we have a valid citizen
-    if (citizen && citizen.citizenid && isMounted) {
+    if (citizen && citizen.citizenId && isMounted) { // Changed from citizenid
       fetchBuildingDetails();
       // We're now handling activities fetch above with the ref check
     }
@@ -590,13 +590,13 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
 
   // Effect to set a random "no relationship" message
   useEffect(() => {
-    if (!isLoadingRelationship && !relationship && citizen && citizen.firstname) {
+    if (!isLoadingRelationship && !relationship && citizen && citizen.firstName) { // Changed from firstname
       const messages = [
-        `Your connection with ${citizen.firstname} is yet to be recorded in the city's annals.`,
-        `The nature of your acquaintance with ${citizen.firstname} remains unchronicled.`,
-        `No formal ties with ${citizen.firstname} have been noted by the scribes.`,
-        `Details of your relationship with ${citizen.firstname} are not yet known.`,
-        `The ledger shows no established connection with ${citizen.firstname} at this time.`
+        `Your connection with ${citizen.firstName} is yet to be recorded in the city's annals.`, // Changed from firstname
+        `The nature of your acquaintance with ${citizen.firstName} remains unchronicled.`, // Changed from firstname
+        `No formal ties with ${citizen.firstName} have been noted by the scribes.`, // Changed from firstname
+        `Details of your relationship with ${citizen.firstName} are not yet known.`, // Changed from firstname
+        `The ledger shows no established connection with ${citizen.firstName} at this time.` // Changed from firstname
       ];
       const randomIndex = Math.floor(Math.random() * messages.length);
       setNoRelationshipMessage(messages[randomIndex]);
@@ -695,11 +695,11 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
   const formatRelevancyText = (text: string, currentCitizen: any): string => {
     if (!text || !currentCitizen) return text;
     let newText = text;
-    newText = newText.replace(/%TARGETCITIZEN%/g, `${currentCitizen.firstname || ''} ${currentCitizen.lastname || ''}`.trim());
-    newText = newText.replace(/%FIRSTNAME%/g, currentCitizen.firstname || '');
-    newText = newText.replace(/%LASTNAME%/g, currentCitizen.lastname || '');
+    newText = newText.replace(/%TARGETCITIZEN%/g, `${currentCitizen.firstName || ''} ${currentCitizen.lastName || ''}`.trim()); // Changed from firstname, lastname
+    newText = newText.replace(/%FIRSTNAME%/g, currentCitizen.firstName || ''); // Changed from firstname
+    newText = newText.replace(/%LASTNAME%/g, currentCitizen.lastName || ''); // Changed from lastname
     newText = newText.replace(/%USERNAME%/g, currentCitizen.username || '');
-    newText = newText.replace(/%SOCIALCLASS%/g, currentCitizen.socialclass || '');
+    newText = newText.replace(/%SOCIALCLASS%/g, currentCitizen.socialClass || ''); // Changed from socialclass
     // Add more replacements here if needed, e.g., for %CURRENTUSER_FIRSTNAME%, etc.
     return newText;
   };
@@ -789,7 +789,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     }
   };
   
-  const socialClassStyle = getSocialClassColor(citizen.socialclass);
+  const socialClassStyle = getSocialClassColor(citizen.socialClass); // Changed from socialclass
   
   return (
     <div
@@ -802,7 +802,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
       
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-serif text-amber-800">
-          {citizen.firstname} {citizen.lastname} 
+          {citizen.firstName} {citizen.lastName} 
           {citizen.username && (
             <span className="text-sm text-amber-600 ml-2">({citizen.username})</span>
           )}
@@ -991,38 +991,38 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
             ) : activities.length > 0 ? (
               <div className="space-y-2 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
                 {activities.map((activity, index) => (
-                  <div key={activity.ActivityId || index} className="bg-amber-100 rounded-lg p-2 text-sm">
+                  <div key={activity.activityId || index} className="bg-amber-100 rounded-lg p-2 text-sm"> {/* Changed from ActivityId */}
                     <div className="flex items-center gap-2 mb-1">
                       <div className="text-amber-700">
-                        {getActivityIcon(activity.Type)}
+                        {getActivityIcon(activity.type)} {/* Changed from Type */}
                       </div>
                       <div className="font-medium text-amber-800">
-                        {formatActivityType(activity.Type)}
+                        {formatActivityType(activity.type)} {/* Changed from Type */}
                       </div>
                       <div className="ml-auto text-xs text-amber-600">
-                        {formatActivityDate(activity.EndDate || activity.StartDate || activity.CreatedAt)}
+                        {formatActivityDate(activity.endDate || activity.startDate || activity.createdAt)} {/* Changed from EndDate, StartDate, CreatedAt */}
                       </div>
                     </div>
                       
-                    {activity.FromBuilding && activity.ToBuilding && (
+                    {activity.fromBuilding && activity.toBuilding && ( // Changed from FromBuilding, ToBuilding
                       <div className="flex items-center text-xs text-amber-700 mb-1">
-                        <span className="font-medium">{activity.FromBuilding}</span>
+                        <span className="font-medium">{activity.fromBuilding}</span> {/* Changed from FromBuilding */}
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mx-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                         </svg>
-                        <span className="font-medium">{activity.ToBuilding}</span>
+                        <span className="font-medium">{activity.toBuilding}</span> {/* Changed from ToBuilding */}
                       </div>
                     )}
                       
-                    {activity.ResourceId && activity.Amount && (
+                    {activity.resourceId && activity.amount && ( // Changed from ResourceId, Amount
                       <div className="text-xs text-amber-700 mb-1">
-                        <span className="font-medium">{activity.Amount}</span> units of <span className="font-medium">{activity.ResourceId}</span>
+                        <span className="font-medium">{activity.amount}</span> units of <span className="font-medium">{activity.resourceId}</span> {/* Changed from Amount, ResourceId */}
                       </div>
                     )}
                       
-                    {activity.Notes && (
+                    {activity.notes && ( // Changed from Notes
                       <div className="text-xs italic text-amber-600 mt-1">
-                        {activity.Notes}
+                        {activity.notes} {/* Changed from Notes */}
                       </div>
                     )}
                   </div>
@@ -1144,7 +1144,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder={`Message ${citizen.firstname}...`}
+              placeholder={`Message ${citizen.firstName}...`} // Changed from firstname
               className="flex-1 p-2 border border-amber-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
               disabled={isTyping}
             />
@@ -1168,10 +1168,10 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
             {/* Full-width image container with relative positioning for the coat of arms overlay, now square */}
             <div className="w-full aspect-square relative mb-4 overflow-hidden rounded-lg border-2 border-amber-600 shadow-lg">
               {/* Main citizen image */}
-              {citizen.imageurl || citizen.profileimage || citizen.ImageUrl ? (
+              {citizen.imageUrl || citizen.profileImage || citizen.ImageUrl ? ( // Changed from imageurl, profileimage
                 <img 
-                  src={citizen.imageurl || citizen.profileimage || citizen.ImageUrl} 
-                  alt={`${citizen.firstname} ${citizen.lastname}`} 
+                  src={citizen.imageUrl || citizen.profileImage || citizen.ImageUrl} // Changed from imageurl, profileimage
+                  alt={`${citizen.firstName} ${citizen.lastName}`} // Changed from firstname, lastname
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     console.error(`Failed to load citizen image: ${(e.target as HTMLImageElement).src}`);
@@ -1217,7 +1217,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
                 citizen.username ? (
                   <img 
                     src={`/images/citizens/${citizen.username}.jpg`}
-                    alt={`${citizen.firstname} ${citizen.lastname}`} 
+                    alt={`${citizen.firstName} ${citizen.lastName}`} // Changed from firstname, lastname
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       console.error(`Failed to load citizen image: ${(e.target as HTMLImageElement).src}`);
@@ -1262,11 +1262,11 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
               {/* Name and social class overlay at the bottom */}
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4"> {/* Changed p-3 to p-4 */}
                 <h3 className="text-white text-2xl font-serif font-bold"> {/* Changed text-xl to text-2xl */}
-                  {citizen.firstname} {citizen.lastname}
+                  {citizen.firstName} {citizen.lastName} {/* Changed from firstname, lastname */}
                 </h3>
                 <div className="flex justify-between items-center">
                   <div className={`px-3 py-1 rounded-full text-sm font-medium inline-block ${socialClassStyle}`}>
-                    {citizen.socialclass}
+                    {citizen.socialClass} {/* Changed from socialclass */}
                   </div>
                   {/* Ducats display removed from here */}
                 </div>
@@ -1274,7 +1274,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
 
               {/* Ducats display at the top right */}
               <div className="absolute top-3 right-3 bg-black/60 text-white px-3 py-1 rounded-lg shadow-md">
-                <span className="text-lg font-bold">{formatDucats(citizen.Ducats || citizen.wealth || citizen.ducats)}</span>
+                <span className="text-lg font-bold">{formatDucats(citizen.ducats || citizen.wealth)}</span> {/* Simplified Ducats access */}
               </div>
             </div>
         </div>
@@ -1350,7 +1350,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
           </div>
 
           <div className="mb-6">
-            <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">About {citizen.firstname}</h3>
+            <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">About {citizen.firstName}</h3> {/* Changed from firstname */}
             <p className="text-amber-700 italic text-sm">{citizen.description || 'No description available.'}</p>
           </div>
         </div>
@@ -1358,7 +1358,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     </div>
     
     <div className="mt-4 text-xs text-amber-500 italic text-center">
-      Citizen of Venice since {citizen.createdat ? formatDate(citizen.createdat) : 'the founding of the Republic'}
+      Citizen of Venice since {citizen.createdAt ? formatDate(citizen.createdAt) : 'the founding of the Republic'} {/* Changed from createdat */}
     </div>
   </div>
   );

@@ -119,8 +119,8 @@ export async function GET(request: NextRequest) {
           name: resourceType?.name || contract.resourceType,
           category: resourceType?.category || 'unknown',
           hourlyAmount: contract.hourlyAmount || 0,
-          price: contract.price || contract.PricePerResource || 0,
-          transporter: contract.transporter || contract.Transporter || null,
+          price: contract.price || contract.PricePerResource || 0, // PricePerResource is from Airtable
+          transporter: contract.transporter || contract.Transporter || null, // Transporter is from Airtable
           icon: resourceType?.icon || `${contract.resourceType.toLowerCase().replace(/\s+/g, '_')}.png`,
           description: resourceType?.description || '',
           contractType: 'public_sell'

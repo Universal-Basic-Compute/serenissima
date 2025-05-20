@@ -697,15 +697,15 @@ export default function BuildingDetailsPanel({
   
               {/* Financial Information */}
               <BuildingFinancials 
-                leaseAmount={building.lease_amount} 
-                rentAmount={building.rent_amount} 
+                leaseAmount={building.leaseAmount} 
+                rentAmount={building.rentAmount} 
               />
   
               {/* Full Description */}
               <BuildingDescription 
                 fullDescription={buildingDefinition?.fullDescription}
-                createdAt={building.created_at}
-                createdBy={building.created_by}
+                createdAt={building.createdAt}
+                createdBy={building.createdBy}
               />
               
               {/* Occupant Information */}

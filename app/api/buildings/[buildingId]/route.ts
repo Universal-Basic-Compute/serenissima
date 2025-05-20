@@ -166,12 +166,12 @@ export async function GET(request: NextRequest) {
             variant: fields.Variant || '',
             position: fields.Position || '',
             rotation: fields.Rotation || 0,
-            owner: fields.Citizen || '',
-            created_at: fields.CreatedAt || new Date().toISOString(),
-            created_by: fields.CreatedBy || '',
-            updated_at: fields.UpdatedAt || new Date().toISOString(),
-            lease_amount: fields.LeaseAmount || 0,
-            rent_amount: fields.RentAmount || 0,
+            owner: fields.Citizen || '', // Airtable field is Citizen
+            createdAt: fields.CreatedAt || new Date().toISOString(), // Changed from created_at
+            createdBy: fields.CreatedBy || '', // Changed from created_by
+            updatedAt: fields.UpdatedAt || new Date().toISOString(), // Changed from updated_at
+            leaseAmount: fields.LeaseAmount || 0, // Changed from lease_amount
+            rentAmount: fields.RentAmount || 0, // Changed from rent_amount
             occupant: fields.Occupant || ''
           };
           
