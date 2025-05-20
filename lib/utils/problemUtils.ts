@@ -56,7 +56,10 @@ export async function saveProblems(
         Description: problem.description,
         Solutions: problem.solutions,
         Notes: problem.notes || '',
-        Position: problem.position || '' // Add the position field
+        // Ensure position is stringified if it's an object, otherwise use it as is or default to empty string
+        Position: typeof problem.position === 'object' && problem.position !== null 
+                  ? JSON.stringify(problem.position) 
+                  : (problem.position || '')
       }
     }));
     

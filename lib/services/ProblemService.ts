@@ -307,7 +307,7 @@ export class ProblemService {
             description: this.generateHomelessDescription(citizen),
             solutions: this.generateHomelessSolutions(citizen),
             notes: `Citizen ${citizen.Username} has no building with Category 'home' where they are listed as Occupant.`,
-            position: citizen.Position || '' // Assumes Position is a JSON string {lat, lng}
+            position: citizen.position || null // Use citizen.position (object) or null
           };
         }
       });
@@ -445,7 +445,7 @@ export class ProblemService {
             description: this.generateWorklessDescription(citizen),
             solutions: this.generateWorklessSolutions(citizen),
             notes: `Citizen ${citizen.Username} has no building with Category 'business' where they are listed as Occupant.`,
-            position: citizen.Position || '' // Assumes Position is a JSON string {lat, lng}
+            position: citizen.position || null // Use citizen.position (object) or null
           };
         }
       });
