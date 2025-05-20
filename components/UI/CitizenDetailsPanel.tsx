@@ -844,11 +844,11 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
                 </div>
               ) : (
                 <>
-                  {relationship.Title && (
-                    <p className="text-sm text-amber-800 mb-2 font-semibold">{relationship.Title}</p>
+                  {relationship.title && ( // Changed from Title
+                    <p className="text-sm text-amber-800 mb-2 font-semibold">{relationship.title}</p> // Changed from Title
                   )}
-                  {relationship.Description && (
-                    <p className="text-xs text-amber-700 mb-3">{relationship.Description}</p>
+                  {relationship.description && ( // Changed from Description
+                    <p className="text-xs text-amber-700 mb-3">{relationship.description}</p> // Changed from Description
                   )}
                   <div className="flex justify-around text-center">
                     <div title="Entwinement (Strength Score): Quantifies the relationship's strength based on shared relevancies and common interests. A higher score indicates more shared ground or potential for mutual benefit. Useful for understanding alignment and potential for collaboration.">
