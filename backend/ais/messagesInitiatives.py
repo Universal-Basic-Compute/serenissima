@@ -359,7 +359,15 @@ def process_ai_message_initiatives(dry_run: bool = False):
             else:
                 probability = (current_score / max_combined_score) * 0.25
             
-            print(f"  Relation avec {target_username} (Score: {current_score}). Probabilité d'initiative: {probability:.2%}")
+            # Vérifier si le destinataire est une IA
+            target_citizen_data = _get_citizen_data(tables, target_username)
+            target_is_ai = False
+            if target_citizen_data and target_citizen_data.get('fields', {}).get('IsAI', False):
+                target_is_ai = True
+                probability /= 2
+                print(f"    -> Cible {target_username} est une IA. Probabilité ajustée à: {probability:.2%}")
+            
+            print(f"  Relation avec {target_username} (Score: {current_score}). Probabilité d'initiative finale: {probability:.2%}")
 
             if random.random() < probability:
                 print(f"    -> {ai_username} initie un message à {target_username}!")
