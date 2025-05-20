@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import Airtable from 'airtable'; // Import Airtable
 import { relevancyService } from '@/lib/services/RelevancyService';
 import { saveRelevancies } from '@/lib/utils/relevancyUtils';
 
