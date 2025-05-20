@@ -70,7 +70,7 @@ def get_top_relationships_for_ai(tables: Dict[str, Table], ai_username: str, lim
         formula = f"OR({{Citizen1}} = '{ai_username}', {{Citizen2}} = '{ai_username}')"
         relationships_records = tables["relationships"].all(
             formula=formula,
-            fields=["Citizen1", "Citizen2", "StrengthScore", "TrustScore", "Type", "Status"]
+            fields=["Citizen1", "Citizen2", "StrengthScore", "TrustScore", "Status"] # "Type" a été retiré
         )
 
         scored_relationships = []

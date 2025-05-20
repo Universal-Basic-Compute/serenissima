@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
         id: relationship.id,
         citizen1: relationship.get('Citizen1'),
         citizen2: relationship.get('Citizen2'),
-        type: relationship.get('Type'),
+        // type: relationship.get('Type'), // Champ retiré car inexistant dans Airtable
         strengthScore: relationship.get('StrengthScore'),
         sentiment: relationship.get('Sentiment'),
         status: relationship.get('Status'),
