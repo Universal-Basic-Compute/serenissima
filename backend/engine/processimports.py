@@ -27,6 +27,8 @@ from typing import Dict, List, Optional, Any
 from pyairtable import Api, Table
 from dotenv import load_dotenv
 
+import uuid # Added for generating ResourceId
+
 # Set up logging
 logging.basicConfig(
     level=logging.INFO,
@@ -36,6 +38,12 @@ log = logging.getLogger("process_imports")
 
 # Load environment variables
 load_dotenv()
+
+def _escape_airtable_value(value: str) -> str:
+    """Échappe les apostrophes pour les formules Airtable."""
+    if isinstance(value, str):
+        return value.replace("'", "\\'")
+    return str(value)
 
 def is_dock_working_hours() -> bool:
     """Check if it's currently within dock working hours (typically 6 AM to 6 PM)."""
@@ -541,6 +549,39 @@ def process_import_contract(tables, contract: Dict, building_types: Dict, resour
         
         log.info(f"✅ Successfully created delivery activity for **{import_amount:,.1f}** **{resource_type}**")
         
+        # After successfully creating the delivery activity, create or update a resource record
+        # This part ensures a "resource" entry exists to track this import flow.
+        try:
+            current_time_iso = datetime.now().isoformat()
+            # Assuming the field in Airtable for resource type is "Resource Type" (with a space)
+            # And the owner of this tracking record is the 'buyer' of the contract.
+            resource_formula = f"AND({{Type}}='import', {{'Resource Type'}}='{_escape_airtable_value(resource_type)}', {{BuildingId}}='{_escape_airtable_value(buyer_building_id)}', {{Owner}}='{_escape_airtable_value(buyer)}')"
+            existing_resources = tables["resources"].all(formula=resource_formula, max_records=1)
+            
+            resource_data_fields = {
+                "Type": "import",
+                "Resource Type": resource_type,
+                "BuildingId": buyer_building_id,
+                "Owner": buyer,
+                "Count": 0,  # Imports start with 0 count, actual processing script will increment upon delivery completion
+                "UpdatedAt": current_time_iso
+            }
+            
+            if existing_resources:
+                resource_airtable_id = existing_resources[0]["id"]
+                tables["resources"].update(resource_airtable_id, resource_data_fields)
+                log.info(f"Updated import-tracking resource record for {resource_type} in building {buyer_building_id} for {buyer}")
+            else:
+                # Generate a unique ResourceId for the new record
+                resource_data_fields["ResourceId"] = f"resource-{uuid.uuid4()}"
+                resource_data_fields["CreatedAt"] = current_time_iso
+                tables["resources"].create(resource_data_fields)
+                log.info(f"Created new import-tracking resource record for {resource_type} in building {buyer_building_id} for {buyer}")
+                
+        except Exception as e_res:
+            log.error(f"Error creating/updating import-tracking resource record for {resource_type} in {buyer_building_id}: {str(e_res)}")
+            # Continue, as the delivery activity is the primary outcome here.
+
         # Note: We don't process payment or close the contract here
         # The payment and contract update will happen when the delivery activity is completed
         return True
