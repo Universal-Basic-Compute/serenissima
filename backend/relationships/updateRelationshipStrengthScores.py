@@ -107,7 +107,8 @@ def get_recent_relevancies(username: str) -> List[Dict]:
         
         # The API /api/relevancies already filters by CreatedAt (desc) and limits records.
         # It also handles 'RelevantToCitizen' = 'all' and JSON array matching.
-        api_url = f"{BASE_URL}/api/relevancies?relevantToCitizen={username}"
+        # Add excludeAll=true to ensure 'all' relevancies are not fetched for relationship calculations.
+        api_url = f"{BASE_URL}/api/relevancies?relevantToCitizen={username}&excludeAll=true"
         
         response = requests.get(api_url, timeout=60)
         response.raise_for_status() # Raise an exception for HTTP errors
