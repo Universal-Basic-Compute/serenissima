@@ -29,7 +29,7 @@ interface RelevancyScore {
 }
 
 interface GuildWithMembersData {
-  id: string; // Guild ID
+  guildId: string; // Functional Guild ID (e.g., "guild_artisans")
   name: string; // Guild Name
   memberUsernames: string[]; // Array of member usernames
 }
@@ -1170,11 +1170,11 @@ export class RelevancyService {
 
     // Placeholder data:
     return [
-      { id: 'guild_artisans', name: 'Artisans Guild', memberUsernames: ['Alice', 'Bob', 'ConsiglioDeiDieci'] },
-      { id: 'guild_merchants', name: 'Merchants Guild', memberUsernames: ['Charlie', 'David', 'Eve'] },
-      { id: 'guild_explorers', name: 'Explorers Guild', memberUsernames: ['Bob', 'Fiona'] },
-      { id: 'guild_empty', name: 'Empty Guild', memberUsernames: [] },
-      { id: 'guild_solo', name: 'Solo Guild', memberUsernames: ['SoloPlayer'] },
+      { guildId: 'guild_artisans', name: 'Artisans Guild', memberUsernames: ['Alice', 'Bob', 'ConsiglioDeiDieci'] },
+      { guildId: 'guild_merchants', name: 'Merchants Guild', memberUsernames: ['Charlie', 'David', 'Eve'] },
+      { guildId: 'guild_explorers', name: 'Explorers Guild', memberUsernames: ['Bob', 'Fiona'] },
+      { guildId: 'guild_empty', name: 'Empty Guild', memberUsernames: [] },
+      { guildId: 'guild_solo', name: 'Solo Guild', memberUsernames: ['SoloPlayer'] },
     ];
   }
 
@@ -1196,7 +1196,7 @@ export class RelevancyService {
       console.log(`[RelevancyService] Fetched ${allGuildsData.length} total guilds for guild member relevancy.`);
 
       for (const guild of allGuildsData) {
-        const guildId = guild.id;
+        const guildId = guild.guildId; // Use the functional GuildId
         const guildName = guild.name;
         const memberUsernames = guild.memberUsernames;
 
