@@ -1327,22 +1327,24 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
               <p className="text-amber-700 italic">No recent activities found.</p>
             )}
           </div>
-
-          {/* Core Personality Section */}
-          {citizen.corePersonality && Array.isArray(citizen.corePersonality) && citizen.corePersonality.length === 3 && (
-            <div className="mb-6">
-              <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Core Traits</h3>
-              <div className="bg-amber-100 p-3 rounded-lg text-sm space-y-1">
-                <p><span className="font-medium text-amber-900">Strength:</span> <span className="text-amber-700">{citizen.corePersonality[0]}</span></p>
-                <p><span className="font-medium text-amber-900">Flaw:</span> <span className="text-amber-700">{citizen.corePersonality[1]}</span></p>
-                <p><span className="font-medium text-amber-900">Driver:</span> <span className="text-amber-700">{citizen.corePersonality[2]}</span></p>
-              </div>
-            </div>
-          )}
             
           {/* Personality Section */}
           <div className="mb-6">
             <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Personality</h3>
+            {/* Core Personality Traits as colored boxes */}
+            {citizen.corePersonality && Array.isArray(citizen.corePersonality) && citizen.corePersonality.length === 3 && (
+              <div className="flex space-x-2 mb-3">
+                <div className="px-3 py-1 text-xs font-medium text-green-800 bg-green-100 border border-green-300 rounded-full shadow-sm">
+                  {citizen.corePersonality[0]}
+                </div>
+                <div className="px-3 py-1 text-xs font-medium text-red-800 bg-red-100 border border-red-300 rounded-full shadow-sm">
+                  {citizen.corePersonality[1]}
+                </div>
+                <div className="px-3 py-1 text-xs font-medium text-blue-800 bg-blue-100 border border-blue-300 rounded-full shadow-sm">
+                  {citizen.corePersonality[2]}
+                </div>
+              </div>
+            )}
             <p className="text-amber-700 italic text-sm">{citizen.personality || 'No personality description available.'}</p>
           </div>
 
