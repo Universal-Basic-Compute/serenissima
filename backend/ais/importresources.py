@@ -41,11 +41,11 @@ def _escape_airtable_value(value: str) -> str:
     """Échappe les apostrophes pour les formules Airtable."""
     return value.replace("'", "\\'")
 
-def _get_no_active_contracts_problems(tables: Dict[str, Table], username: str, limit: int = 50) -> List[Dict]:
-    """Get Latest 50 PROBLEMS where Type='no_active_contracts' and Citizen=Username."""
+def _get_no_active_contracts_problems(tables: Dict[str, Table], username: str, limit: int = 100) -> List[Dict]:
+    """Get Latest 100 PROBLEMS where Citizen=Username."""
     try:
         safe_username = _escape_airtable_value(username)
-        formula = f"AND({{Type}}='no_active_contracts', {{Citizen}}='{safe_username}')"
+        formula = f"{{Citizen}}='{safe_username}'"
         # Assuming 'CreatedAt' field exists for sorting
         records = tables["problems"].all(formula=formula, sort=['-CreatedAt'], max_records=limit)
         print(f"Found {len(records)} 'no_active_contracts' problems for citizen {username}")
@@ -397,6 +397,7 @@ Your decision should be specific, data-driven, and focused on optimizing your re
 IMPORTANT: You must end your response with a JSON object containing your specific import decisions.
 Include the building_id, resource_type, hourly_amount, and reason for each import you want to set up.
 If you decide not to set up any imports at this time, return an empty array.
+Make sure the building type can store the resource.
 """
         
         # Prepare the request payload
@@ -434,7 +435,7 @@ If you decide not to set up any imports at this time, return an empty array.
                 print("="*80)
                 
                 print(f"AI {ai_username} response length: {len(content)} characters")
-                print(f"AI {ai_username} response preview: {content[:200]}...")
+                print(f"AI {ai_username} response preview: {content[:5000]}...")
                 
                 # Try to extract the JSON decision from the response
                 try:
