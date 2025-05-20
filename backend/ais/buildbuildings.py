@@ -11,6 +11,7 @@ import colorama
 from colorama import Fore, Back, Style
 from pprint import pformat
 import textwrap
+import argparse
 
 # Initialize colorama
 colorama.init(autoreset=True)
@@ -120,25 +121,50 @@ def initialize_airtable():
     
     return tables
 
-def get_ai_citizens(tables) -> List[Dict]:
-    """Get all citizens that are marked as AI, are in Venice, and have appropriate social class."""
+def get_ai_citizens(tables, citizen_username_arg: Optional[str] = None) -> List[Dict]:
+    """Get AI citizens, optionally filtered by a specific username."""
     try:
-        # Query citizens with IsAI=true, InVenice=true, and Ducats >= 150000
-        formula = "AND({IsAI}=1, {InVenice}=1, {Ducats}>=150000)"
+        base_formula = "AND({IsAI}=1, {InVenice}=1, {Ducats}>=150000)"
+        if citizen_username_arg:
+            # Ensure username is properly escaped for the formula
+            safe_username = citizen_username_arg.replace("'", "\\'")
+            formula = f"AND({base_formula}, {{Username}}='{safe_username}')"
+            log_info(f"Fetching specific AI citizen: {citizen_username_arg}")
+        else:
+            formula = base_formula
+            log_info("Fetching all eligible AI citizens.")
+
         ai_citizens = tables["citizens"].all(formula=formula)
-        log_success(f"Found {len(ai_citizens)} AI citizens in Venice with at least 150,000 Ducats")
+        
+        if citizen_username_arg and not ai_citizens:
+            log_warning(f"AI citizen '{citizen_username_arg}' not found or does not meet criteria.")
+        elif not ai_citizens:
+            log_warning("No AI citizens found meeting the criteria.")
+        else:
+            log_success(f"Found {len(ai_citizens)} AI citizen(s) matching criteria.")
         return ai_citizens
     except Exception as e:
         log_error(f"Error getting AI citizens: {str(e)}")
         return []
 
-def get_citizen_lands(tables, username: str) -> List[Dict]:
-    """Get all lands owned by a specific citizen or all lands if the citizen owns none."""
+def get_citizen_lands(tables, username: str, target_land_id: Optional[str] = None) -> List[Dict]:
+    """Get lands for the AI to consider: a specific land if target_land_id is provided, otherwise all lands."""
     try:
-        # Return all lands - no longer filtering by ownership
-        all_lands = tables["lands"].all()
-        log_info(f"Returning {len(all_lands)} total lands for {username} to consider for building")
-        return all_lands
+        if target_land_id:
+            # Ensure LandId is properly escaped for the formula
+            safe_land_id = target_land_id.replace("'", "\\'")
+            formula = f"{{LandId}} = '{safe_land_id}'"
+            lands = tables["lands"].all(formula=formula, max_records=1)
+            if lands:
+                log_info(f"Fetched specific land {target_land_id} for {username} to consider.")
+            else:
+                log_warning(f"Specific land {target_land_id} not found.")
+            return lands
+        else:
+            # AI considers all lands if no specific land is targeted
+            all_lands = tables["lands"].all()
+            log_info(f"Returning {len(all_lands)} total lands for {username} to consider for building.")
+            return all_lands
     except Exception as e:
         log_error(f"Error getting lands for citizen {username}: {str(e)}")
         return []
@@ -502,7 +528,7 @@ def prepare_ai_building_strategy(ai_citizen: Dict, citizen_lands: List[Dict], ci
     
     return data_package
 
-def send_building_strategy_request(ai_username: str, data_package: Dict) -> Optional[Dict]:
+def send_building_strategy_request(ai_username: str, data_package: Dict, target_land_id: Optional[str] = None) -> Optional[Dict]:
     """Send the building strategy request to the AI via Kinos API."""
     try:
         api_key = get_kinos_api_key()
@@ -521,26 +547,59 @@ def send_building_strategy_request(ai_username: str, data_package: Dict) -> Opti
         log_info(f"Sending building strategy request to AI citizen {ai_username}")
         log_info(f"API URL: {url}")
         log_info(f"Citizen has {data_package['citizen']['ducats']} ducats")
-        log_info(f"Citizen has access to {len(data_package['lands'])} lands and {len(data_package['buildings'])} buildings")
-        
-        # Create a detailed prompt that addresses the AI directly as the decision-maker
-        prompt = f"""
+        log_info(f"Citizen has access to {len(data_package['lands'])} land(s) and {len(data_package['buildings'])} buildings")
+
+        if target_land_id:
+            log_info(f"AI is considering building on pre-selected land: {target_land_id}")
+            prompt = f"""
+As a citizen in La Serenissima with social class {data_package['citizen']['social_class']}, you are considering building on a specific land: **{target_land_id}**.
+Your task is to decide **what type of building** to construct on this land.
+
+Here's your current situation:
+- You have {data_package['citizen']['ducats']} ducats available.
+- The land {target_land_id} has {data_package['lands'][0]['building_points_count'] if data_package['lands'] else 'N/A'} building points.
+- Existing buildings on this land: {len(data_package['lands'][0]['existing_buildings']) if data_package['lands'] else 'N/A'}.
+
+When making your decision, carefully consider:
+1. Your current building portfolio and financial situation.
+2. EXISTING BUILDINGS on land {target_land_id} - aim for complementary structures.
+3. Supply chains and resource flows - build structures that work well with existing ones.
+4. Opportunities for new buildings that would increase your income.
+5. The rent amounts of existing buildings on this land.
+
+Focus on maximizing your income while maintaining sustainable maintenance costs.
+
+After your analysis, provide your building decision in this JSON format:
+```json
+{{
+  "building_type": "type_of_building_to_build",
+  "reason": "brief explanation of why this building type on this land"
+}}
+```
+
+If you decide not to build anything at this time (e.g., no suitable building type or insufficient funds), return an empty JSON object:
+```json
+{{}}
+```
+"""
+        else:
+            prompt = f"""
 As a citizen in La Serenissima with social class {data_package['citizen']['social_class']}, you need to decide on your next building investment.
 
 Here's your current situation:
-- You own {len(data_package['lands'])} lands
-- You have {len(data_package['buildings'])} buildings
-- Your current net income is {data_package['citizen']['financial']['net_income']} ducats
-- You have {data_package['citizen']['ducats']} ducats available
+- You are considering {len(data_package['lands'])} land(s).
+- You have {len(data_package['buildings'])} buildings.
+- Your current net income is {data_package['citizen']['financial']['net_income']} ducats.
+- You have {data_package['citizen']['ducats']} ducats available.
 
 When making your decision, carefully consider:
-1. Your current building portfolio
-2. EXISTING BUILDINGS on each land (not just yours) - aim for complementary structures
-3. Supply chains and resource flows - build structures that work together efficiently
-4. Opportunities for new buildings that would increase your income
-5. Which lands would be best for new construction (you can build on any land, not just ones you own)
-6. The rent amounts of existing buildings on potential lands
-7. How to prioritize your building plan based on your available ducats
+1. Your current building portfolio.
+2. EXISTING BUILDINGS on each land (not just yours) - aim for complementary structures.
+3. Supply chains and resource flows - build structures that work together efficiently.
+4. Opportunities for new buildings that would increase your income.
+5. Which lands would be best for new construction (you can build on any land, not just ones you own).
+6. The rent amounts of existing buildings on potential lands.
+7. How to prioritize your building plan based on your available ducats.
 
 Focus on maximizing your income while maintaining sustainable maintenance costs. Consider building diversity and how new buildings will complement existing structures.
 
@@ -562,6 +621,7 @@ If you decide not to build anything at this time, return an empty JSON object:
         # Create system instructions with the detailed data
         system_instructions = f"""
 You are {ai_username}, an AI citizen in La Serenissima. You make your own decisions about building strategy.
+{"You are focusing on land " + target_land_id + "." if target_land_id else ""}
 
 Here is the complete data about your current situation:
 {json.dumps(data_package, indent=2)}
@@ -666,25 +726,47 @@ If you decide not to build anything at this time, return an empty JSON object.
                         decision = json.loads(json_content)
                         
                         # Check if we have the required fields
-                        if "building_type" in decision and "land_id" in decision:
+                        if "building_type" in decision:
                             building_type = decision["building_type"]
-                            land_id = decision["land_id"]
                             reason = decision.get("reason", "No reason provided")
                             
-                            log_data(f"AI {ai_username} decision", decision)
-                            log_success(f"AI {ai_username} wants to build a {building_type} on land {land_id}")
-                            log_info(f"Reason: {reason}")
-                            
-                            return decision
+                            if target_land_id:
+                                # If land_id was pre-selected, AI only returns building_type and reason
+                                final_decision = {
+                                    "building_type": building_type,
+                                    "land_id": target_land_id,
+                                    "reason": reason
+                                }
+                                log_data(f"AI {ai_username} decision (land pre-selected)", final_decision)
+                                log_success(f"AI {ai_username} wants to build a {building_type} on pre-selected land {target_land_id}")
+                                log_info(f"Reason: {reason}")
+                                return final_decision
+                            elif "land_id" in decision:
+                                # If AI selected the land
+                                land_id_from_ai = decision["land_id"]
+                                final_decision = {
+                                    "building_type": building_type,
+                                    "land_id": land_id_from_ai,
+                                    "reason": reason
+                                }
+                                log_data(f"AI {ai_username} decision (AI selected land)", final_decision)
+                                log_success(f"AI {ai_username} wants to build a {building_type} on land {land_id_from_ai}")
+                                log_info(f"Reason: {reason}")
+                                return final_decision
+                            else:
+                                log_warning(f"AI response for {ai_username} provided 'building_type' but was missing 'land_id' (and no land was pre-selected).")
+                                return None
+                        elif not decision: # Empty JSON object {} means AI decided not to build
+                            log_info(f"AI {ai_username} decided not to build anything at this time (empty JSON response).")
+                            return None
                     
                     # If we get here, no valid decision was found
-                    log_warning(f"No valid building decision found in AI response.")
+                    log_warning(f"No valid building decision found in AI response for {ai_username}.")
                     return None
                 except Exception as e:
-                    log_error(f"Error extracting decision from AI response: {str(e)}")
+                    log_error(f"Error extracting decision from AI response for {ai_username}: {str(e)}")
+                    log_error(f"Full response content that caused the error for {ai_username}:\n{content}")
                     return None
-                
-                return None
             else:
                 log_error(f"Error processing building strategy request for AI citizen {ai_username}: {response_data}")
                 return None
@@ -899,14 +981,14 @@ def get_available_building_points(polygons: List[Dict], existing_buildings: List
         print(f"Error getting available building points: {str(e)}")
         return {"land": [], "canal": [], "bridge": []}
 
-def send_building_placement_request(ai_username: str, decision: Dict, polygon_data: List[Dict], 
-                                   available_points: Dict[str, List[Dict]], building_types: Dict, 
-                                   tables=None, citizen_relevancies=None) -> bool:
+def send_building_placement_request(ai_username: str, decision: Dict, polygon_data: List[Dict],
+                                   available_points: Dict[str, List[Dict]], building_types: Dict,
+                                   tables=None, citizen_relevancies=None, target_land_id_arg: Optional[str] = None) -> bool:
     """Send a second request to the AI to choose a specific point for building placement."""
-    try:      
-        if not decision or "building_type" not in decision or "land_id" not in decision:
-            print(f"No valid building decision from AI {ai_username}, skipping placement request")
-            print(f"Decision data: {json.dumps(decision)}")
+    try:
+        if not decision or not decision.get("building_type") or not decision.get("land_id"):
+            log_warning(f"No valid building decision from AI {ai_username} (or missing building_type/land_id), skipping placement request.")
+            log_data("Received decision object", decision)
             return False
         
         building_type = decision["building_type"]
@@ -1384,9 +1466,9 @@ Your response must be a JSON object with:
         print(f"Exception traceback: {traceback.format_exc()}")
         return False
 
-def process_ai_building_strategies(dry_run: bool = False):
+def process_ai_building_strategies(dry_run: bool = False, citizen_username_arg: Optional[str] = None, target_land_id_arg: Optional[str] = None):
     """Main function to process AI building strategies."""
-    log_header(f"AI Building Strategy Process (dry_run={dry_run})")
+    log_header(f"AI Building Strategy Process (dry_run={dry_run}, citizen={citizen_username_arg or 'all'}, landId={target_land_id_arg or 'AI choice'})")
     
     # Import traceback for detailed error logging
     import traceback
@@ -1399,40 +1481,23 @@ def process_ai_building_strategies(dry_run: bool = False):
         log_error(f"Failed to initialize Airtable: {str(e)}")
         log_error(f"Exception traceback: {traceback.format_exc()}")
         return
-    
-    # Get AI citizens
-    try:
-        ai_citizens = get_ai_citizens(tables)
-        if not ai_citizens:
-            log_warning("No AI citizens found, exiting")
-            return
-        log_success(f"Successfully retrieved {len(ai_citizens)} AI citizens")
-        
-        # Filter AI citizens to only those with sufficient ducats for building (minimum 1,000,000)
-        filtered_ai_citizens = []
-        for ai_citizen in ai_citizens:
-            ai_username = ai_citizen["fields"].get("Username")
-            ducats = ai_citizen["fields"].get("Ducats", 0)
-            
-            filtered_ai_citizens.append(ai_citizen)
-            log_info(f"AI citizen {ai_username} has {ducats} ducats, including in processing")
 
-        # Replace the original list with the filtered list
-        ai_citizens = filtered_ai_citizens
-        log_success(f"Filtered down to {len(ai_citizens)} AI citizens with sufficient ducats for building")
-        
+    # Get AI citizens, potentially filtered by citizen_username_arg
+    try:
+        ai_citizens = get_ai_citizens(tables, citizen_username_arg)
         if not ai_citizens:
-            log_warning("No AI citizens with sufficient ducats for building, exiting")
+            # Message already logged by get_ai_citizens if no citizens found
             return
+        # Further filtering by ducats is already handled in get_ai_citizens
     except Exception as e:
         log_error(f"Failed to get AI citizens: {str(e)}")
         log_error(f"Exception traceback: {traceback.format_exc()}")
         return
     
-    # Get all buildings for reference
+    # Get all buildings for reference (used to find existing buildings on lands)
     try:
-        all_buildings = get_all_buildings(tables)
-        log_success(f"Successfully retrieved {len(all_buildings)} buildings")
+        all_buildings = get_all_buildings(tables) # This fetches all buildings in the system
+        log_success(f"Successfully retrieved {len(all_buildings)} total buildings for context.")
     except Exception as e:
         log_error(f"Failed to get all buildings: {str(e)}")
         log_error(f"Exception traceback: {traceback.format_exc()}")
@@ -1451,66 +1516,42 @@ def process_ai_building_strategies(dry_run: bool = False):
         log_header(f"Processing AI citizen: {ai_username}")
         
         try:
-            # Get lands owned by this AI
-            citizen_lands = get_citizen_lands(tables, ai_username)
-            log_info(f"Retrieved {len(citizen_lands)} lands for {ai_username}")
+            # Get lands for the AI to consider (specific land or all lands)
+            # The username parameter for get_citizen_lands is for logging context.
+            citizen_lands = get_citizen_lands(tables, ai_username, target_land_id_arg)
             
             if not citizen_lands:
-                log_warning(f"AI citizen {ai_username} has no lands, skipping")
+                if target_land_id_arg:
+                    log_warning(f"Target land {target_land_id_arg} not found for AI citizen {ai_username}, skipping.")
+                else:
+                    log_warning(f"AI citizen {ai_username} has no lands to consider (or all lands query returned empty), skipping.")
                 ai_strategy_results[ai_username] = False
                 continue
             
-            # Get buildings owned by this AI
-            citizen_buildings = get_citizen_buildings(tables, ai_username)
-            log_info(f"Retrieved {len(citizen_buildings)} buildings for {ai_username}")
-            
-            # Get citizen relevancies directly from the API
-            citizen_relevancies = get_citizen_relevancies(ai_username)
-            log_info(f"Retrieved {len(citizen_relevancies)} relevancies for {ai_username}")
-            
-            # Also fetch building ownership relevancies
-            building_ownership_relevancies = []
-            
-            # We'll add these to the data package later when it's created
-            try:
-                # Get API base URL from environment variables, with a default fallback
-                api_base_url = os.getenv("API_BASE_URL", "http://localhost:3000")
-                
-                building_ownership_response = requests.get(
-                    f"{api_base_url}/api/relevancies/building-ownership?username={ai_username}"
-                )
-                
-                if building_ownership_response.ok:
-                    building_ownership_data = building_ownership_response.json()
-                    if building_ownership_data.get("success") and building_ownership_data.get("detailedRelevancy"):
-                        for _, relevancy in building_ownership_data.get("detailedRelevancy", {}).items():
-                            building_ownership_relevancies.append({
-                                "asset_id": relevancy.get("assetId", ""),
-                                "asset_type": relevancy.get("assetType", ""),
-                                "category": relevancy.get("category", ""),
-                                "type": relevancy.get("type", ""),
-                                "target_citizen": relevancy.get("targetCitizen", ""),
-                                "score": relevancy.get("score", 0),
-                                "time_horizon": relevancy.get("timeHorizon", ""),
-                                "title": relevancy.get("title", ""),
-                                "description": relevancy.get("description", ""),
-                                "status": relevancy.get("status", "")
-                            })
-                    log_info(f"Retrieved {len(building_ownership_relevancies)} building ownership relevancies for {ai_username}")
-                else:
-                    log_warning(f"Failed to fetch building ownership relevancies: {building_ownership_response.status_code}")
-            except Exception as e:
-                log_warning(f"Error fetching building ownership relevancies: {str(e)}")
-            
-            # Get polygon data for this citizen's lands
+            # Get buildings owned by this AI (for context in data_package)
+            citizen_buildings_owned = get_citizen_buildings(tables, ai_username)
+            log_info(f"Retrieved {len(citizen_buildings_owned)} buildings owned by {ai_username} for context.")
+
+            # Get polygon data for the land(s) being considered.
+            # get_polygon_data_for_citizen works fine if citizen_lands contains one or more lands.
             polygon_data = get_polygon_data_for_citizen(ai_username, citizen_lands)
-            log_info(f"Retrieved polygon data for {len(polygon_data)} lands")
+            if not polygon_data:
+                log_warning(f"No polygon data found for the lands being considered by {ai_username}, skipping.")
+                ai_strategy_results[ai_username] = False
+                continue
+            log_info(f"Retrieved polygon data for {len(polygon_data)} land(s) being considered.")
+
+            # Determine existing buildings on the specific land(s) being considered for point availability.
+            considered_land_ids = [land["fields"].get("LandId") for land in citizen_lands if land["fields"].get("LandId")]
+            buildings_on_considered_lands = [
+                b for b in all_buildings if b["fields"].get("LandId") in considered_land_ids
+            ]
+            log_info(f"Found {len(buildings_on_considered_lands)} existing buildings on the {len(considered_land_ids)} land(s) under consideration.")
+
+            # Get available building points on the considered land(s)
+            available_points = get_available_building_points(polygon_data, buildings_on_considered_lands)
             
-            # Get available building points
-            available_points = get_available_building_points(polygon_data, citizen_buildings)
-            
-            # Check if there are any available building points
-            total_points = sum(len(points) for points in available_points.values())
+            total_points = sum(len(points_list) for points_list in available_points.values())
             log_info(f"Found {total_points} total available building points for {ai_username}")
             
             if total_points == 0:
@@ -1518,46 +1559,75 @@ def process_ai_building_strategies(dry_run: bool = False):
                 ai_strategy_results[ai_username] = False
                 continue
             
-            # Prepare the data package for the AI
-            data_package = prepare_ai_building_strategy(ai_citizen, citizen_lands, citizen_buildings, all_buildings)
+            # Prepare the data package for the AI.
+            # citizen_buildings_owned is for AI's general context.
+            # all_buildings is for context of what's on all lands (filtered by prepare_ai_building_strategy for relevant lands).
+            data_package = prepare_ai_building_strategy(ai_citizen, citizen_lands, citizen_buildings_owned, all_buildings)
             
-            # Add building ownership relevancies to the data package
+            # Fetch and add building ownership relevancies (if any)
+            # This part can remain as is, as it's contextual information for the AI.
+            building_ownership_relevancies = []
+            try:
+                api_base_url = os.getenv("API_BASE_URL", "http://localhost:3000")
+                building_ownership_response = requests.get(
+                    f"{api_base_url}/api/relevancies/building-ownership?username={ai_username}"
+                )
+                if building_ownership_response.ok:
+                    building_ownership_data = building_ownership_response.json()
+                    if building_ownership_data.get("success") and building_ownership_data.get("detailedRelevancy"):
+                        for _, relevancy_item in building_ownership_data.get("detailedRelevancy", {}).items(): # Renamed relevancy to relevancy_item
+                            building_ownership_relevancies.append({
+                                "asset_id": relevancy_item.get("assetId", ""), "asset_type": relevancy_item.get("assetType", ""),
+                                "category": relevancy_item.get("category", ""), "type": relevancy_item.get("type", ""),
+                                "target_citizen": relevancy_item.get("targetCitizen", ""), "score": relevancy_item.get("score", 0),
+                                "time_horizon": relevancy_item.get("timeHorizon", ""), "title": relevancy_item.get("title", ""),
+                                "description": relevancy_item.get("description", ""), "status": relevancy_item.get("status", "")
+                            })
+                    log_info(f"Retrieved {len(building_ownership_relevancies)} building ownership relevancies for {ai_username}")
+                else:
+                    log_warning(f"Failed to fetch building ownership relevancies: {building_ownership_response.status_code}")
+            except Exception as e_relevancy: # Renamed e to e_relevancy
+                log_warning(f"Error fetching building ownership relevancies: {str(e_relevancy)}")
             data_package["building_ownership_relevancies"] = building_ownership_relevancies
             
             log_success(f"Prepared data package for {ai_username}")
             
-            # Send the building strategy request to the AI
             if not dry_run:
                 log_section(f"STEP 1: Get building decision for {ai_username}")
+                decision = send_building_strategy_request(ai_username, data_package, target_land_id=target_land_id_arg)
                 
-                # First call: Get building decision
-                decision = send_building_strategy_request(ai_username, data_package)
-                
-                if decision is not None:
+                if decision and decision.get("building_type") and decision.get("land_id"):
                     log_section(f"STEP 2: Get placement decision for {ai_username}")
+                    building_types_api = get_building_types_from_api() # Renamed to avoid conflict
                     
-                    # Second call: Get placement decision
-                    building_types = get_building_types_from_api()
+                    # Ensure polygon_data and available_points are for the specific land chosen by AI or CLI
+                    final_land_id = decision["land_id"]
+                    final_polygon_data = [p for p in polygon_data if p.get("id") == final_land_id]
+                    
+                    if not final_polygon_data:
+                        log_error(f"Polygon data for chosen/specified land {final_land_id} not found. Skipping placement.")
+                        ai_strategy_results[ai_username] = False
+                        continue
+
+                    buildings_on_final_land = [b for b in all_buildings if b["fields"].get("LandId") == final_land_id]
+                    final_available_points = get_available_building_points(final_polygon_data, buildings_on_final_land)
+
                     placement_success = send_building_placement_request(
-                        ai_username, 
-                        decision, 
-                        polygon_data, 
-                        available_points,
-                        building_types,
+                        ai_username,
+                        decision,
+                        final_polygon_data, # Use polygon data for the specific chosen land
+                        final_available_points, # Use available points for the specific chosen land
+                        building_types_api,
                         tables,
-                        get_citizen_relevancies(ai_username)  # Get relevancies directly from API
+                        get_citizen_relevancies(ai_username), # Contextual relevancies
+                        target_land_id_arg=final_land_id # Pass the land_id for context in placement
                     )
-                    
                     ai_strategy_results[ai_username] = placement_success
-                    if placement_success:
-                        log_success(f"Building strategy for {ai_username} completed successfully")
-                    else:
-                        log_error(f"Building strategy for {ai_username} failed")
-                else:
-                    log_warning(f"No valid building decision received for {ai_username}")
-                    ai_strategy_results[ai_username] = False
-            else:
-                # In dry run mode, just log what would happen
+                    log_success(f"Building strategy for {ai_username} completed with success: {placement_success}")
+                elif decision is None or not decision.get("building_type"): # AI decided not to build or error
+                    log_warning(f"AI {ai_username} decided not to build or an error occurred in decision making.")
+                    ai_strategy_results[ai_username] = False # Mark as false if no decision to build
+            else: # Dry run
                 log_info(f"[DRY RUN] Would send building strategy request to AI citizen {ai_username}")
                 log_data("Data package summary", {
                     "Citizen": data_package['citizen']['username'],
@@ -1603,8 +1673,15 @@ def process_ai_building_strategies(dry_run: bool = False):
     log_success("AI building strategy process completed")
 
 if __name__ == "__main__":
-    # Check if this is a dry run
-    dry_run = "--dry-run" in sys.argv
+    parser = argparse.ArgumentParser(description="AI Building Strategy Script")
+    parser.add_argument("--dry-run", action="store_true", help="Run the script without making actual changes.")
+    parser.add_argument("--citizen", type=str, help="Run the script for a specific citizen username.")
+    parser.add_argument("--landId", type=str, help="Run the script for a specific land ID, skipping AI land selection.")
+    args = parser.parse_args()
+
+    dry_run_arg = args.dry_run
+    citizen_username_arg = args.citizen
+    target_land_id_arg = args.landId
     
     # Run the process
-    process_ai_building_strategies(dry_run)
+    process_ai_building_strategies(dry_run_arg, citizen_username_arg, target_land_id_arg)
