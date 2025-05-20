@@ -684,21 +684,21 @@ export default function BuildingDetailsPanel({
               
               {/* Owner information */}
               <BuildingOwner owner={building.owner} />
-              
-              {/* Location with point visualization */}
-              <BuildingLocation 
-                building={building}
-                landData={landData}
-                pointData={pointData}
-              />
-              
-              {/* Maintenance Cost */}
-              <BuildingMaintenance maintenanceCost={buildingDefinition?.maintenanceCost} />
   
               {/* Financial Information */}
               <BuildingFinancials 
                 leaseAmount={building.leaseAmount} 
                 rentAmount={building.rentAmount} 
+              />
+              
+              {/* Maintenance Cost */}
+              <BuildingMaintenance maintenanceCost={buildingDefinition?.maintenanceCost} />
+
+              {/* Location with point visualization */}
+              <BuildingLocation 
+                building={building}
+                landData={landData}
+                pointData={pointData}
               />
   
               {/* Full Description */}
