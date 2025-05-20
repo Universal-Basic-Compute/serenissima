@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
         citizen: record.get('Citizen') || '',
         assetType: record.get('AssetType') || '',
         assetId: record.get('AssetId') || '',
-        severity: record.get('Severity') || 'medium',
+        severity: String(record.get('Severity') || 'medium'),
         status: record.get('Status') || 'active',
         createdAt: record.get('CreatedAt') || '',
         updatedAt: record.get('UpdatedAt') || '',

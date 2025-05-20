@@ -920,22 +920,22 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
             <div className="space-y-3 max-h-[200px] overflow-y-auto pr-1 custom-scrollbar">
               {problems.map((problem, index) => (
                 <div key={problem.problemId || index} className={`rounded-lg p-3 text-sm border ${
-                  problem.Severity === 'high' ? 'bg-red-50 border-red-200' :
-                  problem.Severity === 'medium' ? 'bg-yellow-50 border-yellow-200' :
+                  problem.severity === 'high' ? 'bg-red-50 border-red-200' :
+                  problem.severity === 'medium' ? 'bg-yellow-50 border-yellow-200' :
                   'bg-green-50 border-green-200'
                 }`}>
                   <div className="flex items-center justify-between mb-1">
                     <div className={`font-medium ${
-                      problem.Severity === 'high' ? 'text-red-800' :
-                      problem.Severity === 'medium' ? 'text-yellow-800' :
+                      problem.severity === 'high' ? 'text-red-800' :
+                      problem.severity === 'medium' ? 'text-yellow-800' :
                       'text-green-800'
                     }`}>
-                      Severity: {problem.Severity.charAt(0).toUpperCase() + problem.Severity.slice(1)}
+                      Severity: {problem.severity && typeof problem.severity === 'string' ? problem.severity.charAt(0).toUpperCase() + problem.severity.slice(1) : 'Unknown'}
                     </div>
                   </div>
                   <div className={`text-xs mt-1 ${
-                    problem.Severity === 'high' ? 'text-red-700' :
-                    problem.Severity === 'medium' ? 'text-yellow-700' :
+                    problem.severity === 'high' ? 'text-red-700' :
+                    problem.severity === 'medium' ? 'text-yellow-700' :
                     'text-green-700'
                   }`}>
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
