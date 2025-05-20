@@ -116,10 +116,28 @@ def initialize_airtable():
         "lands": Table(airtable_api_key, airtable_base_id, "LANDS"),
         "buildings": Table(airtable_api_key, airtable_base_id, "BUILDINGS"),
         "notifications": Table(airtable_api_key, airtable_base_id, "NOTIFICATIONS"),
-        "relevancies": Table(airtable_api_key, airtable_base_id, "RELEVANCIES")
+        "relevancies": Table(airtable_api_key, airtable_base_id, "RELEVANCIES"),
+        "problems": Table(airtable_api_key, airtable_base_id, "PROBLEMS")
     }
     
     return tables
+
+def _escape_airtable_value(value: str) -> str:
+    """Échappe les apostrophes pour les formules Airtable."""
+    return value.replace("'", "\\'")
+
+def _get_citizen_problems(tables: Dict[str, Table], username: str, limit: int = 50) -> List[Dict]:
+    """Get latest 50 PROBLEMS where Citizen=Username."""
+    try:
+        safe_username = _escape_airtable_value(username)
+        formula = f"{{Citizen}}='{safe_username}'"
+        # Assuming 'CreatedAt' field exists for sorting
+        records = tables["problems"].all(formula=formula, sort=['-CreatedAt'], max_records=limit)
+        log_info(f"Found {len(records)} problems for citizen {username}")
+        return [{'id': r['id'], 'fields': r['fields']} for r in records]
+    except Exception as e:
+        log_error(f"Error fetching problems for {username}: {e}")
+        return []
 
 def get_ai_citizens(tables, citizen_username_arg: Optional[str] = None) -> List[Dict]:
     """Get AI citizens, optionally filtered by a specific username."""
@@ -474,6 +492,9 @@ def prepare_ai_building_strategy(ai_citizen: Dict, citizen_lands: List[Dict], ci
     
     # Filter building types based on social class
     building_types = filter_building_types_by_social_class(all_building_types, allowed_tiers)
+
+    # Get latest problems for the citizen
+    latest_citizen_problems = _get_citizen_problems(tables, username)
     
     log_info(f"Filtered building types for {username} ({social_class}): {len(building_types)} of {len(all_building_types)} types available")
     
@@ -522,6 +543,7 @@ def prepare_ai_building_strategy(ai_citizen: Dict, citizen_lands: List[Dict], ci
         "buildings": buildings_data,
         "relevancies": relevancies_data,  # Add the relevancies data
         "target_relevancies": target_relevancies_data,  # Add the target relevancies data
+        "latest_citizen_problems": latest_citizen_problems, # Add latest problems for the citizen
         "building_types": building_types,  # Now contains only the filtered building types
         "timestamp": datetime.now().isoformat()
     }
@@ -628,6 +650,9 @@ Here is the complete data about your current situation:
 
 Your social class is {data_package['citizen']['social_class']}, which means you can only construct buildings of tiers {', '.join(map(str, data_package['citizen']['allowed_building_tiers']))}.
 The building_types section only includes buildings that you are allowed to construct based on your social class.
+
+Contextual data available:
+- `latest_citizen_problems`: Lists the 50 most recent problems you are facing (e.g., homelessness, worklessness, vacant properties). This can help you prioritize building types that solve these problems.
 
 IMPORTANT: For each land, carefully review the "existing_buildings" field to see what structures are already present. 
 When deciding where to build and what to build:
