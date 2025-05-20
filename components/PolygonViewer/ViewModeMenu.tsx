@@ -1,6 +1,7 @@
 import { ViewMode, ActiveViewMode } from '../PolygonViewer/types';
 import IconButton from '../UI/IconButton';
 import { eventBus, EventTypes } from '../../lib/utils/eventBus';
+import { useRouter } from 'next/navigation'; // Import useRouter
 
 interface ViewModeMenuProps {
   activeView: ActiveViewMode;
@@ -8,19 +9,24 @@ interface ViewModeMenuProps {
 }
 
 export default function ViewModeMenu({ activeView, setActiveView }: ViewModeMenuProps) {
+  const router = useRouter(); // Initialize useRouter
+
   // Create a wrapper function to emit the view mode change event
   const handleViewModeChange = (view: ActiveViewMode) => {
     setActiveView(view);
     // Emit event to notify other components about the view mode change
     eventBus.emit(EventTypes.VIEW_MODE_CHANGED, { viewMode: view });
     
-    // Dispatch events to open specific panels
+    // Dispatch events to open specific panels or navigate
     if (view === 'governance') {
       window.dispatchEvent(new CustomEvent('openGovernancePanel'));
     } else if (view === 'guilds') {
       window.dispatchEvent(new CustomEvent('openGuildsPanel'));
     } else if (view === 'knowledge') {
       window.dispatchEvent(new CustomEvent('openKnowledgePanel'));
+    } else if (view === 'citizens') {
+      router.push('/citizens'); // Navigate to the citizens page
+      // The existing event dispatch for loadCitizens can remain if other components listen to it.
     } else {
       // Close all panels if switching to other views
       window.dispatchEvent(new CustomEvent('closeGovernancePanel'));
