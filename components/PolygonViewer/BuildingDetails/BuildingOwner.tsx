@@ -117,7 +117,7 @@ const BuildingOwner: React.FC<BuildingOwnerProps> = ({ owner }) => {
               {ownerProfile.firstName} {ownerProfile.lastName}
             </p>
             <p className="text-sm text-amber-600">
-              @{ownerProfile.username}
+              {ownerProfile.username}
             </p>
             {ownerProfile.familyMotto && (
               <p className="text-xs italic text-gray-500 mt-1">
