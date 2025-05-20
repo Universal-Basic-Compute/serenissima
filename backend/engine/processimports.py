@@ -486,7 +486,7 @@ def create_delivery_activity(tables, citizen: Dict, contract: Dict, resource_typ
         log.error(f"Error creating delivery activity: {e}")
         return None
 
-def process_import_contract(tables, contract: Dict, building_types: Dict, resource_types: Dict) -> bool:
+def process_import_contract(tables, contract: Dict, building_types: Dict, resource_types: Dict, dry_run: bool = False) -> bool:
     """Process a single import contract."""
     try:
         contract_id = contract['id']
@@ -680,7 +680,7 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
             log.info(f"🧪 **[DRY RUN]** Would process contract **{contract['id']}**")
             success_count += 1
         else:
-            if process_import_contract(tables, contract, building_types, resource_types):
+            if process_import_contract(tables, contract, building_types, resource_types, dry_run=dry_run):
                 success_count += 1
     
     log.info(f"🚢 Import processing complete. Successfully processed **{success_count}** out of **{len(contracts)}** contracts")
