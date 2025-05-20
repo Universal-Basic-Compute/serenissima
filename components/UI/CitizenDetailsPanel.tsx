@@ -1206,7 +1206,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
               )}
               
               {/* Name and social class overlay at the bottom */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4"> {/* Changed p-3 to p-4 */}
                 <h3 className="text-white text-2xl font-serif font-bold"> {/* Changed text-xl to text-2xl */}
                   {citizen.firstname} {citizen.lastname}
                 </h3>
