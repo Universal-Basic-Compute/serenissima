@@ -74,24 +74,29 @@ def generate_image_with_ideogram(prompt: str, aspect_ratio: str, guild_identifie
     # Add aspect ratio guidance to the prompt
     full_prompt = f"{prompt}, {aspect_ratio} aspect ratio, digital art, fantasy style."
     if image_type == "emblem":
-        full_prompt = f"A heraldic emblem or sigil representing a guild in Venice XV century. {prompt}. Centered, iconic, 1:1 aspect ratio, on a transparent background if possible."
+        full_prompt = f"A heraldic emblem or sigil representing a guild in Venice XV century. {prompt}. Centered, iconic, {aspect_ratio} aspect ratio, on a transparent background if possible."
     elif image_type == "banner":
-        full_prompt = f"A wide banner or flag for a guild in Venice XV century. {prompt}. Landscape orientation, 2:1 aspect ratio, detailed, epic."
+        full_prompt = f"A wide banner or flag for a guild in Venice XV century. {prompt}. Landscape orientation, {aspect_ratio} aspect ratio, detailed, epic."
 
     try:
         log.debug(f"Full prompt for Ideogram ({guild_name_for_logging} - {image_type}): {full_prompt}")
+        
+        payload = {
+            "prompt": full_prompt,
+            "aspect_ratio": aspect_ratio,  # Pass aspect_ratio to the API
+            "style_type": "REALISTIC",
+            "rendering_speed": "DEFAULT",
+            "model": "V_3"
+        }
+        log.debug(f"Ideogram API payload: {json.dumps(payload)}")
+
         response = requests.post(
             "https://api.ideogram.ai/v1/ideogram-v3/generate", # Assuming v3, adjust if needed
             headers={
                 "Api-Key": ideogram_api_key,
                 "Content-Type": "application/json"
             },
-            json={
-                "prompt": full_prompt,
-                "style_type": "REALISTIC", # Or another appropriate style
-                "rendering_speed": "DEFAULT",
-                "model": "V_3" # Assuming v3
-            }
+            json=payload
         )
         response.raise_for_status() # Raise an exception for HTTP errors
 
@@ -198,7 +203,7 @@ def process_guild_images(dry_run: bool = False):
         if banner_prompt and not banner_prompt.startswith('/'):
             log.info(f"GuildBanner for {guild_name} is a prompt: '{banner_prompt[:50]}...'")
             if not dry_run:
-                new_banner_url = generate_image_with_ideogram(banner_prompt, "2:1", guild_id_for_filename, "banner", guild_name)
+                new_banner_url = generate_image_with_ideogram(banner_prompt, "ASPECT_16_9", guild_id_for_filename, "banner", guild_name)
                 if new_banner_url:
                     update_guild_record(tables, guild_record_id, 'GuildBanner', new_banner_url)
                 else:
