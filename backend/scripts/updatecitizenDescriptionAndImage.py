@@ -221,40 +221,35 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
         
         Based on your history, activities, and current status as {first_name} {last_name} ({username}), a {social_class} who {workplace_info}, YOU choose:
         
-        1. your new historically accurate description, including:
-           - your personality traits that have developed through your experiences
-           - your aspirations and motivations that align with your economic activities
-           - Notable achievements or events from your history in Venice (if present in the data)
-           - your family background appropriate to your social class
-           - your daily routines and habits
+        1. Your new 'Personality' (a textual description, 2-3 sentences) which elaborates on your core traits, values, temperament, and notable flaws, reflecting your experiences, aspirations, achievements, family background, and daily habits.
         
-        2. A concise core personality (2-3 sentences) that captures your:
-           - fundamental character traits (both positive and negative)
-           - core values and beliefs
-           - general temperament and outlook on life
-           - notable flaws, vices, or weaknesses (such as cunning, greed, pride, impatience, etc.)
+        2. Your 'CorePersonality' as an array of three specific strings: [Positive Trait, Negative Trait, Core Motivation]. This should follow the framework:
+           - Positive Trait: A strength, what you excel at (e.g., "Meticulous", "Disciplined", "Observant").
+           - Negative Trait: A flaw, what limits you (e.g., "Calculating", "Rigid", "Secretive").
+           - Core Motivation: A driver, what fundamentally motivates you (e.g., "Security-driven", "Stability-oriented", "Independence-focused").
+           Each trait should be a single descriptive word or a very short phrase.
 
-        3. A family motto that reflects your values and aspirations (if you don't already have one)
+        3. A family motto that reflects your values and aspirations (if you don't already have one).
 
         4. A coat of arms description (if you don't already have one) that:
-           - Is historically appropriate for your social class
-           - Includes symbolic elements that represent your profession, values, and family history
-           - Follows heraldic conventions of Renaissance Venice
-           - Uses colors and symbols that reflect your status and aspirations
+           - Is historically appropriate for your social class.
+           - Includes symbolic elements that represent your profession, values, and family history.
+           - Follows heraldic conventions of Renaissance Venice.
+           - Uses colors and symbols that reflect your status and aspirations.
         
         5. A detailed image prompt for Ideogram that will generate a portrait of YOU that:
-           - Accurately reflects your social class ({social_class}) with appropriate status symbols
-           - Shows period-appropriate clothing and accessories for your specific profession
-           - Captures your personality traits mentioned in the description
-           - Features authentic Renaissance Venetian style, architecture, and setting
-           - Includes appropriate lighting (Rembrandt-style for higher classes, natural light for lower)
-           - Uses a color palette appropriate to your social standing
-           - Incorporates symbols of your trade or profession
-           - Shows facial features and expression that reflect your character
+           - Accurately reflects your social class ({social_class}) with appropriate status symbols.
+           - Shows period-appropriate clothing and accessories for your specific profession.
+           - Captures your personality traits mentioned in the 'Personality' description and 'CorePersonality' array.
+           - Features authentic Renaissance Venetian style, architecture, and setting.
+           - Includes appropriate lighting (Rembrandt-style for higher classes, natural light for lower).
+           - Uses a color palette appropriate to your social standing.
+           - Incorporates symbols of your trade or profession.
+           - Shows facial features and expression that reflect your character.
         
-        Your current description: {current_description}
+        Your current textual description (Personality): {current_description}
         
-        Please return your response in JSON format with these fields: "description", "corePersonality", "familyMotto", "coatOfArms", and "imagePrompt".
+        Please return your response in JSON format with these fields: "Personality", "CorePersonality", "familyMotto", "coatOfArms", and "imagePrompt".
         """
         
         # Prepare system context with all the citizen data
@@ -339,7 +334,7 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
                 "content": prompt,
                 "model": "claude-3-7-sonnet-latest",
                 "mode": "creative",
-                "addSystem": f"You are a historical expert on Renaissance Venice (1400-1600) helping to update a citizen profile for a historically accurate economic simulation game called La Serenissima. You have access to the following information about the citizen: {system_context_str}. When creating the core personality, be sure to include at least one significant character flaw or vice that would be realistic for a person of this social class and profession in Renaissance Venice. Examples include pride, greed, cunning, jealousy, impatience, vanity, stubbornness, or other human weaknesses.Your response MUST be a valid JSON object with EXACTLY this format:\n\n```json\n{{\n  \"description\": \"string\",\n  \"corePersonality\": \"string\",\n  \"familyMotto\": \"string\",\n  \"coatOfArms\": \"string\",\n  \"imagePrompt\": \"string\"\n}}\n```\n\nDo not include any text before or after the JSON."
+                "addSystem": f"You are a historical expert on Renaissance Venice (1400-1600) helping to update a citizen profile for a historically accurate economic simulation game called La Serenissima. You have access to the following information about the citizen: {system_context_str}. For the 'CorePersonality' array, ensure the Negative Trait is a significant character flaw or vice realistic for Renaissance Venice (e.g., pride, greed, cunning, jealousy, impatience, vanity, stubbornness). Your response MUST be a valid JSON object with EXACTLY this format:\n\n```json\n{{\n  \"Personality\": \"string\",\n  \"CorePersonality\": [\"string\", \"string\", \"string\"],\n  \"familyMotto\": \"string\",\n  \"coatOfArms\": \"string\",\n  \"imagePrompt\": \"string\"\n}}\n```\n\nDo not include any text before or after the JSON."
             }
         )
         
@@ -387,8 +382,18 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
                     # Try a more aggressive approach - manually extract each field
                     try:
                         # Extract each field using regex
-                        description_match = re.search(r'"description"\s*:\s*"(.*?)"(?=,|})', json_str, re.DOTALL)
-                        core_match = re.search(r'"corePersonality"\s*:\s*"(.*?)"(?=,|})', json_str, re.DOTALL)
+                        # For CorePersonality, we expect an array, so regex needs to be more careful or use json.loads on substring
+                        personality_match = re.search(r'"Personality"\s*:\s*"(.*?)"(?=,\s*"CorePersonality")', json_str, re.DOTALL)
+                        if not personality_match: # Fallback if CorePersonality is not next
+                            personality_match = re.search(r'"Personality"\s*:\s*"(.*?)"(?=,|})', json_str, re.DOTALL)
+
+                        core_personality_str_match = re.search(r'"CorePersonality"\s*:\s*(\[.*?\])', json_str, re.DOTALL)
+                        core_array = []
+                        if core_personality_str_match:
+                            try:
+                                core_array = json.loads(core_personality_str_match.group(1))
+                            except json.JSONDecodeError:
+                                log.warning("Could not parse CorePersonality array from regex match.")
                         
                         # Special handling for family motto which might contain quotes
                         motto_start = json_str.find('"familyMotto"')
@@ -408,11 +413,11 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
                         
                         # Create a new JSON object with the extracted values
                         result_data = {
-                            "description": description_match.group(1) if description_match else "",
-                            "corePersonality": core_match.group(1) if core_match else "",
+                            "Personality": personality_match.group(1).strip() if personality_match else "",
+                            "CorePersonality": core_array,
                             "familyMotto": motto_value,
-                            "coatOfArms": coat_match.group(1) if coat_match else "",
-                            "imagePrompt": img_match.group(1) if img_match else ""
+                            "coatOfArms": coat_match.group(1).strip() if coat_match else "",
+                            "imagePrompt": img_match.group(1).strip() if img_match else ""
                         }
                         
                         log.info("Successfully extracted JSON fields manually")
@@ -560,8 +565,8 @@ def generate_coat_of_arms_image(prompt: str, username: str) -> Optional[str]:
         log.error(f"Error generating coat of arms for {username}: {e}")
         return None
 
-def update_citizen_record(tables, username: str, description: str, core_personality: str, family_motto: str, coat_of_arms: str, image_prompt: str, image_url: str, coat_of_arms_url: str = None) -> bool:
-    """Update the citizen record with new description, core personality, family motto, coat of arms, image prompt, and image URLs."""
+def update_citizen_record(tables, username: str, personality_text: str, core_personality_array: list, family_motto: str, coat_of_arms: str, image_prompt: str, image_url: str, coat_of_arms_url: str = None) -> bool:
+    """Update the citizen record with new personality, core personality array, family motto, coat of arms, image prompt, and image URLs."""
     log.info(f"Updating citizen record for {username}")
     
     try:
@@ -575,34 +580,29 @@ def update_citizen_record(tables, username: str, description: str, core_personal
         
         citizen = citizens[0]
         
-        # Check which fields are empty
-        current_core_personality = citizen['fields'].get('CorePersonality', '')
+        # Check which fields are empty for conditional updates
         current_family_motto = citizen['fields'].get('FamilyMotto', '')
         current_coat_of_arms = citizen['fields'].get('CoatOfArms', '')
         
         # Prepare update data
         update_data = {
-            "Description": description,
+            "Description": personality_text,  # Airtable's "Description" field gets the new "Personality" text
+            "CorePersonality": json.dumps(core_personality_array) if core_personality_array else None, # Store array as JSON string
             "ImagePrompt": image_prompt,
             "ImageUrl": image_url
         }
         
-        # Only update CorePersonality if it's empty
-        if not current_core_personality and core_personality:
-            log.info(f"CorePersonality is empty, updating with new value: {core_personality[:50]}...")
-            update_data["CorePersonality"] = core_personality
-        
-        # Only update FamilyMotto if it's empty
+        # Only update FamilyMotto if it's empty and a new one is provided
         if not current_family_motto and family_motto:
             log.info(f"FamilyMotto is empty, updating with new value: {family_motto}")
             update_data["FamilyMotto"] = family_motto
         
-        # Only update CoatOfArms if it's empty
+        # Only update CoatOfArms if it's empty and a new one is provided
         if not current_coat_of_arms and coat_of_arms:
             log.info(f"CoatOfArms is empty, updating with new value: {coat_of_arms[:50]}...")
             update_data["CoatOfArms"] = coat_of_arms
             
-            # If we have a coat of arms URL, update that too
+            # If we have a coat of arms URL and a new coat of arms description, update the image URL
             if coat_of_arms_url:
                 log.info(f"Updating CoatOfArmsImageUrl with: {coat_of_arms_url}")
                 update_data["CoatOfArmsImageUrl"] = coat_of_arms_url
@@ -616,16 +616,16 @@ def update_citizen_record(tables, username: str, description: str, core_personal
         log.error(f"Error updating citizen record: {e}")
         return False
 
-def create_notification(tables, username: str, old_description: str, new_description: str) -> bool:
-    """Create a notification about the updated description and image."""
+def create_notification(tables, username: str, old_personality_text: str, new_personality_text: str) -> bool:
+    """Create a notification about the updated personality description and image."""
     log.info(f"Creating notification for citizen {username}")
     
     try:
         # Create notification content
-        content = "🖼️ Your citizen profile has been updated with a new **description** and **portrait** reflecting your recent **activities**, **achievements**, and **status** in Venice."
+        content = "🖼️ Your citizen profile has been updated with a new **personality description** and **portrait** reflecting your recent **activities**, **achievements**, and **status** in Venice."
         
-        # Extract a brief summary of changes by comparing old and new descriptions
-        summary = "🔄 Your **portrait** and **description** have been updated to better reflect your current **status** and **history** in Venice."
+        # Extract a brief summary of changes
+        summary = "🔄 Your **portrait** and **personality description** have been updated to better reflect your current **status** and **history** in Venice."
         
         # Create the notification record
         tables['notifications'].create({
@@ -633,8 +633,8 @@ def create_notification(tables, username: str, old_description: str, new_descrip
             "Content": content,
             "Details": json.dumps({
                 "event_type": "profile_update",
-                "old_description": old_description,
-                "new_description": new_description,
+                "old_personality": old_personality_text,
+                "new_personality": new_personality_text,
                 "summary": summary,
                 "reason": "✨ Your character has **evolved** through your experiences in **Venice**",
                 "timestamp": datetime.datetime.now().isoformat()
@@ -668,16 +668,16 @@ def update_citizen_description_and_image(username: str, dry_run: bool = False):
         log.error(f"Failed to generate description and image prompt for citizen {username}")
         return False
     
-    new_description = result.get("description", "")
-    new_core_personality = result.get("corePersonality", "")
+    new_personality_text = result.get("Personality", "")
+    new_core_personality_array = result.get("CorePersonality", []) # This is now an array
     new_family_motto = result.get("familyMotto", "")
     new_coat_of_arms = result.get("coatOfArms", "")
     new_image_prompt = result.get("imagePrompt", "")
     
     if dry_run:
         log.info(f"[DRY RUN] Would update citizen {username} with:")
-        log.info(f"[DRY RUN] New description: {new_description}")
-        log.info(f"[DRY RUN] New core personality: {new_core_personality}")
+        log.info(f"[DRY RUN] New Personality (textual): {new_personality_text}")
+        log.info(f"[DRY RUN] New CorePersonality (array): {new_core_personality_array}")
         log.info(f"[DRY RUN] New family motto: {new_family_motto}")
         log.info(f"[DRY RUN] New coat of arms: {new_coat_of_arms}")
         log.info(f"[DRY RUN] New image prompt: {new_image_prompt}")
@@ -698,12 +698,12 @@ def update_citizen_description_and_image(username: str, dry_run: bool = False):
             # Continue anyway, as we can still update the other fields
     
     # Update citizen record
-    old_description = citizen_info["citizen"]['fields'].get('Description', '')
+    old_personality_text = citizen_info["citizen"]['fields'].get('Description', '') # Old "Description" is old "Personality"
     success = update_citizen_record(
         tables, 
         username, 
-        new_description, 
-        new_core_personality, 
+        new_personality_text, 
+        new_core_personality_array, 
         new_family_motto, 
         new_coat_of_arms, 
         new_image_prompt, 
@@ -715,7 +715,7 @@ def update_citizen_description_and_image(username: str, dry_run: bool = False):
         return False
     
     # Create notification
-    create_notification(tables, username, old_description, new_description)
+    create_notification(tables, username, old_personality_text, new_personality_text)
     
     log.info(f"Successfully updated description and image for citizen {username}")
     return True
