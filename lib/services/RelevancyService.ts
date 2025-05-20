@@ -855,6 +855,115 @@ export class RelevancyService {
     
     return formatted;
   }
+
+  /**
+   * Calculate building-operator relevancy scores
+   * This identifies when a citizen owns a building run by another citizen, or runs a building owned by another.
+   */
+  public async calculateBuildingOperatorRelevancy(
+    citizenUsername: string // The citizen for whom this specific calculation is initiated
+  ): Promise<RelevancyScore[]> {
+    const createdRelevancies: RelevancyScore[] = [];
+    try {
+      const baseUrl = typeof window !== 'undefined' 
+        ? window.location.origin 
+        : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+      
+      console.log(`[RelevancyService] Calculating building/operator relevancy related to ${citizenUsername}`);
+      
+      // Fetch all buildings, focusing on those that can be operated (e.g., category 'business')
+      // Or fetch all buildings and filter later. For now, let's assume we get all and filter.
+      // The API call might need to be adjusted if we only want 'business' category buildings.
+      const buildingsResponse = await fetch(`${baseUrl}/api/buildings`); // Potentially filter by category if API supports
+      
+      if (!buildingsResponse.ok) {
+        console.error(`[RelevancyService] Failed to fetch buildings for operator relevancy: ${buildingsResponse.status}`);
+        return [];
+      }
+      
+      const buildingsData = await buildingsResponse.json();
+      const allBuildings = buildingsData.buildings || [];
+      console.log(`[RelevancyService] Fetched ${allBuildings.length} total buildings for checking operator relationships.`);
+
+      for (const building of allBuildings) {
+        const buildingOwner = building.owner;
+        const buildingOperator = building.runBy; // Assuming 'runBy' is the field for the operator
+
+        if (!buildingOwner || !buildingOperator || buildingOwner === buildingOperator) {
+          continue; // No conflict or not fully defined
+        }
+
+        // Check if the citizenUsername is involved either as owner or operator
+        if (buildingOwner === citizenUsername || buildingOperator === citizenUsername) {
+          const buildingType = this.formatBuildingType(building.type);
+          const score = 80; // Base score for this type of relationship, can be adjusted
+          const status = this.determineStatus(score);
+
+          // Case 1: citizenUsername is the Building Owner
+          if (buildingOwner === citizenUsername) {
+            // Relevancy for the Building Owner (citizenUsername)
+            createdRelevancies.push({
+              score,
+              assetId: building.id, // Building ID
+              assetType: 'building',
+              category: 'operator_relations',
+              type: 'operator_in_your_building',
+              distance: 0,
+              closestLandId: building.landId || '', // landId might not be directly relevant here but good for context
+              isConnected: false,
+              connectivityBonus: 0,
+              title: `${buildingOperator} Operates Your ${buildingType}`,
+              description: `**${buildingOperator}** is currently operating your **${buildingType}** (Building ID: ${building.id}).\n\n` +
+                           `### Relationship Details:\n` +
+                           `- You own this building, and they manage its operations.\n` +
+                           `- This relationship is key to the building's productivity and your income from it.`,
+              timeHorizon: 'ongoing',
+              status,
+              targetCitizen: buildingOperator, // The operator
+              relevantToCitizen: citizenUsername  // For the building owner
+            });
+
+            // Relevancy for the Building Operator (buildingOperator)
+            createdRelevancies.push({
+              score,
+              assetId: building.id,
+              assetType: 'building',
+              category: 'operator_relations',
+              type: 'running_in_others_building',
+              distance: 0,
+              closestLandId: building.landId || '',
+              isConnected: false,
+              connectivityBonus: 0,
+              title: `You Operate ${buildingOwner}'s ${buildingType}`,
+              description: `You are currently operating the **${buildingType}** (Building ID: ${building.id}) owned by **${buildingOwner}**.\n\n` +
+                           `### Relationship Details:\n` +
+                           `- They own this building, and you manage its operations.\n` +
+                           `- This relationship is key to your business activities.`,
+              timeHorizon: 'ongoing',
+              status,
+              targetCitizen: buildingOwner,    // The owner
+              relevantToCitizen: buildingOperator // For the operator
+            });
+          }
+          // Case 2: citizenUsername is the Building Operator
+          // This case is covered when the loop eventually processes buildingOperator as citizenUsername,
+          // or if the initial call was for buildingOperator.
+          // To avoid duplicates if processing all citizens, we only add if citizenUsername is the owner.
+          // However, the API is called per citizen, so this structure is fine.
+          // The `calculateSpecificRelevancy.py` script will call this for each citizen if no username is specified.
+        }
+      }
+      
+      // Filter out relevancies not directly for the citizenUsername if this function is meant to be specific
+      // For now, it generates for both parties if citizenUsername is involved.
+      // The API route will then save them appropriately.
+      console.log(`[RelevancyService] Generated ${createdRelevancies.length} building/operator relevancy objects related to ${citizenUsername}.`);
+      return createdRelevancies;
+    } catch (error) {
+      console.error(`[RelevancyService] Error calculating building/operator relevancy for ${citizenUsername}:`, error);
+      return [];
+    }
+  }
 }
 
 // Export a singleton instance

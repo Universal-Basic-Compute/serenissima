@@ -130,6 +130,39 @@ Land domination relevancy helps AIs and administrators:
 - **TargetCitizen**: The other landowner being profiled (e.g., `UserB`)
 - **Score**: Numerical score of `UserB`'s dominance.
 
+## Building Operator Relationship Relevancy
+
+This relevancy identifies relationships where a building's `Owner` is different from its `RunBy` (operator). Two relevancy records are generated for each such case: one for the owner and one for the operator.
+
+### Calculation
+- The system iterates through buildings.
+- If `Building.Owner !== Building.RunBy`:
+    - A record is created for `Building.Owner` (RelevantToCitizen) about `Building.RunBy` (TargetCitizen) operating their building.
+    - A record is created for `Building.RunBy` (RelevantToCitizen) about `Building.Owner` (TargetCitizen) whose building they operate.
+
+### Data Structure Example
+
+**For Building Owner (`CitizenA`) whose building is run by `CitizenB`:**
+- **RelevantToCitizen**: `CitizenA`
+- **TargetCitizen**: `CitizenB`
+- **AssetID**: Building ID
+- **AssetType**: `building`
+- **Category**: `operator_relations`
+- **Type**: `operator_in_your_building`
+- **Title**: "CitizenB Operates Your Market Stall"
+- **Description**: Details about CitizenB running the business in CitizenA's building.
+
+**For Building Operator (`CitizenB`) running `CitizenA`'s building:**
+- **RelevantToCitizen**: `CitizenB`
+- **TargetCitizen**: `CitizenA`
+- **AssetID**: Building ID
+- **AssetType**: `building`
+- **Category**: `operator_relations`
+- **Type**: `running_in_others_building`
+- **Title**: "You Operate CitizenA's Market Stall"
+- **Description**: Details about running a business in CitizenA's building.
+
+
 ## Future Extensions
 
 The relevancy system is designed to be extensible to other types of relevancy:
@@ -237,4 +270,10 @@ python backend/relevancies/calculateSpecificRelevancy.py --type jobs
 
 # Calculate building ownership relevancies for CitizenAlpha
 python backend/relevancies/calculateSpecificRelevancy.py --type building_ownership --username CitizenAlpha
+
+# Calculate building operator relevancies for CitizenAlpha (and the other party involved)
+python backend/relevancies/calculateSpecificRelevancy.py --type building_operator --username CitizenAlpha
+
+# Calculate building operator relevancies for all citizens
+python backend/relevancies/calculateSpecificRelevancy.py --type building_operator
 ```

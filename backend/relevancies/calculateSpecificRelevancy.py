@@ -211,17 +211,21 @@ def calculate_specific_relevancy(
         else:
             # All building_owners building_ownership calculation
             log.info("Requesting building ownership relevancy for all building owners.")
-            buildings_table = initialize_airtable_table('BUILDINGS') # Assuming table name is BUILDINGS
-            building_owners = get_all_building_owners(buildings_table)
+            # For "all building owners", we might need to fetch all citizens instead,
+            # as the API processes based on the citizen provided.
+            # Let's fetch all citizens from CITIZENS table for this "all" case.
+            citizens_table = initialize_airtable_table('CITIZENS')
+            all_citizens_records = citizens_table.all(fields=['Username'])
+            all_citizen_usernames = [r['fields']['Username'] for r in all_citizens_records if 'Username' in r['fields']]
 
-            if building_owners is None:
-                create_admin_notification(notifications_table, "Building Ownership Relevancy Error", "Failed to fetch building owners.")
+
+            if not all_citizen_usernames:
+                create_admin_notification(notifications_table, "Building Ownership Relevancy Error", "Failed to fetch any citizens to process for building ownership.")
                 return False
-            if not building_owners:
-                create_admin_notification(notifications_table, "Building Ownership Relevancy Info", "No building owners found to process.")
-                return True # No error, just nothing to do
+            
+            log.info(f"Found {len(all_citizen_usernames)} citizens to process for building ownership relevancies.")
 
-            for owner_username in building_owners:
+            for owner_username in all_citizen_usernames:
                 import time
                 time.sleep(1) # Small delay between API calls
                 log.info(f"Processing building ownership for: {owner_username}")
@@ -261,11 +265,66 @@ def calculate_specific_relevancy(
                     log.error(f"Unexpected error for {owner_username} (building_ownership): {e_exc}")
                     multi_user_results.append(f"- {owner_username}: Unexpected Error - {e_exc}")
             
-            summary_title = "Building Ownership Relevancy Complete (All Owners)"
-            summary_message = "Building ownership relevancy calculation process finished for all building owners.\n\nResults:\n" + "\n".join(multi_user_results)
+            summary_title = "Building Ownership Relevancy Complete (All Citizens Processed)"
+            summary_message = "Building ownership relevancy calculation process finished for all citizens.\n\nResults:\n" + "\n".join(multi_user_results)
             create_admin_notification(notifications_table, summary_title, summary_message)
-            log.info("Finished processing building ownership relevancies for all building owners.")
+            log.info("Finished processing building ownership relevancies for all citizens.")
             return True # Overall process completed
+
+    elif relevancy_type == "building_operator":
+        api_url = f"{base_url}/api/relevancies/building-operator"
+        request_timeout = 60
+        if username:
+            payload = {"Citizen": username}
+            log.info(f"Requesting building operator relevancy for user: {username}")
+        else:
+            log.info("Requesting building operator relevancy for all citizens.")
+            citizens_table = initialize_airtable_table('CITIZENS')
+            all_citizens_records = citizens_table.all(fields=['Username'])
+            all_citizen_usernames = [r['fields']['Username'] for r in all_citizens_records if 'Username' in r['fields']]
+
+            if not all_citizen_usernames:
+                create_admin_notification(notifications_table, "Building Operator Relevancy Error", "Failed to fetch citizens.")
+                return False
+            
+            log.info(f"Found {len(all_citizen_usernames)} citizens to process for building operator relevancies.")
+
+            for citizen_username_loop in all_citizen_usernames:
+                import time
+                time.sleep(1)
+                log.info(f"Processing building operator relevancy for: {citizen_username_loop}")
+                current_payload = {"Citizen": citizen_username_loop}
+                try:
+                    response = requests.post(api_url, json=current_payload, timeout=request_timeout)
+                    if not response.ok:
+                        error_message = f"API call failed for {citizen_username_loop} (building_operator) with status {response.status_code}: {response.text}"
+                        log.error(error_message)
+                        multi_user_results.append(f"- {citizen_username_loop}: Error - {response.status_code}")
+                        continue
+                    data = response.json()
+                    log.info(f"API response data for {citizen_username_loop} (building_operator): {json.dumps(data, indent=2)}")
+                    if not data.get('success'):
+                        error_detail = data.get('error', 'Unknown API error')
+                        log.error(f"API returned error for {citizen_username_loop} (building_operator): {error_detail}")
+                        multi_user_results.append(f"- {citizen_username_loop}: API Error - {error_detail}")
+                        continue
+                    
+                    relevancies_created_count = data.get('relevanciesSavedCount', 0)
+                    if relevancies_created_count == 0:
+                         log.info(f"No building operator relevancies created for {citizen_username_loop} based on API response.")
+                    multi_user_results.append(f"- {citizen_username_loop}: {relevancies_created_count} building operator relevancies created/saved.")
+                except requests.exceptions.RequestException as e_req:
+                    log.error(f"Request failed for {citizen_username_loop} (building_operator): {e_req}")
+                    multi_user_results.append(f"- {citizen_username_loop}: Request Error - {e_req}")
+                except Exception as e_exc:
+                    log.error(f"Unexpected error for {citizen_username_loop} (building_operator): {e_exc}")
+                    multi_user_results.append(f"- {citizen_username_loop}: Unexpected Error - {e_exc}")
+            
+            summary_title = "Building Operator Relevancy Complete (All Citizens Processed)"
+            summary_message = "Building operator relevancy calculation process finished for all citizens.\n\nResults:\n" + "\n".join(multi_user_results)
+            create_admin_notification(notifications_table, summary_title, summary_message)
+            log.info("Finished processing building operator relevancies for all citizens.")
+            return True
         
     else:
         log.error(f"Unknown relevancy type: {relevancy_type}")
@@ -313,11 +372,13 @@ def calculate_specific_relevancy(
              relevancies_created_count = data.get('relevanciesSavedCount', 0) # API returns count of landowners processed
         elif relevancy_type == "domination" and username and 'relevancyScores' in data and isinstance(data['relevancyScores'], dict): # Domination for specific user
             relevancies_created_count = len(data['relevancyScores']) # Number of other players' profiles saved to this user
-        elif relevancy_type == "building_ownership" and username and 'relevancyScores' in data and isinstance(data['relevancyScores'], dict):
-            relevancies_created_count = len(data['relevancyScores'])
+        elif relevancy_type == "building_ownership" and username and 'relevancyScores' in data and isinstance(data['relevancyScores'], dict): # For specific user
+            relevancies_created_count = data.get('relevanciesSavedCount', len(data.get('relevancyScores', {})))
+        elif relevancy_type == "building_operator" and username and 'relevancyScores' in data and isinstance(data['relevancyScores'], dict): # For specific user
+            relevancies_created_count = data.get('relevanciesSavedCount', len(data.get('relevancyScores', {})))
 
 
-        notification_title = f"{relevancy_type.capitalize()} Relevancy Calculation Complete"
+        notification_title = f"{relevancy_type.replace('_', ' ').capitalize()} Relevancy Calculation Complete"
         details_for_notification = [
             f"Successfully calculated {relevancy_type} relevancies.",
             f"API Save Status: {saved_status_message}.", # Use the more descriptive status
@@ -330,8 +391,11 @@ def calculate_specific_relevancy(
             target_user_info = "all (Global Landowner Profiles)"
             log_context_message = "for all (global landowner profiles)"
         elif relevancy_type == "building_ownership" and not username:
-            target_user_info = "all building owners"
-            log_context_message = "for all building owners"
+            target_user_info = "all citizens (Building Ownership)"
+            log_context_message = "for all citizens (building ownership)"
+        elif relevancy_type == "building_operator" and not username:
+            target_user_info = "all citizens (Building Operator)"
+            log_context_message = "for all citizens (building operator)"
         elif relevancy_type in ["housing", "jobs"] and not username: # These are always global
             target_user_info = "all (Global Report)"
             log_context_message = f"for global {relevancy_type} context"
@@ -376,12 +440,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "--type", 
         required=True, 
-        choices=["proximity", "domination", "housing", "jobs", "building_ownership"],
+        choices=["proximity", "domination", "housing", "jobs", "building_ownership", "building_operator"],
         help="The type of relevancy to calculate."
     )
     parser.add_argument(
         "--username", 
-        help="Username of the citizen (optional for proximity, domination, and building_ownership). If not provided for these types, runs for all relevant owners."
+        help="Username of the citizen (optional for proximity, domination, building_ownership, and building_operator). If not provided for these types, runs for all relevant citizens/owners."
     )
     parser.add_argument(
         "--type_filter", 

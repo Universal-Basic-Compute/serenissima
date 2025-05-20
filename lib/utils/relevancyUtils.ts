@@ -96,13 +96,19 @@ export async function saveRelevancies(
         };
       } else if (data.assetType === 'building') {
         // Handle building ownership relevancy (building on others' land)
+        // and building operator relevancy
+        let relevancyIdBase = `${Citizen}_${data.assetId}_${data.type}`;
+        if (data.category === 'ownership_conflict' && data.closestLandId) {
+          relevancyIdBase = `${Citizen}_${data.assetId}_${data.closestLandId}_${data.type}`;
+        }
+
         return {
           fields: {
-            RelevancyId: `${Citizen}_${data.assetId}_${data.closestLandId}_${Date.now()}`, // Unique ID: buildingOwner_buildingId_landId_timestamp
+            RelevancyId: `${relevancyIdBase}_${Date.now()}`,
             AssetID: data.assetId, // This is the building's ID
             AssetType: data.assetType, // 'building'
-            Category: data.category, // 'ownership'
-            Type: data.type, // 'building_on_others_land'
+            Category: data.category, // 'ownership_conflict' or 'operator_relations'
+            Type: data.type, // e.g. 'building_on_others_land', 'operator_in_your_building'
             TargetCitizen: data.targetCitizen, // The owner of the land
             RelevantToCitizen: Citizen, // The owner of the building
             Score: data.score,
