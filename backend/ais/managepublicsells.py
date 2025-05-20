@@ -12,6 +12,12 @@ from pyairtable import Api, Table
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app.citizen_utils import find_citizen_by_identifier
 
+def _escape_airtable_value(value: str) -> str:
+    """Échappe les apostrophes pour les formules Airtable."""
+    if isinstance(value, str):
+        return value.replace("'", "\\'")
+    return str(value) # Ensure it's a string if not already
+
 def initialize_airtable():
     """Initialize connection to Airtable."""
     load_dotenv()
@@ -562,8 +568,8 @@ def validate_create_contract_decision(
     """Validate that a contract creation decision is valid."""
     building_id = decision.get("building_id")
     resource_type = decision.get("resource_type")
-    hourly_amount = decision.get("hourly_amount")
-    price_per_resource = decision.get("price_per_resource")
+    hourly_amount = decision.get("hourly_amount") # This will be converted to float later
+    price_per_resource = decision.get("price_per_resource") # This will be converted to float later
     
     # Check if all required fields are present
     if not building_id or not resource_type or hourly_amount is None or price_per_resource is None:
@@ -652,50 +658,86 @@ def create_public_sell_contract(
     tables, 
     ai_username: str, 
     decision: Dict, 
-    resource_types: Dict
+    resource_types: Dict # resource_types is not directly used here but kept for signature consistency if needed later
 ) -> bool:
-    """Create a new public sell contract based on the AI's decision."""
+    """Create or update a public sell contract based on the AI's decision using a deterministic ContractId."""
     try:
-        building_id = decision["building_id"]
+        building_id = decision["building_id"] # This is SellerBuilding
         resource_type = decision["resource_type"]
         hourly_amount = float(decision["hourly_amount"])
         price_per_resource = float(decision["price_per_resource"])
         reason = decision.get("reason", "No reason provided")
         
+        # Generate deterministic ContractId: contract-public-sell-{RESOURCE_TYPE}-{SELLER_BUILDING_ID}
+        # Ensure resource_type and building_id are suitable for an ID (e.g., no spaces, certain chars)
+        # For simplicity, we assume they are clean IDs. If not, sanitization might be needed.
+        custom_contract_id = f"contract-public-sell-{resource_type}-{building_id}"
+        
         now = datetime.now().isoformat()
-        end_date = (datetime.now() + timedelta(hours=47)).isoformat()  # Contract ends in 47 hours
-        
-        # Create a new contract
-        import uuid
-        contract_id = f"contract-{uuid.uuid4()}"
-        
-        new_contract = {
-            "ContractId": contract_id,
-            "Seller": ai_username,
-            "Buyer": "public",  # Public contract
-            "Type": "public_sell",
-            "ResourceType": resource_type,
-            "SellerBuilding": building_id,
-            "BuyerBuilding": None,
-            "hourlyAmount": hourly_amount,
-            "PricePerResource": price_per_resource,
-            "Priority": 1,  # Default priority
-            "CreatedAt": now,
-            "EndAt": end_date,
-            "Notes": json.dumps({
-                "reason": reason,
-                "created_by": "AI Public Sell Strategy",
-                "created_at": now
-            })
-        }
-        
-        tables["contracts"].create(new_contract)
-        
-        print(f"Created new public sell contract for {resource_type} from building {building_id}: {hourly_amount} units/hour at {price_per_resource} ducats each")
+        # Public sell contracts are set for 47 hours as per existing logic
+        end_date = (datetime.now() + timedelta(hours=47)).isoformat()
+
+        # Check if a contract with this custom_contract_id already exists
+        existing_contract_record = None
+        try:
+            formula = f"{{ContractId}}='{_escape_airtable_value(custom_contract_id)}'"
+            records = tables["contracts"].all(formula=formula, max_records=1)
+            if records:
+                existing_contract_record = records[0]
+        except Exception as e_check:
+            print(f"Error checking for existing public sell contract {custom_contract_id}: {e_check}")
+            # Decide if to proceed or return False. For now, let's try to create if check fails.
+
+        if existing_contract_record:
+            # Update the existing contract
+            airtable_record_id = existing_contract_record["id"]
+            
+            update_fields = {
+                "hourlyAmount": hourly_amount, # Airtable field name might be HourlyAmount
+                "PricePerResource": price_per_resource,
+                "EndAt": end_date, # Refresh EndAt to extend/set duration
+                "UpdatedAt": now,
+                "Notes": json.dumps({
+                    "reason": reason,
+                    "updated_by": "AI Public Sell Strategy",
+                    "updated_at": now,
+                    "previous_ContractId_logic": "deterministic_overwrite" 
+                })
+            }
+            # Ensure correct field name for hourly amount if it's different in Airtable
+            # e.g. if Airtable uses "HourlyAmount", change "hourlyAmount" key above.
+            # Assuming "hourlyAmount" is correct for now based on existing_contracts data prep.
+
+            tables["contracts"].update(airtable_record_id, update_fields)
+            print(f"Updated public sell contract {custom_contract_id} for {resource_type} from building {building_id}: {hourly_amount} units/hour at {price_per_resource} ducats each")
+        else:
+            # Create a new contract
+            new_contract_data = {
+                "ContractId": custom_contract_id,
+                "Seller": ai_username,
+                "Buyer": "public",  # Public contract
+                "Type": "public_sell",
+                "ResourceType": resource_type,
+                "SellerBuilding": building_id,
+                "BuyerBuilding": None, # No specific buyer building for public sells
+                "hourlyAmount": hourly_amount, # Assuming this is the Airtable field name
+                "PricePerResource": price_per_resource,
+                "Priority": 1,  # Default priority
+                "CreatedAt": now,
+                "EndAt": end_date,
+                "Notes": json.dumps({
+                    "reason": reason,
+                    "created_by": "AI Public Sell Strategy",
+                    "created_at": now,
+                    "ContractId_logic": "deterministic"
+                })
+            }
+            tables["contracts"].create(new_contract_data)
+            print(f"Created new public sell contract {custom_contract_id} for {resource_type} from building {building_id}: {hourly_amount} units/hour at {price_per_resource} ducats each")
         
         return True
     except Exception as e:
-        print(f"Error creating public sell contract: {str(e)}")
+        print(f"Error creating/updating public sell contract for building {decision.get('building_id', 'N/A')}, resource {decision.get('resource_type', 'N/A')}: {str(e)}")
         print(f"Exception traceback: {traceback.format_exc()}")
         return False
 
