@@ -287,30 +287,37 @@ def generate_new_citizen(tables) -> Optional[Dict]:
         # Import the generate_citizen function from the generateCitizen module
         from generateCitizen import generate_citizen
         
-        # Generate a new citizen (using Popolani as default class for delivery personnel)
-        citizen_data = generate_citizen("Popolani")
+        # Generate a new citizen. The social class is hardcoded to Facchini in generate_citizen.
+        # Add specific context for the citizen being generated for import delivery.
+        additional_prompt = "This citizen is a merchant sailor, arriving in Venice to deliver goods. They are not from Venice but are familiar with maritime trade."
+        citizen_data = generate_citizen(social_class=None, additional_prompt_text=additional_prompt) # Pass None for social_class as it's overridden
+        
         if not citizen_data:
             log.error("Failed to generate new citizen")
             return None
         
         # Set InVenice to false for this new citizen
-        citizen_data["InVenice"] = False
+        citizen_data["InVenice"] = False # This field might be set by generate_citizen, ensure it's False
         
         # Save to Airtable
+        # Ensure keys match Airtable field names (PascalCase)
         citizen_record = tables['citizens'].create({
-            "CitizenId": citizen_data["id"],
-            "Username": citizen_data["id"],  # Use ID as username
-            "SocialClass": citizen_data["socialclass"],
-            "FirstName": citizen_data["firstname"],
-            "LastName": citizen_data["lastname"],
-            "Description": citizen_data["description"],
-            "ImagePrompt": citizen_data["imageprompt"],
-            "Ducats": citizen_data["ducats"],
-            "CreatedAt": citizen_data["createdat"],
-            "InVenice": False
+            "CitizenId": citizen_data.get("id"), # Use .get() for safety
+            "Username": citizen_data.get("username"), # Use .get() for safety, ensure it's lowercase from generate_citizen
+            "SocialClass": citizen_data.get("socialclass"), # This will be 'Facchini'
+            "FirstName": citizen_data.get("firstname"),
+            "LastName": citizen_data.get("lastname"),
+            "Description": citizen_data.get("personality"), # 'personality' from generate_citizen maps to 'Description'
+            "CorePersonality": json.dumps(citizen_data.get("corepersonality", [])), # Store as JSON string
+            "ImagePrompt": citizen_data.get("imageprompt"),
+            "FamilyMotto": citizen_data.get("familymotto"),
+            "CoatOfArms": citizen_data.get("coatofarms"),
+            "Ducats": citizen_data.get("ducats"),
+            "CreatedAt": citizen_data.get("createdat"),
+            "InVenice": False # Explicitly set InVenice to False
         })
         
-        log.info(f"👤 Successfully created new citizen for import delivery: **{citizen_data['firstname']} {citizen_data['lastname']}**")
+        log.info(f"👤 Successfully created new citizen for import delivery: **{citizen_data.get('firstname')} {citizen_data.get('lastname')}**")
         return citizen_record
     except Exception as e:
         log.error(f"Error generating new citizen: {e}")
