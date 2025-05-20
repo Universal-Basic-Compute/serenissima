@@ -115,26 +115,69 @@ def generate_citizen(social_class: str, additional_prompt_text: Optional[str] = 
         
         # Extract the JSON from Kinos Engine's response
         content = response.json().get("content", "")
-        
-        # Find the JSON object in the response using a more robust approach
+        log.info(f"Raw Kinos response content:\n{content}")
+
+        citizen_data = None
+        json_str_to_parse = None # Variable to hold the string we attempt to parse
+
         try:
-            # First try to parse the entire content as JSON
-            citizen_data = json.loads(content)
-        except json.JSONDecodeError:
-            # If that fails, try to extract JSON using a more precise regex
+            # Attempt 1: Try to parse the entire content as JSON
+            log.info("Attempting to parse entire Kinos response as JSON...")
+            json_str_to_parse = content
+            citizen_data = json.loads(json_str_to_parse)
+            log.info("Successfully parsed entire response.")
+        except json.JSONDecodeError as e1:
+            log.warning(f"Could not parse entire Kinos response as JSON: {e1}. Trying to extract from code block...")
+            # Attempt 2: Extract JSON from a markdown code block ```json ... ```
             import re
-            # Look for JSON object with the expected fields
-            json_match = re.search(r'({[\s\S]*?"FirstName"[\s\S]*?"LastName"[\s\S]*?"Personality"[\s\S]*?"CorePersonality"[\s\S]*?"ImagePrompt"[\s\S]*?"Ducats"[\s\S]*?})', content)
-            if not json_match:
-                log.error(f"Could not extract JSON from Kinos Engine response: {content}")
-                return None
-            
-            try:
-                citizen_data = json.loads(json_match.group(1))
-            except json.JSONDecodeError as e:
-                log.error(f"Failed to parse extracted JSON: {e}")
-                return None
+            match = re.search(r"```json\s*([\s\S]*?)\s*```", content, re.IGNORECASE) # Added IGNORECASE
+            if match:
+                json_str_to_parse = match.group(1).strip()
+                log.info(f"Extracted from code block:\n{json_str_to_parse}")
+                try:
+                    citizen_data = json.loads(json_str_to_parse)
+                    log.info("Successfully parsed from code block.")
+                except json.JSONDecodeError as e2:
+                    log.warning(f"Could not parse JSON from code block: {e2}. Trying to find first {{ and last }}...")
+                    # Attempt 3: Find the first '{' and last '}' in the original content
+                    start_index = content.find('{')
+                    end_index = content.rfind('}')
+                    if start_index != -1 and end_index != -1 and start_index < end_index:
+                        json_str_to_parse = content[start_index : end_index + 1]
+                        log.info(f"Extracted from first {{ and last }} (original content):\n{json_str_to_parse}")
+                        try:
+                            citizen_data = json.loads(json_str_to_parse)
+                            log.info("Successfully parsed from first {{ and last }} (original content).")
+                        except json.JSONDecodeError as e3:
+                            log.error(f"Failed to parse JSON even from first {{ and last }}: {e3}")
+                            log.error(f"Problematic JSON string (from braces):\n{json_str_to_parse}")
+                            return None
+                    else:
+                        log.error(f"Could not find JSON object markers ({{...}}) in Kinos response: {content}")
+                        return None
+            else:
+                # Attempt 3 (if no code block): Find the first '{' and last '}' in the original content
+                log.warning("No JSON code block found. Trying to find first {{ and last }} in original content...")
+                start_index = content.find('{')
+                end_index = content.rfind('}')
+                if start_index != -1 and end_index != -1 and start_index < end_index:
+                    json_str_to_parse = content[start_index : end_index + 1]
+                    log.info(f"Extracted from first {{ and last }} (original content):\n{json_str_to_parse}")
+                    try:
+                        citizen_data = json.loads(json_str_to_parse)
+                        log.info("Successfully parsed from first {{ and last }} (original content).")
+                    except json.JSONDecodeError as e3:
+                        log.error(f"Failed to parse JSON from first {{ and last }} (original content): {e3}")
+                        log.error(f"Problematic JSON string (from braces, original content):\n{json_str_to_parse}")
+                        return None
+                else:
+                    log.error(f"Could not find JSON object markers ({{...}}) in Kinos response (original content): {content}")
+                    return None
         
+        if not citizen_data: # Should not happen if one of the attempts succeeded or returned None
+            log.error("JSON parsing failed through all attempts.")
+            return None
+
         # Add required fields
         citizen_data["socialclass"] = social_class
         citizen_data["id"] = f"ctz_{int(time.time())}_{random.randint(1000, 9999)}"
