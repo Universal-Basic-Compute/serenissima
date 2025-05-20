@@ -181,7 +181,7 @@ export async function POST(request: Request) {
     const building = {
       id: typedRecord.fields.BuildingId,
       type: typedRecord.fields.Type,
-      land_id: typedRecord.fields.LandId,
+      landId: typedRecord.fields.LandId, // Changed from land_id
       variant: typedRecord.fields.Variant || 'model',
       position: recordPosition,
       point_id: typedRecord.fields.Point || null, // Include point_id in response
@@ -359,7 +359,7 @@ export async function GET(request: Request) {
     interface Building {
       id: string;
       type: string;
-      land_id: string;
+      landId: string; // Changed from land_id
       variant: string;
       position: any;
       rotation: number;
@@ -438,7 +438,7 @@ export async function GET(request: Request) {
         // Override specific fields that need special handling
         id: fields.buildingId || record.id, // This is the custom BuildingId or Airtable record ID
         type: fields.type, // Ensure type is explicitly passed
-        land_id: fields.landId, // Ensure landId is explicitly passed (camelCased from LandId)
+        landId: fields.landId, // Ensure landId is explicitly passed (camelCased from LandId)
         owner: fields.owner, // Ensure owner is explicitly passed
         occupant: fields.occupant, // Ensure occupant is explicitly passed (camelCased from Occupant)
         category: fields.category, // Ensure category is explicitly passed (camelCased from Category)
@@ -507,7 +507,7 @@ export async function GET(request: Request) {
     const debugBuilding1: Building = {
       id: 'building_1',
       type: 'market-stall',
-      land_id: 'polygon-1746052711032',
+      landId: 'polygon-1746052711032', // Changed from land_id
       position: { 
         lat: 45.4371, 
         lng: 12.3358
@@ -521,7 +521,7 @@ export async function GET(request: Request) {
     const debugBuilding2: Building = {
       id: 'building_2',
       type: 'market-stall',
-      land_id: 'polygon-1746052711033',
+      landId: 'polygon-1746052711033', // Changed from land_id
       position: { 
         lat: 45.4375, 
         lng: 12.3368
@@ -535,7 +535,7 @@ export async function GET(request: Request) {
     const debugBuilding3: Building = {
       id: 'building_3',
       type: 'market-stall',
-      land_id: 'polygon-1746052711034',
+      landId: 'polygon-1746052711034', // Changed from land_id
       position: { 
         lat: 45.4365, 
         lng: 12.3348
@@ -550,7 +550,7 @@ export async function GET(request: Request) {
     const debugBuilding4: Building = {
       id: 'building_4',
       type: 'market-stall',
-      land_id: 'polygon-1746052711035',
+      landId: 'polygon-1746052711035', // Changed from land_id
       position: { 
         lat: 45.4380, 
         lng: 12.3378
@@ -567,7 +567,7 @@ export async function GET(request: Request) {
     const debugBuilding5: Building = {
       id: 'building_5',
       type: 'market-stall',
-      land_id: 'polygon-1746052711036',
+      landId: 'polygon-1746052711036', // Changed from land_id
       position: { 
         lat: 45.4368, 
         lng: 12.3362
@@ -611,7 +611,7 @@ function getDebugBuildings() {
   interface Building {
     id: string;
     type: string;
-    land_id: string;
+    landId: string; // Changed from land_id
     variant: string;
     position: any;
     rotation: number;
@@ -623,7 +623,7 @@ function getDebugBuildings() {
   const debugBuilding1: Building = {
     id: 'building_1',
     type: 'market-stall',
-    land_id: 'polygon-1746052711032',
+    landId: 'polygon-1746052711032', // Changed from land_id
     position: { 
       lat: 45.4371, 
       lng: 12.3358
@@ -637,7 +637,7 @@ function getDebugBuildings() {
   const debugBuilding2: Building = {
     id: 'building_2',
     type: 'market-stall',
-    land_id: 'polygon-1746052711033',
+    landId: 'polygon-1746052711033', // Changed from land_id
     position: { 
       lat: 45.4375, 
       lng: 12.3368
@@ -651,7 +651,7 @@ function getDebugBuildings() {
   const debugBuilding3: Building = {
     id: 'building_3',
     type: 'market-stall',
-    land_id: 'polygon-1746052711034',
+    landId: 'polygon-1746052711034', // Changed from land_id
     position: { 
       lat: 45.4365, 
       lng: 12.3348
@@ -666,7 +666,7 @@ function getDebugBuildings() {
   const debugBuilding4: Building = {
     id: 'building_4',
     type: 'market-stall',
-    land_id: 'polygon-1746052711035',
+    landId: 'polygon-1746052711035', // Changed from land_id
     position: { 
       lat: 45.4380, 
       lng: 12.3378
@@ -681,7 +681,7 @@ function getDebugBuildings() {
   const debugBuilding5: Building = {
     id: 'building_5',
     type: 'market-stall',
-    land_id: 'polygon-1746052711036',
+    landId: 'polygon-1746052711036', // Changed from land_id
     position: { 
       lat: 45.4368, 
       lng: 12.3362

@@ -186,9 +186,9 @@ export default function BuildingDetailsPanel({
               (window as any).__currentBuildingRunBy = data.building.owner;
             }
             
-            // If we have a land_id, fetch the land data
-            if (data.building.land_id) {
-              fetchLandData(data.building.land_id);
+            // If we have a landId, fetch the land data
+            if (data.building.landId) { // Changed from land_id
+              fetchLandData(data.building.landId); // Changed from land_id
             }
             
             // Fetch resources for this building (includes contracts)

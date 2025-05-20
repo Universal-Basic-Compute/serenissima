@@ -162,7 +162,7 @@ export async function GET(request: NextRequest) {
           const building = {
             id: buildingId,
             type: fields.Type || 'Unknown',
-            land_id: fields.LandId || fields.Land || '', // Prioritize LandId if it exists, fallback to Land
+            landId: fields.LandId || fields.Land || '', // Prioritize LandId, fallback to Land, changed from land_id
             variant: fields.Variant || '',
             position: fields.Position || '',
             rotation: fields.Rotation || 0,
