@@ -22,6 +22,7 @@ export class CitizenRenderService {
       color: this.getStringValue(citizen, ['Color', 'color']),
       secondaryColor: this.getStringValue(citizen, ['SecondaryColor', 'secondaryColor']),
       prestige: this.getNumberValue(citizen, ['Prestige', 'prestige']),
+      personality: this.getStringValue(citizen, ['Personality', 'personality', 'CorePersonality', 'corePersonality']),
       updatedAt: this.getStringValue(citizen, ['UpdatedAt', 'updatedAt']),
       lastActiveAt: this.getStringValue(citizen, ['LastActiveAt', 'lastActiveAt']),
       familyMotto: this.getStringValue(citizen, ['FamilyMotto', 'familyMotto']),
