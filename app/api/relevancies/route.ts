@@ -41,10 +41,21 @@ export async function GET(request: Request) {
     const escapeAirtableString = (str: string) => str.replace(/'/g, "\\'");
 
     if (targetCitizen) {
-      const safeTargetCitizen = escapeAirtableString(targetCitizen);
-      // Condition for TargetCitizen: exact match OR found within a JSON string array
-      const targetCondition = `OR({TargetCitizen} = '${safeTargetCitizen}', FIND('"${safeTargetCitizen}"', {TargetCitizen}) > 0)`;
-      filterFormulaParts.push(targetCondition);
+      const targetUsernames = targetCitizen.split(',')
+        .map(username => username.trim())
+        .filter(username => username.length > 0);
+
+      if (targetUsernames.length > 0) {
+        const targetOrConditions: string[] = targetUsernames.flatMap(username => {
+          const safeUsername = escapeAirtableString(username);
+          // For each username, check for exact match OR if found within a JSON string array
+          return [
+            `{TargetCitizen} = '${safeUsername}'`,
+            `FIND('"${safeUsername}"', {TargetCitizen}) > 0`
+          ];
+        });
+        filterFormulaParts.push(`OR(${targetOrConditions.join(', ')})`);
+      }
     }
 
     if (relevantToCitizen) {
