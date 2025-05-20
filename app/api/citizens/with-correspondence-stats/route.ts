@@ -41,68 +41,86 @@ export async function POST(request: NextRequest) {
     }
 
     const base = initAirtable();
-    let citizensWithStats: CitizenWithStats[] = [];
 
-    // 1. Fetch all citizens from the CITIZENS table
+    // 1. Fetch all citizens from the CITIZENS table (excluding the current one)
     const citizenRecords = await base(AIRTABLE_CITIZENS_TABLE)
       .select({
-        fields: ['Username', 'FirstName', 'LastName', 'CoatOfArmsImageUrl'], // Corrected field name
-        filterByFormula: `NOT({Username} = '${currentCitizenUsername}')` // Exclude the current citizen
+        fields: ['Username', 'FirstName', 'LastName', 'CoatOfArmsImageUrl'],
+        filterByFormula: `NOT({Username} = '${currentCitizenUsername}')`
       })
       .all();
 
-    const otherCitizens: CitizenFromAirtable[] = citizenRecords.map(record => ({
+    const allOtherCitizensFromAirtable: CitizenFromAirtable[] = citizenRecords.map(record => ({
       id: record.id,
       username: record.get('Username') as string,
       firstName: record.get('FirstName') as string || '',
       lastName: record.get('LastName') as string || '',
-      coatOfArmsImageUrl: record.get('CoatOfArmsImageUrl') as string || null, // Corrected field name
+      coatOfArmsImageUrl: record.get('CoatOfArmsImageUrl') as string || null,
     }));
-    
-    // 2. For each other citizen, get stats
-    for (const otherCitizen of otherCitizens) {
-      if (!otherCitizen.username) continue; // Skip if username is missing
 
-      // Get last message timestamp
-      const lastMessageFilter = `OR(
-        AND({Sender} = '${currentCitizenUsername}', {Receiver} = '${otherCitizen.username}'),
-        AND({Sender} = '${otherCitizen.username}', {Receiver} = '${currentCitizenUsername}')
-      )`;
-      const lastMessageRecords = await base(AIRTABLE_MESSAGES_TABLE)
-        .select({
-          filterByFormula: lastMessageFilter,
-          sort: [{ field: 'CreatedAt', direction: 'desc' }],
-          maxRecords: 1,
-          fields: ['CreatedAt']
-        })
-        .firstPage();
-      
-      const lastMessageTimestamp = lastMessageRecords.length > 0 
-        ? lastMessageRecords[0].get('CreatedAt') as string 
-        : null;
+    // 2. Fetch all relevant messages in one go
+    // Messages where currentCitizenUsername is either Sender or Receiver
+    const messagesFilter = `OR(
+      {Sender} = '${currentCitizenUsername}',
+      {Receiver} = '${currentCitizenUsername}'
+    )`;
+    const messageRecords = await base(AIRTABLE_MESSAGES_TABLE)
+      .select({
+        filterByFormula: messagesFilter,
+        fields: ['Sender', 'Receiver', 'CreatedAt', 'ReadAt'],
+        sort: [{ field: 'CreatedAt', direction: 'desc' }] // Sort by CreatedAt to easily find the last message
+      })
+      .all();
 
-      // Get unread messages count from this otherCitizen to currentCitizenUsername
-      const unreadMessagesFilter = `AND(
-        {Sender} = '${otherCitizen.username}', 
-        {Receiver} = '${currentCitizenUsername}', 
-        {ReadAt} = ''
-      )`;
-      const unreadMessagesRecords = await base(AIRTABLE_MESSAGES_TABLE)
-        .select({
-          filterByFormula: unreadMessagesFilter,
-          fields: ['Sender'] // Only need one field to count
-        })
-        .all();
-      const unreadMessagesFromCitizenCount = unreadMessagesRecords.length;
+    // 3. Process messages to gather stats for each citizen
+    const citizenStatsMap = new Map<string, { lastMessageTimestamp: string | null, unreadMessagesFromCitizenCount: number }>();
 
-      citizensWithStats.push({
-        ...otherCitizen,
-        lastMessageTimestamp,
-        unreadMessagesFromCitizenCount
-      });
+    for (const msgRecord of messageRecords) {
+      const sender = msgRecord.get('Sender') as string;
+      const receiver = msgRecord.get('Receiver') as string;
+      const createdAt = msgRecord.get('CreatedAt') as string;
+      const readAt = msgRecord.get('ReadAt') as string | null;
+
+      // Determine the "other" citizen in this conversation
+      let otherCitizenUsername: string | null = null;
+      if (sender === currentCitizenUsername) {
+        otherCitizenUsername = receiver;
+      } else if (receiver === currentCitizenUsername) {
+        otherCitizenUsername = sender;
+      }
+
+      if (otherCitizenUsername && otherCitizenUsername !== currentCitizenUsername) {
+        if (!citizenStatsMap.has(otherCitizenUsername)) {
+          citizenStatsMap.set(otherCitizenUsername, {
+            lastMessageTimestamp: null,
+            unreadMessagesFromCitizenCount: 0
+          });
+        }
+        const stats = citizenStatsMap.get(otherCitizenUsername)!;
+
+        // Update last message timestamp (since messages are sorted desc, first one encountered is the latest)
+        if (stats.lastMessageTimestamp === null) {
+          stats.lastMessageTimestamp = createdAt;
+        }
+
+        // Increment unread count if message is from otherCitizen to currentCitizen and is unread
+        if (sender === otherCitizenUsername && receiver === currentCitizenUsername && !readAt) {
+          stats.unreadMessagesFromCitizenCount++;
+        }
+      }
     }
 
-    // 3. Sort citizens by lastMessageTimestamp (descending, nulls last)
+    // 4. Combine citizen data with processed stats
+    const citizensWithStats: CitizenWithStats[] = allOtherCitizensFromAirtable.map(citizen => {
+      const stats = citizenStatsMap.get(citizen.username) || { lastMessageTimestamp: null, unreadMessagesFromCitizenCount: 0 };
+      return {
+        ...citizen,
+        lastMessageTimestamp: stats.lastMessageTimestamp,
+        unreadMessagesFromCitizenCount: stats.unreadMessagesFromCitizenCount
+      };
+    });
+
+    // 5. Sort citizens by lastMessageTimestamp (descending, nulls last)
     citizensWithStats.sort((a, b) => {
       if (a.lastMessageTimestamp === null && b.lastMessageTimestamp === null) return 0;
       if (a.lastMessageTimestamp === null) return 1; // a is null, b is not, so b comes first
