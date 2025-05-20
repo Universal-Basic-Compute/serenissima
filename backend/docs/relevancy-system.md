@@ -162,6 +162,40 @@ This relevancy identifies relationships where a building's `Owner` is different 
 - **Title**: "You Operate CitizenA's Market Stall"
 - **Description**: Details about running a business in CitizenA's building.
 
+## Building Occupant Relationship Relevancy
+
+This relevancy identifies relationships between a building's `RunBy` (operator/employer/landlord) and its `Occupant` (employee/renter). It's bidirectional.
+
+### Calculation
+- The system iterates through buildings.
+- If `Building.RunBy` and `Building.Occupant` are different:
+    - **Business Category:**
+        - For `RunBy` (Employer): "You Employ [Occupant] at Your [BuildingType]"
+        - For `Occupant` (Employee): "You Work for [RunBy] at Their [BuildingType]"
+    - **Home Category:**
+        - For `RunBy` (Landlord): "[Occupant] Rents Your [BuildingType]"
+        - For `Occupant` (Renter): "You Rent a [BuildingType] from [RunBy]"
+
+### Data Structure Example (Employer/Employee)
+
+**For Employer (`CitizenA`) whose business building is occupied (worked at) by `CitizenB`:**
+- **RelevantToCitizen**: `CitizenA`
+- **TargetCitizen**: `CitizenB`
+- **AssetID**: Building ID
+- **AssetType**: `building`
+- **Category**: `occupancy_relations`
+- **Type**: `employer_to_employee`
+- **Title**: "You Employ CitizenB at Your Workshop"
+
+**For Employee (`CitizenB`) working at `CitizenA`'s business:**
+- **RelevantToCitizen**: `CitizenB`
+- **TargetCitizen**: `CitizenA`
+- **AssetID**: Building ID
+- **AssetType**: `building`
+- **Category**: `occupancy_relations`
+- **Type**: `employee_to_employer`
+- **Title**: "You Work for CitizenA at Their Workshop"
+
 
 ## Future Extensions
 
@@ -276,4 +310,10 @@ python backend/relevancies/calculateSpecificRelevancy.py --type building_operato
 
 # Calculate building operator relevancies for all citizens
 python backend/relevancies/calculateSpecificRelevancy.py --type building_operator
+
+# Calculate building occupant relationship relevancies for CitizenAlpha
+python backend/relevancies/calculateSpecificRelevancy.py --type building_occupant --username CitizenAlpha
+
+# Calculate building occupant relationship relevancies for all citizens
+python backend/relevancies/calculateSpecificRelevancy.py --type building_occupant
 ```

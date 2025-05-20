@@ -871,10 +871,7 @@ export class RelevancyService {
       
       console.log(`[RelevancyService] Calculating building/operator relevancy related to ${citizenUsername}`);
       
-      // Fetch all buildings, focusing on those that can be operated (e.g., category 'business')
-      // Or fetch all buildings and filter later. For now, let's assume we get all and filter.
-      // The API call might need to be adjusted if we only want 'business' category buildings.
-      const buildingsResponse = await fetch(`${baseUrl}/api/buildings`); // Potentially filter by category if API supports
+      const buildingsResponse = await fetch(`${baseUrl}/api/buildings`); 
       
       if (!buildingsResponse.ok) {
         console.error(`[RelevancyService] Failed to fetch buildings for operator relevancy: ${buildingsResponse.status}`);
@@ -887,24 +884,23 @@ export class RelevancyService {
 
       for (const building of allBuildings) {
         const buildingOwner = building.owner;
-        const buildingOperator = building.runBy; // Assuming 'runBy' is the field for the operator
+        const buildingOperator = building.runBy; 
 
         if (!buildingOwner || !buildingOperator || buildingOwner === buildingOperator) {
-          continue; // No conflict or not fully defined
+          continue; 
         }
 
         const buildingType = this.formatBuildingType(building.type);
-        const score = 80; // Base score for this type of relationship
+        const score = 80; 
         const status = this.determineStatus(score);
 
-        // Case 1: The citizenUsername for whom this function is called IS the Building Owner
         if (buildingOwner === citizenUsername) {
           createdRelevancies.push({
             score,
             assetId: building.id,
             assetType: 'building',
             category: 'operator_relations',
-            type: 'operator_in_your_building', // Owner's perspective
+            type: 'operator_in_your_building', 
             distance: 0,
             closestLandId: building.landId || '',
             isConnected: false,
@@ -916,18 +912,17 @@ export class RelevancyService {
                          `- This relationship is key to the building's productivity and your income from it.`,
             timeHorizon: 'ongoing',
             status,
-            targetCitizen: buildingOperator, // The operator
-            relevantToCitizen: citizenUsername // This relevancy is FOR the building owner
+            targetCitizen: buildingOperator, 
+            relevantToCitizen: citizenUsername 
           });
         }
-        // Case 2: The citizenUsername for whom this function is called IS the Building Operator
         else if (buildingOperator === citizenUsername) {
           createdRelevancies.push({
             score,
             assetId: building.id,
             assetType: 'building',
             category: 'operator_relations',
-            type: 'running_in_others_building', // Operator's perspective
+            type: 'running_in_others_building', 
             distance: 0,
             closestLandId: building.landId || '',
             isConnected: false,
@@ -939,8 +934,8 @@ export class RelevancyService {
                          `- This relationship is key to your business activities.`,
             timeHorizon: 'ongoing',
             status,
-            targetCitizen: buildingOwner, // The owner
-            relevantToCitizen: citizenUsername // This relevancy is FOR the building operator
+            targetCitizen: buildingOwner, 
+            relevantToCitizen: citizenUsername 
           });
         }
       }
@@ -949,6 +944,106 @@ export class RelevancyService {
       return createdRelevancies;
     } catch (error) {
       console.error(`[RelevancyService] Error calculating building/operator relevancy for ${citizenUsername}:`, error);
+      return [];
+    }
+  }
+
+  /**
+   * Calculate building-occupant relationship relevancy scores
+   * This identifies employer/employee or landlord/renter relationships.
+   */
+  public async calculateBuildingOccupantRelationshipRelevancy(
+    citizenUsername: string // The citizen for whom this specific calculation is initiated
+  ): Promise<RelevancyScore[]> {
+    const createdRelevancies: RelevancyScore[] = [];
+    try {
+      const baseUrl = typeof window !== 'undefined' 
+        ? window.location.origin 
+        : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+      
+      console.log(`[RelevancyService] Calculating building/occupant relationship relevancy related to ${citizenUsername}`);
+      
+      const buildingsResponse = await fetch(`${baseUrl}/api/buildings`);
+      if (!buildingsResponse.ok) {
+        console.error(`[RelevancyService] Failed to fetch buildings for occupant relationship relevancy: ${buildingsResponse.status}`);
+        return [];
+      }
+      
+      const buildingsData = await buildingsResponse.json();
+      const allBuildings = buildingsData.buildings || [];
+      console.log(`[RelevancyService] Fetched ${allBuildings.length} total buildings for checking occupant relationships.`);
+
+      for (const building of allBuildings) {
+        const buildingRunBy = building.runBy; // Employer or Landlord
+        const buildingOccupant = building.occupant; // Employee or Renter
+        const buildingCategory = building.category?.toLowerCase(); // 'business' or 'home'
+        const buildingType = this.formatBuildingType(building.type);
+
+        if (!buildingRunBy || !buildingOccupant || buildingRunBy === buildingOccupant || !buildingCategory) {
+          continue; // Relationship not fully defined or no conflict
+        }
+
+        const score = 75; // Base score for these relationships
+        const status = this.determineStatus(score);
+
+        // Case 1: citizenUsername is the RunBy (Employer/Landlord)
+        if (buildingRunBy === citizenUsername) {
+          if (buildingCategory === 'business') {
+            createdRelevancies.push({
+              score, assetId: building.id, assetType: 'building', category: 'occupancy_relations', type: 'employer_to_employee',
+              distance: 0, closestLandId: building.landId || '', isConnected: false, connectivityBonus: 0,
+              title: `You Employ ${buildingOccupant} at Your ${buildingType}`,
+              description: `**${buildingOccupant}** works at your **${buildingType}**.\n\n` +
+                           `### Employer-Employee Relationship:\n` +
+                           `- You are the employer providing this job.\n` +
+                           `- Their work contributes to your business's success.`,
+              timeHorizon: 'ongoing', status, targetCitizen: buildingOccupant, relevantToCitizen: citizenUsername
+            });
+          } else if (buildingCategory === 'home') {
+            createdRelevancies.push({
+              score, assetId: building.id, assetType: 'building', category: 'occupancy_relations', type: 'landlord_to_renter',
+              distance: 0, closestLandId: building.landId || '', isConnected: false, connectivityBonus: 0,
+              title: `${buildingOccupant} Rents Your ${buildingType}`,
+              description: `**${buildingOccupant}** is renting your **${buildingType}**.\n\n` +
+                           `### Landlord-Renter Relationship:\n` +
+                           `- You are the landlord for this property.\n` +
+                           `- This generates rental income for you.`,
+              timeHorizon: 'ongoing', status, targetCitizen: buildingOccupant, relevantToCitizen: citizenUsername
+            });
+          }
+        }
+        // Case 2: citizenUsername is the Occupant (Employee/Renter)
+        else if (buildingOccupant === citizenUsername) {
+          if (buildingCategory === 'business') {
+            createdRelevancies.push({
+              score, assetId: building.id, assetType: 'building', category: 'occupancy_relations', type: 'employee_to_employer',
+              distance: 0, closestLandId: building.landId || '', isConnected: false, connectivityBonus: 0,
+              title: `You Work for ${buildingRunBy} at Their ${buildingType}`,
+              description: `You are employed at the **${buildingType}** run by **${buildingRunBy}**.\n\n` +
+                           `### Employee-Employer Relationship:\n` +
+                           `- This is your place of employment.\n` +
+                           `- Your work contributes to this business.`,
+              timeHorizon: 'ongoing', status, targetCitizen: buildingRunBy, relevantToCitizen: citizenUsername
+            });
+          } else if (buildingCategory === 'home') {
+            createdRelevancies.push({
+              score, assetId: building.id, assetType: 'building', category: 'occupancy_relations', type: 'renter_to_landlord',
+              distance: 0, closestLandId: building.landId || '', isConnected: false, connectivityBonus: 0,
+              title: `You Rent a ${buildingType} from ${buildingRunBy}`,
+              description: `You are renting a **${buildingType}** from **${buildingRunBy}**.\n\n` +
+                           `### Renter-Landlord Relationship:\n` +
+                           `- This is your rented accommodation.\n` +
+                           `- You pay rent to this landlord.`,
+              timeHorizon: 'ongoing', status, targetCitizen: buildingRunBy, relevantToCitizen: citizenUsername
+            });
+          }
+        }
+      }
+      
+      console.log(`[RelevancyService] Generated ${createdRelevancies.length} building/occupant relationship relevancy objects for ${citizenUsername}.`);
+      return createdRelevancies;
+    } catch (error) {
+      console.error(`[RelevancyService] Error calculating building/occupant relationship relevancy for ${citizenUsername}:`, error);
       return [];
     }
   }

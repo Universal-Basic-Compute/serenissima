@@ -334,6 +334,35 @@ def calculate_building_operator_relevancies(username: str, base_url: str) -> Dic
         log.error(traceback.format_exc())
         return {"success": False, "error": str(e)}
 
+def calculate_building_occupant_relevancies(username: str, base_url: str) -> Dict:
+    """Calculate building occupant relationship relevancies for a specific citizen."""
+    try:
+        log.info(f"Calculating building occupant relationship relevancies for citizen: {username}")
+        api_url = f"{base_url}/api/relevancies/building-occupant"
+        payload = {"Citizen": username}
+        response = requests.post(api_url, json=payload, timeout=60)
+        
+        log.info(f"Building occupant API response status for {username}: {response.status_code}")
+        if not response.ok:
+            log.error(f"Building occupant API call failed for {username} with status {response.status_code}: {response.text}")
+            return {"success": False, "error": f"API error: {response.status_code} - {response.text}"}
+        
+        data = response.json()
+        log.info(f"Building occupant API response for {username}: success={data.get('success')}, relevanciesSavedCount={data.get('relevanciesSavedCount', 0)}")
+        if not data.get('success'):
+            log.error(f"Building occupant API returned error for {username}: {data.get('error')}")
+            return {"success": False, "error": data.get('error', 'Unknown error')}
+        
+        return {
+            "success": True,
+            "relevanciesSavedCount": data.get('relevanciesSavedCount', 0),
+            "saved": data.get('saved', False)
+        }
+    except Exception as e:
+        log.error(f"Error calculating building occupant relationship relevancies for {username}: {e}")
+        log.error(traceback.format_exc())
+        return {"success": False, "error": str(e)}
+
 def calculate_relevancies_for_ai(username: str, base_url: str, type_filter: Optional[str] = None) -> Dict:
     """Calculate relevancies for a specific citizen with optional type filter."""
     try:
@@ -503,6 +532,19 @@ def calculate_relevancies(type_filter: Optional[str] = None) -> bool:
                 log.info(f"Successfully processed building operator relevancies for {username}, records saved: {num_bop_saved}")
             else:
                 log.error(f"Failed to calculate building operator relevancies for {username}: {result.get('error')}")
+
+        # Calculate building occupant relationship relevancies for each citizen
+        building_occupant_results = {}
+        for username in citizen_usernames:
+            time.sleep(1)
+            result = calculate_building_occupant_relevancies(username, base_url)
+            building_occupant_results[username] = result
+            if result.get('success'):
+                num_bocc_saved = result.get('relevanciesSavedCount', 0)
+                total_relevancies_saved += num_bocc_saved
+                log.info(f"Successfully processed building occupant relevancies for {username}, records saved: {num_bocc_saved}")
+            else:
+                log.error(f"Failed to calculate building occupant relevancies for {username}: {result.get('error')}")
         
         # Create a detailed message for the notification
         details = []
@@ -565,7 +607,16 @@ def calculate_relevancies(type_filter: Optional[str] = None) -> bool:
             else:
                 num_bop_saved = result.get('relevanciesSavedCount', 0)
                 saved_status = "saved" if result.get('saved', False) else "NOT saved"
-                details.append(f"- {citizen}: {num_bop_saved} records {saved_status}")
+                details.append(f"- {citizen} (Building Operator): {num_bop_saved} records {saved_status}")
+
+        details.append("\nBuilding Occupant Relevancies (per citizen):")
+        for citizen, result in building_occupant_results.items():
+            if not result.get('success'):
+                details.append(f"- {citizen}: Error - {result.get('error', 'Unknown error')}")
+            else:
+                num_bocc_saved = result.get('relevanciesSavedCount', 0)
+                saved_status = "saved" if result.get('saved', False) else "NOT saved"
+                details.append(f"- {citizen} (Building Occupant): {num_bocc_saved} records {saved_status}")
         
         details_text = "\n".join(details)
         
