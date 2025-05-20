@@ -74,28 +74,29 @@ export class ProblemService {
       const problems: Record<string, any> = {};
       
       lands.forEach(land => {
-        // We need to check both the record ID and the landId field
-        const recordId = land.id;
-        const landId = land.landId || recordId;
-        
-        // Check if there are buildings on this land using both IDs
-        const buildingsOnLand = buildingsByLand[recordId] || buildingsByLand[landId] || [];
+        const customLandId = land.landId; // The custom ID like "L001", or undefined
+        const airtableRecordId = land.id; // Airtable record ID, for fallback asset ID
+
+        // Use customLandId for lookup if available.
+        // buildingsByLand is keyed by building.land_id, which should be the custom LandId.
+        const buildingsOnLand = customLandId ? (buildingsByLand[customLandId] || []) : [];
         
         if (buildingsOnLand.length === 0) {
-          // Create a problem for this land
-          const problemId = `no_buildings_${landId}_${Date.now()}`;
+          // Determine the assetId for the problem. Prefer customLandId, fallback to airtableRecordId.
+          const problemAssetId = customLandId || airtableRecordId;
+          const problemId = `no_buildings_${problemAssetId}_${Date.now()}`;
           const landOwner = land.owner || 'Unknown';
           
           problems[problemId] = {
             problemId,
             citizen: landOwner, // Use the land owner as the citizen
             assetType: 'land',
-            assetId: landId,
+            assetId: problemAssetId,
             severity: 'medium',
             status: 'active',
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
-            location: land.historicalName || `Land #${landId}`,
+            location: land.historicalName || `Land #${problemAssetId}`,
             title: `No Buildings on Land`,
             description: this.generateNoBuildingsDescription(land),
             solutions: this.generateNoBuildingsSolutions(land),
