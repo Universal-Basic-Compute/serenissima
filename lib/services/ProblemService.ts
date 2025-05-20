@@ -194,9 +194,22 @@ export class ProblemService {
    */
   public async detectHomelessCitizens(username?: string): Promise<Record<string, any>> {
     try {
-      const citizens = await this.fetchAllCitizens(username);
-      if (citizens.length === 0) {
+      const allFetchedCitizens = await this.fetchAllCitizens(username);
+      if (allFetchedCitizens.length === 0) {
         console.log(`No citizens found to check for homelessness (user: ${username || 'all'})`);
+        return {};
+      }
+
+      const citizens = allFetchedCitizens.filter(c => {
+        if (!c.Username || typeof c.Username !== 'string' || c.Username.trim() === '') {
+          console.warn(`[ProblemService] detectHomelessCitizens: Citizen ${c.CitizenId || c.id || 'Unknown ID'} has invalid or missing Username ('${c.Username}'). Excluding from homeless check.`);
+          return false;
+        }
+        return true;
+      });
+
+      if (citizens.length === 0) {
+        console.log(`No citizens with valid Usernames to check for homelessness (user: ${username || 'all'}). Original count: ${allFetchedCitizens.length}`);
         return {};
       }
 
@@ -244,9 +257,22 @@ export class ProblemService {
    */
   public async detectWorklessCitizens(username?: string): Promise<Record<string, any>> {
     try {
-      const citizens = await this.fetchAllCitizens(username);
-      if (citizens.length === 0) {
+      const allFetchedCitizens = await this.fetchAllCitizens(username);
+      if (allFetchedCitizens.length === 0) {
         console.log(`No citizens found to check for worklessness (user: ${username || 'all'})`);
+        return {};
+      }
+
+      const citizens = allFetchedCitizens.filter(c => {
+        if (!c.Username || typeof c.Username !== 'string' || c.Username.trim() === '') {
+          console.warn(`[ProblemService] detectWorklessCitizens: Citizen ${c.CitizenId || c.id || 'Unknown ID'} has invalid or missing Username ('${c.Username}'). Excluding from workless check.`);
+          return false;
+        }
+        return true;
+      });
+
+      if (citizens.length === 0) {
+        console.log(`No citizens with valid Usernames to check for worklessness (user: ${username || 'all'}). Original count: ${allFetchedCitizens.length}`);
         return {};
       }
 
