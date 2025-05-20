@@ -41,17 +41,29 @@ def _escape_airtable_value(value: str) -> str:
     """Échappe les apostrophes pour les formules Airtable."""
     return value.replace("'", "\\'")
 
-def _get_no_active_contracts_problems(tables: Dict[str, Table], username: str, limit: int = 100) -> List[Dict]:
-    """Get Latest 100 PROBLEMS where Citizen=Username."""
+def _get_citizen_building_problems(tables: Dict[str, Table], username: str, limit: int = 100) -> List[Dict]:
+    """Get latest 100 PROBLEMS where AssetType='building' AND Citizen=Username."""
     try:
         safe_username = _escape_airtable_value(username)
-        formula = f"{{Citizen}}='{safe_username}'"
+        formula = f"AND({{AssetType}}='building', {{Citizen}}='{safe_username}')"
         # Assuming 'CreatedAt' field exists for sorting
         records = tables["problems"].all(formula=formula, sort=['-CreatedAt'], max_records=limit)
-        print(f"Found {len(records)} 'no_active_contracts' problems for citizen {username}")
+        print(f"Found {len(records)} building problems for citizen {username}")
         return [{'id': r['id'], 'fields': r['fields']} for r in records]
     except Exception as e:
-        print(f"Error fetching 'no_active_contracts' problems for {username}: {e}")
+        print(f"Error fetching citizen building problems for {username}: {e}")
+        return []
+
+def _get_general_building_problems(tables: Dict[str, Table], limit: int = 100) -> List[Dict]:
+    """Get latest 100 PROBLEMS where AssetType='building' for any citizen."""
+    try:
+        formula = "{{AssetType}}='building'"
+        # Assuming 'CreatedAt' field exists for sorting
+        records = tables["problems"].all(formula=formula, sort=['-CreatedAt'], max_records=limit)
+        print(f"Found {len(records)} general building problems.")
+        return [{'id': r['id'], 'fields': r['fields']} for r in records]
+    except Exception as e:
+        print(f"Error fetching general building problems: {e}")
         return []
 
 def get_ai_citizens(tables) -> List[Dict]:
