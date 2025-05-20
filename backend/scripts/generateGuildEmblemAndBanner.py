@@ -59,12 +59,12 @@ def get_guilds(tables: Dict[str, Table]) -> List[Dict]:
         log.error(f"Error fetching guilds: {e}")
         return []
 
-def generate_image_with_ideogram(prompt: str, aspect_ratio: str, guild_id: str, image_type: str) -> Optional[str]:
+def generate_image_with_ideogram(prompt: str, aspect_ratio: str, guild_identifier_for_filename: str, image_type: str, guild_name_for_logging: str) -> Optional[str]:
     """
     Generate an image using Ideogram API.
     image_type: "emblem" or "banner"
     """
-    log.info(f"Generating {image_type} for guild {guild_id} with aspect ratio {aspect_ratio}. Prompt: {prompt[:100]}...")
+    log.info(f"Generating {image_type} for guild {guild_name_for_logging} (File ID: {guild_identifier_for_filename}) with aspect ratio {aspect_ratio}. Prompt: {prompt[:100]}...")
     
     ideogram_api_key = os.environ.get('IDEOGRAM_API_KEY')
     if not ideogram_api_key:
@@ -79,6 +79,7 @@ def generate_image_with_ideogram(prompt: str, aspect_ratio: str, guild_id: str, 
         full_prompt = f"A wide banner or flag for a guild. {prompt}. Landscape orientation, 2:1 aspect ratio, detailed, epic."
 
     try:
+        log.debug(f"Full prompt for Ideogram ({guild_name_for_logging} - {image_type}): {full_prompt}")
         response = requests.post(
             "https://api.ideogram.ai/v1/ideogram-v3/generate", # Assuming v3, adjust if needed
             headers={
@@ -98,7 +99,7 @@ def generate_image_with_ideogram(prompt: str, aspect_ratio: str, guild_id: str, 
         image_url = result.get("data", [{}])[0].get("url")
 
         if not image_url:
-            log.error(f"No image URL in Ideogram response for guild {guild_id} ({image_type}).")
+            log.error(f"No image URL in Ideogram response for guild {guild_name_for_logging} (File ID: {guild_identifier_for_filename}, Type: {image_type}).")
             return None
 
         # Download the image
@@ -113,25 +114,25 @@ def generate_image_with_ideogram(prompt: str, aspect_ratio: str, guild_id: str, 
             save_dir = BANNERS_DIR
             file_extension = "png" # Banners can also be png
 
-        image_filename = f"{guild_id}.{file_extension}"
+        image_filename = f"{guild_identifier_for_filename}.{file_extension}"
         image_path = os.path.join(save_dir, image_filename)
 
         with open(image_path, 'wb') as f:
             for chunk in image_response.iter_content(chunk_size=8192):
                 f.write(chunk)
         
-        log.info(f"Saved {image_type} for guild {guild_id} to {image_path}")
+        log.info(f"Saved {image_type} for guild {guild_name_for_logging} (File ID: {guild_identifier_for_filename}) to {image_path}")
         
         # Return the public URL path
-        public_image_url = f"/images/guilds/{image_type}s/{image_filename}"
+        public_image_url = f"/images/guilds/{image_type}s/{image_filename}" # Uses guild_identifier_for_filename via image_filename
         return public_image_url
 
     except requests.exceptions.RequestException as e:
-        log.error(f"Error calling Ideogram API for guild {guild_id} ({image_type}): {e}")
+        log.error(f"Error calling Ideogram API for guild {guild_name_for_logging} (File ID: {guild_identifier_for_filename}, Type: {image_type}): {e}")
     except KeyError:
-        log.error(f"Unexpected response structure from Ideogram API for guild {guild_id} ({image_type}).")
+        log.error(f"Unexpected response structure from Ideogram API for guild {guild_name_for_logging} (File ID: {guild_identifier_for_filename}, Type: {image_type}).")
     except Exception as e:
-        log.error(f"Error generating or saving {image_type} for guild {guild_id}: {e}")
+        log.error(f"Error generating or saving {image_type} for guild {guild_name_for_logging} (File ID: {guild_identifier_for_filename}): {e}")
     
     return None
 
@@ -160,43 +161,52 @@ def process_guild_images(dry_run: bool = False):
         return
 
     for guild in guilds:
-        guild_id = guild['id']
-        guild_name = guild['fields'].get('GuildName', guild_id)
-        log.info(f"\nProcessing guild: {guild_name} (ID: {guild_id})")
+        guild_record_id = guild['id'] # Airtable record ID
+        guild_fields = guild['fields']
+        guild_name = guild_fields.get('GuildName', guild_record_id)
+        
+        # Get the GuildId field value to use for filenames
+        guild_id_for_filename = guild_fields.get('GuildId')
+
+        log.info(f"\nProcessing guild: {guild_name} (Record ID: {guild_record_id}, File ID: {guild_id_for_filename})")
+
+        if not guild_id_for_filename:
+            log.error(f"Guild '{guild_name}' (Record ID: {guild_record_id}) is missing the 'GuildId' field. Skipping image generation.")
+            continue
 
         # Process Guild Emblem
-        emblem_prompt = guild['fields'].get('GuildEmblem')
+        emblem_prompt = guild_fields.get('GuildEmblem')
         if emblem_prompt and not emblem_prompt.startswith('/'):
             log.info(f"GuildEmblem for {guild_name} is a prompt: '{emblem_prompt[:50]}...'")
             if not dry_run:
-                new_emblem_url = generate_image_with_ideogram(emblem_prompt, "1:1", guild_id, "emblem")
+                new_emblem_url = generate_image_with_ideogram(emblem_prompt, "1:1", guild_id_for_filename, "emblem", guild_name)
                 if new_emblem_url:
-                    update_guild_record(tables, guild_id, 'GuildEmblem', new_emblem_url)
+                    update_guild_record(tables, guild_record_id, 'GuildEmblem', new_emblem_url)
                 else:
                     log.error(f"Failed to generate emblem for {guild_name}.")
             else:
                 log.info(f"[DRY RUN] Would generate emblem for {guild_name} with prompt: {emblem_prompt}")
-                log.info(f"[DRY RUN] Would save to public/images/guilds/emblems/{guild_id}.png")
-                log.info(f"[DRY RUN] Would update GuildEmblem field to /images/guilds/emblems/{guild_id}.png")
+                log.info(f"[DRY RUN] Would save to public/images/guilds/emblems/{guild_id_for_filename}.png")
+                log.info(f"[DRY RUN] Would update GuildEmblem field in record {guild_record_id} to /images/guilds/emblems/{guild_id_for_filename}.png")
         elif emblem_prompt and emblem_prompt.startswith('/'):
             log.info(f"GuildEmblem for {guild_name} is already a path: {emblem_prompt}. Skipping.")
         else:
             log.info(f"No GuildEmblem prompt for {guild_name}. Skipping emblem.")
 
         # Process Guild Banner
-        banner_prompt = guild['fields'].get('GuildBanner')
+        banner_prompt = guild_fields.get('GuildBanner')
         if banner_prompt and not banner_prompt.startswith('/'):
             log.info(f"GuildBanner for {guild_name} is a prompt: '{banner_prompt[:50]}...'")
             if not dry_run:
-                new_banner_url = generate_image_with_ideogram(banner_prompt, "2:1", guild_id, "banner")
+                new_banner_url = generate_image_with_ideogram(banner_prompt, "2:1", guild_id_for_filename, "banner", guild_name)
                 if new_banner_url:
-                    update_guild_record(tables, guild_id, 'GuildBanner', new_banner_url)
+                    update_guild_record(tables, guild_record_id, 'GuildBanner', new_banner_url)
                 else:
                     log.error(f"Failed to generate banner for {guild_name}.")
             else:
                 log.info(f"[DRY RUN] Would generate banner for {guild_name} with prompt: {banner_prompt}")
-                log.info(f"[DRY RUN] Would save to public/images/guilds/banners/{guild_id}.png")
-                log.info(f"[DRY RUN] Would update GuildBanner field to /images/guilds/banners/{guild_id}.png")
+                log.info(f"[DRY RUN] Would save to public/images/guilds/banners/{guild_id_for_filename}.png")
+                log.info(f"[DRY RUN] Would update GuildBanner field in record {guild_record_id} to /images/guilds/banners/{guild_id_for_filename}.png")
         elif banner_prompt and banner_prompt.startswith('/'):
             log.info(f"GuildBanner for {guild_name} is already a path: {banner_prompt}. Skipping.")
         else:
