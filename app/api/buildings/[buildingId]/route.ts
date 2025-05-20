@@ -109,29 +109,61 @@ async function findBuildingFile(buildingId: string): Promise<any | null> {
 
 // Helper function to ensure building ID and position are correctly populated
 function ensureBuildingDataIntegrity(building: any, buildingIdFromPath: string): any {
-  let modifiableBuilding = { ...building };
+  let modifiableBuilding = { ...building }; // Contains original 'position' and 'point' fields
 
-  // Ensure 'id' field is present, using buildingIdFromPath if necessary
-  if (!modifiableBuilding.id && buildingIdFromPath) {
-    modifiableBuilding.id = buildingIdFromPath;
+  // 1. Try to use existing 'position' field if it's valid
+  let parsedPosition = null;
+  if (typeof modifiableBuilding.position === 'string' && modifiableBuilding.position.trim() !== "") {
+    try {
+      parsedPosition = JSON.parse(modifiableBuilding.position);
+    } catch (e) {
+      console.warn(`Building ${buildingIdFromPath}: 'position' field is a string but not valid JSON: ${modifiableBuilding.position}`);
+    }
+  } else if (typeof modifiableBuilding.position === 'object' && modifiableBuilding.position !== null) {
+    parsedPosition = modifiableBuilding.position; // Already an object
   }
 
-  // Populate 'position' if empty and ID matches coordinate pattern
-  if ((!modifiableBuilding.position || modifiableBuilding.position === "") && modifiableBuilding.id) {
-    // Regex for building_LAT_LNG pattern (allows for optional negative signs and decimals)
-    const idPattern = /^building_(-?[0-9]+(?:\.[0-9]+)?)_(-?[0-9]+(?:\.[0-9]+)?)$/;
-    const idMatch = String(modifiableBuilding.id).match(idPattern);
-    
+  // Generic pattern for type_LAT_LNG (e.g., building_LAT_LNG, canal_LAT_LNG)
+  // Allows for types containing letters, numbers, and hyphens.
+  const coordPattern = /^[a-zA-Z0-9-]+_(-?[0-9]+(?:\.[0-9]+)?)_(-?[0-9]+(?:\.[0-9]+)?)$/;
+
+  // 2. If 'position' is not valid or not present, try to parse from 'buildingIdFromPath'
+  if (!parsedPosition && buildingIdFromPath) {
+    const idMatch = String(buildingIdFromPath).match(coordPattern);
     if (idMatch) {
       const lat = parseFloat(idMatch[1]);
-      const lng = parseFloat(idMatch[2]); // Second captured group for longitude
-      
+      const lng = parseFloat(idMatch[2]);
       if (!isNaN(lat) && !isNaN(lng)) {
-        modifiableBuilding.position = JSON.stringify({ lat, lng });
-        console.log(`Populated position for ${modifiableBuilding.id} from ID: {"lat":${lat},"lng":${lng}}`);
+        parsedPosition = { lat, lng };
+        console.log(`Building ${buildingIdFromPath}: Populated position from buildingIdFromPath '${buildingIdFromPath}':`, parsedPosition);
       }
     }
   }
+  
+  // 3. If 'position' is still not determined, try to parse from 'point' field (from Airtable/file)
+  if (!parsedPosition && modifiableBuilding.point) {
+    const pointValue = String(modifiableBuilding.point);
+    const pointMatch = pointValue.match(coordPattern);
+    if (pointMatch) {
+      const lat = parseFloat(pointMatch[1]);
+      const lng = parseFloat(pointMatch[2]);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        parsedPosition = { lat, lng };
+        console.log(`Building ${buildingIdFromPath}: Populated position from 'point' field '${pointValue}':`, parsedPosition);
+      }
+    }
+  }
+
+  modifiableBuilding.position = parsedPosition; // Assign the final parsed position (object or null)
+
+  // Ensure 'id' field is present in the returned object, using buildingIdFromPath if building.id is missing
+  // Also handles if Airtable provided 'BuildingId' instead of 'id' in the initial mapping
+  if (!modifiableBuilding.id && buildingIdFromPath) {
+    modifiableBuilding.id = buildingIdFromPath;
+  } else if (!modifiableBuilding.id && modifiableBuilding.BuildingId) { 
+     modifiableBuilding.id = modifiableBuilding.BuildingId;
+  }
+
   return modifiableBuilding;
 }
 
@@ -158,27 +190,37 @@ export async function GET(request: NextRequest) {
           .firstPage();
 
         if (records.length > 0) {
-          const fields = records[0].fields;
-          const building = {
-            id: buildingId,
-            type: fields.Type || 'Unknown',
-            landId: fields.LandId || fields.Land || '', // Prioritize LandId, fallback to Land, changed from land_id
-            variant: fields.Variant || '',
-            position: fields.Position || '',
-            rotation: fields.Rotation || 0,
-            owner: fields.Citizen || '', // Airtable field is Citizen
-            createdAt: fields.CreatedAt || new Date().toISOString(), // Changed from created_at
-            createdBy: fields.CreatedBy || '', // Changed from created_by
-            updatedAt: fields.UpdatedAt || new Date().toISOString(), // Changed from updated_at
-            leaseAmount: fields.LeaseAmount || 0, // Changed from lease_amount
-            rentAmount: fields.RentAmount || 0, // Changed from rent_amount
-            occupant: fields.Occupant || ''
+          const fields = records[0].fields as Airtable.FieldSet; // Type assertion
+          const buildingRaw = {
+            id: fields.BuildingId as string || buildingId,
+            type: fields.Type as string || 'Unknown',
+            landId: (fields.LandId as string || fields.Land as string || '') as string,
+            variant: fields.Variant as string || '',
+            position: fields.Position || null, // Keep as is (string, object, or null from Airtable)
+            point: fields.Point || null,       // Keep as is, will be processed by ensureBuildingDataIntegrity
+            rotation: fields.Rotation as number || 0,
+            owner: fields.Citizen as string || '',
+            createdAt: fields.CreatedAt as string || new Date().toISOString(),
+            createdBy: fields.CreatedBy as string || '',
+            updatedAt: fields.UpdatedAt as string || new Date().toISOString(),
+            leaseAmount: fields.LeaseAmount as number || 0,
+            rentAmount: fields.RentAmount as number || 0,
+            occupant: fields.Occupant as string || ''
           };
           
-          const finalBuildingFromAirtable = ensureBuildingDataIntegrity(building, buildingId);
+          let processedBuilding = ensureBuildingDataIntegrity(buildingRaw, buildingId);
+
+          // Rename 'point' to 'pointId' for the final response and remove original Airtable 'BuildingId' if it was used
+          if (processedBuilding.point) {
+            processedBuilding.pointId = processedBuilding.point;
+            delete processedBuilding.point;
+          }
+          if (processedBuilding.BuildingId) { // Clean up if BuildingId was part of buildingRaw
+            delete processedBuilding.BuildingId;
+          }
 
           console.log(`Building ${buildingId} from Airtable - Citizen field: '${fields.Citizen}', Occupant field: '${fields.Occupant}'`);
-          return NextResponse.json({ building: finalBuildingFromAirtable });
+          return NextResponse.json({ building: processedBuilding });
         }
       } catch (err) {
         console.error('Airtable error:', err);
@@ -201,11 +243,20 @@ export async function GET(request: NextRequest) {
         });
       }
       
-      // Ensure buildingData has an ID and position if applicable
-      const finalBuildingFromFile = ensureBuildingDataIntegrity(buildingData, buildingId);
+      // buildingData is the raw data from the file
+      let processedBuildingFromFile = ensureBuildingDataIntegrity(buildingData, buildingId);
 
-      console.log(`Building ${buildingId} from local file - owner field: '${finalBuildingFromFile.owner}', occupant field: '${finalBuildingFromFile.occupant}'`);
-      return NextResponse.json({ building: finalBuildingFromFile });
+      // Rename 'point' to 'pointId' for the final response and remove original 'BuildingId' if present
+      if (processedBuildingFromFile.point) {
+        processedBuildingFromFile.pointId = processedBuildingFromFile.point;
+        delete processedBuildingFromFile.point;
+      }
+      if (processedBuildingFromFile.BuildingId) { // Clean up if local file used Airtable naming
+        delete processedBuildingFromFile.BuildingId;
+      }
+
+      console.log(`Building ${buildingId} from local file - owner field: '${processedBuildingFromFile.owner}', occupant field: '${processedBuildingFromFile.occupant}'`);
+      return NextResponse.json({ building: processedBuildingFromFile });
     }
 
     return NextResponse.json({ error: `Building not found: ${buildingId}` }, { status: 404 });
