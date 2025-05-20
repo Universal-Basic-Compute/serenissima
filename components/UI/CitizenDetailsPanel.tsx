@@ -1214,10 +1214,13 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
                   <div className={`px-3 py-1 rounded-full text-sm font-medium inline-block ${socialClassStyle}`}>
                     {citizen.socialclass}
                   </div>
-                  <div className="text-white text-lg font-bold">
-                    {formatDucats(citizen.Ducats || citizen.wealth || citizen.ducats)}
-                  </div>
+                  {/* Ducats display removed from here */}
                 </div>
+              </div>
+
+              {/* Ducats display at the top right */}
+              <div className="absolute top-3 right-3 bg-black/60 text-white px-3 py-1 rounded-lg shadow-md">
+                <span className="text-lg font-bold">{formatDucats(citizen.Ducats || citizen.wealth || citizen.ducats)}</span>
               </div>
             </div>
         </div>
