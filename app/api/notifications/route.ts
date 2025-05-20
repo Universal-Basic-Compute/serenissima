@@ -85,7 +85,20 @@ export async function POST(request: Request) {
         type: record.get('Type') as string,
         citizen: record.get('Citizen') as string,
         content: record.get('Content') as string,
-        details: record.get('Details') ? JSON.parse(record.get('Details') as string) : undefined,
+        details: (() => {
+          const detailsString = record.get('Details') as string;
+          if (detailsString) {
+            try {
+              return JSON.parse(detailsString);
+            } catch (e) {
+              console.warn(`[DEBUG] Failed to parse Details JSON for notification ID ${record.id}:`, detailsString, e);
+              // Optionally, return the raw string or a specific error object
+              // For now, returning undefined as per original logic for missing details
+              return undefined; 
+            }
+          }
+          return undefined;
+        })(),
         createdAt: record.get('CreatedAt') as string,
         readAt: record.get('ReadAt') as string || null
       }));
