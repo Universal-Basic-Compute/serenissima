@@ -68,6 +68,7 @@ export async function GET(
       status: record.get('Status') || 'active',
       position: position,
       location: record.get('Location') || '',
+      type: record.get('Type') || '',
       title: record.get('Title') || '',
       description: record.get('Description') || '',
       solutions: record.get('Solutions') || '',

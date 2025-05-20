@@ -9,6 +9,7 @@ interface Problem {
   createdAt: string;
   updatedAt: string;
   location: string;
+  type?: string; // Added type field
   title: string;
   description: string;
   solutions: string;
@@ -133,6 +134,7 @@ export class ProblemService {
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             location: land.historicalName || `Land #${problemAssetId}`,
+            type: 'no_buildings_on_land',
             title: `No Buildings on Land`,
             description: this.generateNoBuildingsDescription(land),
             solutions: this.generateNoBuildingsSolutions(land),
@@ -252,6 +254,7 @@ export class ProblemService {
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             location: buildingName, // Or a more specific location if available
+            type: category === 'home' ? 'vacant_home' : 'vacant_business',
             title,
             description,
             solutions,
@@ -408,6 +411,7 @@ export class ProblemService {
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             location: this.getCitizenLocationString(citizen),
+            type: 'homeless_citizen',
             title: 'Homeless Citizen',
             description: this.generateHomelessDescription(citizen),
             solutions: this.generateHomelessSolutions(citizen),
@@ -496,6 +500,7 @@ export class ProblemService {
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 location: workplaceBuilding.name || workplaceId, // Workplace location
+                type: 'homeless_employee_impact',
                 title: 'Homeless Employee Impact',
                 description: `Your employee, **${employeeName}**, is currently homeless. Homelessness can lead to instability and may result in up to a 50% reduction in productivity.`,
                 solutions: `Consider discussing housing options with **${employeeName}** or providing assistance if possible. Monitor their work performance and consider recruitment alternatives if productivity is significantly impacted.`,
@@ -660,6 +665,7 @@ export class ProblemService {
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             location: this.getCitizenLocationString(citizen),
+            type: 'workless_citizen',
             title: 'Workless Citizen',
             description: this.generateWorklessDescription(citizen),
             solutions: this.generateWorklessSolutions(citizen),
@@ -785,6 +791,7 @@ export class ProblemService {
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             location: buildingName,
+            type: 'no_active_contracts',
             title: 'No Active Contracts',
             description: `Your business premises, **${buildingName}**, currently has no active buy or sell contracts. This means it's not participating in the economy, potentially missing revenue opportunities or failing to secure necessary supplies.`,
             solutions: `To resolve this:\n- Create 'sell' contracts for goods or services your business produces.\n- Create 'buy' contracts for raw materials or goods your business needs.\n- Review market prices and demand to set competitive contract terms.\n- Ensure your business is operational and has an assigned occupant (worker).`,

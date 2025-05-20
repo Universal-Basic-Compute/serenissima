@@ -77,6 +77,7 @@ export async function GET(request: NextRequest) {
         updatedAt: record.get('UpdatedAt') || '',
         location: record.get('Location') || '',
         position: position || '', // Use the parsed or original position
+        type: record.get('Type') || '',
         title: record.get('Title') || '',
         description: record.get('Description') || '',
         solutions: record.get('Solutions') || '',
