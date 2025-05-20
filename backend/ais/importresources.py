@@ -676,37 +676,6 @@ def create_or_update_import_contract(
             }
             tables["contracts"].create(new_contract_data)
             print(f"Created new import contract {custom_contract_id} for {resource_type} at building {building_id}: {hourly_amount} units/hour")
-
-        # After successfully creating or updating the contract, create or update a resource record
-        # This part ensures the AI has a "resource" entry to track this import flow, even if actual count is 0 initially.
-        try:
-            # Assuming the field in Airtable is "Resource Type" (with a space)
-            resource_formula = f"AND({{Type}}='import', {{Resource Type}}='{_escape_airtable_value(resource_type)}', {{BuildingId}}='{_escape_airtable_value(building_id)}', {{Owner}}='{_escape_airtable_value(ai_username)}')"
-            existing_resources = tables["resources"].all(formula=resource_formula, max_records=1)
-            
-            resource_data_fields = {
-                "Type": "import",
-                "Resource Type": resource_type, # Changed field name
-                "BuildingId": building_id,
-                "Owner": ai_username,
-                "Count": 0,  # Imports start with 0 count, actual processing script will increment
-                "UpdatedAt": now
-            }
-            
-            if existing_resources:
-                resource_airtable_id = existing_resources[0]["id"]
-                tables["resources"].update(resource_airtable_id, resource_data_fields)
-                print(f"Updated import-tracking resource record for {resource_type} at building {building_id}")
-            else:
-                import uuid # Keep for ResourceId if needed
-                resource_data_fields["ResourceId"] = f"resource-{uuid.uuid4()}" # Still generate a unique ResourceId for the table's primary key
-                resource_data_fields["CreatedAt"] = now
-                tables["resources"].create(resource_data_fields)
-                print(f"Created new import-tracking resource record for {resource_type} at building {building_id}")
-                
-        except Exception as e_res:
-            print(f"Error creating/updating import-tracking resource record: {str(e_res)}")
-            # Continue execution even if resource creation/update fails, contract is the main goal.
         
         return True
     except Exception as e_contract:
