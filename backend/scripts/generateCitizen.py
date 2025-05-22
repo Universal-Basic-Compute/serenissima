@@ -11,6 +11,7 @@ It can be used by other scripts like immigration.py to create new citizens.
 import os
 import sys
 import logging
+from joinGuild import process_ai_guild_joining # Added import
 import random
 import json
 import datetime
@@ -390,6 +391,18 @@ def _get_random_venice_position() -> Optional[Dict[str, float]]:
                         created_record = tables['citizens'].create(airtable_payload)
                         log.info(f"Successfully saved citizen {citizen_data.get('username')} to Airtable. Record ID: {created_record.get('id')}")
                         
+                        # Attempt to have the newly created citizen join a guild
+                        citizen_username_for_guild = citizen_data.get('username')
+                        if citizen_username_for_guild:
+                            log.info(f"Attempting guild joining process for new citizen: {citizen_username_for_guild}")
+                            try:
+                                process_ai_guild_joining(dry_run=args.dry_run, target_username=citizen_username_for_guild)
+                                log.info(f"Guild joining process completed for {citizen_username_for_guild}.")
+                            except Exception as e_guild:
+                                log.error(f"Error during guild joining for {citizen_username_for_guild}: {e_guild}")
+                        else:
+                            log.warning("Cannot attempt guild joining, username not found in citizen_data.")
+
                         # Now call update_citizen_description_and_image
                         log.info(f"Attempting to update description and image for {citizen_data.get('username')}")
                         update_success = update_citizen_description_and_image(username=citizen_data.get('username'), dry_run=args.dry_run)
