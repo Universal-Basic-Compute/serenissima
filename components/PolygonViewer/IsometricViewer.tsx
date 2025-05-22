@@ -3969,6 +3969,32 @@ number => {
       }
     }
     
+    // Draw polygons using RenderService, incorporating currentHoverState
+    renderService.drawPolygons(ctx, polygonsToRender, {
+      selectedPolygonId,
+      hoveredPolygonId: currentHoverState.type === 'polygon' ? currentHoverState.id : null,
+    });
+
+    // Draw buildings using RenderService, incorporating currentHoverState
+    if (buildings.length > 0) {
+      renderService.drawBuildings(ctx, buildings, scale, offset, canvas.width, canvas.height, {
+        selectedBuildingId,
+        hoveredBuildingId: currentHoverState.type === 'building' ? currentHoverState.id : null,
+        buildingPositionsCache,
+        buildingColorMode,
+        getBuildingColor,
+        getBuildingOwnerColor,
+        getBuildingCategoryColor,
+        isColorDark,
+        getCurrentCitizenIdentifier,
+        polygonsToRender // Pass polygonsToRender for bridge orientation calculation
+      });
+    }
+    
+    // Store current view and scale for comparison in next render
+    prevActiveView.current = activeView;
+    prevScale.current = scale;
+    
     // Add a listener for force redraw
     const handleForceRedraw = () => {
       if (canvasRef.current) {
@@ -3995,7 +4021,8 @@ number => {
     incomeData, minIncome, maxIncome, selectedPolygonId, selectedBuildingId, 
     emptyBuildingPoints, mousePosition, citizensLoaded, citizensByBuilding, 
     incomeDataLoaded, polygonsToRender, getIncomeColor, getCurrentCitizenSecondaryColor,
-    waterPoints, waterPointMode, waterRouteMode, waterRoutePath, transportPath // Added dependencies
+    waterPoints, waterPointMode, waterRouteMode, waterRoutePath, transportPath, currentHoverState, // Added currentHoverState
+    buildingPositionsCache, buildingColorMode // Added for building rendering
   ]);
   
 
