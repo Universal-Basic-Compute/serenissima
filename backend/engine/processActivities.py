@@ -269,24 +269,31 @@ def main(dry_run: bool = False):
                         citizen_record_for_pos = get_citizen_record(tables, citizen_username)
 
                         if building_record_for_pos and citizen_record_for_pos:
+                            # All logic depending on building_record_for_pos and citizen_record_for_pos being valid goes here
                             building_position_str = building_record_for_pos['fields'].get('Position')
-                        building_custom_id = building_record_for_pos['fields'].get('BuildingId') # We still get it for logging
+                            building_custom_id = building_record_for_pos['fields'].get('BuildingId') # We still get it for logging
                         
-                        if building_position_str:
-                            update_payload = {
-                                'Position': building_position_str,
-                                # 'CurrentBuildingId': building_custom_id, # Field does not exist
-                                'UpdatedAt': datetime.now(timezone.utc).isoformat()
-                            }
-                            tables['citizens'].update(citizen_record_for_pos['id'], update_payload)
-                            log.info(f"Updated citizen {citizen_username} Position to {building_position_str} (Building: {building_custom_id}) and UpdatedAt.")
-                        else:
-                            log.warning(f"Building {to_building_airtable_id} is missing Position. Cannot update citizen {citizen_username} position.")
-                    else:
-                        if not building_record_for_pos:
-                            log.warning(f"Target building {to_building_airtable_id} not found. Cannot update citizen {citizen_username} position.")
-                        if not citizen_record_for_pos:
-                            log.warning(f"Citizen {citizen_username} not found. Cannot update citizen position.")
+                            if building_position_str:
+                                update_payload = {
+                                    'Position': building_position_str,
+                                    # 'CurrentBuildingId': building_custom_id, # Field does not exist
+                                    'UpdatedAt': datetime.now(timezone.utc).isoformat()
+                                }
+                                tables['citizens'].update(citizen_record_for_pos['id'], update_payload)
+                                log.info(f"Updated citizen {citizen_username} Position to {building_position_str} (Building: {building_custom_id}) and UpdatedAt.")
+                            else:
+                                log_msg = f"Building {to_building_airtable_id}"
+                                if building_custom_id: # Safely use building_custom_id
+                                    log_msg += f" (Custom ID: {building_custom_id})"
+                                log_msg += f" is missing Position. Cannot update citizen {citizen_username} position."
+                                log.warning(log_msg)
+                        else: # This else corresponds to: if building_record_for_pos and citizen_record_for_pos:
+                            if not building_record_for_pos:
+                                log.warning(f"Target building {to_building_airtable_id} not found. Cannot update citizen {citizen_username} position.")
+                            # This check is important if building_record_for_pos was True, but citizen_record_for_pos was False.
+                            # Or if both were False, this will also log.
+                            if not citizen_record_for_pos: 
+                                log.warning(f"Citizen {citizen_username} not found. Cannot update citizen position.")
                 except Exception as e_update_pos:
                     log.error(f"Error updating citizen {citizen_username} position after activity {activity_guid}: {e_update_pos}")
             elif dry_run and to_building_airtable_id and citizen_username:
