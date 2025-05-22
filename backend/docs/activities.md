@@ -14,8 +14,14 @@ The activity system tracks what citizens are doing at any given time, creating a
     - `goto_inn`: Traveling to an inn (for visitors).
 - **Production**: Citizen is at their workplace and actively transforming input resources into output resources according to a recipe.
     - *Processor*: Consumes specified input resources from the building's inventory and adds specified output resources, if conditions (input availability, storage capacity) are met.
-- **Fetch Resource**: Citizen is traveling from a source building to their workplace (or another target building) to pick up resources as per a contract.
-    - *Processor*: (Currently, `fetch_resource` itself might not have a processor; the subsequent activity like `deliver_resource` or a modified `production` that uses fetched resources would handle them. This needs clarification if `fetch_resource` itself should have processing logic upon arrival at the source or destination).
+- **Fetch Resource**: Citizen travels to a source building (`FromBuilding` in activity) to pick up resources as per a contract. The activity's `ToBuilding` field indicates the ultimate destination for these resources.
+    - *Processor (executes upon arrival at `FromBuilding`)*:
+        - Calculates the actual amount of the specified `ResourceId` to pick up, limited by contract amount, seller's stock, citizen's carrying capacity (10 units total), and buyer's funds.
+        - Buyer (from contract) pays Seller (operator of `FromBuilding`).
+        - Resource is removed from `FromBuilding`'s stock.
+        - Resource is added to the citizen's inventory, marked as owned by the contract's `Buyer`.
+        - Citizen's position is updated to `FromBuilding`.
+    - *Post-processing*: `createActivities.py` should then ideally create a new travel activity for the citizen to take the fetched resources from `FromBuilding` to the original `ToBuilding` (ultimate destination).
 - **Idle**: Waiting for their next scheduled activity
 
 Activities are managed by the `createActivities.py` script, which runs periodically to ensure citizens always have something to do. This system applies equally to both AI and human citizens, creating a unified simulation where all citizens follow the same daily patterns and routines.

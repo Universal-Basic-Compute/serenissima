@@ -26,7 +26,20 @@ This script:
    - If both checks pass:
      - Consumes (decrements/deletes) the input resources from the building's inventory.
      - Produces (increments/creates) the output resources in the building's inventory, owned by the operator.
-6. Updates the activity status to "processed" or "failed". If processed successfully and the activity had a `ToBuilding` destination (not typical for "production" which happens in place), the citizen's `Position` (coordinates) and `UpdatedAt` fields are updated to reflect their new location.
+6. For "fetch_resource" activities (upon arrival at `FromBuilding` - the source):
+   - Determines the actual amount of resource to pick up based on:
+     - Amount specified in the contract/activity.
+     - Stock available at `FromBuilding` (owned by the building's operator/seller).
+     - Citizen's remaining carrying capacity (max 10 units total).
+     - Buyer's (from contract) available Ducats to pay for the resources.
+   - If a positive amount can be fetched:
+     - Processes financial transaction: Buyer pays Seller.
+     - Decrements resource stock from `FromBuilding`.
+     - Adds resource to the citizen's personal inventory. The resource on the citizen is marked as owned by the `Buyer` from the contract.
+   - Updates the citizen's `Position` to be at the `FromBuilding`.
+7. Updates the activity status to "processed" or "failed". If processed successfully:
+   - For most activities with a `ToBuilding` destination, the citizen's `Position` (coordinates) and `UpdatedAt` fields are updated to reflect their new location.
+   - For `fetch_resource` activities, the processor itself handles updating the citizen's position to the `FromBuilding` (pickup location), so the generic update is skipped.
 """
 
 import os
@@ -55,6 +68,7 @@ try:
     from backend.engine.activity_processors.goto_home_processor import process as process_goto_home_fn
     from backend.engine.activity_processors.goto_work_processor import process as process_goto_work_fn
     from backend.engine.activity_processors.production_processor import process as process_production_fn
+    from backend.engine.activity_processors.fetch_resource_processor import process as process_fetch_resource_fn
 except ImportError:
     # Fallback if the script is run in a context where backend.engine is not directly importable
     # This might happen if script is run directly from its own directory without backend being a package
@@ -183,6 +197,7 @@ def main(dry_run: bool = False):
         "goto_home": process_goto_home_fn,
         "goto_work": process_goto_work_fn,
         "production": process_production_fn,
+        "fetch_resource": process_fetch_resource_fn,
         # Add other activity type processors here as they are created
         # "another_activity_type": process_another_activity_type_fn,
     }
@@ -242,13 +257,15 @@ def main(dry_run: bool = False):
             update_activity_status(tables, activity_id_airtable, "processed")
             processed_count += 1
 
-            # Update citizen's position and UpdatedAt if ToBuilding is present
-            to_building_airtable_id = activity_record['fields'].get('ToBuilding')
-            citizen_username = activity_record['fields'].get('Citizen')
+            # Update citizen's position and UpdatedAt if ToBuilding is present,
+            # UNLESS the activity type handles its own position update (e.g., fetch_resource)
+            if activity_type != 'fetch_resource':
+                to_building_airtable_id = activity_record['fields'].get('ToBuilding')
+                citizen_username = activity_record['fields'].get('Citizen')
 
-            if to_building_airtable_id and citizen_username and not dry_run:
-                try:
-                    building_record_for_pos = tables['buildings'].get(to_building_airtable_id)
+                if to_building_airtable_id and citizen_username and not dry_run:
+                    try:
+                        building_record_for_pos = tables['buildings'].get(to_building_airtable_id)
                     citizen_record_for_pos = get_citizen_record(tables, citizen_username)
 
                     if building_record_for_pos and citizen_record_for_pos:
