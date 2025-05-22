@@ -23,12 +23,13 @@ import { renderService } from '@/lib/services/RenderService';
 
 interface IsometricViewerProps {
   activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'contracts' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
+  fullWaterGraphData: { waterPoints: any[] } | null; // Add this prop
 }
 
 // Define a type for all possible view types to use throughout the component
 type ViewType = 'buildings' | 'land' | 'transport' | 'resources' | 'contracts' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
 
-export default function IsometricViewer({ activeView }: IsometricViewerProps) {
+export default function IsometricViewer({ activeView, fullWaterGraphData }: IsometricViewerProps) { // Add fullWaterGraphData to destructuring
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [polygons, setPolygons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,7 +83,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [selectedProblemId, setSelectedProblemId] = useState<string | null>(null);
   const [showProblemDetailsPanel, setShowProblemDetailsPanel] = useState<boolean>(false);
   const [currentHoverState, setCurrentHoverState] = useState<HoverState>(hoverStateService.getState());
-  const [fullWaterGraphData, setFullWaterGraphData] = useState<{ waterPoints: any[] } | null>(null);
+  // const [fullWaterGraphData, setFullWaterGraphData] = useState<{ waterPoints: any[] } | null>(null); // State removed, will come from props
   
   // Add handler function for closing the transport debug panel
   const handleTransportDebugPanelClose = () => {
@@ -3049,9 +3050,7 @@ number => {
                 const connectionLineWidth = (activeView === 'transport' ? 1.0 : 0.7) * scale;
                 ctx.strokeStyle = `rgba(0, 150, 255, ${connectionLineOpacity})`;
                 ctx.lineWidth = Math.max(0.5, connectionLineWidth); // Ensure a minimum line width
-                ctx.setLineDash([1 * scale, 2 * scale]); // Apply "pointillés" style
-                ctx.stroke();
-                ctx.setLineDash([]); // Reset line dash
+                ctx.stroke(); // Draw continuous line
               } else {
                 // Draw a direct line for connections without intermediate points
                 const targetX = (targetPoint.position.lng - 12.3326) * 20000;
@@ -3070,9 +3069,7 @@ number => {
                 const connectionLineWidth = (activeView === 'transport' ? 1.0 : 0.7) * scale;
                 ctx.strokeStyle = `rgba(0, 150, 255, ${connectionLineOpacity})`;
                 ctx.lineWidth = Math.max(0.5, connectionLineWidth); // Ensure a minimum line width
-                ctx.setLineDash([1 * scale, 2 * scale]); // Apply "pointillés" style
-                ctx.stroke();
-                ctx.setLineDash([]); // Reset line dash
+                ctx.stroke(); // Draw continuous line
               }
             }
           });

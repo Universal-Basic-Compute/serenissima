@@ -59,6 +59,7 @@ export default function TwoDPage() {
   const [polygons, setPolygons] = useState<any[]>([]);
   const [buildings, setBuildings] = useState<any[]>([]);
   const [emptyBuildingPoints, setEmptyBuildingPoints] = useState<{lat: number, lng: number}[]>([]);
+  const [fullWaterGraphData, setFullWaterGraphData] = useState<{ waterPoints: any[] } | null>(null); // Add state for water graph
   
   // Handle settings modal
   const handleSettingsClose = () => {
@@ -344,6 +345,41 @@ export default function TwoDPage() {
     const initTimeout = setTimeout(() => {
       initializeTransportService();
     }, 1000);
+
+    // Load full water graph data
+    const loadFullGraph = async () => {
+      // Ensure transportService is initialized (it loads waterGraph internally)
+      // This might be slightly redundant if initializeTransportService also calls preloadPolygons,
+      // but it's safer to ensure it's ready before trying to get data.
+      if (!transportService.isPolygonsLoaded()) {
+        console.log("Page: transportService polygons not loaded, preloading for water graph...");
+        await transportService.preloadPolygons();
+      }
+      const graphData = transportService.getWaterGraphData();
+      if (graphData) {
+        setFullWaterGraphData(graphData);
+        console.log(`Page: Loaded full water graph with ${graphData.waterPoints.length} points from TransportService.`);
+      } else {
+        console.warn("Page: Could not retrieve full water graph data from TransportService. Attempting direct API fetch.");
+        try {
+          const response = await fetch('/api/water-points');
+          if (response.ok) {
+            const apiData = await response.json();
+            if (apiData.success && apiData.waterPoints) {
+              setFullWaterGraphData({ waterPoints: apiData.waterPoints });
+              console.log(`Page: Loaded full water graph directly from API with ${apiData.waterPoints.length} points.`);
+            } else {
+              console.error("Page: Failed to load water graph from API fallback:", apiData.error || "Unknown API error");
+            }
+          } else {
+            console.error("Page: API fallback for water graph failed with status:", response.status);
+          }
+        } catch (apiError) {
+          console.error("Page: Error during API fallback for water graph:", apiError);
+        }
+      }
+    };
+    loadFullGraph();
     
     // Clean up function
     return () => {
@@ -608,7 +644,7 @@ export default function TwoDPage() {
   return (
     <div className="relative w-full h-screen">
       {/* Main 2D Isometric Viewer */}
-      <IsometricViewer activeView={activeView} />
+      <IsometricViewer activeView={activeView} fullWaterGraphData={fullWaterGraphData} />
       
       {/* Top Navigation Bar */}
       <div className="absolute top-0 left-0 right-0 bg-black/50 text-white p-4 flex justify-between items-center">
