@@ -2993,71 +2993,8 @@ number => {
           }
         }
       
-        // Draw connections if any
-        if (waterPoint.connections && Array.isArray(waterPoint.connections)) {
-          waterPoint.connections.forEach(connection => {
-            // Find the target water point
-            const targetPoint = currentWaterPoints.find(wp => wp.id === connection.targetId);
-            if (targetPoint && targetPoint.position) {
-              // Check if this connection has intermediate points
-              if (connection.intermediatePoints && connection.intermediatePoints.length > 0) {
-                // Draw a path with intermediate points
-                ctx.beginPath();
-                ctx.moveTo(isoPos.x, isoPos.y);
-                
-                // Draw through each intermediate point
-                for (const intPoint of connection.intermediatePoints) {
-                  const intX = (intPoint.lng - 12.3326) * 20000;
-                  const intY = (intPoint.lat - 45.4371) * 20000;
-                  
-                  const intIsoPos = {
-                    x: calculateIsoX(intX, intY, scale, offset, canvas.width),
-                    y: calculateIsoY(intX, intY, scale, offset, canvas.height)
-                  };
-                  
-                  ctx.lineTo(intIsoPos.x, intIsoPos.y);
-                }
-                
-                // Connect to the target point
-                const targetX = (targetPoint.position.lng - 12.3326) * 20000;
-                const targetY = (targetPoint.position.lat - 45.4371) * 20000;
-                
-                const targetIsoPos = {
-                  x: calculateIsoX(targetX, targetY, scale, offset, canvas.width),
-                  y: calculateIsoY(targetX, targetY, scale, offset, canvas.height)
-                };
-                
-                ctx.lineTo(targetIsoPos.x, targetIsoPos.y);
-                
-                // Style the path - Unified styling for all water graph connections
-                const connectionLineOpacity = activeView === 'transport' ? 0.6 : 0.35;
-                const connectionLineWidth = (activeView === 'transport' ? 1.0 : 0.7) * scale;
-                ctx.strokeStyle = `rgba(0, 150, 255, ${connectionLineOpacity})`;
-                ctx.lineWidth = Math.max(0.5, connectionLineWidth); // Ensure a minimum line width
-                ctx.stroke(); // Draw continuous line
-              } else {
-                // Draw a direct line for connections without intermediate points
-                const targetX = (targetPoint.position.lng - 12.3326) * 20000;
-                const targetY = (targetPoint.position.lat - 45.4371) * 20000;
-              
-                const targetIsoPos = {
-                  x: calculateIsoX(targetX, targetY, scale, offset, canvas.width),
-                  y: calculateIsoY(targetX, targetY, scale, offset, canvas.height)
-                };
-              
-                // Draw a line connecting the water points - Unified styling
-                ctx.beginPath();
-                ctx.moveTo(isoPos.x, isoPos.y);
-                ctx.lineTo(targetIsoPos.x, targetIsoPos.y);
-                const connectionLineOpacity = activeView === 'transport' ? 0.6 : 0.35;
-                const connectionLineWidth = (activeView === 'transport' ? 1.0 : 0.7) * scale;
-                ctx.strokeStyle = `rgba(0, 150, 255, ${connectionLineOpacity})`;
-                ctx.lineWidth = Math.max(0.5, connectionLineWidth); // Ensure a minimum line width
-                ctx.stroke(); // Draw continuous line
-              }
-            }
-          });
-        }
+        // Connections are now drawn by the fullWaterGraphData loop earlier.
+        // This loop will only draw the water point nodes themselves.
       });
     }
 
