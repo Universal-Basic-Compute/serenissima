@@ -1927,9 +1927,9 @@ number => {
             setSelectedCitizen(null);
           }
         },
-        setHoveredCitizen: (citizen, buildingId, type) => { // Define setHoveredCitizen as a method
-          hoverStateService.setHoveredCitizen(citizen, buildingId, type);
-        },
+        // setHoveredCitizen is removed as it's not an expected property
+        // The interactionService might handle citizen hover internally
+        // or it's managed by hoverStateService directly elsewhere.
         setShowCitizenDetailsPanel,
         calculateTransportRoute,
         findBuildingPosition,
