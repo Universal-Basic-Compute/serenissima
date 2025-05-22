@@ -90,11 +90,17 @@ export class RenderService {
     // Draw the appropriate shape based on the building's point type
     ctx.beginPath();
 
-    const isBridge = buildingType && buildingType.toLowerCase().includes('bridge');
+    const isBridgeByType = buildingType && 
+                           (buildingType.toLowerCase().includes('bridge') || 
+                            buildingType.toLowerCase().includes('ponte'));
+    const isBridgeByCategory = buildingCategory && buildingCategory.toLowerCase() === 'bridge';
+    const isActuallyABridge = isBridgeByType || isBridgeByCategory;
 
-    if (isBridge && rotation !== undefined) {
-      const bridgeWidth = size * 0.8; // Keep the same width as before
-      const bridgeHeight = size * 0.08; // Reduce height for shorter bridges
+    if (isActuallyABridge && rotation !== undefined) {
+      // For bridges, 'size' is squareSize = (default building dimension e.g. 20) * scale * 0.6
+      // Make bridge width a good portion of this, and height a smaller fraction for a rectangular look.
+      const bridgeWidth = size * 0.8; 
+      const bridgeHeight = Math.max(2 * scale, size * 0.25); // Ensure a minimum visible height, e.g. 25% of size
 
       ctx.save();
       ctx.translate(x, y);
@@ -653,9 +659,9 @@ export class RenderService {
           ? building.orientation 
           : building.rotation;
 
-        // Pass effectiveRotation and building type to drawBuilding
+        // Pass effectiveRotation, building type, and building category to drawBuilding
         this.drawBuilding(
-          ctx, screen.x, screen.y, squareSize, color, typeIndicator, isSelected, buildingShape, isHovered, effectiveRotation, building.type
+          ctx, screen.x, screen.y, squareSize, color, typeIndicator, isSelected, buildingShape, isHovered, effectiveRotation, building.type, building.category
         );
       } catch (error) {
         console.error(`Error drawing building ${building?.id || 'unknown'}:`, error);
