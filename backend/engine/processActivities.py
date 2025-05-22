@@ -294,9 +294,9 @@ def main(dry_run: bool = False):
                             # Or if both were False, this will also log.
                             if not citizen_record_for_pos: 
                                 log.warning(f"Citizen {citizen_username} not found. Cannot update citizen position.")
-                except Exception as e_update_pos:
-                    log.error(f"Error updating citizen {citizen_username} position after activity {activity_guid}: {e_update_pos}")
-            elif dry_run and to_building_airtable_id and citizen_username:
+                    except Exception as e_update_pos:
+                        log.error(f"Error updating citizen {citizen_username} position after activity {activity_guid}: {e_update_pos}")
+            elif dry_run and to_building_airtable_id and citizen_username: # This elif corresponds to the 'if not dry_run'
                 log.info(f"[DRY RUN] Would update citizen {citizen_username} position based on ToBuilding {to_building_airtable_id}.")
 
         else:
