@@ -199,36 +199,3 @@ def start_scheduler():
     scheduler_thread = threading.Thread(target=run_scheduled_tasks, daemon=True)
     scheduler_thread.start()
     print("Started scheduler thread for cron-like tasks")
-                    result = subprocess.run(
-                        ["python", script_full_path],
-                        capture_output=True,
-                        text=True,
-                        check=False # Avoid raising CalledProcessError, check returncode manually
-                    )
-                    
-                    if result.returncode == 0:
-                        print(f"Successfully ran {task_name}")
-                        if result.stdout:
-                            print(f"Output: {result.stdout[:500].strip()}...")
-                    else:
-                        print(f"Error running {task_name}. Return code: {result.returncode}")
-                        if result.stderr:
-                            print(f"Error output: {result.stderr.strip()}")
-                        elif result.stdout: # Some scripts might output errors to stdout
-                             print(f"Output (possible error): {result.stdout.strip()}")
-                except FileNotFoundError:
-                    print(f"Exception running {task_name}: Script not found at {script_full_path}")
-                except Exception as e:
-                    print(f"Exception running {task_name}: {str(e)}")
-            
-            # Removed special case for income distribution as per user request.
-        
-        # Sleep for 60 seconds before checking again
-        # The loop runs once per minute. Conditions for 5-min and hourly tasks are checked each time.
-        time.sleep(60)
-
-def start_scheduler():
-    """Start the scheduler in a background thread."""
-    scheduler_thread = threading.Thread(target=run_scheduled_tasks, daemon=True)
-    scheduler_thread.start()
-    print("Started scheduler thread for cron-like tasks")
