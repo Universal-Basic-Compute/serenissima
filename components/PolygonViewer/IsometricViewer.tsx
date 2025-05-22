@@ -1453,6 +1453,60 @@ number => {
     fetchBridgeData();
   }, [buildings]); // Changed dependency to `buildings`
   
+  // Handle mouse up for bridge orientation saving
+  useEffect(() => {
+    const handleMouseUpGlobal = async () => {
+      if (orientBridgeModeActive && selectedBridgeForOrientationId && orientingBridgeAngle !== null) {
+        const bridgeIdToSave = selectedBridgeForOrientationId;
+        const angleToSave = orientingBridgeAngle;
+
+        console.log(`IsometricViewer: MouseUp - Attempting to save orientation for bridge ${bridgeIdToSave}: ${angleToSave} radians`);
+
+        try {
+          const response = await fetch(`/api/bridges/${bridgeIdToSave}/orient`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orientation: angleToSave }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ error: `API Error: ${response.status}` }));
+            throw new Error(errorData.error || `API Error: ${response.status}`);
+          }
+
+          const data = await response.json();
+          if (data.success) {
+            console.log('IsometricViewer: Bridge orientation saved successfully:', data.bridge);
+            // Update local buildings state
+            setBuildings(prevBuildings =>
+              prevBuildings.map(b =>
+                b.id === bridgeIdToSave ? { ...b, orientation: angleToSave, rotation: angleToSave } : b
+              )
+            );
+            // Optionally, show a success notification to the user
+          } else {
+            console.error('IsometricViewer: Failed to save bridge orientation:', data.error);
+            // Optionally, show an error notification to the user
+          }
+        } catch (error) {
+          console.error('IsometricViewer: Error saving bridge orientation:', error);
+          // Optionally, show an error notification to the user
+        } finally {
+          // Reset selection state for bridge orientation
+          // Keep orientBridgeModeActive as is, so user can orient another bridge
+          setSelectedBridgeForOrientationId(null); 
+          setOrientingBridgeAngle(null);
+          // InteractionService should have reset its isDraggingOrientBridge state already
+        }
+      }
+    };
+
+    window.addEventListener('mouseup', handleMouseUpGlobal);
+    return () => {
+      window.removeEventListener('mouseup', handleMouseUpGlobal);
+    };
+  }, [orientBridgeModeActive, selectedBridgeForOrientationId, orientingBridgeAngle, buildings]); // Added buildings to dependencies for setBuildings
+
   // Pre-calculate building positions when buildings are loaded
   useEffect(() => {
     if (buildings.length > 0 && !initialPositionCalculated) {
