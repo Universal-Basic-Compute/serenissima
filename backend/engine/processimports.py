@@ -589,8 +589,13 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
 
         if dry_run:
             log.info(f"🧪 **[DRY RUN]** Would process imports for building {buyer_building_id}.")
-            for res_type_id in list(dict.fromkeys(r['ResourceId'] for r in aggregated_resources_for_activity)): # Unique resource types
-                 log.info(f"  [DRY RUN] Would ensure import-tracking resource record for {res_type_id} in {buyer_building_id} for {buyer_username}.")
+            for resource_item_dry_run in aggregated_resources_for_activity:
+                 res_type_id_dry_run = resource_item_dry_run['ResourceId']
+                 res_amount_dry_run = resource_item_dry_run['Amount']
+                 res_def_dry_run = resource_types.get(res_type_id_dry_run, {})
+                 res_name_dry_run = res_def_dry_run.get('name', res_type_id_dry_run)
+                 res_cat_dry_run = res_def_dry_run.get('category', 'Unknown')
+                 log.info(f"  [DRY RUN] Would ensure import-tracking resource record for {res_type_id_dry_run} (Name: {res_name_dry_run}, Category: {res_cat_dry_run}, Count: {res_amount_dry_run}) in {buyer_building_id} for {buyer_username}.")
             log.info(f"  [DRY RUN] Would find/generate citizen and create one delivery activity for {buyer_building_id} with resources: {json.dumps(aggregated_resources_for_activity)} and contract IDs: {', '.join(contract_ids_for_activity)}.")
             total_activities_created +=1 # Simulate activity creation
             continue
@@ -599,6 +604,9 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
         all_resource_records_managed = True
         for resource_item in aggregated_resources_for_activity:
             resource_type_id = resource_item['ResourceId']
+            resource_amount = resource_item['Amount']
+            resource_definition = resource_types.get(resource_type_id, {})
+            
             try:
                 # The field for the resource kind (e.g., 'sailcloth') is 'Type'.
                 # The 'import' context is implicit to these records managed by this script.
@@ -607,9 +615,13 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
                 
                 current_time_iso = datetime.now().isoformat()
                 resource_data_fields = {
-                    "Type": resource_type_id, # Field 'Type' now stores the actual resource kind
-                    "BuildingId": buyer_building_id, "Owner": buyer_username,
-                    "Count": 0, "UpdatedAt": current_time_iso
+                    "Type": resource_type_id, 
+                    "Name": resource_definition.get('name', resource_type_id),
+                    "Category": resource_definition.get('category', 'Unknown'),
+                    "BuildingId": buyer_building_id, 
+                    "Owner": buyer_username,
+                    "Count": resource_amount, # Count from the aggregated contract amount
+                    "UpdatedAt": current_time_iso
                 }
                 if existing_resources:
                     tables["resources"].update(existing_resources[0]["id"], resource_data_fields)
