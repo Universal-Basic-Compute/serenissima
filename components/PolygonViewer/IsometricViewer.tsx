@@ -1952,7 +1952,8 @@ number => {
     transportEndPoint,
     // waterPoints, // Removed from dependencies, using fullWaterGraphData now
     fullWaterGraphData, // Added fullWaterGraphData as a dependency
-    handleWaterRouteClick
+    handleWaterRouteClick,
+    orientBridgeModeActive // Add orientBridgeModeActive to dependencies
   ]);
 
   // Helper function to check if a point is inside a polygon
