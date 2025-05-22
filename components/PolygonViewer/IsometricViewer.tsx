@@ -89,6 +89,7 @@ export default function IsometricViewer({ activeView, fullWaterGraphData }: Isom
   const [orientBridgeModeActive, setOrientBridgeModeActive] = useState<boolean>(false);
   const [selectedBridgeForOrientationId, setSelectedBridgeForOrientationId] = useState<string | null>(null);
   const [orientingBridgeAngle, setOrientingBridgeAngle] = useState<number | null>(null);
+  const [isUserConsiglioDeiDieci, setIsUserConsiglioDeiDieci] = useState<boolean>(false);
   
   // Add handler function for closing the transport debug panel
   const handleTransportDebugPanelClose = () => {
