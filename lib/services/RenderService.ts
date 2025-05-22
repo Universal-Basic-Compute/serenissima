@@ -126,15 +126,18 @@ export class RenderService {
       ctx.stroke(); // Stroke for non-bridge shapes
     }
     
-    // ctx.fill(); // Fill was here, moved into conditional blocks
-    ctx.stroke();
+    // ctx.stroke(); // Stroke was here, moved into conditional blocks (effectively removing the redundant one)
     
     // Add a small indicator for the building type with fixed font size
-    ctx.fillStyle = '#000'; // Black text for visibility
-    ctx.font = `10px Arial`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(typeIndicator, x, y);
+    // For bridges, we might not want a type indicator, or a different one.
+    // For now, keep it for non-bridges.
+    if (!(isBridge && rotation !== undefined)) {
+      ctx.fillStyle = '#000'; // Black text for visibility
+      ctx.font = `10px Arial`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(typeIndicator, x, y);
+    }
   }
 
   /**
