@@ -724,11 +724,11 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
                         lat = float(parts[1])
                         lng = float(parts[2])
                         citizen_position = {"lat": lat, "lng": lng}
-                        log.info(f"Extracted position from Point field for citizen {citizen_id}: {citizen_position}")
+                        log.info(f"Extracted position from Point field for citizen {citizen_custom_id}: {citizen_position}")
                     except (ValueError, IndexError):
                         log.warning(f"Failed to parse coordinates from Point field: {point_str}")
     except (json.JSONDecodeError, TypeError) as e:
-        log.warning(f"Invalid position data for citizen {citizen_id}: {citizen['fields'].get('Position')} - Error: {str(e)}")
+        log.warning(f"Invalid position data for citizen {citizen_custom_id}: {citizen['fields'].get('Position')} - Error: {str(e)}")
     
     if not citizen_position:
         log.warning(f"Citizen {citizen_custom_id} has no position data, creating idle activity")
@@ -789,7 +789,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
             
             is_at_home = distance_meters < 20  # Within 20 meters
         except (KeyError, TypeError):
-            log.warning(f"Error calculating distance for citizen {citizen_id}")
+            log.warning(f"Error calculating distance for citizen {citizen_custom_id}")
         
         if is_at_home:
             # Citizen is at home, create rest activity
@@ -857,7 +857,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
                 
                 is_at_workplace = distance_meters < 20  # Within 20 meters
             except (KeyError, TypeError):
-                log.warning(f"Error calculating distance for citizen {citizen_id}")
+                log.warning(f"Error calculating distance for citizen {citizen_custom_id}")
             
             if is_at_workplace:
                 # Citizen is at workplace, proceed with normal work activities
