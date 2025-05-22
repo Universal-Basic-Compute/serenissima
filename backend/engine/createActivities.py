@@ -1110,11 +1110,6 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
                         log.info(f"No Arti recipes for building type {building_type}, creating idle activity")
                         create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
                         return True
-                else:
-                    # No production information, create idle activity
-                    log.info(f"No production information for building type {building_type}, creating idle activity")
-                    create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
-                    return True
             else:
                 # Citizen is not at workplace, create goto_work activity
                 log.info(f"Citizen {citizen_custom_id} is not at their workplace, creating goto_work activity")
