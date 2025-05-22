@@ -47,9 +47,12 @@ const BuildingLocation: React.FC<BuildingLocationProps> = ({
     // Add padding
     const padding = 20;
     const scaleX = (canvas.width - padding * 2) / (maxLng - minLng);
-    const scaleY = (canvas.height - padding * 2) / (maxLat - minLat);
+    // Adjust scaleY to make the polygon appear taller on the canvas,
+    // compensating for visual compression due to latitude.
+    // Dividing by 0.7 effectively multiplies the vertical scale by approx 1.43.
+    const scaleY = ((canvas.height - padding * 2) / (maxLat - minLat)) / 0.7;
     
-    // Use the smaller scale to maintain aspect ratio
+    // Use the smaller scale to maintain aspect ratio (based on the potentially adjusted scaleY)
     const scale = Math.min(scaleX, scaleY);
     
     // Center the polygon
