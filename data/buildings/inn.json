@@ -65,9 +65,10 @@
       "wine"
     ],
     "sells": [
-      "meal_service",
-      "drink_service",
-      "lodging_service"
+      "fish",
+      "bread",
+      "wine",
+      "spiced_wine"
     ]
   }
 }
