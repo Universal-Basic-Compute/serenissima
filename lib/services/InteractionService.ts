@@ -22,6 +22,7 @@ export interface InteractionState {
   hoveredCitizenBuilding?: string | null;
   hoveredCitizenType?: string | null;
   waterPointMode?: boolean;
+  isDraggingOrientBridge?: boolean; // New state for orienting bridge
 }
 
 type HoverType = 'none' | 'polygon' | 'building' | 'buildingPoint' | 'citizen' | 'canalPoint' | 'bridgePoint' | 'waterPoint';
@@ -38,7 +39,8 @@ export class InteractionService {
     hoveredCanalPoint: null,
     hoveredBridgePoint: null,
     hoveredCitizenBuilding: null,
-    hoveredCitizenType: null
+    hoveredCitizenType: null,
+    isDraggingOrientBridge: false // Initialize new state
   };
   
   // Refs to track current state without causing re-renders
@@ -252,6 +254,7 @@ export class InteractionService {
       waterRouteMode?: boolean;
       waterRouteStartPoint?: any;
       waterRouteIntermediatePoints?: any[];
+      orientBridgeModeActive?: boolean; // New param
     },
     setters: {
       setMousePosition: (position: { x: number, y: number }) => void;
@@ -270,6 +273,9 @@ export class InteractionService {
       screenToLatLng: (screenX: number, screenY: number, scale: number, offset: {x: number, y: number}, canvasWidth: number, canvasHeight: number) => {lat: number, lng: number};
       saveWaterPoint?: (point: {lat: number, lng: number}) => void;
       handleWaterRouteClick?: (point: {lat: number, lng: number}, isWaterPoint: boolean, waterPointId?: string) => void;
+      // New callbacks for bridge orientation
+      setSelectedBridgeForOrientationId: (id: string | null) => void;
+      setOrientingBridgeAngle: (angle: number | null) => void;
     }
   ): () => void {
     
