@@ -199,7 +199,7 @@ If it does not make sense for the building to store/transform/sell resources, wr
                 "anthropic-version": "2023-06-01"
             },
             json={
-                "model": "claude-3-7-sonnet-latest",
+                "model": "claude-sonnet-4-20250514",
                 "max_tokens": 1000,
                 "system": system_prompt,
                 "messages": [

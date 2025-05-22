@@ -115,7 +115,7 @@ def generate_citizen(social_class: str, additional_prompt_text: Optional[str] = 
             },
             json={
                 "content": prompt,
-                "model": "claude-3-7-sonnet-latest",
+                "model": "claude-sonnet-4-20250514",
                 "mode": "creative",
                 "addSystem": "You are a historical expert on Renaissance Venice (1400-1600) helping to create a citizen for a historically accurate economic simulation game called La Serenissima. Create 1 unique Venetian citizen of the Facchini social class (unskilled workers, servants, gondoliers, and the working poor) with historically accurate name, description, and characteristics. Your response MUST be a valid JSON object with EXACTLY this format:\n\n```json\n{\n  \"FirstName\": \"string\",\n  \"LastName\": \"string\",\n  \"Username\": \"string\",\n  \"Personality\": \"string\",\n  \"CorePersonality\": [\"Positive Trait\", \"Negative Trait\", \"Core Motivation\"],\n  \"ImagePrompt\": \"string\",\n  \"Ducats\": number\n}\n```\n\nThe Username should be a realistic, human-like username that someone might choose based on their name or characteristics (like 'marco_polo' or 'gondolier42'). Make it lowercase with only letters, numbers and underscores. The CorePersonality should be an array of three strings: [Positive Trait, Negative Trait, Core Motivation], representing the citizen's strength (what they excel at), flaw (what limits them), and driver (what fundamentally motivates them). The Personality field should provide a textual description (2-3 sentences) elaborating on these three core traits, values, and temperament. Do not include any text before or after the JSON. The Ducats value should be between 10,000-100,000. Don't use the same names and tropes than the previous generations."
             }
@@ -363,7 +363,7 @@ def _get_random_venice_position() -> Optional[Dict[str, float]]:
                     # 'personality' from Kinos maps to 'Description' in Airtable
                     # 'corepersonality' from Kinos maps to 'CorePersonality' (JSON string)
                     airtable_payload = {
-                        "CitizenId": citizen_data.get("id"), # Use the ctz_... id
+                        "CitizenId": citizen_data.get("username"), # Use the username
                         "Username": citizen_data.get("username"),
                         "SocialClass": citizen_data.get("socialclass"), # Already 'Facchini'
                         "FirstName": citizen_data.get("firstname"),

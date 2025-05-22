@@ -165,7 +165,7 @@ async def generate_icon_prompt(resource):
         
         # Call Claude API
         response = claude.messages.create(
-            model="claude-3-7-sonnet-latest",  # Updated to the latest model
+            model="claude-sonnet-4-20250514",  # Updated to the latest model
             max_tokens=1000,
             system=system_prompt,
             messages=[

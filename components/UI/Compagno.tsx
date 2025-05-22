@@ -905,7 +905,7 @@ const Compagno: React.FC<CompagnoProps> = ({ className, onNotificationsRead }) =
       // Prepare request body
       const requestBody: any = {
         content: content,
-        model: 'claude-3-7-sonnet-latest',
+        model: 'claude-sonnet-4-20250514',
         mode: 'creative',
         addSystem: systemPrompt
       };

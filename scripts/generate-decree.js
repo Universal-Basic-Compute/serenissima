@@ -52,7 +52,7 @@ async function generateDecree(input) {
     const response = await axios.post(
       'https://api.anthropic.com/v1/messages',
       {
-        model: 'claude-3-7-sonnet-latest',
+        model: 'claude-sonnet-4-20250514',
         max_tokens: 4000,
         system: `You are a decree generator for La Serenissima, a digital recreation of Renaissance Venice. 
         Your task is to create a historically plausible decree based on the citizen's input.

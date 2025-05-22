@@ -184,9 +184,11 @@ def get_resource_types() -> Dict:
 def get_building_resources(tables, building_id: str) -> List[Dict]:
     """Get all resources stored in a specific building."""
     try:
-        formula = f"{{BuildingId}}='{building_id}'"
+        # Resources associated with a building now use AssetId and AssetType
+        escaped_building_id = _escape_airtable_value(building_id)
+        formula = f"AND({{AssetId}}='{escaped_building_id}', {{AssetType}}='building')"
         resources = tables['resources'].all(formula=formula)
-        log.info(f"Found {len(resources)} resources in building {building_id}")
+        log.info(f"Found {len(resources)} resources in building {building_id} (via AssetId/AssetType)")
         return resources
     except Exception as e:
         log.error(f"Error getting resources for building {building_id}: {e}")

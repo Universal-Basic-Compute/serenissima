@@ -332,7 +332,7 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
             },
             json={
                 "content": prompt,
-                "model": "claude-3-7-sonnet-latest",
+                "model": "claude-sonnet-4-20250514",
                 "mode": "creative",
                 "addSystem": f"You are a historical expert on Renaissance Venice (1400-1600) helping to update a citizen profile for a historically accurate economic simulation game called La Serenissima. You have access to the following information about the citizen: {system_context_str}. For the 'CorePersonality' array, ensure the Negative Trait is a significant character flaw or vice realistic for Renaissance Venice (e.g., pride, greed, cunning, jealousy, impatience, vanity, stubbornness). Your response MUST be a valid JSON object with EXACTLY this format:\n\n```json\n{{\n  \"Personality\": \"string\",\n  \"CorePersonality\": [\"string\", \"string\", \"string\"],\n  \"familyMotto\": \"string\",\n  \"coatOfArms\": \"string\",\n  \"imagePrompt\": \"string\"\n}}\n```\n\nDo not include any text before or after the JSON."
             }
