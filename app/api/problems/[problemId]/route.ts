@@ -8,10 +8,10 @@ const AIRTABLE_PROBLEMS_TABLE = 'PROBLEMS';
 
 export async function GET(
   request: NextRequest,
-  context: { params: { problemId: string } }
+  { params }: { params: { problemId: string } }
 ) {
   try {
-    const problemId = context.params.problemId;
+    const problemId = params.problemId;
     
     if (!problemId) {
       return NextResponse.json(
