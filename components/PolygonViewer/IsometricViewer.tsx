@@ -613,20 +613,23 @@ number => {
     }
   }, [calculateTotalDistance]); // Removed fetchWaterPoints
   
-  // Function to check if the current user is ConsiglioDeiDieci
-  const isConsiglioDeiDieci = () => {
-    try {
-      const profileStr = localStorage.getItem('citizenProfile');
-      if (profileStr) {
-        const profile = JSON.parse(profileStr);
-        return profile.username === 'ConsiglioDeiDieci';
+  // Effect to check user role on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const profileStr = localStorage.getItem('citizenProfile');
+        if (profileStr) {
+          const profile = JSON.parse(profileStr);
+          setIsUserConsiglioDeiDieci(profile.username === 'ConsiglioDeiDieci');
+        } else {
+          setIsUserConsiglioDeiDieci(false);
+        }
+      } catch (error) {
+        console.error('Error checking if user is ConsiglioDeiDieci:', error);
+        setIsUserConsiglioDeiDieci(false);
       }
-      return false;
-    } catch (error) {
-      console.error('Error checking if user is ConsiglioDeiDieci:', error);
-      return false;
     }
-  };
+  }, []);
   
   // Function to handle water route clicks
   const handleWaterRouteClick = useCallback((point: {lat: number, lng: number}, isWaterPoint: boolean, waterPointId?: string) => {
@@ -3843,7 +3846,7 @@ number => {
           </button>
           
           {/* Water Point Mode Toggle - only visible in transport view for ConsiglioDeiDieci */}
-          {isConsiglioDeiDieci() && (
+          {isUserConsiglioDeiDieci && (
             <button
               onClick={() => {
                 console.log('Toggling water point mode from:', waterPointMode);
@@ -3873,7 +3876,7 @@ number => {
           )}
           
           {/* Water Route Mode Toggle - only visible in transport view for ConsiglioDeiDieci */}
-          {activeView === 'transport' && isConsiglioDeiDieci() && (
+          {activeView === 'transport' && isUserConsiglioDeiDieci && (
             <button
               onClick={() => {
                 console.log('Toggling water route mode from:', waterRouteMode);
@@ -3909,7 +3912,7 @@ number => {
           )}
           
           {/* Water Route Cancel Button - only visible when creating a route for ConsiglioDeiDieci */}
-          {activeView === 'transport' && waterRouteMode && waterRouteStartPoint && isConsiglioDeiDieci() && (
+          {activeView === 'transport' && waterRouteMode && waterRouteStartPoint && isUserConsiglioDeiDieci && (
             <button
               onClick={() => {
                 console.log('Canceling water route creation');
@@ -3929,7 +3932,7 @@ number => {
           )}
           
           {/* Water Route Status - only visible in water route mode for ConsiglioDeiDieci */}
-          {activeView === 'transport' && waterRouteMode && isConsiglioDeiDieci() && (
+          {activeView === 'transport' && waterRouteMode && isUserConsiglioDeiDieci && (
             <div className="absolute top-20 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded text-sm">
               {!waterRouteStartPoint ? (
                 <span>Click on a water point to start the route</span>
