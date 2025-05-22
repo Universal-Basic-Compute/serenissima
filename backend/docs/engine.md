@@ -228,23 +228,6 @@ Every day at 3:00 PM UTC, the loan payment system processes payments for all act
 
 This process simulates the banking system of Renaissance Venice, with regular loan payments ensuring the flow of capital between citizens and institutions.
 
-### Income Distribution (4:00 PM UTC)
-
-**Script**: `backend/distributeIncome.py`
-
-Every afternoon at 4:00 PM UTC, the income distribution system allocates income from land ownership:
-
-1. The script identifies all lands that generate income
-2. For each income-generating land:
-   - It calculates the daily income based on the land's properties
-   - It identifies the land owner
-   - It transfers the appropriate amount of compute tokens to the owner's account
-3. A portion of all income is collected as taxes by the Consiglio dei Dieci (Council of Ten)
-4. Transaction records are created for all income transfers
-5. Notifications are sent to land owners about their income
-
-This process simulates the economic activity of Venice, with land ownership providing passive income to players and tax revenue to the government.
-
 ### Wage Payments (5:00 PM UTC)
 
 **Script**: `backend/engine/dailywages.py`

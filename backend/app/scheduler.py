@@ -12,44 +12,68 @@ def run_scheduled_tasks():
         current_hour = now.hour
         current_minute = now.minute
 
-        # Task to run every 5 minutes
-        if current_minute % 5 == 0:
-            # Path to the script, relative to the 'backend' directory
-            script_path_5_min = "engine/createActivities.py"
-            task_name_5_min = "Citizen activity creation"
-            
-            # Get the absolute path to the backend directory
-            # __file__ is backend/app/scheduler.py
-            # os.path.dirname(__file__) is backend/app
-            # os.path.dirname(os.path.dirname(__file__)) is backend
-            backend_dir_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            script_full_path_5_min = os.path.join(backend_dir_path, script_path_5_min)
+        # Get the absolute path to the backend directory once
+        backend_dir_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-            print(f"Scheduler: Time for 5-minute task at {now.isoformat()}. Running: {task_name_5_min} from {script_full_path_5_min}")
+        # Task to run every 5 minutes (e.g., at :00, :05, :10, ...)
+        if current_minute % 5 == 0:
+            script_path_create_activities = "engine/createActivities.py"
+            task_name_create_activities = "Citizen activity creation"
+            script_full_path_create_activities = os.path.join(backend_dir_path, script_path_create_activities)
+
+            print(f"Scheduler: Time for 5-minute task (createActivities) at {now.isoformat()}. Running: {task_name_create_activities} from {script_full_path_create_activities}")
             
             try:
-                result_5_min = subprocess.run(
-                    ["python", script_full_path_5_min],
+                result_create_activities = subprocess.run(
+                    ["python", script_full_path_create_activities],
                     capture_output=True,
                     text=True,
-                    check=False # Avoid raising CalledProcessError, check returncode manually
+                    check=False
                 )
-                
-                if result_5_min.returncode == 0:
-                    print(f"Successfully ran {task_name_5_min}")
-                    # Log a small part of output for frequent tasks to keep logs cleaner
-                    if result_5_min.stdout:
-                         print(f"Output (first 200 chars): {result_5_min.stdout[:200].strip()}...")
+                if result_create_activities.returncode == 0:
+                    print(f"Successfully ran {task_name_create_activities}")
+                    if result_create_activities.stdout:
+                         print(f"Output (first 200 chars): {result_create_activities.stdout[:200].strip()}...")
                 else:
-                    print(f"Error running {task_name_5_min}. Return code: {result_5_min.returncode}")
-                    if result_5_min.stderr:
-                        print(f"Error output: {result_5_min.stderr.strip()}")
-                    elif result_5_min.stdout: # Some scripts might output errors to stdout
-                        print(f"Output (possible error): {result_5_min.stdout.strip()}")
+                    print(f"Error running {task_name_create_activities}. Return code: {result_create_activities.returncode}")
+                    if result_create_activities.stderr:
+                        print(f"Error output: {result_create_activities.stderr.strip()}")
+                    elif result_create_activities.stdout:
+                        print(f"Output (possible error): {result_create_activities.stdout.strip()}")
             except FileNotFoundError:
-                print(f"Exception running {task_name_5_min}: Script not found at {script_full_path_5_min}")
+                print(f"Exception running {task_name_create_activities}: Script not found at {script_full_path_create_activities}")
             except Exception as e:
-                print(f"Exception running {task_name_5_min}: {str(e)}")
+                print(f"Exception running {task_name_create_activities}: {str(e)}")
+
+        # Task to run every 5 minutes, offset from the first (e.g., at :01, :06, :11, ...)
+        if (current_minute - 1) % 5 == 0: # Offset by 1 minute
+            script_path_process_decay = "resources/processdecay.py"
+            task_name_process_decay = "Resource decay processing"
+            script_full_path_process_decay = os.path.join(backend_dir_path, script_path_process_decay)
+
+            print(f"Scheduler: Time for 5-minute task (processdecay) at {now.isoformat()}. Running: {task_name_process_decay} from {script_full_path_process_decay}")
+
+            try:
+                result_process_decay = subprocess.run(
+                    ["python", script_full_path_process_decay],
+                    capture_output=True,
+                    text=True,
+                    check=False
+                )
+                if result_process_decay.returncode == 0:
+                    print(f"Successfully ran {task_name_process_decay}")
+                    if result_process_decay.stdout:
+                        print(f"Output (first 200 chars): {result_process_decay.stdout[:200].strip()}...")
+                else:
+                    print(f"Error running {task_name_process_decay}. Return code: {result_process_decay.returncode}")
+                    if result_process_decay.stderr:
+                        print(f"Error output: {result_process_decay.stderr.strip()}")
+                    elif result_process_decay.stdout:
+                        print(f"Output (possible error): {result_process_decay.stdout.strip()}")
+            except FileNotFoundError:
+                print(f"Exception running {task_name_process_decay}: Script not found at {script_full_path_process_decay}")
+            except Exception as e:
+                print(f"Exception running {task_name_process_decay}: {str(e)}")
         
         # Hourly tasks (check only at the top of the hour)
         if current_minute == 0:
@@ -107,15 +131,74 @@ def run_scheduled_tasks():
             
             # Check if there's a task for the current hour
             if current_hour in tasks:
-                script_path, task_name = tasks[current_hour]
-                print(f"Running scheduled task: {task_name}")
+                # Ensure tasks[current_hour] is not a string before trying to unpack
+                task_entry = tasks[current_hour]
+                if isinstance(task_entry, tuple) and len(task_entry) == 2:
+                    script_path, task_name = task_entry
+                    print(f"Scheduler: Running scheduled task: {task_name}")
                 
-                try:
-                    # Get the absolute path to the backend directory
-                    backend_dir_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-                    script_full_path = os.path.join(backend_dir_path, script_path)
+                    try:
+                        # backend_dir_path is already defined above
+                        script_full_path = os.path.join(backend_dir_path, script_path)
+                        
+                        # Run the script
+                        result = subprocess.run(
+                            ["python", script_full_path],
+                            capture_output=True,
+                            text=True,
+                            check=False # Avoid raising CalledProcessError, check returncode manually
+                        )
+                        
+                        if result.returncode == 0:
+                            print(f"Successfully ran {task_name}")
+                            if result.stdout:
+                                print(f"Output: {result.stdout[:500].strip()}...")
+                        else:
+                            print(f"Error running {task_name}. Return code: {result.returncode}")
+                            if result.stderr:
+                                print(f"Error output: {result.stderr.strip()}")
+                            elif result.stdout: # Some scripts might output errors to stdout
+                                 print(f"Output (possible error): {result.stdout.strip()}")
+                    except FileNotFoundError:
+                        print(f"Exception running {task_name}: Script not found at {script_full_path}")
+                    except Exception as e:
+                        print(f"Exception running {task_name}: {str(e)}")
+                else:
+                    # Handle cases where a single hour might have multiple tasks defined differently
+                    # This part of the original code structure for tasks might need review if an hour can have multiple script paths.
+                    # For now, assuming one script per hour entry or it's handled by how tasks dict is structured.
+                    # If tasks[current_hour] could be a list of tuples, iterate here.
+                    # Example: if isinstance(task_entry, list): for script_path, task_name in task_entry: ...
+                    log_message_multiple_tasks = f"Task entry for hour {current_hour} is not a (script_path, task_name) tuple: {task_entry}. Skipping."
+                    print(log_message_multiple_tasks) # Or log.warning if logger is configured
+            
+            # Special case for income distribution at 4 PM UTC
+            # This task is also at the top of the hour (current_minute == 0)
+            # if current_hour == 16: # This was the old income distribution
+            #     print("Scheduler: Running income distribution")
+            #     try:
+            #         # Ensure the backend directory is in sys.path for the import
+            #         backend_dir_path_for_import = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            #         if backend_dir_path_for_import not in sys.path:
+            #             sys.path.append(backend_dir_path_for_import)
                     
-                    # Run the script
+            #         from distributeIncome import distribute_income # Assuming distributeIncome.py is in backend/
+            #         distribute_income()
+            #         print("Scheduler: Successfully ran income distribution")
+            #     except ImportError:
+            #         print(f"Exception running income distribution: Could not import distribute_income. Ensure distributeIncome.py is in the backend directory and backend directory is in PYTHONPATH.")
+            #     except Exception as e:
+            #         print(f"Exception running income distribution: {str(e)}")
+        
+        # Sleep for 60 seconds before checking again
+        # The loop runs once per minute. Conditions for 5-min and hourly tasks are checked each time.
+        time.sleep(60)
+
+def start_scheduler():
+    """Start the scheduler in a background thread."""
+    scheduler_thread = threading.Thread(target=run_scheduled_tasks, daemon=True)
+    scheduler_thread.start()
+    print("Started scheduler thread for cron-like tasks")
                     result = subprocess.run(
                         ["python", script_full_path],
                         capture_output=True,
