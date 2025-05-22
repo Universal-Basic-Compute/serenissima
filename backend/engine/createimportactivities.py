@@ -595,7 +595,7 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
                  res_def_dry_run = resource_types.get(res_type_id_dry_run, {})
                  res_name_dry_run = res_def_dry_run.get('name', res_type_id_dry_run)
                  res_cat_dry_run = res_def_dry_run.get('category', 'Unknown')
-                 log.info(f"  [DRY RUN] Would ensure import-tracking resource record for {res_type_id_dry_run} (Name: {res_name_dry_run}, Category: {res_cat_dry_run}, Count: {res_amount_dry_run}) in {buyer_building_id} for {buyer_username}.")
+                 log.info(f"  [DRY RUN] Would ensure import-tracking resource record for {res_type_id_dry_run} (Name: {res_name_dry_run}, Category: {res_cat_dry_run}, Count: {res_amount_dry_run}) in {buyer_building_id} for Owner: Italia.")
             log.info(f"  [DRY RUN] Would find/generate citizen and create one delivery activity for {buyer_building_id} with resources: {json.dumps(aggregated_resources_for_activity)} and contract IDs: {', '.join(contract_ids_for_activity)}.")
             total_activities_created +=1 # Simulate activity creation
             continue
@@ -610,7 +610,8 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
             try:
                 # The field for the resource kind (e.g., 'sailcloth') is 'Type'.
                 # The 'import' context is implicit to these records managed by this script.
-                resource_formula = f"AND({{Type}}='{_escape_airtable_value(resource_type_id)}', {{BuildingId}}='{_escape_airtable_value(buyer_building_id)}', {{Owner}}='{_escape_airtable_value(buyer_username)}')"
+                # Owner of these tracking records will be "Italia".
+                resource_formula = f"AND({{Type}}='{_escape_airtable_value(resource_type_id)}', {{BuildingId}}='{_escape_airtable_value(buyer_building_id)}', {{Owner}}='Italia')"
                 existing_resources = tables["resources"].all(formula=resource_formula, max_records=1)
                 
                 current_time_iso = datetime.now().isoformat()
@@ -619,7 +620,7 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
                     "Name": resource_definition.get('name', resource_type_id),
                     "Category": resource_definition.get('category', 'Unknown'),
                     "BuildingId": buyer_building_id, 
-                    "Owner": buyer_username,
+                    "Owner": "Italia", # Owner is now "Italia"
                     "Count": resource_amount, # Count from the aggregated contract amount
                     "UpdatedAt": current_time_iso
                 }
