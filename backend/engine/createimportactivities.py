@@ -442,7 +442,7 @@ def create_delivery_activity(tables, citizen: Dict, buyer_building_id: str,
             "ContractId": primary_contract_id_str, # First contract ID
             "ToBuilding": buyer_building_id,
             "Resources": json.dumps(resources_to_deliver), # JSON string of resource list
-            "TransportMethod": "merchant_galley", # Added TransportMethod
+            "TransportMode": "merchant_galley", # Added TransportMode
             "CreatedAt": now.isoformat(),
             "StartDate": now.isoformat(),
             "EndDate": end_time.isoformat(),
