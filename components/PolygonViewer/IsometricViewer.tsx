@@ -3049,7 +3049,7 @@ number => {
                 const connectionLineWidth = (activeView === 'transport' ? 1.0 : 0.7) * scale;
                 ctx.strokeStyle = `rgba(0, 150, 255, ${connectionLineOpacity})`;
                 ctx.lineWidth = Math.max(0.5, connectionLineWidth); // Ensure a minimum line width
-                ctx.setLineDash([2 * scale, 2 * scale]); // Apply dotted line style
+                ctx.setLineDash([1 * scale, 2 * scale]); // Apply "pointillés" style
                 ctx.stroke();
                 ctx.setLineDash([]); // Reset line dash
               } else {
@@ -3070,7 +3070,7 @@ number => {
                 const connectionLineWidth = (activeView === 'transport' ? 1.0 : 0.7) * scale;
                 ctx.strokeStyle = `rgba(0, 150, 255, ${connectionLineOpacity})`;
                 ctx.lineWidth = Math.max(0.5, connectionLineWidth); // Ensure a minimum line width
-                ctx.setLineDash([2 * scale, 2 * scale]); // Apply dotted line style
+                ctx.setLineDash([1 * scale, 2 * scale]); // Apply "pointillés" style
                 ctx.stroke();
                 ctx.setLineDash([]); // Reset line dash
               }
