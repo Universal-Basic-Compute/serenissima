@@ -85,6 +85,11 @@ export default function IsometricViewer({ activeView, fullWaterGraphData }: Isom
   const [currentHoverState, setCurrentHoverState] = useState<HoverState>(hoverStateService.getState());
   // const [fullWaterGraphData, setFullWaterGraphData] = useState<{ waterPoints: any[] } | null>(null); // State removed, will come from props
   
+  // State for bridge orientation
+  const [orientBridgeModeActive, setOrientBridgeModeActive] = useState<boolean>(false);
+  const [selectedBridgeForOrientationId, setSelectedBridgeForOrientationId] = useState<string | null>(null);
+  const [orientingBridgeAngle, setOrientingBridgeAngle] = useState<number | null>(null);
+  
   // Add handler function for closing the transport debug panel
   const handleTransportDebugPanelClose = () => {
     setShowTransportDebugPanel(false);
@@ -1928,7 +1933,11 @@ number => {
         findPolygonIdForPoint,
         screenToLatLng,
         saveWaterPoint,
-        handleWaterRouteClick
+        handleWaterRouteClick,
+        // Add bridge orientation callbacks
+        setOrientBridgeModeActive,
+        setSelectedBridgeForOrientationId,
+        setOrientingBridgeAngle
       }
     );
     
