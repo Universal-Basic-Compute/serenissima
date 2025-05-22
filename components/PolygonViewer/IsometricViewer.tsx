@@ -6,7 +6,7 @@ import { eventBus, EventTypes } from '@/lib/utils/eventBus';
 import { fetchCoatOfArmsImageUrl } from '@/app/utils/coatOfArmsUtils';
 import { buildingPointsService } from '@/lib/services/BuildingPointsService';
 import { interactionService } from '@/lib/services/InteractionService';
-import { hoverStateService } from '@/lib/services/HoverStateService';
+import { hoverStateService, HOVER_STATE_CHANGED, HoverState } from '@/lib/services/HoverStateService';
 import { CitizenRenderService } from '@/lib/services/CitizenRenderService';
 import LandDetailsPanel from './LandDetailsPanel';
 import BuildingDetailsPanel from './BuildingDetailsPanel';
@@ -19,6 +19,7 @@ import TransportDebugPanel from '../UI/TransportDebugPanel';
 import TransportErrorMessage from '../UI/TransportErrorMessage';
 import ProblemMarkers from './ProblemMarkers';
 import ProblemDetailsPanel from '../UI/ProblemDetailsPanel';
+import { renderService } from '@/lib/services/RenderService';
 
 interface IsometricViewerProps {
   activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'contracts' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
@@ -80,6 +81,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [showTransportDebugPanel, setShowTransportDebugPanel] = useState<boolean>(false);
   const [selectedProblemId, setSelectedProblemId] = useState<string | null>(null);
   const [showProblemDetailsPanel, setShowProblemDetailsPanel] = useState<boolean>(false);
+  const [currentHoverState, setCurrentHoverState] = useState<HoverState>(hoverStateService.getState());
   
   // Add handler function for closing the transport debug panel
   const handleTransportDebugPanelClose = () => {
@@ -3746,25 +3748,36 @@ number => {
     if (emptyBuildingPoints.length > 0) {
       emptyBuildingPoints.forEach(point => {
         // Convert lat/lng to isometric coordinates
-        const x = (point.lng - 12.3326) * 20000;
-        const y = (point.lat - 45.4371) * 20000;
+        const worldX = (point.lng - 12.3326) * 20000;
+        const worldY = (point.lat - 45.4371) * 20000;
         
         const isoPos = {
-          x: calculateIsoX(x, y, scale, offset, canvas.width),
-          y: calculateIsoY(x, y, scale, offset, canvas.height)
+          x: calculateIsoX(worldX, worldY, scale, offset, canvas.width),
+          y: calculateIsoY(worldX, worldY, scale, offset, canvas.height)
         };
         
-        // Draw a small circle for empty building points with subtle colors
-        const pointSize = activeView === 'buildings' ? 2.2 * scale : 1.8 * scale; // Smaller in non-buildings views
+        const isHovered = currentHoverState.type === 'buildingPoint' &&
+                          currentHoverState.data &&
+                          typeof currentHoverState.data.lat === 'number' &&
+                          typeof currentHoverState.data.lng === 'number' &&
+                          Math.abs(currentHoverState.data.lat - point.lat) < 0.00001 &&
+                          Math.abs(currentHoverState.data.lng - point.lng) < 0.00001;
+
+        const pointSize = (activeView === 'buildings' ? 2.2 : 1.8) * scale * (isHovered ? 1.5 : 1);
         ctx.beginPath();
         ctx.arc(isoPos.x, isoPos.y, pointSize, 0, Math.PI * 2);
   
-        // Use a muted, earthy color that blends with the map
-        // Make points more visible in buildings view, more subtle in other views
         const baseOpacity = activeView === 'buildings' ? 0.15 : 0.08;
+        const finalOpacity = isHovered ? Math.min(1, baseOpacity * 3) : baseOpacity;
       
-        ctx.fillStyle = `rgba(160, 140, 120, ${baseOpacity})`;
+        ctx.fillStyle = `rgba(160, 140, 120, ${finalOpacity})`;
         ctx.fill();
+
+        if (isHovered) {
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+            ctx.lineWidth = 0.5 * scale;
+            ctx.stroke();
+        }
       });
     }
     
@@ -3863,7 +3876,7 @@ number => {
         } else if (point.type === 'building') {
           nodeSize = (activeView === 'transport' ? 3 : 2) * scale;
           nodeColor = `rgba(70, 130, 180, ${baseOpacity})`;
-        } else if (point.type === 'centroid') {
+        } else if (point.type === 'centroid' || point.type === 'center') { // Added 'center'
           nodeSize = (activeView === 'transport' ? 2 : 1.5) * scale;
           nodeColor = `rgba(0, 102, 153, ${baseOpacity - 0.1})`;
         } else if (point.type === 'canal') {
@@ -4025,49 +4038,18 @@ number => {
     };
   }, []);
 
-  // Listen for hover state changes
+  // Listen for hover state changes and update local state
   useEffect(() => {
-    const handleHoverStateChanged = (data: any) => {
-      // Force a redraw of the canvas when hover state changes
-      if (canvasRef.current) {
-        const ctx = canvasRef.current.getContext('2d');
-        if (ctx) {
-          // Import renderService directly here to ensure it's defined
-          const { renderService } = require('@/lib/services/RenderService');
-          
-          // Get the current canvas dimensions
-          const canvas = canvasRef.current;
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          
-          // Draw water background
-          ctx.fillStyle = '#87CEEB';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          
-          // Draw polygons with updated hover state
-          renderService.drawPolygons(ctx, polygonsToRender, {
-            selectedPolygonId,
-            hoveredPolygonId: data.type === 'polygon' ? data.id : null
-          });
-          
-          // Draw buildings with updated hover state
-          if (buildings.length > 0) {
-            renderService.drawBuildings(ctx, buildings, scale, offset, canvas.width, canvas.height, {
-              selectedBuildingId,
-              hoveredBuildingId: data.type === 'building' ? data.id : null
-            });
-          }
-        }
-      }
+    const handleHoverStateChanged = (newState: HoverState) => {
+      setCurrentHoverState(newState);
     };
     
-    // Use a string literal for the event name instead of EventTypes.HOVER_STATE_CHANGED
-    const subscription = eventBus.subscribe('HOVER_STATE_CHANGED', handleHoverStateChanged);
+    const subscription = eventBus.subscribe(HOVER_STATE_CHANGED, handleHoverStateChanged);
     
     return () => {
-      // Use the subscription object's unsubscribe method
       subscription.unsubscribe();
     };
-  }, [polygonsToRender, buildings, scale, offset, selectedPolygonId, selectedBuildingId]);
+  }, []); // Empty dependency array, setCurrentHoverState is stable
 
   // Helper function to get building size based on type
   function getBuildingSize(type: string): {width: number, height: number, depth: number} {
