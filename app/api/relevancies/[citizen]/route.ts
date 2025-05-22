@@ -8,14 +8,13 @@ const AIRTABLE_RELEVANCIES_TABLE = 'RELEVANCIES';
 
 export async function GET(
   request: NextRequest,
-  context: { params: { aiUsername: string } }
+  { params }: { params: Promise<Record<string, string | undefined>> }
 ) {
-  const { params } = context;
   try {
-    const username = params.aiUsername;
+    const { citizen: username } = await params; // Use 'citizen' from route, alias to 'username' if preferred internally
     
     if (!username) {
-      return NextResponse.json({ error: 'Username is required' }, { status: 400 });
+      return NextResponse.json({ error: 'Citizen identifier is required' }, { status: 400 });
     }
     
     // Initialize Airtable
@@ -34,7 +33,7 @@ export async function GET(
 
     // Helper function to escape single quotes in strings for Airtable formulas
     const escapeAirtableString = (str: string) => str.replace(/'/g, "\\'");
-    const safeUsername = escapeAirtableString(username);
+    const safeUsername = escapeAirtableString(username); // 'username' here is the resolved citizen identifier
 
     // Conditions for RelevantToCitizen:
     // 1. Exact match for the username
@@ -56,7 +55,7 @@ export async function GET(
       filterFormula = `AND(${filterFormula}, {Type} = '${safeTypeFilter}')`;
     }
     
-    console.log(`Fetching relevancies for ${username} with filter: ${filterFormula}`);
+    console.log(`Fetching relevancies for ${username} with filter: ${filterFormula}`); // 'username' is the citizen identifier
     
     // Fetch relevancies from Airtable
     const records = await base(AIRTABLE_RELEVANCIES_TABLE)
@@ -86,13 +85,15 @@ export async function GET(
     
     return NextResponse.json({
       success: true,
-      username,
+      citizen: username, // Use 'citizen' or 'username' consistently in response
       relevancies,
       count: relevancies.length
     });
     
   } catch (error) {
-    console.error(`Error fetching relevancies for AI ${params.aiUsername}:`, error);
+    const awaitedParams = await params; // Re-await or ensure username is in scope
+    const citizenForError = awaitedParams.citizen;
+    console.error(`Error fetching relevancies for citizen ${citizenForError || 'unknown'}:`, error);
     return NextResponse.json(
       { error: 'Failed to fetch relevancies', details: error.message },
       { status: 500 }
