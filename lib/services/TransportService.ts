@@ -1355,6 +1355,43 @@ export class TransportService {
   }
 
   /**
+   * Helper to get land group ID for a polygon.
+   */
+  private async getLandGroupId(polygonId: string): Promise<string> {
+    try {
+      // Determine if we're running in Node.js or browser environment
+      const isNode = typeof window === 'undefined';
+      const baseUrl = isNode 
+        ? (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000')
+        : '';
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
+      const response = await fetch(`${baseUrl}/api/land-groups?includeUnconnected=true&minSize=1`, {
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.landGroups && Array.isArray(data.landGroups)) {
+          for (const group of data.landGroups) {
+            if (group.lands && Array.isArray(group.lands) && group.lands.includes(polygonId)) {
+              console.log(`Polygon ${polygonId} found in land group ${group.groupId}`);
+              return group.groupId;
+            }
+          }
+        }
+      }
+      console.warn(`Land group not found for polygon ${polygonId}, using polygonId as fallback.`);
+    } catch (error) {
+      console.error(`Error fetching land group for polygon ${polygonId}:`, error);
+    }
+    return polygonId; // Fallback to polygonId itself if group not found or error occurs
+  }
+
+  /**
    * Check if two points are in the same land group
    */
   private async arePointsInSameGroup(polygon1Id: string, polygon2Id: string): Promise<boolean> {
@@ -3234,392 +3271,152 @@ export class TransportService {
       
       console.log(`Using water graph with ${this.waterGraph.waterPoints.length} water points`);
       
-      // STEP 1: Find the polygon containing the start point
+      // STEP 1: Determine context for start and end points (land or water)
       const startPolygon = this.findPolygonContainingPoint(startPoint, this.polygons);
-      if (!startPolygon) {
-        console.log('Start point is not within any polygon, creating direct water path');
-        return this.createDirectWaterPath(startPoint, endPoint);
-      }
+      const endPolygon = this.findPolygonContainingPoint(endPoint, this.polygons);
+
+      // Segments of the full path
+      const pathSegments: any[] = [];
       
-      // STEP 2: Find the land group of the start polygon
-      let startLandGroupId = startPolygon.id; // Default to the polygon ID itself
-      
-      // Try to get the actual land group ID
-      try {
-        const isNode = typeof window === 'undefined';
-        const baseUrl = isNode ? (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000') : '';
+      let effectiveStartForWaterNet: Point; // Point to connect to the water network (startPoint or a dock)
+      let startDockRef: any = null;
+
+      if (startPolygon) {
+        // Start is on land, find dock and path to it
+        console.log('Start point is on land. Finding nearest dock.');
+        const startLandGroupId = await this.getLandGroupId(startPolygon.id);
+        startDockRef = await this.findNearestPublicDock(startPoint, startLandGroupId);
+
+        if (!startDockRef) {
+          console.warn('No public dock found near start point for water-only path, falling back to direct water path.');
+          return this.createDirectWaterPath(startPoint, endPoint);
+        }
+        effectiveStartForWaterNet = startDockRef.position;
         
-        const landGroupsResponse = await fetch(`${baseUrl}/api/land-groups?includeUnconnected=true&minSize=1`);
-        
-        if (landGroupsResponse.ok) {
-          const landGroupsData = await landGroupsResponse.json();
-          if (landGroupsData.success && landGroupsData.landGroups) {
-            // Find the land group that contains the start polygon
-            const startGroup = landGroupsData.landGroups.find(group => 
-              group.lands && group.lands.includes(startPolygon.id)
-            );
-            
-            if (startGroup) {
-              startLandGroupId = startGroup.groupId;
-              console.log(`Start point is in land group ${startLandGroupId}`);
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching land groups:', error);
-        // Continue with the polygon ID as fallback
-      }
-      
-      // STEP 3: Find the nearest public dock in the same land group as the start point
-      const startDock = await this.findNearestPublicDock(startPoint, startLandGroupId);
-      console.log(`Nearest public dock to start in same land group: ${startDock ? startDock.id : 'none'}`);
-      
-      // If we couldn't find a public dock in the same land group, create a direct path
-      if (!startDock) {
-        console.log('No public dock found in the same land group as start point, creating direct water path');
-        return this.createDirectWaterPath(startPoint, endPoint);
-      }
-      
-      // STEP 2: Find the closest water point to the start dock
-      let startWaterPoint = null;
-      let minStartDistance = Infinity;
-      
-      for (const waterPoint of this.waterGraph.waterPoints) {
-        const distanceToStart = this.calculateDistance(startDock.position, waterPoint.position);
-        if (distanceToStart < minStartDistance) {
-          minStartDistance = distanceToStart;
-          startWaterPoint = waterPoint;
-        }
-      }
-      
-      if (!startWaterPoint) {
-        console.log('No water point found near start dock, creating direct water path');
-        return this.createDirectWaterPath(startPoint, endPoint);
-      }
-      
-      // STEP 3: Find the closest water point to the end point (no dock needed for arrival)
-      let endWaterPoint = null;
-      let minEndDistance = Infinity;
-      
-      for (const waterPoint of this.waterGraph.waterPoints) {
-        const distanceToEnd = this.calculateDistance(endPoint, waterPoint.position);
-        if (distanceToEnd < minEndDistance) {
-          minEndDistance = distanceToEnd;
-          endWaterPoint = waterPoint;
-        }
-      }
-      
-      if (!endWaterPoint) {
-        console.log('No water point found near end point, creating direct water path');
-        return this.createDirectWaterPath(startPoint, endPoint);
-      }
-      
-      console.log(`Found closest water points: start=${startWaterPoint.id}, end=${endWaterPoint.id}`);
-      
-      // STEP 4: Find the shortest path between the water points using Dijkstra's algorithm
-      const waterPath = this.findWaterGraphPath(startWaterPoint.id, endWaterPoint.id);
-      
-      if (!waterPath || waterPath.length === 0) {
-        console.error('No path found between water points');
-        return {
-          success: false,
-          error: 'No path found between water points',
-          details: 'Unable to find a valid path between the water points'
-        };
-      }
-      
-      console.log(`Found water path with ${waterPath.length} points`);
-      
-      // STEP 5: Create the full path
-      const fullPath = [];
-      
-      // Add start point (walking mode)
-      fullPath.push({
-        ...startPoint,
-        type: 'center',
-        polygonId: 'virtual',
-        transportMode: 'walking'
-      });
-      
-      // STEP 5a: Add path from start to dock (walking)
-      // Add intermediate points for walking to the dock
-      const dockDistance = this.calculateDistance(startPoint, startDock.position);
-      if (dockDistance > 20) {
-        // If the distance is significant, try to find a land path to the dock
-        const startPolygon = this.findPolygonContainingPoint(startPoint, this.polygons);
-        const dockPolygon = this.findPolygonContainingPoint(startDock.position, this.polygons);
-        
-        if (startPolygon && dockPolygon && 
-            (startPolygon.id === dockPolygon.id || await this.arePointsInSameGroup(startPolygon.id, dockPolygon.id))) {
-          // If they're in the same polygon or land group, use land pathfinding
-          console.log('Finding land path from start to dock');
-          
-          // Ensure graph is built
-          if (!this.graph) {
-            if (this.pathfindingMode === 'real') {
-              this.graph = await this.buildGraphReal(this.polygons);
-            } else {
-              this.graph = await this.buildGraph(this.polygons);
-            }
-          }
-          
-          // Find the closest nodes to the start and dock
-          const startNodeIds = this.findCloseNodes(startPoint, this.graph, startPolygon.id, 10);
-          const dockNodeIds = this.findCloseNodes(startDock.position, this.graph, dockPolygon.id, 10);
-          
-          if (startNodeIds.length > 0 && dockNodeIds.length > 0) {
-            // Try different combinations of start and dock nodes
-            let bestResult = null;
-            let shortestDistance = Infinity;
-            
-            for (const startNodeId of startNodeIds) {
-              for (const dockNodeId of dockNodeIds) {
-                const result = this.findShortestPath(this.graph, startNodeId, dockNodeId);
-                
-                if (result && result.distance < shortestDistance) {
-                  bestResult = result;
-                  shortestDistance = result.distance;
-                }
-              }
-            }
-            
-            if (bestResult) {
-              // Convert node IDs to actual points for the response
-              const landPathPoints = bestResult.path.map((nodeId, index) => {
-                const node = this.graph.nodes[nodeId];
-                
-                return {
-                  ...node.position,
-                  nodeId,
-                  type: node.type,
-                  polygonId: node.polygonId,
-                  transportMode: 'walking'
-                };
-              });
-              
-              // Replace the first point with the exact start point
-              if (landPathPoints.length > 0) {
-                landPathPoints[0] = {
-                  ...startPoint,
-                  nodeId: landPathPoints[0].nodeId,
-                  type: landPathPoints[0].type,
-                  polygonId: landPathPoints[0].polygonId,
-                  transportMode: 'walking'
-                };
-                
-                // Replace the last point with the exact dock point
-                landPathPoints[landPathPoints.length - 1] = {
-                  ...startDock.position,
-                  nodeId: landPathPoints[landPathPoints.length - 1].nodeId,
-                  type: 'building',
-                  buildingType: 'dock',
-                  buildingId: startDock.id,
-                  polygonId: startDock.land_id || 'virtual',
-                  transportMode: 'walking'
-                };
-              }
-              
-              // Add all points except the first one (already added)
-              for (let i = 1; i < landPathPoints.length; i++) {
-                fullPath.push(landPathPoints[i]);
-              }
-            } else {
-              // If land pathfinding failed, fall back to direct path
-              this.addIntermediatePoints(fullPath, startPoint, startDock.position, 'walking', dockDistance);
-              
-              // Add the dock as a waypoint
-              fullPath.push({
-                ...startDock.position,
-                type: 'building',
-                buildingType: 'dock',
-                buildingId: startDock.id,
-                polygonId: startDock.land_id || 'virtual',
-                transportMode: 'walking'
-              });
-            }
-          } else {
-            // If no nodes found, fall back to direct path
-            this.addIntermediatePoints(fullPath, startPoint, startDock.position, 'walking', dockDistance);
-            
-            // Add the dock as a waypoint
-            fullPath.push({
-              ...startDock.position,
-              type: 'building',
-              buildingType: 'dock',
-              buildingId: startDock.id,
-              polygonId: startDock.land_id || 'virtual',
-              transportMode: 'walking'
-            });
-          }
-        } else {
-          // If they're in different land groups, use a direct path
-          this.addIntermediatePoints(fullPath, startPoint, startDock.position, 'walking', dockDistance);
-          
-          // Add the dock as a waypoint
-          fullPath.push({
-            ...startDock.position,
-            type: 'building',
-            buildingType: 'dock',
-            buildingId: startDock.id,
-            polygonId: startDock.land_id || 'virtual',
-            transportMode: 'walking'
-          });
-        }
+        // Add path from startPoint to startDockRef.position
+        pathSegments.push({ ...startPoint, type: 'center', transportMode: 'walking', polygonId: startPolygon.id });
+        this.addIntermediatePoints(pathSegments, startPoint, startDockRef.position, 'walking', this.calculateDistance(startPoint, startDockRef.position));
+        pathSegments.push({ ...startDockRef.position, type: 'building', buildingType: 'dock', buildingId: startDockRef.id, transportMode: 'walking', polygonId: startDockRef.land_id || startPolygon.id });
       } else {
-        // For short distances, just add the dock directly
-        fullPath.push({
-          ...startDock.position,
-          type: 'building',
-          buildingType: 'dock',
-          buildingId: startDock.id,
-          polygonId: startDock.land_id || 'virtual',
-          transportMode: 'walking'
-        });
+        // Start is in water
+        console.log('Start point is in water.');
+        effectiveStartForWaterNet = startPoint;
+        pathSegments.push({ ...startPoint, type: 'water', transportMode: 'gondola', polygonId: 'virtual' });
       }
-      
-      // STEP 5b: Add path from dock to start water point (walking)
-      this.addIntermediatePoints(fullPath, startDock.position, startWaterPoint.position, 'walking', minStartDistance);
-      
-      // STEP 5c: Add the water path (gondola mode)
-      for (const pointId of waterPath) {
-        const waterPoint = this.waterGraph.waterPoints.find(wp => wp.id === pointId);
-        if (waterPoint) {
-          fullPath.push({
-            ...waterPoint.position,
-            type: 'canal',
-            polygonId: 'virtual',
-            transportMode: 'gondola',
-            nodeId: waterPoint.id
-          });
+
+      // Find closest water graph node to effectiveStartForWaterNet
+      let closestStartWaterNode: any = null;
+      let distToClosestStartWaterNode = Infinity;
+      for (const wgNode of this.waterGraph.waterPoints) {
+        const dist = this.calculateDistance(effectiveStartForWaterNet, wgNode.position);
+        if (dist < distToClosestStartWaterNode) {
+          distToClosestStartWaterNode = dist;
+          closestStartWaterNode = wgNode;
         }
       }
+      if (!closestStartWaterNode) {
+        console.error('Could not find any water graph node near the effective start. Falling back to direct path.');
+        return this.createDirectWaterPath(startPoint, endPoint);
+      }
       
-      // STEP 5d: Add path from end water point to end destination
-      // If the distance is less than 20m, use a straight line
-      if (minEndDistance <= 20) {
-        console.log('End water point is close to destination, using straight line');
-        fullPath.push({
-          ...endPoint,
-          type: 'center',
-          polygonId: 'virtual',
-          transportMode: 'walking'
-        });
+      // Add segment from effectiveStartForWaterNet to closestStartWaterNode.position
+      const modeToWaterNodeStart = startPolygon ? 'walking' : 'gondola';
+      this.addIntermediatePoints(pathSegments, effectiveStartForWaterNet, closestStartWaterNode.position, modeToWaterNodeStart, distToClosestStartWaterNode);
+      pathSegments.push({ ...closestStartWaterNode.position, type: 'canal', transportMode: modeToWaterNodeStart, nodeId: closestStartWaterNode.id, polygonId: 'virtual' });
+
+      // Similar logic for the end point
+      let effectiveEndForWaterNet: Point;
+      let endDockRef: any = null;
+
+      if (endPolygon) {
+        console.log('End point is on land. Finding nearest dock.');
+        const endLandGroupId = await this.getLandGroupId(endPolygon.id);
+        endDockRef = await this.findNearestPublicDock(endPoint, endLandGroupId);
+        if (!endDockRef) {
+          console.warn('No public dock found near end point for water-only path, falling back to direct water path.');
+          return this.createDirectWaterPath(startPoint, endPoint);
+        }
+        effectiveEndForWaterNet = endDockRef.position;
       } else {
-        // If the distance is more than 20m, try land pathfinding
-        const waterPointPolygon = this.findPolygonContainingPoint(endWaterPoint.position, this.polygons);
-        const endPolygon = this.findPolygonContainingPoint(endPoint, this.polygons);
-        
-        if (waterPointPolygon && endPolygon && 
-            (waterPointPolygon.id === endPolygon.id || await this.arePointsInSameGroup(waterPointPolygon.id, endPolygon.id))) {
-          // If they're in the same polygon or land group, use land pathfinding
-          console.log('Finding land path from water point to destination');
-          
-          // Ensure graph is built
-          if (!this.graph) {
-            if (this.pathfindingMode === 'real') {
-              this.graph = await this.buildGraphReal(this.polygons);
-            } else {
-              this.graph = await this.buildGraph(this.polygons);
-            }
-          }
-          
-          // Find the closest nodes to the water point and end
-          const waterNodeIds = this.findCloseNodes(endWaterPoint.position, this.graph, waterPointPolygon.id, 10);
-          const endNodeIds = this.findCloseNodes(endPoint, this.graph, endPolygon.id, 10);
-          
-          if (waterNodeIds.length > 0 && endNodeIds.length > 0) {
-            // Try different combinations of water and end nodes
-            let bestResult = null;
-            let shortestDistance = Infinity;
-            
-            for (const waterNodeId of waterNodeIds) {
-              for (const endNodeId of endNodeIds) {
-                const result = this.findShortestPath(this.graph, waterNodeId, endNodeId);
-                
-                if (result && result.distance < shortestDistance) {
-                  bestResult = result;
-                  shortestDistance = result.distance;
-                }
-              }
-            }
-            
-            if (bestResult) {
-              // Convert node IDs to actual points for the response
-              const landPathPoints = bestResult.path.map((nodeId, index) => {
-                const node = this.graph.nodes[nodeId];
-                
-                return {
-                  ...node.position,
-                  nodeId,
-                  type: node.type,
-                  polygonId: node.polygonId,
-                  transportMode: 'walking'
-                };
-              });
-              
-              // Replace the first point with the exact water point
-              if (landPathPoints.length > 0) {
-                landPathPoints[0] = {
-                  ...endWaterPoint.position,
-                  nodeId: landPathPoints[0].nodeId,
-                  type: 'canal',
-                  polygonId: landPathPoints[0].polygonId,
-                  transportMode: 'walking'
-                };
-                
-                // Replace the last point with the exact end point
-                landPathPoints[landPathPoints.length - 1] = {
-                  ...endPoint,
-                  nodeId: landPathPoints[landPathPoints.length - 1].nodeId,
-                  type: landPathPoints[landPathPoints.length - 1].type,
-                  polygonId: landPathPoints[landPathPoints.length - 1].polygonId,
-                  transportMode: 'walking'
-                };
-              }
-              
-              // Add all points except the first one (already added as the last water point)
-              for (let i = 1; i < landPathPoints.length; i++) {
-                fullPath.push(landPathPoints[i]);
-              }
-            } else {
-              // If land pathfinding failed, fall back to direct path
-              this.addIntermediatePoints(fullPath, endWaterPoint.position, endPoint, 'walking', minEndDistance);
-              
-              // Add end point
-              fullPath.push({
-                ...endPoint,
-                type: 'center',
-                polygonId: 'virtual',
-                transportMode: 'walking'
-              });
-            }
-          } else {
-            // If no nodes found, fall back to direct path
-            this.addIntermediatePoints(fullPath, endWaterPoint.position, endPoint, 'walking', minEndDistance);
-            
-            // Add end point
-            fullPath.push({
-              ...endPoint,
-              type: 'center',
-              polygonId: 'virtual',
-              transportMode: 'walking'
-            });
-          }
-        } else {
-          // If they're in different land groups, use a direct path
-          this.addIntermediatePoints(fullPath, endWaterPoint.position, endPoint, 'walking', minEndDistance);
-          
-          // Add end point
-          fullPath.push({
-            ...endPoint,
-            type: 'center',
-            polygonId: 'virtual',
-            transportMode: 'walking'
-          });
+        console.log('End point is in water.');
+        effectiveEndForWaterNet = endPoint;
+      }
+
+      let closestEndWaterNode: any = null;
+      let distToClosestEndWaterNode = Infinity;
+      for (const wgNode of this.waterGraph.waterPoints) {
+        const dist = this.calculateDistance(effectiveEndForWaterNet, wgNode.position);
+        if (dist < distToClosestEndWaterNode) {
+          distToClosestEndWaterNode = dist;
+          closestEndWaterNode = wgNode;
         }
       }
+      if (!closestEndWaterNode) {
+        console.error('Could not find any water graph node near the effective end. Falling back to direct path.');
+        return this.createDirectWaterPath(startPoint, endPoint);
+      }
+
+      // Pathfind on waterGraph
+      console.log(`Finding water graph path between ${closestStartWaterNode.id} and ${closestEndWaterNode.id}`);
+      const waterGraphNodeIds = this.findWaterGraphPath(closestStartWaterNode.id, closestEndWaterNode.id);
+      if (!waterGraphNodeIds || waterGraphNodeIds.length === 0) {
+        console.warn('No path found on water graph. Attempting direct connection between closest water points or full fallback.');
+        // Try direct path between closest water points as a simpler fallback
+        const directWaterSegment = [
+            { ...closestStartWaterNode.position, type: 'canal', transportMode: 'gondola', nodeId: closestStartWaterNode.id },
+            { ...closestEndWaterNode.position, type: 'canal', transportMode: 'gondola', nodeId: closestEndWaterNode.id }
+        ];
+        this.addIntermediatePoints(pathSegments, closestStartWaterNode.position, closestEndWaterNode.position, 'gondola', this.calculateDistance(closestStartWaterNode.position, closestEndWaterNode.position));
+        pathSegments.push(...directWaterSegment.slice(1)); // Add end point of direct segment
+      } else {
+         const waterGraphSegment = waterGraphNodeIds.map(id => {
+            const node = this.waterGraph.waterPoints.find(wp => wp.id === id);
+            return { ...node.position, type: 'canal', transportMode: 'gondola', nodeId: id, polygonId: 'virtual' };
+        });
+        // pathSegments already ends with closestStartWaterNode.position
+        // waterGraphSegment starts with closestStartWaterNode.position
+        pathSegments.push(...waterGraphSegment.slice(1)); // Add rest of water graph path
+      }
       
-      // STEP 6: Calculate distances and time
+      // Add segment from closestEndWaterNode.position to effectiveEndForWaterNet
+      const modeFromWaterNodeEnd = endPolygon ? 'walking' : 'gondola';
+      // pathSegments already ends with closestEndWaterNode.position
+      this.addIntermediatePoints(pathSegments, closestEndWaterNode.position, effectiveEndForWaterNet, modeFromWaterNodeEnd, distToClosestEndWaterNode);
+      
+      if (endPolygon) {
+        pathSegments.push({ ...endDockRef.position, type: 'building', buildingType: 'dock', buildingId: endDockRef.id, transportMode: 'walking', polygonId: endDockRef.land_id || endPolygon.id });
+        this.addIntermediatePoints(pathSegments, endDockRef.position, endPoint, 'walking', this.calculateDistance(endDockRef.position, endPoint));
+        pathSegments.push({ ...endPoint, type: 'center', transportMode: 'walking', polygonId: endPolygon.id });
+      } else {
+        pathSegments.push({ ...endPoint, type: 'water', transportMode: 'gondola', polygonId: 'virtual' });
+      }
+      
+      // Deduplicate the final path
+      const fullPath = pathSegments.reduce((acc, current, index, arr) => {
+        if (index === 0) {
+          acc.push(current);
+        } else {
+          const prev = arr[index-1];
+          if (!(Math.abs(current.lat - prev.lat) < 1e-7 && 
+                Math.abs(current.lng - prev.lng) < 1e-7 &&
+                current.transportMode === prev.transportMode &&
+                current.type === prev.type )) {
+            acc.push(current);
+          } else {
+            // If coordinates are identical but other properties differ, keep the current one if it's more specific (e.g. building type)
+            if (current.buildingType && !prev.buildingType) {
+                acc.pop(); // remove previous less specific point
+                acc.push(current);
+            } else if (current.nodeId && !prev.nodeId) {
+                acc.pop();
+                acc.push(current);
+            }
+          }
+        }
+        return acc;
+      }, []);
+      
+      // STEP 6: Calculate distances and time (using the new fullPath)
       let totalWalkingDistance = 0;
       let totalWaterDistance = 0;
       
