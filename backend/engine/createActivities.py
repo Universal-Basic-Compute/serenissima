@@ -923,75 +923,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
                     log.warning(f"Path finding to home failed for resident {citizen_custom_id}. Creating idle activity.")
                     idle_end_time_iso = (datetime.datetime.now(pytz.UTC) + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
                     try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso)
-    else:
-        # Daytime activities - FIRST check if citizen is at their workplace
-        
-        # Get citizen's workplace
-            create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
-            return True
-        
-        # Get home position
-        home_position = None
-        try:
-            # First try to get position from the Position field
-            position_str = home['fields'].get('Position')
-            if position_str:
-                home_position = json.loads(position_str)
-            
-            # If Position is missing or invalid, try to extract from Point field
-            if not home_position:
-                point_str = home['fields'].get('Point')
-                if point_str and isinstance(point_str, str):
-                    # Parse the Point field which has format like "building_45.437908_12.337258"
-                    parts = point_str.split('_')
-                    if len(parts) >= 3:
-                        try:
-                            lat = float(parts[1])
-                            lng = float(parts[2])
-                            home_position = {"lat": lat, "lng": lng}
-                            log.info(f"Extracted position from Point field for home {home['fields'].get('BuildingId', home['id'])}: {home_position}")
-                        except (ValueError, IndexError):
-                            log.warning(f"Failed to parse coordinates from Point field: {point_str}")
-        except (json.JSONDecodeError, TypeError) as e:
-            log.warning(f"Invalid position data for home {home['fields'].get('BuildingId', home['id'])}: {home['fields'].get('Position')} - Error: {str(e)}")
-        
-        if not home_position:
-            log.warning(f"Home {home['fields'].get('BuildingId', home['id'])} has no position data, creating idle activity")
-            create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
-            return True
-        
-        # Check if citizen is already at home
-        # Simple check: if positions are close enough (within 20 meters)
-        is_at_home = False
-        try:
-            # Calculate distance between points
-            from math import sqrt, pow
-            distance = sqrt(pow(citizen_position['lat'] - home_position['lat'], 2) + 
-                           pow(citizen_position['lng'] - home_position['lng'], 2))
-            
-            # Convert to approximate meters (very rough approximation)
-            distance_meters = distance * 111000  # 1 degree is roughly 111 km at the equator
-            
-            is_at_home = distance_meters < 20  # Within 20 meters
-        except (KeyError, TypeError):
-            log.warning(f"Error calculating distance for citizen {citizen_custom_id}")
-        
-        if is_at_home:
-            # Citizen is at home, create rest activity
-            home_building_id = home['fields'].get('BuildingId', home['id'])
-            create_rest_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, home_building_id)
-        else:
-            # Citizen needs to go home, get path
-            path_data = get_path_to_home(citizen_position, home_position)
-            
-            if path_data and path_data.get('success'):
-                # Create goto_home activity
-                home_building_id = home['fields'].get('BuildingId', home['id'])
-                create_goto_home_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, home_building_id, path_data)
-            else:
-                # Path finding failed, create idle activity
-                create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
-    else:
+    else: # This is the original 'else:' at line 888, its body will now be the code that started at original line 979
         # Daytime activities - FIRST check if citizen is at their workplace
         
         # Get citizen's workplace
