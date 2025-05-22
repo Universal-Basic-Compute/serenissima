@@ -2866,8 +2866,8 @@ number => {
     // Draw the full water graph (all connections)
     if (fullWaterGraphData && fullWaterGraphData.waterPoints) {
       ctx.save();
-      ctx.setLineDash([3 * scale, 3 * scale]); // Dotted line style
-      ctx.strokeStyle = 'rgba(0, 100, 200, 0.3)'; // Light blue, semi-transparent
+      // ctx.setLineDash([3 * scale, 3 * scale]); // Removed: Use continuous lines
+      ctx.strokeStyle = 'rgba(0, 100, 200, 0.2)'; // Light blue, slightly reduced opacity
       ctx.lineWidth = 0.7 * scale; // Thin lines
 
       const waterPointPositionsMap: Record<string, { lat: number, lng: number }> = {};
