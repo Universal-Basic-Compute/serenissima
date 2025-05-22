@@ -646,9 +646,15 @@ export class RenderService {
         const squareSize = Math.max(size.width, size.depth) * scale * 0.6;
         const typeIndicator = building.type.charAt(0).toUpperCase();
         
-        // Pass rotation and building type to drawBuilding
+        // Determine the effective rotation: use 'orientation' for bridges if available, otherwise 'rotation'
+        const isBridgeType = building.type && building.type.toLowerCase().includes('bridge');
+        const effectiveRotation = (isBridgeType && typeof building.orientation === 'number') 
+          ? building.orientation 
+          : building.rotation;
+
+        // Pass effectiveRotation and building type to drawBuilding
         this.drawBuilding(
-          ctx, screen.x, screen.y, squareSize, color, typeIndicator, isSelected, buildingShape, isHovered, building.rotation, building.type
+          ctx, screen.x, screen.y, squareSize, color, typeIndicator, isSelected, buildingShape, isHovered, effectiveRotation, building.type
         );
       } catch (error) {
         console.error(`Error drawing building ${building?.id || 'unknown'}:`, error);
