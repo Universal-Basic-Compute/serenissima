@@ -62,5 +62,7 @@
       ]
     }
   ],
-  "importPrice": 18
+  "importPrice": 18,
+  "lifetimeHours": 117,
+  "consumptionHours": 2
 }

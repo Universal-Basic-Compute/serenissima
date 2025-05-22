@@ -46,5 +46,7 @@
       "The Zeno conspiracy of 1523"
     ]
   },
-  "importPrice": 600
+  "importPrice": 600,
+  "lifetimeHours": null,
+  "consumptionHours": null
 }

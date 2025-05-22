@@ -6,7 +6,7 @@
   "description": {
     "short": "Fine sand from Murano island.",
     "full": "Exceptionally pure silica sand harvested from specific locations on Murano island. Its unique composition makes it essential for Venice's legendary glass production.",
-    "flavor": "Beneath your feet lies the foundation of Venice's crystalline reputation\u2014mere grains to some, but to the glass masters, these sands are more precious than gold."
+    "flavor": "Beneath your feet lies the foundation of Venice's crystalline reputation—mere grains to some, but to the glass masters, these sands are more precious than gold."
   },
   "varieties": [],
   "historicalNotes": {
@@ -21,5 +21,7 @@
     ],
     "culturalContext": ""
   },
-  "importPrice": 36
+  "importPrice": 36,
+  "lifetimeHours": null,
+  "consumptionHours": null
 }

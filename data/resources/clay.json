@@ -5,5 +5,7 @@
   "subcategory": "mineral",
   "description": "Malleable earth material used for bricks, tiles, and pottery.",
   "icon": "/images/resources/clay.png",
-  "importPrice": 4
+  "importPrice": 4,
+  "lifetimeHours": null,
+  "consumptionHours": null
 }

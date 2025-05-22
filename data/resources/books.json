@@ -61,5 +61,7 @@
       "Northern Europe"
     ]
   },
-  "importPrice": 144
+  "importPrice": 144,
+  "lifetimeHours": null,
+  "consumptionHours": 1168
 }

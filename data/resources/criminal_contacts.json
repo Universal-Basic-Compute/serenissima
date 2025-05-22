@@ -53,5 +53,7 @@
       "riskLevel": "very_high"
     }
   ],
-  "importPrice": 240
+  "importPrice": 240,
+  "lifetimeHours": null,
+  "consumptionHours": null
 }

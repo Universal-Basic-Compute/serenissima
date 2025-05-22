@@ -4,5 +4,7 @@
   "category": "processed_materials",
   "subcategory": "textile",
   "description": "Vibrant colored fabrics ready for tailoring into garments.",
-  "importPrice": 54
+  "importPrice": 54,
+  "lifetimeHours": 584,
+  "consumptionHours": 117
 }

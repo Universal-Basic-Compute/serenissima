@@ -48,5 +48,7 @@
       "Ottoman elite"
     ]
   },
-  "importPrice": 1440
+  "importPrice": 1440,
+  "lifetimeHours": 1168,
+  "consumptionHours": 234
 }

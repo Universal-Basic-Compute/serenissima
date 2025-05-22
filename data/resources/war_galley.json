@@ -61,5 +61,7 @@
     ]
   },
   "icon": "/images/resources/war_galley.png",
-  "importPrice": 30000
+  "importPrice": 30000,
+  "lifetimeHours": null,
+  "consumptionHours": 1168
 }

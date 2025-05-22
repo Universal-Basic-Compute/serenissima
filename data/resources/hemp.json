@@ -8,5 +8,7 @@
     "full": "Durable plant fibers harvested from hemp plants grown on the Venetian mainland and imported from surrounding regions. Essential for maritime industries.",
     "flavor": "Without these humble fibers, no ship would sail, no cargo would be secured, and Venice's maritime empire would unravel like a poorly spun thread."
   },
-  "importPrice": 7
+  "importPrice": 7,
+  "lifetimeHours": 234,
+  "consumptionHours": null
 }

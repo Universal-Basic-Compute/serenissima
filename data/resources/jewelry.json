@@ -60,5 +60,7 @@
       "Ottoman nobility"
     ]
   },
-  "importPrice": 1200
+  "importPrice": 1200,
+  "lifetimeHours": null,
+  "consumptionHours": 2336
 }

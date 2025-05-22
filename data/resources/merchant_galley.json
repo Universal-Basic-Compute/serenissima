@@ -60,5 +60,7 @@
       "North African coast"
     ]
   },
-  "importPrice": 18000
+  "importPrice": 18000,
+  "lifetimeHours": null,
+  "consumptionHours": 1168
 }

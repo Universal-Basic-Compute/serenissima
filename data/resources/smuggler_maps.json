@@ -46,5 +46,7 @@
       "The Arsenale Thieves Guild"
     ]
   },
-  "importPrice": 420
+  "importPrice": 420,
+  "lifetimeHours": null,
+  "consumptionHours": null
 }

@@ -20,5 +20,7 @@
       "primaryUse": "critical_seams"
     }
   ],
-  "importPrice": 34
+  "importPrice": 34,
+  "lifetimeHours": 350,
+  "consumptionHours": null
 }

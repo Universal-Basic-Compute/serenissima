@@ -66,5 +66,7 @@
       "Contemporary artisan revival"
     ]
   },
-  "importPrice": 960
+  "importPrice": 960,
+  "lifetimeHours": null,
+  "consumptionHours": 350
 }

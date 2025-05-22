@@ -17,5 +17,7 @@
       "valueMultiplier": 1.3
     }
   ],
-  "importPrice": 216
+  "importPrice": 216,
+  "lifetimeHours": 350,
+  "consumptionHours": null
 }

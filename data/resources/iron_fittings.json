@@ -4,5 +4,7 @@
   "category": "processed_materials",
   "subcategory": "metallurgy",
   "description": "Forged iron hardware for construction and shipbuilding.",
-  "importPrice": 48
+  "importPrice": 48,
+  "lifetimeHours": null,
+  "consumptionHours": null
 }

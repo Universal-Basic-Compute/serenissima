@@ -20,5 +20,7 @@
   ],
   "historicalNotes": "Venetian construction required specialized materials adapted to the lagoon environment. Buildings were typically constructed on wooden piles driven into the clay beneath the lagoon, with brick and stone structures above. The scarcity of land meant that building materials were often salvaged and reused from older structures.",
   "icon": "/images/resources/building_materials.png",
-  "importPrice": 48
+  "importPrice": 48,
+  "lifetimeHours": null,
+  "consumptionHours": null
 }

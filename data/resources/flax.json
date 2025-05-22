@@ -5,5 +5,7 @@
   "subcategory": "textile",
   "description": "Plant fiber used for producing linen textiles and rope.",
   "icon": "/images/resources/flax.png",
-  "importPrice": 5
+  "importPrice": 5,
+  "lifetimeHours": 234,
+  "consumptionHours": null
 }

@@ -4,5 +4,7 @@
   "category": "raw_materials",
   "subcategory": "natural",
   "description": "Fresh water collected from wells and cisterns, essential for daily life and many crafts.",
-  "importPrice": 1
+  "importPrice": 1,
+  "lifetimeHours": 2,
+  "consumptionHours": 1
 }

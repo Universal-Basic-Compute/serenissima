@@ -26,5 +26,7 @@
       "primaryUse": "furnaces_fireplaces"
     }
   ],
-  "importPrice": 18
+  "importPrice": 18,
+  "lifetimeHours": null,
+  "consumptionHours": null
 }

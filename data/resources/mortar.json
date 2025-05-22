@@ -24,5 +24,7 @@
       "primaryUse": "visible_joints_decorative_work"
     }
   ],
-  "importPrice": 22
+  "importPrice": 22,
+  "lifetimeHours": 2,
+  "consumptionHours": null
 }

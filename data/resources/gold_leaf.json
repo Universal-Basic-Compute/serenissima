@@ -24,5 +24,7 @@
       "primaryUse": "exterior_gilding"
     }
   ],
-  "importPrice": 420
+  "importPrice": 420,
+  "lifetimeHours": null,
+  "consumptionHours": 117
 }

@@ -4,5 +4,7 @@
   "category": "processed_materials",
   "subcategory": "shipbuilding",
   "description": "Prefabricated wooden parts ready for ship assembly.",
-  "importPrice": 180
+  "importPrice": 180,
+  "lifetimeHours": null,
+  "consumptionHours": null
 }

@@ -30,5 +30,7 @@
       "primaryUse": "decorative_elements"
     }
   ],
-  "importPrice": 30
+  "importPrice": 30,
+  "lifetimeHours": null,
+  "consumptionHours": null
 }

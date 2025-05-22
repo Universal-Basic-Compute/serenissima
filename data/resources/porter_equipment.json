@@ -43,5 +43,7 @@
       "Household moving services"
     ]
   },
-  "importPrice": 96
+  "importPrice": 96,
+  "lifetimeHours": 234,
+  "consumptionHours": 58
 }

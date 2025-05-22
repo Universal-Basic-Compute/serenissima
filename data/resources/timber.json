@@ -6,7 +6,9 @@
   "description": {
     "short": "Processed wood for construction and crafting.",
     "full": "Logs cut from the forests of the Venetian mainland and Dalmatian coast, processed into usable timber. Essential for building construction and shipbuilding.",
-    "flavor": "The lifeblood of a maritime empire isn't gold or spice, but timber\u00e2\u20ac\u201dwithout the strength of these mainland forests, Venice would be nothing more than scattered huts upon the lagoon."
+    "flavor": "The lifeblood of a maritime empire isn't gold or spice, but timberâ€”without the strength of these mainland forests, Venice would be nothing more than scattered huts upon the lagoon."
   },
-  "importPrice": 12
+  "importPrice": 12,
+  "lifetimeHours": 584,
+  "consumptionHours": null
 }

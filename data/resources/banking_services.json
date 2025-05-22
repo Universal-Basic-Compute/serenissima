@@ -51,5 +51,7 @@
       "riskLevel": "low"
     }
   ],
-  "importPrice": 60
+  "importPrice": 60,
+  "lifetimeHours": null,
+  "consumptionHours": 10
 }

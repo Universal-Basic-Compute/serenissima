@@ -24,5 +24,7 @@
       "primaryUse": "lighting"
     }
   ],
-  "importPrice": 26
+  "importPrice": 26,
+  "lifetimeHours": 234,
+  "consumptionHours": 19
 }

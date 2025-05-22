@@ -27,5 +27,7 @@
       "primaryUse": "tools_weapons"
     }
   ],
-  "importPrice": 42
+  "importPrice": 42,
+  "lifetimeHours": null,
+  "consumptionHours": null
 }

@@ -52,5 +52,7 @@
       "Ottoman navigators"
     ]
   },
-  "importPrice": 180
+  "importPrice": 180,
+  "lifetimeHours": null,
+  "consumptionHours": 584
 }

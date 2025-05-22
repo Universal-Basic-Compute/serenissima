@@ -56,5 +56,7 @@
       "Transportation services"
     ]
   },
-  "importPrice": 960
+  "importPrice": 960,
+  "lifetimeHours": null,
+  "consumptionHours": 584
 }

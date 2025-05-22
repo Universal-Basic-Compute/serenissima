@@ -26,5 +26,7 @@
   ],
   "historicalNotes": "Venetian glass production was centered on the island of Murano, where glassmakers were both privileged and confined to protect trade secrets. The cristallo technique, producing exceptionally clear glass, was a closely guarded Venetian innovation that brought wealth and prestige to the Republic.",
   "icon": "/images/resources/glass.png",
-  "importPrice": 72
+  "importPrice": 72,
+  "lifetimeHours": null,
+  "consumptionHours": 234
 }

@@ -5,5 +5,7 @@
   "subcategory": "metal",
   "description": "Versatile metal used for tools, hardware, and structural reinforcement in buildings.",
   "icon": "/images/resources/iron.png",
-  "importPrice": 18
+  "importPrice": 18,
+  "lifetimeHours": null,
+  "consumptionHours": null
 }

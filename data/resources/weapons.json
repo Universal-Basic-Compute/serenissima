@@ -60,5 +60,7 @@
       "Foreign militaries"
     ]
   },
-  "importPrice": 420
+  "importPrice": 420,
+  "lifetimeHours": null,
+  "consumptionHours": 1168
 }

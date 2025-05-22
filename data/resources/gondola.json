@@ -43,5 +43,7 @@
       "Ceremonial functions"
     ]
   },
-  "importPrice": 3000
+  "importPrice": 3000,
+  "lifetimeHours": null,
+  "consumptionHours": 1168
 }

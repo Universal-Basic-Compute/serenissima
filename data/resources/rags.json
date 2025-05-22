@@ -5,5 +5,7 @@
   "subcategory": "textile",
   "description": "Discarded cloth collected for paper production and other recycled uses.",
   "icon": "/images/resources/rags.png",
-  "importPrice": 2
+  "importPrice": 2,
+  "lifetimeHours": 117,
+  "consumptionHours": null
 }

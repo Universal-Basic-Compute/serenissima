@@ -4,5 +4,7 @@
   "category": "processed_materials",
   "subcategory": "textile",
   "description": "Finely woven silk fabric ready for dyeing or garment making.",
-  "importPrice": 300
+  "importPrice": 300,
+  "lifetimeHours": 584,
+  "consumptionHours": 117
 }

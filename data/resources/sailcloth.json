@@ -29,5 +29,7 @@
       "primaryUse": "naval_vessels"
     }
   ],
-  "importPrice": 36
+  "importPrice": 36,
+  "lifetimeHours": 350,
+  "consumptionHours": 117
 }
