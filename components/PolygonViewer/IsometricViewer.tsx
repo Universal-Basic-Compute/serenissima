@@ -1898,7 +1898,8 @@ number => {
         waterPointMode,
         waterRouteMode,
         waterRouteStartPoint,
-        waterRouteIntermediatePoints
+        waterRouteIntermediatePoints,
+        orientBridgeModeActive // Add orientBridgeModeActive here
       },
       {
         setMousePosition,
