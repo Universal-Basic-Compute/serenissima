@@ -226,7 +226,7 @@ export default function IsometricViewer({ activeView, fullWaterGraphData }: Isom
   
   // Water point mode state
   const [waterPointMode, setWaterPointMode] = useState<boolean>(false);
-  const [waterPoints, setWaterPoints] = useState<any[]>([]);
+  // const [waterPoints, setWaterPoints] = useState<any[]>([]); // Removed: waterPoints will come from fullWaterGraphData prop
   
   // Water route mode state
   const [waterRouteMode, setWaterRouteMode] = useState<boolean>(false);
@@ -287,8 +287,8 @@ number => {
         connections: []
       };
       
-      // Add to local state first for immediate visual feedback
-      setWaterPoints(prev => [...prev, newWaterPoint]);
+      // Add to local state first for immediate visual feedback - REMOVED as setWaterPoints is removed
+      // setWaterPoints(prev => [...prev, newWaterPoint]); 
       
       // Save to server
       const response = await fetch('/api/water-points', {
@@ -479,14 +479,15 @@ number => {
       // Don't disable water route mode - keep it active
       // setWaterRouteMode(false); - Remove this line
       
-      // Refresh water points
-      fetchWaterPoints();
+      // Refresh water points - REMOVED as fetchWaterPoints is removed
+      // fetchWaterPoints(); 
+      // Consider dispatching an event to app/page.tsx to reload fullWaterGraphData if immediate update is needed
       
     } catch (error) {
       console.error('Error saving water route:', error);
       alert('Failed to save water route. Please try again.');
     }
-  }, [waterRouteStartPoint, waterRouteEndPoint, waterRouteIntermediatePoints, waterRoutePath, calculateTotalDistance, fetchWaterPoints]);
+  }, [waterRouteStartPoint, waterRouteEndPoint, waterRouteIntermediatePoints, waterRoutePath, calculateTotalDistance]); // Removed fetchWaterPoints
   
   // Add a new function to save water route with explicit data
   const saveWaterRouteWithData = useCallback(async (routeData: {
@@ -634,14 +635,15 @@ number => {
       // Don't disable water route mode - keep it active
       // setWaterRouteMode(false); - Remove this line
       
-      // Refresh water points
-      fetchWaterPoints();
+      // Refresh water points - REMOVED as fetchWaterPoints is removed
+      // fetchWaterPoints();
+      // Consider dispatching an event to app/page.tsx to reload fullWaterGraphData if immediate update is needed
       
     } catch (error) {
       console.error('Error saving water route:', error);
       alert('Failed to save water route. Please try again.');
     }
-  }, [calculateTotalDistance, fetchWaterPoints]);
+  }, [calculateTotalDistance]); // Removed fetchWaterPoints
   
   // Function to check if the current user is ConsiglioDeiDieci
   const isConsiglioDeiDieci = () => {
@@ -664,10 +666,11 @@ number => {
     
     // If clicked on a water point
     if (isWaterPoint && waterPointId) {
-      // Find the water point in our state
-      const clickedWaterPoint = waterPoints.find(wp => wp.id === waterPointId);
+      // Find the water point in our state (now from props)
+      const currentWaterPoints = fullWaterGraphData?.waterPoints || [];
+      const clickedWaterPoint = currentWaterPoints.find(wp => wp.id === waterPointId);
       if (!clickedWaterPoint) {
-        console.error(`Water point with ID ${waterPointId} not found`);
+        console.error(`Water point with ID ${waterPointId} not found in fullWaterGraphData`);
         return;
       }
       
@@ -916,9 +919,9 @@ number => {
     // Fetch land groups when switching to transport view
     if (activeView === 'transport') {
       fetchLandGroups();
-      fetchWaterPoints(); // Fetch water points when entering transport view
+      // fetchWaterPoints(); // Removed: Water points are now passed via fullWaterGraphData prop
     }
-  }, [transportMode, activeView, fetchLandGroups, fetchWaterPoints]);
+  }, [transportMode, activeView, fetchLandGroups]); // Removed fetchWaterPoints from dependencies
   
   // Transport path rendering is now handled directly in the drawing code
   
@@ -1907,7 +1910,7 @@ number => {
         citizensByBuilding,
         transportStartPoint,
         transportEndPoint,
-        waterPoints,
+        waterPoints: fullWaterGraphData?.waterPoints || [], // Use prop for water points
         waterPointMode,
         waterRouteMode,
         waterRouteStartPoint,
@@ -1962,7 +1965,8 @@ number => {
     citizensByBuilding,
     transportStartPoint,
     transportEndPoint,
-    waterPoints,
+    // waterPoints, // Removed from dependencies, using fullWaterGraphData now
+    fullWaterGraphData, // Added fullWaterGraphData as a dependency
     handleWaterRouteClick
   ]);
 
@@ -2934,11 +2938,12 @@ number => {
 
     // MOVED SECTIONS WILL BE INSERTED HERE
     // Draw water points in all views, but with different styling based on view
-    if (waterPoints.length > 0) {
+    const currentWaterPoints = fullWaterGraphData?.waterPoints || [];
+    if (currentWaterPoints.length > 0) {
       // Get the hovered water point ID from the hover state service
       const hoveredWaterPointId = hoverStateService.getHoveredWaterPointId();
       
-      waterPoints.forEach(waterPoint => {
+      currentWaterPoints.forEach(waterPoint => {
         if (!waterPoint.position) return;
         
         // Convert lat/lng to isometric coordinates
@@ -3013,7 +3018,7 @@ number => {
         if (waterPoint.connections && Array.isArray(waterPoint.connections)) {
           waterPoint.connections.forEach(connection => {
             // Find the target water point
-            const targetPoint = waterPoints.find(wp => wp.id === connection.targetId);
+            const targetPoint = currentWaterPoints.find(wp => wp.id === connection.targetId);
             if (targetPoint && targetPoint.position) {
               // Check if this connection has intermediate points
               if (connection.intermediatePoints && connection.intermediatePoints.length > 0) {
@@ -3443,7 +3448,8 @@ number => {
     incomeData, minIncome, maxIncome, selectedPolygonId, selectedBuildingId, 
     emptyBuildingPoints, mousePosition, citizensLoaded, citizensByBuilding, 
     incomeDataLoaded, polygonsToRender, getIncomeColor, getCurrentCitizenSecondaryColor,
-    waterPoints, waterPointMode, waterRouteMode, waterRoutePath, transportPath, currentHoverState, // Added currentHoverState
+    fullWaterGraphData, // Replaced waterPoints with fullWaterGraphData
+    waterPointMode, waterRouteMode, waterRoutePath, transportPath, currentHoverState, // Added currentHoverState
     buildingPositionsCache, buildingColorMode // Added for building rendering
   ]);
   
@@ -4134,10 +4140,10 @@ number => {
                   // Disable water route mode when enabling water point mode
                   setWaterRouteMode(false);
                 }
-                // Load existing water points when enabling
-                if (!waterPointMode) {
-                  fetchWaterPoints();
-                }
+                // Load existing water points when enabling - This is now handled by fullWaterGraphData prop
+                // if (!waterPointMode) {
+                //  fetchWaterPoints();
+                // }
               }}
               className={`absolute bottom-52 left-20 ${
                 waterPointMode ? 'bg-blue-600' : 'bg-amber-600'
