@@ -221,24 +221,7 @@ def start_scheduler():
                 except Exception as e:
                     print(f"Exception running {task_name}: {str(e)}")
             
-            # Special case for income distribution at 4 PM UTC
-            # This task is also at the top of the hour (current_minute == 0)
-            if current_hour == 16:
-                print("Scheduler: Running income distribution")
-                try:
-                    # Import and run the distribute_income function directly
-                    # Ensure the backend directory is in sys.path for the import
-                    backend_dir_path_for_import = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-                    if backend_dir_path_for_import not in sys.path:
-                        sys.path.append(backend_dir_path_for_import)
-                    
-                    from distributeIncome import distribute_income # Assuming distributeIncome.py is in backend/
-                    distribute_income()
-                    print("Scheduler: Successfully ran income distribution")
-                except ImportError:
-                    print(f"Exception running income distribution: Could not import distribute_income. Ensure distributeIncome.py is in the backend directory and backend directory is in PYTHONPATH.")
-                except Exception as e:
-                    print(f"Exception running income distribution: {str(e)}")
+            # Removed special case for income distribution as per user request.
         
         # Sleep for 60 seconds before checking again
         # The loop runs once per minute. Conditions for 5-min and hourly tasks are checked each time.
