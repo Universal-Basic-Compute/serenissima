@@ -3,10 +3,10 @@ import { relevancyService } from '@/lib/services/RelevancyService';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { aiUsername: string } }
+  { params }: { params: Promise<Record<string, string | undefined>> }
 ) {
   try {
-    const aiUsername = params.aiUsername;
+    const { aiUsername } = await params;
     
     if (!aiUsername) {
       return NextResponse.json({ error: 'AI username is required' }, { status: 400 });
@@ -53,7 +53,10 @@ export async function GET(
     });
     
   } catch (error) {
-    console.error(`Error calculating proximity relevancies for AI ${params.aiUsername}:`, error);
+    // Await params again or ensure aiUsername is in scope for error logging
+    const awaitedParams = await params;
+    const usernameForError = awaitedParams.aiUsername;
+    console.error(`Error calculating proximity relevancies for AI ${usernameForError || 'unknown'}:`, error);
     return NextResponse.json(
       { error: 'Failed to calculate proximity relevancies', details: error.message },
       { status: 500 }
