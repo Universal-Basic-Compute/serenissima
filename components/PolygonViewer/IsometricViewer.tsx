@@ -82,6 +82,7 @@ export default function IsometricViewer({ activeView }: IsometricViewerProps) {
   const [selectedProblemId, setSelectedProblemId] = useState<string | null>(null);
   const [showProblemDetailsPanel, setShowProblemDetailsPanel] = useState<boolean>(false);
   const [currentHoverState, setCurrentHoverState] = useState<HoverState>(hoverStateService.getState());
+  const [fullWaterGraphData, setFullWaterGraphData] = useState<{ waterPoints: any[] } | null>(null);
   
   // Add handler function for closing the transport debug panel
   const handleTransportDebugPanelClose = () => {
@@ -2877,6 +2878,58 @@ number => {
       selectedPolygonId,
       hoveredPolygonId: currentHoverState.type === 'polygon' ? currentHoverState.id : null,
     });
+
+    // Draw the full water graph (all connections)
+    if (fullWaterGraphData && fullWaterGraphData.waterPoints) {
+      ctx.save();
+      ctx.setLineDash([3 * scale, 3 * scale]); // Dotted line style
+      ctx.strokeStyle = 'rgba(0, 100, 200, 0.3)'; // Light blue, semi-transparent
+      ctx.lineWidth = 0.7 * scale; // Thin lines
+
+      const waterPointPositionsMap: Record<string, { lat: number, lng: number }> = {};
+      fullWaterGraphData.waterPoints.forEach(wp => {
+        if (wp.id && wp.position) {
+          waterPointPositionsMap[wp.id] = wp.position;
+        }
+      });
+
+      fullWaterGraphData.waterPoints.forEach(sourceWaterPoint => {
+        if (!sourceWaterPoint.position || !sourceWaterPoint.connections) return;
+
+        const sourceScreenPos = {
+          x: calculateIsoX((sourceWaterPoint.position.lng - 12.3326) * 20000, (sourceWaterPoint.position.lat - 45.4371) * 20000, scale, offset, canvas.width),
+          y: calculateIsoY((sourceWaterPoint.position.lng - 12.3326) * 20000, (sourceWaterPoint.position.lat - 45.4371) * 20000, scale, offset, canvas.height)
+        };
+
+        sourceWaterPoint.connections.forEach((connection: any) => {
+          const targetPosition = waterPointPositionsMap[connection.targetId];
+          if (!targetPosition) return;
+
+          let lastScreenPos = sourceScreenPos;
+          ctx.beginPath();
+          ctx.moveTo(lastScreenPos.x, lastScreenPos.y);
+
+          if (connection.intermediatePoints && connection.intermediatePoints.length > 0) {
+            connection.intermediatePoints.forEach((intPoint: { lat: number, lng: number }) => {
+              const intScreenPos = {
+                x: calculateIsoX((intPoint.lng - 12.3326) * 20000, (intPoint.lat - 45.4371) * 20000, scale, offset, canvas.width),
+                y: calculateIsoY((intPoint.lng - 12.3326) * 20000, (intPoint.lat - 45.4371) * 20000, scale, offset, canvas.height)
+              };
+              ctx.lineTo(intScreenPos.x, intScreenPos.y);
+              lastScreenPos = intScreenPos;
+            });
+          }
+          
+          const targetScreenPos = {
+            x: calculateIsoX((targetPosition.lng - 12.3326) * 20000, (targetPosition.lat - 45.4371) * 20000, scale, offset, canvas.width),
+            y: calculateIsoY((targetPosition.lng - 12.3326) * 20000, (targetPosition.lat - 45.4371) * 20000, scale, offset, canvas.height)
+          };
+          ctx.lineTo(targetScreenPos.x, targetScreenPos.y);
+          ctx.stroke();
+        });
+      });
+      ctx.restore(); // Restore line dash style
+    }
 
     // MOVED SECTIONS WILL BE INSERTED HERE
     // Draw water points in all views, but with different styling based on view

@@ -260,6 +260,34 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     // This effect should run when the component mounts
     fetchActivityPaths();
   }, []);
+
+  // Effect to load full water graph data
+  useEffect(() => {
+    const loadFullGraph = async () => {
+      const { transportService } = require('@/lib/services/TransportService');
+      // Ensure transportService is initialized (it loads waterGraph internally)
+      if (!transportService.isPolygonsLoaded()) { 
+        await transportService.preloadPolygons(); 
+      }
+      const graphData = transportService.getWaterGraphData();
+      if (graphData) {
+        setFullWaterGraphData(graphData);
+        console.log(`IsometricViewer: Loaded full water graph with ${graphData.waterPoints.length} points.`);
+      } else {
+        console.warn("IsometricViewer: Could not retrieve full water graph data from TransportService.");
+        // Attempt to load it directly if service failed or wasn't ready
+        const response = await fetch('/api/water-points');
+        if (response.ok) {
+          const apiData = await response.json();
+          if (apiData.success && apiData.waterPoints) {
+            setFullWaterGraphData({ waterPoints: apiData.waterPoints });
+            console.log(`IsometricViewer: Loaded full water graph directly from API with ${apiData.waterPoints.length} points.`);
+          }
+        }
+      }
+    };
+    loadFullGraph();
+  }, []); // Load once on mount
   
   // Update when scale or offset changes
   useEffect(() => {

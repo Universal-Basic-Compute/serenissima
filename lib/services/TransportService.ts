@@ -606,6 +606,13 @@ export class TransportService {
   }
 
   /**
+   * Get the loaded water graph data
+   */
+  public getWaterGraphData(): { waterPoints: any[] } | null {
+    return this.waterGraph;
+  }
+
+  /**
    * Calculate distance between two points in meters
    */
   public calculateDistance(point1: {lat: number, lng: number}, point2: {lat: number, lng: number}): number {
