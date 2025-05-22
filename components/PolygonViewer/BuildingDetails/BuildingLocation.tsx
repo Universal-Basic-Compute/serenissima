@@ -46,24 +46,41 @@ const BuildingLocation: React.FC<BuildingLocationProps> = ({
     
     // Add padding
     const padding = 20;
-    const scaleX = (canvas.width - padding * 2) / (maxLng - minLng);
-    // Adjust scaleY to make the polygon appear taller on the canvas,
-    // compensating for visual compression due to latitude.
-    // Dividing by 0.7 effectively multiplies the vertical scale by approx 1.43.
-    const scaleY = ((canvas.height - padding * 2) / (maxLat - minLat)) / 0.7;
+    const W = canvas.width - padding * 2;
+    const H = canvas.height - padding * 2;
+
+    const deltaLng = maxLng - minLng;
+    const deltaLat = maxLat - minLat;
+
+    let s_x: number, s_y: number;
+
+    if (deltaLng === 0 && deltaLat === 0) { // Single point
+      s_x = 1; s_y = 1;
+    } else if (deltaLng === 0) { // Vertical line
+      s_y = H / deltaLat;
+      s_x = 0.7 * s_y; 
+    } else if (deltaLat === 0) { // Horizontal line
+      s_x = W / deltaLng;
+      s_y = s_x / 0.7;
+    } else {
+      const scaleX_orig = W / deltaLng;
+      const scaleY_orig = H / deltaLat;
+      
+      s_x = Math.min(scaleX_orig, 0.7 * scaleY_orig);
+      s_y = s_x / 0.7;
+    }
     
-    // Use the smaller scale to maintain aspect ratio (based on the potentially adjusted scaleY)
-    const scale = Math.min(scaleX, scaleY);
-    
-    // Center the polygon
-    const centerX = (canvas.width / 2) - ((minLng + maxLng) / 2) * scale;
-    const centerY = (canvas.height / 2) + ((minLat + maxLat) / 2) * scale;
+    // Calculate offsets for centering the polygon
+    const renderedWidth = deltaLng * s_x;
+    const renderedHeight = deltaLat * s_y;
+    const offsetX = (W - renderedWidth) / 2;
+    const offsetY = (H - renderedHeight) / 2;
     
     // Draw the polygon
     ctx.beginPath();
     coords.forEach((coord: any, index: number) => {
-      const x = (coord.lng * scale) + centerX;
-      const y = centerY - (coord.lat * scale);
+      const x = padding + offsetX + (coord.lng - minLng) * s_x;
+      const y = padding + offsetY + (maxLat - coord.lat) * s_y; // Y is inverted (maxLat at top)
         
       if (index === 0) {
         ctx.moveTo(x, y);
@@ -93,12 +110,12 @@ const BuildingLocation: React.FC<BuildingLocationProps> = ({
         }
         
         if (position && position.lat && position.lng) {
-          const x = (position.lng * scale) + centerX;
-          const y = centerY - (position.lat * scale);
+          const markerX = padding + offsetX + (position.lng - minLng) * s_x;
+          const markerY = padding + offsetY + (maxLat - position.lat) * s_y;
           
           // Draw a marker for the building
           ctx.beginPath();
-          ctx.arc(x, y, 6, 0, Math.PI * 2);
+          ctx.arc(markerX, markerY, 6, 0, Math.PI * 2);
           ctx.fillStyle = '#FF5500';
           ctx.fill();
           ctx.strokeStyle = '#FFFFFF';
