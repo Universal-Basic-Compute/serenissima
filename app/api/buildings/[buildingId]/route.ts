@@ -48,6 +48,22 @@ export async function GET(request: NextRequest) {
             rentAmount: fields.RentAmount as number || 0,
             occupant: fields.Occupant as string || ''
           };
+          
+          // Attempt to parse position from point if position is null or empty
+          if (!buildingRaw.position && buildingRaw.point) {
+            const pointStr = String(buildingRaw.point);
+            // Regex for type_LAT_LNG pattern (allows for optional negative signs and decimals)
+            const coordPattern = /^[a-zA-Z0-9-]+_(-?[0-9]+(?:\.[0-9]+)?)_(-?[0-9]+(?:\.[0-9]+)?)$/;
+            const pointMatch = pointStr.match(coordPattern);
+            if (pointMatch) {
+              const lat = parseFloat(pointMatch[1]);
+              const lng = parseFloat(pointMatch[2]);
+              if (!isNaN(lat) && !isNaN(lng)) {
+                buildingRaw.position = { lat, lng };
+                console.log(`[API Building ${buildingId}] Populated position from point field '${pointStr}':`, buildingRaw.position);
+              }
+            }
+          }
 
           return NextResponse.json({ building: buildingRaw });
         }
