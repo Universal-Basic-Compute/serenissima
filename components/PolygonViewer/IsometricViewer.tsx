@@ -3049,7 +3049,9 @@ number => {
                 const connectionLineWidth = (activeView === 'transport' ? 1.0 : 0.7) * scale;
                 ctx.strokeStyle = `rgba(0, 150, 255, ${connectionLineOpacity})`;
                 ctx.lineWidth = Math.max(0.5, connectionLineWidth); // Ensure a minimum line width
+                ctx.setLineDash([2 * scale, 2 * scale]); // Apply dotted line style
                 ctx.stroke();
+                ctx.setLineDash([]); // Reset line dash
               } else {
                 // Draw a direct line for connections without intermediate points
                 const targetX = (targetPoint.position.lng - 12.3326) * 20000;
@@ -3068,7 +3070,9 @@ number => {
                 const connectionLineWidth = (activeView === 'transport' ? 1.0 : 0.7) * scale;
                 ctx.strokeStyle = `rgba(0, 150, 255, ${connectionLineOpacity})`;
                 ctx.lineWidth = Math.max(0.5, connectionLineWidth); // Ensure a minimum line width
+                ctx.setLineDash([2 * scale, 2 * scale]); // Apply dotted line style
                 ctx.stroke();
+                ctx.setLineDash([]); // Reset line dash
               }
             }
           });
