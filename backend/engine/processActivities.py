@@ -231,10 +231,44 @@ def main(dry_run: bool = False):
 
         if success:
             update_activity_status(tables, activity_id_airtable, "processed")
-            processed_count +=1
+            processed_count += 1
+
+            # Update citizen's position and UpdatedAt if ToBuilding is present
+            to_building_airtable_id = activity_record['fields'].get('ToBuilding')
+            citizen_username = activity_record['fields'].get('Citizen')
+
+            if to_building_airtable_id and citizen_username and not dry_run:
+                try:
+                    building_record_for_pos = tables['buildings'].get(to_building_airtable_id)
+                    citizen_record_for_pos = get_citizen_record(tables, citizen_username)
+
+                    if building_record_for_pos and citizen_record_for_pos:
+                        building_position_str = building_record_for_pos['fields'].get('Position')
+                        building_custom_id = building_record_for_pos['fields'].get('BuildingId')
+                        
+                        if building_position_str and building_custom_id:
+                            update_payload = {
+                                'Position': building_position_str,
+                                'CurrentBuildingId': building_custom_id, # Store the custom BuildingId
+                                'UpdatedAt': datetime.now(timezone.utc).isoformat()
+                            }
+                            tables['citizens'].update(citizen_record_for_pos['id'], update_payload)
+                            log.info(f"Updated citizen {citizen_username} position to building {building_custom_id} ({building_position_str}) and UpdatedAt.")
+                        else:
+                            log.warning(f"Building {to_building_airtable_id} is missing Position or BuildingId. Cannot update citizen {citizen_username} position.")
+                    else:
+                        if not building_record_for_pos:
+                            log.warning(f"Target building {to_building_airtable_id} not found. Cannot update citizen {citizen_username} position.")
+                        if not citizen_record_for_pos:
+                            log.warning(f"Citizen {citizen_username} not found. Cannot update citizen position.")
+                except Exception as e_update_pos:
+                    log.error(f"Error updating citizen {citizen_username} position after activity {activity_guid}: {e_update_pos}")
+            elif dry_run and to_building_airtable_id and citizen_username:
+                log.info(f"[DRY RUN] Would update citizen {citizen_username} position based on ToBuilding {to_building_airtable_id}.")
+
         else:
             update_activity_status(tables, activity_id_airtable, "failed")
-            failed_count +=1
+            failed_count += 1
         
         log.info(f"--- Finished processing activity {activity_guid} ---")
 
