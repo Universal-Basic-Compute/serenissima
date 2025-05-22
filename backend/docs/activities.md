@@ -8,7 +8,10 @@ The activity system tracks what citizens are doing at any given time, creating a
 
 - **Rest**: Sleeping at home during nighttime hours
 - **Work**: Working at their assigned businesses during the day
-- **Travel**: Moving between locations via walking or gondola
+- **Travel**: Moving between locations via walking or gondola. This includes:
+    - `goto_home`: Traveling to their residence.
+    - `goto_work`: Traveling to their workplace.
+    - `goto_inn`: Traveling to an inn (for visitors).
 - **Idle**: Waiting for their next scheduled activity
 
 Activities are managed by the `createActivities.py` script, which runs periodically to ensure citizens always have something to do. This system applies equally to both AI and human citizens, creating a unified simulation where all citizens follow the same daily patterns and routines.
@@ -34,9 +37,22 @@ Rest activities include:
 - Evening meals
 - Family time
 
-### Travel (goto_home)
+### Travel (goto_home, goto_work, goto_inn)
 
-When citizens need to move from one location to another, they engage in travel activities. The most common travel activity is `goto_home`, which occurs when:
+When citizens need to move from one location to another, they engage in travel activities. These include:
+
+- **`goto_home`**: Occurs when:
+    - Night is approaching and citizens need to return home.
+    - Citizens have been assigned new housing and need to relocate.
+    - *Processor*: Upon arrival, any resources the citizen owns and is carrying are deposited into their home if space permits.
+
+- **`goto_work`**: Occurs when:
+    - It's daytime and a citizen needs to travel to their assigned workplace.
+    - *Processor*: Upon arrival, if the citizen is carrying resources owned by the workplace operator (`RunBy`) and there's storage space, these resources are deposited into the workplace.
+
+- **`goto_inn`**: Occurs when:
+    - It's nighttime and a citizen marked as a visitor (with a `HomeCity` value) needs to find lodging.
+    - *Processor*: Currently no specific processor, but the citizen arrives at the inn.
 
 - Night is approaching and citizens need to return home
 - Citizens have been assigned new housing and need to relocate
@@ -61,10 +77,10 @@ When citizens have no specific task to perform but are not resting, they enter a
 
 Each activity is stored in the ACTIVITIES table with the following fields:
 
-- **ActivityId**: Unique identifier for the activity
-- **Type**: The type of activity (rest, goto_home, work, idle)
-- **CitizenId**: The citizen performing the activity
-- **FromBuilding**: Starting location (for travel activities)
+- **ActivityId**: Unique identifier for the activity (e.g., `goto_work_ctz_..._timestamp`)
+- **Type**: The type of activity (e.g., `rest`, `goto_home`, `goto_work`, `goto_inn`, `idle`, `production`, `fetch_resource`, `deliver_resource_batch`)
+- **Citizen**: The `Username` of the citizen performing the activity.
+- **FromBuilding**: Airtable Record ID of the starting location (for travel/production activities).
 - **ToBuilding**: Destination (for travel activities)
 - **CreatedAt**: When the activity was created
 - **StartDate**: When the activity begins
@@ -79,10 +95,22 @@ The `createActivities.py` script follows this process:
 1. Identify citizens who have no active activities
 2. Determine the current time in Venice
 3. For each idle citizen:
-   - If it's nighttime and the citizen is at home: create a rest activity
-   - If it's nighttime and the citizen is not at home: create a goto_home activity
-   - If it's daytime and the citizen has a job: create a work activity
-   - If none of the above apply: create an idle activity
+   - If it's nighttime:
+     - If the citizen is a visitor (has `HomeCity`):
+       - If at an inn: create `rest` activity at the inn.
+       - Else: create `goto_inn` activity to the closest available inn.
+     - Else (citizen is a resident):
+       - If at home: create `rest` activity at home.
+       - Else: create `goto_home` activity.
+   - If it's daytime:
+     - If the citizen has a workplace:
+       - If at workplace:
+         - Attempt to create `production` activity if inputs for a recipe are available.
+         - Else, attempt to create `fetch_resource` activity based on active contracts.
+         - Else, create `idle` activity.
+       - Else (not at workplace): create `goto_work` activity.
+     - Else (no workplace): create `idle` activity.
+   - If pathfinding for any travel activity fails, or no other suitable activity can be determined: create an `idle` activity.
 
 ### Pathfinding for Travel Activities
 

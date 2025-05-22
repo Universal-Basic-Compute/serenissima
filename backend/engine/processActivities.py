@@ -14,7 +14,12 @@ This script:
    - Checks storage capacity of the citizen's home.
    - Transfers these resources from the citizen's personal inventory to their home building.
    - The resources in the home building remain owned by the citizen.
-4. Updates the activity status to "processed" or "failed".
+4. For "goto_work" activities:
+   - Identifies resources carried by the citizen (`AssetType`='citizen', `AssetId`=CitizenCustomId) that are owned by the operator (`RunBy`) of the workplace.
+   - Checks storage capacity of the workplace.
+   - If space allows, transfers these resources from the citizen's personal inventory to the workplace building.
+   - The resources in the workplace building become owned by the workplace operator.
+5. Updates the activity status to "processed" or "failed".
 """
 
 import os
@@ -41,6 +46,7 @@ try:
     # Import processors
     from backend.engine.activity_processors.deliver_resource_batch_processor import process as process_deliver_resource_batch_fn
     from backend.engine.activity_processors.goto_home_processor import process as process_goto_home_fn
+    from backend.engine.activity_processors.goto_work_processor import process as process_goto_work_fn
 except ImportError:
     # Fallback if the script is run in a context where backend.engine is not directly importable
     # This might happen if script is run directly from its own directory without backend being a package
@@ -167,6 +173,7 @@ def main(dry_run: bool = False):
     ACTIVITY_PROCESSORS = {
         "deliver_resource_batch": process_deliver_resource_batch_fn,
         "goto_home": process_goto_home_fn,
+        "goto_work": process_goto_work_fn,
         # Add other activity type processors here as they are created
         # "another_activity_type": process_another_activity_type_fn,
     }
