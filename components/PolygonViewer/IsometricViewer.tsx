@@ -1409,9 +1409,18 @@ number => {
   
   // Fetch bridge data and merge with buildings
   useEffect(() => {
-    // Only fetch bridge data if we have buildings
     if (buildings.length === 0) return;
-    
+
+    // Check if any bridge actually needs an orientation update
+    const needsOrientationUpdate = buildings.some(b => 
+        b.type && b.type.toLowerCase().includes('bridge') && b.orientation === undefined
+    );
+
+    if (!needsOrientationUpdate) {
+        // console.log('Bridge orientation data seems up-to-date, skipping fetch.');
+        return;
+    }
+
     const fetchBridgeData = async () => {
       try {
         console.log('Fetching bridge orientation data...');
@@ -1422,76 +1431,34 @@ number => {
           if (data.success && data.bridges && Array.isArray(data.bridges)) {
             console.log(`Loaded orientation data for ${data.bridges.length} bridges`);
             
-            // Create a map of bridge IDs to orientation data
-            const bridgeOrientations = {};
-            
-            // Log all bridge IDs from the API for debugging
-            console.log("Bridge IDs from API:", data.bridges.map(b => b.buildingId));
-            console.log("Building IDs in our state:", buildings.map(b => b.id));
-            
-            data.bridges.forEach(bridge => {
-              if (bridge.buildingId && bridge.orientation !== undefined) {
-                bridgeOrientations[bridge.buildingId] = bridge.orientation;
-                
-                // Also map using the ID without the "bridge_" prefix if it exists
-                if (bridge.buildingId.startsWith('bridge_')) {
-                  const shortId = bridge.buildingId.substring(7); // Remove 'bridge_' prefix
-                  bridgeOrientations[shortId] = bridge.orientation;
-                }
-                
-                // Also map using just the coordinates part
-                const parts = bridge.buildingId.split('_');
-                if (parts.length >= 3) {
-                  const coordPart = `${parts[parts.length-2]}_${parts[parts.length-1]}`;
-                  bridgeOrientations[coordPart] = bridge.orientation;
-                }
+            const bridgeOrientationsMap: Record<string, number> = {};
+            data.bridges.forEach((bridge: any) => {
+              // Key the map by the Airtable record ID (bridge.id from /api/bridges response)
+              if (bridge.id && bridge.orientation !== undefined) {
+                bridgeOrientationsMap[bridge.id] = bridge.orientation;
               }
             });
             
-            // Update buildings with orientation data
+            let hasChanges = false;
             const updatedBuildings = buildings.map(building => {
-              // Check if this building is a bridge
-              if (building.type && building.type.toLowerCase().includes('bridge')) {
-                // Try different possible ID formats
-                let orientation = undefined;
+              if (building.type && building.type.toLowerCase().includes('bridge') && building.orientation === undefined) {
+                // Lookup using building.id (which should be the Airtable record ID)
+                const orientation = bridgeOrientationsMap[building.id];
                 
-                // Try exact match first
-                if (bridgeOrientations[building.id] !== undefined) {
-                  orientation = bridgeOrientations[building.id];
-                } 
-                // Try with 'bridge_' prefix
-                else if (building.id && !building.id.startsWith('bridge_')) {
-                  const prefixedId = `bridge_${building.id}`;
-                  if (bridgeOrientations[prefixedId] !== undefined) {
-                    orientation = bridgeOrientations[prefixedId];
-                  }
-                }
-                // Try with just the coordinates part
-                else if (building.id) {
-                  const parts = building.id.split('_');
-                  if (parts.length >= 3) {
-                    const coordPart = `${parts[parts.length-2]}_${parts[parts.length-1]}`;
-                    if (bridgeOrientations[coordPart] !== undefined) {
-                      orientation = bridgeOrientations[coordPart];
-                    }
-                  }
-                }
-                
-                // If we found an orientation, update the building
                 if (orientation !== undefined) {
-                  console.log(`Found orientation ${orientation} for bridge ${building.id}`);
-                  return {
-                    ...building,
-                    orientation
-                  };
+                  hasChanges = true;
+                  return { ...building, orientation };
                 }
               }
               return building;
             });
             
-            // Update the buildings state with the merged data
-            setBuildings(updatedBuildings);
-            console.log('Updated buildings with bridge orientation data');
+            if (hasChanges) {
+              console.log('Updating buildings state with new bridge orientation data.');
+              setBuildings(updatedBuildings);
+            } else {
+              // console.log('No new bridge orientation data to apply.');
+            }
           }
         }
       } catch (error) {
@@ -1500,7 +1467,7 @@ number => {
     };
     
     fetchBridgeData();
-  }, [buildings.length]); // Only re-run when buildings array length changes
+  }, [buildings]); // Changed dependency to `buildings`
   
   // Pre-calculate building positions when buildings are loaded
   useEffect(() => {
