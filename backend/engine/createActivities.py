@@ -412,6 +412,90 @@ def get_idle_citizens(tables) -> List[Dict]:
         log.error(f"Error fetching idle citizens: {e}")
         return []
 
+# Helper functions for position and distance
+def _get_building_position_coords(building_record: Dict) -> Optional[Dict[str, float]]:
+    """Extracts lat/lng coordinates from a building record's Position or Point field."""
+    position = None
+    if not building_record or 'fields' not in building_record:
+        return None
+    try:
+        position_str = building_record['fields'].get('Position')
+        if position_str and isinstance(position_str, str): # Ensure it's a string before parsing
+            position = json.loads(position_str)
+        
+        if not position: # If Position field is empty or not valid JSON
+            point_str = building_record['fields'].get('Point')
+            if point_str and isinstance(point_str, str):
+                parts = point_str.split('_')
+                # Expecting format like "type_lat_lng" or "type_lat_lng_index"
+                if len(parts) >= 3:
+                    lat_str, lng_str = parts[1], parts[2]
+                    # Validate that lat_str and lng_str can be converted to float
+                    if all(s.replace('.', '', 1).replace('-', '', 1).isdigit() for s in [lat_str, lng_str]):
+                        lat, lng = float(lat_str), float(lng_str)
+                        position = {"lat": lat, "lng": lng}
+                    else:
+                        log.warning(f"Non-numeric lat/lng parts in Point field: {point_str} for building {building_record.get('id', 'N/A')}")
+                else:
+                    log.warning(f"Point field format not recognized for coordinate extraction: {point_str} for building {building_record.get('id', 'N/A')}")
+            # else: Point field is also empty or not a string
+    except (json.JSONDecodeError, TypeError, ValueError, IndexError) as e:
+        building_id_log = building_record.get('id', 'N/A')
+        log.warning(f"Could not parse position for building {building_id_log}: {e}. Position string: '{position_str}', Point string: '{building_record['fields'].get('Point')}'")
+    
+    if position and isinstance(position, dict) and 'lat' in position and 'lng' in position:
+        return position
+    return None
+
+def _calculate_distance_meters(pos1: Optional[Dict[str, float]], pos2: Optional[Dict[str, float]]) -> float:
+    """Calculate approximate distance in meters between two lat/lng points."""
+    if not pos1 or not pos2 or 'lat' not in pos1 or 'lng' not in pos1 or 'lat' not in pos2 or 'lng' not in pos2:
+        return float('inf')
+    
+    # Ensure lat/lng are floats
+    try:
+        lat1, lng1 = float(pos1['lat']), float(pos1['lng'])
+        lat2, lng2 = float(pos2['lat']), float(pos2['lng'])
+    except (ValueError, TypeError):
+        log.warning(f"Invalid coordinate types for distance calculation: pos1={pos1}, pos2={pos2}")
+        return float('inf')
+
+    from math import sqrt, pow # Keep import local if not used elsewhere globally
+    distance_degrees = sqrt(pow(lat1 - lat2, 2) + pow(lng1 - lng2, 2))
+    return distance_degrees * 111000  # Rough approximation (1 degree ~ 111km)
+
+def get_closest_inn(tables: Dict[str, Table], citizen_position: Dict[str, float]) -> Optional[Dict]:
+    """Finds the closest building of type 'inn' to the citizen's position."""
+    log.info(f"Searching for the closest inn to position: {citizen_position}")
+    try:
+        inns = tables['buildings'].all(formula="{Type}='inn'")
+        if not inns:
+            log.info("No inns found in the database.")
+            return None
+
+        closest_inn = None
+        min_distance = float('inf')
+
+        for inn_record in inns:
+            inn_position = _get_building_position_coords(inn_record)
+            if inn_position:
+                distance = _calculate_distance_meters(citizen_position, inn_position)
+                if distance < min_distance:
+                    min_distance = distance
+                    closest_inn = inn_record
+            else:
+                log.warning(f"Inn {inn_record.get('id')} has no valid position data.")
+        
+        if closest_inn:
+            inn_id_log = closest_inn['fields'].get('BuildingId', closest_inn['id'])
+            log.info(f"Closest inn found: {inn_id_log} at distance {min_distance:.2f}m.")
+        else:
+            log.info("No inns with valid positions found.")
+        return closest_inn
+    except Exception as e:
+        log.error(f"Error finding closest inn: {e}")
+        return None
+
 def get_citizen_workplace(tables, citizen_id: str, citizen_username: str) -> Optional[Dict]:
     """Find the workplace building for a citizen."""
     log.info(f"Finding workplace for citizen {citizen_id} (Username: {citizen_username})")
@@ -472,17 +556,17 @@ def is_nighttime() -> bool:
     
     return hour >= NIGHT_START_HOUR or hour < NIGHT_END_HOUR
 
-def get_path_to_home(citizen_position: Dict, home_position: Dict) -> Optional[Dict]:
-    """Get a path from the citizen's current position to their home using the transport API."""
-    log.info(f"Getting path from {citizen_position} to {home_position}")
+def get_path_between_points(start_position: Dict, end_position: Dict) -> Optional[Dict]:
+    """Get a path between two points using the transport API."""
+    log.info(f"Getting path from {start_position} to {end_position}")
     
     try:
         # Call the transport API
         response = requests.post(
             TRANSPORT_API_URL,
             json={
-                "startPoint": citizen_position,
-                "endPoint": home_position,
+                "startPoint": start_position,
+                "endPoint": end_position,
                 "startDate": datetime.datetime.now().isoformat()
             }
         )
@@ -502,9 +586,9 @@ def get_path_to_home(citizen_position: Dict, home_position: Dict) -> Optional[Di
         log.error(f"Error calling transport API: {e}")
         return None
 
-def create_rest_activity(tables, citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, home_id: str) -> Optional[Dict]:
-    """Create a rest activity for a citizen at their home."""
-    log.info(f"Creating rest activity for citizen {citizen_username} (CustomID: {citizen_custom_id}) at home {home_id}")
+def create_stay_activity(tables, citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, target_building_id: str, stay_location_type: str = "home") -> Optional[Dict]:
+    """Create a stay activity for a citizen at a target location (home or inn)."""
+    log.info(f"Creating stay activity for citizen {citizen_username} (CustomID: {citizen_custom_id}) at {stay_location_type} {target_building_id}")
     
     try:
         now = datetime.datetime.now(pytz.UTC)
@@ -524,21 +608,25 @@ def create_rest_activity(tables, citizen_custom_id: str, citizen_username: str, 
         end_time_utc = end_time.astimezone(pytz.UTC)
         
         # Create the activity
+        
+        note_message = f"🌙 **Resting** at {stay_location_type} for the night"
+        activity_id_prefix = "rest" if stay_location_type == "home" else f"rest_at_{stay_location_type}"
+
         activity_payload = {
-            "ActivityId": f"rest_{citizen_custom_id}_{int(time.time())}",
-            "Type": "rest",
+            "ActivityId": f"{activity_id_prefix}_{citizen_custom_id}_{int(time.time())}",
+            "Type": "rest", # Keep type as "rest" for general compatibility
             "Citizen": citizen_username,
-            "FromBuilding": home_id,  # This should be BuildingId
-            "ToBuilding": home_id,    # This should be BuildingId
+            "FromBuilding": target_building_id,
+            "ToBuilding": target_building_id,
             "CreatedAt": now.isoformat(),
             "StartDate": now.isoformat(),
             "EndDate": end_time_utc.isoformat(), # Already UTC
-            "Notes": "🌙 **Resting** at home for the night"
+            "Notes": note_message
         }
         activity = tables['activities'].create(activity_payload)
         
         if activity and activity.get('id'):
-            log.info(f"Created rest activity: {activity['id']}")
+            log.info(f"Created stay activity ({stay_location_type}): {activity['id']}")
             try:
                 updated_at_ts = datetime.datetime.now(pytz.UTC).isoformat()
                 tables['citizens'].update(citizen_airtable_id, {'UpdatedAt': updated_at_ts})
@@ -547,10 +635,10 @@ def create_rest_activity(tables, citizen_custom_id: str, citizen_username: str, 
                 log.error(f"Error updating 'UpdatedAt' for citizen record {citizen_airtable_id}: {e_update}")
             return activity
         else:
-            log.error(f"Failed to create rest activity for {citizen_username}")
+            log.error(f"Failed to create stay activity ({stay_location_type}) for {citizen_username}")
             return None
     except Exception as e:
-        log.error(f"Error creating rest activity for {citizen_username}: {e}")
+        log.error(f"Error creating stay activity ({stay_location_type}) for {citizen_username}: {e}")
         return None
 
 def create_goto_work_activity(tables, citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, workplace_id: str, path_data: Dict) -> Optional[Dict]:
@@ -651,6 +739,51 @@ def create_goto_home_activity(tables, citizen_custom_id: str, citizen_username: 
         log.error(f"Error creating goto_home activity for {citizen_username}: {e}")
         return None
 
+def create_travel_to_inn_activity(tables, citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, inn_id: str, path_data: Dict) -> Optional[Dict]:
+    """Create a travel_to_inn activity for a citizen."""
+    log.info(f"Creating travel_to_inn activity for citizen {citizen_username} (CustomID: {citizen_custom_id}) to inn {inn_id}")
+    
+    try:
+        now = datetime.datetime.now(pytz.UTC)
+        
+        start_date = path_data.get('timing', {}).get('startDate', now.isoformat())
+        end_date = path_data.get('timing', {}).get('endDate')
+        
+        if not end_date:
+            end_time = now + datetime.timedelta(hours=1) # Default 1 hour travel
+            end_date = end_time.isoformat()
+        
+        path_json = json.dumps(path_data.get('path', []))
+        
+        activity_payload = {
+            "ActivityId": f"goto_inn_{citizen_custom_id}_{int(time.time())}",
+            "Type": "goto_inn", # New activity type
+            "Citizen": citizen_username,
+            "ToBuilding": inn_id,
+            "CreatedAt": now.isoformat(),
+            "StartDate": start_date,
+            "EndDate": end_date,
+            "Path": path_json,
+            "Notes": "🏨 **Going to an inn** for the night"
+        }
+        activity = tables['activities'].create(activity_payload)
+
+        if activity and activity.get('id'):
+            log.info(f"Created travel_to_inn activity: {activity['id']}")
+            try:
+                updated_at_ts = datetime.datetime.now(pytz.UTC).isoformat()
+                tables['citizens'].update(citizen_airtable_id, {'UpdatedAt': updated_at_ts})
+                log.info(f"Updated 'UpdatedAt' for citizen record {citizen_airtable_id}")
+            except Exception as e_update:
+                log.error(f"Error updating 'UpdatedAt' for citizen record {citizen_airtable_id}: {e_update}")
+            return activity
+        else:
+            log.error(f"Failed to create travel_to_inn activity for {citizen_username}")
+            return None
+    except Exception as e:
+        log.error(f"Error creating travel_to_inn activity for {citizen_username}: {e}")
+        return None
+
 def create_idle_activity(tables, citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str) -> Optional[Dict]:
     """Create an idle activity for a citizen."""
     log.info(f"Creating idle activity for citizen {citizen_username} (CustomID: {citizen_custom_id})")
@@ -704,7 +837,10 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
     
     citizen_name = f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}"
     log.info(f"Processing activity for citizen {citizen_name} (CustomID: {citizen_custom_id}, Username: {citizen_username}, RecordID: {citizen_airtable_record_id})")
-    
+
+    home_city = citizen['fields'].get('HomeCity') # Check if citizen is a visitor
+    log.info(f"Citizen {citizen_username} HomeCity: '{home_city}'")
+
     # Get citizen's position
     citizen_position = None
     try:
@@ -737,11 +873,74 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
     
     # If it's nighttime, handle nighttime activities
     if is_night:
-        # Find citizen's home
-        home = get_citizen_home(tables, citizen_custom_id) # Assuming get_citizen_home uses custom CitizenId
+        if home_city and home_city.strip(): # Visitor logic: HomeCity is not null and not empty
+            log.info(f"Citizen {citizen_username} is a visitor from {home_city}. Finding an inn.")
+            closest_inn = get_closest_inn(tables, citizen_position)
+
+            if closest_inn:
+                inn_position_coords = _get_building_position_coords(closest_inn)
+                if inn_position_coords:
+                    is_at_inn = _calculate_distance_meters(citizen_position, inn_position_coords) < 20
+                    inn_building_id = closest_inn['fields'].get('BuildingId', closest_inn['id'])
+
+                    if is_at_inn:
+                        log.info(f"Citizen {citizen_username} is already at inn {inn_building_id}. Creating stay activity.")
+                        create_stay_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, inn_building_id, stay_location_type="inn")
+                    else:
+                        log.info(f"Citizen {citizen_username} is not at inn {inn_building_id}. Finding path to inn.")
+                        path_data = get_path_between_points(citizen_position, inn_position_coords)
+                        if path_data and path_data.get('success'):
+                            create_travel_to_inn_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, inn_building_id, path_data)
+                        else:
+                            log.warning(f"Path finding to inn {inn_building_id} failed for {citizen_username}. Creating idle activity.")
+                            create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
+                else:
+                    log.warning(f"Closest inn {closest_inn['id']} has no position data. Creating idle activity for {citizen_username}.")
+                    create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
+            else:
+                log.warning(f"No inn found for visitor {citizen_username}. Creating idle activity.")
+                create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
+        else: # Resident logic (HomeCity is null or empty)
+            log.info(f"Citizen {citizen_username} is a resident or HomeCity is not set. Finding home.")
+            # Find citizen's home
+            home = get_citizen_home(tables, citizen_custom_id) 
+            
+            if not home:
+                log.warning(f"Citizen {citizen_custom_id} has no home, creating idle activity")
+                create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
+                return True
+            
+            # Get home position
+            home_position = _get_building_position_coords(home)
         
-        if not home:
-            log.warning(f"Citizen {citizen_custom_id} has no home, creating idle activity")
+            if not home_position:
+                log.warning(f"Home {home['fields'].get('BuildingId', home['id'])} has no position data, creating idle activity for resident {citizen_custom_id}")
+                create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
+                return True
+            
+            # Check if citizen is already at home
+            is_at_home = _calculate_distance_meters(citizen_position, home_position) < 20
+            
+            if is_at_home:
+                # Citizen is at home, create rest activity
+                home_building_id = home['fields'].get('BuildingId', home['id'])
+                create_stay_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, home_building_id, stay_location_type="home")
+            else:
+                # Citizen needs to go home, get path
+                path_data = get_path_between_points(citizen_position, home_position)
+                
+                if path_data and path_data.get('success'):
+                    # Create goto_home activity
+                    home_building_id = home['fields'].get('BuildingId', home['id'])
+                    create_goto_home_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, home_building_id, path_data)
+                else:
+                    # Path finding failed, create idle activity
+                    log.warning(f"Path finding to home failed for resident {citizen_custom_id}. Creating idle activity.")
+                    create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
+    else:
+        # Daytime activities - FIRST check if citizen is at their workplace
+        
+        # Get citizen's workplace
             create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
             return True
         
@@ -814,29 +1013,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
         
         if workplace:
             # Get workplace position
-            workplace_position = None
-            try:
-                # First try to get position from the Position field
-                position_str = workplace['fields'].get('Position')
-                if position_str:
-                    workplace_position = json.loads(position_str)
-                
-                # If Position is missing or invalid, try to extract from Point field
-                if not workplace_position:
-                    point_str = workplace['fields'].get('Point')
-                    if point_str and isinstance(point_str, str):
-                        # Parse the Point field which has format like "building_45.437908_12.337258"
-                        parts = point_str.split('_')
-                        if len(parts) >= 3:
-                            try:
-                                lat = float(parts[1])
-                                lng = float(parts[2])
-                                workplace_position = {"lat": lat, "lng": lng}
-                                log.info(f"Extracted position from Point field for workplace {workplace['fields'].get('BuildingId', workplace['id'])}: {workplace_position}")
-                            except (ValueError, IndexError):
-                                log.warning(f"Failed to parse coordinates from Point field: {point_str}")
-            except (json.JSONDecodeError, TypeError) as e:
-                log.warning(f"Invalid position data for workplace {workplace['fields'].get('BuildingId', workplace['id'])}: {workplace['fields'].get('Position')} - Error: {str(e)}")
+            workplace_position = _get_building_position_coords(workplace)
             
             if not workplace_position:
                 log.warning(f"Workplace {workplace['fields'].get('BuildingId', workplace['id'])} has no position data, creating idle activity")
@@ -844,20 +1021,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
                 return True
             
             # Check if citizen is already at workplace
-            # Simple check: if positions are close enough (within 20 meters)
-            is_at_workplace = False
-            try:
-                # Calculate distance between points
-                from math import sqrt, pow
-                distance = sqrt(pow(citizen_position['lat'] - workplace_position['lat'], 2) + 
-                               pow(citizen_position['lng'] - workplace_position['lng'], 2))
-                
-                # Convert to approximate meters (very rough approximation)
-                distance_meters = distance * 111000  # 1 degree is roughly 111 km at the equator
-                
-                is_at_workplace = distance_meters < 20  # Within 20 meters
-            except (KeyError, TypeError):
-                log.warning(f"Error calculating distance for citizen {citizen_custom_id}")
+            is_at_workplace = _calculate_distance_meters(citizen_position, workplace_position) < 20
             
             if is_at_workplace:
                 # Citizen is at workplace, proceed with normal work activities
@@ -968,10 +1132,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
                 log.info(f"Citizen {citizen_custom_id} is not at their workplace, creating goto_work activity")
                 
                 # Get path to workplace
-                path_data = find_path_between_buildings(
-                    {"fields": {"Position": json.dumps(citizen_position)}}, 
-                    workplace
-                )
+                path_data = get_path_between_points(citizen_position, workplace_position)
                 
                 if path_data and path_data.get('success'):
                     # Create goto_work activity
