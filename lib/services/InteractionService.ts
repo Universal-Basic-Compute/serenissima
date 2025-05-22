@@ -301,6 +301,35 @@ export class InteractionService {
       // Update mouse position
       this.state.mousePosition = { x: mouseX, y: mouseY };
       setters.setMousePosition({ x: mouseX, y: mouseY });
+
+      // If in orient bridge mode and a bridge is selected for orientation
+      if (data.orientBridgeModeActive && this.state.selectedBuildingId && this.state.isDraggingOrientBridge) {
+        const selectedBuilding = data.buildings.find(b => b.id === this.state.selectedBuildingId);
+        if (selectedBuilding && selectedBuilding.position) {
+          let buildingWorldPos;
+          if (typeof selectedBuilding.position === 'string') {
+            try {
+              buildingWorldPos = JSON.parse(selectedBuilding.position);
+            } catch (err) { console.error("Error parsing building position string", err); return; }
+          } else {
+            buildingWorldPos = selectedBuilding.position;
+          }
+
+          if (buildingWorldPos.lat && buildingWorldPos.lng) {
+            const buildingScreenPos = CoordinateService.worldToScreen(
+              (buildingWorldPos.lng - 12.3326) * 20000,
+              (buildingWorldPos.lat - 45.4371) * 20000,
+              scale, offset, canvas.width, canvas.height
+            );
+            
+            const dx = this.state.mousePosition.x - buildingScreenPos.x;
+            const dy = this.state.mousePosition.y - buildingScreenPos.y;
+            const angle = Math.atan2(dy, dx);
+            setters.setOrientingBridgeAngle(angle);
+          }
+        }
+        return; // Don't process other interactions while orienting bridge
+      }
       
       // Only process hover detection if we're not dragging
       if (!this.isDraggingRef) {
@@ -1052,6 +1081,26 @@ export class InteractionService {
     
     // Handle mouse down for panning
     const handleMouseDown = (e: MouseEvent) => {
+      const currentScale = scale; // Use the scale passed to initializeInteractions
+      const currentOffset = offset; // Use the offset passed to initializeInteractions
+      const currentCanvasWidth = canvas.width;
+      const currentCanvasHeight = canvas.height;
+
+      // If in orient bridge mode and a bridge is clicked
+      if (data.orientBridgeModeActive) {
+        const clickedBuilding = this.findClickedBuilding(this.state.mousePosition, data.buildings, currentScale, currentOffset, currentCanvasWidth, currentCanvasHeight);
+        if (clickedBuilding && (clickedBuilding.type?.toLowerCase().includes('bridge') || clickedBuilding.type?.toLowerCase().includes('ponte') || clickedBuilding.category?.toLowerCase() === 'bridge')) {
+          setters.setSelectedBridgeForOrientationId(clickedBuilding.id);
+          setters.setOrientingBridgeAngle(clickedBuilding.orientation || clickedBuilding.rotation || 0);
+          this.state.selectedBuildingId = clickedBuilding.id; // Keep track for mouse move
+          this.state.isDraggingOrientBridge = true; // Start dragging for orientation
+          this.isDraggingRef = false; // Prevent general map dragging
+          this.state.isDragging = false; // Prevent general map dragging
+          console.log(`InteractionService: Started orienting bridge ${clickedBuilding.id}`);
+          return; // Exclusive mode for this mousedown
+        }
+      }
+      
       this.state.isDragging = true;
       this.isDraggingRef = true;
       this.state.dragStart = { x: e.clientX, y: e.clientY };
@@ -1065,7 +1114,24 @@ export class InteractionService {
     
     // Handle mouse up for panning
     const handleMouseUp = () => {
-      // Only update state if we're actually dragging
+      // If orienting a bridge, finalize orientation on mouse up
+      // The actual saving will be handled by IsometricViewer's own mouseUp listener
+      // by checking its state variables (selectedBridgeForOrientationId, orientingBridgeAngle).
+      // InteractionService just needs to reset its internal state for this specific drag.
+      if (data.orientBridgeModeActive && this.state.isDraggingOrientBridge) {
+          console.log(`InteractionService: MouseUp during bridge orientation for ${this.state.selectedBuildingId}. IsometricViewer should save.`);
+          this.state.isDraggingOrientBridge = false; 
+          // Let IsometricViewer reset its own state (selectedBridgeForOrientationId, orientingBridgeAngle) after API call.
+          // No need to call setters.setSelectedBridgeForOrientationId(null) here as IsometricViewer controls that state.
+          
+          // Ensure general dragging is also considered ended.
+          this.state.isDragging = false;
+          this.isDraggingRef = false;
+          eventBus.emit(EventTypes.INTERACTION_DRAG_END, null); // Emit drag end for consistency
+          return; 
+      }
+
+      // Only update state if we're actually dragging for map panning
       if (this.isDraggingRef) {
         this.state.isDragging = false;
         this.isDraggingRef = false;
