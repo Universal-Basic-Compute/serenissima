@@ -27,6 +27,15 @@ import uuid
 from collections import defaultdict
 from typing import Dict, List, Optional, Any
 from pyairtable import Api, Table
+
+# Import activity creators
+from backend.engine.activity_creators.stay_activity_creator import try_create as try_create_stay_activity
+from backend.engine.activity_creators.goto_work_activity_creator import try_create as try_create_goto_work_activity
+from backend.engine.activity_creators.goto_home_activity_creator import try_create as try_create_goto_home_activity
+from backend.engine.activity_creators.travel_to_inn_activity_creator import try_create as try_create_travel_to_inn_activity
+from backend.engine.activity_creators.idle_activity_creator import try_create as try_create_idle_activity
+from backend.engine.activity_creators.production_activity_creator import try_create as try_create_production_activity
+from backend.engine.activity_creators.resource_fetching_activity_creator import try_create as try_create_resource_fetching_activity
 from dotenv import load_dotenv
 
 # Set up logging
@@ -586,60 +595,14 @@ def get_path_between_points(start_position: Dict, end_position: Dict) -> Optiona
         log.error(f"Error calling transport API: {e}")
         return None
 
-def create_stay_activity(tables, citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, target_building_id: str, stay_location_type: str = "home") -> Optional[Dict]:
-    """Create a stay activity for a citizen at a target location (home or inn)."""
-    log.info(f"Creating stay activity for citizen {citizen_username} (CustomID: {citizen_custom_id}) at {stay_location_type} {target_building_id}")
-    
-    try:
-        now = datetime.datetime.now(pytz.UTC)
-        
-        # Calculate end time (next morning at 6 AM)
-        venice_now = now.astimezone(VENICE_TIMEZONE)
-        
-        # If it's before 6 AM, end time is 6 AM today
-        # If it's after 6 AM, end time is 6 AM tomorrow
-        if venice_now.hour < NIGHT_END_HOUR:
-            end_time = venice_now.replace(hour=NIGHT_END_HOUR, minute=0, second=0, microsecond=0)
-        else:
-            tomorrow = venice_now + datetime.timedelta(days=1)
-            end_time = tomorrow.replace(hour=NIGHT_END_HOUR, minute=0, second=0, microsecond=0)
-        
-        # Convert back to UTC for storage
-        end_time_utc = end_time.astimezone(pytz.UTC)
-        
-        # Create the activity
-        
-        note_message = f"🌙 **Resting** at {stay_location_type} for the night"
-        activity_id_prefix = "rest" if stay_location_type == "home" else f"rest_at_{stay_location_type}"
-
-        activity_payload = {
-            "ActivityId": f"{activity_id_prefix}_{citizen_custom_id}_{int(time.time())}",
-            "Type": "rest", # Keep type as "rest" for general compatibility
-            "Citizen": citizen_username,
-            "FromBuilding": target_building_id,
-            "ToBuilding": target_building_id,
-            "CreatedAt": now.isoformat(),
-            "StartDate": now.isoformat(),
-            "EndDate": end_time_utc.isoformat(), # Already UTC
-            "Notes": note_message
-        }
-        activity = tables['activities'].create(activity_payload)
-        
-        if activity and activity.get('id'):
-            log.info(f"Created stay activity ({stay_location_type}): {activity['id']}")
-            try:
-                updated_at_ts = datetime.datetime.now(pytz.UTC).isoformat()
-                tables['citizens'].update(citizen_airtable_id, {'UpdatedAt': updated_at_ts})
-                log.info(f"Updated 'UpdatedAt' for citizen record {citizen_airtable_id}")
-            except Exception as e_update:
-                log.error(f"Error updating 'UpdatedAt' for citizen record {citizen_airtable_id}: {e_update}")
-            return activity
-        else:
-            log.error(f"Failed to create stay activity ({stay_location_type}) for {citizen_username}")
-            return None
-    except Exception as e:
-        log.error(f"Error creating stay activity ({stay_location_type}) for {citizen_username}: {e}")
-        return None
+# --- Removed create_stay_activity ---
+# --- Removed create_goto_work_activity ---
+# --- Removed create_goto_home_activity ---
+# --- Removed create_travel_to_inn_activity ---
+# --- Removed create_idle_activity ---
+# --- Removed create_production_activity ---
+# --- Removed create_resource_fetching_activity ---
+# (Ensure all these function definitions are deleted from this file)
 
 def create_goto_work_activity(tables, citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, workplace_id: str, path_data: Dict) -> Optional[Dict]:
     """Create a goto_work activity for a citizen."""
@@ -885,21 +848,33 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
 
                     if is_at_inn:
                         log.info(f"Citizen {citizen_username} is already at inn {inn_building_id}. Creating stay activity.")
-                        create_stay_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, inn_building_id, stay_location_type="inn")
+                        # Calculate end time for stay activity
+                        now_utc = datetime.datetime.now(pytz.UTC)
+                        venice_now = now_utc.astimezone(VENICE_TIMEZONE)
+                        if venice_now.hour < NIGHT_END_HOUR:
+                            end_time_venice = venice_now.replace(hour=NIGHT_END_HOUR, minute=0, second=0, microsecond=0)
+                        else:
+                            tomorrow_venice = venice_now + datetime.timedelta(days=1)
+                            end_time_venice = tomorrow_venice.replace(hour=NIGHT_END_HOUR, minute=0, second=0, microsecond=0)
+                        stay_end_time_utc_iso = end_time_venice.astimezone(pytz.UTC).isoformat()
+                        try_create_stay_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, inn_building_id, stay_location_type="inn", end_time_utc_iso=stay_end_time_utc_iso)
                     else:
                         log.info(f"Citizen {citizen_username} is not at inn {inn_building_id}. Finding path to inn.")
                         path_data = get_path_between_points(citizen_position, inn_position_coords)
                         if path_data and path_data.get('success'):
-                            create_travel_to_inn_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, inn_building_id, path_data)
+                            try_create_travel_to_inn_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, inn_building_id, path_data)
                         else:
                             log.warning(f"Path finding to inn {inn_building_id} failed for {citizen_username}. Creating idle activity.")
-                            create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
+                            idle_end_time_iso = (datetime.datetime.now(pytz.UTC) + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
+                            try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso)
                 else:
                     log.warning(f"Closest inn {closest_inn['id']} has no position data. Creating idle activity for {citizen_username}.")
-                    create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
+                    idle_end_time_iso = (datetime.datetime.now(pytz.UTC) + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
+                    try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso)
             else:
                 log.warning(f"No inn found for visitor {citizen_username}. Creating idle activity.")
-                create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
+                idle_end_time_iso = (datetime.datetime.now(pytz.UTC) + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
+                try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso)
         else: # Resident logic (HomeCity is null or empty)
             log.info(f"Citizen {citizen_username} is a resident or HomeCity is not set. Finding home.")
             # Find citizen's home
@@ -907,7 +882,8 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
             
             if not home:
                 log.warning(f"Citizen {citizen_custom_id} has no home, creating idle activity")
-                create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
+                idle_end_time_iso = (datetime.datetime.now(pytz.UTC) + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
+                try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso)
                 return True
             
             # Get home position
@@ -915,7 +891,8 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
         
             if not home_position:
                 log.warning(f"Home {home['fields'].get('BuildingId', home['id'])} has no position data, creating idle activity for resident {citizen_custom_id}")
-                create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
+                idle_end_time_iso = (datetime.datetime.now(pytz.UTC) + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
+                try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso)
                 return True
             
             # Check if citizen is already at home
@@ -924,7 +901,15 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
             if is_at_home:
                 # Citizen is at home, create rest activity
                 home_building_id = home['fields'].get('BuildingId', home['id'])
-                create_stay_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, home_building_id, stay_location_type="home")
+                now_utc = datetime.datetime.now(pytz.UTC)
+                venice_now = now_utc.astimezone(VENICE_TIMEZONE)
+                if venice_now.hour < NIGHT_END_HOUR:
+                    end_time_venice = venice_now.replace(hour=NIGHT_END_HOUR, minute=0, second=0, microsecond=0)
+                else:
+                    tomorrow_venice = venice_now + datetime.timedelta(days=1)
+                    end_time_venice = tomorrow_venice.replace(hour=NIGHT_END_HOUR, minute=0, second=0, microsecond=0)
+                stay_end_time_utc_iso = end_time_venice.astimezone(pytz.UTC).isoformat()
+                try_create_stay_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, home_building_id, stay_location_type="home", end_time_utc_iso=stay_end_time_utc_iso)
             else:
                 # Citizen needs to go home, get path
                 path_data = get_path_between_points(citizen_position, home_position)
@@ -932,11 +917,12 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
                 if path_data and path_data.get('success'):
                     # Create goto_home activity
                     home_building_id = home['fields'].get('BuildingId', home['id'])
-                    create_goto_home_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, home_building_id, path_data)
+                    try_create_goto_home_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, home_building_id, path_data)
                 else:
                     # Path finding failed, create idle activity
                     log.warning(f"Path finding to home failed for resident {citizen_custom_id}. Creating idle activity.")
-                    create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
+                    idle_end_time_iso = (datetime.datetime.now(pytz.UTC) + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
+                    try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso)
     else:
         # Daytime activities - FIRST check if citizen is at their workplace
         
@@ -1017,7 +1003,8 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
             
             if not workplace_position:
                 log.warning(f"Workplace {workplace['fields'].get('BuildingId', workplace['id'])} has no position data, creating idle activity")
-                create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
+                idle_end_time_iso = (datetime.datetime.now(pytz.UTC) + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
+                try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso)
                 return True
             
             # Check if citizen is already at workplace
@@ -1058,7 +1045,8 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
                         
                         if can_produce and selected_recipe:
                             # Create production activity
-                            create_production_activity(tables, citizen, workplace, selected_recipe) # citizen contains airtable_id
+                            # Pass citizen's airtable_id, custom_id, username, and workplace's airtable_id
+                            try_create_production_activity(tables, citizen_airtable_record_id, citizen_custom_id, citizen_username, workplace['id'], selected_recipe)
                             return True
                         else:
                             # Not enough resources for production, check contracts
@@ -1137,12 +1125,13 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
                 if path_data and path_data.get('success'):
                     # Create goto_work activity
                     workplace_building_id = workplace['fields'].get('BuildingId', workplace['id'])
-                    create_goto_work_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, workplace_building_id, path_data)
+                    try_create_goto_work_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, workplace_building_id, path_data)
                     return True
                 else:
                     # Path finding failed, create idle activity
                     log.warning(f"Failed to find path to workplace for citizen {citizen_custom_id}, creating idle activity")
-                    create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
+                    idle_end_time_iso = (datetime.datetime.now(pytz.UTC) + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
+                    try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso)
                     return True
         else:
             # No workplace found, continue with existing logic for citizens without workplaces
@@ -1197,7 +1186,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
                             
                             if can_produce and selected_recipe:
                                 # Create production activity
-                                create_production_activity(tables, citizen, work_building, selected_recipe) # citizen contains airtable_id
+                                try_create_production_activity(tables, citizen_airtable_record_id, citizen_custom_id, citizen_username, work_building['id'], selected_recipe)
                                 return True
                             else:
                                 # Not enough resources for production, check contracts
@@ -1232,48 +1221,52 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
                                                     log.warning(f"Found buyer building by record ID instead of BuildingId: {to_building_id}")
                                             
                                             if from_buildings and to_buildings:
-                                                from_building = from_buildings[0]
-                                                to_building = to_buildings[0]
+                                                from_building_rec_alt = from_buildings[0]
+                                                to_building_rec_alt = to_buildings[0]
                                                 
-                                                # Check if source building has enough resources
-                                                resource_type = contract['fields'].get('ResourceType')
-                                                amount = float(contract['fields'].get('Amount', 0) or 0)
+                                                resource_type_contract_alt = contract['fields'].get('ResourceType')
+                                                amount_contract_alt = float(contract['fields'].get('Amount', 0) or 0)
                                                 
-                                                source_resources = get_building_resources(tables, from_building_id)
+                                                source_resources_contract_alt = get_building_resources(tables, from_building_id) # from_building_id is BuildingId
                                                 
-                                                if resource_type in source_resources and source_resources[resource_type] >= amount:
-                                                    # Find path between buildings
-                                                    path = find_path_between_buildings(from_building, to_building)
+                                                if resource_type_contract_alt in source_resources_contract_alt and source_resources_contract_alt[resource_type_contract_alt] >= amount_contract_alt:
+                                                    path_contract_alt = find_path_between_buildings(from_building_rec_alt, to_building_rec_alt)
                                                     
-                                                    if path:
-                                                        # Create resource fetching activity
-                                                        create_resource_fetching_activity( # citizen contains airtable_id
-                                                            tables, citizen, contract, from_building, to_building, path
+                                                    if path_contract_alt:
+                                                        try_create_resource_fetching_activity(
+                                                            tables, citizen_airtable_record_id, citizen_custom_id, citizen_username,
+                                                            contract['id'], from_building_rec_alt['id'], to_building_rec_alt['id'],
+                                                            resource_type_contract_alt, amount_contract_alt, path_contract_alt
                                                         )
                                                         return True
                                 
                                 # If we get here, no contracts could be executed
                                 log.info(f"No viable contracts for citizen {citizen_custom_id}, creating idle activity")
-                                create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
+                                idle_end_time_iso = (datetime.datetime.now(pytz.UTC) + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
+                                try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso)
                                 return True
                         else:
                             # No Arti recipes, create idle activity
                             log.info(f"No Arti recipes for building type {building_type}, creating idle activity")
-                            create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
+                            idle_end_time_iso = (datetime.datetime.now(pytz.UTC) + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
+                            try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso)
                             return True
                     else:
                         # No production information, create idle activity
                         log.info(f"No production information for building type {building_type}, creating idle activity")
-                        create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
+                        idle_end_time_iso = (datetime.datetime.now(pytz.UTC) + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
+                        try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso)
                         return True
                 else:
                     # No work building found, create idle activity
                     log.info(f"No work buildings found for citizen {citizen_username}, creating idle activity")
-                    create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
+                    idle_end_time_iso = (datetime.datetime.now(pytz.UTC) + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
+                    try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso)
                     return True
             except Exception as e:
                 log.error(f"Error finding work buildings for citizen {citizen_username}: {e}")
-                create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
+                idle_end_time_iso = (datetime.datetime.now(pytz.UTC) + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
+                try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso)
                 return True
     
     return True
