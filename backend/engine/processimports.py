@@ -600,12 +600,14 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
         for resource_item in aggregated_resources_for_activity:
             resource_type_id = resource_item['ResourceId']
             try:
-                resource_formula = f"AND({{Type}}='import', {{'Resource Type'}}='{_escape_airtable_value(resource_type_id)}', {{BuildingId}}='{_escape_airtable_value(buyer_building_id)}', {{Owner}}='{_escape_airtable_value(buyer_username)}')"
+                # The field for the resource kind (e.g., 'sailcloth') is 'Type'.
+                # The 'import' context is implicit to these records managed by this script.
+                resource_formula = f"AND({{Type}}='{_escape_airtable_value(resource_type_id)}', {{BuildingId}}='{_escape_airtable_value(buyer_building_id)}', {{Owner}}='{_escape_airtable_value(buyer_username)}')"
                 existing_resources = tables["resources"].all(formula=resource_formula, max_records=1)
                 
                 current_time_iso = datetime.now().isoformat()
                 resource_data_fields = {
-                    "Type": "import", "Resource Type": resource_type_id,
+                    "Type": resource_type_id, # Field 'Type' now stores the actual resource kind
                     "BuildingId": buyer_building_id, "Owner": buyer_username,
                     "Count": 0, "UpdatedAt": current_time_iso
                 }
