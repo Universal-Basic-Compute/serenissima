@@ -712,6 +712,9 @@ export default function BuildingDetailsPanel({
               
               {/* Owner information */}
               <BuildingOwner owner={building.owner} />
+              
+              {/* Occupant Information */}
+              <BuildingOccupant occupant={building.occupant} />
   
               {/* Financial Information */}
               <BuildingFinancials 
@@ -735,9 +738,6 @@ export default function BuildingDetailsPanel({
                 createdAt={building.createdAt}
                 createdBy={building.createdBy}
               />
-              
-              {/* Occupant Information */}
-              <BuildingOccupant occupant={building.occupant} />
               
               {/* Public Sale Contracts */}
               <ContractList contracts={buildingResources?.resources?.publiclySold || []} />
