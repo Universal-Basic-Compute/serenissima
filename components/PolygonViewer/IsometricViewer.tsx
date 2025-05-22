@@ -250,27 +250,6 @@ number => {
     return R * c;
   };
 
-  // Function to fetch existing water points
-  const fetchWaterPoints = useCallback(async () => {
-    try {
-      console.log('Fetching existing water points...');
-      const response = await fetch('/api/water-points');
-      
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success && Array.isArray(data.waterPoints)) {
-          console.log(`Loaded ${data.waterPoints.length} water points`);
-          setWaterPoints(data.waterPoints);
-        } else {
-          console.error('Invalid water points data format:', data);
-        }
-      } else {
-        console.error(`Failed to fetch water points: ${response.status} ${response.statusText}`);
-      }
-    } catch (error) {
-      console.error('Error fetching water points:', error);
-    }
-  }, []);
 
   // Function to save a new water point
   const saveWaterPoint = useCallback(async (point: {lat: number, lng: number}) => {
@@ -746,8 +725,8 @@ number => {
       ];
       setWaterRoutePath(updatedPath);
     }
-  }, [waterPoints, waterRouteStartPoint, waterRouteEndPoint, waterRouteIntermediatePoints, saveWaterRouteWithData]);
-
+  }, [fullWaterGraphData, waterRouteStartPoint, waterRouteEndPoint, waterRouteIntermediatePoints, saveWaterRouteWithData]); // Replaced waterPoints with fullWaterGraphData
+  
   // Function to visualize the transport path
   const visualizeTransportPath = useCallback((path: any[]) => {
     if (!path || path.length < 2) return;
