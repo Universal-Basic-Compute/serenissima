@@ -420,18 +420,10 @@ number => {
         throw new Error(`Failed to save end point: ${endResponse.status} ${endResponse.statusText}`);
       }
       
-      // Update local state
-      setWaterPoints(prevPoints => {
-        return prevPoints.map(pt => {
-          if (pt.id === waterRouteStartPoint.id) {
-            return updatedStartPoint;
-          }
-          if (pt.id === waterRouteEndPoint.id) {
-            return updatedEndPoint;
-          }
-          return pt;
-        });
-      });
+      // Update local state - REMOVED as waterPoints now comes from fullWaterGraphData prop
+      // The parent component should be notified to refresh fullWaterGraphData.
+      // For example, by dispatching an event:
+      // eventBus.dispatch(EventTypes.WATER_DATA_UPDATED);
       
       // Reset water route state but keep water route mode active
       setWaterRouteStartPoint(null);
@@ -576,18 +568,10 @@ number => {
         throw new Error(`Failed to save end point: ${endResponse.status} ${endResponse.statusText}`);
       }
       
-      // Update local state
-      setWaterPoints(prevPoints => {
-        return prevPoints.map(pt => {
-          if (pt.id === routeData.startPoint.id) {
-            return updatedStartPoint;
-          }
-          if (pt.id === routeData.endPoint.id) {
-            return updatedEndPoint;
-          }
-          return pt;
-        });
-      });
+      // Update local state - REMOVED as waterPoints now comes from fullWaterGraphData prop
+      // The parent component should be notified to refresh fullWaterGraphData.
+      // For example, by dispatching an event:
+      // eventBus.dispatch(EventTypes.WATER_DATA_UPDATED);
       
       // Reset water route state but keep water route mode active
       setWaterRouteStartPoint(null);
