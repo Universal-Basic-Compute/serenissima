@@ -274,6 +274,7 @@ export class InteractionService {
       saveWaterPoint?: (point: {lat: number, lng: number}) => void;
       handleWaterRouteClick?: (point: {lat: number, lng: number}, isWaterPoint: boolean, waterPointId?: string) => void;
       // New callbacks for bridge orientation
+      setOrientBridgeModeActive: (active: boolean) => void; // Add this line
       setSelectedBridgeForOrientationId: (id: string | null) => void;
       setOrientingBridgeAngle: (angle: number | null) => void;
     }
