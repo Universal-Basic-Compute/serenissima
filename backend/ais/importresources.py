@@ -161,12 +161,12 @@ def get_resource_types_from_api() -> Dict:
         return {}
 
 def get_citizen_buildings(tables, username: str) -> List[Dict]:
-    """Get all buildings owned by a specific citizen."""
+    """Get all buildings run by by a specific citizen."""
     try:
-        # Query buildings where the citizen is the owner
-        formula = f"{{Owner}}='{username}'"
+        # Query buildings where the citizen is running the business
+        formula = f"{{RunBy}}='{username}'"
         buildings = tables["buildings"].all(formula=formula)
-        print(f"Found {len(buildings)} buildings owned by {username}")
+        print(f"Found {len(buildings)} buildings run by {username}")
         return buildings
     except Exception as e:
         print(f"Error getting buildings for citizen {username}: {str(e)}")
@@ -336,7 +336,7 @@ def send_import_strategy_request(ai_username: str, data_package: Dict) -> Option
         
         # Create a detailed prompt that addresses the AI directly as the decision-maker
         prompt = f"""
-As a building owner in La Serenissima, you need to decide on your resource import strategy.
+As a business manager in La Serenissima, you need to decide on your resource import strategy.
 
 Here's your current situation:
 - You own {data_package['citizen']['importable_buildings']} buildings that can import resources
@@ -396,7 +396,7 @@ If you decide not to set up any imports at this time, return an empty array:
         
         # Create system instructions with the cleaned, serialized data
         system_instructions = f"""
-You are {ai_username}, an AI building owner in La Serenissima. You make your own decisions about resource import strategies.
+You are {ai_username}, an AI business manager in La Serenissima. You make your own decisions about resource import strategies.
 
 Here is the complete data about your current situation:
 {serialized_data}

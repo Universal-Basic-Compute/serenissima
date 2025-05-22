@@ -1,20 +1,164 @@
 {
-  "totalErrors": 14,
+  "totalErrors": 40,
   "totalWarnings": 0,
   "exitCode": 1,
-  "timestamp": "2025-05-18T20:59:08.508Z",
+  "timestamp": "2025-05-20T15:33:20.272Z",
   "errors": [
     {
       "filePath": "app/api/calculateRelevancies/route.ts",
-      "line": 363,
+      "line": 362,
       "column": 54,
       "code": "TS2345",
       "message": "Argument of type 'Records<FieldSet>' is not assignable to parameter of type 'any[]'.",
       "type": "error"
     },
     {
+      "filePath": "app/api/guilds/route.ts",
+      "line": 45,
+      "column": 11,
+      "code": "TS2322",
+      "message": "Type '{ guildId: string | number | boolean | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]; guildName: string; createdAt: string; primaryLocation: string; ... 11 more ...; color: string; }[]' is not assignable to type 'Guild[]'.",
+      "type": "error"
+    },
+    {
+      "filePath": "app/api/lands/route.ts",
+      "line": 111,
+      "column": 38,
+      "code": "TS2538",
+      "message": "Type 'Collaborator' cannot be used as an index type.",
+      "type": "error"
+    },
+    {
+      "filePath": "app/api/lands/route.ts",
+      "line": 111,
+      "column": 38,
+      "code": "TS2538",
+      "message": "Type 'readonly Attachment[]' cannot be used as an index type.",
+      "type": "error"
+    },
+    {
+      "filePath": "app/api/lands/route.ts",
+      "line": 111,
+      "column": 38,
+      "code": "TS2538",
+      "message": "Type 'readonly Collaborator[]' cannot be used as an index type.",
+      "type": "error"
+    },
+    {
+      "filePath": "app/api/lands/route.ts",
+      "line": 111,
+      "column": 38,
+      "code": "TS2538",
+      "message": "Type 'readonly string[]' cannot be used as an index type.",
+      "type": "error"
+    },
+    {
+      "filePath": "app/api/lands/route.ts",
+      "line": 111,
+      "column": 38,
+      "code": "TS2538",
+      "message": "Type 'true' cannot be used as an index type.",
+      "type": "error"
+    },
+    {
+      "filePath": "app/api/relevancies/building-operator/route.ts",
+      "line": 38,
+      "column": 33,
+      "code": "TS2538",
+      "message": "Type 'string[]' cannot be used as an index type.",
+      "type": "error"
+    },
+    {
+      "filePath": "app/api/relevancies/building-operator/route.ts",
+      "line": 39,
+      "column": 30,
+      "code": "TS2538",
+      "message": "Type 'string[]' cannot be used as an index type.",
+      "type": "error"
+    },
+    {
+      "filePath": "app/api/relevancies/building-operator/route.ts",
+      "line": 43,
+      "column": 28,
+      "code": "TS2538",
+      "message": "Type 'string[]' cannot be used as an index type.",
+      "type": "error"
+    },
+    {
+      "filePath": "app/api/relevancies/building-ownership/route.ts",
+      "line": 75,
+      "column": 33,
+      "code": "TS2538",
+      "message": "Type 'string[]' cannot be used as an index type.",
+      "type": "error"
+    },
+    {
+      "filePath": "app/api/relevancies/building-ownership/route.ts",
+      "line": 76,
+      "column": 30,
+      "code": "TS2538",
+      "message": "Type 'string[]' cannot be used as an index type.",
+      "type": "error"
+    },
+    {
+      "filePath": "app/api/relevancies/building-ownership/route.ts",
+      "line": 81,
+      "column": 28,
+      "code": "TS2538",
+      "message": "Type 'string[]' cannot be used as an index type.",
+      "type": "error"
+    },
+    {
+      "filePath": "app/api/relevancies/guild-member/route.ts",
+      "line": 4,
+      "column": 10,
+      "code": "TS2459",
+      "message": "Module '\"@/lib/services/RelevancyService\"' declares 'RelevancyScore' locally, but it is not exported.",
+      "type": "error"
+    },
+    {
+      "filePath": "app/api/relevancies/route.ts",
+      "line": 148,
+      "column": 73,
+      "code": "TS2345",
+      "message": "Argument of type 'string | true | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]' is not assignable to parameter of type 'string'.",
+      "type": "error"
+    },
+    {
+      "filePath": "app/api/relevancies/route.ts",
+      "line": 149,
+      "column": 73,
+      "code": "TS2345",
+      "message": "Argument of type 'string | true | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]' is not assignable to parameter of type 'string'.",
+      "type": "error"
+    },
+    {
+      "filePath": "app/api/relevancies/same-land-neighbor/route.ts",
+      "line": 4,
+      "column": 10,
+      "code": "TS2459",
+      "message": "Module '\"@/lib/services/RelevancyService\"' declares 'RelevancyScore' locally, but it is not exported.",
+      "type": "error"
+    },
+    {
+      "filePath": "app/page.tsx",
+      "line": 487,
+      "column": 16,
+      "code": "TS2339",
+      "message": "Property 'off' does not exist on type 'EventBus'.",
+      "type": "error"
+    },
+    {
+      "filePath": "app/page.tsx",
+      "line": 601,
+      "column": 16,
+      "code": "TS2367",
+      "message": "This comparison appears to be unintentional because the types '\"buildings\" | \"transport\" | \"resources\" | \"contracts\" | \"loans\"' and '\"citizens\"' have no overlap.",
+      "type": "error"
+    },
+    {
       "filePath": "components/PolygonViewer/IsometricViewer.tsx",
-      "line": 315,
+      "line": 319,
       "column": 12,
       "code": "TS2304",
       "message": "Cannot find name 'citizenAnimationService'.",
@@ -22,7 +166,7 @@
     },
     {
       "filePath": "components/PolygonViewer/IsometricViewer.tsx",
-      "line": 1911,
+      "line": 1915,
       "column": 9,
       "code": "TS2353",
       "message": "Object literal may only specify known properties, and 'setHoveredCitizen' does not exist in type '{ setMousePosition: (position: { x: number; y: number; }) => void; setSelectedPolygonId: (id: string) => void; setShowLandDetailsPanel: (show: boolean) => void; setSelectedBuildingId: (id: string) => void; ... 11 more ...; handleWaterRouteClick?: (point: { ...; }, isWaterPoint: boolean, waterPointId?: string) => voi...'.",
@@ -30,63 +174,71 @@
     },
     {
       "filePath": "lib/services/CitizenRenderService.ts",
-      "line": 45,
+      "line": 47,
       "column": 23,
       "code": "TS2339",
-      "message": "Property 'position' does not exist on type '{ id: string; firstName: string; lastName: string; socialClass: string; imageUrl: string; description: string; username: string; isAi: boolean; ducats: number; createdat: string; worksFor: string; ... 9 more ...; work: string; }'.",
+      "message": "Property 'position' does not exist on type '{ id: string; firstName: string; lastName: string; socialClass: string; imageUrl: string; description: string; username: string; isAi: boolean; ducats: number; createdat: string; worksFor: string; ... 11 more ...; corePersonality: string[]; }'.",
       "type": "error"
     },
     {
       "filePath": "lib/services/CitizenRenderService.ts",
-      "line": 50,
+      "line": 52,
       "column": 23,
       "code": "TS2339",
-      "message": "Property 'position' does not exist on type '{ id: string; firstName: string; lastName: string; socialClass: string; imageUrl: string; description: string; username: string; isAi: boolean; ducats: number; createdat: string; worksFor: string; ... 9 more ...; work: string; }'.",
+      "message": "Property 'position' does not exist on type '{ id: string; firstName: string; lastName: string; socialClass: string; imageUrl: string; description: string; username: string; isAi: boolean; ducats: number; createdat: string; worksFor: string; ... 11 more ...; corePersonality: string[]; }'.",
       "type": "error"
     },
     {
       "filePath": "lib/services/CitizenRenderService.ts",
-      "line": 53,
+      "line": 55,
       "column": 21,
       "code": "TS2339",
-      "message": "Property 'position' does not exist on type '{ id: string; firstName: string; lastName: string; socialClass: string; imageUrl: string; description: string; username: string; isAi: boolean; ducats: number; createdat: string; worksFor: string; ... 9 more ...; work: string; }'.",
+      "message": "Property 'position' does not exist on type '{ id: string; firstName: string; lastName: string; socialClass: string; imageUrl: string; description: string; username: string; isAi: boolean; ducats: number; createdat: string; worksFor: string; ... 11 more ...; corePersonality: string[]; }'.",
       "type": "error"
     },
     {
       "filePath": "lib/services/CitizenRenderService.ts",
-      "line": 56,
+      "line": 58,
       "column": 19,
       "code": "TS2339",
-      "message": "Property 'position' does not exist on type '{ id: string; firstName: string; lastName: string; socialClass: string; imageUrl: string; description: string; username: string; isAi: boolean; ducats: number; createdat: string; worksFor: string; ... 9 more ...; work: string; }'.",
+      "message": "Property 'position' does not exist on type '{ id: string; firstName: string; lastName: string; socialClass: string; imageUrl: string; description: string; username: string; isAi: boolean; ducats: number; createdat: string; worksFor: string; ... 11 more ...; corePersonality: string[]; }'.",
       "type": "error"
     },
     {
       "filePath": "lib/services/CitizenRenderService.ts",
-      "line": 62,
+      "line": 64,
       "column": 21,
       "code": "TS2339",
-      "message": "Property 'workplace' does not exist on type '{ id: string; firstName: string; lastName: string; socialClass: string; imageUrl: string; description: string; username: string; isAi: boolean; ducats: number; createdat: string; worksFor: string; ... 9 more ...; work: string; }'.",
+      "message": "Property 'workplace' does not exist on type '{ id: string; firstName: string; lastName: string; socialClass: string; imageUrl: string; description: string; username: string; isAi: boolean; ducats: number; createdat: string; worksFor: string; ... 11 more ...; corePersonality: string[]; }'.",
       "type": "error"
     },
     {
       "filePath": "lib/services/CitizenRenderService.ts",
-      "line": 67,
+      "line": 69,
       "column": 21,
       "code": "TS2339",
-      "message": "Property 'workplace' does not exist on type '{ id: string; firstName: string; lastName: string; socialClass: string; imageUrl: string; description: string; username: string; isAi: boolean; ducats: number; createdat: string; worksFor: string; ... 9 more ...; work: string; }'.",
+      "message": "Property 'workplace' does not exist on type '{ id: string; firstName: string; lastName: string; socialClass: string; imageUrl: string; description: string; username: string; isAi: boolean; ducats: number; createdat: string; worksFor: string; ... 11 more ...; corePersonality: string[]; }'.",
       "type": "error"
     },
     {
       "filePath": "lib/services/CitizenRenderService.ts",
-      "line": 70,
+      "line": 72,
       "column": 19,
       "code": "TS2339",
-      "message": "Property 'workplace' does not exist on type '{ id: string; firstName: string; lastName: string; socialClass: string; imageUrl: string; description: string; username: string; isAi: boolean; ducats: number; createdat: string; worksFor: string; ... 9 more ...; work: string; }'.",
+      "message": "Property 'workplace' does not exist on type '{ id: string; firstName: string; lastName: string; socialClass: string; imageUrl: string; description: string; username: string; isAi: boolean; ducats: number; createdat: string; worksFor: string; ... 11 more ...; corePersonality: string[]; }'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/services/ProblemService.ts",
+      "line": 634,
+      "column": 13,
+      "code": "TS2353",
+      "message": "Object literal may only specify known properties, and 'position' does not exist in type 'Problem'.",
       "type": "error"
     },
     {
       "filePath": "lib/services/RelevancyService.ts",
-      "line": 436,
+      "line": 471,
       "column": 18,
       "code": "TS2551",
       "message": "Property 'BuildingPointsCount' does not exist on type 'LandData'. Did you mean 'buildingPoints'?",
@@ -94,7 +246,7 @@
     },
     {
       "filePath": "lib/services/RelevancyService.ts",
-      "line": 438,
+      "line": 473,
       "column": 38,
       "code": "TS2551",
       "message": "Property 'BuildingPointsCount' does not exist on type 'LandData'. Did you mean 'buildingPoints'?",
@@ -102,7 +254,7 @@
     },
     {
       "filePath": "lib/services/RelevancyService.ts",
-      "line": 439,
+      "line": 474,
       "column": 25,
       "code": "TS2551",
       "message": "Property 'buildingPointsCount' does not exist on type 'LandData'. Did you mean 'buildingPoints'?",
@@ -110,20 +262,76 @@
     },
     {
       "filePath": "lib/services/RelevancyService.ts",
-      "line": 441,
+      "line": 476,
       "column": 38,
       "code": "TS2551",
       "message": "Property 'buildingPointsCount' does not exist on type 'LandData'. Did you mean 'buildingPoints'?",
       "type": "error"
+    },
+    {
+      "filePath": "lib/services/RelevancyService.ts",
+      "line": 698,
+      "column": 9,
+      "code": "TS2740",
+      "message": "Type '{}' is missing the following properties from type 'RelevancyScore[]': length, pop, push, concat, and 35 more.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/services/RelevancyService.ts",
+      "line": 708,
+      "column": 9,
+      "code": "TS2740",
+      "message": "Type '{}' is missing the following properties from type 'RelevancyScore[]': length, pop, push, concat, and 35 more.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/services/RelevancyService.ts",
+      "line": 716,
+      "column": 9,
+      "code": "TS2740",
+      "message": "Type '{}' is missing the following properties from type 'RelevancyScore[]': length, pop, push, concat, and 35 more.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/services/RelevancyService.ts",
+      "line": 727,
+      "column": 30,
+      "code": "TS2339",
+      "message": "Property 'landId' does not exist on type 'LandData'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/services/RelevancyService.ts",
+      "line": 729,
+      "column": 97,
+      "code": "TS2339",
+      "message": "Property 'landId' does not exist on type 'LandData'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/services/RelevancyService.ts",
+      "line": 762,
+      "column": 132,
+      "code": "TS2339",
+      "message": "Property 'landId' does not exist on type 'LandData'.",
+      "type": "error"
+    },
+    {
+      "filePath": "lib/services/RelevancyService.ts",
+      "line": 1097,
+      "column": 26,
+      "code": "TS2339",
+      "message": "Property 'landId' does not exist on type 'LandData'.",
+      "type": "error"
     }
   ],
-  "rawOutputLines": 16,
+  "rawOutputLines": 48,
   "firstFewLines": [
-    "app/api/calculateRelevancies/route.ts(363,54): error TS2345: Argument of type 'Records<FieldSet>' is not assignable to parameter of type 'any[]'.\r",
+    "app/api/calculateRelevancies/route.ts(362,54): error TS2345: Argument of type 'Records<FieldSet>' is not assignable to parameter of type 'any[]'.\r",
     "  The type 'Records<FieldSet>' is 'readonly' and cannot be assigned to the mutable type 'any[]'.\r",
-    "components/PolygonViewer/IsometricViewer.tsx(315,12): error TS2304: Cannot find name 'citizenAnimationService'.\r",
-    "components/PolygonViewer/IsometricViewer.tsx(1911,9): error TS2353: Object literal may only specify known properties, and 'setHoveredCitizen' does not exist in type '{ setMousePosition: (position: { x: number; y: number; }) => void; setSelectedPolygonId: (id: string) => void; setShowLandDetailsPanel: (show: boolean) => void; setSelectedBuildingId: (id: string) => void; ... 11 more ...; handleWaterRouteClick?: (point: { ...; }, isWaterPoint: boolean, waterPointId?: string) => voi...'.\r",
-    "lib/services/CitizenRenderService.ts(45,23): error TS2339: Property 'position' does not exist on type '{ id: string; firstName: string; lastName: string; socialClass: string; imageUrl: string; description: string; username: string; isAi: boolean; ducats: number; createdat: string; worksFor: string; ... 9 more ...; work: string; }'.\r"
+    "app/api/guilds/route.ts(45,11): error TS2322: Type '{ guildId: string | number | boolean | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]; guildName: string; createdAt: string; primaryLocation: string; ... 11 more ...; color: string; }[]' is not assignable to type 'Guild[]'.\r",
+    "  Type '{ guildId: string | number | boolean | Collaborator | readonly Collaborator[] | readonly string[] | readonly Attachment[]; guildName: string; createdAt: string; primaryLocation: string; ... 11 more ...; color: string; }' is not assignable to type 'Guild'.\r",
+    "    Types of property 'guildId' are incompatible.\r"
   ],
   "compilerExitCode": 1
 }

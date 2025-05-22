@@ -27,7 +27,7 @@ from pyairtable import Api, Table
 from dotenv import load_dotenv
 
 # Import our citizen generator module
-from citizen_generator import generate_citizen
+from generate_citizen import generate_citizen
 
 # Set up logging
 logging.basicConfig(

@@ -20,8 +20,8 @@ colorama.init(autoreset=True)
 OWNER_CITIZEN = "ConsiglioDeiDieci"
 PUBLIC_WELL_TYPE = "public_well"
 PUBLIC_WELL_CATEGORY = "passive" # Based on public_well.json
-DOCK_TYPE = "dock" # Assuming 'dock' is the type for public docks
-DOCK_CATEGORY = "transport" # Based on typical dock category
+DOCK_TYPE = "public_dock" # Assuming 'dock' is the type for public docks
+DOCK_CATEGORY = "business" # Based on typical dock category
 
 # Logging functions
 def log_header(message: str):
