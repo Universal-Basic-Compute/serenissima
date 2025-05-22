@@ -64,7 +64,9 @@ export class RenderService {
     typeIndicator: string,
     isSelected: boolean = false,
     shape: 'square' | 'circle' | 'triangle' = 'square',
-    isHovered: boolean = false
+    isHovered: boolean = false,
+    rotation?: number, // Add rotation parameter
+    buildingType?: string // Add buildingType to determine if it's a bridge
   ): void {
     // Apply different styles based on state
     if (isSelected) {
@@ -86,28 +88,45 @@ export class RenderService {
     
     // Draw the appropriate shape based on the building's point type
     ctx.beginPath();
-    
-    if (shape === 'circle') {
-      // Draw circle for canal points
-      ctx.arc(x, y, size/2, 0, Math.PI * 2);
-    } else if (shape === 'triangle') {
-      // Draw triangle for bridge points
-      const halfSize = size/2;
-      ctx.moveTo(x, y - halfSize);
-      ctx.lineTo(x - halfSize, y + halfSize);
-      ctx.lineTo(x + halfSize, y + halfSize);
-      ctx.closePath();
+
+    const isBridge = buildingType && buildingType.toLowerCase().includes('bridge');
+
+    if (isBridge && rotation !== undefined) {
+      const bridgeWidth = size * 0.8; // Keep the same width as before
+      const bridgeHeight = size * 0.08; // Reduce height for shorter bridges
+
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rotation);
+      ctx.rect(-bridgeWidth / 2, -bridgeHeight / 2, bridgeWidth, bridgeHeight);
+      ctx.fill();
+      ctx.stroke(); // Stroke needs to be inside save/restore if rotation is applied
+      ctx.restore();
     } else {
-      // Draw square for regular building points (default)
-      ctx.rect(
-        x - size/2, 
-        y - size/2, 
-        size, 
-        size
-      );
+      if (shape === 'circle') {
+        // Draw circle for canal points
+        ctx.arc(x, y, size / 2, 0, Math.PI * 2);
+      } else if (shape === 'triangle') {
+        // Draw triangle for bridge points
+        const halfSize = size / 2;
+        ctx.moveTo(x, y - halfSize);
+        ctx.lineTo(x - halfSize, y + halfSize);
+        ctx.lineTo(x + halfSize, y + halfSize);
+        ctx.closePath();
+      } else {
+        // Draw square for regular building points (default)
+        ctx.rect(
+          x - size / 2,
+          y - size / 2,
+          size,
+          size
+        );
+      }
+      ctx.fill();
+      ctx.stroke(); // Stroke for non-bridge shapes
     }
     
-    ctx.fill();
+    // ctx.fill(); // Fill was here, moved into conditional blocks
     ctx.stroke();
     
     // Add a small indicator for the building type with fixed font size
@@ -623,9 +642,10 @@ export class RenderService {
         // Draw the building
         const squareSize = Math.max(size.width, size.depth) * scale * 0.6;
         const typeIndicator = building.type.charAt(0).toUpperCase();
-          
+        
+        // Pass rotation and building type to drawBuilding
         this.drawBuilding(
-          ctx, screen.x, screen.y, squareSize, color, typeIndicator, isSelected, buildingShape, isHovered
+          ctx, screen.x, screen.y, squareSize, color, typeIndicator, isSelected, buildingShape, isHovered, building.rotation, building.type
         );
       } catch (error) {
         console.error(`Error drawing building ${building?.id || 'unknown'}:`, error);

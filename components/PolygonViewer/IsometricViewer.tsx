@@ -2572,7 +2572,7 @@ number => {
     }
     
     // Draw buildings in all views, not just buildings view
-    const filteredBuildings = filterBuildings();
+    const filteredBuildings = filterBuildings(); // This filter is for 'city' vs 'me'
     if (filteredBuildings.length > 0) {
       // Count how many buildings will be drawn
       const buildingsWithValidPosition = filteredBuildings.filter(building => {
@@ -2598,228 +2598,10 @@ number => {
       //console.log(`%c DRAWING BUILDINGS: ${buildingsWithValidPosition.length} of ${filteredBuildings.length} buildings have valid positions for drawing`, 'background: #9C27B0; color: white; padding: 4px 8px; font-weight: bold; border-radius: 4px;');
       
       // Get current citizen identifier
-      const currentCitizen = getCurrentCitizenIdentifier();
+      const currentCitizen = getCurrentCitizenIdentifier(); // This is fine here
       
-      filteredBuildings.forEach(building => {
-        if (!building.position) return;
-        
-        // Use cached position if available
-        let x, y;
-        if (buildingPositionsCache[building.id]) {
-          // Use the pre-calculated position from cache
-          x = buildingPositionsCache[building.id].x;
-          y = buildingPositionsCache[building.id].y;
-        } else {
-          // Fallback to calculating position if not in cache
-          let position;
-          if (typeof building.position === 'string') {
-            try {
-              position = JSON.parse(building.position);
-            } catch (e) {
-              return;
-            }
-          } else {
-            position = building.position;
-          }
-          
-          // Convert lat/lng to isometric coordinates
-          if ('lat' in position && 'lng' in position) {
-            // Normalize coordinates relative to center of Venice
-            // Scale factor adjusted to match the map
-            x = (position.lng - 12.3326) * 20000;
-            y = (position.lat - 45.4371) * 20000; // Remove the 0.7 factor
-          } else if ('x' in position && 'z' in position) {
-            x = position.x;
-            y = position.z;
-          } else {
-            return;
-          }
-          
-          // Store in cache for future use
-          if (initialPositionCalculated) {
-            setBuildingPositionsCache(prev => ({
-              ...prev,
-              [building.id]: { x, y }
-            }));
-          }
-        }
-        
-        const isoPos = {
-          x: calculateIsoX(x, y, scale, offset, canvas.width),
-          y: calculateIsoY(x, y, scale, offset, canvas.height)
-        };
-        
-        // Get building size based on type
-        const size = getBuildingSize(building.type);
-        
-        // Determine color based on mode
-        let color;
-        if (buildingColorMode === 'type') {
-          color = getBuildingColor(building.type);
-        } else {
-          // Use owner color
-          color = getBuildingOwnerColor(building.owner || 'unknown');
-        }
-        
-        // Determine if this building is selected
-        const isSelected = selectedBuildingId !== null && selectedBuildingId === building.id;
-        
-        // Determine if this building is owned by the current citizen
-        const isOwnedByCurrentCitizen = building.owner === currentCitizen;
-        
-        // Draw simple square for building with select state
-        const squareSize = Math.max(size.width, size.depth) * scale * 0.6;
-        
-        
-        // Apply different styles based on category and ownership
-        ctx.fillStyle = isSelected ? lightenColor(color, 35) : color;
-
-        // Get the building category
-        const buildingCategory = building.category || 'unknown';
-
-        // Get the border color based on category
-        const borderColor = getBuildingCategoryColor(buildingCategory);
-
-        // Set border color and width
-        ctx.strokeStyle = borderColor;
-
-        // Make the border thicker for buildings owned by the current user
-        ctx.lineWidth = isOwnedByCurrentCitizen ? 2.5 : 1;
-
-        // If selected, make the border even thicker and use a highlight color
-        if (isSelected) {
-          ctx.lineWidth = 3.5;
-          ctx.strokeStyle = '#FF3300'; // Bright red-orange for selected
-        }
-        
-        // Check if this is a bridge
-        const isBridge = building.type.toLowerCase().includes('bridge');
-        
-        if (isBridge) {
-          // Make the bridge rectangle smaller in length but keep the width
-          const bridgeWidth = squareSize * 0.8; // Keep the same width
-          const bridgeHeight = squareSize * 0.08; // Reduce height for shorter bridges
-          
-          // Use the orientation from the bridge data directly
-          let angle = 0;
-          
-          // Debug log to check if we're reaching this code
-          console.log(`Processing bridge ${building.id}, has orientation: ${building.orientation !== undefined}`);
-          
-          if (building.orientation !== undefined) {
-            // Use the orientation value directly from the API
-            angle = building.orientation;
-            console.log(`Bridge ${building.id} orientation: ${angle} radians (${angle * 180 / Math.PI} degrees)`);
-            
-            // Save the current context state
-            ctx.save();
-            
-            // Translate to the bridge position
-            ctx.translate(isoPos.x, isoPos.y);
-            
-            // Rotate the context using the orientation value directly
-            ctx.rotate(angle);
-            
-            // Draw the rectangle centered at origin (0,0)
-            ctx.beginPath();
-            ctx.rect(
-              -bridgeWidth/2, 
-              -bridgeHeight/2, 
-              bridgeWidth, 
-              bridgeHeight
-            );
-            ctx.fill();
-            ctx.stroke();
-            
-            // Restore the context state
-            ctx.restore();
-          } else {
-            // Fallback to calculating based on polygon center if orientation is not provided
-            let polygonCenter = { x: 0, y: 0 };
-            let foundPolygon = false;
-            
-            // Try to find which polygon contains this bridge
-            for (const poly of polygonsToRender) {
-              if (poly.polygon.id === building.land_id) {
-                // Use the polygon's center
-                polygonCenter.x = poly.centerX;
-                polygonCenter.y = poly.centerY;
-                foundPolygon = true;
-                break;
-              }
-            }
-            
-            if (foundPolygon) {
-              // Calculate angle from bridge to polygon center
-              const dx = polygonCenter.x - isoPos.x;
-              const dy = polygonCenter.y - isoPos.y;
-              angle = Math.atan2(dy, dx) + Math.PI/2; // Add 90 degrees to make it perpendicular
-              
-              // Save the current context state
-              ctx.save();
-              
-              // Translate to the bridge position
-              ctx.translate(isoPos.x, isoPos.y);
-              
-              // Rotate the context
-              ctx.rotate(angle);
-              
-              // Draw the rectangle centered at origin (0,0)
-              ctx.beginPath();
-              ctx.rect(
-                -bridgeWidth/2, 
-                -bridgeHeight/2, 
-                bridgeWidth, 
-                bridgeHeight
-              );
-              ctx.fill();
-              ctx.stroke();
-              
-              // Restore the context state
-              ctx.restore();
-            } else {
-              // If we couldn't find the polygon, draw a default horizontal bridge
-              ctx.beginPath();
-              ctx.rect(
-                isoPos.x - bridgeWidth/2, 
-                isoPos.y - bridgeHeight/2, 
-                bridgeWidth, 
-                bridgeHeight
-              );
-              ctx.fill();
-              ctx.stroke();
-            }
-          }
-        } else {
-          // Draw square for non-bridge buildings
-          ctx.beginPath();
-          ctx.rect(
-            isoPos.x - squareSize/2, 
-            isoPos.y - squareSize/2, 
-            squareSize, 
-            squareSize
-          );
-          ctx.fill();
-          ctx.stroke();
-          
-          // Add a small indicator for the building type with fixed font size
-          // Determine text color based on building color darkness
-          const isDark = isColorDark(color);
-          ctx.fillStyle = isDark ? '#FFFFFF' : '#000000'; // White text for dark backgrounds, black for light
-          ctx.font = `10px Arial`;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          // Use first letter of building type as an indicator
-          const typeIndicator = building.type.charAt(0).toUpperCase();
-          ctx.fillText(
-            typeIndicator, 
-            isoPos.x, 
-            isoPos.y
-          );
-        }
-      });
-      
-      //console.log(`%c BUILDINGS DRAWN: Completed drawing ${buildingsWithValidPosition.length} buildings`, 'background: #9C27B0; color: white; padding: 4px 8px; font-weight: bold; border-radius: 4px;');
+      // The detailed drawing loop for filteredBuildings is removed.
+      // renderService.drawBuildings will handle all buildings, including bridges.
     }
     
     // This section is now handled above with consistent styling across all views
@@ -3079,27 +2861,21 @@ number => {
     }
 
     // Draw buildings using RenderService, incorporating currentHoverState
-    if (buildings.length > 0) {
-      // Filter out bridges, as they are handled by the custom drawing loop above
-      // to ensure their specific appearance (rotated thin rectangle) is preserved.
-      const nonBridgeBuildings = buildings.filter(building => 
-        !(building.type && building.type.toLowerCase().includes('bridge'))
-      );
-
-      if (nonBridgeBuildings.length > 0) {
-        renderService.drawBuildings(ctx, nonBridgeBuildings, scale, offset, canvas.width, canvas.height, {
-          selectedBuildingId,
-          hoveredBuildingId: currentHoverState.type === 'building' ? currentHoverState.id : null,
-          buildingPositionsCache,
-          buildingColorMode,
-          getBuildingColor,
-          getBuildingOwnerColor,
-          getBuildingCategoryColor,
-          isColorDark,
-          getCurrentCitizenIdentifier,
-          polygonsToRender // Pass polygonsToRender for bridge orientation calculation
-        });
-      }
+    // Now, pass all filteredBuildings (which could be all city buildings or just 'my' buildings)
+    // to renderService.drawBuildings. The service will handle bridge-specific rendering.
+    if (filteredBuildings.length > 0) {
+      renderService.drawBuildings(ctx, filteredBuildings, scale, offset, canvas.width, canvas.height, {
+        selectedBuildingId,
+        hoveredBuildingId: currentHoverState.type === 'building' ? currentHoverState.id : null,
+        buildingPositionsCache,
+        buildingColorMode,
+        getBuildingColor, // This will be used by renderService
+        getBuildingOwnerColor, // This will be used by renderService
+        getBuildingCategoryColor, // This will be used by renderService
+        isColorDark, // This will be used by renderService
+        getCurrentCitizenIdentifier, // This will be used by renderService
+        polygonsToRender // Pass polygonsToRender for bridge orientation calculation (if still needed by service)
+      });
     }
     
     // Draw the calculated transport path if available
