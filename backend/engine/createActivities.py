@@ -247,17 +247,19 @@ def find_path_between_buildings(from_building: Dict, to_building: Dict) -> Optio
 def create_resource_fetching_activity(tables, citizen: Dict, contract: Dict, from_building: Dict, to_building: Dict, path: Dict) -> Optional[Dict]:
     """Create a resource fetching activity based on a contract."""
     try:
-        # Always use CitizenId from fields, not the Airtable record ID
-        citizen_id = citizen['fields'].get('CitizenId')
-        
-        # Get the citizen's username
-        citizen_username = citizen['fields'].get('Username', citizen_id)
-        
-        # If CitizenId is missing, log an error and return
-        if not citizen_id:
-            log.error(f"Missing CitizenId in citizen record: {citizen['id']}")
-            return None
-        
+        citizen_airtable_record_id = citizen['id']
+        citizen_custom_id = citizen['fields'].get('CitizenId') # For ActivityId generation if needed
+        citizen_username = citizen['fields'].get('Username')
+
+        if not citizen_username: # Fallback if username is somehow missing
+            citizen_username = citizen_custom_id
+        if not citizen_custom_id: # Should not happen if process_citizen_activity validates
+             log.error(f"Missing CitizenId for citizen record {citizen_airtable_record_id}")
+             return None
+        if not citizen_username: # Should not happen
+             log.error(f"Missing Username for citizen record {citizen_airtable_record_id}")
+             return None
+
         contract_id = contract['id']
         from_building_id = from_building['id']
         to_building_id = to_building['id']
@@ -276,12 +278,12 @@ def create_resource_fetching_activity(tables, citizen: Dict, contract: Dict, fro
         end_time = now + datetime.timedelta(minutes=travel_time_minutes)
         
         # Create the activity
-        activity_id = f"fetch_{citizen_id}_{uuid.uuid4()}"
+        activity_id_str = f"fetch_{citizen_custom_id}_{uuid.uuid4()}" # Use custom_id for activity string
         
-        activity = tables['activities'].create({
-            "ActivityId": activity_id,
+        activity_payload = {
+            "ActivityId": activity_id_str,
             "Type": "fetch_resource",
-            "Citizen": citizen_username,
+            "Citizen": citizen_username, # Username for Citizen field
             "ContractId": contract_id,
             "FromBuilding": from_building_id,
             "ToBuilding": to_building_id,
@@ -292,28 +294,42 @@ def create_resource_fetching_activity(tables, citizen: Dict, contract: Dict, fro
             "EndDate": end_time.isoformat(),
             "Path": json.dumps(path.get('path', [])),
             "Notes": f"🚚 Fetching **{amount:,.0f}** units of **{resource_type}** from **{from_building['fields'].get('Name', from_building_id)}** to **{to_building['fields'].get('Name', to_building_id)}**"
-        })
+        }
         
-        log.info(f"Created resource fetching activity: {activity['id']}")
-        return activity
+        activity = tables['activities'].create(activity_payload)
+        
+        if activity and activity.get('id'):
+            log.info(f"Created resource fetching activity: {activity['id']}")
+            try:
+                updated_at_ts = datetime.datetime.now(pytz.UTC).isoformat()
+                tables['citizens'].update(citizen_airtable_record_id, {'UpdatedAt': updated_at_ts})
+                log.info(f"Updated 'UpdatedAt' for citizen record {citizen_airtable_record_id}")
+            except Exception as e_update:
+                log.error(f"Error updating 'UpdatedAt' for citizen record {citizen_airtable_record_id}: {e_update}")
+            return activity
+        else:
+            log.error(f"Failed to create resource fetching activity for {citizen_username}")
+            return None
     except Exception as e:
-        log.error(f"Error creating resource fetching activity: {e}")
+        log.error(f"Error creating resource fetching activity for {citizen_username}: {e}")
         return None
 
 def create_production_activity(tables, citizen: Dict, building: Dict, recipe: Dict) -> Optional[Dict]:
     """Create a production activity based on a recipe."""
     try:
-        # Always use CitizenId from fields, not the Airtable record ID
-        citizen_id = citizen['fields'].get('CitizenId')
-        
-        # Get the citizen's username
-        citizen_username = citizen['fields'].get('Username', citizen_id)
-        
-        # If CitizenId is missing, log an error and return
-        if not citizen_id:
-            log.error(f"Missing CitizenId in citizen record: {citizen['id']}")
-            return None
-        
+        citizen_airtable_record_id = citizen['id']
+        citizen_custom_id = citizen['fields'].get('CitizenId') # For ActivityId generation if needed
+        citizen_username = citizen['fields'].get('Username')
+
+        if not citizen_username: # Fallback if username is somehow missing
+            citizen_username = citizen_custom_id
+        if not citizen_custom_id: # Should not happen if process_citizen_activity validates
+             log.error(f"Missing CitizenId for citizen record {citizen_airtable_record_id}")
+             return None
+        if not citizen_username: # Should not happen
+             log.error(f"Missing Username for citizen record {citizen_airtable_record_id}")
+             return None
+
         building_id = building['id']
         
         # Extract recipe details
@@ -329,12 +345,12 @@ def create_production_activity(tables, citizen: Dict, building: Dict, recipe: Di
         output_desc = ", ".join([f"**{amount:,.0f}** **{resource}**" for resource, amount in outputs.items()])
         
         # Create the activity
-        activity_id = f"produce_{citizen_id}_{uuid.uuid4()}"
+        activity_id_str = f"produce_{citizen_custom_id}_{uuid.uuid4()}" # Use custom_id for activity string
         
-        activity = tables['activities'].create({
-            "ActivityId": activity_id,
+        activity_payload = {
+            "ActivityId": activity_id_str,
             "Type": "production",
-            "Citizen": citizen_username,
+            "Citizen": citizen_username, # Username for Citizen field
             "FromBuilding": building_id,
             "ToBuilding": building_id,  # Same building for production
             "CreatedAt": now.isoformat(),
@@ -343,12 +359,23 @@ def create_production_activity(tables, citizen: Dict, building: Dict, recipe: Di
             "Notes": f"⚒️ Producing {output_desc} from {input_desc}",
             "RecipeInputs": json.dumps(inputs),
             "RecipeOutputs": json.dumps(outputs)
-        })
+        }
+        activity = tables['activities'].create(activity_payload)
         
-        log.info(f"Created production activity: {activity['id']}")
-        return activity
+        if activity and activity.get('id'):
+            log.info(f"Created production activity: {activity['id']}")
+            try:
+                updated_at_ts = datetime.datetime.now(pytz.UTC).isoformat()
+                tables['citizens'].update(citizen_airtable_record_id, {'UpdatedAt': updated_at_ts})
+                log.info(f"Updated 'UpdatedAt' for citizen record {citizen_airtable_record_id}")
+            except Exception as e_update:
+                log.error(f"Error updating 'UpdatedAt' for citizen record {citizen_airtable_record_id}: {e_update}")
+            return activity
+        else:
+            log.error(f"Failed to create production activity for {citizen_username}")
+            return None
     except Exception as e:
-        log.error(f"Error creating production activity: {e}")
+        log.error(f"Error creating production activity for {citizen_username}: {e}")
         return None
 
 def get_idle_citizens(tables) -> List[Dict]:
@@ -475,21 +502,12 @@ def get_path_to_home(citizen_position: Dict, home_position: Dict) -> Optional[Di
         log.error(f"Error calling transport API: {e}")
         return None
 
-def create_rest_activity(tables, citizen_id: str, citizen_username: str, home_id: str) -> Optional[Dict]:
+def create_rest_activity(tables, citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, home_id: str) -> Optional[Dict]:
     """Create a rest activity for a citizen at their home."""
-    log.info(f"Creating rest activity for citizen {citizen_id} at home {home_id}")
+    log.info(f"Creating rest activity for citizen {citizen_username} (CustomID: {citizen_custom_id}) at home {home_id}")
     
     try:
-        # Check if citizen_id is valid
-        if not citizen_id:
-            log.error("Missing CitizenId for rest activity")
-            return None
-        
-        # If citizen_username is not provided, use citizen_id as fallback
-        if not citizen_username:
-            citizen_username = citizen_id
-            
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(pytz.UTC)
         
         # Calculate end time (next morning at 6 AM)
         venice_now = now.astimezone(VENICE_TIMEZONE)
@@ -506,39 +524,41 @@ def create_rest_activity(tables, citizen_id: str, citizen_username: str, home_id
         end_time_utc = end_time.astimezone(pytz.UTC)
         
         # Create the activity
-        activity = tables['activities'].create({
-            "ActivityId": f"rest_{citizen_id}_{int(time.time())}",
+        activity_payload = {
+            "ActivityId": f"rest_{citizen_custom_id}_{int(time.time())}",
             "Type": "rest",
             "Citizen": citizen_username,
             "FromBuilding": home_id,  # This should be BuildingId
             "ToBuilding": home_id,    # This should be BuildingId
             "CreatedAt": now.isoformat(),
             "StartDate": now.isoformat(),
-            "EndDate": end_time_utc.isoformat(),
+            "EndDate": end_time_utc.isoformat(), # Already UTC
             "Notes": "🌙 **Resting** at home for the night"
-        })
+        }
+        activity = tables['activities'].create(activity_payload)
         
-        log.info(f"Created rest activity: {activity['id']}")
-        return activity
+        if activity and activity.get('id'):
+            log.info(f"Created rest activity: {activity['id']}")
+            try:
+                updated_at_ts = datetime.datetime.now(pytz.UTC).isoformat()
+                tables['citizens'].update(citizen_airtable_id, {'UpdatedAt': updated_at_ts})
+                log.info(f"Updated 'UpdatedAt' for citizen record {citizen_airtable_id}")
+            except Exception as e_update:
+                log.error(f"Error updating 'UpdatedAt' for citizen record {citizen_airtable_id}: {e_update}")
+            return activity
+        else:
+            log.error(f"Failed to create rest activity for {citizen_username}")
+            return None
     except Exception as e:
-        log.error(f"Error creating rest activity: {e}")
+        log.error(f"Error creating rest activity for {citizen_username}: {e}")
         return None
 
-def create_goto_work_activity(tables, citizen_id: str, citizen_username: str, workplace_id: str, path_data: Dict) -> Optional[Dict]:
+def create_goto_work_activity(tables, citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, workplace_id: str, path_data: Dict) -> Optional[Dict]:
     """Create a goto_work activity for a citizen."""
-    log.info(f"Creating goto_work activity for citizen {citizen_id} to workplace {workplace_id}")
+    log.info(f"Creating goto_work activity for citizen {citizen_username} (CustomID: {citizen_custom_id}) to workplace {workplace_id}")
     
     try:
-        # Check if citizen_id is valid
-        if not citizen_id:
-            log.error("Missing CitizenId for goto_work activity")
-            return None
-            
-        # If citizen_username is not provided, use citizen_id as fallback
-        if not citizen_username:
-            citizen_username = citizen_id
-            
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(pytz.UTC)
         
         # Get timing information from path data
         start_date = path_data.get('timing', {}).get('startDate', now.isoformat())
@@ -553,39 +573,41 @@ def create_goto_work_activity(tables, citizen_id: str, citizen_username: str, wo
         path_json = json.dumps(path_data.get('path', []))
         
         # Create the activity
-        activity = tables['activities'].create({
-            "ActivityId": f"goto_work_{citizen_id}_{int(time.time())}",
+        activity_payload = {
+            "ActivityId": f"goto_work_{citizen_custom_id}_{int(time.time())}",
             "Type": "goto_work",
             "Citizen": citizen_username,
             "ToBuilding": workplace_id,  # This should be BuildingId
-            "CreatedAt": now.isoformat(),
-            "StartDate": start_date,
-            "EndDate": end_date,
+            "CreatedAt": now.isoformat(), # now is UTC
+            "StartDate": start_date, # Assuming path_data provides UTC timestamps
+            "EndDate": end_date,     # Assuming path_data provides UTC timestamps
             "Path": path_json,
             "Notes": "🏢 **Going to work**"
-        })
+        }
+        activity = tables['activities'].create(activity_payload)
         
-        log.info(f"Created goto_work activity: {activity['id']}")
-        return activity
+        if activity and activity.get('id'):
+            log.info(f"Created goto_work activity: {activity['id']}")
+            try:
+                updated_at_ts = datetime.datetime.now(pytz.UTC).isoformat()
+                tables['citizens'].update(citizen_airtable_id, {'UpdatedAt': updated_at_ts})
+                log.info(f"Updated 'UpdatedAt' for citizen record {citizen_airtable_id}")
+            except Exception as e_update:
+                log.error(f"Error updating 'UpdatedAt' for citizen record {citizen_airtable_id}: {e_update}")
+            return activity
+        else:
+            log.error(f"Failed to create goto_work activity for {citizen_username}")
+            return None
     except Exception as e:
-        log.error(f"Error creating goto_work activity: {e}")
+        log.error(f"Error creating goto_work activity for {citizen_username}: {e}")
         return None
 
-def create_goto_home_activity(tables, citizen_id: str, citizen_username: str, home_id: str, path_data: Dict) -> Optional[Dict]:
+def create_goto_home_activity(tables, citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, home_id: str, path_data: Dict) -> Optional[Dict]:
     """Create a goto_home activity for a citizen."""
-    log.info(f"Creating goto_home activity for citizen {citizen_id} to home {home_id}")
+    log.info(f"Creating goto_home activity for citizen {citizen_username} (CustomID: {citizen_custom_id}) to home {home_id}")
     
     try:
-        # Check if citizen_id is valid
-        if not citizen_id:
-            log.error("Missing CitizenId for goto_home activity")
-            return None
-            
-        # If citizen_username is not provided, use citizen_id as fallback
-        if not citizen_username:
-            citizen_username = citizen_id
-            
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(pytz.UTC)
         
         # Get timing information from path data
         start_date = path_data.get('timing', {}).get('startDate', now.isoformat())
@@ -600,77 +622,88 @@ def create_goto_home_activity(tables, citizen_id: str, citizen_username: str, ho
         path_json = json.dumps(path_data.get('path', []))
         
         # Create the activity
-        activity = tables['activities'].create({
-            "ActivityId": f"goto_home_{citizen_id}_{int(time.time())}",
+        activity_payload = {
+            "ActivityId": f"goto_home_{citizen_custom_id}_{int(time.time())}",
             "Type": "goto_home",
             "Citizen": citizen_username,
             "ToBuilding": home_id,  # This should be BuildingId
-            "CreatedAt": now.isoformat(),
-            "StartDate": start_date,
-            "EndDate": end_date,
+            "CreatedAt": now.isoformat(), # now is UTC
+            "StartDate": start_date, # Assuming path_data provides UTC timestamps
+            "EndDate": end_date,     # Assuming path_data provides UTC timestamps
             "Path": path_json,
             "Notes": "🏠 **Going home** for the night"
-        })
-        
-        log.info(f"Created goto_home activity: {activity['id']}")
-        return activity
+        }
+        activity = tables['activities'].create(activity_payload)
+
+        if activity and activity.get('id'):
+            log.info(f"Created goto_home activity: {activity['id']}")
+            try:
+                updated_at_ts = datetime.datetime.now(pytz.UTC).isoformat()
+                tables['citizens'].update(citizen_airtable_id, {'UpdatedAt': updated_at_ts})
+                log.info(f"Updated 'UpdatedAt' for citizen record {citizen_airtable_id}")
+            except Exception as e_update:
+                log.error(f"Error updating 'UpdatedAt' for citizen record {citizen_airtable_id}: {e_update}")
+            return activity
+        else:
+            log.error(f"Failed to create goto_home activity for {citizen_username}")
+            return None
     except Exception as e:
-        log.error(f"Error creating goto_home activity: {e}")
+        log.error(f"Error creating goto_home activity for {citizen_username}: {e}")
         return None
 
-def create_idle_activity(tables, citizen_id: str, citizen_username: str = None) -> Optional[Dict]:
+def create_idle_activity(tables, citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str) -> Optional[Dict]:
     """Create an idle activity for a citizen."""
-    log.info(f"Creating idle activity for citizen {citizen_id}")
+    log.info(f"Creating idle activity for citizen {citizen_username} (CustomID: {citizen_custom_id})")
     
     try:
-        # Check if citizen_id is valid
-        if not citizen_id:
-            log.error("Missing CitizenId for idle activity")
-            return None
-            
-        # If citizen_username is not provided, use citizen_id as fallback
-        if not citizen_username:
-            citizen_username = citizen_id
-            
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(pytz.UTC)
         end_time = now + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)
         
         # Create the activity
-        activity = tables['activities'].create({
-            "ActivityId": f"idle_{citizen_id}_{int(time.time())}",
+        activity_payload = {
+            "ActivityId": f"idle_{citizen_custom_id}_{int(time.time())}",
             "Type": "idle",
             "Citizen": citizen_username,
             "CreatedAt": now.isoformat(),
             "StartDate": now.isoformat(),
             "EndDate": end_time.isoformat(),
             "Notes": "⏳ **Idle activity** due to failed path finding or no home"
-        })
+        }
+        activity = tables['activities'].create(activity_payload)
         
-        log.info(f"Created idle activity: {activity['id']}")
-        return activity
+        if activity and activity.get('id'):
+            log.info(f"Created idle activity: {activity['id']}")
+            try:
+                updated_at_ts = datetime.datetime.now(pytz.UTC).isoformat()
+                tables['citizens'].update(citizen_airtable_id, {'UpdatedAt': updated_at_ts})
+                log.info(f"Updated 'UpdatedAt' for citizen record {citizen_airtable_id}")
+            except Exception as e_update:
+                log.error(f"Error updating 'UpdatedAt' for citizen record {citizen_airtable_id}: {e_update}")
+            return activity
+        else:
+            log.error(f"Failed to create idle activity for {citizen_username}")
+            return None
     except Exception as e:
-        log.error(f"Error creating idle activity: {e}")
+        log.error(f"Error creating idle activity for {citizen_username}: {e}")
         return None
 
 def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
     """Process activity creation for a single citizen."""
-    # Always use CitizenId from fields, not the Airtable record ID
-    citizen_id = citizen['fields'].get('CitizenId')
-    
-    # If CitizenId is missing, log an error and return
-    if not citizen_id:
-        log.error(f"Missing CitizenId in citizen record: {citizen['id']}")
+    # Get citizen identifiers
+    citizen_custom_id = citizen['fields'].get('CitizenId') # The custom ID, e.g., ctz_...
+    citizen_username = citizen['fields'].get('Username')   # The Username
+    citizen_airtable_record_id = citizen['id']             # The Airtable record ID, e.g., rec...
+
+    # Validate essential identifiers
+    if not citizen_custom_id:
+        log.error(f"Missing CitizenId in citizen record: {citizen_airtable_record_id}")
         return False
-    
-    # Get the citizen's username for looking up work buildings
-    citizen_username = citizen['fields'].get('Username')
     if not citizen_username:
-        log.warning(f"Citizen {citizen_id} has no Username, using CitizenId as fallback")
-        citizen_username = citizen_id
+        log.warning(f"Citizen {citizen_custom_id} (Record ID: {citizen_airtable_record_id}) has no Username, using CitizenId as fallback for username.")
+        citizen_username = citizen_custom_id
     
     citizen_name = f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}"
-    
-    log.info(f"Processing activity for citizen {citizen_name} (ID: {citizen_id}, Username: {citizen_username})")
+    log.info(f"Processing activity for citizen {citizen_name} (CustomID: {citizen_custom_id}, Username: {citizen_username}, RecordID: {citizen_airtable_record_id})")
     
     # Get citizen's position
     citizen_position = None
@@ -698,18 +731,18 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
         log.warning(f"Invalid position data for citizen {citizen_id}: {citizen['fields'].get('Position')} - Error: {str(e)}")
     
     if not citizen_position:
-        log.warning(f"Citizen {citizen_id} has no position data, creating idle activity")
-        create_idle_activity(tables, citizen_id)
+        log.warning(f"Citizen {citizen_custom_id} has no position data, creating idle activity")
+        create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
         return True
     
     # If it's nighttime, handle nighttime activities
     if is_night:
         # Find citizen's home
-        home = get_citizen_home(tables, citizen_id)
+        home = get_citizen_home(tables, citizen_custom_id) # Assuming get_citizen_home uses custom CitizenId
         
         if not home:
-            log.warning(f"Citizen {citizen_id} has no home, creating idle activity")
-            create_idle_activity(tables, citizen_id)
+            log.warning(f"Citizen {citizen_custom_id} has no home, creating idle activity")
+            create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
             return True
         
         # Get home position
@@ -739,7 +772,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
         
         if not home_position:
             log.warning(f"Home {home['fields'].get('BuildingId', home['id'])} has no position data, creating idle activity")
-            create_idle_activity(tables, citizen_id)
+            create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
             return True
         
         # Check if citizen is already at home
@@ -760,26 +793,24 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
         
         if is_at_home:
             # Citizen is at home, create rest activity
-            # Use BuildingId instead of Airtable record ID
             home_building_id = home['fields'].get('BuildingId', home['id'])
-            create_rest_activity(tables, citizen_id, citizen_username, home_building_id)
+            create_rest_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, home_building_id)
         else:
             # Citizen needs to go home, get path
             path_data = get_path_to_home(citizen_position, home_position)
             
             if path_data and path_data.get('success'):
                 # Create goto_home activity
-                # Use BuildingId instead of Airtable record ID
                 home_building_id = home['fields'].get('BuildingId', home['id'])
-                create_goto_home_activity(tables, citizen_id, citizen_username, home_building_id, path_data)
+                create_goto_home_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, home_building_id, path_data)
             else:
                 # Path finding failed, create idle activity
-                create_idle_activity(tables, citizen_id, citizen_username)
+                create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
     else:
         # Daytime activities - FIRST check if citizen is at their workplace
         
         # Get citizen's workplace
-        workplace = get_citizen_workplace(tables, citizen_id, citizen_username)
+        workplace = get_citizen_workplace(tables, citizen_custom_id, citizen_username) # Assuming get_citizen_workplace uses custom CitizenId or Username
         
         if workplace:
             # Get workplace position
@@ -809,7 +840,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
             
             if not workplace_position:
                 log.warning(f"Workplace {workplace['fields'].get('BuildingId', workplace['id'])} has no position data, creating idle activity")
-                create_idle_activity(tables, citizen_id, citizen_username)
+                create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
                 return True
             
             # Check if citizen is already at workplace
@@ -830,7 +861,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
             
             if is_at_workplace:
                 # Citizen is at workplace, proceed with normal work activities
-                log.info(f"Citizen {citizen_id} is at their workplace, creating work activity")
+                log.info(f"Citizen {citizen_custom_id} is at their workplace, creating work activity")
                 
                 # Continue with existing work activity logic
                 building_type = workplace['fields'].get('Type')
@@ -863,11 +894,11 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
                         
                         if can_produce and selected_recipe:
                             # Create production activity
-                            create_production_activity(tables, citizen, workplace, selected_recipe)
+                            create_production_activity(tables, citizen, workplace, selected_recipe) # citizen contains airtable_id
                             return True
                         else:
                             # Not enough resources for production, check contracts
-                            contracts = get_citizen_contracts(tables, citizen_id)
+                            contracts = get_citizen_contracts(tables, citizen_custom_id) # get_citizen_contracts uses custom_id
                             
                             if contracts:
                                 # Process contracts in priority order
@@ -913,28 +944,28 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
                                                 
                                                 if path:
                                                     # Create resource fetching activity
-                                                    create_resource_fetching_activity(
+                                                    create_resource_fetching_activity( # citizen contains airtable_id
                                                         tables, citizen, contract, from_building, to_building, path
                                                     )
                                                     return True
                             
                             # If we get here, no contracts could be executed
-                            log.info(f"No viable contracts for citizen {citizen_id}, creating idle activity")
-                            create_idle_activity(tables, citizen_id, citizen_username)
+                            log.info(f"No viable contracts for citizen {citizen_custom_id}, creating idle activity")
+                            create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
                             return True
                     else:
                         # No Arti recipes, create idle activity
                         log.info(f"No Arti recipes for building type {building_type}, creating idle activity")
-                        create_idle_activity(tables, citizen_id, citizen_username)
+                        create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
                         return True
                 else:
                     # No production information, create idle activity
                     log.info(f"No production information for building type {building_type}, creating idle activity")
-                    create_idle_activity(tables, citizen_id, citizen_username)
+                    create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
                     return True
             else:
                 # Citizen is not at workplace, create goto_work activity
-                log.info(f"Citizen {citizen_id} is not at their workplace, creating goto_work activity")
+                log.info(f"Citizen {citizen_custom_id} is not at their workplace, creating goto_work activity")
                 
                 # Get path to workplace
                 path_data = find_path_between_buildings(
@@ -944,14 +975,13 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
                 
                 if path_data and path_data.get('success'):
                     # Create goto_work activity
-                    # Use BuildingId instead of Airtable record ID
                     workplace_building_id = workplace['fields'].get('BuildingId', workplace['id'])
-                    create_goto_work_activity(tables, citizen_id, citizen_username, workplace_building_id, path_data)
+                    create_goto_work_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, workplace_building_id, path_data)
                     return True
                 else:
                     # Path finding failed, create idle activity
-                    log.warning(f"Failed to find path to workplace for citizen {citizen_id}, creating idle activity")
-                    create_idle_activity(tables, citizen_id, citizen_username)
+                    log.warning(f"Failed to find path to workplace for citizen {citizen_custom_id}, creating idle activity")
+                    create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
                     return True
         else:
             # No workplace found, continue with existing logic for citizens without workplaces
@@ -1006,11 +1036,11 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
                             
                             if can_produce and selected_recipe:
                                 # Create production activity
-                                create_production_activity(tables, citizen, work_building, selected_recipe)
+                                create_production_activity(tables, citizen, work_building, selected_recipe) # citizen contains airtable_id
                                 return True
                             else:
                                 # Not enough resources for production, check contracts
-                                contracts = get_citizen_contracts(tables, citizen_id)
+                                contracts = get_citizen_contracts(tables, citizen_custom_id) # get_citizen_contracts uses custom_id
                                 
                                 if contracts:
                                     # Process contracts in priority order
@@ -1056,33 +1086,33 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
                                                     
                                                     if path:
                                                         # Create resource fetching activity
-                                                        create_resource_fetching_activity(
+                                                        create_resource_fetching_activity( # citizen contains airtable_id
                                                             tables, citizen, contract, from_building, to_building, path
                                                         )
                                                         return True
                                 
                                 # If we get here, no contracts could be executed
-                                log.info(f"No viable contracts for citizen {citizen_id}, creating idle activity")
-                                create_idle_activity(tables, citizen_id, citizen_username)
+                                log.info(f"No viable contracts for citizen {citizen_custom_id}, creating idle activity")
+                                create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
                                 return True
                         else:
                             # No Arti recipes, create idle activity
                             log.info(f"No Arti recipes for building type {building_type}, creating idle activity")
-                            create_idle_activity(tables, citizen_id, citizen_username)
+                            create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
                             return True
                     else:
                         # No production information, create idle activity
                         log.info(f"No production information for building type {building_type}, creating idle activity")
-                        create_idle_activity(tables, citizen_id, citizen_username)
+                        create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
                         return True
                 else:
                     # No work building found, create idle activity
                     log.info(f"No work buildings found for citizen {citizen_username}, creating idle activity")
-                    create_idle_activity(tables, citizen_id, citizen_username)
+                    create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
                     return True
             except Exception as e:
                 log.error(f"Error finding work buildings for citizen {citizen_username}: {e}")
-                create_idle_activity(tables, citizen_id, citizen_username)
+                create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id)
                 return True
     
     return True
