@@ -109,21 +109,23 @@ const BuildingLocation: React.FC<BuildingLocationProps> = ({
           position = building.position;
         }
         
-        if (position && position.lat && position.lng) {
+        if (position && typeof position.lat === 'number' && typeof position.lng === 'number') {
           const markerX = padding + offsetX + (position.lng - minLng) * s_x;
           const markerY = padding + offsetY + (maxLat - position.lat) * s_y;
           
           // Draw a marker for the building
           ctx.beginPath();
           ctx.arc(markerX, markerY, 6, 0, Math.PI * 2);
-          ctx.fillStyle = '#FF5500';
+          ctx.fillStyle = '#FF5500'; // Bright orange color for visibility
           ctx.fill();
-          ctx.strokeStyle = '#FFFFFF';
+          ctx.strokeStyle = '#FFFFFF'; // White border for contrast
           ctx.lineWidth = 1.5;
           ctx.stroke();
+        } else {
+          console.warn('Building position is invalid or missing lat/lng numbers:', position);
         }
       } catch (error) {
-        console.error('Error parsing building position:', error);
+        console.error('Error parsing or drawing building position marker:', error);
       }
     }
   };
