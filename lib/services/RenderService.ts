@@ -67,7 +67,8 @@ export class RenderService {
     isHovered: boolean = false,
     rotation?: number,
     buildingType?: string,
-    buildingCategory?: string // Add buildingCategory parameter
+    buildingCategory?: string, // Add buildingCategory parameter
+    scale?: number // Add scale parameter
   ): void {
     // Apply different styles based on state
     if (isSelected) {
