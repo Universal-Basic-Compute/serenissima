@@ -1,6 +1,8 @@
 import { eventBus } from '../utils/eventBus';
-import { debounce, throttle } from '../utils/performanceUtils';
-import { CitizenRenderService } from './CitizenRenderService';
+import { throttle } from '../utils/performanceUtils';
+// CitizenRenderService is not directly used in this file after setHoveredCitizen was updated.
+// If it's used by other parts of hoverStateService that are not shown, keep it.
+// For now, assuming it's only for the setHoveredCitizen method which now calls CitizenRenderService internally.
 
 // Define the hover state changed event type
 export const HOVER_STATE_CHANGED = 'HOVER_STATE_CHANGED';

@@ -12,6 +12,7 @@ interface Guild {
   createdAt: string;
   primaryLocation: string;
   description: string;
+  shortDescription?: string; // Added shortDescription
   patronSaint?: string;
   guildTier?: string;
   leadershipStructure?: string;
@@ -43,7 +44,7 @@ export async function GET() {
     
     // Transform Airtable records to our Guild interface format
     const guilds: Guild[] = records.map(record => ({
-      guildId: record.get('GuildId'),
+      guildId: String(record.get('GuildId')), // Cast to string
       guildName: record.get('GuildName') as string,
       createdAt: record.get('CreatedAt') as string,
       primaryLocation: record.get('PrimaryLocation') as string,

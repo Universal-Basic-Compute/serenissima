@@ -67,18 +67,21 @@ export async function POST(request: NextRequest) {
     // Group relevancies by who they are relevant to
     const relevanciesByCitizen: Record<string, Record<string, any>> = {};
     allGeneratedRelevancies.forEach(relevancy => {
-      const relevantTo = relevancy.relevantToCitizen;
-      if (!relevantTo) {
+      const relevantToField = relevancy.relevantToCitizen;
+      if (!relevantToField) {
         console.warn('[API building-ownership POST] Skipping relevancy with no relevantToCitizen:', relevancy);
         return;
       }
-      if (!relevanciesByCitizen[relevantTo]) {
-        relevanciesByCitizen[relevantTo] = {};
+      // Ensure relevantTo is a string for use as a key
+      const relevantToKey = Array.isArray(relevantToField) ? relevantToField.join(',') : String(relevantToField);
+
+      if (!relevanciesByCitizen[relevantToKey]) {
+        relevanciesByCitizen[relevantToKey] = {};
       }
       // Create a unique key for the relevancy within that citizen's list
       // Using assetId (buildingId) and closestLandId (landId) should be unique for this context
       const relevancyKey = `${relevancy.assetId}_${relevancy.closestLandId}_${relevancy.type}`;
-      relevanciesByCitizen[relevantTo][relevancyKey] = relevancy;
+      relevanciesByCitizen[relevantToKey][relevancyKey] = relevancy;
     });
 
     let totalSavedCount = 0;

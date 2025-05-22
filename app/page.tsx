@@ -481,10 +481,10 @@ export default function TwoDPage() {
       setShowCitizenDetailsPanelDirect(true);
     };
 
-    eventBus.on('showCitizenPanelEvent', handleShowCitizenPanel);
+    const subscription = eventBus.subscribe('showCitizenPanelEvent', handleShowCitizenPanel);
 
     return () => {
-      eventBus.off('showCitizenPanelEvent', handleShowCitizenPanel);
+      subscription.unsubscribe();
     };
   }, []);
 

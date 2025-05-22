@@ -7,7 +7,7 @@ export class CitizenRenderService {
     if (!citizen) return null;
     
     // Create a safe version with only the properties we need
-    const safeCitizen = {
+    const safeCitizen: any = { // Initialize as any to allow adding properties
       id: this.getStringValue(citizen, ['CitizenId', 'citizenId', 'citizenid', 'id']),
       firstName: this.getStringValue(citizen, ['FirstName', 'firstName', 'firstname']),
       lastName: this.getStringValue(citizen, ['LastName', 'lastName', 'lastname']),

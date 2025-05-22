@@ -12,6 +12,7 @@ interface Problem {
   type?: string; // Added type field
   title: string;
   description: string;
+  position?: { lat: number, lng: number } | null; // Added position field
   solutions: string;
   notes?: string;
 }

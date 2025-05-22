@@ -1,16 +1,19 @@
 import { CoordinateService } from './CoordinateService';
 
 // Define interfaces for better type safety
-interface LandData {
-  id: string;
+export interface LandData { // Export LandData
+  id: string; // Airtable Record ID
+  landId?: string; // Polygon-style ID e.g. poly_xxx
   owner?: string;
   center?: { lat: number, lng: number } | null;
   coordinates?: { lat: number, lng: number }[];
   historicalName?: string | null;
   buildingPoints?: number;
+  BuildingPointsCount?: number; // Added to reflect potential data source
+  buildingPointsCount?: number; // Added to reflect potential data source
 }
 
-interface RelevancyScore {
+export interface RelevancyScore { // Export RelevancyScore
   score: number;
   assetId: string;
   assetType: string;
@@ -94,7 +97,7 @@ export class RelevancyService {
       
       if (citizenLands.length === 0) {
         console.log(`Citizen ${Citizen} does not own any lands`);
-        return {};
+        return {} as Record<string, RelevancyScore>; // Return empty object of correct type
       }
       
       // Fetch all lands
@@ -468,18 +471,16 @@ export class RelevancyService {
         
         // Count building points - use BuildingPointsCount if available
         let buildingPointsCount = 0;
-        if (land.BuildingPointsCount !== undefined) {
-          // If BuildingPointsCount is available, use it directly
-          buildingPointsCount = land.BuildingPointsCount;
-        } else if (land.buildingPointsCount !== undefined) {
-          // Try camelCase version
-          buildingPointsCount = land.buildingPointsCount;
+        if (land.buildingPoints !== undefined && typeof land.buildingPoints === 'number') {
+          // If buildingPoints is a number, use it directly
+          buildingPointsCount = land.buildingPoints;
         } else if (land.buildingPoints && Array.isArray(land.buildingPoints)) {
           // Fallback to array length if available
           buildingPointsCount = land.buildingPoints.length;
-        } else if (typeof land.buildingPoints === 'number') {
-          // Fallback to direct number if available
-          buildingPointsCount = land.buildingPoints;
+        } else if (land.BuildingPointsCount !== undefined) { // Check PascalCase if others fail
+            buildingPointsCount = land.BuildingPointsCount;
+        } else if (land.buildingPointsCount !== undefined) { // Check camelCase if others fail
+            buildingPointsCount = land.buildingPointsCount;
         }
         
         // Add to the citizen's total
@@ -695,7 +696,7 @@ export class RelevancyService {
       
       if (!buildingsResponse.ok) {
         console.error(`[RelevancyService] Failed to fetch buildings for ${username}: ${buildingsResponse.status}`);
-        return {};
+        return []; // Return empty array of RelevancyScore
       }
       
       const buildingsData = await buildingsResponse.json();
@@ -705,7 +706,7 @@ export class RelevancyService {
       // Skip if no buildings
       if (!buildings.length) {
         console.log(`[RelevancyService] Citizen ${username} does not own any buildings. No building ownership relevancies.`);
-        return {};
+        return []; // Return empty array of RelevancyScore
       }
       
       // Fetch all lands to get owner information
@@ -713,7 +714,7 @@ export class RelevancyService {
       
       if (!landsResponse.ok) {
         console.error(`[RelevancyService] Failed to fetch all lands: ${landsResponse.status}`);
-        return {};
+        return []; // Return empty array of RelevancyScore
       }
       
       const landsData = await landsResponse.json();
@@ -1094,9 +1095,9 @@ export class RelevancyService {
       const allLandsData = await this.fetchLands(); 
       const landDetailsMap: Record<string, { historicalName?: string | null }> = {};
       allLandsData.forEach(land => {
-        const key = land.landId || land.id; // Prefer landId (polygon-id), fallback to Airtable record ID
+        const key = land.landId || land.id; // Prefer land.landId (polygon-id), fallback to land.id (Airtable record ID)
         if (key) {
-          landDetailsMap[key] = { historicalName: land.historicalName };
+          landDetailsMap[String(key)] = { historicalName: land.historicalName }; // Ensure key is string
         }
       });
 

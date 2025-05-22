@@ -105,7 +105,8 @@ export async function GET(request: Request) {
         
       // Get the Airtable record ID and the LandId field
       const recordId = record.id;
-      const landId = record.get('LandId') || recordId; // Use LandId if available, fall back to record ID
+      const landIdField = record.get('LandId');
+      const landId = String(landIdField || recordId); // Use LandId if available, fall back to record ID, ensure string
         
       // Get polygon data using the LandId field
       const polygonData = polygonMap[landId] || {};

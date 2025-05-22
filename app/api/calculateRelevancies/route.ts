@@ -359,7 +359,7 @@ export async function GET(request: NextRequest) {
     const polygons = await fetchPolygonData();
     
     // Merge land data with polygon data
-    const allLands = await mergeLandDataWithPolygons(landsRecords, polygons);
+    const allLands = await mergeLandDataWithPolygons(landsRecords as any[], polygons);
     
     // Fetch land groups data
     const landGroups = await fetchLandGroups();

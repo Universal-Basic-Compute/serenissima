@@ -1927,16 +1927,7 @@ number => {
             setSelectedCitizen(null);
           }
         },
-        setHoveredCitizen: (buildingId, type, citizen) => {
-          if (citizen) {
-            // Use the HoverStateService to handle citizen hover state
-            // The service will sanitize the citizen object
-            hoverStateService.setHoveredCitizen(citizen, buildingId, type);
-          } else {
-            // Clear hover state when no citizen is hovered
-            hoverStateService.clearHoveredResource();
-          }
-        },
+        setHoveredCitizen: hoverStateService.setHoveredCitizen.bind(hoverStateService),
         setShowCitizenDetailsPanel,
         calculateTransportRoute,
         findBuildingPosition,
