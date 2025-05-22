@@ -591,6 +591,7 @@ export default function TwoDPage() {
       window.dispatchEvent(new CustomEvent('fetchIncomeData'));
       window.dispatchEvent(new CustomEvent('showIncomeVisualization'));
     } else if (activeView === 'citizens') {
+      setShowCitizenRegistry(true); 
       window.dispatchEvent(new CustomEvent('loadCitizens'));
     } else if (activeView === 'governance') {
       setShowGovernancePanel(true);
@@ -598,9 +599,7 @@ export default function TwoDPage() {
       setShowGuildsPanel(true);
     } else if (activeView === 'knowledge') {
       setShowKnowledgePanel(true);
-    } else if (activeView === 'citizens') {
-      setShowCitizenRegistry(true); // Show the registry
-      window.dispatchEvent(new CustomEvent('loadCitizens')); // Also dispatch load event
+    // The redundant 'citizens' block has been removed. Its logic is merged into the first 'citizens' block.
     } else if (activeView === 'loans') {
       setShowLoanPanel(true);
     }
