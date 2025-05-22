@@ -487,7 +487,7 @@ number => {
       console.error('Error saving water route:', error);
       alert('Failed to save water route. Please try again.');
     }
-  }, [waterRouteStartPoint, waterRouteEndPoint, waterRouteIntermediatePoints, waterRoutePath, calculateTotalDistance]); // Removed fetchWaterPoints
+  }, [waterRouteStartPoint, waterRouteEndPoint, waterRouteIntermediatePoints, waterRoutePath, calculateTotalDistance, fullWaterGraphData]); // Added fullWaterGraphData
   
   // Add a new function to save water route with explicit data
   const saveWaterRouteWithData = useCallback(async (routeData: {
@@ -3983,12 +3983,12 @@ number => {
       )}
       
       {/* Water Point Count - only visible in transport view */}
-      {activeView === 'transport' && waterPoints.length > 0 && (
+      {activeView === 'transport' && fullWaterGraphData && fullWaterGraphData.waterPoints && fullWaterGraphData.waterPoints.length > 0 && (
         <div className="absolute bottom-64 left-20 bg-black/70 text-white px-3 py-1 rounded text-xs">
-          {waterPoints.length} water points loaded
+          {fullWaterGraphData.waterPoints.length} water points loaded
         </div>
       )}
-      
+    
       
       {/* Building Color Mode Toggle and Filter Toggle */}
       <div className="absolute bottom-4 left-4 bg-black/70 text-white p-3 rounded-lg shadow-lg">
@@ -4176,10 +4176,10 @@ number => {
                 if (waterPointMode) {
                   setWaterPointMode(false);
                 }
-                // Load existing water points when enabling
-                if (!waterRouteMode) {
-                  fetchWaterPoints();
-                }
+                // Load existing water points when enabling - This is now handled by fullWaterGraphData prop
+                // if (!waterRouteMode) {
+                //   fetchWaterPoints(); 
+                // }
               }}
               className={`absolute bottom-64 left-20 ${
                 waterRouteMode ? 'bg-blue-600' : 'bg-amber-600'
