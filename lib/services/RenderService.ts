@@ -65,8 +65,9 @@ export class RenderService {
     isSelected: boolean = false,
     shape: 'square' | 'circle' | 'triangle' = 'square',
     isHovered: boolean = false,
-    rotation?: number, // Add rotation parameter
-    buildingType?: string // Add buildingType to determine if it's a bridge
+    rotation?: number,
+    buildingType?: string,
+    buildingCategory?: string // Add buildingCategory parameter
   ): void {
     // Apply different styles based on state
     if (isSelected) {
@@ -131,7 +132,7 @@ export class RenderService {
     // Add a small indicator for the building type with fixed font size
     // For bridges, we might not want a type indicator, or a different one.
     // For now, keep it for non-bridges.
-    if (!(isBridge && rotation !== undefined)) {
+    if (!(isActuallyABridge && rotation !== undefined)) {
       ctx.fillStyle = '#000'; // Black text for visibility
       ctx.font = `10px Arial`;
       ctx.textAlign = 'center';
