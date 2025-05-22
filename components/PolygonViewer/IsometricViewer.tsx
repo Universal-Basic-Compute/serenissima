@@ -1927,7 +1927,9 @@ number => {
             setSelectedCitizen(null);
           }
         },
-        setHoveredCitizen: hoverStateService.setHoveredCitizen.bind(hoverStateService),
+        setHoveredCitizen: (citizen, buildingId, type) => { // Define setHoveredCitizen as a method
+          hoverStateService.setHoveredCitizen(citizen, buildingId, type);
+        },
         setShowCitizenDetailsPanel,
         calculateTransportRoute,
         findBuildingPosition,
