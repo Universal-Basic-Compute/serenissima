@@ -8,10 +8,10 @@ const AIRTABLE_RELEVANCIES_TABLE = 'RELEVANCIES';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { type: string } }
+  { params }: { params: Promise<Record<string, string | undefined>> }
 ) {
   try {
-    const type = params.type;
+    const { type } = await params;
     
     if (!type) {
       return NextResponse.json({ error: 'Relevancy type is required' }, { status: 400 });
@@ -73,7 +73,10 @@ export async function GET(
     });
     
   } catch (error) {
-    console.error(`Error fetching relevancies for type ${params.type}:`, error);
+    // Await params again or ensure type is in scope for error logging
+    const awaitedParams = await params;
+    const typeForError = awaitedParams.type;
+    console.error(`Error fetching relevancies for type ${typeForError || 'unknown'}:`, error);
     return NextResponse.json(
       { error: 'Failed to fetch relevancies', details: error.message },
       { status: 500 }
