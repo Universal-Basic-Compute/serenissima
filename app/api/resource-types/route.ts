@@ -42,11 +42,13 @@ function loadResourceData(filePath: string): any {
     const resourceData = JSON.parse(data);
     
     return {
-      id: path.basename(filePath, '.json'),
+      // id: path.basename(filePath, '.json'), // id is derived later by the caller
       name: resourceData.name || path.basename(filePath, '.json'),
       category: resourceData.category || 'Uncategorized',
       description: resourceData.description || '',
-      importPrice: resourceData.importPrice || 0
+      importPrice: resourceData.importPrice || 0,
+      lifetimeHours: resourceData.lifetimeHours !== undefined ? resourceData.lifetimeHours : null,
+      consumptionHours: resourceData.consumptionHours !== undefined ? resourceData.consumptionHours : null
     };
   } catch (error) {
     console.error(`Error loading resource data from ${filePath}:`, error);
@@ -102,9 +104,9 @@ export async function GET(request: Request) {
     
     // Load and parse each resource file
     let resources = resourceFiles.map(filePath => {
-      const resourceData = loadResourceData(filePath);
+      const loadedData = loadResourceData(filePath); // Changed variable name
       
-      if (!resourceData) {
+      if (!loadedData) { // Check loadedData
         return null;
       }
       
@@ -117,10 +119,12 @@ export async function GET(request: Request) {
       
       return {
         id,
-        name: resourceData.name || id,
-        category: resourceData.category || pathParts[0] || 'Uncategorized',
-        description: resourceData.description || '',
-        importPrice: resourceData.importPrice || 0
+        name: loadedData.name || id, // Use loadedData
+        category: loadedData.category || pathParts[0] || 'Uncategorized', // Use loadedData
+        description: loadedData.description || '', // Use loadedData
+        importPrice: loadedData.importPrice || 0, // Use loadedData
+        lifetimeHours: loadedData.lifetimeHours, 
+        consumptionHours: loadedData.consumptionHours
       };
     }).filter(Boolean); // Remove null entries
     
