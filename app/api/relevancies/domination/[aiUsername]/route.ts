@@ -8,10 +8,10 @@ const AIRTABLE_RELEVANCIES_TABLE = 'RELEVANCIES';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { aiUsername: string } }
+  { params }: { params: Promise<Record<string, string | undefined>> }
 ) {
   try {
-    const aiUsername = params.aiUsername;
+    const { aiUsername } = await params;
     
     if (!aiUsername) {
       return NextResponse.json({ error: 'AI username is required' }, { status: 400 });
@@ -64,7 +64,9 @@ export async function GET(
     });
     
   } catch (error) {
-    console.error(`Error fetching domination relevancies for AI ${params.aiUsername}:`, error);
+    const awaitedParams = await params; // Re-await or ensure aiUsername is in scope
+    const usernameForError = awaitedParams.aiUsername;
+    console.error(`Error fetching domination relevancies for AI ${usernameForError || 'unknown'}:`, error);
     return NextResponse.json(
       { error: 'Failed to fetch domination relevancies', details: error.message },
       { status: 500 }
