@@ -19,7 +19,7 @@ This script:
    - Checks storage capacity of the workplace.
    - If space allows, transfers these resources from the citizen's personal inventory to the workplace building.
    - The resources in the workplace building become owned by the workplace operator.
-5. Updates the activity status to "processed" or "failed".
+5. Updates the activity status to "processed" or "failed". If processed successfully and the activity had a `ToBuilding` destination, the citizen's `Position` (coordinates) and `UpdatedAt` fields are updated to reflect their new location.
 """
 
 import os
@@ -244,18 +244,18 @@ def main(dry_run: bool = False):
 
                     if building_record_for_pos and citizen_record_for_pos:
                         building_position_str = building_record_for_pos['fields'].get('Position')
-                        building_custom_id = building_record_for_pos['fields'].get('BuildingId')
+                        building_custom_id = building_record_for_pos['fields'].get('BuildingId') # We still get it for logging
                         
-                        if building_position_str and building_custom_id:
+                        if building_position_str:
                             update_payload = {
                                 'Position': building_position_str,
-                                'CurrentBuildingId': building_custom_id, # Store the custom BuildingId
+                                # 'CurrentBuildingId': building_custom_id, # Field does not exist
                                 'UpdatedAt': datetime.now(timezone.utc).isoformat()
                             }
                             tables['citizens'].update(citizen_record_for_pos['id'], update_payload)
-                            log.info(f"Updated citizen {citizen_username} position to building {building_custom_id} ({building_position_str}) and UpdatedAt.")
+                            log.info(f"Updated citizen {citizen_username} Position to {building_position_str} (Building: {building_custom_id}) and UpdatedAt.")
                         else:
-                            log.warning(f"Building {to_building_airtable_id} is missing Position or BuildingId. Cannot update citizen {citizen_username} position.")
+                            log.warning(f"Building {to_building_airtable_id} is missing Position. Cannot update citizen {citizen_username} position.")
                     else:
                         if not building_record_for_pos:
                             log.warning(f"Target building {to_building_airtable_id} not found. Cannot update citizen {citizen_username} position.")
