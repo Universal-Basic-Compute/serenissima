@@ -266,10 +266,10 @@ def main(dry_run: bool = False):
                 if to_building_airtable_id and citizen_username and not dry_run:
                     try:
                         building_record_for_pos = tables['buildings'].get(to_building_airtable_id)
-                    citizen_record_for_pos = get_citizen_record(tables, citizen_username)
+                        citizen_record_for_pos = get_citizen_record(tables, citizen_username)
 
-                    if building_record_for_pos and citizen_record_for_pos:
-                        building_position_str = building_record_for_pos['fields'].get('Position')
+                        if building_record_for_pos and citizen_record_for_pos:
+                            building_position_str = building_record_for_pos['fields'].get('Position')
                         building_custom_id = building_record_for_pos['fields'].get('BuildingId') # We still get it for logging
                         
                         if building_position_str:
