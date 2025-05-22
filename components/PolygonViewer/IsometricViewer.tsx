@@ -3969,7 +3969,13 @@ number => {
     return () => {
       window.removeEventListener('forceRedraw', handleForceRedraw);
     };
-  }, [loading, polygons, landOwners, citizens, activeView, buildings, scale, offset, incomeData, minIncome, maxIncome, selectedPolygonId, selectedBuildingId, emptyBuildingPoints, mousePosition, citizensLoaded, citizensByBuilding, incomeDataLoaded, polygonsToRender, getIncomeColor, getCurrentCitizenSecondaryColor]);
+  }, [
+    loading, polygons, landOwners, citizens, activeView, buildings, scale, offset, 
+    incomeData, minIncome, maxIncome, selectedPolygonId, selectedBuildingId, 
+    emptyBuildingPoints, mousePosition, citizensLoaded, citizensByBuilding, 
+    incomeDataLoaded, polygonsToRender, getIncomeColor, getCurrentCitizenSecondaryColor,
+    waterPoints, waterPointMode, waterRouteMode, waterRoutePath, transportPath // Added dependencies
+  ]);
   
 
   // Handle window resize
