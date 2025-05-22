@@ -660,9 +660,9 @@ export class RenderService {
           ? building.orientation 
           : building.rotation;
 
-        // Pass effectiveRotation, building type, and building category to drawBuilding
+        // Pass effectiveRotation, building type, building category, and scale to drawBuilding
         this.drawBuilding(
-          ctx, screen.x, screen.y, squareSize, color, typeIndicator, isSelected, buildingShape, isHovered, effectiveRotation, building.type, building.category
+          ctx, screen.x, screen.y, squareSize, color, typeIndicator, isSelected, buildingShape, isHovered, effectiveRotation, building.type, building.category, scale
         );
       } catch (error) {
         console.error(`Error drawing building ${building?.id || 'unknown'}:`, error);
