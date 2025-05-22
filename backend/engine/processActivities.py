@@ -19,7 +19,14 @@ This script:
    - Checks storage capacity of the workplace.
    - If space allows, transfers these resources from the citizen's personal inventory to the workplace building.
    - The resources in the workplace building become owned by the workplace operator.
-5. Updates the activity status to "processed" or "failed". If processed successfully and the activity had a `ToBuilding` destination, the citizen's `Position` (coordinates) and `UpdatedAt` fields are updated to reflect their new location.
+5. For "production" activities:
+   - Retrieves the `RecipeInputs` and `RecipeOutputs` from the activity.
+   - Verifies if the production building (identified by `FromBuilding`) has sufficient input resources owned by the building operator.
+   - Verifies if the building has enough storage capacity for the output resources after inputs are consumed.
+   - If both checks pass:
+     - Consumes (decrements/deletes) the input resources from the building's inventory.
+     - Produces (increments/creates) the output resources in the building's inventory, owned by the operator.
+6. Updates the activity status to "processed" or "failed". If processed successfully and the activity had a `ToBuilding` destination (not typical for "production" which happens in place), the citizen's `Position` (coordinates) and `UpdatedAt` fields are updated to reflect their new location.
 """
 
 import os
@@ -47,6 +54,7 @@ try:
     from backend.engine.activity_processors.deliver_resource_batch_processor import process as process_deliver_resource_batch_fn
     from backend.engine.activity_processors.goto_home_processor import process as process_goto_home_fn
     from backend.engine.activity_processors.goto_work_processor import process as process_goto_work_fn
+    from backend.engine.activity_processors.production_processor import process as process_production_fn
 except ImportError:
     # Fallback if the script is run in a context where backend.engine is not directly importable
     # This might happen if script is run directly from its own directory without backend being a package
@@ -174,6 +182,7 @@ def main(dry_run: bool = False):
         "deliver_resource_batch": process_deliver_resource_batch_fn,
         "goto_home": process_goto_home_fn,
         "goto_work": process_goto_work_fn,
+        "production": process_production_fn,
         # Add other activity type processors here as they are created
         # "another_activity_type": process_another_activity_type_fn,
     }
