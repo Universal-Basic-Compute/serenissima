@@ -2536,173 +2536,16 @@ export class TransportService {
 
   // Function to enhance path with canal segments
   private enhancePathWithCanalSegments(pathPoints: any[], canalNetwork: Record<string, Point[]>): any[] {
-    const enhancedPath: any[] = [];
-
-    // Always use the exact start point
-    if (pathPoints.length > 0) {
-      enhancedPath.push(pathPoints[0]);
-    }
-
-    // Process each segment of the path
-    for (let i = 0; i < pathPoints.length - 1; i++) {
-      const point1 = pathPoints[i];
-      const point2 = pathPoints[i + 1];
-
-      // If both points are canal points, try to find a canal path between them
-      if (point1.type === 'canal' && point2.type === 'canal' && point1.transportMode === 'gondola') {
-        // Look for a canal segment that connects these points
-        let canalSegmentFound = false;
-
-        for (const [segmentId, segmentPoints] of Object.entries(canalNetwork)) {
-          const startPoint = segmentPoints[0];
-          const endPoint = segmentPoints[segmentPoints.length - 1];
-
-          // Check if this segment connects our points (approximately)
-          const threshold = 0.0001; // Small threshold for floating point comparison
-
-          const startMatches =
-            (Math.abs(startPoint.lat - point1.lat) < threshold &&
-             Math.abs(startPoint.lng - point1.lng) < threshold) ||
-            (Math.abs(startPoint.lat - point2.lat) < threshold &&
-             Math.abs(startPoint.lng - point2.lng) < threshold);
-
-          const endMatches =
-            (Math.abs(endPoint.lat - point1.lat) < threshold &&
-             Math.abs(endPoint.lng - point1.lng) < threshold) ||
-            (Math.abs(endPoint.lat - point2.lat) < threshold &&
-             Math.abs(endPoint.lng - point2.lng) < threshold);
-
-          if (startMatches && endMatches) {
-            // We found a canal segment that connects our points
-            canalSegmentFound = true;
-
-            // Add 2-3 intermediate points along the canal for a more natural curve
-            const numPoints = 2 + Math.floor(Math.random() * 2); // 2 or 3 points
-            
-            for (let j = 1; j <= numPoints; j++) {
-              const fraction = j / (numPoints + 1);
-              // Add some randomness to the midpoint to create natural curves
-              const jitter = 0.00005 * (Math.random() * 2 - 1);
-              const midpoint: Point = {
-                lat: point1.lat + (point2.lat - point1.lat) * fraction + jitter,
-                lng: point1.lng + (point2.lng - point1.lng) * fraction + jitter,
-                type: 'canal',
-                transportMode: 'gondola',
-                isIntermediatePoint: true
-              };
-              enhancedPath.push(midpoint);
-            }
-            break;
-          }
-        }
-
-        // If no canal segment was found, add intermediate points anyway for visual appeal
-        if (!canalSegmentFound) {
-          // Calculate distance between points
-          const distance = this.calculateDistance(point1, point2);
-          
-          // If distance is significant, add more intermediate points
-          const numPoints = distance > 50 ? 3 : 2;
-          
-          for (let j = 1; j <= numPoints; j++) {
-            const fraction = j / (numPoints + 1);
-            // Add some randomness to create natural curves
-            const jitter = 0.00005 * (Math.random() * 2 - 1);
-            const midpoint: Point = {
-              lat: point1.lat + (point2.lat - point1.lat) * fraction + jitter,
-              lng: point1.lng + (point2.lng - point1.lng) * fraction + jitter,
-              type: 'canal',
-              transportMode: 'gondola',
-              isIntermediatePoint: true
-            };
-            enhancedPath.push(midpoint);
-          }
-        }
-      } else if (point1.transportMode === 'walking') {
-        // For walking paths, add more intermediate points for better visualization
-        // Calculate distance between points to determine how many intermediate points to add
-        const distance = this.calculateDistance(point1, point2);
-        
-        // Add more points for longer distances
-        const numPoints = Math.max(1, Math.min(5, Math.floor(distance / 30)));
-        
-        for (let j = 1; j <= numPoints; j++) {
-          const fraction = j / (numPoints + 1);
-          // Add some randomness to create natural curves
-          const jitter = 0.00002 * (Math.random() * 2 - 1);
-          const midpoint = {
-            lat: point1.lat + (point2.lat - point1.lat) * fraction + jitter,
-            lng: point1.lng + (point2.lng - point1.lng) * fraction + jitter,
-            type: point1.type,
-            transportMode: 'walking',
-            isIntermediatePoint: true
-          };
-          enhancedPath.push(midpoint);
-        }
-      }
-
-      // Don't add the endpoint of this segment if it's the last point in the original path
-      // (we'll add it separately at the end to ensure we use the exact end point)
-      if (i < pathPoints.length - 2) {
-        enhancedPath.push(point2);
-      }
-    }
-
-    // Always use the exact end point
-    if (pathPoints.length > 1) {
-      enhancedPath.push(pathPoints[pathPoints.length - 1]);
-    }
-
-    return enhancedPath;
+    // This function is modified to no longer add artificial intermediate points.
+    // It will return the original path points, as the start/end points are already handled.
+    return pathPoints;
   }
 
   // Function to enhance water paths with intermediate points
   private enhanceWaterPath(pathPoints: any[]): any[] {
-    const enhancedPath: any[] = [];
-    
-    // Always use the exact start point
-    if (pathPoints.length > 0) {
-      enhancedPath.push(pathPoints[0]);
-    }
-    
-    // Process each segment of the path
-    for (let i = 0; i < pathPoints.length - 1; i++) {
-      const point1 = pathPoints[i];
-      const point2 = pathPoints[i + 1];
-      
-      // Calculate distance between points
-      const distance = this.calculateDistance(point1, point2);
-      
-      // Add more intermediate points for longer segments
-      const numPoints = distance > 50 ? 3 : 2;
-      
-      for (let j = 1; j <= numPoints; j++) {
-        const fraction = j / (numPoints + 1);
-        // Add some randomness to create natural curves
-        const jitter = 0.00005 * (Math.random() * 2 - 1);
-        const midpoint: Point = {
-          lat: point1.lat + (point2.lat - point1.lat) * fraction + jitter,
-          lng: point1.lng + (point2.lng - point1.lng) * fraction + jitter,
-          type: 'canal',
-          transportMode: 'gondola',
-          isIntermediatePoint: true
-        };
-        enhancedPath.push(midpoint);
-      }
-      
-      // Don't add the endpoint of this segment if it's the last point in the original path
-      // (we'll add it separately at the end to ensure we use the exact end point)
-      if (i < pathPoints.length - 2) {
-        enhancedPath.push(point2);
-      }
-    }
-    
-    // Always use the exact end point
-    if (pathPoints.length > 1) {
-      enhancedPath.push(pathPoints[pathPoints.length - 1]);
-    }
-    
-    return enhancedPath;
+    // This function is modified to no longer add artificial intermediate points.
+    // It will return the original path points.
+    return pathPoints;
   }
 
   // Function to find the closest node to a given point
@@ -3217,22 +3060,9 @@ export class TransportService {
     transportMode: string,
     distance: number
   ): void {
-    if (distance <= 20) return; // No need for intermediate points for short distances
-    
-    const numPoints = Math.max(1, Math.floor(distance / 100));
-    for (let i = 1; i <= numPoints; i++) {
-      const fraction = i / (numPoints + 1);
-      // Add some randomness to create natural curves
-      const jitter = 0.00002 * (Math.random() * 2 - 1);
-      path.push({
-        lat: startPoint.lat + (endPoint.lat - startPoint.lat) * fraction + jitter,
-        lng: startPoint.lng + (endPoint.lng - startPoint.lng) * fraction + jitter,
-        type: 'center',
-        polygonId: 'virtual',
-        transportMode: transportMode,
-        isIntermediatePoint: true
-      });
-    }
+    // This function is intentionally left blank to prevent adding artificial intermediate points.
+    // The original logic added points to make paths appear more "natural".
+    return;
   }
 
   // Function to find a water-only path between two points
