@@ -9,7 +9,12 @@ This script:
    - Checks storage capacity of the target building.
    - Updates or creates resource records in the target building for its operator/owner.
    - Processes financial transactions based on the original contracts in the batch.
-3. Updates the activity status to "processed" or "failed".
+3. For "goto_home" activities:
+   - Identifies all resources owned by the citizen (AssetType='citizen', Owner=CitizenUsername, AssetId=CitizenCustomId).
+   - Checks storage capacity of the citizen's home.
+   - Transfers these resources from the citizen's personal inventory to their home building.
+   - The resources in the home building remain owned by the citizen.
+4. Updates the activity status to "processed" or "failed".
 """
 
 import os
@@ -35,6 +40,7 @@ try:
     from backend.engine.createimportactivities import get_resource_types as get_resource_definitions_from_api
     # Import processors
     from backend.engine.activity_processors.deliver_resource_batch_processor import process as process_deliver_resource_batch_fn
+    from backend.engine.activity_processors.goto_home_processor import process as process_goto_home_fn
 except ImportError:
     # Fallback if the script is run in a context where backend.engine is not directly importable
     # This might happen if script is run directly from its own directory without backend being a package
@@ -160,6 +166,7 @@ def main(dry_run: bool = False):
     # Define a dictionary to map activity types to their processor functions
     ACTIVITY_PROCESSORS = {
         "deliver_resource_batch": process_deliver_resource_batch_fn,
+        "goto_home": process_goto_home_fn,
         # Add other activity type processors here as they are created
         # "another_activity_type": process_another_activity_type_fn,
     }
