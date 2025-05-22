@@ -3113,18 +3113,26 @@ number => {
 
     // Draw buildings using RenderService, incorporating currentHoverState
     if (buildings.length > 0) {
-      renderService.drawBuildings(ctx, buildings, scale, offset, canvas.width, canvas.height, {
-        selectedBuildingId,
-        hoveredBuildingId: currentHoverState.type === 'building' ? currentHoverState.id : null,
-        buildingPositionsCache,
-        buildingColorMode,
-        getBuildingColor,
-        getBuildingOwnerColor,
-        getBuildingCategoryColor,
-        isColorDark,
-        getCurrentCitizenIdentifier,
-        polygonsToRender // Pass polygonsToRender for bridge orientation calculation
-      });
+      // Filter out bridges, as they are handled by the custom drawing loop above
+      // to ensure their specific appearance (rotated thin rectangle) is preserved.
+      const nonBridgeBuildings = buildings.filter(building => 
+        !(building.type && building.type.toLowerCase().includes('bridge'))
+      );
+
+      if (nonBridgeBuildings.length > 0) {
+        renderService.drawBuildings(ctx, nonBridgeBuildings, scale, offset, canvas.width, canvas.height, {
+          selectedBuildingId,
+          hoveredBuildingId: currentHoverState.type === 'building' ? currentHoverState.id : null,
+          buildingPositionsCache,
+          buildingColorMode,
+          getBuildingColor,
+          getBuildingOwnerColor,
+          getBuildingCategoryColor,
+          isColorDark,
+          getCurrentCitizenIdentifier,
+          polygonsToRender // Pass polygonsToRender for bridge orientation calculation
+        });
+      }
     }
     
     // Draw the calculated transport path if available
