@@ -33,12 +33,16 @@ export async function GET(request: NextRequest) {
 
         if (records.length > 0) {
           const fields = records[0].fields as Airtable.FieldSet; // Define fields here
+
+          // Define the expected structure for the position property
+          type PositionType = { lat: number; lng: number } | string | null;
+
           const buildingRaw = {
             buildingId: fields.BuildingId as string || buildingId,
             type: fields.Type as string || 'Unknown',
             landId: (fields.LandId as string || fields.Land as string || '') as string,
             variant: fields.Variant as string || '',
-            position: fields.Position || null, // Keep as is (string, object, or null from Airtable)
+            position: (fields.Position as PositionType) || null, // Apply the PositionType
             point: fields.Point || null,       // Keep as is, will be processed by ensureBuildingDataIntegrity
             rotation: fields.Rotation as number || 0,
             owner: fields.Owner as string || '',
