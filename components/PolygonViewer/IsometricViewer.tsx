@@ -617,17 +617,24 @@ number => {
   // Effect to check user role on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      console.log('[IsometricViewer] Checking user role for ConsiglioDeiDieci...');
       try {
         const profileStr = localStorage.getItem('citizenProfile');
+        console.log('[IsometricViewer] citizenProfile from localStorage:', profileStr);
         if (profileStr) {
           const profile = JSON.parse(profileStr);
-          setIsUserConsiglioDeiDieci(profile.username === 'ConsiglioDeiDieci');
+          console.log('[IsometricViewer] Parsed profile:', profile);
+          const isConsiglio = profile.username === 'ConsiglioDeiDieci';
+          setIsUserConsiglioDeiDieci(isConsiglio);
+          console.log('[IsometricViewer] setIsUserConsiglioDeiDieci called with:', isConsiglio);
         } else {
           setIsUserConsiglioDeiDieci(false);
+          console.log('[IsometricViewer] citizenProfile not found in localStorage, setIsUserConsiglioDeiDieci called with: false');
         }
       } catch (error) {
-        console.error('Error checking if user is ConsiglioDeiDieci:', error);
+        console.error('[IsometricViewer] Error checking if user is ConsiglioDeiDieci:', error);
         setIsUserConsiglioDeiDieci(false);
+        console.log('[IsometricViewer] Error occurred, setIsUserConsiglioDeiDieci called with: false');
       }
     }
   }, []);
