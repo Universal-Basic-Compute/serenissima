@@ -41,10 +41,11 @@
       {
         "inputs": {
           "fish": 1,
-          "bread": 1
+          "bread": 1,
+          "wine": 1
         },
         "outputs": {
-          "meal_service": 1
+          "criminal_contacts": 1
         },
         "craftMinutes": 30
       },
@@ -62,7 +63,8 @@
     "stores": [
       "fish",
       "bread",
-      "wine"
+      "wine",
+      "spiced_wine"
     ],
     "sells": [
       "fish",
