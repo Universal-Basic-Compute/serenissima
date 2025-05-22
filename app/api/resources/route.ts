@@ -31,7 +31,7 @@ export async function GET(request: Request) {
       base('RESOURCES')
         .select({
           filterByFormula: filterFormula || '',
-          view: 'Grid view'
+          view: 'Grid view' // Ensure all necessary fields like AssetType, AssetId, Position are in this view or fetched explicitly
         })
         .eachPage(
           function page(records, fetchNextPage) {
@@ -50,6 +50,69 @@ export async function GET(request: Request) {
           }
         );
     });
+
+    // --- Enhanced Position Logic ---
+    const citizenAssetIds: string[] = [];
+    (records as any[]).forEach(record => {
+      const assetType = record.get('AssetType');
+      if (assetType === 'Citizen') {
+        const assetId = record.get('AssetId');
+        if (assetId) {
+          citizenAssetIds.push(assetId);
+        }
+      }
+    });
+
+    let citizenPositionsMap: Map<string, { lat: number, lng: number }> = new Map();
+    if (citizenAssetIds.length > 0) {
+      console.log(`Fetching positions for ${citizenAssetIds.length} citizen assets.`);
+      const uniqueCitizenAssetIds = [...new Set(citizenAssetIds)]; // Ensure unique IDs
+      const citizenFilterFormula = `OR(${uniqueCitizenAssetIds.map(id => `{Username} = '${id.replace(/'/g, "\\'")}'`).join(',')})`;
+      
+      try {
+        const citizenRecords = await new Promise((resolve, reject) => {
+          const allCitizenRecords: any[] = [];
+          base('CITIZENS') // Assuming the table is named CITIZENS
+            .select({
+              filterByFormula: citizenFilterFormula,
+              fields: ['Username', 'Position'] // Assuming AssetId maps to Username
+            })
+            .eachPage(
+              function page(records, fetchNextPage) {
+                records.forEach(record => {
+                  allCitizenRecords.push(record);
+                });
+                fetchNextPage();
+              },
+              function done(err) {
+                if (err) { reject(err); return; }
+                resolve(allCitizenRecords);
+              }
+            );
+        });
+
+        (citizenRecords as any[]).forEach(citizenRecord => {
+          const citizenId = citizenRecord.get('Username');
+          const positionString = citizenRecord.get('Position');
+          if (citizenId && positionString) {
+            try {
+              const parsedPosition = JSON.parse(positionString);
+              if (parsedPosition && typeof parsedPosition.lat === 'number' && typeof parsedPosition.lng === 'number') {
+                citizenPositionsMap.set(citizenId, { lat: parsedPosition.lat, lng: parsedPosition.lng });
+              } else {
+                console.warn(`Citizen ${citizenId} has invalid position data:`, parsedPosition);
+              }
+            } catch (e) {
+              console.warn(`Invalid position JSON for citizen ${citizenId}: ${positionString}`, e);
+            }
+          }
+        });
+        console.log(`Fetched positions for ${citizenPositionsMap.size} citizens.`);
+      } catch (citizenError) {
+        console.error('Error fetching citizen positions from Airtable:', citizenError);
+      }
+    }
+    // --- End of Enhanced Position Logic ---
     
     // Transform Airtable records to our resource format
     const resourceMap = new Map(); // Use a Map to deduplicate by ResourceId
@@ -63,11 +126,47 @@ export async function GET(request: Request) {
         return;
       }
       
-      let position;
-      try {
-        position = JSON.parse(record.get('Position') || '{}');
-      } catch (e) {
-        console.warn(`Invalid position format for resource ${resourceId}:`, e);
+      let position: { lat: number, lng: number } | {} = {}; // Default to an empty object
+      const assetType = record.get('AssetType');
+      const assetId = record.get('AssetId');
+
+      if (assetType === 'building' && assetId) {
+        const parts = String(assetId).split('_');
+        if (parts.length >= 3) {
+          const potentialLngStr = parts[parts.length - 1];
+          const potentialLatStr = parts[parts.length - 2];
+          const potentialLat = parseFloat(potentialLatStr);
+          const potentialLng = parseFloat(potentialLngStr);
+
+          if (!isNaN(potentialLat) && !isNaN(potentialLng)) {
+            position = { lat: potentialLat, lng: potentialLng };
+            console.log(`Parsed position from AssetId ${assetId} for building:`, position);
+          }
+        }
+        // If position is still empty (parsing AssetId failed), try the Position field
+        if (Object.keys(position).length === 0) {
+          try {
+            const posField = record.get('Position');
+            if (posField) position = JSON.parse(posField);
+          } catch (e) {
+            console.warn(`Invalid Position JSON for building resource ${resourceId} (AssetId: ${assetId}):`, record.get('Position'), e);
+          }
+        }
+      } else if (assetType === 'Citizen' && assetId && citizenPositionsMap.has(assetId)) {
+        position = citizenPositionsMap.get(assetId)!;
+        console.log(`Using fetched position for citizen asset ${assetId}:`, position);
+      } else {
+        // Fallback for other types or if specific logic failed
+        try {
+          const posField = record.get('Position');
+          if (posField) position = JSON.parse(posField);
+        } catch (e) {
+          console.warn(`Invalid Position JSON for resource ${resourceId}:`, record.get('Position'), e);
+        }
+      }
+      
+      // Ensure position is an object, even if empty
+      if (typeof position !== 'object' || position === null) {
         position = {};
       }
       
