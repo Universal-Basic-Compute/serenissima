@@ -3189,26 +3189,50 @@ export class TransportService {
       // Pathfind on waterGraph
       console.log(`Finding water graph path between ${closestStartWaterNode.id} and ${closestEndWaterNode.id}`);
       const waterGraphNodeIds = this.findWaterGraphPath(closestStartWaterNode.id, closestEndWaterNode.id);
+
       if (!waterGraphNodeIds || waterGraphNodeIds.length === 0) {
         console.warn('No path found on water graph. Attempting direct connection between closest water points or full fallback.');
         // Try direct path between closest water points as a simpler fallback
-        const directWaterSegment = [
-            { ...closestStartWaterNode.position, type: 'canal', transportMode: 'gondola', nodeId: closestStartWaterNode.id },
-            { ...closestEndWaterNode.position, type: 'canal', transportMode: 'gondola', nodeId: closestEndWaterNode.id }
-        ];
-        this.addIntermediatePoints(pathSegments, closestStartWaterNode.position, closestEndWaterNode.position, 'gondola', this.calculateDistance(closestStartWaterNode.position, closestEndWaterNode.position));
-        pathSegments.push(...directWaterSegment.slice(1)); // Add end point of direct segment
+        // pathSegments already contains closestStartWaterNode.position
+        this.addIntermediatePoints(pathSegments, closestStartWaterNode.position, closestEndWaterNode.position, 'gondola', this.calculateDistance(closestStartWaterNode.position, closestEndWaterNode.position)); // This is a NO-OP
+        pathSegments.push({ ...closestEndWaterNode.position, type: 'canal', transportMode: 'gondola', nodeId: closestEndWaterNode.id, polygonId: 'virtual' }); // Main node
       } else {
-         const waterGraphSegment = waterGraphNodeIds.map(id => {
-            const node = this.waterGraph.waterPoints.find(wp => wp.id === id);
-            return { ...node.position, type: 'canal', transportMode: 'gondola', nodeId: id, polygonId: 'virtual' };
-        });
-        // pathSegments already ends with closestStartWaterNode.position
-        // waterGraphSegment starts with closestStartWaterNode.position
-        pathSegments.push(...waterGraphSegment.slice(1)); // Add rest of water graph path
+        // Reconstruct path using waterGraphNodeIds and include intermediatePoints from watergraph.json
+        // pathSegments already contains the position of waterGraphNodeIds[0] (closestStartWaterNode.position)
+        for (let i = 0; i < waterGraphNodeIds.length - 1; i++) {
+          const currentWaterNodeId = waterGraphNodeIds[i];
+          const nextWaterNodeId = waterGraphNodeIds[i+1];
+
+          const currentWaterNode = this.waterGraph.waterPoints.find(wp => wp.id === currentWaterNodeId);
+          const nextWaterNode = this.waterGraph.waterPoints.find(wp => wp.id === nextWaterNodeId);
+
+          if (currentWaterNode && nextWaterNode) {
+            const connection = currentWaterNode.connections.find(conn => conn.targetId === nextWaterNodeId);
+            if (connection && connection.intermediatePoints && connection.intermediatePoints.length > 0) {
+              connection.intermediatePoints.forEach(ip => {
+                pathSegments.push({
+                  ...ip, // lat, lng
+                  type: 'canal',
+                  transportMode: 'gondola',
+                  isIntermediatePoint: true, // Mark as intermediate
+                  polygonId: 'virtual'
+                });
+              });
+            }
+            // Add the next main water node's position
+            pathSegments.push({
+              ...nextWaterNode.position,
+              type: 'canal',
+              transportMode: 'gondola',
+              nodeId: nextWaterNode.id,
+              polygonId: 'virtual'
+              // isIntermediatePoint is undefined/false for main nodes
+            });
+          }
+        }
       }
       
-      // Add segment from closestEndWaterNode.position to effectiveEndForWaterNet
+      // Add segment from the last point in pathSegments (which is closestEndWaterNode.position or equivalent) to effectiveEndForWaterNet
       const modeFromWaterNodeEnd = endPolygon ? 'walking' : 'gondola';
       // pathSegments already ends with closestEndWaterNode.position
       this.addIntermediatePoints(pathSegments, closestEndWaterNode.position, effectiveEndForWaterNet, modeFromWaterNodeEnd, distToClosestEndWaterNode);
@@ -3238,6 +3262,10 @@ export class TransportService {
                 acc.pop(); // remove previous less specific point
                 acc.push(current);
             } else if (current.nodeId && !prev.nodeId) {
+                acc.pop();
+                acc.push(current);
+            } else if (current.isIntermediatePoint === true && prev.isIntermediatePoint !== true) {
+                // If current is an intermediate point and previous wasn't (and coords are same), prefer current.
                 acc.pop();
                 acc.push(current);
             }
