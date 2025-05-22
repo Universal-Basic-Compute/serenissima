@@ -316,8 +316,23 @@ number => {
   
   // Helper function to calculate the total distance of a path
   const calculateTotalDistance = useCallback((path: any[]) => {
-    return citizenAnimationService.calculateTotalDistance(path);
-  }, []);
+    if (!path || path.length < 2) {
+      return 0;
+    }
+    let totalDistance = 0;
+    for (let i = 0; i < path.length - 1; i++) {
+      const point1 = path[i];
+      const point2 = path[i+1];
+      // Ensure points have lat and lng properties
+      if (point1 && typeof point1.lat === 'number' && typeof point1.lng === 'number' &&
+          point2 && typeof point2.lat === 'number' && typeof point2.lng === 'number') {
+        totalDistance += calculateDistance(point1, point2);
+      } else {
+        console.warn('Invalid point in path for distance calculation:', point1, point2);
+      }
+    }
+    return totalDistance;
+  }, [calculateDistance]); // Added calculateDistance to dependency array
   
   // Function to save a water route
   const saveWaterRoute = useCallback(async () => {
