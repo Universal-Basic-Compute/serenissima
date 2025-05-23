@@ -54,8 +54,13 @@ import math # Added for Haversine distance
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any
 
-# Add the parent directory to the path to allow imports from app and other engine scripts
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Add the project root to sys.path to allow imports from backend.engine
+# Corrected sys.path manipulation:
+# os.path.dirname(__file__) -> backend/engine
+# os.path.join(..., '..') -> backend/engine/.. -> backend
+# os.path.join(..., '..', '..') -> backend/engine/../../ -> serenissima (project root)
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.insert(0, PROJECT_ROOT)
 
 from pyairtable import Api, Table
 from dotenv import load_dotenv
