@@ -156,10 +156,13 @@ def _get_relevancies_data(tables: Dict[str, Table], relevant_to_username: str, t
     try:
         safe_relevant_to_username = _escape_airtable_value(relevant_to_username)
         safe_target_username = _escape_airtable_value(target_username)
+        # Formule simplifiée pour le débogage : ne vérifie que la correspondance exacte.
+        # Si RelevantToCitizen ou TargetCitizen peuvent être des listes de liens, cette formule ne fonctionnera pas correctement
+        # et nécessitera une approche différente (par exemple, plusieurs requêtes ou une logique de jointure côté client).
         formula = (
             f"AND("
-            f"OR({{RelevantToCitizen}} = '{safe_relevant_to_username}', FIND('\"{safe_relevant_to_username}\"', {{RelevantToCitizen}}) > 0),"
-            f"OR({{TargetCitizen}} = '{safe_target_username}', FIND('\"{safe_target_username}\"', {{TargetCitizen}}) > 0)"
+            f"{{RelevantToCitizen}} = '{safe_relevant_to_username}',"
+            f"{{TargetCitizen}} = '{safe_target_username}'"
             f")"
         )
         # Rétablissement du tri
