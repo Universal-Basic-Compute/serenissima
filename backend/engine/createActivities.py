@@ -417,8 +417,10 @@ def get_idle_citizens(tables) -> List[Dict]:
         log.info(f"Found {len(all_citizens)} total citizens")
         
         # Then, get all active activities
-        now = datetime.datetime.now().isoformat()
-        active_activities_formula = f"AND({{StartDate}} <= '{now}', {{EndDate}} >= '{now}')"
+        now_utc = datetime.datetime.now(pytz.UTC) # Use UTC for consistent time comparison
+        now_iso_utc = now_utc.isoformat()
+
+        active_activities_formula = f"AND({{StartDate}} <= '{now_iso_utc}', {{EndDate}} >= '{now_iso_utc}')" # Compare with UTC time
         active_activities = tables['activities'].all(formula=active_activities_formula)
         
         # Extract citizen Usernames with active activities
@@ -622,7 +624,7 @@ def get_path_between_points(start_position: Dict, end_position: Dict) -> Optiona
             json={
                 "startPoint": start_position,
                 "endPoint": end_position,
-                "startDate": datetime.datetime.now().isoformat()
+                "startDate": datetime.datetime.now(pytz.UTC).isoformat() # Send UTC start date
             }
         )
         
