@@ -466,6 +466,8 @@ def get_idle_citizens(tables) -> List[Dict]:
         log.error(f"{LogColors.FAIL}Error fetching idle citizens: {e}{LogColors.ENDC}")
         return []
 
+# Removed create_resource_fetching_activity and create_production_activity as they are imported.
+
 def _escape_airtable_value(value: str) -> str:
     """Escapes single quotes for Airtable formulas."""
     if isinstance(value, str):
@@ -703,168 +705,9 @@ def get_path_between_points(start_position: Dict, end_position: Dict) -> Optiona
 # --- Removed create_resource_fetching_activity ---
 # (Ensure all these function definitions are deleted from this file)
 
-def create_goto_work_activity(tables, citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, workplace_id: str, path_data: Dict) -> Optional[Dict]:
-    """Create a goto_work activity for a citizen."""
-    log.info(f"{LogColors.OKCYAN}Creating goto_work activity for citizen {citizen_username} (CustomID: {citizen_custom_id}) to workplace {workplace_id}{LogColors.ENDC}")
-    
-    try:
-        VENICE_TIMEZONE_LOCAL = pytz.timezone('Europe/Rome') # Local VENICE_TIMEZONE
-        now_venice = datetime.datetime.now(VENICE_TIMEZONE_LOCAL)
-        
-        # Get timing information from path data
-        start_date = path_data.get('timing', {}).get('startDate', now_venice.isoformat())
-        end_date = path_data.get('timing', {}).get('endDate')
-        
-        if not end_date:
-            # If no end date provided, use a default duration
-            end_time = now_venice + datetime.timedelta(hours=1)
-            end_date = end_time.isoformat()
-        
-        # Ensure path is a valid JSON string
-        path_json = json.dumps(path_data.get('path', []))
-        
-        # Create the activity
-        activity_payload = {
-            "ActivityId": f"goto_work_{citizen_custom_id}_{int(time.time())}",
-            "Type": "goto_work",
-            "Citizen": citizen_username,
-            "ToBuilding": workplace_id,  # This should be BuildingId
-            "CreatedAt": now_venice.isoformat(), 
-            "StartDate": start_date, # Expected to be Venice time ISO string
-            "EndDate": end_date,     # Expected to be Venice time ISO string
-            "Path": path_json,
-            "Notes": "🏢 **Going to work**"
-        }
-        activity = tables['activities'].create(activity_payload)
-        
-        if activity and activity.get('id'):
-            log.info(f"{LogColors.OKGREEN}Created goto_work activity: {activity['id']}{LogColors.ENDC}")
-            # Citizen UpdatedAt is handled by Airtable
-            return activity
-        else:
-            log.error(f"{LogColors.FAIL}Failed to create goto_work activity for {citizen_username}{LogColors.ENDC}")
-            return None
-    except Exception as e:
-        log.error(f"{LogColors.FAIL}Error creating goto_work activity for {citizen_username}: {e}{LogColors.ENDC}")
-        return None
-
-def create_goto_home_activity(tables, citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, home_id: str, path_data: Dict) -> Optional[Dict]:
-    """Create a goto_home activity for a citizen."""
-    log.info(f"{LogColors.OKCYAN}Creating goto_home activity for citizen {citizen_username} (CustomID: {citizen_custom_id}) to home {home_id}{LogColors.ENDC}")
-    
-    try:
-        VENICE_TIMEZONE_LOCAL = pytz.timezone('Europe/Rome') # Local VENICE_TIMEZONE
-        now_venice = datetime.datetime.now(VENICE_TIMEZONE_LOCAL)
-        
-        # Get timing information from path data
-        start_date = path_data.get('timing', {}).get('startDate', now_venice.isoformat())
-        end_date = path_data.get('timing', {}).get('endDate')
-        
-        if not end_date:
-            # If no end date provided, use a default duration
-            end_time_calc = now_venice + datetime.timedelta(hours=1)
-            end_date = end_time_calc.isoformat()
-        
-        # Ensure path is a valid JSON string
-        path_json = json.dumps(path_data.get('path', []))
-        
-        # Create the activity
-        activity_payload = {
-            "ActivityId": f"goto_home_{citizen_custom_id}_{int(time.time())}",
-            "Type": "goto_home",
-            "Citizen": citizen_username,
-            "ToBuilding": home_id,  # This should be BuildingId
-            "CreatedAt": now_venice.isoformat(), 
-            "StartDate": start_date, # Expected to be Venice time ISO string
-            "EndDate": end_date,     # Expected to be Venice time ISO string
-            "Path": path_json,
-            "Notes": "🏠 **Going home** for the night"
-        }
-        activity = tables['activities'].create(activity_payload)
-
-        if activity and activity.get('id'):
-            log.info(f"{LogColors.OKGREEN}Created goto_home activity: {activity['id']}{LogColors.ENDC}")
-            # Citizen UpdatedAt is handled by Airtable
-            return activity
-        else:
-            log.error(f"{LogColors.FAIL}Failed to create goto_home activity for {citizen_username}{LogColors.ENDC}")
-            return None
-    except Exception as e:
-        log.error(f"{LogColors.FAIL}Error creating goto_home activity for {citizen_username}: {e}{LogColors.ENDC}")
-        return None
-
-def create_travel_to_inn_activity(tables, citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str, inn_id: str, path_data: Dict) -> Optional[Dict]:
-    """Create a travel_to_inn activity for a citizen."""
-    log.info(f"{LogColors.OKCYAN}Creating travel_to_inn activity for citizen {citizen_username} (CustomID: {citizen_custom_id}) to inn {inn_id}{LogColors.ENDC}")
-    
-    try:
-        VENICE_TIMEZONE_LOCAL = pytz.timezone('Europe/Rome') # Local VENICE_TIMEZONE
-        now_venice = datetime.datetime.now(VENICE_TIMEZONE_LOCAL)
-        
-        start_date = path_data.get('timing', {}).get('startDate', now_venice.isoformat())
-        end_date = path_data.get('timing', {}).get('endDate')
-        
-        if not end_date:
-            end_time_calc = now_venice + datetime.timedelta(hours=1) # Default 1 hour travel
-            end_date = end_time_calc.isoformat()
-        
-        path_json = json.dumps(path_data.get('path', []))
-        
-        activity_payload = {
-            "ActivityId": f"goto_inn_{citizen_custom_id}_{int(time.time())}",
-            "Type": "goto_inn", # New activity type
-            "Citizen": citizen_username,
-            "ToBuilding": inn_id,
-            "CreatedAt": now_venice.isoformat(),
-            "StartDate": start_date, # Expected to be Venice time ISO string
-            "EndDate": end_date,     # Expected to be Venice time ISO string
-            "Path": path_json,
-            "Notes": "🏨 **Going to an inn** for the night"
-        }
-        activity = tables['activities'].create(activity_payload)
-
-        if activity and activity.get('id'):
-            log.info(f"{LogColors.OKGREEN}Created travel_to_inn activity: {activity['id']}{LogColors.ENDC}")
-            # Citizen UpdatedAt is handled by Airtable
-            return activity
-        else:
-            log.error(f"{LogColors.FAIL}Failed to create travel_to_inn activity for {citizen_username}{LogColors.ENDC}")
-            return None
-    except Exception as e:
-        log.error(f"{LogColors.FAIL}Error creating travel_to_inn activity for {citizen_username}: {e}{LogColors.ENDC}")
-        return None
-
-def create_idle_activity(tables, citizen_custom_id: str, citizen_username: str, citizen_airtable_id: str) -> Optional[Dict]:
-    """Create an idle activity for a citizen."""
-    log.info(f"{LogColors.OKCYAN}Creating idle activity for citizen {citizen_username} (CustomID: {citizen_custom_id}){LogColors.ENDC}")
-    
-    try:
-        VENICE_TIMEZONE_LOCAL = pytz.timezone('Europe/Rome') # Local VENICE_TIMEZONE
-        now_venice = datetime.datetime.now(VENICE_TIMEZONE_LOCAL)
-        end_time_venice = now_venice + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)
-        
-        # Create the activity
-        activity_payload = {
-            "ActivityId": f"idle_{citizen_custom_id}_{int(time.time())}",
-            "Type": "idle",
-            "Citizen": citizen_username,
-            "CreatedAt": now_venice.isoformat(),
-            "StartDate": now_venice.isoformat(),
-            "EndDate": end_time_venice.isoformat(),
-            "Notes": "⏳ **Idle activity** due to failed path finding or no home"
-        }
-        activity = tables['activities'].create(activity_payload)
-        
-        if activity and activity.get('id'):
-            log.info(f"{LogColors.OKGREEN}Created idle activity: {activity['id']}{LogColors.ENDC}")
-            # Citizen UpdatedAt is handled by Airtable
-            return activity
-        else:
-            log.error(f"{LogColors.FAIL}Failed to create idle activity for {citizen_username}{LogColors.ENDC}")
-            return None
-    except Exception as e:
-        log.error(f"{LogColors.FAIL}Error creating idle activity for {citizen_username}: {e}{LogColors.ENDC}")
-        return None
+# The following functions were identified as unused or duplicated by imported versions:
+# create_goto_work_activity, create_goto_home_activity, create_travel_to_inn_activity, create_idle_activity.
+# Their definitions have been removed.
 
 def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_defs: Dict) -> bool:
     """Process activity creation for a single citizen."""
