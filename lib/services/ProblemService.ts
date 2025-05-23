@@ -627,18 +627,28 @@ export class ProblemService {
         return {};
       }
       console.log(`[ProblemService] detectHungryCitizens: Processing ${citizens.length} citizens in Venice with valid usernames.`);
-
+      
+      console.log(`[ProblemService] detectHungryCitizens: STEP 1 - About to fetch buildings.`);
       const buildings = await this.fetchAllBuildings(); // For employer check
+      console.log(`[ProblemService] detectHungryCitizens: STEP 2 - Fetched ${buildings ? buildings.length : 'null/undefined'} buildings. Sample of first building (if any): ${buildings && buildings.length > 0 ? JSON.stringify(buildings[0]) : 'No buildings fetched or empty array.'}`);
+
       const problems: Record<string, any> = {};
       const now = new Date().getTime();
       const twentyFourHoursInMs = 24 * 60 * 60 * 1000;
 
+      console.log(`[ProblemService] detectHungryCitizens: STEP 3 - About to loop over ${citizens.length} citizens.`);
+      let citizensProcessedInLoop = 0;
+
       citizens.forEach(citizen => {
+        citizensProcessedInLoop++;
+        // Minimal first log inside the loop
+        console.log(`[ProblemService] detectHungryCitizens Loop START: Citizen ${citizensProcessedInLoop}/${citizens.length}. Username: ${citizen.username || 'N/A'}`);
+
         // Use camelCase: citizen.username, citizen.citizenId, citizen.ateAt
-        const citizenUsername = citizen.username;
+        const citizenUsername = citizen.username; // Should be valid due to filter
         const ateAtTimestamp = citizen.ateAt; 
         
-        console.log(`[ProblemService] detectHungryCitizens Loop: Processing citizen ${citizenUsername} (ID: ${citizen.citizenId || citizen.id}). AteAt raw: '${ateAtTimestamp}' (type: ${typeof ateAtTimestamp})`);
+        console.log(`[ProblemService] detectHungryCitizens Loop Details: Citizen ${citizenUsername} (ID: ${citizen.citizenId || citizen.id || 'N/A'}). AteAt raw: '${ateAtTimestamp}' (type: ${typeof ateAtTimestamp})`);
         
         let isHungry;
         if (!ateAtTimestamp) { 
@@ -751,10 +761,12 @@ export class ProblemService {
         }
       });
 
+      console.log(`[ProblemService] detectHungryCitizens: STEP 4 - Finished loop. Actual citizens processed in loop: ${citizensProcessedInLoop}.`);
       console.log(`[ProblemService] detectHungryCitizens: Created ${Object.keys(problems).length} problems for hungry citizens and their employers (user: ${username || 'all'}).`);
       return problems;
     } catch (error) {
-      console.error('[ProblemService] Error detecting hungry citizens:', error);
+      // Make the catch block more specific to this function
+      console.error('[ProblemService] Error in detectHungryCitizens main try block:', error);
       return {};
     }
   }
