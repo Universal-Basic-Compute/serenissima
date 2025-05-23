@@ -645,7 +645,7 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
                 resource_data_fields = {
                     "Type": resource_type_id, 
                     "Name": resource_definition.get('name', resource_type_id),
-                    "Category": resource_definition.get('category', 'Unknown'),
+                    # "Category": resource_definition.get('category', 'Unknown'), # Removed Category
                     "Asset": delivery_citizen_asset, # Use Username of delivery person
                     "AssetType": "citizen",
                     "Owner": "Italia", 
