@@ -26,7 +26,7 @@ Here are the types of problems currently managed by the system:
 ### 2. Homeless Employee Impact
 
 -   **Description**: This problem is reported to an employer if one of their employees is homeless.
--   **Detection**: When a citizen is identified as homeless (see above), the system checks if they have a job. If so, and if the employer (`ranBy` in the professional buildings table) is different from the employee, a problem is created for the employer.
+-   **Detection**: When a citizen is identified as homeless (see above), the system checks if they have a job. If so, and if the employer (`runBy` in the professional buildings table) is different from the employee, a problem is created for the employer.
 -   **Impact/Severity**: Low. The employer is informed that their employee's productivity could be reduced by up to 50%.
 -   **Suggested Solutions**:
     -   Discuss housing options with the employee.
@@ -60,7 +60,7 @@ Here are the types of problems currently managed by the system:
 ### 5. Hungry Employee Impact
 
 -   **Description**: This problem is reported to an employer if one of their employees is hungry.
--   **Detection**: When a citizen is identified as hungry (see above), the system checks if they have a job. If so, and if the employer (`ranBy` in the professional buildings table) is different from the employee, a problem is created for the employer.
+-   **Detection**: When a citizen is identified as hungry (see above), the system checks if they have a job. If so, and if the employer (`runBy` in the professional buildings table) is different from the employee, a problem is created for the employer.
 -   **Impact/Severity**: Low. The employer is informed that their employee's productivity could be significantly reduced due to hunger.
 -   **Suggested Solutions**:
     -   Consider if the employee's wages are sufficient for them to afford food.
@@ -112,8 +112,8 @@ Here are the types of problems currently managed by the system:
 
 ### 10. Zero Rent for Leased Business
 
--   **Description**: This problem is reported to a building owner if their commercial property (category "business") has its rent amount set to 0 Ducats (or is null/undefined) AND the building is operated by a different citizen (`Owner` != `RanBy`).
--   **Detection**: The system identifies buildings with `Category` = "business", a valid `Owner`, where `RentAmount` is 0 (or null/undefined), and the `Owner` field is different from the `RanBy` field.
+-   **Description**: This problem is reported to a building owner if their commercial property (category "business") has its rent amount set to 0 Ducats (or is null/undefined) AND the building is operated by a different citizen (`Owner` != `RunBy`).
+-   **Detection**: The system identifies buildings with `Category` = "business", a valid `Owner`, where `RentAmount` is 0 (or null/undefined), and the `Owner` field is different from the `RunBy` field.
 -   **Impact/Severity**: Medium. The owner is missing out on rental income from a business they own but is operated by someone else.
 -   **Suggested Solutions**:
     -   Set an appropriate rent amount for the business operator.

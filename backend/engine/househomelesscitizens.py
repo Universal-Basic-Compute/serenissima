@@ -204,8 +204,8 @@ def assign_citizen_to_building(tables, citizen: Dict, building: Dict) -> bool:
         
         create_notification(tables, citizen_id, notification_content, details)
         
-        # If the building has a RanBy field, send notification to that citizen too
-        ran_by_citizen = building['fields'].get('RanBy')
+        # If the building has a RunBy field, send notification to that citizen too
+        ran_by_citizen = building['fields'].get('RunBy')
         if ran_by_citizen:
             manager_notification = f"🏠 **{citizen_name}** has been assigned to your building **{building_name}**."
             manager_details = {

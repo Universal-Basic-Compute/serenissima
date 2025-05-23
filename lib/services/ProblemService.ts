@@ -247,9 +247,9 @@ export class ProblemService {
           if (workplaceBuilding) {
             const workplaceId = workplaceBuilding.id || workplaceBuilding.buildingId || 'UnknownWorkplaceID';
             // Access building properties with camelCase
-            console.log(`[ProblemService] Processing workplace for ${citizenUsername} (Source: ${workplaceSource}): ID='${workplaceId}', Name='${workplaceBuilding.name}', Occupant='${workplaceBuilding.occupant}', RanBy='${workplaceBuilding.ranBy}', Category='${workplaceBuilding.category}'`);
+            console.log(`[ProblemService] Processing workplace for ${citizenUsername} (Source: ${workplaceSource}): ID='${workplaceId}', Name='${workplaceBuilding.name}', Occupant='${workplaceBuilding.occupant}', RunBy='${workplaceBuilding.runBy}', Category='${workplaceBuilding.category}'`);
             
-            const employerUsernameRaw = workplaceBuilding.ranBy; // Expect ranBy to be camelCase from API
+            const employerUsernameRaw = workplaceBuilding.runBy; // Expect runBy to be camelCase from API
             const employerUsernameTrimmed = employerUsernameRaw && typeof employerUsernameRaw === 'string' ? employerUsernameRaw.trim() : null;
             
             const hasValidEmployerField = employerUsernameRaw !== undefined && employerUsernameRaw !== null;
@@ -257,11 +257,11 @@ export class ProblemService {
             const employerIsDifferentFromEmployee = employerIsNonEmptyString && employerUsernameTrimmed !== citizenUsername;
 
             console.log(`[ProblemService] Employer Check for ${citizenUsername} at workplace ${workplaceId}:`);
-            console.log(`  - Raw 'ranBy' from building: '${employerUsernameRaw}' (type: ${typeof employerUsernameRaw})`);
-            console.log(`  - Trimmed 'ranBy': '${employerUsernameTrimmed}'`);
+            console.log(`  - Raw 'runBy' from building: '${employerUsernameRaw}' (type: ${typeof employerUsernameRaw})`);
+            console.log(`  - Trimmed 'runBy': '${employerUsernameTrimmed}'`);
             console.log(`  - citizen.username for comparison: '${citizenUsername}'`);
-            console.log(`  - Condition 'hasValidEmployerField' (ranBy is not null/undefined): ${hasValidEmployerField}`); // ranBy is camelCase
-            console.log(`  - Condition 'employerIsNonEmptyString' (ranBy is non-empty string after trim): ${employerIsNonEmptyString}`);
+            console.log(`  - Condition 'hasValidEmployerField' (runBy is not null/undefined): ${hasValidEmployerField}`); // runBy is camelCase
+            console.log(`  - Condition 'employerIsNonEmptyString' (runBy is non-empty string after trim): ${employerIsNonEmptyString}`);
             console.log(`  - Condition 'employerIsDifferentFromEmployee': ${employerIsDifferentFromEmployee}`);
 
             if (employerIsNonEmptyString && employerIsDifferentFromEmployee) {
@@ -479,7 +479,7 @@ export class ProblemService {
   /**
    * Detect buildings with zero rent amount.
    * For Homes: if rentAmount is 0, null, or undefined.
-   * For Businesses: if rentAmount is 0, null, or undefined AND Owner is not RanBy.
+   * For Businesses: if rentAmount is 0, null, or undefined AND Owner is not RunBy.
    */
   public async detectZeroRentAmountBuildings(username?: string): Promise<Record<string, Problem>> {
     try {
@@ -500,7 +500,7 @@ export class ProblemService {
         const buildingId = building.id || building.buildingId || `unknown_building_${Date.now()}_${Math.random()}`;
         const buildingName = building.name || building.type || 'Unnamed Building';
         const rentAmount = building.rentAmount; // Can be number, null, or undefined
-        const ranBy = building.ranBy && typeof building.ranBy === 'string' ? building.ranBy.trim() : null;
+        const runBy = building.runBy && typeof building.runBy === 'string' ? building.runBy.trim() : null;
         const occupant = building.occupant && typeof building.occupant === 'string' ? building.occupant.trim() : null; // Get and trim occupant
 
         let skipReason = "";
@@ -518,7 +518,7 @@ export class ProblemService {
         if (skipReason) {
           // Log more skipped items if a specific user is targeted, or fewer for "all users" run.
           if (username || processedCount < 10) { 
-            console.log(`[ProblemService] detectZeroRentAmountBuildings (Processed: ${processedCount}): SKIPPING Building ${buildingId} (Name: ${buildingName}, Owner: ${owner}, Category: ${category}, RentAmount: ${rentAmount}, RanBy: ${ranBy}). Reason: ${skipReason}`);
+            console.log(`[ProblemService] detectZeroRentAmountBuildings (Processed: ${processedCount}): SKIPPING Building ${buildingId} (Name: ${buildingName}, Owner: ${owner}, Category: ${category}, RentAmount: ${rentAmount}, RunBy: ${runBy}). Reason: ${skipReason}`);
           }
           return; // Skip this building
         }
@@ -527,7 +527,7 @@ export class ProblemService {
         // Log more if a username is specified, or fewer for "all" (e.g., first few passing, or first few problems found).
         const problemsFoundCount = Object.keys(problems).length;
         if (username || processedCount < 10 || (problemsFoundCount < 5 && processedCount < 50) ) { 
-            console.log(`[ProblemService] detectZeroRentAmountBuildings (Processed: ${processedCount}, ProblemsFoundSoFar: ${problemsFoundCount}): CHECKING Building ${buildingId} (Name: ${buildingName}, Owner: ${owner}, Category: ${category}, RentAmount: ${rentAmount}, RanBy: ${ranBy}) for problem generation.`);
+            console.log(`[ProblemService] detectZeroRentAmountBuildings (Processed: ${processedCount}, ProblemsFoundSoFar: ${problemsFoundCount}): CHECKING Building ${buildingId} (Name: ${buildingName}, Owner: ${owner}, Category: ${category}, RentAmount: ${rentAmount}, RunBy: ${runBy}) for problem generation.`);
         }
         
         let problemTypeSpecific = '';
@@ -554,12 +554,12 @@ export class ProblemService {
             }
           }
         } else if (category === 'business') {
-          // For businesses, problem only if Owner is not RanBy
-          if ((rentAmount === 0 || rentAmount === null || rentAmount === undefined) && owner && ranBy && owner !== ranBy) {
+          // For businesses, problem only if Owner is not RunBy
+          if ((rentAmount === 0 || rentAmount === null || rentAmount === undefined) && owner && runBy && owner !== runBy) {
             problemTypeSpecific = 'zero_rent_business_leased';
             title = 'Zero Rent for Leased Business';
-            description = `Your commercial property, **${buildingName}** (ID: ${buildingId}), is being run by **${ranBy}** but has its rent set to 0 Ducats. This means you are not collecting rent from the business operator, missing potential income.`;
-            solutions = `Consider the following actions:\n- Set an appropriate rent amount for the business operator (**${ranBy}**) to pay.\n- Review the lease agreement and terms with the operator.\n- If this zero-rent arrangement is intentional (e.g., a special agreement or subsidiary), you may ignore this notification.`;
+            description = `Your commercial property, **${buildingName}** (ID: ${buildingId}), is being run by **${runBy}** but has its rent set to 0 Ducats. This means you are not collecting rent from the business operator, missing potential income.`;
+            solutions = `Consider the following actions:\n- Set an appropriate rent amount for the business operator (**${runBy}**) to pay.\n- Review the lease agreement and terms with the operator.\n- If this zero-rent arrangement is intentional (e.g., a special agreement or subsidiary), you may ignore this notification.`;
             severity = 'medium';
             generateProblem = true;
           }
@@ -581,7 +581,7 @@ export class ProblemService {
             title,
             description,
             solutions,
-            notes: `Building Category: ${category}. Owner: ${owner}. Occupant: ${occupant || 'N/A'}. RanBy: ${ranBy || 'N/A'}. RentAmount: ${rentAmount === undefined ? 'undefined' : rentAmount === null ? 'null' : rentAmount}.`,
+            notes: `Building Category: ${category}. Owner: ${owner}. Occupant: ${occupant || 'N/A'}. RunBy: ${runBy || 'N/A'}. RentAmount: ${rentAmount === undefined ? 'undefined' : rentAmount === null ? 'null' : rentAmount}.`,
             position: building.position || null,
           };
         }
@@ -845,7 +845,7 @@ export class ProblemService {
 
           if (workplaceBuilding) {
             const workplaceId = workplaceBuilding.id || workplaceBuilding.buildingId || 'UnknownWorkplaceID';
-            const employerUsernameRaw = workplaceBuilding.ranBy; // Expect ranBy from API to be camelCase
+            const employerUsernameRaw = workplaceBuilding.runBy; // Expect runBy from API to be camelCase
             const employerUsernameTrimmed = employerUsernameRaw && typeof employerUsernameRaw === 'string' ? employerUsernameRaw.trim() : null;
             
             const hasValidEmployerField = employerUsernameRaw !== undefined && employerUsernameRaw !== null;
