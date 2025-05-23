@@ -110,14 +110,11 @@ load_dotenv()
 # Constants
 TRANSPORT_API_URL = os.getenv("TRANSPORT_API_URL", "http://localhost:3000/api/transport")
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:3000") # Define API_BASE_URL
-VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
-NIGHT_START_HOUR = 22  # 10 PM
-NIGHT_END_HOUR = 6     # 6 AM
-SHOPPING_START_HOUR = 17 # 5 PM
-SHOPPING_END_HOUR = 20   # 8 PM
-IDLE_ACTIVITY_DURATION_HOURS = 1
-CITIZEN_CARRY_CAPACITY = 10.0
-SOCIAL_CLASS_VALUE = {"Nobili": 4, "Cittadini": 3, "Popolani": 2, "Facchini": 1, "Forestieri": 2}
+# VENICE_TIMEZONE is imported from activity_helpers and used to define now_venice_dt
+# NIGHT_START_HOUR, NIGHT_END_HOUR, SHOPPING_START_HOUR, SHOPPING_END_HOUR
+# are now primarily managed in activity_helpers.py or citizen_general_activities.py
+# IDLE_ACTIVITY_DURATION_HOURS, CITIZEN_CARRY_CAPACITY, SOCIAL_CLASS_VALUE
+# are now primarily managed in citizen_general_activities.py
 
 
 def initialize_airtable():
