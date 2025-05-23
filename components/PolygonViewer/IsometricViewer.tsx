@@ -33,6 +33,8 @@ export default function IsometricViewer({ activeView, fullWaterGraphData }: Isom
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [polygons, setPolygons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [polygonsDataLoaded, setPolygonsDataLoaded] = useState(false); // New state for polygon data readiness
+  const [bgImageReady, setBgImageReady] = useState(false); // New state for background image readiness
   const [landOwners, setLandOwners] = useState<Record<string, string>>({});
   const [citizens, setCitizens] = useState<Record<string, any>>({});
   const [scale, setScale] = useState(3); // Start with a 3x zoom for a closer view
@@ -759,9 +761,12 @@ number => {
     window.dispatchEvent(pathUpdateEvent);
   }, []);
 
-  // Load polygons
+  // Load polygons and background image
   useEffect(() => {
-    console.log('IsometricViewer: Starting to fetch polygons from API...');
+    console.log('IsometricViewer: Initiating data and background image loading...');
+    setLoading(true); // Ensure loading is true at the start
+    setPolygonsDataLoaded(false);
+    setBgImageReady(false);
 
     // Define loading images and select one randomly
     const loadingImageFiles = [
@@ -773,10 +778,25 @@ number => {
 
     if (loadingImageFiles.length > 0) {
       const randomIndex = Math.floor(Math.random() * loadingImageFiles.length);
-      const selectedImage = `/images/loading/${loadingImageFiles[randomIndex]}`;
-      setCurrentLoadingImage(selectedImage);
+      const selectedImageSrc = `/images/loading/${loadingImageFiles[randomIndex]}`;
+      setCurrentLoadingImage(selectedImageSrc);
+
+      const img = new Image();
+      img.onload = () => {
+        console.log('IsometricViewer: Background image loaded successfully.');
+        setBgImageReady(true);
+      };
+      img.onerror = () => {
+        console.warn(`IsometricViewer: Failed to load background image: ${selectedImageSrc}`);
+        setBgImageReady(true); // Mark as ready even on error to not block UI
+      };
+      img.src = selectedImageSrc;
+    } else {
+      console.log('IsometricViewer: No background images defined, marking as ready.');
+      setBgImageReady(true); // No image to load
     }
 
+    // Fetch polygons
     fetch('/api/get-polygons')
       .then(response => {
         console.log(`IsometricViewer: API response status: ${response.status} ${response.statusText}`);
@@ -788,22 +808,15 @@ number => {
           console.log(`IsometricViewer: Setting ${data.polygons.length} polygons to state`);
           setPolygons(data.polygons);
           
-          // Store in window for other components
           if (typeof window !== 'undefined') {
             console.log(`IsometricViewer: Setting window.__polygonData with ${data.polygons.length} polygons`);
             (window as any).__polygonData = data.polygons;
             
-            // IMPORTANT: Import and directly initialize the transport service
             try {
-              // Import the transport service just once
               const { transportService } = require('@/lib/services/TransportService');
               console.log('IsometricViewer: Directly initializing transport service with polygon data');
-              
-              // Use the imported service
               const success = transportService.initializeWithPolygonData(data.polygons);
               console.log(`IsometricViewer: Direct transport service initialization ${success ? 'succeeded' : 'failed'}`);
-              
-              // If direct initialization failed, try the setPolygonsData method as fallback
               if (!success) {
                 console.log('IsometricViewer: Trying setPolygonsData as fallback');
                 const fallbackSuccess = transportService.setPolygonsData(data.polygons);
@@ -818,14 +831,24 @@ number => {
         } else {
           console.error('IsometricViewer: No polygons found in API response');
         }
-        setLoading(false);
+        setPolygonsDataLoaded(true);
       })
       .catch(error => {
         console.error('IsometricViewer: Error loading polygons:', error);
-        setLoading(false);
+        setPolygonsDataLoaded(true); // Mark as attempt complete even on error
       });
   }, []);
-  
+
+  // Effect to manage the main loading state based on data and image readiness
+  useEffect(() => {
+    if (polygonsDataLoaded && bgImageReady) {
+      console.log('IsometricViewer: Both polygons and background image are ready. Hiding loader.');
+      setLoading(false);
+    } else {
+      console.log(`IsometricViewer: Waiting for resources. Polygons loaded: ${polygonsDataLoaded}, BG Image ready: ${bgImageReady}`);
+      setLoading(true);
+    }
+  }, [polygonsDataLoaded, bgImageReady]);
 
   // Handle transport mode activation
   useEffect(() => {
