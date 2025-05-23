@@ -728,6 +728,8 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
     # Sort contracts by CreatedAt to process older ones first
     all_active_import_contracts_master_list.sort(key=lambda x: x['fields'].get('CreatedAt', ''))
     
+    deferred_contract_ids_this_run = set() # Track contracts deferred in this run due to buyer funds
+
     available_public_docks = get_public_docks(tables)
     if not available_public_docks:
         log.error("No public_docks found. Cannot determine galley location. Exiting.")
@@ -825,9 +827,14 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
             cost_for_this_part = price_per_resource * amount_to_take_from_contract
             buyer_balance = get_citizen_balance(tables, buyer_username)
             if buyer_balance < cost_for_this_part:
-                log.warning(f"Buyer {buyer_username} (Balance: {buyer_balance:,.2f}) insufficient for contract {contract_custom_id} part (Cost: {cost_for_this_part:,.2f}). Saving for later.")
-                contracts_for_next_iteration.append(contract_record) # Save for next galley (buyer might get funds)
-                continue
+                if contract_airtable_id in deferred_contract_ids_this_run:
+                    log.warning(f"Buyer {buyer_username} (Balance: {buyer_balance:,.2f}) still insufficient for contract {contract_custom_id} (Cost: {cost_for_this_part:.2f}). Contract previously deferred. Dropping for this script run.")
+                    # Do NOT add to contracts_for_next_iteration to prevent infinite loop
+                else:
+                    log.warning(f"Buyer {buyer_username} (Balance: {buyer_balance:,.2f}) insufficient for contract {contract_custom_id} part (Cost: {cost_for_this_part:.2f}). Saving for later this run.")
+                    contracts_for_next_iteration.append(contract_record) # Save for next galley (buyer might get funds)
+                    deferred_contract_ids_this_run.add(contract_airtable_id)
+                continue # to next contract in the current batch
 
             current_galley_load += amount_to_take_from_contract
             processed_contract_airtable_ids_for_this_batch.add(contract_airtable_id)
