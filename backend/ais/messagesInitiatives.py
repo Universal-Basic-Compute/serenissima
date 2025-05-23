@@ -144,8 +144,8 @@ def _get_relationship_data(tables: Dict[str, Table], username1: str, username2: 
 def _get_notifications_data(tables: Dict[str, Table], username: str, limit: int = 50) -> List[Dict]:
     try:
         safe_username = _escape_airtable_value(username)
-        # S'assurer que le champ Citizen est bien comparé à une chaîne simple.
-        formula = f"{{Citizen}} = '{safe_username}'"
+        # Utiliser FIND pour plus de robustesse si Citizen est un champ de lien ou texte contenant le nom
+        formula = f"FIND('{safe_username}', ARRAYJOIN({{Citizen}})) > 0"
         records = tables["notifications"].all(formula=formula, sort=[('-CreatedAt', 'desc')], max_records=limit)
         return [{'id': r['id'], 'fields': r['fields']} for r in records]
     except Exception as e:
@@ -159,8 +159,13 @@ def _get_relevancies_data(tables: Dict[str, Table], relevant_to_username: str, t
         # Formule simplifiée pour le débogage : ne vérifie que la correspondance exacte.
         # Si RelevantToCitizen ou TargetCitizen peuvent être des listes de liens, cette formule ne fonctionnera pas correctement
         # et nécessitera une approche différente (par exemple, plusieurs requêtes ou une logique de jointure côté client).
-        # Simplification pour le débogage :
-        formula = f"AND({{RelevantToCitizen}} = '{safe_relevant_to_username}', {{TargetCitizen}} = '{safe_target_username}')"
+        # Utiliser FIND pour plus de robustesse
+        formula = (
+            f"AND("
+            f"FIND('{safe_relevant_to_username}', ARRAYJOIN({{RelevantToCitizen}})) > 0,"
+            f"FIND('{safe_target_username}', ARRAYJOIN({{TargetCitizen}})) > 0"
+            f")"
+        )
         records = tables["relevancies"].all(formula=formula, sort=[('-CreatedAt', 'desc')], max_records=limit)
         return [{'id': r['id'], 'fields': r['fields']} for r in records]
     except Exception as e:
@@ -174,8 +179,13 @@ def _get_problems_data(tables: Dict[str, Table], username1: str, username2: str,
         # Simplification pour le débogage :
         # Cette formule OR est généralement correcte, mais si {Citizen} est un champ de lien multiple,
         # la comparaison directe peut être problématique.
-        # Pour l'instant, nous la gardons, mais si l'erreur persiste ici, cela indique un problème avec les champs de lien.
-        formula = f"OR({{Citizen}} = '{safe_username1}', {{Citizen}} = '{safe_username2}')"
+        # Utiliser FIND pour plus de robustesse
+        formula = (
+            f"OR("
+            f"FIND('{safe_username1}', ARRAYJOIN({{Citizen}})) > 0,"
+            f"FIND('{safe_username2}', ARRAYJOIN({{Citizen}})) > 0"
+            f")"
+        )
         records = tables["problems"].all(formula=formula, sort=[('-CreatedAt', 'desc')], max_records=limit)
         return [{'id': r['id'], 'fields': r['fields']} for r in records]
     except Exception as e:
