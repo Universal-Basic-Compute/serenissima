@@ -3296,28 +3296,6 @@ number => {
       }
     }
     
-    // Draw polygons using RenderService, incorporating currentHoverState
-    renderService.drawPolygons(ctx, polygonsToRender, {
-      selectedPolygonId,
-      hoveredPolygonId: currentHoverState.type === 'polygon' ? currentHoverState.id : null,
-    });
-
-    // Draw buildings using RenderService, incorporating currentHoverState
-    if (buildings.length > 0) {
-      renderService.drawBuildings(ctx, buildings, scale, offset, canvas.width, canvas.height, {
-        selectedBuildingId,
-        hoveredBuildingId: currentHoverState.type === 'building' ? currentHoverState.id : null,
-        buildingPositionsCache,
-        buildingColorMode,
-        getBuildingColor,
-        getBuildingOwnerColor,
-        getBuildingCategoryColor,
-        isColorDark,
-        getCurrentCitizenIdentifier,
-        polygonsToRender // Pass polygonsToRender for bridge orientation calculation
-      });
-    }
-    
     // Store current view and scale for comparison in next render
     prevActiveView.current = activeView;
     prevScale.current = scale;
