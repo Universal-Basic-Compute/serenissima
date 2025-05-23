@@ -1381,9 +1381,12 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
             try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso, reason_message="No workplace assigned.")
     return True
 
-def create_activities(dry_run: bool = False):
+def create_activities(dry_run: bool = False, target_citizen_username: Optional[str] = None):
     """Main function to create activities for idle citizens."""
-    log.info(f"{LogColors.HEADER}Starting activity creation process (dry_run: {dry_run}){LogColors.ENDC}")
+    if target_citizen_username:
+        log.info(f"{LogColors.HEADER}Starting activity creation process for citizen '{target_citizen_username}' (dry_run: {dry_run}){LogColors.ENDC}")
+    else:
+        log.info(f"{LogColors.HEADER}Starting activity creation process for all idle citizens (dry_run: {dry_run}){LogColors.ENDC}")
     
     tables = initialize_airtable()
     now_utc_dt = datetime.datetime.now(pytz.UTC) # Define now_utc_dt here
@@ -1394,10 +1397,36 @@ def create_activities(dry_run: bool = False):
         log.error(f"{LogColors.FAIL}Failed to fetch resource definitions. Exiting activity creation.{LogColors.ENDC}")
         return
 
-    idle_citizens = get_idle_citizens(tables)
+    citizens_to_process_list = []
+    if target_citizen_username:
+        # Fetch the specific citizen
+        formula = f"{{Username}} = '{_escape_airtable_value(target_citizen_username)}'"
+        try:
+            target_citizen_records = tables['citizens'].all(formula=formula, max_records=1)
+            if not target_citizen_records:
+                log.error(f"{LogColors.FAIL}Citizen '{target_citizen_username}' not found.{LogColors.ENDC}")
+                return
+            target_citizen_record = target_citizen_records[0]
+
+            # Check if this citizen is idle
+            now_iso_utc = datetime.datetime.now(pytz.UTC).isoformat()
+            activity_formula = f"AND({{Citizen}}='{_escape_airtable_value(target_citizen_username)}', {{StartDate}} <= '{now_iso_utc}', {{EndDate}} >= '{now_iso_utc}')"
+            active_activities = tables['activities'].all(formula=activity_formula, max_records=1)
+            
+            if active_activities:
+                log.info(f"{LogColors.OKBLUE}Citizen '{target_citizen_username}' already has an active activity. No new activity will be created.{LogColors.ENDC}")
+                return # Citizen is busy
+            else:
+                log.info(f"{LogColors.OKGREEN}Citizen '{target_citizen_username}' is idle. Proceeding to create activity.{LogColors.ENDC}")
+                citizens_to_process_list = [target_citizen_record]
+        except Exception as e:
+            log.error(f"{LogColors.FAIL}Error fetching or checking status for citizen '{target_citizen_username}': {e}{LogColors.ENDC}")
+            return
+    else:
+        citizens_to_process_list = get_idle_citizens(tables) # Existing logic for all idle citizens
     
-    if not idle_citizens:
-        log.info(f"{LogColors.OKBLUE}No idle citizens found. Activity creation process complete.{LogColors.ENDC}")
+    if not citizens_to_process_list:
+        log.info(f"{LogColors.OKBLUE}No idle citizens to process.{LogColors.ENDC}")
         return
     
     # Check if it's nighttime in Venice
@@ -1417,31 +1446,39 @@ def create_activities(dry_run: bool = False):
     # Then, attempt to assign citizens to fetch from galleys
     # This pool will be modified by process_galley_unloading_activities
     citizens_still_available_after_final_delivery = list(citizens_available_for_general_activities)
-    if not dry_run:
-        galley_fetch_activities_created = process_galley_unloading_activities(tables, citizens_still_available_after_final_delivery, now_utc_dt)
-        success_count += galley_fetch_activities_created
-    elif dry_run and idle_citizens: # If dry run, simulate checking for galley tasks
-        log.info(f"{LogColors.OKCYAN}[DRY RUN] Would check for merchant galleys with pending deliveries (fetch tasks).{LogColors.ENDC}")
-        log.info(f"{LogColors.OKCYAN}[DRY RUN] Would check for citizens at galleys ready for final delivery tasks.{LogColors.ENDC}")
+    
+    galley_fetch_activities_created = 0 # Initialize here
+    if not target_citizen_username: # Galley tasks are for general pool, not specific citizen run
+        if not dry_run:
+            galley_fetch_activities_created = process_galley_unloading_activities(tables, citizens_still_available_after_final_delivery, now_utc_dt)
+            success_count += galley_fetch_activities_created
+        elif dry_run and citizens_to_process_list: # If dry run, simulate checking for galley tasks
+            log.info(f"{LogColors.OKCYAN}[DRY RUN] Would check for merchant galleys with pending deliveries (fetch tasks).{LogColors.ENDC}")
+            log.info(f"{LogColors.OKCYAN}[DRY RUN] Would check for citizens at galleys ready for final delivery tasks.{LogColors.ENDC}")
 
 
     # Finally, process general activities for any remaining idle citizens
     citizens_for_general_processing = list(citizens_still_available_after_final_delivery) # Use the latest available pool
-    log.info(f"{LogColors.OKBLUE}Processing general activities for {len(citizens_for_general_processing)} remaining idle citizens.{LogColors.ENDC}")
+    if target_citizen_username and citizens_to_process_list: # If specific citizen, only process them
+        citizens_for_general_processing = citizens_to_process_list
+        log.info(f"{LogColors.OKBLUE}Processing general activity for target citizen: {target_citizen_username}.{LogColors.ENDC}")
+    else:
+        log.info(f"{LogColors.OKBLUE}Processing general activities for {len(citizens_for_general_processing)} remaining idle citizens.{LogColors.ENDC}")
 
     for citizen_record in citizens_for_general_processing:
         if dry_run:
             # Avoid double counting if already simulated for galley tasks in dry_run
-            if not (idle_citizens and galley_fetch_activities_created > 0): # Simplified check
-                 log.info(f"{LogColors.OKCYAN}[DRY RUN] Would create general activity for citizen {citizen_record['id']}{LogColors.ENDC}")
+            if not (citizens_to_process_list and galley_fetch_activities_created > 0 and not target_citizen_username): # Simplified check
+                 log.info(f"{LogColors.OKCYAN}[DRY RUN] Would create general activity for citizen {citizen_record['fields'].get('Username', citizen_record['id'])}{LogColors.ENDC}")
                  success_count +=1 # Add to dry run success count
         else:
             activity_created_for_citizen = process_citizen_activity(tables, citizen_record, night_time, resource_defs)
             if activity_created_for_citizen:
                 success_count += 1
     
-    summary_color = LogColors.OKGREEN if success_count == len(idle_citizens) else LogColors.WARNING if success_count > 0 else LogColors.FAIL
-    log.info(f"{summary_color}Activity creation process complete. Total activities created or simulated: {success_count} for {len(idle_citizens)} initially idle citizens.{LogColors.ENDC}")
+    total_citizens_considered = len(citizens_to_process_list)
+    summary_color = LogColors.OKGREEN if success_count == total_citizens_considered else LogColors.WARNING if success_count > 0 else LogColors.FAIL
+    log.info(f"{summary_color}Activity creation process complete. Total activities created or simulated: {success_count} for {total_citizens_considered} citizen(s) considered.{LogColors.ENDC}")
 
 
 def process_final_deliveries_from_galley(tables: Dict[str, Table], citizens_pool: List[Dict], now_utc_dt: datetime.datetime) -> int:
@@ -1747,13 +1784,14 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Create activities for idle citizens.")
     parser.add_argument("--dry-run", action="store_true", help="Run without making changes")
     parser.add_argument("--verbose", action="store_true", help="Enable verbose logging")
+    parser.add_argument("--citizen", type=str, help="Process activities for a specific citizen by username.")
     
     args = parser.parse_args()
     
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
     
-    create_activities(dry_run=args.dry_run)
+    create_activities(dry_run=args.dry_run, target_citizen_username=args.citizen)
 
 def _fetch_and_assign_random_starting_position(tables: Dict[str, Table], citizen_record: Dict) -> Optional[Dict[str, float]]:
     """
