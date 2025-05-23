@@ -233,6 +233,10 @@ export default function IsometricViewer({ activeView, fullWaterGraphData }: Isom
   // Water point mode state
   const [waterPointMode, setWaterPointMode] = useState<boolean>(false);
   // const [waterPoints, setWaterPoints] = useState<any[]>([]); // Removed: waterPoints will come from fullWaterGraphData prop
+
+  // Refs for immersive loading text
+  const loadingTitleRef = useRef<string>('');
+  const loadingSubtitleRef = useRef<string>('');
   
   // Water route mode state
   const [waterRouteMode, setWaterRouteMode] = useState<boolean>(false);
@@ -2010,6 +2014,25 @@ number => {
     try {
       // Set calculating state to true to show loading indicator
       setCalculatingPath(true);
+
+      // Immersive loading messages
+      const loadingTitles = [
+        "Consulting Ancient Maps...",
+        "Charting Venetian Routes...",
+        "Navigating Secret Canals...",
+        "Seeking Gondoliers' Counsel...",
+        "Deciphering Lagoon Mysteries..."
+      ];
+      const loadingSubtitles = [
+        "One moment, please, as the cartographer sketches the way...",
+        "The lagoon's currents are complex, but we shall find the path...",
+        "Every bridge and waterway is being surveyed for the optimal journey...",
+        "La Serenissima unveils its hidden passages...",
+        "Patience, citizen, we are rowing as swiftly as oars allow!"
+      ];
+      loadingTitleRef.current = loadingTitles[Math.floor(Math.random() * loadingTitles.length)];
+      loadingSubtitleRef.current = loadingSubtitles[Math.floor(Math.random() * loadingSubtitles.length)];
+
       console.log('Calculating transport route from', start, 'to', end);
       
       // First, check if we have polygon data available in state
@@ -2067,12 +2090,12 @@ number => {
         ctx.font = '24px "Times New Roman", serif';
         ctx.fillStyle = 'rgba(218, 165, 32, 0.9)';
         ctx.textAlign = 'center';
-        ctx.fillText('Calcolando il Percorso', centerX, centerY - 50);
+        ctx.fillText(loadingTitleRef.current || 'Calculating Route...', centerX, centerY - 50);
         
         // Subtitle
         ctx.font = '16px "Times New Roman", serif';
         ctx.fillStyle = '#FFFFFF';
-        ctx.fillText('Trovando la via migliore attraverso i canali...', centerX, centerY - 10);
+        ctx.fillText(loadingSubtitleRef.current || 'Finding the best path through the canals...', centerX, centerY - 10);
         
         // Animated dots
         const dots = Math.floor((Date.now() / 500) % 4);
