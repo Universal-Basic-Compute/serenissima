@@ -4270,6 +4270,27 @@ number => {
           }}
         />
       )}
+
+      {/* Building Creation Panel */}
+      {showBuildingCreationPanel && selectedPointForCreation && (
+        <BuildingCreationPanel
+          selectedPoint={selectedPointForCreation}
+          onClose={() => {
+            setShowBuildingCreationPanel(false);
+            setSelectedPointForCreation(null);
+          }}
+          onBuild={(buildingType, point, cost) => {
+            // Handle the build action
+            console.log(`Build ${buildingType} at ${point.lat},${point.lng} on polygon ${point.polygonId} (type: ${point.pointType}) for ${cost} ducats`);
+            // Here you would typically call an API to create the building
+            // For now, just close the panel
+            setShowBuildingCreationPanel(false);
+            setSelectedPointForCreation(null);
+            // Potentially refresh buildings data or add the new building optimistically
+            eventBus.emit(EventTypes.BUILDING_PLACED, { type: buildingType, position: {lat: point.lat, lng: point.lng}, land_id: point.polygonId });
+          }}
+        />
+      )}
     </div>
   );
 }
