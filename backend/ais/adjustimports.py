@@ -3,6 +3,7 @@ import sys
 import json
 import traceback
 from datetime import datetime, timedelta
+import pytz # Added for Venice timezone
 from typing import Dict, List, Optional, Tuple, Any
 import requests
 from dotenv import load_dotenv
@@ -308,7 +309,7 @@ def prepare_import_strategy_data(
         "existing_contracts": existing_contracts,
         "latest_citizen_building_problems": citizen_building_problems,
         "latest_general_building_problems": general_building_problems,
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now(pytz.timezone('Europe/Rome')).isoformat()
     }
     
     return data_package
@@ -620,8 +621,11 @@ def create_or_update_import_contract(
         # For now, assuming they are simple strings/IDs.
         custom_contract_id = f"contract-import-{building_id}-{resource_type}"
         
-        now = datetime.now().isoformat()
-        end_date = (datetime.now() + timedelta(weeks=1)).isoformat()  # Contract ends in 1 week
+        VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
+        now_venice = datetime.now(VENICE_TIMEZONE)
+        now_iso = now_venice.isoformat()
+        end_date_venice = now_venice + timedelta(weeks=1)
+        end_date_iso = end_date_venice.isoformat()  # Contract ends in 1 week
 
         # Check if a contract with this custom_contract_id already exists
         existing_contract_record = None
@@ -645,11 +649,11 @@ def create_or_update_import_contract(
             update_fields = {
                 "HourlyAmount": hourly_amount,
                 "PricePerResource": import_price,
-                "EndAt": end_date, # Refresh EndAt
+                "EndAt": end_date_iso, # Refresh EndAt (Venice time ISO)
                 "Notes": json.dumps({
                     "reason": reason,
                     "updated_by": "AI Import Strategy",
-                    "updated_at": now,
+                    "updated_at": now_iso, # Venice time ISO
                     "previous_ContractId_logic": "deterministic_overwrite"
                 })
             }
@@ -680,12 +684,12 @@ def create_or_update_import_contract(
                 "HourlyAmount": hourly_amount,
                 "PricePerResource": import_price,
                 "Priority": 1,  # Default priority
-                "CreatedAt": now,
-                "EndAt": end_date,
+                "CreatedAt": now_iso, # Venice time ISO
+                "EndAt": end_date_iso, # Venice time ISO
                 "Notes": json.dumps({
                     "reason": reason,
                     "created_by": "AI Import Strategy",
-                    "created_at": now,
+                    "created_at": now_iso, # Venice time ISO
                     "ContractId_logic": "deterministic"
                 })
             }
@@ -701,7 +705,9 @@ def create_or_update_import_contract(
 def create_admin_notification(tables, ai_import_results: Dict[str, Dict]) -> None:
     """Create a notification for admins with the AI import strategy results."""
     try:
-        now = datetime.now().isoformat()
+        VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
+        now_venice = datetime.now(VENICE_TIMEZONE)
+        now_iso = now_venice.isoformat()
         
         # Create a summary message
         message = "AI Import Strategy Results:\n\n"

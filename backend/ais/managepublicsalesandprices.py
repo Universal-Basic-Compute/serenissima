@@ -4,6 +4,7 @@ import json
 import traceback
 from collections import defaultdict # Added from setprices.py
 from datetime import datetime, timedelta
+import pytz # Added for Venice timezone
 from typing import Dict, List, Optional, Tuple, Any
 import requests
 from dotenv import load_dotenv
@@ -161,11 +162,13 @@ def get_citizen_resources(tables, username: str) -> List[Dict]:
 def get_citizen_active_contracts(tables, username: str) -> List[Dict]:
     """Get all active contracts where the citizen is the seller."""
     try:
-        # Get current time
-        now = datetime.now().isoformat()
+        # Get current time in Venice timezone
+        VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
+        now_venice = datetime.now(VENICE_TIMEZONE)
+        now_iso_venice = now_venice.isoformat()
         
         # Query contracts where the citizen is the seller and the contract is active (between CreatedAt and EndAt)
-        formula = f"AND({{Seller}}='{username}', {{CreatedAt}}<='{now}', {{EndAt}}>='{now}')"
+        formula = f"AND({{Seller}}='{username}', {{CreatedAt}}<='{now_iso_venice}', {{EndAt}}>='{now_iso_venice}')"
         contracts = tables["contracts"].all(formula=formula)
         print(f"Found {len(contracts)} active contracts where {username} is the seller")
         return contracts
@@ -278,8 +281,10 @@ def get_citizen_problems_from_api(username: str, limit: int = 100) -> List[Dict]
 def get_all_active_public_sell_contracts(tables: Dict[str, Table]) -> List[Dict]:
     """Get all active public_sell contracts from all sellers."""
     try:
-        now = datetime.now().isoformat()
-        formula = f"AND({{Type}}='public_sell', {{CreatedAt}}<='{now}', {{EndAt}}>='{now}')"
+        VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
+        now_venice = datetime.now(VENICE_TIMEZONE)
+        now_iso_venice = now_venice.isoformat()
+        formula = f"AND({{Type}}='public_sell', {{CreatedAt}}<='{now_iso_venice}', {{EndAt}}>='{now_iso_venice}')"
         contracts = tables["contracts"].all(formula=formula)
         print(f"Found {len(contracts)} active public_sell contracts globally.")
         return contracts
@@ -448,7 +453,7 @@ def prepare_sales_and_price_strategy_data(
         "existing_ai_public_sell_contracts": existing_ai_public_sell_contracts,
         "latest_relevancies": latest_relevancies[:10], # Limit for brevity
         "latest_problems": latest_problems[:10],     # Limit for brevity
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now(pytz.timezone('Europe/Rome')).isoformat()
     }
     return data_package
 
@@ -677,10 +682,12 @@ def create_or_update_public_sell_contract_from_decision(
         # This ensures one active public sell contract per resource, per building, per AI.
         custom_contract_id = f"contract-public-sell-{ai_username}-{building_id}-{resource_type}"
         
-        now = datetime.now()
-        now_iso = now.isoformat()
+        VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
+        now_venice = datetime.now(VENICE_TIMEZONE)
+        now_iso = now_venice.isoformat()
         # Public sell contracts are set for 47 hours as per existing logic
-        end_date_iso = (now + timedelta(hours=47)).isoformat()
+        end_date_venice = now_venice + timedelta(hours=47)
+        end_date_iso = end_date_venice.isoformat()
 
         existing_contract_record = None
         try:
@@ -748,7 +755,9 @@ def end_public_sell_contract( # Renamed from original for clarity, functionality
             return False
         
         record_id = contracts_to_end[0]["id"]
-        now_iso = datetime.now().isoformat()
+        VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
+        now_venice = datetime.now(VENICE_TIMEZONE)
+        now_iso = now_venice.isoformat()
         
         # Preserve existing notes if possible, or append to them
         existing_notes_str = contracts_to_end[0]["fields"].get("Notes", "{}")
@@ -780,7 +789,9 @@ def end_public_sell_contract( # Renamed from original for clarity, functionality
 def create_admin_notification(tables: Dict[str, Table], ai_sales_and_price_results: Dict[str, Dict]) -> None:
     """Create a notification for admins with the AI sales and price strategy results."""
     try:
-        now_iso = datetime.now().isoformat()
+        VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
+        now_venice = datetime.now(VENICE_TIMEZONE)
+        now_iso = now_venice.isoformat()
         message = "AI Public Sales & Pricing Strategy Results:\n\n"
 
         for ai_name, results in ai_sales_and_price_results.items():
