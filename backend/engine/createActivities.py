@@ -77,6 +77,11 @@ from backend.engine.utils.activity_helpers import (
     get_idle_citizens,
     _fetch_and_assign_random_starting_position
 )
+# Import galley activity processing functions
+from backend.engine.logic.galley_activities import (
+    process_final_deliveries_from_galley,
+    process_galley_unloading_activities
+)
 
 # Set up logging
 logging.basicConfig(
@@ -1173,13 +1178,13 @@ def create_activities(dry_run: bool = False, target_citizen_username: Optional[s
     if not dry_run:
         # Attempt final deliveries first
         if citizens_remaining_idle: # Check if there's anyone to process
-            final_delivery_activities_created = process_final_deliveries_from_galley(tables, citizens_remaining_idle, now_venice_dt)
+            final_delivery_activities_created = process_final_deliveries_from_galley(tables, citizens_remaining_idle, now_venice_dt, TRANSPORT_API_URL)
             success_count += final_delivery_activities_created
             # citizens_remaining_idle is modified in place by process_final_deliveries_from_galley
 
         # Then, attempt galley unloading for citizens still idle
         if citizens_remaining_idle: # Check if there's anyone left
-            galley_fetch_activities_created = process_galley_unloading_activities(tables, citizens_remaining_idle, now_venice_dt)
+            galley_fetch_activities_created = process_galley_unloading_activities(tables, citizens_remaining_idle, now_venice_dt, TRANSPORT_API_URL)
             success_count += galley_fetch_activities_created
             # citizens_remaining_idle is modified in place by process_galley_unloading_activities
     
