@@ -10,6 +10,7 @@ import sys
 import json
 import logging
 import argparse
+import math # Added import
 import requests
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Any
@@ -205,12 +206,16 @@ def main(dry_run: bool = False):
             hours_passed = (now_utc - last_consumed_dt).total_seconds() / 3600
             if hours_passed < 0: hours_passed = 0 
 
-            units_to_consume = int(hours_passed // consumption_hours)
+            units_to_consume = int(hours_passed // consumption_hours) # Number of consumption cycles
 
             if units_to_consume > 0:
-                actual_units_consumed = min(units_to_consume, current_count)
+                # Consider only the whole units available for consumption
+                available_whole_units = math.floor(current_count)
+                actual_units_consumed = min(units_to_consume, available_whole_units)
+                
                 if actual_units_consumed > 0:
-                    new_count = current_count - actual_units_consumed
+                    # Subtract the integer amount consumed from the potentially fractional current_count
+                    new_count = current_count - actual_units_consumed 
                     log_message = (f"Occupant {actual_occupant_username} in home {building_custom_id} "
                                    f"consumes {actual_units_consumed:.2f} unit(s) of {resource_type_id}. "
                                    f"Old count: {current_count:.2f}, New count: {new_count:.2f}.")

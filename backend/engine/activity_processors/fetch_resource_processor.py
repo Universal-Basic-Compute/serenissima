@@ -5,6 +5,7 @@ The citizen buys the resources on behalf of the contract's buyer.
 """
 import json
 import logging
+import math # Added import
 import uuid
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any
@@ -148,13 +149,15 @@ def process(
     carrier_current_load = get_citizen_current_load(tables, carrier_custom_id)
     carrier_remaining_capacity = max(0, CITIZEN_STORAGE_CAPACITY - carrier_current_load)
 
-    stock_at_source = get_source_building_resource_stock(tables, from_building_custom_id, resource_id_to_fetch, effective_seller_username)
+    raw_stock_at_source = get_source_building_resource_stock(tables, from_building_custom_id, resource_id_to_fetch, effective_seller_username)
+    effective_stock_at_source = math.floor(raw_stock_at_source)
+    log.info(f"Stock at source for {resource_id_to_fetch} in {from_building_custom_id}: Raw={raw_stock_at_source}, Effective (floor)={effective_stock_at_source}")
 
     # 3. Determine actual amount to purchase
     amount_to_purchase = desired_amount_to_fetch
-    if amount_to_purchase > stock_at_source:
-        log.info(f"Desired amount {desired_amount_to_fetch} of {resource_id_to_fetch} exceeds stock {stock_at_source} at {from_building_custom_id}. Limiting to stock.")
-        amount_to_purchase = stock_at_source
+    if amount_to_purchase > effective_stock_at_source:
+        log.info(f"Desired amount {desired_amount_to_fetch} of {resource_id_to_fetch} exceeds effective stock {effective_stock_at_source} at {from_building_custom_id}. Limiting to effective stock.")
+        amount_to_purchase = effective_stock_at_source
     
     if amount_to_purchase > carrier_remaining_capacity:
         log.info(f"Amount {amount_to_purchase} of {resource_id_to_fetch} exceeds carrier {carrier_username} capacity {carrier_remaining_capacity}. Limiting to capacity.")
