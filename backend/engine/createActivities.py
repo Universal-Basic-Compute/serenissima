@@ -444,7 +444,7 @@ def get_idle_citizens(tables) -> List[Dict]:
 def _escape_airtable_value(value: str) -> str:
     """Escapes single quotes for Airtable formulas."""
     if isinstance(value, str):
-        return value.replace("'", "\\'")
+        return value
     return str(value)
 
 # Helper functions for position and distance
