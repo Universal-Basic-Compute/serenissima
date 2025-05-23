@@ -54,6 +54,18 @@ import math # Added for Haversine distance
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any
 
+# Define ANSI color codes for logging
+class LogColors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 # Add the project root to sys.path to allow imports from backend.engine
 # Corrected sys.path manipulation:
 # os.path.dirname(__file__) -> backend/engine
@@ -76,7 +88,7 @@ log = logging.getLogger("process_activities")
 def process_placeholder_activity_fn(tables, activity_record, building_type_defs, resource_defs):
     activity_guid = activity_record['fields'].get('ActivityId', activity_record['id'])
     activity_type = activity_record['fields'].get('Type')
-    log.info(f"Activity {activity_guid} (type: {activity_type}) processed by placeholder (e.g., expired or simple state change).")
+    log.info(f"{LogColors.OKCYAN}Activity {activity_guid} (type: {activity_type}) processed by placeholder (e.g., expired or simple state change).{LogColors.ENDC}")
     return True
 
 # Attempt to import helper functions from other engine scripts
@@ -95,7 +107,7 @@ try:
     )
 except ImportError:
     # Fallback if the script is run in a context where backend.engine is not directly importable
-    log.warning("Could not import helper functions directly. Ensure PYTHONPATH is set correctly or run as part of the application.")
+    log.warning(f"{LogColors.WARNING}Could not import helper functions directly. Ensure PYTHONPATH is set correctly or run as part of the application.{LogColors.ENDC}")
     # Define placeholder functions or exit if these are critical
     def get_building_type_definitions_from_api():
         raise NotImplementedError("get_building_type_definitions_from_api is not available")
@@ -131,7 +143,7 @@ def initialize_airtable() -> Optional[Dict[str, Table]]:
     base_id = os.environ.get('AIRTABLE_BASE_ID')
     
     if not api_key or not base_id:
-        log.error("Missing Airtable credentials. Set AIRTABLE_API_KEY and AIRTABLE_BASE_ID environment variables.")
+        log.error(f"{LogColors.FAIL}Missing Airtable credentials. Set AIRTABLE_API_KEY and AIRTABLE_BASE_ID environment variables.{LogColors.ENDC}")
         return None
     
     try:
@@ -146,7 +158,7 @@ def initialize_airtable() -> Optional[Dict[str, Table]]:
             'problems': Table(api_key, base_id, 'PROBLEMS') # For logging issues
         }
     except Exception as e:
-        log.error(f"Failed to initialize Airtable: {e}")
+        log.error(f"{LogColors.FAIL}Failed to initialize Airtable: {e}{LogColors.ENDC}")
         return None
 
 def _escape_airtable_value(value: str) -> str:
@@ -161,10 +173,10 @@ def get_concluded_unprocessed_activities(tables: Dict[str, Table]) -> List[Dict]
     formula = f"AND({{EndDate}} <= '{now_iso}', OR({{Status}} = BLANK(), {{Status}} != 'processed', {{Status}} != 'failed'))"
     try:
         activities = tables['activities'].all(formula=formula)
-        log.info(f"Found {len(activities)} concluded and unprocessed activities.")
+        log.info(f"{LogColors.OKBLUE}Found {len(activities)} concluded and unprocessed activities.{LogColors.ENDC}")
         return activities
     except Exception as e:
-        log.error(f"Error fetching concluded unprocessed activities: {e}")
+        log.error(f"{LogColors.FAIL}Error fetching concluded unprocessed activities: {e}{LogColors.ENDC}")
         return []
 
 def get_citizen_record(tables: Dict[str, Table], username: str) -> Optional[Dict]:
@@ -174,7 +186,7 @@ def get_citizen_record(tables: Dict[str, Table], username: str) -> Optional[Dict
         records = tables['citizens'].all(formula=formula, max_records=1)
         return records[0] if records else None
     except Exception as e:
-        log.error(f"Error fetching citizen record for {username}: {e}")
+        log.error(f"{LogColors.FAIL}Error fetching citizen record for {username}: {e}{LogColors.ENDC}")
         return None
 
 def get_building_record(tables: Dict[str, Table], building_id: str) -> Optional[Dict]:
@@ -184,7 +196,7 @@ def get_building_record(tables: Dict[str, Table], building_id: str) -> Optional[
         records = tables['buildings'].all(formula=formula, max_records=1)
         return records[0] if records else None
     except Exception as e:
-        log.error(f"Error fetching building record for {building_id}: {e}")
+        log.error(f"{LogColors.FAIL}Error fetching building record for {building_id}: {e}{LogColors.ENDC}")
         return None
 
 def get_contract_record(tables: Dict[str, Table], contract_id: str) -> Optional[Dict]:
@@ -194,7 +206,7 @@ def get_contract_record(tables: Dict[str, Table], contract_id: str) -> Optional[
         records = tables['contracts'].all(formula=formula, max_records=1)
         return records[0] if records else None
     except Exception as e:
-        log.error(f"Error fetching contract record for {contract_id}: {e}")
+        log.error(f"{LogColors.FAIL}Error fetching contract record for {contract_id}: {e}{LogColors.ENDC}")
         return None
 
 def get_building_current_storage(tables: Dict[str, Table], building_custom_id: str) -> float:
@@ -206,9 +218,9 @@ def get_building_current_storage(tables: Dict[str, Table], building_custom_id: s
         resources_in_building = tables['resources'].all(formula=formula)
         for resource in resources_in_building:
             total_stored_volume += float(resource['fields'].get('Count', 0))
-        log.info(f"Building {building_custom_id} currently stores {total_stored_volume} units of resources.")
+        log.info(f"{LogColors.OKBLUE}Building {building_custom_id} currently stores {total_stored_volume} units of resources.{LogColors.ENDC}")
     except Exception as e:
-        log.error(f"Error calculating current storage for building {building_custom_id}: {e}")
+        log.error(f"{LogColors.FAIL}Error calculating current storage for building {building_custom_id}: {e}{LogColors.ENDC}")
     return total_stored_volume
 
 # Removed process_deliver_resource_batch function from here. It's now in its own module.
@@ -217,9 +229,9 @@ def update_activity_status(tables: Dict[str, Table], activity_airtable_id: str, 
     """Updates the status of an activity."""
     try:
         tables['activities'].update(activity_airtable_id, {'Status': status})
-        log.info(f"Updated activity {activity_airtable_id} status to '{status}'.")
+        log.info(f"{LogColors.OKGREEN}Updated activity {activity_airtable_id} status to '{status}'.{LogColors.ENDC}")
     except Exception as e:
-        log.error(f"Error updating status for activity {activity_airtable_id}: {e}")
+        log.error(f"{LogColors.FAIL}Error updating status for activity {activity_airtable_id}: {e}{LogColors.ENDC}")
 
 def _haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """Calculate distance in kilometers between two lat/lng points using Haversine formula."""
@@ -249,7 +261,7 @@ def calculate_gondola_travel_details(path_json_string: Optional[str]) -> tuple[f
     try:
         path_points = json.loads(path_json_string)
     except json.JSONDecodeError:
-        log.error(f"Failed to parse path JSON: {path_json_string}")
+        log.error(f"{LogColors.FAIL}Failed to parse path JSON: {path_json_string}{LogColors.ENDC}")
         return 0.0, 0.0
 
     if not isinstance(path_points, list) or len(path_points) < 2:
@@ -268,45 +280,45 @@ def calculate_gondola_travel_details(path_json_string: Optional[str]) -> tuple[f
                     segment_distance = _haversine_distance(lat1, lon1, lat2, lon2)
                     total_gondola_distance_km += segment_distance
             except (TypeError, ValueError) as e:
-                log.warning(f"Could not parse coordinates for path segment: {p1} to {p2}. Error: {e}")
+                log.warning(f"{LogColors.WARNING}Could not parse coordinates for path segment: {p1} to {p2}. Error: {e}{LogColors.ENDC}")
                 continue
     
     fee = 0.0
     if total_gondola_distance_km > 0:
         fee = 10 + (5 * total_gondola_distance_km)
-        log.info(f"Calculated gondola travel: Distance={total_gondola_distance_km:.2f} km, Fee={fee:.2f} Ducats.")
+        log.info(f"{LogColors.OKBLUE}Calculated gondola travel: Distance={total_gondola_distance_km:.2f} km, Fee={fee:.2f} Ducats.{LogColors.ENDC}")
     
     return total_gondola_distance_km, fee
 
 def process_building_arrivals(tables: Dict[str, Table], dry_run: bool = False):
     """Checks for buildings (e.g., merchant galleys) that have 'arrived'."""
-    log.info("Checking for building arrivals (e.g., merchant galleys)...")
+    log.info(f"{LogColors.OKBLUE}Checking for building arrivals (e.g., merchant galleys)...{LogColors.ENDC}")
     now_iso = datetime.now(timezone.utc).isoformat()
     # Check for merchant galleys specifically, using ConstructionDate as the arrival time
     formula = f"AND({{Type}}='merchant_galley', {{IsConstructed}}=FALSE(), {{ConstructionDate}}<='{now_iso}')"
     try:
         arrived_buildings = tables['buildings'].all(formula=formula)
         if not arrived_buildings:
-            log.info("No merchant galleys have arrived at this time.")
+            log.info(f"{LogColors.OKBLUE}No merchant galleys have arrived at this time.{LogColors.ENDC}")
             return
 
         for building_record in arrived_buildings:
             building_id_airtable = building_record['id']
             building_custom_id = building_record['fields'].get('BuildingId', building_id_airtable)
-            log.info(f"Merchant galley {building_custom_id} (Airtable ID: {building_id_airtable}) has arrived.")
+            log.info(f"{LogColors.OKGREEN}Merchant galley {building_custom_id} (Airtable ID: {building_id_airtable}) has arrived.{LogColors.ENDC}")
             if not dry_run:
                 try:
                     tables['buildings'].update(building_id_airtable, {'IsConstructed': True})
-                    log.info(f"Updated merchant galley {building_custom_id} to IsConstructed=True.")
+                    log.info(f"{LogColors.OKGREEN}Updated merchant galley {building_custom_id} to IsConstructed=True.{LogColors.ENDC}")
                 except Exception as e_update:
-                    log.error(f"Error updating IsConstructed for galley {building_custom_id}: {e_update}")
+                    log.error(f"{LogColors.FAIL}Error updating IsConstructed for galley {building_custom_id}: {e_update}{LogColors.ENDC}")
             else:
-                log.info(f"[DRY RUN] Would update merchant galley {building_custom_id} to IsConstructed=True.")
+                log.info(f"{LogColors.OKCYAN}[DRY RUN] Would update merchant galley {building_custom_id} to IsConstructed=True.{LogColors.ENDC}")
     except Exception as e_fetch:
-        log.error(f"Error fetching arriving buildings: {e_fetch}")
+        log.error(f"{LogColors.FAIL}Error fetching arriving buildings: {e_fetch}{LogColors.ENDC}")
 
 def main(dry_run: bool = False):
-    log.info(f"Starting Process Activities script (dry_run={dry_run})...")
+    log.info(f"{LogColors.OKCYAN}Starting Process Activities script (dry_run={dry_run})...{LogColors.ENDC}")
 
     # Define a dictionary to map activity types to their processor functions
     ACTIVITY_PROCESSORS = {
@@ -326,7 +338,7 @@ def main(dry_run: bool = False):
 
     tables = initialize_airtable()
     if not tables:
-        log.error("Failed to initialize Airtable. Exiting.")
+        log.error(f"{LogColors.FAIL}Failed to initialize Airtable. Exiting.{LogColors.ENDC}")
         return
 
     # Process building arrivals (e.g., galleys)
@@ -337,12 +349,12 @@ def main(dry_run: bool = False):
     resource_defs = get_resource_definitions_from_api()
 
     if not building_type_defs or not resource_defs:
-        log.error("Failed to fetch building or resource definitions. Exiting.")
+        log.error(f"{LogColors.FAIL}Failed to fetch building or resource definitions. Exiting.{LogColors.ENDC}")
         return
 
     activities_to_process = get_concluded_unprocessed_activities(tables)
     if not activities_to_process:
-        log.info("No activities to process.")
+        log.info(f"{LogColors.OKBLUE}No activities to process.{LogColors.ENDC}")
         return
 
     processed_count = 0
@@ -353,16 +365,16 @@ def main(dry_run: bool = False):
         activity_id_airtable = activity_record['id']
         activity_guid = activity_record['fields'].get('ActivityId', activity_id_airtable)
 
-        log.info(f"--- Processing activity {activity_guid} of type {activity_type} ---")
+        log.info(f"{LogColors.HEADER}--- Processing activity {activity_guid} of type {activity_type} ---{LogColors.ENDC}")
         
         success = False
         if dry_run:
-            log.info(f"[DRY RUN] Would process activity {activity_guid} of type {activity_type}.")
+            log.info(f"{LogColors.OKCYAN}[DRY RUN] Would process activity {activity_guid} of type {activity_type}.{LogColors.ENDC}")
             if activity_type in ACTIVITY_PROCESSORS:
-                log.info(f"[DRY RUN] Processor for {activity_type} exists.")
+                log.info(f"{LogColors.OKCYAN}[DRY RUN] Processor for {activity_type} exists.{LogColors.ENDC}")
                 success = True # Simulate success for dry run if processor exists
             else:
-                log.warning(f"[DRY RUN] No processor found for activity type: {activity_type} for activity {activity_guid}. Would mark as failed.")
+                log.warning(f"{LogColors.WARNING}[DRY RUN] No processor found for activity type: {activity_type} for activity {activity_guid}. Would mark as failed.{LogColors.ENDC}")
                 success = False
         else:
             if activity_type in ACTIVITY_PROCESSORS:
@@ -370,12 +382,12 @@ def main(dry_run: bool = False):
                 try:
                     success = processor_func(tables, activity_record, building_type_defs, resource_defs)
                 except Exception as e_process:
-                    log.error(f"Error processing activity {activity_guid} of type {activity_type}: {e_process}")
+                    log.error(f"{LogColors.FAIL}Error processing activity {activity_guid} of type {activity_type}: {e_process}{LogColors.ENDC}")
                     import traceback
                     log.error(traceback.format_exc())
                     success = False
             else:
-                log.warning(f"No processor found for activity type: {activity_type} for activity {activity_guid}. Marking as failed.")
+                log.warning(f"{LogColors.WARNING}No processor found for activity type: {activity_type} for activity {activity_guid}. Marking as failed.{LogColors.ENDC}")
                 success = False
 
         if success:
@@ -401,12 +413,12 @@ def main(dry_run: bool = False):
                         if transporter_citizen_record_check:
                             fee_recipient_username = transporter_username
                             determined_recipient_from_transporter_field = True
-                            log.info(f"Gondola fee for activity {activity_guid} initially assigned to Transporter field value (citizen): {transporter_username}")
+                            log.info(f"{LogColors.OKBLUE}Gondola fee for activity {activity_guid} initially assigned to Transporter field value (citizen): {transporter_username}{LogColors.ENDC}")
                         # else: Transporter field is not a known citizen, will try path or default to Consiglio
 
                     if not determined_recipient_from_transporter_field:
                         # Try to find recipient from path if Transporter field didn't yield one (or was Consiglio/empty/invalid)
-                        log.info(f"Transporter field for activity {activity_guid} did not yield a specific recipient (value: {transporter_username}). Checking path for public_dock operator.")
+                        log.info(f"{LogColors.OKBLUE}Transporter field for activity {activity_guid} did not yield a specific recipient (value: {transporter_username}). Checking path for public_dock operator.{LogColors.ENDC}")
                         try:
                             path_points = json.loads(activity_path_json) if activity_path_json else []
                             for point in path_points:
@@ -419,18 +431,18 @@ def main(dry_run: bool = False):
                                             run_by_citizen_check = get_citizen_record(tables, run_by_user)
                                             if run_by_citizen_check:
                                                 fee_recipient_username = run_by_user
-                                                log.info(f"Gondola fee for activity {activity_guid} reassigned to RunBy ({run_by_user}) of public_dock {dock_building_id} found in path.")
+                                                log.info(f"{LogColors.OKBLUE}Gondola fee for activity {activity_guid} reassigned to RunBy ({run_by_user}) of public_dock {dock_building_id} found in path.{LogColors.ENDC}")
                                                 break # Found a valid recipient from path
                                             else:
-                                                log.warning(f"RunBy user {run_by_user} for public_dock {dock_building_id} (from path) not found. Checking next dock in path.")
+                                                log.warning(f"{LogColors.WARNING}RunBy user {run_by_user} for public_dock {dock_building_id} (from path) not found. Checking next dock in path.{LogColors.ENDC}")
                                         # else: Dock has no RunBy or RunBy is Consiglio, check next dock
                                     # else: Not a public_dock, or dock not found, check next point
                         except json.JSONDecodeError:
-                            log.error(f"Failed to parse activity path JSON for activity {activity_guid} while checking for dock operator: {activity_path_json}")
+                            log.error(f"{LogColors.FAIL}Failed to parse activity path JSON for activity {activity_guid} while checking for dock operator: {activity_path_json}{LogColors.ENDC}")
                         
                         if fee_recipient_username == "ConsiglioDeiDieci" and transporter_username and transporter_username != "ConsiglioDeiDieci":
                             # This case means Transporter field had a value, it wasn't a valid citizen, and no path dock operator was found.
-                            log.warning(f"Transporter {transporter_username} in activity {activity_guid} was not a valid citizen, and no public_dock operator found in path. Fee defaults to ConsiglioDeiDieci.")
+                            log.warning(f"{LogColors.WARNING}Transporter {transporter_username} in activity {activity_guid} was not a valid citizen, and no public_dock operator found in path. Fee defaults to ConsiglioDeiDieci.{LogColors.ENDC}")
                     
                     fee_recipient_record = get_citizen_record(tables, fee_recipient_username)
 
@@ -460,19 +472,19 @@ def main(dry_run: bool = False):
                                 "ExecutedAt": now_iso_fee
                             }
                             tables['transactions'].create(transaction_payload)
-                            log.info(f"Citizen {citizen_username_for_fee} paid {gondola_fee:.2f} Ducats gondola fee to {fee_recipient_username} for activity {activity_guid}. Distance: {gondola_distance_km:.2f} km.")
+                            log.info(f"{LogColors.OKGREEN}Citizen {citizen_username_for_fee} paid {gondola_fee:.2f} Ducats gondola fee to {fee_recipient_username} for activity {activity_guid}. Distance: {gondola_distance_km:.2f} km.{LogColors.ENDC}")
                         else:
-                            log.warning(f"Citizen {citizen_username_for_fee} has insufficient Ducats ({traveler_ducats:.2f}) for gondola fee ({gondola_fee:.2f}) for activity {activity_guid}.")
+                            log.warning(f"{LogColors.WARNING}Citizen {citizen_username_for_fee} has insufficient Ducats ({traveler_ducats:.2f}) for gondola fee ({gondola_fee:.2f}) for activity {activity_guid}.{LogColors.ENDC}")
                             # Consider creating a problem or debt record here in the future
                     else:
-                        if not traveler_citizen_record: log.error(f"Traveler citizen {citizen_username_for_fee} not found for gondola fee.")
-                        if not fee_recipient_record: log.error(f"Fee recipient citizen {fee_recipient_username} not found for gondola fee.")
+                        if not traveler_citizen_record: log.error(f"{LogColors.FAIL}Traveler citizen {citizen_username_for_fee} not found for gondola fee.{LogColors.ENDC}")
+                        if not fee_recipient_record: log.error(f"{LogColors.FAIL}Fee recipient citizen {fee_recipient_username} not found for gondola fee.{LogColors.ENDC}")
             elif dry_run and activity_path_json and citizen_username_for_fee:
                  gondola_distance_km, gondola_fee = calculate_gondola_travel_details(activity_path_json)
                  if gondola_fee > 0:
                     fee_recipient_username_dry_run = transporter_username if transporter_username and transporter_username != "ConsiglioDeiDieci" else "ConsiglioDeiDieci"
                     # In a dry run, we can't confirm if transporter_username is a valid citizen, so we assume it would be if not Consiglio.
-                    log.info(f"[DRY RUN] Would process gondola fee of {gondola_fee:.2f} Ducats for citizen {citizen_username_for_fee} to {fee_recipient_username_dry_run} for activity {activity_guid} (Distance: {gondola_distance_km:.2f} km).")
+                    log.info(f"{LogColors.OKCYAN}[DRY RUN] Would process gondola fee of {gondola_fee:.2f} Ducats for citizen {citizen_username_for_fee} to {fee_recipient_username_dry_run} for activity {activity_guid} (Distance: {gondola_distance_km:.2f} km).{LogColors.ENDC}")
 
 
             # Update citizen's position and UpdatedAt if ToBuilding is present,
@@ -495,7 +507,7 @@ def main(dry_run: bool = False):
                             
                             # If Position field is empty, try to parse from BuildingId or Point
                             if not building_position_str:
-                                log.info(f"Building {to_building_custom_id} 'Position' field is empty. Attempting to parse from BuildingId or Point.")
+                                log.info(f"{LogColors.OKBLUE}Building {to_building_custom_id} 'Position' field is empty. Attempting to parse from BuildingId or Point.{LogColors.ENDC}")
                                 parsed_pos_coords = None
                                 
                                 # Try parsing from BuildingId (e.g., "building_lat_lng..." or "canal_lat_lng...")
@@ -506,9 +518,9 @@ def main(dry_run: bool = False):
                                         lat = float(parts[1])
                                         lng = float(parts[2])
                                         parsed_pos_coords = {"lat": lat, "lng": lng}
-                                        log.info(f"Parsed position {parsed_pos_coords} from BuildingId '{building_id_str_for_parse}'.")
+                                        log.info(f"{LogColors.OKBLUE}Parsed position {parsed_pos_coords} from BuildingId '{building_id_str_for_parse}'.{LogColors.ENDC}")
                                     except (ValueError, IndexError):
-                                        log.debug(f"Could not parse lat/lng from BuildingId '{building_id_str_for_parse}'.")
+                                        log.debug(f"{LogColors.WARNING}Could not parse lat/lng from BuildingId '{building_id_str_for_parse}'.{LogColors.ENDC}")
                                         # Continue to try Point field
 
                                 # If not found in BuildingId, try parsing from Point field
@@ -521,13 +533,13 @@ def main(dry_run: bool = False):
                                                 lat = float(point_parts[1])
                                                 lng = float(point_parts[2])
                                                 parsed_pos_coords = {"lat": lat, "lng": lng}
-                                                log.info(f"Parsed position {parsed_pos_coords} from Point field '{point_field_str}'.")
+                                                log.info(f"{LogColors.OKBLUE}Parsed position {parsed_pos_coords} from Point field '{point_field_str}'.{LogColors.ENDC}")
                                             except (ValueError, IndexError):
-                                                log.debug(f"Could not parse lat/lng from Point field '{point_field_str}'.")
+                                                log.debug(f"{LogColors.WARNING}Could not parse lat/lng from Point field '{point_field_str}'.{LogColors.ENDC}")
                                         else:
-                                            log.debug(f"Point field '{point_field_str}' not in expected format for parsing.")
+                                            log.debug(f"{LogColors.WARNING}Point field '{point_field_str}' not in expected format for parsing.{LogColors.ENDC}")
                                     else:
-                                        log.debug(f"Point field is empty or not a string for building {to_building_custom_id}.")
+                                        log.debug(f"{LogColors.WARNING}Point field is empty or not a string for building {to_building_custom_id}.{LogColors.ENDC}")
                                 
                                 if parsed_pos_coords:
                                     building_position_str = json.dumps(parsed_pos_coords)
@@ -538,30 +550,30 @@ def main(dry_run: bool = False):
                                     # 'UpdatedAt' is automatically handled by Airtable on record update
                                 }
                                 tables['citizens'].update(citizen_record_for_pos['id'], update_payload)
-                                log.info(f"Updated citizen {citizen_username_for_pos} Position to {building_position_str} (Building Custom ID: {to_building_custom_id}).")
+                                log.info(f"{LogColors.OKGREEN}Updated citizen {citizen_username_for_pos} Position to {building_position_str} (Building Custom ID: {to_building_custom_id}).{LogColors.ENDC}")
                             else:
-                                log.warning(f"Building {to_building_custom_id} is missing a parsable Position, BuildingId, or Point. Cannot update citizen {citizen_username_for_pos} position.")
+                                log.warning(f"{LogColors.WARNING}Building {to_building_custom_id} is missing a parsable Position, BuildingId, or Point. Cannot update citizen {citizen_username_for_pos} position.{LogColors.ENDC}")
                         else: 
                             if not building_record_for_pos:
-                                log.warning(f"Target building (Custom ID: {to_building_custom_id}) not found. Cannot update citizen {citizen_username_for_pos} position.")
+                                log.warning(f"{LogColors.WARNING}Target building (Custom ID: {to_building_custom_id}) not found. Cannot update citizen {citizen_username_for_pos} position.{LogColors.ENDC}")
                             if not citizen_record_for_pos: 
-                                log.warning(f"Citizen {citizen_username_for_pos} not found. Cannot update citizen position.")
+                                log.warning(f"{LogColors.WARNING}Citizen {citizen_username_for_pos} not found. Cannot update citizen position.{LogColors.ENDC}")
                     except Exception as e_update_pos:
-                        log.error(f"Error updating citizen {citizen_username_for_pos} position after activity {activity_guid}: {e_update_pos}")
+                        log.error(f"{LogColors.FAIL}Error updating citizen {citizen_username_for_pos} position after activity {activity_guid}: {e_update_pos}{LogColors.ENDC}")
             elif dry_run and activity_type not in no_pos_update_types:
                 to_building_custom_id_dry = activity_record['fields'].get('ToBuilding')
                 citizen_username_dry = activity_record['fields'].get('Citizen')
                 if to_building_custom_id_dry and citizen_username_dry:
-                    log.info(f"[DRY RUN] Would update citizen {citizen_username_dry} position based on ToBuilding (Custom ID: {to_building_custom_id_dry}).")
+                    log.info(f"{LogColors.OKCYAN}[DRY RUN] Would update citizen {citizen_username_dry} position based on ToBuilding (Custom ID: {to_building_custom_id_dry}).{LogColors.ENDC}")
 
         else: # if not success
             update_activity_status(tables, activity_id_airtable, "failed")
             failed_count += 1
         
-        log.info(f"--- Finished processing activity {activity_guid} ---")
+        log.info(f"{LogColors.HEADER}--- Finished processing activity {activity_guid} ---{LogColors.ENDC}")
 
-
-    log.info(f"Process Activities script finished. Processed: {processed_count}, Failed: {failed_count}.")
+    summary_color = LogColors.OKGREEN if failed_count == 0 else LogColors.WARNING if processed_count > 0 else LogColors.FAIL
+    log.info(f"{summary_color}Process Activities script finished. Processed: {processed_count}, Failed: {failed_count}.{LogColors.ENDC}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process concluded activities in La Serenissima.")

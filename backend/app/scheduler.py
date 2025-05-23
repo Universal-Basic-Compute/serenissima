@@ -22,24 +22,25 @@ def run_scheduled_tasks():
             script_full_path_create_activities = os.path.join(backend_dir_path, script_path_create_activities)
 
             print(f"Scheduler: Time for 5-minute task (createActivities) at {now.isoformat()}. Running: {task_name_create_activities} from {script_full_path_create_activities}")
-            
             try:
-                result_create_activities = subprocess.run(
+                process = subprocess.Popen(
                     ["python", script_full_path_create_activities],
-                    capture_output=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT, # Redirect stderr to stdout
                     text=True,
-                    check=False
+                    bufsize=1, 
+                    universal_newlines=True
                 )
-                if result_create_activities.returncode == 0:
+                if process.stdout:
+                    for line in iter(process.stdout.readline, ''):
+                        print(f"[{task_name_create_activities}] {line.strip()}")
+                    process.stdout.close()
+                
+                return_code = process.wait()
+                if return_code == 0:
                     print(f"Successfully ran {task_name_create_activities}")
-                    if result_create_activities.stdout:
-                         print(f"Output (first 200 chars): {result_create_activities.stdout[:200].strip()}...")
                 else:
-                    print(f"Error running {task_name_create_activities}. Return code: {result_create_activities.returncode}")
-                    if result_create_activities.stderr:
-                        print(f"Error output: {result_create_activities.stderr.strip()}")
-                    elif result_create_activities.stdout:
-                        print(f"Output (possible error): {result_create_activities.stdout.strip()}")
+                    print(f"Error running {task_name_create_activities}. Return code: {return_code}")
             except FileNotFoundError:
                 print(f"Exception running {task_name_create_activities}: Script not found at {script_full_path_create_activities}")
             except Exception as e:
@@ -52,24 +53,25 @@ def run_scheduled_tasks():
             script_full_path_process_decay = os.path.join(backend_dir_path, script_path_process_decay)
 
             print(f"Scheduler: Time for 5-minute task (processdecay) at {now.isoformat()}. Running: {task_name_process_decay} from {script_full_path_process_decay}")
-
             try:
-                result_process_decay = subprocess.run(
+                process = subprocess.Popen(
                     ["python", script_full_path_process_decay],
-                    capture_output=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
                     text=True,
-                    check=False
+                    bufsize=1,
+                    universal_newlines=True
                 )
-                if result_process_decay.returncode == 0:
+                if process.stdout:
+                    for line in iter(process.stdout.readline, ''):
+                        print(f"[{task_name_process_decay}] {line.strip()}")
+                    process.stdout.close()
+
+                return_code = process.wait()
+                if return_code == 0:
                     print(f"Successfully ran {task_name_process_decay}")
-                    if result_process_decay.stdout:
-                        print(f"Output (first 200 chars): {result_process_decay.stdout[:200].strip()}...")
                 else:
-                    print(f"Error running {task_name_process_decay}. Return code: {result_process_decay.returncode}")
-                    if result_process_decay.stderr:
-                        print(f"Error output: {result_process_decay.stderr.strip()}")
-                    elif result_process_decay.stdout:
-                        print(f"Output (possible error): {result_process_decay.stdout.strip()}")
+                    print(f"Error running {task_name_process_decay}. Return code: {return_code}")
             except FileNotFoundError:
                 print(f"Exception running {task_name_process_decay}: Script not found at {script_full_path_process_decay}")
             except Exception as e:
@@ -82,24 +84,25 @@ def run_scheduled_tasks():
             script_full_path_process_activities = os.path.join(backend_dir_path, script_path_process_activities)
 
             print(f"Scheduler: Time for 5-minute task (processActivities) at {now.isoformat()}. Running: {task_name_process_activities} from {script_full_path_process_activities}")
-            
             try:
-                result_process_activities = subprocess.run(
+                process = subprocess.Popen(
                     ["python", script_full_path_process_activities],
-                    capture_output=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
                     text=True,
-                    check=False
+                    bufsize=1,
+                    universal_newlines=True
                 )
-                if result_process_activities.returncode == 0:
+                if process.stdout:
+                    for line in iter(process.stdout.readline, ''):
+                        print(f"[{task_name_process_activities}] {line.strip()}")
+                    process.stdout.close()
+
+                return_code = process.wait()
+                if return_code == 0:
                     print(f"Successfully ran {task_name_process_activities}")
-                    if result_process_activities.stdout:
-                         print(f"Output (first 200 chars): {result_process_activities.stdout[:200].strip()}...")
                 else:
-                    print(f"Error running {task_name_process_activities}. Return code: {result_process_activities.returncode}")
-                    if result_process_activities.stderr:
-                        print(f"Error output: {result_process_activities.stderr.strip()}")
-                    elif result_process_activities.stdout:
-                        print(f"Output (possible error): {result_process_activities.stdout.strip()}")
+                    print(f"Error running {task_name_process_activities}. Return code: {return_code}")
             except FileNotFoundError:
                 print(f"Exception running {task_name_process_activities}: Script not found at {script_full_path_process_activities}")
             except Exception as e:
@@ -167,30 +170,30 @@ def run_scheduled_tasks():
                 task_entry = tasks[current_hour]
                 if isinstance(task_entry, tuple) and len(task_entry) == 2:
                     script_path, task_name = task_entry
-                    print(f"Scheduler: Running scheduled task: {task_name}")
+                    print(f"Scheduler: Running hourly task: {task_name} from {script_path}")
                 
                     try:
-                        # backend_dir_path is already defined above
                         script_full_path = os.path.join(backend_dir_path, script_path)
                         
-                        # Run the script
-                        result = subprocess.run(
+                        process = subprocess.Popen(
                             ["python", script_full_path],
-                            capture_output=True,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT, # Redirect stderr to stdout
                             text=True,
-                            check=False # Avoid raising CalledProcessError, check returncode manually
+                            bufsize=1, 
+                            universal_newlines=True
                         )
+                        if process.stdout:
+                            for line in iter(process.stdout.readline, ''):
+                                print(f"[{task_name}] {line.strip()}")
+                            process.stdout.close()
                         
-                        if result.returncode == 0:
+                        return_code = process.wait()
+                        
+                        if return_code == 0:
                             print(f"Successfully ran {task_name}")
-                            if result.stdout:
-                                print(f"Output: {result.stdout[:500].strip()}...")
                         else:
-                            print(f"Error running {task_name}. Return code: {result.returncode}")
-                            if result.stderr:
-                                print(f"Error output: {result.stderr.strip()}")
-                            elif result.stdout: # Some scripts might output errors to stdout
-                                 print(f"Output (possible error): {result.stdout.strip()}")
+                            print(f"Error running {task_name}. Return code: {return_code}")
                     except FileNotFoundError:
                         print(f"Exception running {task_name}: Script not found at {script_full_path}")
                     except Exception as e:
