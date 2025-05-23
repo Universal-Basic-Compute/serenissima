@@ -957,19 +957,15 @@ number => {
 
   // Effect to manage the main loading state based on data, image readiness, and minimum time
   useEffect(() => {
-    if (polygonsDataLoaded && bgImageReady && minLoadingTimeElapsed) {
-      console.log('IsometricViewer: All loading conditions met. Hiding loader.');
-      setLoading(false);
+    const allConditionsMet = polygonsDataLoaded && bgImageReady && minLoadingTimeElapsed;
+    if (allConditionsMet) {
+      if (loading) { // Only set if it's currently true to avoid unnecessary re-renders
+        console.log('IsometricViewer: All loading conditions met. Hiding loader.');
+        setLoading(false);
+      }
     } else {
-      console.log(`IsometricViewer: Waiting for resources. Polygons: ${polygonsDataLoaded}, BG Image: ${bgImageReady}, Min Time: ${minLoadingTimeElapsed}`);
-      // Ensure loading is true if conditions are not met, especially if they become false after being true.
-      if (!loading && !(polygonsDataLoaded && bgImageReady && minLoadingTimeElapsed)) {
-         setLoading(true);
-      } else if (loading && (polygonsDataLoaded && bgImageReady && minLoadingTimeElapsed)) {
-        // This case should be handled by the if block above, but as a safeguard:
-        // setLoading(false); // This is already done above.
-      } else if (!loading && !(polygonsDataLoaded && bgImageReady && minLoadingTimeElapsed)) {
-        // If not loading, but conditions aren't met, set loading to true.
+      if (!loading) { // Only set if it's currently false
+        console.log(`IsometricViewer: Waiting for resources. Polygons: ${polygonsDataLoaded}, BG Image: ${bgImageReady}, Min Time: ${minLoadingTimeElapsed}`);
         setLoading(true);
       }
     }
@@ -2126,7 +2122,7 @@ number => {
 
   // Get color based on income using a gradient with softer, Renaissance-appropriate colors
   // Income is normalized by building points count for better comparison
-  const getIncomeColor = (income: number | undefined): string => {
+  const getIncomeColor = useCallback((income: number | undefined): string => {
     if (income === undefined) return '#E8DCC0'; // Softer parchment color for no data
     
     // Normalize income to a 0-1 scale
@@ -2149,7 +2145,7 @@ number => {
       const b = Math.floor(102 - t * (102 - 42)); // 102 to 42
       return `rgb(${r}, ${g}, ${b})`;
     }
-  };
+  }, [minIncome, maxIncome]);
   
   // Use the InteractionService to handle mouse interactions
   useEffect(() => {
