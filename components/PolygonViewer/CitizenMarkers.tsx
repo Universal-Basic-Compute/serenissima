@@ -47,6 +47,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   const lastFrameTimeRef = useRef<number>(0);
   // Add a new state to track initialization status
   const [positionsInitialized, setPositionsInitialized] = useState<boolean>(false);
+  const [readyToRenderMarkers, setReadyToRenderMarkers] = useState<boolean>(false); // New state for render readiness
   const REFRESH_INTERVAL = 2 * 60 * 1000; // 2 minutes in milliseconds
   
   // Helper function to convert lat/lng to screen coordinates
@@ -323,25 +324,36 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   
   // Add effect to initialize animated citizens when paths are loaded
   useEffect(() => {
-    if (Object.keys(activityPaths).length === 0 || citizens.length === 0) return;
+    // Mark as not ready to render while processing new data
+    setReadyToRenderMarkers(false);
+
+    if (Object.keys(activityPaths).length === 0 || citizens.length === 0) {
+      setAnimatedCitizens({}); // Clear previous animated citizens
+      setPositionsInitialized(false); // Not initialized if no data
+      // Still, we can mark as ready to render (nothing) to avoid indefinite loading message
+      // Or, if an explicit "no citizens to display" message is desired, handle that in renderCitizenMarkers
+      setReadyToRenderMarkers(true); 
+      return;
+    }
     
-    console.log('Initializing animated citizens with paths...');
+    console.log('CitizenMarkers: (Re)Initializing animated citizens with paths...');
     
     // Use the CitizenAnimationService to initialize animated citizens
-    const initialAnimatedCitizens = citizenAnimationService.initializeAnimatedCitizens(
+    const newAnimatedCitizens = citizenAnimationService.initializeAnimatedCitizens(
       citizens,
       activityPaths
     );
     
     // Update state with the initialized citizens
-    setAnimatedCitizens(initialAnimatedCitizens);
-    console.log(`Initialized ${Object.keys(initialAnimatedCitizens).length} animated citizens`);
+    setAnimatedCitizens(newAnimatedCitizens);
+    console.log(`CitizenMarkers: Initialized ${Object.keys(newAnimatedCitizens).length} animated citizens`);
     
     // Set the positions initialized flag to true
     setPositionsInitialized(true);
+    setReadyToRenderMarkers(true); // Mark as ready to render new positions
     
     // Start animation loop immediately
-    if (animationActive && Object.keys(initialAnimatedCitizens).length > 0) {
+    if (animationActive && Object.keys(newAnimatedCitizens).length > 0) {
       citizenAnimationService.startAnimation(handleAnimationUpdate);
     }
     
@@ -437,13 +449,20 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   
   // Helper function to render citizen markers
   function renderCitizenMarkers() {
-    // Don't render anything until positions are initialized
-    if (!positionsInitialized && Object.keys(activityPaths).length > 0) {
+    // If not ready to render (e.g., during a refresh cycle), show an updating message or return null
+    if (!readyToRenderMarkers) {
       return (
-        <div className="absolute top-20 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-lg">
-          Calculating citizen positions...
+        <div className="absolute top-20 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-lg animate-pulse">
+          Updating citizen positions...
         </div>
       );
+    }
+
+    // If positions are initialized but there are no citizens to show (e.g. after filtering or no data)
+    if (positionsInitialized && citizens.length === 0 && Object.keys(animatedCitizens).length === 0) {
+        // Optionally, display a "No citizens to display" message or return null
+        // For now, returning null to keep it clean if no citizens.
+        return null; 
     }
   
   return (
