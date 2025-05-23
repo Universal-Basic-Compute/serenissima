@@ -164,16 +164,59 @@ def process(
             return False # Partial consumption is problematic, fail the operation
 
     # Produce Outputs
-    for res_type, produced_amount_float in recipe_outputs.items():
-        produced_amount = float(produced_amount_float)
+
+    # Calculate production ratio based on actual activity duration vs recipe's craft minutes
+    production_ratio = 1.0  # Default to full production (current behavior)
+    recipe_craft_minutes_val = activity_fields.get('RecipeCraftMinutes')
+
+    if recipe_craft_minutes_val is not None:
+        try:
+            recipe_duration_minutes = float(recipe_craft_minutes_val)
+            if recipe_duration_minutes > 0:
+                start_date_str = activity_fields.get('StartDate')
+                end_date_str = activity_fields.get('EndDate')
+
+                if start_date_str and end_date_str:
+                    start_dt = datetime.fromisoformat(start_date_str)
+                    end_dt = datetime.fromisoformat(end_date_str)
+                    
+                    # Ensure they are timezone-aware (assuming UTC if naive, though creator should make them aware)
+                    if start_dt.tzinfo is None: start_dt = start_dt.replace(tzinfo=timezone.utc)
+                    if end_dt.tzinfo is None: end_dt = end_dt.replace(tzinfo=timezone.utc)
+
+                    actual_duration_seconds = (end_dt - start_dt).total_seconds()
+                    actual_duration_minutes = actual_duration_seconds / 60.0
+                    
+                    if actual_duration_minutes < 0: actual_duration_minutes = 0.0 # Safety for negative duration
+
+                    production_ratio = actual_duration_minutes / recipe_duration_minutes
+                    production_ratio = min(1.0, max(0.0, production_ratio)) # Clamp between 0.0 and 1.0
+                    log.info(f"Activity {activity_guid}: Actual duration {actual_duration_minutes:.2f}m, Recipe craft minutes {recipe_duration_minutes:.2f}m. Production ratio: {production_ratio:.4f}")
+                else:
+                    log.warning(f"Activity {activity_guid} missing StartDate or EndDate. Assuming full production ratio.")
+            else:
+                log.warning(f"RecipeCraftMinutes is {recipe_duration_minutes} for activity {activity_guid}. Assuming full production ratio.")
+        except ValueError:
+            log.warning(f"Invalid RecipeCraftMinutes value '{recipe_craft_minutes_val}' for activity {activity_guid}. Assuming full production ratio.")
+    else:
+        log.info(f"RecipeCraftMinutes not found for activity {activity_guid}. Assuming full production ratio (old behavior).")
+
+    for res_type, base_produced_amount_str in recipe_outputs.items():
+        base_produced_amount = float(base_produced_amount_str)
+        final_produced_amount = base_produced_amount * production_ratio
+
+        if final_produced_amount <= 0.00001: # Effectively zero or negligible
+            log.info(f"Calculated produced amount for {res_type} is negligible ({final_produced_amount:.4f}). Skipping output.")
+            continue
+
         output_res_record = get_specific_building_resource(tables, building_custom_id, res_type, operator_username)
         
         try:
             if output_res_record:
                 current_count = float(output_res_record['fields'].get('Count', 0))
-                new_count = current_count + produced_amount
+                new_count = current_count + final_produced_amount
                 tables['resources'].update(output_res_record['id'], {'Count': new_count, 'UpdatedAt': now_iso})
-                log.info(f"Produced {produced_amount} of {res_type} in {building_custom_id} (updated existing). New count: {new_count}")
+                log.info(f"Produced {final_produced_amount:.4f} of {res_type} in {building_custom_id} (updated existing). New count: {new_count:.4f}")
             else:
                 res_def = resource_defs.get(res_type, {})
                 building_pos_str = prod_building_record['fields'].get('Position', '{}')
@@ -187,13 +230,13 @@ def process(
                     "AssetId": building_custom_id,
                     "AssetType": "building",
                     "Owner": operator_username,
-                    "Count": produced_amount,
+                    "Count": final_produced_amount,
                     "Position": building_pos_str,
                     "CreatedAt": now_iso,
                     "UpdatedAt": now_iso
                 }
                 tables['resources'].create(new_resource_payload)
-                log.info(f"Produced {produced_amount} of {res_type} in {building_custom_id} (created new).")
+                log.info(f"Produced {final_produced_amount:.4f} of {res_type} in {building_custom_id} (created new).")
         except Exception as e_produce:
             log.error(f"Error producing output {res_type} for activity {activity_guid}: {e_produce}")
             # Consider rollback or error handling for partial production
