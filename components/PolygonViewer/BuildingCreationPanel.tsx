@@ -68,8 +68,16 @@ const BuildingCreationPanel: React.FC<BuildingCreationPanelProps> = ({ selectedP
 
   const filteredBuildingTypes = useMemo(() => {
     return allBuildingTypes.filter(bt => {
-      // Ensure pointType matches, or if building's pointType is 'land', it can be built on any type of point (as a fallback)
-      return bt.pointType === selectedPoint.pointType || (bt.pointType === 'land' && selectedPoint.pointType !== null);
+      const buildingDesignatedPointType = bt.pointType; // Rappel : ceci est 'land' si la valeur originale était null
+      const actualSelectedPointType = selectedPoint.pointType;
+
+      if (actualSelectedPointType === 'land') {
+        // Pour les points terrestres, autoriser les bâtiments spécifiquement pour 'land' ou 'BuildingPoint'
+        return buildingDesignatedPointType === 'land' || buildingDesignatedPointType === 'BuildingPoint';
+      } else {
+        // Pour les points 'canal' ou 'bridge', autoriser une correspondance directe ou les bâtiments 'land' comme solution de repli
+        return buildingDesignatedPointType === actualSelectedPointType || buildingDesignatedPointType === 'land';
+      }
     });
   }, [allBuildingTypes, selectedPoint.pointType]);
 
