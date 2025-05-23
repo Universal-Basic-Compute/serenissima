@@ -3219,39 +3219,46 @@ number => {
     }
 
     // Draw buildings using RenderService, incorporating currentHoverState
-    // Now, pass all filteredBuildings (which could be all city buildings or just 'my' buildings)
-    // to renderService.drawBuildings. The service will handle bridge-specific rendering.
+    // Render in two passes: non-merchant_galley buildings first, then merchant_galley buildings
     if (filteredBuildings.length > 0) {
-      // DEBUG: Log orientation of the selected bridge before drawing
-      if (selectedBridgeForOrientationId) {
-        const bridgeToDebug = filteredBuildings.find(b => b.id === selectedBridgeForOrientationId);
-        if (bridgeToDebug) {
-          console.log(`[BRIDGE_ORIENT_DEBUG] Drawing: Bridge ${selectedBridgeForOrientationId} has orientation: ${bridgeToDebug.orientation}, rotation: ${bridgeToDebug.rotation}`);
-        } else {
-          console.log(`[BRIDGE_ORIENT_DEBUG] Drawing: Selected bridge ${selectedBridgeForOrientationId} not found in filteredBuildings.`);
-        }
-      }
-      if (interactionMode === 'orient_bridge' && selectedBridgeForOrientationId && orientingBridgeAngle !== null) {
-        console.log(`[BRIDGE_ORIENT_DEBUG] Drawing: In orient_bridge mode. Current orientingBridgeAngle for ${selectedBridgeForOrientationId} is ${orientingBridgeAngle}`);
-      }
+      const merchantGalleys = filteredBuildings.filter(b => b.type && b.type.toLowerCase() === 'merchant_galley');
+      const otherBuildings = filteredBuildings.filter(b => !b.type || b.type.toLowerCase() !== 'merchant_galley');
 
-
-      renderService.drawBuildings(ctx, filteredBuildings, scale, offset, canvas.width, canvas.height, {
+      const renderOptions = {
         selectedBuildingId,
         hoveredBuildingId: currentHoverState.type === 'building' ? currentHoverState.id : null,
         buildingPositionsCache,
         buildingColorMode,
-        getBuildingColor, // This will be used by renderService
-        getBuildingOwnerColor, // This will be used by renderService
-        getBuildingCategoryColor, // This will be used by renderService
-        isColorDark, // This will be used by renderService
-        getCurrentCitizenIdentifier, // This will be used by renderService
-        polygonsToRender, // Pass polygonsToRender for bridge orientation calculation (if still needed by service)
-        // Pass orientingBridgeAngle and selectedBridgeForOrientationId to renderService
-        // so it can draw the bridge with the temporary angle during orientation
+        getBuildingColor,
+        getBuildingOwnerColor,
+        getBuildingCategoryColor,
+        isColorDark,
+        getCurrentCitizenIdentifier,
+        polygonsToRender,
         orientingBridgeAngle: interactionMode === 'orient_bridge' ? orientingBridgeAngle : null,
         selectedBridgeForOrientationId: interactionMode === 'orient_bridge' ? selectedBridgeForOrientationId : null,
-      });
+      };
+
+      // Draw other buildings first
+      if (otherBuildings.length > 0) {
+        // DEBUG logs for otherBuildings (can be removed after verification)
+        if (interactionMode === 'orient_bridge' && selectedBridgeForOrientationId && otherBuildings.some(b => b.id === selectedBridgeForOrientationId)) {
+            const bridgeToDebug = otherBuildings.find(b => b.id === selectedBridgeForOrientationId);
+            console.log(`[BRIDGE_ORIENT_DEBUG] Drawing (Other): Bridge ${selectedBridgeForOrientationId} has orientation: ${bridgeToDebug?.orientation}, rotation: ${bridgeToDebug?.rotation}`);
+        }
+        renderService.drawBuildings(ctx, otherBuildings, scale, offset, canvas.width, canvas.height, renderOptions);
+      }
+
+      // Then draw merchant galleys on top
+      if (merchantGalleys.length > 0) {
+        // DEBUG logs for merchantGalleys (can be removed after verification)
+        if (interactionMode === 'orient_bridge' && selectedBridgeForOrientationId && merchantGalleys.some(b => b.id === selectedBridgeForOrientationId)) {
+            // This case should ideally not happen if merchant_galley is not a bridge, but kept for robustness
+            const bridgeToDebug = merchantGalleys.find(b => b.id === selectedBridgeForOrientationId);
+            console.log(`[BRIDGE_ORIENT_DEBUG] Drawing (Galleys): Bridge ${selectedBridgeForOrientationId} has orientation: ${bridgeToDebug?.orientation}, rotation: ${bridgeToDebug?.rotation}`);
+        }
+        renderService.drawBuildings(ctx, merchantGalleys, scale, offset, canvas.width, canvas.height, renderOptions);
+      }
     }
     
     // Draw the calculated transport path if available
