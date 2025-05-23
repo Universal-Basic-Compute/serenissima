@@ -100,7 +100,15 @@ export default function IsometricViewer({ activeView, setActiveView, fullWaterGr
   const [selectedProblemId, setSelectedProblemId] = useState<string | null>(null);
   const [showProblemDetailsPanel, setShowProblemDetailsPanel] = useState<boolean>(false);
   const [currentHoverState, setCurrentHoverState] = useState<HoverState>(hoverStateService.getState());
-  // const [fullWaterGraphData, setFullWaterGraphData] = useState<{ waterPoints: any[] } | null>(null); // State removed, will come from props
+  
+  // State for BuildingCreationPanel
+  const [showBuildingCreationPanel, setShowBuildingCreationPanel] = useState<boolean>(false);
+  const [selectedPointForCreation, setSelectedPointForCreation] = useState<{
+    lat: number;
+    lng: number;
+    polygonId: string;
+    pointType: 'land' | 'canal' | 'bridge';
+  } | null>(null);
   
   // State for path statistics
   const [pathStats, setPathStats] = useState<{
@@ -2200,6 +2208,21 @@ number => {
         setOrientingBridgeAngle: (angle) => {
           console.log(`[BRIDGE_ORIENT_DEBUG] setOrientingBridgeAngle called with: ${angle}`);
           setOrientingBridgeAngle(angle);
+        },
+        onEmptyBuildingPointSelected: (point, polygonId) => {
+          console.log('Empty building point selected:', point, polygonId);
+          setSelectedPointForCreation({ ...point, polygonId, pointType: 'land' });
+          setShowBuildingCreationPanel(true);
+        },
+        onCanalPointSelected: (point, polygonId) => {
+          console.log('Canal point selected:', point, polygonId);
+          setSelectedPointForCreation({ ...point, polygonId, pointType: 'canal' });
+          setShowBuildingCreationPanel(true);
+        },
+        onBridgePointSelected: (point, polygonId) => {
+          console.log('Bridge point selected:', point, polygonId);
+          setSelectedPointForCreation({ ...point, polygonId, pointType: 'bridge' });
+          setShowBuildingCreationPanel(true);
         }
       }
     );
@@ -4222,6 +4245,27 @@ number => {
           onClose={() => {
             setShowProblemDetailsPanel(false);
             setSelectedProblemId(null);
+          }}
+        />
+      )}
+
+      {/* Building Creation Panel */}
+      {showBuildingCreationPanel && selectedPointForCreation && (
+        <BuildingCreationPanel
+          selectedPoint={selectedPointForCreation}
+          onClose={() => {
+            setShowBuildingCreationPanel(false);
+            setSelectedPointForCreation(null);
+          }}
+          onBuild={(buildingType, point, cost) => {
+            // Handle the build action
+            console.log(`Build ${buildingType} at ${point.lat},${point.lng} on polygon ${point.polygonId} (type: ${point.pointType}) for ${cost} ducats`);
+            // Here you would typically call an API to create the building
+            // For now, just close the panel
+            setShowBuildingCreationPanel(false);
+            setSelectedPointForCreation(null);
+            // Potentially refresh buildings data or add the new building optimistically
+            eventBus.emit(EventTypes.BUILDING_PLACED, { type: buildingType, position: {lat: point.lat, lng: point.lng}, land_id: point.polygonId });
           }}
         />
       )}
