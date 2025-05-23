@@ -76,7 +76,7 @@ try:
     )
 except ImportError:
     # Fallback if the script is run in a context where backend.engine is not directly importable
-    print("Warning: Could not import helper functions directly. Ensure PYTHONPATH is set correctly or run as part of the application.")
+    log.warning("Could not import helper functions directly. Ensure PYTHONPATH is set correctly or run as part of the application.")
     # Define placeholder functions or exit if these are critical
     def get_building_type_definitions_from_api():
         raise NotImplementedError("get_building_type_definitions_from_api is not available")
