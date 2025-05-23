@@ -289,14 +289,14 @@ def get_active_contracts(tables) -> List[Dict]:
     try:
         now = datetime.now().isoformat()
         
-        # Query contracts that are active and have no Seller assigned yet
-        formula = f"AND({{CreatedAt}}<='{now}', {{EndAt}}>='{now}', {{Type}}='import', {{Seller}}=BLANK())"
+        # Query all active import contracts, regardless of current Seller
+        formula = f"AND({{CreatedAt}}<='{now}', {{EndAt}}>='{now}', {{Type}}='import')"
         contracts = tables['contracts'].all(formula=formula)
         
         # Sort by CreatedAt
         contracts.sort(key=lambda x: x['fields'].get('CreatedAt', ''))
         
-        log.info(f"Found {len(contracts)} active import contracts awaiting merchant assignment.")
+        log.info(f"Found {len(contracts)} active import contracts (any seller).")
         return contracts
     except Exception as e:
         log.error(f"Error getting active import contracts: {e}")
@@ -594,14 +594,27 @@ def create_delivery_activity(tables, citizen: Dict, galley_building_id: str,
             log.error(f"Galley building {galley_building_id} not found for activity.")
             return None
         
-        end_position_str = galley_building_record[0]['fields'].get('Position')
-        if not end_position_str:
-            log.error(f"Galley building {galley_building_id} has no Position data.")
+        # Merchant galleys store their location in the 'Point' field as "water_lat_lng"
+        point_str = galley_building_record[0]['fields'].get('Point')
+        end_position = None
+        if point_str and isinstance(point_str, str) and point_str.startswith("water_"):
+            parts = point_str.split('_')
+            if len(parts) == 3:
+                try:
+                    lat = float(parts[1])
+                    lng = float(parts[2])
+                    end_position = {"lat": lat, "lng": lng}
+                    log.info(f"Parsed end_position {end_position} from Point field '{point_str}' for galley {galley_building_id}.")
+                except ValueError:
+                    log.error(f"Could not parse lat/lng from Point field '{point_str}' for galley {galley_building_id}.")
+            else:
+                log.error(f"Point field '{point_str}' for galley {galley_building_id} not in expected water_lat_lng format.")
+        else:
+            log.error(f"Galley building {galley_building_id} has no valid 'Point' data (expected 'water_lat_lng' format). Point field value: {point_str}")
             return None
-        try:
-            end_position = json.loads(end_position_str)
-        except json.JSONDecodeError:
-            log.error(f"Failed to parse Position JSON for galley {galley_building_id}: {end_position_str}")
+        
+        if not end_position: # Should be redundant if logic above is correct, but as a safeguard
+            log.error(f"Failed to determine end_position for galley {galley_building_id}.")
             return None
 
         path_data = None
