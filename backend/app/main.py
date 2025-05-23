@@ -1118,17 +1118,8 @@ async def get_transactions():
 @app.get("/api/transactions/land/{land_id}")
 async def get_land_transactions(land_id: str):
     """Get all transactions for a land (both incoming and outgoing offers)"""
-    
-    try:
-        # Try different formats of the land ID
-        possible_ids = [
-            land_id,
-            f"polygon-{land_id}" if not land_id.startswith("polygon-") else land_id,
-            land_id.replace("polygon-", "") if land_id.startswith("polygon-") else land_id
-        ]
-        
-    """Get all land sale contracts for a land (both incoming and outgoing offers if applicable)"""
-    
+    # The problematic docstring and the first try block have been removed.
+    # The following try block is now the main one for this function.
     try:
         possible_ids = [
             land_id,
