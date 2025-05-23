@@ -1778,8 +1778,8 @@ def process_galley_unloading_activities(tables: Dict[str, Table], idle_citizens:
                 continue
             
             # Find import contracts associated with this galley that need processing
-            contracts_to_fetch_formula = (f"AND({{Type}}='import', "
-                                          f"{{Seller}}='{_escape_airtable_value(galley_owner_username)}', "
+            # Removed Type='import' to broaden search, relying on Seller, SellerBuilding, and LastExecutedAt
+            contracts_to_fetch_formula = (f"AND({{Seller}}='{_escape_airtable_value(galley_owner_username)}', "
                                           f"{{SellerBuilding}}='{_escape_airtable_value(galley_custom_id)}', "
                                           f"{{LastExecutedAt}}=BLANK())")
             try:
