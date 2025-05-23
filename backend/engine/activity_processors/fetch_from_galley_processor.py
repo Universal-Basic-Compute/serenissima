@@ -228,6 +228,14 @@ def process(
             if item_found_and_updated:
                 tables['buildings'].update(galley_airtable_id, {"PendingDeliveriesData": json.dumps(updated_pending_deliveries)})
                 log.info(f"[fetch_from_galley_proc] Updated PendingDeliveriesData on galley {galley_custom_id}.")
+                
+                # If all items have been picked up, mark galley as ready to depart
+                if not updated_pending_deliveries:
+                    log.info(f"[fetch_from_galley_proc] All items picked up from galley {galley_custom_id}. Marking as 'empty_ready_to_depart'.")
+                    try:
+                        tables['buildings'].update(galley_airtable_id, {"Status": "empty_ready_to_depart"})
+                    except Exception as e_status_update:
+                        log.error(f"[fetch_from_galley_proc] Error updating status for empty galley {galley_custom_id}: {e_status_update}")
             else:
                 log.warning(f"[fetch_from_galley_proc] Could not find matching item in PendingDeliveriesData for contract {original_contract_custom_id}, resource {resource_id_to_fetch} on galley {galley_custom_id}.")
 

@@ -1328,6 +1328,7 @@ def process_final_deliveries_from_galley(tables: Dict[str, Table], citizens_pool
                         "CreatedAt": now_utc_dt.isoformat(),
                         "StartDate": start_date_iso,
                         "EndDate": end_date_iso,
+                        "Priority": 9, # Priorité élevée pour la livraison finale
                         "Notes": f"🚢 Delivering resources from galley {current_galley_custom_id} to {buyer_building_custom_id} for contract {original_contract_id}."
                     }
                     try:
