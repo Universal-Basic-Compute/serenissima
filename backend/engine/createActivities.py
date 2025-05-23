@@ -695,9 +695,9 @@ def create_goto_work_activity(tables, citizen_custom_id: str, citizen_username: 
             "Type": "goto_work",
             "Citizen": citizen_username,
             "ToBuilding": workplace_id,  # This should be BuildingId
-            "CreatedAt": now.isoformat(), # now is UTC
-            "StartDate": start_date, # Assuming path_data provides UTC timestamps
-            "EndDate": end_date,     # Assuming path_data provides UTC timestamps
+            "CreatedAt": now_venice.isoformat(), 
+            "StartDate": start_date, # Expected to be Venice time ISO string
+            "EndDate": end_date,     # Expected to be Venice time ISO string
             "Path": path_json,
             "Notes": "🏢 **Going to work**"
         }
@@ -719,16 +719,17 @@ def create_goto_home_activity(tables, citizen_custom_id: str, citizen_username: 
     log.info(f"{LogColors.OKCYAN}Creating goto_home activity for citizen {citizen_username} (CustomID: {citizen_custom_id}) to home {home_id}{LogColors.ENDC}")
     
     try:
-        now = datetime.datetime.now(pytz.UTC)
+        VENICE_TIMEZONE_LOCAL = pytz.timezone('Europe/Rome') # Local VENICE_TIMEZONE
+        now_venice = datetime.datetime.now(VENICE_TIMEZONE_LOCAL)
         
         # Get timing information from path data
-        start_date = path_data.get('timing', {}).get('startDate', now.isoformat())
+        start_date = path_data.get('timing', {}).get('startDate', now_venice.isoformat())
         end_date = path_data.get('timing', {}).get('endDate')
         
         if not end_date:
             # If no end date provided, use a default duration
-            end_time = now + datetime.timedelta(hours=1)
-            end_date = end_time.isoformat()
+            end_time_calc = now_venice + datetime.timedelta(hours=1)
+            end_date = end_time_calc.isoformat()
         
         # Ensure path is a valid JSON string
         path_json = json.dumps(path_data.get('path', []))
@@ -739,9 +740,9 @@ def create_goto_home_activity(tables, citizen_custom_id: str, citizen_username: 
             "Type": "goto_home",
             "Citizen": citizen_username,
             "ToBuilding": home_id,  # This should be BuildingId
-            "CreatedAt": now.isoformat(), # now is UTC
-            "StartDate": start_date, # Assuming path_data provides UTC timestamps
-            "EndDate": end_date,     # Assuming path_data provides UTC timestamps
+            "CreatedAt": now_venice.isoformat(), 
+            "StartDate": start_date, # Expected to be Venice time ISO string
+            "EndDate": end_date,     # Expected to be Venice time ISO string
             "Path": path_json,
             "Notes": "🏠 **Going home** for the night"
         }
@@ -763,14 +764,15 @@ def create_travel_to_inn_activity(tables, citizen_custom_id: str, citizen_userna
     log.info(f"{LogColors.OKCYAN}Creating travel_to_inn activity for citizen {citizen_username} (CustomID: {citizen_custom_id}) to inn {inn_id}{LogColors.ENDC}")
     
     try:
-        now = datetime.datetime.now(pytz.UTC)
+        VENICE_TIMEZONE_LOCAL = pytz.timezone('Europe/Rome') # Local VENICE_TIMEZONE
+        now_venice = datetime.datetime.now(VENICE_TIMEZONE_LOCAL)
         
-        start_date = path_data.get('timing', {}).get('startDate', now.isoformat())
+        start_date = path_data.get('timing', {}).get('startDate', now_venice.isoformat())
         end_date = path_data.get('timing', {}).get('endDate')
         
         if not end_date:
-            end_time = now + datetime.timedelta(hours=1) # Default 1 hour travel
-            end_date = end_time.isoformat()
+            end_time_calc = now_venice + datetime.timedelta(hours=1) # Default 1 hour travel
+            end_date = end_time_calc.isoformat()
         
         path_json = json.dumps(path_data.get('path', []))
         
@@ -779,9 +781,9 @@ def create_travel_to_inn_activity(tables, citizen_custom_id: str, citizen_userna
             "Type": "goto_inn", # New activity type
             "Citizen": citizen_username,
             "ToBuilding": inn_id,
-            "CreatedAt": now.isoformat(),
-            "StartDate": start_date,
-            "EndDate": end_date,
+            "CreatedAt": now_venice.isoformat(),
+            "StartDate": start_date, # Expected to be Venice time ISO string
+            "EndDate": end_date,     # Expected to be Venice time ISO string
             "Path": path_json,
             "Notes": "🏨 **Going to an inn** for the night"
         }
@@ -803,17 +805,18 @@ def create_idle_activity(tables, citizen_custom_id: str, citizen_username: str, 
     log.info(f"{LogColors.OKCYAN}Creating idle activity for citizen {citizen_username} (CustomID: {citizen_custom_id}){LogColors.ENDC}")
     
     try:
-        now = datetime.datetime.now(pytz.UTC)
-        end_time = now + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)
+        VENICE_TIMEZONE_LOCAL = pytz.timezone('Europe/Rome') # Local VENICE_TIMEZONE
+        now_venice = datetime.datetime.now(VENICE_TIMEZONE_LOCAL)
+        end_time_venice = now_venice + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)
         
         # Create the activity
         activity_payload = {
             "ActivityId": f"idle_{citizen_custom_id}_{int(time.time())}",
             "Type": "idle",
             "Citizen": citizen_username,
-            "CreatedAt": now.isoformat(),
-            "StartDate": now.isoformat(),
-            "EndDate": end_time.isoformat(),
+            "CreatedAt": now_venice.isoformat(),
+            "StartDate": now_venice.isoformat(),
+            "EndDate": end_time_venice.isoformat(),
             "Notes": "⏳ **Idle activity** due to failed path finding or no home"
         }
         activity = tables['activities'].create(activity_payload)
@@ -847,7 +850,9 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
     citizen_name = f"{citizen['fields'].get('FirstName', '')} {citizen['fields'].get('LastName', '')}"
     log.info(f"{LogColors.HEADER}Processing activity for citizen {citizen_name} (CustomID: {citizen_custom_id}, Username: {citizen_username}, RecordID: {citizen_airtable_record_id}){LogColors.ENDC}")
     
-    now_utc_dt = datetime.datetime.now(pytz.UTC)
+    VENICE_TIMEZONE_PROC = pytz.timezone('Europe/Rome') # Define for this scope
+    now_venice_dt = datetime.datetime.now(VENICE_TIMEZONE_PROC)
+    now_utc_dt = now_venice_dt.astimezone(pytz.UTC) # Keep UTC for comparisons if AteAt is UTC
 
     # --- HIGH PRIORITY: HUNGER CHECK ---
     ate_at_str = citizen['fields'].get('AteAt')
@@ -1477,6 +1482,7 @@ def create_activities(dry_run: bool = False, target_citizen_username: Optional[s
         return
     
     # Check if it's nighttime in Venice
+    # is_nighttime() uses VENICE_TIMEZONE internally, VENICE_TIMEZONE is defined globally in this file
     night_time = is_nighttime()
     log.info(f"{LogColors.OKBLUE}Current time in Venice: {'Night' if night_time else 'Day'}{LogColors.ENDC}")
     
@@ -1485,9 +1491,10 @@ def create_activities(dry_run: bool = False, target_citizen_username: Optional[s
     
     # Attempt to create final delivery activities for citizens at galleys first
     # This pool will be modified by process_final_deliveries_from_galley
-    citizens_available_for_general_activities = list(citizens_to_process_list) 
+    citizens_available_for_general_activities = list(citizens_to_process_list)
+    # now_venice_dt is defined at the start of create_activities
     if not dry_run:
-        final_delivery_activities_created = process_final_deliveries_from_galley(tables, citizens_available_for_general_activities, now_utc_dt)
+        final_delivery_activities_created = process_final_deliveries_from_galley(tables, citizens_available_for_general_activities, now_venice_dt) # Pass now_venice_dt
         success_count += final_delivery_activities_created
 
     # Then, attempt to assign citizens to fetch from galleys
@@ -1497,7 +1504,7 @@ def create_activities(dry_run: bool = False, target_citizen_username: Optional[s
     galley_fetch_activities_created = 0 # Initialize here
     if not target_citizen_username: # Galley tasks are for general pool, not specific citizen run
         if not dry_run:
-            galley_fetch_activities_created = process_galley_unloading_activities(tables, citizens_still_available_after_final_delivery, now_utc_dt)
+            galley_fetch_activities_created = process_galley_unloading_activities(tables, citizens_still_available_after_final_delivery, now_venice_dt) # Pass now_venice_dt
             success_count += galley_fetch_activities_created
         elif dry_run and citizens_to_process_list: # If dry run, simulate checking for galley tasks
             log.info(f"{LogColors.OKCYAN}[DRY RUN] Would check for merchant galleys with pending deliveries (fetch tasks).{LogColors.ENDC}")
@@ -1535,6 +1542,11 @@ def process_final_deliveries_from_galley(tables: Dict[str, Table], citizens_pool
     Modifies citizens_pool by removing citizens who are assigned a delivery.
     Returns the number of delivery activities created.
     """
+    # now_utc_dt is now_venice_dt in the calling scope of create_activities
+    # For clarity, let's rename it or ensure VENICE_TIMEZONE is used for new datetimes here.
+    VENICE_TIMEZONE_FINAL_DELIVERY = pytz.timezone('Europe/Rome')
+    current_time_venice = now_utc_dt # Assuming now_utc_dt from caller is already Venice time
+
     activities_created_count = 0
     citizens_assigned_delivery = []
 
@@ -1652,10 +1664,10 @@ def process_final_deliveries_from_galley(tables: Dict[str, Table], citizens_pool
                     # Or inline the creation logic:
                     
                     activity_id_str_final = f"deliver_final_{citizen_custom_id}_{uuid.uuid4()}"
-                    start_date_iso = path_to_buyer.get('timing', {}).get('startDate', now_utc_dt.isoformat())
+                    start_date_iso = path_to_buyer.get('timing', {}).get('startDate', current_time_venice.isoformat())
                     end_date_iso = path_to_buyer.get('timing', {}).get('endDate')
                     if not end_date_iso:
-                        end_date_iso = (now_utc_dt + datetime.timedelta(hours=1)).isoformat() # Default 1hr
+                        end_date_iso = (current_time_venice + datetime.timedelta(hours=1)).isoformat() # Default 1hr
 
                     final_delivery_payload = {
                         "ActivityId": activity_id_str_final,
@@ -1667,9 +1679,9 @@ def process_final_deliveries_from_galley(tables: Dict[str, Table], citizens_pool
                         "ContractId": original_contract_id, # CRITICAL: This is the Original Custom Contract ID
                         "Path": json.dumps(path_to_buyer.get('path', [])),
                         "Transporter": path_to_buyer.get('transporter'),
-                        "CreatedAt": now_utc_dt.isoformat(),
-                        "StartDate": start_date_iso,
-                        "EndDate": end_date_iso,
+                        "CreatedAt": current_time_venice.isoformat(),
+                        "StartDate": start_date_iso, # Expected to be Venice time ISO
+                        "EndDate": end_date_iso,     # Expected to be Venice time ISO
                         "Priority": 9, # Priorité élevée pour la livraison finale
                         "Notes": f"🚢 Delivering resources from galley {current_galley_custom_id} to {buyer_building_custom_id} for contract {original_contract_id}."
                     }
@@ -1706,6 +1718,10 @@ def process_galley_unloading_activities(tables: Dict[str, Table], idle_citizens:
     activities for idle citizens to unload them.
     Returns the number of 'fetch_from_galley' activities created.
     """
+    # now_utc_dt is now_venice_dt in the calling scope of create_activities
+    VENICE_TIMEZONE_GALLEY_UNLOAD = pytz.timezone('Europe/Rome')
+    current_time_venice_gu = now_utc_dt # Assuming now_utc_dt from caller is already Venice time
+
     activities_created_count = 0
     if not idle_citizens:
         log.info(f"{LogColors.OKBLUE}No idle citizens available to process galley unloading.{LogColors.ENDC}")
