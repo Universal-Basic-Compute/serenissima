@@ -196,6 +196,8 @@ def create_or_get_merchant_galley(
             "Position": json.dumps(position_coords),
             "Category": "Transport", # Assuming a category for such buildings
             "CreatedAt": datetime.now(timezone.utc).isoformat(),
+            "IsConstructed": False, # Galley is "arriving"
+            "ArrivalDate": None,    # Will be set after activity creation
             "PendingDeliveriesData": json.dumps([]), # Initialize with empty list
             # No Occupant, Wages, RentAmount initially
         }
@@ -895,23 +897,27 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
     )
 
     if activity_created:
-        log.info(f"✅ Successfully created galley delivery activity to {galley_building_id}.")
-        # Store involved_original_contracts_info in the galley's PendingDeliveriesData
-        if involved_original_contracts_info and not dry_run:
+        log.info(f"✅ Successfully created galley delivery activity {activity_created['id']} to {galley_building_id}.")
+        arrival_time_iso = activity_created['fields'].get('EndDate')
+
+        if arrival_time_iso and not dry_run:
+            update_payload_for_galley = {
+                "IsConstructed": False, # Explicitly set to False, signifying it's "en route"
+                "ArrivalDate": arrival_time_iso,
+                "PendingDeliveriesData": json.dumps(involved_original_contracts_info)
+            }
             try:
-                tables['buildings'].update(merchant_galley_building['id'], {
-                    "PendingDeliveriesData": json.dumps(involved_original_contracts_info)
-                })
-                log.info(f"Stored PendingDeliveriesData for galley {galley_building_id} (Airtable ID: {merchant_galley_building['id']}).")
+                tables['buildings'].update(merchant_galley_building['id'], update_payload_for_galley)
+                log.info(f"Updated galley {galley_building_id} (Airtable ID: {merchant_galley_building['id']}) with IsConstructed=False, ArrivalDate={arrival_time_iso}, and PendingDeliveriesData.")
             except Exception as e_update_galley:
-                log.error(f"Error updating PendingDeliveriesData for galley {galley_building_id}: {e_update_galley}")
+                log.error(f"Error updating galley {galley_building_id} with arrival data: {e_update_galley}")
         elif dry_run:
-            log.info(f"[DRY RUN] Would store PendingDeliveriesData for galley {galley_building_id}: {json.dumps(involved_original_contracts_info)}")
+            log.info(f"[DRY RUN] Would update galley {galley_building_id} with IsConstructed=False, ArrivalDate={arrival_time_iso}, and PendingDeliveriesData: {json.dumps(involved_original_contracts_info)}")
 
     else:
         log.error(f"Failed to create galley delivery activity to {galley_building_id}.")
 
-    log.info(f"🚢 Import processing complete. Galley {galley_building_id} prepared.")
+    log.info(f"🚢 Import processing complete. Galley {galley_building_id} dispatch initiated.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process import contracts into a central galley.")

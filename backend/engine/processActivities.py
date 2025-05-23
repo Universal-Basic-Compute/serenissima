@@ -249,6 +249,32 @@ def calculate_gondola_travel_details(path_json_string: Optional[str]) -> tuple[f
     
     return total_gondola_distance_km, fee
 
+def process_building_arrivals(tables: Dict[str, Table], dry_run: bool = False):
+    """Checks for buildings (e.g., merchant galleys) that have 'arrived'."""
+    log.info("Checking for building arrivals (e.g., merchant galleys)...")
+    now_iso = datetime.now(timezone.utc).isoformat()
+    # Check for merchant galleys specifically, or any building with IsConstructed=False and an ArrivalDate
+    formula = f"AND({{Type}}='merchant_galley', {{IsConstructed}}=FALSE(), {{ArrivalDate}}<='{now_iso}')"
+    try:
+        arrived_buildings = tables['buildings'].all(formula=formula)
+        if not arrived_buildings:
+            log.info("No merchant galleys have arrived at this time.")
+            return
+
+        for building_record in arrived_buildings:
+            building_id_airtable = building_record['id']
+            building_custom_id = building_record['fields'].get('BuildingId', building_id_airtable)
+            log.info(f"Merchant galley {building_custom_id} (Airtable ID: {building_id_airtable}) has arrived.")
+            if not dry_run:
+                try:
+                    tables['buildings'].update(building_id_airtable, {'IsConstructed': True})
+                    log.info(f"Updated merchant galley {building_custom_id} to IsConstructed=True.")
+                except Exception as e_update:
+                    log.error(f"Error updating IsConstructed for galley {building_custom_id}: {e_update}")
+            else:
+                log.info(f"[DRY RUN] Would update merchant galley {building_custom_id} to IsConstructed=True.")
+    except Exception as e_fetch:
+        log.error(f"Error fetching arriving buildings: {e_fetch}")
 
 def main(dry_run: bool = False):
     log.info(f"Starting Process Activities script (dry_run={dry_run})...")
@@ -271,6 +297,9 @@ def main(dry_run: bool = False):
     if not tables:
         log.error("Failed to initialize Airtable. Exiting.")
         return
+
+    # Process building arrivals (e.g., galleys)
+    process_building_arrivals(tables, dry_run)
 
     # Fetch definitions once
     building_type_defs = get_building_type_definitions_from_api()

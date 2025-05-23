@@ -1187,8 +1187,10 @@ def process_galley_unloading_activities(tables: Dict[str, Table], idle_citizens:
         return 0
 
     try:
-        galleys_with_pending = tables['buildings'].all(formula="AND({Type}='merchant_galley', {PendingDeliveriesData}!='')")
-        log.info(f"Found {len(galleys_with_pending)} merchant galleys with PendingDeliveriesData.")
+        # Only consider galleys that have "arrived" (IsConstructed = True)
+        formula_galleys = "AND({Type}='merchant_galley', {PendingDeliveriesData}!='', {IsConstructed}=TRUE())"
+        galleys_with_pending = tables['buildings'].all(formula=formula_galleys)
+        log.info(f"Found {len(galleys_with_pending)} merchant galleys that have arrived and have PendingDeliveriesData.")
 
         available_citizens_pool = list(idle_citizens) # Make a mutable copy
 
