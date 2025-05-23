@@ -792,45 +792,46 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
 
     # --- Perform Actual Operations ---
 
-    # 1. Financial Transactions
-    for contract_info in involved_original_contracts_info:
-        buyer_citizen_rec = get_citizen_record(tables, contract_info['buyer'])
-        # Seller is "Italia"
-        italia_citizen_rec = get_citizen_record(tables, "Italia") # Assuming "Italia" is a citizen record
+    # 1. Financial Transactions (Deferred - Payment will occur upon resource unloading from galley)
+    # log.info("Financial transactions for import batch are deferred until resources are unloaded from the galley.")
+    # for contract_info in involved_original_contracts_info:
+    #     buyer_citizen_rec = get_citizen_record(tables, contract_info['buyer'])
+    #     # Seller is "Italia"
+    #     italia_citizen_rec = get_citizen_record(tables, "Italia") # Assuming "Italia" is a citizen record
 
-        if not buyer_citizen_rec or not italia_citizen_rec:
-            log.error(f"Buyer {contract_info['buyer']} or Seller Italia not found for transaction of contract {contract_info['contract_id']}. Critical error, stopping.")
-            # Ideally, implement rollback or more robust error handling here.
-            return
+    #     if not buyer_citizen_rec or not italia_citizen_rec:
+    #         log.error(f"Buyer {contract_info['buyer']} or Seller Italia not found for transaction of contract {contract_info['contract_id']}. Critical error, stopping.")
+    #         # Ideally, implement rollback or more robust error handling here.
+    #         return
 
-        try:
-            buyer_ducats = float(buyer_citizen_rec['fields'].get('Ducats', 0))
-            italia_ducats = float(italia_citizen_rec['fields'].get('Ducats', 0))
+    #     try:
+    #         buyer_ducats = float(buyer_citizen_rec['fields'].get('Ducats', 0))
+    #         italia_ducats = float(italia_citizen_rec['fields'].get('Ducats', 0))
 
-            tables['citizens'].update(buyer_citizen_rec['id'], {'Ducats': buyer_ducats - contract_info['cost']})
-            tables['citizens'].update(italia_citizen_rec['id'], {'Ducats': italia_ducats + contract_info['cost']})
+    #         tables['citizens'].update(buyer_citizen_rec['id'], {'Ducats': buyer_ducats - contract_info['cost']})
+    #         tables['citizens'].update(italia_citizen_rec['id'], {'Ducats': italia_ducats + contract_info['cost']})
 
-            transaction_payload = {
-                "Type": "import_payment_to_galley",
-                "AssetType": "contract",
-                "Asset": contract_info['contract_id'], # Custom ContractId
-                "Seller": "Italia",
-                "Buyer": contract_info['buyer'],
-                "Price": contract_info['cost'],
-                "Details": json.dumps({
-                    "resource_type": contract_info['resource_type'],
-                    "amount": contract_info['amount'],
-                    "galley_id": galley_building_id,
-                    "original_buyer_building": contract_info['original_buyer_building']
-                }),
-                "CreatedAt": datetime.now(timezone.utc).isoformat(),
-                "ExecutedAt": datetime.now(timezone.utc).isoformat()
-            }
-            tables['transactions'].create(transaction_payload)
-            log.info(f"Processed financial transaction for contract {contract_info['contract_id']}. Cost: {contract_info['cost']:.2f}")
-        except Exception as e_finance:
-            log.error(f"Error processing financial transaction for contract {contract_info['contract_id']}: {e_finance}. Stopping.")
-            return
+    #         transaction_payload = {
+    #             "Type": "import_payment_to_galley",
+    #             "AssetType": "contract",
+    #             "Asset": contract_info['contract_id'], # Custom ContractId
+    #             "Seller": "Italia",
+    #             "Buyer": contract_info['buyer'],
+    #             "Price": contract_info['cost'],
+    #             "Details": json.dumps({
+    #                 "resource_type": contract_info['resource_type'],
+    #                 "amount": contract_info['amount'],
+    #                 "galley_id": galley_building_id,
+    #                 "original_buyer_building": contract_info['original_buyer_building']
+    #             }),
+    #             "CreatedAt": datetime.now(timezone.utc).isoformat(),
+    #             "ExecutedAt": datetime.now(timezone.utc).isoformat()
+    #         }
+    #         tables['transactions'].create(transaction_payload)
+    #         log.info(f"Processed financial transaction for contract {contract_info['contract_id']}. Cost: {contract_info['cost']:.2f}")
+    #     except Exception as e_finance:
+    #         log.error(f"Error processing financial transaction for contract {contract_info['contract_id']}: {e_finance}. Stopping.")
+    #         return
 
     # 2. Create/Update Resources in the Galley Building
     galley_position_str = merchant_galley_building['fields'].get('Position', '{}')
