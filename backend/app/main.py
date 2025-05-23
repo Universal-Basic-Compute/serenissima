@@ -72,6 +72,19 @@ except Exception as e:
     print(f"ERROR initializing Airtable TRANSACTIONS table: {str(e)}")
     traceback.print_exc(file=sys.stdout)
 
+# Initialize Airtable for CONTRACTS table
+AIRTABLE_CONTRACTS_TABLE_NAME = os.getenv("AIRTABLE_CONTRACTS_TABLE", "CONTRACTS")
+try:
+    contracts_table = Table(AIRTABLE_API_KEY, AIRTABLE_BASE_ID, AIRTABLE_CONTRACTS_TABLE_NAME)
+    print(f"Initialized Airtable CONTRACTS table: {AIRTABLE_CONTRACTS_TABLE_NAME}")
+    # Test the connection
+    print("Testing Airtable CONTRACTS table connection...")
+    test_contracts_records = contracts_table.all(limit=1)
+    print(f"Airtable CONTRACTS table connection successful. Found {len(test_contracts_records)} test records.")
+except Exception as e:
+    print(f"ERROR initializing Airtable CONTRACTS table: {str(e)}")
+    traceback.print_exc(file=sys.stdout)
+
 # Create FastAPI app
 app = FastAPI(title="Wallet Storage API")
 
@@ -845,28 +858,135 @@ async def create_transaction(transaction_data: TransactionRequest):
     
     if not transaction_data.price or transaction_data.price <= 0:
         raise HTTPException(status_code=400, detail="Price must be greater than 0")
-    
+
     try:
-        # Convert seller to username if it's a wallet address
         seller_username = transaction_data.seller
         if transaction_data.seller.startswith("0x") or len(transaction_data.seller) > 30:
-            # Look up the username for this wallet
             seller_records = citizens_table.all(formula=f"{{Wallet}}='{transaction_data.seller}'")
             if seller_records:
                 seller_username = seller_records[0]["fields"].get("Username", transaction_data.seller)
                 print(f"Converted seller wallet {transaction_data.seller} to username {seller_username}")
             else:
                 print(f"Could not find username for wallet {transaction_data.seller}, using wallet as username")
-        
-        # Check if transaction already exists for this asset
-        formula = f"AND({{Asset}}='{transaction_data.asset}', {{Type}}='{transaction_data.type}', {{ExecutedAt}}=BLANK())"
-        print(f"Searching for existing transaction with formula: {formula}")
-        existing_records = transactions_table.all(formula=formula)
-        
-        if existing_records:
-            # Return existing record
-            record = existing_records[0]
-            print(f"Found existing transaction record: {record['id']}")
+
+        now = datetime.datetime.now().isoformat()
+        land_details_json = None
+        if transaction_data.type == "land":
+            land_details = {}
+            if transaction_data.historical_name:
+                land_details["historical_name"] = transaction_data.historical_name
+            if transaction_data.english_name:
+                land_details["english_name"] = transaction_data.english_name
+            if transaction_data.description:
+                land_details["description"] = transaction_data.description
+            if land_details:
+                land_details_json = json.dumps(land_details)
+
+        if transaction_data.type == "land":
+            # Create a CONTRACT for land sale
+            formula = f"AND({{ResourceType}}='{transaction_data.asset}', {{Type}}='land_sale', {{Seller}}='{seller_username}', {{Status}}='available')"
+            print(f"Searching for existing land sale contract with formula: {formula}")
+            existing_records = contracts_table.all(formula=formula)
+
+            if existing_records:
+                record = existing_records[0]
+                print(f"Found existing land sale contract: {record['id']}")
+                # Potentially update if price changes, or just return existing. For now, return existing.
+                notes_data = json.loads(record["fields"].get("Notes", "{}"))
+                return {
+                    "id": record["id"],
+                    "type": record["fields"].get("Type", "land_sale"), # Should be land_sale
+                    "asset": record["fields"].get("ResourceType", ""), # LandId
+                    "seller": record["fields"].get("Seller", ""),
+                    "buyer": record["fields"].get("Buyer", None),
+                    "price": record["fields"].get("PricePerResource", 0),
+                    "historical_name": notes_data.get("historical_name"),
+                    "english_name": notes_data.get("english_name"),
+                    "description": notes_data.get("description"),
+                    "created_at": record["fields"].get("CreatedAt", ""),
+                    "updated_at": record["fields"].get("UpdatedAt", ""),
+                    "executed_at": record["fields"].get("ExecutedAt", None)
+                }
+
+            fields = {
+                "Type": "land_sale",
+                "ResourceType": transaction_data.asset, # LandId
+                "Seller": seller_username,
+                "PricePerResource": transaction_data.price,
+                "Amount": 1,
+                "Status": "available",
+                "CreatedAt": now,
+                "UpdatedAt": now
+            }
+            if land_details_json:
+                fields["Notes"] = land_details_json
+            
+            print(f"Creating new land sale contract with fields: {fields}")
+            record = contracts_table.create(fields)
+            print(f"Created new land sale contract: {record['id']}")
+            
+            return {
+                "id": record["id"],
+                "type": "land_sale",
+                "asset": fields.get("ResourceType"),
+                "seller": fields.get("Seller"),
+                "buyer": None,
+                "price": fields.get("PricePerResource"),
+                "historical_name": transaction_data.historical_name,
+                "english_name": transaction_data.english_name,
+                "description": transaction_data.description,
+                "created_at": fields.get("CreatedAt"),
+                "updated_at": fields.get("UpdatedAt"),
+                "executed_at": None
+            }
+        else:
+            # Existing logic for other transaction types (non-land)
+            formula = f"AND({{Asset}}='{transaction_data.asset}', {{Type}}='{transaction_data.type}', {{ExecutedAt}}=BLANK())"
+            print(f"Searching for existing transaction with formula: {formula}")
+            existing_records = transactions_table.all(formula=formula)
+
+            if existing_records:
+                record = existing_records[0]
+                # ... (return existing transaction - this part is unchanged)
+                print(f"Found existing transaction record: {record['id']}")
+                return {
+                    "id": record["id"],
+                    "type": record["fields"].get("Type", ""),
+                    "asset": record["fields"].get("Asset", ""),
+                    "seller": record["fields"].get("Seller", ""),
+                    "buyer": record["fields"].get("Buyer", None),
+                    "price": record["fields"].get("Price", 0),
+                    "historical_name": None, # Or parse from Notes if applicable
+                    "english_name": None,
+                    "description": None,
+                    "created_at": record["fields"].get("CreatedAt", ""),
+                    "updated_at": record["fields"].get("UpdatedAt", ""),
+                    "executed_at": record["fields"].get("ExecutedAt", None)
+                }
+
+            fields = {
+                "Type": transaction_data.type,
+                "Asset": transaction_data.asset,
+                "Seller": seller_username,
+                "Price": transaction_data.price,
+                "CreatedAt": now,
+                "UpdatedAt": now
+            }
+            if transaction_data.buyer:
+                buyer_username = transaction_data.buyer
+                if transaction_data.buyer.startswith("0x") or len(transaction_data.buyer) > 30:
+                    buyer_records = citizens_table.all(formula=f"{{Wallet}}='{transaction_data.buyer}'")
+                    if buyer_records:
+                        buyer_username = buyer_records[0]["fields"].get("Username", transaction_data.buyer)
+                    # ... (rest of buyer conversion)
+                fields["Buyer"] = buyer_username
+            
+            # Notes for non-land transactions (if any)
+            # if land_details_json: fields["Notes"] = land_details_json # This was inside land block
+
+            print(f"Creating new transaction record with fields: {fields}")
+            record = transactions_table.create(fields)
+            print(f"Created new transaction record: {record['id']}")
             return {
                 "id": record["id"],
                 "type": record["fields"].get("Type", ""),
@@ -881,66 +1001,8 @@ async def create_transaction(transaction_data: TransactionRequest):
                 "updated_at": record["fields"].get("UpdatedAt", ""),
                 "executed_at": record["fields"].get("ExecutedAt", None)
             }
-        
-        # Create new record
-        now = datetime.datetime.now().isoformat()
-        
-        fields = {
-            "Type": transaction_data.type,
-            "Asset": transaction_data.asset,
-            "Seller": seller_username,  # Use username instead of wallet address
-            "Price": transaction_data.price,
-            "CreatedAt": now,
-            "UpdatedAt": now
-        }
-        
-        if transaction_data.buyer:
-            # Convert buyer to username if it's a wallet address
-            buyer_username = transaction_data.buyer
-            if transaction_data.buyer.startswith("0x") or len(transaction_data.buyer) > 30:
-                # Look up the username for this wallet
-                buyer_records = citizens_table.all(formula=f"{{Wallet}}='{transaction_data.buyer}'")
-                if buyer_records:
-                    buyer_username = buyer_records[0]["fields"].get("Username", transaction_data.buyer)
-                    print(f"Converted buyer wallet {transaction_data.buyer} to username {buyer_username}")
-                else:
-                    print(f"Could not find username for wallet {transaction_data.buyer}, using wallet as username")
-            
-            fields["Buyer"] = buyer_username  # Use username instead of wallet address
-            
-        # Store land details as JSON in Notes field if this is a land transaction
-        if transaction_data.type == "land":
-            land_details = {}
-            if transaction_data.historical_name:
-                land_details["historical_name"] = transaction_data.historical_name
-            if transaction_data.english_name:
-                land_details["english_name"] = transaction_data.english_name
-            if transaction_data.description:
-                land_details["description"] = transaction_data.description
-                
-            if land_details:
-                fields["Notes"] = json.dumps(land_details)
-        
-        print(f"Creating new transaction record with fields: {fields}")
-        record = transactions_table.create(fields)
-        print(f"Created new transaction record: {record['id']}")
-        
-        return {
-            "id": record["id"],
-            "type": record["fields"].get("Type", ""),
-            "asset": record["fields"].get("Asset", ""),
-            "seller": record["fields"].get("Seller", ""),
-            "buyer": record["fields"].get("Buyer", None),
-            "price": record["fields"].get("Price", 0),
-            "historical_name": None,
-            "english_name": None,
-            "description": None,
-            "created_at": record["fields"].get("CreatedAt", ""),
-            "updated_at": record["fields"].get("UpdatedAt", ""),
-            "executed_at": record["fields"].get("ExecutedAt", None)
-        }
     except Exception as e:
-        error_msg = f"Failed to create transaction record: {str(e)}"
+        error_msg = f"Failed to create transaction/contract: {str(e)}"
         print(f"ERROR: {error_msg}")
         traceback.print_exc(file=sys.stdout)
         raise HTTPException(status_code=500, detail=error_msg)
@@ -960,57 +1022,48 @@ async def get_land_transaction(land_id: str):
         # Log the possible IDs we're checking
         print(f"Checking possible land IDs: {possible_ids}")
         
-        # Create a formula that checks all possible ID formats
-        id_conditions = []
-        for id in possible_ids:
-            id_conditions.append(f"{{Asset}}='{id}'")
+        # Create a formula that checks all possible ID formats for ResourceType
+        id_conditions = [f"{{ResourceType}}='{pid}'" for pid in possible_ids]
         
-        formula = f"AND(OR({', '.join(id_conditions)}), {{Type}}='land', {{ExecutedAt}}=BLANK())"
+        # Search in contracts_table for available land sales
+        formula = f"AND(OR({', '.join(id_conditions)}), {{Type}}='land_sale', {{Status}}='available')"
         
-        print(f"Searching for land transaction with formula: {formula}")
-        records = transactions_table.all(formula=formula)
+        print(f"Searching for land sale contract with formula: {formula}")
+        records = contracts_table.all(formula=formula)
         
         if not records:
-            # Try a more lenient search without the ExecutedAt condition
-            lenient_formula = f"AND(OR({', '.join(id_conditions)}), {{Type}}='land')"
-            print(f"No active transaction found. Trying more lenient search: {lenient_formula}")
-            records = transactions_table.all(formula=lenient_formula)
+            # Try a more lenient search if no "available" contract is found (e.g., pending, executed)
+            lenient_formula = f"AND(OR({', '.join(id_conditions)}), {{Type}}='land_sale')"
+            print(f"No active land sale contract found. Trying more lenient search: {lenient_formula}")
+            records = contracts_table.all(formula=lenient_formula, sort=[('-CreatedAt')]) # Get the latest if multiple
             
             if not records:
-                print(f"No transaction found for land {land_id}")
-                raise HTTPException(status_code=404, detail="Transaction not found")
+                print(f"No land sale contract found for land {land_id}")
+                raise HTTPException(status_code=404, detail="Contract not found for this land")
+
+        record = records[0] # Take the first one (latest if sorted)
+        print(f"Found land sale contract: {record['id']}")
         
-        record = records[0]
-        print(f"Found transaction record: {record['id']}")
-        
-        # Extract land details from Notes field if available
-        historical_name = None
-        english_name = None
-        description = None
-        
+        notes_data = {}
         if "Notes" in record["fields"]:
             try:
-                land_details = json.loads(record["fields"].get("Notes", "{}"))
-                historical_name = land_details.get("historical_name")
-                english_name = land_details.get("english_name")
-                description = land_details.get("description")
+                notes_data = json.loads(record["fields"].get("Notes", "{}"))
             except json.JSONDecodeError:
-                # If Notes isn't valid JSON, just ignore it
-                pass
+                pass # Ignore if Notes isn't valid JSON
         
         return {
             "id": record["id"],
-            "type": record["fields"].get("Type", ""),
-            "asset": record["fields"].get("Asset", ""),
+            "type": record["fields"].get("Type", "land_sale"),
+            "asset": record["fields"].get("ResourceType", ""), # LandId
             "seller": record["fields"].get("Seller", ""),
             "buyer": record["fields"].get("Buyer", None),
-            "price": record["fields"].get("Price", 0),
-            "historical_name": historical_name,
-            "english_name": english_name,
-            "description": description,
+            "price": record["fields"].get("PricePerResource", 0),
+            "historical_name": notes_data.get("historical_name"),
+            "english_name": notes_data.get("english_name"),
+            "description": notes_data.get("description"),
             "created_at": record["fields"].get("CreatedAt", ""),
             "updated_at": record["fields"].get("UpdatedAt", ""),
-            "executed_at": record["fields"].get("ExecutedAt", None)
+            "executed_at": record["fields"].get("ExecutedAt", None) # Or map from Status='executed'
         }
     except HTTPException:
         raise
@@ -1022,49 +1075,42 @@ async def get_land_transaction(land_id: str):
 
 @app.get("/api/transactions")
 async def get_transactions():
-    """Get all active transactions"""
+    """Get all active land sale contracts"""
     
     try:
-        formula = "{{ExecutedAt}}=BLANK()"
-        print(f"Fetching all active transactions with formula: {formula}")
-        records = transactions_table.all(formula=formula)
+        # Fetch available land sale contracts
+        formula = "AND({Type}='land_sale', {Status}='available')"
+        print(f"Fetching all active land sale contracts with formula: {formula}")
+        records = contracts_table.all(formula=formula, sort=[('-CreatedAt')])
         
-        transactions = []
+        contracts_response = []
         for record in records:
-            # Extract land details from Notes field if available
-            historical_name = None
-            english_name = None
-            description = None
-            
+            notes_data = {}
             if "Notes" in record["fields"]:
                 try:
-                    land_details = json.loads(record["fields"].get("Notes", "{}"))
-                    historical_name = land_details.get("historical_name")
-                    english_name = land_details.get("english_name")
-                    description = land_details.get("description")
+                    notes_data = json.loads(record["fields"].get("Notes", "{}"))
                 except json.JSONDecodeError:
-                    # If Notes isn't valid JSON, just ignore it
                     pass
             
-            transactions.append({
+            contracts_response.append({
                 "id": record["id"],
-                "type": record["fields"].get("Type", ""),
-                "asset": record["fields"].get("Asset", ""),
+                "type": record["fields"].get("Type", "land_sale"),
+                "asset": record["fields"].get("ResourceType", ""), # LandId
                 "seller": record["fields"].get("Seller", ""),
                 "buyer": record["fields"].get("Buyer", None),
-                "price": record["fields"].get("Price", 0),
-                "historical_name": historical_name,
-                "english_name": english_name,
-                "description": description,
+                "price": record["fields"].get("PricePerResource", 0),
+                "historical_name": notes_data.get("historical_name"),
+                "english_name": notes_data.get("english_name"),
+                "description": notes_data.get("description"),
                 "created_at": record["fields"].get("CreatedAt", ""),
                 "updated_at": record["fields"].get("UpdatedAt", ""),
                 "executed_at": record["fields"].get("ExecutedAt", None)
             })
         
-        print(f"Found {len(transactions)} active transactions")
-        return transactions
+        print(f"Found {len(contracts_response)} active land sale contracts")
+        return contracts_response
     except Exception as e:
-        error_msg = f"Failed to get transactions: {str(e)}"
+        error_msg = f"Failed to get land sale contracts: {str(e)}"
         print(f"ERROR: {error_msg}")
         traceback.print_exc(file=sys.stdout)
         raise HTTPException(status_code=500, detail=error_msg)
@@ -1081,53 +1127,53 @@ async def get_land_transactions(land_id: str):
             land_id.replace("polygon-", "") if land_id.startswith("polygon-") else land_id
         ]
         
-        # Create a formula that checks all possible ID formats
-        id_conditions = [f"{{Asset}}='{id}'" for id in possible_ids]
-        formula = f"AND(OR({', '.join(id_conditions)}), {{Type}}='land', {{ExecutedAt}}=BLANK())"
+    """Get all land sale contracts for a land (both incoming and outgoing offers if applicable)"""
+    
+    try:
+        possible_ids = [
+            land_id,
+            f"polygon-{land_id}" if not land_id.startswith("polygon-") else land_id,
+            land_id.replace("polygon-", "") if land_id.startswith("polygon-") else land_id
+        ]
         
-        print(f"Searching for land transactions with formula: {formula}")
-        records = transactions_table.all(formula=formula)
+        id_conditions = [f"{{ResourceType}}='{pid}'" for pid in possible_ids]
+        # Fetch 'available' or 'pending_execution' land sale contracts
+        formula = f"AND(OR({', '.join(id_conditions)}), {{Type}}='land_sale', OR({{Status}}='available', {{Status}}='pending_execution'))"
+        
+        print(f"Searching for land sale contracts with formula: {formula}")
+        records = contracts_table.all(formula=formula, sort=[('-CreatedAt')])
         
         if not records:
-            # No transactions found
-            return []
+            return [] # No contracts found
         
-        transactions = []
+        contracts_response = []
         for record in records:
-            # Extract land details from Notes field if available
-            historical_name = None
-            english_name = None
-            description = None
-            
+            notes_data = {}
             if "Notes" in record["fields"]:
                 try:
-                    land_details = json.loads(record["fields"].get("Notes", "{}"))
-                    historical_name = land_details.get("historical_name")
-                    english_name = land_details.get("english_name")
-                    description = land_details.get("description")
+                    notes_data = json.loads(record["fields"].get("Notes", "{}"))
                 except json.JSONDecodeError:
-                    # If Notes isn't valid JSON, just ignore it
                     pass
             
-            transactions.append({
+            contracts_response.append({
                 "id": record["id"],
-                "type": record["fields"].get("Type", ""),
-                "asset": record["fields"].get("Asset", ""),
+                "type": record["fields"].get("Type", "land_sale"),
+                "asset": record["fields"].get("ResourceType", ""), # LandId
                 "seller": record["fields"].get("Seller", ""),
                 "buyer": record["fields"].get("Buyer", None),
-                "price": record["fields"].get("Price", 0),
-                "historical_name": historical_name,
-                "english_name": english_name,
-                "description": description,
+                "price": record["fields"].get("PricePerResource", 0),
+                "historical_name": notes_data.get("historical_name"),
+                "english_name": notes_data.get("english_name"),
+                "description": notes_data.get("description"),
                 "created_at": record["fields"].get("CreatedAt", ""),
                 "updated_at": record["fields"].get("UpdatedAt", ""),
                 "executed_at": record["fields"].get("ExecutedAt", None)
             })
         
-        print(f"Found {len(transactions)} transactions for land {land_id}")
-        return transactions
+        print(f"Found {len(contracts_response)} land sale contracts for land {land_id}")
+        return contracts_response
     except Exception as e:
-        error_msg = f"Failed to get land transactions: {str(e)}"
+        error_msg = f"Failed to get land sale contracts: {str(e)}"
         print(f"ERROR: {error_msg}")
         traceback.print_exc(file=sys.stdout)
         raise HTTPException(status_code=500, detail=error_msg)
@@ -1140,18 +1186,23 @@ async def execute_transaction(transaction_id: str, data: dict):
         raise HTTPException(status_code=400, detail="Buyer is required")
     
     try:
-        # Get the transaction record
-        record = transactions_table.get(transaction_id)
+        # Get the contract record
+        record = contracts_table.get(transaction_id) # transaction_id is now ContractId
         if not record:
-            raise HTTPException(status_code=404, detail="Transaction not found")
-        
-        # Check if transaction is already executed
-        if record["fields"].get("ExecutedAt"):
-            raise HTTPException(status_code=400, detail="Transaction already executed")
-        
-        # Get the seller and price from the transaction
+            raise HTTPException(status_code=404, detail="Contract not found")
+
+        contract_type = record["fields"].get("Type")
+        contract_status = record["fields"].get("Status")
+
+        # Check if contract is already executed or not available for execution
+        if contract_status == "executed":
+            raise HTTPException(status_code=400, detail="Contract already executed")
+        if contract_status != "available" and contract_status != "pending_execution": # Allow pending_execution if that's a state
+            raise HTTPException(status_code=400, detail=f"Contract not in a state to be executed (Status: {contract_status})")
+
+        # Get the seller and price from the contract
         seller = record["fields"].get("Seller", "")
-        price = record["fields"].get("Price", 0)
+        price = record["fields"].get("PricePerResource", 0) # Price from PricePerResource
         buyer = data["buyer"]
         
         # Always use usernames for buyer and seller
@@ -1965,27 +2016,75 @@ async def trigger_income_distribution():
 async def cancel_transaction(transaction_id: str, data: dict):
     """Cancel a transaction"""
     
-    if not data.get("seller"):
-        raise HTTPException(status_code=400, detail="Seller is required")
+    if not data.get("seller"): # Seller identifier (username or wallet)
+        raise HTTPException(status_code=400, detail="Seller is required for cancellation")
     
     try:
-        # Get the transaction record
-        record = transactions_table.get(transaction_id)
+        # Get the contract record
+        record = contracts_table.get(transaction_id) # transaction_id is ContractId
         if not record:
-            raise HTTPException(status_code=404, detail="Transaction not found")
-        
-        # Check if transaction is already executed
-        if record["fields"].get("ExecutedAt"):
-            raise HTTPException(status_code=400, detail="Transaction already executed")
-        
-        # Check if the seller is the one who created the transaction
-        if record["fields"].get("Seller") != data["seller"]:
-            raise HTTPException(status_code=403, detail="Only the seller can cancel this transaction")
-        
-        # Delete the transaction
-        transactions_table.delete(transaction_id)
-        
-        return {"success": True, "message": "Transaction cancelled successfully"}
+            raise HTTPException(status_code=404, detail="Contract not found")
+
+        contract_type = record["fields"].get("Type")
+        contract_status = record["fields"].get("Status")
+        contract_seller = record["fields"].get("Seller")
+
+        # For land sales, only the original seller can cancel an "available" contract
+        if contract_type == "land_sale":
+            if contract_status != "available":
+                raise HTTPException(status_code=400, detail=f"Land sale contract cannot be cancelled (Status: {contract_status})")
+
+            # Normalize seller from request and contract for comparison
+            request_seller_normalized = data["seller"].lower()
+            contract_seller_normalized = contract_seller.lower()
+            
+            # Also check against wallet if username is stored in contract_seller
+            seller_wallet = None
+            seller_username_in_contract = None
+
+            # Attempt to find citizen by contract_seller to get both username and wallet
+            # This logic assumes contract_seller might be username or wallet
+            # A more robust way is to always store a consistent identifier (e.g. username)
+            # and then fetch wallet if needed, or vice-versa.
+            # For now, we'll try to match against the stored seller field directly.
+            # If contract_seller is a wallet, it should match. If it's a username, it should match.
+            
+            # A simpler check: if the provided seller identifier (data["seller"]) matches the contract's seller field
+            if request_seller_normalized != contract_seller_normalized:
+                 # If direct match fails, try to resolve if one is username and other is wallet
+                seller_citizen_record = find_citizen_by_identifier(citizens_table, contract_seller)
+                request_seller_citizen_record = find_citizen_by_identifier(citizens_table, data["seller"])
+
+                match_found = False
+                if seller_citizen_record and request_seller_citizen_record:
+                    if seller_citizen_record['id'] == request_seller_citizen_record['id']:
+                        match_found = True
+                
+                if not match_found:
+                    print(f"Seller mismatch: Request seller '{data['seller']}' vs Contract seller '{contract_seller}'")
+                    raise HTTPException(status_code=403, detail="Only the original seller can cancel this land sale contract.")
+
+            # Update contract status to "cancelled" or delete
+            # contracts_table.update(transaction_id, {"Status": "cancelled", "UpdatedAt": datetime.datetime.now().isoformat()})
+            contracts_table.delete(transaction_id) # Current behavior is delete
+            print(f"Land sale contract {transaction_id} cancelled by seller {data['seller']}")
+            return {"success": True, "message": "Land sale contract cancelled successfully"}
+        else:
+            # Fallback to old transaction logic if not a land_sale contract (or handle other contract types)
+            # This part assumes non-land transactions are still in transactions_table
+            # If all transactions move to contracts, this else block needs adjustment
+            original_transaction_record = transactions_table.get(transaction_id)
+            if not original_transaction_record:
+                 raise HTTPException(status_code=404, detail="Transaction not found in transactions_table either.")
+
+            if original_transaction_record["fields"].get("ExecutedAt"):
+                raise HTTPException(status_code=400, detail="Transaction already executed")
+            if original_transaction_record["fields"].get("Seller") != data["seller"]:
+                raise HTTPException(status_code=403, detail="Only the seller can cancel this transaction")
+            
+            transactions_table.delete(transaction_id)
+            return {"success": True, "message": "Transaction cancelled successfully"}
+
     except HTTPException:
         raise
     except Exception as e:
