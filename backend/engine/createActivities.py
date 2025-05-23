@@ -82,6 +82,8 @@ from backend.engine.logic.galley_activities import (
     process_final_deliveries_from_galley,
     process_galley_unloading_activities
 )
+# Import general citizen activity processing function
+from backend.engine.logic.citizen_general_activities import process_citizen_activity
 
 # Set up logging
 logging.basicConfig(
@@ -1229,7 +1231,11 @@ def create_activities(dry_run: bool = False, target_citizen_username: Optional[s
             else:
                 # No need for the 'if target_citizen_username and ... != target_citizen_username:' check
                 # because citizens_to_process_general is already filtered.
-                activity_created_for_citizen = process_citizen_activity(tables, citizen_record, night_time, resource_defs)
+                # Pass additional required arguments
+                activity_created_for_citizen = process_citizen_activity(
+                    tables, citizen_record, night_time, resource_defs,
+                    now_venice_dt, now_utc_dt, TRANSPORT_API_URL, API_BASE_URL
+                )
                 if activity_created_for_citizen:
                     success_count += 1
     
