@@ -251,14 +251,14 @@ def process(
                 "Name": res_def_details.get('name', resource_id_to_fetch),
                 "Asset": carrier_username,
                 "AssetType": "citizen",
-                "Owner": galley_owner_username, # Resources on citizen are owned by the merchant (galley owner)
+                "Owner": ultimate_buyer_username, # Resources on citizen are owned by the ultimate buyer from the contract
                 "Count": actual_amount_to_pickup,
                 # "Position": galley_position_str, # Citizen is at the galley - REMOVED
                 "CreatedAt": now_iso,
                 "Notes": f"Fetched for contract: {original_contract_custom_id}" # Store original contract ID
             }
             tables['resources'].create(new_carrier_res_payload)
-            log.info(f"[fetch_from_galley_proc] Created {actual_amount_to_pickup} of {resource_id_to_fetch} for carrier {carrier_username} (owned by merchant {galley_owner_username}), linked to contract {original_contract_custom_id}.")
+            log.info(f"[fetch_from_galley_proc] Created {actual_amount_to_pickup} of {resource_id_to_fetch} for carrier {carrier_username} (owned by ultimate buyer {ultimate_buyer_username}), linked to contract {original_contract_custom_id}.")
 
         # Update carrier's position to Galley
         tables['citizens'].update(carrier_airtable_id, {'Position': galley_position_str})
