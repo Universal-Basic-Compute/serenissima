@@ -208,10 +208,10 @@ export class ActivityPathService {
    * Get activity path color based on type
    */
   public getActivityPathColor(activity: ActivityPath, socialClass?: string): string {
-    // If social class is provided, use it for coloring
-    if (socialClass) {
+    // If social class is provided and not empty after trimming, use it for coloring
+    if (socialClass && socialClass.trim()) {
       // Return color based on social class
-      const baseClass = socialClass.toLowerCase();
+      const baseClass = socialClass.trim().toLowerCase();
       
       if (baseClass.includes('nobili')) {
         return 'rgba(218, 165, 32, 0.8)'; // Gold for nobility

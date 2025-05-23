@@ -130,7 +130,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   
     // Get the social class if citizen is found
     const socialClass = citizen ? 
-      (citizen.socialclass || citizen.SocialClass || citizen.socialClass || '') : 
+      (citizen.socialClass || citizen.socialclass || citizen.SocialClass || '') : 
       '';
     
     // Use the ActivityPathService to get the color
