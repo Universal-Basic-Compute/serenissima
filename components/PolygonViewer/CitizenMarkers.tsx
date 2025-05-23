@@ -95,13 +95,13 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
 ;
   
   // Function to fetch activity paths
-  const fetchActivityPaths = async () => {
+  const fetchActivityPaths = async (forceRefresh: boolean = false, ongoing: boolean = false) => {
     setIsLoadingPaths(true);
-    console.log('Fetching activity paths using ActivityPathService...');
+    console.log(`Fetching activity paths using ActivityPathService (forceRefresh: ${forceRefresh}, ongoing: ${ongoing})...`);
     
     try {
       // Use the ActivityPathService to fetch paths
-      const pathsMap = await activityPathService.fetchActivityPaths();
+      const pathsMap = await activityPathService.fetchActivityPaths(forceRefresh, ongoing);
       
       // Update state with the fetched paths
       setActivityPaths(pathsMap);
@@ -281,7 +281,8 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
       // After citizens are loaded, fetch their activity paths
       // This fetchActivityPaths() call is for the very first load.
       // Subsequent refreshes are handled by the setInterval.
-      fetchActivityPaths(); 
+      // For the main map, fetch ongoing activities.
+      fetchActivityPaths(false, true); 
     });
         
     // Clean up event listeners
@@ -398,8 +399,8 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
         // The CITIZENS_LOADED event will be emitted by the service, 
         // and the existing event listener in this component will update the 'citizens' state.
 
-        // Force refresh activity paths
-        const pathsMap = await activityPathService.fetchActivityPaths(true);
+        // Force refresh activity paths, ensuring we get ongoing ones for the map
+        const pathsMap = await activityPathService.fetchActivityPaths(true, true);
         setActivityPaths(pathsMap); // Update paths state directly
 
         // Re-initialize animations if necessary (the existing useEffect for [activityPaths, citizens] should handle this)

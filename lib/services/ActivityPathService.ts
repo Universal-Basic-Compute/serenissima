@@ -20,8 +20,9 @@ export class ActivityPathService {
   /**
    * Fetch activity paths for citizens
    * @param forceRefresh - If true, bypasses the cache and re-fetches data.
+   * @param ongoing - If true, fetches only ongoing activities.
    */
-  public async fetchActivityPaths(forceRefresh: boolean = false): Promise<Record<string, ActivityPath[]>> {
+  public async fetchActivityPaths(forceRefresh: boolean = false, ongoing: boolean = false): Promise<Record<string, ActivityPath[]>> {
     // Return cached data if it's recent enough and not a forced refresh
     if (
       !forceRefresh &&
@@ -52,7 +53,12 @@ export class ActivityPathService {
     
     try {
       // Fetch the most recent activities with paths
-      const response = await fetch(`/api/activities?limit=100&hasPath=true`);
+      let apiUrl = `/api/activities?limit=100&hasPath=true`;
+      if (ongoing) {
+        apiUrl += `&ongoing=true`;
+        console.log('ActivityPathService: Fetching only ongoing activities.');
+      }
+      const response = await fetch(apiUrl);
       
       if (response.ok) {
         const data = await response.json();
