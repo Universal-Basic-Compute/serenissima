@@ -42,6 +42,7 @@ export default function IsometricViewer({ activeView, setActiveView, fullWaterGr
   const [citizens, setCitizens] = useState<Record<string, any>>({});
   const [scale, setScale] = useState(3); // Start with a 3x zoom for a closer view
   const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [canvasDims, setCanvasDims] = useState({ width: typeof window !== 'undefined' ? window.innerWidth : 0, height: typeof window !== 'undefined' ? window.innerHeight : 0 });
 
   // Define loading images and select one randomly for initial state
   const loadingImageFiles = [
@@ -2493,7 +2494,7 @@ number => {
   };
   
   // Function to find building position
-  const findBuildingPosition = (buildingId: string): {x: number, y: number} | null => {
+  const findBuildingPosition = useCallback((buildingId: string): {x: number, y: number} | null => {
     // First check if any building in the buildings array matches
     const building = buildings.find(b => b.id === buildingId);
     if (building && building.position) {
@@ -2521,8 +2522,8 @@ number => {
       }
       
       return {
-        x: calculateIsoX(x, y, scale, offset, canvasRef.current?.width || 0),
-        y: calculateIsoY(x, y, scale, offset, canvasRef.current?.height || 0)
+        x: calculateIsoX(x, y, scale, offset, canvasDims.width),
+        y: calculateIsoY(x, y, scale, offset, canvasDims.height)
       };
     }
     
@@ -2541,15 +2542,15 @@ number => {
           const y = (buildingPoint.lat - 45.4371) * 20000;
           
           return {
-            x: calculateIsoX(x, y, scale, offset, canvasRef.current?.width || 0),
-            y: calculateIsoY(x, y, scale, offset, canvasRef.current?.height || 0)
+            x: calculateIsoX(x, y, scale, offset, canvasDims.width),
+            y: calculateIsoY(x, y, scale, offset, canvasDims.height)
           };
         }
       }
     }
     
     return null;
-  };
+  }, [buildings, polygons, scale, offset, canvasDims.width, canvasDims.height]); // Added dependencies
   
   // Function to create a citizen marker
   const createCitizenMarker = (
@@ -2564,13 +2565,28 @@ number => {
   };
 
   // Define isometric projection functions at the component level
-  const calculateIsoX = (x: number, y: number, currentScale: number, currentOffset: {x: number, y: number}, canvasWidth: number) => {
-    return x * currentScale + canvasWidth / 2 + currentOffset.x; // Correct east-west orientation
+  // These now take currentCanvasWidth and currentCanvasHeight to be explicit
+  const calculateIsoX = (x: number, y: number, currentScale: number, currentOffset: {x: number, y: number}, currentCanvasWidth: number) => {
+    return x * currentScale + currentCanvasWidth / 2 + currentOffset.x; // Correct east-west orientation
   };
   
-  const calculateIsoY = (x: number, y: number, currentScale: number, currentOffset: {x: number, y: number}, canvasHeight: number) => {
-    return (-y) * currentScale * 1.4 + canvasHeight / 2 + currentOffset.y; // Multiply by 1.4 to stretch vertically
+  const calculateIsoY = (x: number, y: number, currentScale: number, currentOffset: {x: number, y: number}, currentCanvasHeight: number) => {
+    return (-y) * currentScale * 1.4 + currentCanvasHeight / 2 + currentOffset.y; // Multiply by 1.4 to stretch vertically
   };
+
+  // Helper function to convert lat/lng to screen coordinates, now uses canvasDims state
+  const latLngToScreen = useCallback((lat: number, lng: number) => {
+    const world = {
+      x: (lng - 12.3326) * 20000,
+      y: (lat - 45.4371) * 20000
+    };
+    // Use CoordinateService.worldToScreen which should internally use calculateIsoX/Y or similar logic
+    // Pass canvasDims from state to ensure consistency
+    return {
+      x: CoordinateService.worldToScreen(world.x, world.y, scale, offset, canvasDims.width, canvasDims.height).x,
+      y: CoordinateService.worldToScreen(world.x, world.y, scale, offset, canvasDims.width, canvasDims.height).y
+    };
+  }, [scale, offset, canvasDims.width, canvasDims.height]);
 
   // Create a memoized function to calculate polygonsToRender
   const calculatePolygonsToRender = useCallback(() => {
@@ -2611,8 +2627,9 @@ number => {
       // For other views, keep the default yellow color
     
       // Create local shorthand functions that use the current state values
-      const localIsoX = (x: number, y: number) => calculateIsoX(x, y, scale, offset, canvasRef.current?.width || 0);
-      const localIsoY = (x: number, y: number) => calculateIsoY(x, y, scale, offset, canvasRef.current?.height || 0);
+      // Pass canvasDims from state to ensure calculations use the correct, most up-to-date dimensions
+      const localIsoX = (x: number, y: number) => calculateIsoX(x, y, scale, offset, canvasDims.width);
+      const localIsoY = (x: number, y: number) => calculateIsoY(x, y, scale, offset, canvasDims.height);
     
       // Convert lat/lng to isometric coordinates
       const coords = polygon.coordinates.map((coord: {lat: number, lng: number}) => {
@@ -2664,7 +2681,7 @@ number => {
         hasPublicDock        // Add this flag to identify polygons with public docks
       };
     }).filter(Boolean);
-  }, [polygons, landOwners, citizens, activeView, scale, offset, incomeData, incomeDataLoaded, landGroups, landGroupColors]);
+  }, [polygons, landOwners, citizens, activeView, scale, offset, incomeData, incomeDataLoaded, landGroups, landGroupColors, canvasDims.width, canvasDims.height, getIncomeColor]); // Added canvasDims and getIncomeColor
 
   // Update polygonsToRender when the dependencies of calculatePolygonsToRender change
   useEffect(() => {
@@ -2691,10 +2708,7 @@ number => {
     // Reset any transformations
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     
-    // Set canvas size
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    
+    // Canvas size is now set by the resize effect.
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
@@ -3450,61 +3464,46 @@ number => {
     prevActiveView.current = activeView;
     prevScale.current = scale;
     
-    // Add a listener for force redraw
-    const handleForceRedraw = () => {
-      if (canvasRef.current) {
-        const ctx = canvasRef.current.getContext('2d');
-        if (ctx) {
-          // Reset any transformations
-          ctx.setTransform(1, 0, 0, 1, 0, 0);
-          // Clear the canvas
-          ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-          // Redraw everything - trigger a full redraw cycle
-          const event = new Event('redraw');
-          window.dispatchEvent(event);
-        }
-      }
-    };
+    // The 'forceRedraw' event listener is removed as reactivity should handle redraws.
     
-    window.addEventListener('forceRedraw', handleForceRedraw);
-    
-    return () => {
-      window.removeEventListener('forceRedraw', handleForceRedraw);
-    };
   }, [
     loading, polygons, landOwners, citizens, activeView, buildings, scale, offset, 
     incomeData, minIncome, maxIncome, selectedPolygonId, selectedBuildingId, 
     emptyBuildingPoints, mousePosition, citizensLoaded, citizensByBuilding, 
     incomeDataLoaded, polygonsToRender, getIncomeColor, getCurrentCitizenSecondaryColor,
-    fullWaterGraphData, // Replaced waterPoints with fullWaterGraphData
-    interactionMode, // Added interactionMode
-    waterRoutePath, transportPath, currentHoverState, // Added currentHoverState
-    buildingPositionsCache, buildingColorMode // Added for building rendering
+    fullWaterGraphData, 
+    interactionMode, 
+    waterRoutePath, transportPath, currentHoverState, 
+    buildingPositionsCache, buildingColorMode, canvasDims // Added canvasDims to ensure re-draw if it changes
   ]);
   
 
-  // Handle window resize
+  // Handle window resize and initial canvas setup
   useEffect(() => {
-    const handleResize = debounce(() => {
+    const updateCanvasDimensions = () => {
       if (canvasRef.current) {
-        canvasRef.current.width = window.innerWidth;
-        canvasRef.current.height = window.innerHeight;
-        
-        // Clear the coat of arms cache when resizing
-        renderedCoatOfArmsCache.current = {};
-        
-        // Redraw everything
-        const event = new Event('redraw');
-        window.dispatchEvent(event);
+        const newWidth = window.innerWidth;
+        const newHeight = window.innerHeight;
+        canvasRef.current.width = newWidth;
+        canvasRef.current.height = newHeight;
+        setCanvasDims({ width: newWidth, height: newHeight });
+        renderedCoatOfArmsCache.current = {}; // Clear cache on resize
       }
+    };
+
+    updateCanvasDimensions(); // Initial sizing on mount
+
+    const handleResize = debounce(() => {
+      updateCanvasDimensions();
     }, 200);
     
     window.addEventListener('resize', handleResize);
     
     return () => {
       window.removeEventListener('resize', handleResize);
+      handleResize.cancel(); // Clean up debounce
     };
-  }, []);
+  }, []); // Empty dependency array, runs once on mount for setup and cleanup
   
   // Listen for problem details panel events
   useEffect(() => {
