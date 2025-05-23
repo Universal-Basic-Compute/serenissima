@@ -32,6 +32,7 @@ const TIER_NAMES: { [key: number]: string } = {
   2: 'Tier 2: Popolani',
   3: 'Tier 3: Cittadini',
   4: 'Tier 4: Nobili',
+  5: 'Tier 5: Unique', // Added Tier 5
 };
 
 const BuildingCreationPanel: React.FC<BuildingCreationPanelProps> = ({ selectedPoint, onClose, onBuild }) => {
