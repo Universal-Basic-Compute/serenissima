@@ -1755,25 +1755,12 @@ def process_galley_unloading_activities(tables: Dict[str, Table], idle_citizens:
 
             galley_airtable_id = galley_record['id']
             galley_custom_id = galley_record['fields'].get('BuildingId')
-            galley_position_str = galley_record['fields'].get('Position')
             galley_owner_username = galley_record['fields'].get('Owner')
             
-            galley_position = None # Initialize galley_position
-            if galley_position_str:
-                try:
-                    galley_position = json.loads(galley_position_str)
-                except json.JSONDecodeError:
-                    log.error(f"{LogColors.FAIL}Could not parse Position JSON for galley {galley_custom_id}: '{galley_position_str}'. Skipping galley.{LogColors.ENDC}")
-                    continue # Skip this galley if position is invalid
+            galley_position = _get_building_position_coords(galley_record) # Use helper to get parsed position
 
-            if not all([galley_custom_id, galley_position, galley_owner_username]): # Check galley_position instead of galley_position_str
-                log.warning(f"{LogColors.WARNING}Galley {galley_airtable_id} missing BuildingId, Position, or Owner. Skipping.{LogColors.ENDC}")
-                continue
-            
-            try:
-                galley_position = json.loads(galley_position_str)
-            except json.JSONDecodeError:
-                log.error(f"{LogColors.FAIL}Could not parse Position for galley {galley_custom_id}. Skipping.{LogColors.ENDC}")
+            if not all([galley_custom_id, galley_position, galley_owner_username]):
+                log.warning(f"{LogColors.WARNING}Galley {galley_airtable_id} (Custom ID: {galley_custom_id}) missing BuildingId, valid Position, or Owner. Skipping. Position found: {galley_position}{LogColors.ENDC}")
                 continue
             
             # Find import contracts associated with this galley that need processing
