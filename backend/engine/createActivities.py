@@ -1134,6 +1134,7 @@ def create_activities(dry_run: bool = False):
     log.info(f"Starting activity creation process (dry_run: {dry_run})")
     
     tables = initialize_airtable()
+    now_utc_dt = datetime.datetime.now(pytz.UTC) # Define now_utc_dt here
     idle_citizens = get_idle_citizens(tables)
     
     if not idle_citizens:
