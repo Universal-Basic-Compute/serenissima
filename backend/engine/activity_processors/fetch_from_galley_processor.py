@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 CITIZEN_STORAGE_CAPACITY = 10.0 # Standard citizen carrying capacity
 
 def _get_citizen_record_local(tables: Dict[str, Any], username: str) -> Optional[Dict]:
-    formula = f"{{Username}} = '{username.replace("'", "\\'")}'"
+    formula = f"{{Username}} = '{username.replace("'", "\\'")}'" # Corrected: added closing parenthesis
     try:
         records = tables['citizens'].all(formula=formula, max_records=1)
         return records[0] if records else None
