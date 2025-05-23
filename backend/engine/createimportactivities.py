@@ -600,7 +600,8 @@ def create_delivery_activity(tables, citizen: Dict, galley_building_id: str,
         end_position = None
         if point_str and isinstance(point_str, str) and point_str.startswith("water_"):
             parts = point_str.split('_')
-            if len(parts) == 3:
+            # The format can be water_lat_lng_variationCounter, so parts[1] is lat, parts[2] is lng
+            if len(parts) >= 3: 
                 try:
                     lat = float(parts[1])
                     lng = float(parts[2])
