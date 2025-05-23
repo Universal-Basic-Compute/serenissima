@@ -118,17 +118,28 @@ export async function GET(request: Request) {
     const resourceMap = new Map(); // Use a Map to deduplicate by ResourceId
     
     (records as any[]).forEach(record => {
-      const resourceId = record.get('ResourceId');
+      const airtableResourceId = record.get('ResourceId'); // Renamed to avoid conflict in scope
       
       // Skip if we've already processed this ResourceId
-      if (resourceMap.has(resourceId)) {
-        console.warn(`Duplicate ResourceId found in Airtable: ${resourceId}`);
+      if (resourceMap.has(airtableResourceId)) {
+        console.warn(`Duplicate ResourceId found in Airtable: ${airtableResourceId}`);
         return;
       }
+
+      // Initialize with all fields from Airtable, keys converted to camelCase
+      const processedFields: Record<string, any> = {};
+      if (record.fields) {
+        for (const airtableKey in record.fields) {
+          if (Object.prototype.hasOwnProperty.call(record.fields, airtableKey)) {
+            const camelKey = airtableKey.charAt(0).toLowerCase() + airtableKey.slice(1);
+            processedFields[camelKey] = record.fields[airtableKey];
+          }
+        }
+      }
       
-      let position: { lat: number, lng: number } | {} = {}; // Default to an empty object
-      const assetType = record.get('AssetType');
-      const assetId = record.get('AssetId');
+      let finalPosition: { lat: number, lng: number } | {} = {}; // Default to an empty object
+      const assetType = record.get('AssetType'); // Original Airtable field name for logic
+      const assetId = record.get('AssetId'); // Original Airtable field name for logic
 
       if (assetType === 'building' && assetId) {
         const parts = String(assetId).split('_');
@@ -139,56 +150,54 @@ export async function GET(request: Request) {
           const potentialLng = parseFloat(potentialLngStr);
 
           if (!isNaN(potentialLat) && !isNaN(potentialLng)) {
-            position = { lat: potentialLat, lng: potentialLng };
-            console.log(`Parsed position from AssetId ${assetId} for building:`, position);
+            finalPosition = { lat: potentialLat, lng: potentialLng };
+            console.log(`Parsed position from AssetId ${assetId} for building:`, finalPosition);
           }
         }
-        // If position is still empty (parsing AssetId failed), try the Position field
-        if (Object.keys(position).length === 0) {
+        if (Object.keys(finalPosition).length === 0) {
           try {
-            const posField = record.get('Position');
-            if (posField) position = JSON.parse(posField);
+            const posField = record.get('Position'); // Original Airtable field name
+            if (posField) finalPosition = JSON.parse(posField);
           } catch (e) {
-            console.warn(`Invalid Position JSON for building resource ${resourceId} (AssetId: ${assetId}):`, record.get('Position'), e);
+            console.warn(`Invalid Position JSON for building resource ${airtableResourceId} (AssetId: ${assetId}):`, record.get('Position'), e);
           }
         }
       } else if (assetType === 'Citizen' && assetId && citizenPositionsMap.has(assetId)) {
-        position = citizenPositionsMap.get(assetId)!;
-        console.log(`Using fetched position for citizen asset ${assetId}:`, position);
+        finalPosition = citizenPositionsMap.get(assetId)!;
+        console.log(`Using fetched position for citizen asset ${assetId}:`, finalPosition);
       } else {
-        // Fallback for other types or if specific logic failed
         try {
-          const posField = record.get('Position');
-          if (posField) position = JSON.parse(posField);
+          const posField = record.get('Position'); // Original Airtable field name
+          if (posField) finalPosition = JSON.parse(posField);
         } catch (e) {
-          console.warn(`Invalid Position JSON for resource ${resourceId}:`, record.get('Position'), e);
+          console.warn(`Invalid Position JSON for resource ${airtableResourceId}:`, record.get('Position'), e);
         }
       }
       
-      // Ensure position is an object, even if empty
-      if (typeof position !== 'object' || position === null) {
-        position = {};
+      if (typeof finalPosition !== 'object' || finalPosition === null) {
+        finalPosition = {};
       }
       
-      // Get icon field or use default
-      const icon = record.get('Icon') || 'default.png';
+      const finalResource = {
+        ...processedFields, // Spread all camelCased fields
+        id: airtableResourceId, // Explicitly set/override id using ResourceId from Airtable
+        position: finalPosition, // Explicitly set/override position
+      };
+
+      // Apply defaults for fields that might be missing or need specific fallbacks
+      // These use the camelCased keys from finalResource (which came from processedFields)
+      finalResource.name = finalResource.name || finalResource.type;
+      finalResource.category = finalResource.category || 'raw_materials';
+      finalResource.subcategory = finalResource.subcategory || '';
+      finalResource.count = typeof finalResource.count === 'undefined' ? 1 : finalResource.count;
+      finalResource.landId = finalResource.landId || '';
+      finalResource.owner = finalResource.owner || 'system';
+      finalResource.createdAt = finalResource.createdAt || new Date().toISOString();
+      finalResource.icon = finalResource.icon || (finalResource.type ? `${String(finalResource.type).toLowerCase().replace(/\s+/g, '_')}.png` : 'default.png');
+      finalResource.description = finalResource.description || '';
+      finalResource.rarity = finalResource.rarity || 'common';
       
-      resourceMap.set(resourceId, {
-        id: resourceId,
-        type: record.get('Type'),
-        name: record.get('Name') || record.get('Type'), // Use Type as fallback for Name
-        category: record.get('Category') || 'raw_materials', // Default category
-        subcategory: record.get('Subcategory') || '', // Add subcategory
-        position: position,
-        count: record.get('Count') || 1,
-        landId: record.get('LandId') || '',
-        owner: record.get('Owner') || 'system',
-        createdAt: record.get('CreatedAt') || new Date().toISOString(),
-        // Add a standardized icon field
-        icon: icon, // Use the icon from Airtable or default
-        description: record.get('Description') || '', // Add description field
-        rarity: record.get('Rarity') || 'common' // Add rarity field
-      });
+      resourceMap.set(airtableResourceId, finalResource);
     });
     
     // Convert Map to array
@@ -342,18 +351,29 @@ export async function POST(request: Request) {
 
     // Transform the Airtable record to our format
     const typedRecord = record as AirtableRecord;
+
+    const processedFieldsPost: Record<string, any> = {};
+    if (typedRecord.fields) {
+      for (const airtableKey in typedRecord.fields) {
+        if (Object.prototype.hasOwnProperty.call(typedRecord.fields, airtableKey)) {
+          const camelKey = airtableKey.charAt(0).toLowerCase() + airtableKey.slice(1);
+          processedFieldsPost[camelKey] = typedRecord.fields[airtableKey];
+        }
+      }
+    }
+
     const resource = {
-      id: typedRecord.fields.ResourceId,
-      type: typedRecord.fields.Type,
-      name: typedRecord.fields.Name,
-      category: typedRecord.fields.Category,
-      position: JSON.parse(typedRecord.fields.Position),
-      count: typedRecord.fields.Count,
-      landId: typedRecord.fields.LandId,
-      owner: typedRecord.fields.Owner,
-      createdAt: typedRecord.fields.CreatedAt
+      ...processedFieldsPost, // Spread all camelCased fields
+      // Ensure 'id' is from 'ResourceId' and 'position' is parsed JSON
+      id: typedRecord.fields.ResourceId, 
+      position: JSON.parse(typedRecord.fields.Position || '{}') 
     };
     
+    // Apply defaults if necessary, similar to GET, though for POST, most fields should be defined by input data
+    resource.name = resource.name || resource.type;
+    resource.category = resource.category || 'unknown'; // Default from POST logic if not set
+    // resource.count, resource.landId, resource.owner, resource.createdAt should come from POST data or Airtable
+
     console.log('Successfully created resource in Airtable:', resource);
     
     // Return the created resource with success flag
