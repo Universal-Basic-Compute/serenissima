@@ -472,6 +472,36 @@ def _escape_airtable_value(value: str) -> str:
         return value
     return str(value)
 
+def _has_recent_failed_activity_for_contract(
+    tables: Dict[str, Table], 
+    activity_type_to_check: str, 
+    contract_id_in_activity_table: str, 
+    hours_ago: int = 6
+) -> bool:
+    """
+    Checks if there's a recently failed activity of a specific type for a given ContractId.
+    The ContractId here is what's stored in the ACTIVITIES.ContractId field for that activity type.
+    """
+    try:
+        # Airtable formula to check if UpdatedAt is within the last 'hours_ago'
+        # DATEADD(NOW(), -hours_ago, 'hours') calculates the time 'hours_ago' from now.
+        # IS_AFTER({UpdatedAt}, ...) checks if UpdatedAt is more recent than that time.
+        time_check_formula = f"IS_AFTER({{UpdatedAt}}, DATEADD(NOW(), -{hours_ago}, 'hours'))"
+        
+        formula = (f"AND({{Type}}='{_escape_airtable_value(activity_type_to_check)}', "
+                   f"{{ContractId}}='{_escape_airtable_value(contract_id_in_activity_table)}', "
+                   f"{{Status}}='failed', "
+                   f"{time_check_formula})")
+        
+        recently_failed_activities = tables['activities'].all(formula=formula, max_records=1)
+        if recently_failed_activities:
+            log.info(f"{LogColors.WARNING}Found recently failed '{activity_type_to_check}' activity for ContractId '{contract_id_in_activity_table}' within the last {hours_ago} hours. Skipping recreation.{LogColors.ENDC}")
+            return True
+        return False
+    except Exception as e:
+        log.error(f"{LogColors.FAIL}Error checking for recent failed activities for type '{activity_type_to_check}', ContractId '{contract_id_in_activity_table}': {e}{LogColors.ENDC}")
+        return False # Default to false to allow creation if check fails
+
 # Helper functions for position and distance
 def _get_building_position_coords(building_record: Dict) -> Optional[Dict[str, float]]:
     """Extracts lat/lng coordinates from a building record's Position or Point field."""
@@ -1382,17 +1412,23 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                                          # This might mean they should be delivering, not fetching, or the contract is misconfigured.
                                          # For now, let's assume they need to fetch from another building.
                                     elif citizen_position and _get_building_position_coords(from_building_rec):
+                                        # Check for recent failures for this fetch_resource task
+                                        # For fetch_resource, ContractId in ACTIVITIES is the Airtable Record ID of the contract
+                                        if _has_recent_failed_activity_for_contract(tables, 'fetch_resource', contract['id']):
+                                            log.info(f"{LogColors.OKBLUE}Skipping fetch_resource for contract {contract['id']} (Airtable ID) due to recent failure.{LogColors.ENDC}")
+                                            continue # Skip this contract, try next one
+
                                         path_to_source = get_path_between_points(citizen_position, _get_building_position_coords(from_building_rec))
                                         if path_to_source and path_to_source.get('success'):
                                             from_building_custom_id_contract = from_building_rec['fields'].get('BuildingId')
                                             to_building_custom_id_contract = to_building_rec['fields'].get('BuildingId')
                                             if from_building_custom_id_contract and to_building_custom_id_contract:
-                                                try_create_resource_fetching_activity(
+                                                if try_create_resource_fetching_activity(
                                                     tables, citizen_airtable_record_id, citizen_custom_id, citizen_username,
                                                     contract['id'], from_building_custom_id_contract, to_building_custom_id_contract, # Pass custom BuildingIds
                                                     resource_type_contract, amount_contract, path_to_source
-                                                )
-                                                return True
+                                                ):
+                                                    return True # Activity created
                                             else:
                                                 log.warning(f"{LogColors.WARNING}Missing custom BuildingId for contract buildings: From={from_building_custom_id_contract}, To={to_building_custom_id_contract}{LogColors.ENDC}")
                 log.info(f"{LogColors.OKBLUE}No production or fetching tasks available for {citizen_custom_id} at workplace {workplace_custom_id}. Creating idle activity.{LogColors.ENDC}")
@@ -1812,6 +1848,11 @@ def process_galley_unloading_activities(tables: Dict[str, Table], idle_citizens:
 
                 if not all([original_contract_id, resource_type]) or amount <= 0:
                     log.warning(f"{LogColors.WARNING}Invalid contract data for import from galley {galley_custom_id}: ContractId={original_contract_id}, Resource={resource_type}, Amount={amount}{LogColors.ENDC}")
+                    continue
+                
+                # Check if this task recently failed for this contract
+                if _has_recent_failed_activity_for_contract(tables, 'fetch_from_galley', original_contract_id):
+                    log.info(f"{LogColors.OKBLUE}Skipping fetch_from_galley for contract {original_contract_id} due to recent failure.{LogColors.ENDC}")
                     continue
 
                 # Check if an active fetch_from_galley activity already exists for this specific contract item
