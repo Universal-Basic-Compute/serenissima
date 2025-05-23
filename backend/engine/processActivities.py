@@ -324,49 +324,64 @@ def main(dry_run: bool = False):
             activity_path_json = activity_record['fields'].get('Path')
             citizen_username_for_fee = activity_record['fields'].get('Citizen')
             activity_custom_id_for_fee = activity_record['fields'].get('ActivityId', activity_id_airtable)
+            transporter_username = activity_record['fields'].get('Transporter') # Get the transporter from activity
 
             if activity_path_json and citizen_username_for_fee and not dry_run:
                 gondola_distance_km, gondola_fee = calculate_gondola_travel_details(activity_path_json)
                 if gondola_fee > 0:
                     traveler_citizen_record = get_citizen_record(tables, citizen_username_for_fee)
-                    consiglio_record = get_citizen_record(tables, "ConsiglioDeiDieci")
+                    
+                    fee_recipient_username = "ConsiglioDeiDieci" # Default recipient
+                    if transporter_username and transporter_username != "ConsiglioDeiDieci":
+                        # Check if this transporter is a valid citizen
+                        transporter_citizen_record_check = get_citizen_record(tables, transporter_username)
+                        if transporter_citizen_record_check:
+                            fee_recipient_username = transporter_username
+                            log.info(f"Gondola fee for activity {activity_guid} will go to transporter: {transporter_username}")
+                        else:
+                            log.warning(f"Transporter {transporter_username} specified in activity {activity_guid} not found. Fee defaults to ConsiglioDeiDieci.")
+                    
+                    fee_recipient_record = get_citizen_record(tables, fee_recipient_username)
 
-                    if traveler_citizen_record and consiglio_record:
+                    if traveler_citizen_record and fee_recipient_record:
                         traveler_ducats = float(traveler_citizen_record['fields'].get('Ducats', 0))
                         if traveler_ducats >= gondola_fee:
-                            consiglio_ducats = float(consiglio_record['fields'].get('Ducats', 0))
+                            recipient_ducats = float(fee_recipient_record['fields'].get('Ducats', 0))
                             now_iso_fee = datetime.now(timezone.utc).isoformat()
 
                             tables['citizens'].update(traveler_citizen_record['id'], {'Ducats': traveler_ducats - gondola_fee})
-                            tables['citizens'].update(consiglio_record['id'], {'Ducats': consiglio_ducats + gondola_fee})
+                            tables['citizens'].update(fee_recipient_record['id'], {'Ducats': recipient_ducats + gondola_fee})
                             
                             transaction_payload = {
                                 "Type": "gondola_fee",
                                 "AssetType": "transport_activity",
                                 "Asset": activity_custom_id_for_fee,
-                                "Seller": "ConsiglioDeiDieci", # Recipient of the fee
+                                "Seller": fee_recipient_username, # Recipient of the fee
                                 "Buyer": citizen_username_for_fee,  # Payer of the fee
                                 "Price": gondola_fee,
                                 "Details": json.dumps({
                                     "activity_guid": activity_guid,
                                     "distance_km": round(gondola_distance_km, 2),
-                                    "path_preview": activity_path_json[:100] + "..." if activity_path_json else ""
+                                    "path_preview": activity_path_json[:100] + "..." if activity_path_json else "",
+                                    "original_transporter_field": transporter_username # Log what was in the Transporter field
                                 }),
                                 "CreatedAt": now_iso_fee,
                                 "ExecutedAt": now_iso_fee
                             }
                             tables['transactions'].create(transaction_payload)
-                            log.info(f"Citizen {citizen_username_for_fee} paid {gondola_fee:.2f} Ducats gondola fee for activity {activity_guid}. Distance: {gondola_distance_km:.2f} km.")
+                            log.info(f"Citizen {citizen_username_for_fee} paid {gondola_fee:.2f} Ducats gondola fee to {fee_recipient_username} for activity {activity_guid}. Distance: {gondola_distance_km:.2f} km.")
                         else:
                             log.warning(f"Citizen {citizen_username_for_fee} has insufficient Ducats ({traveler_ducats:.2f}) for gondola fee ({gondola_fee:.2f}) for activity {activity_guid}.")
                             # Consider creating a problem or debt record here in the future
                     else:
                         if not traveler_citizen_record: log.error(f"Traveler citizen {citizen_username_for_fee} not found for gondola fee.")
-                        if not consiglio_record: log.error(f"ConsiglioDeiDieci citizen record not found for gondola fee.")
+                        if not fee_recipient_record: log.error(f"Fee recipient citizen {fee_recipient_username} not found for gondola fee.")
             elif dry_run and activity_path_json and citizen_username_for_fee:
                  gondola_distance_km, gondola_fee = calculate_gondola_travel_details(activity_path_json)
                  if gondola_fee > 0:
-                    log.info(f"[DRY RUN] Would process gondola fee of {gondola_fee:.2f} Ducats for citizen {citizen_username_for_fee} for activity {activity_guid} (Distance: {gondola_distance_km:.2f} km).")
+                    fee_recipient_username_dry_run = transporter_username if transporter_username and transporter_username != "ConsiglioDeiDieci" else "ConsiglioDeiDieci"
+                    # In a dry run, we can't confirm if transporter_username is a valid citizen, so we assume it would be if not Consiglio.
+                    log.info(f"[DRY RUN] Would process gondola fee of {gondola_fee:.2f} Ducats for citizen {citizen_username_for_fee} to {fee_recipient_username_dry_run} for activity {activity_guid} (Distance: {gondola_distance_km:.2f} km).")
 
 
             # Update citizen's position and UpdatedAt if ToBuilding is present,

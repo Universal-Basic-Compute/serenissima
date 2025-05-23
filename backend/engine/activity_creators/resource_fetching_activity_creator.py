@@ -47,6 +47,8 @@ def try_create(
         except Exception:
             pass # Ignore if fetching names fails, use IDs
 
+        transporter = path_data.get('transporter') # Get transporter from path_data
+
         activity_payload = {
             "ActivityId": activity_id_str,
             "Type": "fetch_resource",
@@ -60,6 +62,7 @@ def try_create(
             "StartDate": now.isoformat(),
             "EndDate": end_time.isoformat(),
             "Path": json.dumps(path_data.get('path', [])),
+            "Transporter": transporter, # Add Transporter field
             "Notes": f"🚚 Fetching **{amount:,.0f}** units of **{resource_type}** from **{from_building_name}** to **{to_building_name}**"
         }
         

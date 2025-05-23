@@ -33,6 +33,8 @@ def try_create(
         
         path_json = json.dumps(path_data.get('path', []))
         
+        transporter = path_data.get('transporter') # Get transporter from path_data
+
         activity_payload = {
             "ActivityId": f"goto_inn_{citizen_custom_id}_{int(time.time())}",
             "Type": "goto_inn",
@@ -42,6 +44,7 @@ def try_create(
             "StartDate": start_date,
             "EndDate": end_date,
             "Path": path_json,
+            "Transporter": transporter, # Add Transporter field
             "Notes": "🏨 **Going to an inn** for the night"
         }
         activity = tables['activities'].create(activity_payload)

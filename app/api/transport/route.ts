@@ -37,14 +37,14 @@ export async function GET(request: Request) {
     // Find the path using the transport service
     const result = await transportService.findPath(startPoint, endPoint);
     
-    // If path was found successfully, calculate the endDate
+    // If path was found successfully, calculate the endDate and determine transporter
     if (result.success && result.path) {
       // Calculate the distance of the path
       const distance = calculatePathDistance(result.path);
       
       // Calculate travel time based on distance (assume average walking speed of 5 km/h)
       // 5 km/h = 5000 m/h = 1.4 m/s
-      const averageSpeedMetersPerSecond = 1.4;
+      const averageSpeedMetersPerSecond = 1.4; // This might need adjustment if gondolas have different speeds
       const travelTimeSeconds = distance / averageSpeedMetersPerSecond;
       
       // Calculate endDate by adding travel time to startDate
@@ -57,6 +57,37 @@ export async function GET(request: Request) {
         durationSeconds: travelTimeSeconds,
         distanceMeters: distance
       };
+
+      // Determine transporter if gondola is used
+      let transporter = null;
+      const usesGondola = result.path.some((p: any) => p.transportMode === 'gondola');
+
+      if (usesGondola) {
+        for (const point of result.path) {
+          if (point.type === 'dock' && point.nodeId) {
+            try {
+              const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
+                              (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+              const buildingUrl = new URL(`/api/buildings/${encodeURIComponent(point.nodeId)}`, baseUrl);
+              const buildingResponse = await fetch(buildingUrl.toString());
+
+              if (buildingResponse.ok) {
+                const buildingData = await buildingResponse.json();
+                if (buildingData.building && buildingData.building.runBy) {
+                  transporter = buildingData.building.runBy;
+                  console.log(`Identified transporter ${transporter} from dock ${point.nodeId}`);
+                  break; // Use the first dock operator found in the path
+                }
+              } else {
+                console.warn(`Failed to fetch building details for dock ${point.nodeId}: ${buildingResponse.status}`);
+              }
+            } catch (e) {
+              console.error(`Error fetching building details for dock ${point.nodeId}:`, e);
+            }
+          }
+        }
+      }
+      result.transporter = transporter; // Add transporter to the result
     }
     
     return NextResponse.json(result);
@@ -195,14 +226,14 @@ export async function POST(request: Request) {
       }
     }
     
-    // If path was found successfully, calculate the endDate
+    // If path was found successfully, calculate the endDate and determine transporter
     if (result.success && result.path) {
       // Calculate the distance of the path
       const distance = calculatePathDistance(result.path);
       
       // Calculate travel time based on distance (assume average walking speed of 5 km/h)
       // 5 km/h = 5000 m/h = 1.4 m/s
-      const averageSpeedMetersPerSecond = 1.4;
+      const averageSpeedMetersPerSecond = 1.4; // This might need adjustment if gondolas have different speeds
       const travelTimeSeconds = distance / averageSpeedMetersPerSecond;
       
       // Calculate endDate by adding travel time to startDate
@@ -219,6 +250,42 @@ export async function POST(request: Request) {
       // Extract journey information from the path
       const journey = extractJourneyFromPath(result.path);
       result.journey = journey;
+
+      // Determine transporter if gondola is used
+      let transporter = null;
+      const usesGondola = result.path.some((p: any) => p.transportMode === 'gondola');
+
+      if (usesGondola) {
+        for (const point of result.path) {
+          // Check if the point itself is a dock or if a segment starting/ending here is gondola
+          // and this point is a dock.
+          // The transportMode is on the segment, so we'd ideally check segments.
+          // For simplicity, if any point in the path is a dock and gondolas are used,
+          // we try to get its operator. This might need refinement if path structure is complex.
+          if (point.type === 'dock' && point.nodeId) {
+            try {
+              const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
+                              (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+              const buildingUrl = new URL(`/api/buildings/${encodeURIComponent(point.nodeId)}`, baseUrl);
+              const buildingResponse = await fetch(buildingUrl.toString());
+
+              if (buildingResponse.ok) {
+                const buildingData = await buildingResponse.json();
+                if (buildingData.building && buildingData.building.runBy) {
+                  transporter = buildingData.building.runBy;
+                  console.log(`Identified transporter ${transporter} from dock ${point.nodeId}`);
+                  break; // Use the first dock operator found in the path
+                }
+              } else {
+                console.warn(`Failed to fetch building details for dock ${point.nodeId}: ${buildingResponse.status}`);
+              }
+            } catch (e) {
+              console.error(`Error fetching building details for dock ${point.nodeId}:`, e);
+            }
+          }
+        }
+      }
+      result.transporter = transporter; // Add transporter to the result, will be null if not found/not applicable
     }
     
     return NextResponse.json(result);
