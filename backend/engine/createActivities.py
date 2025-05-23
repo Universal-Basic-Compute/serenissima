@@ -49,13 +49,6 @@ from backend.engine.activity_creators import (
     try_create_fetch_from_galley_activity # Import new creator
 )
 from dotenv import load_dotenv
-# Attempt to import helper functions from other engine scripts
-try:
-    from backend.engine.createimportactivities import get_resource_types as get_resource_definitions_from_api
-except ImportError:
-    log.warning("Could not import get_resource_definitions_from_api directly.")
-    def get_resource_definitions_from_api():
-        raise NotImplementedError("get_resource_definitions_from_api is not available")
 
 # Set up logging
 logging.basicConfig(
@@ -63,6 +56,14 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 log = logging.getLogger("create_activities")
+
+# Attempt to import helper functions from other engine scripts
+try:
+    from backend.engine.createimportactivities import get_resource_types as get_resource_definitions_from_api
+except ImportError:
+    log.warning("Could not import get_resource_definitions_from_api directly.")
+    def get_resource_definitions_from_api():
+        raise NotImplementedError("get_resource_definitions_from_api is not available")
 
 # Load environment variables
 load_dotenv()
