@@ -6,6 +6,7 @@ import json
 import logging
 import uuid
 from datetime import datetime, timezone
+import pytz # Added for Venice timezone
 from typing import Dict, List, Optional, Any
 
 # Assuming shared utilities are accessible, e.g., from processActivities or a common util module
@@ -165,7 +166,9 @@ def process(
         return True # Successfully "arrived" even if nothing picked up
 
     # 4. Perform Resource Transfers
-    now_iso = datetime.now(timezone.utc).isoformat()
+    VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
+    now_venice = datetime.now(VENICE_TIMEZONE)
+    now_iso = now_venice.isoformat()
     try:
         # Decrement resource from galley
         new_galley_stock = stock_in_galley - actual_amount_to_pickup
