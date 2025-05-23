@@ -7,13 +7,13 @@
  */
 export async function fetchBuildingTypes(): Promise<any[]> {
   try {
-    console.log('Fetching building types from API...');
+    console.log('Fetching building types from API (cache temporarily bypassed)...'); // Log message updated
     
-    // Check if we already have cached data in the window object
-    if (typeof window !== 'undefined' && (window as any).__buildingTypes) {
-      console.log('Using cached building types from window.__buildingTypes');
-      return (window as any).__buildingTypes;
-    }
+    // Temporarily bypass window cache to ensure fresh data
+    // if (typeof window !== 'undefined' && (window as any).__buildingTypes) {
+    //   console.log('Using cached building types from window.__buildingTypes');
+    //   return (window as any).__buildingTypes;
+    // }
     
     // Fetch from API
     const response = await fetch('/api/building-types');
