@@ -33,8 +33,9 @@ export default function IsometricViewer({ activeView, fullWaterGraphData }: Isom
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [polygons, setPolygons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [polygonsDataLoaded, setPolygonsDataLoaded] = useState(false); // New state for polygon data readiness
-  const [bgImageReady, setBgImageReady] = useState(false); // New state for background image readiness
+  const [polygonsDataLoaded, setPolygonsDataLoaded] = useState(false);
+  const [bgImageReady, setBgImageReady] = useState(false);
+  const [minLoadingTimeElapsed, setMinLoadingTimeElapsed] = useState(false); // New state for minimum display time
   const [landOwners, setLandOwners] = useState<Record<string, string>>({});
   const [citizens, setCitizens] = useState<Record<string, any>>({});
   const [scale, setScale] = useState(3); // Start with a 3x zoom for a closer view
@@ -761,12 +762,19 @@ number => {
     window.dispatchEvent(pathUpdateEvent);
   }, []);
 
-  // Load polygons and background image
+  // Load polygons, background image, and set minimum loading time
   useEffect(() => {
-    console.log('IsometricViewer: Initiating data and background image loading...');
-    setLoading(true); // Ensure loading is true at the start
+    console.log('IsometricViewer: Initiating data, background image, and min loading time...');
+    setLoading(true);
     setPolygonsDataLoaded(false);
     setBgImageReady(false);
+    setMinLoadingTimeElapsed(false);
+
+    // Start timer for minimum display duration
+    const minTimeTimer = setTimeout(() => {
+      console.log('IsometricViewer: Minimum loading time elapsed.');
+      setMinLoadingTimeElapsed(true);
+    }, 3000); // 3 seconds
 
     // Define loading images and select one randomly
     const loadingImageFiles = [
@@ -3807,20 +3815,22 @@ number => {
       </div>
       
       {/* Loading indicator */}
-      {loading && (
-        <div className="absolute inset-0 flex items-center justify-center z-50">
-          {currentLoadingImage && (
-            <img
-              src={currentLoadingImage}
-              alt="Loading background"
-              className="absolute inset-0 w-full h-full object-cover opacity-50" // Adjust opacity as needed
-            />
-          )}
-          <div className="relative z-10 bg-black/70 p-6 rounded-lg shadow-xl border-2 border-amber-500">
-            <p className="text-3xl font-serif text-amber-100 animate-pulse">Loading Venice...</p>
-          </div>
+      <div 
+        className={`absolute inset-0 flex flex-col items-center justify-center z-50 bg-black/75 transition-opacity duration-1000 ease-in-out ${
+          loading ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+      >
+        {currentLoadingImage && (
+          <img
+            src={currentLoadingImage}
+            alt="Venetian vista during loading"
+            className="max-w-xl max-h-[60vh] object-contain rounded-lg shadow-2xl mb-8 border-4 border-amber-600/50"
+          />
+        )}
+        <div className="bg-black/50 p-6 rounded-lg shadow-xl border-2 border-amber-500/70">
+          <p className="text-3xl font-serif text-amber-100 animate-pulse">Loading Venice...</p>
         </div>
-      )}
+      </div>
       
       {/* Debug button for citizen images */}
       {activeView === 'citizens' && (
