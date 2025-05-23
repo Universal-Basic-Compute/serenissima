@@ -275,6 +275,11 @@ def update_social_class(dry_run: bool = False):
             log.warning(f"Citizen {username} has no social class set, skipping")
             continue
         
+        # Skip if citizen is Forestieri
+        if current_social_class == "Forestieri":
+            log.info(f"Citizen {username} is Forestieri, skipping social class update.")
+            continue
+            
         # Determine new social class
         new_social_class = current_social_class
         update_reason = None
