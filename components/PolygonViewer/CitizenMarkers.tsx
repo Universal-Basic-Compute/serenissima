@@ -660,7 +660,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                   fill="none"
                   stroke={getActivityPathColor(activity)} // Or a specific color for merchant galleys
                   strokeWidth="4.0" // Twice as bold
-                  strokeOpacity="0.8" // Slightly more opaque
+                  strokeOpacity="0.5" // Reduced opacity
                 />
                 {activity.path.map((point, index) => {
                   if (!point || typeof point.lat !== 'number' || typeof point.lng !== 'number') return null;
