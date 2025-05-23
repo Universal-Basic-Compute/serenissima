@@ -588,45 +588,90 @@ If you decide not to change any prices at this time, return an empty array.
         print(f"Exception traceback: {traceback.format_exc()}")
         return None
 
-def update_building_prices(tables, building_id: str, resource_prices: Dict[str, float], reasoning: str) -> bool:
-    """Update the prices for resources in a building."""
-    try:
-        # Find the building record
-        formula = f"{{BuildingId}}='{building_id}'"
-        buildings = tables["buildings"].all(formula=formula)
+def create_or_update_public_sell_contracts(
+    tables: Dict[str, Table], 
+    ai_username: str, 
+    building_id: str, # This is the custom BuildingId (e.g. bld_...)
+    resource_prices: Dict[str, float], 
+    reasoning: str,
+    resource_definitions: Dict # To get resource name for notes if needed
+) -> bool:
+    """Create or update public_sell contracts for a building based on AI decisions."""
+    all_successful = True
+    now = datetime.now()
+    now_iso = now.isoformat()
+    # Standard duration for public sell contracts
+    end_date_iso = (now + timedelta(hours=47)).isoformat() 
+
+    # Get the building's Airtable record ID if needed for other operations,
+    # but SellerBuilding in contract should be the custom BuildingId.
+    # building_record = get_building_record(tables, building_id) # Assuming get_building_record uses custom ID
+    # if not building_record:
+    #     print(f"Building {building_id} not found. Cannot create/update contracts.")
+    #     return False
+    # building_airtable_id = building_record['id']
+
+
+    for resource_type, price in resource_prices.items():
+        if price <= 0:
+            print(f"Skipping resource {resource_type} for building {building_id} due to non-positive price: {price}")
+            continue
+
+        contract_custom_id = f"contract-public-sell-{ai_username}-{building_id}-{resource_type}"
         
-        if not buildings:
-            print(f"Building {building_id} not found")
-            return False
-        
-        building = buildings[0]
-        
-        # Get existing Notes if any
-        existing_notes = {}
-        if "Notes" in building["fields"]:
-            try:
-                existing_notes = json.loads(building["fields"]["Notes"])
-                if not isinstance(existing_notes, dict):
-                    existing_notes = {}
-            except json.JSONDecodeError:
-                # If Notes isn't valid JSON, start with an empty dict
-                existing_notes = {}
-        
-        # Add or update the PriceReasoning field in the Notes
-        existing_notes["PriceReasoning"] = reasoning
-        
-        # Update the Prices field with the new resource prices
-        tables["buildings"].update(building["id"], {
-            "Prices": json.dumps(resource_prices),
-            "Notes": json.dumps(existing_notes)
-        })
-        
-        print(f"Updated prices for building {building_id} with {len(resource_prices)} resource prices")
-        print(f"New prices: {json.dumps(resource_prices)}")
-        return True
-    except Exception as e:
-        print(f"Error updating prices for building {building_id}: {str(e)}")
-        return False
+        try:
+            # Check for existing contract
+            formula = f"{{ContractId}}='{_escape_airtable_value(contract_custom_id)}'"
+            existing_contracts = tables["contracts"].all(formula=formula, max_records=1)
+            
+            contract_notes = json.dumps({
+                "reasoning": reasoning,
+                "set_by_script": "setprices.py",
+                "timestamp": now_iso
+            })
+
+            if existing_contracts:
+                # Update existing contract
+                contract_airtable_id = existing_contracts[0]['id']
+                update_payload = {
+                    "PricePerResource": float(price),
+                    "EndAt": end_date_iso,
+                    "Notes": contract_notes,
+                    "UpdatedAt": now_iso
+                    # HourlyAmount is not changed here, managepublicsells.py might handle it
+                }
+                tables["contracts"].update(contract_airtable_id, update_payload)
+                print(f"Updated public_sell contract {contract_custom_id} for {resource_type} from building {building_id}: Price={price}, EndAt={end_date_iso}")
+            else:
+                # Create new contract
+                # Default hourlyAmount as this script's AI prompt doesn't specify it.
+                # managepublicsells.py can refine this.
+                default_hourly_amount = 1.0 
+                resource_name = resource_definitions.get(resource_type, {}).get("name", resource_type)
+
+                create_payload = {
+                    "ContractId": contract_custom_id,
+                    "Seller": ai_username,
+                    "SellerBuilding": building_id, # Custom BuildingId
+                    "ResourceType": resource_type,
+                    "PricePerResource": float(price),
+                    "Type": "public_sell",
+                    "Buyer": "public",
+                    "Transporter": "public",
+                    "hourlyAmount": default_hourly_amount, 
+                    "CreatedAt": now_iso,
+                    "EndAt": end_date_iso,
+                    "Notes": contract_notes,
+                    "Priority": 1 # Default priority
+                }
+                tables["contracts"].create(create_payload)
+                print(f"Created public_sell contract {contract_custom_id} for {resource_type} (Name: {resource_name}) from building {building_id}: Price={price}, Amount={default_hourly_amount}, EndAt={end_date_iso}")
+        except Exception as e:
+            print(f"Error creating/updating contract for resource {resource_type} in building {building_id}: {str(e)}")
+            print(f"Exception traceback: {traceback.format_exc()}")
+            all_successful = False
+            
+    return all_successful
 
 def create_admin_notification(tables, ai_price_settings: Dict[str, List[Dict]]) -> None:
     """Create a notification for admins with the AI price setting summary."""
@@ -783,14 +828,21 @@ def process_ai_price_settings(dry_run: bool = False):
                     reasoning = setting.get("reasoning", "No reasoning provided")
                     
                     if not building_id or not resource_prices:
-                        print(f"Invalid price setting: {setting}")
+                        print(f"Invalid price setting from AI for {ai_username}: {setting}")
                         continue
                     
-                    # Update the building prices
-                    success = update_building_prices(tables, building_id, resource_prices, reasoning)
+                    # Create or update public_sell contracts
+                    success = create_or_update_public_sell_contracts(
+                        tables, 
+                        ai_username, # Pass AI's username
+                        building_id, 
+                        resource_prices, 
+                        reasoning,
+                        resource_types # Pass resource_definitions for names
+                    )
                     
                     if success:
-                        # Add to the list of settings for this AI
+                        # Add to the list of settings for this AI for notification purposes
                         ai_price_settings[ai_username].append({
                             "building_id": building_id,
                             "resource_prices": resource_prices,
