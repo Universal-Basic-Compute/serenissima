@@ -203,7 +203,7 @@ def process_eat_at_tavern(
         
         transaction_payload = {
             "Type": "tavern_meal",
-            "AssetType": "service",
+            "AssetType": "building", # Changed from "service" to "building"
             "Asset": tavern_building_custom_id, # Use custom BuildingId
             "Seller": tavern_operator, # The tavern operator
             "Buyer": citizen_username,
