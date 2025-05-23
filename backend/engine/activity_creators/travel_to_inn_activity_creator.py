@@ -48,12 +48,7 @@ def try_create(
 
         if activity and activity.get('id'):
             log.info(f"Created travel_to_inn activity: {activity['id']}")
-            try:
-                updated_at_ts = datetime.datetime.now(pytz.UTC).isoformat()
-                tables['citizens'].update(citizen_airtable_id, {'UpdatedAt': updated_at_ts})
-                log.info(f"Updated 'UpdatedAt' for citizen record {citizen_airtable_id}")
-            except Exception as e_update:
-                log.error(f"Error updating 'UpdatedAt' for citizen record {citizen_airtable_id}: {e_update}")
+            # Citizen UpdatedAt is handled by Airtable
             return activity
         else:
             log.error(f"Failed to create travel_to_inn activity for {citizen_username}")

@@ -42,8 +42,7 @@ def try_create_eat_from_inventory_activity(
         
         if activity and activity.get('id'):
             log.info(f"Created 'eat_from_inventory' activity: {activity['id']}")
-            # Update citizen's UpdatedAt
-            tables['citizens'].update(citizen_airtable_id, {'UpdatedAt': now.isoformat()})
+            # Citizen UpdatedAt is handled by Airtable
             return activity
         return None
     except Exception as e:
@@ -91,7 +90,7 @@ def try_create_eat_at_home_activity(
             
             if activity and activity.get('id'):
                 log.info(f"Created 'eat_at_home' activity: {activity['id']}")
-                tables['citizens'].update(citizen_airtable_id, {'UpdatedAt': now.isoformat()})
+                # Citizen UpdatedAt is handled by Airtable
                 return activity
             return None
         except Exception as e:
@@ -144,7 +143,7 @@ def try_create_eat_at_tavern_activity(
         
         if activity and activity.get('id'):
             log.info(f"Created 'eat_at_tavern' activity: {activity['id']}")
-            tables['citizens'].update(citizen_airtable_id, {'UpdatedAt': now.isoformat()})
+            # Citizen UpdatedAt is handled by Airtable
             return activity
         return None
     except Exception as e:

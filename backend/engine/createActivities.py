@@ -314,12 +314,7 @@ def create_resource_fetching_activity(tables, citizen: Dict, contract: Dict, fro
         
         if activity and activity.get('id'):
             log.info(f"Created resource fetching activity: {activity['id']}")
-            try:
-                updated_at_ts = datetime.datetime.now(pytz.UTC).isoformat()
-                tables['citizens'].update(citizen_airtable_record_id, {'UpdatedAt': updated_at_ts})
-                log.info(f"Updated 'UpdatedAt' for citizen record {citizen_airtable_record_id}")
-            except Exception as e_update:
-                log.error(f"Error updating 'UpdatedAt' for citizen record {citizen_airtable_record_id}: {e_update}")
+            # Citizen UpdatedAt is handled by Airtable
             return activity
         else:
             log.error(f"Failed to create resource fetching activity for {citizen_username}")
@@ -378,12 +373,7 @@ def create_production_activity(tables, citizen: Dict, building: Dict, recipe: Di
         
         if activity and activity.get('id'):
             log.info(f"Created production activity: {activity['id']}")
-            try:
-                updated_at_ts = datetime.datetime.now(pytz.UTC).isoformat()
-                tables['citizens'].update(citizen_airtable_record_id, {'UpdatedAt': updated_at_ts})
-                log.info(f"Updated 'UpdatedAt' for citizen record {citizen_airtable_record_id}")
-            except Exception as e_update:
-                log.error(f"Error updating 'UpdatedAt' for citizen record {citizen_airtable_record_id}: {e_update}")
+            # Citizen UpdatedAt is handled by Airtable
             return activity
         else:
             log.error(f"Failed to create production activity for {citizen_username}")
@@ -650,12 +640,7 @@ def create_goto_work_activity(tables, citizen_custom_id: str, citizen_username: 
         
         if activity and activity.get('id'):
             log.info(f"Created goto_work activity: {activity['id']}")
-            try:
-                updated_at_ts = datetime.datetime.now(pytz.UTC).isoformat()
-                tables['citizens'].update(citizen_airtable_id, {'UpdatedAt': updated_at_ts})
-                log.info(f"Updated 'UpdatedAt' for citizen record {citizen_airtable_id}")
-            except Exception as e_update:
-                log.error(f"Error updating 'UpdatedAt' for citizen record {citizen_airtable_id}: {e_update}")
+            # Citizen UpdatedAt is handled by Airtable
             return activity
         else:
             log.error(f"Failed to create goto_work activity for {citizen_username}")
@@ -699,12 +684,7 @@ def create_goto_home_activity(tables, citizen_custom_id: str, citizen_username: 
 
         if activity and activity.get('id'):
             log.info(f"Created goto_home activity: {activity['id']}")
-            try:
-                updated_at_ts = datetime.datetime.now(pytz.UTC).isoformat()
-                tables['citizens'].update(citizen_airtable_id, {'UpdatedAt': updated_at_ts})
-                log.info(f"Updated 'UpdatedAt' for citizen record {citizen_airtable_id}")
-            except Exception as e_update:
-                log.error(f"Error updating 'UpdatedAt' for citizen record {citizen_airtable_id}: {e_update}")
+            # Citizen UpdatedAt is handled by Airtable
             return activity
         else:
             log.error(f"Failed to create goto_home activity for {citizen_username}")
@@ -744,12 +724,7 @@ def create_travel_to_inn_activity(tables, citizen_custom_id: str, citizen_userna
 
         if activity and activity.get('id'):
             log.info(f"Created travel_to_inn activity: {activity['id']}")
-            try:
-                updated_at_ts = datetime.datetime.now(pytz.UTC).isoformat()
-                tables['citizens'].update(citizen_airtable_id, {'UpdatedAt': updated_at_ts})
-                log.info(f"Updated 'UpdatedAt' for citizen record {citizen_airtable_id}")
-            except Exception as e_update:
-                log.error(f"Error updating 'UpdatedAt' for citizen record {citizen_airtable_id}: {e_update}")
+            # Citizen UpdatedAt is handled by Airtable
             return activity
         else:
             log.error(f"Failed to create travel_to_inn activity for {citizen_username}")
@@ -780,12 +755,7 @@ def create_idle_activity(tables, citizen_custom_id: str, citizen_username: str, 
         
         if activity and activity.get('id'):
             log.info(f"Created idle activity: {activity['id']}")
-            try:
-                updated_at_ts = datetime.datetime.now(pytz.UTC).isoformat()
-                tables['citizens'].update(citizen_airtable_id, {'UpdatedAt': updated_at_ts})
-                log.info(f"Updated 'UpdatedAt' for citizen record {citizen_airtable_id}")
-            except Exception as e_update:
-                log.error(f"Error updating 'UpdatedAt' for citizen record {citizen_airtable_id}: {e_update}")
+            # Citizen UpdatedAt is handled by Airtable
             return activity
         else:
             log.error(f"Failed to create idle activity for {citizen_username}")

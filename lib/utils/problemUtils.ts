@@ -50,7 +50,7 @@ export async function saveProblems(
         Severity: problem.severity,
         Status: problem.status,
         CreatedAt: problem.createdAt,
-        UpdatedAt: problem.updatedAt,
+        // UpdatedAt is computed
         Location: problem.location,
         Title: problem.title,
         Description: problem.description,

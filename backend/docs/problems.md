@@ -151,7 +151,7 @@ Each problem record in Airtable (and as processed by the system) typically conta
 -   `Severity` (Single Select): The severity of the problem (e.g., "low", "medium", "high", "critical").
 -   `Status` (Single Select): The current status of the problem (e.g., "active", "resolved", "ignored").
 -   `CreatedAt` (Date/Time): The date and time of the problem's creation.
--   `UpdatedAt` (Date/Time): The date and time of the problem's last update.
+-   `UpdatedAt` (Date/Time): The date and time of the problem's last update (this is usually automatically managed by Airtable if it's a computed field based on last modification time).
 -   `Location` (Text): A textual description of the problem's location (e.g., building name, land name).
 -   `Position` (Text, JSON): The geographic coordinates (latitude, longitude) of the concerned asset, stored as a JSON string.
 -   `Title` (Text): A concise title for the problem (e.g., "No Buildings on Land", "Homeless Citizen").

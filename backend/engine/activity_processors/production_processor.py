@@ -154,7 +154,7 @@ def process(
         
         try:
             if new_count > 0.001: # Using a small epsilon for float comparison
-                tables['resources'].update(input_res_record['id'], {'Count': new_count, 'UpdatedAt': now_iso, 'ConsumedAt': now_iso}) # Add ConsumedAt
+                tables['resources'].update(input_res_record['id'], {'Count': new_count, 'ConsumedAt': now_iso}) # Add ConsumedAt
                 log.info(f"Consumed {req_amount} of {res_type} from {building_custom_id}. New count: {new_count}")
             else:
                 tables['resources'].delete(input_res_record['id'])
@@ -258,7 +258,7 @@ def process(
             if output_res_record:
                 current_count = float(output_res_record['fields'].get('Count', 0))
                 new_count = current_count + final_produced_amount
-                tables['resources'].update(output_res_record['id'], {'Count': new_count, 'UpdatedAt': now_iso})
+                tables['resources'].update(output_res_record['id'], {'Count': new_count})
                 log.info(f"Produced {final_produced_amount:.4f} of {res_type} in {building_custom_id} (updated existing). New count: {new_count:.4f}")
             else:
                 res_def = resource_defs.get(res_type, {})
@@ -275,8 +275,7 @@ def process(
                     "Owner": operator_username,
                     "Count": final_produced_amount,
                     "Position": building_pos_str,
-                    "CreatedAt": now_iso,
-                    "UpdatedAt": now_iso
+                    "CreatedAt": now_iso
                 }
                 tables['resources'].create(new_resource_payload)
                 log.info(f"Produced {final_produced_amount:.4f} of {res_type} in {building_custom_id} (created new).")
@@ -287,12 +286,5 @@ def process(
 
     log.info(f"Successfully processed 'production' activity {activity_guid} for building {building_custom_id}.")
     
-    # Update the production building's UpdatedAt timestamp
-    try:
-        tables['buildings'].update(prod_building_record['id'], {'UpdatedAt': now_iso})
-        log.info(f"Updated 'UpdatedAt' for production building record {prod_building_record['id']}")
-    except Exception as e_update_bldg:
-        log.error(f"Error updating 'UpdatedAt' for production building record {prod_building_record['id']}: {e_update_bldg}")
-        # Continue, as main processing was successful
-
+    # Building UpdatedAt is handled by Airtable
     return True

@@ -649,16 +649,17 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
                     "Asset": delivery_citizen_asset_id, # Use Username of delivery person
                     "AssetType": "citizen",
                     "Owner": "Italia", 
-                    "Count": resource_amount, 
-                    "UpdatedAt": current_time_iso
+                    "Count": resource_amount
                 }
                 # Removed "BuildingId"
                 if existing_resources:
-                    tables["resources"].update(existing_resources[0]["id"], resource_data_fields)
+                    # Update only Count, UpdatedAt is computed
+                    tables["resources"].update(existing_resources[0]["id"], {"Count": resource_amount})
                     log.info(f"Updated import-tracking resource record for {resource_type_id} for citizen {delivery_citizen_asset_id}.")
                 else:
                     resource_data_fields["ResourceId"] = f"resource-{uuid.uuid4()}" # This is the custom ID for the resource stack
                     resource_data_fields["CreatedAt"] = current_time_iso
+                    # UpdatedAt is computed on create
                     tables["resources"].create(resource_data_fields)
                     log.info(f"Created new import-tracking resource record for {resource_type_id} for citizen {delivery_citizen_asset_id}.")
             except Exception as e_res_track:

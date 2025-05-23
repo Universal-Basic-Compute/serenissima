@@ -211,7 +211,6 @@ def create_transaction_record(tables, from_citizen: str, to_citizen: str, amount
             "Buyer": to_citizen,     # Land owner is the buyer (receiving)
             "Price": amount,
             "CreatedAt": now,
-            "UpdatedAt": now,
             "ExecutedAt": now,
             "Notes": json.dumps({
                 "land_id": land_id,
@@ -444,7 +443,6 @@ def create_tax_transaction_record(tables, from_citizen: str, to_citizen: str, am
             "Buyer": to_citizen,     # ConsiglioDeiDieci is the buyer (receiving)
             "Price": amount,
             "CreatedAt": now,
-            "UpdatedAt": now,
             "ExecutedAt": now,
             "Notes": json.dumps({
                 "land_id": land_id,

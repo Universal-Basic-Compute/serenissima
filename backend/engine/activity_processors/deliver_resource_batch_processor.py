@@ -22,15 +22,6 @@ from backend.engine.processActivities import (
 
 # If update_building_updated_at is not in processActivities, define it here or import from its actual location.
 # For now, let's assume it will be available. If not, we can define a local helper.
-def _update_building_timestamp(tables: Dict[str, Any], building_airtable_id: str, timestamp_iso: str) -> bool:
-    """Helper to update UpdatedAt for a building."""
-    try:
-        tables['buildings'].update(building_airtable_id, {'UpdatedAt': timestamp_iso})
-        log.info(f"Updated 'UpdatedAt' for building record {building_airtable_id}")
-        return True
-    except Exception as e:
-        log.error(f"Error updating 'UpdatedAt' for building record {building_airtable_id}: {e}")
-        return False
 
 log = logging.getLogger(__name__) # Use a logger specific to this module
 
@@ -107,7 +98,7 @@ def process(
                 tracking_res_record = tracking_resources[0]
                 current_tracking_count = float(tracking_res_record['fields'].get('Count', 0))
                 if current_tracking_count > amount: # Assuming amount is what's being delivered from this tracking stock
-                    tables['resources'].update(tracking_res_record['id'], {'Count': current_tracking_count - amount, 'UpdatedAt': datetime.now(timezone.utc).isoformat()})
+                    tables['resources'].update(tracking_res_record['id'], {'Count': current_tracking_count - amount})
                 else: # Delivered all or more than was tracked (or exactly tracked amount)
                     tables['resources'].delete(tracking_res_record['id'])
                 log.info(f"Adjusted import-tracking resource {resource_type_id} for delivery citizen {delivery_person_username}.")
@@ -130,7 +121,7 @@ def process(
             if existing_building_resources:
                 bres_record = existing_building_resources[0]
                 new_count = float(bres_record['fields'].get('Count', 0)) + amount
-                tables['resources'].update(bres_record['id'], {'Count': new_count, 'UpdatedAt': now_iso})
+                tables['resources'].update(bres_record['id'], {'Count': new_count})
                 log.info(f"Updated resource {resource_type_id} count in building {to_building_id} for {target_owner_username} to {new_count}.")
             else:
                 res_def = resource_defs.get(resource_type_id, {})
@@ -147,8 +138,7 @@ def process(
                     "Owner": target_owner_username,
                     "Count": amount,
                     "Position": building_pos_str,
-                    "CreatedAt": now_iso,
-                    "UpdatedAt": now_iso
+                    "CreatedAt": now_iso
                 }
                 tables['resources'].create(new_resource_payload)
                 log.info(f"Created new resource {resource_type_id} in building {to_building_id} for {target_owner_username}.")
@@ -226,8 +216,5 @@ def process(
             log.error(f"Error processing financial transaction for contract {original_contract_id}: {e_finance}")
             all_financials_processed = False
     
-    if all_financials_processed:
-        # Update the destination building's UpdatedAt timestamp
-        _update_building_timestamp(tables, dest_building_record['id'], datetime.now(timezone.utc).isoformat())
-            
+    # Building UpdatedAt is handled by Airtable
     return all_financials_processed

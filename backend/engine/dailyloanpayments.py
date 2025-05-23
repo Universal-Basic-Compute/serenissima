@@ -161,7 +161,6 @@ def create_transaction_record(tables, loan: Dict, payment_amount: float) -> Opti
             "Buyer": lender,     # Lender is the buyer (receiving)
             "Price": payment_amount,
             "CreatedAt": now,
-            "UpdatedAt": now,
             "ExecutedAt": now,
             "Notes": json.dumps({
                 "loan_id": loan_id,
@@ -353,7 +352,6 @@ def process_loan_payment(tables, loan: Dict, dry_run: bool = False) -> bool:
     updated_loan = tables['loans'].update(loan_id, {
         "RemainingBalance": new_balance,
         "Status": new_status,
-        "UpdatedAt": now,
         "Notes": f"{loan['fields'].get('Notes', '')}\nPayment of {payment_amount} made on {now}"
     })
     

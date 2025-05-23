@@ -22,16 +22,6 @@ def _get_building_by_airtable_id(tables: Dict[str, Any], airtable_id: str) -> Op
         log.error(f"Error fetching building by Airtable ID {airtable_id}: {e}")
         return None
 
-def _update_building_timestamp(tables: Dict[str, Any], building_airtable_id: str, timestamp_iso: str) -> bool:
-    """Helper to update UpdatedAt for a building."""
-    try:
-        tables['buildings'].update(building_airtable_id, {'UpdatedAt': timestamp_iso})
-        log.info(f"Updated 'UpdatedAt' for building record {building_airtable_id}")
-        return True
-    except Exception as e:
-        log.error(f"Error updating 'UpdatedAt' for building record {building_airtable_id}: {e}")
-        return False
-
 log = logging.getLogger(__name__)
 
 # Standard amount of "hunger" one meal satisfies, or a generic food unit.
@@ -40,11 +30,10 @@ FOOD_UNIT_CONSUMED = 1.0
 TAVERN_MEAL_COST = 10 # Ducats
 
 def _update_citizen_ate_at(tables: Dict[str, Any], citizen_airtable_id: str, timestamp_iso: str) -> bool:
-    """Helper to update AteAt and UpdatedAt for a citizen."""
+    """Helper to update AteAt for a citizen."""
     try:
         tables['citizens'].update(citizen_airtable_id, {
-            'AteAt': timestamp_iso,
-            'UpdatedAt': timestamp_iso
+            'AteAt': timestamp_iso
         })
         return True
     except Exception as e:
@@ -96,7 +85,7 @@ def process_eat_from_inventory(
         now_iso = datetime.now(timezone.utc).isoformat()
 
         if new_amount > 0.001: # Epsilon for float comparison
-            tables['resources'].update(food_record['id'], {'Count': new_amount, 'UpdatedAt': now_iso})
+            tables['resources'].update(food_record['id'], {'Count': new_amount})
         else:
             tables['resources'].delete(food_record['id'])
         
@@ -160,15 +149,14 @@ def process_eat_at_home(
         now_iso = datetime.now(timezone.utc).isoformat()
 
         if new_amount > 0.001:
-            tables['resources'].update(food_record['id'], {'Count': new_amount, 'UpdatedAt': now_iso})
+            tables['resources'].update(food_record['id'], {'Count': new_amount})
         else:
             tables['resources'].delete(food_record['id'])
         
         log.info(f"Citizen {citizen_username} consumed {amount_to_eat} of {food_resource_type} at home {home_building_custom_id}. New amount: {new_amount if new_amount > 0.001 else 0}")
         
         if _update_citizen_ate_at(tables, citizen_record['id'], now_iso):
-            # Also update the home building's UpdatedAt
-            _update_building_timestamp(tables, home_building_record['id'], now_iso)
+            # Building UpdatedAt is handled by Airtable
             return True
         return False
 
@@ -236,14 +224,13 @@ def process_eat_at_tavern(
         operator_record = get_citizen_record(tables, tavern_operator)
         if operator_record:
             operator_ducats = float(operator_record['fields'].get('Ducats', 0))
-            tables['citizens'].update(operator_record['id'], {'Ducats': operator_ducats + TAVERN_MEAL_COST, 'UpdatedAt': now_iso})
+            tables['citizens'].update(operator_record['id'], {'Ducats': operator_ducats + TAVERN_MEAL_COST})
             log.info(f"Credited tavern operator {tavern_operator} with {TAVERN_MEAL_COST} Ducats.")
         else:
             log.warning(f"Could not find tavern operator {tavern_operator} to credit meal cost.")
 
         if _update_citizen_ate_at(tables, citizen_record['id'], now_iso):
-            # Also update the tavern building's UpdatedAt
-            _update_building_timestamp(tables, tavern_record['id'], now_iso)
+            # Building UpdatedAt is handled by Airtable
             return True
         return False
         

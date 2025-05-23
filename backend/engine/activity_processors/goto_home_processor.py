@@ -24,16 +24,6 @@ def _get_building_by_airtable_id(tables: Dict[str, Any], airtable_id: str) -> Op
         log.error(f"Error fetching building by Airtable ID {airtable_id}: {e}")
         return None
 
-def _update_building_timestamp(tables: Dict[str, Any], building_airtable_id: str, timestamp_iso: str) -> bool:
-    """Helper to update UpdatedAt for a building."""
-    try:
-        tables['buildings'].update(building_airtable_id, {'UpdatedAt': timestamp_iso})
-        log.info(f"Updated 'UpdatedAt' for building record {building_airtable_id}")
-        return True
-    except Exception as e:
-        log.error(f"Error updating 'UpdatedAt' for building record {building_airtable_id}: {e}")
-        return False
-
 log = logging.getLogger(__name__)
 
 def process(
@@ -132,7 +122,7 @@ def process(
             if existing_home_resources:
                 home_res_airtable_id = existing_home_resources[0]['id']
                 new_count_at_home = float(existing_home_resources[0]['fields'].get('Count', 0)) + amount_to_deposit
-                tables['resources'].update(home_res_airtable_id, {'Count': new_count_at_home, 'UpdatedAt': now_iso})
+                tables['resources'].update(home_res_airtable_id, {'Count': new_count_at_home})
                 log.info(f"Updated resource {resource_type_id} count in home {home_building_custom_id} for {citizen_username} to {new_count_at_home}.")
             else:
                 res_def = resource_defs.get(resource_type_id, {})
@@ -149,8 +139,7 @@ def process(
                     "Owner": citizen_username, # Citizen owns the resources in their home
                     "Count": amount_to_deposit,
                     "Position": home_building_pos_str, # Position of the home
-                    "CreatedAt": now_iso,
-                    "UpdatedAt": now_iso
+                    "CreatedAt": now_iso
                 }
                 tables['resources'].create(new_resource_payload_home)
                 log.info(f"Created new resource {resource_type_id} in home {home_building_custom_id} for {citizen_username}.")
@@ -170,8 +159,5 @@ def process(
         return False
 
     log.info(f"Successfully processed 'goto_home' activity {activity_guid} for {citizen_username}. All resources deposited.")
-    
-    # Update the home building's UpdatedAt timestamp
-    _update_building_timestamp(tables, home_building_record['id'], now_iso)
     
     return True

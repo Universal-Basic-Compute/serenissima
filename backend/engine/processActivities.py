@@ -186,7 +186,7 @@ def get_building_current_storage(tables: Dict[str, Table], building_custom_id: s
 def update_activity_status(tables: Dict[str, Table], activity_airtable_id: str, status: str):
     """Updates the status of an activity."""
     try:
-        tables['activities'].update(activity_airtable_id, {'Status': status, 'UpdatedAt': datetime.now(timezone.utc).isoformat()})
+        tables['activities'].update(activity_airtable_id, {'Status': status})
         log.info(f"Updated activity {activity_airtable_id} status to '{status}'.")
     except Exception as e:
         log.error(f"Error updating status for activity {activity_airtable_id}: {e}")
@@ -337,8 +337,8 @@ def main(dry_run: bool = False):
                             consiglio_ducats = float(consiglio_record['fields'].get('Ducats', 0))
                             now_iso_fee = datetime.now(timezone.utc).isoformat()
 
-                            tables['citizens'].update(traveler_citizen_record['id'], {'Ducats': traveler_ducats - gondola_fee, 'UpdatedAt': now_iso_fee})
-                            tables['citizens'].update(consiglio_record['id'], {'Ducats': consiglio_ducats + gondola_fee, 'UpdatedAt': now_iso_fee})
+                            tables['citizens'].update(traveler_citizen_record['id'], {'Ducats': traveler_ducats - gondola_fee})
+                            tables['citizens'].update(consiglio_record['id'], {'Ducats': consiglio_ducats + gondola_fee})
                             
                             transaction_payload = {
                                 "Type": "gondola_fee",
@@ -389,11 +389,10 @@ def main(dry_run: bool = False):
                         
                             if building_position_str:
                                 update_payload = {
-                                    'Position': building_position_str,
-                                    'UpdatedAt': datetime.now(timezone.utc).isoformat()
+                                    'Position': building_position_str
                                 }
                                 tables['citizens'].update(citizen_record_for_pos['id'], update_payload)
-                                log.info(f"Updated citizen {citizen_username_for_pos} Position to {building_position_str} (Building Airtable ID: {to_building_airtable_id}) and UpdatedAt.")
+                                log.info(f"Updated citizen {citizen_username_for_pos} Position to {building_position_str} (Building Airtable ID: {to_building_airtable_id}).")
                             else:
                                 log.warning(f"Building {to_building_airtable_id} is missing Position. Cannot update citizen {citizen_username_for_pos} position.")
                         else: 

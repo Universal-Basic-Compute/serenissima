@@ -25,16 +25,6 @@ def _get_building_by_airtable_id(tables: Dict[str, Any], airtable_id: str) -> Op
         log.error(f"Error fetching building by Airtable ID {airtable_id}: {e}")
         return None
 
-def _update_building_timestamp(tables: Dict[str, Any], building_airtable_id: str, timestamp_iso: str) -> bool:
-    """Helper to update UpdatedAt for a building."""
-    try:
-        tables['buildings'].update(building_airtable_id, {'UpdatedAt': timestamp_iso})
-        log.info(f"Updated 'UpdatedAt' for building record {building_airtable_id}")
-        return True
-    except Exception as e:
-        log.error(f"Error updating 'UpdatedAt' for building record {building_airtable_id}: {e}")
-        return False
-
 log = logging.getLogger(__name__)
 
 def process(
@@ -138,7 +128,7 @@ def process(
             if existing_workplace_resources:
                 workplace_res_airtable_id = existing_workplace_resources[0]['id']
                 new_count_at_workplace = float(existing_workplace_resources[0]['fields'].get('Count', 0)) + amount_to_deposit
-                tables['resources'].update(workplace_res_airtable_id, {'Count': new_count_at_workplace, 'UpdatedAt': now_iso})
+                tables['resources'].update(workplace_res_airtable_id, {'Count': new_count_at_workplace})
                 log.info(f"Updated resource {resource_type_id} count in workplace {workplace_building_custom_id} for operator {workplace_operator_username} to {new_count_at_workplace}.")
             else:
                 res_def = resource_defs.get(resource_type_id, {})
@@ -155,8 +145,7 @@ def process(
                     "Owner": workplace_operator_username, # Workplace operator owns these resources
                     "Count": amount_to_deposit,
                     "Position": workplace_building_pos_str, # Position of the workplace
-                    "CreatedAt": now_iso,
-                    "UpdatedAt": now_iso
+                    "CreatedAt": now_iso
                 }
                 tables['resources'].create(new_resource_payload_workplace)
                 log.info(f"Created new resource {resource_type_id} in workplace {workplace_building_custom_id} for operator {workplace_operator_username}.")
@@ -176,8 +165,5 @@ def process(
         return False # Indicate failure to deposit
 
     log.info(f"Successfully processed 'goto_work' activity {activity_guid} for {citizen_username}. Resources deposited as applicable.")
-    
-    # Update the workplace building's UpdatedAt timestamp
-    _update_building_timestamp(tables, workplace_building_record['id'], now_iso)
     
     return True

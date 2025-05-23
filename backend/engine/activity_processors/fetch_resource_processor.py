@@ -190,8 +190,8 @@ def process(
 
     try:
         # Financial transaction
-        tables['citizens'].update(buyer_citizen_record['id'], {'Ducats': buyer_ducats - total_cost, 'UpdatedAt': now_iso})
-        tables['citizens'].update(seller_citizen_record['id'], {'Ducats': seller_ducats + total_cost, 'UpdatedAt': now_iso})
+        tables['citizens'].update(buyer_citizen_record['id'], {'Ducats': buyer_ducats - total_cost})
+        tables['citizens'].update(seller_citizen_record['id'], {'Ducats': seller_ducats + total_cost})
         log.info(f"Transferred {total_cost} ducats from buyer {buyer_username} to seller {effective_seller_username}.")
 
         transaction_payload = {
@@ -225,7 +225,7 @@ def process(
             source_res_record = source_res_records[0]
             new_source_count = float(source_res_record['fields'].get('Count', 0)) - amount_to_purchase
             if new_source_count > 0.001:
-                tables['resources'].update(source_res_record['id'], {'Count': new_source_count, 'UpdatedAt': now_iso})
+                tables['resources'].update(source_res_record['id'], {'Count': new_source_count})
             else:
                 tables['resources'].delete(source_res_record['id'])
             log.info(f"Decremented {amount_to_purchase} of {resource_id_to_fetch} from building {from_building_custom_id}.")
@@ -244,7 +244,7 @@ def process(
         if existing_carrier_res:
             carrier_res_record = existing_carrier_res[0]
             new_carrier_count = float(carrier_res_record['fields'].get('Count', 0)) + amount_to_purchase
-            tables['resources'].update(carrier_res_record['id'], {'Count': new_carrier_count, 'UpdatedAt': now_iso})
+            tables['resources'].update(carrier_res_record['id'], {'Count': new_carrier_count})
             log.info(f"Updated {resource_id_to_fetch} for carrier {carrier_username} to {new_carrier_count} (owned by {buyer_username}).")
         else:
             new_carrier_res_payload = {
@@ -257,16 +257,14 @@ def process(
                 "Owner": buyer_username, # Resources on citizen are owned by the contract's buyer
                 "Count": amount_to_purchase,
                 "Position": from_building_position_str, # Citizen is at FromBuilding
-                "CreatedAt": now_iso,
-                "UpdatedAt": now_iso
+                "CreatedAt": now_iso
             }
             tables['resources'].create(new_carrier_res_payload)
             log.info(f"Created {amount_to_purchase} of {resource_id_to_fetch} for carrier {carrier_username} (owned by {buyer_username}).")
 
         # Update carrier's position to FromBuilding
         tables['citizens'].update(carrier_airtable_id, {
-            'Position': from_building_position_str,
-            'UpdatedAt': now_iso
+            'Position': from_building_position_str
         })
         log.info(f"Updated carrier {carrier_username} position to {from_building_custom_id} ({from_building_position_str}).")
 
@@ -287,12 +285,5 @@ def process(
             
     log.info(f"Successfully processed 'fetch_resource' activity {activity_guid}. Fetched {amount_to_purchase} of {resource_id_to_fetch}.")
     
-    # Update the source building's UpdatedAt timestamp
-    try:
-        tables['buildings'].update(from_building_record['id'], {'UpdatedAt': now_iso})
-        log.info(f"Updated 'UpdatedAt' for source building record {from_building_record['id']}")
-    except Exception as e_update_bldg:
-        log.error(f"Error updating 'UpdatedAt' for source building record {from_building_record['id']}: {e_update_bldg}")
-        # Continue, as main processing was successful
-        
+    # Building UpdatedAt is handled by Airtable
     return True

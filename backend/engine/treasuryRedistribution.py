@@ -194,7 +194,6 @@ def create_transaction_record(tables, from_citizen: str, to_citizen: str, amount
             "Buyer": to_citizen,  # Citizen ID
             "Price": amount,
             "CreatedAt": now,
-            "UpdatedAt": now,
             "ExecutedAt": now,
             "Notes": json.dumps({
                 "payment_type": "treasury_redistribution",
