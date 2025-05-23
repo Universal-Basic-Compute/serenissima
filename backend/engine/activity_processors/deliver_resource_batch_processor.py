@@ -16,14 +16,11 @@ from backend.engine.processActivities import (
     get_building_record,
     get_contract_record,
     get_building_current_storage,
-    _escape_airtable_value,
-    update_building_updated_at # Assuming this will be added to processActivities or a shared util
+    _escape_airtable_value
+    # update_building_updated_at # This function does not exist in processActivities.py
 )
 
-# If update_building_updated_at is not in processActivities, define it here or import from its actual location.
-# For now, let's assume it will be available. If not, we can define a local helper.
-
-log = logging.getLogger(__name__) # Use a logger specific to this module
+log = logging.getLogger(__name__)
 
 def process(
     tables: Dict[str, Any], # Using Any for Table type for simplicity here
@@ -64,6 +61,17 @@ def process(
         return False
     
     dest_building_type_str = dest_building_record['fields'].get('Type')
+
+    # Check if the destination is a merchant galley
+    if dest_building_type_str == "merchant_galley":
+        log.info(f"Activity {activity_guid} is delivering to merchant_galley {to_building_id}. "
+                 f"This signifies the galley's arrival. No resource transfer or financial processing needed here.")
+        # The citizen's position will be updated by the main loop in processActivities.py
+        # Resources are already considered "in" the galley, owned by "Italia".
+        # Financials are deferred.
+        return True # Activity is successfully processed.
+
+    # Proceed with normal delivery logic if not a merchant_galley
     dest_building_def = building_type_defs.get(dest_building_type_str, {})
     storage_capacity = dest_building_def.get('productionInformation', {}).get('storageCapacity', 0)
     
