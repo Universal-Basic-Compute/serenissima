@@ -1145,7 +1145,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
     if not citizen_position: # Re-check after hunger logic if position was needed but missing
         log.warning(f"Citizen {citizen_custom_id} has no position data, creating idle activity")
         idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
-        try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso)
+        try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso, reason_message="No position data available.")
         return True
     
     # If it's nighttime, handle nighttime activities
@@ -1177,15 +1177,15 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                         else:
                             log.warning(f"Path finding to inn {inn_custom_id} failed for {citizen_username}. Creating idle activity.")
                             idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
-                            try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso)
+                            try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso, reason_message=f"Pathfinding to inn {inn_custom_id} failed.")
                 else:
                     log.warning(f"Inn {closest_inn['id'] if closest_inn else 'N/A'} has no position data. Creating idle activity for {citizen_username}.")
                     idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
-                    try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso)
+                    try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso, reason_message="Inn has no position data.")
             else:
                 log.warning(f"No inn found for visitor {citizen_username}. Creating idle activity.")
                 idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
-                try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso)
+                try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso, reason_message="No inn found for visitor.")
 
         else: # Resident logic
             log.info(f"Citizen {citizen_username} is a resident or HomeCity is not set. Finding home.")
@@ -1193,7 +1193,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
             if not home:
                 log.warning(f"Citizen {citizen_custom_id} has no home, creating idle activity")
                 idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
-                try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso)
+                try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso, reason_message="No home assigned.")
                 return True
             
             home_position = _get_building_position_coords(home)
@@ -1203,7 +1203,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
             if not home_position:
                 log.warning(f"Home {home_custom_id} has no position data, creating idle for resident {citizen_custom_id}")
                 idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
-                try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso)
+                try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso, reason_message="Home has no position data.")
                 return True
             
             is_at_home = _calculate_distance_meters(citizen_position, home_position) < 20
@@ -1222,7 +1222,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                 else:
                     log.warning(f"Path finding to home failed for resident {citizen_custom_id}. Creating idle activity.")
                     idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
-                    try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso)
+                    try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso, reason_message=f"Pathfinding to home {home_custom_id} failed.")
     else: 
         # Daytime activities
         workplace = get_citizen_workplace(tables, citizen_custom_id, citizen_username)
@@ -1234,7 +1234,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
             if not workplace_position:
                 log.warning(f"Workplace {workplace_custom_id} has no position data, creating idle activity")
                 idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
-                try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso)
+                try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso, reason_message="Workplace has no position data.")
                 return True
             
             is_at_workplace = _calculate_distance_meters(citizen_position, workplace_position) < 20
@@ -1291,7 +1291,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                                                 log.warning(f"Missing custom BuildingId for contract buildings: From={from_building_custom_id_contract}, To={to_building_custom_id_contract}")
                 log.info(f"No production or fetching for {citizen_custom_id} at {workplace_custom_id}. Creating idle.")
                 idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
-                try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso)
+                try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso, reason_message="No production or fetching tasks available at workplace.")
             else: # Not at workplace, needs to go to work
                 # Check if citizen is at home before creating goto_work
                 home_for_departure_check = get_citizen_home(tables, citizen_custom_id) # Re-fetch or use existing `home` if available
@@ -1322,11 +1322,11 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                 else:
                     log.warning(f"Path to workplace {workplace_custom_id} failed for {citizen_custom_id}. Creating idle.")
                     idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
-                    try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso)
+                    try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso, reason_message=f"Pathfinding to workplace {workplace_custom_id} failed.")
         else: # No workplace
             log.info(f"No workplace for citizen {citizen_username}. Creating idle activity.")
             idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
-            try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso)
+            try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso, reason_message="No workplace assigned.")
     return True
 
 def create_activities(dry_run: bool = False):

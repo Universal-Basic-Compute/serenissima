@@ -18,7 +18,8 @@ def try_create(
     citizen_custom_id: str, 
     citizen_username: str, 
     citizen_airtable_id: str,
-    end_date_iso: str = None # Expecting ISO format string for EndDate
+    end_date_iso: str = None, # Expecting ISO format string for EndDate
+    reason_message: Optional[str] = None
 ) -> Optional[Dict]:
     """Creates an idle activity for a citizen."""
     log.info(f"Attempting to create idle activity for citizen {citizen_username} (CustomID: {citizen_custom_id})")
@@ -32,6 +33,12 @@ def try_create(
             end_date_iso = end_time.isoformat()
             log.warning(f"end_date_iso for idle activity not provided, calculated fallback: {end_date_iso}")
 
+        default_note = "⏳ **Idle activity**"
+        if reason_message:
+            notes = f"{default_note}: {reason_message}"
+        else:
+            notes = f"{default_note} due to undetermined circumstances."
+
         activity_payload = {
             "ActivityId": f"idle_{citizen_custom_id}_{int(time.time())}",
             "Type": "idle",
@@ -39,7 +46,7 @@ def try_create(
             "CreatedAt": now.isoformat(),
             "StartDate": now.isoformat(),
             "EndDate": end_date_iso,
-            "Notes": "⏳ **Idle activity** due to failed path finding or no home/work"
+            "Notes": notes
         }
         activity = tables['activities'].create(activity_payload)
         
