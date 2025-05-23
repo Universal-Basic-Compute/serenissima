@@ -155,7 +155,7 @@ def process(
         
         try:
             if new_count > 0.001: # Using a small epsilon for float comparison
-                tables['resources'].update(input_res_record['id'], {'Count': new_count, 'UpdatedAt': now_iso})
+                tables['resources'].update(input_res_record['id'], {'Count': new_count, 'UpdatedAt': now_iso, 'ConsumedAt': now_iso}) # Add ConsumedAt
                 log.info(f"Consumed {req_amount} of {res_type} from {building_custom_id}. New count: {new_count}")
             else:
                 tables['resources'].delete(input_res_record['id'])
