@@ -1438,7 +1438,7 @@ def create_activities(dry_run: bool = False, target_citizen_username: Optional[s
     
     # Attempt to create final delivery activities for citizens at galleys first
     # This pool will be modified by process_final_deliveries_from_galley
-    citizens_available_for_general_activities = list(idle_citizens) 
+    citizens_available_for_general_activities = list(citizens_to_process_list) 
     if not dry_run:
         final_delivery_activities_created = process_final_deliveries_from_galley(tables, citizens_available_for_general_activities, now_utc_dt)
         success_count += final_delivery_activities_created
