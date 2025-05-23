@@ -122,7 +122,7 @@ export default function IsometricViewer({ activeView, setActiveView, fullWaterGr
 
   const handleInteractionModeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newMode = e.target.value as InteractionMode;
-    console.log(`Switching interaction mode from ${interactionMode} to ${newMode}`);
+    console.log(`[BRIDGE_ORIENT_DEBUG] Switching interaction mode from ${interactionMode} to ${newMode}`);
 
     // Cleanup for the OLD mode
     if (interactionMode === 'orient_bridge') {
@@ -1627,39 +1627,57 @@ number => {
       const bridgeIdToSave = selectedBridgeForOrientationId;
       const angleToSave = orientingBridgeAngle;
 
-      console.log(`IsometricViewer: Saving orientation for bridge ${bridgeIdToSave}: ${angleToSave} radians (Mode: ${interactionMode})`);
+      console.log(`[BRIDGE_ORIENT_DEBUG] saveSelectedBridgeOrientation: Attempting to save for bridge ${bridgeIdToSave}, angle: ${angleToSave} radians.`);
 
       try {
+        console.log(`[BRIDGE_ORIENT_DEBUG] API Call: PATCH /api/bridges/${bridgeIdToSave}/orient with body:`, JSON.stringify({ orientation: angleToSave }));
         const response = await fetch(`/api/bridges/${bridgeIdToSave}/orient`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ orientation: angleToSave }),
         });
 
+        console.log(`[BRIDGE_ORIENT_DEBUG] API Response Status: ${response.status}`);
+        const responseBodyText = await response.text(); // Read body as text first
+        console.log(`[BRIDGE_ORIENT_DEBUG] API Response Body: ${responseBodyText}`);
+
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: `API Error: ${response.status}` }));
+          let errorData;
+          try {
+            errorData = JSON.parse(responseBodyText);
+          } catch (e) {
+            errorData = { error: `API Error: ${response.status}, Body: ${responseBodyText}` };
+          }
+          console.error('[BRIDGE_ORIENT_DEBUG] API Error Data:', errorData);
           throw new Error(errorData.error || `API Error: ${response.status}`);
         }
 
-        const data = await response.json();
+        const data = JSON.parse(responseBodyText); // Parse text to JSON
         if (data.success) {
-          console.log('IsometricViewer: Bridge orientation saved successfully:', data.bridge);
-          setBuildings(prevBuildings =>
-            prevBuildings.map(b =>
+          console.log('[BRIDGE_ORIENT_DEBUG] Bridge orientation saved successfully via API:', data.bridge);
+          setBuildings(prevBuildings => {
+            const newBuildings = prevBuildings.map(b =>
               b.id === bridgeIdToSave ? { ...b, orientation: angleToSave, rotation: angleToSave } : b
-            )
-          );
+            );
+            console.log(`[BRIDGE_ORIENT_DEBUG] Updated local buildings state for ${bridgeIdToSave}. New orientation: ${angleToSave}.`);
+            // Log the specific bridge object after update
+            const updatedBridge = newBuildings.find(b => b.id === bridgeIdToSave);
+            console.log('[BRIDGE_ORIENT_DEBUG] Bridge object after local update:', updatedBridge);
+            return newBuildings;
+          });
           // Optionally, show a success notification
         } else {
-          console.error('IsometricViewer: Failed to save bridge orientation:', data.error);
+          console.error('[BRIDGE_ORIENT_DEBUG] API reported failure to save bridge orientation:', data.error);
           // Optionally, show an error notification
         }
       } catch (error) {
-        console.error('IsometricViewer: Error saving bridge orientation:', error);
+        console.error('[BRIDGE_ORIENT_DEBUG] Error in saveSelectedBridgeOrientation catch block:', error);
         // Optionally, show an error notification
       }
       // Do not reset selectedBridgeForOrientationId or orientingBridgeAngle here,
       // let 'Enter' or 'Escape' key handlers do that.
+    } else {
+      console.log(`[BRIDGE_ORIENT_DEBUG] saveSelectedBridgeOrientation: Conditions not met. Mode: ${interactionMode}, SelectedBridge: ${selectedBridgeForOrientationId}, Angle: ${orientingBridgeAngle}`);
     }
   }, [interactionMode, selectedBridgeForOrientationId, orientingBridgeAngle, buildings, setBuildings]);
 
@@ -1698,6 +1716,7 @@ number => {
         let newAngle = orientingBridgeAngle !== null 
           ? orientingBridgeAngle 
           : (currentBuilding?.orientation !== undefined ? currentBuilding.orientation : 0);
+        console.log(`[BRIDGE_ORIENT_DEBUG] KeyDown: Initial angle for ${selectedBridgeForOrientationId}: ${newAngle} (orientingBridgeAngle: ${orientingBridgeAngle}, currentBuilding.orientation: ${currentBuilding?.orientation})`);
 
         const increment = Math.PI / 90; // 2 degrees increment
 
@@ -1714,11 +1733,13 @@ number => {
         if (angleChanged) {
           // Normalize angle to be between 0 and 2*PI
           newAngle = (newAngle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+          console.log(`[BRIDGE_ORIENT_DEBUG] KeyDown: Angle changed. New angle: ${newAngle}. Calling setOrientingBridgeAngle.`);
           setOrientingBridgeAngle(newAngle);
         }
 
         if (e.key === 'Enter') {
           e.preventDefault();
+          console.log(`[BRIDGE_ORIENT_DEBUG] KeyDown: Enter pressed. Current orientingBridgeAngle: ${orientingBridgeAngle}`);
           if (orientingBridgeAngle !== null) { // Only save if an angle has been set/changed
             await saveSelectedBridgeOrientation();
           }
@@ -2172,8 +2193,14 @@ number => {
         saveWaterPoint,
         handleWaterRouteClick,
         // Add bridge orientation callbacks (setOrientBridgeModeActive is removed as mode is controlled by dropdown)
-        setSelectedBridgeForOrientationId,
-        setOrientingBridgeAngle
+        setSelectedBridgeForOrientationId: (bridgeId) => {
+          console.log(`[BRIDGE_ORIENT_DEBUG] setSelectedBridgeForOrientationId called with: ${bridgeId}`);
+          setSelectedBridgeForOrientationId(bridgeId);
+        },
+        setOrientingBridgeAngle: (angle) => {
+          console.log(`[BRIDGE_ORIENT_DEBUG] setOrientingBridgeAngle called with: ${angle}`);
+          setOrientingBridgeAngle(angle);
+        }
       }
     );
     
@@ -3166,6 +3193,20 @@ number => {
     // Now, pass all filteredBuildings (which could be all city buildings or just 'my' buildings)
     // to renderService.drawBuildings. The service will handle bridge-specific rendering.
     if (filteredBuildings.length > 0) {
+      // DEBUG: Log orientation of the selected bridge before drawing
+      if (selectedBridgeForOrientationId) {
+        const bridgeToDebug = filteredBuildings.find(b => b.id === selectedBridgeForOrientationId);
+        if (bridgeToDebug) {
+          console.log(`[BRIDGE_ORIENT_DEBUG] Drawing: Bridge ${selectedBridgeForOrientationId} has orientation: ${bridgeToDebug.orientation}, rotation: ${bridgeToDebug.rotation}`);
+        } else {
+          console.log(`[BRIDGE_ORIENT_DEBUG] Drawing: Selected bridge ${selectedBridgeForOrientationId} not found in filteredBuildings.`);
+        }
+      }
+      if (interactionMode === 'orient_bridge' && selectedBridgeForOrientationId && orientingBridgeAngle !== null) {
+        console.log(`[BRIDGE_ORIENT_DEBUG] Drawing: In orient_bridge mode. Current orientingBridgeAngle for ${selectedBridgeForOrientationId} is ${orientingBridgeAngle}`);
+      }
+
+
       renderService.drawBuildings(ctx, filteredBuildings, scale, offset, canvas.width, canvas.height, {
         selectedBuildingId,
         hoveredBuildingId: currentHoverState.type === 'building' ? currentHoverState.id : null,
@@ -3176,7 +3217,11 @@ number => {
         getBuildingCategoryColor, // This will be used by renderService
         isColorDark, // This will be used by renderService
         getCurrentCitizenIdentifier, // This will be used by renderService
-        polygonsToRender // Pass polygonsToRender for bridge orientation calculation (if still needed by service)
+        polygonsToRender, // Pass polygonsToRender for bridge orientation calculation (if still needed by service)
+        // Pass orientingBridgeAngle and selectedBridgeForOrientationId to renderService
+        // so it can draw the bridge with the temporary angle during orientation
+        orientingBridgeAngle: interactionMode === 'orient_bridge' ? orientingBridgeAngle : null,
+        selectedBridgeForOrientationId: interactionMode === 'orient_bridge' ? selectedBridgeForOrientationId : null,
       });
     }
     
