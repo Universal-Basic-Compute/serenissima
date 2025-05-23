@@ -4170,31 +4170,6 @@ number => {
         </>
       )}
       
-      {/* Orient Bridge Mode Button - Visible in buildings view for ConsiglioDeiDieci (Top Right) */}
-      {activeView === 'buildings' && isUserConsiglioDeiDieci && (
-        <button
-          onClick={() => {
-            // Toggle between 'orient_bridge' and 'normal'
-            const newMode = interactionMode === 'orient_bridge' ? 'normal' : 'orient_bridge';
-            // Simulate the event object structure that handleInteractionModeChange expects
-            const simulatedEvent = { target: { value: newMode } } as React.ChangeEvent<HTMLSelectElement>;
-            handleInteractionModeChange(simulatedEvent);
-            console.log(`Orient Bridge Mode toggled to: ${newMode} (Top Right Button)`);
-          }}
-          className={`absolute top-4 right-4 ${
-            interactionMode === 'orient_bridge' ? 'bg-red-600 hover:bg-red-500' : 'bg-purple-600 hover:bg-purple-500'
-          } text-white px-4 py-2 rounded-lg text-sm shadow-lg flex items-center transition-colors`}
-          title={interactionMode === 'orient_bridge' ? "Exit Orient Bridge Mode" : "Enter Orient Bridge Mode"}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 21v-1m0-18v1m7.071 2.929l-.707.707M4.929 19.071l-.707.707m14.142 0l-.707-.707M4.929 4.929l-.707-.707m7.071 14.142L12 12" />
-          </svg>
-          {interactionMode === 'orient_bridge' ? 'Exit Orient Mode' : 'Orient Bridge'}
-        </button>
-      )}
-      
       {/* Interaction Mode Dropdown - Visible for ConsiglioDeiDieci */}
       {isUserConsiglioDeiDieci && (activeView === 'buildings' || activeView === 'transport') && (
         <div className="absolute bottom-52 left-20 bg-black/70 text-white p-2 rounded-lg shadow-lg flex items-center space-x-2">
