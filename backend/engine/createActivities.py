@@ -677,10 +677,11 @@ def create_goto_work_activity(tables, citizen_custom_id: str, citizen_username: 
     log.info(f"{LogColors.OKCYAN}Creating goto_work activity for citizen {citizen_username} (CustomID: {citizen_custom_id}) to workplace {workplace_id}{LogColors.ENDC}")
     
     try:
-        now = datetime.datetime.now(pytz.UTC)
+        VENICE_TIMEZONE_LOCAL = pytz.timezone('Europe/Rome') # Local VENICE_TIMEZONE
+        now_venice = datetime.datetime.now(VENICE_TIMEZONE_LOCAL)
         
         # Get timing information from path data
-        start_date = path_data.get('timing', {}).get('startDate', now.isoformat())
+        start_date = path_data.get('timing', {}).get('startDate', now_venice.isoformat())
         end_date = path_data.get('timing', {}).get('endDate')
         
         if not end_date:
