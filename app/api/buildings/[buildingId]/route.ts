@@ -56,16 +56,22 @@ export async function GET(request: NextRequest) {
           // Attempt to parse position from point if position is null or empty
           if (!buildingRaw.position && buildingRaw.point) {
             const pointStr = String(buildingRaw.point);
-            // Regex for type_LAT_LNG pattern (allows for optional negative signs and decimals)
-            const coordPattern = /^[a-zA-Z0-9-]+_(-?[0-9]+(?:\.[0-9]+)?)_(-?[0-9]+(?:\.[0-9]+)?)$/;
+            // Regex for type_LAT_LNG or type_LAT_LNG_variant pattern
+            // Allows for optional negative signs and decimals in lat/lng
+            // Allows for an optional _variant at the end
+            const coordPattern = /^[a-zA-Z0-9-]+_(-?[0-9]+(?:\.[0-9]+)?)_(-?[0-9]+(?:\.[0-9]+)?)(?:_[^_]+)?$/;
             const pointMatch = pointStr.match(coordPattern);
-            if (pointMatch) {
+            if (pointMatch && pointMatch[1] && pointMatch[2]) {
               const lat = parseFloat(pointMatch[1]);
               const lng = parseFloat(pointMatch[2]);
               if (!isNaN(lat) && !isNaN(lng)) {
                 buildingRaw.position = { lat, lng };
                 console.log(`[API Building ${buildingId}] Populated position from point field '${pointStr}':`, buildingRaw.position);
+              } else {
+                console.warn(`[API Building ${buildingId}] Could not parse lat/lng from point field '${pointStr}' despite matching pattern.`);
               }
+            } else {
+                console.warn(`[API Building ${buildingId}] Point field '${pointStr}' did not match expected pattern for coordinate extraction.`);
             }
           }
 
