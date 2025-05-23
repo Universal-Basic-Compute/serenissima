@@ -24,16 +24,17 @@ def try_create_eat_from_inventory_activity(
     """Creates an 'eat_from_inventory' activity."""
     log.info(f"Attempting to create 'eat_from_inventory' for {citizen_username} eating {amount_to_eat} of {food_resource_type}")
     try:
-        now = datetime.datetime.now(pytz.UTC)
-        end_time = now + datetime.timedelta(minutes=EAT_ACTIVITY_DURATION_MINUTES)
+        VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
+        now_venice = datetime.datetime.now(VENICE_TIMEZONE)
+        end_time_venice = now_venice + datetime.timedelta(minutes=EAT_ACTIVITY_DURATION_MINUTES)
         
         activity_payload = {
             "ActivityId": f"eat_inv_{citizen_custom_id}_{int(time.time())}",
             "Type": "eat_from_inventory",
             "Citizen": citizen_username,
-            "CreatedAt": now.isoformat(),
-            "StartDate": now.isoformat(),
-            "EndDate": end_time.isoformat(),
+            "CreatedAt": now_venice.isoformat(),
+            "StartDate": now_venice.isoformat(),
+            "EndDate": end_time_venice.isoformat(),
             "Notes": f"🍲 Eating {amount_to_eat:.1f} {food_resource_type} from personal inventory.",
             "ResourceId": food_resource_type, # What is being eaten
             "Amount": amount_to_eat          # How much is being eaten
@@ -70,8 +71,9 @@ def try_create_eat_at_home_activity(
     if is_at_home:
         log.info(f"Citizen {citizen_username} is at home. Attempting to create 'eat_at_home' activity at {home_building_custom_id} eating {amount_to_eat} of {food_resource_type}.")
         try:
-            now = datetime.datetime.now(pytz.UTC)
-            end_time = now + datetime.timedelta(minutes=EAT_ACTIVITY_DURATION_MINUTES)
+            VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
+            now_venice = datetime.datetime.now(VENICE_TIMEZONE)
+            end_time_venice = now_venice + datetime.timedelta(minutes=EAT_ACTIVITY_DURATION_MINUTES)
             
             activity_payload = {
                 "ActivityId": f"eat_home_{citizen_custom_id}_{int(time.time())}",
@@ -79,9 +81,9 @@ def try_create_eat_at_home_activity(
                 "Citizen": citizen_username,
                 "FromBuilding": home_building_custom_id, # Use custom BuildingId
                 "ToBuilding": home_building_custom_id,   # Use custom BuildingId
-                "CreatedAt": now.isoformat(),
-                "StartDate": now.isoformat(),
-                "EndDate": end_time.isoformat(),
+                "CreatedAt": now_venice.isoformat(),
+                "StartDate": now_venice.isoformat(),
+                "EndDate": end_time_venice.isoformat(),
                 "Notes": f"🍲 Eating {amount_to_eat:.1f} {food_resource_type} at home.",
                 "ResourceId": food_resource_type,
                 "Amount": amount_to_eat
@@ -124,8 +126,9 @@ def try_create_eat_at_tavern_activity(
     # The actual cost/food type might be determined by the processor or be generic
     log.info(f"Attempting to create 'eat_at_tavern' for {citizen_username} at tavern {tavern_building_custom_id}")
     try:
-        now = datetime.datetime.now(pytz.UTC)
-        end_time = now + datetime.timedelta(minutes=EAT_ACTIVITY_DURATION_MINUTES) # Eating duration
+        VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
+        now_venice = datetime.datetime.now(VENICE_TIMEZONE)
+        end_time_venice = now_venice + datetime.timedelta(minutes=EAT_ACTIVITY_DURATION_MINUTES) # Eating duration
         
         activity_payload = {
             "ActivityId": f"eat_tav_{citizen_custom_id}_{int(time.time())}",
@@ -133,9 +136,9 @@ def try_create_eat_at_tavern_activity(
             "Citizen": citizen_username,
             "FromBuilding": tavern_building_custom_id, # Use custom BuildingId
             "ToBuilding": tavern_building_custom_id,   # Use custom BuildingId
-            "CreatedAt": now.isoformat(),
-            "StartDate": now.isoformat(),
-            "EndDate": end_time.isoformat(),
+            "CreatedAt": now_venice.isoformat(),
+            "StartDate": now_venice.isoformat(),
+            "EndDate": end_time_venice.isoformat(),
             "Notes": f"🍲 Eating a meal at the tavern."
             # Specifics like cost or food type consumed can be handled by the processor
         }

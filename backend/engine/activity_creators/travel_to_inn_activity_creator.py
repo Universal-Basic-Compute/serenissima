@@ -22,14 +22,15 @@ def try_create(
     log.info(f"Attempting to create travel_to_inn activity for citizen {citizen_username} (CustomID: {citizen_custom_id}) to inn {inn_custom_id}")
     
     try:
-        now = datetime.datetime.now(pytz.UTC)
+        VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
+        now_venice = datetime.datetime.now(VENICE_TIMEZONE)
         
-        start_date = path_data.get('timing', {}).get('startDate', now.isoformat())
+        start_date = path_data.get('timing', {}).get('startDate', now_venice.isoformat())
         end_date = path_data.get('timing', {}).get('endDate')
         
         if not end_date:
-            end_time = now + datetime.timedelta(hours=1) # Default 1 hour travel
-            end_date = end_time.isoformat()
+            end_time_calc = now_venice + datetime.timedelta(hours=1) # Default 1 hour travel
+            end_date = end_time_calc.isoformat()
         
         path_json = json.dumps(path_data.get('path', []))
         
@@ -40,9 +41,9 @@ def try_create(
             "Type": "goto_inn",
             "Citizen": citizen_username,
             "ToBuilding": inn_custom_id, # Use custom BuildingId
-            "CreatedAt": now.isoformat(),
-            "StartDate": start_date,
-            "EndDate": end_date,
+            "CreatedAt": now_venice.isoformat(),
+            "StartDate": start_date, # Expected to be Venice time ISO string
+            "EndDate": end_date,     # Expected to be Venice time ISO string
             "Path": path_json,
             "Transporter": transporter, # Add Transporter field
             "Notes": "🏨 **Going to an inn** for the night"

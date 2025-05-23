@@ -27,8 +27,9 @@ def try_create(
         outputs = recipe.get('outputs', {})
         craft_minutes = recipe.get('craftMinutes', 60)
         
-        now = datetime.datetime.now(pytz.UTC)
-        end_time = now + datetime.timedelta(minutes=craft_minutes)
+        VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
+        now_venice = datetime.datetime.now(VENICE_TIMEZONE)
+        end_time_venice = now_venice + datetime.timedelta(minutes=craft_minutes)
         
         input_desc = ", ".join([f"**{amount:,.0f}** **{resource}**" for resource, amount in inputs.items()])
         output_desc = ", ".join([f"**{amount:,.0f}** **{resource}**" for resource, amount in outputs.items()])
@@ -41,9 +42,9 @@ def try_create(
             "Citizen": citizen_username,
             "FromBuilding": building_custom_id, # Use custom BuildingId
             "ToBuilding": building_custom_id,   # Same building for production
-            "CreatedAt": now.isoformat(),
-            "StartDate": now.isoformat(),
-            "EndDate": end_time.isoformat(),
+            "CreatedAt": now_venice.isoformat(),
+            "StartDate": now_venice.isoformat(),
+            "EndDate": end_time_venice.isoformat(),
             "Notes": f"⚒️ Producing {output_desc} from {input_desc}",
             "RecipeInputs": json.dumps(inputs),
             "RecipeOutputs": json.dumps(outputs),

@@ -30,21 +30,21 @@ def try_create(
     log.info(f"Attempting to create stay activity for citizen {citizen_username} (CustomID: {citizen_custom_id}) at {stay_location_type} {target_building_custom_id}")
     
     try:
-        now = datetime.datetime.now(pytz.UTC)
+        VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
+        now_venice = datetime.datetime.now(VENICE_TIMEZONE)
 
-        if not end_time_utc_iso:
+        if not end_time_utc_iso: # end_time_utc_iso is expected to be a Venice time ISO string
             # Fallback if not provided, though it should be.
             # Calculate end time (next morning at 6 AM Venice time)
-            venice_tz = pytz.timezone('Europe/Rome')
-            venice_now = now.astimezone(venice_tz)
+            venice_now_for_calc = now_venice # Use now_venice for calculation
             NIGHT_END_HOUR = 6 # Assuming 6 AM
-            if venice_now.hour < NIGHT_END_HOUR:
-                end_time_venice = venice_now.replace(hour=NIGHT_END_HOUR, minute=0, second=0, microsecond=0)
+            if venice_now_for_calc.hour < NIGHT_END_HOUR:
+                end_time_venice_calc = venice_now_for_calc.replace(hour=NIGHT_END_HOUR, minute=0, second=0, microsecond=0)
             else:
-                tomorrow_venice = venice_now + datetime.timedelta(days=1)
-                end_time_venice = tomorrow_venice.replace(hour=NIGHT_END_HOUR, minute=0, second=0, microsecond=0)
-            end_time_utc_iso = end_time_venice.astimezone(pytz.UTC).isoformat()
-            log.warning(f"end_time_utc_iso was not provided, calculated fallback: {end_time_utc_iso}")
+                tomorrow_venice_calc = venice_now_for_calc + datetime.timedelta(days=1)
+                end_time_venice_calc = tomorrow_venice_calc.replace(hour=NIGHT_END_HOUR, minute=0, second=0, microsecond=0)
+            end_time_utc_iso = end_time_venice_calc.isoformat() # This is now a Venice time ISO string
+            log.warning(f"end_time_utc_iso (Venice time) was not provided, calculated fallback: {end_time_utc_iso}")
 
         note_message = f"🌙 **Resting** at {stay_location_type} for the night"
         activity_id_prefix = "rest" if stay_location_type == "home" else f"rest_at_{stay_location_type}"
@@ -55,9 +55,9 @@ def try_create(
             "Citizen": citizen_username,
             "FromBuilding": target_building_custom_id, # Use custom BuildingId
             "ToBuilding": target_building_custom_id,   # Use custom BuildingId
-            "CreatedAt": now.isoformat(),
-            "StartDate": now.isoformat(),
-            "EndDate": end_time_utc_iso,
+            "CreatedAt": now_venice.isoformat(),
+            "StartDate": now_venice.isoformat(),
+            "EndDate": end_time_utc_iso, # Expected to be Venice time ISO string
             "Notes": note_message
         }
         activity = tables['activities'].create(activity_payload)

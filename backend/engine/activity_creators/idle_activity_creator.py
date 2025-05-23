@@ -25,13 +25,14 @@ def try_create(
     log.info(f"Attempting to create idle activity for citizen {citizen_username} (CustomID: {citizen_custom_id})")
     
     try:
-        now = datetime.datetime.now(pytz.UTC)
+        VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
+        now_venice = datetime.datetime.now(VENICE_TIMEZONE)
 
-        if not end_date_iso:
+        if not end_date_iso: # end_date_iso is expected to be a Venice time ISO string
             IDLE_ACTIVITY_DURATION_HOURS = 1 # Fallback
-            end_time = now + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)
-            end_date_iso = end_time.isoformat()
-            log.warning(f"end_date_iso for idle activity not provided, calculated fallback: {end_date_iso}")
+            end_time_calc = now_venice + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)
+            end_date_iso = end_time_calc.isoformat()
+            log.warning(f"end_date_iso for idle activity (Venice time) not provided, calculated fallback: {end_date_iso}")
 
         default_note = "⏳ **Idle activity**"
         if reason_message:
@@ -43,9 +44,9 @@ def try_create(
             "ActivityId": f"idle_{citizen_custom_id}_{int(time.time())}",
             "Type": "idle",
             "Citizen": citizen_username,
-            "CreatedAt": now.isoformat(),
-            "StartDate": now.isoformat(),
-            "EndDate": end_date_iso,
+            "CreatedAt": now_venice.isoformat(),
+            "StartDate": now_venice.isoformat(),
+            "EndDate": end_date_iso, # Expected to be Venice time ISO string
             "Notes": notes
         }
         activity = tables['activities'].create(activity_payload)
