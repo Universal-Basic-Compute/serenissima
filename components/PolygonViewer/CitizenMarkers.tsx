@@ -104,11 +104,10 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
       // Update state with the fetched paths
       setActivityPaths(pathsMap);
       
-      // Set all paths to be visible
-      const allPaths = Object.values(pathsMap).flat();
-      setVisiblePaths(allPaths);
-      
-      console.log(`Loaded ${allPaths.length} activity paths for ${Object.keys(pathsMap).length} citizens`);
+      // The concept of "all visible paths" by default has been removed.
+      // Paths are now shown on hover or selection.
+      const allPathsCount = Object.values(pathsMap).flat().length;
+      console.log(`Loaded ${allPathsCount} activity paths for ${Object.keys(pathsMap).length} citizens`);
     } catch (error) {
       console.error('Error fetching activity paths:', error);
     } finally {
