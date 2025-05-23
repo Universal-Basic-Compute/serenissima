@@ -702,9 +702,8 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                   points={pointsString}
                   fill="none"
                   stroke={getActivityPathColor(activity)}
-                  strokeWidth="2.5"
+                  strokeWidth="1.5"
                   strokeOpacity="0.6"
-                  strokeDasharray="4,4"
                 />
                 {/* Add small circles at path endpoints only to reduce visual clutter */}
                 {pathToRender.length > 0 && [
@@ -719,7 +718,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                       key={`endpoint-${index}`}
                       cx={screenPos.x}
                       cy={screenPos.y}
-                      r="3"
+                      r="1.5"
                       fill={getActivityPathColor(activity)}
                       opacity="0.7"
                     />
@@ -749,9 +748,8 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                   points={pointsString}
                   fill="none"
                   stroke={getActivityPathColor(activity)}
-                  strokeWidth="3.5"
+                  strokeWidth="2.0"
                   strokeOpacity="0.7"
-                  strokeDasharray="6,4"
                 />
                 {/* Add small circles at path points */}
                 {activity.path.map((point, index) => {
@@ -763,7 +761,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                       key={`point-${index}`}
                       cx={screenPos.x}
                       cy={screenPos.y}
-                      r="3.5"
+                      r="2"
                       fill={getActivityPathColor(activity)}
                       opacity="0.8"
                     />
@@ -793,7 +791,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                   points={pointsString}
                   fill="none"
                   stroke={getActivityPathColor(activity)}
-                  strokeWidth="4.5"
+                  strokeWidth="2.5"
                   strokeOpacity="0.9"
                 />
                 {/* Add small circles at path points */}
@@ -806,7 +804,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                       key={`point-${index}`}
                       cx={screenPos.x}
                       cy={screenPos.y}
-                      r="4.5"
+                      r="2.5"
                       fill={getActivityPathColor(activity)}
                       opacity="1"
                     />
