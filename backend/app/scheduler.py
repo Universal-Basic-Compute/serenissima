@@ -74,6 +74,36 @@ def run_scheduled_tasks():
                 print(f"Exception running {task_name_process_decay}: Script not found at {script_full_path_process_decay}")
             except Exception as e:
                 print(f"Exception running {task_name_process_decay}: {str(e)}")
+
+        # Task to run every 5 minutes, offset by 2 minutes (e.g., at :02, :07, :12, ...)
+        if (current_minute - 2) % 5 == 0:
+            script_path_process_activities = "engine/processActivities.py"
+            task_name_process_activities = "Process concluded activities"
+            script_full_path_process_activities = os.path.join(backend_dir_path, script_path_process_activities)
+
+            print(f"Scheduler: Time for 5-minute task (processActivities) at {now.isoformat()}. Running: {task_name_process_activities} from {script_full_path_process_activities}")
+            
+            try:
+                result_process_activities = subprocess.run(
+                    ["python", script_full_path_process_activities],
+                    capture_output=True,
+                    text=True,
+                    check=False
+                )
+                if result_process_activities.returncode == 0:
+                    print(f"Successfully ran {task_name_process_activities}")
+                    if result_process_activities.stdout:
+                         print(f"Output (first 200 chars): {result_process_activities.stdout[:200].strip()}...")
+                else:
+                    print(f"Error running {task_name_process_activities}. Return code: {result_process_activities.returncode}")
+                    if result_process_activities.stderr:
+                        print(f"Error output: {result_process_activities.stderr.strip()}")
+                    elif result_process_activities.stdout:
+                        print(f"Output (possible error): {result_process_activities.stdout.strip()}")
+            except FileNotFoundError:
+                print(f"Exception running {task_name_process_activities}: Script not found at {script_full_path_process_activities}")
+            except Exception as e:
+                print(f"Exception running {task_name_process_activities}: {str(e)}")
         
         # Hourly tasks (check only at the top of the hour)
         if current_minute == 0:
