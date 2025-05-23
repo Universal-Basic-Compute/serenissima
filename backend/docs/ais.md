@@ -353,6 +353,25 @@ The AI public sell management system:
 
 AI citizens are created and managed through the Airtable database:
 
+### Business Delegation
+**Implementation**: `backend/ais/delegateBusinesses.py`  
+**Schedule**: (To be determined, e.g., Daily at a specific time)
+
+To prevent AI citizens from becoming overly dominant or complex to manage by accumulating too many businesses, this script redistributes businesses if an AI runs more than a set limit (e.g., 10).
+
+#### Process:
+1.  The script identifies AI citizens running more than the `BUSINESS_LIMIT_PER_AI` (e.g., 10) businesses (where `Category` is "business" and the AI is the `RunBy`).
+2.  For each "overburdened" AI, businesses beyond the limit are identified for delegation. These are sorted by their `Wages` field in ascending order (lowest wage businesses are delegated first).
+3.  The script identifies all other AI citizens as potential "delegatees", sorting them by their `Ducats` balance in descending order (wealthier AIs are prioritized to take over businesses).
+4.  Businesses are delegated one by one. The wealthiest available delegatee AI who is currently running fewer than `BUSINESS_LIMIT_PER_AI` businesses takes over the lowest-wage business from an overburdened AI.
+5.  The `RunBy` field of the delegated business is updated in the `BUILDINGS` table.
+6.  Notifications are sent to the original AI owner, the new AI owner, and an admin summary is created for `ConsiglioDeiDieci`.
+
+#### Economic Impact:
+-   Prevents monopolies and encourages a more distributed management of businesses among AI citizens.
+-   Ensures that AI business management remains somewhat balanced.
+-   Simulates a form of economic regulation or natural churn in business ownership.
+
 ### Price Setting for Produced Goods (Uses Kinos Engine API)
 
 **Implementation**: `backend/ais/setprices.py`  
