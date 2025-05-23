@@ -157,6 +157,18 @@ const BuildingCreationPanel: React.FC<BuildingCreationPanelProps> = ({ selectedP
       target.src = '/images/buildings/contract_stall.jpg';
     }
   };
+
+  const getResourceImagePath = (resourceName: string): string => {
+    if (!resourceName) return '/images/resources/default.png';
+    const formattedName = resourceName.toLowerCase().replace(/\s+/g, '_');
+    return `/images/resources/${formattedName}.png`;
+  };
+
+  const handleResourceImageError = (event: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const target = event.currentTarget;
+    // Basic fallback, can be expanded if multiple resource image types (jpg, etc.)
+    target.src = '/images/resources/default.png'; 
+  };
   
   const handleBuildClick = (building: BuildingType) => {
     const cost = building.constructionCosts?.ducats || 0;
@@ -167,8 +179,10 @@ const BuildingCreationPanel: React.FC<BuildingCreationPanelProps> = ({ selectedP
   // Expose methods for the detailed view renderer
   // This is a workaround. Ideally, renderDetailedBuildingView would be a child component.
   (BuildingCreationPanel as any).handleBackToGridClick = () => setDetailedBuildingType(null);
-  (BuildingCreationPanel as any).getBuildingImagePath = getBuildingImagePath;
-  (BuildingCreationPanel as any).handleImageError = handleImageError;
+  (BuildingCreationPanel as any).getBuildingImagePath = getBuildingImagePath; // For building images
+  (BuildingCreationPanel as any).handleImageError = handleImageError; // For building images
+  (BuildingCreationPanel as any).getResourceImagePath = getResourceImagePath; // For resource images
+  (BuildingCreationPanel as any).handleResourceImageError = handleResourceImageError; // For resource images
   (BuildingCreationPanel as any).handleBuildClick = handleBuildClick;
 
 
@@ -267,7 +281,7 @@ const BuildingCreationPanel: React.FC<BuildingCreationPanelProps> = ({ selectedP
               ) : null}
             </>
           ) : (
-            renderDetailedBuildingView(detailedBuildingType)
+            renderDetailedBuildingView(detailedBuildingType, getResourceImagePath, handleResourceImageError)
           )}
         </div>
       </div>
@@ -276,106 +290,155 @@ const BuildingCreationPanel: React.FC<BuildingCreationPanelProps> = ({ selectedP
 };
 
 // Helper component/function to render the detailed view
-const renderDetailedBuildingView = (building: BuildingType) => {
+const renderDetailedBuildingView = (
+  building: BuildingType,
+  getResourceImagePath: (resourceName: string) => string,
+  handleResourceImageError: (event: React.SyntheticEvent<HTMLImageElement, Event>) => void
+) => {
   const { 
     type, name, category, subcategory, buildTier, pointType, 
     constructionCosts, maintenanceCost, shortDescription, 
     productionInformation, canImport 
   } = building;
 
+  const renderResourceList = (items: string[] | undefined, title: string) => {
+    if (!items || items.length === 0) return null;
+    return (
+      <div>
+        <strong className="text-amber-700 block mb-1">{title}:</strong>
+        <div className="flex flex-wrap gap-2">
+          {items.map(item => (
+            <div key={item} className="flex items-center bg-amber-200/50 px-2 py-1 rounded-md text-xs">
+              <img 
+                src={getResourceImagePath(item)} 
+                alt={item} 
+                className="w-4 h-4 mr-1.5 object-contain" 
+                onError={handleResourceImageError} 
+              />
+              <span className="capitalize">{item.replace(/_/g, ' ')}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="bg-amber-100 p-4 rounded-lg shadow-inner">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-2xl font-serif text-amber-800">{name}</h3>
+    <div className="bg-amber-50 p-6 rounded-lg shadow-inner text-sm">
+      <div className="flex justify-between items-center mb-6 pb-3 border-b border-amber-300">
+        <h3 className="text-3xl font-serif text-amber-800">{name}</h3>
         <button 
-          onClick={() => (BuildingCreationPanel as any).handleBackToGridClick()} // Accessing via panel instance for now
-          className="px-4 py-2 bg-amber-500 text-white rounded hover:bg-amber-600"
+          onClick={() => (BuildingCreationPanel as any).handleBackToGridClick()}
+          className="px-4 py-2 bg-amber-500 text-white rounded hover:bg-amber-600 transition-colors text-sm"
         >
           Back to List
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Left Column: Basic Info & Costs */}
-        <div className="space-y-3">
-          <div>
-            <img
-              src={(BuildingCreationPanel as any).getBuildingImagePath(type)} // Accessing via panel instance
-              alt={name}
-              onError={(e) => (BuildingCreationPanel as any).handleImageError(e)} // Accessing via panel instance
-              className="w-full h-48 object-cover rounded-md border border-amber-200 mb-2"
-            />
-          </div>
-          <p><strong className="text-amber-700">Type:</strong> {type}</p>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Left Column: Image & Basic Info */}
+        <div className="md:col-span-1 space-y-3">
+          <img
+            src={(BuildingCreationPanel as any).getBuildingImagePath(type)}
+            alt={name}
+            onError={(e) => (BuildingCreationPanel as any).handleImageError(e)}
+            className="w-full h-auto aspect-video object-cover rounded-lg border-2 border-amber-300 shadow-md mb-3"
+          />
+          <p><strong className="text-amber-700">Type:</strong> <span className="font-mono text-xs bg-amber-200/60 px-1 py-0.5 rounded">{type}</span></p>
           <p><strong className="text-amber-700">Category:</strong> {category} - {subcategory}</p>
           <p><strong className="text-amber-700">Tier:</strong> {TIER_NAMES[buildTier] || `Tier ${buildTier}`}</p>
           <p><strong className="text-amber-700">Point Type:</strong> {pointType || 'N/A'}</p>
-          <p><strong className="text-amber-700">Description:</strong> {shortDescription || 'N/A'}</p>
-          
+        </div>
+
+        {/* Middle Column: Costs & Description */}
+        <div className="md:col-span-1 space-y-4">
           <div>
-            <h4 className="text-lg font-semibold text-amber-700 mt-2 mb-1">Construction Costs:</h4>
-            <ul className="list-disc list-inside text-sm">
-              <li>⚜️ {formatNumberWithSpaces(constructionCosts?.ducats)} Ducats</li>
+            <h4 className="text-lg font-semibold font-serif text-amber-700 mb-2">Description:</h4>
+            <p className="text-amber-800 leading-relaxed">{shortDescription || 'No description available.'}</p>
+          </div>
+          <div>
+            <h4 className="text-lg font-semibold font-serif text-amber-700 mt-3 mb-2">Construction Costs:</h4>
+            <div className="space-y-1.5">
+              <div className="flex items-center space-x-2">
+                <span className="text-xl">⚜️</span>
+                <span className="text-amber-800">{formatNumberWithSpaces(constructionCosts?.ducats)} Ducats</span>
+              </div>
               {constructionCosts && Object.entries(constructionCosts).map(([resource, amount]) => {
                 if (resource !== 'ducats' && amount) {
-                  return <li key={resource} className="capitalize">{resource.replace(/_/g, ' ')}: {amount}</li>;
+                  return (
+                    <div key={resource} className="flex items-center space-x-2">
+                      <img 
+                        src={getResourceImagePath(resource)} 
+                        alt={resource} 
+                        className="w-5 h-5 object-contain" 
+                        onError={handleResourceImageError} 
+                      />
+                      <span className="capitalize text-amber-800">{resource.replace(/_/g, ' ')}: {amount}</span>
+                    </div>
+                  );
                 }
                 return null;
               })}
-            </ul>
+            </div>
           </div>
-          <p><strong className="text-amber-700">Maintenance Cost:</strong> {maintenanceCost ? `${formatNumberWithSpaces(maintenanceCost)} Ducats/cycle` : 'N/A'}</p>
+          <p className="mt-2"><strong className="text-amber-700">Maintenance Cost:</strong> {maintenanceCost ? `${formatNumberWithSpaces(maintenanceCost)} Ducats/cycle` : 'N/A'}</p>
           <p><strong className="text-amber-700">Can Import Resources:</strong> {canImport ? 'Yes' : 'No'}</p>
         </div>
-
+        
         {/* Right Column: Production Info */}
-        <div className="space-y-3">
+        <div className="md:col-span-1 space-y-4">
           {productionInformation && (
-            <>
-              <h4 className="text-lg font-semibold text-amber-700">Production Information:</h4>
-              {productionInformation.storageCapacity && (
-                <p><strong className="text-amber-700">Storage Capacity:</strong> {productionInformation.storageCapacity} units</p>
-              )}
-              
-              {productionInformation.stores && productionInformation.stores.length > 0 && (
-                <div>
-                  <strong className="text-amber-700">Stores:</strong>
-                  <ul className="list-disc list-inside text-sm ml-4">
-                    {productionInformation.stores.map(item => <li key={item} className="capitalize">{item.replace(/_/g, ' ')}</li>)}
-                  </ul>
-                </div>
-              )}
+            <div>
+              <h4 className="text-lg font-semibold font-serif text-amber-700 mb-2">Production Information:</h4>
+              <div className="space-y-3">
+                {productionInformation.storageCapacity !== undefined && (
+                  <p><strong className="text-amber-700">Storage Capacity:</strong> {productionInformation.storageCapacity} units</p>
+                )}
+                
+                {renderResourceList(productionInformation.stores, "Stores")}
+                {renderResourceList(productionInformation.sells, "Sells")}
 
-              {productionInformation.sells && productionInformation.sells.length > 0 && (
-                <div>
-                  <strong className="text-amber-700">Sells:</strong>
-                  <ul className="list-disc list-inside text-sm ml-4">
-                    {productionInformation.sells.map(item => <li key={item} className="capitalize">{item.replace(/_/g, ' ')}</li>)}
-                  </ul>
-                </div>
-              )}
-
-              {productionInformation.Arti && productionInformation.Arti.length > 0 && (
-                <div>
-                  <h5 className="text-md font-semibold text-amber-700 mt-2 mb-1">Recipes (Arti):</h5>
-                  <div className="space-y-2">
-                    {productionInformation.Arti.map((recipe, index) => (
-                      <div key={index} className="p-2 border border-amber-200 rounded bg-amber-50 text-sm">
-                        <p className="font-medium text-amber-800">Recipe {index + 1}:</p>
-                        <p><strong className="text-amber-600">Inputs:</strong> {Object.entries(recipe.inputs).map(([item, qty]) => `${qty} ${item.replace(/_/g, ' ')}`).join(', ')}</p>
-                        <p><strong className="text-amber-600">Outputs:</strong> {Object.entries(recipe.outputs).map(([item, qty]) => `${qty} ${item.replace(/_/g, ' ')}`).join(', ')}</p>
-                        <p><strong className="text-amber-600">Craft Time:</strong> {recipe.craftMinutes} minutes</p>
-                      </div>
-                    ))}
+                {productionInformation.Arti && productionInformation.Arti.length > 0 && (
+                  <div>
+                    <h5 className="text-md font-semibold text-amber-700 mt-3 mb-2">Recipes (Arti):</h5>
+                    <div className="space-y-3">
+                      {productionInformation.Arti.map((recipe, index) => (
+                        <div key={index} className="p-3 border border-amber-200 rounded-lg bg-amber-50/70 shadow-sm">
+                          <p className="font-medium text-amber-800 mb-1.5">Recipe {index + 1} (Craft Time: {recipe.craftMinutes} min)</p>
+                          <div>
+                            <strong className="text-amber-600 text-xs block mb-0.5">Inputs:</strong>
+                            <div className="flex flex-wrap gap-1.5">
+                              {Object.entries(recipe.inputs).map(([item, qty]) => (
+                                <div key={item} className="flex items-center bg-red-100/70 px-1.5 py-0.5 rounded text-xs">
+                                  <img src={getResourceImagePath(item)} alt={item} className="w-3.5 h-3.5 mr-1 object-contain" onError={handleResourceImageError} />
+                                  <span>{qty} {item.replace(/_/g, ' ')}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="mt-1.5">
+                            <strong className="text-amber-600 text-xs block mb-0.5">Outputs:</strong>
+                            <div className="flex flex-wrap gap-1.5">
+                              {Object.entries(recipe.outputs).map(([item, qty]) => (
+                                <div key={item} className="flex items-center bg-green-100/70 px-1.5 py-0.5 rounded text-xs">
+                                  <img src={getResourceImagePath(item)} alt={item} className="w-3.5 h-3.5 mr-1 object-contain" onError={handleResourceImageError} />
+                                  <span>{qty} {item.replace(/_/g, ' ')}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
-            </>
+                )}
+              </div>
+            </div>
           )}
         </div>
       </div>
       
-      <div className="mt-6 text-center">
+      <div className="mt-8 pt-4 border-t border-amber-300 text-center">
         <button
           onClick={() => (BuildingCreationPanel as any).handleBuildClick(building)} // Accessing via panel instance
           className="px-6 py-2 bg-green-600 text-white text-lg rounded hover:bg-green-700 transition-colors"
@@ -394,8 +457,8 @@ const renderDetailedBuildingView = (building: BuildingType) => {
 (BuildingCreationPanel as any).handleBackToGridClick = () => {
   // This will be set correctly inside the component's scope
 };
-(BuildingCreationPanel as any).getBuildingImagePath = (type: string) => `/images/buildings/${type.toLowerCase().replace(/[_-]/g, '_')}.png`;
-(BuildingCreationPanel as any).handleImageError = (event: React.SyntheticEvent<HTMLImageElement, Event>) => {
+(BuildingCreationPanel as any).getBuildingImagePath = (type: string) => `/images/buildings/${type.toLowerCase().replace(/[_-]/g, '_')}.png`; // Kept for building image
+(BuildingCreationPanel as any).handleImageError = (event: React.SyntheticEvent<HTMLImageElement, Event>) => { // Kept for building image
   const target = event.currentTarget;
   const currentSrc = target.src;
   const typeFormatted = target.alt.toLowerCase().replace(/[_-]/g, '_');
@@ -403,6 +466,10 @@ const renderDetailedBuildingView = (building: BuildingType) => {
   else if (currentSrc.endsWith('.jpg')) target.src = '/images/buildings/contract_stall.jpg';
   else target.src = '/images/buildings/contract_stall.jpg';
 };
+// getResourceImagePath and handleResourceImageError are now passed as arguments to renderDetailedBuildingView
+// So they don't need to be attached to (BuildingCreationPanel as any) for that specific use case.
+// However, if they were used elsewhere in BuildingCreationPanel directly, they would still be accessible.
+
 (BuildingCreationPanel as any).handleBuildClick = (building: BuildingType) => {
   // This will be set correctly inside the component's scope
 };
