@@ -89,6 +89,22 @@ except ImportError:
         raise NotImplementedError("get_building_type_definitions_from_api is not available")
     def get_resource_definitions_from_api():
         raise NotImplementedError("get_resource_definitions_from_api is not available")
+    
+    # Define placeholders for processor functions if imports fail
+    def process_deliver_resource_batch_fn(tables, activity_record, building_type_defs, resource_defs):
+        raise NotImplementedError("process_deliver_resource_batch_fn is not available due to import error")
+    def process_goto_home_fn(tables, activity_record, building_type_defs, resource_defs):
+        raise NotImplementedError("process_goto_home_fn is not available due to import error")
+    def process_goto_work_fn(tables, activity_record, building_type_defs, resource_defs):
+        raise NotImplementedError("process_goto_work_fn is not available due to import error")
+    def process_production_fn(tables, activity_record, building_type_defs, resource_defs):
+        raise NotImplementedError("process_production_fn is not available due to import error")
+    def process_fetch_resource_fn(tables, activity_record, building_type_defs, resource_defs):
+        raise NotImplementedError("process_fetch_resource_fn is not available due to import error")
+    def process_eat_fn(tables, activity_record, building_type_defs, resource_defs):
+        raise NotImplementedError("process_eat_fn is not available due to import error")
+    def process_fetch_from_galley_fn(tables, activity_record, building_type_defs, resource_defs):
+        raise NotImplementedError("process_fetch_from_galley_fn is not available due to import error")
 
 # Load environment variables
 load_dotenv()
