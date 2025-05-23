@@ -394,14 +394,43 @@ def main(dry_run: bool = False):
                     traveler_citizen_record = get_citizen_record(tables, citizen_username_for_fee)
                     
                     fee_recipient_username = "ConsiglioDeiDieci" # Default recipient
+                    determined_recipient_from_transporter_field = False
+
                     if transporter_username and transporter_username != "ConsiglioDeiDieci":
-                        # Check if this transporter is a valid citizen
                         transporter_citizen_record_check = get_citizen_record(tables, transporter_username)
                         if transporter_citizen_record_check:
                             fee_recipient_username = transporter_username
-                            log.info(f"Gondola fee for activity {activity_guid} will go to transporter: {transporter_username}")
-                        else:
-                            log.warning(f"Transporter {transporter_username} specified in activity {activity_guid} not found. Fee defaults to ConsiglioDeiDieci.")
+                            determined_recipient_from_transporter_field = True
+                            log.info(f"Gondola fee for activity {activity_guid} initially assigned to Transporter field value (citizen): {transporter_username}")
+                        # else: Transporter field is not a known citizen, will try path or default to Consiglio
+
+                    if not determined_recipient_from_transporter_field:
+                        # Try to find recipient from path if Transporter field didn't yield one (or was Consiglio/empty/invalid)
+                        log.info(f"Transporter field for activity {activity_guid} did not yield a specific recipient (value: {transporter_username}). Checking path for public_dock operator.")
+                        try:
+                            path_points = json.loads(activity_path_json) if activity_path_json else []
+                            for point in path_points:
+                                if point.get("type") == "dock" and point.get("nodeId"):
+                                    dock_building_id = point.get("nodeId")
+                                    dock_record = get_building_record(tables, dock_building_id) # Fetches by BuildingId (custom ID)
+                                    if dock_record and dock_record['fields'].get('Type') == 'public_dock':
+                                        run_by_user = dock_record['fields'].get('RunBy')
+                                        if run_by_user and run_by_user != "ConsiglioDeiDieci": # Ensure RunBy is not Consiglio itself
+                                            run_by_citizen_check = get_citizen_record(tables, run_by_user)
+                                            if run_by_citizen_check:
+                                                fee_recipient_username = run_by_user
+                                                log.info(f"Gondola fee for activity {activity_guid} reassigned to RunBy ({run_by_user}) of public_dock {dock_building_id} found in path.")
+                                                break # Found a valid recipient from path
+                                            else:
+                                                log.warning(f"RunBy user {run_by_user} for public_dock {dock_building_id} (from path) not found. Checking next dock in path.")
+                                        # else: Dock has no RunBy or RunBy is Consiglio, check next dock
+                                    # else: Not a public_dock, or dock not found, check next point
+                        except json.JSONDecodeError:
+                            log.error(f"Failed to parse activity path JSON for activity {activity_guid} while checking for dock operator: {activity_path_json}")
+                        
+                        if fee_recipient_username == "ConsiglioDeiDieci" and transporter_username and transporter_username != "ConsiglioDeiDieci":
+                            # This case means Transporter field had a value, it wasn't a valid citizen, and no path dock operator was found.
+                            log.warning(f"Transporter {transporter_username} in activity {activity_guid} was not a valid citizen, and no public_dock operator found in path. Fee defaults to ConsiglioDeiDieci.")
                     
                     fee_recipient_record = get_citizen_record(tables, fee_recipient_username)
 
