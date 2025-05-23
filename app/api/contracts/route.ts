@@ -39,6 +39,25 @@ export async function GET(request: Request) {
     
     const airtable = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
     const contractsTable = airtable(CONTRACTS_TABLE);
+
+    // Fetch all resource type definitions for enrichment
+    let resourceTypeDefinitions: Map<string, any> = new Map();
+    try {
+      const resourceTypesResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/resource-types`);
+      if (resourceTypesResponse.ok) {
+        const resourceTypesData = await resourceTypesResponse.json();
+        if (resourceTypesData.success && resourceTypesData.resourceTypes) {
+          (resourceTypesData.resourceTypes as any[]).forEach(def => {
+            resourceTypeDefinitions.set(def.id, def);
+          });
+          console.log(`Successfully fetched ${resourceTypeDefinitions.size} resource type definitions for contract enrichment.`);
+        }
+      } else {
+        console.warn(`Failed to fetch resource type definitions for contracts: ${resourceTypesResponse.status}`);
+      }
+    } catch (e) {
+      console.error('Error fetching resource type definitions for contracts:', e);
+    }
     
     // Build the filter formula based on parameters
     let formula = '';
@@ -81,19 +100,29 @@ export async function GET(request: Request) {
     // Process records to include location data
     const contractsWithLocation = await Promise.all(
       (records as any[]).map(async (record) => {
-        const resourceType = record.get('ResourceType') || 'unknown';
-        
+        const resourceTypeId = record.get('ResourceType') || 'unknown';
+        const resourceDef = resourceTypeDefinitions.get(resourceTypeId);
+
         // Format the resource type for the image URL (lowercase, replace spaces with underscores)
-        const formattedResourceType = resourceType.toLowerCase().replace(/\s+/g, '_');
+        const formattedResourceType = resourceTypeId.toLowerCase().replace(/\s+/g, '_');
         
-        const contractData = {
+        const contractData: Record<string, any> = {
           id: record.id,
           contractId: record.get('ContractId'),
           type: record.get('Type'),
           buyer: record.get('Buyer'),
           seller: record.get('Seller'),
-          resourceType: resourceType,
-          imageUrl: `/resources/${formattedResourceType}.png`, // Add the imageUrl field
+          resourceType: resourceTypeId,
+          // Enrich with resource definition data
+          resourceName: resourceDef?.name || resourceTypeId,
+          resourceCategory: resourceDef?.category || 'Unknown',
+          resourceSubcategory: resourceDef?.subcategory || null,
+          resourceTier: resourceDef?.tier ?? null,
+          resourceDescription: resourceDef?.description || '',
+          resourceImportPrice: resourceDef?.importPrice ?? 0,
+          resourceLifetimeHours: resourceDef?.lifetimeHours ?? null,
+          resourceConsumptionHours: resourceDef?.consumptionHours ?? null,
+          imageUrl: resourceDef?.icon ? `/resources/${resourceDef.icon}` : `/resources/${formattedResourceType}.png`,
           buyerBuilding: record.get('BuyerBuilding'),
           sellerBuilding: record.get('SellerBuilding'),
           price: record.get('PricePerResource'),
