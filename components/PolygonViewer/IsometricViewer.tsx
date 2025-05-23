@@ -2911,7 +2911,7 @@ number => {
         
         // Adjusted opacity for water points
         const pointBaseOpacity = activeView === 'transport' ? 0.4 : 0.2;
-        const opacity = isHovered || waterRouteMode ? 0.8 : pointBaseOpacity;
+        const opacity = isHovered || (interactionMode === 'create_water_route') ? 0.8 : pointBaseOpacity; // Use interactionMode
         ctx.fillStyle = isHovered ? 'rgba(0, 200, 255, 0.8)' : `rgba(0, 150, 255, ${opacity})`;
         ctx.fill();
       
@@ -2930,7 +2930,7 @@ number => {
           ctx.stroke();
           
           // Add tooltip for hovered water point in water route mode
-          if (waterRouteMode) {
+          if (interactionMode === 'create_water_route') { // Use interactionMode
             // Draw tooltip background
             const tooltipText = !waterRouteStartPoint ? 
               "Click to start route" : 
@@ -3334,7 +3334,8 @@ number => {
     emptyBuildingPoints, mousePosition, citizensLoaded, citizensByBuilding, 
     incomeDataLoaded, polygonsToRender, getIncomeColor, getCurrentCitizenSecondaryColor,
     fullWaterGraphData, // Replaced waterPoints with fullWaterGraphData
-    waterPointMode, waterRouteMode, waterRoutePath, transportPath, currentHoverState, // Added currentHoverState
+    interactionMode, // Added interactionMode
+    waterRoutePath, transportPath, currentHoverState, // Added currentHoverState
     buildingPositionsCache, buildingColorMode // Added for building rendering
   ]);
   
