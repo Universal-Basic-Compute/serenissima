@@ -926,19 +926,38 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
                     log.error(f"Error checking home food for {citizen_username} in {home_building_id}: {e_home_food}")
             
             if has_food_at_home and food_type_at_home:
-                if is_at_home:
-                    log.info(f"Found {food_type_at_home} at home {home_building_id} and citizen is there.")
-                    if try_create_eat_at_home_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, home_airtable_id, food_type_at_home, 1.0):
-                        return True # Activity created
-                elif citizen_position and home_position: # Not at home, but home has food
-                    log.info(f"Home {home_building_id} has {food_type_at_home}. Citizen {citizen_username} is not at home. Creating goto_home.")
-                    path_data = get_path_between_points(citizen_position, home_position)
-                    if path_data and path_data.get('success'):
-                        if try_create_goto_home_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, home_building_id, path_data): # Pass custom BuildingId
-                             return True # Goto activity created, will eat next cycle
+                # Determine path_data only if not at home
+                path_data_for_eat_sequence = None
+                if not is_at_home:
+                    if citizen_position and home_position:
+                        log.info(f"Home {home_building_id} has {food_type_at_home}. Citizen {citizen_username} is not at home. Calculating path to home to eat.")
+                        path_data_for_eat_sequence = get_path_between_points(citizen_position, home_position)
+                        if not (path_data_for_eat_sequence and path_data_for_eat_sequence.get('success')):
+                            log.warning(f"Path finding to home {home_building_id} failed for {citizen_username} to eat. Path data: {path_data_for_eat_sequence}")
+                            # path_data_for_eat_sequence will be None or invalid, try_create_eat_at_home_activity should handle this
                     else:
-                        log.warning(f"Path finding to home {home_building_id} failed for {citizen_username} to eat.")
-        
+                        log.warning(f"Citizen {citizen_username} not at home, but citizen_position or home_position is missing. Cannot pathfind to home to eat.")
+                
+                # Call the modified try_create_eat_at_home_activity
+                # It will internally decide to create 'goto_home' or 'eat_at_home'
+                activity_created = try_create_eat_at_home_activity(
+                    tables,
+                    citizen_custom_id,
+                    citizen_username,
+                    citizen_airtable_record_id,
+                    home_airtable_id,          # Airtable Record ID for 'eat_at_home'
+                    home_building_id,          # Custom BuildingId for 'goto_home'
+                    food_type_at_home,
+                    1.0,                       # Amount to eat
+                    is_at_home,
+                    path_data_for_eat_sequence # Path data, or None if at home or path failed
+                )
+                if activity_created:
+                    log.info(f"Activity ({activity_created['fields'].get('Type')}) created for {citizen_username} regarding eating at home.")
+                    return True # Activity (either goto_home or eat_at_home) created
+                else:
+                    log.warning(f"Failed to create any activity for {citizen_username} regarding eating at home {home_building_id}.")
+
         # Option 3: Eat at tavern (if citizen has enough ducats)
         citizen_ducats = float(citizen['fields'].get('Ducats', 0))
         TAVERN_MEAL_COST_ESTIMATE = 10 # Estimate, actual cost in processor
