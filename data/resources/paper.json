@@ -6,5 +6,6 @@
   "description": "Processed sheets ready for printing, writing, and document creation.",
   "importPrice": 42,
   "lifetimeHours": 234,
-  "consumptionHours": 10
+  "consumptionHours": 10,
+  "tier": 3
 }

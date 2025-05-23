@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "business",
   "subcategory": "Food Industry",
-  "tier": 2,
   "size": "Small",
   "unlockCondition": "Access to milk supply, Cheesemakers' Guild membership",
   "calculationsAnalysis": "The Dairy processes imported milk into cheese, a valuable and longer-lasting food product. Construction includes specialized equipment for cheese making. Income is steady from cheese sales, with maintenance covering milk spoilage and production costs. Employs skilled cheesemakers.",
@@ -55,5 +54,9 @@
     "Cheese vats",
     "Aging cellar",
     "Sales counter"
-  ]
+  ],
+  "buildTier": 2,
+  "workTier": 2,
+  "consumeTier": 2,
+  "canImport": true
 }

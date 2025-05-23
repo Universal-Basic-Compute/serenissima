@@ -3,7 +3,6 @@
   "pointType": "canal",
   "category": "business",
   "subcategory": "Transportation Facilities",
-  "tier": 2,
   "size": "Medium",
   "unlockCondition": "5,000,000 ducats capital, Water Transportation Guild connection",
   "calculationsAnalysis": "The Gondola Station balances transportation infrastructure with service revenue. The construction cost of 1,750,000 ducats reflects the specialized docking and waiting facilities required, while the income of 17,500 ducats (1% return) represents the fees collected from gondoliers for using the station. The maintenance cost of 20,000 ducats exceeds income, creating a realistic scenario where transportation infrastructure requires subsidy but provides essential mobility services. The employment capacity of 10 represents the dispatchers, maintenance staff, and station managers. The construction time of 5 days (432000000ms) reflects the specialized construction requirements. This building creates a strategic investment in public transportation that enhances city mobility and accessibility, reflecting Venice's historical dependence on organized water transportation services.",
@@ -81,5 +80,8 @@
       "gondola",
       "small_boats"
     ]
-  }
+  },
+  "buildTier": 2,
+  "workTier": 2,
+  "consumeTier": 3
 }

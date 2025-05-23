@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "business",
   "subcategory": "Trade Facilities",
-  "tier": 3,
   "size": "Extra Large",
   "unlockCondition": "25,000,000 ducats total wealth, German merchant connections, Senate approval",
   "canImport": true,
@@ -127,5 +126,8 @@
       "silk_fabric",
       "dyed_textiles"
     ]
-  }
+  },
+  "buildTier": 3,
+  "workTier": 3,
+  "consumeTier": 3
 }

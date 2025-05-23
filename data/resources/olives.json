@@ -7,5 +7,6 @@
   "icon": "/images/resources/olives.png",
   "importPrice": 7,
   "lifetimeHours": 10,
-  "consumptionHours": 4
+  "consumptionHours": 4,
+  "tier": 2
 }

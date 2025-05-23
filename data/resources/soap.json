@@ -28,5 +28,6 @@
   "icon": "/images/resources/soap.png",
   "importPrice": 30,
   "lifetimeHours": 117,
-  "consumptionHours": 10
+  "consumptionHours": 10,
+  "tier": 2
 }

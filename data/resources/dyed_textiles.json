@@ -6,5 +6,6 @@
   "description": "Vibrant colored fabrics ready for tailoring into garments.",
   "importPrice": 54,
   "lifetimeHours": 584,
-  "consumptionHours": 117
+  "consumptionHours": 117,
+  "tier": 3
 }

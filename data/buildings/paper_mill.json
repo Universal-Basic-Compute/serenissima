@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "business",
   "subcategory": "Publishing Industry",
-  "tier": 2,
   "size": "Large",
   "unlockCondition": "8,000,000 ducats capital, water rights, outside city location",
   "calculationsAnalysis": "The Paper Mill represents specialized industrial production with modest direct income but significant industry-enabling capabilities. The construction cost of 2,250,000 ducats reflects the water-powered machinery and specialized facilities required, while the income of 25,000 ducats (1.11% return) represents the value of paper production. The maintenance cost of 20,000 ducats (80% of income) creates a modest profit margin appropriate for this raw material production facility. The employment capacity of 20 represents the workers needed for this labor-intensive process. The construction time of 6 days (518400000ms) reflects the specialized construction requirements. This building creates a strategic investment in paper production that enables the lucrative publishing industry, reflecting Venice's historical position as an early center of printing that depended on reliable paper supplies.",
@@ -83,5 +82,8 @@
     "Drying loft",
     "Cutting and sorting room",
     "Finished paper storage"
-  ]
+  ],
+  "buildTier": 2,
+  "workTier": 2,
+  "consumeTier": 3
 }

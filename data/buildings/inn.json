@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "Business",
   "subcategory": "Hospitality",
-  "tier": 1,
   "size": "Medium",
   "unlockCondition": "100,000 ducats capital",
   "calculationsAnalysis": "The Inn provides essential services with a modest investment. The construction cost of 50,000 ducats is relatively low, reflecting its common nature. It generates an estimated income of 500 ducats per cycle from lodging, food, and drink sales. The maintenance cost is 150 ducats (30% of income), covering supplies and upkeep, ensuring a steady profit. It employs 3 individuals, including an innkeeper, cook, and server. Construction takes 2 days (172,800,000ms), allowing for quick establishment. This building is a cornerstone of Venetian daily life, offering hospitality and fostering social interaction.",
@@ -72,5 +71,8 @@
       "wine",
       "spiced_wine"
     ]
-  }
+  },
+  "buildTier": 1,
+  "workTier": 2,
+  "consumeTier": 2
 }

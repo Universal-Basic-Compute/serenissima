@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "business",
   "subcategory": "Retail Shops",
-  "tier": 2,
   "size": "Medium",
   "unlockCondition": "2,500,000 ducats total wealth, 5 citizens",
   "calculationsAnalysis": "The Bottega represents a step up in commercial investment with a construction cost of 600,000 ducats and income of 11,000 ducats, providing a 1.8% return per cycle. The maintenance cost of 6,000 ducats (55% of income) reflects the more complex structure and workshop equipment. With an employment capacity of 3, it creates a significant jump in workforce requirements, representing the master craftsman and apprentices typical of Renaissance workshops. The construction time of 2 days (172800000ms) creates a meaningful progression from the Contract Stall while remaining accessible to early-game players. This building serves as a bridge between simple retail and specialized production.",
@@ -114,5 +113,8 @@
     "Workshop area",
     "Street display",
     "Entrance"
-  ]
+  ],
+  "buildTier": 2,
+  "workTier": 2,
+  "consumeTier": 2
 }

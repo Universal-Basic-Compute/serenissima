@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "business",
   "subcategory": "Trade Facilities",
-  "tier": 2,
   "size": "Medium",
   "unlockCondition": "10,000,000 ducats and official connections, or government license",
   "calculationsAnalysis": "The Weighing Station balances government service with modest revenue generation. The construction cost of 1,900,000 ducats reflects the specialized equipment and official infrastructure required, while the income of 25,000 ducats (1.32% return) represents the fees collected for standardized measurements. The maintenance cost of 13,500 ducats (54% of income) creates a modest profit margin appropriate for a semi-governmental service. The employment capacity of 8 represents the officials and workers needed to operate measurement equipment and maintain records. The construction time of 3 days (259200000ms) reflects the specialized construction requirements. This building creates a strategic investment in commercial infrastructure that benefits the entire trading system while generating modest direct returns, reflecting Venice's sophisticated approach to standardization and commercial regulation.",
@@ -93,5 +92,8 @@
     "Smaller scales area",
     "Queue management position",
     "Record-keeping office"
-  ]
+  ],
+  "buildTier": 2,
+  "workTier": 3,
+  "consumeTier": 3
 }

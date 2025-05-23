@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "business",
   "subcategory": "Luxury Goods",
-  "tier": 3,
   "size": "Small",
   "unlockCondition": "Master Baker qualification, access to fine ingredients (sugar, spices)",
   "calculationsAnalysis": "The Luxury Bakery produces high-value pastries for a discerning clientele. Higher construction costs reflect finer equipment and decor. Income is substantial due to premium pricing, though input costs (flour, sugar) are also higher. Employs highly skilled pastry chefs.",
@@ -25,7 +24,7 @@
         "inputs": {
           "flour": 2,
           "sugar": 1,
-          "olive_oil": 0.5, 
+          "olive_oil": 0.5,
           "fuel": 1
         },
         "outputs": {
@@ -60,5 +59,8 @@
     "Preparation area",
     "Sales counter",
     "Consultation area for special orders"
-  ]
+  ],
+  "buildTier": 3,
+  "workTier": 3,
+  "consumeTier": 3
 }

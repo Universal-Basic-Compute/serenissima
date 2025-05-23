@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "Criminal",
   "subcategory": "Intelligence Operations",
-  "tier": 3,
   "size": "Small",
   "unlockCondition": "12,000,000 ducats capital, Criminal Contacts (elite quality), political connections",
   "calculationsAnalysis": "The Spy Safehouse represents specialized intelligence infrastructure with strategic and covert commercial value. The construction cost of 4,000,000 ducats reflects the specialized security and communication systems required, while the income of 25,000 ducats (0.63% return) represents the value of sold intelligence and blackmail opportunities. The maintenance cost of 35,000 ducats (140% of income) creates a substantial ongoing expense justified by the valuable intelligence produced and security requirements. The employment capacity of 4 represents the minimal trusted operatives needed. The construction time of 10 days (864000000ms) reflects the need for extremely discreet construction. This building creates a strategic investment in intelligence gathering with appropriate security requirements reflecting Venice's historical position as a center of Renaissance espionage where multiple powers maintained intelligence operations.",
@@ -101,5 +100,8 @@
     "Hidden compartments",
     "Escape route planning",
     "Agent reception area"
-  ]
+  ],
+  "buildTier": 3,
+  "workTier": 3,
+  "consumeTier": 3
 }

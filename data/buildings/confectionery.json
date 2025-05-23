@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "business",
   "subcategory": "Luxury Goods",
-  "tier": 3,
   "size": "Medium",
   "unlockCondition": "Master Confectioner status, reliable supply of sugar and spices",
   "calculationsAnalysis": "The Confectionery produces exquisite sugar treats, a mark of luxury. High construction costs for specialized tools and presentation. Premium pricing leads to high income, but input costs (sugar, spices, fruits) are also significant. Employs master confectioners and artisans.",
@@ -25,7 +24,7 @@
         "inputs": {
           "sugar": 2,
           "spices": 0.5,
-          "fruit": 1 
+          "fruit": 1
         },
         "outputs": {
           "sugar_confections": 1
@@ -37,7 +36,7 @@
     "stores": [
       "sugar",
       "spices",
-      "fruit", 
+      "fruit",
       "sugar_confections"
     ],
     "sells": [
@@ -58,5 +57,8 @@
     "Cooling racks",
     "Display and sales area",
     "Ingredient storage"
-  ]
+  ],
+  "buildTier": 3,
+  "workTier": 3,
+  "consumeTier": 4
 }

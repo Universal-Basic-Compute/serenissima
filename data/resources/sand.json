@@ -7,5 +7,6 @@
   "icon": "/images/resources/sand.png",
   "importPrice": 1,
   "lifetimeHours": null,
-  "consumptionHours": null
+  "consumptionHours": null,
+  "tier": 0
 }

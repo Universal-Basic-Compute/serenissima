@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "business",
   "subcategory": "Transportation Services",
-  "tier": 2,
   "size": "Medium",
   "unlockCondition": "4,000,000 ducats capital, Transportation Guild connection",
   "calculationsAnalysis": "The Porter Guild Hall represents specialized transportation infrastructure with modest service income. The construction cost of 1,500,000 ducats reflects the facilities required for organizing porter services, while the income of 18,000 ducats (1.2% return) represents fees and commissions from coordinating porter activities. The maintenance cost of 15,000 ducats (83.3% of income) creates a modest profit margin appropriate for service infrastructure. The employment capacity of 25 represents the porters, dispatchers, and administrators needed. The construction time of 4 days (345600000ms) reflects the straightforward construction requirements. This building creates a strategic investment in land-based transportation that complements Venice's water transport system.",
@@ -89,5 +88,8 @@
     "Administration office",
     "Route planning station",
     "Fee negotiation counter"
-  ]
+  ],
+  "buildTier": 2,
+  "workTier": 1,
+  "consumeTier": 1
 }

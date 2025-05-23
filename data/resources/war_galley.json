@@ -63,5 +63,6 @@
   "icon": "/images/resources/war_galley.png",
   "importPrice": 30000,
   "lifetimeHours": null,
-  "consumptionHours": 1168
+  "consumptionHours": 1168,
+  "tier": 4
 }

@@ -53,5 +53,6 @@
   ],
   "importPrice": 60,
   "lifetimeHours": null,
-  "consumptionHours": 10
+  "consumptionHours": 10,
+  "tier": 3
 }

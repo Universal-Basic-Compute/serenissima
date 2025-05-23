@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "business",
   "subcategory": "Trade Facilities",
-  "tier": 3,
   "size": "Large",
   "unlockCondition": "20,000,000 ducats total wealth, Cloth Guild membership",
   "canImport": true,
@@ -97,5 +96,8 @@
       "velvet",
       "brocade"
     ]
-  }
+  },
+  "buildTier": 3,
+  "workTier": 3,
+  "consumeTier": 3
 }

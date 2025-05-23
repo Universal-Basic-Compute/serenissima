@@ -28,5 +28,6 @@
   "icon": "/images/resources/glass.png",
   "importPrice": 72,
   "lifetimeHours": null,
-  "consumptionHours": 234
+  "consumptionHours": 234,
+  "tier": 2
 }

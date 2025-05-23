@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "business",
   "subcategory": "Luxury Goods",
-  "tier": 2,
   "size": "Small",
   "unlockCondition": "Trade connections with the East, substantial capital",
   "calculationsAnalysis": "The Spice Merchant Shop deals in high-value, low-volume exotic spices. Construction includes secure storage and an elegant storefront. Income is high per unit but sales volume may be lower than basic goods. Maintenance covers security and preservation of valuable stock. Employs knowledgeable merchants.",
@@ -15,7 +14,7 @@
     "timber": 70,
     "bricks": 150,
     "stone": 100,
-    "iron": 30 
+    "iron": 30
   },
   "maintenanceCost": 800,
   "constructionTime": 518400000,
@@ -42,5 +41,9 @@
     "Secure vault/storage",
     "Consultation desk",
     "Sales counter"
-  ]
+  ],
+  "buildTier": 2,
+  "workTier": 3,
+  "consumeTier": 4,
+  "canImport": true
 }

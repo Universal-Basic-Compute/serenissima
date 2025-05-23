@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "business",
   "subcategory": "Security Facilities",
-  "tier": 3,
   "size": "Large",
   "unlockCondition": "20,000,000 ducats, Military Guild connection, government approval",
   "calculationsAnalysis": "The Armory represents specialized military infrastructure with strategic rather than commercial value. The construction cost of 6,000,000 ducats reflects the secure facilities and specialized storage systems required, while generating no direct income reflects its military rather than commercial purpose. The maintenance cost of 40,000 ducats creates a substantial ongoing expense justified by the critical weapons storage and maintenance capabilities provided. The employment capacity of 25 represents the guards, armorers, and administrators needed. The construction time of 10 days (864000000ms) reflects the specialized construction requirements. This building creates a strategic military asset with appropriate government restrictions reflecting the historical importance of centralized weapons control in Venice's security system, where the state carefully managed arms to maintain both external defense and internal stability.",
@@ -83,5 +82,8 @@
     "sells": [
       "weapons"
     ]
-  }
+  },
+  "buildTier": 3,
+  "workTier": 3,
+  "consumeTier": 3
 }

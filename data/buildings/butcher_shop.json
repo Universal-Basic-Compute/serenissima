@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "business",
   "subcategory": "Food Industry",
-  "tier": 2,
   "size": "Medium",
   "unlockCondition": "Butchers' Guild membership, livestock supply chain",
   "calculationsAnalysis": "The Butcher Shop processes imported livestock into various cuts of meat. Construction requires specialized tools and hygiene facilities. Income is derived from meat sales, with significant maintenance for waste disposal and tool upkeep. Employs skilled butchers and assistants.",
@@ -27,14 +26,13 @@
           "salt": 0.2
         },
         "outputs": {
-          "meat": 2 
+          "meat": 2
         },
         "craftMinutes": 90
       }
     ],
     "storageCapacity": 200,
     "stores": [
-      "livestock",
       "meat",
       "salt"
     ],
@@ -56,5 +54,9 @@
     "Meat display",
     "Sales counter",
     "Delivery entrance"
-  ]
+  ],
+  "buildTier": 2,
+  "workTier": 2,
+  "consumeTier": 3,
+  "canImport": true
 }

@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "business",
   "subcategory": "Glass Industry",
-  "tier": 2,
   "size": "Medium",
   "unlockCondition": "5,000,000 ducats capital, Glass Guild membership, Murano location",
   "calculationsAnalysis": "The Glassblower Workshop represents specialized artistic production with substantial returns. The construction cost of 1,500,000 ducats reflects the specialized equipment and facilities required, while the income of 30,000 ducats (2% return) represents the high-value artistic glass pieces produced. The maintenance cost of 20,000 ducats (66.7% of income) creates a reasonable profit margin appropriate for luxury crafts. The employment capacity of 6 represents the master glassblower, apprentices, and assistants needed. The construction time of 4 days (345600000ms) reflects the specialized construction requirements. This building creates a strategic investment in luxury production with appropriate guild and location requirements reflecting the historical importance of Murano glass to Venice's luxury exports, where artistic glassblowing represented the perfect combination of technical skill and artistic creativity that made Venetian products famous throughout Europe.",
@@ -87,5 +86,8 @@
     "Cooling ovens",
     "Display area for finished works",
     "Customer commission desk"
-  ]
+  ],
+  "buildTier": 2,
+  "workTier": 2,
+  "consumeTier": 3
 }

@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "business",
   "subcategory": "Retail Shops",
-  "tier": 1,
   "size": "Medium",
   "unlockCondition": "Basic trading license",
   "calculationsAnalysis": "The Vegetable Market serves as a key distribution point for fresh produce. Construction costs are moderate, reflecting a larger, more permanent structure than a simple stall. Income is derived from the sale of various vegetables, with maintenance covering spoilage and operational costs. Employs a few staff for sorting, stocking, and sales.",
@@ -39,5 +38,9 @@
     "Display stalls",
     "Storage area",
     "Sales counter"
-  ]
+  ],
+  "buildTier": 1,
+  "workTier": 1,
+  "consumeTier": 1,
+  "canImport": true
 }

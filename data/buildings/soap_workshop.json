@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "business",
   "subcategory": "Household Goods",
-  "tier": 2,
   "size": "Medium",
   "unlockCondition": "4,000,000 ducats total wealth, access to olive oil supply",
   "shortDescription": "Workshop producing Venetian soap from olive oil and other ingredients.",
@@ -70,5 +69,8 @@
     "Cutting station",
     "Packaging area",
     "Scent blending table"
-  ]
+  ],
+  "buildTier": 2,
+  "workTier": 2,
+  "consumeTier": 2
 }

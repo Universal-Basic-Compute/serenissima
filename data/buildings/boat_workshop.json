@@ -3,7 +3,6 @@
   "pointType": "canal",
   "category": "business",
   "subcategory": "Transportation Industry",
-  "tier": 2,
   "size": "Medium",
   "unlockCondition": "6,000,000 ducats capital, Boat Builders Guild connection, water access",
   "calculationsAnalysis": "The Boat Workshop represents specialized maritime production with modest returns. The construction cost of 2,000,000 ducats reflects the specialized equipment and waterfront facilities required, while the income of 25,000 ducats (1.25% return) represents sales of various watercraft. The maintenance cost of 20,000 ducats (80% of income) creates a modest profit margin appropriate for specialized production. The employment capacity of 8 represents the boat builders, apprentices, and assistants needed. The construction time of 5 days (432000000ms) reflects the specialized construction requirements. This building creates a strategic investment in transportation infrastructure that supports Venice's unique water-based mobility needs.",
@@ -98,5 +97,8 @@
     "Launching slipway",
     "Design consultation desk",
     "Repair dock"
-  ]
+  ],
+  "buildTier": 2,
+  "workTier": 2,
+  "consumeTier": 2
 }

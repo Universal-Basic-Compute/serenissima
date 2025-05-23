@@ -6,5 +6,6 @@
   "description": "Prefabricated wooden parts ready for ship assembly.",
   "importPrice": 180,
   "lifetimeHours": null,
-  "consumptionHours": null
+  "consumptionHours": null,
+  "tier": 0
 }

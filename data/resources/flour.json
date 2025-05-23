@@ -6,5 +6,6 @@
   "description": "Milled grain ready for baking into bread and pastries.",
   "importPrice": 14,
   "lifetimeHours": 29,
-  "consumptionHours": 10
+  "consumptionHours": 10,
+  "tier": 0
 }

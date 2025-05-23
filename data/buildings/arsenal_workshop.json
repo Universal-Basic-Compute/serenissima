@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "business",
   "subcategory": "Naval Facilities",
-  "tier": 4,
   "size": "Extra Large",
   "unlockCondition": "Government license only, Senate appointment",
   "calculationsAnalysis": "The Arsenal Workshop represents Venice's revolutionary naval production system with strategic rather than commercial value. The construction cost of 12,500,000 ducats reflects the massive industrial facilities and specialized equipment required, while generating no direct income reflects its military rather than commercial purpose. The maintenance cost of 100,000 ducats creates a substantial ongoing expense justified by the critical naval production capabilities provided. The employment capacity of 80 represents the shipwrights, craftsmen, and laborers needed for industrial-scale production. The construction time of 40 days (3456000000ms) reflects the massive industrial project. This building creates a strategic military asset with appropriate government restrictions reflecting the historical Arsenal's status as a state-controlled facility that was the largest industrial complex in pre-industrial Europe and key to Venice's naval dominance.",
@@ -118,5 +117,8 @@
       "war_galley",
       "ship_components"
     ]
-  }
+  },
+  "buildTier": 4,
+  "workTier": 2,
+  "consumeTier": 3
 }

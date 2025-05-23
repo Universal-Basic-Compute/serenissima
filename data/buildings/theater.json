@@ -3,13 +3,12 @@
   "pointType": "building",
   "category": "Public & Government",
   "subcategory": "Educational & Cultural",
-  "tier": 2,
   "size": "Large",
   "unlockCondition": "12,000,000 ducats, Cultural Guild connection, noble patronage",
   "calculationsAnalysis": "The Theater balances cultural investment with entertainment revenue. The construction cost of 7,500,000 ducats reflects the specialized architecture and facilities required, while the income of 60,000 ducats (0.8% return) represents ticket sales and patron contributions. The maintenance cost of 45,000 ducats (75% of income) creates a modest profit margin appropriate for a cultural institution with commercial aspects. The employment capacity of 25 represents the performers, stagehands, and administrative staff needed. The construction time of 14 days (1209600000ms) reflects the specialized construction requirements. This building creates a strategic investment in cultural entertainment that enhances city prestige while providing modest returns, reflecting Venice's historically vibrant theatrical tradition that served both artistic and social functions.",
   "shortDescription": "Entertainment venue for performances, including plays, music, and commedia dell'arte.",
   "fullDescription": "Enriching Venetian cultural life, theaters provide venues for various performances from sophisticated dramas to popular entertainment. Featuring a stage, audience seating often in multiple tiers, backstage facilities, and sometimes refreshment areas, these buildings serve as important social gathering spaces. Venice's theater tradition blended intellectual content with spectacular staging and music.",
-  "flavorText": "On this stage we hold a mirror to Venice herself\u2014sometimes flattering, sometimes critical, but always revealing truths that might otherwise remain unspoken.",
+  "flavorText": "On this stage we hold a mirror to Venice herself—sometimes flattering, sometimes critical, but always revealing truths that might otherwise remain unspoken.",
   "constructionCosts": {
     "ducats": 7500000,
     "timber": 250,
@@ -91,5 +90,8 @@
       "spiced_wine",
       "wine"
     ]
-  }
+  },
+  "buildTier": 2,
+  "workTier": 3,
+  "consumeTier": 3
 }

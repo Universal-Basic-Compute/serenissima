@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "business",
   "subcategory": "Water Management",
-  "tier": 2,
   "size": "Medium",
   "unlockCondition": "Government license only",
   "calculationsAnalysis": "The Canal Maintenance Office represents essential water management infrastructure with no direct revenue. The construction cost of 2,500,000 ducats reflects the specialized equipment and facilities required, while generating no direct income reflects its public service rather than commercial purpose. The maintenance cost of 40,000 ducats creates a substantial ongoing expense justified by the essential canal maintenance provided. The employment capacity of 20 represents the engineers, dredgers, and maintenance crews needed. The construction time of 7 days (604800000ms) reflects the specialized construction requirements. This building creates a strategic investment in waterway management that prevents sedimentation and maintains Venice's vital canal network, reflecting the historical reality that without constant maintenance, Venice's canals would quickly become unusable, threatening the city's very existence.",
@@ -102,5 +101,8 @@
       "building_materials",
       "porter_equipment"
     ]
-  }
+  },
+  "buildTier": 2,
+  "workTier": 2,
+  "consumeTier": 0
 }

@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "business",
   "subcategory": "Trade Facilities",
-  "tier": 3,
   "size": "Large",
   "unlockCondition": "30,000,000 ducats total wealth, Eastern trade connections, Merchant Guild membership",
   "canImport": true,
@@ -96,5 +95,8 @@
     "Spice processing area",
     "Cultural exchange space",
     "Dock receiving area"
-  ]
+  ],
+  "buildTier": 3,
+  "workTier": 3,
+  "consumeTier": 3
 }

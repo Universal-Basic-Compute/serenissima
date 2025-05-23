@@ -27,5 +27,6 @@
   ],
   "importPrice": 4,
   "lifetimeHours": 1,
-  "consumptionHours": 1
+  "consumptionHours": 1,
+  "tier": 1
 }

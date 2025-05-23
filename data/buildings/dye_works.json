@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "business",
   "subcategory": "Textile Industry",
-  "tier": 2,
   "size": "Medium",
   "unlockCondition": "6,000,000 ducats capital, Textile Guild membership",
   "calculationsAnalysis": "The Dye Works represents specialized textile processing with no direct income but industry-enabling capabilities. The construction cost of 1,400,000 ducats reflects the specialized vats and water systems required, while generating no direct income reflects its position as an intermediate production step rather than end product. The maintenance cost of 17,500 ducats creates an ongoing expense justified by enabling valuable colored textile production downstream. The employment capacity of 15 represents the dyers and assistants needed for this labor-intensive process. The construction time of 3 days (259200000ms) reflects the specialized construction requirements. This building creates a strategic investment in textile processing that enables the lucrative colored fabric industry, reflecting Venice's historical expertise in creating vibrant textiles using exotic dyestuffs from its extensive trade networks.",
@@ -88,5 +87,8 @@
     "Dyestuff storage",
     "Quality control station",
     "Master dyer's workplace"
-  ]
+  ],
+  "buildTier": 2,
+  "workTier": 2,
+  "consumeTier": 3
 }

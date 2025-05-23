@@ -7,5 +7,6 @@
   "icon": "/images/resources/stone.png",
   "importPrice": 6,
   "lifetimeHours": null,
-  "consumptionHours": null
+  "consumptionHours": null,
+  "tier": 0
 }

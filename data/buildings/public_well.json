@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "passive",
   "subcategory": "Water Management",
-  "tier": 1,
   "size": "Small",
   "unlockCondition": "1,000,000 ducats capital, community approval",
   "calculationsAnalysis": "The Public Well represents basic water access infrastructure with modest revenue. The construction cost of 500,000 ducats reflects the connection to cistern systems and decorative wellhead, while generating 8,000 ducats income reflects small usage fees and increased property values in the vicinity. The maintenance cost of 7,500 ducats creates an ongoing expense justified by the essential water access provided. The employment capacity of 1 reflects the occasional maintenance worker needed for this infrastructure. The construction time of 2 days (172800000ms) reflects the relatively simple construction requirements. This building creates an accessible investment in water access that improves public health and community development, reflecting the historical importance of public wells as both practical infrastructure and social gathering points in Venetian neighborhoods.",
@@ -52,5 +51,8 @@
     "sells": [
       "water"
     ]
-  }
+  },
+  "buildTier": 1,
+  "workTier": 0,
+  "consumeTier": 0
 }

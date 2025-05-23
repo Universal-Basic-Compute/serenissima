@@ -6,5 +6,6 @@
   "description": "Fresh water collected from wells and cisterns, essential for daily life and many crafts.",
   "importPrice": 1,
   "lifetimeHours": 2,
-  "consumptionHours": 1
+  "consumptionHours": 1,
+  "tier": 1
 }

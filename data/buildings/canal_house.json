@@ -3,7 +3,6 @@
   "pointType": "canal",
   "category": "home",
   "subcategory": "Basic Residences",
-  "tier": 2,
   "size": "Medium",
   "unlockCondition": "12,000,000 ducats total wealth, waterfront property",
   "calculationsAnalysis": "The Canal House represents specialized waterfront residential property with direct transportation access. The construction cost of 2,000,000 ducats reflects the premium waterfront location and specialized water-level construction, while the income of 35,000 ducats (1.75% return) represents the premium rent such properties commanded. The maintenance cost of 11,000 ducats (31% of income) shows an increased maintenance ratio, reflecting the challenges of maintaining structures in direct contact with water. The residentsCapacity of 8 represents a prosperous family with servants. The construction time of 5 days (432000000ms) reflects the specialized waterfront construction requirements. This building creates a strategic residential option with transportation advantages, reflecting Venice's unique water-based urban structure.",
@@ -76,5 +75,8 @@
       "disguise_materials",
       "forgery_tools"
     ]
-  }
+  },
+  "buildTier": 2,
+  "workTier": 2,
+  "consumeTier": 2
 }

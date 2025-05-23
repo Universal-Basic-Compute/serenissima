@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "business",
   "subcategory": "Guild Headquarters",
-  "tier": 3,
   "size": "Large",
   "unlockCondition": "Glass Guild Master status or 25,000,000 ducats with Guild connections, Murano location",
   "calculationsAnalysis": "The Glass Guild Hall represents specialized institutional infrastructure with industry governance functions. The construction cost of 12,500,000 ducats reflects the prestigious architecture and specialized facilities required, while the income of 75,000 ducats (0.6% return) represents membership fees and regulatory charges. The maintenance cost of 60,000 ducats (80% of income) creates a modest surplus appropriate for a non-profit institution. The employment capacity of 20 represents the administrative staff and industry experts. The construction time of 20 days (1728000000ms) reflects the specialized construction requirements. This building creates a strategic investment in industry governance with appropriate guild requirements reflecting the historical importance of guild regulation in Venice's glass industry, which maintained quality standards and protected valuable trade secrets.",
@@ -102,5 +101,8 @@
       "fine_glassware",
       "maps"
     ]
-  }
+  },
+  "buildTier": 3,
+  "workTier": 3,
+  "consumeTier": 3
 }

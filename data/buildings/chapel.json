@@ -3,13 +3,12 @@
   "pointType": "building",
   "category": "Public & Government",
   "subcategory": "Religious Buildings",
-  "tier": 1,
   "size": "Small",
   "unlockCondition": "5,000,000 ducats, Church approval",
   "calculationsAnalysis": "The Chapel represents a smaller religious investment with significant prestige benefits. The construction cost of 2,000,000 ducats reflects the high-quality materials and craftsmanship required even for small religious structures, while the income of 5,000 ducats (0.25% return) represents modest donations and fees for private ceremonies. The maintenance cost of 10,000 ducats (200% of income) creates an ongoing expense that is partially offset by income but primarily justified by reputation and spiritual benefits. The employment capacity of 2 represents the minimal religious staff. The construction time of 5 days (432000000ms) reflects the detailed artistic work required. This building creates a strategic option for players to enhance reputation and fulfill religious obligations without the major investment of a full church, reflecting the historical practice of private chapels maintained by wealthy families and institutions.",
   "shortDescription": "Small private worship space often attached to palaces or institutions.",
   "fullDescription": "Meeting the spiritual needs of private households or institutions, chapels provide dedicated worship spaces on a smaller scale than parish churches. Featuring an altar, devotional artwork, and often family memorials, these intimate religious spaces allow for private worship while demonstrating the owner's piety and status. Many Venetian noble families maintained private chapels within their palazzos or funded chapels within larger churches.",
-  "flavorText": "The lord of the house may command all who dwell beneath his roof\u2014save in the chapel, where all kneel equally before a higher authority.",
+  "flavorText": "The lord of the house may command all who dwell beneath his roof—save in the chapel, where all kneel equally before a higher authority.",
   "constructionCosts": {
     "ducats": 2000000,
     "timber": 50,
@@ -86,5 +85,8 @@
       "books",
       "gold_leaf"
     ]
-  }
+  },
+  "buildTier": 1,
+  "workTier": 0,
+  "consumeTier": 0
 }

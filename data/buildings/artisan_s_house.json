@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "home",
   "subcategory": "Basic Residences",
-  "tier": 1,
   "size": "Medium",
   "unlockCondition": "5 citizens, 2,000,000 ducats total wealth",
   "calculationsAnalysis": "The Artisan's House represents a step up in residential investment with workshop capabilities. The construction cost of 750,000 ducats reflects the larger structure with specialized workshop space, while the income of 12,000 ducats (1.6% return) represents both rent and workshop production. The maintenance cost of 10,000 ducats (83% of income) creates a more realistic maintenance burden for a working building. The residentsCapacity of 5 represents the artisan family with perhaps an apprentice. The construction time of 3 days (259200000ms) creates a meaningful progression from the Fisherman's Cottage. This building serves as a bridge between pure residential and productive buildings, reflecting the historical reality of combined living and working spaces in Renaissance Venice.",
@@ -99,5 +98,8 @@
       "glass",
       "paper"
     ]
-  }
+  },
+  "buildTier": 1,
+  "workTier": 2,
+  "consumeTier": 2
 }

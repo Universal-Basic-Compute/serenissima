@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "business",
   "subcategory": "Illicit Operations",
-  "tier": 2,
   "size": "Medium",
   "unlockCondition": "8,000,000 ducats capital, Criminal Contacts (street level quality), water access",
   "canImport": true,
@@ -105,5 +104,8 @@
     "Front business",
     "Escape route planning",
     "Smuggler boat moorings"
-  ]
+  ],
+  "buildTier": 2,
+  "workTier": 2,
+  "consumeTier": 2
 }

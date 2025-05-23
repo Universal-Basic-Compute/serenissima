@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "business",
   "subcategory": "Food Processing",
-  "tier": 2,
   "size": "Medium",
   "unlockCondition": "3,000,000 ducats total wealth, access to olive supply",
   "shortDescription": "Facility for extracting oil from olives through pressing.",
@@ -67,5 +66,8 @@
     "Press mechanism",
     "Oil collection vats",
     "Storage area"
-  ]
+  ],
+  "buildTier": 2,
+  "workTier": 2,
+  "consumeTier": 2
 }

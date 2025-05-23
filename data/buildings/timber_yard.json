@@ -3,7 +3,6 @@
   "pointType": "canal",
   "category": "business",
   "subcategory": "Trade Facilities",
-  "tier": 2,
   "size": "Extra Large",
   "unlockCondition": "12,000,000 ducats total wealth, water access",
   "canImport": true,
@@ -94,5 +93,8 @@
       "spruce",
       "cedar"
     ]
-  }
+  },
+  "buildTier": 2,
+  "workTier": 2,
+  "consumeTier": 2
 }

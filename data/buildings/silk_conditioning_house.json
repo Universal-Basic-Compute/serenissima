@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "business",
   "subcategory": "Textile Industry",
-  "tier": 2,
   "size": "Medium",
   "unlockCondition": "7,500,000 ducats capital, Textile Guild connection",
   "calculationsAnalysis": "The Silk Conditioning House represents specialized textile infrastructure with modest returns but industry-enabling capabilities. The construction cost of 1,750,000 ducats reflects the specialized equipment and facilities required, while the income of 22,000 ducats (1.26% return) represents processing fees for raw silk. The maintenance cost of 30,000 ducats exceeds income, creating a realistic scenario where initial processing often operated at a loss but enabled profitable downstream production. The employment capacity of 12 represents the skilled workers needed for this delicate process. The construction time of 5 days (432000000ms) reflects the specialized construction requirements. This building creates a strategic investment in textile processing that enables the lucrative silk industry, reflecting Venice's historical position as a center for luxury textile production that depended on carefully prepared raw materials.",
@@ -70,5 +69,8 @@
     "Stretching frames",
     "Quality control table",
     "Drying rooms"
-  ]
+  ],
+  "buildTier": 2,
+  "workTier": 3,
+  "consumeTier": 4
 }

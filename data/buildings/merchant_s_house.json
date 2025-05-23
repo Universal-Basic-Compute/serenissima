@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "home",
   "subcategory": "Basic Residences",
-  "tier": 2,
   "size": "Medium",
   "unlockCondition": "7,500,000 ducats total wealth, Merchant Guild connection",
   "calculationsAnalysis": "The Merchant's House represents middle-class housing with business capabilities. The construction cost of 1,600,000 ducats reflects the quality construction and business facilities, while the income of 30,000 ducats (1.9% return) represents both residential rent and commercial activities. The maintenance cost of 7,500 ducats (25% of income) creates an appropriate maintenance ratio for this tier, reflecting the more complex structure and higher standards. The residentsCapacity of 7 represents the merchant family with servants. The construction time of 4 days (345600000ms) reflects the more sophisticated construction. This building creates a progression into middle-class housing with appropriate guild requirements reflecting the social organization of Renaissance Venice, where guild membership was essential for commercial activities.",
@@ -102,5 +101,8 @@
       "spiced_wine",
       "jewelry"
     ]
-  }
+  },
+  "buildTier": 2,
+  "workTier": 3,
+  "consumeTier": 3
 }

@@ -3,7 +3,6 @@
   "pointType": "canal",
   "category": "business",
   "subcategory": "Transportation Facilities",
-  "tier": 2,
   "size": "Medium",
   "unlockCondition": "Waterfront property, 5,000,000 ducats capital",
   "canImport": true,
@@ -92,5 +91,8 @@
       "gondola",
       "criminal_contacts"
     ]
-  }
+  },
+  "buildTier": 2,
+  "workTier": 3,
+  "consumeTier": 3
 }

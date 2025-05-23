@@ -3,7 +3,6 @@
   "pointType": "canal",
   "category": "home",
   "subcategory": "Noble Residences",
-  "tier": 4,
   "size": "Extra Large",
   "unlockCondition": "200,000,000 ducats total wealth, Great Council membership",
   "calculationsAnalysis": "The Grand Canal Palace represents the pinnacle of Venetian residential architecture and status. The construction cost of 15,000,000 ducats reflects the extraordinary materials, craftsmanship, and prime Grand Canal location, while the income of 180,000 ducats (1.2% return) represents the economic power wielded from this prestigious address. The maintenance cost of 75,000 ducats (41.7% of income) reflects the extensive staff and upkeep required for such a grand residence. The residentsCapacity of 25 represents the noble family with extensive household staff. The construction time of 20 days (1728000000ms) reflects the elaborate construction and artistic elements. This building creates an endgame residential option with appropriate wealth and political requirements reflecting the highest echelon of Venetian society.",
@@ -95,5 +94,8 @@
       "luxury_silk_garments",
       "jewelry"
     ]
-  }
+  },
+  "buildTier": 4,
+  "workTier": 4,
+  "consumeTier": 4
 }

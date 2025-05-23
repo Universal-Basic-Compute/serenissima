@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "business",
   "subcategory": "Luxury Industry",
-  "tier": 3,
   "size": "Small",
   "unlockCondition": "15,000,000 ducats capital, Goldsmith Guild membership",
   "calculationsAnalysis": "The Goldsmith Workshop represents high-end luxury production with substantial returns. The construction cost of 2,500,000 ducats reflects the secure facilities and specialized equipment required, while the income of 45,000 ducats (1.8% return) represents the high-value precious metal items produced. The maintenance cost of 35,000 ducats (77.8% of income) creates a modest profit margin appropriate for high-value, low-volume luxury production. The employment capacity of 6 represents the master goldsmith, apprentices, and security staff needed. The construction time of 5 days (432000000ms) reflects the specialized construction requirements. This building creates a strategic investment in luxury production with appropriate guild and wealth requirements reflecting the historical importance of fine jewelry and precious metalwork to Venice's luxury contract, where goldsmithing represented the pinnacle of metalworking craftsmanship.",
@@ -87,5 +86,8 @@
     "Gem-setting station",
     "Apprentice workstations",
     "Design consultation table"
-  ]
+  ],
+  "buildTier": 3,
+  "workTier": 3,
+  "consumeTier": 4
 }

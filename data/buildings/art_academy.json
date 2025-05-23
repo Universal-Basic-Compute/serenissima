@@ -3,13 +3,12 @@
   "pointType": "building",
   "category": "Public & Government",
   "subcategory": "Educational & Cultural",
-  "tier": 3,
   "size": "Large",
   "unlockCondition": "15,000,000 ducats, Artistic Guild connection, cultural reputation",
   "calculationsAnalysis": "The Art Academy balances cultural investment with artistic industry support. The construction cost of 6,000,000 ducats reflects the specialized studios and facilities required, while the income of 35,000 ducats (0.58% return) represents tuition, commissions, and patron contributions. The maintenance cost of 40,000 ducats exceeds income, creating a realistic scenario where artistic institutions required patronage but enhanced Venice's cultural prestige. The employment capacity of 25 represents the master artists, instructors, and staff needed. The construction time of 14 days (1209600000ms) reflects the specialized construction requirements. This building creates a strategic investment in artistic excellence that enhances the city's cultural reputation and supports luxury industries, reflecting Venice's historical emphasis on arts as both cultural and commercial assets.",
   "shortDescription": "Educational institution teaching painting, sculpture, and other fine arts to students.",
   "fullDescription": "Nurturing the artistic talent that adorns Venice's buildings and collections, art academies provide formal training in various creative disciplines. Featuring studios with specialized lighting, sculpture workshops, model rooms, exhibition spaces, and often material preparation areas, these institutions combine technical instruction with artistic philosophy. Venice's distinctive artistic style developed within these academies.",
-  "flavorText": "Talent without training is like a ship without a rudder\u2014here we provide not just techniques, but the wisdom to know when to follow tradition and when to challenge it.",
+  "flavorText": "Talent without training is like a ship without a rudder—here we provide not just techniques, but the wisdom to know when to follow tradition and when to challenge it.",
   "constructionCosts": {
     "ducats": 6000000,
     "timber": 150,
@@ -74,5 +73,8 @@
     "sells": [
       "maps"
     ]
-  }
+  },
+  "buildTier": 3,
+  "workTier": 4,
+  "consumeTier": 4
 }

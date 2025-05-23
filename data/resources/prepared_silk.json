@@ -19,5 +19,6 @@
   ],
   "importPrice": 216,
   "lifetimeHours": 350,
-  "consumptionHours": null
+  "consumptionHours": null,
+  "tier": 0
 }

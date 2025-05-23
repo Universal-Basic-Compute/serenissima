@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "business",
   "subcategory": "Food Industry",
-  "tier": 1,
   "size": "Small",
   "unlockCondition": "1,000,000 ducats capital, Bakers Guild connection",
   "calculationsAnalysis": "The Bakery represents basic food production with modest but reliable returns. The construction cost of 400,000 ducats reflects the specialized oven and preparation areas required, while the income of 7,000 ducats (1.75% return) represents daily bread and pastry sales. The maintenance cost of 5,000 ducats (71% of income) creates a modest profit margin appropriate for this essential service that was often price-controlled. The employment capacity of 4 represents the baker, apprentices, and sales staff needed. The construction time of 2 days (172800000ms) reflects the straightforward construction requirements. This building creates an accessible investment in food production with appropriate guild requirements reflecting the historical importance of regulated bakeries in Venice's urban food system, where consistent bread supply at controlled prices was considered essential to social stability.",
@@ -75,5 +74,8 @@
     "Preparation tables",
     "Early morning line",
     "Delivery distribution"
-  ]
+  ],
+  "buildTier": 1,
+  "workTier": 2,
+  "consumeTier": 1
 }

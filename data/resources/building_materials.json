@@ -22,5 +22,6 @@
   "icon": "/images/resources/building_materials.png",
   "importPrice": 48,
   "lifetimeHours": null,
-  "consumptionHours": null
+  "consumptionHours": null,
+  "tier": 0
 }

@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "business",
   "subcategory": "Metal Industry",
-  "tier": 1,
   "size": "Medium",
   "unlockCondition": "2,000,000 ducats capital, Metal Workers Guild connection",
   "calculationsAnalysis": "The Blacksmith represents basic metal production with modest but reliable returns. The construction cost of 750,000 ducats reflects the forge and specialized equipment required, while the income of 12,000 ducats (1.6% return) represents sales of metal goods and components. The maintenance cost of 20,000 ducats (167% of income) creates a negative profit margin reflecting the essential but resource-intensive nature of basic metalworking. The employment capacity of 5 represents the blacksmith, apprentices, and assistants needed. The construction time of 2 days (172800000ms) reflects the straightforward construction requirements. This building creates an accessible investment in metal production that supports numerous other industries, reflecting the historical importance of blacksmiths in Venice's industrial ecosystem, where metal components were essential for shipbuilding, construction, and daily life.",
@@ -97,5 +96,8 @@
     "Finishing workbench",
     "Tool wall",
     "Order pickup area"
-  ]
+  ],
+  "buildTier": 1,
+  "workTier": 2,
+  "consumeTier": 2
 }

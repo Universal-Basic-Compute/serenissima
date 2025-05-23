@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "business",
   "subcategory": "Trade Facilities",
-  "tier": 3,
   "size": "Large",
   "unlockCondition": "18,000,000 ducats total wealth, Blacksmith Guild connection",
   "canImport": true,
@@ -95,5 +94,8 @@
       "bronze",
       "lead"
     ]
-  }
+  },
+  "buildTier": 3,
+  "workTier": 2,
+  "consumeTier": 2
 }

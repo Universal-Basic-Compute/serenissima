@@ -3,7 +3,6 @@
   "pointType": "bridge",
   "category": "bridge",
   "subcategory": "Naval Facilities",
-  "tier": 4,
   "size": "Large",
   "unlockCondition": "Government facility only, not privately constructable",
   "canImport": true,
@@ -92,5 +91,8 @@
       "smuggler_maps",
       "criminal_contacts"
     ]
-  }
+  },
+  "buildTier": 4,
+  "workTier": 2,
+  "consumeTier": 0
 }

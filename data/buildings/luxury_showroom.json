@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "business",
   "subcategory": "Retail Shops",
-  "tier": 3,
   "size": "Large",
   "unlockCondition": "15,000,000 ducats total wealth, Noble connections, Merchant Guild membership",
   "calculationsAnalysis": "The Luxury Showroom represents high-end retail with substantial investment and returns. The construction cost of 3,000,000 ducats reflects the premium materials and prestigious location required, while the income of 35,000 ducats (1.2% return) represents the high margins on luxury goods. The maintenance cost of 20,000 ducats (57% of income) reflects the high standards of upkeep and security required. The employment capacity of 5 represents the specialized staff needed to serve elite clientele. The construction time of 5 days (432000000ms) creates a meaningful progression tier for advanced players. This building creates a strategic choice to invest in high-end retail with appropriate wealth and connection requirements reflecting the exclusive nature of luxury commerce in Renaissance Venice.",
@@ -104,5 +103,8 @@
     "Private consultation room",
     "Exclusive client entrance",
     "Custom commission desk"
-  ]
+  ],
+  "buildTier": 3,
+  "workTier": 3,
+  "consumeTier": 4
 }

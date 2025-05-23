@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "business",
   "subcategory": "Trade Facilities",
-  "tier": 3,
   "size": "Medium",
   "unlockCondition": "15,000,000 ducats total wealth, Glassmakers Guild connection",
   "canImport": true,
@@ -95,5 +94,8 @@
       "glass_beads",
       "window_glass"
     ]
-  }
+  },
+  "buildTier": 3,
+  "workTier": 3,
+  "consumeTier": 4
 }

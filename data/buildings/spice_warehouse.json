@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "business",
   "subcategory": "Trade Facilities",
-  "tier": 3,
   "size": "Medium",
   "unlockCondition": "15,000,000 ducats total wealth, Eastern trade connections",
   "canImport": true,
@@ -99,5 +98,8 @@
       "ginger",
       "saffron"
     ]
-  }
+  },
+  "buildTier": 3,
+  "workTier": 3,
+  "consumeTier": 3
 }

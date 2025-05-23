@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "business",
   "subcategory": "Trade Facilities",
-  "tier": 3,
   "size": "Large",
   "unlockCondition": "Senate appointment only",
   "canImport": true,
@@ -98,5 +97,8 @@
     "Official's offices",
     "Harbor inspection point",
     "Security checkpoint"
-  ]
+  ],
+  "buildTier": 3,
+  "workTier": 3,
+  "consumeTier": 3
 }

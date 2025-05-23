@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "business",
   "subcategory": "Storage Facilities",
-  "tier": 1,
   "size": "Medium",
   "unlockCondition": "5,000,000 ducats capital",
   "calculationsAnalysis": "The Small Warehouse balances basic storage infrastructure with modest rental income. The construction cost of 1,250,000 ducats reflects the secure structure and organizational systems required, while the income of 15,000 ducats (1.2% return) represents storage rental fees. The maintenance cost of 12,500 ducats (83.3% of income) creates a thin profit margin appropriate for basic commercial infrastructure. The employment capacity of 5 represents the clerks, guards, and laborers needed. The construction time of 3 days (259200000ms) reflects the straightforward construction requirements. This building creates an accessible investment in commercial storage that supports trading activities, reflecting the historical importance of secure storage in Venice's commercial system where goods often needed to be warehoused between maritime shipments.",
@@ -91,5 +90,8 @@
       "rope",
       "tools"
     ]
-  }
+  },
+  "buildTier": 1,
+  "workTier": 2,
+  "consumeTier": 2
 }

@@ -3,7 +3,6 @@
   "pointType": "building",
   "category": "business",
   "subcategory": "Storage Facilities",
-  "tier": 2,
   "size": "Medium",
   "unlockCondition": "5,000,000 ducats capital, Wine Guild connection",
   "calculationsAnalysis": "The Wine Cellar balances specialized storage infrastructure with premium service income. The construction cost of 2,000,000 ducats reflects the temperature-controlled environment and security features required, while the income of 25,000 ducats (1.25% return) represents storage fees and wine handling charges. The maintenance cost of 17,500 ducats (70% of income) creates a modest profit margin appropriate for specialized storage infrastructure. The employment capacity of 5 represents the cellar master, assistants, and security staff needed. The construction time of 5 days (432000000ms) reflects the specialized construction requirements. This building creates a strategic investment in wine storage that enhances value through proper aging, reflecting the historical importance of wine in Venetian culture and commerce, where proper storage was essential for this valuable commodity.",
@@ -61,5 +60,8 @@
       "wine",
       "spiced_wine"
     ]
-  }
+  },
+  "buildTier": 2,
+  "workTier": 3,
+  "consumeTier": 3
 }
