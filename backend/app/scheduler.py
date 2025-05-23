@@ -126,8 +126,7 @@ def run_scheduled_tasks():
                 12: ("ais/answertomessages.py", "AI message responses"),
                 14: ("ais/answertomessages.py", "AI message responses"),
                 16: ("ais/answertomessages.py", "AI message responses"),
-                18: ("ais/importresources.py", "AI resource import management"),
-                # 19: ("ais/setprices.py", "AI price setting for produced goods"), # This is now part of managepublicsalesandprices.py
+                18: ("ais/adjustimports.py", "AI resource import management"),
                 20: ("ais/delegateBusinesses.py", "AI Business Delegation") # Example time, adjust as needed
             }
             

@@ -277,7 +277,7 @@ The AI wage adjustment system:
 
 ### Resource Import Management (Uses Kinos Engine API)
 
-**Implementation**: `backend/ais/importresources.py`  
+**Implementation**: `backend/ais/adjustimports.py`  
 **Schedule**: Daily at 1:00 AM UTC
 
 AI citizens strategically set up resource imports for their buildings (via la fonction `send_import_strategy_request`):
