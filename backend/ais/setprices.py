@@ -350,7 +350,7 @@ Here's your current situation:
 - Each building can produce different types of resources
 - You need to set a competitive price for each resource
 
-Please analyze the contract and set appropriate prices for each resource in each of your buildings. Consider:
+Please analyze the provided data and set appropriate prices for ALL SELLABLE resources in EACH of your buildings. Consider:
 1. `importPrice`: The cost to import the resource. Selling below this is usually a loss unless inputs are very cheap.
 2. `currentPriceInThisBuilding`: The price you are currently charging for this resource in this specific building.
 3. `globalAverageSellPrice`: The average price this resource is sold for across all public sell contracts in Venice.
