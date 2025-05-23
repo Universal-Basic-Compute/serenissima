@@ -67,7 +67,7 @@ def process(
         log.info(f"Activity {activity_guid} is delivering to merchant_galley {to_building_id}. "
                  f"This signifies the galley's arrival. No resource transfer or financial processing needed here.")
         # The citizen's position will be updated by the main loop in processActivities.py
-        # Resources are already considered "in" the galley, owned by "Italia".
+        # Resources are already considered "in" the galley, owned by the merchant.
         # Financials are deferred.
         return True # Activity is successfully processed.
 
