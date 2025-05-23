@@ -1709,7 +1709,8 @@ def process_final_deliveries_from_galley(tables: Dict[str, Table], citizens_pool
                         "StartDate": start_date_iso, # Expected to be Venice time ISO
                         "EndDate": end_date_iso,     # Expected to be Venice time ISO
                         "Priority": 9, # Priorité élevée pour la livraison finale
-                        "Notes": f"🚢 Delivering resources from galley {current_galley_custom_id} to {buyer_building_custom_id} for contract {original_contract_id}."
+                        "Notes": f"🚢 Delivering resources from galley {current_galley_custom_id} to {buyer_building_custom_id} for contract {original_contract_id}.",
+                        "Status": "created"
                     }
                     try:
                         created_activity = tables['activities'].create(final_delivery_payload)

@@ -59,7 +59,8 @@ def try_create(
             "EndDate": end_date_iso,     # Expected to be Venice time ISO string
             "Path": path_json_str,
             "Notes": notes,
-            "Priority": 10 # High priority to clear the galley
+            "Priority": 10, # High priority to clear the galley
+            "Status": "created"
         }
         
         activity = tables['activities'].create(activity_payload)

@@ -61,7 +61,8 @@ def try_create(
             "EndDate": end_time_venice.isoformat(),
             "Path": json.dumps(path_data.get('path', [])),
             "Transporter": transporter, # Add Transporter field
-            "Notes": f"🚚 Fetching **{amount:,.0f}** units of **{resource_type}** from **{from_building_name}** to **{to_building_name}**"
+            "Notes": f"🚚 Fetching **{amount:,.0f}** units of **{resource_type}** from **{from_building_name}** to **{to_building_name}**",
+            "Status": "created"
         }
         
         activity = tables['activities'].create(activity_payload)

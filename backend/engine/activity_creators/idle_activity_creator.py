@@ -47,7 +47,8 @@ def try_create(
             "CreatedAt": now_venice.isoformat(),
             "StartDate": now_venice.isoformat(),
             "EndDate": end_date_iso, # Expected to be Venice time ISO string
-            "Notes": notes
+            "Notes": notes,
+            "Status": "created"
         }
         activity = tables['activities'].create(activity_payload)
         

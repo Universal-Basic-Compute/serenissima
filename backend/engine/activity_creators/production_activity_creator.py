@@ -48,7 +48,8 @@ def try_create(
             "Notes": f"⚒️ Producing {output_desc} from {input_desc}",
             "RecipeInputs": json.dumps(inputs),
             "RecipeOutputs": json.dumps(outputs),
-            "RecipeCraftMinutes": craft_minutes # Store the craft minutes for this recipe
+            "RecipeCraftMinutes": craft_minutes, # Store the craft minutes for this recipe
+            "Status": "created"
         }
         activity = tables['activities'].create(activity_payload)
         

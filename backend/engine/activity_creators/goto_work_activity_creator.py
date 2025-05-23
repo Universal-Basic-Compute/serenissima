@@ -136,7 +136,8 @@ def try_create(
             "EndDate": end_date,     # Expected to be Venice time ISO string from path_data or calculated
             "Path": path_json,
             "Transporter": transporter, # Add Transporter field
-            "Notes": "🏢 **Going to work**"
+            "Notes": "🏢 **Going to work**",
+            "Status": "created"
         }
         activity = tables['activities'].create(activity_payload)
         

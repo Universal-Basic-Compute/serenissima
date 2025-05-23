@@ -37,7 +37,8 @@ def try_create_eat_from_inventory_activity(
             "EndDate": end_time_venice.isoformat(),
             "Notes": f"🍲 Eating {amount_to_eat:.1f} {food_resource_type} from personal inventory.",
             "ResourceId": food_resource_type, # What is being eaten
-            "Amount": amount_to_eat          # How much is being eaten
+            "Amount": amount_to_eat,          # How much is being eaten
+            "Status": "created"
         }
         activity = tables['activities'].create(activity_payload)
         
@@ -86,7 +87,8 @@ def try_create_eat_at_home_activity(
                 "EndDate": end_time_venice.isoformat(),
                 "Notes": f"🍲 Eating {amount_to_eat:.1f} {food_resource_type} at home.",
                 "ResourceId": food_resource_type,
-                "Amount": amount_to_eat
+                "Amount": amount_to_eat,
+                "Status": "created"
             }
             activity = tables['activities'].create(activity_payload)
             
@@ -139,7 +141,8 @@ def try_create_eat_at_tavern_activity(
             "CreatedAt": now_venice.isoformat(),
             "StartDate": now_venice.isoformat(),
             "EndDate": end_time_venice.isoformat(),
-            "Notes": f"🍲 Eating a meal at the tavern."
+            "Notes": f"🍲 Eating a meal at the tavern.",
+            "Status": "created"
             # Specifics like cost or food type consumed can be handled by the processor
         }
         activity = tables['activities'].create(activity_payload)
