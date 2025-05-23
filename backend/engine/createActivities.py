@@ -1068,7 +1068,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
                 return True
             
             is_at_workplace = _calculate_distance_meters(citizen_position, workplace_position) < 20
-            if is_at_workplace:
+            if is_at_workplace: # Citizen is at their workplace
                 log.info(f"Citizen {citizen_custom_id} is at workplace {workplace_custom_id}. Checking for production/fetching.")
                 building_type = workplace['fields'].get('Type')
                 building_type_info = get_building_type_info(building_type)
@@ -1117,10 +1117,33 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
                 log.info(f"No production or fetching for {citizen_custom_id} at {workplace_custom_id}. Creating idle.")
                 idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
                 try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso)
-            else: # Not at workplace
+            else: # Not at workplace, needs to go to work
+                # Check if citizen is at home before creating goto_work
+                home_for_departure_check = get_citizen_home(tables, citizen_custom_id) # Re-fetch or use existing `home` if available
+                is_at_home_for_work_departure = False
+                citizen_pos_str_for_pickup = citizen['fields'].get('Position') # Current position as string
+
+                if home_for_departure_check and citizen_position:
+                    home_pos_for_departure_check = _get_building_position_coords(home_for_departure_check)
+                    if home_pos_for_departure_check:
+                        is_at_home_for_work_departure = _calculate_distance_meters(citizen_position, home_pos_for_departure_check) < 20
+                
+                log.info(f"Citizen {citizen_username} needs to go to work. Is at home: {is_at_home_for_work_departure}.")
+
                 path_data = get_path_between_points(citizen_position, workplace_position)
                 if path_data and path_data.get('success'):
-                    try_create_goto_work_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, workplace_airtable_id, path_data) # Pass Airtable Record ID
+                    try_create_goto_work_activity(
+                        tables, 
+                        citizen_custom_id, 
+                        citizen_username, 
+                        citizen_airtable_record_id, 
+                        workplace_airtable_id, # Airtable Record ID of workplace
+                        path_data,
+                        home_for_departure_check, # Pass home record
+                        resource_defs,            # Pass global resource definitions
+                        is_at_home_for_work_departure, # Pass is_at_home status
+                        citizen_pos_str_for_pickup # Pass citizen's current position string
+                    )
                 else:
                     log.warning(f"Path to workplace {workplace_custom_id} failed for {citizen_custom_id}. Creating idle.")
                     idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
