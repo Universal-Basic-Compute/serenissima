@@ -100,7 +100,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
       nameOverlayPadding: 'p-1',
       nameText: 'text-xs',
       socialClassText: 'text-[0.6rem] px-1 py-0', // Tiny text for social class
-      ducatsOverlayPos: 'top-1 right-1',
+      // ducatsOverlayPos: 'top-1 right-1', // Removed
       ducatsIconSize: 'text-[0.5rem]',
       ducatsTextSize: 'text-[0.6rem]',
       // Username and Motto below
@@ -113,7 +113,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
       nameOverlayPadding: 'p-2',
       nameText: 'text-sm',
       socialClassText: 'text-xs',
-      ducatsOverlayPos: 'top-1.5 right-1.5',
+      // ducatsOverlayPos: 'top-1.5 right-1.5', // Removed
       ducatsIconSize: 'text-xs',
       ducatsTextSize: 'text-sm',
       username: 'text-xs truncate mt-1',
@@ -125,7 +125,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
       nameOverlayPadding: 'p-3',
       nameText: 'text-lg',
       socialClassText: 'text-sm',
-      ducatsOverlayPos: 'top-2 right-2',
+      // ducatsOverlayPos: 'top-2 right-2', // Removed
       ducatsIconSize: 'text-sm',
       ducatsTextSize: 'text-base',
       username: 'text-sm truncate mt-1',
@@ -137,7 +137,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
       nameOverlayPadding: 'p-4',
       nameText: 'text-xl',
       socialClassText: 'text-base',
-      ducatsOverlayPos: 'top-3 right-3',
+      // ducatsOverlayPos: 'top-3 right-3', // Removed
       ducatsIconSize: 'text-base',
       ducatsTextSize: 'text-lg',
       username: 'text-base truncate mt-2',
@@ -244,9 +244,11 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
         
         {/* Name and social class overlay */}
         <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent ${dim.nameOverlayPadding}`}>
-          <h3 className={`${dim.nameText} text-white font-serif font-bold truncate`}>
-            {displayData.firstName} {displayData.lastName}
-          </h3>
+          {!(displayData.firstName === "Unknown" && displayData.lastName === "Citizen") && (
+            <h3 className={`${dim.nameText} text-white font-serif font-bold truncate`}>
+              {displayData.firstName} {displayData.lastName}
+            </h3>
+          )}
           <div className="flex justify-between items-center">
             <div className={`${dim.socialClassText} px-2 py-0.5 rounded-full font-medium inline-block ${socialClassStyle}`}>
               {displayData.socialClass}
@@ -254,18 +256,7 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
           </div>
         </div>
 
-        {/* Ducats display overlay */}
-        {showDucats && displayData.Ducats !== undefined && (
-          <div className={`absolute ${dim.ducatsOverlayPos} bg-black/70 text-white px-2 py-1 rounded-lg shadow-md flex items-center`}>
-            <span className={`${dim.ducatsIconSize} mr-1`}>⚜️</span>
-            <AnimatedDucats 
-              value={displayData.Ducats} 
-              suffix="" 
-              prefix=""
-              className={`${dim.ducatsTextSize} font-bold inline truncate`}
-            />
-          </div>
-        )}
+        {/* Ducats display overlay - REMOVED */}
       </div>
       
       {/* Username and Family Motto below the image block */}
@@ -275,6 +266,19 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
       {(displayData.familyMotto) && showMotto && (
         <div className={`${dim.name} italic text-amber-600 text-center mt-1 w-full font-light motto-text line-clamp-2`}>
           "{displayData.familyMotto}"
+        </div>
+      )}
+      
+      {/* New Ducats display area */}
+      {showDucats && displayData.Ducats !== undefined && (
+        <div className={`text-center mt-2 w-full flex items-center justify-center text-amber-100`}> {/* Applied text-amber-100 for visibility on dark backgrounds if any */}
+          <span className={`${dim.ducatsIconSize} mr-1`}>⚜️</span>
+          <AnimatedDucats 
+            value={displayData.Ducats} 
+            suffix="" 
+            prefix=""
+            className={`${dim.ducatsTextSize} font-bold inline truncate`} // Reused existing ducats text size
+          />
         </div>
       )}
     </div>
