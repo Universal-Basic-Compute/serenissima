@@ -101,6 +101,15 @@ export default function IsometricViewer({ activeView, fullWaterGraphData }: Isom
   const [currentHoverState, setCurrentHoverState] = useState<HoverState>(hoverStateService.getState());
   // const [fullWaterGraphData, setFullWaterGraphData] = useState<{ waterPoints: any[] } | null>(null); // State removed, will come from props
   
+  // State for path statistics
+  const [pathStats, setPathStats] = useState<{
+    totalDistance: number;
+    walkingDistance: number;
+    waterDistance: number;
+    estimatedTimeMinutes: number;
+    transportCost: number;
+  } | null>(null);
+
   // State for bridge orientation (now part of interactionMode)
   const [selectedBridgeForOrientationId, setSelectedBridgeForOrientationId] = useState<string | null>(null);
   const [orientingBridgeAngle, setOrientingBridgeAngle] = useState<number | null>(null);

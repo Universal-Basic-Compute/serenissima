@@ -596,6 +596,46 @@ export default function TwoDPage() {
     };
   }, [polygons, buildings]); // Remove emptyBuildingPoints from dependencies
 
+  // Effect to calculate path statistics when transportPath changes
+  useEffect(() => {
+    if (activeView === 'transport' && transportPath.length > 0) {
+      let newTotalDistance = 0;
+      let newWalkingDistance = 0;
+      let newWaterDistance = 0;
+      let totalGondolaDistanceKm = 0;
+
+      for (let i = 0; i < transportPath.length - 1; i++) {
+        const point1 = transportPath[i];
+        const point2 = transportPath[i + 1];
+        const segmentDistance = calculateDistance({ lat: point1.lat, lng: point1.lng }, { lat: point2.lat, lng: point2.lng });
+        newTotalDistance += segmentDistance;
+
+        if (point1.transportMode === 'gondola') {
+          newWaterDistance += segmentDistance;
+          totalGondolaDistanceKm += segmentDistance / 1000;
+        } else {
+          newWalkingDistance += segmentDistance;
+        }
+      }
+
+      const walkingTimeHours = newWalkingDistance / 1000 / 3.5; // Assuming 3.5 km/h walking speed
+      const waterTimeHours = newWaterDistance / 1000 / 10;    // Assuming 10 km/h gondola speed
+      const newEstimatedTimeMinutes = Math.round((walkingTimeHours + waterTimeHours) * 60);
+      
+      const newTransportCost = totalGondolaDistanceKm > 0 ? 10 + (5 * totalGondolaDistanceKm) : 0;
+
+      setPathStats({
+        totalDistance: newTotalDistance,
+        walkingDistance: newWalkingDistance,
+        waterDistance: newWaterDistance,
+        estimatedTimeMinutes: newEstimatedTimeMinutes,
+        transportCost: newTransportCost,
+      });
+    } else {
+      setPathStats(null); // Clear stats if no path or not in transport view
+    }
+  }, [transportPath, activeView, calculateDistance]);
+
   // State for loan panel
   const [showLoanPanel, setShowLoanPanel] = useState<boolean>(false);
   // State for transport debug panel
