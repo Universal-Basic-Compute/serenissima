@@ -686,7 +686,7 @@ def create_goto_work_activity(tables, citizen_custom_id: str, citizen_username: 
         
         if not end_date:
             # If no end date provided, use a default duration
-            end_time = now + datetime.timedelta(hours=1)
+            end_time = now_venice + datetime.timedelta(hours=1)
             end_date = end_time.isoformat()
         
         # Ensure path is a valid JSON string
