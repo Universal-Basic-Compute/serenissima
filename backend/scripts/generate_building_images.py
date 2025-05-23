@@ -38,26 +38,69 @@ BUILDINGS_IMAGE_DIR = os.path.join(os.getcwd(), 'public', 'images', 'buildings')
 
 def _fetch_prompt_from_kinos(building_data: Dict[str, Any]) -> Optional[str]:
     """
-    Fetches a pre-generated or dynamically generated prompt from the Kinos service.
-    Kinos is expected to return a full prompt suitable for Ideogram.
+    Fetches a pre-generated or dynamically generated prompt from the Kinos service
+    by sending a detailed message to a Kin.
     """
-    kinos_api_url = os.environ.get("KINOS_API_URL", "https://kinos.internal/api/generate-ideogram-prompt")
+    # Kinos API configuration
     kinos_api_key = os.environ.get("KINOS_API_KEY")
-
     if not kinos_api_key:
         log.warning("KINOS_API_KEY not set. Cannot fetch prompt from Kinos.")
         return None
-    if not kinos_api_url:
-        log.warning("KINOS_API_URL not set. Cannot fetch prompt from Kinos.")
-        return None
+
+    kinos_api_base_url = os.environ.get("KINOS_API_BASE_URL", "https://api.kinos-engine.ai/v2")
+    kinos_blueprint_id = os.environ.get("KINOS_BLUEPRINT_ID", "serenissima")
+    kinos_kin_id = os.environ.get("KINOS_KIN_ID_PROMPT_GENERATION", "ConsiglioDeiDieci")
+    kinos_channel_id = os.environ.get("KINOS_CHANNEL_ID_BUILDING_IMAGES", "ConsiglioDeiDieci_building_images")
+    kinos_model = os.environ.get("KINOS_MODEL_PROMPT_GENERATION", "claude-sonnet-4-20250514")
+
+    kinos_api_url = f"{kinos_api_base_url}/blueprints/{kinos_blueprint_id}/kins/{kinos_kin_id}/messages"
+
+    # Construct the 'content' for the Kinos message
+    content_lines = [
+        "Please generate an Ideogram prompt for an image of a 15th-century Venetian building with the following details:",
+        f"- Name: {building_data.get('name', 'N/A')}",
+        f"- Category: {building_data.get('category', 'N/A')}",
+    ]
+    if building_data.get('subcategory'):
+        content_lines.append(f"- Subcategory: {building_data.get('subcategory')}")
+    if building_data.get('description'):
+        content_lines.append(f"- Description: {building_data.get('description')}")
+    if building_data.get('completed_building_3d_prompt'):
+        content_lines.append(f"- Specific 3D Prompt Elements: {building_data.get('completed_building_3d_prompt')}")
+    # The 'base_descriptive_prompt' is a summary and might be redundant if other fields are detailed enough.
+    # Including it for completeness, Kinos can decide if it's useful.
+    content_lines.append(f"- Base Descriptive Summary: {building_data.get('base_descriptive_prompt', 'N/A')}")
+    content_lines.append("\nEnsure the generated Ideogram prompt follows the system instructions to create a visually distinct and UX-friendly image.")
+    kinos_message_content = "\n".join(content_lines)
+
+    # Construct the 'addSystem' instructions for Kinos
+    add_system_instructions = """
+You are an expert prompt engineer for the Ideogram image generation service.
+Your task is to generate a concise, effective, and descriptive Ideogram prompt based on the provided building details.
+The Ideogram prompt should:
+1. Start with a clear subject, e.g., "A detailed illustration of a [Building Name], a [Category] building..."
+2. Incorporate key architectural details from the 15th-century Venetian context.
+3. Emphasize visual distinctiveness and a clear silhouette for game asset identification.
+4. Include style cues like "realistic textures (weathered stone, brick, plaster)", "natural lighting with warm Mediterranean sunlight", "historically accurate details".
+5. Specify "Square format image" and always include "--ar 1:1".
+6. If "Specific 3D Prompt Elements" are provided in the details, integrate their essence while maintaining overall stylistic consistency for UX.
+7. Tailor descriptive words and color palettes based on the building's category and name (e.g., residential, commercial, industrial, civic).
+    - Residential: Venetian Gothic, ornate windows, balconies. Palazzos: grand facade, marble. Modest homes: terracotta, ochre.
+    - Commercial: Functional, identifiable. Workshops: signs of craft, earthy tones. Markets: open-air, vibrant awnings. Warehouses: sturdy, practical, muted colors. Taverns: welcoming, warm wood.
+    - Industrial: Robust, functional. Shipyards: slipways, timber. Furnaces: chimneys, glowing light, utilitarian greys.
+    - Civic/Religious: Impressive, prominent. Churches: iconography, bell tower, Istrian stone, mosaics. Government: formal, imposing, symbols of state.
+    - Infrastructure: Bridges: stone/wood, arch design. Docks: wooden/stone, mooring posts. Wells: ornate wellhead.
+8. Ensure the Venetian setting is clear, mentioning canals or campos if not implied by the category.
+9. The final Ideogram prompt should be a single, coherent paragraph.
+Do not include any conversational preamble or postamble in your response. Only output the generated Ideogram prompt.
+"""
 
     payload = {
-        "building_details": building_data,
-        "target_service": "ideogram",
-        "context": {
-            "kin_channel": "ConsiglioDeiDieci", # As per user request context
-            "request_type": "images_building_prompt"
-        }
+        "content": kinos_message_content,
+        "model": kinos_model,
+        "addSystem": add_system_instructions.strip(),
+        "channel_id": kinos_channel_id,
+        "history_length": 0 # No history needed for this type of direct prompt generation request
     }
 
     headers = {
@@ -66,24 +109,26 @@ def _fetch_prompt_from_kinos(building_data: Dict[str, Any]) -> Optional[str]:
     }
 
     try:
-        log.info(f"Requesting prompt from Kinos for {building_data.get('name')} at {kinos_api_url}")
-        response = requests.post(kinos_api_url, json=payload, headers=headers, timeout=15)
+        log.info(f"Sending message to Kinos ({kinos_kin_id}) for {building_data.get('name')} at {kinos_api_url}")
+        log.debug(f"Kinos payload: {json.dumps(payload, indent=2)}")
+        response = requests.post(kinos_api_url, json=payload, headers=headers, timeout=30) # Increased timeout
         response.raise_for_status()  # Raise HTTPError for bad responses (4XX or 5XX)
         
         response_data = response.json()
-        generated_prompt = response_data.get("prompt")
+        # The Kinos message response has "content" which should be the Ideogram prompt
+        generated_prompt = response_data.get("content")
 
         if generated_prompt and isinstance(generated_prompt, str):
-            log.info(f"Successfully fetched prompt from Kinos for {building_data.get('name')}")
-            return generated_prompt
+            log.info(f"Successfully received Ideogram prompt from Kinos for {building_data.get('name')}")
+            return generated_prompt.strip()
         else:
-            log.error(f"Kinos response did not contain a valid prompt string for {building_data.get('name')}. Response: {response_data}")
+            log.error(f"Kinos message response did not contain a valid 'content' string for {building_data.get('name')}. Response: {response_data}")
             return None
     except requests.exceptions.Timeout:
-        log.error(f"Timeout calling Kinos API for {building_data.get('name')}")
+        log.error(f"Timeout calling Kinos API for {building_data.get('name')} at {kinos_api_url}")
         return None
     except requests.exceptions.RequestException as e:
-        log.error(f"Error calling Kinos API for {building_data.get('name')}: {e}")
+        log.error(f"Error calling Kinos API for {building_data.get('name')} ({kinos_api_url}): {e}")
         return None
     except json.JSONDecodeError as e:
         log.error(f"Error decoding JSON response from Kinos for {building_data.get('name')}: {e}. Response text: {response.text[:500]}")
