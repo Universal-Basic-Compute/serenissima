@@ -493,6 +493,8 @@ export class ProblemService {
       let processedCount = 0;
 
       buildings.forEach(building => {
+        processedCount++; // Increment for every building processed
+
         const owner = building.owner && typeof building.owner === 'string' ? building.owner.trim() : null;
         const category = building.category && typeof building.category === 'string' ? building.category.toLowerCase() : null;
         const buildingId = building.id || building.buildingId || `unknown_building_${Date.now()}_${Math.random()}`;
@@ -500,21 +502,32 @@ export class ProblemService {
         const rentAmount = building.rentAmount; // Can be number, null, or undefined
         const ranBy = building.ranBy && typeof building.ranBy === 'string' ? building.ranBy.trim() : null;
 
-        // Basic filtering: must have an owner, be a home or business.
-        // If rentAmount is explicitly positive, no "zero rent" problem.
-        if (!owner || !(category === 'home' || category === 'business') || (rentAmount !== undefined && rentAmount !== null && rentAmount > 0)) {
-          return;
-        }
-        
-        // If a specific username is provided, only create problems for that owner.
-        if (username && owner !== username) {
-          return;
+        let skipReason = "";
+
+        if (!owner) {
+          skipReason = "No owner";
+        } else if (!(category === 'home' || category === 'business')) {
+          skipReason = `Invalid category: '${category}'`;
+        } else if (rentAmount !== undefined && rentAmount !== null && rentAmount > 0) {
+          skipReason = `Rent is positive: ${rentAmount}`;
+        } else if (username && owner !== username) { // This check applies if a specific username is targeted
+          skipReason = `Owner '${owner}' does not match target username '${username}'`;
         }
 
-        if (processedCount < 5) {
-            console.log(`[ProblemService] detectZeroRentAmountBuildings: Checking Building ${buildingId} (Name: ${buildingName}, Owner: ${owner}, Category: ${category}, RentAmount: ${rentAmount}, RanBy: ${ranBy})`);
+        if (skipReason) {
+          // Log more skipped items if a specific user is targeted, or fewer for "all users" run.
+          if (username || processedCount < 10) { 
+            console.log(`[ProblemService] detectZeroRentAmountBuildings (Processed: ${processedCount}): SKIPPING Building ${buildingId} (Name: ${buildingName}, Owner: ${owner}, Category: ${category}, RentAmount: ${rentAmount}, RanBy: ${ranBy}). Reason: ${skipReason}`);
+          }
+          return; // Skip this building
         }
-        processedCount++;
+        
+        // Log for buildings that PASS the initial skip checks and are being further evaluated.
+        // Log more if a username is specified, or fewer for "all" (e.g., first few passing, or first few problems found).
+        const problemsFoundCount = Object.keys(problems).length;
+        if (username || processedCount < 10 || (problemsFoundCount < 5 && processedCount < 50) ) { 
+            console.log(`[ProblemService] detectZeroRentAmountBuildings (Processed: ${processedCount}, ProblemsFoundSoFar: ${problemsFoundCount}): CHECKING Building ${buildingId} (Name: ${buildingName}, Owner: ${owner}, Category: ${category}, RentAmount: ${rentAmount}, RanBy: ${ranBy}) for problem generation.`);
+        }
         
         let problemTypeSpecific = '';
         let title = '';
