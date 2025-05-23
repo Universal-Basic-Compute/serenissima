@@ -138,7 +138,7 @@ export const HoverTooltip: React.FC = () => {
   
   const handleCitizenHover = (state: HoverState) => {
     if (state.data && state.data.citizen) {
-      console.log('TOOLTIP: Citizen data available:', state.data.citizen);
+      console.log('TOOLTIP: Citizen data received from HoverStateService (state.data.citizen):', JSON.stringify(state.data.citizen)); // Log the received citizen object
       const citizen = state.data.citizen;
       
       // Ensure citizen data is safe for rendering
@@ -254,7 +254,7 @@ export const HoverTooltip: React.FC = () => {
     if (citizen) {
       // If we have the citizen data, display it
       // Ensure we have the correct property names for image and social class
-      const imageUrl = citizen.imageUrl || `/images/citizens/${citizen.username || 'default'}.jpg`;
+      const imageUrl = citizen.imageUrl || `/images/citizens/${citizen.id || 'default'}.jpg`; // Use citizen.id from safeCitizen
     
       console.log('TOOLTIP: Using image URL:', imageUrl);
     

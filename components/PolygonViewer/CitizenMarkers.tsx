@@ -189,6 +189,9 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
       ...citizen,
       activityNotes: latestNotes
     };
+
+    console.log('[CitizenMarkers] handleCitizenHover: latestNotes:', latestNotes);
+    console.log('[CitizenMarkers] handleCitizenHover: citizenWithNotes being sent to hoverStateService:', citizenWithNotes);
     
     hoverStateService.setHoveredCitizen(citizenWithNotes);
   };
