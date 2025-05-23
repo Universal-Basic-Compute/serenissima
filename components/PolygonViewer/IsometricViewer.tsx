@@ -47,8 +47,13 @@ export default function IsometricViewer({ activeView, setActiveView, fullWaterGr
   const loadingImageFiles = [
     'renaissance-architectural-construction.png',
     'renaissance-venetian-merchant-s-ledger.png',
-    'secretive-venetian-council-of-ten-meeting.png'
-    // Add more image names here if available
+    'secretive-venetian-council-of-ten-meeting.png',
+    '1.png',
+    '2.png',
+    '3.png',
+    '4.png',
+    '5.png',
+    '6.png'
   ];
   const initialLoadingImage = loadingImageFiles.length > 0
     ? `/images/loading/${loadingImageFiles[Math.floor(Math.random() * loadingImageFiles.length)]}`
