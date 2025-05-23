@@ -827,17 +827,23 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
     # --- Perform Actual Operations ---
 
     # 1. Update Original Contracts with Merchant Details
-    log.info(f"Updating {len(processed_contract_airtable_ids)} original contracts with merchant {selected_merchant_username} and galley {galley_building_id}.")
+    # Only update contracts that were actually processed and included in this galley's batch.
+    log.info(f"Updating {len(processed_contract_airtable_ids)} specific original contracts with merchant {selected_merchant_username} and galley {galley_building_id} as SellerBuilding.")
     for contract_airtable_id_to_update in processed_contract_airtable_ids:
         try:
+            # Fetch the contract to get its custom ID for logging, if needed
+            contract_record_for_log = tables['contracts'].get(contract_airtable_id_to_update)
+            contract_custom_id_log = contract_record_for_log['fields'].get('ContractId', contract_airtable_id_to_update) if contract_record_for_log else contract_airtable_id_to_update
+            
             update_payload_contract = {
                 "Seller": selected_merchant_username,
                 "SellerBuilding": galley_building_id, # Custom ID of the galley
-                "Transporter": selected_merchant_username,
-                "Status": "processing_by_merchant" # Optional: update status
+                # "Transporter" field on the original contract remains NULL or as is.
+                # It refers to the transporter from the galley to the buyer, not the merchant importing.
+                "Status": "processing_by_merchant" 
             }
             tables['contracts'].update(contract_airtable_id_to_update, update_payload_contract)
-            log.info(f"Updated contract (Airtable ID: {contract_airtable_id_to_update}) with merchant details.")
+            log.info(f"Updated contract {contract_custom_id_log} (Airtable ID: {contract_airtable_id_to_update}) with Seller='{selected_merchant_username}', SellerBuilding='{galley_building_id}'.")
         except Exception as e_update_contract:
             log.error(f"Error updating contract (Airtable ID: {contract_airtable_id_to_update}) with merchant details: {e_update_contract}")
             # Decide if this is critical enough to stop the whole batch. For now, log and continue.
