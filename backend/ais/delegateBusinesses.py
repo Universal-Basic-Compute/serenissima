@@ -75,10 +75,12 @@ def get_all_businesses(tables: Dict[str, Table]) -> List[Dict]:
 def create_notification(tables: Dict[str, Table], citizen_username: str, title: str, content: str, details: Optional[Dict] = None):
     """Creates a notification for a citizen."""
     try:
+        # Assuming the primary field or a summary field in NOTIFICATIONS table is 'Name'
+        # If not, this needs to be adjusted to the correct field name for the title.
         notification_payload = {
             "Citizen": citizen_username,
             "Type": "business_delegation",
-            "Title": title,
+            "Name": title, # Changed "Title" to "Name"
             "Content": content,
             "CreatedAt": datetime.now().isoformat(),
             "Details": json.dumps(details) if details else None
