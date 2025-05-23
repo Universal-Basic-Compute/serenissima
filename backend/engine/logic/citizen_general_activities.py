@@ -61,6 +61,8 @@ SOCIAL_CLASS_VALUE = {"Nobili": 4, "Cittadini": 3, "Popolani": 2, "Facchini": 1,
 TAVERN_MEAL_COST_ESTIMATE = 10 # Ducats
 # VENICE_TIMEZONE, NIGHT_START_HOUR, NIGHT_END_HOUR, SHOPPING_START_HOUR, SHOPPING_END_HOUR
 # are effectively handled by is_nighttime_helper and is_shopping_time_helper from activity_helpers.py
+# However, NIGHT_END_HOUR is needed locally for stay duration calculation.
+NIGHT_END_HOUR_FOR_STAY = 6 # Define locally if used for stay duration logic
 
 def process_citizen_activity(
     tables: Dict[str, Table], 
@@ -411,11 +413,11 @@ def process_citizen_activity(
                     is_at_inn = _calculate_distance_meters(citizen_position, inn_position_coords) < 20
                     if is_at_inn:
                         log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} is already at inn {inn_custom_id}. Creating stay activity.{LogColors.ENDC}")
-                        venice_now = now_utc_dt.astimezone(pytz.timezone('Europe/Rome')) # Use VENICE_TIMEZONE from helpers
-                        if venice_now.hour < is_nighttime_helper.NIGHT_END_HOUR: # Access constant via helper if moved
-                            end_time_venice = venice_now.replace(hour=is_nighttime_helper.NIGHT_END_HOUR, minute=0, second=0, microsecond=0)
+                        venice_now = now_utc_dt.astimezone(VENICE_TIMEZONE) # Use imported VENICE_TIMEZONE
+                        if venice_now.hour < NIGHT_END_HOUR_FOR_STAY:
+                            end_time_venice = venice_now.replace(hour=NIGHT_END_HOUR_FOR_STAY, minute=0, second=0, microsecond=0)
                         else:
-                            end_time_venice = (venice_now + datetime.timedelta(days=1)).replace(hour=is_nighttime_helper.NIGHT_END_HOUR, minute=0, second=0, microsecond=0)
+                            end_time_venice = (venice_now + datetime.timedelta(days=1)).replace(hour=NIGHT_END_HOUR_FOR_STAY, minute=0, second=0, microsecond=0)
                         stay_end_time_utc_iso = end_time_venice.astimezone(pytz.UTC).isoformat()
                         try_create_stay_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, inn_custom_id, stay_location_type="inn", end_time_utc_iso=stay_end_time_utc_iso) 
                     else:
@@ -456,11 +458,11 @@ def process_citizen_activity(
             
             is_at_home = _calculate_distance_meters(citizen_position, home_position) < 20
             if is_at_home:
-                venice_now = now_utc_dt.astimezone(pytz.timezone('Europe/Rome')) # Use VENICE_TIMEZONE from helpers
-                if venice_now.hour < is_nighttime_helper.NIGHT_END_HOUR: # Access constant via helper if moved
-                    end_time_venice = venice_now.replace(hour=is_nighttime_helper.NIGHT_END_HOUR, minute=0, second=0, microsecond=0)
+                venice_now = now_utc_dt.astimezone(VENICE_TIMEZONE) # Use imported VENICE_TIMEZONE
+                if venice_now.hour < NIGHT_END_HOUR_FOR_STAY:
+                    end_time_venice = venice_now.replace(hour=NIGHT_END_HOUR_FOR_STAY, minute=0, second=0, microsecond=0)
                 else:
-                    end_time_venice = (venice_now + datetime.timedelta(days=1)).replace(hour=is_nighttime_helper.NIGHT_END_HOUR, minute=0, second=0, microsecond=0)
+                    end_time_venice = (venice_now + datetime.timedelta(days=1)).replace(hour=NIGHT_END_HOUR_FOR_STAY, minute=0, second=0, microsecond=0)
                 stay_end_time_utc_iso = end_time_venice.astimezone(pytz.UTC).isoformat()
                 log.info(f"{LogColors.OKBLUE}Resident {citizen_username} is at home {home_custom_id}. Creating stay activity.{LogColors.ENDC}")
                 try_create_stay_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, home_custom_id, stay_location_type="home", end_time_utc_iso=stay_end_time_utc_iso) 
