@@ -72,8 +72,8 @@ const BuildingCreationPanel: React.FC<BuildingCreationPanelProps> = ({ selectedP
       const actualSelectedPointType = selectedPoint.pointType;
 
       if (actualSelectedPointType === 'land') {
-        // Pour les points terrestres, autoriser les bâtiments spécifiquement pour 'land' ou 'BuildingPoint'
-        return buildingDesignatedPointType === 'land' || buildingDesignatedPointType === 'BuildingPoint';
+        // Pour les points terrestres, autoriser les bâtiments spécifiquement pour 'land' ou 'building'
+        return buildingDesignatedPointType === 'land' || buildingDesignatedPointType === 'building';
       } else {
         // Pour les points 'canal' ou 'bridge', autoriser une correspondance directe ou les bâtiments 'land' comme solution de repli
         return buildingDesignatedPointType === actualSelectedPointType || buildingDesignatedPointType === 'land';
