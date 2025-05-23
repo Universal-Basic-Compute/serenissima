@@ -52,6 +52,7 @@ export default function IsometricViewer({ activeView, fullWaterGraphData }: Isom
     ? `/images/loading/${loadingImageFiles[Math.floor(Math.random() * loadingImageFiles.length)]}`
     : null;
   const [currentLoadingImage, setCurrentLoadingImage] = useState<string | null>(initialLoadingImage);
+  const [currentLoadingTip, setCurrentLoadingTip] = useState<string>('');
   // Add refs to track previous state
   const prevActiveView = useRef<ViewType | null>(null);
   const prevScale = useRef<number>(3);
@@ -773,7 +774,7 @@ number => {
     window.dispatchEvent(pathUpdateEvent);
   }, []);
 
-  // Effect for initial setup: setting loading states and starting timers/image load
+  // Effect for initial setup: setting loading states and starting timers/image load/tip selection
   useEffect(() => {
     console.log('IsometricViewer: Initial setup effect running...');
     setLoading(true);
@@ -786,6 +787,36 @@ number => {
       console.log('IsometricViewer: Minimum loading time elapsed.');
       setMinLoadingTimeElapsed(true);
     }, 3000); // 3 seconds
+
+    // Define and select a loading tip
+    const loadingTips = [
+      "Connect your wallet to establish your identity and access your $COMPUTE tokens.",
+      "Acquire land parcels to start building your Venetian empire; location is key!",
+      "Construct workshops to produce goods like textiles, glassware, or woodworking items.",
+      "Secure your supply chain: use the Contracts View to buy raw materials.",
+      "Sell your produced goods via the Contracts View or directly to other players.",
+      "The economic cycle: Land -> Buildings -> Businesses -> Resources -> Citizens -> Land. Master it!",
+      "Diversify your investments across districts and building types to mitigate risk.",
+      "Form strategic partnerships with other merchants for efficient supply chains.",
+      "Monitor contract price fluctuations in the Contracts View to maximize profits.",
+      "Consider vertical integration: control more steps in your supply chain for higher profits.",
+      "Fund public works to gain favor and influence decree proposals.",
+      "Guilds can coordinate buying/selling to influence contract prices collectively.",
+      "As a landowner, set strategic lease prices to attract tenants or block competitors.",
+      "Control transportation by acquiring land at chokepoints or building docks.",
+      "Higher social classes receive larger shares of daily treasury redistribution.",
+      "Achieve Nobili status by gaining over 10,000 Prestige through city contributions.",
+      "Earning over 100,000 Ducats daily can elevate you to Cittadini status.",
+      "Owning business buildings or running them can elevate you to Popolani status.",
+      "Cultivate a network for contract intelligence; information is power.",
+      "Use strategic lending for influence; debtors can become valuable allies.",
+      "Manipulate public perception by funding infrastructure that benefits your businesses.",
+      "Control access to Guild Leadership to shape industry regulations in your favor.",
+      "Weaponize decree proposals: craft rules that favor your business model.",
+      "Prepare for crises: stockpiling resources can turn disruptions into opportunities.",
+      "Layer your strategies: combine intelligence, alliances, and economic control for maximum effect."
+    ];
+    setCurrentLoadingTip(loadingTips[Math.floor(Math.random() * loadingTips.length)]);
 
     // Load the initially selected background image
     if (currentLoadingImage) {
@@ -3842,11 +3873,16 @@ number => {
           <img
             src={currentLoadingImage}
             alt="Venetian vista during loading"
-            className="max-w-xl max-h-[60vh] object-contain rounded-lg shadow-2xl mb-8 border-4 border-amber-600/50"
+            className="max-w-3xl max-h-[70vh] object-contain rounded-lg shadow-2xl mb-6 border-4 border-amber-600/50"
           />
         )}
-        <div className="bg-black/50 p-6 rounded-lg shadow-xl border-2 border-amber-500/70">
-          <p className="text-3xl font-serif text-amber-100 animate-pulse">Loading Venice...</p>
+        <div className="bg-black/60 p-6 rounded-lg shadow-xl border-2 border-amber-500/70 text-center">
+          <p className="text-3xl font-serif text-amber-100 animate-pulse mb-4">Loading Venice...</p>
+          {currentLoadingTip && (
+            <p className="text-sm font-sans text-amber-200 max-w-md">
+              {currentLoadingTip}
+            </p>
+          )}
         </div>
       </div>
       
