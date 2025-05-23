@@ -53,7 +53,8 @@ def get_all_ai_citizens(tables: Dict[str, Table]) -> List[Dict]:
     """Fetch all AI citizens, sorted by Ducats descending."""
     try:
         # Filter for IsAI = true and InVenice = true
-        ai_citizens = tables['citizens'].all(formula="AND({IsAI}=1, {InVenice}=1)", sort=[('-Ducats', 'desc')])
+        # Use sort=['-FieldName'] for compatibility with older pyairtable versions
+        ai_citizens = tables['citizens'].all(formula="AND({IsAI}=1, {InVenice}=1)", sort=['-Ducats'])
         log.info(f"Fetched {len(ai_citizens)} AI citizens.")
         return ai_citizens
     except Exception as e:
