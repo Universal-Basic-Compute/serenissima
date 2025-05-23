@@ -14,6 +14,9 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
   const [progress, setProgress] = useState(0);
   const [imageError, setImageError] = useState(false);
   const [hasError, setHasError] = useState(false);
+
+const CACHE_KEY_LOADING_IMAGES = 'loadingImagesList';
+const CACHE_DURATION_LOADING_IMAGES = 60 * 60 * 1000; // 1 heure en millisecondes
   
   // Force completion after the specified duration - simplified and more robust
   useEffect(() => {
@@ -61,81 +64,90 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
   }, [duration, onLoadingComplete]);
 
   useEffect(() => {
-    // Function to get random loading image - simplified with better error handling
-    const getRandomLoadingImage = async () => {
+    const setLoadingImageWithFallback = (imageUrl: string) => {
+      const fallbackImagePath = '/loading/fallback.jpg';
+      setLoadingImage(fallbackImagePath); // Set fallback immediately
+
+      const img = new window.Image();
+      img.onload = () => {
+        console.log('LoadingScreen: Image loaded successfully:', imageUrl);
+        setLoadingImage(imageUrl);
+        setImageError(false);
+      };
+      img.onerror = (e) => {
+        console.error('LoadingScreen: Error preloading image:', imageUrl, e);
+        // Fallback is already set.
+      };
+      img.src = imageUrl;
+    };
+
+    const fetchAndSetRandomImage = async () => {
       try {
-        console.log('Fetching loading images from API...');
-        
-        // Set a timeout for the fetch operation
+        console.log('LoadingScreen: Fetching loading images from API...');
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 3000);
-        
-        // Fetch the list of files from the loading directory
+
         const response = await fetch('/api/list-loading-images', {
           signal: controller.signal
         }).catch(error => {
-          console.warn('Fetch failed, using fallback image:', error);
+          console.warn('LoadingScreen: Fetch failed, using fallback image:', error);
           return null;
         });
-        
         clearTimeout(timeoutId);
-        
-        // If fetch failed or response is not ok, use fallback immediately
+
         if (!response || !response.ok) {
-          console.warn('API response not ok, using fallback image');
-          setLoadingImage('/loading/fallback.jpg');
+          console.warn('LoadingScreen: API response not ok, using fallback image');
+          setLoadingImage('/loading/fallback.jpg'); // Direct fallback
           return;
         }
-        
+
         const data = await response.json().catch(error => {
-          console.warn('Failed to parse JSON, using fallback image:', error);
+          console.warn('LoadingScreen: Failed to parse JSON, using fallback image:', error);
           return null;
         });
-        
-        // If data parsing failed or no images, use fallback
+
         if (!data || !data.success || !data.images || data.images.length === 0) {
-          console.warn('No valid images in API response, using fallback');
-          setLoadingImage('/loading/fallback.jpg');
+          console.warn('LoadingScreen: No valid images in API response, using fallback');
+          setLoadingImage('/loading/fallback.jpg'); // Direct fallback
           return;
         }
-        
-        // Select a random image from the returned list
+
+        // Store in cache
+        localStorage.setItem(CACHE_KEY_LOADING_IMAGES, JSON.stringify({ images: data.images, timestamp: Date.now() }));
         const randomImage = data.images[Math.floor(Math.random() * data.images.length)];
-        console.log('Selected loading image:', randomImage);
-        
-        // Use a static fallback image path that we know exists
-        const fallbackImagePath = '/loading/fallback.jpg';
-        
-        // Set fallback immediately so something shows
-        setLoadingImage(fallbackImagePath);
-        
-        // Then try to load the random image
-        const img = new window.Image();
-        
-        img.onload = () => {
-          console.log('Image loaded successfully:', randomImage);
-          setLoadingImage(randomImage);
-          setImageError(false);
-        };
-        
-        img.onerror = (e) => {
-          console.error('Error preloading image:', randomImage, e);
-          // Keep using the fallback that's already set
-        };
-        
-        // Start loading the image
-        img.src = randomImage;
-        
+        console.log('LoadingScreen: Selected loading image from API:', randomImage);
+        setLoadingImageWithFallback(randomImage);
+
       } catch (error) {
-        console.error('Critical error in loading screen:', error);
+        console.error('LoadingScreen: Critical error fetching/processing image list:', error);
         setHasError(true);
         setImageError(true);
-        setLoadingImage('/loading/fallback.jpg');
+        setLoadingImage('/loading/fallback.jpg'); // Direct fallback
       }
     };
 
-    // Call the function to get a random image
-    getRandomLoadingImage();
+    const initializeLoadingImage = async () => {
+      try {
+        const cachedDataJSON = localStorage.getItem(CACHE_KEY_LOADING_IMAGES);
+        if (cachedDataJSON) {
+          const cachedData = JSON.parse(cachedDataJSON);
+          if (cachedData && cachedData.images && Array.isArray(cachedData.images) && cachedData.images.length > 0 && (Date.now() - cachedData.timestamp < CACHE_DURATION_LOADING_IMAGES)) {
+            console.log('LoadingScreen: Using cached loading images list.');
+            const randomImage = cachedData.images[Math.floor(Math.random() * cachedData.images.length)];
+            setLoadingImageWithFallback(randomImage);
+            return;
+          } else {
+            console.log('LoadingScreen: Cached image list is stale or invalid, fetching from API.');
+          }
+        }
+      } catch (cacheError) {
+        console.warn('LoadingScreen: Error reading or parsing cache, fetching from API.', cacheError);
+      }
+      // If cache miss, stale, or error, fetch from API
+      await fetchAndSetRandomImage();
+    };
+
+    initializeLoadingImage();
 
     // Set up progress animation with smoother easing
     const startTime = Date.now();
