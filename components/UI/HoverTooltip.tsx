@@ -210,7 +210,7 @@ export const HoverTooltip: React.FC = () => {
     tooltipContent = (
       <div className="flex flex-col items-center">
         {/* Add the building image */}
-        <div className="w-80 h-64 mb-2 overflow-hidden rounded">
+        <div className="w-96 h-80 mb-2 overflow-hidden rounded">
           <img 
             src={buildingImagePath || `/images/buildings/${tooltipData.buildingType?.toLowerCase().replace(/[_-]/g, '_')}.jpg`} 
             alt={tooltipData.name || 'Building'}
@@ -267,7 +267,7 @@ export const HoverTooltip: React.FC = () => {
       tooltipContent = (
         <div className="flex flex-col items-center">
           {/* Citizen image with improved styling */}
-          <div className="w-48 h-48 mb-2 overflow-hidden rounded-lg border-2 border-amber-600 shadow-md">
+          <div className="w-64 h-64 mb-2 overflow-hidden rounded-lg border-2 border-amber-600 shadow-md">
             <img 
               src={imageUrl}
               alt={`${firstName} ${lastName}`}
