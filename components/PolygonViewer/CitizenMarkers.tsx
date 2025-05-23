@@ -625,7 +625,8 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
       )}
       
       {/* Activity Paths - Show only on hover */}
-      {(hoveredCitizenPaths.length > 0) && (
+      {/* Activity Paths - Show merchant_galley paths always, others on hover/selection */}
+      {(Object.keys(activityPaths).length > 0) && (
         <svg 
           className="absolute inset-0 pointer-events-none" 
           style={{ 
@@ -637,7 +638,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
         >
           {/* Debug text to confirm the SVG is rendering */}
           <text x="20" y="40" fill="red" fontSize="12">
-            Paths: {hoveredCitizenPaths.length} hovered
+            Paths: {hoveredCitizenPaths.length} hovered, {selectedCitizenPaths.length} selected, {Object.values(activityPaths).flat().filter(a => a.transportMode === "merchant_galley").length} merchant galleys
           </text>
           
           {/* Animation status indicator */}
@@ -645,65 +646,49 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
             Animation: {animationActive ? "Active" : "Paused"}
           </text>
           
-          {/* Render paths for hovered citizen */}
-          {hoveredCitizenPaths.map((activity) => {
-            // Generate points string with validation
+          {/* Render always-visible merchant galley paths */}
+          {Object.values(activityPaths).flat().filter(activity => activity.transportMode === "merchant_galley").map((activity) => {
             const pointsString = activity.path
               .filter(point => point && typeof point.lat === 'number' && typeof point.lng === 'number')
-              .map(point => {
-                const screenPos = latLngToScreen(point.lat, point.lng);
-                return `${screenPos.x},${screenPos.y}`;
-              })
+              .map(point => { const screenPos = latLngToScreen(point.lat, point.lng); return `${screenPos.x},${screenPos.y}`; })
               .join(' ');
-            
-            // Only render if we have valid points
             if (!pointsString) return null;
-            
             return (
-              <g key={activity.id}>
+              <g key={`${activity.id}-merchant-galley`}>
                 <polyline 
                   points={pointsString}
                   fill="none"
-                  stroke={getActivityPathColor(activity)}
-                  strokeWidth="2.0"
-                  strokeOpacity="0.7"
+                  stroke={getActivityPathColor(activity)} // Or a specific color for merchant galleys
+                  strokeWidth="4.0" // Twice as bold
+                  strokeOpacity="0.8" // Slightly more opaque
                 />
-                {/* Add small circles at path points */}
                 {activity.path.map((point, index) => {
                   if (!point || typeof point.lat !== 'number' || typeof point.lng !== 'number') return null;
-                  
                   const screenPos = latLngToScreen(point.lat, point.lng);
                   return (
                     <circle 
-                      key={`point-${index}`}
+                      key={`mg-point-${index}`}
                       cx={screenPos.x}
                       cy={screenPos.y}
-                      r="2"
+                      r="3" // Slightly larger points for bold paths
                       fill={getActivityPathColor(activity)}
-                      opacity="0.8"
+                      opacity="0.9"
                     />
                   );
                 })}
               </g>
             );
           })}
-          
-          {/* Render paths for selected citizen with higher opacity */}
-          {selectedCitizenPaths.map((activity) => {
-            // Generate points string with validation
+
+          {/* Render paths for selected citizen (if not a merchant galley path) */}
+          {selectedCitizenPaths.filter(activity => activity.transportMode !== "merchant_galley").map((activity) => {
             const pointsString = activity.path
               .filter(point => point && typeof point.lat === 'number' && typeof point.lng === 'number')
-              .map(point => {
-                const screenPos = latLngToScreen(point.lat, point.lng);
-                return `${screenPos.x},${screenPos.y}`;
-              })
+              .map(point => { const screenPos = latLngToScreen(point.lat, point.lng); return `${screenPos.x},${screenPos.y}`; })
               .join(' ');
-            
-            // Only render if we have valid points
             if (!pointsString) return null;
-            
             return (
-              <g key={activity.id}>
+              <g key={`${activity.id}-selected`}>
                 <polyline 
                   points={pointsString}
                   fill="none"
@@ -711,19 +696,54 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
                   strokeWidth="2.5"
                   strokeOpacity="0.9"
                 />
-                {/* Add small circles at path points */}
                 {activity.path.map((point, index) => {
                   if (!point || typeof point.lat !== 'number' || typeof point.lng !== 'number') return null;
-                  
                   const screenPos = latLngToScreen(point.lat, point.lng);
                   return (
                     <circle 
-                      key={`point-${index}`}
+                      key={`sel-point-${index}`}
                       cx={screenPos.x}
                       cy={screenPos.y}
                       r="2.5"
                       fill={getActivityPathColor(activity)}
                       opacity="1"
+                    />
+                  );
+                })}
+              </g>
+            );
+          })}
+
+          {/* Render paths for hovered citizen (if not merchant galley and not already selected) */}
+          {hoveredCitizenPaths.filter(activity => 
+            activity.transportMode !== "merchant_galley" && 
+            !selectedCitizenPaths.find(selActivity => selActivity.id === activity.id)
+          ).map((activity) => {
+            const pointsString = activity.path
+              .filter(point => point && typeof point.lat === 'number' && typeof point.lng === 'number')
+              .map(point => { const screenPos = latLngToScreen(point.lat, point.lng); return `${screenPos.x},${screenPos.y}`; })
+              .join(' ');
+            if (!pointsString) return null;
+            return (
+              <g key={`${activity.id}-hovered`}>
+                <polyline 
+                  points={pointsString}
+                  fill="none"
+                  stroke={getActivityPathColor(activity)}
+                  strokeWidth="2.0"
+                  strokeOpacity="0.7"
+                />
+                {activity.path.map((point, index) => {
+                  if (!point || typeof point.lat !== 'number' || typeof point.lng !== 'number') return null;
+                  const screenPos = latLngToScreen(point.lat, point.lng);
+                  return (
+                    <circle 
+                      key={`hov-point-${index}`}
+                      cx={screenPos.x}
+                      cy={screenPos.y}
+                      r="2"
+                      fill={getActivityPathColor(activity)}
+                      opacity="0.8"
                     />
                   );
                 })}

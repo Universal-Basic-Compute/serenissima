@@ -8,6 +8,7 @@ export interface ActivityPath {
   startTime: string;
   endTime?: string;
   notes?: string | null; // Add notes field
+  transportMode?: string; // Add transportMode field
 }
 
 export class ActivityPathService {
@@ -111,7 +112,8 @@ export class ActivityPathService {
                   type: activity.Type || 'unknown',
                   startTime: activity.StartDate || activity.CreatedAt,
                   endTime: activity.EndDate,
-                  notes: (typeof activity.Notes === 'string' && activity.Notes.trim()) ? activity.Notes.trim() : null // Ensure notes is a non-empty trimmed string or null
+                  notes: (typeof activity.Notes === 'string' && activity.Notes.trim()) ? activity.Notes.trim() : null, // Ensure notes is a non-empty trimmed string or null
+                  transportMode: activity.TransportMode // Populate transportMode
                 };
                 
                 pathsMap[citizenId].push(activityPath);

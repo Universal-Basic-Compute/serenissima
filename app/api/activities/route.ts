@@ -74,10 +74,29 @@ export async function GET(request: Request) {
     const data = await response.json();
     
     // Extract and format the activities
-    const activities = data.records.map((record: any) => ({
-      ActivityId: record.id,
-      ...record.fields
-    }));
+    const activities = data.records.map((record: any) => {
+      // Ensure all desired fields are explicitly mapped or spread
+      const fields = record.fields;
+      return {
+        ActivityId: record.id,
+        Citizen: fields.Citizen, // Assuming 'Citizen' is the username field link
+        CitizenId: fields.CitizenId, // Actual CitizenId if different
+        Path: fields.Path,
+        Type: fields.Type,
+        StartDate: fields.StartDate,
+        CreatedAt: fields.CreatedAt, // Keep CreatedAt for sorting/fallback
+        EndDate: fields.EndDate,
+        Notes: fields.Notes,
+        TransportMode: fields.TransportMode, // Add TransportMode
+        // Include any other fields that are expected by the frontend services
+        // For example, if Location, Target, ResourceType etc. are used by ActivityPathService or CitizenMarkers
+        Location: fields.Location,
+        Target: fields.Target,
+        ResourceType: fields.ResourceType,
+        Amount: fields.Amount,
+        Price: fields.Price
+      };
+    });
     
     console.log(`Found ${activities.length} activities with paths: ${hasPath}`);
     
