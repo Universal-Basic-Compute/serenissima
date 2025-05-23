@@ -2,6 +2,7 @@ import os
 import sys
 import json
 import traceback
+from collections import defaultdict
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple, Any
 import requests
