@@ -52,7 +52,7 @@ def try_create(
             "Type": "fetch_from_galley",
             "Citizen": citizen_username,
             "FromBuilding": galley_airtable_id, # Airtable Record ID of the galley
-            "OriginalContractId": original_contract_custom_id, # Custom ID of the original contract
+            "ContractId": original_contract_custom_id, # Store original contract's custom ID in ContractId field
             "ResourceId": resource_id_to_fetch,
             "Amount": amount_to_fetch,
             "CreatedAt": now_venice.isoformat(),

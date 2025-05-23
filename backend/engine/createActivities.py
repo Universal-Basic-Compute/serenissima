@@ -1802,7 +1802,7 @@ def process_galley_unloading_activities(tables: Dict[str, Table], idle_citizens:
                 # Check if an active fetch_from_galley activity already exists for this specific contract item
                 activity_exists_formula = (f"AND({{Type}}='fetch_from_galley', "
                                            f"{{FromBuilding}}='{galley_airtable_id}', " # Galley's Airtable ID
-                                           f"{{OriginalContractId}}='{_escape_airtable_value(original_contract_id)}', "
+                                           f"{{ContractId}}='{_escape_airtable_value(original_contract_id)}', " # Use ContractId
                                            f"{{ResourceId}}='{_escape_airtable_value(resource_type)}', "
                                            f"{{Status}}!='processed', {{Status}}!='failed')")
                 try:
