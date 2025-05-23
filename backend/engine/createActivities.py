@@ -64,7 +64,7 @@ from backend.engine.utils.activity_helpers import (
     _calculate_distance_meters,
     is_nighttime as is_nighttime_helper, 
     is_shopping_time as is_shopping_time_helper, 
-    get_path_between_points as get_path_between_points_helper,
+    get_path_between_points, # Corrected import name
     get_citizen_current_load,
     get_closest_inn,
     get_citizen_workplace,

@@ -20,7 +20,7 @@ from backend.engine.utils.activity_helpers import (
     _calculate_distance_meters,
     is_nighttime as is_nighttime_helper, 
     is_shopping_time as is_shopping_time_helper, 
-    get_path_between_points as get_path_between_points_helper,
+    get_path_between_points, # Corrected import name
     get_citizen_current_load,
     get_closest_inn,
     get_citizen_workplace,
@@ -201,7 +201,7 @@ def process_citizen_activity(
                 if not is_at_home:
                     if citizen_position and home_position:
                         log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} is not at home. Calculating path to home {home_building_id} to eat.{LogColors.ENDC}")
-                        path_data_for_eat_sequence = get_path_between_points_helper(citizen_position, home_position, transport_api_url) 
+                        path_data_for_eat_sequence = get_path_between_points(citizen_position, home_position, transport_api_url) 
                         if not (path_data_for_eat_sequence and path_data_for_eat_sequence.get('success')):
                             log.warning(f"{LogColors.WARNING}Path finding to home {home_building_id} failed for {citizen_username} to eat. Path data: {path_data_for_eat_sequence}{LogColors.ENDC}")
                         else:
@@ -245,7 +245,7 @@ def process_citizen_activity(
                                 log.warning(f"{LogColors.WARNING}Failed to create 'eat_at_tavern' for {citizen_username} at {tavern_custom_id} despite being there.{LogColors.ENDC}")
                         else: 
                             log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} not at tavern {tavern_custom_id}. Finding path to tavern.{LogColors.ENDC}")
-                            path_data = get_path_between_points_helper(citizen_position, tavern_position_coords, transport_api_url) 
+                            path_data = get_path_between_points(citizen_position, tavern_position_coords, transport_api_url) 
                             if path_data and path_data.get('success'):
                                 log.info(f"{LogColors.OKGREEN}Path to tavern {tavern_custom_id} found. Attempting to create 'travel_to_inn' (for tavern).{LogColors.ENDC}")
                                 if try_create_travel_to_inn_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, tavern_custom_id, path_data): 
@@ -290,7 +290,7 @@ def process_citizen_activity(
                 home_position = _get_building_position_coords(home)
                 home_custom_id = home['fields'].get('BuildingId', home['id'])
                 if citizen_position and home_position and _calculate_distance_meters(citizen_position, home_position) > 20:
-                    path_to_home_for_deposit = get_path_between_points_helper(citizen_position, home_position, transport_api_url) 
+                    path_to_home_for_deposit = get_path_between_points(citizen_position, home_position, transport_api_url) 
                     if path_to_home_for_deposit and path_to_home_for_deposit.get('success'):
                         if try_create_goto_home_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, home_custom_id, path_to_home_for_deposit):
                             return True 
@@ -368,7 +368,7 @@ def process_citizen_activity(
                             log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} attempting to buy {amount_to_buy:.2f} of {resource_id_to_buy} from {seller_building['fields'].get('BuildingId')}.{LogColors.ENDC}")
                             seller_building_pos = _get_building_position_coords(seller_building) 
                             
-                            path_to_seller = get_path_between_points_helper(citizen_position, seller_building_pos, transport_api_url) 
+                            path_to_seller = get_path_between_points(citizen_position, seller_building_pos, transport_api_url) 
                             if path_to_seller and path_to_seller.get('success'):
                                 home_custom_id_for_delivery = home['fields'].get('BuildingId', home['id'])
                                 if try_create_resource_fetching_activity(
@@ -422,7 +422,7 @@ def process_citizen_activity(
                         try_create_stay_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, inn_custom_id, stay_location_type="inn", end_time_utc_iso=stay_end_time_utc_iso) 
                     else:
                         log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} is not at inn {inn_custom_id}. Finding path to inn.{LogColors.ENDC}")
-                        path_data = get_path_between_points_helper(citizen_position, inn_position_coords, transport_api_url) 
+                        path_data = get_path_between_points(citizen_position, inn_position_coords, transport_api_url) 
                         if path_data and path_data.get('success'):
                             try_create_travel_to_inn_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, inn_custom_id, path_data) 
                         else:
@@ -468,7 +468,7 @@ def process_citizen_activity(
                 try_create_stay_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, home_custom_id, stay_location_type="home", end_time_utc_iso=stay_end_time_utc_iso) 
             else:
                 log.info(f"{LogColors.OKBLUE}Resident {citizen_username} is not at home {home_custom_id}. Finding path home.{LogColors.ENDC}")
-                path_data = get_path_between_points_helper(citizen_position, home_position, transport_api_url) 
+                path_data = get_path_between_points(citizen_position, home_position, transport_api_url) 
                 if path_data and path_data.get('success'):
                     log.info(f"{LogColors.OKGREEN}Path to home {home_custom_id} found. Creating 'goto_home' activity.{LogColors.ENDC}")
                     try_create_goto_home_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, home_custom_id, path_data) 
@@ -539,7 +539,7 @@ def process_citizen_activity(
                                                 log.info(f"{LogColors.OKBLUE}Skipping fetch_resource for contract {contract['id']} (Airtable ID) due to recent failure.{LogColors.ENDC}")
                                                 continue 
 
-                                            path_to_source = get_path_between_points_helper(citizen_position, _get_building_position_coords(from_building_rec), transport_api_url) 
+                                            path_to_source = get_path_between_points(citizen_position, _get_building_position_coords(from_building_rec), transport_api_url) 
                                             if path_to_source and path_to_source.get('success'):
                                                 from_building_custom_id_contract = from_building_rec['fields'].get('BuildingId')
                                                 to_building_custom_id_contract = to_building_rec['fields'].get('BuildingId')
@@ -568,7 +568,7 @@ def process_citizen_activity(
                 
                 log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} needs to go to work. Is at home: {is_at_home_for_work_departure}.{LogColors.ENDC}")
 
-                path_data = get_path_between_points_helper(citizen_position, workplace_position, transport_api_url) 
+                path_data = get_path_between_points(citizen_position, workplace_position, transport_api_url) 
                 if path_data and path_data.get('success'):
                     try_create_goto_work_activity(
                         tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, 

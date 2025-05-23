@@ -14,7 +14,7 @@ from backend.engine.utils.activity_helpers import (
     _escape_airtable_value,
     _get_building_position_coords,
     _calculate_distance_meters,
-    get_path_between_points_helper,
+    get_path_between_points, # Corrected import name
     _has_recent_failed_activity_for_contract # Assuming this might be used or adapted
 )
 # Import activity creators
@@ -144,7 +144,7 @@ def process_final_deliveries_from_galley(
                     log.warning(f"{LogColors.WARNING}BuyerBuilding {buyer_building_custom_id} has no position. Skipping delivery for {citizen_username}.{LogColors.ENDC}")
                     continue
 
-                path_to_buyer = get_path_between_points_helper(citizen_current_pos, buyer_building_pos, transport_api_url) 
+                path_to_buyer = get_path_between_points(citizen_current_pos, buyer_building_pos, transport_api_url) 
                 if path_to_buyer and path_to_buyer.get('success'):
                     activity_id_str_final = f"deliver_final_{citizen_custom_id}_{uuid.uuid4()}"
                     start_date_iso = path_to_buyer.get('timing', {}).get('startDate', current_time_venice.isoformat())
@@ -312,7 +312,7 @@ def process_galley_unloading_activities(
                     idle_citizens.append(citizen_for_task) 
                     continue
 
-                path_to_galley = get_path_between_points_helper(citizen_current_pos, galley_position, transport_api_url) 
+                path_to_galley = get_path_between_points(citizen_current_pos, galley_position, transport_api_url) 
                 if path_to_galley and path_to_galley.get('success'):
                     activity_created = try_create_fetch_from_galley_activity(
                         tables,
