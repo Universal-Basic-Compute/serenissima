@@ -44,7 +44,8 @@ function loadResourceData(filePath: string): any {
     return {
       // id: path.basename(filePath, '.json'), // id is derived later by the caller
       name: resourceData.name || path.basename(filePath, '.json'),
-      category: resourceData.category || 'Uncategorized',
+      category: resourceData.category, // Keep as is, will be processed with path fallback later
+      subcategory: resourceData.subcategory, // Keep as is, will be processed with path fallback later
       description: resourceData.description || '',
       importPrice: resourceData.importPrice || 0,
       lifetimeHours: resourceData.lifetimeHours !== undefined ? resourceData.lifetimeHours : null,
@@ -114,15 +115,16 @@ export async function GET(request: Request) {
       const relativePath = path.relative(resourcesDir, filePath);
       // Remove the .json extension
       const id = path.basename(relativePath, '.json');
-      // Get the directory structure as categories
-      const pathParts = path.dirname(relativePath).split(path.sep);
+      // Get the directory structure as categories, filtering out '.' if it's a root file
+      const pathParts = path.dirname(relativePath).split(path.sep).filter(p => p !== '.');
       
       return {
         id,
-        name: loadedData.name || id, // Use loadedData
-        category: loadedData.category || pathParts[0] || 'Uncategorized', // Use loadedData
-        description: loadedData.description || '', // Use loadedData
-        importPrice: loadedData.importPrice || 0, // Use loadedData
+        name: loadedData.name || id,
+        category: loadedData.category || (pathParts.length > 0 ? pathParts[0] : 'Uncategorized'),
+        subcategory: loadedData.subcategory || (pathParts.length > 1 ? pathParts[1] : null),
+        description: loadedData.description || '',
+        importPrice: loadedData.importPrice || 0,
         lifetimeHours: loadedData.lifetimeHours, 
         consumptionHours: loadedData.consumptionHours
       };

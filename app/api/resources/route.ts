@@ -1,6 +1,19 @@
 import { NextResponse } from 'next/server';
-import { loadAllResources } from '@/lib/utils/serverResourceUtils';
+// import { loadAllResources } from '@/lib/utils/serverResourceUtils'; // Not used
 import Airtable from 'airtable';
+
+// Define an interface for resource type definitions
+interface ResourceTypeDefinition {
+  id: string;
+  name: string;
+  category: string;
+  subcategory?: string | null;
+  description?: string;
+  importPrice?: number;
+  lifetimeHours?: number | null;
+  consumptionHours?: number | null;
+  // Add any other fields that come from /api/resource-types
+}
 
 // Configure Airtable
 const apiKey = process.env.AIRTABLE_API_KEY;
@@ -16,6 +29,25 @@ export async function GET(request: Request) {
     const owner = searchParams.get('owner');
     
     console.log(`Loading resources${owner ? ` for owner: ${owner}` : ' (all)'}`);
+
+    // Fetch all resource type definitions for enrichment
+    let resourceTypeDefinitions: Map<string, ResourceTypeDefinition> = new Map();
+    try {
+      const resourceTypesResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/resource-types`);
+      if (resourceTypesResponse.ok) {
+        const resourceTypesData = await resourceTypesResponse.json();
+        if (resourceTypesData.success && resourceTypesData.resourceTypes) {
+          (resourceTypesData.resourceTypes as ResourceTypeDefinition[]).forEach(def => {
+            resourceTypeDefinitions.set(def.id, def);
+          });
+          console.log(`Successfully fetched ${resourceTypeDefinitions.size} resource type definitions for enrichment.`);
+        }
+      } else {
+        console.warn(`Failed to fetch resource type definitions: ${resourceTypesResponse.status}`);
+      }
+    } catch (e) {
+      console.error('Error fetching resource type definitions:', e);
+    }
     
     // Build filter formula for Airtable query
     let filterFormula = '';
@@ -69,6 +101,19 @@ export async function GET(request: Request) {
       
       // Set the primary ID
       outputRecord.id = record.get('ResourceId') || record.id;
+
+      // Enrich with data from resource type definitions
+      const resourceType = outputRecord.type || record.get('Type'); // type is camelCased 'Type'
+      if (resourceType && resourceTypeDefinitions.has(resourceType)) {
+        const definition = resourceTypeDefinitions.get(resourceType)!;
+        outputRecord.name = outputRecord.name || definition.name;
+        outputRecord.category = outputRecord.category || definition.category;
+        outputRecord.subcategory = outputRecord.subcategory || definition.subcategory;
+        outputRecord.description = outputRecord.description || definition.description;
+        outputRecord.importPrice = outputRecord.importPrice ?? definition.importPrice;
+        outputRecord.lifetimeHours = outputRecord.lifetimeHours ?? definition.lifetimeHours;
+        outputRecord.consumptionHours = outputRecord.consumptionHours ?? definition.consumptionHours;
+      }
       
       // Initialize position
       outputRecord.position = {};
@@ -202,23 +247,44 @@ export async function POST(request: Request) {
       ...data,
       position: position
     }, null, 2));
+
+    // Fetch resource type definition for defaults
+    let definition: ResourceTypeDefinition | undefined;
+    if (data.type) {
+      try {
+        const resTypeResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/resource-types`);
+        if (resTypeResponse.ok) {
+          const resTypesData = await resTypeResponse.json();
+          if (resTypesData.success && resTypesData.resourceTypes) {
+            definition = (resTypesData.resourceTypes as ResourceTypeDefinition[]).find(rt => rt.id === data.type);
+          }
+        }
+      } catch (e) {
+        console.warn(`Could not fetch definition for resource type ${data.type}: ${e}`);
+      }
+    }
     
     // Create a record in Airtable - ensure position is stored as a string
+    const airtablePayload: Record<string, any> = {
+      ResourceId: data.id, // Custom ID for the resource stack
+      Type: data.type,
+      Name: data.name || definition?.name || data.type,
+      Category: data.category || definition?.category || 'unknown',
+      Subcategory: data.subcategory || definition?.subcategory || null,
+      Description: data.description || definition?.description || '',
+      Position: JSON.stringify(position), // Position of the resource itself
+      Count: data.count || 1,
+      Asset: data.asset || '', // BuildingId, Username, or LandId depending on AssetType
+      AssetType: data.assetType || 'unknown', // 'building', 'citizen', 'land'
+      Owner: data.owner || 'system',
+      CreatedAt: data.createdAt || new Date().toISOString()
+      // ImportPrice, LifetimeHours, ConsumptionHours could also be added here if they should be stored on instance
+    };
+    
     const record = await new Promise((resolve, reject) => {
-      base('RESOURCES').create({
-        ResourceId: data.id, // Custom ID for the resource stack
-        Type: data.type,
-        Name: data.name || data.type,
-        Category: data.category || 'unknown',
-        Position: JSON.stringify(position), // Position of the resource itself
-        Count: data.count || 1,
-        Asset: data.asset || '', // BuildingId, Username, or LandId depending on AssetType
-        AssetType: data.assetType || 'unknown', // 'building', 'citizen', 'land'
-        Owner: data.owner || 'system',
-        CreatedAt: data.createdAt || new Date().toISOString()
-      }, function(err, record) {
+      base('RESOURCES').create(airtablePayload, function(err, record) {
         if (err) {
-          console.error('Error creating resource in Airtable:', err);
+          console.error('Error creating resource in Airtable:', err, 'Payload:', airtablePayload);
           reject(err);
           return;
         }
@@ -234,12 +300,15 @@ export async function POST(request: Request) {
         Type: string;
         Name: string;
         Category: string;
+        Subcategory?: string | null; // Added Subcategory
+        Description?: string; // Added Description
         Position: string;
         Count: number;
         Asset: string;      // Renamed from LandId, more generic
         AssetType: string;  // Added AssetType
         Owner: string;
         CreatedAt: string;
+        // Potentially ImportPrice, LifetimeHours, ConsumptionHours if stored
       };
     }
 
@@ -255,25 +324,27 @@ export async function POST(request: Request) {
         }
       }
     }
-
-    const resource = {
+    
+    const resourceResponse = {
       ...processedFieldsPost, // Spread all camelCased fields
-      // Ensure 'id' is from 'ResourceId' and 'position' is parsed JSON
       id: typedRecord.fields.ResourceId, 
-      position: JSON.parse(typedRecord.fields.Position || '{}') 
+      position: JSON.parse(typedRecord.fields.Position || '{}'),
+      // Ensure defaults from definition if not set by Airtable fields directly
+      name: processedFieldsPost.name || definition?.name || typedRecord.fields.Type,
+      category: processedFieldsPost.category || definition?.category || 'unknown',
+      subcategory: processedFieldsPost.subcategory || definition?.subcategory || null,
+      description: processedFieldsPost.description || definition?.description || '',
+      importPrice: processedFieldsPost.importPrice ?? definition?.importPrice,
+      lifetimeHours: processedFieldsPost.lifetimeHours ?? definition?.lifetimeHours,
+      consumptionHours: processedFieldsPost.consumptionHours ?? definition?.consumptionHours,
     };
     
-    // Apply defaults if necessary, similar to GET, though for POST, most fields should be defined by input data
-    resource.name = resource.name || resource.type;
-    resource.category = resource.category || 'unknown'; // Default from POST logic if not set
-    // resource.count, resource.landId, resource.owner, resource.createdAt should come from POST data or Airtable
-
-    console.log('Successfully created resource in Airtable:', resource);
+    console.log('Successfully created resource in Airtable:', resourceResponse);
     
     // Return the created resource with success flag
     return NextResponse.json({ 
       success: true, 
-      resource,
+      resource: resourceResponse,
       message: 'Resource created successfully'
     });
   } catch (error) {
