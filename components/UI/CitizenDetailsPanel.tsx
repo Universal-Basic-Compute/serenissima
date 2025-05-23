@@ -1137,7 +1137,10 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
         
         {/* Second column - Correspondance */}
         <div className="w-1/3">
-          <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Correspondance</h3>
+          <div className="flex items-center">
+            <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Correspondance</h3>
+            <InfoIcon tooltipText="Direct messages exchanged with this citizen. Use this to negotiate, gather information, or build relationships." />
+          </div>
           
           {/* Messages area */}
           <div 
