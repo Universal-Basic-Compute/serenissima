@@ -715,7 +715,7 @@ def create_or_update_public_sell_contract_from_decision(
                 "Buyer": "public",
                 "Type": "public_sell",
                 "ResourceType": resource_type,
-                "Transporter": "public",
+                # "Transporter": "public", # Removed as per request
                 "SellerBuilding": building_id, # Custom BuildingId
                 "BuyerBuilding": None,
                 "HourlyAmount": hourly_amount,
