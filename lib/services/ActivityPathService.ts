@@ -19,10 +19,12 @@ export class ActivityPathService {
 
   /**
    * Fetch activity paths for citizens
+   * @param forceRefresh - If true, bypasses the cache and re-fetches data.
    */
-  public async fetchActivityPaths(): Promise<Record<string, ActivityPath[]>> {
-    // Return cached data if it's recent enough
+  public async fetchActivityPaths(forceRefresh: boolean = false): Promise<Record<string, ActivityPath[]>> {
+    // Return cached data if it's recent enough and not a forced refresh
     if (
+      !forceRefresh &&
       Object.keys(this.activityPaths).length > 0 && 
       Date.now() - this.lastFetchTime < this.CACHE_DURATION
     ) {
@@ -42,7 +44,11 @@ export class ActivityPathService {
     }
 
     this.isLoading = true;
-    console.log('Fetching recent activity paths with routes...');
+    if (forceRefresh) {
+      console.log('ActivityPathService: Forcing refresh of activity paths...');
+    } else {
+      console.log('Fetching recent activity paths with routes (cache miss or expired)...');
+    }
     
     try {
       // Fetch the most recent activities with paths

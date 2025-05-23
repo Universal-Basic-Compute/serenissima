@@ -47,6 +47,7 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   const lastFrameTimeRef = useRef<number>(0);
   // Add a new state to track initialization status
   const [positionsInitialized, setPositionsInitialized] = useState<boolean>(false);
+  const REFRESH_INTERVAL = 2 * 60 * 1000; // 2 minutes in milliseconds
   
   // Helper function to convert lat/lng to screen coordinates
   const latLngToScreen = useCallback((lat: number, lng: number) => {
@@ -259,35 +260,41 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     
     // Listen for citizens loaded event
     const handleCitizensLoaded = (data: any) => {
-      setCitizens(data.citizens);
+      // Ensure data.citizens is an array before setting
+      if (data && Array.isArray(data.citizens)) {
+        setCitizens(data.citizens);
+      } else {
+        console.warn("CitizenMarkers: CITIZENS_LOADED event received with invalid data structure. Expected data.citizens to be an array.", data);
+        // Optionally, set to empty array or handle error appropriately
+        // setCitizens([]); 
+      }
       setIsLoading(false);
     };
     
     // Add event listeners
     window.addEventListener('loadCitizens', handleLoadCitizens);
-    eventBus.subscribe(EventTypes.CITIZENS_LOADED, handleCitizensLoaded);
+    const citizensLoadedSubscription = eventBus.subscribe(EventTypes.CITIZENS_LOADED, handleCitizensLoaded);
     
     // Initial load
     loadCitizensData().then(() => {
       // After citizens are loaded, fetch their activity paths
-      fetchActivityPaths();
+      // This fetchActivityPaths() call is for the very first load.
+      // Subsequent refreshes are handled by the setInterval.
+      fetchActivityPaths(); 
     });
-    
-    // Subscribe to events and store the subscription
-    const subscription = eventBus.subscribe(EventTypes.CITIZENS_LOADED, handleCitizensLoaded);
-    
+        
     // Clean up event listeners
     return () => {
       window.removeEventListener('loadCitizens', handleLoadCitizens);
-      subscription.unsubscribe();
+      citizensLoadedSubscription.unsubscribe();
     };
-  }, []);
+  }, []); // Keep empty to run once on mount for initial load & listener setup
   
-  // Add a separate effect to update paths when citizens change
-  useEffect(() => {
-    // This effect should run when the component mounts
-    fetchActivityPaths();
-  }, []);
+  // This effect is for the initial fetch of activity paths.
+  // It was previously duplicated. Now consolidated into the above useEffect's .then() block for initial load.
+  // useEffect(() => {
+  //   fetchActivityPaths();
+  // }, []); // This can be removed if fetchActivityPaths is reliably called after initial citizen load.
   
   // Update when scale or offset changes
   useEffect(() => {
@@ -368,6 +375,39 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
       citizenAnimationService.startAnimation(handleAnimationUpdate);
     }
   }, [positionsInitialized, animationActive, handleAnimationUpdate]);
+
+  // Effect for periodic data refresh
+  useEffect(() => {
+    const refreshData = async () => {
+      console.log(`CitizenMarkers: Refreshing citizen and activity data (Interval: ${REFRESH_INTERVAL / 1000}s)`);
+      try {
+        // Force refresh citizen data
+        await citizenService.loadCitizens(true); 
+        // The CITIZENS_LOADED event will be emitted by the service, 
+        // and the existing event listener in this component will update the 'citizens' state.
+
+        // Force refresh activity paths
+        const pathsMap = await activityPathService.fetchActivityPaths(true);
+        setActivityPaths(pathsMap); // Update paths state directly
+
+        // Re-initialize animations if necessary (the existing useEffect for [activityPaths, citizens] should handle this)
+        console.log('CitizenMarkers: Data refreshed. Animation service will re-initialize if data changed.');
+      } catch (error) {
+        console.error('CitizenMarkers: Error during periodic data refresh:', error);
+      }
+    };
+
+    // Call it once initially after a short delay to ensure first load is complete
+    // The initial load is already handled by other useEffect hooks.
+    // This interval is purely for subsequent refreshes.
+    const intervalId = setInterval(refreshData, REFRESH_INTERVAL);
+
+    // Cleanup interval on component unmount
+    return () => {
+      clearInterval(intervalId);
+      console.log('CitizenMarkers: Cleared data refresh interval.');
+    };
+  }, [REFRESH_INTERVAL]); // Empty dependency array ensures this runs once to set up the interval
   
   const handleCitizenClick = (citizen: any) => {
     // Ensure we have a valid citizen object before setting it

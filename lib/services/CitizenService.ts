@@ -10,11 +10,16 @@ export class CitizenService {
 
   /**
    * Load citizens data
+   * @param forceRefresh - If true, bypasses the isLoaded check and re-fetches data.
    */
-  public async loadCitizens(): Promise<void> {
-    if (this.isLoaded || this.isLoading) return;
+  public async loadCitizens(forceRefresh: boolean = false): Promise<void> {
+    if (!forceRefresh && (this.isLoaded || this.isLoading)) return;
     
     this.isLoading = true;
+    if (forceRefresh) {
+      console.log('CitizenService: Forcing refresh of citizens data...');
+      this.isLoaded = false; // Reset loaded flag to allow re-fetch
+    }
     
     try {
       console.log('Loading citizens data...');
