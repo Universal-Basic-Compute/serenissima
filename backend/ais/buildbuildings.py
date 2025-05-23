@@ -1357,7 +1357,6 @@ Your response must be a JSON object with:
                                         "Buyer": ai_username,
                                         "Price": construction_cost,
                                         "CreatedAt": datetime.now().isoformat(),
-                                        "UpdatedAt": datetime.now().isoformat(),
                                         "ExecutedAt": datetime.now().isoformat(),
                                         "Notes": f"Payment for {building_type} construction"
                                     }

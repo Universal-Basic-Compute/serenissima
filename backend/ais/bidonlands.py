@@ -113,8 +113,7 @@ def create_or_update_bid(tables, ai_citizen: Dict, land: Dict, existing_bid: Opt
             # Update the transaction with the new bid
             now = datetime.now().isoformat()
             tables["transactions"].update(existing_bid["id"], {
-                "Price": new_bid,
-                "UpdatedAt": now
+                "Price": new_bid
             })
             
             print(f"Updated bid for {land_id} from {current_bid} to {new_bid} by AI {ai_username}")
@@ -153,8 +152,7 @@ def create_or_update_bid(tables, ai_citizen: Dict, land: Dict, existing_bid: Opt
                 "Seller": land_owner if land_owner else "Republic",
                 "Buyer": ai_username,
                 "Price": bid_amount,
-                "CreatedAt": now,
-                "UpdatedAt": now
+                "CreatedAt": now
             }
             
             tables["transactions"].create(transaction)

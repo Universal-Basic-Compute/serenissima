@@ -641,7 +641,6 @@ def create_or_update_import_contract(
             tables["contracts"].update(airtable_record_id, {
                 "HourlyAmount": hourly_amount,
                 "PricePerResource": import_price,
-                "UpdatedAt": now,
                 "EndAt": end_date, # Refresh EndAt
                 "Notes": json.dumps({
                     "reason": reason,

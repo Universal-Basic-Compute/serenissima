@@ -703,7 +703,6 @@ def create_or_update_public_sell_contract_from_decision(
                 "HourlyAmount": hourly_amount,
                 "PricePerResource": price_per_resource,
                 "EndAt": end_date_iso, # Refresh EndAt
-                "UpdatedAt": now_iso,
                 "Notes": contract_notes
             }
             tables["contracts"].update(airtable_record_id, update_fields)
@@ -768,8 +767,7 @@ def end_public_sell_contract( # Renamed from original for clarity, functionality
         tables["contracts"].update(record_id, {
             "EndAt": now_iso, # Set EndAt to now to effectively end it
             "Status": "ended_by_ai", # Optional: update status
-            "Notes": json.dumps(updated_notes_dict),
-            "UpdatedAt": now_iso
+            "Notes": json.dumps(updated_notes_dict)
         })
         print(f"Ended public sell contract {contract_custom_id_to_end}.")
         
