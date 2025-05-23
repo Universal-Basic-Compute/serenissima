@@ -4124,6 +4124,19 @@ number => {
           </select>
         </div>
       )}
+      
+      {/* Transport Path Info Panel */}
+      {activeView === 'transport' && pathStats && (
+        <div className="absolute bottom-4 right-4 bg-black/70 text-white p-3 rounded-lg shadow-lg w-64">
+          <h4 className="text-md font-serif text-amber-400 mb-2 border-b border-amber-500 pb-1">Path Information</h4>
+          <div className="space-y-1 text-sm">
+            <p><strong>Distance:</strong> {pathStats.totalDistance < 1000 ? `${Math.round(pathStats.totalDistance)}m` : `${(pathStats.totalDistance / 1000).toFixed(2)}km`}</p>
+            <p> (🚶 {pathStats.walkingDistance < 1000 ? `${Math.round(pathStats.walkingDistance)}m` : `${(pathStats.walkingDistance / 1000).toFixed(2)}km`} | 🛶 {pathStats.waterDistance < 1000 ? `${Math.round(pathStats.waterDistance)}m` : `${(pathStats.waterDistance / 1000).toFixed(2)}km`})</p>
+            <p><strong>Est. Time:</strong> {pathStats.estimatedTimeMinutes} min</p>
+            <p><strong>Est. Cost:</strong> {pathStats.transportCost > 0 ? `${pathStats.transportCost.toFixed(2)} Ducats` : 'N/A (Walking)'}</p>
+          </div>
+        </div>
+      )}
 
       {/* Transport Debug Panel - Only render when showTransportDebugPanel is true */}
       {showTransportDebugPanel && (
