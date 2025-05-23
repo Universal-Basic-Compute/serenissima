@@ -16,7 +16,7 @@ const InfoIcon: React.FC<InfoIconProps> = ({ tooltipText, className }) => {
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        className="h-4 w-4 text-amber-600 hover:text-amber-800 cursor-help transform -translate-y-0.5"
+        className="h-4 w-4 text-amber-600 hover:text-amber-800 cursor-help transform -translate-y-1"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -30,7 +30,7 @@ const InfoIcon: React.FC<InfoIconProps> = ({ tooltipText, className }) => {
       </svg>
       {showTooltip && (
         <div
-          className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-black/70 text-white text-xs rounded-lg p-2 shadow-lg z-[60] pointer-events-none" /* Increased z-index, reduced opacity */
+          className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-black/60 text-white text-sm rounded-lg p-2 shadow-lg z-[60] pointer-events-none" /* Adjusted y-translate, opacity, and text size */
         >
           {tooltipText}
         </div>
