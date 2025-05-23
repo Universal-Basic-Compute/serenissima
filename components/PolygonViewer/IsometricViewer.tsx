@@ -1688,6 +1688,62 @@ number => {
     };
   }, [interactionMode, selectedBridgeForOrientationId, orientingBridgeAngle, saveSelectedBridgeOrientation]);
 
+  // Effect for handling keyboard controls for bridge orientation
+  useEffect(() => {
+    const handleKeyDown = async (e: KeyboardEvent) => {
+      if (interactionMode === 'orient_bridge' && selectedBridgeForOrientationId) {
+        let angleChanged = false;
+        // Ensure orientingBridgeAngle is not null; default to 0 or current building orientation if null
+        const currentBuilding = buildings.find(b => b.id === selectedBridgeForOrientationId);
+        let newAngle = orientingBridgeAngle !== null 
+          ? orientingBridgeAngle 
+          : (currentBuilding?.orientation !== undefined ? currentBuilding.orientation : 0);
+
+        const increment = Math.PI / 90; // 2 degrees increment
+
+        if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          newAngle -= increment;
+          angleChanged = true;
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          newAngle += increment;
+          angleChanged = true;
+        }
+
+        if (angleChanged) {
+          // Normalize angle to be between 0 and 2*PI
+          newAngle = (newAngle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+          setOrientingBridgeAngle(newAngle);
+        }
+
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          if (orientingBridgeAngle !== null) { // Only save if an angle has been set/changed
+            await saveSelectedBridgeOrientation();
+          }
+          // Optionally, deselect the bridge after saving
+          // setSelectedBridgeForOrientationId(null);
+          // setOrientingBridgeAngle(null);
+        }
+
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          // Cancel orientation for the current bridge
+          setSelectedBridgeForOrientationId(null);
+          setOrientingBridgeAngle(null);
+          // Optionally, switch back to normal interaction mode
+          // setInteractionMode('normal');
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [interactionMode, selectedBridgeForOrientationId, orientingBridgeAngle, saveSelectedBridgeOrientation, buildings]);
+
   // Pre-calculate building positions when buildings are loaded
   useEffect(() => {
     if (buildings.length > 0 && !initialPositionCalculated) {
