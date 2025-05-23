@@ -277,40 +277,6 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
           "{displayData.familyMotto}"
         </div>
       )}
-      <style jsx>{`
-        @media (max-width: 320px) {
-          .${dim.container} {
-            width: 100%;
-            padding: 0 4px;
-          }
-          
-          .${dim.image}, .${dim.initials} {
-            width: 80%;
-            height: auto;
-            aspect-ratio: 1;
-          }
-        }
-        
-        /* Add responsive text sizing */
-        @media (max-width: 480px) {
-          .username-text {
-            font-size: 0.75rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-          }
-          .motto-text {
-            font-size: 0.7rem;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-          }
-          .ducats-text {
-            font-size: 0.7rem;
-          }
-        }
-      `}</style>
     </div>
   );
 };
