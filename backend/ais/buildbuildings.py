@@ -142,7 +142,7 @@ def _get_citizen_problems(tables: Dict[str, Table], username: str, limit: int = 
 def get_ai_citizens(tables, citizen_username_arg: Optional[str] = None) -> List[Dict]:
     """Get AI citizens, optionally filtered by a specific username."""
     try:
-        base_formula = "AND({IsAI}=1, {InVenice}=1, {Ducats}>=150000)"
+        base_formula = "AND({IsAI}=1, {InVenice}=1, {Ducats}>=250000)"
         if citizen_username_arg:
             # Ensure username is properly escaped for the formula
             safe_username = citizen_username_arg
