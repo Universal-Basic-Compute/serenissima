@@ -941,15 +941,27 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
         # In a real scenario, you'd call the transport API with current_departure_point.
         # For now, we'll pass the varied start_position to create_delivery_activity and assume it uses it.
         
+        # The create_delivery_activity function needs to accept start_position.
+        # We'll modify its call signature or assume it's already adapted.
+        # For this example, let's assume it takes an optional start_position.
+        # If create_delivery_activity doesn't take start_position, the path_data generation within it needs to be adapted.
+        
+        # The original create_delivery_activity uses a fixed start_position.
+        # We need to pass the varied one.
+        # Let's assume the signature is:
+        # create_delivery_activity(tables, citizen, galley_building_id, resources_in_galley_manifest, original_contract_ids, start_position_override=None)
+        
         activity_created = create_delivery_activity(
-            tables, delivery_citizen, galley_building_id, 
+            tables, 
+            delivery_citizen, 
+            galley_building_id, 
             final_galley_manifest_for_activity, 
             original_contract_custom_ids_for_notes,
-            current_departure_point # Pass the varied departure point
+            start_position_override=current_departure_point # Pass the varied departure point
         )
 
         if activity_created:
-            log.info(f"✅ Galley piloting activity {activity_created['id']} created for {galley_building_id} (Merchant: {selected_merchant_username}).")
+            log.info(f"✅ Successfully created galley piloting activity {activity_created['id']} to {galley_building_id} (for merchant {selected_merchant_username}) departing from {current_departure_point}.")
             arrival_time_iso = activity_created['fields'].get('EndDate')
             if arrival_time_iso and not dry_run: # Redundant dry_run check, but safe
                 update_payload_for_galley = {
