@@ -251,7 +251,7 @@ def process(
                 "ResourceId": f"resource-{uuid.uuid4()}",
                 "Type": resource_id_to_fetch,
                 "Name": res_def_details.get('name', resource_id_to_fetch),
-                "Category": res_def_details.get('category', 'Unknown'),
+                # "Category": res_def_details.get('category', 'Unknown'), # Removed Category
                 "Asset": carrier_username, # Asset -> Asset, use Username
                 "AssetType": "citizen",
                 "Owner": buyer_username, # Resources on citizen are owned by the contract's buyer

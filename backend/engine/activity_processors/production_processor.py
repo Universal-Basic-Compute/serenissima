@@ -268,7 +268,7 @@ def process(
                     "ResourceId": f"resource-{uuid.uuid4()}",
                     "Type": res_type,
                     "Name": res_def.get('name', res_type),
-                    "Category": res_def.get('category', 'Unknown'),
+                    # "Category": res_def.get('category', 'Unknown'), # Removed Category
                     "BuildingId": building_custom_id, # Custom BuildingId
                     "Asset": building_custom_id,      # Asset field stores BuildingId for AssetType='building'
                     "AssetType": "building",
