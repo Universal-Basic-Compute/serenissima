@@ -248,6 +248,36 @@ def detect_problems():
         else:
             log.error(f"No Active Contracts API call failed: {no_contracts_response.status_code} - {no_contracts_response.text}")
             all_problem_details_summary.append(f"- No Active Contracts (Businesses): API Call Failed ({no_contracts_response.status_code})")
+
+        # 6. Detect Zero Rent Amount Buildings
+        log.info("--- Detecting Zero Rent Amount Buildings ---")
+        zero_rent_api_url = f"{base_url}/api/problems/zero-rent-amount"
+        log.info(f"Calling API: {zero_rent_api_url} for all relevant buildings/owners")
+        zero_rent_response = requests.post(zero_rent_api_url, json={}, timeout=180)
+        log.info(f"Zero Rent Amount API response status: {zero_rent_response.status_code}")
+
+        if zero_rent_response.ok:
+            zero_rent_data = zero_rent_response.json()
+            log.info(f"Zero Rent Amount API response: success={zero_rent_data.get('success')}, problemCount={zero_rent_data.get('problemCount')}")
+            if zero_rent_data.get('success'):
+                count = zero_rent_data.get('problemCount', 0)
+                saved_count = zero_rent_data.get('savedCount', 0)
+                total_problems_detected += count
+                total_problems_saved += saved_count
+                all_problem_details_summary.append(f"- Zero Rent Buildings: {count} detected, {saved_count} saved.")
+                
+                problems_by_citizen_zero_rent = {}
+                for problem_id, problem in zero_rent_data.get('problems', {}).items(): # Ensure 'problems' key exists
+                    citizen = problem.get('citizen', 'Unknown')
+                    problems_by_citizen_zero_rent[citizen] = problems_by_citizen_zero_rent.get(citizen, 0) + 1
+                if problems_by_citizen_zero_rent:
+                    all_problem_details_summary.append("  Affected owners (Zero Rent): " + ", ".join([f"{c}({num})" for c, num in problems_by_citizen_zero_rent.items()]))
+            else:
+                log.error(f"Zero Rent Amount API returned error: {zero_rent_data.get('error')}")
+                all_problem_details_summary.append(f"- Zero Rent Buildings: API Error - {zero_rent_data.get('error', 'Unknown')}")
+        else:
+            log.error(f"Zero Rent Amount API call failed: {zero_rent_response.status_code} - {zero_rent_response.text}")
+            all_problem_details_summary.append(f"- Zero Rent Buildings: API Call Failed ({zero_rent_response.status_code})")
         
         # Create admin notification
         details_text = "\n".join(all_problem_details_summary)

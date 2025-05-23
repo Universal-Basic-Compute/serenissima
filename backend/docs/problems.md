@@ -100,6 +100,26 @@ Here are the types of problems currently managed by the system:
     -   Analyze market prices and demand.
     -   Ensure the business is operational with an occupant.
 
+### 9. Zero Rent for Home
+
+-   **Description**: This problem is reported to a building owner if their residential property (category "home") has its rent amount set to 0 Ducats (or is null/undefined).
+-   **Detection**: The system identifies buildings with `Category` = "home", a valid `Owner`, and where `RentAmount` is 0, null, or not set.
+-   **Impact/Severity**: Low. While potentially intentional (e.g., for personal use), a zero rent means no rental income is generated if the property were leased.
+-   **Suggested Solutions**:
+    -   If intending to rent, set a competitive rent amount.
+    -   If for personal use, this notification can be ignored.
+    -   Review property management strategy for income generation.
+
+### 10. Zero Rent for Leased Business
+
+-   **Description**: This problem is reported to a building owner if their commercial property (category "business") has its rent amount set to 0 Ducats (or is null/undefined) AND the building is operated by a different citizen (`Owner` != `RanBy`).
+-   **Detection**: The system identifies buildings with `Category` = "business", a valid `Owner`, where `RentAmount` is 0 (or null/undefined), and the `Owner` field is different from the `RanBy` field.
+-   **Impact/Severity**: Medium. The owner is missing out on rental income from a business they own but is operated by someone else.
+-   **Suggested Solutions**:
+    -   Set an appropriate rent amount for the business operator.
+    -   Review lease agreements and terms with the operator.
+    -   If the zero-rent arrangement is intentional (e.g., special agreement, subsidiary), this notification can be ignored.
+
 ## Problem Management and Display
 
 ### Detection
