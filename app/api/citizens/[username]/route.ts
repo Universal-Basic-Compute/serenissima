@@ -85,13 +85,16 @@ export async function GET(request: NextRequest) {
     if (records.length > 0) {
       const record = records[0];
       
-      // Get all fields from the record
-      const allFields = record.fields;
+      // Get all fields from the record and convert keys to camelCase
+      const camelCaseFields = toCamelCase(record.fields);
       
-      // Convert all field names to camelCase
-      const camelCaseFields = toCamelCase(allFields);
+      // Ensure 'username' is present from the primary 'Username' Airtable field
+      if (record.fields.Username && !camelCaseFields.username) {
+        camelCaseFields.username = record.fields.Username as string;
+      }
       
       // Parse position if it's a string
+      // Assuming the JSON string itself uses camelCase keys e.g., {"lat": ..., "lng": ...}
       if (typeof camelCaseFields.position === 'string' && 
           (camelCaseFields.position.startsWith('{') || camelCaseFields.position.startsWith('['))) {
         try {

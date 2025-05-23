@@ -294,21 +294,23 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
 
   // Function to fetch message history
   const fetchMessageHistory = async () => {
-    if (!citizen || !citizen.citizenId) return; // Changed from citizenid
+    // Use citizen.citizenId (camelCase)
+    if (!citizen || !citizen.citizenId) return; 
     
     // Check if we've already attempted to fetch messages for this citizen
-    if (messagesFetchAttemptedRef.current[citizen.citizenId]) { // Changed from citizenid
-      console.log(`Already attempted to fetch messages for citizen ${citizen.citizenId}, skipping`); // Changed from citizenid
+    if (messagesFetchAttemptedRef.current[citizen.citizenId]) { 
+      console.log(`Already attempted to fetch messages for citizen ${citizen.citizenId}, skipping`); 
       return;
     }
     
     // Mark that we've attempted to fetch messages for this citizen
-    messagesFetchAttemptedRef.current[citizen.citizenId] = true; // Changed from citizenid
+    messagesFetchAttemptedRef.current[citizen.citizenId] = true; 
     
     setIsLoadingHistory(true);
     try {
       // Always use the regular messages API
-      console.log(`Fetching messages for citizen ${citizen.username || citizen.citizenId} using /api/messages`); // Changed from citizenid
+      // Use citizen.username, citizen.citizenId (camelCase)
+      console.log(`Fetching messages for citizen ${citizen.username || citizen.citizenId} using /api/messages`); 
 
       // Get current citizen from localStorage
       let currentUsername = 'visitor';
@@ -331,7 +333,8 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
           },
           body: JSON.stringify({
             currentCitizen: currentUsername,
-            otherCitizen: citizen.username || citizen.citizenId // Use username if available, otherwise citizenId
+            // Use citizen.username, citizen.citizenId (camelCase)
+            otherCitizen: citizen.username || citizen.citizenId 
           })
         });
 
@@ -342,22 +345,21 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
         const data = await response.json();
 
         if (data.success && data.messages) {
+          // Assuming API returns msg.messageId, msg.sender, msg.content, msg.createdAt (camelCase)
           const formattedMessages = data.messages.map((msg: any) => ({
-            id: msg.messageId,
-            role: msg.sender === currentUsername ? 'user' : 'assistant', // 'user' for sender, 'assistant' for receiver
+            id: msg.messageId, 
+            role: msg.sender === currentUsername ? 'user' : 'assistant',
             content: msg.content,
-            timestamp: msg.createdAt
+            timestamp: msg.createdAt 
           }));
           setMessages(formattedMessages);
         } else {
-          // No messages from API, or API indicated no messages (e.g. success:true, messages:[])
-          // or API indicated failure to get messages (e.g. success:false)
-          setMessages([]); // Set to empty array, removing the automatic "Buongiorno" message
+          setMessages([]);
         }
     } catch (error) {
       console.error('Error fetching message history:', error);
-      setMessagesFetchFailed(true); // Indicate that fetching failed
-      setMessages([]); // Set to empty array on error too
+      setMessagesFetchFailed(true);
+      setMessages([]);
     } finally {
       setIsLoadingHistory(false);
     }
@@ -365,7 +367,8 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
 
   // Function to send messages
   const sendMessage = async (content: string) => {
-    if (!content.trim() || !citizen || !citizen.citizenId) return; // Changed from citizenid
+    // Use citizen.citizenId (camelCase)
+    if (!content.trim() || !citizen || !citizen.citizenId) return; 
     
     // Get current citizen from localStorage
     let currentUsername = 'visitor';
@@ -395,7 +398,8 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
 
     try {
       // Always use the /api/messages/send endpoint
-      console.log(`Sending message to ${citizen.username || citizen.citizenId} using /api/messages/send`); // Changed from citizenid
+      // Use citizen.username, citizen.citizenId (camelCase)
+      console.log(`Sending message to ${citizen.username || citizen.citizenId} using /api/messages/send`); 
 
       const response = await fetch('/api/messages/send', {
         method: 'POST',
@@ -404,9 +408,10 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
         },
         body: JSON.stringify({
           sender: currentUsername,
-          receiver: citizen.username || citizen.citizenId, // Use username if available, changed from citizenid
+          // Use citizen.username, citizen.citizenId (camelCase)
+          receiver: citizen.username || citizen.citizenId, 
           content: content,
-          type: 'message' // Ensure type is 'message'
+          type: 'message'
         })
       });
 
@@ -415,19 +420,15 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
       }
 
       const data = await response.json();
-
+      // Assuming API returns data.message.messageId (camelCase)
       if (data.success && data.message) {
-        // The message is sent. The receiver will see it when they fetch messages.
-        // For now, we can add a confirmation or simply let the optimistic update stand.
-        // To avoid duplicate messages if the receiver is the current user,
-        // we might not add an "assistant" response here.
-        // The optimistic update of the user's own message is already done.
-        // If you want a confirmation message from the system:
+        // Message sent logic
+        // Example using citizen.firstName (camelCase)
         /*
         setMessages(prev => [...prev, {
           id: `conf-${data.message.messageId}`,
-          role: 'assistant', // Or a system role
-          content: `Message sent to ${citizen.firstName}.`, // Changed from firstname
+          role: 'assistant', 
+          content: `Message sent to ${citizen.firstName}.`, 
           timestamp: new Date().toISOString()
         }]);
         */
@@ -463,9 +464,9 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     setHomeBuilding(null);
     setWorkBuilding(null);
     setIsLoadingBuildings(false);
-    // Activities and Messages are handled by their own fetch-once refs below.
 
-    if (citizen && citizen.citizenId && citizen.username) { // Changed from citizenid
+    // Use citizen.citizenId, citizen.username (camelCase)
+    if (citizen && citizen.citizenId && citizen.username) { 
         // --- Relevancies (Opportunities) ---
         if (cachedRelevancies.hasOwnProperty(citizen.username)) {
             setRelevancies(cachedRelevancies[citizen.username]);
@@ -494,22 +495,20 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
         }
         
         // --- Message History (existing logic with fetch-once ref) ---
-        if (!messagesFetchAttemptedRef.current[citizen.citizenId]) { // Changed from citizenid
+        // Use citizen.citizenId (camelCase)
+        if (!messagesFetchAttemptedRef.current[citizen.citizenId]) { 
             fetchMessageHistory();
         } else {
-            // If messages were already attempted, ensure loading is false if not actively fetching.
-            // fetchMessageHistory handles its own loading state. If we are here, it means
-            // messages were either fetched or an attempt was made.
-            // If messages are empty and not loading, the UI shows "No correspondence yet".
+            // Message fetch already attempted
         }
       
         // --- Activities (existing logic with fetch-once ref) ---
-        if (!activitiesFetchAttemptedRef.current[citizen.citizenId]) { // Changed from citizenid
-            setActivities([]); // Clear previous activities before fetching new ones
-            fetchCitizenActivities(citizen.citizenId); // Changed from citizenid
+        // Use citizen.citizenId (camelCase)
+        if (!activitiesFetchAttemptedRef.current[citizen.citizenId]) { 
+            setActivities([]); 
+            fetchCitizenActivities(citizen.citizenId); 
         } else {
-            // Similar to messages, if activities were attempted, their state is either populated or empty.
-            // fetchCitizenActivities handles its own loading state.
+            // Activities fetch already attempted
         }
       
     } else {
@@ -577,26 +576,27 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     let isMounted = true;
     
     // Only fetch building data if we have a valid citizen
-    if (citizen && citizen.citizenId && isMounted) { // Changed from citizenid
+    // Use citizen.citizenId (camelCase)
+    if (citizen && citizen.citizenId && isMounted) { 
       fetchBuildingDetails();
-      // We're now handling activities fetch above with the ref check
     }
     
     return () => {
       isMounted = false;
       window.removeEventListener('keydown', handleEscKey);
     };
-  }, [citizen, onClose]); // Only depend on citizen and onClose
+  }, [citizen, onClose]);
 
   // Effect to set a random "no relationship" message
   useEffect(() => {
-    if (!isLoadingRelationship && !relationship && citizen && citizen.firstName) { // Changed from firstname
+    // Use citizen.firstName (camelCase)
+    if (!isLoadingRelationship && !relationship && citizen && citizen.firstName) { 
       const messages = [
-        `Your connection with ${citizen.firstName} is yet to be recorded in the city's annals.`, // Changed from firstname
-        `The nature of your acquaintance with ${citizen.firstName} remains unchronicled.`, // Changed from firstname
-        `No formal ties with ${citizen.firstName} have been noted by the scribes.`, // Changed from firstname
-        `Details of your relationship with ${citizen.firstName} are not yet known.`, // Changed from firstname
-        `The ledger shows no established connection with ${citizen.firstName} at this time.` // Changed from firstname
+        `Your connection with ${citizen.firstName} is yet to be recorded in the city's annals.`, 
+        `The nature of your acquaintance with ${citizen.firstName} remains unchronicled.`, 
+        `No formal ties with ${citizen.firstName} have been noted by the scribes.`, 
+        `Details of your relationship with ${citizen.firstName} are not yet known.`, 
+        `The ledger shows no established connection with ${citizen.firstName} at this time.` 
       ];
       const randomIndex = Math.floor(Math.random() * messages.length);
       setNoRelationshipMessage(messages[randomIndex]);
@@ -695,12 +695,12 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
   const formatRelevancyText = (text: string, currentCitizen: any): string => {
     if (!text || !currentCitizen) return text;
     let newText = text;
-    newText = newText.replace(/%TARGETCITIZEN%/g, `${currentCitizen.firstName || ''} ${currentCitizen.lastName || ''}`.trim()); // Changed from firstname, lastname
-    newText = newText.replace(/%FIRSTNAME%/g, currentCitizen.firstName || ''); // Changed from firstname
-    newText = newText.replace(/%LASTNAME%/g, currentCitizen.lastName || ''); // Changed from lastname
+    // Use currentCitizen.firstName, currentCitizen.lastName, currentCitizen.username, currentCitizen.socialClass (camelCase)
+    newText = newText.replace(/%TARGETCITIZEN%/g, `${currentCitizen.firstName || ''} ${currentCitizen.lastName || ''}`.trim()); 
+    newText = newText.replace(/%FIRSTNAME%/g, currentCitizen.firstName || ''); 
+    newText = newText.replace(/%LASTNAME%/g, currentCitizen.lastName || ''); 
     newText = newText.replace(/%USERNAME%/g, currentCitizen.username || '');
-    newText = newText.replace(/%SOCIALCLASS%/g, currentCitizen.socialClass || ''); // Changed from socialclass
-    // Add more replacements here if needed, e.g., for %CURRENTUSER_FIRSTNAME%, etc.
+    newText = newText.replace(/%SOCIALCLASS%/g, currentCitizen.socialClass || ''); 
     return newText;
   };
   
@@ -789,7 +789,8 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     }
   };
   
-  const socialClassStyle = getSocialClassColor(citizen.socialClass); // Changed from socialclass
+  // Use citizen.socialClass (camelCase)
+  const socialClassStyle = getSocialClassColor(citizen.socialClass); 
   
   return (
     <div
@@ -802,6 +803,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
       
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-serif text-amber-800">
+          {/* Use citizen.firstName, citizen.lastName, citizen.username (camelCase) */}
           {citizen.firstName} {citizen.lastName} 
           {citizen.username && (
             <span className="text-sm text-amber-600 ml-2">({citizen.username})</span>
@@ -844,11 +846,12 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
                 </div>
               ) : (
                 <>
-                  {relationship.title && ( // Changed from Title
-                    <p className="text-sm text-amber-800 mb-2 font-semibold">{relationship.title}</p> // Changed from Title
+                  {/* Use relationship.title, relationship.description, relationship.strengthScore, relationship.trustScore, relationship.tier (camelCase) */}
+                  {relationship.title && ( 
+                    <p className="text-sm text-amber-800 mb-2 font-semibold">{relationship.title}</p> 
                   )}
-                  {relationship.description && ( // Changed from Description
-                    <p className="text-xs text-amber-700 mb-3">{relationship.description}</p> // Changed from Description
+                  {relationship.description && ( 
+                    <p className="text-xs text-amber-700 mb-3">{relationship.description}</p> 
                   )}
                   <div className="flex justify-around text-center">
                     <div title="Entwinement (Strength Score): Quantifies the relationship's strength based on shared relevancies and common interests. A higher score indicates more shared ground or potential for mutual benefit. Useful for understanding alignment and potential for collaboration.">
@@ -864,7 +867,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
                     {typeof relationship.trustScore !== 'undefined' && (
                       <div title="Trust Score: Quantifies the level of trust built through direct positive interactions (messages, loans, contracts, transactions). A higher score suggests a more reliable and positive direct relationship history. Useful for gauging reliability in direct dealings.">
                         <div className={`px-3 py-1 rounded-full text-xl font-bold ${
-                          relationship.trustScore > 75 ? 'bg-sky-200 text-sky-800' : // Using sky for trust
+                          relationship.trustScore > 75 ? 'bg-sky-200 text-sky-800' : 
                           relationship.trustScore > 25 ? 'bg-orange-200 text-orange-800' :
                           'bg-rose-200 text-rose-800'
                         }`}>
@@ -874,10 +877,10 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
                       </div>
                     )}
                   </div>
-                  {relationship.Tier && (
+                  {relationship.tier && ( // Changed from Tier to tier
                     <div className="text-center mt-3">
                       <p className="text-xs text-amber-600">Tier</p>
-                      <p className="text-sm font-medium text-amber-800">{relationship.Tier}</p>
+                      <p className="text-sm font-medium text-amber-800">{relationship.tier}</p>
                     </div>
                   )}
                 </>
@@ -990,39 +993,40 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
               </div>
             ) : activities.length > 0 ? (
               <div className="space-y-2 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
+                {/* Assuming activity object has camelCase properties: activityId, type, endDate, startDate, createdAt, fromBuilding, toBuilding, resourceId, amount, notes */}
                 {activities.map((activity, index) => (
-                  <div key={activity.activityId || index} className="bg-amber-100 rounded-lg p-2 text-sm"> {/* Changed from ActivityId */}
+                  <div key={activity.activityId || index} className="bg-amber-100 rounded-lg p-2 text-sm"> 
                     <div className="flex items-center gap-2 mb-1">
                       <div className="text-amber-700">
-                        {getActivityIcon(activity.type)} {/* Changed from Type */}
+                        {getActivityIcon(activity.type)} 
                       </div>
                       <div className="font-medium text-amber-800">
-                        {formatActivityType(activity.type)} {/* Changed from Type */}
+                        {formatActivityType(activity.type)} 
                       </div>
                       <div className="ml-auto text-xs text-amber-600">
-                        {formatActivityDate(activity.endDate || activity.startDate || activity.createdAt)} {/* Changed from EndDate, StartDate, CreatedAt */}
+                        {formatActivityDate(activity.endDate || activity.startDate || activity.createdAt)} 
                       </div>
                     </div>
                       
-                    {activity.fromBuilding && activity.toBuilding && ( // Changed from FromBuilding, ToBuilding
+                    {activity.fromBuilding && activity.toBuilding && ( 
                       <div className="flex items-center text-xs text-amber-700 mb-1">
-                        <span className="font-medium">{activity.fromBuilding}</span> {/* Changed from FromBuilding */}
+                        <span className="font-medium">{activity.fromBuilding}</span> 
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mx-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                         </svg>
-                        <span className="font-medium">{activity.toBuilding}</span> {/* Changed from ToBuilding */}
+                        <span className="font-medium">{activity.toBuilding}</span> 
                       </div>
                     )}
                       
-                    {activity.resourceId && activity.amount && ( // Changed from ResourceId, Amount
+                    {activity.resourceId && activity.amount && ( 
                       <div className="text-xs text-amber-700 mb-1">
-                        <span className="font-medium">{activity.amount}</span> units of <span className="font-medium">{activity.resourceId}</span> {/* Changed from Amount, ResourceId */}
+                        <span className="font-medium">{activity.amount}</span> units of <span className="font-medium">{activity.resourceId}</span> 
                       </div>
                     )}
                       
-                    {activity.notes && ( // Changed from Notes
+                    {activity.notes && ( 
                       <div className="text-xs italic text-amber-600 mt-1">
-                        {activity.notes} {/* Changed from Notes */}
+                        {activity.notes} 
                       </div>
                     )}
                   </div>
@@ -1060,7 +1064,8 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
               <div className="text-center py-8">
                 {messagesFetchFailed ? (
                   <div className="text-gray-500 italic">
-                    Unable to load conversation history with {citizen.firstname}.
+                    {/* Use citizen.firstName (camelCase) */}
+                    Unable to load conversation history with {citizen.firstName}.
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center h-full text-amber-700 italic">
@@ -1144,7 +1149,8 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder={`Message ${citizen.firstName}...`} // Changed from firstname
+              // Use citizen.firstName (camelCase)
+              placeholder={`Message ${citizen.firstName}...`} 
               className="flex-1 p-2 border border-amber-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
               disabled={isTyping}
             />
@@ -1167,11 +1173,11 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
           <div className="w-full mb-6">
             {/* Full-width image container with relative positioning for the coat of arms overlay, now square */}
             <div className="w-full aspect-square relative mb-4 overflow-hidden rounded-lg border-2 border-amber-600 shadow-lg">
-              {/* Main citizen image */}
-              {citizen.imageUrl || citizen.profileImage || citizen.ImageUrl ? ( // Changed from imageurl, profileimage
+              {/* Main citizen image - Use citizen.imageUrl, citizen.profileImage (camelCase) */}
+              {citizen.imageUrl || citizen.profileImage ? ( 
                 <img 
-                  src={citizen.imageUrl || citizen.profileImage || citizen.ImageUrl} // Changed from imageurl, profileimage
-                  alt={`${citizen.firstName} ${citizen.lastName}`} // Changed from firstname, lastname
+                  src={citizen.imageUrl || citizen.profileImage} 
+                  alt={`${citizen.firstName} ${citizen.lastName}`} 
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     console.error(`Failed to load citizen image: ${(e.target as HTMLImageElement).src}`);
@@ -1217,7 +1223,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
                 citizen.username ? (
                   <img 
                     src={`/images/citizens/${citizen.username}.jpg`}
-                    alt={`${citizen.firstName} ${citizen.lastName}`} // Changed from firstname, lastname
+                    alt={`${citizen.firstName} ${citizen.lastName}`} 
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       console.error(`Failed to load citizen image: ${(e.target as HTMLImageElement).src}`);
@@ -1259,29 +1265,28 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
                 </div>
               )}
               
-              {/* Name and social class overlay at the bottom */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4"> {/* Changed p-3 to p-4 */}
-                <h3 className="text-white text-2xl font-serif font-bold"> {/* Changed text-xl to text-2xl */}
-                  {citizen.firstName} {citizen.lastName} {/* Changed from firstname, lastname */}
+              {/* Name and social class overlay at the bottom - Use citizen.firstName, citizen.lastName, citizen.socialClass (camelCase) */}
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4"> 
+                <h3 className="text-white text-2xl font-serif font-bold"> 
+                  {citizen.firstName} {citizen.lastName} 
                 </h3>
                 <div className="flex justify-between items-center">
                   <div className={`px-3 py-1 rounded-full text-sm font-medium inline-block ${socialClassStyle}`}>
-                    {citizen.socialClass} {/* Changed from socialclass */}
+                    {citizen.socialClass} 
                   </div>
-                  {/* Ducats display removed from here */}
                 </div>
               </div>
 
-              {/* Ducats display at the top right */}
+              {/* Ducats display at the top right - Use citizen.ducats, citizen.wealth (camelCase) */}
               <div className="absolute top-3 right-3 bg-black/60 text-white px-3 py-1 rounded-lg shadow-md">
-                <span className="text-lg font-bold">{formatDucats(citizen.ducats || citizen.wealth)}</span> {/* Simplified Ducats access */}
+                <span className="text-lg font-bold">{formatDucats(citizen.ducats || citizen.wealth)}</span> 
               </div>
             </div>
         </div>
         
         {/* Add max-height and scrolling to the details section */}
         <div className="max-h-[400px] overflow-y-auto pr-1 custom-scrollbar">
-          {/* Home and Work section */}
+          {/* Home and Work section - homeBuilding and workBuilding properties are assumed camelCase from API */}
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div>
               <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Home</h3>
@@ -1309,7 +1314,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
                     <p className="text-amber-800 font-medium">{workBuilding.name || formatBuildingType(workBuilding.type)}</p>
                     <p className="text-amber-700 text-sm">{formatBuildingType(workBuilding.type)}</p>
                   </div>
-                ) : citizen.worksFor ? (
+                ) : citizen.worksFor ? ( /* Use citizen.worksFor, citizen.workplace.type (camelCase) */
                   <div>
                     <p className="text-amber-800 font-medium">
                       <span className="font-bold">{citizen.worksFor}</span>
@@ -1329,10 +1334,9 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
             </div>
           </div>
             
-          {/* Personality Section */}
+          {/* Personality Section - Use citizen.corePersonality, citizen.personality (camelCase) */}
           <div className="mb-6">
             <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Personality</h3>
-            {/* Core Personality Traits as colored boxes */}
             {citizen.corePersonality && Array.isArray(citizen.corePersonality) && citizen.corePersonality.length === 3 && (
               <div className="flex space-x-2 mb-3">
                 <div className="px-3 py-1 text-xs font-medium text-green-800 bg-green-100 border border-green-300 rounded-full shadow-sm">
@@ -1350,7 +1354,8 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
           </div>
 
           <div className="mb-6">
-            <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">About {citizen.firstName}</h3> {/* Changed from firstname */}
+            {/* Use citizen.firstName, citizen.description (camelCase) */}
+            <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">About {citizen.firstName}</h3> 
             <p className="text-amber-700 italic text-sm">{citizen.description || 'No description available.'}</p>
           </div>
         </div>
@@ -1358,7 +1363,8 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
     </div>
     
     <div className="mt-4 text-xs text-amber-500 italic text-center">
-      Citizen of Venice since {citizen.createdAt ? formatDate(citizen.createdAt) : 'the founding of the Republic'} {/* Changed from createdat */}
+      {/* Use citizen.createdAt (camelCase) */}
+      Citizen of Venice since {citizen.createdAt ? formatDate(citizen.createdAt) : 'the founding of the Republic'} 
     </div>
   </div>
   );

@@ -85,52 +85,54 @@ export async function GET(request: Request) {
     
     // Transform Airtable records to our citizen format
     const citizens = records.map(record => {
-      // Get all fields and convert keys to camelCase
-      const fields = toCamelCase(record.fields);
+      // Get all fields from Airtable (PascalCase) and convert their keys to camelCase
+      const camelCaseFields = toCamelCase(record.fields);
+
+      // Ensure 'username' is present from the primary 'Username' Airtable field
+      // This handles if 'Username' was not in record.fields or toCamelCase missed it.
+      // However, toCamelCase should handle 'Username' -> 'username'.
+      // More robustly, ensure the primary identifier is correctly cased.
+      if (record.fields.Username && !camelCaseFields.username) {
+        camelCaseFields.username = record.fields.Username as string;
+      }
       
-      // Get the position field and parse it if it's a string
-      let position = record.get('Position');
-      
-      // Simple position parsing - assume it works
-      if (typeof position === 'string' && (position.startsWith('{') || position.startsWith('['))) {
+      // Parse position if it's a string
+      // Assuming the JSON string itself uses camelCase keys e.g., {"lat": ..., "lng": ...}
+      if (typeof camelCaseFields.position === 'string' && 
+          (camelCaseFields.position.startsWith('{') || camelCaseFields.position.startsWith('['))) {
         try {
-          position = JSON.parse(position);
+          camelCaseFields.position = JSON.parse(camelCaseFields.position);
         } catch (e) {
-          console.warn(`Failed to parse position for citizen ${record.get('Username')}: ${position}`, e);
-          // position remains as string or becomes null depending on desired error handling
+          console.warn(`Failed to parse position for citizen ${camelCaseFields.username}: ${camelCaseFields.position}`, e);
         }
       }
-
-      const username = record.get('Username') as string;
       
       // Parse CorePersonality
       let corePersonalityArray: string[] | null = null;
-      const corePersonalityString = record.get('CorePersonality') as string;
-      if (typeof corePersonalityString === 'string') {
+      const corePersonalityString = camelCaseFields.corePersonality as string; // Access camelCased field
+      if (typeof corePersonalityString === 'string') { // Check the camelCased field
         try {
           const parsed = JSON.parse(corePersonalityString);
           if (Array.isArray(parsed) && parsed.length === 3 && parsed.every(item => typeof item === 'string')) {
             corePersonalityArray = parsed;
           } else {
-            console.warn(`CorePersonality for citizen ${username} is not a valid 3-string array: ${corePersonalityString}`);
+            console.warn(`CorePersonality for citizen ${camelCaseFields.username} is not a valid 3-string array: ${corePersonalityString}`);
           }
         } catch (e) {
-          console.warn(`Failed to parse CorePersonality for citizen ${username}: ${corePersonalityString}`, e);
+          console.warn(`Failed to parse CorePersonality for citizen ${camelCaseFields.username}: ${corePersonalityString}`, e);
         }
       }
       
-      // Create citizen object with all fields from the record
-      const citizen = {
-        ...fields,  // Include all fields with camelCase keys
-        username: username,
-        position: position, // Use the parsed position
-        corePersonality: corePersonalityArray, // Add parsed core personality
-        worksFor: employmentMap[username] || null,
-        workplace: workplaceMap[username] || null,
-        home: homeMap[username] || null // Add home buildingId
+      // Create citizen object, ensuring all keys are camelCase
+      const citizenObject = {
+        ...camelCaseFields, // Start with all camelCased fields
+        corePersonality: corePersonalityArray, // Override with parsed array
+        worksFor: employmentMap[camelCaseFields.username as string] || null,
+        workplace: workplaceMap[camelCaseFields.username as string] || null,
+        home: homeMap[camelCaseFields.username as string] || null
       };
       
-      return citizen;
+      return citizenObject;
     });
     
     return NextResponse.json({
@@ -142,6 +144,7 @@ export async function GET(request: Request) {
     console.error('Error fetching citizens:', error);
     
     // Return a fallback with sample citizens
+    // Fallback sample citizens, ensure all keys are camelCase
     const sampleCitizens = [
       {
         username: 'compagno',
@@ -151,17 +154,20 @@ export async function GET(request: Request) {
         isAi: true,
         socialClass: 'Servant',
         description: 'A helpful Venetian guide',
-        position: {"lat": 45.4371, "lng": 12.3326}, // Properly formatted as object
+        position: {"lat": 45.4371, "lng": 12.3326},
         prestige: 0,
         wallet: '',
         familyMotto: 'At your service',
         color: '#FFC107',
         guildId: null,
         preferences: {},
-        createdAt: new Date().toISOString(),  // Add createdAt field
-        updatedAt: new Date().toISOString(),   // Add updatedAt field
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
         worksFor: null,
-        workplace: null
+        workplace: null,
+        home: null, // Added missing field
+        ateAt: null, // Added missing field
+        inVenice: true // Added missing field
       },
       {
         username: 'marco_polo',
@@ -171,17 +177,20 @@ export async function GET(request: Request) {
         isAi: true,
         socialClass: 'Merchant',
         description: 'Famous Venetian merchant and explorer',
-        position: {"lat": 45.4380, "lng": 12.3350}, // Example position
+        position: {"lat": 45.4380, "lng": 12.3350},
         prestige: 100,
         wallet: '',
         familyMotto: 'The world awaits',
         color: '#2196F3',
         guildId: 'merchants',
         preferences: {},
-        createdAt: new Date(Date.now() - 86400000).toISOString(),  // 1 day ago
-        updatedAt: new Date(Date.now() - 3600000).toISOString(),    // 1 hour ago
+        createdAt: new Date(Date.now() - 86400000).toISOString(),
+        updatedAt: new Date(Date.now() - 3600000).toISOString(),
         worksFor: null,
-        workplace: null
+        workplace: null,
+        home: null, // Added missing field
+        ateAt: null, // Added missing field
+        inVenice: true // Added missing field
       },
       {
         username: 'doge_venice',
@@ -191,23 +200,27 @@ export async function GET(request: Request) {
         isAi: true,
         socialClass: 'Noble',
         description: 'The elected leader of Venice',
-        position: {"lat": 45.4337, "lng": 12.3390}, // Example position for Doge's Palace
+        position: {"lat": 45.4337, "lng": 12.3390},
         prestige: 1000,
         wallet: '',
         familyMotto: 'For the glory of Venice',
         color: '#9C27B0',
         guildId: 'council',
         preferences: {},
-        createdAt: new Date(Date.now() - 31536000000).toISOString(),  // 1 year ago
-        updatedAt: new Date(Date.now() - 604800000).toISOString(),     // 1 week ago
+        createdAt: new Date(Date.now() - 31536000000).toISOString(),
+        updatedAt: new Date(Date.now() - 604800000).toISOString(),
         worksFor: null,
-        workplace: null
+        workplace: null,
+        home: null, // Added missing field
+        ateAt: null, // Added missing field
+        inVenice: true // Added missing field
       }
     ];
     
     return NextResponse.json({
       success: true,
-      citizens: sampleCitizens
+      citizens: sampleCitizens,
+      _fallback: true // Indicate that fallback data is used
     });
   }
 }
