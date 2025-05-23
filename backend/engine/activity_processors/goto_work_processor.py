@@ -17,6 +17,24 @@ from backend.engine.processActivities import (
     _escape_airtable_value
 )
 
+# Helper to get building by Airtable ID if not already in processActivities
+def _get_building_by_airtable_id(tables: Dict[str, Any], airtable_id: str) -> Optional[Dict]:
+    try:
+        return tables['buildings'].get(airtable_id)
+    except Exception as e:
+        log.error(f"Error fetching building by Airtable ID {airtable_id}: {e}")
+        return None
+
+def _update_building_timestamp(tables: Dict[str, Any], building_airtable_id: str, timestamp_iso: str) -> bool:
+    """Helper to update UpdatedAt for a building."""
+    try:
+        tables['buildings'].update(building_airtable_id, {'UpdatedAt': timestamp_iso})
+        log.info(f"Updated 'UpdatedAt' for building record {building_airtable_id}")
+        return True
+    except Exception as e:
+        log.error(f"Error updating 'UpdatedAt' for building record {building_airtable_id}: {e}")
+        return False
+
 log = logging.getLogger(__name__)
 
 def process(
@@ -48,15 +66,11 @@ def process(
         log.error(f"Citizen {citizen_username} is missing CitizenId field.")
         return False
 
-    try:
-        workplace_building_record = tables['buildings'].get(workplace_building_airtable_id)
-        if not workplace_building_record:
-            log.error(f"Workplace building with Airtable ID {workplace_building_airtable_id} not found for activity {activity_guid}.")
-            return False
-    except Exception as e_get_workplace:
-        log.error(f"Error fetching workplace building {workplace_building_airtable_id} by Airtable ID: {e_get_workplace}")
+    workplace_building_record = _get_building_by_airtable_id(tables, workplace_building_airtable_id)
+    if not workplace_building_record:
+        log.error(f"Workplace building with Airtable ID {workplace_building_airtable_id} not found for activity {activity_guid}.")
         return False
-
+    
     workplace_building_custom_id = workplace_building_record['fields'].get('BuildingId')
     if not workplace_building_custom_id:
         log.error(f"Workplace building {workplace_building_airtable_id} is missing the 'BuildingId' field.")
@@ -162,4 +176,8 @@ def process(
         return False # Indicate failure to deposit
 
     log.info(f"Successfully processed 'goto_work' activity {activity_guid} for {citizen_username}. Resources deposited as applicable.")
+    
+    # Update the workplace building's UpdatedAt timestamp
+    _update_building_timestamp(tables, workplace_building_record['id'], now_iso)
+    
     return True

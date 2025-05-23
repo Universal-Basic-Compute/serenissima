@@ -16,8 +16,21 @@ from backend.engine.processActivities import (
     get_building_record,
     get_contract_record,
     get_building_current_storage,
-    _escape_airtable_value # If needed directly, otherwise it's used by the imported functions
+    _escape_airtable_value,
+    update_building_updated_at # Assuming this will be added to processActivities or a shared util
 )
+
+# If update_building_updated_at is not in processActivities, define it here or import from its actual location.
+# For now, let's assume it will be available. If not, we can define a local helper.
+def _update_building_timestamp(tables: Dict[str, Any], building_airtable_id: str, timestamp_iso: str) -> bool:
+    """Helper to update UpdatedAt for a building."""
+    try:
+        tables['buildings'].update(building_airtable_id, {'UpdatedAt': timestamp_iso})
+        log.info(f"Updated 'UpdatedAt' for building record {building_airtable_id}")
+        return True
+    except Exception as e:
+        log.error(f"Error updating 'UpdatedAt' for building record {building_airtable_id}: {e}")
+        return False
 
 log = logging.getLogger(__name__) # Use a logger specific to this module
 
@@ -212,5 +225,9 @@ def process(
         except Exception as e_finance:
             log.error(f"Error processing financial transaction for contract {original_contract_id}: {e_finance}")
             all_financials_processed = False
+    
+    if all_financials_processed:
+        # Update the destination building's UpdatedAt timestamp
+        _update_building_timestamp(tables, dest_building_record['id'], datetime.now(timezone.utc).isoformat())
             
     return all_financials_processed

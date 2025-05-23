@@ -10,9 +10,27 @@ from typing import Dict, Optional, Any
 
 from backend.engine.processActivities import (
     get_citizen_record,
-    get_building_record_by_airtable_id, # Assuming this exists or is added
+    # get_building_record_by_airtable_id, # This will be a local helper or imported
     _escape_airtable_value
 )
+
+# Local helper or import if shared
+def _get_building_by_airtable_id(tables: Dict[str, Any], airtable_id: str) -> Optional[Dict]:
+    try:
+        return tables['buildings'].get(airtable_id)
+    except Exception as e:
+        log.error(f"Error fetching building by Airtable ID {airtable_id}: {e}")
+        return None
+
+def _update_building_timestamp(tables: Dict[str, Any], building_airtable_id: str, timestamp_iso: str) -> bool:
+    """Helper to update UpdatedAt for a building."""
+    try:
+        tables['buildings'].update(building_airtable_id, {'UpdatedAt': timestamp_iso})
+        log.info(f"Updated 'UpdatedAt' for building record {building_airtable_id}")
+        return True
+    except Exception as e:
+        log.error(f"Error updating 'UpdatedAt' for building record {building_airtable_id}: {e}")
+        return False
 
 log = logging.getLogger(__name__)
 
@@ -110,7 +128,7 @@ def process_eat_at_home(
         log.error(f"Citizen {citizen_username} not found for activity {activity_guid}.")
         return False
 
-    home_building_record = get_building_record_by_airtable_id(tables, home_building_airtable_id)
+    home_building_record = _get_building_by_airtable_id(tables, home_building_airtable_id)
     if not home_building_record:
         log.error(f"Home building {home_building_airtable_id} not found for activity {activity_guid}.")
         return False
@@ -148,7 +166,11 @@ def process_eat_at_home(
         
         log.info(f"Citizen {citizen_username} consumed {amount_to_eat} of {food_resource_type} at home {home_building_custom_id}. New amount: {new_amount if new_amount > 0.001 else 0}")
         
-        return _update_citizen_ate_at(tables, citizen_record['id'], now_iso)
+        if _update_citizen_ate_at(tables, citizen_record['id'], now_iso):
+            # Also update the home building's UpdatedAt
+            _update_building_timestamp(tables, home_building_record['id'], now_iso)
+            return True
+        return False
 
     except Exception as e:
         log.error(f"Error processing 'eat_at_home' for {citizen_username} ({activity_guid}): {e}")
@@ -172,6 +194,11 @@ def process_eat_at_tavern(
         log.error(f"Citizen {citizen_username} not found for activity {activity_guid}.")
         return False
 
+    tavern_record = _get_building_by_airtable_id(tables, tavern_building_airtable_id)
+    if not tavern_record:
+        log.error(f"Tavern building {tavern_building_airtable_id} not found for activity {activity_guid}.")
+        return False
+
     current_ducats = float(citizen_record['fields'].get('Ducats', 0))
     if current_ducats < TAVERN_MEAL_COST:
         log.warning(f"Citizen {citizen_username} has insufficient Ducats ({current_ducats}) for tavern meal (cost: {TAVERN_MEAL_COST}) for activity {activity_guid}.")
@@ -186,10 +213,7 @@ def process_eat_at_tavern(
         log.info(f"Citizen {citizen_username} paid {TAVERN_MEAL_COST} Ducats for a meal at tavern. New balance: {new_ducats}")
         
         # Create a transaction record for the meal purchase
-        tavern_record = get_building_record_by_airtable_id(tables, tavern_building_airtable_id)
-        tavern_operator = "UnknownTavernOperator"
-        if tavern_record:
-            tavern_operator = tavern_record['fields'].get('RunBy') or tavern_record['fields'].get('Owner', "UnknownTavernOperator")
+        tavern_operator = tavern_record['fields'].get('RunBy') or tavern_record['fields'].get('Owner', "UnknownTavernOperator")
         
         transaction_payload = {
             "Type": "tavern_meal",
@@ -217,8 +241,12 @@ def process_eat_at_tavern(
         else:
             log.warning(f"Could not find tavern operator {tavern_operator} to credit meal cost.")
 
-        return _update_citizen_ate_at(tables, citizen_record['id'], now_iso)
-
+        if _update_citizen_ate_at(tables, citizen_record['id'], now_iso):
+            # Also update the tavern building's UpdatedAt
+            _update_building_timestamp(tables, tavern_record['id'], now_iso)
+            return True
+        return False
+        
     except Exception as e:
         log.error(f"Error processing 'eat_at_tavern' for {citizen_username} ({activity_guid}): {e}")
         return False

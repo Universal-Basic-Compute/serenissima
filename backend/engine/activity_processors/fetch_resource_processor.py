@@ -12,8 +12,8 @@ from typing import Dict, List, Optional, Any
 
 from backend.engine.processActivities import (
     get_citizen_record,
-    get_building_record, # Fetches by custom BuildingId
-    get_contract_record, # Fetches by custom ContractId (string)
+    get_building_record, 
+    get_contract_record, 
     _escape_airtable_value
 )
 
@@ -21,7 +21,8 @@ log = logging.getLogger(__name__)
 
 CITIZEN_STORAGE_CAPACITY = 10.0
 
-def get_building_record_by_airtable_id(tables: Dict[str, Any], airtable_record_id: str) -> Optional[Dict]:
+# Moved get_building_record_by_airtable_id to be a local helper or imported if shared
+def _get_building_by_airtable_id(tables: Dict[str, Any], airtable_record_id: str) -> Optional[Dict]:
     """Fetches a building record by its Airtable Record ID."""
     try:
         building_record = tables['buildings'].get(airtable_record_id)
@@ -102,7 +103,7 @@ def process(
     # The contract_airtable_id is the Airtable Record ID, not the custom ContractId string.
     # We need to fetch the contract by its Airtable Record ID.
     try:
-        contract_record = tables['contracts'].get(contract_airtable_id)
+        contract_record = tables['contracts'].get(contract_airtable_id) # Fetches by Airtable Record ID
         if not contract_record:
             log.error(f"Contract with Airtable ID {contract_airtable_id} not found for activity {activity_guid}.")
             return False
@@ -115,7 +116,7 @@ def process(
     seller_username_from_contract = contract_fields.get('Seller') # Operator of FromBuilding
     price_per_resource = float(contract_fields.get('PricePerResource', 0))
 
-    from_building_record = get_building_record_by_airtable_id(tables, from_building_airtable_id)
+    from_building_record = _get_building_by_airtable_id(tables, from_building_airtable_id)
     if not from_building_record:
         log.error(f"Source building (Airtable ID: {from_building_airtable_id}) not found.")
         return False
@@ -285,4 +286,13 @@ def process(
             log.warning(f"Failed to update notes for activity {activity_guid}: {e_notes}")
             
     log.info(f"Successfully processed 'fetch_resource' activity {activity_guid}. Fetched {amount_to_purchase} of {resource_id_to_fetch}.")
+    
+    # Update the source building's UpdatedAt timestamp
+    try:
+        tables['buildings'].update(from_building_record['id'], {'UpdatedAt': now_iso})
+        log.info(f"Updated 'UpdatedAt' for source building record {from_building_record['id']}")
+    except Exception as e_update_bldg:
+        log.error(f"Error updating 'UpdatedAt' for source building record {from_building_record['id']}: {e_update_bldg}")
+        # Continue, as main processing was successful
+        
     return True

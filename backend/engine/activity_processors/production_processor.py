@@ -10,16 +10,15 @@ from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any
 
 from backend.engine.processActivities import (
-    get_building_record, # Already fetches by custom BuildingId, need one for Airtable ID
-    get_citizen_record, # Added for fetching operator's citizen record
-    _escape_airtable_value,
-    # We'll need a way to get building by Airtable Record ID if not already available
-    # For now, assuming `tables['buildings'].get(airtable_record_id)` works.
+    get_building_record, 
+    get_citizen_record, 
+    _escape_airtable_value
 )
 
 log = logging.getLogger(__name__)
 
-def get_building_record_by_airtable_id(tables: Dict[str, Any], airtable_record_id: str) -> Optional[Dict]:
+# Moved get_building_record_by_airtable_id to be a local helper or imported if shared
+def _get_building_by_airtable_id(tables: Dict[str, Any], airtable_record_id: str) -> Optional[Dict]:
     """Fetches a building record by its Airtable Record ID."""
     try:
         building_record = tables['buildings'].get(airtable_record_id)
@@ -93,7 +92,7 @@ def process(
         log.error(f"Failed to parse RecipeInputs or RecipeOutputs JSON for activity {activity_guid}.")
         return False
 
-    prod_building_record = get_building_record_by_airtable_id(tables, building_airtable_id)
+    prod_building_record = _get_building_by_airtable_id(tables, building_airtable_id)
     if not prod_building_record:
         log.error(f"Production building (Airtable ID: {building_airtable_id}) not found for activity {activity_guid}.")
         return False
@@ -287,4 +286,13 @@ def process(
             return False
 
     log.info(f"Successfully processed 'production' activity {activity_guid} for building {building_custom_id}.")
+    
+    # Update the production building's UpdatedAt timestamp
+    try:
+        tables['buildings'].update(prod_building_record['id'], {'UpdatedAt': now_iso})
+        log.info(f"Updated 'UpdatedAt' for production building record {prod_building_record['id']}")
+    except Exception as e_update_bldg:
+        log.error(f"Error updating 'UpdatedAt' for production building record {prod_building_record['id']}: {e_update_bldg}")
+        # Continue, as main processing was successful
+
     return True
