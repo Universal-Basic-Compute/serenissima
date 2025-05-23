@@ -19,9 +19,12 @@ def initialize_airtable():
     
     api = Api(airtable_api_key)
     
+    AIRTABLE_CONTRACTS_TABLE_NAME = os.getenv("AIRTABLE_CONTRACTS_TABLE", "CONTRACTS")
+    AIRTABLE_TRANSACTIONS_TABLE_NAME = os.getenv("AIRTABLE_TRANSACTIONS_TABLE", "TRANSACTIONS") # For logging
     tables = {
         "citizens": Table(airtable_api_key, airtable_base_id, "CITIZENS"),
-        "transactions": Table(airtable_api_key, airtable_base_id, "TRANSACTIONS"),
+        "contracts": Table(airtable_api_key, airtable_base_id, AIRTABLE_CONTRACTS_TABLE_NAME),
+        "transactions_log_table": Table(airtable_api_key, airtable_base_id, AIRTABLE_TRANSACTIONS_TABLE_NAME),
         "lands": Table(airtable_api_key, airtable_base_id, "LANDS"),
         "notifications": Table(airtable_api_key, airtable_base_id, "NOTIFICATIONS")
     }
@@ -45,33 +48,40 @@ def get_ai_citizens(tables) -> List[Dict]:
         return []
 
 def get_available_land_transactions(tables) -> List[Dict]:
-    """Get all land transactions where Buyer is null."""
+    """Get all available land_sale contracts."""
     try:
-        # Query transactions with Type=land and Buyer is null
-        formula = "AND({Type}='land', {Buyer}='')"
-        transactions = tables["transactions"].all(formula=formula)
+        # Query contracts with Type='land_sale' and Status='available'
+        formula = "AND({Type}='land_sale', {Status}='available')"
+        contracts = tables["contracts"].all(formula=formula)
         
-        # Sort by Price in descending order
-        transactions.sort(key=lambda x: x["fields"].get("Price", 0), reverse=True)
+        # Sort by PricePerResource in descending order (AI wants the most expensive it can afford)
+        # Or ascending if AI wants cheapest first. Current logic implies most expensive.
+        contracts.sort(key=lambda x: x["fields"].get("PricePerResource", 0), reverse=True)
         
-        print(f"Found {len(transactions)} available land transactions")
-        return transactions
+        print(f"Found {len(contracts)} available land_sale contracts")
+        return contracts
     except Exception as e:
         print(f"Error getting available land transactions: {str(e)}")
         return []
 
-def update_transaction_with_buyer(tables, transaction_id: str, buyer: str) -> bool:
-    """Update a transaction with a buyer."""
+def execute_land_purchase_contract(tables, contract_id: str, buyer_username: str) -> Optional[Dict]:
+    """Update a land_sale contract with a buyer, marking it as executed."""
     try:
         now = datetime.now().isoformat()
         
-        # Update the transaction
-        tables["transactions"].update(transaction_id, {
-            "Buyer": buyer,
-            "ExecutedAt": now
+        # Update the contract
+        updated_contract = tables["contracts"].update(contract_id, {
+            "Buyer": buyer_username,
+            "Status": "executed",
+            "ExecutedAt": now,
+            "UpdatedAt": now
         })
         
-        print(f"Updated transaction {transaction_id} with buyer {buyer}")
+        print(f"Executed land_sale contract {contract_id} with buyer {buyer_username}")
+        return updated_contract
+    except Exception as e:
+        print(f"Error executing land_sale contract {contract_id}: {str(e)}")
+        return None
         return True
     except Exception as e:
         print(f"Error updating transaction {transaction_id}: {str(e)}")
@@ -202,30 +212,80 @@ def process_ai_land_purchases(dry_run: bool = False):
                 break
         
         if selected_transaction:
-            transaction_id = selected_transaction["id"]
-            land_id = selected_transaction["fields"].get("Asset")
-            price = selected_transaction["fields"].get("Price", 0)
+            contract_id = selected_transaction["id"]
+            land_id = selected_transaction["fields"].get("ResourceType") # LandId is in ResourceType
+            price = selected_transaction["fields"].get("PricePerResource", 0)
+            original_seller_username = selected_transaction["fields"].get("Seller") # Who listed the land
             
-            print(f"AI {ai_username} can afford land {land_id} for {price} ducats")
+            print(f"AI {ai_username} can afford land {land_id} (listed by {original_seller_username}) for {price} ducats")
             
             if not dry_run:
-                # Update the transaction with the buyer
-                update_success = update_transaction_with_buyer(tables, transaction_id, ai_username)
+                # Execute the land_sale contract
+                executed_contract = execute_land_purchase_contract(tables, contract_id, ai_username)
                 
-                if update_success:
+                if executed_contract:
                     # Update the land with the new owner
                     land_update_success = update_land_with_owner(tables, land_id, ai_username)
                     
-                    # Update the citizen's ducats
                     if land_update_success:
-                        new_ducats = ai_ducats - price
-                        tables["citizens"].update(ai_citizen["id"], {
-                            "Ducats": new_ducats
-                        })
-                        print(f"Updated {ai_username}'s ducats from {ai_ducats} to {new_ducats}")
+                        # Update the AI citizen's ducats
+                        new_ai_ducats = ai_ducats - price
+                        tables["citizens"].update(ai_citizen["id"], {"Ducats": new_ai_ducats})
+                        print(f"Updated AI {ai_username}'s ducats from {ai_ducats} to {new_ai_ducats}")
+
+                        # Update original seller's ducats
+                        if original_seller_username and original_seller_username != "Republic":
+                            seller_record_data = find_citizen_by_identifier(tables, original_seller_username)
+                            if seller_record_data:
+                                seller_current_ducats = seller_record_data["fields"].get("Ducats", 0)
+                                new_seller_ducats = seller_current_ducats + price
+                                tables["citizens"].update(seller_record_data["id"], {"Ducats": new_seller_ducats})
+                                print(f"Updated seller {original_seller_username}'s ducats from {seller_current_ducats} to {new_seller_ducats}")
+                            else:
+                                print(f"Warning: Could not find seller {original_seller_username} to update ducats.")
                         
-                        # Create notification for the citizen
+                        # Create a transaction log for the ducat transfer
+                        try:
+                            tables["transactions_log_table"].create({
+                                "Type": "transfer_log",
+                                "Asset": "compute_token_for_land_sale",
+                                "Seller": original_seller_username, # Receiver of ducats
+                                "Buyer": ai_username,             # Payer of ducats
+                                "Price": price,
+                                "CreatedAt": datetime.now().isoformat(),
+                                "ExecutedAt": datetime.now().isoformat(),
+                                "Notes": json.dumps({
+                                    "contract_id": contract_id,
+                                    "land_id": land_id,
+                                    "purchase_by_ai": True
+                                })
+                            })
+                            print(f"Created transfer_log for land purchase: {ai_username} paid {price} to {original_seller_username} for {land_id}")
+                        except Exception as e:
+                            print(f"Error creating transfer_log for land purchase: {str(e)}")
+
+                        # Create notification for the AI citizen
                         create_notification(tables, ai_username, land_id, price)
+                        
+                        # Create notification for the original seller
+                        if original_seller_username and original_seller_username != "Republic" and original_seller_username != ai_username :
+                            try:
+                                notification_content = f"Your land {land_id} has been purchased by {ai_username} for {price} ducats."
+                                tables["notifications"].create({
+                                    "Citizen": original_seller_username,
+                                    "Type": "land_sold",
+                                    "Content": notification_content,
+                                    "CreatedAt": datetime.now().isoformat(),
+                                    "Details": json.dumps({
+                                        "land_id": land_id,
+                                        "buyer": ai_username,
+                                        "price": price,
+                                        "timestamp": datetime.now().isoformat()
+                                    })
+                                })
+                                print(f"Sent land sold notification to {original_seller_username}")
+                            except Exception as e:
+                                print(f"Error sending land sold notification: {str(e)}")
                         
                         # Add to purchases list for admin notification
                         purchases.append({

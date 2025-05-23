@@ -23,10 +23,11 @@ def initialize_airtable():
     
     api = Api(airtable_api_key)
     
+    AIRTABLE_CONTRACTS_TABLE_NAME = os.getenv("AIRTABLE_CONTRACTS_TABLE", "CONTRACTS")
     tables = {
         "citizens": Table(airtable_api_key, airtable_base_id, "CITIZENS"),
         "lands": Table(airtable_api_key, airtable_base_id, "LANDS"),
-        "transactions": Table(airtable_api_key, airtable_base_id, "TRANSACTIONS"),
+        "contracts": Table(airtable_api_key, airtable_base_id, AIRTABLE_CONTRACTS_TABLE_NAME),
         "notifications": Table(airtable_api_key, airtable_base_id, "NOTIFICATIONS")
     }
     
@@ -56,21 +57,21 @@ def get_lands_with_income(tables) -> List[Dict]:
         print(f"Error getting lands with income: {str(e)}")
         return []
 
-def get_existing_bids(tables, ai_citizen_id: str) -> Dict[str, Dict]:
-    """Get existing bids from an AI citizen, indexed by land_id."""
+def get_existing_bids(tables, ai_username: str) -> Dict[str, Dict]:
+    """Get existing bids (land_sale_offer contracts) from an AI citizen, indexed by land_id."""
     try:
-        # Query transactions where the buyer is the AI citizen and type is 'land'
-        formula = f"AND({{Buyer}}='{ai_citizen_id}', {{Type}}='land', {{ExecutedAt}}=BLANK())"
-        transactions = tables["transactions"].all(formula=formula)
+        # Query contracts where the buyer is the AI citizen, type is 'land_sale_offer', and status is 'pending'
+        formula = f"AND({{Buyer}}='{ai_username}', {{Type}}='land_sale_offer', {{Status}}='pending')"
+        contracts = tables["contracts"].all(formula=formula)
         
-        # Index by asset (land_id)
+        # Index by ResourceType (land_id)
         bids_by_land = {}
-        for transaction in transactions:
-            asset = transaction["fields"].get("Asset")
-            if asset:
-                bids_by_land[asset] = transaction
+        for contract in contracts:
+            resource_type = contract["fields"].get("ResourceType")
+            if resource_type:
+                bids_by_land[resource_type] = contract
         
-        print(f"Found {len(bids_by_land)} existing bids for AI citizen {ai_citizen_id}")
+        print(f"Found {len(bids_by_land)} existing land_sale_offer contracts for AI citizen {ai_username}")
         return bids_by_land
     except Exception as e:
         print(f"Error getting existing bids: {str(e)}")
@@ -110,13 +111,14 @@ def create_or_update_bid(tables, ai_citizen: Dict, land: Dict, existing_bid: Opt
                 print(f"AI {ai_username} doesn't have enough compute to increase bid on {land_id}. Needs {new_bid * 2}, has {ai_compute}")
                 return False
             
-            # Update the transaction with the new bid
+            # Update the contract with the new bid price
             now = datetime.now().isoformat()
-            tables["transactions"].update(existing_bid["id"], {
-                "Price": new_bid
+            tables["contracts"].update(existing_bid["id"], {
+                "PricePerResource": new_bid,
+                "UpdatedAt": now
             })
             
-            print(f"Updated bid for {land_id} from {current_bid} to {new_bid} by AI {ai_username}")
+            print(f"Updated land_sale_offer contract for {land_id} from {current_bid} to {new_bid} by AI {ai_username}")
             
             # Send notification to land owner about the updated bid
             if land_owner:
@@ -145,18 +147,22 @@ def create_or_update_bid(tables, ai_citizen: Dict, land: Dict, existing_bid: Opt
             # Create a new bid
             now = datetime.now().isoformat()
             
-            # Create transaction record
-            transaction = {
-                "Type": "land",
-                "Asset": land_id,
-                "Seller": land_owner if land_owner else "Republic",
-                "Buyer": ai_username,
-                "Price": bid_amount,
-                "CreatedAt": now
+            # Create a new land_sale_offer contract
+            contract_data = {
+                "Type": "land_sale_offer",
+                "ResourceType": land_id,
+                "Buyer": ai_username, # AI is offering to buy
+                "Seller": land_owner if land_owner else "Republic", # Current land owner or Republic
+                "PricePerResource": bid_amount,
+                "Amount": 1,
+                "Status": "pending", # This offer needs to be accepted by the seller
+                "CreatedAt": now,
+                "UpdatedAt": now,
+                "Notes": json.dumps({"bidder_ai": ai_username, "land_owner_at_bid_time": land_owner})
             }
             
-            tables["transactions"].create(transaction)
-            print(f"Created new bid for {land_id} at {bid_amount} by AI {ai_username}")
+            tables["contracts"].create(contract_data)
+            print(f"Created new land_sale_offer contract for {land_id} at {bid_amount} by AI {ai_username} to {land_owner if land_owner else 'Republic'}")
             
             # Send notification to land owner about the new bid
             if land_owner:
