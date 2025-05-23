@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 CITIZEN_STORAGE_CAPACITY = 10.0 # Standard citizen carrying capacity
 
 def _get_citizen_record_local(tables: Dict[str, Any], username: str) -> Optional[Dict]:
-    formula = f"{{Username}} = '{username.replace(\"'\", \"\\\\'\")}'"
+    formula = f"{{Username}} = '{username.replace("'", "\\'")}'"
     try:
         records = tables['citizens'].all(formula=formula, max_records=1)
         return records[0] if records else None
@@ -34,7 +34,7 @@ def _get_building_by_airtable_id_local(tables: Dict[str, Any], airtable_id: str)
         return None
 
 def get_citizen_current_load_local(tables: Dict[str, Any], citizen_username: str) -> float:
-    formula = f"AND({{Asset}}='{citizen_username.replace(\"'\", \"\\\\'\")}', {{AssetType}}='citizen')"
+    formula = f"AND({{Asset}}='{citizen_username.replace("'", "\\'")}', {{AssetType}}='citizen')"
     current_load = 0.0
     try:
         resources_carried = tables['resources'].all(formula=formula)
@@ -50,8 +50,8 @@ def get_resource_stock_in_galley(
     resource_type_id: str
 ) -> Optional[Dict]:
     """Gets the specific resource record from the galley (owned by Italia)."""
-    formula = (f"AND({{Type}}='{resource_type_id.replace(\"'\", \"\\\\'\")}', "
-               f"{{Asset}}='{galley_custom_id.replace(\"'\", \"\\\\'\")}', "
+    formula = (f"AND({{Type}}='{resource_type_id.replace("'", "\\'")}', "
+               f"{{Asset}}='{galley_custom_id.replace("'", "\\'")}', "
                f"{{AssetType}}='building', "
                f"{{Owner}}='Italia')")
     try:
@@ -105,7 +105,7 @@ def process(
     # Assuming OriginalContractId in activity is the custom ContractId string
     original_contract_record = None
     try:
-        formula_contract = f"{{ContractId}} = '{original_contract_custom_id.replace(\"'\", \"\\\\'\")}'"
+        formula_contract = f"{{ContractId}} = '{original_contract_custom_id.replace("'", "\\'")}'"
         contracts_found = tables['contracts'].all(formula=formula_contract, max_records=1)
         if contracts_found:
             original_contract_record = contracts_found[0]
@@ -168,10 +168,10 @@ def process(
         log.info(f"[fetch_from_galley_proc] Decremented {actual_amount_to_pickup} of {resource_id_to_fetch} from galley {galley_custom_id}.")
 
         # Add resource to carrier citizen's inventory, owned by the ultimate_buyer_username
-        carrier_res_formula = (f"AND({{Type}}='{resource_id_to_fetch.replace(\"'\", \"\\\\'\")}', "
-                               f"{{Asset}}='{carrier_username.replace(\"'\", \"\\\\'\")}', "
+        carrier_res_formula = (f"AND({{Type}}='{resource_id_to_fetch.replace("'", "\\'")}', "
+                               f"{{Asset}}='{carrier_username.replace("'", "\\'")}', "
                                f"{{AssetType}}='citizen', "
-                               f"{{Owner}}='{ultimate_buyer_username.replace(\"'\", \"\\\\'\")}')")
+                               f"{{Owner}}='{ultimate_buyer_username.replace("'", "\\'")}')")
         existing_carrier_res = tables['resources'].all(formula=carrier_res_formula, max_records=1)
         res_def_details = resource_defs.get(resource_id_to_fetch, {})
 
