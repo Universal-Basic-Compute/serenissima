@@ -1899,20 +1899,6 @@ def process_galley_unloading_activities(tables: Dict[str, Table], idle_citizens:
     log.info(f"{LogColors.OKGREEN}Created {activities_created_count} 'fetch_from_galley' activities.{LogColors.ENDC}")
     return activities_created_count
 
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Create activities for idle citizens.")
-    parser.add_argument("--dry-run", action="store_true", help="Run without making changes")
-    parser.add_argument("--verbose", action="store_true", help="Enable verbose logging")
-    parser.add_argument("--citizen", type=str, help="Process activities for a specific citizen by username.")
-    
-    args = parser.parse_args()
-    
-    if args.verbose:
-        logging.getLogger().setLevel(logging.DEBUG)
-    
-    create_activities(dry_run=args.dry_run, target_citizen_username=args.citizen)
-
 def _fetch_and_assign_random_starting_position(tables: Dict[str, Table], citizen_record: Dict) -> Optional[Dict[str, float]]:
     """
     Fetches polygon data, selects a random buildingPoint, assigns it to the citizen,
@@ -1972,3 +1958,16 @@ def _fetch_and_assign_random_starting_position(tables: Dict[str, Table], citizen
     except Exception as e_general:
         log.error(f"{LogColors.FAIL}General error fetching or assigning random position for {citizen_custom_id}: {e_general}{LogColors.ENDC}")
         return None
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Create activities for idle citizens.")
+    parser.add_argument("--dry-run", action="store_true", help="Run without making changes")
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose logging")
+    parser.add_argument("--citizen", type=str, help="Process activities for a specific citizen by username.")
+    
+    args = parser.parse_args()
+    
+    if args.verbose:
+        logging.getLogger().setLevel(logging.DEBUG)
+    
+    create_activities(dry_run=args.dry_run, target_citizen_username=args.citizen)
