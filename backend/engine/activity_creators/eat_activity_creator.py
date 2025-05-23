@@ -68,7 +68,7 @@ def try_create_eat_at_home_activity(
     from .goto_home_activity_creator import try_create as try_create_goto_home_activity
 
     if is_at_home:
-        log.info(f"Citizen {citizen_username} is at home. Attempting to create 'eat_at_home' activity at {home_building_airtable_id} eating {amount_to_eat} of {food_resource_type}.")
+        log.info(f"Citizen {citizen_username} is at home. Attempting to create 'eat_at_home' activity at {home_building_custom_id} eating {amount_to_eat} of {food_resource_type}.")
         try:
             now = datetime.datetime.now(pytz.UTC)
             end_time = now + datetime.timedelta(minutes=EAT_ACTIVITY_DURATION_MINUTES)
@@ -77,8 +77,8 @@ def try_create_eat_at_home_activity(
                 "ActivityId": f"eat_home_{citizen_custom_id}_{int(time.time())}",
                 "Type": "eat_at_home",
                 "Citizen": citizen_username,
-                "FromBuilding": home_building_airtable_id, # Location of eating
-                "ToBuilding": home_building_airtable_id,   # Stays in the same building
+                "FromBuilding": home_building_custom_id, # Use custom BuildingId
+                "ToBuilding": home_building_custom_id,   # Use custom BuildingId
                 "CreatedAt": now.isoformat(),
                 "StartDate": now.isoformat(),
                 "EndDate": end_time.isoformat(),
