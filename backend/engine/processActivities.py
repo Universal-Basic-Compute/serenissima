@@ -253,8 +253,8 @@ def process_building_arrivals(tables: Dict[str, Table], dry_run: bool = False):
     """Checks for buildings (e.g., merchant galleys) that have 'arrived'."""
     log.info("Checking for building arrivals (e.g., merchant galleys)...")
     now_iso = datetime.now(timezone.utc).isoformat()
-    # Check for merchant galleys specifically, or any building with IsConstructed=False and an ArrivalDate
-    formula = f"AND({{Type}}='merchant_galley', {{IsConstructed}}=FALSE(), {{ArrivalDate}}<='{now_iso}')"
+    # Check for merchant galleys specifically, using ConstructionDate as the arrival time
+    formula = f"AND({{Type}}='merchant_galley', {{IsConstructed}}=FALSE(), {{ConstructionDate}}<='{now_iso}')"
     try:
         arrived_buildings = tables['buildings'].all(formula=formula)
         if not arrived_buildings:
