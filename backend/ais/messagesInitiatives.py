@@ -33,12 +33,12 @@ def initialize_airtable() -> Optional[Dict[str, Table]]:
         base = Base(api, airtable_base_id) # Create a Base object
         
         tables = {
-            "citizens": Table(None, base, "CITIZENS"),
-            "messages": Table(None, base, "MESSAGES"),
-            "notifications": Table(None, base, "NOTIFICATIONS"),
-            "relationships": Table(None, base, "RELATIONSHIPS"),
-            "relevancies": Table(None, base, "RELEVANCIES"),
-            "problems": Table(None, base, "PROBLEMS")
+            "citizens": base.table("CITIZENS"), # Corrected usage
+            "messages": base.table("MESSAGES"), # Corrected usage
+            "notifications": base.table("NOTIFICATIONS"), # Corrected usage
+            "relationships": base.table("RELATIONSHIPS"), # Corrected usage
+            "relevancies": base.table("RELEVANCIES"), # Corrected usage
+            "problems": base.table("PROBLEMS") # Corrected usage
         }
         print("Connexion à Airtable initialisée avec des objets Base et Table explicites.")
         return tables
@@ -108,11 +108,11 @@ def get_top_relationships_for_ai(tables: Dict[str, Table], ai_username: str, lim
 
 # --- Fonctions d'assistance pour récupérer les données contextuelles (copiées/adaptées de answertomessages.py) ---
 
-def _escape_airtable_value(value: Any) -> str: # Changed type hint to Any
-    """Échappe les apostrophes pour les formules Airtable."""
+def _escape_airtable_value(value: Any) -> str:
+    """Échappe les apostrophes pour les formules Airtable et s'assure que la valeur est une chaîne."""
     if not isinstance(value, str):
-        value = str(value)
-    return value.replace("'", "\\'")
+        value = str(value)  # Convertit en chaîne d'abord
+    return value.replace("'", "\\'") # Ensuite, échappe les apostrophes
 
 def _get_citizen_data(tables: Dict[str, Table], username: str) -> Optional[Dict]:
     try:
