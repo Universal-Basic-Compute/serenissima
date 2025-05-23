@@ -102,41 +102,98 @@ def create_image_prompt(building: Dict[str, Any]) -> str:
     completed_prompt = building.get('completedBuilding3DPrompt', '')
     
     # Create a base prompt
-    base_prompt = f"A realistic detailed illustration of a {name}, a {category} building in 15th century Venice."
-    
-    # If we have minimal information, add some generic details based on the name
-    if not description and not completed_prompt:
-        base_prompt += f" This is a historical Venetian {name.lower()} with characteristic Renaissance architecture."
-        base_prompt += " The building features typical Venetian Gothic elements like pointed arches, ornate windows, and decorative facades."
-        base_prompt += " It stands along a canal with gondolas nearby, surrounded by other period-appropriate structures."
-    
-    # Add subcategory if available
+    base_prompt = f"A {name}, a {category.lower()} building in 15th century Venice."
     if subcategory:
-        base_prompt += f" This is part of the {subcategory} subcategory."
-    
-    # Add description if available
+        base_prompt += f" This is a {subcategory.lower()} type of {category.lower()}."
+
+    # Add descriptive elements
     if description:
         base_prompt += f" {description}"
-    
-    # Add the 3D prompt if available
+    # The completedBuilding3DPrompt can be very specific, potentially overriding distinctiveness efforts.
+    # We include it but rely on other elements to guide the overall style for UX.
     if completed_prompt:
         base_prompt += f" {completed_prompt}"
+
+    # Dynamic style elements for distinctiveness and UX
+    style_elements = [
+        "Detailed illustration",
+        "clear silhouette for easy game asset identification", # UX focus
+        "realistic textures (weathered stone, brick, plaster)",
+        "natural lighting with warm Mediterranean sunlight",
+        "historically accurate details for 15th century Venice",
+        "Square format image", # Ideogram prefers this phrasing
+        "--ar 1:1" # Aspect ratio
+    ]
+
+    # Category-specific visual cues
+    # Normalizing category and name for comparisons
+    current_category = category.lower()
+    current_name_lower = name.lower()
+
+    if current_category == "residential" or "house" in current_name_lower or "palazzo" in current_name_lower:
+        style_elements.append("Venetian Gothic architecture with ornate windows and balconies.")
+        if "palazzo" in current_name_lower:
+            style_elements.append("Grand facade, possibly with a water entrance (porta d'acqua). Color palette: rich marble, Istrian stone, subtle gold accents.")
+        else:
+            style_elements.append("Modest yet elegant facade, typical of Venetian homes. Color palette: warm terracotta, ochre, and faded pastels.")
+    elif current_category == "commercial" or current_category == "business":
+        style_elements.append("Functional yet representative architecture, clearly identifiable for its purpose.")
+        if "workshop" in current_name_lower or "artisan" in current_name_lower or "smithy" in current_name_lower or "bakery" in current_name_lower:
+            style_elements.append("Visible signs of craft or trade, possibly an open storefront or workshop area with tools or products visible.")
+            style_elements.append("Color palette: earthy tones, aged wood, and practical stone.")
+        elif "market" in current_name_lower or "stall" in current_name_lower:
+            style_elements.append("Open-air structure or prominent stall, designed to attract customers, perhaps with displayed goods (subtly).")
+            style_elements.append("Color palette: vibrant awnings or distinct stall colors, contrasting with stone/wood structure.")
+        elif "warehouse" in current_name_lower:
+            style_elements.append("Sturdy, practical design, possibly with large doors, hoists, or cranes for goods. Minimal ornamentation.")
+            style_elements.append("Color palette: robust stone or dark brick, muted functional colors, perhaps slightly grimy from use.")
+        elif "tavern" in current_name_lower or "inn" in current_name_lower:
+            style_elements.append("Welcoming facade, perhaps with a visible sign or outdoor seating area (if appropriate).")
+            style_elements.append("Color palette: warm wood tones, inviting colors, possibly with painted stucco.")
+        else: # Generic commercial
+            style_elements.append("Distinctive signage or architectural feature related to its trade (e.g., banker's house, scribe's office).")
+            style_elements.append("Color palette: rich but professional colors, perhaps with guild insignia if applicable.")
+    elif current_category == "industrial": # e.g. shipyard, glass furnace
+        style_elements.append("Robust and functional structures, clear evidence of industrial activity and scale.")
+        if "shipyard" in current_name_lower or "arsenal" in current_name_lower or "boatyard" in current_name_lower:
+            style_elements.append("Large covered slipways or open-air construction areas, timber framing, possibly near water with ships under construction or repair.")
+        elif "glass" in current_name_lower or "furnace" in current_name_lower or "foundry" in current_name_lower:
+            style_elements.append("Tall chimneys emitting light smoke, glowing light from within (implied), sturdy brickwork, industrial character.")
+        style_elements.append("Color palette: utilitarian greys, dark browns, and soot-stained elements, reflecting heavy use.")
+    elif current_category == "civic" or current_category == "public" or current_category == "religious":
+        style_elements.append("Impressive and prominent architecture, reflecting public importance and status.")
+        if "church" in current_name_lower or "chapel" in current_name_lower or "cathedral" in current_name_lower:
+            style_elements.append("Religious iconography, prominent bell tower (campanile), stained glass windows. Byzantine and Gothic influences are key.")
+            style_elements.append("Color palette: white Istrian stone, marble details, gold accents, possibly mosaics.")
+        elif "palace" in current_name_lower and "doge" in current_name_lower:
+             style_elements.append("Iconic Venetian Gothic architecture, pink and white patterned facade, grand loggias, instantly recognizable.")
+        elif "government" in current_name_lower or "scuola" in current_name_lower or "palazzo pubblico" in current_name_lower:
+            style_elements.append("Formal and imposing facade, possibly with symbols of state, city, or guild. Often features arcades or loggias.")
+            style_elements.append("Color palette: dignified stone, marble, official colors, possibly frescoes or reliefs.")
+    elif current_category == "infrastructure":
+        if "bridge" in current_name_lower:
+            style_elements.append("Stone or wooden construction, characteristic Venetian arch design, clearly spanning a canal.")
+            style_elements.append("Integrates with surrounding walkways and buildings.")
+        elif "dock" in current_name_lower or "pier" in current_name_lower or "landing" in current_name_lower:
+            style_elements.append("Wooden or stone structures at the water's edge, mooring posts (pali da casada), possibly with goods or boats tied up.")
+        elif "well" in current_name_lower:
+            style_elements.append("Ornate wellhead (vera da pozzo) in a campo (square), typically made of Istrian stone with carvings.")
+    else: # Default fallback if category not matched
+        style_elements.append("Typical Venetian architectural elements with Byzantine and Gothic influences.")
+        style_elements.append("Color palette: common Venetian colors like terracotta, ochre, or faded stucco.")
+
+    # Add characteristic Venetian elements if not already implied by category
+    # This ensures the setting is always clear.
+    if not any(s in base_prompt.lower() for s in ["canal", "water", "gondola"]) and current_category not in ["infrastructure"]:
+         style_elements.append("The building is situated in a typical Venetian scene, possibly alongside a canal or in a bustling campo.")
+
+    # Combine all elements
+    full_prompt = f"{base_prompt} {' '.join(style_elements)}"
     
-    # Add style guidelines
-    style_guidelines = (
-        "Realistic Renaissance architectural style with historically accurate details. "
-        "Venetian Gothic architectural elements with Byzantine influences. "
-        "Natural lighting with warm Mediterranean sunlight. "
-        "Include characteristic Venetian elements like canals, bridges, or gondolas where appropriate. "
-        "Rich, warm color palette with terracotta, ochre, and Venetian red tones. "
-        "Detailed textures showing weathered stone, brick, and plaster. "
-        "Square format image with clear visibility of the building. "
-        "--ar 1:1"
-    )
+    # Clean up extra spaces
+    full_prompt = ' '.join(full_prompt.split())
     
-    # Combine everything
-    full_prompt = f"{base_prompt} {style_guidelines}"
-    
+    log.info(f"Generated prompt for {name}: {full_prompt}")
     return full_prompt
 
 def generate_image(prompt: str, base_filename: str, output_dir: str) -> Optional[str]:
