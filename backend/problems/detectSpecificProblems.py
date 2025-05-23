@@ -82,6 +82,7 @@ def detect_specific_problems(
         "workless": "/api/problems/workless",
         "vacant_buildings": "/api/problems/vacant-buildings",
         "no_active_contracts": "/api/problems/no-active-contracts",
+        "hungry": "/api/problems/hungry", # Added hungry problem type
     }
 
     if problem_type not in api_url_path_map:
@@ -168,7 +169,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--type", 
         required=True, 
-        choices=["homeless", "workless", "vacant_buildings", "no_active_contracts"],
+        choices=["homeless", "workless", "vacant_buildings", "no_active_contracts", "hungry"], # Added hungry
         help="The type of problem to detect."
     )
     parser.add_argument(

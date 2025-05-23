@@ -690,6 +690,210 @@ export class ProblemService {
            `- Improve skills or social standing to access better jobs.\n` +
            `- The daily job assignment script (10:00 AM UTC) may assign a job if available and criteria are met.`;
   }
+
+  /**
+   * Detect hungry citizens
+   */
+  public async detectHungryCitizens(username?: string): Promise<Record<string, any>> {
+    try {
+      const allFetchedCitizens = await this.fetchAllCitizens(username);
+      console.log(`[ProblemService] detectHungryCitizens: Starting with ${allFetchedCitizens.length} fetched citizens (user: ${username || 'all'}).`);
+      if (allFetchedCitizens.length === 0) {
+        console.log(`No citizens found to check for hunger (user: ${username || 'all'}).`);
+        return {};
+      }
+
+      const citizens = allFetchedCitizens.filter(c => {
+        // Basic validation similar to other detection methods
+        let effectiveUsername: string | undefined = undefined;
+        const originalPascalUsername = c.Username;
+        const camelUsername = (c as any).username;
+
+        if (c.Username && typeof c.Username === 'string' && c.Username.trim() !== '') {
+          effectiveUsername = c.Username.trim();
+        } else if (camelUsername && typeof camelUsername === 'string' && camelUsername.trim() !== '') {
+          effectiveUsername = camelUsername.trim();
+          c.Username = effectiveUsername;
+        }
+        
+        const logIdentifier = c.CitizenId || (c as any).citizenId || c.id || 'Unknown ID';
+        if (!effectiveUsername) {
+          console.warn(`[ProblemService] detectHungryCitizens: Citizen ${logIdentifier} has invalid/missing Username. Excluding from hunger check.`);
+          return false;
+        }
+
+        // Normalize CitizenId
+        const originalPascalCitizenId = c.CitizenId;
+        const camelCitizenId = (c as any).citizenId;
+        if (camelCitizenId && typeof camelCitizenId === 'string' && camelCitizenId.trim() !== '') {
+          c.CitizenId = camelCitizenId.trim();
+        } else if (originalPascalCitizenId && typeof originalPascalCitizenId === 'string' && originalPascalCitizenId.trim() !== '') {
+          c.CitizenId = originalPascalCitizenId.trim();
+        }
+
+        // Normalize FirstName and LastName
+        const nameFields = ['FirstName', 'LastName'];
+        nameFields.forEach(field => {
+            const pascalCaseField = c[field];
+            const camelCaseField = (c as any)[field.charAt(0).toLowerCase() + field.slice(1)];
+            if (camelCaseField && typeof camelCaseField === 'string' && camelCaseField.trim() !== '') {
+                c[field] = camelCaseField.trim();
+            } else if (pascalCaseField && typeof pascalCaseField === 'string' && pascalCaseField.trim() !== '') {
+                c[field] = pascalCaseField.trim();
+            }
+        });
+        
+        // Ensure inVenice is true
+        const inVenice = c.inVenice === true || (c as any).invenice === true; // Check both casings
+        if (!inVenice) {
+            console.log(`[ProblemService] detectHungryCitizens: Citizen ${c.Username} is not in Venice. Skipping hunger check.`);
+            return false;
+        }
+
+        return true;
+      });
+
+      if (citizens.length === 0) {
+        console.log(`No citizens in Venice with valid Usernames to check for hunger (user: ${username || 'all'}). Original count: ${allFetchedCitizens.length}`);
+        return {};
+      }
+      console.log(`[ProblemService] detectHungryCitizens: Processing ${citizens.length} citizens in Venice with valid usernames.`);
+
+      const buildings = await this.fetchAllBuildings(); // For employer check
+      const problems: Record<string, any> = {};
+      const now = new Date().getTime();
+      const twentyFourHoursInMs = 24 * 60 * 60 * 1000;
+
+      citizens.forEach(citizen => {
+        // Expect 'ateAt' from camelCased fields from API
+        const ateAtTimestamp = citizen.ateAt || (citizen as any).AteAt; 
+        
+        if (!ateAtTimestamp) {
+          console.warn(`[ProblemService] detectHungryCitizens: Citizen ${citizen.Username} has no 'ateAt' timestamp. Assuming hungry.`);
+          // If no timestamp, assume hungry by default or handle as per game rules (e.g., new citizens)
+          // For now, let's create a problem if it's missing, implying they've never eaten.
+        }
+
+        let isHungry = !ateAtTimestamp; // Hungry if never eaten
+
+        if (ateAtTimestamp) {
+          try {
+            const lastMealTime = new Date(ateAtTimestamp).getTime();
+            if (now - lastMealTime > twentyFourHoursInMs) {
+              isHungry = true;
+            }
+          } catch (e) {
+            console.error(`[ProblemService] detectHungryCitizens: Error parsing ateAt timestamp '${ateAtTimestamp}' for citizen ${citizen.Username}. Assuming hungry. Error: ${e}`);
+            isHungry = true; // Assume hungry if timestamp is invalid
+          }
+        }
+
+        if (isHungry) {
+          const problemId = `hungry_${citizen.CitizenId || citizen.id}_${Date.now()}`;
+          problems[problemId] = {
+            problemId,
+            citizen: citizen.Username,
+            assetType: 'citizen',
+            assetId: citizen.CitizenId || citizen.id,
+            severity: 'medium',
+            status: 'active',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            location: this.getCitizenLocationString(citizen),
+            type: 'hungry_citizen',
+            title: 'Hungry Citizen',
+            description: this.generateHungryDescription(citizen),
+            solutions: this.generateHungrySolutions(citizen),
+            notes: `Citizen ${citizen.Username} last ate at ${ateAtTimestamp || 'never/unknown'}. Current time: ${new Date(now).toISOString()}`,
+            position: citizen.position || null
+          };
+
+          // Check for employer impact
+          let workplaceBuilding: any = null;
+          let workplaceSource: string = "";
+
+          if (citizen.workplace && typeof citizen.workplace === 'object' && citizen.workplace.buildingId) {
+            const directWorkplaceId = citizen.workplace.buildingId;
+            const candidateBuilding = buildings.find(b => b.id === directWorkplaceId || b.buildingId === directWorkplaceId);
+            if (candidateBuilding) {
+                if (candidateBuilding.category?.toLowerCase() === 'business' && candidateBuilding.occupant === citizen.Username) {
+                    workplaceBuilding = candidateBuilding;
+                    workplaceSource = `direct lookup (validated citizen.workplace.buildingId '${directWorkplaceId}')`;
+                }
+            }
+          }
+          
+          if (!workplaceBuilding) { // Fallback to inference
+            const inferredBuilding = buildings.find(b => 
+              b.occupant === citizen.Username && 
+              b.category?.toLowerCase() === 'business'
+            );
+            if (inferredBuilding) {
+              workplaceBuilding = inferredBuilding;
+              workplaceSource = `inference (occupant='${citizen.Username}', category='business')`;
+            }
+          }
+
+          if (workplaceBuilding) {
+            const workplaceId = workplaceBuilding.id || workplaceBuilding.buildingId || 'UnknownWorkplaceID';
+            const employerUsernameRaw = workplaceBuilding.ranBy;
+            const employerUsernameTrimmed = employerUsernameRaw && typeof employerUsernameRaw === 'string' ? employerUsernameRaw.trim() : null;
+            
+            const hasValidEmployerField = employerUsernameRaw !== undefined && employerUsernameRaw !== null;
+            const employerIsNonEmptyString = !!(employerUsernameTrimmed && employerUsernameTrimmed !== '');
+            const employerIsDifferentFromEmployee = employerIsNonEmptyString && employerUsernameTrimmed !== citizen.Username;
+
+            if (employerIsNonEmptyString && employerIsDifferentFromEmployee) {
+              const employerUsername = employerUsernameTrimmed!;
+              const employeeName = `${citizen.FirstName || citizen.Username} ${citizen.LastName || ''}`.trim();
+              const employerProblemId = `hungry_employee_impact_${employerUsername}_${citizen.Username}_${Date.now()}`;
+              
+              problems[employerProblemId] = {
+                problemId: employerProblemId,
+                citizen: employerUsername,
+                assetType: 'employee_performance',
+                assetId: citizen.CitizenId || citizen.id,
+                severity: 'low',
+                status: 'active',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                location: workplaceBuilding.name || workplaceId,
+                type: 'hungry_employee_impact',
+                title: 'Hungry Employee Impact',
+                description: `Your employee, **${employeeName}**, is currently hungry. Hunger can significantly reduce productivity (up to 50%).`,
+                solutions: `Ensure **${employeeName}** has the means and opportunity to eat. Consider if wages are sufficient or if working conditions impede access to food. Monitor their performance.`,
+                notes: `Hungry Employee: ${citizen.Username} (ID: ${citizen.CitizenId || citizen.id}), Workplace: ${workplaceBuilding.name || workplaceId} (ID: ${workplaceId}). Last ate: ${ateAtTimestamp || 'never/unknown'}.`,
+                position: workplaceBuilding.position || null
+              };
+              console.log(`[ProblemService] CREATED 'Hungry Employee Impact' problem for employer '${employerUsername}' regarding employee '${citizen.Username}'. Source: ${workplaceSource}`);
+            }
+          }
+        }
+      });
+
+      console.log(`[ProblemService] detectHungryCitizens: Created ${Object.keys(problems).length} problems for hungry citizens and their employers (user: ${username || 'all'}).`);
+      return problems;
+    } catch (error) {
+      console.error('[ProblemService] Error detecting hungry citizens:', error);
+      return {};
+    }
+  }
+
+  private generateHungryDescription(citizen: any): string {
+    const citizenName = `**${citizen.FirstName || citizen.Username} ${citizen.LastName || ''}**`.trim();
+    return `${citizenName} has not eaten in over 24 hours and is now hungry. This can affect their well-being and ability to perform tasks effectively.\n\n` +
+           `### Impact\n` +
+           `- Reduced energy and focus.\n` +
+           `- If employed, work productivity may be reduced by up to 50%.\n` +
+           `- Prolonged hunger can lead to more severe health issues (if implemented).`;
+  }
+
+  private generateHungrySolutions(citizen: any): string {
+    return `### Recommended Solutions\n` +
+           `- Ensure the citizen consumes food. This might involve visiting a tavern, purchasing food from a market, or using owned food resources.\n` +
+           `- Check if the citizen has sufficient Ducats to afford food.\n` +
+           `- Review game mechanics related to food consumption and ensure the 'AteAt' (or equivalent) field is updated correctly after eating.`;
+  }
 }
 
 // Export a singleton instance

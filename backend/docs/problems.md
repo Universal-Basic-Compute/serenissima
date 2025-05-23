@@ -43,7 +43,27 @@ Here are the types of problems currently managed by the system:
     -   Improve skills or social standing.
     -   Wait for automatic job assignment by the daily script (if applicable).
 
-### 4. Vacant Home
+### 4. Hungry Citizen
+
+-   **Description**: A citizen is considered hungry if their last recorded meal (`AteAt` field) was more than 24 hours ago. This problem only applies to citizens currently marked as `inVenice = true`.
+-   **Detection**: The system checks each citizen with `inVenice = true`. It parses their `AteAt` timestamp and compares it to the current time. If the difference exceeds 24 hours, a "Hungry Citizen" problem is generated.
+-   **Impact/Severity**: Medium. Hunger can affect a citizen's well-being and reduce their work productivity by up to 50%.
+-   **Suggested Solutions**:
+    -   Ensure the citizen has access to food (e.g., by visiting a tavern or having food resources).
+    -   Verify that game mechanics for eating are functioning and the `AteAt` field is being updated correctly.
+    -   If the citizen is an AI, ensure their behavior scripts include routines for obtaining and consuming food.
+
+### 5. Hungry Employee Impact
+
+-   **Description**: This problem is reported to an employer if one of their employees is hungry.
+-   **Detection**: When a citizen is identified as hungry (see above), the system checks if they have a job. If so, and if the employer (`ranBy` in the professional buildings table) is different from the employee, a problem is created for the employer.
+-   **Impact/Severity**: Low. The employer is informed that their employee's productivity could be significantly reduced due to hunger.
+-   **Suggested Solutions**:
+    -   Consider if the employee's wages are sufficient for them to afford food.
+    -   Discuss the importance of regular meals with the employee, if appropriate for game context.
+    -   Monitor performance and consider if systemic issues are preventing employees from eating.
+
+### 6. Vacant Home
 
 -   **Description**: This problem is reported when a residential building (category "home") has an owner but no occupant.
 -   **Detection**: The system identifies buildings with `Category` = "home", a valid `Owner`, but an empty `Occupant` field.
@@ -54,7 +74,7 @@ Here are the types of problems currently managed by the system:
     -   Maintain the property.
     -   Sell the property.
 
-### 5. Vacant Business Premises
+### 7. Vacant Business Premises
 
 -   **Description**: This problem is reported when a commercial building (category "business") has an owner but no occupant (worker).
 -   **Detection**: The system identifies buildings with `Category` = "business", a valid `Owner`, but an empty `Occupant` field.
@@ -65,7 +85,7 @@ Here are the types of problems currently managed by the system:
     -   Ensure the property is suitable for common business types.
     -   Sell the property.
 
-### 6. No Active Contracts
+### 8. No Active Contracts
 
 -   **Description**: This problem is reported for "commercial" (business) category buildings that are not involved in any active contracts (neither as a buyer `BuyerBuilding` nor as a seller `SellerBuilding`).
 -   **Detection**: The system retrieves all "business" category buildings. Then, it retrieves all active contracts (where the current date is between `CreatedAt` and `EndAt`). It then identifies commercial buildings that do not appear as `BuyerBuilding` or `SellerBuilding` in these active contracts.
