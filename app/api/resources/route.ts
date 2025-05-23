@@ -275,7 +275,7 @@ export async function POST(request: Request) {
       // Subcategory: data.subcategory || definition?.subcategory || null, // Removed Subcategory
       // Tier: data.tier ?? definition?.tier ?? null, // Removed Tier
       Description: data.description || definition?.description || '',
-      Position: JSON.stringify(position), // Position of the resource itself
+      // Position: JSON.stringify(position), // Position of the resource itself - REMOVED
       Count: data.count || 1,
       Asset: data.asset || '', // BuildingId, Username, or LandId depending on AssetType
       AssetType: data.assetType || 'unknown', // 'building', 'citizen', 'land'

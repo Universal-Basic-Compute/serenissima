@@ -159,7 +159,7 @@ def process(
                     "AssetType": "building",
                     "Owner": target_owner_username,
                     "Count": amount,
-                    "Position": building_pos_str,
+                    # "Position": building_pos_str, # REMOVED
                     "CreatedAt": now_iso
                 }
                 tables['resources'].create(new_resource_payload)

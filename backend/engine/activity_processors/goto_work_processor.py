@@ -139,7 +139,7 @@ def process(
                     "AssetType": "building",
                     "Owner": workplace_operator_username, # Workplace operator owns these resources
                     "Count": amount_to_deposit,
-                    "Position": workplace_building_pos_str, # Position of the workplace
+                    # "Position": workplace_building_pos_str, # Position of the workplace - REMOVED
                     "CreatedAt": now_iso
                 }
                 tables['resources'].create(new_resource_payload_workplace)

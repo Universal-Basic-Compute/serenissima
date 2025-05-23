@@ -253,7 +253,7 @@ def process(
                 "AssetType": "citizen",
                 "Owner": galley_owner_username, # Resources on citizen are owned by the merchant (galley owner)
                 "Count": actual_amount_to_pickup,
-                "Position": galley_position_str, # Citizen is at the galley
+                # "Position": galley_position_str, # Citizen is at the galley - REMOVED
                 "CreatedAt": now_iso,
                 "Notes": f"Fetched for contract: {original_contract_custom_id}" # Store original contract ID
             }

@@ -275,7 +275,7 @@ def process(
                 "AssetType": "citizen",
                 "Owner": effective_buyer_username, # Resources on citizen are owned by the effective_buyer_username
                 "Count": amount_to_purchase,
-                "Position": from_building_position_str, # Citizen is at FromBuilding
+                # "Position": from_building_position_str, # Citizen is at FromBuilding - REMOVED
                 "CreatedAt": now_iso
             }
             tables['resources'].create(new_carrier_res_payload)
