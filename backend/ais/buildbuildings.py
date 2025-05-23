@@ -54,6 +54,42 @@ def log_data(label, data, indent=2):
     indented_data = textwrap.indent(formatted_data, ' ' * indent)
     print(indented_data)
 
+def send_error_message_to_kinos_ai(ai_username: str, error_context: str, error_message: str, original_ai_response: Optional[str] = None):
+    """Sends a system message to the Kinos AI about an error in processing its strategy."""
+    try:
+        api_key = get_kinos_api_key() # Assumes get_kinos_api_key() is defined in this module
+        blueprint = "serenissima-ai"
+        url = f"https://api.kinos-engine.ai/v2/blueprints/{blueprint}/kins/{ai_username}/add-message"
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
+        
+        system_message_content = (
+            f"System Alert: There was an error processing your last strategy for '{error_context}'.\n"
+            f"Error: {error_message}\n"
+        )
+        if original_ai_response:
+            system_message_content += f"\nYour response that caused the error (first 500 chars):\n{original_ai_response[:500]}"
+
+        payload = {
+            "message": system_message_content,
+            "role": "system", # Send as a system message
+            "metadata": {
+                "source": "backend_strategy_processor",
+                "error_context": error_context,
+                "error_details": error_message
+            }
+        }
+        
+        response = requests.post(url, headers=headers, json=payload)
+        if response.status_code == 200 or response.status_code == 201:
+            log_success(f"Successfully sent error notification message to Kinos AI {ai_username} regarding {error_context}.")
+        else:
+            log_error(f"Failed to send error notification message to Kinos AI {ai_username}. Status: {response.status_code}, Response: {response.text}")
+    except Exception as e:
+        log_error(f"Exception while sending error message to Kinos AI {ai_username}: {e}")
+
 def log_table(headers, rows):
     """Print data in a table format."""
     # Calculate column widths
@@ -832,9 +868,11 @@ If you decide not to build anything at this time, return an empty JSON object.
                 except Exception as e:
                     log_error(f"Error extracting decision from AI response for {ai_username}: {str(e)}")
                     log_error(f"Full response content that caused the error for {ai_username}:\n{content}")
+                    send_error_message_to_kinos_ai(ai_username, "building_strategy_parsing", str(e), content)
                     return None
             else:
                 log_error(f"Error processing building strategy request for AI citizen {ai_username}: {response_data}")
+                send_error_message_to_kinos_ai(ai_username, "building_strategy_api_error", f"Kinos API status: {status}, Response: {json.dumps(response_data)}")
                 return None
         else:
             log_error(f"Error from Kinos API: {response.status_code} - {response.text}")
@@ -842,6 +880,7 @@ If you decide not to build anything at this time, return an empty JSON object.
     except Exception as e:
         log_error(f"Error sending building strategy request to AI citizen {ai_username}: {str(e)}")
         log_error(f"Exception traceback: {traceback.format_exc()}")
+        send_error_message_to_kinos_ai(ai_username, "building_strategy_exception", str(e))
         return None
 
 def create_admin_notification(tables, ai_strategy_results: Dict[str, bool]) -> None:
