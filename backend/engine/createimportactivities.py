@@ -523,9 +523,9 @@ def generate_new_citizen(tables: Dict[str, Table], dry_run: bool = False) -> Opt
         log.error(f"Error in generate_new_citizen: {e}")
         return None
 
-def create_delivery_activity(tables, citizen: Dict, buyer_building_id: str,
-                             resources_to_deliver: List[Dict[str, Any]],
-                             contract_ids: List[str]) -> Optional[Dict]:
+def create_delivery_activity(tables, citizen: Dict, galley_building_id: str,
+                             resources_in_galley_manifest: List[Dict[str, Any]],
+                             original_contract_ids: List[str]) -> Optional[Dict]:
     """Create a single delivery activity for the merchant galley."""
     if not resources_in_galley_manifest or not galley_building_id:
         log.warning(f"No resources or galley_building_id to create activity for galley {galley_building_id}")
