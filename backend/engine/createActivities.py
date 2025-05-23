@@ -1800,19 +1800,33 @@ def process_galley_unloading_activities(tables: Dict[str, Table], idle_citizens:
                     continue
 
                 # Check if an active fetch_from_galley activity already exists for this specific contract item
-                activity_exists_formula = (f"AND({{Type}}='fetch_from_galley', "
-                                           f"{{FromBuilding}}='{galley_airtable_id}', " # Galley's Airtable ID
-                                           f"{{ContractId}}='{_escape_airtable_value(original_contract_id)}', " # Use ContractId
-                                           f"{{ResourceId}}='{_escape_airtable_value(resource_type)}', "
-                                           f"{{Status}}!='processed', {{Status}}!='failed')")
+                # We remove ResourceId from the direct formula and will check it by parsing the Resources field later.
+                activity_exists_formula_broad = (f"AND({{Type}}='fetch_from_galley', "
+                                                 f"{{FromBuilding}}='{galley_airtable_id}', " # Galley's Airtable ID
+                                                 f"{{ContractId}}='{_escape_airtable_value(original_contract_id)}', "
+                                                 f"{{Status}}!='processed', {{Status}}!='failed')")
+                activity_truly_exists = False
                 try:
-                    existing_activities = tables['activities'].all(formula=activity_exists_formula, max_records=1)
-                    if existing_activities:
-                        log.info(f"{LogColors.OKBLUE}Active 'fetch_from_galley' already exists for contract {original_contract_id}, resource {resource_type} from galley {galley_custom_id}. Skipping.{LogColors.ENDC}")
+                    potential_existing_activities = tables['activities'].all(formula=activity_exists_formula_broad)
+                    for act in potential_existing_activities:
+                        resources_json_str = act['fields'].get('Resources')
+                        if resources_json_str:
+                            try:
+                                resources_list_in_activity = json.loads(resources_json_str)
+                                # Expecting a list with one item for fetch_from_galley
+                                if isinstance(resources_list_in_activity, list) and len(resources_list_in_activity) == 1:
+                                    if resources_list_in_activity[0].get('ResourceId') == resource_type:
+                                        activity_truly_exists = True
+                                        break 
+                            except json.JSONDecodeError:
+                                log.warning(f"{LogColors.WARNING}Could not parse Resources JSON '{resources_json_str}' for activity {act['id']}{LogColors.ENDC}")
+                    
+                    if activity_truly_exists:
+                        log.info(f"{LogColors.OKBLUE}Active 'fetch_from_galley' already exists for contract {original_contract_id}, resource {resource_type} from galley {galley_custom_id} (checked via Resources field). Skipping.{LogColors.ENDC}")
                         continue
                 except Exception as e_check_existing:
                     log.error(f"{LogColors.FAIL}Error checking for existing fetch_from_galley activities: {e_check_existing}{LogColors.ENDC}")
-                    # Proceed with caution or skip
+                    # Proceed with caution or skip, might create duplicate if this fails
 
                 citizen_for_task = available_citizens_pool.pop(0) # Assign an idle citizen
                 

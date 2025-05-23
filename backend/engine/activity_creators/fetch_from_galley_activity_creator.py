@@ -53,8 +53,7 @@ def try_create(
             "Citizen": citizen_username,
             "FromBuilding": galley_airtable_id, # Airtable Record ID of the galley
             "ContractId": original_contract_custom_id, # Store original contract's custom ID in ContractId field
-            "ResourceId": resource_id_to_fetch,
-            "Amount": amount_to_fetch,
+            "Resources": json.dumps([{"ResourceId": resource_id_to_fetch, "Amount": amount_to_fetch}]), # Store as JSON array
             "CreatedAt": now_venice.isoformat(),
             "StartDate": start_date_iso, # Expected to be Venice time ISO string
             "EndDate": end_date_iso,     # Expected to be Venice time ISO string
