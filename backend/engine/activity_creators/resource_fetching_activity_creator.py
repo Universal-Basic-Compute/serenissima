@@ -27,13 +27,14 @@ def try_create(
     log.info(f"Attempting to create resource fetching activity for {citizen_username} from {from_building_custom_id} to {to_building_custom_id}")
 
     try:
-        now = datetime.datetime.now(pytz.UTC)
+        VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
+        now_venice = datetime.datetime.now(VENICE_TIMEZONE)
         
         travel_time_minutes = 30  # Default
         if 'timing' in path_data and 'durationSeconds' in path_data['timing']:
             travel_time_minutes = path_data['timing']['durationSeconds'] / 60
         
-        end_time = now + datetime.timedelta(minutes=travel_time_minutes)
+        end_time_venice = now_venice + datetime.timedelta(minutes=travel_time_minutes)
         activity_id_str = f"fetch_{citizen_custom_id}_{uuid.uuid4()}"
         
         # Fetch building names for notes if possible (optional, for richer notes)
@@ -55,9 +56,9 @@ def try_create(
             "ToBuilding": to_building_custom_id,   # Use custom BuildingId
             "ResourceId": resource_type, # Store the specific resource type being fetched
             "Amount": amount,           # Store the amount
-            "CreatedAt": now.isoformat(),
-            "StartDate": now.isoformat(),
-            "EndDate": end_time.isoformat(),
+            "CreatedAt": now_venice.isoformat(),
+            "StartDate": now_venice.isoformat(), # Start immediately in Venice time
+            "EndDate": end_time_venice.isoformat(),
             "Path": json.dumps(path_data.get('path', [])),
             "Transporter": transporter, # Add Transporter field
             "Notes": f"🚚 Fetching **{amount:,.0f}** units of **{resource_type}** from **{from_building_name}** to **{to_building_name}**"
@@ -68,7 +69,8 @@ def try_create(
         if activity and activity.get('id'):
             log.info(f"Created resource fetching activity: {activity['id']}")
             try:
-                updated_at_ts = datetime.datetime.now(pytz.UTC).isoformat()
+                # VENICE_TIMEZONE is already defined above
+                updated_at_ts = datetime.datetime.now(VENICE_TIMEZONE).isoformat()
                 tables['citizens'].update(citizen_airtable_id, {'UpdatedAt': updated_at_ts})
                 log.info(f"Updated 'UpdatedAt' for citizen record {citizen_airtable_id}")
             except Exception as e_update:
