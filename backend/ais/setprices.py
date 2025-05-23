@@ -3,7 +3,7 @@ import sys
 import json
 import traceback
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta # Added timedelta
 from typing import Dict, List, Optional, Tuple, Any
 import requests
 from dotenv import load_dotenv
@@ -12,6 +12,12 @@ from pyairtable import Api, Table
 # Add the parent directory to the path to import citizen_utils
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app.citizen_utils import find_citizen_by_identifier
+
+def _escape_airtable_value(value: str) -> str:
+    """Échappe les apostrophes pour les formules Airtable."""
+    if isinstance(value, str):
+        return value.replace("'", "\\'")
+    return str(value)
 
 def initialize_airtable():
     """Initialize connection to Airtable."""
