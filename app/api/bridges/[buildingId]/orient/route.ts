@@ -45,24 +45,32 @@ export async function PATCH(
     }
 
     const airtableRecordId = records[0].id;
-    console.log(`Found Airtable record ID: ${airtableRecordId} for BuildingId: ${buildingId}`);
+    console.log(`[API Orient Bridge] Found Airtable record ID: ${airtableRecordId} for BuildingId: ${buildingId}`);
+
+    const updatePayload = [{
+      id: airtableRecordId,
+      fields: {
+        Rotation: orientation, // Assuming 'Rotation' is the field in Airtable
+      },
+    }];
+    console.log('[API Orient Bridge] Airtable update payload:', JSON.stringify(updatePayload, null, 2));
 
     // Update the bridge record with the new orientation (mapped to 'Rotation' field)
-    const updatedRecords = await base(AIRTABLE_BUILDINGS_TABLE).update([
-      {
-        id: airtableRecordId,
-        fields: {
-          Rotation: orientation, // Assuming 'Rotation' is the field in Airtable
-          // Potentially also update an 'Orientation' field if it exists and is preferred
-          // Orientation: orientation, 
-        },
-      },
-    ]);
+    const updatedRecords = await base(AIRTABLE_BUILDINGS_TABLE).update(updatePayload);
 
-    if (!updatedRecords || updatedRecords.length === 0) {
-      throw new Error('Failed to update bridge orientation in Airtable.');
+    console.log('[API Orient Bridge] Airtable update response (updatedRecords):', updatedRecords);
+
+    if (!updatedRecords) {
+      console.error('[API Orient Bridge] Airtable update returned null or undefined.');
+      throw new Error('Failed to update bridge orientation in Airtable: No response from Airtable update.');
+    }
+    
+    if (updatedRecords.length === 0) {
+      console.error('[API Orient Bridge] Airtable update returned an empty array. This might indicate the record ID was not found for update or the field could not be set.');
+      throw new Error('Failed to update bridge orientation in Airtable: Update returned no records.');
     }
 
+    console.log(`[API Orient Bridge] Successfully updated ${updatedRecords.length} record(s).`);
     const updatedFields = updatedRecords[0].fields;
     const responseBuilding = {
       id: updatedFields.BuildingId || buildingId, // Use BuildingId from fields or fallback to param
