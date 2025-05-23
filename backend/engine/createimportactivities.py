@@ -200,18 +200,18 @@ def create_or_get_merchant_galley(
                 "id": "dry_run_galley_airtable_id",
                 "fields": {
                     "BuildingId": galley_building_id,
-                    "Type": "merchant_galley",
+                    "Type": "merchant_galley", # Type is the primary descriptor
                     "Owner": merchant_username,
                     "RunBy": merchant_username,
-                    "Position": json.dumps(position_coords),
-                    "Name": f"Merchant Galley for {merchant_username} at {galley_building_id}"
+                    "Position": json.dumps(position_coords)
+                    # "Name" field removed as it's not in the Airtable schema
                 }
             }
 
         galley_payload = {
             "BuildingId": galley_building_id,
-            "Type": "merchant_galley",
-            "Name": f"Merchant Galley for {merchant_username} at {galley_building_id}",
+            "Type": "merchant_galley", # Type is the primary descriptor
+            # "Name" field removed as it's not in the Airtable schema
             "Owner": merchant_username,
             "RunBy": merchant_username, 
             "Position": json.dumps(position_coords),
