@@ -395,188 +395,187 @@ def main(dry_run: bool = False):
         if success:
             update_activity_status(tables, activity_id_airtable, "processed")
             processed_count += 1
-
-            # Gondola Fee Processing
-            activity_path_json = activity_record['fields'].get('Path')
-            citizen_username_for_fee = activity_record['fields'].get('Citizen')
-            activity_custom_id_for_fee = activity_record['fields'].get('ActivityId', activity_id_airtable)
-            transporter_username = activity_record['fields'].get('Transporter') # Get the transporter from activity
-
-            if activity_path_json and citizen_username_for_fee and not dry_run:
-                gondola_distance_km, gondola_fee = calculate_gondola_travel_details(activity_path_json)
-                if gondola_fee > 0:
-                    traveler_citizen_record = get_citizen_record(tables, citizen_username_for_fee)
-                    
-                    fee_recipient_username = "ConsiglioDeiDieci" # Default recipient
-                    determined_recipient_from_transporter_field = False
-
-                    if transporter_username and transporter_username != "ConsiglioDeiDieci":
-                        transporter_citizen_record_check = get_citizen_record(tables, transporter_username)
-                        if transporter_citizen_record_check:
-                            fee_recipient_username = transporter_username
-                            determined_recipient_from_transporter_field = True
-                            log.info(f"{LogColors.OKBLUE}Gondola fee for activity {activity_guid} initially assigned to Transporter field value (citizen): {transporter_username}{LogColors.ENDC}")
-                        # else: Transporter field is not a known citizen, will try path or default to Consiglio
-
-                    if not determined_recipient_from_transporter_field:
-                        # Try to find recipient from path if Transporter field didn't yield one (or was Consiglio/empty/invalid)
-                        log.info(f"{LogColors.OKBLUE}Transporter field for activity {activity_guid} did not yield a specific recipient (value: {transporter_username}). Checking path for public_dock operator.{LogColors.ENDC}")
-                        try:
-                            path_points = json.loads(activity_path_json) if activity_path_json else []
-                            for point in path_points:
-                                if point.get("type") == "dock" and point.get("nodeId"):
-                                    dock_building_id = point.get("nodeId")
-                                    dock_record = get_building_record(tables, dock_building_id) # Fetches by BuildingId (custom ID)
-                                    if dock_record and dock_record['fields'].get('Type') == 'public_dock':
-                                        run_by_user = dock_record['fields'].get('RunBy')
-                                        if run_by_user and run_by_user != "ConsiglioDeiDieci": # Ensure RunBy is not Consiglio itself
-                                            run_by_citizen_check = get_citizen_record(tables, run_by_user)
-                                            if run_by_citizen_check:
-                                                fee_recipient_username = run_by_user
-                                                log.info(f"{LogColors.OKBLUE}Gondola fee for activity {activity_guid} reassigned to RunBy ({run_by_user}) of public_dock {dock_building_id} found in path.{LogColors.ENDC}")
-                                                break # Found a valid recipient from path
-                                            else:
-                                                log.warning(f"{LogColors.WARNING}RunBy user {run_by_user} for public_dock {dock_building_id} (from path) not found. Checking next dock in path.{LogColors.ENDC}")
-                                        # else: Dock has no RunBy or RunBy is Consiglio, check next dock
-                                    # else: Not a public_dock, or dock not found, check next point
-                        except json.JSONDecodeError:
-                            log.error(f"{LogColors.FAIL}Failed to parse activity path JSON for activity {activity_guid} while checking for dock operator: {activity_path_json}{LogColors.ENDC}")
-                        
-                        if fee_recipient_username == "ConsiglioDeiDieci" and transporter_username and transporter_username != "ConsiglioDeiDieci":
-                            # This case means Transporter field had a value, it wasn't a valid citizen, and no path dock operator was found.
-                            log.warning(f"{LogColors.WARNING}Transporter {transporter_username} in activity {activity_guid} was not a valid citizen, and no public_dock operator found in path. Fee defaults to ConsiglioDeiDieci.{LogColors.ENDC}")
-                    
-                    fee_recipient_record = get_citizen_record(tables, fee_recipient_username)
-
-                    if traveler_citizen_record and fee_recipient_record:
-                        traveler_ducats = float(traveler_citizen_record['fields'].get('Ducats', 0))
-                        if traveler_ducats >= gondola_fee:
-                            recipient_ducats = float(fee_recipient_record['fields'].get('Ducats', 0))
-                            VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
-                            now_venice_fee = datetime.now(VENICE_TIMEZONE)
-                            now_iso_fee = now_venice_fee.isoformat()
-
-                            tables['citizens'].update(traveler_citizen_record['id'], {'Ducats': traveler_ducats - gondola_fee})
-                            tables['citizens'].update(fee_recipient_record['id'], {'Ducats': recipient_ducats + gondola_fee})
-                            
-                            transaction_payload = {
-                                "Type": "gondola_fee",
-                                "AssetType": "transport_activity",
-                                "Asset": activity_custom_id_for_fee,
-                                "Seller": fee_recipient_username, # Recipient of the fee
-                                "Buyer": citizen_username_for_fee,  # Payer of the fee
-                                "Price": gondola_fee,
-                                "Notes": json.dumps({
-                                    "activity_guid": activity_guid,
-                                    "distance_km": round(gondola_distance_km, 2),
-                                    "path_preview": activity_path_json[:100] + "..." if activity_path_json else "",
-                                    "original_transporter_field": transporter_username # Log what was in the Transporter field
-                                }),
-                                "CreatedAt": now_iso_fee,
-                                "ExecutedAt": now_iso_fee
-                            }
-                            tables['transactions'].create(transaction_payload)
-                            log.info(f"{LogColors.OKGREEN}Citizen {citizen_username_for_fee} paid {gondola_fee:.2f} Ducats gondola fee to {fee_recipient_username} for activity {activity_guid}. Distance: {gondola_distance_km:.2f} km.{LogColors.ENDC}")
-                        else:
-                            log.warning(f"{LogColors.WARNING}Citizen {citizen_username_for_fee} has insufficient Ducats ({traveler_ducats:.2f}) for gondola fee ({gondola_fee:.2f}) for activity {activity_guid}.{LogColors.ENDC}")
-                            # Consider creating a problem or debt record here in the future
-                    else:
-                        if not traveler_citizen_record: log.error(f"{LogColors.FAIL}Traveler citizen {citizen_username_for_fee} not found for gondola fee.{LogColors.ENDC}")
-                        if not fee_recipient_record: log.error(f"{LogColors.FAIL}Fee recipient citizen {fee_recipient_username} not found for gondola fee.{LogColors.ENDC}")
-            elif dry_run and activity_path_json and citizen_username_for_fee:
-                 gondola_distance_km, gondola_fee = calculate_gondola_travel_details(activity_path_json)
-                 if gondola_fee > 0:
-                    fee_recipient_username_dry_run = transporter_username if transporter_username and transporter_username != "ConsiglioDeiDieci" else "ConsiglioDeiDieci"
-                    # In a dry run, we can't confirm if transporter_username is a valid citizen, so we assume it would be if not Consiglio.
-                    log.info(f"{LogColors.OKCYAN}[DRY RUN] Would process gondola fee of {gondola_fee:.2f} Ducats for citizen {citizen_username_for_fee} to {fee_recipient_username_dry_run} for activity {activity_guid} (Distance: {gondola_distance_km:.2f} km).{LogColors.ENDC}")
-
-
-            # Update citizen's position and UpdatedAt if ToBuilding is present,
-            # UNLESS the activity type handles its own position update (e.g., fetch_resource, fetch_from_galley)
-            # or if the activity doesn't involve changing location (e.g. eat_from_inventory, eat_at_home, eat_at_tavern if already there)
-            no_pos_update_types = ['fetch_resource', 'fetch_from_galley', 'eat_from_inventory', 'eat_at_home', 'eat_at_tavern', 'production', 'rest', 'idle']
-            
-            # Define VENICE_TIMEZONE for potential UpdatedAt override, though Airtable usually handles it.
-            VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
-
-            if activity_type not in no_pos_update_types:
-                # ToBuilding field now stores the custom BuildingId
-                to_building_custom_id = activity_record['fields'].get('ToBuilding') 
-                citizen_username_for_pos = activity_record['fields'].get('Citizen')
-
-                if to_building_custom_id and citizen_username_for_pos and not dry_run:
-                    try:
-                        # Fetch building record using its custom BuildingId
-                        building_record_for_pos = get_building_record(tables, to_building_custom_id)
-                        citizen_record_for_pos = get_citizen_record(tables, citizen_username_for_pos)
-
-                        if building_record_for_pos and citizen_record_for_pos:
-                            building_position_str = building_record_for_pos['fields'].get('Position')
-                            
-                            # If Position field is empty, try to parse from BuildingId or Point
-                            if not building_position_str:
-                                log.info(f"{LogColors.OKBLUE}Building {to_building_custom_id} 'Position' field is empty. Attempting to parse from BuildingId or Point.{LogColors.ENDC}")
-                                parsed_pos_coords = None
-                                
-                                # Try parsing from BuildingId (e.g., "building_lat_lng..." or "canal_lat_lng...")
-                                building_id_str_for_parse = building_record_for_pos['fields'].get('BuildingId', '')
-                                parts = building_id_str_for_parse.split('_')
-                                if len(parts) >= 3: # e.g. building_45.43_12.35 or canal_45.43_12.35
-                                    try:
-                                        lat = float(parts[1])
-                                        lng = float(parts[2])
-                                        parsed_pos_coords = {"lat": lat, "lng": lng}
-                                        log.info(f"{LogColors.OKBLUE}Parsed position {parsed_pos_coords} from BuildingId '{building_id_str_for_parse}'.{LogColors.ENDC}")
-                                    except (ValueError, IndexError):
-                                        log.debug(f"{LogColors.WARNING}Could not parse lat/lng from BuildingId '{building_id_str_for_parse}'.{LogColors.ENDC}")
-                                        # Continue to try Point field
-
-                                # If not found in BuildingId, try parsing from Point field
-                                if not parsed_pos_coords:
-                                    point_field_str = building_record_for_pos['fields'].get('Point', '')
-                                    if point_field_str and isinstance(point_field_str, str): # Ensure Point is a string
-                                        point_parts = point_field_str.split('_')
-                                        if len(point_parts) >= 3: # e.g. building_45.43_12.35 or canal_45.43_12.35
-                                            try:
-                                                lat = float(point_parts[1])
-                                                lng = float(point_parts[2])
-                                                parsed_pos_coords = {"lat": lat, "lng": lng}
-                                                log.info(f"{LogColors.OKBLUE}Parsed position {parsed_pos_coords} from Point field '{point_field_str}'.{LogColors.ENDC}")
-                                            except (ValueError, IndexError):
-                                                log.debug(f"{LogColors.WARNING}Could not parse lat/lng from Point field '{point_field_str}'.{LogColors.ENDC}")
-                                        else:
-                                            log.debug(f"{LogColors.WARNING}Point field '{point_field_str}' not in expected format for parsing.{LogColors.ENDC}")
-                                    else:
-                                        log.debug(f"{LogColors.WARNING}Point field is empty or not a string for building {to_building_custom_id}.{LogColors.ENDC}")
-                                
-                                if parsed_pos_coords:
-                                    building_position_str = json.dumps(parsed_pos_coords)
-
-                            if building_position_str:
-                                update_payload = {
-                                    'Position': building_position_str
-                                    # 'UpdatedAt' is automatically handled by Airtable on record update
-                                }
-                                tables['citizens'].update(citizen_record_for_pos['id'], update_payload)
-                                log.info(f"{LogColors.OKGREEN}Updated citizen {citizen_username_for_pos} Position to {building_position_str} (Building Custom ID: {to_building_custom_id}).{LogColors.ENDC}")
-                            else:
-                                log.warning(f"{LogColors.WARNING}Building {to_building_custom_id} is missing a parsable Position, BuildingId, or Point. Cannot update citizen {citizen_username_for_pos} position.{LogColors.ENDC}")
-                        else: 
-                            if not building_record_for_pos:
-                                log.warning(f"{LogColors.WARNING}Target building (Custom ID: {to_building_custom_id}) not found. Cannot update citizen {citizen_username_for_pos} position.{LogColors.ENDC}")
-                            if not citizen_record_for_pos: 
-                                log.warning(f"{LogColors.WARNING}Citizen {citizen_username_for_pos} not found. Cannot update citizen position.{LogColors.ENDC}")
-                    except Exception as e_update_pos:
-                        log.error(f"{LogColors.FAIL}Error updating citizen {citizen_username_for_pos} position after activity {activity_guid}: {e_update_pos}{LogColors.ENDC}")
-            elif dry_run and activity_type not in no_pos_update_types:
-                to_building_custom_id_dry = activity_record['fields'].get('ToBuilding')
-                citizen_username_dry = activity_record['fields'].get('Citizen')
-                if to_building_custom_id_dry and citizen_username_dry:
-                    log.info(f"{LogColors.OKCYAN}[DRY RUN] Would update citizen {citizen_username_dry} position based on ToBuilding (Custom ID: {to_building_custom_id_dry}).{LogColors.ENDC}")
-
         else: # if not success
             update_activity_status(tables, activity_id_airtable, "failed")
             failed_count += 1
+        
+        # Gondola Fee Processing - Moved outside the if/else success block
+        activity_path_json = activity_record['fields'].get('Path')
+        citizen_username_for_fee = activity_record['fields'].get('Citizen')
+        activity_custom_id_for_fee = activity_record['fields'].get('ActivityId', activity_id_airtable)
+        transporter_username = activity_record['fields'].get('Transporter') # Get the transporter from activity
+
+        if activity_path_json and citizen_username_for_fee and not dry_run:
+            gondola_distance_km, gondola_fee = calculate_gondola_travel_details(activity_path_json)
+            if gondola_fee > 0:
+                traveler_citizen_record = get_citizen_record(tables, citizen_username_for_fee)
+                
+                fee_recipient_username = "ConsiglioDeiDieci" # Default recipient
+                determined_recipient_from_transporter_field = False
+
+                if transporter_username and transporter_username != "ConsiglioDeiDieci":
+                    transporter_citizen_record_check = get_citizen_record(tables, transporter_username)
+                    if transporter_citizen_record_check:
+                        fee_recipient_username = transporter_username
+                        determined_recipient_from_transporter_field = True
+                        log.info(f"{LogColors.OKBLUE}Gondola fee for activity {activity_guid} initially assigned to Transporter field value (citizen): {transporter_username}{LogColors.ENDC}")
+                    # else: Transporter field is not a known citizen, will try path or default to Consiglio
+
+                if not determined_recipient_from_transporter_field:
+                    # Try to find recipient from path if Transporter field didn't yield one (or was Consiglio/empty/invalid)
+                    log.info(f"{LogColors.OKBLUE}Transporter field for activity {activity_guid} did not yield a specific recipient (value: {transporter_username}). Checking path for public_dock operator.{LogColors.ENDC}")
+                    try:
+                        path_points = json.loads(activity_path_json) if activity_path_json else []
+                        for point in path_points:
+                            if point.get("type") == "dock" and point.get("nodeId"):
+                                dock_building_id = point.get("nodeId")
+                                dock_record = get_building_record(tables, dock_building_id) # Fetches by BuildingId (custom ID)
+                                if dock_record and dock_record['fields'].get('Type') == 'public_dock':
+                                    run_by_user = dock_record['fields'].get('RunBy')
+                                    if run_by_user and run_by_user != "ConsiglioDeiDieci": # Ensure RunBy is not Consiglio itself
+                                        run_by_citizen_check = get_citizen_record(tables, run_by_user)
+                                        if run_by_citizen_check:
+                                            fee_recipient_username = run_by_user
+                                            log.info(f"{LogColors.OKBLUE}Gondola fee for activity {activity_guid} reassigned to RunBy ({run_by_user}) of public_dock {dock_building_id} found in path.{LogColors.ENDC}")
+                                            break # Found a valid recipient from path
+                                        else:
+                                            log.warning(f"{LogColors.WARNING}RunBy user {run_by_user} for public_dock {dock_building_id} (from path) not found. Checking next dock in path.{LogColors.ENDC}")
+                                    # else: Dock has no RunBy or RunBy is Consiglio, check next dock
+                                # else: Not a public_dock, or dock not found, check next point
+                    except json.JSONDecodeError:
+                        log.error(f"{LogColors.FAIL}Failed to parse activity path JSON for activity {activity_guid} while checking for dock operator: {activity_path_json}{LogColors.ENDC}")
+                    
+                    if fee_recipient_username == "ConsiglioDeiDieci" and transporter_username and transporter_username != "ConsiglioDeiDieci":
+                        # This case means Transporter field had a value, it wasn't a valid citizen, and no path dock operator was found.
+                        log.warning(f"{LogColors.WARNING}Transporter {transporter_username} in activity {activity_guid} was not a valid citizen, and no public_dock operator found in path. Fee defaults to ConsiglioDeiDieci.{LogColors.ENDC}")
+                
+                fee_recipient_record = get_citizen_record(tables, fee_recipient_username)
+
+                if traveler_citizen_record and fee_recipient_record:
+                    traveler_ducats = float(traveler_citizen_record['fields'].get('Ducats', 0))
+                    if traveler_ducats >= gondola_fee:
+                        recipient_ducats = float(fee_recipient_record['fields'].get('Ducats', 0))
+                        VENICE_TIMEZONE_FEE = pytz.timezone('Europe/Rome') # Define VENICE_TIMEZONE locally for this block
+                        now_venice_fee = datetime.now(VENICE_TIMEZONE_FEE)
+                        now_iso_fee = now_venice_fee.isoformat()
+
+                        tables['citizens'].update(traveler_citizen_record['id'], {'Ducats': traveler_ducats - gondola_fee})
+                        tables['citizens'].update(fee_recipient_record['id'], {'Ducats': recipient_ducats + gondola_fee})
+                        
+                        transaction_payload = {
+                            "Type": "gondola_fee",
+                            "AssetType": "transport_activity",
+                            "Asset": activity_custom_id_for_fee,
+                            "Seller": fee_recipient_username, # Recipient of the fee
+                            "Buyer": citizen_username_for_fee,  # Payer of the fee
+                            "Price": gondola_fee,
+                            "Notes": json.dumps({
+                                "activity_guid": activity_guid,
+                                "distance_km": round(gondola_distance_km, 2),
+                                "path_preview": activity_path_json[:100] + "..." if activity_path_json else "",
+                                "original_transporter_field": transporter_username # Log what was in the Transporter field
+                            }),
+                            "CreatedAt": now_iso_fee,
+                            "ExecutedAt": now_iso_fee
+                        }
+                        tables['transactions'].create(transaction_payload)
+                        log.info(f"{LogColors.OKGREEN}Citizen {citizen_username_for_fee} paid {gondola_fee:.2f} Ducats gondola fee to {fee_recipient_username} for activity {activity_guid}. Distance: {gondola_distance_km:.2f} km.{LogColors.ENDC}")
+                    else:
+                        log.warning(f"{LogColors.WARNING}Citizen {citizen_username_for_fee} has insufficient Ducats ({traveler_ducats:.2f}) for gondola fee ({gondola_fee:.2f}) for activity {activity_guid}.{LogColors.ENDC}")
+                        # Consider creating a problem or debt record here in the future
+                else:
+                    if not traveler_citizen_record: log.error(f"{LogColors.FAIL}Traveler citizen {citizen_username_for_fee} not found for gondola fee.{LogColors.ENDC}")
+                    if not fee_recipient_record: log.error(f"{LogColors.FAIL}Fee recipient citizen {fee_recipient_username} not found for gondola fee.{LogColors.ENDC}")
+        elif dry_run and activity_path_json and citizen_username_for_fee:
+             gondola_distance_km, gondola_fee = calculate_gondola_travel_details(activity_path_json)
+             if gondola_fee > 0:
+                fee_recipient_username_dry_run = transporter_username if transporter_username and transporter_username != "ConsiglioDeiDieci" else "ConsiglioDeiDieci"
+                # In a dry run, we can't confirm if transporter_username is a valid citizen, so we assume it would be if not Consiglio.
+                log.info(f"{LogColors.OKCYAN}[DRY RUN] Would process gondola fee of {gondola_fee:.2f} Ducats for citizen {citizen_username_for_fee} to {fee_recipient_username_dry_run} for activity {activity_guid} (Distance: {gondola_distance_km:.2f} km).{LogColors.ENDC}")
+
+        # Update citizen's position and UpdatedAt if ToBuilding is present,
+        # UNLESS the activity type handles its own position update (e.g., fetch_resource, fetch_from_galley)
+        # or if the activity doesn't involve changing location (e.g. eat_from_inventory, eat_at_home, eat_at_tavern if already there)
+        # This block is now outside the if/else success block.
+        no_pos_update_types = ['fetch_resource', 'fetch_from_galley', 'eat_from_inventory', 'eat_at_home', 'eat_at_tavern', 'production', 'rest', 'idle']
+        
+        # Define VENICE_TIMEZONE for potential UpdatedAt override, though Airtable usually handles it.
+        VENICE_TIMEZONE_POS = pytz.timezone('Europe/Rome') # Define VENICE_TIMEZONE locally for this block
+
+        if activity_type not in no_pos_update_types:
+            # ToBuilding field now stores the custom BuildingId
+            to_building_custom_id = activity_record['fields'].get('ToBuilding') 
+            citizen_username_for_pos = activity_record['fields'].get('Citizen')
+
+            if to_building_custom_id and citizen_username_for_pos and not dry_run:
+                try:
+                    # Fetch building record using its custom BuildingId
+                    building_record_for_pos = get_building_record(tables, to_building_custom_id)
+                    citizen_record_for_pos = get_citizen_record(tables, citizen_username_for_pos)
+
+                    if building_record_for_pos and citizen_record_for_pos:
+                        building_position_str = building_record_for_pos['fields'].get('Position')
+                        
+                        # If Position field is empty, try to parse from BuildingId or Point
+                        if not building_position_str:
+                            log.info(f"{LogColors.OKBLUE}Building {to_building_custom_id} 'Position' field is empty. Attempting to parse from BuildingId or Point.{LogColors.ENDC}")
+                            parsed_pos_coords = None
+                            
+                            # Try parsing from BuildingId (e.g., "building_lat_lng..." or "canal_lat_lng...")
+                            building_id_str_for_parse = building_record_for_pos['fields'].get('BuildingId', '')
+                            parts = building_id_str_for_parse.split('_')
+                            if len(parts) >= 3: # e.g. building_45.43_12.35 or canal_45.43_12.35
+                                try:
+                                    lat = float(parts[1])
+                                    lng = float(parts[2])
+                                    parsed_pos_coords = {"lat": lat, "lng": lng}
+                                    log.info(f"{LogColors.OKBLUE}Parsed position {parsed_pos_coords} from BuildingId '{building_id_str_for_parse}'.{LogColors.ENDC}")
+                                except (ValueError, IndexError):
+                                    log.debug(f"{LogColors.WARNING}Could not parse lat/lng from BuildingId '{building_id_str_for_parse}'.{LogColors.ENDC}")
+                                    # Continue to try Point field
+
+                            # If not found in BuildingId, try parsing from Point field
+                            if not parsed_pos_coords:
+                                point_field_str = building_record_for_pos['fields'].get('Point', '')
+                                if point_field_str and isinstance(point_field_str, str): # Ensure Point is a string
+                                    point_parts = point_field_str.split('_')
+                                    if len(point_parts) >= 3: # e.g. building_45.43_12.35 or canal_45.43_12.35
+                                        try:
+                                            lat = float(point_parts[1])
+                                            lng = float(point_parts[2])
+                                            parsed_pos_coords = {"lat": lat, "lng": lng}
+                                            log.info(f"{LogColors.OKBLUE}Parsed position {parsed_pos_coords} from Point field '{point_field_str}'.{LogColors.ENDC}")
+                                        except (ValueError, IndexError):
+                                            log.debug(f"{LogColors.WARNING}Could not parse lat/lng from Point field '{point_field_str}'.{LogColors.ENDC}")
+                                    else:
+                                        log.debug(f"{LogColors.WARNING}Point field '{point_field_str}' not in expected format for parsing.{LogColors.ENDC}")
+                                else:
+                                    log.debug(f"{LogColors.WARNING}Point field is empty or not a string for building {to_building_custom_id}.{LogColors.ENDC}")
+                            
+                            if parsed_pos_coords:
+                                building_position_str = json.dumps(parsed_pos_coords)
+
+                        if building_position_str:
+                            update_payload = {
+                                'Position': building_position_str
+                                # 'UpdatedAt' is automatically handled by Airtable on record update
+                            }
+                            tables['citizens'].update(citizen_record_for_pos['id'], update_payload)
+                            log.info(f"{LogColors.OKGREEN}Updated citizen {citizen_username_for_pos} Position to {building_position_str} (Building Custom ID: {to_building_custom_id}).{LogColors.ENDC}")
+                        else:
+                            log.warning(f"{LogColors.WARNING}Building {to_building_custom_id} is missing a parsable Position, BuildingId, or Point. Cannot update citizen {citizen_username_for_pos} position.{LogColors.ENDC}")
+                    else: 
+                        if not building_record_for_pos:
+                            log.warning(f"{LogColors.WARNING}Target building (Custom ID: {to_building_custom_id}) not found. Cannot update citizen {citizen_username_for_pos} position.{LogColors.ENDC}")
+                        if not citizen_record_for_pos: 
+                            log.warning(f"{LogColors.WARNING}Citizen {citizen_username_for_pos} not found. Cannot update citizen position.{LogColors.ENDC}")
+                except Exception as e_update_pos:
+                    log.error(f"{LogColors.FAIL}Error updating citizen {citizen_username_for_pos} position after activity {activity_guid}: {e_update_pos}{LogColors.ENDC}")
+        elif dry_run and activity_type not in no_pos_update_types:
+            to_building_custom_id_dry = activity_record['fields'].get('ToBuilding')
+            citizen_username_dry = activity_record['fields'].get('Citizen')
+            if to_building_custom_id_dry and citizen_username_dry:
+                log.info(f"{LogColors.OKCYAN}[DRY RUN] Would update citizen {citizen_username_dry} position based on ToBuilding (Custom ID: {to_building_custom_id_dry}).{LogColors.ENDC}")
         
         log.info(f"{LogColors.HEADER}--- Finished processing activity {activity_guid} ---{LogColors.ENDC}")
 
