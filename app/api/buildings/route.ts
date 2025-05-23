@@ -351,6 +351,21 @@ export async function GET(request: Request) {
     }
 
     // Transform Airtable records to our format
+    const extractStringFromArrayField = (fieldValue: any): string | null => {
+      let potentialString: any = null;
+      if (Array.isArray(fieldValue) && fieldValue.length > 0) {
+        potentialString = fieldValue[0];
+      } else if (typeof fieldValue === 'string') {
+        potentialString = fieldValue;
+      }
+
+      if (typeof potentialString === 'string') {
+        const trimmed = potentialString.trim();
+        return trimmed === '' ? null : trimmed; // Return null if string is empty after trim
+      }
+      return null; // Default to null if not a non-empty string
+    };
+
     const buildings = typedRecords.map(record => {
       // Get all fields and convert keys to camelCase
       const fields = toCamelCase(record.fields);
@@ -417,20 +432,20 @@ export async function GET(request: Request) {
         ...fields,
         // Override specific fields that need special handling
         id: fields.buildingId || record.id, // This is the custom BuildingId or Airtable record ID
-        type: fields.type, // Ensure type is explicitly passed
-        landId: fields.landId, // Ensure landId is explicitly passed (camelCased from LandId)
-        owner: fields.owner, // Ensure owner is explicitly passed
-        occupant: fields.occupant, // Ensure occupant is explicitly passed (camelCased from Occupant)
-        category: fields.category, // Ensure category is explicitly passed (camelCased from Category)
-        runBy: fields.runBy, // Ensure runBy is explicitly passed (camelCased from RunBy)
+        type: fields.type,
+        landId: fields.landId,
+        owner: extractStringFromArrayField(fields.owner),
+        occupant: extractStringFromArrayField(fields.occupant),
+        category: fields.category, // Assuming category is a direct string or already handled if it's a lookup
+        runBy: extractStringFromArrayField(fields.runBy),
         position: position,
         // Include other important fields that might be directly accessed by services
-        name: fields.name,
-        rentAmount: fields.rentAmount,
-        leaseAmount: fields.leaseAmount,
-        variant: fields.variant,
-        rotation: fields.rotation,
-        createdAt: fields.createdAt,
+        name: fields.name, // Assuming name is a direct string
+        rentAmount: fields.rentAmount, // Assuming numeric or null
+        leaseAmount: fields.leaseAmount, // Assuming numeric or null
+        variant: fields.variant, // Assuming string or null
+        rotation: fields.rotation, // Assuming numeric or null
+        createdAt: fields.createdAt, // Assuming string (date)
       };
     });
     
