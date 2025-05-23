@@ -24,6 +24,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const username = searchParams.get('username');
     const sellerBuilding = searchParams.get('sellerBuilding');
+    const scope = searchParams.get('scope'); // New parameter for contract scope
     
     // Initialize Airtable
     const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
@@ -63,14 +64,20 @@ export async function GET(request: Request) {
     let formula = '';
     
     if (sellerBuilding) {
-      // Filter by seller building
+      // Filter by seller building (highest priority)
       formula = `{SellerBuilding}='${sellerBuilding}'`;
+    } else if (username && scope === 'userNonPublic') {
+      // User-specific contracts, excluding public_sell type
+      formula = `AND(OR({Buyer}='${username}', {Seller}='${username}'), {Type}!='public_sell')`;
+      console.log(`Contracts API: Fetching userNonPublic for ${username}`);
     } else if (username) {
-      // Get public_sell contracts AND contracts where the citizen is buyer or seller
+      // Default for user: their contracts AND all public_sell contracts
       formula = `OR({Type}='public_sell', {Buyer}='${username}', {Seller}='${username}')`;
+      console.log(`Contracts API: Fetching all relevant for ${username} (includes public_sell)`);
     } else {
-      // Just get public_sell contracts if no username provided
+      // Default public: all public_sell contracts (unfiltered by stock here)
       formula = `{Type}='public_sell'`;
+      console.log(`Contracts API: Fetching all public_sell (unfiltered by stock)`);
     }
     
     // Query Airtable
