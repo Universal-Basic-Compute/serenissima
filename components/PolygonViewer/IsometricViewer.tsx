@@ -4089,6 +4089,33 @@ number => {
         </>
       )}
       
+      {/* Orient Bridge Mode Button - Visible in buildings view for ConsiglioDeiDieci (Top Right) */}
+      {activeView === 'buildings' && isUserConsiglioDeiDieci && (
+        <button
+          onClick={() => {
+            const newMode = !orientBridgeModeActive;
+            setOrientBridgeModeActive(newMode);
+            console.log(`Orient Bridge Mode ${newMode ? 'activated' : 'deactivated'} (Top Right Button)`);
+            if (!newMode) {
+              // Reset selection when exiting mode
+              setSelectedBridgeForOrientationId(null);
+              setOrientingBridgeAngle(null);
+            }
+          }}
+          className={`absolute top-4 right-4 ${ // Changed to top-4 right-4
+            orientBridgeModeActive ? 'bg-red-600 hover:bg-red-500' : 'bg-purple-600 hover:bg-purple-500'
+          } text-white px-4 py-2 rounded-lg text-sm shadow-lg flex items-center transition-colors`}
+          title={orientBridgeModeActive ? "Exit Orient Bridge Mode" : "Enter Orient Bridge Mode"}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 21v-1m0-18v1m7.071 2.929l-.707.707M4.929 19.071l-.707.707m14.142 0l-.707-.707M4.929 4.929l-.707-.707m7.071 14.142L12 12" />
+          </svg>
+          {orientBridgeModeActive ? 'Exit Orient Mode' : 'Orient Bridge'}
+        </button>
+      )}
+      
       {/* Transport Debug Panel - Only render when showTransportDebugPanel is true */}
       {showTransportDebugPanel && (
         <TransportDebugPanel 
