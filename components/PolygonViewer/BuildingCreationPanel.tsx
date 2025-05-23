@@ -2,6 +2,14 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { fetchBuildingTypes } from '@/lib/utils/buildingTypeUtils';
 import { FaTimes } from 'react-icons/fa';
 
+// Helper function to format numbers with spaces as thousand separators
+const formatNumberWithSpaces = (num: number | undefined | null): string => {
+  if (num === undefined || num === null) {
+    return 'N/A';
+  }
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+};
+
 interface BuildingType {
   type: string;
   name: string;
@@ -217,7 +225,7 @@ const BuildingCreationPanel: React.FC<BuildingCreationPanelProps> = ({ selectedP
                   </div>
                   <div className="mt-auto">
                     <p className="text-md font-semibold text-amber-800 mb-2">
-                      Cost: ⚜️ {building.constructionCosts?.ducats ?? 'N/A'}
+                      Cost: ⚜️ {formatNumberWithSpaces(building.constructionCosts?.ducats)}
                     </p>
                     <button
                       onClick={() => handleBuildClick(building)}
