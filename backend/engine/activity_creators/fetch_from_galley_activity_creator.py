@@ -27,16 +27,17 @@ def try_create(
     log.info(f"Attempting to create 'fetch_from_galley' for {citizen_username} to galley {galley_custom_id} for contract {original_contract_custom_id}")
 
     try:
-        now_utc = datetime.datetime.now(pytz.UTC)
+        VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
+        now_venice = datetime.datetime.now(VENICE_TIMEZONE)
         
-        # Use timing from path_data if available
-        start_date_iso = path_data_to_galley.get('timing', {}).get('startDate', now_utc.isoformat())
+        # Use timing from path_data if available, these should also be Venice time ISO strings
+        start_date_iso = path_data_to_galley.get('timing', {}).get('startDate', now_venice.isoformat())
         end_date_iso = path_data_to_galley.get('timing', {}).get('endDate')
         
         if not end_date_iso: # Fallback if path_data has no timing
             travel_duration_default_hours = 1 
-            end_time_utc = now_utc + datetime.timedelta(hours=travel_duration_default_hours)
-            end_date_iso = end_time_utc.isoformat()
+            end_time_calc = now_venice + datetime.timedelta(hours=travel_duration_default_hours)
+            end_date_iso = end_time_calc.isoformat()
         
         path_json_str = json.dumps(path_data_to_galley.get('path', []))
         
@@ -54,9 +55,9 @@ def try_create(
             "OriginalContractId": original_contract_custom_id, # Custom ID of the original contract
             "ResourceId": resource_id_to_fetch,
             "Amount": amount_to_fetch,
-            "CreatedAt": now_utc.isoformat(),
-            "StartDate": start_date_iso,
-            "EndDate": end_date_iso,
+            "CreatedAt": now_venice.isoformat(),
+            "StartDate": start_date_iso, # Expected to be Venice time ISO string
+            "EndDate": end_date_iso,     # Expected to be Venice time ISO string
             "Path": path_json_str,
             "Notes": notes,
             "Priority": 10 # High priority to clear the galley
@@ -68,7 +69,8 @@ def try_create(
             log.info(f"Created 'fetch_from_galley' activity: {activity['id']}")
             # Update citizen's UpdatedAt (optional, Airtable might do this)
             try:
-                tables['citizens'].update(citizen_airtable_id, {'UpdatedAt': now_utc.isoformat()})
+                # VENICE_TIMEZONE is defined above
+                tables['citizens'].update(citizen_airtable_id, {'UpdatedAt': datetime.datetime.now(VENICE_TIMEZONE).isoformat()})
             except Exception as e_update_citizen:
                 log.warning(f"Could not update citizen {citizen_username} UpdatedAt: {e_update_citizen}")
             return activity
