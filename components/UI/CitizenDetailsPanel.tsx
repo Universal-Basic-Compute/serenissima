@@ -73,6 +73,11 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
   const [isLoadingProblems, setIsLoadingProblems] = useState<boolean>(false);
   const [cachedProblems, setCachedProblems] = useState<Record<string, any[]>>({});
   
+  // State for citizen's transport resources
+  const [transportResources, setTransportResources] = useState<any[]>([]);
+  const [isLoadingTransports, setIsLoadingTransports] = useState<boolean>(false);
+  const [cachedTransports, setCachedTransports] = useState<Record<string, any[]>>({});
+  
   // Function to check if the current user is ConsiglioDeiDieci
   const isConsiglioDeiDieci = () => {
     try {
@@ -221,6 +226,37 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
       setCachedProblems(prev => ({ ...prev, [citizenUsername]: [] }));
     } finally {
       setIsLoadingProblems(false);
+    }
+  };
+
+  // Function to fetch citizen's transport resources
+  const fetchTransportResources = async (citizenUsername: string) => {
+    if (!citizenUsername) return;
+
+    setIsLoadingTransports(true);
+    try {
+      const response = await fetch(`/api/citizens/${citizenUsername}/transports`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.transports) {
+          setTransportResources(data.transports);
+          setCachedTransports(prev => ({ ...prev, [citizenUsername]: data.transports }));
+        } else {
+          setTransportResources([]);
+          setCachedTransports(prev => ({ ...prev, [citizenUsername]: [] }));
+          console.warn(`Failed to fetch transports or no transports found for ${citizenUsername}:`, data.error);
+        }
+      } else {
+        console.error(`Error fetching transports for ${citizenUsername}: ${response.status} ${response.statusText}`);
+        setTransportResources([]);
+        setCachedTransports(prev => ({ ...prev, [citizenUsername]: [] }));
+      }
+    } catch (error) {
+      console.error(`Exception fetching transports for ${citizenUsername}:`, error);
+      setTransportResources([]);
+      setCachedTransports(prev => ({ ...prev, [citizenUsername]: [] }));
+    } finally {
+      setIsLoadingTransports(false);
     }
   };
 
@@ -510,6 +546,15 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
         } else {
             // Activities fetch already attempted
         }
+
+        // --- Transport Resources ---
+        if (cachedTransports.hasOwnProperty(citizen.username)) {
+            setTransportResources(cachedTransports[citizen.username]);
+            setIsLoadingTransports(false);
+        } else {
+            setTransportResources([]);
+            fetchTransportResources(citizen.username);
+        }
       
     } else {
         // No citizen, or citizenid/username missing. Clear all relevant states.
@@ -521,6 +566,8 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
         setIsLoadingProblems(false);
         setActivities([]);
         setIsLoadingActivities(false); // Ensure loading state is reset
+        setTransportResources([]);
+        setIsLoadingTransports(false);
         setMessages([]);
         setIsLoadingHistory(false); // Ensure loading state is reset
     }
@@ -1034,6 +1081,35 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
               </div>
             ) : (
               <p className="text-amber-700 italic">No recent activities found.</p>
+            )}
+          </div>
+
+          {/* Transports Section */}
+          <div className="mt-4">
+            <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Transports</h3>
+            {isLoadingTransports ? (
+              <div className="flex justify-center py-4">
+                <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            ) : transportResources.length > 0 ? (
+              <div className="space-y-2 max-h-40 overflow-y-auto pr-1 custom-scrollbar">
+                {transportResources.map((transport, index) => (
+                  <div key={transport.id || index} className="bg-amber-100 rounded-lg p-2 text-sm flex items-center">
+                    <img 
+                      src={`/images/resources/${(transport.Name || transport.name || 'default_boat').toLowerCase().replace(/\s+/g, '_')}.png`} 
+                      alt={transport.Name || transport.name} 
+                      className="w-8 h-8 mr-3 object-contain"
+                      onError={(e) => { (e.target as HTMLImageElement).src = '/images/resources/default_boat.png';}}
+                    />
+                    <div>
+                      <div className="font-medium text-amber-800">{transport.Name || transport.name}</div>
+                      {transport.Description && <p className="text-xs text-amber-600 italic">{transport.Description}</p>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-amber-700 italic">No transport resources found for this citizen.</p>
             )}
           </div>
         </div>
