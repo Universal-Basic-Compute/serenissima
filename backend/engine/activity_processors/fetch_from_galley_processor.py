@@ -18,7 +18,9 @@ log = logging.getLogger(__name__)
 CITIZEN_STORAGE_CAPACITY = 10.0 # Standard citizen carrying capacity
 
 def _get_citizen_record_local(tables: Dict[str, Any], username: str) -> Optional[Dict]:
-    formula = f"{{Username}} = '{username.replace("'", "\\'")}'" # Corrected: added closing parenthesis
+    # Escape single quotes in username for Airtable formula
+    safe_username_for_formula = username.replace("'", "\\'")
+    formula = f"{{Username}} = '{safe_username_for_formula}'"
     try:
         records = tables['citizens'].all(formula=formula, max_records=1)
         return records[0] if records else None
