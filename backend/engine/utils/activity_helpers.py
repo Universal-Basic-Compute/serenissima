@@ -42,6 +42,7 @@ def _has_recent_failed_activity_for_contract(
         # Airtable formula to check if UpdatedAt is within the last 'hours_ago'
         # DATEADD(NOW(), -hours_ago, 'hours') calculates the time 'hours_ago' from now.
         # IS_AFTER({UpdatedAt}, ...) checks if UpdatedAt is more recent than that time.
+        # Corrected field name to UpdatedAt (capital A)
         time_check_formula = f"IS_AFTER({{UpdatedAt}}, DATEADD(NOW(), -{hours_ago}, 'hours'))"
         
         formula = (f"AND({{Type}}='{_escape_airtable_value(activity_type_to_check)}', "
