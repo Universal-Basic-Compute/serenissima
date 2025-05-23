@@ -40,7 +40,9 @@ def initialize_airtable():
 
 def _escape_airtable_value(value: str) -> str:
     """Échappe les apostrophes pour les formules Airtable."""
-    return value
+    if isinstance(value, str):
+        return value.replace("'", "\\'")
+    return str(value)
 
 def _get_citizen_building_problems(tables: Dict[str, Table], username: str, limit: int = 100) -> List[Dict]:
     """Get latest 100 PROBLEMS where AssetType='building' AND Citizen=Username."""

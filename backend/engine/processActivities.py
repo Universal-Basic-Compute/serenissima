@@ -165,7 +165,7 @@ def initialize_airtable() -> Optional[Dict[str, Table]]:
 def _escape_airtable_value(value: str) -> str:
     """Escapes single quotes for Airtable formulas."""
     if isinstance(value, str):
-        return value
+        return value.replace("'", "\\'") # Correctly escape single quotes
     return str(value)
 
 def get_concluded_unprocessed_activities(tables: Dict[str, Table]) -> List[Dict]:
