@@ -17,7 +17,7 @@ import json
 import time
 import requests
 from typing import Dict, List, Optional, Any
-from urllib.parse import urlparse # Added import
+from urllib.parse import urlparse
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -34,6 +34,63 @@ load_dotenv()
 # Constants
 BUILDINGS_DATA_DIR = os.path.join(os.getcwd(), 'data', 'buildings')
 BUILDINGS_IMAGE_DIR = os.path.join(os.getcwd(), 'public', 'images', 'buildings')
+
+
+def _fetch_prompt_from_kinos(building_data: Dict[str, Any]) -> Optional[str]:
+    """
+    Fetches a pre-generated or dynamically generated prompt from the Kinos service.
+    Kinos is expected to return a full prompt suitable for Ideogram.
+    """
+    kinos_api_url = os.environ.get("KINOS_API_URL", "https://kinos.internal/api/generate-ideogram-prompt")
+    kinos_api_key = os.environ.get("KINOS_API_KEY")
+
+    if not kinos_api_key:
+        log.warning("KINOS_API_KEY not set. Cannot fetch prompt from Kinos.")
+        return None
+    if not kinos_api_url:
+        log.warning("KINOS_API_URL not set. Cannot fetch prompt from Kinos.")
+        return None
+
+    payload = {
+        "building_details": building_data,
+        "target_service": "ideogram",
+        "context": {
+            "kin_channel": "ConsiglioDeiDieci", # As per user request context
+            "request_type": "images_building_prompt"
+        }
+    }
+
+    headers = {
+        "Authorization": f"Bearer {kinos_api_key}",
+        "Content-Type": "application/json"
+    }
+
+    try:
+        log.info(f"Requesting prompt from Kinos for {building_data.get('name')} at {kinos_api_url}")
+        response = requests.post(kinos_api_url, json=payload, headers=headers, timeout=15)
+        response.raise_for_status()  # Raise HTTPError for bad responses (4XX or 5XX)
+        
+        response_data = response.json()
+        generated_prompt = response_data.get("prompt")
+
+        if generated_prompt and isinstance(generated_prompt, str):
+            log.info(f"Successfully fetched prompt from Kinos for {building_data.get('name')}")
+            return generated_prompt
+        else:
+            log.error(f"Kinos response did not contain a valid prompt string for {building_data.get('name')}. Response: {response_data}")
+            return None
+    except requests.exceptions.Timeout:
+        log.error(f"Timeout calling Kinos API for {building_data.get('name')}")
+        return None
+    except requests.exceptions.RequestException as e:
+        log.error(f"Error calling Kinos API for {building_data.get('name')}: {e}")
+        return None
+    except json.JSONDecodeError as e:
+        log.error(f"Error decoding JSON response from Kinos for {building_data.get('name')}: {e}. Response text: {response.text[:500]}")
+        return None
+    except Exception as e:
+        log.error(f"Unexpected error processing Kinos response for {building_data.get('name')}: {e}")
+        return None
 
 def scan_building_files() -> List[Dict[str, Any]]:
     """Scan the buildings directory for JSON files and load their contents."""
@@ -101,99 +158,53 @@ def create_image_prompt(building: Dict[str, Any]) -> str:
     description = building.get('fullDescription', building.get('shortDescription', ''))
     completed_prompt = building.get('completedBuilding3DPrompt', '')
     
-    # Create a base prompt
-    base_prompt = f"A {name}, a {category.lower()} building in 15th century Venice."
+    # Create a base prompt string that Kinos might use or ignore
+    base_prompt_for_kinos = f"A {name}, a {category.lower()} building in 15th century Venice."
     if subcategory:
-        base_prompt += f" This is a {subcategory.lower()} type of {category.lower()}."
-
-    # Add descriptive elements
+        base_prompt_for_kinos += f" This is a {subcategory.lower()} type of {category.lower()}."
     if description:
-        base_prompt += f" {description}"
-    # The completedBuilding3DPrompt can be very specific, potentially overriding distinctiveness efforts.
-    # We include it but rely on other elements to guide the overall style for UX.
+        base_prompt_for_kinos += f" {description}"
     if completed_prompt:
-        base_prompt += f" {completed_prompt}"
+        base_prompt_for_kinos += f" {completed_prompt}"
 
-    # Dynamic style elements for distinctiveness and UX
-    style_elements = [
-        "Detailed illustration",
-        "clear silhouette for easy game asset identification", # UX focus
-        "realistic textures (weathered stone, brick, plaster)",
-        "natural lighting with warm Mediterranean sunlight",
-        "historically accurate details for 15th century Venice",
-        "Square format image", # Ideogram prefers this phrasing
-        "--ar 1:1" # Aspect ratio
-    ]
+    building_details_for_kinos = {
+        "name": name,
+        "category": category,
+        "subcategory": subcategory,
+        "description": description,
+        "completed_building_3d_prompt": completed_prompt,
+        "base_descriptive_prompt": base_prompt_for_kinos # Pass the constructed base description
+        # Add any other fields from 'building' dict that Kinos might find useful
+    }
 
-    # Category-specific visual cues
-    # Normalizing category and name for comparisons
-    current_category = category.lower()
-    current_name_lower = name.lower()
+    kinos_generated_prompt = _fetch_prompt_from_kinos(building_details_for_kinos)
 
-    if current_category == "residential" or "house" in current_name_lower or "palazzo" in current_name_lower:
-        style_elements.append("Venetian Gothic architecture with ornate windows and balconies.")
-        if "palazzo" in current_name_lower:
-            style_elements.append("Grand facade, possibly with a water entrance (porta d'acqua). Color palette: rich marble, Istrian stone, subtle gold accents.")
-        else:
-            style_elements.append("Modest yet elegant facade, typical of Venetian homes. Color palette: warm terracotta, ochre, and faded pastels.")
-    elif current_category == "commercial" or current_category == "business":
-        style_elements.append("Functional yet representative architecture, clearly identifiable for its purpose.")
-        if "workshop" in current_name_lower or "artisan" in current_name_lower or "smithy" in current_name_lower or "bakery" in current_name_lower:
-            style_elements.append("Visible signs of craft or trade, possibly an open storefront or workshop area with tools or products visible.")
-            style_elements.append("Color palette: earthy tones, aged wood, and practical stone.")
-        elif "market" in current_name_lower or "stall" in current_name_lower:
-            style_elements.append("Open-air structure or prominent stall, designed to attract customers, perhaps with displayed goods (subtly).")
-            style_elements.append("Color palette: vibrant awnings or distinct stall colors, contrasting with stone/wood structure.")
-        elif "warehouse" in current_name_lower:
-            style_elements.append("Sturdy, practical design, possibly with large doors, hoists, or cranes for goods. Minimal ornamentation.")
-            style_elements.append("Color palette: robust stone or dark brick, muted functional colors, perhaps slightly grimy from use.")
-        elif "tavern" in current_name_lower or "inn" in current_name_lower:
-            style_elements.append("Welcoming facade, perhaps with a visible sign or outdoor seating area (if appropriate).")
-            style_elements.append("Color palette: warm wood tones, inviting colors, possibly with painted stucco.")
-        else: # Generic commercial
-            style_elements.append("Distinctive signage or architectural feature related to its trade (e.g., banker's house, scribe's office).")
-            style_elements.append("Color palette: rich but professional colors, perhaps with guild insignia if applicable.")
-    elif current_category == "industrial": # e.g. shipyard, glass furnace
-        style_elements.append("Robust and functional structures, clear evidence of industrial activity and scale.")
-        if "shipyard" in current_name_lower or "arsenal" in current_name_lower or "boatyard" in current_name_lower:
-            style_elements.append("Large covered slipways or open-air construction areas, timber framing, possibly near water with ships under construction or repair.")
-        elif "glass" in current_name_lower or "furnace" in current_name_lower or "foundry" in current_name_lower:
-            style_elements.append("Tall chimneys emitting light smoke, glowing light from within (implied), sturdy brickwork, industrial character.")
-        style_elements.append("Color palette: utilitarian greys, dark browns, and soot-stained elements, reflecting heavy use.")
-    elif current_category == "civic" or current_category == "public" or current_category == "religious":
-        style_elements.append("Impressive and prominent architecture, reflecting public importance and status.")
-        if "church" in current_name_lower or "chapel" in current_name_lower or "cathedral" in current_name_lower:
-            style_elements.append("Religious iconography, prominent bell tower (campanile), stained glass windows. Byzantine and Gothic influences are key.")
-            style_elements.append("Color palette: white Istrian stone, marble details, gold accents, possibly mosaics.")
-        elif "palace" in current_name_lower and "doge" in current_name_lower:
-             style_elements.append("Iconic Venetian Gothic architecture, pink and white patterned facade, grand loggias, instantly recognizable.")
-        elif "government" in current_name_lower or "scuola" in current_name_lower or "palazzo pubblico" in current_name_lower:
-            style_elements.append("Formal and imposing facade, possibly with symbols of state, city, or guild. Often features arcades or loggias.")
-            style_elements.append("Color palette: dignified stone, marble, official colors, possibly frescoes or reliefs.")
-    elif current_category == "infrastructure":
-        if "bridge" in current_name_lower:
-            style_elements.append("Stone or wooden construction, characteristic Venetian arch design, clearly spanning a canal.")
-            style_elements.append("Integrates with surrounding walkways and buildings.")
-        elif "dock" in current_name_lower or "pier" in current_name_lower or "landing" in current_name_lower:
-            style_elements.append("Wooden or stone structures at the water's edge, mooring posts (pali da casada), possibly with goods or boats tied up.")
-        elif "well" in current_name_lower:
-            style_elements.append("Ornate wellhead (vera da pozzo) in a campo (square), typically made of Istrian stone with carvings.")
-    else: # Default fallback if category not matched
-        style_elements.append("Typical Venetian architectural elements with Byzantine and Gothic influences.")
-        style_elements.append("Color palette: common Venetian colors like terracotta, ochre, or faded stucco.")
+    if kinos_generated_prompt:
+        full_prompt = kinos_generated_prompt
+        # Kinos is expected to return the full prompt, including aspect ratio etc.
+        log.info(f"Using prompt from Kinos for {name}")
+    else:
+        log.warning(f"Failed to get prompt from Kinos for {name}. Falling back to basic prompt construction.")
+        # Fallback: use base_prompt_for_kinos and generic style guidelines
+        fallback_style_elements = [
+            "Detailed illustration",
+            "clear silhouette for easy game asset identification",
+            "realistic textures (weathered stone, brick, plaster)",
+            "natural lighting with warm Mediterranean sunlight",
+            "historically accurate details for 15th century Venice",
+            "Square format image",
+            "--ar 1:1"
+        ]
+        # Ensure Venetian context if not already present in base_prompt_for_kinos
+        if not any(s in base_prompt_for_kinos.lower() for s in ["canal", "water", "gondola", "venice", "venetian"]):
+             fallback_style_elements.append("The building is situated in a typical Venetian scene, possibly alongside a canal or in a bustling campo.")
+        
+        full_prompt = f"{base_prompt_for_kinos} {' '.join(fallback_style_elements)}"
 
-    # Add characteristic Venetian elements if not already implied by category
-    # This ensures the setting is always clear.
-    if not any(s in base_prompt.lower() for s in ["canal", "water", "gondola"]) and current_category not in ["infrastructure"]:
-         style_elements.append("The building is situated in a typical Venetian scene, possibly alongside a canal or in a bustling campo.")
-
-    # Combine all elements
-    full_prompt = f"{base_prompt} {' '.join(style_elements)}"
-    
     # Clean up extra spaces
     full_prompt = ' '.join(full_prompt.split())
     
-    log.info(f"Generated prompt for {name}: {full_prompt}")
+    log.info(f"Final prompt for {name}: {full_prompt}")
     return full_prompt
 
 def generate_image(prompt: str, base_filename: str, output_dir: str) -> Optional[str]:
