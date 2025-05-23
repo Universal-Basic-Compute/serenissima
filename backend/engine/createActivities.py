@@ -75,7 +75,8 @@ from backend.engine.utils.activity_helpers import (
     find_path_between_buildings,
     get_citizen_contracts,
     get_idle_citizens,
-    _fetch_and_assign_random_starting_position
+    _fetch_and_assign_random_starting_position,
+    VENICE_TIMEZONE # Import VENICE_TIMEZONE
 )
 # Import galley activity processing functions
 from backend.engine.logic.galley_activities import (
