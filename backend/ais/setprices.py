@@ -350,10 +350,12 @@ Here's your current situation:
 - You need to set a competitive price for each resource
 
 Please analyze the contract and set appropriate prices for each resource in each of your buildings. Consider:
-1. The import price of each resource (this is what merchants would pay to import it)
-2. The current price you're charging (if any)
-3. The demand for different resource types
-4. Competitive pricing strategies to maximize your profits
+1. `importPrice`: The cost to import the resource. Selling below this is usually a loss unless inputs are very cheap.
+2. `currentPriceInThisBuilding`: The price you are currently charging for this resource in this specific building.
+3. `globalAverageSellPrice`: The average price this resource is sold for across all public sell contracts in Venice.
+4. `landAverageSellPrice`: The average price this resource is sold for by buildings on the SAME LAND PARCEL as this building. This indicates very local competition.
+5. The demand for different resource types (you may need to infer this or it might be provided in other data).
+6. Competitive pricing strategies to maximize your profits. You might price slightly below averages to sell more, or above if you believe your location or stock offers an advantage.
 
 After your analysis, provide your price decisions in this JSON format:
 ```json
