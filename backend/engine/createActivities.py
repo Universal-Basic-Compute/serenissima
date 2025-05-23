@@ -135,7 +135,7 @@ def get_citizen_contracts(tables, citizen_id: str) -> List[Dict]:
         
         # Query contracts where the citizen is the buyer, type is 'recurrent', and the contract is active.
         # Exclude 'import' contracts as they are handled by galley logic.
-        formula = f"AND({{Buyer}}='{citizen_id}', {{Type}}='recurrent', {{CreatedAt}}<='{now_iso_venice}', {{EndAt}}>='{now_iso_venice}')"
+        formula = f"AND({{Buyer}}='{_escape_airtable_value(citizen_id)}', {{Type}}='recurrent', {{CreatedAt}}<='{now_iso_venice}', {{EndAt}}>='{now_iso_venice}')"
         contracts = tables['contracts'].all(formula=formula)
         
         # Sort by Priority in descending order
@@ -525,7 +525,7 @@ def get_citizen_workplace(tables, citizen_id: str, citizen_username: str) -> Opt
     
     try:
         # Get buildings where this citizen is the occupant and the category is business
-        formula = f"AND({{Occupant}}='{citizen_username}', {{Category}}='business')"
+        formula = f"AND({{Occupant}}='{_escape_airtable_value(citizen_username)}', {{Category}}='business')"
         
         workplaces = tables['buildings'].all(formula=formula)
         
@@ -553,7 +553,7 @@ def get_citizen_home(tables, citizen_id: str) -> Optional[Dict]:
         # Get buildings where this citizen is the occupant and the type is a housing type
         housing_types = ['canal_house', 'merchant_s_house', 'artisan_s_house', 'fisherman_s_cottage']
         type_conditions = [f"{{Type}}='{housing_type}'" for housing_type in housing_types]
-        formula = f"AND({{Occupant}}='{citizen_id}', OR({', '.join(type_conditions)}))"
+        formula = f"AND({{Occupant}}='{_escape_airtable_value(citizen_id)}', OR({', '.join(type_conditions)}))"
         
         homes = tables['buildings'].all(formula=formula)
         
@@ -758,7 +758,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                 if not is_at_home:
                     if citizen_position and home_position:
                         log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} is not at home. Calculating path to home {home_building_id} to eat.{LogColors.ENDC}")
-                        path_data_for_eat_sequence = get_path_between_points(citizen_position, home_position)
+                        path_data_for_eat_sequence = get_path_between_points_helper(citizen_position, home_position, TRANSPORT_API_URL)
                         if not (path_data_for_eat_sequence and path_data_for_eat_sequence.get('success')):
                             log.warning(f"{LogColors.WARNING}Path finding to home {home_building_id} failed for {citizen_username} to eat. Path data: {path_data_for_eat_sequence}{LogColors.ENDC}")
                             # path_data_for_eat_sequence will be None or invalid, try_create_eat_at_home_activity should handle this
@@ -816,7 +816,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                                 log.warning(f"{LogColors.WARNING}Failed to create 'eat_at_tavern' for {citizen_username} at {tavern_custom_id} despite being there.{LogColors.ENDC}")
                         else: # Not at tavern, create goto_tavern
                             log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} not at tavern {tavern_custom_id}. Finding path to tavern.{LogColors.ENDC}")
-                            path_data = get_path_between_points(citizen_position, tavern_position_coords)
+                            path_data = get_path_between_points_helper(citizen_position, tavern_position_coords, TRANSPORT_API_URL)
                             if path_data and path_data.get('success'):
                                 log.info(f"{LogColors.OKGREEN}Path to tavern {tavern_custom_id} found. Attempting to create 'travel_to_inn' (for tavern).{LogColors.ENDC}")
                                 # Create a generic goto_inn, assuming it can be used for taverns too
@@ -877,7 +877,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                 home_position = _get_building_position_coords(home)
                 home_custom_id = home['fields'].get('BuildingId', home['id'])
                 if citizen_position and home_position and _calculate_distance_meters(citizen_position, home_position) > 20:
-                    path_to_home_for_deposit = get_path_between_points(citizen_position, home_position)
+                    path_to_home_for_deposit = get_path_between_points_helper(citizen_position, home_position, TRANSPORT_API_URL)
                     if path_to_home_for_deposit and path_to_home_for_deposit.get('success'):
                         if try_create_goto_home_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, home_custom_id, path_to_home_for_deposit):
                             return True # Activity created to go home and deposit
@@ -959,7 +959,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                             log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} attempting to buy {amount_to_buy:.2f} of {resource_id_to_buy} from {seller_building['fields'].get('BuildingId')}.{LogColors.ENDC}")
                             seller_building_pos = _get_building_position_coords(seller_building) # Already fetched
                             
-                            path_to_seller = get_path_between_points(citizen_position, seller_building_pos)
+                            path_to_seller = get_path_between_points_helper(citizen_position, seller_building_pos, TRANSPORT_API_URL)
                             if path_to_seller and path_to_seller.get('success'):
                                 home_custom_id_for_delivery = home['fields'].get('BuildingId', home['id'])
                                 # Create fetch_resource: citizen goes to seller, buys, item goes to inventory.
@@ -1020,7 +1020,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                         try_create_stay_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, inn_custom_id, stay_location_type="inn", end_time_utc_iso=stay_end_time_utc_iso) # Pass custom BuildingId
                     else:
                         log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} is not at inn {inn_custom_id}. Finding path to inn.{LogColors.ENDC}")
-                        path_data = get_path_between_points(citizen_position, inn_position_coords)
+                        path_data = get_path_between_points_helper(citizen_position, inn_position_coords, TRANSPORT_API_URL)
                         if path_data and path_data.get('success'):
                             try_create_travel_to_inn_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, inn_custom_id, path_data) # Pass custom BuildingId
                         else:
@@ -1067,7 +1067,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                 try_create_stay_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, home_custom_id, stay_location_type="home", end_time_utc_iso=stay_end_time_utc_iso) # Pass custom BuildingId
             else:
                 log.info(f"{LogColors.OKBLUE}Resident {citizen_username} is not at home {home_custom_id}. Finding path home.{LogColors.ENDC}")
-                path_data = get_path_between_points(citizen_position, home_position)
+                path_data = get_path_between_points_helper(citizen_position, home_position, TRANSPORT_API_URL)
                 if path_data and path_data.get('success'):
                     log.info(f"{LogColors.OKGREEN}Path to home {home_custom_id} found. Creating 'goto_home' activity.{LogColors.ENDC}")
                     try_create_goto_home_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, home_custom_id, path_data) # Pass custom BuildingId
@@ -1147,7 +1147,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                                             log.info(f"{LogColors.OKBLUE}Skipping fetch_resource for contract {contract['id']} (Airtable ID) due to recent failure.{LogColors.ENDC}")
                                             continue # Skip this contract, try next one
 
-                                        path_to_source = get_path_between_points(citizen_position, _get_building_position_coords(from_building_rec))
+                                        path_to_source = get_path_between_points_helper(citizen_position, _get_building_position_coords(from_building_rec), TRANSPORT_API_URL)
                                         if path_to_source and path_to_source.get('success'):
                                             from_building_custom_id_contract = from_building_rec['fields'].get('BuildingId')
                                             to_building_custom_id_contract = to_building_rec['fields'].get('BuildingId')
@@ -1177,7 +1177,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                 
                 log.info(f"{LogColors.OKBLUE}Citizen {citizen_username} needs to go to work. Is at home: {is_at_home_for_work_departure}.{LogColors.ENDC}")
 
-                path_data = get_path_between_points(citizen_position, workplace_position)
+                path_data = get_path_between_points_helper(citizen_position, workplace_position, TRANSPORT_API_URL)
                 if path_data and path_data.get('success'):
                     try_create_goto_work_activity(
                         tables, 
@@ -1445,7 +1445,7 @@ def process_final_deliveries_from_galley(tables: Dict[str, Table], citizens_pool
                     log.warning(f"{LogColors.WARNING}BuyerBuilding {buyer_building_custom_id} has no position. Skipping delivery for {citizen_username}.{LogColors.ENDC}")
                     continue
 
-                path_to_buyer = get_path_between_points(citizen_current_pos, buyer_building_pos)
+                path_to_buyer = get_path_between_points_helper(citizen_current_pos, buyer_building_pos, TRANSPORT_API_URL)
                 if path_to_buyer and path_to_buyer.get('success'):
                     from .resource_fetching_activity_creator import try_create as try_create_deliver_batch_placeholder # Using this structure
                     
@@ -1637,7 +1637,7 @@ def process_galley_unloading_activities(tables: Dict[str, Table], idle_citizens:
                     idle_citizens.append(citizen_for_task) # Put back into the main list
                     continue
 
-                path_to_galley = get_path_between_points(citizen_current_pos, galley_position)
+                path_to_galley = get_path_between_points_helper(citizen_current_pos, galley_position, TRANSPORT_API_URL)
                 if path_to_galley and path_to_galley.get('success'):
                     activity_created = try_create_fetch_from_galley_activity(
                         tables,
