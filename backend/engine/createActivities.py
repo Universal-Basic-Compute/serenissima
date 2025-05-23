@@ -60,10 +60,14 @@ log = logging.getLogger("create_activities")
 # Attempt to import helper functions from other engine scripts
 try:
     from backend.engine.createimportactivities import get_resource_types as get_resource_definitions_from_api
+    from backend.engine.processActivities import get_building_record # Import get_building_record
 except ImportError:
-    log.warning("Could not import get_resource_definitions_from_api directly.")
+    log.warning("Could not import get_resource_definitions_from_api or get_building_record directly.")
     def get_resource_definitions_from_api():
         raise NotImplementedError("get_resource_definitions_from_api is not available")
+    def get_building_record(tables, building_id_custom: str): # Add a fallback definition
+        raise NotImplementedError("get_building_record is not available")
+
 
 # Load environment variables
 load_dotenv()
