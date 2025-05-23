@@ -82,12 +82,12 @@ def process(
     carrier_username = activity_fields.get('Citizen')
     # ContractId in activity is the Airtable Record ID of the contract
     contract_airtable_id = activity_fields.get('ContractId') 
-    # FromBuilding in activity is the Airtable Record ID of the source building
-    from_building_airtable_id = activity_fields.get('FromBuilding')
+    # FromBuilding in activity is now the custom BuildingId of the source building
+    from_building_custom_id_from_activity = activity_fields.get('FromBuilding')
     resource_id_to_fetch = activity_fields.get('ResourceId')
     desired_amount_to_fetch = float(activity_fields.get('Amount', 0))
 
-    if not all([carrier_username, contract_airtable_id, from_building_airtable_id, resource_id_to_fetch, desired_amount_to_fetch > 0]):
+    if not all([carrier_username, contract_airtable_id, from_building_custom_id_from_activity, resource_id_to_fetch, desired_amount_to_fetch > 0]):
         log.error(f"Activity {activity_guid} is missing crucial data.")
         return False
 
@@ -113,19 +113,22 @@ def process(
         
     contract_fields = contract_record['fields']
     buyer_username = contract_fields.get('Buyer') # This is the ultimate owner of the resource
-    seller_username_from_contract = contract_fields.get('Seller') # Operator of FromBuilding
+    seller_username_from_contract = contract_fields.get('Seller') # Operator of FromBuilding (as per contract)
     price_per_resource = float(contract_fields.get('PricePerResource', 0))
 
-    from_building_record = _get_building_by_airtable_id(tables, from_building_airtable_id)
+    # Fetch source building record using its custom BuildingId from the activity
+    from_building_record = get_building_record(tables, from_building_custom_id_from_activity)
     if not from_building_record:
-        log.error(f"Source building (Airtable ID: {from_building_airtable_id}) not found.")
+        log.error(f"Source building with custom ID '{from_building_custom_id_from_activity}' not found.")
         return False
-    from_building_custom_id = from_building_record['fields'].get('BuildingId')
+    
+    # The custom ID from the activity is the one we use
+    from_building_custom_id = from_building_custom_id_from_activity
     from_building_operator = from_building_record['fields'].get('RunBy') or from_building_record['fields'].get('Owner')
     from_building_position_str = from_building_record['fields'].get('Position', '{}')
 
     if from_building_operator != seller_username_from_contract:
-        log.warning(f"Contract seller {seller_username_from_contract} does not match source building operator {from_building_operator} for building {from_building_custom_id}. Using building operator.")
+        log.warning(f"Contract seller {seller_username_from_contract} does not match source building operator {from_building_operator} for building {from_building_custom_id}. Using building operator for stock check and payment.")
     # The effective seller is the building operator
     effective_seller_username = from_building_operator
     if not effective_seller_username:

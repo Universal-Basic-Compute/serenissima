@@ -10,17 +10,9 @@ from typing import Dict, Optional, Any
 
 from backend.engine.processActivities import (
     get_citizen_record,
-    # get_building_record_by_airtable_id, # This will be a local helper or imported
+    get_building_record, # Use this to fetch by custom BuildingId
     _escape_airtable_value
 )
-
-# Local helper or import if shared
-def _get_building_by_airtable_id(tables: Dict[str, Any], airtable_id: str) -> Optional[Dict]:
-    try:
-        return tables['buildings'].get(airtable_id)
-    except Exception as e:
-        log.error(f"Error fetching building by Airtable ID {airtable_id}: {e}")
-        return None
 
 log = logging.getLogger(__name__)
 
@@ -106,26 +98,27 @@ def process_eat_at_home(
     activity_fields = activity_record['fields']
     activity_guid = activity_fields.get('ActivityId', activity_record['id'])
     citizen_username = activity_fields.get('Citizen')
-    home_building_airtable_id = activity_fields.get('FromBuilding') # Home is the location
+    # FromBuilding in activity is now the custom BuildingId of the home
+    home_building_custom_id_from_activity = activity_fields.get('FromBuilding') 
     food_resource_type = activity_fields.get('ResourceId')
     amount_to_eat = float(activity_fields.get('Amount', FOOD_UNIT_CONSUMED))
 
-    log.info(f"Processing 'eat_at_home' ({activity_guid}) for {citizen_username} at {home_building_airtable_id}, eating {food_resource_type}")
+    log.info(f"Processing 'eat_at_home' ({activity_guid}) for {citizen_username} at {home_building_custom_id_from_activity}, eating {food_resource_type}")
 
     citizen_record = get_citizen_record(tables, citizen_username)
     if not citizen_record:
         log.error(f"Citizen {citizen_username} not found for activity {activity_guid}.")
         return False
 
-    home_building_record = _get_building_by_airtable_id(tables, home_building_airtable_id)
+    # Fetch home building record using its custom BuildingId from the activity
+    home_building_record = get_building_record(tables, home_building_custom_id_from_activity)
     if not home_building_record:
-        log.error(f"Home building {home_building_airtable_id} not found for activity {activity_guid}.")
+        log.error(f"Home building with custom ID '{home_building_custom_id_from_activity}' not found for activity {activity_guid}.")
         return False
-    home_building_custom_id = home_building_record['fields'].get('BuildingId')
-    if not home_building_custom_id:
-        log.error(f"Home building {home_building_airtable_id} missing BuildingId for activity {activity_guid}.")
-        return False
-
+    
+    # The custom ID from the activity is the one we use
+    home_building_custom_id = home_building_custom_id_from_activity
+    
     # Resource is identified by AssetType='building', Asset=home_building_custom_id, Owner=citizen_username, Type=food_resource_type
     resource_formula = (f"AND({{AssetType}}='building', "
                         f"{{Asset}}='{_escape_airtable_value(home_building_custom_id)}', "
@@ -173,19 +166,24 @@ def process_eat_at_tavern(
     activity_fields = activity_record['fields']
     activity_guid = activity_fields.get('ActivityId', activity_record['id'])
     citizen_username = activity_fields.get('Citizen')
-    tavern_building_airtable_id = activity_fields.get('FromBuilding') # Tavern is the location
+    # FromBuilding in activity is now the custom BuildingId of the tavern
+    tavern_building_custom_id_from_activity = activity_fields.get('FromBuilding') 
 
-    log.info(f"Processing 'eat_at_tavern' ({activity_guid}) for {citizen_username} at {tavern_building_airtable_id}")
+    log.info(f"Processing 'eat_at_tavern' ({activity_guid}) for {citizen_username} at {tavern_building_custom_id_from_activity}")
 
     citizen_record = get_citizen_record(tables, citizen_username)
     if not citizen_record:
         log.error(f"Citizen {citizen_username} not found for activity {activity_guid}.")
         return False
 
-    tavern_record = _get_building_by_airtable_id(tables, tavern_building_airtable_id)
+    # Fetch tavern building record using its custom BuildingId from the activity
+    tavern_record = get_building_record(tables, tavern_building_custom_id_from_activity)
     if not tavern_record:
-        log.error(f"Tavern building {tavern_building_airtable_id} not found for activity {activity_guid}.")
+        log.error(f"Tavern building with custom ID '{tavern_building_custom_id_from_activity}' not found for activity {activity_guid}.")
         return False
+    
+    # The custom ID from the activity is the one we use
+    tavern_building_custom_id = tavern_building_custom_id_from_activity
 
     current_ducats = float(citizen_record['fields'].get('Ducats', 0))
     if current_ducats < TAVERN_MEAL_COST:
@@ -206,13 +204,13 @@ def process_eat_at_tavern(
         transaction_payload = {
             "Type": "tavern_meal",
             "AssetType": "service",
-            "Asset": tavern_building_airtable_id, # Could be tavern's custom ID if available
+            "Asset": tavern_building_custom_id, # Use custom BuildingId
             "Seller": tavern_operator, # The tavern operator
             "Buyer": citizen_username,
             "Price": TAVERN_MEAL_COST,
             "Details": json.dumps({
                 "activity_guid": activity_guid,
-                "tavern_id": tavern_building_airtable_id
+                "tavern_id": tavern_building_custom_id # Use custom BuildingId
             }),
             "CreatedAt": now_iso,
             "ExecutedAt": now_iso

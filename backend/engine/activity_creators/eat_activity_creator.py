@@ -54,7 +54,7 @@ def try_create_eat_at_home_activity(
     citizen_custom_id: str,
     citizen_username: str,
     citizen_airtable_id: str,
-    home_building_airtable_id: str, # Airtable Record ID of the home
+    # home_building_airtable_id is no longer needed if we consistently use custom_id
     home_building_custom_id: str,   # Custom BuildingId (bld_...) of the home
     food_resource_type: str,
     amount_to_eat: float,
@@ -100,13 +100,13 @@ def try_create_eat_at_home_activity(
         # Citizen is not at home, create 'goto_home' activity
         log.info(f"Citizen {citizen_username} is not at home. Attempting to create 'goto_home' to eat {food_resource_type}.")
         if path_data_to_home and path_data_to_home.get('success'):
-            # Note: try_create_goto_home_activity expects the custom building ID for home_id
+            # try_create_goto_home_activity now expects the custom building ID for home_custom_id
             return try_create_goto_home_activity(
                 tables,
                 citizen_custom_id,
                 citizen_username,
                 citizen_airtable_id,
-                home_building_airtable_id, # Pass Airtable Record ID
+                home_building_custom_id, # Pass custom BuildingId
                 path_data_to_home
             )
         else:
@@ -118,11 +118,11 @@ def try_create_eat_at_tavern_activity(
     citizen_custom_id: str,
     citizen_username: str,
     citizen_airtable_id: str,
-    tavern_building_airtable_id: str # Airtable Record ID of the tavern
+    tavern_building_custom_id: str # Changed to custom BuildingId
 ) -> Optional[Dict]:
     """Creates an 'eat_at_tavern' activity."""
     # The actual cost/food type might be determined by the processor or be generic
-    log.info(f"Attempting to create 'eat_at_tavern' for {citizen_username} at tavern {tavern_building_airtable_id}")
+    log.info(f"Attempting to create 'eat_at_tavern' for {citizen_username} at tavern {tavern_building_custom_id}")
     try:
         now = datetime.datetime.now(pytz.UTC)
         end_time = now + datetime.timedelta(minutes=EAT_ACTIVITY_DURATION_MINUTES) # Eating duration
@@ -131,8 +131,8 @@ def try_create_eat_at_tavern_activity(
             "ActivityId": f"eat_tav_{citizen_custom_id}_{int(time.time())}",
             "Type": "eat_at_tavern",
             "Citizen": citizen_username,
-            "FromBuilding": tavern_building_airtable_id, # Location of eating
-            "ToBuilding": tavern_building_airtable_id,   # Stays in the same building
+            "FromBuilding": tavern_building_custom_id, # Use custom BuildingId
+            "ToBuilding": tavern_building_custom_id,   # Use custom BuildingId
             "CreatedAt": now.isoformat(),
             "StartDate": now.isoformat(),
             "EndDate": end_time.isoformat(),

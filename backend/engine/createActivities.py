@@ -930,8 +930,8 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                     citizen_custom_id,
                     citizen_username,
                     citizen_airtable_record_id,
-                    home_airtable_id,          # Airtable Record ID for 'eat_at_home'
-                    home_building_id,          # Custom BuildingId for 'goto_home'
+                    # home_building_airtable_id, # No longer needed by creator if custom_id is primary
+                    home_building_id,          # Custom BuildingId for 'eat_at_home' and 'goto_home'
                     food_type_at_home,
                     1.0,                       # Amount to eat
                     is_at_home,
@@ -958,14 +958,15 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                         is_at_tavern = _calculate_distance_meters(citizen_position, tavern_position_coords) < 20
                         if is_at_tavern:
                             log.info(f"Citizen {citizen_username} is at tavern {tavern_custom_id}. Creating eat_at_tavern activity.")
-                            if try_create_eat_at_tavern_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, tavern_airtable_id):
+                            if try_create_eat_at_tavern_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, tavern_custom_id): # Pass custom_id
                                 return True
                         else: # Not at tavern, create goto_tavern
                             log.info(f"Citizen {citizen_username} not at tavern {tavern_custom_id}. Finding path to tavern.")
                             path_data = get_path_between_points(citizen_position, tavern_position_coords)
                             if path_data and path_data.get('success'):
                                 # Create a generic goto_inn, assuming it can be used for taverns too
-                                if try_create_travel_to_inn_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, tavern_custom_id, path_data): # Pass custom BuildingId
+                                # try_create_travel_to_inn_activity expects custom BuildingId for inn_id
+                                if try_create_travel_to_inn_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, tavern_custom_id, path_data): 
                                     return True
                             else:
                                 log.warning(f"Path finding to tavern {tavern_custom_id} failed for {citizen_username}.")
@@ -1011,12 +1012,12 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                         else:
                             end_time_venice = (venice_now + datetime.timedelta(days=1)).replace(hour=NIGHT_END_HOUR, minute=0, second=0, microsecond=0)
                         stay_end_time_utc_iso = end_time_venice.astimezone(pytz.UTC).isoformat()
-                        try_create_stay_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, inn_airtable_id, stay_location_type="inn", end_time_utc_iso=stay_end_time_utc_iso) # Pass Airtable Record ID
+                        try_create_stay_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, inn_custom_id, stay_location_type="inn", end_time_utc_iso=stay_end_time_utc_iso) # Pass custom BuildingId
                     else:
                         log.info(f"Citizen {citizen_username} is not at inn {inn_custom_id}. Finding path to inn.")
                         path_data = get_path_between_points(citizen_position, inn_position_coords)
                         if path_data and path_data.get('success'):
-                            try_create_travel_to_inn_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, inn_airtable_id, path_data) # Pass Airtable Record ID
+                            try_create_travel_to_inn_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, inn_custom_id, path_data) # Pass custom BuildingId
                         else:
                             log.warning(f"Path finding to inn {inn_custom_id} failed for {citizen_username}. Creating idle activity.")
                             idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
@@ -1057,11 +1058,11 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                 else:
                     end_time_venice = (venice_now + datetime.timedelta(days=1)).replace(hour=NIGHT_END_HOUR, minute=0, second=0, microsecond=0)
                 stay_end_time_utc_iso = end_time_venice.astimezone(pytz.UTC).isoformat()
-                try_create_stay_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, home_airtable_id, stay_location_type="home", end_time_utc_iso=stay_end_time_utc_iso) # Pass Airtable Record ID
+                try_create_stay_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, home_custom_id, stay_location_type="home", end_time_utc_iso=stay_end_time_utc_iso) # Pass custom BuildingId
             else:
                 path_data = get_path_between_points(citizen_position, home_position)
                 if path_data and path_data.get('success'):
-                    try_create_goto_home_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, home_airtable_id, path_data) # Pass Airtable Record ID
+                    try_create_goto_home_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, home_custom_id, path_data) # Pass custom BuildingId
                 else:
                     log.warning(f"Path finding to home failed for resident {citizen_custom_id}. Creating idle activity.")
                     idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
@@ -1092,7 +1093,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                         building_resources = get_building_resources(tables, workplace_custom_id) # Use custom ID
                         selected_recipe = next((r for r in recipes if can_produce_output(building_resources, r)), None)
                         if selected_recipe:
-                            try_create_production_activity(tables, citizen_airtable_record_id, citizen_custom_id, citizen_username, workplace_airtable_id, selected_recipe) # Pass Airtable ID for building
+                            try_create_production_activity(tables, citizen_airtable_record_id, citizen_custom_id, citizen_username, workplace_custom_id, selected_recipe) # Pass custom BuildingId
                             return True
                 
                 contracts = get_citizen_contracts(tables, citizen_username) # Use username for contracts
@@ -1121,12 +1122,17 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                                     elif citizen_position and _get_building_position_coords(from_building_rec):
                                         path_to_source = get_path_between_points(citizen_position, _get_building_position_coords(from_building_rec))
                                         if path_to_source and path_to_source.get('success'):
-                                            try_create_resource_fetching_activity(
-                                                tables, citizen_airtable_record_id, citizen_custom_id, citizen_username,
-                                                contract['id'], from_building_rec['id'], to_building_rec['id'], # Pass Airtable IDs
-                                                resource_type_contract, amount_contract, path_to_source
-                                            )
-                                            return True
+                                            from_building_custom_id_contract = from_building_rec['fields'].get('BuildingId')
+                                            to_building_custom_id_contract = to_building_rec['fields'].get('BuildingId')
+                                            if from_building_custom_id_contract and to_building_custom_id_contract:
+                                                try_create_resource_fetching_activity(
+                                                    tables, citizen_airtable_record_id, citizen_custom_id, citizen_username,
+                                                    contract['id'], from_building_custom_id_contract, to_building_custom_id_contract, # Pass custom BuildingIds
+                                                    resource_type_contract, amount_contract, path_to_source
+                                                )
+                                                return True
+                                            else:
+                                                log.warning(f"Missing custom BuildingId for contract buildings: From={from_building_custom_id_contract}, To={to_building_custom_id_contract}")
                 log.info(f"No production or fetching for {citizen_custom_id} at {workplace_custom_id}. Creating idle.")
                 idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
                 try_create_idle_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, end_date_iso=idle_end_time_iso)
@@ -1150,7 +1156,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool, resource_def
                         citizen_custom_id, 
                         citizen_username, 
                         citizen_airtable_record_id, 
-                        workplace_airtable_id, # Airtable Record ID of workplace
+                        workplace_custom_id, # Pass custom BuildingId of workplace
                         path_data,
                         home_for_departure_check, # Pass home record
                         resource_defs,            # Pass global resource definitions
@@ -1362,8 +1368,8 @@ def process_final_deliveries_from_galley(tables: Dict[str, Table], citizens_pool
                         "ActivityId": activity_id_str_final,
                         "Type": "deliver_resource_batch",
                         "Citizen": citizen_username,
-                        "FromBuilding": at_galley_airtable_id, # From the galley
-                        "ToBuilding": buyer_building_airtable_id, # To the buyer's building
+                        "FromBuilding": at_galley_airtable_id, # From the galley (Airtable ID is fine for temporary entities like galleys)
+                        "ToBuilding": buyer_building_custom_id, # To the buyer's building (custom BuildingId)
                         "Resources": json.dumps(resources_list),
                         "ContractId": original_contract_id, # CRITICAL: This is the Original Custom Contract ID
                         "Path": json.dumps(path_to_buyer.get('path', [])),

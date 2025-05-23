@@ -16,11 +16,11 @@ def try_create(
     citizen_airtable_id: str, # Airtable record ID of the citizen
     citizen_custom_id: str,   # Custom CitizenId (ctz_...)
     citizen_username: str,    # Username
-    building_airtable_id: str,# Airtable record ID of the building
+    building_custom_id: str,  # Custom BuildingId of the building
     recipe: Dict
 ) -> Optional[Dict]:
     """Creates a production activity based on a recipe."""
-    log.info(f"Attempting to create production activity for {citizen_username} at building {building_airtable_id}")
+    log.info(f"Attempting to create production activity for {citizen_username} at building {building_custom_id}")
     
     try:
         inputs = recipe.get('inputs', {})
@@ -39,8 +39,8 @@ def try_create(
             "ActivityId": activity_id_str,
             "Type": "production",
             "Citizen": citizen_username,
-            "FromBuilding": building_airtable_id, # Use Airtable record ID for linking
-            "ToBuilding": building_airtable_id,   # Same building for production
+            "FromBuilding": building_custom_id, # Use custom BuildingId
+            "ToBuilding": building_custom_id,   # Same building for production
             "CreatedAt": now.isoformat(),
             "StartDate": now.isoformat(),
             "EndDate": end_time.isoformat(),

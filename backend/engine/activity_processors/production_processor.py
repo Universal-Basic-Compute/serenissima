@@ -17,18 +17,7 @@ from backend.engine.processActivities import (
 
 log = logging.getLogger(__name__)
 
-# Moved get_building_record_by_airtable_id to be a local helper or imported if shared
-def _get_building_by_airtable_id(tables: Dict[str, Any], airtable_record_id: str) -> Optional[Dict]:
-    """Fetches a building record by its Airtable Record ID."""
-    try:
-        building_record = tables['buildings'].get(airtable_record_id)
-        if building_record:
-            return building_record
-        log.warning(f"Building record with Airtable ID {airtable_record_id} not found.")
-        return None
-    except Exception as e:
-        log.error(f"Error fetching building record by Airtable ID {airtable_record_id}: {e}")
-        return None
+# Removed _get_building_by_airtable_id as we'll use get_building_record
 
 def get_specific_building_resource(
     tables: Dict[str, Any], 
@@ -77,12 +66,13 @@ def process(
     activity_guid = activity_fields.get('ActivityId', activity_id_airtable)
     log.info(f"Processing 'production' activity: {activity_guid}")
 
-    building_airtable_id = activity_fields.get('FromBuilding') # Production happens at FromBuilding
+    # FromBuilding in activity is now the custom BuildingId
+    building_custom_id_from_activity = activity_fields.get('FromBuilding') 
     recipe_inputs_json = activity_fields.get('RecipeInputs')
     recipe_outputs_json = activity_fields.get('RecipeOutputs')
 
-    if not all([building_airtable_id, recipe_inputs_json, recipe_outputs_json]):
-        log.error(f"Activity {activity_guid} is missing Building, RecipeInputs, or RecipeOutputs.")
+    if not all([building_custom_id_from_activity, recipe_inputs_json, recipe_outputs_json]):
+        log.error(f"Activity {activity_guid} is missing Building (custom ID), RecipeInputs, or RecipeOutputs.")
         return False
 
     try:
@@ -92,15 +82,14 @@ def process(
         log.error(f"Failed to parse RecipeInputs or RecipeOutputs JSON for activity {activity_guid}.")
         return False
 
-    prod_building_record = _get_building_by_airtable_id(tables, building_airtable_id)
+    # Fetch production building record using its custom BuildingId from the activity
+    prod_building_record = get_building_record(tables, building_custom_id_from_activity)
     if not prod_building_record:
-        log.error(f"Production building (Airtable ID: {building_airtable_id}) not found for activity {activity_guid}.")
+        log.error(f"Production building with custom ID '{building_custom_id_from_activity}' not found for activity {activity_guid}.")
         return False
     
-    building_custom_id = prod_building_record['fields'].get('BuildingId')
-    if not building_custom_id:
-        log.error(f"Production building {building_airtable_id} is missing 'BuildingId' field.")
-        return False
+    # The custom ID from the activity is the one we use
+    building_custom_id = building_custom_id_from_activity
 
     operator_username = prod_building_record['fields'].get('RunBy') or prod_building_record['fields'].get('Owner')
     if not operator_username:

@@ -11,18 +11,10 @@ from typing import Dict, List, Optional, Any
 # Import utility functions from processActivities.py or a shared utility module
 from backend.engine.processActivities import (
     get_citizen_record,
-    get_building_record, # This fetches by custom ID. We need by Airtable ID for home.
+    get_building_record, # Use this to fetch by custom BuildingId
     get_building_current_storage,
     _escape_airtable_value
 )
-
-# Helper to get building by Airtable ID if not already in processActivities
-def _get_building_by_airtable_id(tables: Dict[str, Any], airtable_id: str) -> Optional[Dict]:
-    try:
-        return tables['buildings'].get(airtable_id)
-    except Exception as e:
-        log.error(f"Error fetching building by Airtable ID {airtable_id}: {e}")
-        return None
 
 log = logging.getLogger(__name__)
 
@@ -39,10 +31,11 @@ def process(
     log.info(f"Processing 'goto_home' activity: {activity_guid}")
 
     citizen_username = activity_fields.get('Citizen')
-    home_building_id_str = activity_fields.get('ToBuilding') # This is the Airtable Record ID of the building
+    # 'ToBuilding' in the activity record is now the custom BuildingId of the home
+    home_building_custom_id_from_activity = activity_fields.get('ToBuilding') 
 
-    if not citizen_username or not home_building_id_str:
-        log.error(f"Activity {activity_guid} is missing Citizen or ToBuilding (home).")
+    if not citizen_username or not home_building_custom_id_from_activity:
+        log.error(f"Activity {activity_guid} is missing Citizen or ToBuilding (home custom ID).")
         return False
 
     citizen_record = get_citizen_record(tables, citizen_username)
@@ -50,17 +43,14 @@ def process(
         log.error(f"Citizen {citizen_username} not found for activity {activity_guid}.")
         return False
     
-    # The ToBuilding field in activities created by createActivities.py for goto_home
-    # stores the Airtable Record ID of the home building, not the BuildingId custom field.
-    home_building_record = _get_building_by_airtable_id(tables, home_building_id_str)
+    # Fetch home building record using its custom BuildingId from the activity
+    home_building_record = get_building_record(tables, home_building_custom_id_from_activity)
     if not home_building_record:
-        log.error(f"Home building with Airtable ID {home_building_id_str} not found for activity {activity_guid}.")
+        log.error(f"Home building with custom ID '{home_building_custom_id_from_activity}' not found for activity {activity_guid}.")
         return False
     
-    home_building_custom_id = home_building_record['fields'].get('BuildingId')
-    if not home_building_custom_id:
-        log.error(f"Home building {home_building_id_str} is missing the 'BuildingId' field.")
-        return False
+    # The custom ID from the activity is the one we use throughout
+    home_building_custom_id = home_building_custom_id_from_activity
 
     home_building_type_str = home_building_record['fields'].get('Type')
     home_building_def = building_type_defs.get(home_building_type_str, {})

@@ -419,39 +419,39 @@ def main(dry_run: bool = False):
             # or if the activity doesn't involve changing location (e.g. eat_from_inventory, eat_at_home, eat_at_tavern if already there)
             no_pos_update_types = ['fetch_resource', 'fetch_from_galley', 'eat_from_inventory', 'eat_at_home', 'eat_at_tavern', 'production', 'rest', 'idle']
             if activity_type not in no_pos_update_types:
-                to_building_airtable_id = activity_record['fields'].get('ToBuilding') # This is Airtable Record ID
+                # ToBuilding field now stores the custom BuildingId
+                to_building_custom_id = activity_record['fields'].get('ToBuilding') 
                 citizen_username_for_pos = activity_record['fields'].get('Citizen')
 
-                if to_building_airtable_id and citizen_username_for_pos and not dry_run:
+                if to_building_custom_id and citizen_username_for_pos and not dry_run:
                     try:
-                        # building_record_for_pos is fetched using Airtable Record ID
-                        building_record_for_pos = tables['buildings'].get(to_building_airtable_id)
+                        # Fetch building record using its custom BuildingId
+                        building_record_for_pos = get_building_record(tables, to_building_custom_id)
                         citizen_record_for_pos = get_citizen_record(tables, citizen_username_for_pos)
 
                         if building_record_for_pos and citizen_record_for_pos:
                             building_position_str = building_record_for_pos['fields'].get('Position')
-                            # building_custom_id_for_log = building_record_for_pos['fields'].get('BuildingId') # For logging
                         
                             if building_position_str:
                                 update_payload = {
                                     'Position': building_position_str
                                 }
                                 tables['citizens'].update(citizen_record_for_pos['id'], update_payload)
-                                log.info(f"Updated citizen {citizen_username_for_pos} Position to {building_position_str} (Building Airtable ID: {to_building_airtable_id}).")
+                                log.info(f"Updated citizen {citizen_username_for_pos} Position to {building_position_str} (Building Custom ID: {to_building_custom_id}).")
                             else:
-                                log.warning(f"Building {to_building_airtable_id} is missing Position. Cannot update citizen {citizen_username_for_pos} position.")
+                                log.warning(f"Building {to_building_custom_id} is missing Position. Cannot update citizen {citizen_username_for_pos} position.")
                         else: 
                             if not building_record_for_pos:
-                                log.warning(f"Target building (Airtable ID: {to_building_airtable_id}) not found. Cannot update citizen {citizen_username_for_pos} position.")
+                                log.warning(f"Target building (Custom ID: {to_building_custom_id}) not found. Cannot update citizen {citizen_username_for_pos} position.")
                             if not citizen_record_for_pos: 
                                 log.warning(f"Citizen {citizen_username_for_pos} not found. Cannot update citizen position.")
                     except Exception as e_update_pos:
                         log.error(f"Error updating citizen {citizen_username_for_pos} position after activity {activity_guid}: {e_update_pos}")
             elif dry_run and activity_type not in no_pos_update_types:
-                to_building_airtable_id_dry = activity_record['fields'].get('ToBuilding')
+                to_building_custom_id_dry = activity_record['fields'].get('ToBuilding')
                 citizen_username_dry = activity_record['fields'].get('Citizen')
-                if to_building_airtable_id_dry and citizen_username_dry:
-                    log.info(f"[DRY RUN] Would update citizen {citizen_username_dry} position based on ToBuilding (Airtable ID: {to_building_airtable_id_dry}).")
+                if to_building_custom_id_dry and citizen_username_dry:
+                    log.info(f"[DRY RUN] Would update citizen {citizen_username_dry} position based on ToBuilding (Custom ID: {to_building_custom_id_dry}).")
 
         else: # if not success
             update_activity_status(tables, activity_id_airtable, "failed")

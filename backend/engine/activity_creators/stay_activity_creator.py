@@ -19,7 +19,7 @@ def try_create(
     citizen_custom_id: str, 
     citizen_username: str, 
     citizen_airtable_id: str, 
-    target_building_id: str, 
+    target_building_custom_id: str, # Changed to custom BuildingId
     stay_location_type: str = "home",
     end_time_utc_iso: str = None # Expecting ISO format string for EndDate
 ) -> Optional[Dict]:
@@ -27,7 +27,7 @@ def try_create(
     Creates a stay activity for a citizen at a target location (home or inn).
     The end_time_utc_iso should be pre-calculated by the calling logic.
     """
-    log.info(f"Attempting to create stay activity for citizen {citizen_username} (CustomID: {citizen_custom_id}) at {stay_location_type} {target_building_id}")
+    log.info(f"Attempting to create stay activity for citizen {citizen_username} (CustomID: {citizen_custom_id}) at {stay_location_type} {target_building_custom_id}")
     
     try:
         now = datetime.datetime.now(pytz.UTC)
@@ -53,8 +53,8 @@ def try_create(
             "ActivityId": f"{activity_id_prefix}_{citizen_custom_id}_{int(time.time())}",
             "Type": "rest", 
             "Citizen": citizen_username,
-            "FromBuilding": target_building_id,
-            "ToBuilding": target_building_id,
+            "FromBuilding": target_building_custom_id, # Use custom BuildingId
+            "ToBuilding": target_building_custom_id,   # Use custom BuildingId
             "CreatedAt": now.isoformat(),
             "StartDate": now.isoformat(),
             "EndDate": end_time_utc_iso,

@@ -17,14 +17,14 @@ def try_create(
     citizen_custom_id: str,   # Custom CitizenId (ctz_...)
     citizen_username: str,    # Username
     contract_airtable_id: str,# Airtable record ID of the contract
-    from_building_airtable_id: str, # Airtable record ID of the source building
-    to_building_airtable_id: str,   # Airtable record ID of the destination building
+    from_building_custom_id: str, # Custom BuildingId of the source building
+    to_building_custom_id: str,   # Custom BuildingId of the destination building
     resource_type: str,
     amount: float,
     path_data: Dict # Path data from transport API
 ) -> Optional[Dict]:
     """Creates a resource fetching activity based on a contract."""
-    log.info(f"Attempting to create resource fetching activity for {citizen_username} from {from_building_airtable_id} to {to_building_airtable_id}")
+    log.info(f"Attempting to create resource fetching activity for {citizen_username} from {from_building_custom_id} to {to_building_custom_id}")
 
     try:
         now = datetime.datetime.now(pytz.UTC)
@@ -37,15 +37,12 @@ def try_create(
         activity_id_str = f"fetch_{citizen_custom_id}_{uuid.uuid4()}"
         
         # Fetch building names for notes if possible (optional, for richer notes)
-        from_building_name = from_building_airtable_id
-        to_building_name = to_building_airtable_id
-        try:
-            from_b_rec = tables['buildings'].get(from_building_airtable_id)
-            to_b_rec = tables['buildings'].get(to_building_airtable_id)
-            if from_b_rec: from_building_name = from_b_rec['fields'].get('Name', from_building_airtable_id)
-            if to_b_rec: to_building_name = to_b_rec['fields'].get('Name', to_building_airtable_id)
-        except Exception:
-            pass # Ignore if fetching names fails, use IDs
+        # To fetch by custom ID, we'd need get_building_record, or assume names are passed if needed.
+        # For simplicity, we'll use the custom IDs in notes if full records aren't easily available here.
+        from_building_name = from_building_custom_id
+        to_building_name = to_building_custom_id
+        # If full building records were passed to this creator, we could use their names.
+        # For now, this is a simplification. The processor will fetch full records.
 
         transporter = path_data.get('transporter') # Get transporter from path_data
 
@@ -54,8 +51,8 @@ def try_create(
             "Type": "fetch_resource",
             "Citizen": citizen_username,
             "ContractId": contract_airtable_id, # Link to contract by Airtable ID
-            "FromBuilding": from_building_airtable_id,
-            "ToBuilding": to_building_airtable_id,
+            "FromBuilding": from_building_custom_id, # Use custom BuildingId
+            "ToBuilding": to_building_custom_id,   # Use custom BuildingId
             "ResourceId": resource_type, # Store the specific resource type being fetched
             "Amount": amount,           # Store the amount
             "CreatedAt": now.isoformat(),

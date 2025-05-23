@@ -22,7 +22,7 @@ def try_create(
     citizen_custom_id: str, 
     citizen_username: str, 
     citizen_airtable_id: str, 
-    workplace_id: str, # This is Airtable Record ID of the workplace
+    workplace_custom_id: str, # This is the custom BuildingId of the workplace
     path_data: Dict,
     citizen_home_record: Optional[Dict], # Airtable record of the citizen's home
     resource_definitions: Dict, # Global resource definitions
@@ -30,7 +30,7 @@ def try_create(
     citizen_current_position_str: Optional[str] # Citizen's current position as JSON string
 ) -> Optional[Dict]:
     """Creates a goto_work activity for a citizen. If at home, may pick up food."""
-    log.info(f"Attempting to create goto_work activity for citizen {citizen_username} (CustomID: {citizen_custom_id}) to workplace {workplace_id}")
+    log.info(f"Attempting to create goto_work activity for citizen {citizen_username} (CustomID: {citizen_custom_id}) to workplace {workplace_custom_id}")
 
     # Logic to pick up food if at home
     if is_at_home and citizen_home_record and resource_definitions:
@@ -127,7 +127,7 @@ def try_create(
             "ActivityId": f"goto_work_{citizen_custom_id}_{int(time.time())}",
             "Type": "goto_work",
             "Citizen": citizen_username,
-            "ToBuilding": workplace_id,
+            "ToBuilding": workplace_custom_id, # Use custom BuildingId
             "CreatedAt": now.isoformat(),
             "StartDate": start_date,
             "EndDate": end_date,

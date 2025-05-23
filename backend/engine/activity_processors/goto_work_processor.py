@@ -13,17 +13,10 @@ from typing import Dict, List, Optional, Any
 # Import utility functions from processActivities.py or a shared utility module
 from backend.engine.processActivities import (
     get_citizen_record,
+    get_building_record, # Use this to fetch by custom BuildingId
     get_building_current_storage,
     _escape_airtable_value
 )
-
-# Helper to get building by Airtable ID if not already in processActivities
-def _get_building_by_airtable_id(tables: Dict[str, Any], airtable_id: str) -> Optional[Dict]:
-    try:
-        return tables['buildings'].get(airtable_id)
-    except Exception as e:
-        log.error(f"Error fetching building by Airtable ID {airtable_id}: {e}")
-        return None
 
 log = logging.getLogger(__name__)
 
@@ -40,11 +33,11 @@ def process(
     log.info(f"Processing 'goto_work' activity: {activity_guid}")
 
     citizen_username = activity_fields.get('Citizen')
-    # 'ToBuilding' in the activity record is the Airtable Record ID of the workplace building
-    workplace_building_airtable_id = activity_fields.get('ToBuilding')
+    # 'ToBuilding' in the activity record is now the custom BuildingId of the workplace
+    workplace_building_custom_id_from_activity = activity_fields.get('ToBuilding')
 
-    if not citizen_username or not workplace_building_airtable_id:
-        log.error(f"Activity {activity_guid} is missing Citizen or ToBuilding (workplace).")
+    if not citizen_username or not workplace_building_custom_id_from_activity:
+        log.error(f"Activity {activity_guid} is missing Citizen or ToBuilding (workplace custom ID).")
         return False
 
     citizen_record = get_citizen_record(tables, citizen_username)
@@ -56,15 +49,14 @@ def process(
         log.error(f"Citizen {citizen_username} is missing CitizenId field.")
         return False
 
-    workplace_building_record = _get_building_by_airtable_id(tables, workplace_building_airtable_id)
+    # Fetch workplace building record using its custom BuildingId from the activity
+    workplace_building_record = get_building_record(tables, workplace_building_custom_id_from_activity)
     if not workplace_building_record:
-        log.error(f"Workplace building with Airtable ID {workplace_building_airtable_id} not found for activity {activity_guid}.")
+        log.error(f"Workplace building with custom ID '{workplace_building_custom_id_from_activity}' not found for activity {activity_guid}.")
         return False
     
-    workplace_building_custom_id = workplace_building_record['fields'].get('BuildingId')
-    if not workplace_building_custom_id:
-        log.error(f"Workplace building {workplace_building_airtable_id} is missing the 'BuildingId' field.")
-        return False
+    # The custom ID from the activity is the one we use throughout
+    workplace_building_custom_id = workplace_building_custom_id_from_activity
     
     workplace_operator_username = workplace_building_record['fields'].get('RunBy')
     if not workplace_operator_username:

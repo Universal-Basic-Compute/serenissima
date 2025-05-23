@@ -15,11 +15,11 @@ def try_create(
     citizen_custom_id: str, 
     citizen_username: str, 
     citizen_airtable_id: str, 
-    inn_id: str, 
+    inn_custom_id: str, # Changed to custom BuildingId
     path_data: Dict
 ) -> Optional[Dict]:
     """Creates a travel_to_inn activity for a citizen."""
-    log.info(f"Attempting to create travel_to_inn activity for citizen {citizen_username} (CustomID: {citizen_custom_id}) to inn {inn_id}")
+    log.info(f"Attempting to create travel_to_inn activity for citizen {citizen_username} (CustomID: {citizen_custom_id}) to inn {inn_custom_id}")
     
     try:
         now = datetime.datetime.now(pytz.UTC)
@@ -39,7 +39,7 @@ def try_create(
             "ActivityId": f"goto_inn_{citizen_custom_id}_{int(time.time())}",
             "Type": "goto_inn",
             "Citizen": citizen_username,
-            "ToBuilding": inn_id,
+            "ToBuilding": inn_custom_id, # Use custom BuildingId
             "CreatedAt": now.isoformat(),
             "StartDate": start_date,
             "EndDate": end_date,
