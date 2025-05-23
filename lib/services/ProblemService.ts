@@ -654,7 +654,7 @@ export class ProblemService {
         problems[problemId] = {
           problemId,
           citizen: runBy!, // runBy is confirmed to be non-null by this point
-          assetType: 'building_operations',
+          assetType: 'building',
           asset: buildingId,
           severity,
           status: 'active',
