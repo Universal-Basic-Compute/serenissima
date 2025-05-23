@@ -110,9 +110,11 @@ def get_top_relationships_for_ai(tables: Dict[str, Table], ai_username: str, lim
 
 def _escape_airtable_value(value: Any) -> str:
     """Échappe les apostrophes pour les formules Airtable et s'assure que la valeur est une chaîne."""
+    # S'assurer que la valeur est une chaîne avant toute manipulation
     if not isinstance(value, str):
-        value = str(value)  # Convertit en chaîne d'abord
-    return value.replace("'", "\\'") # Ensuite, échappe les apostrophes
+        value = str(value)
+    # Échapper les apostrophes
+    return value.replace("'", "\\'")
 
 def _get_citizen_data(tables: Dict[str, Table], username: str) -> Optional[Dict]:
     try:
