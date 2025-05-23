@@ -773,9 +773,9 @@ number => {
     window.dispatchEvent(pathUpdateEvent);
   }, []);
 
-  // Load polygons, background image, and set minimum loading time
+  // Effect for initial setup: setting loading states and starting timers/image load
   useEffect(() => {
-    console.log('IsometricViewer: Initiating data, background image, and min loading time...');
+    console.log('IsometricViewer: Initial setup effect running...');
     setLoading(true);
     setPolygonsDataLoaded(false);
     setBgImageReady(false);
@@ -804,59 +804,77 @@ number => {
       setBgImageReady(true); // No image to load
     }
 
-    // Fetch polygons
-    fetch('/api/get-polygons')
-      .then(response => {
-        console.log(`IsometricViewer: API response status: ${response.status} ${response.statusText}`);
-        return response.json();
-      })
-      .then(data => {
-        console.log(`IsometricViewer: API data received, polygons property exists: ${!!data.polygons}`);
-        if (data.polygons) {
-          console.log(`IsometricViewer: Setting ${data.polygons.length} polygons to state`);
-          setPolygons(data.polygons);
-          
-          if (typeof window !== 'undefined') {
-            console.log(`IsometricViewer: Setting window.__polygonData with ${data.polygons.length} polygons`);
-            (window as any).__polygonData = data.polygons;
+    return () => {
+      clearTimeout(minTimeTimer); // Clear the timer if the component unmounts
+    };
+  }, [currentLoadingImage]); // currentLoadingImage is stable after initial set, so this runs once
+
+  // Effect to fetch polygons AFTER the background image is ready
+  useEffect(() => {
+    if (bgImageReady && !polygonsDataLoaded) { // Only fetch if bg image is ready and polygons not yet loaded
+      console.log('IsometricViewer: Background image ready, now fetching polygons...');
+      fetch('/api/get-polygons')
+        .then(response => {
+          console.log(`IsometricViewer: API response status: ${response.status} ${response.statusText}`);
+          return response.json();
+        })
+        .then(data => {
+          console.log(`IsometricViewer: API data received, polygons property exists: ${!!data.polygons}`);
+          if (data.polygons) {
+            console.log(`IsometricViewer: Setting ${data.polygons.length} polygons to state`);
+            setPolygons(data.polygons);
             
-            try {
-              const { transportService } = require('@/lib/services/TransportService');
-              console.log('IsometricViewer: Directly initializing transport service with polygon data');
-              const success = transportService.initializeWithPolygonData(data.polygons);
-              console.log(`IsometricViewer: Direct transport service initialization ${success ? 'succeeded' : 'failed'}`);
-              if (!success) {
-                console.log('IsometricViewer: Trying setPolygonsData as fallback');
-                const fallbackSuccess = transportService.setPolygonsData(data.polygons);
-                console.log(`IsometricViewer: Fallback initialization ${fallbackSuccess ? 'succeeded' : 'failed'}`);
+            if (typeof window !== 'undefined') {
+              console.log(`IsometricViewer: Setting window.__polygonData with ${data.polygons.length} polygons`);
+              (window as any).__polygonData = data.polygons;
+              
+              try {
+                const { transportService } = require('@/lib/services/TransportService');
+                console.log('IsometricViewer: Directly initializing transport service with polygon data');
+                const success = transportService.initializeWithPolygonData(data.polygons);
+                console.log(`IsometricViewer: Direct transport service initialization ${success ? 'succeeded' : 'failed'}`);
+                if (!success) {
+                  console.log('IsometricViewer: Trying setPolygonsData as fallback');
+                  const fallbackSuccess = transportService.setPolygonsData(data.polygons);
+                  console.log(`IsometricViewer: Fallback initialization ${fallbackSuccess ? 'succeeded' : 'failed'}`);
+                }
+              } catch (error) {
+                console.error('IsometricViewer: Error initializing transport service:', error);
               }
-            } catch (error) {
-              console.error('IsometricViewer: Error initializing transport service:', error);
+            } else {
+              console.warn('IsometricViewer: window is not defined, running in non-browser environment');
             }
           } else {
-            console.warn('IsometricViewer: window is not defined, running in non-browser environment');
+            console.error('IsometricViewer: No polygons found in API response');
           }
-        } else {
-          console.error('IsometricViewer: No polygons found in API response');
-        }
-        setPolygonsDataLoaded(true);
-      })
-      .catch(error => {
-        console.error('IsometricViewer: Error loading polygons:', error);
-        setPolygonsDataLoaded(true); // Mark as attempt complete even on error
-      });
-  }, []);
+          setPolygonsDataLoaded(true);
+        })
+        .catch(error => {
+          console.error('IsometricViewer: Error loading polygons:', error);
+          setPolygonsDataLoaded(true); // Mark as attempt complete even on error
+        });
+    }
+  }, [bgImageReady, polygonsDataLoaded]); // Runs when bgImageReady changes or polygonsDataLoaded changes
 
-  // Effect to manage the main loading state based on data and image readiness
+  // Effect to manage the main loading state based on data, image readiness, and minimum time
   useEffect(() => {
-    if (polygonsDataLoaded && bgImageReady) {
-      console.log('IsometricViewer: Both polygons and background image are ready. Hiding loader.');
+    if (polygonsDataLoaded && bgImageReady && minLoadingTimeElapsed) {
+      console.log('IsometricViewer: All loading conditions met. Hiding loader.');
       setLoading(false);
     } else {
-      console.log(`IsometricViewer: Waiting for resources. Polygons loaded: ${polygonsDataLoaded}, BG Image ready: ${bgImageReady}`);
-      setLoading(true);
+      console.log(`IsometricViewer: Waiting for resources. Polygons: ${polygonsDataLoaded}, BG Image: ${bgImageReady}, Min Time: ${minLoadingTimeElapsed}`);
+      // Ensure loading is true if conditions are not met, especially if they become false after being true.
+      if (!loading && !(polygonsDataLoaded && bgImageReady && minLoadingTimeElapsed)) {
+         setLoading(true);
+      } else if (loading && (polygonsDataLoaded && bgImageReady && minLoadingTimeElapsed)) {
+        // This case should be handled by the if block above, but as a safeguard:
+        // setLoading(false); // This is already done above.
+      } else if (!loading && !(polygonsDataLoaded && bgImageReady && minLoadingTimeElapsed)) {
+        // If not loading, but conditions aren't met, set loading to true.
+        setLoading(true);
+      }
     }
-  }, [polygonsDataLoaded, bgImageReady]);
+  }, [polygonsDataLoaded, bgImageReady, minLoadingTimeElapsed, loading]);
 
   // Handle transport mode activation
   useEffect(() => {
