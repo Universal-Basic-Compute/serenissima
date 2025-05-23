@@ -693,7 +693,7 @@ def create_public_sell_contract(
             airtable_record_id = existing_contract_record["id"]
             
             update_fields = {
-                "hourlyAmount": hourly_amount, # Airtable field name might be HourlyAmount
+                "HourlyAmount": hourly_amount, # Airtable field name might be HourlyAmount
                 "PricePerResource": price_per_resource,
                 "EndAt": end_date, # Refresh EndAt to extend/set duration
                 "UpdatedAt": now,
@@ -721,7 +721,7 @@ def create_public_sell_contract(
                 "Transporter": "public", # Set Transporter to "public"
                 "SellerBuilding": building_id,
                 "BuyerBuilding": None, # No specific buyer building for public sells
-                "hourlyAmount": hourly_amount, # Assuming this is the Airtable field name
+                "HourlyAmount": hourly_amount, # Assuming this is the Airtable field name
                 "PricePerResource": price_per_resource,
                 "Priority": 1,  # Default priority
                 "CreatedAt": now,

@@ -664,7 +664,7 @@ def create_or_update_public_sell_contracts(
                     "Type": "public_sell",
                     "Buyer": "public",
                     "Transporter": "public",
-                    "hourlyAmount": default_hourly_amount, 
+                    "HourlyAmount": default_hourly_amount, 
                     "CreatedAt": now_iso,
                     "EndAt": end_date_iso,
                     "Notes": contract_notes,
