@@ -1109,7 +1109,7 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
                 ))}
               </div>
             ) : (
-              <p className="text-amber-700 italic">No transport resources found for this citizen.</p>
+              <p className="text-amber-700 italic">No gondolas, barges, or other means of conveyance are currently listed under this citizen's name.</p>
             )}
           </div>
         </div>
