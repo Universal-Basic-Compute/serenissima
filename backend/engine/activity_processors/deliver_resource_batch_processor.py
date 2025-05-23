@@ -220,7 +220,7 @@ def process(
         return True # Successfully delivered, but no payment needed/possible.
 
     buyer_citizen_rec = get_citizen_record(tables, buyer_username)
-    seller_citizen_rec = get_citizen_record(tables, seller_username) # Should be "Italia"
+    seller_citizen_rec = get_citizen_record(tables, seller_username)
 
     if not buyer_citizen_rec or not seller_citizen_rec:
         log.warning(f"Buyer ({buyer_username}) or Seller ({seller_username}) citizen record not found for contract {original_contract_custom_id}. Skipping payment.")
