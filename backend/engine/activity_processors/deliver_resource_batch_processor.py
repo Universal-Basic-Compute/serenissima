@@ -6,6 +6,7 @@ import logging
 import re
 import uuid
 from datetime import datetime, timezone
+import pytz # Added for Venice timezone
 from typing import Dict, List, Optional, Any
 
 # To import utility functions from processActivities.py, we assume it's in the parent of this package.
@@ -138,7 +139,7 @@ def process(
                                 f"{{Owner}}='{_escape_airtable_value(target_owner_username)}')")
         try:
             existing_building_resources = tables['resources'].all(formula=building_res_formula, max_records=1)
-            now_iso = datetime.now(timezone.utc).isoformat()
+            # now_iso is already defined as Venice time ISO string
             if existing_building_resources:
                 bres_record = existing_building_resources[0]
                 new_count = float(bres_record['fields'].get('Count', 0)) + amount
@@ -262,8 +263,8 @@ def process(
                 "activity_guid": activity_guid,
                 "note": "Full payment from buyer to merchant."
             }),
-            "CreatedAt": datetime.now(timezone.utc).isoformat(),
-            "ExecutedAt": datetime.now(timezone.utc).isoformat()
+            "CreatedAt": now_iso, # Venice time ISO string
+            "ExecutedAt": now_iso # Venice time ISO string
         }
         tables['transactions'].create(transaction_payload_buyer_to_merchant)
         log.info(f"Created transaction: Buyer {buyer_username} to Merchant {seller_username} for {total_cost_for_this_delivery:.2f} (Contract: {original_contract_custom_id}).")
@@ -293,8 +294,8 @@ def process(
                 "activity_guid": activity_guid,
                 "note": "Merchant's payment to Italia for cost of imported goods."
             }),
-            "CreatedAt": datetime.now(timezone.utc).isoformat(),
-            "ExecutedAt": datetime.now(timezone.utc).isoformat()
+            "CreatedAt": now_iso, # Venice time ISO string
+            "ExecutedAt": now_iso # Venice time ISO string
         }
         tables['transactions'].create(transaction_payload_merchant_to_italia)
         log.info(f"Created transaction: Merchant {seller_username} to Italia for {italia_share:.2f} (Contract: {original_contract_custom_id}).")

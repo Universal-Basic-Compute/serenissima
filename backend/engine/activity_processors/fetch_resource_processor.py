@@ -8,6 +8,7 @@ import logging
 import math # Added import
 import uuid
 from datetime import datetime, timezone
+import pytz # Added for Venice timezone
 from typing import Dict, List, Optional, Any
 
 from backend.engine.processActivities import (
@@ -190,7 +191,9 @@ def process(
         try:
             tables['citizens'].update(carrier_airtable_id, {
                 'Position': from_building_position_str,
-                'UpdatedAt': datetime.now(timezone.utc).isoformat()
+                # 'UpdatedAt' is automatically handled by Airtable on record update.
+                # If manual update is desired:
+                # 'UpdatedAt': datetime.now(VENICE_TIMEZONE).isoformat() 
             })
             log.info(f"Updated carrier {carrier_username} position to {from_building_custom_id} ({from_building_position_str}) as part of fetch (no items).")
         except Exception as e_pos_update:
@@ -199,7 +202,9 @@ def process(
         return True
 
     # 4. Perform Transactions
-    now_iso = datetime.now(timezone.utc).isoformat()
+    VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
+    now_venice = datetime.now(VENICE_TIMEZONE)
+    now_iso = now_venice.isoformat()
     total_cost = amount_to_purchase * price_per_resource
 
     try:
