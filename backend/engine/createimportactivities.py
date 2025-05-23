@@ -157,7 +157,8 @@ def get_dock_water_coordinates(dock_record: Dict, polygons_data: Dict) -> Option
     dock_canal_point_data = None
     if isinstance(canal_points_list, list):
         for point in canal_points_list:
-            if isinstance(point, dict) and point.get('nodeId') == dock_building_id:
+            # The dock_building_id (e.g., "canal_lat_lng") corresponds to the 'id' field of the canalPoint object
+            if isinstance(point, dict) and point.get('id') == dock_building_id:
                 dock_canal_point_data = point
                 break
     else:
