@@ -22,7 +22,7 @@ import requests
 import pytz
 import random
 import uuid
-from datetime import datetime, time, timedelta
+from datetime import datetime, time, timedelta, timezone
 from typing import Dict, List, Optional, Any
 from pyairtable import Api, Table
 from dotenv import load_dotenv
@@ -203,6 +203,16 @@ def create_or_get_merchant_galley(
         return created_galley
     except Exception as e:
         log.error(f"Error creating/getting merchant_galley {galley_building_id}: {e}")
+        return None
+
+def get_citizen_record(tables: Dict[str, Table], username: str) -> Optional[Dict]:
+    """Fetches a citizen record by username."""
+    formula = f"{{Username}} = '{_escape_airtable_value(username)}'"
+    try:
+        records = tables['citizens'].all(formula=formula, max_records=1)
+        return records[0] if records else None
+    except Exception as e:
+        log.error(f"Error fetching citizen record for {username}: {e}")
         return None
 
 # --- End of New Helper Functions ---
