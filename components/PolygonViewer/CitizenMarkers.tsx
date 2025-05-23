@@ -179,7 +179,13 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
       const mostRecentPathWithNotes = sortedPaths.find(p => p.notes);
       if (mostRecentPathWithNotes) {
         latestNotes = mostRecentPathWithNotes.notes;
+      } else {
+        // Log if no paths with notes were found for this citizen
+        console.log(`[CitizenMarkers] No paths with notes found for citizen ${citizenIdForNotes}. All paths for this citizen:`, sortedPaths.map(p => ({ id: p.id, type: p.type, startTime: p.startTime, notes: p.notes })));
       }
+    } else {
+      // Log if no activity paths were found at all for this citizen
+      console.log(`[CitizenMarkers] No activity paths found at all for citizen ${citizenIdForNotes}.`);
     }
     
     // Add activityNotes to the citizen object for the tooltip

@@ -61,6 +61,15 @@ export class ActivityPathService {
                 // Parse path if it's a string
                 path = typeof activity.Path === 'string' ? JSON.parse(activity.Path) : activity.Path;
                 
+                // Log the raw Notes field from the activity
+                const citizenIdForLog = activity.Citizen || activity.CitizenId || 'unknown_citizen';
+                // Conditional logging for specific citizen if needed for targeted debugging:
+                // if (citizenIdForLog === 'StarGazer2000') { // Example: Cecilia Valier's username if known
+                //   console.log(`[ActivityPathService] DEBUG StarGazer2000: Activity ${activity.ActivityId || 'unknown_activity'}, Raw Notes: `, activity.Notes, activity);
+                // }
+                console.log(`[ActivityPathService] Processing activity ${activity.ActivityId || 'unknown_activity'} for citizen ${citizenIdForLog}. Raw Notes: `, activity.Notes);
+
+
                 // Log the parsed path for debugging
                 console.log(`Parsed path for activity ${activity.ActivityId || 'unknown'}, citizen ${activity.Citizen || activity.CitizenId}:`, 
                   path.length > 0 ? `${path.length} points, first: ${JSON.stringify(path[0])}` : 'empty path');
