@@ -299,7 +299,7 @@ AI citizens strategically set up resource imports for their buildings (via la fo
 4. When import decisions are made:
    - New import contracts are created or existing ones are updated
    - Contract details include resource type, hourly amount, and price
-   - Each contract is set with appropriate parameters (seller: "Italia", transporter: "Italia")
+   - Each contract is set with appropriate parameters
 
 5. An admin notification is created with statistics about all import decisions, showing the resources being imported by each AI citizen
 

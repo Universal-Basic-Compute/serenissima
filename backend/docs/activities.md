@@ -25,7 +25,7 @@ The activity system tracks what citizens are doing at any given time, creating a
 - **Fetch From Galley**: Citizen travels to a `merchant_galley` building to pick up a specific batch of resources (related to an original import contract).
     - *Fields*: `FromBuilding` (galley's Airtable ID), `OriginalContractId` (custom ID of the original import contract), `ResourceId`, `Amount`.
     - *Processor (executes upon arrival at galley)*:
-        - Verifies resource availability in the galley (owned by "Italia").
+        - Verifies resource availability in the galley (owned by the Merchant).
         - Checks citizen's carrying capacity.
         - Transfers the specified `Amount` of `ResourceId` from the galley's resources to the citizen's inventory. The resources in the citizen's inventory become owned by the `Buyer` of the `OriginalContractId`.
         - Updates the galley's `PendingDeliveriesData` to reflect the picked-up amount.

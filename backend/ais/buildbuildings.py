@@ -124,7 +124,7 @@ def initialize_airtable():
 
 def _escape_airtable_value(value: str) -> str:
     """Échappe les apostrophes pour les formules Airtable."""
-    return value.replace("'", "\\'")
+    return value
 
 def _get_citizen_problems(tables: Dict[str, Table], username: str, limit: int = 50) -> List[Dict]:
     """Get latest 50 PROBLEMS where Citizen=Username."""
@@ -145,7 +145,7 @@ def get_ai_citizens(tables, citizen_username_arg: Optional[str] = None) -> List[
         base_formula = "AND({IsAI}=1, {InVenice}=1, {Ducats}>=150000)"
         if citizen_username_arg:
             # Ensure username is properly escaped for the formula
-            safe_username = citizen_username_arg.replace("'", "\\'")
+            safe_username = citizen_username_arg
             formula = f"AND({base_formula}, {{Username}}='{safe_username}')"
             log_info(f"Fetching specific AI citizen: {citizen_username_arg}")
         else:
@@ -170,7 +170,7 @@ def get_citizen_lands(tables, username: str, target_land_id: Optional[str] = Non
     try:
         if target_land_id:
             # Ensure LandId is properly escaped for the formula
-            safe_land_id = target_land_id.replace("'", "\\'")
+            safe_land_id = target_land_id
             formula = f"{{LandId}} = '{safe_land_id}'"
             lands = tables["lands"].all(formula=formula, max_records=1)
             if lands:

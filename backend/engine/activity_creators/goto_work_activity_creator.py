@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 def _escape_airtable_value(value: str) -> str:
     """Escapes single quotes for Airtable formulas."""
     if isinstance(value, str):
-        return value.replace("'", "\\'")
+        return value
     return str(value)
 
 def try_create(

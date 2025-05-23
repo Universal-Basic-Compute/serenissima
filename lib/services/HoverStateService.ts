@@ -210,10 +210,16 @@ export class HoverStateService {
    */
   public setHoveredCitizen(citizen: any, buildingId: string | null = null, type: 'home' | 'work' | null = null): void {
     // Use the CitizenRenderService to sanitize the citizen object
-    const safeCitizen = citizen ? CitizenRenderService.sanitizeCitizen(citizen) : null;
+    const baseSafeCitizen = citizen ? CitizenRenderService.sanitizeCitizen(citizen) : null;
     
-    this.setHoverState('citizen', buildingId || safeCitizen?.id || null, { 
-      citizen: safeCitizen, 
+    // Preserve activityNotes from the original citizen object (which is citizenWithNotes)
+    const activityNotes = citizen?.activityNotes || null;
+    
+    // Combine the sanitized citizen data with the activityNotes
+    const finalCitizenData = baseSafeCitizen ? { ...baseSafeCitizen, activityNotes } : null;
+    
+    this.setHoverState('citizen', buildingId || baseSafeCitizen?.id || null, { 
+      citizen: finalCitizenData, 
       buildingId, 
       citizenType: type 
     });

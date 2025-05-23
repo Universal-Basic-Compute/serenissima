@@ -38,7 +38,7 @@ def initialize_airtable():
 
 def _escape_airtable_value(value: str) -> str:
     """Échappe les apostrophes pour les formules Airtable."""
-    return value.replace("'", "\\'")
+    return value
 
 def _get_building_relevancies_for_citizen(tables: Dict[str, Table], username: str, limit: int = 50) -> List[Dict]:
     """Get latest 50 RELEVANCIES where AssetType='building' AND RelevantToCitizen=Username."""

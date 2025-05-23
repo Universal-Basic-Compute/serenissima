@@ -94,7 +94,7 @@ def mark_messages_as_read_api(receiver_username: str, message_ids: List[str]) ->
 
 def _escape_airtable_value(value: str) -> str:
     """Échappe les apostrophes pour les formules Airtable."""
-    return value.replace("'", "\\'")
+    return value
 
 def _get_citizen_data(tables: Dict[str, Table], username: str) -> Optional[Dict]:
     try:

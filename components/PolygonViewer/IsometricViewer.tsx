@@ -1562,10 +1562,10 @@ number => {
     // Call fetchBuildings once when the component mounts
     fetchBuildings();
     
-    // Set up interval to refresh buildings
-    const interval = setInterval(fetchBuildings, 30000);
+    // Set up interval to refresh buildings - REMOVED
+    // const interval = setInterval(fetchBuildings, 30000);
     
-    return () => clearInterval(interval);
+    // return () => clearInterval(interval); - REMOVED
   }, []); // Empty dependency array to run only on mount
   
   // Fetch bridge data and merge with buildings

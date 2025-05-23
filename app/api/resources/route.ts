@@ -271,9 +271,9 @@ export async function POST(request: Request) {
       ResourceId: data.id, // Custom ID for the resource stack
       Type: data.type,
       Name: data.name || definition?.name || data.type,
-      Category: data.category || definition?.category || 'unknown',
-      Subcategory: data.subcategory || definition?.subcategory || null,
-      Tier: data.tier ?? definition?.tier ?? null, // Added Tier for Airtable
+      // Category: data.category || definition?.category || 'unknown', // Removed Category
+      // Subcategory: data.subcategory || definition?.subcategory || null, // Removed Subcategory
+      // Tier: data.tier ?? definition?.tier ?? null, // Removed Tier
       Description: data.description || definition?.description || '',
       Position: JSON.stringify(position), // Position of the resource itself
       Count: data.count || 1,

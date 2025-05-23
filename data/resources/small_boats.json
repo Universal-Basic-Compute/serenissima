@@ -59,5 +59,6 @@
   "importPrice": 960,
   "lifetimeHours": null,
   "consumptionHours": 584,
-  "tier": 2
+  "tier": 2,
+  "storageCapacity": 100
 }

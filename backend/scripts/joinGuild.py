@@ -104,7 +104,7 @@ def citizen_decides_to_join(social_class: str) -> bool:
 
 def _escape_airtable_formula_value(value: str) -> str:
     """Escapes single quotes for Airtable formulas."""
-    return value.replace("'", "\\'")
+    return value
 
 def ask_ai_to_choose_guild(ai_username: str, ai_social_class: str, guilds_data: List[Dict]) -> Optional[str]:
     """Ask the AI to choose a guild using Kinos Engine API."""

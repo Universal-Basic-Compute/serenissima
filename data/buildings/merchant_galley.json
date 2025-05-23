@@ -2,7 +2,7 @@
   "type": "merchant_galley",
   "name": "Merchant Galley",
   "pointType": "water",
-  "category": "Transport",
+  "category": "transport",
   "subcategory": "Maritime Vessels",
   "size": "Large",
   "unlockCondition": "Dynamically created by import system",

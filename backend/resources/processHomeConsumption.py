@@ -37,7 +37,7 @@ CITIZENS_TABLE_NAME = "CITIZENS" # Added for fetching citizen details if needed
 def _escape_airtable_value(value: str) -> str:
     """Escapes single quotes for Airtable formulas."""
     if isinstance(value, str):
-        return value.replace("'", "\\'")
+        return value
     return str(value)
 
 def initialize_airtable() -> Optional[Dict[str, Table]]:

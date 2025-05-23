@@ -63,5 +63,6 @@
   "importPrice": 18000,
   "lifetimeHours": null,
   "consumptionHours": 1168,
-  "tier": 3
+  "tier": 3,
+  "storageCapacity": 1000
 }

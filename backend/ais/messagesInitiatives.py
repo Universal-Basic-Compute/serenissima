@@ -110,7 +110,7 @@ def get_top_relationships_for_ai(tables: Dict[str, Table], ai_username: str, lim
 
 def _escape_airtable_value(value: str) -> str:
     """Échappe les apostrophes pour les formules Airtable."""
-    return value.replace("'", "\\'")
+    return value
 
 def _get_citizen_data(tables: Dict[str, Table], username: str) -> Optional[Dict]:
     try:
