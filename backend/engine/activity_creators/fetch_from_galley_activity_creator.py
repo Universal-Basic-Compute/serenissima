@@ -51,7 +51,7 @@ def try_create(
             "ActivityId": activity_id_str,
             "Type": "fetch_from_galley",
             "Citizen": citizen_username,
-            "FromBuilding": galley_airtable_id, # Airtable Record ID of the galley
+            "FromBuilding": galley_custom_id, # Use custom BuildingId of the galley
             "ContractId": original_contract_custom_id, # Store original contract's custom ID in ContractId field
             "Resources": json.dumps([{"ResourceId": resource_id_to_fetch, "Amount": amount_to_fetch}]), # Store as JSON array
             "CreatedAt": now_venice.isoformat(),

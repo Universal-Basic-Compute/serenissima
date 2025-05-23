@@ -13,14 +13,19 @@ from typing import Dict, List, Optional, Any
 # For now, let's define necessary local helpers or assume they'd be imported.
 # from backend.engine.processActivities import get_citizen_record, _escape_airtable_value, get_building_record_by_airtable_id
 # For simplicity, we'll define local versions or simplified logic if not directly available.
+# from backend.engine.processActivities import get_citizen_record, _escape_airtable_value, get_building_record_by_airtable_id
+# For simplicity, we'll define local versions or simplified logic if not directly available.
+from backend.engine.processActivities import get_citizen_record as get_citizen_record_global, get_building_record
 
 log = logging.getLogger(__name__)
 
 CITIZEN_STORAGE_CAPACITY = 10.0 # Standard citizen carrying capacity
 
 def _get_citizen_record_local(tables: Dict[str, Any], username: str) -> Optional[Dict]:
+    # This function can be replaced by get_citizen_record_global if its logic is identical
+    # For now, keeping it to ensure no unintended changes if get_citizen_record_global has subtle differences.
     # Escape single quotes in username for Airtable formula
-    safe_username_for_formula = username
+    safe_username_for_formula = username # Assuming username is already safe or _escape_airtable_value is used by caller
     formula = f"{{Username}} = '{safe_username_for_formula}'"
     try:
         records = tables['citizens'].all(formula=formula, max_records=1)
@@ -29,14 +34,10 @@ def _get_citizen_record_local(tables: Dict[str, Any], username: str) -> Optional
         log.error(f"[fetch_from_galley_proc] Error fetching citizen {username}: {e}")
         return None
 
-def _get_building_by_airtable_id_local(tables: Dict[str, Any], airtable_id: str) -> Optional[Dict]:
-    try:
-        return tables['buildings'].get(airtable_id)
-    except Exception as e:
-        log.error(f"[fetch_from_galley_proc] Error fetching building by Airtable ID {airtable_id}: {e}")
-        return None
+# _get_building_by_airtable_id_local is no longer needed as we fetch by custom ID.
 
 def get_citizen_current_load_local(tables: Dict[str, Any], citizen_username: str) -> float:
+    # Assuming _escape_airtable_value is available or username is pre-sanitized
     formula = f"AND({{Asset}}='{citizen_username}', {{AssetType}}='citizen')"
     current_load = 0.0
     try:
@@ -77,32 +78,53 @@ def process(
     log.info(f"Processing 'fetch_from_galley' activity: {activity_guid}")
 
     carrier_username = activity_fields.get('Citizen')
-    # FromBuilding in activity is the Airtable Record ID of the galley
-    galley_airtable_id = activity_fields.get('FromBuilding') 
+    # FromBuilding in activity is now the custom BuildingId of the galley
+    galley_custom_id_from_activity = activity_fields.get('FromBuilding')
     # OriginalContractId is the custom ID string of the original import contract
-    original_contract_custom_id = activity_fields.get('OriginalContractId')
-    resource_id_to_fetch = activity_fields.get('ResourceId')
-    amount_to_fetch_from_contract = float(activity_fields.get('Amount', 0)) # Amount specified by the original contract part
+    original_contract_custom_id = activity_fields.get('OriginalContractId') # This should be ContractId from activity
+    
+    # ResourceId and Amount are now inside the 'Resources' JSON field
+    resources_json_str = activity_fields.get('Resources')
+    resource_id_to_fetch = None
+    amount_to_fetch_from_contract = 0.0
+    if resources_json_str:
+        try:
+            resources_list = json.loads(resources_json_str)
+            if isinstance(resources_list, list) and len(resources_list) == 1:
+                resource_id_to_fetch = resources_list[0].get('ResourceId')
+                amount_to_fetch_from_contract = float(resources_list[0].get('Amount', 0))
+        except json.JSONDecodeError:
+            log.error(f"Activity {activity_guid} has invalid Resources JSON: {resources_json_str}")
+            return False
+            
+    # Amount specified by the original contract part (now parsed from Resources field)
 
-    if not all([carrier_username, galley_airtable_id, original_contract_custom_id, resource_id_to_fetch, amount_to_fetch_from_contract > 0]):
-        log.error(f"Activity {activity_guid} is missing crucial data.")
+    if not all([carrier_username, galley_custom_id_from_activity, original_contract_custom_id, resource_id_to_fetch, amount_to_fetch_from_contract > 0]):
+        log.error(f"Activity {activity_guid} is missing crucial data (Citizen, FromBuilding (custom ID), ContractId, ResourceId, or Amount).")
         return False
 
     # 1. Fetch records
-    carrier_citizen_record = _get_citizen_record_local(tables, carrier_username)
+    carrier_citizen_record = _get_citizen_record_local(tables, carrier_username) # or get_citizen_record_global
     if not carrier_citizen_record:
         log.error(f"[fetch_from_galley_proc] Carrier citizen {carrier_username} not found.")
         return False
     carrier_airtable_id = carrier_citizen_record['id']
 
-    galley_building_record = _get_building_by_airtable_id_local(tables, galley_airtable_id)
+    # Fetch galley building record using its custom BuildingId from the activity
+    galley_building_record = get_building_record(tables, galley_custom_id_from_activity)
     if not galley_building_record:
-        log.error(f"[fetch_from_galley_proc] Galley building (Airtable ID: {galley_airtable_id}) not found.")
+        log.error(f"[fetch_from_galley_proc] Galley building (Custom ID: {galley_custom_id_from_activity}) not found.")
         return False
-    galley_custom_id = galley_building_record['fields'].get('BuildingId')
+    
+    # The custom ID from the activity is the one we use
+    galley_custom_id = galley_custom_id_from_activity 
     galley_position_str = galley_building_record['fields'].get('Position', '{}')
-    if not galley_custom_id:
-        log.error(f"[fetch_from_galley_proc] Galley building {galley_airtable_id} missing BuildingId.")
+    # galley_airtable_id is still useful if we need to update the galley record itself, e.g. its PendingDeliveriesData
+    galley_airtable_id_for_updates = galley_building_record['id']
+
+
+    if not galley_custom_id: # Should not happen if get_building_record succeeded and returned a valid record
+        log.error(f"[fetch_from_galley_proc] Galley building with custom ID {galley_custom_id_from_activity} missing BuildingId field internally (should be same as custom ID).")
         return False
 
     # Fetch original contract to determine the ultimate buyer

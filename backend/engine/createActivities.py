@@ -1698,7 +1698,7 @@ def process_final_deliveries_from_galley(tables: Dict[str, Table], citizens_pool
                         "ActivityId": activity_id_str_final,
                         "Type": "deliver_resource_batch",
                         "Citizen": citizen_username,
-                        "FromBuilding": at_galley_airtable_id, # From the galley (Airtable ID is fine for temporary entities like galleys)
+                        "FromBuilding": current_galley_custom_id, # From the galley (use custom BuildingId)
                         "ToBuilding": buyer_building_custom_id, # To the buyer's building (custom BuildingId)
                         "Resources": json.dumps(resources_list),
                         "ContractId": original_contract_id, # CRITICAL: This is the Original Custom Contract ID
