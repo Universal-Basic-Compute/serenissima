@@ -112,6 +112,9 @@ export class CitizenService {
     } else if (baseClass.includes('laborer') || baseClass.includes('facchini')) {
       // Gray for laborers
       return 'rgba(128, 128, 128, 0.8)';
+    } else if (baseClass.includes('forestieri')) {
+      // Burgundy for Forestieri
+      return 'rgba(128, 0, 32, 0.8)';
     }
     
     // Default color if social class is unknown or not matched

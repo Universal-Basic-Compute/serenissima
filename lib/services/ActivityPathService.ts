@@ -221,6 +221,8 @@ export class ActivityPathService {
         return 'rgba(205, 133, 63, 0.8)'; // Brown for common people
       } else if (baseClass.includes('laborer') || baseClass.includes('facchini')) {
         return 'rgba(128, 128, 128, 0.8)'; // Gray for laborers
+      } else if (baseClass.includes('forestieri')) {
+        return 'rgba(128, 0, 32, 0.8)'; // Burgundy for Forestieri
       }
     }
   
