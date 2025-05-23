@@ -170,8 +170,8 @@ const BuildingCreationPanel: React.FC<BuildingCreationPanelProps> = ({ selectedP
   const pointTypeDisplay = selectedPoint.pointType.charAt(0).toUpperCase() + selectedPoint.pointType.slice(1);
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-40 p-4">
-      <div className="bg-amber-50 text-amber-900 rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col border-2 border-amber-700">
+    <div className="fixed inset-0 bg-black/75 flex items-center justify-center z-40 p-4">
+      <div className="bg-amber-50 text-amber-900 rounded-lg shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col border-2 border-amber-700">
         <div className="flex justify-between items-center p-4 border-b border-amber-300">
           <h2 className="text-2xl font-serif">Construct Building on {pointTypeDisplay} Point</h2>
           <button onClick={onClose} className="text-amber-600 hover:text-amber-800">
@@ -213,11 +213,11 @@ const BuildingCreationPanel: React.FC<BuildingCreationPanelProps> = ({ selectedP
                     />
                     <h3 className="text-md font-semibold font-serif text-amber-800">{building.name}</h3>
                     <p className="text-xs text-amber-600 mb-1 capitalize">{building.category} - {building.subcategory}</p>
-                    <p className="text-xs text-amber-700 mb-2 line-clamp-2">{building.shortDescription || 'No description available.'}</p>
+                    <p className="text-xs text-amber-700 mb-2 line-clamp-3">{building.shortDescription || 'No description available.'}</p>
                   </div>
                   <div className="mt-auto">
-                    <p className="text-sm font-medium text-amber-900 mb-2">
-                      Cost: {building.constructionCosts?.ducats ?? 'N/A'} Ducats
+                    <p className="text-md font-semibold text-amber-800 mb-2">
+                      Cost: ⚜️ {building.constructionCosts?.ducats ?? 'N/A'}
                     </p>
                     <button
                       onClick={() => handleBuildClick(building)}
