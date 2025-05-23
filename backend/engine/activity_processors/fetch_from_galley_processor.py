@@ -21,6 +21,24 @@ log = logging.getLogger(__name__)
 
 CITIZEN_STORAGE_CAPACITY = 10.0 # Standard citizen carrying capacity
 
+def _fail_activity_with_note(
+    tables: Dict[str, Any], 
+    activity_airtable_id: str, 
+    activity_guid: str, 
+    original_notes: str, 
+    reason_message: str
+) -> bool:
+    """Updates activity notes with a failure reason and logs the error."""
+    error_note = f"ÉCHEC: {reason_message}"
+    updated_notes = f"{original_notes}\n{error_note}" if original_notes else error_note
+    log.error(f"Activité {activity_guid} échouée: {reason_message}")
+    try:
+        tables['activities'].update(activity_airtable_id, {'Notes': updated_notes})
+        log.info(f"Notes mises à jour pour l'activité échouée {activity_guid}.")
+    except Exception as e_update_notes:
+        log.error(f"Erreur lors de la mise à jour des notes pour l'activité échouée {activity_guid}: {e_update_notes}")
+    return False
+
 def _get_citizen_record_local(tables: Dict[str, Any], username: str) -> Optional[Dict]:
     # This function can be replaced by get_citizen_record_global if its logic is identical
     # For now, keeping it to ensure no unintended changes if get_citizen_record_global has subtle differences.
@@ -94,27 +112,33 @@ def process(
                 resource_id_to_fetch = resources_list[0].get('ResourceId')
                 amount_to_fetch_from_contract = float(resources_list[0].get('Amount', 0))
         except json.JSONDecodeError:
-            log.error(f"Activity {activity_guid} has invalid Resources JSON: {resources_json_str}")
-            return False
+            reason = f"JSON invalide dans le champ Resources: {resources_json_str}"
+            return _fail_activity_with_note(tables, activity_id_airtable, activity_guid, activity_fields.get('Notes', ''), reason)
             
     # Amount specified by the original contract part (now parsed from Resources field)
 
     if not all([carrier_username, galley_custom_id_from_activity, original_contract_custom_id, resource_id_to_fetch, amount_to_fetch_from_contract > 0]):
-        log.error(f"Activity {activity_guid} is missing crucial data (Citizen, FromBuilding (custom ID), ContractId, ResourceId, or Amount).")
-        return False
+        missing_data_elements = []
+        if not carrier_username: missing_data_elements.append("Citizen")
+        if not galley_custom_id_from_activity: missing_data_elements.append("FromBuilding (ID personnalisé)")
+        if not original_contract_custom_id: missing_data_elements.append("ContractId")
+        if not resource_id_to_fetch: missing_data_elements.append("ResourceId (depuis Resources JSON)")
+        if not (amount_to_fetch_from_contract > 0): missing_data_elements.append("Amount (depuis Resources JSON, doit être > 0)")
+        reason = f"Données cruciales manquantes: {', '.join(missing_data_elements)}."
+        return _fail_activity_with_note(tables, activity_id_airtable, activity_guid, activity_fields.get('Notes', ''), reason)
 
     # 1. Fetch records
     carrier_citizen_record = _get_citizen_record_local(tables, carrier_username) # or get_citizen_record_global
     if not carrier_citizen_record:
-        log.error(f"[fetch_from_galley_proc] Carrier citizen {carrier_username} not found.")
-        return False
+        reason = f"Citoyen transporteur {carrier_username} non trouvé."
+        return _fail_activity_with_note(tables, activity_id_airtable, activity_guid, activity_fields.get('Notes', ''), reason)
     carrier_airtable_id = carrier_citizen_record['id']
 
     # Fetch galley building record using its custom BuildingId from the activity
     galley_building_record = get_building_record(tables, galley_custom_id_from_activity)
     if not galley_building_record:
-        log.error(f"[fetch_from_galley_proc] Galley building (Custom ID: {galley_custom_id_from_activity}) not found.")
-        return False
+        reason = f"Bâtiment galère (ID personnalisé: {galley_custom_id_from_activity}) non trouvé."
+        return _fail_activity_with_note(tables, activity_id_airtable, activity_guid, activity_fields.get('Notes', ''), reason)
     
     # The custom ID from the activity is the one we use
     galley_custom_id = galley_custom_id_from_activity 
@@ -124,8 +148,8 @@ def process(
 
 
     if not galley_custom_id: # Should not happen if get_building_record succeeded and returned a valid record
-        log.error(f"[fetch_from_galley_proc] Galley building with custom ID {galley_custom_id_from_activity} missing BuildingId field internally (should be same as custom ID).")
-        return False
+        reason = f"Bâtiment galère avec ID personnalisé {galley_custom_id_from_activity} manque le champ BuildingId interne."
+        return _fail_activity_with_note(tables, activity_id_airtable, activity_guid, activity_fields.get('Notes', ''), reason)
 
     # Fetch original contract to determine the ultimate buyer
     # Assuming OriginalContractId in activity is the custom ContractId string
@@ -136,16 +160,16 @@ def process(
         if contracts_found:
             original_contract_record = contracts_found[0]
         else:
-            log.error(f"[fetch_from_galley_proc] Original contract {original_contract_custom_id} not found.")
-            return False
+            reason = f"Contrat original {original_contract_custom_id} non trouvé."
+            return _fail_activity_with_note(tables, activity_id_airtable, activity_guid, activity_fields.get('Notes', ''), reason)
     except Exception as e_orig_contract:
-        log.error(f"[fetch_from_galley_proc] Error fetching original contract {original_contract_custom_id}: {e_orig_contract}")
-        return False
+        reason = f"Erreur lors de la récupération du contrat original {original_contract_custom_id}: {e_orig_contract}"
+        return _fail_activity_with_note(tables, activity_id_airtable, activity_guid, activity_fields.get('Notes', ''), reason)
     
     ultimate_buyer_username = original_contract_record['fields'].get('Buyer')
     if not ultimate_buyer_username:
-        log.error(f"[fetch_from_galley_proc] Original contract {original_contract_custom_id} missing Buyer.")
-        return False
+        reason = f"Contrat original {original_contract_custom_id} manque l'Acheteur (Buyer)."
+        return _fail_activity_with_note(tables, activity_id_airtable, activity_guid, activity_fields.get('Notes', ''), reason)
 
     # 2. Calculate capacity and availability
     carrier_current_load = get_citizen_current_load_local(tables, carrier_username)
@@ -153,13 +177,14 @@ def process(
 
     galley_owner_username = galley_building_record['fields'].get('Owner') # Get the merchant who owns the galley
     if not galley_owner_username:
-        log.error(f"[fetch_from_galley_proc] Galley {galley_custom_id} has no owner. Cannot determine resource ownership.")
-        return False
+        reason = f"Galère {galley_custom_id} n'a pas de propriétaire. Impossible de déterminer la propriété des ressources."
+        return _fail_activity_with_note(tables, activity_id_airtable, activity_guid, activity_fields.get('Notes', ''), reason)
 
     galley_resource_record = get_resource_stock_in_galley(tables, galley_custom_id, resource_id_to_fetch, galley_owner_username)
     if not galley_resource_record:
-        log.warning(f"[fetch_from_galley_proc] Resource {resource_id_to_fetch} not found in galley {galley_custom_id} (owned by {galley_owner_username}).")
-        return False # Cannot fetch if resource not in galley
+        reason = f"Ressource {resource_id_to_fetch} non trouvée dans la galère {galley_custom_id} (appartenant à {galley_owner_username})."
+        # This is a warning in logs but should fail the activity if resource isn't there.
+        return _fail_activity_with_note(tables, activity_id_airtable, activity_guid, activity_fields.get('Notes', ''), reason)
     
     stock_in_galley = float(galley_resource_record['fields'].get('Count', 0))
 
@@ -183,9 +208,15 @@ def process(
             tables['citizens'].update(carrier_airtable_id, {'Position': galley_position_str})
             log.info(f"[fetch_from_galley_proc] Updated carrier {carrier_username} position to galley {galley_custom_id} ({galley_position_str}).")
         except Exception as e_pos_update:
-            log.error(f"[fetch_from_galley_proc] Error updating carrier {carrier_username} position: {e_pos_update}")
-            return False
-        return True # Successfully "arrived" even if nothing picked up
+            reason = f"Erreur lors de la mise à jour de la position du transporteur {carrier_username}: {e_pos_update}"
+            return _fail_activity_with_note(tables, activity_id_airtable, activity_guid, activity_fields.get('Notes', ''), reason)
+        # If nothing to pick up, activity is still "successful" in terms of arrival.
+        # Notes can be updated to reflect "Arrived, but nothing to pick up."
+        success_note = f"Arrivé à la galère {galley_custom_id}, mais rien à ramasser (quantité calculée: {actual_amount_to_pickup})."
+        try:
+            tables['activities'].update(activity_id_airtable, {'Notes': f"{activity_fields.get('Notes', '')}\nINFO: {success_note}"})
+        except Exception: pass # Best effort to update notes
+        return True 
 
     # 4. Perform Resource Transfers
     VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
@@ -246,8 +277,8 @@ def process(
             log.warning(f"[fetch_from_galley_proc] Original contract record for {original_contract_custom_id} not available to update LastExecutedAt.")
 
     except Exception as e_process:
-        log.error(f"[fetch_from_galley_proc] Error during transaction processing for activity {activity_guid}: {e_process}")
-        return False
+        reason = f"Erreur lors du traitement des transactions pour l'activité {activity_guid}: {e_process}"
+        return _fail_activity_with_note(tables, activity_id_airtable, activity_guid, activity_fields.get('Notes', ''), reason)
             
     log.info(f"Successfully processed 'fetch_from_galley' activity {activity_guid}. Picked up {actual_amount_to_pickup} of {resource_id_to_fetch}.")
     return True
