@@ -1621,51 +1621,64 @@ number => {
     fetchBridgeData();
   }, [buildings]); // Changed dependency to `buildings`
   
+  // useCallback for saving bridge orientation
+  const saveSelectedBridgeOrientation = useCallback(async () => {
+    if (interactionMode === 'orient_bridge' && selectedBridgeForOrientationId && orientingBridgeAngle !== null) {
+      const bridgeIdToSave = selectedBridgeForOrientationId;
+      const angleToSave = orientingBridgeAngle;
+
+      console.log(`IsometricViewer: Saving orientation for bridge ${bridgeIdToSave}: ${angleToSave} radians (Mode: ${interactionMode})`);
+
+      try {
+        const response = await fetch(`/api/bridges/${bridgeIdToSave}/orient`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orientation: angleToSave }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ error: `API Error: ${response.status}` }));
+          throw new Error(errorData.error || `API Error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.success) {
+          console.log('IsometricViewer: Bridge orientation saved successfully:', data.bridge);
+          setBuildings(prevBuildings =>
+            prevBuildings.map(b =>
+              b.id === bridgeIdToSave ? { ...b, orientation: angleToSave, rotation: angleToSave } : b
+            )
+          );
+          // Optionally, show a success notification
+        } else {
+          console.error('IsometricViewer: Failed to save bridge orientation:', data.error);
+          // Optionally, show an error notification
+        }
+      } catch (error) {
+        console.error('IsometricViewer: Error saving bridge orientation:', error);
+        // Optionally, show an error notification
+      }
+      // Do not reset selectedBridgeForOrientationId or orientingBridgeAngle here,
+      // let 'Enter' or 'Escape' key handlers do that.
+    }
+  }, [interactionMode, selectedBridgeForOrientationId, orientingBridgeAngle, buildings, setBuildings]);
+
   // Handle mouse up for bridge orientation saving
   useEffect(() => {
     const handleMouseUpGlobal = async () => {
+      // Check if interactionService indicates a drag just ended.
+      // This is a conceptual check; actual implementation depends on how InteractionService signals this.
+      // For now, we assume if mode is correct and a bridge is selected with an angle, mouse up implies finalization of a mouse drag.
       if (interactionMode === 'orient_bridge' && selectedBridgeForOrientationId && orientingBridgeAngle !== null) {
-        const bridgeIdToSave = selectedBridgeForOrientationId;
-        const angleToSave = orientingBridgeAngle;
-
-        console.log(`IsometricViewer: MouseUp - Attempting to save orientation for bridge ${bridgeIdToSave}: ${angleToSave} radians (Mode: ${interactionMode})`);
-
-        try {
-          const response = await fetch(`/api/bridges/${bridgeIdToSave}/orient`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ orientation: angleToSave }),
-          });
-
-          if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ error: `API Error: ${response.status}` }));
-            throw new Error(errorData.error || `API Error: ${response.status}`);
-          }
-
-          const data = await response.json();
-          if (data.success) {
-            console.log('IsometricViewer: Bridge orientation saved successfully:', data.bridge);
-            // Update local buildings state
-            setBuildings(prevBuildings =>
-              prevBuildings.map(b =>
-                b.id === bridgeIdToSave ? { ...b, orientation: angleToSave, rotation: angleToSave } : b
-              )
-            );
-            // Optionally, show a success notification to the user
-          } else {
-            console.error('IsometricViewer: Failed to save bridge orientation:', data.error);
-            // Optionally, show an error notification to the user
-          }
-        } catch (error) {
-          console.error('IsometricViewer: Error saving bridge orientation:', error);
-          // Optionally, show an error notification to the user
-        } finally {
-          // Reset selection state for bridge orientation
-          // Keep orientBridgeModeActive as is, so user can orient another bridge
-          setSelectedBridgeForOrientationId(null); 
-          setOrientingBridgeAngle(null);
-          // InteractionService should have reset its isDraggingOrientBridge state already
-        }
+        // We might want to check a flag from interactionService if a mouse drag was *actually* happening.
+        // For now, let's assume mouse up after a click-select and potential drag should save.
+        // The InteractionService itself handles the mousemove part of dragging.
+        // This global mouseup is to catch the end of that drag.
+        console.log(`IsometricViewer: MouseUp detected during bridge orientation.`);
+        // await saveSelectedBridgeOrientation(); // Potentially save on mouse-up if that's desired UX for mouse users.
+                                             // Or, rely solely on Enter key for saving.
+                                             // For now, let's not save on mouse-up to give keyboard a chance.
+                                             // The InteractionService should stop updating the angle on its mouseup.
       }
     };
 
@@ -1673,7 +1686,7 @@ number => {
     return () => {
       window.removeEventListener('mouseup', handleMouseUpGlobal);
     };
-  }, [interactionMode, selectedBridgeForOrientationId, orientingBridgeAngle, buildings]); // Added buildings to dependencies for setBuildings
+  }, [interactionMode, selectedBridgeForOrientationId, orientingBridgeAngle, saveSelectedBridgeOrientation]);
 
   // Pre-calculate building positions when buildings are loaded
   useEffect(() => {
