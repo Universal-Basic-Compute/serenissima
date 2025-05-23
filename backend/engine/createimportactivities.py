@@ -861,7 +861,7 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
                 "SellerBuilding": galley_building_id, # Custom ID of the galley
                 # "Transporter" field on the original contract remains NULL or as is.
                 # It refers to the transporter from the galley to the buyer, not the merchant importing.
-                "Status": "processing_by_merchant" 
+                # "Status": "processing_by_merchant" # Removed as 'Status' field does not exist
             }
             tables['contracts'].update(contract_airtable_id_to_update, update_payload_contract)
             log.info(f"Updated contract {contract_custom_id_log} (Airtable ID: {contract_airtable_id_to_update}) with Seller='{selected_merchant_username}', SellerBuilding='{galley_building_id}'.")
