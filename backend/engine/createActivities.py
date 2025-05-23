@@ -128,11 +128,13 @@ def get_citizen_contracts(tables, citizen_id: str) -> List[Dict]:
     log.info(f"{LogColors.OKBLUE}Fetching contracts for citizen {citizen_id}{LogColors.ENDC}")
     
     try:
-        # Get current time
-        now = datetime.datetime.now().isoformat()
+        # Get current time in Venice timezone
+        VENICE_TIMEZONE_CONTRACTS = pytz.timezone('Europe/Rome')
+        now_venice_contracts = datetime.datetime.now(VENICE_TIMEZONE_CONTRACTS)
+        now_iso_venice = now_venice_contracts.isoformat()
         
-        # Query contracts where the citizen is the buyer, type is recurrent, and the contract is active
-        formula = f"AND({{Buyer}}='{citizen_id}', {{Type}}='recurrent', {{CreatedAt}}<='{now}', {{EndAt}}>='{now}')"
+        # Query contracts where the citizen is the buyer, type is 'recurrent' OR 'import', and the contract is active
+        formula = f"AND({{Buyer}}='{citizen_id}', OR({{Type}}='recurrent', {{Type}}='import'), {{CreatedAt}}<='{now_iso_venice}', {{EndAt}}>='{now_iso_venice}')"
         contracts = tables['contracts'].all(formula=formula)
         
         # Sort by Priority in descending order
