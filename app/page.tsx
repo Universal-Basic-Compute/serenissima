@@ -58,6 +58,7 @@ export default function TwoDPage() {
   // Data state
   const [polygons, setPolygons] = useState<any[]>([]);
   const [buildings, setBuildings] = useState<any[]>([]);
+  const [transportPath, setTransportPath] = useState<any[]>([]); // Re-add transportPath state
   const [emptyBuildingPoints, setEmptyBuildingPoints] = useState<{lat: number, lng: number}[]>([]);
   const [fullWaterGraphData, setFullWaterGraphData] = useState<{ waterPoints: any[] } | null>(null); // Add state for water graph
   

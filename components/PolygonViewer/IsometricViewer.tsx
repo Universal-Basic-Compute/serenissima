@@ -967,18 +967,17 @@ number => {
       // Force the active view to be 'transport' first
       if (activeView !== 'transport') {
         console.log('Switching to transport view');
-        window.dispatchEvent(new CustomEvent('switchToTransportView', {
-          detail: { view: 'transport' }
-        }));
+        // Assuming setActiveView is available and correctly updates the view
+        setActiveView('transport'); 
       }
       
       // Set a small timeout to ensure view has changed before activating transport mode
       setTimeout(() => {
         setTransportMode(true);
-        setTransportStartPoint(null);
-        setTransportEndPoint(null);
-        setTransportPath([]);
-        console.log('Transport mode state set to:', true);
+        // Transport start/end points are managed within IsometricViewer or TransportService
+        // Reset local path state here
+        setTransportPath([]); 
+        console.log('Transport mode state set to true in TwoDPage');
       }, 100);
     };
     
@@ -987,9 +986,9 @@ number => {
     
     // Add listener for transport route calculated events
     const handleTransportRouteCalculated = (event: CustomEvent) => {
-      console.log('Transport route calculated event received in IsometricViewer:', event.detail);
+      console.log('TRANSPORT_ROUTE_CALCULATED event received in TwoDPage:', event.detail);
       if (event.detail && event.detail.path) {
-        visualizeTransportPath(event.detail.path);
+        setTransportPath(event.detail.path); // Update local transportPath state
       }
     };
     
@@ -999,7 +998,7 @@ number => {
       window.removeEventListener('showTransportRoutes', eventListener);
       window.removeEventListener('TRANSPORT_ROUTE_CALCULATED', handleTransportRouteCalculated as EventListener);
     };
-  }, [activeView, visualizeTransportPath]);
+  }, [activeView, setActiveView]); // Removed visualizeTransportPath, added setActiveView
 
     // Fetch land groups data
   const fetchLandGroups = useCallback(async () => {
