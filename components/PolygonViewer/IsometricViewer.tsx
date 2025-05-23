@@ -23,13 +23,14 @@ import { renderService } from '@/lib/services/RenderService';
 
 interface IsometricViewerProps {
   activeView: 'buildings' | 'land' | 'transport' | 'resources' | 'contracts' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
+  setActiveView: (view: ViewType) => void; // Add setActiveView prop
   fullWaterGraphData: { waterPoints: any[] } | null; // Add this prop
 }
 
 // Define a type for all possible view types to use throughout the component
 type ViewType = 'buildings' | 'land' | 'transport' | 'resources' | 'contracts' | 'governance' | 'loans' | 'knowledge' | 'citizens' | 'guilds';
 
-export default function IsometricViewer({ activeView, fullWaterGraphData }: IsometricViewerProps) { // Add fullWaterGraphData to destructuring
+export default function IsometricViewer({ activeView, setActiveView, fullWaterGraphData }: IsometricViewerProps) { // Add setActiveView to destructuring
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [polygons, setPolygons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

@@ -709,7 +709,7 @@ export default function TwoDPage() {
   return (
     <div className="relative w-full h-screen">
       {/* Main 2D Isometric Viewer */}
-      <IsometricViewer activeView={activeView} fullWaterGraphData={fullWaterGraphData} />
+      <IsometricViewer activeView={activeView} setActiveView={setActiveView} fullWaterGraphData={fullWaterGraphData} />
       
       {/* Top Navigation Bar */}
       <div className="absolute top-0 left-0 right-0 bg-black/50 text-white p-4 flex justify-between items-center">
