@@ -4013,9 +4013,9 @@ number => {
                 setTransportStartPoint(null);
                 setTransportEndPoint(null);
                 setTransportPath([]);
-                // Disable water point mode when enabling transport mode
-                if (waterPointMode) {
-                  setWaterPointMode(false);
+                // If currently in water point mode, switch to normal mode
+                if (interactionMode === 'place_water_point') {
+                  setInteractionMode('normal');
                 }
               }
               console.log('Transport mode toggled to:', !transportMode);
