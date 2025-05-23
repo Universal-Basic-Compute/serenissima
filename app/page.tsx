@@ -55,6 +55,15 @@ export default function TwoDPage() {
   const [showCitizenDetailsPanelDirect, setShowCitizenDetailsPanelDirect] = useState<boolean>(false);
   const [citizenForPanelDirect, setCitizenForPanelDirect] = useState<any | null>(null);
 
+  // State for path statistics
+  const [pathStats, setPathStats] = useState<{
+    totalDistance: number;
+    walkingDistance: number;
+    waterDistance: number;
+    estimatedTimeMinutes: number;
+    transportCost: number;
+  } | null>(null);
+
   // Helper function to calculate distance between two points
   const calculateDistance = (point1: {lat: number, lng: number}, point2: {lat: number, lng: number}): number => {
     const R = 6371000; // Earth radius in meters
