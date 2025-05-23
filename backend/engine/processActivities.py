@@ -50,6 +50,7 @@ import argparse
 import requests
 import uuid
 import re
+import math # Added for Haversine distance
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any
 
@@ -190,6 +191,63 @@ def update_activity_status(tables: Dict[str, Table], activity_airtable_id: str, 
     except Exception as e:
         log.error(f"Error updating status for activity {activity_airtable_id}: {e}")
 
+def _haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """Calculate distance in kilometers between two lat/lng points using Haversine formula."""
+    R = 6371  # Earth radius in kilometers
+
+    dLat = math.radians(lat2 - lat1)
+    dLon = math.radians(lon2 - lon1)
+    lat1_rad = math.radians(lat1)
+    lat2_rad = math.radians(lat2)
+
+    a = math.sin(dLat / 2) * math.sin(dLat / 2) + \
+        math.cos(lat1_rad) * math.cos(lat2_rad) * \
+        math.sin(dLon / 2) * math.sin(dLon / 2)
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    distance = R * c
+    return distance
+
+def calculate_gondola_travel_details(path_json_string: Optional[str]) -> tuple[float, float]:
+    """
+    Calculates the total distance traveled by gondola and the associated fee.
+    Fee is 10 base + 5 per km.
+    Returns (total_gondola_distance_km, fee).
+    """
+    if not path_json_string:
+        return 0.0, 0.0
+
+    try:
+        path_points = json.loads(path_json_string)
+    except json.JSONDecodeError:
+        log.error(f"Failed to parse path JSON: {path_json_string}")
+        return 0.0, 0.0
+
+    if not isinstance(path_points, list) or len(path_points) < 2:
+        return 0.0, 0.0
+
+    total_gondola_distance_km = 0.0
+    for i in range(len(path_points) - 1):
+        p1 = path_points[i]
+        p2 = path_points[i+1]
+
+        if isinstance(p1, dict) and p1.get("transportMode") == "gondola":
+            try:
+                lat1, lon1 = float(p1.get("lat", 0.0)), float(p1.get("lng", 0.0))
+                lat2, lon2 = float(p2.get("lat", 0.0)), float(p2.get("lng", 0.0))
+                if lat1 != 0.0 or lon1 != 0.0 or lat2 != 0.0 or lon2 != 0.0: # Avoid calculating for zero coords
+                    segment_distance = _haversine_distance(lat1, lon1, lat2, lon2)
+                    total_gondola_distance_km += segment_distance
+            except (TypeError, ValueError) as e:
+                log.warning(f"Could not parse coordinates for path segment: {p1} to {p2}. Error: {e}")
+                continue
+    
+    fee = 0.0
+    if total_gondola_distance_km > 0:
+        fee = 10 + (5 * total_gondola_distance_km)
+        log.info(f"Calculated gondola travel: Distance={total_gondola_distance_km:.2f} km, Fee={fee:.2f} Ducats.")
+    
+    return total_gondola_distance_km, fee
+
 
 def main(dry_run: bool = False):
     log.info(f"Starting Process Activities script (dry_run={dry_run})...")
@@ -261,6 +319,55 @@ def main(dry_run: bool = False):
         if success:
             update_activity_status(tables, activity_id_airtable, "processed")
             processed_count += 1
+
+            # Gondola Fee Processing
+            activity_path_json = activity_record['fields'].get('Path')
+            citizen_username_for_fee = activity_record['fields'].get('Citizen')
+            activity_custom_id_for_fee = activity_record['fields'].get('ActivityId', activity_id_airtable)
+
+            if activity_path_json and citizen_username_for_fee and not dry_run:
+                gondola_distance_km, gondola_fee = calculate_gondola_travel_details(activity_path_json)
+                if gondola_fee > 0:
+                    traveler_citizen_record = get_citizen_record(tables, citizen_username_for_fee)
+                    consiglio_record = get_citizen_record(tables, "ConsiglioDeiDieci")
+
+                    if traveler_citizen_record and consiglio_record:
+                        traveler_ducats = float(traveler_citizen_record['fields'].get('Ducats', 0))
+                        if traveler_ducats >= gondola_fee:
+                            consiglio_ducats = float(consiglio_record['fields'].get('Ducats', 0))
+                            now_iso_fee = datetime.now(timezone.utc).isoformat()
+
+                            tables['citizens'].update(traveler_citizen_record['id'], {'Ducats': traveler_ducats - gondola_fee, 'UpdatedAt': now_iso_fee})
+                            tables['citizens'].update(consiglio_record['id'], {'Ducats': consiglio_ducats + gondola_fee, 'UpdatedAt': now_iso_fee})
+                            
+                            transaction_payload = {
+                                "Type": "gondola_fee",
+                                "AssetType": "transport_activity",
+                                "AssetId": activity_custom_id_for_fee,
+                                "Seller": "ConsiglioDeiDieci", # Recipient of the fee
+                                "Buyer": citizen_username_for_fee,  # Payer of the fee
+                                "Price": gondola_fee,
+                                "Details": json.dumps({
+                                    "activity_guid": activity_guid,
+                                    "distance_km": round(gondola_distance_km, 2),
+                                    "path_preview": activity_path_json[:100] + "..." if activity_path_json else ""
+                                }),
+                                "CreatedAt": now_iso_fee,
+                                "ExecutedAt": now_iso_fee
+                            }
+                            tables['transactions'].create(transaction_payload)
+                            log.info(f"Citizen {citizen_username_for_fee} paid {gondola_fee:.2f} Ducats gondola fee for activity {activity_guid}. Distance: {gondola_distance_km:.2f} km.")
+                        else:
+                            log.warning(f"Citizen {citizen_username_for_fee} has insufficient Ducats ({traveler_ducats:.2f}) for gondola fee ({gondola_fee:.2f}) for activity {activity_guid}.")
+                            # Consider creating a problem or debt record here in the future
+                    else:
+                        if not traveler_citizen_record: log.error(f"Traveler citizen {citizen_username_for_fee} not found for gondola fee.")
+                        if not consiglio_record: log.error(f"ConsiglioDeiDieci citizen record not found for gondola fee.")
+            elif dry_run and activity_path_json and citizen_username_for_fee:
+                 gondola_distance_km, gondola_fee = calculate_gondola_travel_details(activity_path_json)
+                 if gondola_fee > 0:
+                    log.info(f"[DRY RUN] Would process gondola fee of {gondola_fee:.2f} Ducats for citizen {citizen_username_for_fee} for activity {activity_guid} (Distance: {gondola_distance_km:.2f} km).")
+
 
             # Update citizen's position and UpdatedAt if ToBuilding is present,
             # UNLESS the activity type handles its own position update (e.g., fetch_resource)
