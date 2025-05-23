@@ -98,8 +98,8 @@ def process(
     carrier_username = activity_fields.get('Citizen')
     # FromBuilding in activity is now the custom BuildingId of the galley
     galley_custom_id_from_activity = activity_fields.get('FromBuilding')
-    # OriginalContractId is the custom ID string of the original import contract
-    original_contract_custom_id = activity_fields.get('OriginalContractId') # This should be ContractId from activity
+    # The custom ID string of the original import contract is stored in the 'ContractId' field of the activity
+    original_contract_custom_id = activity_fields.get('ContractId')
     
     # ResourceId and Amount are now inside the 'Resources' JSON field
     resources_json_str = activity_fields.get('Resources')
