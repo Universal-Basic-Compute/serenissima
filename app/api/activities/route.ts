@@ -7,8 +7,9 @@ export async function GET(request: Request) {
     const citizenIds = searchParams.getAll('citizenId');
     const limit = parseInt(searchParams.get('limit') || '10', 10);
     const hasPath = searchParams.get('hasPath') === 'true';
+    const ongoing = searchParams.get('ongoing') === 'true'; // New 'ongoing' parameter
     
-    console.log(`Fetching activities: limit=${limit}, hasPath=${hasPath}, citizenIds=${citizenIds.length > 0 ? citizenIds.join(',') : 'none'}`);
+    console.log(`Fetching activities: limit=${limit}, hasPath=${hasPath}, ongoing=${ongoing}, citizenIds=${citizenIds.length > 0 ? citizenIds.join(',') : 'none'}`);
     
     // Get Airtable credentials from environment variables
     const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
@@ -43,6 +44,25 @@ export async function GET(request: Request) {
       filterByFormula = filterByFormula 
         ? `AND(${filterByFormula}, ${pathFilter})` 
         : pathFilter;
+    }
+
+    // Add ongoing filter if requested
+    if (ongoing) {
+      // Assuming CreatedAt and EndDate are stored in Venice time.
+      // NOW() in Airtable is UTC. We need to compare with Venice time.
+      // 'Europe/Rome' is a common tz database name for Venice.
+      const ongoingFilter = `
+        AND(
+          IS_AFTER(SET_TIMEZONE(NOW(), 'Europe/Rome'), {CreatedAt}),
+          IS_BEFORE(SET_TIMEZONE(NOW(), 'Europe/Rome'), {EndDate}),
+          NOT({Status} = 'processed'),
+          NOT({Status} = 'failed')
+        )
+      `.replace(/\s+/g, ' ').trim(); // Minify the formula string
+
+      filterByFormula = filterByFormula
+        ? `AND(${filterByFormula}, ${ongoingFilter})`
+        : ongoingFilter;
     }
     
     // Prepare the request parameters
