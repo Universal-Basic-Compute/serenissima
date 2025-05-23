@@ -28,7 +28,8 @@ def initialize_airtable():
     tables = {
         "citizens": Table(airtable_api_key, airtable_base_id, "CITIZENS"),
         "buildings": Table(airtable_api_key, airtable_base_id, "BUILDINGS"),
-        "notifications": Table(airtable_api_key, airtable_base_id, "NOTIFICATIONS")
+        "notifications": Table(airtable_api_key, airtable_base_id, "NOTIFICATIONS"),
+        "contracts": Table(airtable_api_key, airtable_base_id, "CONTRACTS") # Ajouter la table des contrats
     }
     
     return tables
@@ -147,6 +148,26 @@ def get_resource_types_from_api() -> Dict:
         print(f"Exception fetching resource types from API: {str(e)}")
         return {}
 
+def get_building_public_sell_contracts(tables: Dict[str, Table], seller_username: str, seller_building_id: str) -> List[Dict]:
+    """Get active public_sell contracts for a specific seller and building."""
+    try:
+        now = datetime.now().isoformat()
+        # Assurer que les valeurs sont correctement échappées pour la formule Airtable
+        safe_seller_username = seller_username.replace("'", "\\'")
+        safe_seller_building_id = seller_building_id.replace("'", "\\'")
+        
+        formula = (f"AND({{Seller}}='{safe_seller_username}', "
+                   f"{{SellerBuilding}}='{safe_seller_building_id}', "
+                   f"{{Type}}='public_sell', "
+                   f"{{CreatedAt}}<='{now}', "
+                   f"{{EndAt}}>='{now}')")
+        contracts = tables["contracts"].all(formula=formula)
+        # print(f"Found {len(contracts)} active public_sell contracts for seller {seller_username}, building {seller_building_id}")
+        return contracts
+    except Exception as e:
+        # print(f"Error getting public_sell contracts for seller {seller_username}, building {seller_building_id}: {str(e)}")
+        return []
+
 def get_kinos_api_key() -> str:
     """Get the Kinos API key from environment variables."""
     load_dotenv()
@@ -156,7 +177,8 @@ def get_kinos_api_key() -> str:
         sys.exit(1)
     return api_key
 
-def prepare_price_setting_data(ai_citizen: Dict, citizen_buildings: List[Dict], 
+def prepare_price_setting_data(tables: Dict[str, Table], ai_citizen: Dict, 
+                              citizen_buildings: List[Dict], 
                               building_definitions: Dict, resource_types: Dict) -> Dict:
     """Prepare a comprehensive data package for the AI to set resource prices."""
     
@@ -170,13 +192,14 @@ def prepare_price_setting_data(ai_citizen: Dict, citizen_buildings: List[Dict],
         building_id = building["fields"].get("BuildingId", "")
         building_type = building["fields"].get("Type", "")
         
-        # Get current prices if they exist
+        # Get current prices from active public_sell contracts for this building and seller
         current_prices = {}
-        if "Prices" in building["fields"]:
-            try:
-                current_prices = json.loads(building["fields"]["Prices"])
-            except json.JSONDecodeError:
-                current_prices = {}
+        active_sell_contracts = get_building_public_sell_contracts(tables, username, building_id)
+        for contract in active_sell_contracts:
+            resource_sold = contract["fields"].get("ResourceType")
+            price_sold_at = contract["fields"].get("PricePerResource")
+            if resource_sold and price_sold_at is not None:
+                current_prices[resource_sold] = float(price_sold_at)
         
         # Get building definition to find production information
         building_def = building_definitions.get(building_type, {})
@@ -205,7 +228,8 @@ def prepare_price_setting_data(ai_citizen: Dict, citizen_buildings: List[Dict],
         output_resources = []
         for output_id in outputs:
             resource_info = resource_types.get(output_id, {})
-            current_price = current_prices.get(output_id, 0)
+            # current_price is now derived from active_sell_contracts
+            current_price = current_prices.get(output_id, 0) # Default to 0 if no active contract for this resource
             import_price = resource_info.get("importPrice", 0)
             
             output_resources.append({
@@ -601,7 +625,7 @@ def process_ai_price_settings(dry_run: bool = False):
             continue
         
         # Prepare the data package for the AI
-        data_package = prepare_price_setting_data(ai_citizen, citizen_buildings, building_definitions, resource_types)
+        data_package = prepare_price_setting_data(tables, ai_citizen, citizen_buildings, building_definitions, resource_types)
         
         # Check if there are any buildings with outputs
         if not data_package["buildings"]:
