@@ -317,7 +317,7 @@ export default function ContractMarkers({
               <div className="relative">
                 {locationContracts.map((contract, index) => {
                   // Determine border color based on contract type
-                  let borderColor = '#d97706'; // Default amber color
+                  let borderColor = 'transparent'; // Default to transparent
                   
                   if (contract.type === 'public_sell') {
                     borderColor = '#10B981'; // Green for public sells
@@ -459,7 +459,7 @@ export default function ContractMarkers({
                   {/* Show up to 3 stacked icons */}
                   {locationContracts.slice(0, Math.min(3, locationContracts.length)).map((contract, index) => {
                     // Determine border color based on contract type
-                    let borderColor = '#d97706'; // Default amber color
+                    let borderColor = 'transparent'; // Default to transparent
                     
                     if (contract.type === 'public_sell') {
                       borderColor = '#10B981'; // Green for public sells
