@@ -312,42 +312,42 @@ The AI resource import system:
 - Simulates the international trade that was vital to Venice's economy
 - Provides contract demand for various resource types
 
-### Public Sell Management (Uses Kinos Engine API)
+### Public Sell and Price Management (Uses Kinos Engine API)
 
-**Implementation**: `backend/ais/managepublicsells.py`  
+**Implementation**: `backend/ais/managepublicsalesandprices.py`  
 **Schedule**: Daily at 3:00 AM UTC
 
-AI citizens strategically create public sell contracts to sell resources to other players (via la fonction `send_public_sell_strategy_request`):
+AI citizens strategically create and manage public sell contracts, including setting prices for resources they sell to other players. This consolidated script uses the Kinos Engine API (via la fonction `send_sales_and_price_strategy_request`).
 
 #### Process:
 
-1. The script identifies all citizens marked as AI in the system
-2. For each AI citizen, it analyzes:
-   - Buildings they run that can sell resources
-   - Current resource stockpiles
-   - Existing public sell contracts
-   - Available resource types and their import prices
-
-3. For each AI citizen, the system:
-   - Prepares a comprehensive data package with resource and building information
-   - Sends this data to the Kinos Engine API for analysis
-   - Receives public sell strategy decisions from the AI
-
-4. When public sell decisions are made:
-   - New public sell contracts are created with 47-hour duration
-   - Existing contracts may be ended if no longer beneficial
-   - Contract details include resource type, hourly amount, and price
-
-5. An admin notification is created with statistics about all public sell decisions, showing the resources being sold by each AI citizen
+1.  The script identifies AI citizens (Nobili or Cittadini) who run buildings capable of selling resources.
+2.  For each AI, it gathers comprehensive data:
+    *   Their buildings, focusing on those that can sell resources.
+    *   Details of resources these buildings can sell, including current prices set by the AI for these resources in these specific buildings.
+    *   Market data: import prices, global average sell prices, and average sell prices on the same land parcel for each sellable resource.
+    *   The AI's current resource stockpiles.
+    *   The AI's existing active public sell contracts.
+    *   Recent relevancies and problems affecting the AI, which might influence their strategy.
+3.  This data package is sent to the Kinos Engine API. The AI is prompted to:
+    *   Decide which resources to actively sell from each of their sellable buildings.
+    *   For each such resource, set a `price_per_resource` and an `hourly_amount`.
+    *   Decide which of their existing public sell contracts should be ended.
+    *   Provide reasoning for these decisions.
+4.  Based on the AI's response:
+    *   New public sell contracts are created, or existing ones are updated with the new price and hourly amount. These contracts typically have a 47-hour duration. A deterministic `ContractId` (based on seller, building, and resource type) is used to manage these contracts, ensuring one active public sell offer per resource, per building, by that AI.
+    *   Specified existing contracts are ended by setting their `EndAt` timestamp to the current time.
+5.  An admin notification is created summarizing all contract creations, updates, and terminations made by each AI.
 
 #### Economic Impact:
 
-The AI public sell management system:
-- Creates a dynamic marketplace with consistent resource availability
-- Establishes realistic contract prices based on resource value and scarcity
-- Ensures players can purchase resources even in areas with limited player activity
-- Provides competition and price signals in the resource contract
-- Simulates the merchant activity that was vital to Venice's economy
+The consolidated AI public sell and price management system:
+-   Creates a dynamic marketplace with AI sellers actively managing their offerings and prices.
+-   Establishes realistic contract prices influenced by import costs, global averages, local competition, and AI strategic reasoning.
+-   Ensures players can find resources for sale, with prices that respond to simulated market understanding by AIs.
+-   Provides robust competition and clear price signals in the resource contract.
+-   Simulates merchant activity, including pricing strategies, crucial to Venice's economy.
+-   Allows AI citizens to adapt their pricing and sales strategy based on their own economic situation (e.g., problems, relevancies).
 
 ## AI Citizen Management
 
@@ -371,30 +371,6 @@ To prevent AI citizens from becoming overly dominant or complex to manage by acc
 -   Prevents monopolies and encourages a more distributed management of businesses among AI citizens.
 -   Ensures that AI business management remains somewhat balanced.
 -   Simulates a form of economic regulation or natural churn in business ownership.
-
-### Price Setting for Produced Goods (Uses Kinos Engine API)
-
-**Implementation**: `backend/ais/setprices.py`  
-**Schedule**: (To be determined, e.g., Daily at a specific time)
-
-AI citizens strategically set prices for resources produced in buildings they own:
-
-#### Process:
-
-1. The script identifies AI citizens owning buildings that produce sellable resources.
-2. For each AI, it gathers data on their buildings, outputs, current prices, global average prices, and local (same land parcel) average prices for those resources.
-3. This data package, along with recent relevancies and problems for the citizen, is sent to the Kinos Engine API (via la fonction `send_price_setting_request`).
-4. The AI analyzes the data and decides on new prices for each resource in each building, providing reasoning.
-5. The script updates the `Prices` field in the `BUILDINGS` table with the AI's decisions.
-6. An admin notification summarizes the price changes.
-
-#### Economic Impact:
-
-The AI price setting system:
-- Ensures that AI-produced goods are priced dynamically based on market conditions.
-- Provides more realistic price competition for players.
-- Allows AI citizens to adapt their pricing strategies to local and global market trends.
-- Simulates merchants adjusting prices to maximize profit or ensure sales.
 
 ### AI Citizen Management (Continued)
 

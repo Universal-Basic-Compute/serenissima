@@ -118,7 +118,7 @@ def run_scheduled_tasks():
                 0: ("ais/adjustwages.py", "AI wage adjustments"),
                 1: ("ais/processnotifications.py", "AI notification processing"),
                 2: ("ais/answertomessages.py", "AI message responses"),
-                3: ("ais/managepublicsells.py", "AI public sell management"),
+                3: ("ais/managepublicsalesandprices.py", "AI public sell and price management"), # Updated script name and description
                 4: ("ais/answertomessages.py", "AI message responses"),
                 6: ("ais/answertomessages.py", "AI message responses"),
                 8: ("ais/answertomessages.py", "AI message responses"),
@@ -127,7 +127,7 @@ def run_scheduled_tasks():
                 14: ("ais/answertomessages.py", "AI message responses"),
                 16: ("ais/answertomessages.py", "AI message responses"),
                 18: ("ais/importresources.py", "AI resource import management"),
-                19: ("ais/setprices.py", "AI price setting for produced goods"), # Example time, adjust as needed
+                # 19: ("ais/setprices.py", "AI price setting for produced goods"), # This is now part of managepublicsalesandprices.py
                 20: ("ais/delegateBusinesses.py", "AI Business Delegation") # Example time, adjust as needed
             }
             
