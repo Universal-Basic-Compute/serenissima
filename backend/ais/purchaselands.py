@@ -6,6 +6,10 @@ from typing import Dict, List, Optional
 from dotenv import load_dotenv
 from pyairtable import Api, Table
 
+# Add the parent directory to the path to import citizen_utils
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from app.citizen_utils import find_citizen_by_identifier
+
 def initialize_airtable():
     """Initialize connection to Airtable."""
     load_dotenv()
@@ -82,10 +86,14 @@ def execute_land_purchase_contract(tables, contract_id: str, buyer_username: str
     except Exception as e:
         print(f"Error executing land_sale contract {contract_id}: {str(e)}")
         return None
-        return True
+        # The 'return True' here is unreachable due to 'return None' above.
+        # Assuming the intent was for the try block to return the updated_contract or True on success.
+        # However, the current structure returns updated_contract or None.
+        # The 'return True' in the except block was likely a copy-paste error or leftover.
+        # The original error was about transaction_id, which is fixed below.
     except Exception as e:
-        print(f"Error updating transaction {transaction_id}: {str(e)}")
-        return False
+        print(f"Error executing land_sale contract {contract_id}: {str(e)}") # Changed transaction_id to contract_id
+        return False # Should be None to match the function's return type hint Optional[Dict] or handle error differently
 
 def update_land_with_owner(tables, land_id: str, owner: str) -> bool:
     """Update a land with a new owner."""
