@@ -254,7 +254,8 @@ export class InteractionService {
       waterRouteMode?: boolean;
       waterRouteStartPoint?: any;
       waterRouteIntermediatePoints?: any[];
-      orientBridgeModeActive?: boolean; 
+      orientBridgeModeActive?: boolean;
+      selectedBridgeForOrientationId?: string | null; // Add this
     },
     setters: {
       setMousePosition: (position: { x: number, y: number }) => void;
@@ -302,9 +303,9 @@ export class InteractionService {
       this.state.mousePosition = { x: mouseX, y: mouseY };
       setters.setMousePosition({ x: mouseX, y: mouseY });
 
-      // If in orient bridge mode and a bridge is selected for orientation
-      if (data.orientBridgeModeActive && this.state.selectedBuildingId && this.state.isDraggingOrientBridge) {
-        const selectedBuilding = data.buildings.find(b => b.id === this.state.selectedBuildingId);
+      // If in orient bridge mode, a bridge is selected for orientation, and we are dragging it
+      if (data.orientBridgeModeActive && data.selectedBridgeForOrientationId && this.state.isDraggingOrientBridge) {
+        const selectedBuilding = data.buildings.find(b => b.id === data.selectedBridgeForOrientationId);
         if (selectedBuilding && selectedBuilding.position) {
           let buildingWorldPos;
           if (typeof selectedBuilding.position === 'string') {
@@ -663,7 +664,7 @@ export class InteractionService {
     
     // Handle mouse click with debounce to prevent multiple rapid clicks
     const handleClick = debounce((e: MouseEvent) => {
-      if (this.isDraggingRef) return; // Skip click handling while dragging
+      if (this.isDraggingRef && !this.state.isDraggingOrientBridge) return; // Skip click handling if it was a map drag, but not if it was an orient drag
       
       const rect = canvas.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
@@ -755,11 +756,35 @@ export class InteractionService {
         return; // Skip other click handling when in transport mode
       }
       
+      // If in orient bridge mode, left-click should NOT open building details for bridges.
+      if (data.orientBridgeModeActive) {
+        const clickedBuildingForOrientCheck = this.findClickedBuilding({ x: mouseX, y: mouseY }, data.buildings, scale, offset, canvas.width, canvas.height);
+        if (clickedBuildingForOrientCheck && (clickedBuildingForOrientCheck.type?.toLowerCase().includes('bridge') || clickedBuildingForOrientCheck.category?.toLowerCase() === 'bridge')) {
+          console.log(`InteractionService: Left-click on bridge ${clickedBuildingForOrientCheck.id} in orient mode. Doing nothing with details panel.`);
+          // If a bridge is selected for orientation, a left click might confirm it, but current logic is mouseup.
+          // For now, prevent details panel.
+          return; 
+        }
+      }
+      
       // Check if click is on any building - this works in all view modes
-      for (const building of data.buildings) {
-        if (!building.position) continue;
+      const clickedBuilding = this.findClickedBuilding({ x: mouseX, y: mouseY }, data.buildings, scale, offset, canvas.width, canvas.height);
+      if (clickedBuilding) {
+        // If NOT in orient bridge mode OR if it's not a bridge, then select for details.
+        if (!data.orientBridgeModeActive || !(clickedBuilding.type?.toLowerCase().includes('bridge') || clickedBuilding.category?.toLowerCase() === 'bridge')) {
+            this.state.selectedBuildingId = clickedBuilding.id; // This is for general building selection, not orientation
+            setters.setSelectedBuildingId(clickedBuilding.id);
+            setters.setShowBuildingDetailsPanel(true);
+            window.dispatchEvent(new CustomEvent('showBuildingDetailsPanel', { detail: { buildingId: clickedBuilding.id } }));
+            return;
+        }
+      }
+      
+      // Original loop for buildings (now part of the logic above)
+      // for (const building of data.buildings) {
+      //   if (!building.position) continue;
         
-        let position;
+      //   let position;
         if (typeof building.position === 'string') {
           try {
             position = JSON.parse(building.position);
@@ -1081,26 +1106,21 @@ export class InteractionService {
     
     // Handle mouse down for panning
     const handleMouseDown = (e: MouseEvent) => {
-      const currentScale = scale; // Use the scale passed to initializeInteractions
-      const currentOffset = offset; // Use the offset passed to initializeInteractions
-      const currentCanvasWidth = canvas.width;
-      const currentCanvasHeight = canvas.height;
-
-      // If in orient bridge mode and a bridge is clicked
-      if (data.orientBridgeModeActive) {
-        const clickedBuilding = this.findClickedBuilding(this.state.mousePosition, data.buildings, currentScale, currentOffset, currentCanvasWidth, currentCanvasHeight);
-        if (clickedBuilding && (clickedBuilding.type?.toLowerCase().includes('bridge') || clickedBuilding.type?.toLowerCase().includes('ponte') || clickedBuilding.category?.toLowerCase() === 'bridge')) {
-          setters.setSelectedBridgeForOrientationId(clickedBuilding.id);
-          setters.setOrientingBridgeAngle(clickedBuilding.orientation || clickedBuilding.rotation || 0);
-          this.state.selectedBuildingId = clickedBuilding.id; // Keep track for mouse move
-          this.state.isDraggingOrientBridge = true; // Start dragging for orientation
-          this.isDraggingRef = false; // Prevent general map dragging
-          this.state.isDragging = false; // Prevent general map dragging
-          console.log(`InteractionService: Started orienting bridge ${clickedBuilding.id}`);
-          return; // Exclusive mode for this mousedown
+      // If in orient bridge mode AND a bridge is ALREADY selected for orientation (via right-click)
+      // then this mousedown initiates the drag-to-orient.
+      if (data.orientBridgeModeActive && data.selectedBridgeForOrientationId) {
+        const selectedBuilding = data.buildings.find(b => b.id === data.selectedBridgeForOrientationId);
+        // Check if the mousedown is on the selected bridge
+        if (selectedBuilding && this.findClickedBuilding(this.state.mousePosition, [selectedBuilding], scale, offset, canvas.width, canvas.height)) {
+            this.state.isDraggingOrientBridge = true;
+            this.isDraggingRef = false; // Prevent map drag
+            this.state.isDragging = false; // Prevent map drag
+            console.log(`InteractionService: Mousedown on selected bridge ${data.selectedBridgeForOrientationId}, starting orientation drag.`);
+            return; // Exclusive mode for this mousedown
         }
       }
       
+      // If not orienting a bridge, proceed with normal map drag initiation.
       this.state.isDragging = true;
       this.isDraggingRef = true;
       this.state.dragStart = { x: e.clientX, y: e.clientY };

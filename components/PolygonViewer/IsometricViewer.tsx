@@ -2071,7 +2071,8 @@ number => {
         waterRouteMode: interactionMode === 'create_water_route',
         waterRouteStartPoint,
         waterRouteIntermediatePoints,
-        orientBridgeModeActive: interactionMode === 'orient_bridge' // Pass derived boolean
+        orientBridgeModeActive: interactionMode === 'orient_bridge', // Pass derived boolean
+        selectedBridgeForOrientationId, // Pass this state
       },
       {
         setMousePosition,
@@ -2125,7 +2126,8 @@ number => {
     transportStartPoint,
     transportEndPoint,
     fullWaterGraphData, 
-    handleWaterRouteClick
+    handleWaterRouteClick,
+    selectedBridgeForOrientationId // Add to dependency array
   ]);
 
   // Helper function to check if a point is inside a polygon
