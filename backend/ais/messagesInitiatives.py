@@ -144,8 +144,8 @@ def _get_relationship_data(tables: Dict[str, Table], username1: str, username2: 
 def _get_notifications_data(tables: Dict[str, Table], username: str, limit: int = 50) -> List[Dict]:
     try:
         safe_username = _escape_airtable_value(username)
+        # S'assurer que le champ Citizen est bien comparé à une chaîne simple.
         formula = f"{{Citizen}} = '{safe_username}'"
-        # Rétablissement du tri
         records = tables["notifications"].all(formula=formula, sort=[('-CreatedAt', 'desc')], max_records=limit)
         return [{'id': r['id'], 'fields': r['fields']} for r in records]
     except Exception as e:
@@ -159,13 +159,8 @@ def _get_relevancies_data(tables: Dict[str, Table], relevant_to_username: str, t
         # Formule simplifiée pour le débogage : ne vérifie que la correspondance exacte.
         # Si RelevantToCitizen ou TargetCitizen peuvent être des listes de liens, cette formule ne fonctionnera pas correctement
         # et nécessitera une approche différente (par exemple, plusieurs requêtes ou une logique de jointure côté client).
-        formula = (
-            f"AND("
-            f"{{RelevantToCitizen}} = '{safe_relevant_to_username}',"
-            f"{{TargetCitizen}} = '{safe_target_username}'"
-            f")"
-        )
-        # Rétablissement du tri
+        # Simplification pour le débogage :
+        formula = f"AND({{RelevantToCitizen}} = '{safe_relevant_to_username}', {{TargetCitizen}} = '{safe_target_username}')"
         records = tables["relevancies"].all(formula=formula, sort=[('-CreatedAt', 'desc')], max_records=limit)
         return [{'id': r['id'], 'fields': r['fields']} for r in records]
     except Exception as e:
@@ -176,8 +171,11 @@ def _get_problems_data(tables: Dict[str, Table], username1: str, username2: str,
     try:
         safe_username1 = _escape_airtable_value(username1)
         safe_username2 = _escape_airtable_value(username2)
+        # Simplification pour le débogage :
+        # Cette formule OR est généralement correcte, mais si {Citizen} est un champ de lien multiple,
+        # la comparaison directe peut être problématique.
+        # Pour l'instant, nous la gardons, mais si l'erreur persiste ici, cela indique un problème avec les champs de lien.
         formula = f"OR({{Citizen}} = '{safe_username1}', {{Citizen}} = '{safe_username2}')"
-        # Rétablissement du tri
         records = tables["problems"].all(formula=formula, sort=[('-CreatedAt', 'desc')], max_records=limit)
         return [{'id': r['id'], 'fields': r['fields']} for r in records]
     except Exception as e:
