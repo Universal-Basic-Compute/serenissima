@@ -220,44 +220,89 @@ def process(
         return True # Successfully delivered, but no payment needed/possible.
 
     buyer_citizen_rec = get_citizen_record(tables, buyer_username)
-    seller_citizen_rec = get_citizen_record(tables, seller_username)
+    merchant_citizen_rec = get_citizen_record(tables, seller_username) # seller_username is the merchant
+    italia_citizen_rec = get_citizen_record(tables, "Italia") # System account for cost of goods
 
-    if not buyer_citizen_rec or not seller_citizen_rec:
-        log.warning(f"Buyer ({buyer_username}) or Seller ({seller_username}) citizen record not found for contract {original_contract_custom_id}. Skipping payment.")
-        return False # Payment is critical for import flow
+    if not buyer_citizen_rec or not merchant_citizen_rec:
+        log.warning(f"Buyer ({buyer_username}) or Merchant ({seller_username}) citizen record not found for contract {original_contract_custom_id}. Skipping payment.")
+        return False
+    if not italia_citizen_rec:
+        log.error(f"System citizen 'Italia' not found. Cannot process cost of goods for contract {original_contract_custom_id}.")
+        return False
     
     try:
         buyer_ducats = float(buyer_citizen_rec['fields'].get('Ducats', 0))
-        seller_ducats = float(seller_citizen_rec['fields'].get('Ducats', 0))
+        merchant_ducats_initial = float(merchant_citizen_rec['fields'].get('Ducats', 0))
+        italia_ducats_initial = float(italia_citizen_rec['fields'].get('Ducats', 0))
 
         if buyer_ducats < total_cost_for_this_delivery:
             log.error(f"Buyer {buyer_username} has insufficient funds ({buyer_ducats:.2f}) for import payment ({total_cost_for_this_delivery:.2f}) for contract {original_contract_custom_id}.")
-            # Create a problem for the buyer?
             return False # Payment failed
 
-        tables['citizens'].update(buyer_citizen_rec['id'], {'Ducats': buyer_ducats - total_cost_for_this_delivery})
-        tables['citizens'].update(seller_citizen_rec['id'], {'Ducats': seller_ducats + total_cost_for_this_delivery})
+        # Calculate shares
+        italia_share = total_cost_for_this_delivery * 0.5
+        merchant_profit = total_cost_for_this_delivery - italia_share # This is also 0.5
 
-        transaction_payload = {
-            "Type": "import_payment_final", # Distinguish from old "import_payment"
+        # Transaction 1: Buyer pays Merchant full amount
+        tables['citizens'].update(buyer_citizen_rec['id'], {'Ducats': buyer_ducats - total_cost_for_this_delivery})
+        tables['citizens'].update(merchant_citizen_rec['id'], {'Ducats': merchant_ducats_initial + total_cost_for_this_delivery})
+        log.info(f"Buyer {buyer_username} paid {total_cost_for_this_delivery:.2f} to Merchant {seller_username}.")
+
+        transaction_payload_buyer_to_merchant = {
+            "Type": "import_payment_final",
             "AssetType": "contract",
             "Asset": original_contract_custom_id,
-            "Seller": seller_username,
+            "Seller": seller_username, # Merchant
             "Buyer": buyer_username,
             "Price": total_cost_for_this_delivery,
             "Details": json.dumps({
                 "delivered_items": delivered_items_details,
                 "original_contract_resource_type": contract_fields.get('ResourceType'),
                 "price_per_unit_contract": price_per_resource,
-                "activity_guid": activity_guid
+                "activity_guid": activity_guid,
+                "note": "Full payment from buyer to merchant."
             }),
             "CreatedAt": datetime.now(timezone.utc).isoformat(),
             "ExecutedAt": datetime.now(timezone.utc).isoformat()
         }
-        tables['transactions'].create(transaction_payload)
-        log.info(f"Processed FINAL import payment for contract {original_contract_custom_id} (Activity: {activity_guid}). Buyer {buyer_username} paid {total_cost_for_this_delivery:.2f} to {seller_username}.")
+        tables['transactions'].create(transaction_payload_buyer_to_merchant)
+        log.info(f"Created transaction: Buyer {buyer_username} to Merchant {seller_username} for {total_cost_for_this_delivery:.2f} (Contract: {original_contract_custom_id}).")
+
+        # Transaction 2: Merchant pays "Italia" for cost of goods
+        merchant_ducats_after_sale = merchant_ducats_initial + total_cost_for_this_delivery
+        
+        # No need to check if merchant_ducats_after_sale < italia_share if total_cost_for_this_delivery > 0,
+        # because italia_share is 50% of total_cost_for_this_delivery.
+        # The merchant will always have enough from this specific sale to cover Italia's share.
+
+        tables['citizens'].update(merchant_citizen_rec['id'], {'Ducats': merchant_ducats_after_sale - italia_share})
+        tables['citizens'].update(italia_citizen_rec['id'], {'Ducats': italia_ducats_initial + italia_share})
+        log.info(f"Merchant {seller_username} paid {italia_share:.2f} to Italia (cost of goods).")
+        
+        transaction_payload_merchant_to_italia = {
+            "Type": "import_cost_of_goods",
+            "AssetType": "contract_revenue_share",
+            "Asset": original_contract_custom_id,
+            "Seller": "Italia", 
+            "Buyer": seller_username, # Merchant is "buying" from Italia
+            "Price": italia_share,
+            "Details": json.dumps({
+                "original_buyer": buyer_username,
+                "total_sale_price_to_buyer": total_cost_for_this_delivery,
+                "merchant_profit": merchant_profit,
+                "activity_guid": activity_guid,
+                "note": "Merchant's payment to Italia for cost of imported goods."
+            }),
+            "CreatedAt": datetime.now(timezone.utc).isoformat(),
+            "ExecutedAt": datetime.now(timezone.utc).isoformat()
+        }
+        tables['transactions'].create(transaction_payload_merchant_to_italia)
+        log.info(f"Created transaction: Merchant {seller_username} to Italia for {italia_share:.2f} (Contract: {original_contract_custom_id}).")
+
     except Exception as e_finance:
-        log.error(f"Error processing FINAL import payment for contract {original_contract_custom_id}: {e_finance}")
+        log.error(f"Error processing financial split for contract {original_contract_custom_id}: {e_finance}")
+        # Consider how to handle partial transaction failures (e.g., if buyer paid merchant but merchant couldn't pay Italia)
+        # For now, any exception here fails the entire financial step.
         return False 
     
     # Building UpdatedAt is handled by Airtable
