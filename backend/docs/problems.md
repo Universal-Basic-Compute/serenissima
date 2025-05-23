@@ -147,7 +147,7 @@ Each problem record in Airtable (and as processed by the system) typically conta
 -   `ProblemId` (Text): A unique identifier for this problem instance (e.g., `homeless_citizenX_timestamp`).
 -   `Citizen` (Text): The username of the citizen concerned by the problem.
 -   `AssetType` (Text): The type of asset concerned (e.g., "land", "building", "citizen").
--   `AssetId` (Text): The identifier of the concerned asset.
+-   `Asset` (Text): The identifier of the concerned asset.
 -   `Severity` (Single Select): The severity of the problem (e.g., "low", "medium", "high", "critical").
 -   `Status` (Single Select): The current status of the problem (e.g., "active", "resolved", "ignored").
 -   `CreatedAt` (Date/Time): The date and time of the problem's creation.

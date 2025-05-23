@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
         problemId: record.get('ProblemId') || '',
         citizen: record.get('Citizen') || '',
         assetType: record.get('AssetType') || '',
-        assetId: record.get('AssetId') || '',
+        asset: record.get('Asset') || '',
         severity: String(record.get('Severity') || 'medium'),
         status: record.get('Status') || 'active',
         createdAt: record.get('CreatedAt') || '',

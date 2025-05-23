@@ -14,7 +14,7 @@ interface Problem {
   problemId: string;
   citizen: string;
   assetType: string;
-  assetId: string;
+  asset: string;
   severity: string;
   status: string;
   position: { lat: number; lng: number };

@@ -191,7 +191,7 @@ def create_transaction_record(tables, from_citizen: str, to_citizen: str, amount
         # Create the transaction record
         transaction = tables['transactions'].create({
             "Type": "wage_payment",
-            "AssetId": f"wage_{business_id}_{now}",
+            "Asset": f"wage_{business_id}_{now}",
             "Seller": from_citizen,  # Business owner is the seller (paying)
             "Buyer": to_citizen,     # Citizen is the buyer (receiving)
             "Price": amount,

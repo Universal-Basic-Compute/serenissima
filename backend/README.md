@@ -54,7 +54,7 @@ The LANDS table should have the following fields:
 
 The TRANSACTIONS table should have the following fields:
 - Type (text): The type of transaction (land, bridge, etc.)
-- AssetId (text): The ID of the asset being transacted
+- Asset (text): The ID of the asset being transacted
 - Seller (text): The seller's wallet address or name
 - Buyer (text): The buyer's wallet address (can be empty for listings)
 - Price (number): The price of the asset

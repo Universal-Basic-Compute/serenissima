@@ -203,7 +203,7 @@ def process_ai_land_purchases(dry_run: bool = False):
         
         if selected_transaction:
             transaction_id = selected_transaction["id"]
-            land_id = selected_transaction["fields"].get("AssetId")
+            land_id = selected_transaction["fields"].get("Asset")
             price = selected_transaction["fields"].get("Price", 0)
             
             print(f"AI {ai_username} can afford land {land_id} for {price} ducats")

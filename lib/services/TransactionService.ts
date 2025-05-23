@@ -15,7 +15,7 @@ import { Listing, Offer, Transaction } from '../store/contractStore';
 // Extend the Listing interface to include updatedAt
 interface ExtendedListing {
   id: string;
-  assetId: string;
+  asset: string;
   assetType?: 'land' | 'building' | 'bridge' | 'compute';
   seller: string;
   price: number;
@@ -170,8 +170,8 @@ export class TransactionService {
     this.transactionsByCitizenCache.clear();
     
     // If we have specific transaction data, also invalidate related caches
-    if (data && data.assetId) {
-      this.transactionsByAssetCache.delete(data.assetId);
+    if (data && data.asset) {
+      this.transactionsByAssetCache.delete(data.asset);
     }
     
     if (data && data.buyer) {
@@ -190,7 +190,7 @@ export class TransactionService {
    * @throws {ApiError} If API request fails
    */
   public async createTransaction(
-    assetId: string, 
+    asset: string, 
     assetType: 'land' | 'building' | 'bridge' | 'compute', 
     seller: string, 
     buyer: string,
@@ -201,11 +201,11 @@ export class TransactionService {
       description?: string;
     }
   ): Promise<Transaction> {
-    log.info(`Creating transaction for ${assetType} ${assetId} from ${seller} to ${buyer} for ${price}`);
+    log.info(`Creating transaction for ${assetType} ${asset} from ${seller} to ${buyer} for ${price}`);
     
     // Validate inputs
-    if (!assetId) {
-      throw new ValidationError('Asset ID is required', 'assetId');
+    if (!asset) {
+      throw new ValidationError('Asset ID is required', 'asset');
     }
     
     if (!assetType) {
@@ -235,7 +235,7 @@ export class TransactionService {
         },
         body: JSON.stringify({
           type: assetType,
-          asset_id: assetId,
+          asset: asset,
           seller: seller,
           buyer: buyer,
           price: price,
@@ -260,7 +260,7 @@ export class TransactionService {
       const transaction: Transaction = {
         id: data.id,
         type: data.type,
-        assetId: data.asset_id,
+        asset: data.asset,
         seller: data.seller,
         buyer: data.buyer,
         price: data.price,
@@ -270,7 +270,7 @@ export class TransactionService {
       
       // Invalidate cache
       this.invalidateTransactionsCache({ 
-        assetId: transaction.assetId,
+        asset: transaction.asset,
         seller: transaction.seller,
         buyer: transaction.buyer
       });
@@ -281,7 +281,7 @@ export class TransactionService {
       // Also emit land ownership changed event if this is a land transaction
       if (assetType === 'land') {
         eventBus.emit(EventTypes.LAND_OWNERSHIP_CHANGED, {
-          landId: assetId,
+          landId: asset,
           newOwner: buyer,
           previousOwner: seller,
           timestamp: Date.now()
@@ -349,7 +349,7 @@ export class TransactionService {
       const transaction: Transaction = {
         id: data.id,
         type: data.type,
-        assetId: data.asset_id,
+        asset: data.asset,
         seller: data.seller,
         buyer: data.buyer,
         price: data.price,
@@ -379,29 +379,29 @@ export class TransactionService {
    * Get transactions by asset ID
    * @throws {ApiError} If API request fails
    */
-  public async getTransactionsByAsset(assetId: string): Promise<Transaction[]> {
-    log.debug(`Getting transactions for asset: ${assetId}`);
+  public async getTransactionsByAsset(asset: string): Promise<Transaction[]> {
+    log.debug(`Getting transactions for asset: ${asset}`);
     
-    if (!assetId) {
-      throw new ValidationError('Asset ID is required', 'assetId');
+    if (!asset) {
+      throw new ValidationError('Asset ID is required', 'asset');
     }
     
     // Check cache first
-    const cachedEntry = this.transactionsByAssetCache.get(assetId);
+    const cachedEntry = this.transactionsByAssetCache.get(asset);
     if (this.isCacheValid(cachedEntry)) {
-      log.debug(`Returning transactions from cache for asset: ${assetId}`);
+      log.debug(`Returning transactions from cache for asset: ${asset}`);
       return cachedEntry!.data;
     }
     
     try {
-      const endpoint = `${getBackendBaseUrl()}/api/transactions/land/${assetId}`;
+      const endpoint = `${getBackendBaseUrl()}/api/transactions/land/${asset}`;
       log.debug(`Fetching transactions from endpoint: ${endpoint}`);
       
       const response = await fetch(endpoint);
       
       if (!response.ok) {
         if (response.status === 404) {
-          log.info(`No transactions found for asset: ${assetId}`);
+          log.info(`No transactions found for asset: ${asset}`);
           return [];
         }
         
@@ -425,7 +425,7 @@ export class TransactionService {
         .map(item => ({
           id: item.id,
           type: item.type,
-          assetId: item.asset_id,
+          asset: item.asset,
           seller: item.seller,
           buyer: item.buyer,
           price: item.price,
@@ -434,7 +434,7 @@ export class TransactionService {
         }));
       
       // Update cache
-      this.setCacheEntry(this.transactionsByAssetCache, assetId, transactions);
+      this.setCacheEntry(this.transactionsByAssetCache, asset, transactions);
       
       return transactions;
     } catch (error) {
@@ -512,7 +512,7 @@ export class TransactionService {
         .map(item => ({
           id: item.id,
           type: item.type,
-          assetId: item.asset_id,
+          asset: item.asset,
           seller: item.seller,
           buyer: item.buyer,
           price: item.price,
@@ -546,7 +546,7 @@ export class TransactionService {
    * @throws {ApiError} If API request fails
    */
   public async createListing(
-    assetId: string, 
+    asset: string, 
     assetType: 'land' | 'building' | 'bridge' | 'compute', 
     price: number,
     metadata?: {
@@ -555,11 +555,11 @@ export class TransactionService {
       description?: string;
     }
   ): Promise<Listing> {
-    log.info(`Creating listing for ${assetType} ${assetId} for ${price}`);
+    log.info(`Creating listing for ${assetType} ${asset} for ${price}`);
     
     // Validate inputs
-    if (!assetId) {
-      throw new ValidationError('Asset ID is required', 'assetId');
+    if (!asset) {
+      throw new ValidationError('Asset ID is required', 'asset');
     }
     
     if (!assetType) {
@@ -587,7 +587,7 @@ export class TransactionService {
         },
         body: JSON.stringify({
           type: assetType,
-          asset_id: assetId,
+          asset: asset,
           seller: walletAddress,
           price: price,
           historical_name: metadata?.historicalName,
@@ -610,7 +610,7 @@ export class TransactionService {
       // Convert API response to our Listing interface
       const listing: Listing = {
         id: data.id,
-        assetId: data.asset_id,
+        asset: data.asset,
         assetType: assetType,
         seller: data.seller,
         price: data.price,
@@ -620,7 +620,7 @@ export class TransactionService {
       
       // Invalidate cache
       this.invalidateTransactionsCache({ 
-        assetId: listing.assetId,
+        asset: listing.asset,
         seller: listing.seller
       });
       
@@ -720,7 +720,7 @@ export class TransactionService {
    * @throws {ApiError} If API request fails
    */
   public async createOffer(
-    assetId: string,
+    asset: string,
     assetType: 'land' | 'building' | 'bridge' | 'compute',
     seller: string,
     price: number,
@@ -730,11 +730,11 @@ export class TransactionService {
       description?: string;
     }
   ): Promise<Offer> {
-    log.info(`Creating offer for ${assetType} ${assetId} to ${seller} for ${price}`);
+    log.info(`Creating offer for ${assetType} ${asset} to ${seller} for ${price}`);
     
     // Validate inputs
-    if (!assetId) {
-      throw new ValidationError('Asset ID is required', 'assetId');
+    if (!asset) {
+      throw new ValidationError('Asset ID is required', 'asset');
     }
     
     if (!assetType) {
@@ -766,7 +766,7 @@ export class TransactionService {
         },
         body: JSON.stringify({
           type: assetType,
-          asset_id: assetId,
+          asset: asset,
           seller: seller,
           buyer: walletAddress,
           price: price,
@@ -790,7 +790,7 @@ export class TransactionService {
       // Convert API response to our ExtendedOffer interface
       const offer: ExtendedOffer = {
         id: data.id,
-        listingId: data.asset_id, // Using asset_id as listingId
+        listingId: data.asset, // Using asset as listingId
         buyer: data.buyer,
         price: data.price,
         createdAt: data.created_at,
@@ -804,7 +804,7 @@ export class TransactionService {
       
       // Invalidate cache
       this.invalidateTransactionsCache({ 
-        assetId: data.asset_id,
+        asset: data.asset,
         seller: data.seller,
         buyer: offer.buyer
       });
@@ -949,7 +949,7 @@ export class TransactionService {
       const transaction: Transaction = {
         id: data.id,
         type: data.type,
-        assetId: data.asset_id,
+        asset: data.asset,
         seller: data.seller,
         buyer: data.buyer,
         price: data.price,
@@ -960,7 +960,7 @@ export class TransactionService {
       // Invalidate cache
       this.invalidateTransactionsCache({
         transactionId: transaction.id,
-        assetId: transaction.assetId,
+        asset: transaction.asset,
         seller: transaction.seller,
         buyer: transaction.buyer
       });
@@ -971,7 +971,7 @@ export class TransactionService {
       // Also emit land ownership changed event if this is a land transaction
       if (transaction.type === 'land') {
         eventBus.emit(TransactionEventTypes.LAND_OWNERSHIP_CHANGED, {
-          landId: transaction.assetId,
+          landId: transaction.asset,
           newOwner: transaction.buyer,
           previousOwner: transaction.seller,
           timestamp: Date.now()

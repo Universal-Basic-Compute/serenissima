@@ -452,7 +452,7 @@ def prepare_ai_building_strategy(tables: Dict[str, Table], ai_citizen: Dict, cit
     relevancies_data = []
     for relevancy in relevancies:
         relevancy_info = {
-            "asset_id": relevancy.get("assetId", ""),
+            "asset": relevancy.get("asset", ""),
             "asset_type": relevancy.get("assetType", ""),
             "category": relevancy.get("category", ""),
             "type": relevancy.get("type", ""),
@@ -473,7 +473,7 @@ def prepare_ai_building_strategy(tables: Dict[str, Table], ai_citizen: Dict, cit
     target_relevancies_data = []
     for relevancy in target_relevancies:
         relevancy_info = {
-            "asset_id": relevancy.get("assetId", ""),
+            "asset": relevancy.get("asset", ""),
             "asset_type": relevancy.get("assetType", ""),
             "category": relevancy.get("category", ""),
             "type": relevancy.get("type", ""),
@@ -1352,7 +1352,7 @@ Your response must be a JSON object with:
                                     
                                     transaction_record = {
                                         "Type": "building_construction",
-                                        "AssetId": building_id,
+                                        "Asset": building_id,
                                         "Seller": "ConsiglioDeiDieci",
                                         "Buyer": ai_username,
                                         "Price": construction_cost,
@@ -1601,7 +1601,7 @@ def process_ai_building_strategies(dry_run: bool = False, citizen_username_arg: 
                     if building_ownership_data.get("success") and building_ownership_data.get("detailedRelevancy"):
                         for _, relevancy_item in building_ownership_data.get("detailedRelevancy", {}).items(): # Renamed relevancy to relevancy_item
                             building_ownership_relevancies.append({
-                                "asset_id": relevancy_item.get("assetId", ""), "asset_type": relevancy_item.get("assetType", ""),
+                                "asset": relevancy_item.get("asset", ""), "asset_type": relevancy_item.get("assetType", ""),
                                 "category": relevancy_item.get("category", ""), "type": relevancy_item.get("type", ""),
                                 "target_citizen": relevancy_item.get("targetCitizen", ""), "score": relevancy_item.get("score", 0),
                                 "time_horizon": relevancy_item.get("timeHorizon", ""), "title": relevancy_item.get("title", ""),

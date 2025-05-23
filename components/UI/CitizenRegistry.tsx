@@ -17,7 +17,7 @@ interface CitizenRegistryProps {
 
 interface Relevancy {
   relevancyId: string;
-  assetId: string;
+  asset: string;
   assetType: string;
   category: string;
   type: string;

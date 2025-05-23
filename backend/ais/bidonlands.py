@@ -63,12 +63,12 @@ def get_existing_bids(tables, ai_citizen_id: str) -> Dict[str, Dict]:
         formula = f"AND({{Buyer}}='{ai_citizen_id}', {{Type}}='land', {{ExecutedAt}}=BLANK())"
         transactions = tables["transactions"].all(formula=formula)
         
-        # Index by asset_id (land_id)
+        # Index by asset (land_id)
         bids_by_land = {}
         for transaction in transactions:
-            asset_id = transaction["fields"].get("AssetId")
-            if asset_id:
-                bids_by_land[asset_id] = transaction
+            asset = transaction["fields"].get("Asset")
+            if asset:
+                bids_by_land[asset] = transaction
         
         print(f"Found {len(bids_by_land)} existing bids for AI citizen {ai_citizen_id}")
         return bids_by_land
@@ -148,7 +148,7 @@ def create_or_update_bid(tables, ai_citizen: Dict, land: Dict, existing_bid: Opt
             # Create transaction record
             transaction = {
                 "Type": "land",
-                "AssetId": land_id,
+                "Asset": land_id,
                 "Seller": land_owner if land_owner else "Republic",
                 "Buyer": ai_username,
                 "Price": bid_amount,

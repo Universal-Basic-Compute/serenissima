@@ -79,8 +79,8 @@ export async function POST(request: NextRequest) {
         relevanciesByCitizen[relevantToKey] = {};
       }
       // Create a unique key for the relevancy within that citizen's list
-      // Using assetId (buildingId) and closestLandId (landId) should be unique for this context
-      const relevancyKey = `${relevancy.assetId}_${relevancy.closestLandId}_${relevancy.type}`;
+      // Using asset (buildingId) and closestLandId (landId) should be unique for this context
+      const relevancyKey = `${relevancy.asset}_${relevancy.closestLandId}_${relevancy.type}`;
       relevanciesByCitizen[relevantToKey][relevancyKey] = relevancy;
     });
 
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
     const detailedRelevancyForRequestingUser: Record<string, any> = {};
 
     relevanciesForRequestingUser.forEach(relevancy => {
-      const key = `${relevancy.assetId}_${relevancy.closestLandId}_${relevancy.type}`;
+      const key = `${relevancy.asset}_${relevancy.closestLandId}_${relevancy.type}`;
       simpleScoresForRequestingUser[key] = relevancy.score;
       detailedRelevancyForRequestingUser[key] = relevancy;
     });

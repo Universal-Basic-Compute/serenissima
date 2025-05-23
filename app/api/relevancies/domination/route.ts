@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
           const globalLandownerProfileRecord = {
             fields: {
               RelevancyId: `global_domination_${landownerUsername}_${Date.now()}`,
-              AssetID: landownerUsername, // The landowner being profiled
+              Asset: landownerUsername, // The landowner being profiled
               AssetType: "citizen",       // dominationData.assetType is 'citizen'
               Category: "domination",     // dominationData.category is 'domination'
               Type: "global_landowner_profile", // Specific type for these global profiles

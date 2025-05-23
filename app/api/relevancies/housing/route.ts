@@ -117,7 +117,7 @@ export async function GET(request: NextRequest) {
     // Create relevancy object
     const housingRelevancy = {
       score: relevancyScore,
-      assetId: 'venice_housing',
+      asset: 'venice_housing',
       assetType: 'city',
       category: 'housing',
       type: 'housing_situation',
@@ -273,7 +273,7 @@ export async function POST(request: NextRequest) {
     // Create relevancy object
     const housingRelevancy = {
       score: relevancyScore,
-      assetId: 'venice_housing',
+      asset: 'venice_housing',
       assetType: 'city',
       category: 'housing',
       type: 'housing_situation',
@@ -320,7 +320,7 @@ ${getHousingRecommendation(homelessCount, vacantCount, relevancyScore)}
       // Create the relevancy record directly
       await base(AIRTABLE_RELEVANCIES_TABLE).create({
         RelevancyId: relevancyId,
-        AssetID: 'venice_housing',
+        Asset: 'venice_housing',
         AssetType: 'city',
         Category: 'housing',
         Type: 'housing_situation',

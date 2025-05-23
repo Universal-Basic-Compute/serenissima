@@ -130,7 +130,7 @@ class LandResponse(BaseModel):
 
 class TransactionRequest(BaseModel):
     type: str  # 'land', 'bridge', etc.
-    asset_id: str
+    asset: str
     seller: str
     buyer: str = None
     price: float
@@ -141,7 +141,7 @@ class TransactionRequest(BaseModel):
 class TransactionResponse(BaseModel):
     id: str
     type: str
-    asset_id: str
+    asset: str
     seller: str
     buyer: str = None
     price: float
@@ -379,7 +379,7 @@ async def transfer_compute_endpoint(wallet_data: WalletRequest):
             try:
                 transaction_record = transactions_table.create({
                     "Type": "deposit",
-                    "AssetId": "compute_token",
+                    "Asset": "compute_token",
                     "Seller": "Treasury",
                     "Buyer": wallet_data.wallet_address,
                     "Price": transfer_amount,
@@ -416,7 +416,7 @@ async def transfer_compute_endpoint(wallet_data: WalletRequest):
             try:
                 transaction_record = transactions_table.create({
                     "Type": "deposit",
-                    "AssetId": "compute_token",
+                    "Asset": "compute_token",
                     "Seller": "Treasury",
                     "Buyer": wallet_data.wallet_address,
                     "Price": transfer_amount,
@@ -837,7 +837,7 @@ async def create_transaction(transaction_data: TransactionRequest):
     if not transaction_data.type:
         raise HTTPException(status_code=400, detail="Transaction type is required")
     
-    if not transaction_data.asset_id:
+    if not transaction_data.asset:
         raise HTTPException(status_code=400, detail="Asset ID is required")
     
     if not transaction_data.seller:
@@ -859,7 +859,7 @@ async def create_transaction(transaction_data: TransactionRequest):
                 print(f"Could not find username for wallet {transaction_data.seller}, using wallet as username")
         
         # Check if transaction already exists for this asset
-        formula = f"AND({{AssetId}}='{transaction_data.asset_id}', {{Type}}='{transaction_data.type}', {{ExecutedAt}}=BLANK())"
+        formula = f"AND({{Asset}}='{transaction_data.asset}', {{Type}}='{transaction_data.type}', {{ExecutedAt}}=BLANK())"
         print(f"Searching for existing transaction with formula: {formula}")
         existing_records = transactions_table.all(formula=formula)
         
@@ -870,7 +870,7 @@ async def create_transaction(transaction_data: TransactionRequest):
             return {
                 "id": record["id"],
                 "type": record["fields"].get("Type", ""),
-                "asset_id": record["fields"].get("AssetId", ""),
+                "asset": record["fields"].get("Asset", ""),
                 "seller": record["fields"].get("Seller", ""),
                 "buyer": record["fields"].get("Buyer", None),
                 "price": record["fields"].get("Price", 0),
@@ -887,7 +887,7 @@ async def create_transaction(transaction_data: TransactionRequest):
         
         fields = {
             "Type": transaction_data.type,
-            "AssetId": transaction_data.asset_id,
+            "Asset": transaction_data.asset,
             "Seller": seller_username,  # Use username instead of wallet address
             "Price": transaction_data.price,
             "CreatedAt": now,
@@ -928,7 +928,7 @@ async def create_transaction(transaction_data: TransactionRequest):
         return {
             "id": record["id"],
             "type": record["fields"].get("Type", ""),
-            "asset_id": record["fields"].get("AssetId", ""),
+            "asset": record["fields"].get("Asset", ""),
             "seller": record["fields"].get("Seller", ""),
             "buyer": record["fields"].get("Buyer", None),
             "price": record["fields"].get("Price", 0),
@@ -963,7 +963,7 @@ async def get_land_transaction(land_id: str):
         # Create a formula that checks all possible ID formats
         id_conditions = []
         for id in possible_ids:
-            id_conditions.append(f"{{AssetId}}='{id}'")
+            id_conditions.append(f"{{Asset}}='{id}'")
         
         formula = f"AND(OR({', '.join(id_conditions)}), {{Type}}='land', {{ExecutedAt}}=BLANK())"
         
@@ -1001,7 +1001,7 @@ async def get_land_transaction(land_id: str):
         return {
             "id": record["id"],
             "type": record["fields"].get("Type", ""),
-            "asset_id": record["fields"].get("AssetId", ""),
+            "asset": record["fields"].get("Asset", ""),
             "seller": record["fields"].get("Seller", ""),
             "buyer": record["fields"].get("Buyer", None),
             "price": record["fields"].get("Price", 0),
@@ -1049,7 +1049,7 @@ async def get_transactions():
             transactions.append({
                 "id": record["id"],
                 "type": record["fields"].get("Type", ""),
-                "asset_id": record["fields"].get("AssetId", ""),
+                "asset": record["fields"].get("Asset", ""),
                 "seller": record["fields"].get("Seller", ""),
                 "buyer": record["fields"].get("Buyer", None),
                 "price": record["fields"].get("Price", 0),
@@ -1082,7 +1082,7 @@ async def get_land_transactions(land_id: str):
         ]
         
         # Create a formula that checks all possible ID formats
-        id_conditions = [f"{{AssetId}}='{id}'" for id in possible_ids]
+        id_conditions = [f"{{Asset}}='{id}'" for id in possible_ids]
         formula = f"AND(OR({', '.join(id_conditions)}), {{Type}}='land', {{ExecutedAt}}=BLANK())"
         
         print(f"Searching for land transactions with formula: {formula}")
@@ -1112,7 +1112,7 @@ async def get_land_transactions(land_id: str):
             transactions.append({
                 "id": record["id"],
                 "type": record["fields"].get("Type", ""),
-                "asset_id": record["fields"].get("AssetId", ""),
+                "asset": record["fields"].get("Asset", ""),
                 "seller": record["fields"].get("Seller", ""),
                 "buyer": record["fields"].get("Buyer", None),
                 "price": record["fields"].get("Price", 0),
@@ -1232,7 +1232,7 @@ async def execute_transaction(transaction_id: str, data: dict):
                 try:
                     transactions_table.create({
                         "Type": "transfer",
-                        "AssetId": "compute_token",
+                        "Asset": "compute_token",
                         "Seller": seller_username,
                         "Buyer": buyer_username,
                         "Price": price,
@@ -1265,7 +1265,7 @@ async def execute_transaction(transaction_id: str, data: dict):
                     # Add to TRANSACTIONS table as a failed transaction
                     transactions_table.create({
                         "Type": "error",
-                        "AssetId": "compute_token",
+                        "Asset": "compute_token",
                         "Seller": seller_username,
                         "Buyer": buyer_username,
                         "Price": price,
@@ -1283,8 +1283,8 @@ async def execute_transaction(transaction_id: str, data: dict):
             print(f"Transferred {price} compute from {buyer_username} to {seller_username}")
         
         # Update the land ownership if it's a land transaction
-        if record["fields"].get("Type") == "land" and record["fields"].get("AssetId"):
-            land_id = record["fields"].get("AssetId")
+        if record["fields"].get("Type") == "land" and record["fields"].get("Asset"):
+            land_id = record["fields"].get("Asset")
             print(f"Updating land ownership for asset {land_id} to {buyer_username}")
             
             # Check if land exists in Airtable
@@ -1327,7 +1327,7 @@ async def execute_transaction(transaction_id: str, data: dict):
         return {
             "id": updated_record["id"],
             "type": updated_record["fields"].get("Type", ""),
-            "asset_id": updated_record["fields"].get("AssetId", ""),
+            "asset": updated_record["fields"].get("Asset", ""),
             "seller": updated_record["fields"].get("Seller", ""),
             "buyer": updated_record["fields"].get("Buyer", None),
             "price": updated_record["fields"].get("Price", 0),
@@ -1548,7 +1548,7 @@ async def transfer_compute_solana(wallet_data: WalletRequest):
             try:
                 transaction_record = transactions_table.create({
                     "Type": "deposit",
-                    "AssetId": "compute_token",
+                    "Asset": "compute_token",
                     "Seller": "Treasury",
                     "Buyer": wallet_data.wallet_address,
                     "Price": transfer_amount,
@@ -1589,7 +1589,7 @@ async def transfer_compute_solana(wallet_data: WalletRequest):
             try:
                 transaction_record = transactions_table.create({
                     "Type": "deposit",
-                    "AssetId": "compute_token",
+                    "Asset": "compute_token",
                     "Seller": "Treasury",
                     "Buyer": wallet_data.wallet_address,
                     "Price": transfer_amount,
@@ -1652,7 +1652,7 @@ async def transfer_compute_between_citizens(data: dict):
         try:
             transaction_record = transactions_table.create({
                 "Type": "transfer",
-                "AssetId": "compute_token",
+                "Asset": "compute_token",
                 "Seller": to_wallet,  # Recipient is the "seller" in this context
                 "Buyer": from_wallet,  # Sender is the "buyer" in this context
                 "Price": amount,
@@ -2206,7 +2206,7 @@ async def apply_for_loan(loan_application: dict):
                         # Create transaction record
                         transactions_table.create({
                             "Type": "loan",
-                            "AssetId": "compute_token",
+                            "Asset": "compute_token",
                             "Seller": lender,
                             "Buyer": borrower,
                             "Price": principal,
@@ -2583,7 +2583,7 @@ async def inject_compute_complete(data: dict):
             try:
                 transaction_record = transactions_table.create({
                     "Type": "inject",
-                    "AssetId": "compute_token",
+                    "Asset": "compute_token",
                     "Seller": data["wallet_address"],
                     "Buyer": "Treasury",
                     "Price": transfer_amount,
@@ -2623,7 +2623,7 @@ async def inject_compute_complete(data: dict):
             try:
                 transaction_record = transactions_table.create({
                     "Type": "inject",
-                    "AssetId": "compute_token",
+                    "Asset": "compute_token",
                     "Seller": data["wallet_address"],
                     "Buyer": "Treasury",
                     "Price": transfer_amount,

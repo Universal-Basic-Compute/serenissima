@@ -63,7 +63,7 @@ export async function GET(
       problemId: record.get('ProblemId') || '',
       citizen: record.get('Citizen') || '',
       assetType: record.get('AssetType') || '',
-      assetId: record.get('AssetId') || '',
+      asset: record.get('Asset') || '',
       severity: record.get('Severity') || 'medium',
       status: record.get('Status') || 'active',
       position: position,

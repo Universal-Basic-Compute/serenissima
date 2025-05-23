@@ -3,7 +3,7 @@ interface Problem {
   problemId: string;
   citizen: string;
   assetType: string;
-  assetId: string;
+  asset: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
   status: 'active' | 'resolved' | 'ignored';
   createdAt: string;
@@ -84,7 +84,7 @@ export class ProblemService {
             problemId,
             citizen: owner, // Problem is for the building owner
             assetType: 'building',
-            assetId: buildingId,
+            asset: buildingId,
             severity,
             status: 'active',
             createdAt: new Date().toISOString(),
@@ -190,7 +190,7 @@ export class ProblemService {
             problemId,
             citizen: citizenUsername,
             assetType: 'citizen',
-            assetId: citizen.citizenId || citizen.id, // Prefer citizenId
+            asset: citizen.citizenId || citizen.id, // Prefer citizenId
             severity: 'medium',
             status: 'active',
             createdAt: new Date().toISOString(),
@@ -274,7 +274,7 @@ export class ProblemService {
                 problemId: employerProblemId,
                 citizen: employerUsername,
                 assetType: 'employee_performance',
-                assetId: citizen.citizenId || citizen.id, // Asset is the homeless employee
+                asset: citizen.citizenId || citizen.id, // Asset is the homeless employee
                 severity: 'low',
                 status: 'active',
                 createdAt: new Date().toISOString(),
@@ -389,7 +389,7 @@ export class ProblemService {
             problemId,
             citizen: citizenUsername,
             assetType: 'citizen',
-            assetId: citizen.citizenId || citizen.id, // Prefer citizenId
+            asset: citizen.citizenId || citizen.id, // Prefer citizenId
             severity: 'low', 
             status: 'active',
             createdAt: new Date().toISOString(),
@@ -571,7 +571,7 @@ export class ProblemService {
             problemId,
             citizen: owner!, // Owner is confirmed to be non-null by this point
             assetType: 'building',
-            assetId: buildingId,
+            asset: buildingId,
             severity,
             status: 'active',
             createdAt: new Date().toISOString(),
@@ -641,7 +641,7 @@ export class ProblemService {
             problemId,
             citizen: owner,
             assetType: 'building',
-            assetId: buildingId,
+            asset: buildingId,
             severity: 'medium',
             status: 'active',
             createdAt: new Date().toISOString(),
@@ -802,7 +802,7 @@ export class ProblemService {
             problemId,
             citizen: citizenUsername,
             assetType: 'citizen',
-            assetId: citizen.citizenId || citizen.id,
+            asset: citizen.citizenId || citizen.id,
             severity: 'medium',
             status: 'active',
             createdAt: new Date().toISOString(),
@@ -862,7 +862,7 @@ export class ProblemService {
                 problemId: employerProblemId,
                 citizen: employerUsername,
                 assetType: 'employee_performance',
-                assetId: citizen.citizenId || citizen.id,
+                asset: citizen.citizenId || citizen.id,
                 severity: 'low',
                 status: 'active',
                 createdAt: new Date().toISOString(),

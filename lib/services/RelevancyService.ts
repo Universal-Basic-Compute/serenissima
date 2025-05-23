@@ -15,7 +15,7 @@ export interface LandData { // Export LandData
 
 export interface RelevancyScore { // Export RelevancyScore
   score: number;
-  assetId: string;
+  asset: string;
   assetType: string;
   category: string;
   type: string;
@@ -251,7 +251,7 @@ export class RelevancyService {
     // Return the complete relevancy score object
     return {
       score: numericScore,
-      assetId: land.id,
+      asset: land.id,
       assetType: 'land',
       category: 'proximity',
       type: isConnected ? 'connected' : 'geographic',
@@ -536,7 +536,7 @@ export class RelevancyService {
       // Create the relevancy score object
       relevancyScores[username] = {
         score: numericScore,
-        assetId: username, // Using username as the asset ID for citizen-based relevancies
+        asset: username, // Using username as the asset ID for citizen-based relevancies
         assetType: 'citizen',
         category: 'domination',
         type: 'landowner',
@@ -805,7 +805,7 @@ export class RelevancyService {
         // 1. Relevancy for the Building Owner (username)
         createdRelevancies.push({
           score: parseFloat(score.toFixed(2)),
-          assetId: building.buildingId, // ID of the building
+          asset: building.buildingId, // ID of the building
           assetType: 'building',
           category: 'ownership_conflict',
           type: 'building_on_others_land',
@@ -833,7 +833,7 @@ export class RelevancyService {
         
         createdRelevancies.push({
           score: parseFloat(landOwnerScore.toFixed(2)),
-          assetId: building.buildingId, // The asset is still the building
+          asset: building.buildingId, // The asset is still the building
           assetType: 'building',
           category: 'ownership_conflict',
           type: 'others_building_on_your_land', // Different type for landowner's perspective
@@ -916,7 +916,7 @@ export class RelevancyService {
         if (buildingOwner === citizenUsername) {
           createdRelevancies.push({
             score,
-            assetId: building.id,
+            asset: building.id,
             assetType: 'building',
             category: 'operator_relations',
             type: 'operator_in_your_building', 
@@ -938,7 +938,7 @@ export class RelevancyService {
         else if (buildingOperator === citizenUsername) {
           createdRelevancies.push({
             score,
-            assetId: building.id,
+            asset: building.id,
             assetType: 'building',
             category: 'operator_relations',
             type: 'running_in_others_building', 
@@ -1009,7 +1009,7 @@ export class RelevancyService {
         if (buildingRunBy === citizenUsername) {
           if (buildingCategory === 'business') {
             createdRelevancies.push({
-              score, assetId: building.id, assetType: 'building', category: 'occupancy_relations', type: 'employer_to_employee',
+              score, asset: building.id, assetType: 'building', category: 'occupancy_relations', type: 'employer_to_employee',
               distance: 0, closestLandId: building.landId || '', isConnected: false, connectivityBonus: 0,
               title: `You Employ ${buildingOccupant} at Your ${buildingType}`,
               description: `**${buildingOccupant}** works at your **${buildingType}**.\n\n` +
@@ -1020,7 +1020,7 @@ export class RelevancyService {
             });
           } else if (buildingCategory === 'home') {
             createdRelevancies.push({
-              score, assetId: building.id, assetType: 'building', category: 'occupancy_relations', type: 'landlord_to_renter',
+              score, asset: building.id, assetType: 'building', category: 'occupancy_relations', type: 'landlord_to_renter',
               distance: 0, closestLandId: building.landId || '', isConnected: false, connectivityBonus: 0,
               title: `${buildingOccupant} Rents Your ${buildingType}`,
               description: `**${buildingOccupant}** is renting your **${buildingType}**.\n\n` +
@@ -1035,7 +1035,7 @@ export class RelevancyService {
         else if (buildingOccupant === citizenUsername) {
           if (buildingCategory === 'business') {
             createdRelevancies.push({
-              score, assetId: building.id, assetType: 'building', category: 'occupancy_relations', type: 'employee_to_employer',
+              score, asset: building.id, assetType: 'building', category: 'occupancy_relations', type: 'employee_to_employer',
               distance: 0, closestLandId: building.landId || '', isConnected: false, connectivityBonus: 0,
               title: `You Work for ${buildingRunBy} at Their ${buildingType}`,
               description: `You are employed at the **${buildingType}** run by **${buildingRunBy}**.\n\n` +
@@ -1046,7 +1046,7 @@ export class RelevancyService {
             });
           } else if (buildingCategory === 'home') {
             createdRelevancies.push({
-              score, assetId: building.id, assetType: 'building', category: 'occupancy_relations', type: 'renter_to_landlord',
+              score, asset: building.id, assetType: 'building', category: 'occupancy_relations', type: 'renter_to_landlord',
               distance: 0, closestLandId: building.landId || '', isConnected: false, connectivityBonus: 0,
               title: `You Rent a ${buildingType} from ${buildingRunBy}`,
               description: `You are renting a **${buildingType}** from **${buildingRunBy}**.\n\n` +
@@ -1132,7 +1132,7 @@ export class RelevancyService {
           
           createdRelevancies.push({
             score: parseFloat(score.toFixed(2)),
-            assetId: landIdKey, 
+            asset: landIdKey, 
             assetType: 'land', 
             category: 'neighborhood',
             type: 'same_land_neighbor',
@@ -1266,7 +1266,7 @@ export class RelevancyService {
           
           createdRelevancies.push({
             score: parseFloat(score.toFixed(2)),
-            assetId: guildId, 
+            asset: guildId, 
             assetType: 'guild', 
             category: 'affiliation',
             type: 'guild_member',

@@ -131,7 +131,7 @@ export async function GET(request: NextRequest) {
     // Create relevancy object
     const jobMarketRelevancy = {
       score: relevancyScore,
-      assetId: 'venice_job_market',
+      asset: 'venice_job_market',
       assetType: 'city',
       category: 'employment',
       type: 'job_market_situation',
@@ -291,7 +291,7 @@ export async function POST(request: NextRequest) {
     // Create relevancy object
     const jobMarketRelevancy = {
       score: relevancyScore,
-      assetId: 'venice_job_market',
+      asset: 'venice_job_market',
       assetType: 'city',
       category: 'employment',
       type: 'job_market_situation',
@@ -339,7 +339,7 @@ ${getJobMarketRecommendation(unemployedCount, vacantCount, relevancyScore, jobsB
       // Create the relevancy record directly
       await base(AIRTABLE_RELEVANCIES_TABLE).create({
         RelevancyId: relevancyId,
-        AssetID: 'venice_job_market',
+        Asset: 'venice_job_market',
         AssetType: 'city',
         Category: 'employment',
         Type: 'job_market_situation',

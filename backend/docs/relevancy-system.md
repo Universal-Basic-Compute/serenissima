@@ -38,7 +38,7 @@ Each relevancy calculation includes a time horizon indicating how soon the AI sh
 Each relevancy record contains:
 
 - **Score**: Numerical relevancy score (0-100)
-- **AssetID**: ID of the relevant asset
+- **Asset**: ID of the relevant asset
 - **AssetType**: Type of asset (land, building, resource)
 - **Category**: Category of relevancy (proximity, economic, strategic)
 - **Type**: Specific type of relevancy (connected, geographic)
@@ -112,7 +112,7 @@ Land domination relevancy helps AIs and administrators:
 - When global domination is calculated (e.g., via `POST /api/relevancies/domination` with `Citizen: "all"`), one record is created *for each landowner*. These records are relevant to "all" (or a global entity like `ConsiglioDeiDieci`).
 - **RelevantToCitizen**: `"all"` (or `ConsiglioDeiDieci`)
 - **TargetCitizen**: The landowner being profiled (e.g., `CitizenAlpha`)
-- **AssetID**: The landowner being profiled (e.g., `CitizenAlpha`)
+- **Asset**: The landowner being profiled (e.g., `CitizenAlpha`)
 - **AssetType**: `citizen`
 - **Category**: `domination`
 - **Type**: `global_landowner_profile`
@@ -123,7 +123,7 @@ Land domination relevancy helps AIs and administrators:
 **Peer Domination Profile Records (Specific User Request - `Citizen: "UserA"`)**
 - When a specific citizen (e.g., `UserA`) requests domination scores (via `POST /api/relevancies/domination` with `Citizen: "UserA"`), they receive a list of relevancies. Each relevancy in this list details how dominant *another* landowner (`UserB`, `UserC`, etc.) is. These are saved via the `saveRelevancies` utility.
 - **RelevantToCitizen**: The requesting citizen (e.g., `UserA`)
-- **AssetID**: The other landowner being profiled (e.g., `UserB`)
+- **Asset**: The other landowner being profiled (e.g., `UserB`)
 - **AssetType**: `citizen`
 - **Category**: `domination`
 - **Type**: `peer_dominance_profile` (or the default type used by `saveRelevancies` for citizen assets)
@@ -145,7 +145,7 @@ This relevancy identifies relationships where a building's `Owner` is different 
 **For Building Owner (`CitizenA`) whose building is run by `CitizenB`:**
 - **RelevantToCitizen**: `CitizenA`
 - **TargetCitizen**: `CitizenB`
-- **AssetID**: Building ID
+- **Asset**: Building ID
 - **AssetType**: `building`
 - **Category**: `operator_relations`
 - **Type**: `operator_in_your_building`
@@ -155,7 +155,7 @@ This relevancy identifies relationships where a building's `Owner` is different 
 **For Building Operator (`CitizenB`) running `CitizenA`'s building:**
 - **RelevantToCitizen**: `CitizenB`
 - **TargetCitizen**: `CitizenA`
-- **AssetID**: Building ID
+- **Asset**: Building ID
 - **AssetType**: `building`
 - **Category**: `operator_relations`
 - **Type**: `running_in_others_building`
@@ -181,7 +181,7 @@ This relevancy identifies relationships between a building's `RunBy` (operator/e
 **For Employer (`CitizenA`) whose business building is occupied (worked at) by `CitizenB`:**
 - **RelevantToCitizen**: `CitizenA`
 - **TargetCitizen**: `CitizenB`
-- **AssetID**: Building ID
+- **Asset**: Building ID
 - **AssetType**: `building`
 - **Category**: `occupancy_relations`
 - **Type**: `employer_to_employee`
@@ -190,7 +190,7 @@ This relevancy identifies relationships between a building's `RunBy` (operator/e
 **For Employee (`CitizenB`) working at `CitizenA`'s business:**
 - **RelevantToCitizen**: `CitizenB`
 - **TargetCitizen**: `CitizenA`
-- **AssetID**: Building ID
+- **Asset**: Building ID
 - **AssetType**: `building`
 - **Category**: `occupancy_relations`
 - **Type**: `employee_to_employer`
@@ -334,7 +334,7 @@ This type of relevancy identifies communities of residents living on the same `L
 - For each `LandId` that has two or more occupants, a single relevancy record is created.
 
 ### Data Structure
-- **AssetID**: The `LandId` of the land/land parcel.
+- **Asset**: The `LandId` of the land/land parcel.
 - **AssetType**: `land`
 - **Category**: `neighborhood`.
 - **Type**: `same_land_neighbor`.
@@ -366,7 +366,7 @@ This type of relevancy identifies communities of players belonging to the same g
 - For each guild with two or more members, a single relevancy record is created.
 
 ### Data Structure
-- **AssetID**: The `GuildId`.
+- **Asset**: The `GuildId`.
 - **AssetType**: `guild`.
 - **Category**: `affiliation`.
 - **Type**: `guild_member`.

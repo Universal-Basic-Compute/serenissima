@@ -90,7 +90,7 @@ def process(
 
         # For citizen-carried resources (AssetType='citizen'), Asset field uses Username.
         tracking_res_formula = (f"AND({{Type}}='{_escape_airtable_value(resource_type_id)}', "
-                                f"{{Asset}}='{_escape_airtable_value(delivery_person_username)}', " # AssetId -> Asset, use Username
+                                f"{{Asset}}='{_escape_airtable_value(delivery_person_username)}', " # Asset -> Asset, use Username
                                 f"{{AssetType}}='citizen', {{Owner}}='Italia')")
         try:
             tracking_resources = tables['resources'].all(formula=tracking_res_formula, max_records=1)
@@ -112,7 +112,7 @@ def process(
         # The Owner is the target_owner_username (RunBy or Owner of the building).
         # BuildingId field is also present for convenience.
         building_res_formula = (f"AND({{Type}}='{_escape_airtable_value(resource_type_id)}', "
-                                f"{{Asset}}='{_escape_airtable_value(to_building_id)}', " # AssetId -> Asset
+                                f"{{Asset}}='{_escape_airtable_value(to_building_id)}', " # Asset -> Asset
                                 f"{{AssetType}}='building', "
                                 f"{{Owner}}='{_escape_airtable_value(target_owner_username)}')")
         try:
@@ -197,7 +197,7 @@ def process(
             transaction_payload = {
                 "Type": "import_payment",
                 "AssetType": "contract",
-                "AssetId": original_contract_id,
+                "Asset": original_contract_id,
                 "Seller": seller_username,
                 "Buyer": buyer_username,
                 "Price": total_cost,

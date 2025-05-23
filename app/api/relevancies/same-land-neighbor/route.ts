@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     let relevanciesSavedCount = 0;
 
     for (const relevancy of groupRelevancies) {
-      const landId = relevancy.assetId; // This is the LandId (e.g., polygon-xxxx)
+      const landId = relevancy.asset; // This is the LandId (e.g., polygon-xxxx)
       // stableRelevancyId is per land, as there's one relevancy record per land group
       const stableRelevancyId = `same_land_neighbor_${landId}`; 
 
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       
       const fieldsToSave = {
         RelevancyId: stableRelevancyId,
-        AssetID: relevancy.assetId, // LandId (e.g. polygon-xxxx)
+        Asset: relevancy.asset, // LandId (e.g. polygon-xxxx)
         AssetType: relevancy.assetType, // 'land'
         Category: relevancy.category,   // 'neighborhood'
         Type: relevancy.type,           // 'same_land_neighbor'

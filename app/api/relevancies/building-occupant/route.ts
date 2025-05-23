@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     const relevanciesToSave: Record<string, any> = {};
     generatedRelevancies.forEach(relevancy => {
       // Create a unique key for the relevancy: buildingId_type
-      const relevancyKey = `${relevancy.assetId}_${relevancy.type}`;
+      const relevancyKey = `${relevancy.asset}_${relevancy.type}`;
       relevanciesToSave[relevancyKey] = relevancy;
     });
 
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     const detailedRelevancyForRequestingUser: Record<string, any> = {};
 
     generatedRelevancies.forEach(relevancy => {
-      const key = `${relevancy.assetId}_${relevancy.type}`;
+      const key = `${relevancy.asset}_${relevancy.type}`;
       simpleScoresForRequestingUser[key] = relevancy.score;
       detailedRelevancyForRequestingUser[key] = relevancy;
     });

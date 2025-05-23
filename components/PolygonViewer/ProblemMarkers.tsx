@@ -9,7 +9,7 @@ interface Problem {
   problemId: string;
   citizen: string;
   assetType: string;
-  assetId: string;
+  asset: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
   status: 'active' | 'resolved' | 'pending';
   position: { lat: number; lng: number };

@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     let relevanciesSavedCount = 0;
 
     for (const relevancy of guildRelevancies) {
-      const guildId = relevancy.assetId; // This is the GuildId
+      const guildId = relevancy.asset; // This is the GuildId
       const stableRelevancyId = `guild_member_${guildId}`; 
 
       // relevancy.relevantToCitizen and relevancy.targetCitizen are arrays of member usernames from the service
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
       
       const fieldsToSave = {
         RelevancyId: stableRelevancyId,
-        AssetID: relevancy.assetId, // GuildId
+        Asset: relevancy.asset, // GuildId
         AssetType: relevancy.assetType, // 'guild'
         Category: relevancy.category,   // 'affiliation'
         Type: relevancy.type,           // 'guild_member'

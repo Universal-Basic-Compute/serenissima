@@ -9,11 +9,11 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const citizenId = searchParams.get('citizenId');
-    const assetId = searchParams.get('assetId');
+    const asset = searchParams.get('asset');
     const role = searchParams.get('role');
     
     // Create a cache key based on the request parameters
-    const cacheKey = `${citizenId || 'all'}_${assetId || 'all'}_${role || 'all'}`;
+    const cacheKey = `${citizenId || 'all'}_${asset || 'all'}_${role || 'all'}`;
     const currentTime = Date.now();
     
     // Check if we have valid cached data
@@ -30,8 +30,8 @@ export async function GET(request: NextRequest) {
       const apiBaseUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL || 'http://localhost:10000';
       let endpoint = `${apiBaseUrl}/api/transactions`;
       
-      if (assetId) {
-        endpoint = `${apiBaseUrl}/api/transactions/land/${assetId}`;
+      if (asset) {
+        endpoint = `${apiBaseUrl}/api/transactions/land/${asset}`;
       }
       
       const response = await fetch(endpoint, {
@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
       const formattedTransactions = filteredTransactions.map((tx: any) => ({
         id: tx.id,
         type: tx.type,
-        assetId: tx.asset_id,
+        asset: tx.asset,
         seller: tx.seller,
         buyer: tx.buyer,
         price: tx.price,

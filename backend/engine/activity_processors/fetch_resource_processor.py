@@ -56,7 +56,7 @@ def get_source_building_resource_stock(
 ) -> float:
     """Gets the stock of a specific resource type in a building owned by a specific user."""
     formula = (f"AND({{Type}}='{_escape_airtable_value(resource_type_id)}', "
-               f"{{AssetId}}='{_escape_airtable_value(building_custom_id)}', "
+               f"{{Asset}}='{_escape_airtable_value(building_custom_id)}', "
                f"{{AssetType}}='building', "
                f"{{Owner}}='{_escape_airtable_value(owner_username)}')")
     try:
@@ -197,7 +197,7 @@ def process(
         transaction_payload = {
             "Type": "resource_purchase_on_fetch",
             "AssetType": "contract", # Could be 'resource'
-            "AssetId": contract_record['fields'].get('ContractId', contract_airtable_id), # Custom ContractId if available
+            "Asset": contract_record['fields'].get('ContractId', contract_airtable_id), # Custom ContractId if available
             "Seller": effective_seller_username,
             "Buyer": buyer_username,
             "Price": total_cost,
@@ -217,7 +217,7 @@ def process(
 
         # Decrement resource from source building
         source_res_formula = (f"AND({{Type}}='{_escape_airtable_value(resource_id_to_fetch)}', "
-                              f"{{Asset}}='{_escape_airtable_value(from_building_custom_id)}', " # AssetId -> Asset
+                              f"{{Asset}}='{_escape_airtable_value(from_building_custom_id)}', " # Asset -> Asset
                               f"{{AssetType}}='building', "
                               f"{{Owner}}='{_escape_airtable_value(effective_seller_username)}')")
         source_res_records = tables['resources'].all(formula=source_res_formula, max_records=1)
@@ -235,7 +235,7 @@ def process(
 
         # Add resource to carrier citizen's inventory
         carrier_res_formula = (f"AND({{Type}}='{_escape_airtable_value(resource_id_to_fetch)}', "
-                               f"{{Asset}}='{_escape_airtable_value(carrier_username)}', " # AssetId -> Asset, use Username
+                               f"{{Asset}}='{_escape_airtable_value(carrier_username)}', " # Asset -> Asset, use Username
                                f"{{AssetType}}='citizen', "
                                f"{{Owner}}='{_escape_airtable_value(buyer_username)}')") # Owned by the contract buyer
         existing_carrier_res = tables['resources'].all(formula=carrier_res_formula, max_records=1)
@@ -252,7 +252,7 @@ def process(
                 "Type": resource_id_to_fetch,
                 "Name": res_def_details.get('name', resource_id_to_fetch),
                 "Category": res_def_details.get('category', 'Unknown'),
-                "Asset": carrier_username, # AssetId -> Asset, use Username
+                "Asset": carrier_username, # Asset -> Asset, use Username
                 "AssetType": "citizen",
                 "Owner": buyer_username, # Resources on citizen are owned by the contract's buyer
                 "Count": amount_to_purchase,

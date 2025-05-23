@@ -194,11 +194,11 @@ async function saveRelevancies(
 
     // Log the field names we're using to help debug
     console.log('Using the following field names for RELEVANCIES table:');
-    console.log('RelevancyId, AssetID, AssetType, Category, Type, TargetCitizen, RelevantToCitizen, Score, TimeHorizon, Title, Description, Notes, Status, CreatedAt');
+    console.log('RelevancyId, Asset, AssetType, Category, Type, TargetCitizen, RelevantToCitizen, Score, TimeHorizon, Title, Description, Notes, Status, CreatedAt');
 
     // Log the field names we're using to help debug
     console.log('Using the following field names for RELEVANCIES table:');
-    console.log('RelevancyId, AssetID, AssetType, Category, Type, TargetCitizen, RelevantToCitizen, Score, TimeHorizon, Title, Description, Notes, Status, CreatedAt');
+    console.log('RelevancyId, Asset, AssetType, Category, Type, TargetCitizen, RelevantToCitizen, Score, TimeHorizon, Title, Description, Notes, Status, CreatedAt');
     
     // Delete existing relevancy records for this citizen to avoid duplicates
     const existingRecords = await base(AIRTABLE_RELEVANCIES_TABLE)
@@ -224,7 +224,7 @@ async function saveRelevancies(
         return {
           fields: {
             RelevancyId: `${Citizen}_${id}_${Date.now()}`, // Generate a unique ID
-            AssetID: id,
+            Asset: id,
             AssetType: data.assetType,
             Category: data.category,
             Type: data.type,
@@ -248,7 +248,7 @@ async function saveRelevancies(
         return {
           fields: {
             RelevancyId: `${Citizen}_${id}_${Date.now()}`, // Generate a unique ID
-            AssetID: id,
+            Asset: id,
             AssetType: data.assetType,
             Category: data.category,
             Type: data.type,

@@ -51,7 +51,7 @@ const ListLandForSaleModal: React.FC<ListLandForSaleModalProps> = ({
         },
         body: JSON.stringify({
           type: 'land',
-          asset_id: landId,
+          asset: landId,
           seller: walletAddress,
           price: price,
           historical_name: landName,

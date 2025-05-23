@@ -305,7 +305,7 @@ def generate_description_and_image_prompt(username: str, citizen_info: Dict) -> 
             ],
             "relevancies": [  # Add the relevancies to the system context
                 {
-                    "asset_id": r.get('AssetID', ''),
+                    "asset": r.get('Asset', ''),
                     "asset_type": r.get('AssetType', ''),
                     "category": r.get('Category', ''),
                     "type": r.get('Type', ''),

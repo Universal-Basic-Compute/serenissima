@@ -206,7 +206,7 @@ def process_eat_at_tavern(
         transaction_payload = {
             "Type": "tavern_meal",
             "AssetType": "service",
-            "AssetId": tavern_building_airtable_id, # Could be tavern's custom ID if available
+            "Asset": tavern_building_airtable_id, # Could be tavern's custom ID if available
             "Seller": tavern_operator, # The tavern operator
             "Buyer": citizen_username,
             "Price": TAVERN_MEAL_COST,

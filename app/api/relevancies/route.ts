@@ -126,7 +126,7 @@ export async function GET(request: Request) {
     const relevancies = relevanciesRecords.map(record => {
       return {
         relevancyId: record.id,
-        assetId: record.get('AssetId') || '',
+        asset: record.get('Asset') || '',
         assetType: record.get('AssetType') || '',
         category: record.get('Category') || '',
         type: record.get('Type') || '',

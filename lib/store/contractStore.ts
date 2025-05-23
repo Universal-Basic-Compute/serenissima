@@ -1,6 +1,6 @@
 export interface Listing {
   id: string;
-  assetId: string;
+  asset: string;
   assetType?: 'land' | 'building' | 'bridge' | 'compute';
   seller: string;
   price: number;
@@ -31,7 +31,7 @@ export interface Offer {
 export interface Transaction {
   id: string;
   type: string;
-  assetId: string;
+  asset: string;
   seller: string;
   buyer: string;
   price: number;

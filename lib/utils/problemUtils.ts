@@ -46,7 +46,7 @@ export async function saveProblems(
         ProblemId: problem.problemId,
         Citizen: problem.citizen,
         AssetType: problem.assetType,
-        AssetId: problem.assetId,
+        Asset: problem.asset,
         Severity: problem.severity,
         Status: problem.status,
         CreatedAt: problem.createdAt,

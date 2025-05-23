@@ -36,7 +36,7 @@ export async function saveRelevancies(
         return {
           fields: {
             RelevancyId: `${Citizen}_${id}_${Date.now()}`, // Generate a unique ID
-            AssetID: id,
+            Asset: id,
             AssetType: data.assetType,
             Category: data.category,
             Type: data.type,
@@ -78,7 +78,7 @@ export async function saveRelevancies(
         return {
           fields: {
             RelevancyId: `${Citizen}_${id}_${Date.now()}`, // Generate a unique ID
-            AssetID: id, // This 'id' is often the username of the target citizen or an asset identifier
+            Asset: id, // This 'id' is often the username of the target citizen or an asset identifier
             AssetType: data.assetType,
             Category: data.category,
             Type: data.type,
@@ -97,7 +97,7 @@ export async function saveRelevancies(
         return {
           fields: {
             RelevancyId: `global_${id}_${Date.now()}`, // Generate a unique ID with 'global' prefix
-            AssetID: id,
+            Asset: id,
             AssetType: data.assetType,
             Category: data.category,
             Type: data.type,
@@ -115,15 +115,15 @@ export async function saveRelevancies(
       } else if (data.assetType === 'building') {
         // Handle building ownership relevancy (building on others' land)
         // and building operator relevancy
-        let relevancyIdBase = `${Citizen}_${data.assetId}_${data.type}`;
+        let relevancyIdBase = `${Citizen}_${data.asset}_${data.type}`;
         if (data.category === 'ownership_conflict' && data.closestLandId) {
-          relevancyIdBase = `${Citizen}_${data.assetId}_${data.closestLandId}_${data.type}`;
+          relevancyIdBase = `${Citizen}_${data.asset}_${data.closestLandId}_${data.type}`;
         }
 
         return {
           fields: {
             RelevancyId: `${relevancyIdBase}_${Date.now()}`,
-            AssetID: data.assetId, // This is the building's ID
+            Asset: data.asset, // This is the building's ID
             AssetType: data.assetType, // 'building'
             Category: data.category, // 'ownership_conflict' or 'operator_relations'
             Type: data.type, // e.g. 'building_on_others_land', 'operator_in_your_building'
@@ -132,8 +132,8 @@ export async function saveRelevancies(
             Score: data.score,
             TimeHorizon: data.timeHorizon || 'medium',
             Title: data.title || `Building on Land of ${data.targetCitizen}`,
-            Description: data.description || `Your building ${data.assetId} is on land owned by ${data.targetCitizen}.`,
-            Notes: `Building ID: ${data.assetId}, Land ID: ${data.closestLandId}`, // Add land_id to notes
+            Description: data.description || `Your building ${data.asset} is on land owned by ${data.targetCitizen}.`,
+            Notes: `Building ID: ${data.asset}, Land ID: ${data.closestLandId}`, // Add land_id to notes
             Status: data.status || 'active',
             CreatedAt: new Date().toISOString()
           }

@@ -189,7 +189,7 @@ def create_transaction_record(tables, from_citizen: str, to_citizen: str, amount
         # Create the transaction record
         transaction = tables['transactions'].create({
             "Type": "treasury_redistribution",
-            "AssetId": f"redistribution_{now}",
+            "Asset": f"redistribution_{now}",
             "Seller": from_citizen,  # ConsiglioDeiDieci
             "Buyer": to_citizen,  # Citizen ID
             "Price": amount,

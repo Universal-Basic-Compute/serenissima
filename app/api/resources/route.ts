@@ -66,7 +66,7 @@ export async function GET(request: Request) {
       base('RESOURCES')
         .select({
           filterByFormula: filterFormula, // Apply filter if owner is specified
-          view: 'Grid view' // Ensure all necessary fields like AssetType, AssetId are in this view
+          view: 'Grid view' // Ensure all necessary fields like AssetType, Asset are in this view
         })
         .eachPage(
           function page(records, fetchNextPage) {
@@ -122,7 +122,7 @@ export async function GET(request: Request) {
       
       // Parse position if AssetType is 'building'
       const assetType = record.get('AssetType');
-      const assetValue = record.get('Asset'); // Changed from AssetId to Asset
+      const assetValue = record.get('Asset'); // Changed from Asset to Asset
       
       // If AssetType is 'building', the 'Asset' field should contain the BuildingId (e.g. building_lat_lng_variant)
       // The 'Position' field on the RESOURCES table itself should ideally store the parsed JSON coordinates.

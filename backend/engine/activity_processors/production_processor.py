@@ -38,7 +38,7 @@ def get_specific_building_resource(
 ) -> Optional[Dict]:
     """Fetches a specific resource type from a building for a specific owner."""
     formula = (f"AND({{Type}}='{_escape_airtable_value(resource_type_id)}', "
-               f"{{Asset}}='{_escape_airtable_value(building_custom_id)}', " # AssetId -> Asset
+               f"{{Asset}}='{_escape_airtable_value(building_custom_id)}', " # Asset -> Asset
                f"{{AssetType}}='building', "
                f"{{Owner}}='{_escape_airtable_value(owner_username)}')")
     try:
@@ -55,7 +55,7 @@ def get_all_building_resources(
     """Fetches all resource records for a specific building (summing across owners if necessary, but usually one operator)."""
     # This simplified version assumes we sum all resources in the building regardless of specific owner for capacity check.
     # Or, more accurately, it should be for the operator.
-    formula = (f"AND({{Asset}}='{_escape_airtable_value(building_custom_id)}', " # AssetId -> Asset
+    formula = (f"AND({{Asset}}='{_escape_airtable_value(building_custom_id)}', " # Asset -> Asset
                f"{{AssetType}}='building')")
     try:
         records = tables['resources'].all(formula=formula)

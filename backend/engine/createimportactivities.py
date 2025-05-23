@@ -184,11 +184,11 @@ def get_resource_types() -> Dict:
 def get_building_resources(tables, building_id: str) -> List[Dict]:
     """Get all resources stored in a specific building."""
     try:
-        # Resources associated with a building now use AssetId and AssetType
+        # Resources associated with a building now use Asset and AssetType
         escaped_building_id = _escape_airtable_value(building_id)
-        formula = f"AND({{AssetId}}='{escaped_building_id}', {{AssetType}}='building')"
+        formula = f"AND({{Asset}}='{escaped_building_id}', {{AssetType}}='building')"
         resources = tables['resources'].all(formula=formula)
-        log.info(f"Found {len(resources)} resources in building {building_id} (via AssetId/AssetType)")
+        log.info(f"Found {len(resources)} resources in building {building_id} (via Asset/AssetType)")
         return resources
     except Exception as e:
         log.error(f"Error getting resources for building {building_id}: {e}")
@@ -591,16 +591,16 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
 
         if dry_run:
             log.info(f"🧪 **[DRY RUN]** Would process imports for building {buyer_building_id}.")
-            mock_delivery_citizen_asset_id = f"dry_run_ctz_for_{buyer_building_id.replace('.', '_')}"
-            log.info(f"  [DRY RUN] Would find/generate citizen (e.g., {mock_delivery_citizen_asset_id}) and set InVenice=True.")
+            mock_delivery_citizen_asset = f"dry_run_ctz_for_{buyer_building_id.replace('.', '_')}"
+            log.info(f"  [DRY RUN] Would find/generate citizen (e.g., {mock_delivery_citizen_asset}) and set InVenice=True.")
             for resource_item_dry_run in aggregated_resources_for_activity:
                  res_type_id_dry_run = resource_item_dry_run['ResourceId']
                  res_amount_dry_run = resource_item_dry_run['Amount']
                  res_def_dry_run = resource_types.get(res_type_id_dry_run, {})
                  res_name_dry_run = res_def_dry_run.get('name', res_type_id_dry_run)
                  res_cat_dry_run = res_def_dry_run.get('category', 'Unknown')
-                 log.info(f"  [DRY RUN] Would ensure import-tracking resource record for {res_type_id_dry_run} (Name: {res_name_dry_run}, Category: {res_cat_dry_run}, Count: {res_amount_dry_run}) with AssetId: {mock_delivery_citizen_asset_id}, AssetType: citizen, Owner: Italia.")
-            log.info(f"  [DRY RUN] Would create one delivery activity for {buyer_building_id} with resources: {json.dumps(aggregated_resources_for_activity)} and contract IDs: {', '.join(contract_ids_for_activity)} assigned to citizen {mock_delivery_citizen_asset_id}.")
+                 log.info(f"  [DRY RUN] Would ensure import-tracking resource record for {res_type_id_dry_run} (Name: {res_name_dry_run}, Category: {res_cat_dry_run}, Count: {res_amount_dry_run}) with Asset: {mock_delivery_citizen_asset}, AssetType: citizen, Owner: Italia.")
+            log.info(f"  [DRY RUN] Would create one delivery activity for {buyer_building_id} with resources: {json.dumps(aggregated_resources_for_activity)} and contract IDs: {', '.join(contract_ids_for_activity)} assigned to citizen {mock_delivery_citizen_asset}.")
             total_activities_created +=1 # Simulate activity creation
             continue
 
@@ -615,17 +615,17 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
         
         # Set InVenice to True for the selected/generated citizen
         delivery_citizen_record_id = delivery_citizen['id']
-        delivery_citizen_asset_id = delivery_citizen['fields'].get('CitizenId', delivery_citizen['fields'].get('Username'))
+        delivery_citizen_asset = delivery_citizen['fields'].get('CitizenId', delivery_citizen['fields'].get('Username'))
 
-        if not delivery_citizen_asset_id:
+        if not delivery_citizen_asset:
             log.error(f"Delivery citizen {delivery_citizen_record_id} has no CitizenId or Username. Skipping.")
             continue
         
         try:
             tables['citizens'].update(delivery_citizen_record_id, {"InVenice": True})
-            log.info(f"Set InVenice=True for delivery citizen {delivery_citizen_asset_id} ({delivery_citizen_record_id}).")
+            log.info(f"Set InVenice=True for delivery citizen {delivery_citizen_asset} ({delivery_citizen_record_id}).")
         except Exception as e_inv:
-            log.error(f"Failed to set InVenice=True for citizen {delivery_citizen_asset_id}: {e_inv}")
+            log.error(f"Failed to set InVenice=True for citizen {delivery_citizen_asset}: {e_inv}")
             # Continue processing, but this is a potential issue.
 
         # Create/Update "import-tracking" RESOURCES records for all involved resource types
@@ -637,8 +637,8 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
             
             try:
                 # For citizen-carried resources (AssetType='citizen'), Asset field uses Username.
-                # delivery_citizen_asset_id here is the Username.
-                resource_formula = f"AND({{Type}}='{_escape_airtable_value(resource_type_id)}', {{Asset}}='{_escape_airtable_value(delivery_citizen_asset_id)}', {{AssetType}}='citizen', {{Owner}}='Italia')"
+                # delivery_citizen_asset here is the Username.
+                resource_formula = f"AND({{Type}}='{_escape_airtable_value(resource_type_id)}', {{Asset}}='{_escape_airtable_value(delivery_citizen_asset)}', {{AssetType}}='citizen', {{Owner}}='Italia')"
                 existing_resources = tables["resources"].all(formula=resource_formula, max_records=1)
                 
                 current_time_iso = datetime.now().isoformat()
@@ -646,7 +646,7 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
                     "Type": resource_type_id, 
                     "Name": resource_definition.get('name', resource_type_id),
                     "Category": resource_definition.get('category', 'Unknown'),
-                    "Asset": delivery_citizen_asset_id, # Use Username of delivery person
+                    "Asset": delivery_citizen_asset, # Use Username of delivery person
                     "AssetType": "citizen",
                     "Owner": "Italia", 
                     "Count": resource_amount
@@ -655,15 +655,15 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
                 if existing_resources:
                     # Update only Count, UpdatedAt is computed
                     tables["resources"].update(existing_resources[0]["id"], {"Count": resource_amount})
-                    log.info(f"Updated import-tracking resource record for {resource_type_id} for citizen {delivery_citizen_asset_id}.")
+                    log.info(f"Updated import-tracking resource record for {resource_type_id} for citizen {delivery_citizen_asset}.")
                 else:
                     resource_data_fields["ResourceId"] = f"resource-{uuid.uuid4()}" # This is the custom ID for the resource stack
                     resource_data_fields["CreatedAt"] = current_time_iso
                     # UpdatedAt is computed on create
                     tables["resources"].create(resource_data_fields)
-                    log.info(f"Created new import-tracking resource record for {resource_type_id} for citizen {delivery_citizen_asset_id}.")
+                    log.info(f"Created new import-tracking resource record for {resource_type_id} for citizen {delivery_citizen_asset}.")
             except Exception as e_res_track:
-                log.error(f"Error managing import-tracking resource record for {resource_type_id} for citizen {delivery_citizen_asset_id}: {e_res_track}")
+                log.error(f"Error managing import-tracking resource record for {resource_type_id} for citizen {delivery_citizen_asset}: {e_res_track}")
                 all_resource_records_managed = False
                 break # Stop processing this building if a tracking record fails
         

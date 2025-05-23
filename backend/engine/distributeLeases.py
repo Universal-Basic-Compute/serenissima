@@ -206,7 +206,7 @@ def create_transaction_record(tables, from_citizen: str, to_citizen: str, amount
         # Create the transaction record
         transaction = tables['transactions'].create({
             "Type": "lease_payment",
-            "AssetId": f"lease_{land_id}_{building_id}",
+            "Asset": f"lease_{land_id}_{building_id}",
             "Seller": from_citizen,  # Building owner is the seller (paying)
             "Buyer": to_citizen,     # Land owner is the buyer (receiving)
             "Price": amount,
@@ -438,7 +438,7 @@ def create_tax_transaction_record(tables, from_citizen: str, to_citizen: str, am
         # Create the transaction record
         transaction = tables['transactions'].create({
             "Type": "lease_tax",
-            "AssetId": f"tax_{land_id}_{building_id}",
+            "Asset": f"tax_{land_id}_{building_id}",
             "Seller": from_citizen,  # Building owner is the seller (paying)
             "Buyer": to_citizen,     # ConsiglioDeiDieci is the buyer (receiving)
             "Price": amount,

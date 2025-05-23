@@ -156,7 +156,7 @@ def create_transaction_record(tables, loan: Dict, payment_amount: float) -> Opti
         # Create the transaction record
         transaction = tables['transactions'].create({
             "Type": "loan_payment",
-            "AssetId": "compute_token",
+            "Asset": "compute_token",
             "Seller": borrower,  # Borrower is the seller (paying)
             "Buyer": lender,     # Lender is the buyer (receiving)
             "Price": payment_amount,

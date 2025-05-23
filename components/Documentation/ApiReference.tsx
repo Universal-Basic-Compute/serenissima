@@ -1791,7 +1791,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
   {
     "id": "string",
     "type": "string",
-    "assetId": "string",
+    "asset": "string",
     "seller": "string",
     "buyer": "string",
     "price": number,
@@ -1811,7 +1811,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
             <h4 className="font-bold mb-2">Query Parameters</h4>
             <ul className="list-disc pl-6">
               <li><code>citizenId</code> (optional) - Filter transactions by citizen ID</li>
-              <li><code>assetId</code> (optional) - Filter transactions by asset ID</li>
+              <li><code>asset</code> (optional) - Filter transactions by asset ID</li>
               <li><code>role</code> (optional) - Filter transactions by role ('buyer' or 'seller')</li>
             </ul>
           </div>
@@ -1825,7 +1825,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
     {
       "id": "string",
       "type": "string",
-      "assetId": "string",
+      "asset": "string",
       "seller": "string",
       "buyer": "string",
       "price": number,
@@ -2105,7 +2105,7 @@ fetch('/api/resources/counts?buildingId=building-123456789')
     {
       "id": "string",
       "relevancyId": "string",
-      "assetId": "string",
+      "asset": "string",
       "assetType": "string",
       "category": "string",
       "type": "string",
@@ -2357,7 +2357,7 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
     {
       "id": "string",
       "relevancyId": "string",
-      "assetId": "string",
+      "asset": "string",
       "assetType": "string",
       "category": "string",
       "type": "string",
@@ -2406,7 +2406,7 @@ fetch('/api/relevancies/proximity?ai=marco_polo&type=connected')
     {
       "id": "string",
       "relevancyId": "string",
-      "assetId": "string",
+      "asset": "string",
       "assetType": "string",
       "category": "string",
       "type": "string",

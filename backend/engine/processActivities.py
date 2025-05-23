@@ -10,12 +10,12 @@ This script:
    - Updates or creates resource records in the target building for its operator/owner.
    - Processes financial transactions based on the original contracts in the batch.
 3. For "goto_home" activities:
-   - Identifies all resources owned by the citizen (AssetType='citizen', Owner=CitizenUsername, AssetId=CitizenCustomId).
+   - Identifies all resources owned by the citizen (AssetType='citizen', Owner=CitizenUsername, Asset=CitizenCustomId).
    - Checks storage capacity of the citizen's home.
    - Transfers these resources from the citizen's personal inventory to their home building.
    - The resources in the home building remain owned by the citizen.
 4. For "goto_work" activities:
-   - Identifies resources carried by the citizen (`AssetType`='citizen', `AssetId`=CitizenCustomId) that are owned by the operator (`RunBy`) of the workplace.
+   - Identifies resources carried by the citizen (`AssetType`='citizen', `Asset`=CitizenCustomId) that are owned by the operator (`RunBy`) of the workplace.
    - Checks storage capacity of the workplace.
    - If space allows, transfers these resources from the citizen's personal inventory to the workplace building.
    - The resources in the workplace building become owned by the workplace operator.
@@ -343,7 +343,7 @@ def main(dry_run: bool = False):
                             transaction_payload = {
                                 "Type": "gondola_fee",
                                 "AssetType": "transport_activity",
-                                "AssetId": activity_custom_id_for_fee,
+                                "Asset": activity_custom_id_for_fee,
                                 "Seller": "ConsiglioDeiDieci", # Recipient of the fee
                                 "Buyer": citizen_username_for_fee,  # Payer of the fee
                                 "Price": gondola_fee,
