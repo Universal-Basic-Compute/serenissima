@@ -17,6 +17,7 @@ import json
 import time
 import requests
 from typing import Dict, List, Optional, Any
+from urllib.parse import urlparse # Added import
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -138,9 +139,11 @@ def create_image_prompt(building: Dict[str, Any]) -> str:
     
     return full_prompt
 
-def generate_image(prompt: str, output_path: str) -> bool:
-    """Generate image using Ideogram API and save to the specified path."""
-    log.info(f"Generating image for: {output_path}")
+def generate_image(prompt: str, base_filename: str, output_dir: str) -> Optional[str]:
+    """
+    Generate image using Ideogram API, save with correct extension, and return the full path.
+    """
+    log.info(f"Generating image for base filename: {base_filename} in dir: {output_dir}")
     
     # Log the full prompt to the console
     log.info(f"PROMPT: {prompt}")
@@ -186,9 +189,23 @@ def generate_image(prompt: str, output_path: str) -> bool:
         
         if not image_url:
             log.error("No image URL in response")
-            return False
+            return None
         
         log.info(f"Image URL received: {image_url}")
+
+        # Determine file extension from URL
+        parsed_url = urlparse(image_url)
+        image_path_on_server = parsed_url.path
+        original_extension = Path(image_path_on_server).suffix.lower() # .png, .jpg etc.
+        
+        if not original_extension or original_extension not in ['.png', '.jpg', '.jpeg']:
+            log.warning(f"Could not determine a valid extension from image URL {image_url} (path: {image_path_on_server}, ext: '{original_extension}'), defaulting to .png")
+            original_extension = ".png"
+
+        # Ensure the output directory exists
+        os.makedirs(output_dir, exist_ok=True)
+        
+        actual_output_path = os.path.join(output_dir, f"{base_filename}{original_extension}")
         
         # Download the image
         log.info(f"Downloading image from URL: {image_url}")
@@ -196,35 +213,32 @@ def generate_image(prompt: str, output_path: str) -> bool:
         
         if not image_response.ok:
             log.error(f"Failed to download image: {image_response.status_code} {image_response.reason}")
-            return False
-        
-        # Ensure the directory exists
-        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+            return None
         
         # Save the image
-        log.info(f"Saving image to {output_path}")
-        with open(output_path, 'wb') as f:
+        log.info(f"Saving image to {actual_output_path}")
+        with open(actual_output_path, 'wb') as f:
             for chunk in image_response.iter_content(chunk_size=8192):
                 f.write(chunk)
         
         # Verify the saved file
-        if os.path.exists(output_path):
-            file_size = os.path.getsize(output_path)
-            log.info(f"Successfully saved image to {output_path} (size: {file_size} bytes)")
+        if os.path.exists(actual_output_path):
+            file_size = os.path.getsize(actual_output_path)
+            log.info(f"Successfully saved image to {actual_output_path} (size: {file_size} bytes)")
             
             if file_size < 1000:  # Suspiciously small for an image
-                log.warning(f"Warning: Saved file is very small ({file_size} bytes), might not be a valid image")
+                log.warning(f"Warning: Saved file {actual_output_path} is very small ({file_size} bytes), might not be a valid image")
                 # Save the response content for inspection
-                with open(f"{output_path}.response.json", 'w') as f:
+                with open(f"{actual_output_path}.response.json", 'w') as f: # Suffix before extension
                     f.write(response.text)
         else:
-            log.error(f"Failed to save image to {output_path}")
-            return False
+            log.error(f"Failed to save image to {actual_output_path}")
+            return None
             
-        return True
+        return actual_output_path
     except Exception as e:
-        log.error(f"Error generating image: {e}")
-        return False
+        log.error(f"Error generating image for {base_filename}: {e}")
+        return None
 
 def process_building(building: Dict[str, Any], force_regenerate: bool = False) -> bool:
     """Process a single building to generate its image."""
@@ -239,50 +253,60 @@ def process_building(building: Dict[str, Any], force_regenerate: bool = False) -
     safe_type = building_type.lower().replace(' ', '_').replace("'s", "s_").replace("'", '').replace('"', '')
     
     # Use the building ID if available, otherwise use the safe name
-    building_id = building.get('id', safe_name)
+    building_id = building.get('id', safe_name) # This is a filename stem
     
-    # Determine the output file path - use flat structure
-    output_path = os.path.join(BUILDINGS_IMAGE_DIR, f"{safe_name}.jpg")
-    
-    # Add more detailed logging about the check
-    log.info(f"Checking if image exists at: {output_path}")
-    image_exists = os.path.exists(output_path)
-    log.info(f"Image exists: {image_exists}, Force regenerate: {force_regenerate}")
-    
-    # Check if the image already exists
-    if image_exists and not force_regenerate:
-        log.info(f"Image already exists for {name}, skipping. Use --force to regenerate.")
-        return True
-    
+    # Check if image already exists (with common extensions)
+    if not force_regenerate:
+        possible_extensions = [".png", ".jpg", ".jpeg"]
+        existing_image_path = None
+        for ext in possible_extensions:
+            potential_path = os.path.join(BUILDINGS_IMAGE_DIR, f"{safe_name}{ext}")
+            if os.path.exists(potential_path):
+                existing_image_path = potential_path
+                break
+        
+        log.info(f"Checking if image exists for base name '{safe_name}': Path found: {existing_image_path}")
+        
+        if existing_image_path:
+            log.info(f"Image {existing_image_path} already exists for {name}, skipping. Use --force to regenerate.")
+            return True
+            
     # Create the prompt
     prompt = create_image_prompt(building)
     
-    # Generate the image
-    success = generate_image(prompt, output_path)
+    # Generate the image, getting the full path of the saved image
+    saved_image_full_path = generate_image(prompt, safe_name, BUILDINGS_IMAGE_DIR)
     
-    # Also save a copy with the building ID if available
-    if building_id and success:
-        id_output_path = os.path.join(BUILDINGS_IMAGE_DIR, f"{building_id}.jpg")
-        try:
-            # Copy the file
-            with open(output_path, 'rb') as src, open(id_output_path, 'wb') as dst:
-                dst.write(src.read())
-            log.info(f"Created ID-based copy at {id_output_path}")
-        except Exception as e:
-            log.error(f"Error creating ID-based copy: {e}")
+    if not saved_image_full_path:
+        log.error(f"Failed to generate image for {name} (base: {safe_name})")
+        return False
+
+    # Extract the extension from the actually saved file
+    _, saved_extension = os.path.splitext(saved_image_full_path)
+    
+    # Also save a copy with the building ID if available and different from safe_name
+    if building_id and building_id != safe_name:
+        id_output_path = os.path.join(BUILDINGS_IMAGE_DIR, f"{building_id}{saved_extension}")
+        if saved_image_full_path != id_output_path: # Avoid copying to itself
+            try:
+                with open(saved_image_full_path, 'rb') as src, open(id_output_path, 'wb') as dst:
+                    dst.write(src.read())
+                log.info(f"Created ID-based copy at {id_output_path}")
+            except Exception as e:
+                log.error(f"Error creating ID-based copy for {building_id}: {e}")
     
     # Also save a copy with the building type if different from name
-    if safe_type != safe_name and success:
-        type_output_path = os.path.join(BUILDINGS_IMAGE_DIR, f"{safe_type}.jpg")
-        try:
-            # Copy the file
-            with open(output_path, 'rb') as src, open(type_output_path, 'wb') as dst:
-                dst.write(src.read())
-            log.info(f"Created type-based copy at {type_output_path}")
-        except Exception as e:
-            log.error(f"Error creating type-based copy: {e}")
+    if safe_type != safe_name:
+        type_output_path = os.path.join(BUILDINGS_IMAGE_DIR, f"{safe_type}{saved_extension}")
+        if saved_image_full_path != type_output_path: # Avoid copying to itself
+            try:
+                with open(saved_image_full_path, 'rb') as src, open(type_output_path, 'wb') as dst:
+                    dst.write(src.read())
+                log.info(f"Created type-based copy at {type_output_path}")
+            except Exception as e:
+                log.error(f"Error creating type-based copy for {safe_type}: {e}")
     
-    return success
+    return True
 
 def main():
     """Main function to generate building images."""
