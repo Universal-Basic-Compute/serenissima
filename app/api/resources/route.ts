@@ -8,6 +8,7 @@ interface ResourceTypeDefinition {
   name: string;
   category: string;
   subcategory?: string | null;
+  tier?: number | null; // Added tier
   description?: string;
   importPrice?: number;
   lifetimeHours?: number | null;
@@ -109,6 +110,7 @@ export async function GET(request: Request) {
         outputRecord.name = outputRecord.name || definition.name;
         outputRecord.category = outputRecord.category || definition.category;
         outputRecord.subcategory = outputRecord.subcategory || definition.subcategory;
+        outputRecord.tier = outputRecord.tier ?? definition.tier; // Added tier
         outputRecord.description = outputRecord.description || definition.description;
         outputRecord.importPrice = outputRecord.importPrice ?? definition.importPrice;
         outputRecord.lifetimeHours = outputRecord.lifetimeHours ?? definition.lifetimeHours;
@@ -271,6 +273,7 @@ export async function POST(request: Request) {
       Name: data.name || definition?.name || data.type,
       Category: data.category || definition?.category || 'unknown',
       Subcategory: data.subcategory || definition?.subcategory || null,
+      Tier: data.tier ?? definition?.tier ?? null, // Added Tier for Airtable
       Description: data.description || definition?.description || '',
       Position: JSON.stringify(position), // Position of the resource itself
       Count: data.count || 1,
@@ -300,8 +303,9 @@ export async function POST(request: Request) {
         Type: string;
         Name: string;
         Category: string;
-        Subcategory?: string | null; // Added Subcategory
-        Description?: string; // Added Description
+        Subcategory?: string | null;
+        Tier?: number | null; // Added Tier
+        Description?: string;
         Position: string;
         Count: number;
         Asset: string;      // Renamed from LandId, more generic
@@ -333,6 +337,7 @@ export async function POST(request: Request) {
       name: processedFieldsPost.name || definition?.name || typedRecord.fields.Type,
       category: processedFieldsPost.category || definition?.category || 'unknown',
       subcategory: processedFieldsPost.subcategory || definition?.subcategory || null,
+      tier: processedFieldsPost.tier ?? definition?.tier ?? null, // Added tier
       description: processedFieldsPost.description || definition?.description || '',
       importPrice: processedFieldsPost.importPrice ?? definition?.importPrice,
       lifetimeHours: processedFieldsPost.lifetimeHours ?? definition?.lifetimeHours,

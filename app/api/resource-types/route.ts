@@ -46,6 +46,7 @@ function loadResourceData(filePath: string): any {
       name: resourceData.name || path.basename(filePath, '.json'),
       category: resourceData.category, // Keep as is, will be processed with path fallback later
       subcategory: resourceData.subcategory, // Keep as is, will be processed with path fallback later
+      tier: resourceData.tier !== undefined ? resourceData.tier : null, // Add tier, default to null
       description: resourceData.description || '',
       importPrice: resourceData.importPrice || 0,
       lifetimeHours: resourceData.lifetimeHours !== undefined ? resourceData.lifetimeHours : null,
@@ -123,6 +124,7 @@ export async function GET(request: Request) {
         name: loadedData.name || id,
         category: loadedData.category || (pathParts.length > 0 ? pathParts[0] : 'Uncategorized'),
         subcategory: loadedData.subcategory || (pathParts.length > 1 ? pathParts[1] : null),
+        tier: loadedData.tier, // tier is already defaulted in loadResourceData
         description: loadedData.description || '',
         importPrice: loadedData.importPrice || 0,
         lifetimeHours: loadedData.lifetimeHours, 
