@@ -1941,15 +1941,20 @@ number => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
-    const handleMouseDown = (e: MouseEvent) => {
+    const handleMouseDown_ViewerPanning = (e: MouseEvent) => {
+      // If in orient_bridge mode, do not initiate map panning.
+      // The InteractionService's mousedown (on canvas) will handle bridge selection and set its own state.
+      if (interactionMode === 'orient_bridge') {
+        return;
+      }
+
       setIsDragging(true);
-      isDraggingRef.current = true; // Update the ref
+      isDraggingRef.current = true; 
       setDragStart({ x: e.clientX, y: e.clientY });
     };
     
-    const handleMouseMove = (e: MouseEvent) => {
-      // Use the ref value instead of the state
-      if (!isDraggingRef.current) return;
+    const handleMouseMove_ViewerPanning = (e: MouseEvent) => { 
+      if (!isDraggingRef.current) return; 
       
       const dx = e.clientX - dragStart.x;
       const dy = e.clientY - dragStart.y;
@@ -1958,24 +1963,23 @@ number => {
       setDragStart({ x: e.clientX, y: e.clientY });
     };
     
-    const handleMouseUp = () => {
-      // Only update state if we're actually dragging
+    const handleMouseUp_ViewerPanning = () => { 
       if (isDraggingRef.current) {
         setIsDragging(false);
-        isDraggingRef.current = false; // Update the ref
+        isDraggingRef.current = false; 
       }
     };
     
-    canvas.addEventListener('mousedown', handleMouseDown);
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
+    canvas.addEventListener('mousedown', handleMouseDown_ViewerPanning);
+    window.addEventListener('mousemove', handleMouseMove_ViewerPanning);
+    window.addEventListener('mouseup', handleMouseUp_ViewerPanning);
     
     return () => {
-      canvas.removeEventListener('mousedown', handleMouseDown);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      canvas.removeEventListener('mousedown', handleMouseDown_ViewerPanning);
+      window.removeEventListener('mousemove', handleMouseMove_ViewerPanning);
+      window.removeEventListener('mouseup', handleMouseUp_ViewerPanning);
     };
-  }, [dragStart]); // Remove isDragging from dependencies
+  }, [dragStart, interactionMode]); // Added interactionMode to dependencies
 
   // Emit map transformation events for other components to sync with
   useEffect(() => {
