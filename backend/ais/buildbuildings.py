@@ -1670,8 +1670,26 @@ def process_ai_building_strategies(dry_run: bool = False, citizen_username_arg: 
                 decision = send_building_strategy_request(ai_username, data_package, target_land_id=target_land_id_arg)
                 
                 if decision and decision.get("building_type") and decision.get("land_id"):
+                    building_type_chosen = decision["building_type"]
+                    building_types_api = get_building_types_from_api() # This fetches all buildable types by the AI
+
+                    # Get construction cost
+                    chosen_building_info = building_types_api.get(building_type_chosen)
+                    if not chosen_building_info:
+                        log_error(f"Building type '{building_type_chosen}' chosen by AI {ai_username} not found in API definitions. Skipping placement.")
+                        ai_strategy_results[ai_username] = False
+                        continue
+                    
+                    construction_cost = chosen_building_info.get("constructionCost", float('inf'))
+                    citizen_ducats = data_package.get("citizen", {}).get("ducats", 0)
+
+                    if citizen_ducats < construction_cost:
+                        log_error(f"AI citizen {ai_username} does not have enough ducats ({citizen_ducats}) to build {building_type_chosen} (cost: {construction_cost}). Skipping placement.")
+                        ai_strategy_results[ai_username] = False
+                        continue
+                    
+                    log_success(f"AI citizen {ai_username} has enough ducats ({citizen_ducats}) to build {building_type_chosen} (cost: {construction_cost}). Proceeding to placement.")
                     log_section(f"STEP 2: Get placement decision for {ai_username}")
-                    building_types_api = get_building_types_from_api() # Renamed to avoid conflict
                     
                     # Ensure polygon_data and available_points are for the specific land chosen by AI or CLI
                     final_land_id = decision["land_id"]
