@@ -208,50 +208,17 @@ def process(
         tables['citizens'].update(carrier_airtable_id, {'Position': galley_position_str})
         log.info(f"[fetch_from_galley_proc] Updated carrier {carrier_username} position to galley {galley_custom_id} ({galley_position_str}).")
 
-        # Update PendingDeliveriesData on the galley building
-        # This is complex: find the specific item in JSON, update its 'picked_up_amount' or remove if fully picked.
-        # For now, let's assume this part is handled by a separate mechanism or that createActivities won't recreate for this item.
-        # A simple way is to add a note to the activity that it was processed.
-        # A more robust way: the galley's PendingDeliveriesData is a list of dicts.
-        # We need to find the dict matching original_contract_custom_id and resource_id_to_fetch,
-        # then reduce its 'amount' by actual_amount_to_pickup. If amount becomes <=0, remove the dict.
-        
-        pending_data_str = galley_building_record['fields'].get('PendingDeliveriesData', '[]')
-        try:
-            pending_deliveries = json.loads(pending_data_str)
-            updated_pending_deliveries = []
-            item_found_and_updated = False
-            for item in pending_deliveries:
-                if item.get('contract_id') == original_contract_custom_id and \
-                   item.get('resource_type') == resource_id_to_fetch:
-                    item_found_and_updated = True
-                    remaining_amount_in_item = float(item.get('amount', 0)) - actual_amount_to_pickup
-                    if remaining_amount_in_item > 0.001:
-                        item['amount'] = remaining_amount_in_item
-                        updated_pending_deliveries.append(item)
-                    # If remaining is zero or less, it's fully picked up, so don't add back.
-                else:
-                    updated_pending_deliveries.append(item)
-            
-            if item_found_and_updated:
-                tables['buildings'].update(galley_airtable_id, {"PendingDeliveriesData": json.dumps(updated_pending_deliveries)})
-                log.info(f"[fetch_from_galley_proc] Updated PendingDeliveriesData on galley {galley_custom_id}.")
-                
-                # If all items have been picked up, mark galley as ready to depart
-                if not updated_pending_deliveries:
-                    log.info(f"[fetch_from_galley_proc] All items picked up from galley {galley_custom_id}. Marking as 'empty_ready_to_depart'.")
-                    try:
-                        tables['buildings'].update(galley_airtable_id, {"Status": "empty_ready_to_depart"})
-                    except Exception as e_status_update:
-                        log.error(f"[fetch_from_galley_proc] Error updating status for empty galley {galley_custom_id}: {e_status_update}")
-            else:
-                log.warning(f"[fetch_from_galley_proc] Could not find matching item in PendingDeliveriesData for contract {original_contract_custom_id}, resource {resource_id_to_fetch} on galley {galley_custom_id}.")
-
-        except json.JSONDecodeError:
-            log.error(f"[fetch_from_galley_proc] Could not parse PendingDeliveriesData from galley {galley_custom_id}.")
-        except Exception as e_pdd:
-            log.error(f"[fetch_from_galley_proc] Error updating PendingDeliveriesData on galley {galley_custom_id}: {e_pdd}")
-
+        # Update the original import contract to mark this fetch as completed
+        if original_contract_record and original_contract_record.get('id'):
+            try:
+                tables['contracts'].update(original_contract_record['id'], {'LastExecutedAt': now_iso})
+                log.info(f"[fetch_from_galley_proc] Marked original import contract {original_contract_custom_id} (Airtable ID: {original_contract_record['id']}) as fetched by setting LastExecutedAt.")
+            except Exception as e_update_contract:
+                log.error(f"[fetch_from_galley_proc] Error updating LastExecutedAt for contract {original_contract_custom_id}: {e_update_contract}")
+                # This is a significant issue, but the resource transfer has happened.
+                # Depending on desired atomicity, might return False or just log. For now, log and proceed.
+        else:
+            log.warning(f"[fetch_from_galley_proc] Original contract record for {original_contract_custom_id} not available to update LastExecutedAt.")
 
     except Exception as e_process:
         log.error(f"[fetch_from_galley_proc] Error during transaction processing for activity {activity_guid}: {e_process}")

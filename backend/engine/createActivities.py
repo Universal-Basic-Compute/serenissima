@@ -1665,14 +1665,14 @@ def process_galley_unloading_activities(tables: Dict[str, Table], idle_citizens:
         return 0
 
     try:
-        # Only consider galleys that have "arrived" (IsConstructed = True)
-        formula_galleys = "AND({Type}='merchant_galley', {PendingDeliveriesData}!='', {IsConstructed}=TRUE())"
-        galleys_with_pending = tables['buildings'].all(formula=formula_galleys)
-        log.info(f"{LogColors.OKBLUE}Found {len(galleys_with_pending)} merchant galleys that have arrived and have PendingDeliveriesData.{LogColors.ENDC}")
+        # Find galleys that have "arrived" (IsConstructed = True)
+        formula_arrived_galleys = "AND({Type}='merchant_galley', {IsConstructed}=TRUE())"
+        arrived_galleys = tables['buildings'].all(formula=formula_arrived_galleys)
+        log.info(f"{LogColors.OKBLUE}Found {len(arrived_galleys)} arrived merchant galleys.{LogColors.ENDC}")
 
         available_citizens_pool = list(idle_citizens) # Make a mutable copy
 
-        for galley_record in galleys_with_pending:
+        for galley_record in arrived_galleys:
             if not available_citizens_pool:
                 log.info(f"{LogColors.OKBLUE}No more idle citizens available for further galley unloading tasks.{LogColors.ENDC}")
                 break
@@ -1680,42 +1680,56 @@ def process_galley_unloading_activities(tables: Dict[str, Table], idle_citizens:
             galley_airtable_id = galley_record['id']
             galley_custom_id = galley_record['fields'].get('BuildingId')
             galley_position_str = galley_record['fields'].get('Position')
-            pending_data_str = galley_record['fields'].get('PendingDeliveriesData', '[]')
+            galley_owner_username = galley_record['fields'].get('Owner')
 
-            if not galley_custom_id or not galley_position_str:
-                log.warning(f"{LogColors.WARNING}Galley {galley_airtable_id} missing BuildingId or Position. Skipping.{LogColors.ENDC}")
+            if not all([galley_custom_id, galley_position_str, galley_owner_username]):
+                log.warning(f"{LogColors.WARNING}Galley {galley_airtable_id} missing BuildingId, Position, or Owner. Skipping.{LogColors.ENDC}")
                 continue
             
             try:
                 galley_position = json.loads(galley_position_str)
-                pending_deliveries = json.loads(pending_data_str)
             except json.JSONDecodeError:
-                log.error(f"{LogColors.FAIL}Could not parse Position or PendingDeliveriesData for galley {galley_custom_id}. Skipping.{LogColors.ENDC}")
-                continue
-
-            if not pending_deliveries:
-                # log.info(f"{LogColors.OKBLUE}Galley {galley_custom_id} has no pending deliveries in its data. Skipping.{LogColors.ENDC}")
+                log.error(f"{LogColors.FAIL}Could not parse Position for galley {galley_custom_id}. Skipping.{LogColors.ENDC}")
                 continue
             
-            log.info(f"{LogColors.OKBLUE}Processing galley {galley_custom_id} with {len(pending_deliveries)} items in PendingDeliveriesData.{LogColors.ENDC}")
+            # Find import contracts associated with this galley that need processing
+            contracts_to_fetch_formula = (f"AND({{Type}}='import', "
+                                          f"{{Seller}}='{_escape_airtable_value(galley_owner_username)}', "
+                                          f"{{SellerBuilding}}='{_escape_airtable_value(galley_custom_id)}', "
+                                          f"{{LastExecutedAt}}=BLANK())")
+            try:
+                pending_import_contracts = tables['contracts'].all(formula=contracts_to_fetch_formula)
+            except Exception as e_fetch_contracts:
+                log.error(f"{LogColors.FAIL}Error fetching pending import contracts for galley {galley_custom_id}: {e_fetch_contracts}{LogColors.ENDC}")
+                continue
 
-            for item_to_fetch in pending_deliveries:
+            if not pending_import_contracts:
+                # log.info(f"{LogColors.OKBLUE}Galley {galley_custom_id} has no pending import contracts to fetch from. Skipping.{LogColors.ENDC}")
+                continue
+            
+            log.info(f"{LogColors.OKBLUE}Processing galley {galley_custom_id} with {len(pending_import_contracts)} pending import contracts.{LogColors.ENDC}")
+
+            for contract_to_fetch in pending_import_contracts:
                 if not available_citizens_pool:
                     log.info(f"{LogColors.OKBLUE}No more idle citizens for items in galley {galley_custom_id}.{LogColors.ENDC}")
-                    break # Break from items loop for this galley
+                    break # Break from contracts loop for this galley
 
-                original_contract_id = item_to_fetch.get('contract_id')
-                resource_type = item_to_fetch.get('resource_type')
-                amount = float(item_to_fetch.get('amount', 0))
+                original_contract_id = contract_to_fetch['fields'].get('ContractId') # Custom ContractId string
+                resource_type = contract_to_fetch['fields'].get('ResourceType')
+                # Amount is typically HourlyAmount for import contracts, representing total to import over time.
+                # For fetch_from_galley, we might fetch the full contract amount or a portion.
+                # The createimportactivities.py script batches amounts into the galley.
+                # The processor for deliver_resource_batch (piloting galley) puts the full batched amount into the galley.
+                # So, fetch_from_galley should fetch the amount specified in the contract.
+                amount = float(contract_to_fetch['fields'].get('HourlyAmount', 0)) # Assuming HourlyAmount is the total for this contract part
 
                 if not all([original_contract_id, resource_type]) or amount <= 0:
-                    log.warning(f"{LogColors.WARNING}Invalid item in PendingDeliveriesData for galley {galley_custom_id}: {item_to_fetch}{LogColors.ENDC}")
+                    log.warning(f"{LogColors.WARNING}Invalid contract data for import from galley {galley_custom_id}: ContractId={original_contract_id}, Resource={resource_type}, Amount={amount}{LogColors.ENDC}")
                     continue
 
-                # Check if an active fetch_from_galley activity already exists for this specific item
-                # This is a simplified check; a more robust check might involve a unique hash of the item.
+                # Check if an active fetch_from_galley activity already exists for this specific contract item
                 activity_exists_formula = (f"AND({{Type}}='fetch_from_galley', "
-                                           f"{{FromBuilding}}='{galley_airtable_id}', "
+                                           f"{{FromBuilding}}='{galley_airtable_id}', " # Galley's Airtable ID
                                            f"{{OriginalContractId}}='{_escape_airtable_value(original_contract_id)}', "
                                            f"{{ResourceId}}='{_escape_airtable_value(resource_type)}', "
                                            f"{{Status}}!='processed', {{Status}}!='failed')")

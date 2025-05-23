@@ -219,7 +219,7 @@ def create_or_get_merchant_galley(
             "CreatedAt": datetime.now(timezone.utc).isoformat(),
             "IsConstructed": False, # Galley is "arriving"
             "ConstructionDate": None,    # Will be set after activity creation to simulate arrival time
-            "PendingDeliveriesData": json.dumps([]), # Initialize with empty list
+            # "PendingDeliveriesData": json.dumps([]), # Removed: No longer using this field
             # No Occupant, Wages, RentAmount initially
         }
         created_galley = tables['buildings'].create(galley_payload)
@@ -965,8 +965,9 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
             arrival_time_iso = activity_created['fields'].get('EndDate')
             if arrival_time_iso and not dry_run: # Redundant dry_run check, but safe
                 update_payload_for_galley = {
-                    "IsConstructed": False, "ConstructionDate": arrival_time_iso,
-                    "PendingDeliveriesData": json.dumps(involved_original_contracts_info)
+                    "IsConstructed": False, "ConstructionDate": arrival_time_iso
+                    # "PendingDeliveriesData" removed. The manifest is in the activity,
+                    # and individual contract status will be tracked by LastExecutedAt.
                 }
                 try:
                     tables['buildings'].update(merchant_galley_building['id'], update_payload_for_galley)
