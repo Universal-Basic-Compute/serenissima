@@ -37,6 +37,7 @@ export default function IsometricViewer({ activeView, fullWaterGraphData }: Isom
   const [citizens, setCitizens] = useState<Record<string, any>>({});
   const [scale, setScale] = useState(3); // Start with a 3x zoom for a closer view
   const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [currentLoadingImage, setCurrentLoadingImage] = useState<string | null>(null);
   // Add refs to track previous state
   const prevActiveView = useRef<ViewType | null>(null);
   const prevScale = useRef<number>(3);
@@ -761,6 +762,23 @@ number => {
   // Load polygons
   useEffect(() => {
     console.log('IsometricViewer: Starting to fetch polygons from API...');
+
+    // Define loading images and select one randomly
+    const loadingImageFiles = [
+      'loading_image_1.png',
+      'loading_image_2.png',
+      'loading_image_3.png',
+      'loading_image_4.png',
+      'loading_image_5.png'
+      // Add more image names here if available
+    ];
+
+    if (loadingImageFiles.length > 0) {
+      const randomIndex = Math.floor(Math.random() * loadingImageFiles.length);
+      const selectedImage = `/images/loading/${loadingImageFiles[randomIndex]}`;
+      setCurrentLoadingImage(selectedImage);
+    }
+
     fetch('/api/get-polygons')
       .then(response => {
         console.log(`IsometricViewer: API response status: ${response.status} ${response.statusText}`);
@@ -3769,9 +3787,16 @@ number => {
       
       {/* Loading indicator */}
       {loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-          <div className="bg-white p-4 rounded-lg shadow-lg">
-            <p className="text-lg font-serif">Loading Venice...</p>
+        <div className="absolute inset-0 flex items-center justify-center z-50">
+          {currentLoadingImage && (
+            <img
+              src={currentLoadingImage}
+              alt="Loading background"
+              className="absolute inset-0 w-full h-full object-cover opacity-50" // Adjust opacity as needed
+            />
+          )}
+          <div className="relative z-10 bg-black/70 p-6 rounded-lg shadow-xl border-2 border-amber-500">
+            <p className="text-3xl font-serif text-amber-100 animate-pulse">Loading Venice...</p>
           </div>
         </div>
       )}
