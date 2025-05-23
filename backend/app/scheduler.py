@@ -111,6 +111,7 @@ def run_scheduled_tasks():
                 16: ("engine/citizenworkmobility.py", "Citizen work mobility"),
                 17: ("engine/dailywages.py", "Daily wage payments"),
                 18: ("engine/dailyrentpayments.py", "Daily rent payments"),
+                19: ("engine/calculateIncomeAndTurnover.py", "Citizen Income and Turnover Calculation"),
                 20: ("ais/bidonlands.py", "AI land bidding"),
                 21: ("ais/buildbuildings.py", "AI building construction"),
                 22: ("ais/adjustleases.py", "AI lease adjustments"),

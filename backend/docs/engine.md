@@ -344,6 +344,27 @@ Every day at 10:00 PM UTC, the AI rent adjustment system allows AI citizens to o
 
 This process creates a more dynamic housing contract with AI building owners actively managing their properties, providing contract signals about the value of different housing types, and encouraging citizens to seek affordable housing based on their wealth and social class.
 
+### Citizen Income and Turnover Calculation (7:00 PM UTC)
+
+**Script**: `backend/engine/calculateIncomeAndTurnover.py`
+
+Every day at 7:00 PM UTC, this script calculates financial metrics for all citizens:
+
+1.  The script fetches all citizens and all transactions from Airtable.
+2.  For each citizen, it calculates their total income and turnover (expenses) over the last 24 hours, 7 days, and 30 days.
+    *   **Income** is tallied from transactions where the citizen is a seller, receives a deposit (e.g., from the Treasury or loan disbursement), or is the recipient in a direct transfer.
+    *   **Turnover** (expenses) is tallied from transactions where the citizen is a buyer, makes an injection (e.g., to the Treasury), or is the sender in a direct transfer.
+3.  The script then updates each citizen's record in the `CITIZENS` table with the following calculated fields:
+    *   `DailyIncome`
+    *   `DailyTurnover`
+    *   `WeeklyIncome`
+    *   `WeeklyTurnover`
+    *   `MonthlyIncome`
+    *   `MonthlyTurnover`
+4.  This provides an up-to-date financial overview for each citizen, which can be used for display, analysis, or by other game systems.
+
+This process helps in understanding the economic activity and financial health of citizens over different periods.
+
 ### AI Wage Adjustments (11:00 PM UTC)
 
 **Script**: `backend/ais/adjustwages.py`
