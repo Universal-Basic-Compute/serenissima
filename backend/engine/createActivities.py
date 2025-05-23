@@ -133,8 +133,9 @@ def get_citizen_contracts(tables, citizen_id: str) -> List[Dict]:
         now_venice_contracts = datetime.datetime.now(VENICE_TIMEZONE_CONTRACTS)
         now_iso_venice = now_venice_contracts.isoformat()
         
-        # Query contracts where the citizen is the buyer, type is 'recurrent' OR 'import', and the contract is active
-        formula = f"AND({{Buyer}}='{citizen_id}', OR({{Type}}='recurrent', {{Type}}='import'), {{CreatedAt}}<='{now_iso_venice}', {{EndAt}}>='{now_iso_venice}')"
+        # Query contracts where the citizen is the buyer, type is 'recurrent', and the contract is active.
+        # Exclude 'import' contracts as they are handled by galley logic.
+        formula = f"AND({{Buyer}}='{citizen_id}', {{Type}}='recurrent', {{CreatedAt}}<='{now_iso_venice}', {{EndAt}}>='{now_iso_venice}')"
         contracts = tables['contracts'].all(formula=formula)
         
         # Sort by Priority in descending order
