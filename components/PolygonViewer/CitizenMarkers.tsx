@@ -175,7 +175,8 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     if (citizenPaths.length > 0) {
       // Sort paths by startTime descending to get the most recent first
       const sortedPaths = [...citizenPaths].sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
-      const mostRecentPathWithNotes = sortedPaths.find(p => p.notes && p.notes.trim() !== '');
+      // p.notes is now guaranteed to be a non-empty string or null by ActivityPathService
+      const mostRecentPathWithNotes = sortedPaths.find(p => p.notes);
       if (mostRecentPathWithNotes) {
         latestNotes = mostRecentPathWithNotes.notes;
       }

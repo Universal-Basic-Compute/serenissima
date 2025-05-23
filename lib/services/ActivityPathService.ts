@@ -102,7 +102,7 @@ export class ActivityPathService {
                   type: activity.Type || 'unknown',
                   startTime: activity.StartDate || activity.CreatedAt,
                   endTime: activity.EndDate,
-                  notes: activity.Notes || null // Extract Notes field
+                  notes: (typeof activity.Notes === 'string' && activity.Notes.trim()) ? activity.Notes.trim() : null // Ensure notes is a non-empty trimmed string or null
                 };
                 
                 pathsMap[citizenId].push(activityPath);
