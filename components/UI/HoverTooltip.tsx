@@ -550,7 +550,7 @@ export const HoverTooltip: React.FC = () => {
   
   return (
     <div 
-      className="absolute z-50 bg-black/80 text-white px-4 py-3 rounded text-sm pointer-events-none max-w-xs"
+      className="absolute z-50 bg-black/80 text-white px-4 py-3 rounded text-sm pointer-events-none max-w-md"
       data-ui-panel="true" // The tooltip itself should prevent hover on items below it
       style={{
         left: position.x + 15,
