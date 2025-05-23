@@ -12,17 +12,9 @@ const base = new Airtable({ apiKey }).base(baseId);
 export async function GET(request: Request) {
   try {
     // Get URL parameters
-    const { searchParams } = new URL(request.url);
-    const owner = searchParams.get('owner');
+    // const { searchParams } = new URL(request.url); // Owner filter removed
     
-    console.log(`Loading resources${owner ? ` for owner: ${owner}` : ' (all)'}`);
-    
-    // Build filter formula for Airtable query
-    let filterFormula = '';
-    if (owner) {
-      filterFormula = `{Owner} = '${owner}'`;
-      console.log(`Filtering resources by owner: ${owner}`);
-    }
+    console.log(`Loading all resources`);
     
     // Query Airtable directly
     const records = await new Promise((resolve, reject) => {
@@ -30,8 +22,8 @@ export async function GET(request: Request) {
       
       base('RESOURCES')
         .select({
-          filterByFormula: filterFormula || '',
-          view: 'Grid view' // Ensure all necessary fields like AssetType, AssetId, Position are in this view or fetched explicitly
+          // filterByFormula: filterFormula || '', // Owner filter removed
+          view: 'Grid view' // Ensure all necessary fields like AssetType, AssetId are in this view
         })
         .eachPage(
           function page(records, fetchNextPage) {
@@ -50,164 +42,56 @@ export async function GET(request: Request) {
           }
         );
     });
-
-    // --- Enhanced Position Logic ---
-    const citizenAssetIds: string[] = [];
-    (records as any[]).forEach(record => {
-      const assetType = record.get('AssetType');
-      if (assetType === 'Citizen') {
-        const assetId = record.get('AssetId');
-        if (assetId) {
-          citizenAssetIds.push(assetId);
-        }
-      }
-    });
-
-    let citizenPositionsMap: Map<string, { lat: number, lng: number }> = new Map();
-    if (citizenAssetIds.length > 0) {
-      console.log(`Fetching positions for ${citizenAssetIds.length} citizen assets.`);
-      const uniqueCitizenAssetIds = [...new Set(citizenAssetIds)]; // Ensure unique IDs
-      const citizenFilterFormula = `OR(${uniqueCitizenAssetIds.map(id => `{Username} = '${id.replace(/'/g, "\\'")}'`).join(',')})`;
-      
-      try {
-        const citizenRecords = await new Promise((resolve, reject) => {
-          const allCitizenRecords: any[] = [];
-          base('CITIZENS') // Assuming the table is named CITIZENS
-            .select({
-              filterByFormula: citizenFilterFormula,
-              fields: ['Username', 'Position'] // Assuming AssetId maps to Username
-            })
-            .eachPage(
-              function page(records, fetchNextPage) {
-                records.forEach(record => {
-                  allCitizenRecords.push(record);
-                });
-                fetchNextPage();
-              },
-              function done(err) {
-                if (err) { reject(err); return; }
-                resolve(allCitizenRecords);
-              }
-            );
-        });
-
-        (citizenRecords as any[]).forEach(citizenRecord => {
-          const citizenId = citizenRecord.get('Username');
-          const positionString = citizenRecord.get('Position');
-          if (citizenId && positionString) {
-            try {
-              const parsedPosition = JSON.parse(positionString);
-              if (parsedPosition && typeof parsedPosition.lat === 'number' && typeof parsedPosition.lng === 'number') {
-                citizenPositionsMap.set(citizenId, { lat: parsedPosition.lat, lng: parsedPosition.lng });
-              } else {
-                console.warn(`Citizen ${citizenId} has invalid position data:`, parsedPosition);
-              }
-            } catch (e) {
-              console.warn(`Invalid position JSON for citizen ${citizenId}: ${positionString}`, e);
-            }
-          }
-        });
-        console.log(`Fetched positions for ${citizenPositionsMap.size} citizens.`);
-      } catch (citizenError) {
-        console.error('Error fetching citizen positions from Airtable:', citizenError);
-      }
-    }
-    // --- End of Enhanced Position Logic ---
     
-    // Transform Airtable records to our resource format
-    const resourceMap = new Map(); // Use a Map to deduplicate by ResourceId
-    
-    (records as any[]).forEach(record => {
-      const airtableResourceId = record.get('ResourceId'); // Renamed to avoid conflict in scope
+    // Transform Airtable records
+    const outputResources = (records as any[]).map(record => {
+      const outputRecord: Record<string, any> = {};
       
-      // Skip if we've already processed this ResourceId
-      if (resourceMap.has(airtableResourceId)) {
-        console.warn(`Duplicate ResourceId found in Airtable: ${airtableResourceId}`);
-        return;
-      }
-
-      // Initialize with all fields from Airtable, keys converted to camelCase
-      const processedFields: Record<string, any> = {};
+      // Populate with camelCased fields from Airtable
       if (record.fields) {
         for (const airtableKey in record.fields) {
           if (Object.prototype.hasOwnProperty.call(record.fields, airtableKey)) {
             const camelKey = airtableKey.charAt(0).toLowerCase() + airtableKey.slice(1);
-            processedFields[camelKey] = record.fields[airtableKey];
+            outputRecord[camelKey] = record.fields[airtableKey];
           }
         }
       }
       
-      let finalPosition: { lat: number, lng: number } | {} = {}; // Default to an empty object
-      const assetType = record.get('AssetType'); // Original Airtable field name for logic
-      const assetId = record.get('AssetId'); // Original Airtable field name for logic
-
-      if (assetType === 'building' && assetId) {
-        const parts = String(assetId).split('_');
+      // Set the primary ID
+      outputRecord.id = record.get('ResourceId') || record.id;
+      
+      // Initialize position
+      outputRecord.position = {};
+      
+      // Parse position if AssetType is 'building'
+      const assetType = record.get('AssetType');
+      const assetId = record.get('AssetId');
+      
+      if (assetType === 'building' && assetId && typeof assetId === 'string') {
+        const parts = assetId.split('_');
+        // Expecting format like "building_LAT_LNG" or "prefix_LAT_LNG"
+        // Using parts[1] for lat and parts[2] for lng based on parseBuildingId example
         if (parts.length >= 3) {
-          const potentialLngStr = parts[parts.length - 1];
-          const potentialLatStr = parts[parts.length - 2];
-          const potentialLat = parseFloat(potentialLatStr);
-          const potentialLng = parseFloat(potentialLngStr);
-
-          if (!isNaN(potentialLat) && !isNaN(potentialLng)) {
-            finalPosition = { lat: potentialLat, lng: potentialLng };
-            console.log(`Parsed position from AssetId ${assetId} for building:`, finalPosition);
+          const lat = parseFloat(parts[1]);
+          const lng = parseFloat(parts[2]);
+          
+          if (!isNaN(lat) && !isNaN(lng)) {
+            outputRecord.position = { lat, lng };
+            // console.log(`Parsed position from AssetId ${assetId} for building:`, outputRecord.position);
+          } else {
+            // console.warn(`Could not parse lat/lng from AssetId ${assetId}`);
           }
-        }
-        if (Object.keys(finalPosition).length === 0) {
-          try {
-            const posField = record.get('Position'); // Original Airtable field name
-            if (posField) finalPosition = JSON.parse(posField);
-          } catch (e) {
-            console.warn(`Invalid Position JSON for building resource ${airtableResourceId} (AssetId: ${assetId}):`, record.get('Position'), e);
-          }
-        }
-      } else if (assetType === 'Citizen' && assetId && citizenPositionsMap.has(assetId)) {
-        finalPosition = citizenPositionsMap.get(assetId)!;
-        console.log(`Using fetched position for citizen asset ${assetId}:`, finalPosition);
-      } else {
-        try {
-          const posField = record.get('Position'); // Original Airtable field name
-          if (posField) finalPosition = JSON.parse(posField);
-        } catch (e) {
-          console.warn(`Invalid Position JSON for resource ${airtableResourceId}:`, record.get('Position'), e);
+        } else {
+          // console.warn(`AssetId ${assetId} does not have enough parts to parse lat/lng`);
         }
       }
       
-      if (typeof finalPosition !== 'object' || finalPosition === null) {
-        finalPosition = {};
-      }
-      
-      const finalResource = {
-        ...processedFields, // Spread all camelCased fields
-        id: airtableResourceId, // Explicitly set/override id using ResourceId from Airtable
-        position: finalPosition, // Explicitly set/override position
-      };
-
-      // Apply defaults for fields that might be missing or need specific fallbacks
-      // These use the camelCased keys from finalResource (which came from processedFields)
-      finalResource.name = finalResource.name || finalResource.type;
-      finalResource.category = finalResource.category || 'raw_materials';
-      finalResource.subcategory = finalResource.subcategory || '';
-      finalResource.count = typeof finalResource.count === 'undefined' ? 1 : finalResource.count;
-      finalResource.landId = finalResource.landId || '';
-      finalResource.owner = finalResource.owner || 'system';
-      finalResource.createdAt = finalResource.createdAt || new Date().toISOString();
-      finalResource.icon = finalResource.icon || (finalResource.type ? `${String(finalResource.type).toLowerCase().replace(/\s+/g, '_')}.png` : 'default.png');
-      finalResource.description = finalResource.description || '';
-      finalResource.rarity = finalResource.rarity || 'common';
-      
-      resourceMap.set(airtableResourceId, finalResource);
+      return outputRecord;
     });
     
-    // Convert Map to array
-    const resources = Array.from(resourceMap.values());
+    console.log(`Returning ${outputResources.length} resources.`);
     
-    // Type assertion for records to ensure TypeScript knows it's an array
-    const recordsArray = records as any[];
-    console.log(`Returning ${resources.length} unique resources (from ${recordsArray.length} total records)`);
-    
-    return NextResponse.json(resources);
+    return NextResponse.json(outputResources);
   } catch (error) {
     console.error('Error loading resources:', error);
     return NextResponse.json(
