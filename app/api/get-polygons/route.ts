@@ -94,10 +94,17 @@ export async function GET(request: Request) {
     const headers = new Headers();
     headers.set('Cache-Control', 'public, max-age=300'); // Cache for 5 minutes
     
-    return new NextResponse(JSON.stringify({ polygons }), {
-      status: 200,
-      headers
-    });
+    return NextResponse.json(
+      { 
+        success: true, 
+        version: new Date().toISOString(), // Add a version timestamp
+        polygons 
+      }, 
+      { 
+        status: 200, 
+        headers // Pass existing headers object for caching
+      }
+    );
   } catch (error) {
     console.error('Error fetching polygons:', error);
     return NextResponse.json(
