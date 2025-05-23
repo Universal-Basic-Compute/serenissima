@@ -683,7 +683,7 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
         log.error("Failed to get polygon data, exiting.")
         return
 
-    # Get active import contracts (Seller="Italia")
+    # Get active import contracts
     all_active_import_contracts = get_active_contracts(tables)
     if not all_active_import_contracts:
         log.info("No active import contracts found, exiting.")
