@@ -580,7 +580,7 @@ export class RenderService {
   /**
    * Draw polygons
    */
-  private drawPolygons(
+  public drawPolygons(
     ctx: CanvasRenderingContext2D,
     polygonsToRender: any[],
     interactionState: any
@@ -601,7 +601,7 @@ export class RenderService {
   /**
    * Draw buildings
    */
-  private drawBuildings(
+  public drawBuildings(
     ctx: CanvasRenderingContext2D,
     buildings: any[],
     scale: number,
