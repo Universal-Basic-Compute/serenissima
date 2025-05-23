@@ -97,9 +97,22 @@ def process(
             continue
 
         # For citizen-carried resources (AssetType='citizen'), Asset field uses Username.
+        # The Owner should be the merchant who is the Seller in the original contract.
+        original_contract_id_for_owner = activity_fields.get('ContractId') # This is the Original Custom Contract ID
+        contract_for_owner_details = get_contract_record(tables, original_contract_id_for_owner)
+        
+        if not contract_for_owner_details:
+            log.error(f"Cannot determine resource owner: Original contract {original_contract_id_for_owner} not found for activity {activity_guid}.")
+            all_resources_transferred = False; break
+        
+        merchant_owner_username = contract_for_owner_details['fields'].get('Seller')
+        if not merchant_owner_username:
+            log.error(f"Cannot determine resource owner: Original contract {original_contract_id_for_owner} has no Seller for activity {activity_guid}.")
+            all_resources_transferred = False; break
+
         tracking_res_formula = (f"AND({{Type}}='{_escape_airtable_value(resource_type_id)}', "
-                                f"{{Asset}}='{_escape_airtable_value(delivery_person_username)}', " # Asset -> Asset, use Username
-                                f"{{AssetType}}='citizen', {{Owner}}='Italia')")
+                                f"{{Asset}}='{_escape_airtable_value(delivery_person_username)}', "
+                                f"{{AssetType}}='citizen', {{Owner}}='{_escape_airtable_value(merchant_owner_username)}')")
         try:
             tracking_resources = tables['resources'].all(formula=tracking_res_formula, max_records=1)
             if tracking_resources:
@@ -174,13 +187,11 @@ def process(
 
     contract_fields = contract_record['fields']
     buyer_username = contract_fields.get('Buyer')
-    # Seller for imports is always "Italia"
-    seller_username = "Italia" # contract_fields.get('Seller') should be Italia
-    
-    if contract_fields.get('Seller') != "Italia":
-        log.warning(f"Contract {original_contract_custom_id} Seller is not 'Italia' ({contract_fields.get('Seller')}). This might not be an import payment context.")
-        # Decide if this is an error or if other payment types are handled here.
-        # For now, proceed assuming it's an import payment to Italia.
+    seller_username = contract_fields.get('Seller') # The Seller is the merchant from the contract
+
+    if not seller_username:
+        log.error(f"Contract {original_contract_custom_id} is missing a Seller. Cannot process payment for activity {activity_guid}.")
+        return False # Critical for import payment
 
     price_per_resource = float(contract_fields.get('PricePerResource', 0))
     

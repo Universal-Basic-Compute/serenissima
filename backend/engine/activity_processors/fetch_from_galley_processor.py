@@ -47,13 +47,14 @@ def get_citizen_current_load_local(tables: Dict[str, Any], citizen_username: str
 def get_resource_stock_in_galley(
     tables: Dict[str, Any], 
     galley_custom_id: str, 
-    resource_type_id: str
+    resource_type_id: str,
+    galley_owner_username: str # Added galley owner
 ) -> Optional[Dict]:
-    """Gets the specific resource record from the galley (owned by Italia)."""
+    """Gets the specific resource record from the galley, owned by the specified galley_owner_username."""
     formula = (f"AND({{Type}}='{resource_type_id.replace("'", "\\'")}', "
                f"{{Asset}}='{galley_custom_id.replace("'", "\\'")}', "
                f"{{AssetType}}='building', "
-               f"{{Owner}}='Italia')")
+               f"{{Owner}}='{galley_owner_username.replace("'", "\\'")}')") # Use galley_owner_username
     try:
         records = tables['resources'].all(formula=formula, max_records=1)
         return records[0] if records else None
@@ -125,9 +126,14 @@ def process(
     carrier_current_load = get_citizen_current_load_local(tables, carrier_username)
     carrier_remaining_capacity = max(0, CITIZEN_STORAGE_CAPACITY - carrier_current_load)
 
-    galley_resource_record = get_resource_stock_in_galley(tables, galley_custom_id, resource_id_to_fetch)
+    galley_owner_username = galley_building_record['fields'].get('Owner') # Get the merchant who owns the galley
+    if not galley_owner_username:
+        log.error(f"[fetch_from_galley_proc] Galley {galley_custom_id} has no owner. Cannot determine resource ownership.")
+        return False
+
+    galley_resource_record = get_resource_stock_in_galley(tables, galley_custom_id, resource_id_to_fetch, galley_owner_username)
     if not galley_resource_record:
-        log.warning(f"[fetch_from_galley_proc] Resource {resource_id_to_fetch} not found in galley {galley_custom_id} (owned by Italia).")
+        log.warning(f"[fetch_from_galley_proc] Resource {resource_id_to_fetch} not found in galley {galley_custom_id} (owned by {galley_owner_username}).")
         return False # Cannot fetch if resource not in galley
     
     stock_in_galley = float(galley_resource_record['fields'].get('Count', 0))
@@ -187,14 +193,14 @@ def process(
                 "Name": res_def_details.get('name', resource_id_to_fetch),
                 "Asset": carrier_username,
                 "AssetType": "citizen",
-                "Owner": ultimate_buyer_username, # Resources on citizen are owned by the contract's original buyer
+                "Owner": galley_owner_username, # Resources on citizen are owned by the merchant (galley owner)
                 "Count": actual_amount_to_pickup,
                 "Position": galley_position_str, # Citizen is at the galley
                 "CreatedAt": now_iso,
                 "Notes": f"Fetched for contract: {original_contract_custom_id}" # Store original contract ID
             }
             tables['resources'].create(new_carrier_res_payload)
-            log.info(f"[fetch_from_galley_proc] Created {actual_amount_to_pickup} of {resource_id_to_fetch} for carrier {carrier_username} (owned by {ultimate_buyer_username}), linked to contract {original_contract_custom_id}.")
+            log.info(f"[fetch_from_galley_proc] Created {actual_amount_to_pickup} of {resource_id_to_fetch} for carrier {carrier_username} (owned by merchant {galley_owner_username}), linked to contract {original_contract_custom_id}.")
 
         # Update carrier's position to Galley
         tables['citizens'].update(carrier_airtable_id, {'Position': galley_position_str})
