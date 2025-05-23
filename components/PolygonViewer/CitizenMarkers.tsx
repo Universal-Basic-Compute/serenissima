@@ -40,8 +40,6 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
   const [isLoadingPaths, setIsLoadingPaths] = useState<boolean>(false);
   const [selectedCitizenPaths, setSelectedCitizenPaths] = useState<ActivityPath[]>([]);
   const [hoveredCitizenPaths, setHoveredCitizenPaths] = useState<ActivityPath[]>([]);
-  // Add a new state to track all visible paths
-  const [visiblePaths, setVisiblePaths] = useState<ActivityPath[]>([]);
   // Add new state variables for animation
   const [animatedCitizens, setAnimatedCitizens] = useState<Record<string, AnimatedCitizen>>({});
   const [animationActive, setAnimationActive] = useState<boolean>(true);
@@ -293,19 +291,6 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
       setAnimatedCitizens({...animatedCitizens});
     }
   }, [scale, offset, canvasWidth, canvasHeight]);
-  
-  // Add an additional useEffect to update visiblePaths when activeView changes
-  useEffect(() => {
-    // Show paths in all views except land
-    if (activeView !== 'land') {
-      const allPaths = Object.values(activityPaths).flat();
-      setVisiblePaths(allPaths);
-      console.log(`Setting ${allPaths.length} paths as visible in ${activeView} view`);
-    } else {
-      // Clear paths in land view
-      setVisiblePaths([]);
-    }
-  }, [activeView, activityPaths]);
   
   // Add effect to get the current logged-in citizen's username
   useEffect(() => {
@@ -633,8 +618,8 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
         </svg>
       )}
       
-      {/* Activity Paths - Modified to show in all views except land */}
-      {((activeView !== 'land' && visiblePaths.length > 0) || hoveredCitizenPaths.length > 0 || selectedCitizenPaths.length > 0) && (
+      {/* Activity Paths - Show only on hover */}
+      {(hoveredCitizenPaths.length > 0) && (
         <svg 
           className="absolute inset-0 pointer-events-none" 
           style={{ 
@@ -646,90 +631,13 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
         >
           {/* Debug text to confirm the SVG is rendering */}
           <text x="20" y="40" fill="red" fontSize="12">
-            Paths: {hoveredCitizenPaths.length} hovered, {selectedCitizenPaths.length} selected, {activeView !== 'land' ? visiblePaths.length : 0} visible
+            Paths: {hoveredCitizenPaths.length} hovered
           </text>
           
           {/* Animation status indicator */}
           <text x="20" y="60" fill={animationActive ? "green" : "red"} fontSize="12">
             Animation: {animationActive ? "Active" : "Paused"}
           </text>
-          
-          {/* Render all paths when not in land view */}
-          {activeView !== 'land' && visiblePaths.map((activity) => {
-            // Get the animated citizen for this path
-            const animatedCitizen = Object.values(animatedCitizens).find(
-              ac => ac.currentPath?.id === activity.id
-            );
-            
-            // If this path is being animated, only show the remaining portion
-            let pathToRender = activity.path;
-            if (animatedCitizen && animatedCitizen.currentPath?.id === activity.id) {
-              // Find the current segment
-              const totalLength = activity.path.length;
-              const segmentIndex = Math.floor(animatedCitizen.progress * (totalLength - 1));
-              
-              // Instead of including all points in the current segment,
-              // just create a direct path from current position to the end of the current segment
-              // and then include all remaining points
-              if (segmentIndex + 1 < totalLength) {
-                const currentSegmentEnd = activity.path[segmentIndex + 1];
-                
-                // Create a new path that starts at the current position, goes to the end of the current segment,
-                // and then includes all remaining points
-                pathToRender = [
-                  animatedCitizen.currentPosition, 
-                  currentSegmentEnd, 
-                  ...activity.path.slice(segmentIndex + 2)
-                ];
-              } else {
-                // If we're at the last segment, just show a path from current position to end
-                pathToRender = [animatedCitizen.currentPosition, activity.path[totalLength - 1]];
-              }
-            }
-            
-            // Generate points string with validation
-            const pointsString = pathToRender
-              .filter(point => point && typeof point.lat === 'number' && typeof point.lng === 'number')
-              .map(point => {
-                const screenPos = latLngToScreen(point.lat, point.lng);
-                return `${screenPos.x},${screenPos.y}`;
-              })
-              .join(' ');
-            
-            // Only render if we have valid points
-            if (!pointsString) return null;
-            
-            return (
-              <g key={activity.id}>
-                <polyline 
-                  points={pointsString}
-                  fill="none"
-                  stroke={getActivityPathColor(activity)}
-                  strokeWidth="1.5"
-                  strokeOpacity="0.6"
-                />
-                {/* Add small circles at path endpoints only to reduce visual clutter */}
-                {pathToRender.length > 0 && [
-                  pathToRender[0],
-                  pathToRender[pathToRender.length - 1]
-                ].map((point, index) => {
-                  if (!point || typeof point.lat !== 'number' || typeof point.lng !== 'number') return null;
-                  
-                  const screenPos = latLngToScreen(point.lat, point.lng);
-                  return (
-                    <circle 
-                      key={`endpoint-${index}`}
-                      cx={screenPos.x}
-                      cy={screenPos.y}
-                      r="1.5"
-                      fill={getActivityPathColor(activity)}
-                      opacity="0.7"
-                    />
-                  );
-                })}
-              </g>
-            );
-          })}
           
           {/* Render paths for hovered citizen */}
           {hoveredCitizenPaths.map((activity) => {
