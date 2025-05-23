@@ -596,6 +596,89 @@ export class ProblemService {
     }
   }
 
+  /**
+   * Detect business buildings with zero wages.
+   * Problem is for RunBy if Wages is 0, null, or undefined.
+   */
+  public async detectZeroWagesBusinesses(username?: string): Promise<Record<string, Problem>> {
+    try {
+      const buildings = await this.fetchAllBuildings();
+      console.log(`[ProblemService] detectZeroWagesBusinesses: Fetched ${buildings.length} buildings to check for zero wages.`);
+      if (buildings.length === 0) {
+        return {};
+      }
+
+      const problems: Record<string, Problem> = {};
+      let processedCount = 0;
+
+      buildings.forEach(building => {
+        processedCount++;
+
+        const runBy = building.runBy && typeof building.runBy === 'string' ? building.runBy.trim() : null;
+        const category = building.category && typeof building.category === 'string' ? building.category.toLowerCase() : null;
+        const buildingId = building.id || building.buildingId || `unknown_building_${Date.now()}_${Math.random()}`;
+        const buildingName = building.name || building.type || 'Unnamed Building';
+        const wages = building.wages; // Expect 'wages' (camelCased from Airtable 'Wages')
+
+        let skipReason = "";
+
+        if (category !== 'business') {
+          skipReason = `Not a business category: '${category}'`;
+        } else if (!runBy) {
+          skipReason = "No RunBy citizen";
+        } else if (wages !== undefined && wages !== null && wages > 0) {
+          skipReason = `Wages are positive: ${wages}`;
+        } else if (username && runBy !== username) {
+          skipReason = `RunBy '${runBy}' does not match target username '${username}'`;
+        }
+
+        if (skipReason) {
+          if (username || processedCount < 10) {
+            console.log(`[ProblemService] detectZeroWagesBusinesses (Processed: ${processedCount}): SKIPPING Building ${buildingId} (Name: ${buildingName}, RunBy: ${runBy}, Category: ${category}, Wages: ${wages}). Reason: ${skipReason}`);
+          }
+          return;
+        }
+
+        const problemsFoundCount = Object.keys(problems).length;
+        if (username || processedCount < 10 || (problemsFoundCount < 5 && processedCount < 50)) {
+            console.log(`[ProblemService] detectZeroWagesBusinesses (Processed: ${processedCount}, ProblemsFoundSoFar: ${problemsFoundCount}): CHECKING Building ${buildingId} (Name: ${buildingName}, RunBy: ${runBy}, Category: ${category}, Wages: ${wages}) for problem generation.`);
+        }
+        
+        const problemTypeSpecific = 'zero_wages_business';
+        const title = 'Zero Wages for Business';
+        const description = `Your business, **${buildingName}** (ID: ${buildingId}), currently has its wages set to 0 Ducats. This means employees are not being paid, which can lead to dissatisfaction, low morale, and potential departure of workers.`;
+        const solutions = `Consider the following actions:\n- Set appropriate wages for employees working at this business.\n- Review your business finances to ensure you can afford to pay wages.\n- If the business is not yet operational or currently has no employees, this might be acceptable temporarily, but plan to set wages once it becomes active with staff.`;
+        const severity: Problem['severity'] = 'medium';
+
+        const problemId = `${problemTypeSpecific}_${buildingId}_${Date.now()}`;
+        problems[problemId] = {
+          problemId,
+          citizen: runBy!, // runBy is confirmed to be non-null by this point
+          assetType: 'building_operations',
+          asset: buildingId,
+          severity,
+          status: 'active',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          location: buildingName,
+          type: problemTypeSpecific,
+          title,
+          description,
+          solutions,
+          notes: `Business Building: ${buildingName} (ID: ${buildingId}). RunBy: ${runBy}. Wages: ${wages === undefined ? 'undefined' : wages === null ? 'null' : wages}.`,
+          position: building.position || null,
+        };
+      });
+
+      const numProblems = Object.keys(problems).length;
+      console.log(`[ProblemService] detectZeroWagesBusinesses: Created ${numProblems} 'Zero Wages for Business' problems (target user: ${username || 'all'}).`);
+      return problems;
+    } catch (error) {
+      console.error('[ProblemService] Error detecting zero wages for businesses:', error);
+      return {};
+    }
+  }
+
   public async detectNoActiveContractsForBusinesses(username?: string): Promise<Record<string, Problem>> {
     try {
       console.log(`[ProblemService] detectNoActiveContractsForBusinesses: Starting detection (user: ${username || 'all'}).`);

@@ -120,6 +120,17 @@ Here are the types of problems currently managed by the system:
     -   Review lease agreements and terms with the operator.
     -   If the zero-rent arrangement is intentional (e.g., special agreement, subsidiary), this notification can be ignored.
 
+### 11. Zero Wages for Business
+
+-   **Description**: This problem is reported to a business operator (`RunBy`) if their commercial property (category "business") has its wages amount set to 0 Ducats (or is null/undefined).
+-   **Detection**: The system identifies buildings with `Category` = "business", a valid `RunBy` citizen, and where the `Wages` field (expected to be on the building record, representing the wage rate or total wage pool for that business) is 0, null, or not set.
+-   **Impact/Severity**: Medium. Operating a business with zero wages means employees are not being paid. This can lead to severe dissatisfaction, low morale, inability to attract or retain workers, and ultimately business failure.
+-   **Suggested Solutions**:
+    -   Set an appropriate wage amount for employees working at this business. This could be an hourly rate, a daily rate, or a share of profits, depending on game mechanics.
+    -   Review the business's financial model to ensure it can sustainably afford to pay wages.
+    -   If the business is not yet operational or currently has no employees, this might be acceptable temporarily. However, a plan to implement wages should be in place once the business becomes active with staff.
+    -   Ensure the `Wages` field for the building is correctly configured in Airtable.
+
 ## Problem Management and Display
 
 ### Detection

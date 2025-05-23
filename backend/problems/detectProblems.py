@@ -278,6 +278,36 @@ def detect_problems():
         else:
             log.error(f"Zero Rent Amount API call failed: {zero_rent_response.status_code} - {zero_rent_response.text}")
             all_problem_details_summary.append(f"- Zero Rent Buildings: API Call Failed ({zero_rent_response.status_code})")
+
+        # 7. Detect Zero Wages for Businesses
+        log.info("--- Detecting Zero Wages for Businesses ---")
+        zero_wages_api_url = f"{base_url}/api/problems/zero-wages-business"
+        log.info(f"Calling API: {zero_wages_api_url} for all relevant business operators")
+        zero_wages_response = requests.post(zero_wages_api_url, json={}, timeout=180)
+        log.info(f"Zero Wages Business API response status: {zero_wages_response.status_code}")
+
+        if zero_wages_response.ok:
+            zero_wages_data = zero_wages_response.json()
+            log.info(f"Zero Wages Business API response: success={zero_wages_data.get('success')}, problemCount={zero_wages_data.get('problemCount')}")
+            if zero_wages_data.get('success'):
+                count = zero_wages_data.get('problemCount', 0)
+                saved_count = zero_wages_data.get('savedCount', 0)
+                total_problems_detected += count
+                total_problems_saved += saved_count
+                all_problem_details_summary.append(f"- Zero Wages (Businesses): {count} detected, {saved_count} saved.")
+                
+                problems_by_operator_zero_wages = {}
+                for problem_id, problem in zero_wages_data.get('problems', {}).items():
+                    operator = problem.get('citizen', 'Unknown') # 'citizen' field holds the RunBy
+                    problems_by_operator_zero_wages[operator] = problems_by_operator_zero_wages.get(operator, 0) + 1
+                if problems_by_operator_zero_wages:
+                    all_problem_details_summary.append("  Affected operators (Zero Wages): " + ", ".join([f"{c}({num})" for c, num in problems_by_operator_zero_wages.items()]))
+            else:
+                log.error(f"Zero Wages Business API returned error: {zero_wages_data.get('error')}")
+                all_problem_details_summary.append(f"- Zero Wages (Businesses): API Error - {zero_wages_data.get('error', 'Unknown')}")
+        else:
+            log.error(f"Zero Wages Business API call failed: {zero_wages_response.status_code} - {zero_wages_response.text}")
+            all_problem_details_summary.append(f"- Zero Wages (Businesses): API Call Failed ({zero_wages_response.status_code})")
         
         # Create admin notification
         details_text = "\n".join(all_problem_details_summary)
