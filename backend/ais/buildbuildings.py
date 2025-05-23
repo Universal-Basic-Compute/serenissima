@@ -276,13 +276,20 @@ def get_relevancies_for_target_citizen(username: str) -> List[Dict]:
         log_error(f"Error getting relevancies for target citizen {username}: {str(e)}")
         return []
 
-def get_building_tier(building_type: str, building_types: Dict) -> int:
-    """Determine the tier of a building type."""
-    # First check if the tier is explicitly defined in the building_types data
-    if building_type in building_types and "tier" in building_types[building_type]:
-        return building_types[building_type]["tier"]
+def get_building_tier(building_type: str, building_types_data: Dict) -> int: # Renamed building_types to building_types_data for clarity
+    """Determine the buildTier of a building type."""
+    # Check if the buildTier is explicitly defined in the building_types_data
+    # The building_types_data passed here is the global dict fetched from API
+    if building_type in building_types_data and building_types_data[building_type].get("buildTier") is not None:
+        return int(building_types_data[building_type]["buildTier"])
     
+    # Fallback to 'tier' if 'buildTier' is not present (for backward compatibility or other uses of 'tier')
+    if building_type in building_types_data and building_types_data[building_type].get("tier") is not None:
+        log_warning(f"Building type '{building_type}' using fallback 'tier' field instead of 'buildTier'. Tier: {building_types_data[building_type]['tier']}")
+        return int(building_types_data[building_type]["tier"])
+
     # Default tiers based on building type if not specified in the API data
+    # This mapping might be outdated if the API is the source of truth for tiers.
     tier_mapping = {
         # Tier 5 (Nobili only)
         "doge_palace": 5, "basilica": 5, "arsenal_gate": 5, "grand_canal_palace": 5,
@@ -314,10 +321,41 @@ def get_building_tier(building_type: str, building_types: Dict) -> int:
     if building_type.lower() in tier_mapping:
         return tier_mapping[building_type.lower()]
     
-    # If not found in the mapping, default to tier 1 (most permissive for basic buildings)
-    # This ensures unknown building types are at least buildable by some if tier info is missing.
-    # Consider logging a warning if a building type defaults.
-    log_warning(f"Building type '{building_type}' tier not found in API or mapping, defaulting to tier 1.")
+    # If not found in the API data or local mapping, default to a restrictive tier or handle as error.
+    # Defaulting to a high tier (e.g., 5) makes it unbuildable by most if data is missing.
+    # Defaulting to a low tier (e.g., 1) might be too permissive.
+    # For now, let's keep the original fallback mapping if API data is incomplete.
+    tier_mapping = {
+        # Tier 5 (Nobili only)
+        "doge_palace": 5, "basilica": 5, "arsenal_gate": 5, "grand_canal_palace": 5,
+        "procuratie": 5, "ducal_chapel": 5, "state_archives": 5, "senate_hall": 5,
+        
+        # Tier 4 (Nobili only)
+        "mint": 4, "arsenal": 4, "customs_house": 4, "grand_theater": 4,
+        "admiralty": 4, "treasury": 4, "council_chamber": 4, "embassy": 4,
+        "magistrate": 4, "naval_academy": 4, "opera_house": 4,
+        
+        # Tier 3 (Cittadini and above)
+        "fondaco": 3, "shipyard": 3, "eastern_merchant_house": 3, "bank": 3,
+        "trading_house": 3, "counting_house": 3, "merchant_guild": 3, "spice_warehouse": 3,
+        "silk_exchange": 3, "glass_factory": 3, "printing_press": 3, "apothecary": 3,
+        
+        # Tier 2 (Popolani and above)
+        "bottega": 2, "glassblower": 2, "merceria": 2, "canal_house": 2,
+        "artisan_workshop": 2, "sculptor_studio": 2, "goldsmith": 2, "lace_maker": 2,
+        "mask_maker": 2, "weaver": 2, "carpenter": 2, "stonemason": 2, "painter_studio": 2,
+        
+        # Tier 1 (All classes)
+        "market_stall": 1, "fisherman_cottage": 1, "blacksmith": 1, "bakery": 1,
+        "dock": 1, "bridge": 1, "workshop": 1, "tavern": 1, "gondola_station": 1,
+        "small_shop": 1, "fishmonger": 1, "butcher": 1, "cobbler": 1, "tailor": 1,
+        "barber": 1, "inn": 1, "laundry": 1, "water_well": 1, "vegetable_garden": 1
+    }
+    if building_type.lower() in tier_mapping:
+        log_warning(f"Building type '{building_type}' buildTier/tier not found in API data, using fallback mapping. Tier: {tier_mapping[building_type.lower()]}")
+        return tier_mapping[building_type.lower()]
+
+    log_warning(f"Building type '{building_type}' buildTier/tier not found in API or fallback mapping, defaulting to tier 1 (permissive).")
     return 1
 
 def get_building_types_from_api() -> Dict:
@@ -359,7 +397,8 @@ def get_building_types_from_api() -> Dict:
                             "name": building["name"],
                             "shortDescription": building.get("shortDescription", ""),
                             "constructionCost": ducats_cost,
-                            "tier": building.get("tier", 5),  # Default to tier 5 if not specified
+                            "buildTier": building.get("buildTier"), # Prefer buildTier
+                            "tier": building.get("tier"), # Keep tier for other potential uses or fallback
                             "category": building.get("category", "business")  # Include the category field
                         }
                 
