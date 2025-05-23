@@ -52,6 +52,7 @@ import uuid
 import re
 import math # Added for Haversine distance
 from datetime import datetime, timezone
+import pytz # Added for Venice timezone
 from typing import Dict, List, Optional, Any
 
 # Define ANSI color codes for logging
@@ -451,7 +452,9 @@ def main(dry_run: bool = False):
                         traveler_ducats = float(traveler_citizen_record['fields'].get('Ducats', 0))
                         if traveler_ducats >= gondola_fee:
                             recipient_ducats = float(fee_recipient_record['fields'].get('Ducats', 0))
-                            now_iso_fee = datetime.now(timezone.utc).isoformat()
+                            VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
+                            now_venice_fee = datetime.now(VENICE_TIMEZONE)
+                            now_iso_fee = now_venice_fee.isoformat()
 
                             tables['citizens'].update(traveler_citizen_record['id'], {'Ducats': traveler_ducats - gondola_fee})
                             tables['citizens'].update(fee_recipient_record['id'], {'Ducats': recipient_ducats + gondola_fee})
@@ -492,6 +495,10 @@ def main(dry_run: bool = False):
             # UNLESS the activity type handles its own position update (e.g., fetch_resource, fetch_from_galley)
             # or if the activity doesn't involve changing location (e.g. eat_from_inventory, eat_at_home, eat_at_tavern if already there)
             no_pos_update_types = ['fetch_resource', 'fetch_from_galley', 'eat_from_inventory', 'eat_at_home', 'eat_at_tavern', 'production', 'rest', 'idle']
+            
+            # Define VENICE_TIMEZONE for potential UpdatedAt override, though Airtable usually handles it.
+            VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
+
             if activity_type not in no_pos_update_types:
                 # ToBuilding field now stores the custom BuildingId
                 to_building_custom_id = activity_record['fields'].get('ToBuilding') 
