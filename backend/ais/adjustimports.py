@@ -638,7 +638,11 @@ def create_or_update_import_contract(
             # Update the existing contract
             airtable_record_id = existing_contract_record["id"]
             
-            tables["contracts"].update(airtable_record_id, {
+            # For imports, Seller and Transporter are set by createimportactivities.py
+            # If we are updating, we might be just changing amount/price, keep existing Seller if any.
+            # However, if this script is the *origin* of the import need, Seller should be blank.
+            # Let's assume for now that if it's an "import" type, Seller is initially NULL.
+            update_fields = {
                 "HourlyAmount": hourly_amount,
                 "PricePerResource": import_price,
                 "EndAt": end_date, # Refresh EndAt
@@ -646,21 +650,33 @@ def create_or_update_import_contract(
                     "reason": reason,
                     "updated_by": "AI Import Strategy",
                     "updated_at": now,
-                    "previous_ContractId_logic": "deterministic_overwrite" 
+                    "previous_ContractId_logic": "deterministic_overwrite"
                 })
-            })
-            print(f"Updated import contract {custom_contract_id} for {resource_type} at building {building_id}: {hourly_amount} units/hour")
+            }
+            # If it's an import contract being managed here, ensure Seller related fields are nullified
+            # if this script is meant to reset them for later merchant assignment.
+            # This part is tricky: if an AI is *adjusting* an existing import contract already assigned to a merchant,
+            # we wouldn't want to nullify the Seller.
+            # Let's assume this script primarily *creates* the need, so Seller is initially NULL.
+            # If the contract type is 'import', we ensure Seller fields are not set by this script.
+            # They will be set by createimportactivities.py when a merchant is assigned.
+            # This means if an existing import contract is found, we only update amount/price/enddate.
+            # If it's a *new* import contract, Seller fields are omitted.
+
+            print(f"Updated import contract {custom_contract_id} for {resource_type} at building {building_id}: {hourly_amount} units/hour. Seller/Transporter to be assigned.")
+            tables["contracts"].update(airtable_record_id, update_fields)
+
         else:
             # Create a new contract
             new_contract_data = {
                 "ContractId": custom_contract_id, # Use the deterministic ID
                 "Type": "import", # Explicitly set Type to 'import'
                 "Buyer": ai_username,
-                "Seller": "Italia", # Standard seller for imports
+                "Seller": None, # Seller will be assigned by createimportactivities
                 "ResourceType": resource_type,
-                "Transporter": "Italia", # Standard transporter for imports
+                "Transporter": None, # Transporter will be assigned by createimportactivities
                 "BuyerBuilding": building_id,
-                "SellerBuilding": None, # No seller building for imports from "Italia"
+                "SellerBuilding": None, # SellerBuilding will be the galley, assigned by createimportactivities
                 "HourlyAmount": hourly_amount,
                 "PricePerResource": import_price,
                 "Priority": 1,  # Default priority

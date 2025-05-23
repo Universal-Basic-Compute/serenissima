@@ -160,10 +160,10 @@ def create_or_get_merchant_galley(
     tables: Dict[str, Table], 
     galley_building_id: str, 
     position_coords: Dict[str, float], 
-    owner_username: str = "Italia", 
+    merchant_username: str, # Changed from owner_username to merchant_username
     dry_run: bool = False
 ) -> Optional[Dict]:
-    """Creates or gets the temporary merchant galley building."""
+    """Creates or gets the temporary merchant galley building, owned by the specified merchant."""
     formula = f"{{BuildingId}} = '{_escape_airtable_value(galley_building_id)}'"
     try:
         existing_galleys = tables['buildings'].all(formula=formula, max_records=1)
@@ -180,19 +180,19 @@ def create_or_get_merchant_galley(
                 "fields": {
                     "BuildingId": galley_building_id,
                     "Type": "merchant_galley",
-                    "Owner": owner_username,
-                    "RunBy": owner_username,
+                    "Owner": merchant_username,
+                    "RunBy": merchant_username,
                     "Position": json.dumps(position_coords),
-                    "Name": f"Merchant Galley at {galley_building_id}"
+                    "Name": f"Merchant Galley for {merchant_username} at {galley_building_id}"
                 }
             }
 
         galley_payload = {
             "BuildingId": galley_building_id,
             "Type": "merchant_galley",
-            "Name": f"Merchant Galley at {galley_building_id}",
-            "Owner": owner_username,
-            "RunBy": owner_username, # Italia also "runs" it
+            "Name": f"Merchant Galley for {merchant_username} at {galley_building_id}",
+            "Owner": merchant_username,
+            "RunBy": merchant_username, 
             "Position": json.dumps(position_coords),
             "Category": "Transport", # Assuming a category for such buildings
             "CreatedAt": datetime.now(timezone.utc).isoformat(),
@@ -216,6 +216,27 @@ def get_citizen_record(tables: Dict[str, Table], username: str) -> Optional[Dict
         return records[0] if records else None
     except Exception as e:
         log.error(f"Error fetching citizen record for {username}: {e}")
+        return None
+
+def select_import_merchant(tables: Dict[str, Table]) -> Optional[Dict]:
+    """Selects an available AI merchant (Forestieri, Ducats > 1M) for an import operation."""
+    log.info("Selecting an import merchant...")
+    try:
+        # Assuming IsAI is a boolean field (1 for true)
+        formula = "AND({SocialClass}='Forestieri', {Ducats}>1000000, {IsAI}=1)"
+        potential_merchants = tables['citizens'].all(formula=formula)
+        
+        if not potential_merchants:
+            log.warning("No suitable AI merchants (Forestieri, Ducats > 1M) found.")
+            return None
+        
+        # Simple selection: random. Could be more sophisticated (e.g., least busy).
+        selected_merchant = random.choice(potential_merchants)
+        merchant_username = selected_merchant['fields'].get('Username')
+        log.info(f"Selected merchant {merchant_username} for import operation.")
+        return selected_merchant
+    except Exception as e:
+        log.error(f"Error selecting import merchant: {e}")
         return None
 
 # --- End of New Helper Functions ---
@@ -243,18 +264,18 @@ def initialize_airtable():
         sys.exit(1)
 
 def get_active_contracts(tables) -> List[Dict]:
-    """Get all active import contracts ordered by CreatedAt."""
+    """Get all active import contracts awaiting merchant assignment (Seller is NULL), ordered by CreatedAt."""
     try:
         now = datetime.now().isoformat()
         
-        # Query contracts that are active (between CreatedAt and EndAt) and are import contracts (Seller = "Italia")
-        formula = f"AND({{CreatedAt}}<='{now}', {{EndAt}}>='{now}', {{Seller}}='Italia')"
+        # Query contracts that are active and have no Seller assigned yet
+        formula = f"AND({{CreatedAt}}<='{now}', {{EndAt}}>='{now}', {{Type}}='import', {{Seller}}=BLANK())"
         contracts = tables['contracts'].all(formula=formula)
         
         # Sort by CreatedAt
         contracts.sort(key=lambda x: x['fields'].get('CreatedAt', ''))
         
-        log.info(f"Found {len(contracts)} active import contracts for Seller='Italia'")
+        log.info(f"Found {len(contracts)} active import contracts awaiting merchant assignment.")
         return contracts
     except Exception as e:
         log.error(f"Error getting active import contracts: {e}")
@@ -686,10 +707,17 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
         
     galley_building_id = f"water_{galley_water_coords['lat']}_{galley_water_coords['lng']}"
     
-    # Create or get the merchant galley building
-    merchant_galley_building = create_or_get_merchant_galley(tables, galley_building_id, galley_water_coords, "Italia", dry_run)
+    # Select a merchant for this import operation
+    selected_merchant_record = select_import_merchant(tables)
+    if not selected_merchant_record:
+        log.error("No available merchant to handle imports. Exiting.")
+        return
+    selected_merchant_username = selected_merchant_record['fields'].get('Username')
+
+    # Create or get the merchant galley building, owned by the selected merchant
+    merchant_galley_building = create_or_get_merchant_galley(tables, galley_building_id, galley_water_coords, selected_merchant_username, dry_run)
     if not merchant_galley_building:
-        log.error(f"Failed to create or get merchant galley building {galley_building_id}. Exiting.")
+        log.error(f"Failed to create or get merchant galley building {galley_building_id} for merchant {selected_merchant_username}. Exiting.")
         return
 
     # Aggregate resources from contracts, respecting the 1000 unit cap for the galley
@@ -786,72 +814,48 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
         log.info(f"🧪 **[DRY RUN]** Would process import batch for galley {galley_building_id} at {galley_water_coords}.")
         log.info(f"  [DRY RUN] Galley manifest: {json.dumps(final_galley_manifest_for_activity)}")
         for contract_info_dry_run in involved_original_contracts_info:
-            log.info(f"  [DRY RUN] Would process payment for contract {contract_info_dry_run['contract_id']}: Buyer {contract_info_dry_run['buyer']} pays {contract_info_dry_run['cost']:.2f} to Italia.")
+            # Payment is deferred, but original contract would be updated
+            log.info(f"  [DRY RUN] Would update contract {contract_info_dry_run['contract_id']} with Seller={selected_merchant_username}, SellerBuilding={galley_building_id}, Transporter={selected_merchant_username}.")
         for res_item_dry_run in batched_resources_for_galley:
-            log.info(f"  [DRY RUN] Would create/update resource {res_item_dry_run['Type']} (Amount: {res_item_dry_run['Amount']:.2f}) in galley {galley_building_id}, owned by Italia.")
-        log.info(f"  [DRY RUN] Would find/generate citizen and create one delivery activity to galley {galley_building_id}.")
+            log.info(f"  [DRY RUN] Would create/update resource {res_item_dry_run['Type']} (Amount: {res_item_dry_run['Amount']:.2f}) in galley {galley_building_id}, owned by {selected_merchant_username}.")
+        log.info(f"  [DRY RUN] Would find/generate citizen and create one delivery activity to galley {galley_building_id} (acting for {selected_merchant_username}).")
         log.info(f"🚢 Import processing complete (DRY RUN).")
         return
 
     # --- Perform Actual Operations ---
 
-    # 1. Financial Transactions (Deferred - Payment will occur upon resource unloading from galley)
-    # log.info("Financial transactions for import batch are deferred until resources are unloaded from the galley.")
-    # for contract_info in involved_original_contracts_info:
-    #     buyer_citizen_rec = get_citizen_record(tables, contract_info['buyer'])
-    #     # Seller is "Italia"
-    #     italia_citizen_rec = get_citizen_record(tables, "Italia") # Assuming "Italia" is a citizen record
+    # --- Perform Actual Operations ---
 
-    #     if not buyer_citizen_rec or not italia_citizen_rec:
-    #         log.error(f"Buyer {contract_info['buyer']} or Seller Italia not found for transaction of contract {contract_info['contract_id']}. Critical error, stopping.")
-    #         # Ideally, implement rollback or more robust error handling here.
-    #         return
+    # 1. Update Original Contracts with Merchant Details
+    log.info(f"Updating {len(processed_contract_airtable_ids)} original contracts with merchant {selected_merchant_username} and galley {galley_building_id}.")
+    for contract_airtable_id_to_update in processed_contract_airtable_ids:
+        try:
+            update_payload_contract = {
+                "Seller": selected_merchant_username,
+                "SellerBuilding": galley_building_id, # Custom ID of the galley
+                "Transporter": selected_merchant_username,
+                "Status": "processing_by_merchant" # Optional: update status
+            }
+            tables['contracts'].update(contract_airtable_id_to_update, update_payload_contract)
+            log.info(f"Updated contract (Airtable ID: {contract_airtable_id_to_update}) with merchant details.")
+        except Exception as e_update_contract:
+            log.error(f"Error updating contract (Airtable ID: {contract_airtable_id_to_update}) with merchant details: {e_update_contract}")
+            # Decide if this is critical enough to stop the whole batch. For now, log and continue.
 
-    #     try:
-    #         buyer_ducats = float(buyer_citizen_rec['fields'].get('Ducats', 0))
-    #         italia_ducats = float(italia_citizen_rec['fields'].get('Ducats', 0))
-
-    #         tables['citizens'].update(buyer_citizen_rec['id'], {'Ducats': buyer_ducats - contract_info['cost']})
-    #         tables['citizens'].update(italia_citizen_rec['id'], {'Ducats': italia_ducats + contract_info['cost']})
-
-    #         transaction_payload = {
-    #             "Type": "import_payment_to_galley",
-    #             "AssetType": "contract",
-    #             "Asset": contract_info['contract_id'], # Custom ContractId
-    #             "Seller": "Italia",
-    #             "Buyer": contract_info['buyer'],
-    #             "Price": contract_info['cost'],
-    #             "Details": json.dumps({
-    #                 "resource_type": contract_info['resource_type'],
-    #                 "amount": contract_info['amount'],
-    #                 "galley_id": galley_building_id,
-    #                 "original_buyer_building": contract_info['original_buyer_building']
-    #             }),
-    #             "CreatedAt": datetime.now(timezone.utc).isoformat(),
-    #             "ExecutedAt": datetime.now(timezone.utc).isoformat()
-    #         }
-    #         tables['transactions'].create(transaction_payload)
-    #         log.info(f"Processed financial transaction for contract {contract_info['contract_id']}. Cost: {contract_info['cost']:.2f}")
-    #     except Exception as e_finance:
-    #         log.error(f"Error processing financial transaction for contract {contract_info['contract_id']}: {e_finance}. Stopping.")
-    #         return
-
-    # 2. Create/Update Resources in the Galley Building
+    # 2. Create/Update Resources in the Galley Building (Owned by the selected merchant)
     galley_position_str = merchant_galley_building['fields'].get('Position', '{}')
     for res_item in batched_resources_for_galley:
         res_type_id = res_item['Type']
         res_amount = res_item['Amount']
         res_def = resource_types.get(res_type_id, {})
         
-        # Resources in a building: Asset=BuildingId, AssetType='building'
-        formula = f"AND({{Type}}='{_escape_airtable_value(res_type_id)}', {{Asset}}='{_escape_airtable_value(galley_building_id)}', {{AssetType}}='building', {{Owner}}='Italia')"
+        # Resources in a building: Asset=BuildingId, AssetType='building', Owner=MerchantUsername
+        formula = f"AND({{Type}}='{_escape_airtable_value(res_type_id)}', {{Asset}}='{_escape_airtable_value(galley_building_id)}', {{AssetType}}='building', {{Owner}}='{_escape_airtable_value(selected_merchant_username)}')"
         try:
             existing_galley_res = tables["resources"].all(formula=formula, max_records=1)
             if existing_galley_res:
-                # This assumes we are replacing the stock, not adding. If adding, fetch current count.
-                # For imports, it's usually a fresh load for this batch.
                 tables["resources"].update(existing_galley_res[0]["id"], {"Count": res_amount})
-                log.info(f"Updated resource {res_type_id} (Amount: {res_amount:.2f}) in galley {galley_building_id}.")
+                log.info(f"Updated resource {res_type_id} (Amount: {res_amount:.2f}) in galley {galley_building_id} for merchant {selected_merchant_username}.")
             else:
                 new_res_payload = {
                     "ResourceId": f"resource-{uuid.uuid4()}",
@@ -859,18 +863,18 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
                     "Name": res_def.get('name', res_type_id),
                     "Asset": galley_building_id,
                     "AssetType": "building",
-                    "Owner": "Italia",
+                    "Owner": selected_merchant_username, # Owned by the selected merchant
                     "Count": res_amount,
-                    "Position": galley_position_str, # Position of the galley
+                    "Position": galley_position_str, 
                     "CreatedAt": datetime.now(timezone.utc).isoformat()
                 }
                 tables["resources"].create(new_res_payload)
-                log.info(f"Created resource {res_type_id} (Amount: {res_amount:.2f}) in galley {galley_building_id}.")
+                log.info(f"Created resource {res_type_id} (Amount: {res_amount:.2f}) in galley {galley_building_id} for merchant {selected_merchant_username}.")
         except Exception as e_res_galley:
-            log.error(f"Error creating/updating resource {res_type_id} in galley {galley_building_id}: {e_res_galley}. Stopping.")
+            log.error(f"Error creating/updating resource {res_type_id} in galley {galley_building_id} for merchant {selected_merchant_username}: {e_res_galley}. Stopping.")
             return
 
-    # 3. Find/Generate Citizen for Delivery Activity
+    # 3. Find/Generate Citizen for Galley Piloting Activity
     delivery_citizen = find_available_citizen(tables)
     if not delivery_citizen:
         log.info(f"No available citizen for galley delivery, generating new one.")
@@ -886,38 +890,54 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
         log.error(f"Failed to set InVenice=True for citizen {delivery_citizen['fields'].get('Username')}: {e_inv}")
         # Continue, but this is an issue.
 
-    # 4. Create Single Delivery Activity
+    # 4. Create Single Delivery Activity (Galley Piloting)
     original_contract_custom_ids_for_notes = [info['contract_id'] for info in involved_original_contracts_info]
+    
+    # Modify notes for the galley piloting activity
+    piloting_activity_notes = (f"🚢 Piloting merchant galley (for merchant {selected_merchant_username}) "
+                               f"with imported resources to {galley_building_id}. "
+                               f"Original Contract IDs: {', '.join(original_contract_custom_ids_for_notes)}")
+
+    # Call create_delivery_activity, ensuring the notes are updated
+    # The create_delivery_activity function itself needs to be flexible with its notes or we update notes here.
+    # For now, let's assume create_delivery_activity uses the passed notes.
+    # We need to ensure the `create_delivery_activity` function uses the `original_contract_ids` parameter for the notes.
+    # Let's adjust the call slightly if the function signature for notes is different.
+    # The current signature is: create_delivery_activity(tables, citizen, galley_building_id, resources_in_galley_manifest, original_contract_ids)
+    # The last parameter `original_contract_ids` is used in the notes string construction within that function.
+    
     activity_created = create_delivery_activity(
         tables, 
         delivery_citizen, 
-        galley_building_id, # Target is the galley
-        final_galley_manifest_for_activity, # What's in the galley
-        original_contract_custom_ids_for_notes # For notes
+        galley_building_id, 
+        final_galley_manifest_for_activity, 
+        original_contract_custom_ids_for_notes # This list of IDs will be used in the notes
     )
 
     if activity_created:
-        log.info(f"✅ Successfully created galley delivery activity {activity_created['id']} to {galley_building_id}.")
+        log.info(f"✅ Successfully created galley piloting activity {activity_created['id']} to {galley_building_id} (for merchant {selected_merchant_username}).")
         arrival_time_iso = activity_created['fields'].get('EndDate')
 
+        # Update the galley's ConstructionDate and PendingDeliveriesData
         if arrival_time_iso and not dry_run:
             update_payload_for_galley = {
-                "IsConstructed": False, # Explicitly set to False, signifying it's "en route"
-                "ConstructionDate": arrival_time_iso, # Use ConstructionDate for arrival time
+                "IsConstructed": False, 
+                "ConstructionDate": arrival_time_iso, 
                 "PendingDeliveriesData": json.dumps(involved_original_contracts_info)
+                # Owner and RunBy are already set to the merchant during galley creation/retrieval
             }
             try:
                 tables['buildings'].update(merchant_galley_building['id'], update_payload_for_galley)
-                log.info(f"Updated galley {galley_building_id} (Airtable ID: {merchant_galley_building['id']}) with IsConstructed=False, ConstructionDate (as ArrivalDate)={arrival_time_iso}, and PendingDeliveriesData.")
+                log.info(f"Updated galley {galley_building_id} (Airtable ID: {merchant_galley_building['id']}) with IsConstructed=False, ConstructionDate={arrival_time_iso}, and PendingDeliveriesData.")
             except Exception as e_update_galley:
                 log.error(f"Error updating galley {galley_building_id} with arrival data: {e_update_galley}")
         elif dry_run:
-            log.info(f"[DRY RUN] Would update galley {galley_building_id} with IsConstructed=False, ConstructionDate (as ArrivalDate)={arrival_time_iso}, and PendingDeliveriesData: {json.dumps(involved_original_contracts_info)}")
+            log.info(f"[DRY RUN] Would update galley {galley_building_id} with IsConstructed=False, ConstructionDate={arrival_time_iso}, and PendingDeliveriesData: {json.dumps(involved_original_contracts_info)}")
 
     else:
-        log.error(f"Failed to create galley delivery activity to {galley_building_id}.")
+        log.error(f"Failed to create galley piloting activity to {galley_building_id} for merchant {selected_merchant_username}.")
 
-    log.info(f"🚢 Import processing complete. Galley {galley_building_id} dispatch initiated.")
+    log.info(f"🚢 Import processing complete for merchant {selected_merchant_username}. Galley {galley_building_id} dispatch initiated.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process import contracts into a central galley.")
