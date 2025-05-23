@@ -892,7 +892,7 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
                     "AssetType": "building",
                     "Owner": selected_merchant_username, # Owned by the selected merchant
                     "Count": res_amount,
-                    "Position": galley_position_str, 
+                    # "Position": galley_position_str, # Removed as 'Position' field does not exist on RESOURCES table
                     "CreatedAt": datetime.now(timezone.utc).isoformat()
                 }
                 tables["resources"].create(new_res_payload)
