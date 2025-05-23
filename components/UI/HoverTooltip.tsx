@@ -243,11 +243,12 @@ export const HoverTooltip: React.FC = () => {
     const citizen = tooltipData.citizen;
     
     console.log('TOOLTIP: Rendering citizen tooltip with data:', {
-      citizen: citizen ? {
-        name: citizen.firstname || citizen.FirstName || '',
-        lastName: citizen.lastname || citizen.LastName || '',
-        socialClass: citizen.socialclass || citizen.SocialClass || citizen.socialClass || '',
-        imageUrl: citizen.imageurl || citizen.profileimage || citizen.ImageUrl || citizen.image
+      citizen: citizen ? { // citizen here is safeCitizen
+        firstName: citizen.firstName,
+        lastName: citizen.lastName,
+        socialClass: citizen.socialClass,
+        imageUrl: citizen.imageUrl,
+        activityNotes: citizen.activityNotes // Add activityNotes to the log
       } : 'No citizen data'
     });
     
@@ -256,13 +257,15 @@ export const HoverTooltip: React.FC = () => {
       // Ensure we have the correct property names for image and social class
       const imageUrl = citizen.imageUrl || `/images/citizens/${citizen.id || 'default'}.jpg`; // Use citizen.id from safeCitizen
     
-      console.log('TOOLTIP: Using image URL:', imageUrl);
+      // This console.log can be removed or kept, but the one above is more comprehensive now.
+      // console.log('TOOLTIP: Using image URL:', imageUrl); 
     
       const firstName = typeof citizen.firstName === 'string' ? citizen.firstName : '';
       const lastName = typeof citizen.lastName === 'string' ? citizen.lastName : '';
       const socialClass = typeof citizen.socialClass === 'string' ? citizen.socialClass : 'Citizen';
       
-      console.log('TOOLTIP: Citizen display info:', { firstName, lastName, socialClass });
+      // This console.log can be removed or kept.
+      // console.log('TOOLTIP: Citizen display info:', { firstName, lastName, socialClass });
       
       tooltipContent = (
         <div className="flex flex-col items-center">
