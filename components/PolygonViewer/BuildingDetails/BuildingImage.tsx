@@ -55,7 +55,7 @@ const BuildingImage: React.FC<BuildingImageProps> = ({
       }
       
       // Try the direct flat path first
-      const flatImagePath = `/images/buildings/${type}.jpg`;
+      const flatImagePath = `/images/buildings/${type}.png`;
       console.log(`Trying flat path: ${flatImagePath}`);
       
       try {
@@ -69,7 +69,7 @@ const BuildingImage: React.FC<BuildingImageProps> = ({
       }
       
       // Try with underscores instead of spaces
-      const underscorePath = `/images/buildings/${type.replace(/\s+/g, '_').toLowerCase()}.jpg`;
+      const underscorePath = `/images/buildings/${type.replace(/\s+/g, '_').toLowerCase()}.png`;
       console.log(`Trying underscore path: ${underscorePath}`);
       
       try {
@@ -83,7 +83,7 @@ const BuildingImage: React.FC<BuildingImageProps> = ({
       }
       
       // Try with hyphens instead of spaces
-      const hyphenPath = `/images/buildings/${type.replace(/\s+/g, '-').toLowerCase()}.jpg`;
+      const hyphenPath = `/images/buildings/${type.replace(/\s+/g, '-').toLowerCase()}.png`;
       console.log(`Trying hyphen path: ${hyphenPath}`);
       
       try {
@@ -97,11 +97,11 @@ const BuildingImage: React.FC<BuildingImageProps> = ({
       }
       
       // If all else fails, use a default image
-      console.log(`No image found for building type: ${type}, using default contract_stall.jpg`);
-      return '/images/buildings/contract_stall.jpg';
+      console.log(`No image found for building type: ${type}, using default contract_stall.png`);
+      return '/images/buildings/contract_stall.png';
     } catch (error) {
       console.error('Error getting building image path:', error);
-      return '/images/buildings/contract_stall.jpg';
+      return '/images/buildings/contract_stall.png';
     }
   };
 
@@ -111,7 +111,7 @@ const BuildingImage: React.FC<BuildingImageProps> = ({
         .then(path => setImagePath(path))
         .catch(error => {
           console.error('Error resolving building image path:', error);
-          setImagePath('/images/buildings/contract_stall.jpg');
+          setImagePath('/images/buildings/contract_stall.png');
         });
     }
   }, [buildingType, buildingVariant]);

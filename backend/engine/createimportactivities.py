@@ -216,7 +216,7 @@ def create_or_get_merchant_galley(
             "RunBy": merchant_username, 
             "Point": galley_building_id, # Use BuildingId (water_lat_lng) for Point field
             "Category": "Transport", # Assuming a category for such buildings
-            "CreatedAt": datetime.now(timezone.utc).isoformat(),
+            "CreatedAt": datetime.now(pytz.timezone('Europe/Rome')).isoformat(), # Venice time
             "IsConstructed": False, # Galley is "arriving"
             "ConstructionDate": None,    # Will be set after activity creation to simulate arrival time
             # "PendingDeliveriesData": json.dumps([]), # Removed: No longer using this field
@@ -287,10 +287,12 @@ def initialize_airtable():
 def get_active_contracts(tables) -> List[Dict]:
     """Get all active import contracts awaiting merchant assignment (Seller is NULL), ordered by CreatedAt."""
     try:
-        now = datetime.now().isoformat()
+        VENICE_TIMEZONE = pytz.timezone('Europe/Rome') # Define if not already global
+        now_venice = datetime.now(VENICE_TIMEZONE)
+        now_iso_venice = now_venice.isoformat()
         
         # Query all active import contracts, regardless of current Seller
-        formula = f"AND({{CreatedAt}}<='{now}', {{EndAt}}>='{now}', {{Type}}='import')"
+        formula = f"AND({{CreatedAt}}<='{now_iso_venice}', {{EndAt}}>='{now_iso_venice}', {{Type}}='import')"
         contracts = tables['contracts'].all(formula=formula)
         
         # Sort by CreatedAt
@@ -628,7 +630,7 @@ def create_delivery_activity(tables, citizen: Dict, galley_building_id: str,
                 url,
                 json={
                     "startPoint": start_position, "endPoint": end_position,
-                    "startDate": datetime.now(timezone.utc).isoformat(),
+                    "startDate": datetime.now(pytz.timezone('Europe/Rome')).isoformat(), # Venice time
                     "pathfindingMode": "water_only" # Explicitly use water_only for ship
                 }
             )
@@ -644,17 +646,20 @@ def create_delivery_activity(tables, citizen: Dict, galley_building_id: str,
 
         if not path_data or not path_data.get('path'):
             log.warning(f"Path finding for galley to {galley_building_id} failed. Creating simple path.")
+            VENICE_TIMEZONE_PATH = pytz.timezone('Europe/Rome')
+            now_venice_path = datetime.now(VENICE_TIMEZONE_PATH)
             path_data = {
                 "path": [start_position, end_position], # Simple straight line
-                "timing": {"startDate": datetime.now(timezone.utc).isoformat(),
-                           "endDate": (datetime.now(timezone.utc) + timedelta(hours=2)).isoformat(), # Assume 2 hours for simple path
+                "timing": {"startDate": now_venice_path.isoformat(),
+                           "endDate": (now_venice_path + timedelta(hours=2)).isoformat(), # Assume 2 hours for simple path
                            "durationSeconds": 7200}
             }
 
-        now_utc = datetime.now(timezone.utc)
+        VENICE_TIMEZONE = pytz.timezone('Europe/Rome') # Define if not already global
+        now_venice_activity = datetime.now(VENICE_TIMEZONE)
         # Use duration from path_data if available, otherwise default
         travel_duration_seconds = path_data['timing'].get('durationSeconds', 7200) # Default 2 hours
-        end_time_utc = now_utc + timedelta(seconds=travel_duration_seconds)
+        end_time_venice_activity = now_venice_activity + timedelta(seconds=travel_duration_seconds)
         
         activity_id_str = f"import_galley_delivery_{galley_building_id}_{uuid.uuid4()}"
         
@@ -669,9 +674,9 @@ def create_delivery_activity(tables, citizen: Dict, galley_building_id: str,
             "ToBuilding": galley_building_id, # Target is the galley itself
             "Resources": json.dumps(resources_in_galley_manifest), 
             "TransportMode": "merchant_galley",
-            "CreatedAt": now_utc.isoformat(),
-            "StartDate": path_data['timing'].get('startDate', now_utc.isoformat()), # Use start date from path if available
-            "EndDate": path_data['timing'].get('endDate', end_time_utc.isoformat()),   # Use end date from path if available
+            "CreatedAt": now_venice_activity.isoformat(),
+            "StartDate": path_data['timing'].get('startDate', now_venice_activity.isoformat()), # Use start date from path if available
+            "EndDate": path_data['timing'].get('endDate', end_time_venice_activity.isoformat()),   # Use end date from path if available
             "Path": json.dumps(path_data.get('path', [])),
             "Notes": f"🚢 Piloting merchant galley with imported resources ({resource_summary}) to {galley_building_id}. Original Contract IDs: {', '.join(original_contract_ids)}"
         }
@@ -900,7 +905,7 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
                     new_res_payload = {
                         "ResourceId": f"resource-{uuid.uuid4()}", "Type": res_type_id, "Name": res_def.get('name', res_type_id),
                         "Asset": galley_building_id, "AssetType": "building", "Owner": selected_merchant_username,
-                        "Count": res_amount, "CreatedAt": datetime.now(timezone.utc).isoformat()
+                        "Count": res_amount, "CreatedAt": datetime.now(pytz.timezone('Europe/Rome')).isoformat() # Venice time
                     }
                     tables["resources"].create(new_res_payload)
                 log.info(f"Processed resource {res_type_id} (Amount: {res_amount:.2f}) in galley {galley_building_id} for merchant {selected_merchant_username}.")

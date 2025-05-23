@@ -7,6 +7,7 @@ import json
 import logging
 import uuid
 from datetime import datetime, timezone
+import pytz # Added for Venice timezone
 from typing import Dict, List, Optional, Any
 
 from backend.engine.processActivities import (
@@ -131,7 +132,9 @@ def process(
         return False # Not enough space for outputs
 
     # 3. Process Production
-    now_iso = datetime.now(timezone.utc).isoformat()
+    VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
+    now_venice = datetime.now(VENICE_TIMEZONE)
+    now_iso = now_venice.isoformat()
 
     # Consume Inputs
     for res_type, req_amount_float in recipe_inputs.items():

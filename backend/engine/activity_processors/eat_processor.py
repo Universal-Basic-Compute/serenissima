@@ -6,6 +6,7 @@ Updates citizen's 'AteAt' timestamp.
 import json
 import logging
 from datetime import datetime, timezone
+import pytz # Added for Venice timezone
 from typing import Dict, Optional, Any
 
 from backend.engine.processActivities import (
@@ -23,9 +24,10 @@ TAVERN_MEAL_COST = 10 # Ducats
 
 def _update_citizen_ate_at(tables: Dict[str, Any], citizen_airtable_id: str, timestamp_iso: str) -> bool:
     """Helper to update AteAt for a citizen."""
+    # VENICE_TIMEZONE should be defined in the calling function if timestamp_iso is generated there
     try:
         tables['citizens'].update(citizen_airtable_id, {
-            'AteAt': timestamp_iso
+            'AteAt': timestamp_iso # Expecting timestamp_iso to be already in Venice time
         })
         return True
     except Exception as e:
@@ -139,7 +141,9 @@ def process_eat_at_home(
             if amount_to_eat <= 0: return False
 
         new_amount = current_amount - amount_to_eat
-        now_iso = datetime.now(timezone.utc).isoformat()
+        VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
+        now_venice = datetime.now(VENICE_TIMEZONE)
+        now_iso = now_venice.isoformat()
 
         if new_amount > 0.001:
             tables['resources'].update(food_record['id'], {'Count': new_amount})
@@ -193,7 +197,9 @@ def process_eat_at_tavern(
     
     try:
         new_ducats = current_ducats - TAVERN_MEAL_COST
-        now_iso = datetime.now(timezone.utc).isoformat()
+        VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
+        now_venice = datetime.now(VENICE_TIMEZONE)
+        now_iso = now_venice.isoformat()
         
         tables['citizens'].update(citizen_record['id'], {'Ducats': new_ducats})
         log.info(f"Citizen {citizen_username} paid {TAVERN_MEAL_COST} Ducats for a meal at tavern. New balance: {new_ducats}")

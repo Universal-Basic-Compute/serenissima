@@ -212,12 +212,12 @@ export const HoverTooltip: React.FC = () => {
         {/* Add the building image */}
         <div className="w-96 h-80 mb-2 overflow-hidden rounded">
           <img 
-            src={buildingImagePath || `/images/buildings/${tooltipData.buildingType?.toLowerCase().replace(/[_-]/g, '_')}.jpg`} 
+            src={buildingImagePath || `/images/buildings/${tooltipData.buildingType?.toLowerCase().replace(/[_-]/g, '_')}.png`} 
             alt={tooltipData.name || 'Building'}
             className="w-full h-full object-cover"
             onError={(e) => {
               // Fallback to default image if the specific one doesn't exist
-              e.currentTarget.src = '/images/buildings/contract_stall.jpg';
+              e.currentTarget.src = '/images/buildings/contract_stall.png';
             }}
           />
         </div>

@@ -13,6 +13,7 @@ import argparse
 import math # Added import
 import requests
 from datetime import datetime, timedelta, timezone
+import pytz # Added for Venice timezone
 from typing import Dict, List, Optional, Any
 from dotenv import load_dotenv
 from pyairtable import Api, Table
@@ -127,7 +128,9 @@ def main(dry_run: bool = False):
         log.info("No home buildings found. Exiting.")
         return
 
-    now_utc = datetime.now(timezone.utc)
+    VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
+    now_venice = datetime.now(VENICE_TIMEZONE) # Use Venice time for 'ConsumedAt'
+    now_utc = datetime.now(timezone.utc) # Keep UTC for age calculation if timestamps are UTC
     total_consumed_count = 0
     processed_homes = 0
 
@@ -223,7 +226,7 @@ def main(dry_run: bool = False):
 
                     if not dry_run:
                         try:
-                            update_payload = {"ConsumedAt": now_utc.isoformat()}
+                            update_payload = {"ConsumedAt": now_venice.isoformat()} # Use Venice time ISO string
                             if new_count > 0.001: 
                                 update_payload["Count"] = new_count
                                 tables[RESOURCES_TABLE_NAME].update(instance_id_airtable, update_payload)

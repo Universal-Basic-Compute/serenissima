@@ -6,6 +6,7 @@ import json
 import logging
 import uuid
 from datetime import datetime, timezone
+import pytz # Added for Venice timezone
 from typing import Dict, List, Optional, Any
 
 # Import utility functions from processActivities.py or a shared utility module
@@ -91,7 +92,9 @@ def process(
         return False # Cannot deposit if not enough space
 
     all_resources_transferred = True
-    now_iso = datetime.now(timezone.utc).isoformat()
+    VENICE_TIMEZONE = pytz.timezone('Europe/Rome')
+    now_venice = datetime.now(VENICE_TIMEZONE)
+    now_iso = now_venice.isoformat()
 
     for res_record_citizen_owned in citizen_owned_resources:
         resource_type_id = res_record_citizen_owned['fields'].get('Type')
