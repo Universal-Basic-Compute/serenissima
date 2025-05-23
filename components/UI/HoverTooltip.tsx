@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { hoverStateService, HOVER_STATE_CHANGED, HoverState } from '@/lib/services/HoverStateService';
 import { eventBus } from '@/lib/utils/eventBus';
 import { buildingService } from '@/lib/services/BuildingService';
@@ -145,7 +147,8 @@ export const HoverTooltip: React.FC = () => {
         lastName: typeof citizen.lastName === 'string' ? citizen.lastName : '',
         socialClass: typeof citizen.socialClass === 'string' ? citizen.socialClass : '',
         imageUrl: typeof citizen.imageUrl === 'string' && citizen.imageUrl !== '' ? citizen.imageUrl : null,
-        id: typeof citizen.id === 'string' ? citizen.id : ''
+        id: typeof citizen.id === 'string' ? citizen.id : '',
+        activityNotes: typeof citizen.activityNotes === 'string' ? citizen.activityNotes : null // Extract activityNotes
       };
       
       setTooltipData({
@@ -282,6 +285,12 @@ export const HoverTooltip: React.FC = () => {
           <div className="text-amber-400 text-sm font-semibold mb-1">
             {socialClass}
           </div>
+          {/* Display Activity Notes if available */}
+          {citizen.activityNotes && (
+            <div className="mt-2 text-xs text-gray-300 prose prose-sm prose-invert max-w-full">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{citizen.activityNotes}</ReactMarkdown>
+            </div>
+          )}
           {tooltipData.citizenType && (
             <div className="mt-1 text-xs bg-amber-800/50 px-2 py-1 rounded-full">
               {tooltipData.citizenType === 'home' ? 'Resident' : 'Worker'} at {tooltipData.buildingId}
