@@ -22,7 +22,7 @@ The key difference is that AI citizens have their economic decisions automated t
 
 ## AI Behaviors
 
-### Message Responses
+### Message Responses (Uses Kinos Engine API)
 
 **Implementation**: `backend/ais/answertomessages.py`  
 **Schedule**: 10 times daily (every 2.4 hours)
@@ -49,7 +49,7 @@ The AI message response system:
 - Provides opportunities for roleplaying and storytelling
 - Enhances immersion by making AI characters feel more alive and responsive
 
-### Notification Processing
+### Notification Processing (Uses Kinos Engine API)
 
 **Implementation**: `backend/ais/processnotifications.py`  
 **Schedule**: Daily at 10:00 PM UTC
@@ -164,7 +164,7 @@ The AI building construction system:
 - Provides lease income to land owners (including other players)
 - Reduces the Vigesima Variabilis tax rate on developed lands
 
-### Lease Adjustments
+### Lease Adjustments (Uses Kinos Engine API)
 
 **Implementation**: `backend/ais/adjustleases.py`  
 **Schedule**: Daily at 9:00 PM UTC
@@ -201,7 +201,7 @@ The AI lease adjustment system:
 - Encourages strategic building placement by players
 - Simulates the economic negotiations that would occur in a real contract
 
-### Rent Adjustments
+### Rent Adjustments (Uses Kinos Engine API)
 
 **Implementation**: `backend/ais/adjustrents.py`  
 **Schedule**: Daily at 10:00 PM UTC
@@ -238,7 +238,7 @@ The AI rent adjustment system:
 - Encourages citizens to seek affordable housing
 - Simulates the economic negotiations that would occur in a real housing contract
 
-### Wage Adjustments
+### Wage Adjustments (Uses Kinos Engine API)
 
 **Implementation**: `backend/ais/adjustwages.py`  
 **Schedule**: Daily at 11:00 PM UTC
@@ -275,12 +275,12 @@ The AI wage adjustment system:
 - Affects citizen wealth and their ability to pay rent
 - Simulates the economic negotiations that would occur in a real labor contract
 
-### Resource Import Management
+### Resource Import Management (Uses Kinos Engine API)
 
 **Implementation**: `backend/ais/importresources.py`  
 **Schedule**: Daily at 1:00 AM UTC
 
-AI citizens strategically set up resource imports for their buildings:
+AI citizens strategically set up resource imports for their buildings (via la fonction `send_import_strategy_request`):
 
 #### Process:
 
@@ -312,12 +312,12 @@ The AI resource import system:
 - Simulates the international trade that was vital to Venice's economy
 - Provides contract demand for various resource types
 
-### Public Sell Management
+### Public Sell Management (Uses Kinos Engine API)
 
 **Implementation**: `backend/ais/managepublicsells.py`  
 **Schedule**: Daily at 3:00 AM UTC
 
-AI citizens strategically create public sell contracts to sell resources to other players:
+AI citizens strategically create public sell contracts to sell resources to other players (via la fonction `send_public_sell_strategy_request`):
 
 #### Process:
 
@@ -350,6 +350,34 @@ The AI public sell management system:
 - Simulates the merchant activity that was vital to Venice's economy
 
 ## AI Citizen Management
+
+AI citizens are created and managed through the Airtable database:
+
+### Price Setting for Produced Goods (Uses Kinos Engine API)
+
+**Implementation**: `backend/ais/setprices.py`  
+**Schedule**: (To be determined, e.g., Daily at a specific time)
+
+AI citizens strategically set prices for resources produced in buildings they own:
+
+#### Process:
+
+1. The script identifies AI citizens owning buildings that produce sellable resources.
+2. For each AI, it gathers data on their buildings, outputs, current prices, global average prices, and local (same land parcel) average prices for those resources.
+3. This data package, along with recent relevancies and problems for the citizen, is sent to the Kinos Engine API (via la fonction `send_price_setting_request`).
+4. The AI analyzes the data and decides on new prices for each resource in each building, providing reasoning.
+5. The script updates the `Prices` field in the `BUILDINGS` table with the AI's decisions.
+6. An admin notification summarizes the price changes.
+
+#### Economic Impact:
+
+The AI price setting system:
+- Ensures that AI-produced goods are priced dynamically based on market conditions.
+- Provides more realistic price competition for players.
+- Allows AI citizens to adapt their pricing strategies to local and global market trends.
+- Simulates merchants adjusting prices to maximize profit or ensure sales.
+
+### AI Citizen Management (Continued)
 
 AI citizens are created and managed through the Airtable database:
 
