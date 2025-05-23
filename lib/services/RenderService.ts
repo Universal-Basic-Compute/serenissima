@@ -96,12 +96,13 @@ export class RenderService {
                             buildingType.toLowerCase().includes('ponte'));
     const isBridgeByCategory = buildingCategory && buildingCategory.toLowerCase() === 'bridge';
     const isActuallyABridge = isBridgeByType || isBridgeByCategory;
+    const isMerchantGalley = buildingType?.toLowerCase() === 'merchant_galley';
 
     if (isActuallyABridge && rotation !== undefined) {
       // For bridges, 'size' is squareSize = (default building dimension e.g. 20) * scale * 0.6
       // Make bridge width a good portion of this, and height a smaller fraction for a rectangular look.
       const bridgeWidth = size * 0.8; 
-      const bridgeHeight = Math.max(2 * scale, size * 0.25); // Ensure a minimum visible height, e.g. 25% of size
+      const bridgeHeight = Math.max(2 * (scale || 1), size * 0.25); // Ensure a minimum visible height, e.g. 25% of size
 
       ctx.save();
       ctx.translate(x, y);
@@ -109,6 +110,20 @@ export class RenderService {
       ctx.rect(-bridgeWidth / 2, -bridgeHeight / 2, bridgeWidth, bridgeHeight);
       ctx.fill();
       ctx.stroke(); // Stroke needs to be inside save/restore if rotation is applied
+      ctx.restore();
+    } else if (isMerchantGalley && rotation !== undefined) {
+      // For merchant galleys, draw an elongated ellipse (boat shape from above)
+      // 'size' here is squareSize, use it to determine boat dimensions
+      const boatLength = size * 1.5; // Make it longer than it is wide
+      const boatWidth = size * 0.6;
+
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rotation); 
+      ctx.beginPath();
+      ctx.ellipse(0, 0, boatLength / 2, boatWidth / 2, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
       ctx.restore();
     } else {
       if (shape === 'circle') {
@@ -139,7 +154,8 @@ export class RenderService {
     // Add a small indicator for the building type with fixed font size
     // For bridges, we might not want a type indicator, or a different one.
     // For now, keep it for non-bridges.
-    if (!(isActuallyABridge && rotation !== undefined)) {
+    // Also, skip text indicator for merchant galleys.
+    if (!(isActuallyABridge && rotation !== undefined) && !(buildingType?.toLowerCase() === 'merchant_galley')) {
       ctx.fillStyle = '#000'; // Black text for visibility
       ctx.font = `10px Arial`;
       ctx.textAlign = 'center';
