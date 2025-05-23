@@ -31,7 +31,8 @@ from backend.engine.utils.activity_helpers import (
     # find_path_between_buildings, # This helper might be redundant if get_path_between_points_helper is used
     get_citizen_contracts,
     # get_idle_citizens, # Not used by process_citizen_activity directly
-    _fetch_and_assign_random_starting_position
+    _fetch_and_assign_random_starting_position,
+    VENICE_TIMEZONE # Import VENICE_TIMEZONE
 )
 
 # Import activity creators
