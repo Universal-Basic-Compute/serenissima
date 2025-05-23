@@ -476,6 +476,105 @@ export class ProblemService {
     });
   }
 
+  /**
+   * Detect buildings with zero rent amount.
+   * For Homes: if rentAmount is 0, null, or undefined.
+   * For Businesses: if rentAmount is 0, null, or undefined AND Owner is not RanBy.
+   */
+  public async detectZeroRentAmountBuildings(username?: string): Promise<Record<string, Problem>> {
+    try {
+      const buildings = await this.fetchAllBuildings();
+      console.log(`[ProblemService] detectZeroRentAmountBuildings: Fetched ${buildings.length} buildings to check for zero rent.`);
+      if (buildings.length === 0) {
+        return {};
+      }
+
+      const problems: Record<string, Problem> = {};
+      let processedCount = 0;
+
+      buildings.forEach(building => {
+        const owner = building.owner && typeof building.owner === 'string' ? building.owner.trim() : null;
+        const category = building.category && typeof building.category === 'string' ? building.category.toLowerCase() : null;
+        const buildingId = building.id || building.buildingId || `unknown_building_${Date.now()}_${Math.random()}`;
+        const buildingName = building.name || building.type || 'Unnamed Building';
+        const rentAmount = building.rentAmount; // Can be number, null, or undefined
+        const ranBy = building.ranBy && typeof building.ranBy === 'string' ? building.ranBy.trim() : null;
+
+        // Basic filtering: must have an owner, be a home or business.
+        // If rentAmount is explicitly positive, no "zero rent" problem.
+        if (!owner || !(category === 'home' || category === 'business') || (rentAmount !== undefined && rentAmount !== null && rentAmount > 0)) {
+          return;
+        }
+        
+        // If a specific username is provided, only create problems for that owner.
+        if (username && owner !== username) {
+          return;
+        }
+
+        if (processedCount < 5) {
+            console.log(`[ProblemService] detectZeroRentAmountBuildings: Checking Building ${buildingId} (Name: ${buildingName}, Owner: ${owner}, Category: ${category}, RentAmount: ${rentAmount}, RanBy: ${ranBy})`);
+        }
+        processedCount++;
+        
+        let problemTypeSpecific = '';
+        let title = '';
+        let description = '';
+        let solutions = '';
+        let severity: Problem['severity'] = 'low';
+        let generateProblem = false;
+
+        if (category === 'home') {
+          if (rentAmount === 0 || rentAmount === null || rentAmount === undefined) {
+            problemTypeSpecific = 'zero_rent_home';
+            title = 'Zero Rent for Home';
+            description = `Your residential property, **${buildingName}** (ID: ${buildingId}), currently has its rent set to 0 Ducats. While this might be intentional (e.g., for personal use), it means you are not generating rental income if the property were to be leased to another citizen.`;
+            solutions = `Consider the following actions:\n- If you intend to rent this property, set a competitive rent amount based on market conditions.\n- If the property is for personal use or other non-rental purposes, you can ignore this notification.\n- Review your property management strategy to ensure rents are set appropriately for income generation.`;
+            severity = 'low';
+            generateProblem = true;
+          }
+        } else if (category === 'business') {
+          // For businesses, problem only if Owner is not RanBy
+          if ((rentAmount === 0 || rentAmount === null || rentAmount === undefined) && owner && ranBy && owner !== ranBy) {
+            problemTypeSpecific = 'zero_rent_business_leased';
+            title = 'Zero Rent for Leased Business';
+            description = `Your commercial property, **${buildingName}** (ID: ${buildingId}), is being run by **${ranBy}** but has its rent set to 0 Ducats. This means you are not collecting rent from the business operator, missing potential income.`;
+            solutions = `Consider the following actions:\n- Set an appropriate rent amount for the business operator (**${ranBy}**) to pay.\n- Review the lease agreement and terms with the operator.\n- If this zero-rent arrangement is intentional (e.g., a special agreement or subsidiary), you may ignore this notification.`;
+            severity = 'medium';
+            generateProblem = true;
+          }
+        }
+
+        if (generateProblem) {
+          const problemId = `${problemTypeSpecific}_${buildingId}_${Date.now()}`;
+          problems[problemId] = {
+            problemId,
+            citizen: owner!, // Owner is confirmed to be non-null by this point
+            assetType: 'building',
+            assetId: buildingId,
+            severity,
+            status: 'active',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            location: buildingName,
+            type: problemTypeSpecific,
+            title,
+            description,
+            solutions,
+            notes: `Building Category: ${category}. Owner: ${owner}. RanBy: ${ranBy || 'N/A'}. RentAmount: ${rentAmount === undefined ? 'undefined' : rentAmount === null ? 'null' : rentAmount}.`,
+            position: building.position || null,
+          };
+        }
+      });
+
+      const numProblems = Object.keys(problems).length;
+      console.log(`[ProblemService] detectZeroRentAmountBuildings: Created ${numProblems} 'Zero Rent Amount' problems (target user: ${username || 'all'}).`);
+      return problems;
+    } catch (error) {
+      console.error('[ProblemService] Error detecting zero rent amount buildings:', error);
+      return {};
+    }
+  }
+
   public async detectNoActiveContractsForBusinesses(username?: string): Promise<Record<string, Problem>> {
     try {
       console.log(`[ProblemService] detectNoActiveContractsForBusinesses: Starting detection (user: ${username || 'all'}).`);
