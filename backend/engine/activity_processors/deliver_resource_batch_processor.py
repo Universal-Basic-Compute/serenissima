@@ -255,7 +255,7 @@ def process(
             "Seller": seller_username, # Merchant
             "Buyer": buyer_username,
             "Price": total_cost_for_this_delivery,
-            "Details": json.dumps({
+            "Notes": json.dumps({
                 "delivered_items": delivered_items_details,
                 "original_contract_resource_type": contract_fields.get('ResourceType'),
                 "price_per_unit_contract": price_per_resource,
@@ -286,7 +286,7 @@ def process(
             "Seller": "Italia", 
             "Buyer": seller_username, # Merchant is "buying" from Italia
             "Price": italia_share,
-            "Details": json.dumps({
+            "Notes": json.dumps({
                 "original_buyer": buyer_username,
                 "total_sale_price_to_buyer": total_cost_for_this_delivery,
                 "merchant_profit": merchant_profit,

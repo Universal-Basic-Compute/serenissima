@@ -215,7 +215,7 @@ def process(
             "Seller": effective_seller_username,
             "Buyer": effective_buyer_username, # Use effective_buyer_username
             "Price": total_cost,
-            "Details": json.dumps({
+            "Notes": json.dumps({
                 "resource_type": resource_id_to_fetch,
                 "amount": amount_to_purchase,
                 "price_per_unit": price_per_resource,

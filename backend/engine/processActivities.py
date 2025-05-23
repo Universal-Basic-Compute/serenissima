@@ -410,7 +410,7 @@ def main(dry_run: bool = False):
                                 "Seller": fee_recipient_username, # Recipient of the fee
                                 "Buyer": citizen_username_for_fee,  # Payer of the fee
                                 "Price": gondola_fee,
-                                "Details": json.dumps({
+                                "Notes": json.dumps({
                                     "activity_guid": activity_guid,
                                     "distance_km": round(gondola_distance_km, 2),
                                     "path_preview": activity_path_json[:100] + "..." if activity_path_json else "",

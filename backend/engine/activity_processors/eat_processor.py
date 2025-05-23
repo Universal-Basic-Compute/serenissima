@@ -208,7 +208,7 @@ def process_eat_at_tavern(
             "Seller": tavern_operator, # The tavern operator
             "Buyer": citizen_username,
             "Price": TAVERN_MEAL_COST,
-            "Details": json.dumps({
+            "Notes": json.dumps({
                 "activity_guid": activity_guid,
                 "tavern_id": tavern_building_custom_id # Use custom BuildingId
             }),
