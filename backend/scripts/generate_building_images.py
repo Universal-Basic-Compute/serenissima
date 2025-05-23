@@ -198,20 +198,6 @@ def generate_image(prompt: str, output_path: str) -> bool:
             log.error(f"Failed to download image: {image_response.status_code} {image_response.reason}")
             return False
         
-        # Check content type to ensure it's an image
-        content_type = image_response.headers.get('Content-Type', '')
-        log.info(f"Content-Type of downloaded file: {content_type}")
-        
-        if 'image' not in content_type:
-            log.error(f"Downloaded content is not an image: {content_type}")
-            # Save the response content for inspection
-            debug_path = f"{output_path}.debug"
-            with open(debug_path, 'wb') as f:
-                for chunk in image_response.iter_content(chunk_size=8192):
-                    f.write(chunk)
-            log.error(f"Saved problematic response to {debug_path} for inspection")
-            return False
-        
         # Ensure the directory exists
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         
