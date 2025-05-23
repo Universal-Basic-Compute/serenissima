@@ -10,18 +10,32 @@ const formatNumberWithSpaces = (num: number | undefined | null): string => {
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 };
 
+interface ProductionInfo {
+  Arti?: Array<{
+    inputs: Record<string, number>;
+    outputs: Record<string, number>;
+    craftMinutes: number;
+  }>;
+  storageCapacity?: number;
+  stores?: string[];
+  sells?: string[];
+}
+
 interface BuildingType {
   type: string;
   name: string;
-  buildTier: number; // Changed from tier to buildTier
-  pointType: string | null; // Can be 'land', 'canal', 'bridge', or null (assume 'land')
+  buildTier: number;
+  pointType: string | null;
   constructionCosts?: {
     ducats?: number;
     [resource: string]: number | undefined;
   };
+  maintenanceCost?: number;
   shortDescription?: string;
   category?: string;
   subcategory?: string;
+  productionInformation?: ProductionInfo;
+  canImport?: boolean;
 }
 
 interface BuildingCreationPanelProps {
@@ -48,6 +62,7 @@ const BuildingCreationPanel: React.FC<BuildingCreationPanelProps> = ({ selectedP
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTier, setActiveTier] = useState<number>(1);
+  const [detailedBuildingType, setDetailedBuildingType] = useState<BuildingType | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -149,6 +164,14 @@ const BuildingCreationPanel: React.FC<BuildingCreationPanelProps> = ({ selectedP
     onBuild(building.type, selectedPoint, cost); 
   };
 
+  // Expose methods for the detailed view renderer
+  // This is a workaround. Ideally, renderDetailedBuildingView would be a child component.
+  (BuildingCreationPanel as any).handleBackToGridClick = () => setDetailedBuildingType(null);
+  (BuildingCreationPanel as any).getBuildingImagePath = getBuildingImagePath;
+  (BuildingCreationPanel as any).handleImageError = handleImageError;
+  (BuildingCreationPanel as any).handleBuildClick = handleBuildClick;
+
+
   if (loading) {
     return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -207,43 +230,182 @@ const BuildingCreationPanel: React.FC<BuildingCreationPanelProps> = ({ selectedP
           </div>
         </div>
 
-        <div className="overflow-y-auto p-4 flex-grow">
-          {availableTiers.length > 0 && buildingsByTier[activeTier] ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {buildingsByTier[activeTier].map(building => (
-                <div key={building.type} className="bg-amber-100 border border-amber-300 rounded-lg p-3 shadow-md hover:shadow-lg transition-shadow flex flex-col justify-between">
-                  <div>
-                    <img
-                      src={getBuildingImagePath(building.type)}
-                      alt={building.type}
-                      onError={handleImageError}
-                      className="w-full h-32 object-cover rounded-md mb-2 border border-amber-200"
-                    />
-                    <h3 className="text-md font-semibold font-serif text-amber-800">{building.name}</h3>
-                    <p className="text-xs text-amber-600 mb-1 capitalize">{building.category} - {building.subcategory}</p>
-                    <p className="text-xs text-amber-700 mb-2 line-clamp-3">{building.shortDescription || 'No description available.'}</p>
-                  </div>
-                  <div className="mt-auto">
-                    <p className="text-md font-semibold text-amber-800 mb-2">
-                      Cost: ⚜️ {formatNumberWithSpaces(building.constructionCosts?.ducats)}
-                    </p>
-                    <button
-                      onClick={() => handleBuildClick(building)}
-                      className="w-full px-3 py-1.5 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors"
-                    >
-                      Build
-                    </button>
-                  </div>
+        <div className="overflow-y-auto p-6 flex-grow">
+          {!detailedBuildingType ? (
+            <>
+              {availableTiers.length > 0 && buildingsByTier[activeTier] ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                  {buildingsByTier[activeTier].map(building => (
+                    <div key={building.type} className="bg-amber-100 border border-amber-300 rounded-lg p-3 shadow-md hover:shadow-lg transition-shadow flex flex-col justify-between">
+                      <div>
+                        <img
+                          src={getBuildingImagePath(building.type)}
+                          alt={building.type}
+                          onError={handleImageError}
+                          className="w-full h-32 object-cover rounded-md mb-2 border border-amber-200"
+                        />
+                        <h3 className="text-md font-semibold font-serif text-amber-800">{building.name}</h3>
+                        <p className="text-xs text-amber-600 mb-1 capitalize">{building.category} - {building.subcategory}</p>
+                        <p className="text-xs text-amber-700 mb-2 line-clamp-3">{building.shortDescription || 'No description available.'}</p>
+                      </div>
+                      <div className="mt-auto pt-2">
+                        <p className="text-sm font-medium text-amber-900 mb-2">
+                          Cost: ⚜️ {formatNumberWithSpaces(building.constructionCosts?.ducats)}
+                        </p>
+                        <button
+                          onClick={() => setDetailedBuildingType(building)}
+                          className="w-full px-3 py-1.5 bg-amber-500 text-white text-sm rounded hover:bg-amber-600 transition-colors"
+                        >
+                          See more
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          ) : availableTiers.length > 0 ? (
-             <p className="text-center text-amber-700 py-8">Select a tier to view available buildings.</p>
-          ) : null}
+              ) : availableTiers.length > 0 ? (
+                <p className="text-center text-amber-700 py-8">Select a tier to view available buildings.</p>
+              ) : null}
+            </>
+          ) : (
+            renderDetailedBuildingView(detailedBuildingType)
+          )}
         </div>
       </div>
     </div>
   );
 };
+
+// Helper component/function to render the detailed view
+const renderDetailedBuildingView = (building: BuildingType) => {
+  const { 
+    type, name, category, subcategory, buildTier, pointType, 
+    constructionCosts, maintenanceCost, shortDescription, 
+    productionInformation, canImport 
+  } = building;
+
+  return (
+    <div className="bg-amber-100 p-4 rounded-lg shadow-inner">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-2xl font-serif text-amber-800">{name}</h3>
+        <button 
+          onClick={() => (BuildingCreationPanel as any).handleBackToGridClick()} // Accessing via panel instance for now
+          className="px-4 py-2 bg-amber-500 text-white rounded hover:bg-amber-600"
+        >
+          Back to List
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Left Column: Basic Info & Costs */}
+        <div className="space-y-3">
+          <div>
+            <img
+              src={(BuildingCreationPanel as any).getBuildingImagePath(type)} // Accessing via panel instance
+              alt={name}
+              onError={(e) => (BuildingCreationPanel as any).handleImageError(e)} // Accessing via panel instance
+              className="w-full h-48 object-cover rounded-md border border-amber-200 mb-2"
+            />
+          </div>
+          <p><strong className="text-amber-700">Type:</strong> {type}</p>
+          <p><strong className="text-amber-700">Category:</strong> {category} - {subcategory}</p>
+          <p><strong className="text-amber-700">Tier:</strong> {TIER_NAMES[buildTier] || `Tier ${buildTier}`}</p>
+          <p><strong className="text-amber-700">Point Type:</strong> {pointType || 'N/A'}</p>
+          <p><strong className="text-amber-700">Description:</strong> {shortDescription || 'N/A'}</p>
+          
+          <div>
+            <h4 className="text-lg font-semibold text-amber-700 mt-2 mb-1">Construction Costs:</h4>
+            <ul className="list-disc list-inside text-sm">
+              <li>⚜️ {formatNumberWithSpaces(constructionCosts?.ducats)} Ducats</li>
+              {constructionCosts && Object.entries(constructionCosts).map(([resource, amount]) => {
+                if (resource !== 'ducats' && amount) {
+                  return <li key={resource} className="capitalize">{resource.replace(/_/g, ' ')}: {amount}</li>;
+                }
+                return null;
+              })}
+            </ul>
+          </div>
+          <p><strong className="text-amber-700">Maintenance Cost:</strong> {maintenanceCost ? `${formatNumberWithSpaces(maintenanceCost)} Ducats/cycle` : 'N/A'}</p>
+          <p><strong className="text-amber-700">Can Import Resources:</strong> {canImport ? 'Yes' : 'No'}</p>
+        </div>
+
+        {/* Right Column: Production Info */}
+        <div className="space-y-3">
+          {productionInformation && (
+            <>
+              <h4 className="text-lg font-semibold text-amber-700">Production Information:</h4>
+              {productionInformation.storageCapacity && (
+                <p><strong className="text-amber-700">Storage Capacity:</strong> {productionInformation.storageCapacity} units</p>
+              )}
+              
+              {productionInformation.stores && productionInformation.stores.length > 0 && (
+                <div>
+                  <strong className="text-amber-700">Stores:</strong>
+                  <ul className="list-disc list-inside text-sm ml-4">
+                    {productionInformation.stores.map(item => <li key={item} className="capitalize">{item.replace(/_/g, ' ')}</li>)}
+                  </ul>
+                </div>
+              )}
+
+              {productionInformation.sells && productionInformation.sells.length > 0 && (
+                <div>
+                  <strong className="text-amber-700">Sells:</strong>
+                  <ul className="list-disc list-inside text-sm ml-4">
+                    {productionInformation.sells.map(item => <li key={item} className="capitalize">{item.replace(/_/g, ' ')}</li>)}
+                  </ul>
+                </div>
+              )}
+
+              {productionInformation.Arti && productionInformation.Arti.length > 0 && (
+                <div>
+                  <h5 className="text-md font-semibold text-amber-700 mt-2 mb-1">Recipes (Arti):</h5>
+                  <div className="space-y-2">
+                    {productionInformation.Arti.map((recipe, index) => (
+                      <div key={index} className="p-2 border border-amber-200 rounded bg-amber-50 text-sm">
+                        <p className="font-medium text-amber-800">Recipe {index + 1}:</p>
+                        <p><strong className="text-amber-600">Inputs:</strong> {Object.entries(recipe.inputs).map(([item, qty]) => `${qty} ${item.replace(/_/g, ' ')}`).join(', ')}</p>
+                        <p><strong className="text-amber-600">Outputs:</strong> {Object.entries(recipe.outputs).map(([item, qty]) => `${qty} ${item.replace(/_/g, ' ')}`).join(', ')}</p>
+                        <p><strong className="text-amber-600">Craft Time:</strong> {recipe.craftMinutes} minutes</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+      
+      <div className="mt-6 text-center">
+        <button
+          onClick={() => (BuildingCreationPanel as any).handleBuildClick(building)} // Accessing via panel instance
+          className="px-6 py-2 bg-green-600 text-white text-lg rounded hover:bg-green-700 transition-colors"
+        >
+          Build {name} for ⚜️ {formatNumberWithSpaces(constructionCosts?.ducats)}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// Need to expose handleBackToGridClick and other methods if they are called from renderDetailedBuildingView
+// This is a bit of a hack due to the functional component structure.
+// A class component or a more structured state management (like context/redux) would handle this cleaner.
+// For now, we'll assign them to the component function itself.
+(BuildingCreationPanel as any).handleBackToGridClick = () => {
+  // This will be set correctly inside the component's scope
+};
+(BuildingCreationPanel as any).getBuildingImagePath = (type: string) => `/images/buildings/${type.toLowerCase().replace(/[_-]/g, '_')}.png`;
+(BuildingCreationPanel as any).handleImageError = (event: React.SyntheticEvent<HTMLImageElement, Event>) => {
+  const target = event.currentTarget;
+  const currentSrc = target.src;
+  const typeFormatted = target.alt.toLowerCase().replace(/[_-]/g, '_');
+  if (currentSrc.endsWith('.png')) target.src = `/images/buildings/${typeFormatted}.jpg`;
+  else if (currentSrc.endsWith('.jpg')) target.src = '/images/buildings/contract_stall.jpg';
+  else target.src = '/images/buildings/contract_stall.jpg';
+};
+(BuildingCreationPanel as any).handleBuildClick = (building: BuildingType) => {
+  // This will be set correctly inside the component's scope
+};
+
 
 export default BuildingCreationPanel;
