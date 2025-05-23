@@ -1103,6 +1103,11 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
                     />
                     <div>
                       <div className="font-medium text-amber-800">{transport.Name || transport.name}</div>
+                      {(transport.Quantity !== undefined || transport.quantity !== undefined) && (
+                        <p className="text-xs text-amber-700">
+                          Quantity: {transport.Quantity !== undefined ? transport.Quantity : transport.quantity}
+                        </p>
+                      )}
                       {transport.Description && <p className="text-xs text-amber-600 italic">{transport.Description}</p>}
                     </div>
                   </div>
