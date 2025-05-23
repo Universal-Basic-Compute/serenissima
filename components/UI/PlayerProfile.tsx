@@ -52,44 +52,37 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
 
   // Fetch citizen data if wallet address is provided but no direct data
   useEffect(() => {
-    // If we already have the username and other data, use that
-    if (username && firstName && lastName) {
-      setCitizenData({
-        username,
-        firstName,
-        lastName,
-        coatOfArmsImageUrl: coatOfArmsImageUrl || null,
-        familyMotto,
-        Ducats // Include the Ducats if provided directly
-      });
-      return;
-    }
-    
-    // Listen for profile updates
     const handleProfileUpdate = (event: CustomEvent) => {
-      if (event.detail && (
-          (username && event.detail.citizen_name === username) || 
-          (walletAddress && event.detail.wallet_address === walletAddress)
-        )) {
-        console.log(`Received profile update for ${username || walletAddress} with compute: ${event.detail.ducats}`);
+      const profileDetail = event.detail;
+      if (!profileDetail) return;
+
+      // Update if the event matches the component's specific username or walletAddress prop
+      const specificUserMatch = (username && profileDetail.citizen_name === username) ||
+                               (walletAddress && profileDetail.wallet_address === walletAddress);
+
+      // If PlayerProfile is used without username/walletAddress (e.g. for current user display in WalletButton),
+      // it might listen for any 'citizenProfileUpdated' if profileDetail indicates it's for 'self'.
+      // For now, we'll keep it simple: only update if props match.
+      // Add `profileDetail.isSelf` or similar flag in the event if generic updates are needed.
+      if (specificUserMatch) {
+        console.log(`PlayerProfile: Event update for ${profileDetail.citizen_name}`);
         setCitizenData({
-          username: event.detail.citizen_name || username || 'Unknown',
-          firstName: event.detail.first_name || event.detail.citizen_name?.split(' ')[0] || firstName || 'Unknown',
-          lastName: event.detail.last_name || event.detail.citizen_name?.split(' ').slice(1).join(' ') || lastName || 'Citizen',
-          coatOfArmsImageUrl: event.detail.coat_of_arms_image || coatOfArmsImageUrl,
-          familyMotto: event.detail.family_motto || familyMotto,
-          Ducats: event.detail.ducats
+          username: profileDetail.citizen_name,
+          firstName: profileDetail.first_name,
+          lastName: profileDetail.last_name,
+          coatOfArmsImageUrl: profileDetail.coat_of_arms_image,
+          familyMotto: profileDetail.family_motto,
+          Ducats: profileDetail.ducats, // This can be undefined from the event
+          socialClass: profileDetail.social_class // Assuming event provides this
         });
       }
     };
-    
+
     window.addEventListener('citizenProfileUpdated', handleProfileUpdate as EventListener);
-    
     return () => {
       window.removeEventListener('citizenProfileUpdated', handleProfileUpdate as EventListener);
     };
-    
-  }, [walletAddress, username, firstName, lastName, coatOfArmsImageUrl]);
+  }, [username, walletAddress]); // Effect only re-subscribes if identifier props change
 
   // Determine sizes based on the size prop
   const dimensions = {
@@ -168,14 +161,26 @@ const PlayerProfile: React.FC<PlayerProfileProps> = ({
   };
 
   // Use either provided data or fetched data
-  const displayData = citizenData || {
-    username: username || 'Unknown',
-    firstName: firstName || 'Unknown',
-    lastName: lastName || 'Citizen',
+  // Prioritize citizenData (from event/fetch), then fall back to props.
+  const sourceData = citizenData || {
+    username: username,
+    firstName: firstName,
+    lastName: lastName,
     coatOfArmsImageUrl: coatOfArmsImageUrl,
-    familyMotto: familyMotto, // Keep familyMotto in displayData
-    Ducats: Ducats !== undefined ? Ducats : 0,
-    socialClass: 'Popolani' // Default social class if not provided
+    familyMotto: familyMotto,
+    Ducats: Ducats,
+    socialClass: undefined // Social class typically comes from fetched/event data
+  };
+
+  // Consolidate and provide final defaults for displayData
+  const displayData = {
+    username: sourceData.username ?? 'Unknown',
+    firstName: sourceData.firstName ?? 'Unknown',
+    lastName: sourceData.lastName ?? 'Citizen',
+    coatOfArmsImageUrl: sourceData.coatOfArmsImageUrl ?? null,
+    familyMotto: sourceData.familyMotto, // familyMotto can be undefined; handled by showMotto prop
+    Ducats: sourceData.Ducats ?? 0, // Ensure Ducats is a number, defaulting to 0
+    socialClass: sourceData.socialClass ?? 'Popolani' // Default social class
   };
   
   // Determine social class color
