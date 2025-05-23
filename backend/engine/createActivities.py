@@ -1216,7 +1216,7 @@ def create_activities(dry_run: bool = False):
                  log.info(f"[DRY RUN] Would create general activity for citizen {citizen_record['id']}")
                  success_count +=1 # Add to dry run success count
         else:
-            activity_created_for_citizen = process_citizen_activity(tables, citizen_record, night_time)
+            activity_created_for_citizen = process_citizen_activity(tables, citizen_record, night_time, resource_defs)
             if activity_created_for_citizen:
                 success_count += 1
     
