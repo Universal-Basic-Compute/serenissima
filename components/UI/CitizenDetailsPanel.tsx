@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Citizen } from '@/components/PolygonViewer/types';
+import InfoIcon from './InfoIcon'; // Import the new InfoIcon component
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { FaSpinner, FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
@@ -873,7 +874,10 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
         {/* First column - Relationship & Opportunities */}
         <div className="w-1/3">
           {/* Relationship Section */}
-          <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Relationship</h3>
+          <div className="flex items-center">
+            <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Relationship</h3>
+            <InfoIcon tooltipText="Entwinement: Measures relationship strength based on shared relevancies and common interests. Trust: Assesses reliability from positive direct interactions (messages, loans, contracts)." />
+          </div>
           {isLoadingRelationship ? (
             <div className="flex justify-center py-4">
               <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin"></div>
@@ -939,7 +943,10 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
             </p>
           )}
 
-          <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Connections</h3>
+          <div className="flex items-center">
+            <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Connections</h3>
+            <InfoIcon tooltipText="Opportunities and relevant links for this citizen, based on their activities, needs, and relationships with you or the community." />
+          </div>
           
           {isLoadingRelevancies ? (
             <div className="flex justify-center py-4">
@@ -983,7 +990,10 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
           )}
 
           {/* Problems Section */}
-          <h3 className="text-lg font-serif text-amber-800 mt-4 mb-2 border-b border-amber-200 pb-1">Problems</h3>
+          <div className="flex items-center mt-4">
+            <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Problems</h3>
+            <InfoIcon tooltipText="Active issues or challenges faced by this citizen that may require attention or offer opportunities for assistance." />
+          </div>
           {isLoadingProblems ? (
             <div className="flex justify-center py-4">
               <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin"></div>
@@ -1032,7 +1042,10 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
 
           {/* Recent Activities Section - Moved here */}
           <div className="mt-4"> {/* Use mt-4 for spacing similar to other top-level sections */}
-            <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Recent Activities</h3>
+            <div className="flex items-center">
+              <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Recent Activities</h3>
+              <InfoIcon tooltipText="A log of this citizen's recent actions and engagements within Venice, providing insights into their daily life and interactions." />
+            </div>
               
             {isLoadingActivities ? (
               <div className="flex justify-center py-4">
@@ -1086,7 +1099,10 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
 
           {/* Transports Section */}
           <div className="mt-4">
-            <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Transports</h3>
+            <div className="flex items-center">
+              <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Transports</h3>
+              <InfoIcon tooltipText="Means of conveyance (gondolas, barges, etc.) currently listed under this citizen's name, indicating their capacity for transporting goods or people." />
+            </div>
             {isLoadingTransports ? (
               <div className="flex justify-center py-4">
                 <div className="w-6 h-6 border-2 border-amber-600 border-t-transparent rounded-full animate-spin"></div>
@@ -1370,7 +1386,10 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
           {/* Home and Work section - homeBuilding and workBuilding properties are assumed camelCase from API */}
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div>
-              <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Home</h3>
+              <div className="flex items-center">
+                <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Home</h3>
+                <InfoIcon tooltipText="The primary residence of this citizen within Venice." />
+              </div>
               <div className="bg-amber-100 p-3 rounded-lg">
                 {isLoadingBuildings ? (
                   <p className="text-amber-700 italic">Loading...</p>
@@ -1386,7 +1405,10 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
             </div>
               
             <div>
-              <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Work</h3>
+              <div className="flex items-center">
+                <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Work</h3>
+                <InfoIcon tooltipText="The primary place of employment or business operation for this citizen." />
+              </div>
               <div className="bg-amber-100 p-3 rounded-lg">
                 {isLoadingBuildings ? (
                   <p className="text-amber-700 italic">Loading...</p>
@@ -1417,7 +1439,10 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
             
           {/* Personality Section - Use citizen.corePersonality, citizen.personality (camelCase) */}
           <div className="mb-6">
-            <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Personality</h3>
+            <div className="flex items-center">
+              <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">Personality</h3>
+              <InfoIcon tooltipText="Key personality traits and a general description of this citizen's character and demeanor." />
+            </div>
             {citizen.corePersonality && Array.isArray(citizen.corePersonality) && citizen.corePersonality.length === 3 && (
               <div className="flex space-x-2 mb-3">
                 <div className="px-3 py-1 text-xs font-medium text-green-800 bg-green-100 border border-green-300 rounded-full shadow-sm">
@@ -1436,7 +1461,10 @@ const CitizenDetailsPanel: React.FC<CitizenDetailsPanelProps> = ({ citizen, onCl
 
           <div className="mb-6">
             {/* Use citizen.firstName, citizen.description (camelCase) */}
-            <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">About {citizen.firstName}</h3> 
+            <div className="flex items-center">
+              <h3 className="text-lg font-serif text-amber-800 mb-2 border-b border-amber-200 pb-1">About {citizen.firstName}</h3>
+              <InfoIcon tooltipText="A brief biography or notable information about this citizen." />
+            </div> 
             <p className="text-amber-700 italic text-sm">{citizen.description || 'No description available.'}</p>
           </div>
         </div>
