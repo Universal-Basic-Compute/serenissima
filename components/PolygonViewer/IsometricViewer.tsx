@@ -109,6 +109,48 @@ export default function IsometricViewer({ activeView, fullWaterGraphData }: Isom
   // New state for unified interaction mode
   type InteractionMode = 'normal' | 'orient_bridge' | 'place_water_point' | 'create_water_route';
   const [interactionMode, setInteractionMode] = useState<InteractionMode>('normal');
+
+  const handleInteractionModeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newMode = e.target.value as InteractionMode;
+    console.log(`Switching interaction mode from ${interactionMode} to ${newMode}`);
+
+    // Cleanup for the OLD mode
+    if (interactionMode === 'orient_bridge') {
+      setSelectedBridgeForOrientationId(null);
+      setOrientingBridgeAngle(null);
+    }
+    if (interactionMode === 'create_water_route') {
+      setWaterRouteStartPoint(null);
+      setWaterRouteEndPoint(null);
+      setWaterRouteIntermediatePoints([]);
+      setWaterRoutePath([]);
+    }
+    // Add any cleanup for 'place_water_point' if needed
+
+    // Setup for the NEW mode
+    if (newMode === 'orient_bridge') {
+      if (transportMode) setTransportMode(false); // Disable general transport mode
+    }
+    if (newMode === 'place_water_point') {
+      if (transportMode) setTransportMode(false);
+    }
+    if (newMode === 'create_water_route') {
+      if (transportMode) setTransportMode(false);
+      setWaterRouteStartPoint(null); // Reset route state when entering mode
+      setWaterRouteEndPoint(null);
+      setWaterRouteIntermediatePoints([]);
+      setWaterRoutePath([]);
+    }
+    
+    // If switching to 'normal', ensure general transport mode is also reset if it was tied to a special mode
+    if (newMode === 'normal' && (interactionMode === 'place_water_point' || interactionMode === 'create_water_route')) {
+        // if transportMode was implicitly active due to a special water mode, consider resetting it or managing its state explicitly.
+        // For now, general transportMode is toggled by its own button.
+    }
+
+
+    setInteractionMode(newMode);
+  };
   
   // Add handler function for closing the transport debug panel
   const handleTransportDebugPanelClose = () => {
@@ -4004,7 +4046,7 @@ number => {
           )}
           
           {/* Water Route Status - only visible in water route mode for ConsiglioDeiDieci */}
-          {activeView === 'transport' && waterRouteMode && isUserConsiglioDeiDieci && (
+          {activeView === 'transport' && interactionMode === 'create_water_route' && isUserConsiglioDeiDieci && (
             <div className="absolute top-20 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded text-sm">
               {!waterRouteStartPoint ? (
                 <span>Click on a water point to start the route</span>
