@@ -40,7 +40,18 @@ export default function IsometricViewer({ activeView, fullWaterGraphData }: Isom
   const [citizens, setCitizens] = useState<Record<string, any>>({});
   const [scale, setScale] = useState(3); // Start with a 3x zoom for a closer view
   const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const [currentLoadingImage, setCurrentLoadingImage] = useState<string | null>(null);
+
+  // Define loading images and select one randomly for initial state
+  const loadingImageFiles = [
+    'renaissance-architectural-construction.png',
+    'renaissance-venetian-merchant-s-ledger.png',
+    'secretive-venetian-council-of-ten-meeting.png'
+    // Add more image names here if available
+  ];
+  const initialLoadingImage = loadingImageFiles.length > 0
+    ? `/images/loading/${loadingImageFiles[Math.floor(Math.random() * loadingImageFiles.length)]}`
+    : null;
+  const [currentLoadingImage, setCurrentLoadingImage] = useState<string | null>(initialLoadingImage);
   // Add refs to track previous state
   const prevActiveView = useRef<ViewType | null>(null);
   const prevScale = useRef<number>(3);
@@ -776,31 +787,20 @@ number => {
       setMinLoadingTimeElapsed(true);
     }, 3000); // 3 seconds
 
-    // Define loading images and select one randomly
-    const loadingImageFiles = [
-      'renaissance-architectural-construction.png',
-      'renaissance-venetian-merchant-s-ledger.png',
-      'secretive-venetian-council-of-ten-meeting.png'
-      // Add more image names here if available
-    ];
-
-    if (loadingImageFiles.length > 0) {
-      const randomIndex = Math.floor(Math.random() * loadingImageFiles.length);
-      const selectedImageSrc = `/images/loading/${loadingImageFiles[randomIndex]}`;
-      setCurrentLoadingImage(selectedImageSrc);
-
+    // Load the initially selected background image
+    if (currentLoadingImage) {
       const img = new Image();
       img.onload = () => {
         console.log('IsometricViewer: Background image loaded successfully.');
         setBgImageReady(true);
       };
       img.onerror = () => {
-        console.warn(`IsometricViewer: Failed to load background image: ${selectedImageSrc}`);
+        console.warn(`IsometricViewer: Failed to load background image: ${currentLoadingImage}`);
         setBgImageReady(true); // Mark as ready even on error to not block UI
       };
-      img.src = selectedImageSrc;
+      img.src = currentLoadingImage;
     } else {
-      console.log('IsometricViewer: No background images defined, marking as ready.');
+      console.log('IsometricViewer: No background image to load, marking as ready.');
       setBgImageReady(true); // No image to load
     }
 
