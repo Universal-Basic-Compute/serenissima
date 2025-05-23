@@ -1757,8 +1757,16 @@ def process_galley_unloading_activities(tables: Dict[str, Table], idle_citizens:
             galley_custom_id = galley_record['fields'].get('BuildingId')
             galley_position_str = galley_record['fields'].get('Position')
             galley_owner_username = galley_record['fields'].get('Owner')
+            
+            galley_position = None # Initialize galley_position
+            if galley_position_str:
+                try:
+                    galley_position = json.loads(galley_position_str)
+                except json.JSONDecodeError:
+                    log.error(f"{LogColors.FAIL}Could not parse Position JSON for galley {galley_custom_id}: '{galley_position_str}'. Skipping galley.{LogColors.ENDC}")
+                    continue # Skip this galley if position is invalid
 
-            if not all([galley_custom_id, galley_position_str, galley_owner_username]):
+            if not all([galley_custom_id, galley_position, galley_owner_username]): # Check galley_position instead of galley_position_str
                 log.warning(f"{LogColors.WARNING}Galley {galley_airtable_id} missing BuildingId, Position, or Owner. Skipping.{LogColors.ENDC}")
                 continue
             
