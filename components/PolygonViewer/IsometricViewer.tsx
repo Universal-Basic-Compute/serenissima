@@ -769,7 +769,10 @@ number => {
       'loading_image_2.png',
       'loading_image_3.png',
       'loading_image_4.png',
-      'loading_image_5.png'
+      'loading_image_5.png',
+      'renaissance-architectural-construction.png',
+      'renaissance-venetian-merchant-s-ledger.png',
+      'secretive-venetian-council-of-ten-meeting.png'
       // Add more image names here if available
     ];
 
