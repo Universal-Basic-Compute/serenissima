@@ -765,9 +765,6 @@ number => {
 
     // Define loading images and select one randomly
     const loadingImageFiles = [
-      'loading_image_1.png',
-      'loading_image_2.png',
-      'loading_image_3.png',
       'renaissance-architectural-construction.png',
       'renaissance-venetian-merchant-s-ledger.png',
       'secretive-venetian-council-of-ten-meeting.png'
