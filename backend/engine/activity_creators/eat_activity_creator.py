@@ -106,7 +106,7 @@ def try_create_eat_at_home_activity(
                 citizen_custom_id,
                 citizen_username,
                 citizen_airtable_id,
-                home_building_custom_id, # Pass custom BuildingId
+                home_building_airtable_id, # Pass Airtable Record ID
                 path_data_to_home
             )
         else:

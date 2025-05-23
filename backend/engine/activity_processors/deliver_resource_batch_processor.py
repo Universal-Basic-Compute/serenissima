@@ -158,71 +158,96 @@ def process(
         log.error(f"Resource transfer failed for activity {activity_guid}. Financial transactions will be skipped.")
         return False
 
-    notes = activity_fields.get('Notes', '')
-    contract_ids_match = re.search(r"Involves Contract IDs: ([\w\s,-]+)", notes)
-    if not contract_ids_match:
-        log.error(f"Could not parse original Contract IDs from notes for activity {activity_guid}: {notes}")
-        return False
+    # Financial processing for the final delivery leg
+    original_contract_custom_id = activity_fields.get('ContractId') # This should be the Original Custom Contract ID
+
+    if not original_contract_custom_id:
+        log.error(f"Activity {activity_guid} is missing ContractId (expected Original Custom Contract ID) for financial processing.")
+        # If this was a generic delivery not from import, it might be okay.
+        # For now, assume import deliveries MUST have this.
+        return False # Or True if non-import deliveries are fine without financials here.
+
+    contract_record = get_contract_record(tables, original_contract_custom_id) # Fetches by custom ContractId
+    if not contract_record:
+        log.warning(f"Original contract {original_contract_custom_id} not found for activity {activity_guid}. Skipping financial part.")
+        return False # Critical for import payment
+
+    contract_fields = contract_record['fields']
+    buyer_username = contract_fields.get('Buyer')
+    # Seller for imports is always "Italia"
+    seller_username = "Italia" # contract_fields.get('Seller') should be Italia
     
-    original_contract_ids_str = contract_ids_match.group(1)
-    original_contract_ids = [cid.strip() for cid in original_contract_ids_str.split(',')]
+    if contract_fields.get('Seller') != "Italia":
+        log.warning(f"Contract {original_contract_custom_id} Seller is not 'Italia' ({contract_fields.get('Seller')}). This might not be an import payment context.")
+        # Decide if this is an error or if other payment types are handled here.
+        # For now, proceed assuming it's an import payment to Italia.
 
-    all_financials_processed = True
-    for original_contract_id in original_contract_ids:
-        contract_record = get_contract_record(tables, original_contract_id)
-        if not contract_record:
-            log.warning(f"Original contract {original_contract_id} not found for activity {activity_guid}. Skipping its financial part.")
-            all_financials_processed = False
-            continue
-
-        contract_fields = contract_record['fields']
-        buyer_username = contract_fields.get('Buyer')
-        seller_username = contract_fields.get('Seller')
-        price_per_resource = float(contract_fields.get('PricePerResource', 0))
-        amount_for_this_contract_part = float(contract_fields.get('HourlyAmount', 0)) 
+    price_per_resource = float(contract_fields.get('PricePerResource', 0))
+    
+    # Calculate total cost based on actual resources delivered in THIS batch
+    # The 'resources_to_deliver' list contains what was actually in this activity's payload
+    total_cost_for_this_delivery = 0
+    delivered_items_details = []
+    for item_delivered in resources_to_deliver: # resources_to_deliver is from activity_fields.get('Resources')
+        res_type = item_delivered.get('ResourceId')
+        amount_delivered = float(item_delivered.get('Amount', 0))
         
-        if not buyer_username or not seller_username or price_per_resource <= 0 or amount_for_this_contract_part <= 0:
-            log.warning(f"Contract {original_contract_id} has invalid financial details. Skipping.")
-            all_financials_processed = False
-            continue
+        # We need to ensure the price_per_resource from the contract applies to this specific resource type.
+        # The contract is for a specific resource type. If batch contains multiple, this logic needs care.
+        # Assuming the contract is for ONE resource type, or price is an average.
+        # For simplicity, assume the contract's PricePerResource applies to all items in this batch if they match contract's ResourceType.
+        # A more robust system might have per-resource pricing if a batch can contain items from different original contracts.
+        # Here, `original_contract_custom_id` refers to ONE original contract.
+        if contract_fields.get('ResourceType') == res_type:
+            total_cost_for_this_delivery += price_per_resource * amount_delivered
+            delivered_items_details.append({"resource": res_type, "amount": amount_delivered, "cost_part": price_per_resource * amount_delivered})
+        else:
+            log.warning(f"Resource {res_type} in delivery batch for activity {activity_guid} does not match contract {original_contract_custom_id}'s resource type {contract_fields.get('ResourceType')}. This item's cost not included.")
 
-        total_cost = price_per_resource * amount_for_this_contract_part
-        buyer_citizen_rec = get_citizen_record(tables, buyer_username)
-        seller_citizen_rec = get_citizen_record(tables, seller_username)
+    if total_cost_for_this_delivery <= 0:
+        log.warning(f"Total cost for delivery in activity {activity_guid} is zero or negative. No payment processed. Items: {delivered_items_details}")
+        return True # Successfully delivered, but no payment needed/possible.
 
-        if not buyer_citizen_rec or not seller_citizen_rec:
-            log.warning(f"Buyer or Seller citizen record not found for contract {original_contract_id}. Skipping.")
-            all_financials_processed = False
-            continue
-        
-        try:
-            buyer_ducats = float(buyer_citizen_rec['fields'].get('Ducats', 0))
-            seller_ducats = float(seller_citizen_rec['fields'].get('Ducats', 0))
+    buyer_citizen_rec = get_citizen_record(tables, buyer_username)
+    seller_citizen_rec = get_citizen_record(tables, seller_username) # Should be "Italia"
 
-            tables['citizens'].update(buyer_citizen_rec['id'], {'Ducats': buyer_ducats - total_cost})
-            tables['citizens'].update(seller_citizen_rec['id'], {'Ducats': seller_ducats + total_cost})
+    if not buyer_citizen_rec or not seller_citizen_rec:
+        log.warning(f"Buyer ({buyer_username}) or Seller ({seller_username}) citizen record not found for contract {original_contract_custom_id}. Skipping payment.")
+        return False # Payment is critical for import flow
+    
+    try:
+        buyer_ducats = float(buyer_citizen_rec['fields'].get('Ducats', 0))
+        seller_ducats = float(seller_citizen_rec['fields'].get('Ducats', 0))
 
-            transaction_payload = {
-                "Type": "import_payment",
-                "AssetType": "contract",
-                "Asset": original_contract_id,
-                "Seller": seller_username,
-                "Buyer": buyer_username,
-                "Price": total_cost,
-                "Details": json.dumps({
-                    "resource_type": contract_fields.get('ResourceType'),
-                    "amount": amount_for_this_contract_part,
-                    "price_per_unit": price_per_resource,
-                    "activity_guid": activity_guid
-                }),
-                "CreatedAt": datetime.now(timezone.utc).isoformat(),
-                "ExecutedAt": datetime.now(timezone.utc).isoformat()
-            }
-            tables['transactions'].create(transaction_payload)
-            log.info(f"Processed financial transaction for contract {original_contract_id} (Activity: {activity_guid}). Cost: {total_cost}")
-        except Exception as e_finance:
-            log.error(f"Error processing financial transaction for contract {original_contract_id}: {e_finance}")
-            all_financials_processed = False
+        if buyer_ducats < total_cost_for_this_delivery:
+            log.error(f"Buyer {buyer_username} has insufficient funds ({buyer_ducats:.2f}) for import payment ({total_cost_for_this_delivery:.2f}) for contract {original_contract_custom_id}.")
+            # Create a problem for the buyer?
+            return False # Payment failed
+
+        tables['citizens'].update(buyer_citizen_rec['id'], {'Ducats': buyer_ducats - total_cost_for_this_delivery})
+        tables['citizens'].update(seller_citizen_rec['id'], {'Ducats': seller_ducats + total_cost_for_this_delivery})
+
+        transaction_payload = {
+            "Type": "import_payment_final", # Distinguish from old "import_payment"
+            "AssetType": "contract",
+            "Asset": original_contract_custom_id,
+            "Seller": seller_username,
+            "Buyer": buyer_username,
+            "Price": total_cost_for_this_delivery,
+            "Details": json.dumps({
+                "delivered_items": delivered_items_details,
+                "original_contract_resource_type": contract_fields.get('ResourceType'),
+                "price_per_unit_contract": price_per_resource,
+                "activity_guid": activity_guid
+            }),
+            "CreatedAt": datetime.now(timezone.utc).isoformat(),
+            "ExecutedAt": datetime.now(timezone.utc).isoformat()
+        }
+        tables['transactions'].create(transaction_payload)
+        log.info(f"Processed FINAL import payment for contract {original_contract_custom_id} (Activity: {activity_guid}). Buyer {buyer_username} paid {total_cost_for_this_delivery:.2f} to {seller_username}.")
+    except Exception as e_finance:
+        log.error(f"Error processing FINAL import payment for contract {original_contract_custom_id}: {e_finance}")
+        return False 
     
     # Building UpdatedAt is handled by Airtable
-    return all_financials_processed
+    return True

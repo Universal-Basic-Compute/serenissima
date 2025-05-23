@@ -190,10 +190,11 @@ def process(
                 "Owner": ultimate_buyer_username, # Resources on citizen are owned by the contract's original buyer
                 "Count": actual_amount_to_pickup,
                 "Position": galley_position_str, # Citizen is at the galley
-                "CreatedAt": now_iso
+                "CreatedAt": now_iso,
+                "Notes": f"Fetched for contract: {original_contract_custom_id}" # Store original contract ID
             }
             tables['resources'].create(new_carrier_res_payload)
-            log.info(f"[fetch_from_galley_proc] Created {actual_amount_to_pickup} of {resource_id_to_fetch} for carrier {carrier_username} (owned by {ultimate_buyer_username}).")
+            log.info(f"[fetch_from_galley_proc] Created {actual_amount_to_pickup} of {resource_id_to_fetch} for carrier {carrier_username} (owned by {ultimate_buyer_username}), linked to contract {original_contract_custom_id}.")
 
         # Update carrier's position to Galley
         tables['citizens'].update(carrier_airtable_id, {'Position': galley_position_str})

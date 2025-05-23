@@ -984,7 +984,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
             closest_inn = get_closest_inn(tables, citizen_position)
             if closest_inn:
                 inn_position_coords = _get_building_position_coords(closest_inn)
-                inn_custom_id = closest_inn['fields'].get('BuildingId', closest_inn['id']) # Custom ID
+                inn_custom_id = closest_inn['fields'].get('BuildingId', closest_inn['id']) 
                 inn_airtable_id = closest_inn['id'] # Airtable Record ID
 
                 if inn_position_coords:
@@ -997,12 +997,12 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
                         else:
                             end_time_venice = (venice_now + datetime.timedelta(days=1)).replace(hour=NIGHT_END_HOUR, minute=0, second=0, microsecond=0)
                         stay_end_time_utc_iso = end_time_venice.astimezone(pytz.UTC).isoformat()
-                        try_create_stay_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, inn_custom_id, stay_location_type="inn", end_time_utc_iso=stay_end_time_utc_iso) # Pass custom ID
+                        try_create_stay_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, inn_airtable_id, stay_location_type="inn", end_time_utc_iso=stay_end_time_utc_iso) # Pass Airtable Record ID
                     else:
                         log.info(f"Citizen {citizen_username} is not at inn {inn_custom_id}. Finding path to inn.")
                         path_data = get_path_between_points(citizen_position, inn_position_coords)
                         if path_data and path_data.get('success'):
-                            try_create_travel_to_inn_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, inn_custom_id, path_data) # Pass custom ID
+                            try_create_travel_to_inn_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, inn_airtable_id, path_data) # Pass Airtable Record ID
                         else:
                             log.warning(f"Path finding to inn {inn_custom_id} failed for {citizen_username}. Creating idle activity.")
                             idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
@@ -1026,7 +1026,8 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
                 return True
             
             home_position = _get_building_position_coords(home)
-            home_custom_id = home['fields'].get('BuildingId', home['id']) # Custom ID
+            home_custom_id = home['fields'].get('BuildingId', home['id']) 
+            home_airtable_id = home['id'] # Airtable Record ID
 
             if not home_position:
                 log.warning(f"Home {home_custom_id} has no position data, creating idle for resident {citizen_custom_id}")
@@ -1042,11 +1043,11 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
                 else:
                     end_time_venice = (venice_now + datetime.timedelta(days=1)).replace(hour=NIGHT_END_HOUR, minute=0, second=0, microsecond=0)
                 stay_end_time_utc_iso = end_time_venice.astimezone(pytz.UTC).isoformat()
-                try_create_stay_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, home_custom_id, stay_location_type="home", end_time_utc_iso=stay_end_time_utc_iso) # Pass custom ID
+                try_create_stay_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, home_airtable_id, stay_location_type="home", end_time_utc_iso=stay_end_time_utc_iso) # Pass Airtable Record ID
             else:
                 path_data = get_path_between_points(citizen_position, home_position)
                 if path_data and path_data.get('success'):
-                    try_create_goto_home_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, home_custom_id, path_data) # Pass custom ID
+                    try_create_goto_home_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, home_airtable_id, path_data) # Pass Airtable Record ID
                 else:
                     log.warning(f"Path finding to home failed for resident {citizen_custom_id}. Creating idle activity.")
                     idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
@@ -1056,7 +1057,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
         workplace = get_citizen_workplace(tables, citizen_custom_id, citizen_username)
         if workplace:
             workplace_position = _get_building_position_coords(workplace)
-            workplace_custom_id = workplace['fields'].get('BuildingId', workplace['id']) # Custom ID
+            workplace_custom_id = workplace['fields'].get('BuildingId', workplace['id']) 
             workplace_airtable_id = workplace['id'] # Airtable Record ID
 
             if not workplace_position:
@@ -1118,7 +1119,7 @@ def process_citizen_activity(tables, citizen: Dict, is_night: bool) -> bool:
             else: # Not at workplace
                 path_data = get_path_between_points(citizen_position, workplace_position)
                 if path_data and path_data.get('success'):
-                    try_create_goto_work_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, workplace_custom_id, path_data) # Pass custom ID
+                    try_create_goto_work_activity(tables, citizen_custom_id, citizen_username, citizen_airtable_record_id, workplace_airtable_id, path_data) # Pass Airtable Record ID
                 else:
                     log.warning(f"Path to workplace {workplace_custom_id} failed for {citizen_custom_id}. Creating idle.")
                     idle_end_time_iso = (now_utc_dt + datetime.timedelta(hours=IDLE_ACTIVITY_DURATION_HOURS)).isoformat()
@@ -1147,32 +1148,212 @@ def create_activities(dry_run: bool = False):
     
     # Process each idle citizen
     success_count = 0
-    citizens_still_idle_after_main_logic = []
+    
+    # Attempt to create final delivery activities for citizens at galleys first
+    # This pool will be modified by process_final_deliveries_from_galley
+    citizens_available_for_general_activities = list(idle_citizens) 
+    if not dry_run:
+        final_delivery_activities_created = process_final_deliveries_from_galley(tables, citizens_available_for_general_activities, now_utc_dt)
+        success_count += final_delivery_activities_created
 
-    for citizen_record in idle_citizens:
+    # Then, attempt to assign citizens to fetch from galleys
+    # This pool will be modified by process_galley_unloading_activities
+    citizens_still_available_after_final_delivery = list(citizens_available_for_general_activities)
+    if not dry_run:
+        galley_fetch_activities_created = process_galley_unloading_activities(tables, citizens_still_available_after_final_delivery, now_utc_dt)
+        success_count += galley_fetch_activities_created
+    elif dry_run and idle_citizens: # If dry run, simulate checking for galley tasks
+        log.info(f"[DRY RUN] Would check for merchant galleys with pending deliveries (fetch tasks).")
+        log.info(f"[DRY RUN] Would check for citizens at galleys ready for final delivery tasks.")
+
+
+    # Finally, process general activities for any remaining idle citizens
+    citizens_for_general_processing = list(citizens_still_available_after_final_delivery) # Use the latest available pool
+    log.info(f"Processing general activities for {len(citizens_for_general_processing)} remaining idle citizens.")
+
+    for citizen_record in citizens_for_general_processing:
         if dry_run:
-            log.info(f"[DRY RUN] Would create activity for citizen {citizen_record['id']}")
-            success_count += 1
+            # Avoid double counting if already simulated for galley tasks in dry_run
+            if not (idle_citizens and galley_fetch_activities_created > 0): # Simplified check
+                 log.info(f"[DRY RUN] Would create general activity for citizen {citizen_record['id']}")
+                 success_count +=1 # Add to dry run success count
         else:
             activity_created_for_citizen = process_citizen_activity(tables, citizen_record, night_time)
             if activity_created_for_citizen:
                 success_count += 1
-            else:
-                # If no regular activity was created, citizen might be available for galley unloading
-                citizens_still_idle_after_main_logic.append(citizen_record)
     
-    log.info(f"Main activity creation loop complete. Created activities for {success_count} citizens.")
-
-    # Now, process galley unloading with remaining idle citizens
-    if not dry_run and citizens_still_idle_after_main_logic:
-        log.info(f"Attempting to assign {len(citizens_still_idle_after_main_logic)} remaining idle citizens to galley unloading tasks.")
-        galley_activities_created = process_galley_unloading_activities(tables, citizens_still_idle_after_main_logic, now_utc_dt)
-        success_count += galley_activities_created # Add to total count of activities created
-    elif dry_run and idle_citizens: # If dry run, simulate checking for galley tasks
-        log.info(f"[DRY RUN] Would check for merchant galleys with pending deliveries and assign idle citizens.")
-
-
     log.info(f"Activity creation process complete. Total activities created or simulated: {success_count} for {len(idle_citizens)} initially idle citizens.")
+
+
+def process_final_deliveries_from_galley(tables: Dict[str, Table], citizens_pool: List[Dict], now_utc_dt: datetime.datetime) -> int:
+    """
+    Identifies citizens at galleys carrying resources from a fetch_from_galley activity
+    and creates deliver_resource_batch activities to the final buyer.
+    Modifies citizens_pool by removing citizens who are assigned a delivery.
+    Returns the number of delivery activities created.
+    """
+    activities_created_count = 0
+    citizens_assigned_delivery = []
+
+    if not citizens_pool:
+        return 0
+
+    try:
+        arrived_galleys = tables['buildings'].all(formula="AND({Type}='merchant_galley', {IsConstructed}=TRUE())")
+        if not arrived_galleys:
+            # log.info("No arrived merchant galleys found for final delivery processing.")
+            return 0
+        
+        galley_locations_map = {
+            galley['id']: (_get_building_position_coords(galley), galley['fields'].get('BuildingId'))
+            for galley in arrived_galleys if _get_building_position_coords(galley) and galley['fields'].get('BuildingId')
+        }
+        if not galley_locations_map:
+            log.info("No arrived galleys with valid positions found.")
+            return 0
+
+        for citizen_record in list(citizens_pool): # Iterate over a copy for safe removal
+            citizen_username = citizen_record['fields'].get('Username')
+            citizen_airtable_id = citizen_record['id']
+            citizen_custom_id = citizen_record['fields'].get('CitizenId', citizen_username)
+            citizen_pos_str = citizen_record['fields'].get('Position')
+            
+            if not citizen_pos_str or not citizen_username:
+                continue
+            
+            try:
+                citizen_current_pos = json.loads(citizen_pos_str)
+            except json.JSONDecodeError:
+                continue
+
+            at_galley_airtable_id = None
+            current_galley_custom_id = None
+
+            for galley_aid, (galley_pos, galley_cid) in galley_locations_map.items():
+                if _calculate_distance_meters(citizen_current_pos, galley_pos) < 20: # Citizen is at this galley
+                    at_galley_airtable_id = galley_aid
+                    current_galley_custom_id = galley_cid
+                    break
+            
+            if not at_galley_airtable_id:
+                continue # Citizen not at any known galley
+
+            # Citizen is at a galley. Check resources they are carrying.
+            # Resources are owned by the ultimate_buyer_username, Asset is citizen_username
+            carried_res_formula = f"AND({{Asset}}='{_escape_airtable_value(citizen_username)}', {{AssetType}}='citizen', {{Owner}}!='Italia')"
+            
+            try:
+                carried_resources_records = tables['resources'].all(formula=carried_res_formula)
+            except Exception as e_fetch_carried:
+                log.error(f"Error fetching carried resources for {citizen_username} at galley: {e_fetch_carried}")
+                continue
+
+            resources_for_delivery_by_contract: Dict[str, List[Dict]] = defaultdict(list)
+            contract_to_buyer_building_map: Dict[str, str] = {}
+
+            for res_rec in carried_resources_records:
+                notes = res_rec['fields'].get('Notes', '')
+                match = re.search(r"Fetched for contract: (contract-[^\s]+)", notes)
+                if match:
+                    original_contract_id = match.group(1)
+                    resources_for_delivery_by_contract[original_contract_id].append({
+                        "ResourceId": res_rec['fields'].get('Type'),
+                        "Amount": float(res_rec['fields'].get('Count', 0))
+                    })
+                    # Store buyer building if not already fetched for this contract
+                    if original_contract_id not in contract_to_buyer_building_map:
+                        original_contract_details = tables['contracts'].all(formula=f"{{ContractId}}='{_escape_airtable_value(original_contract_id)}'", max_records=1)
+                        if original_contract_details:
+                            buyer_building_custom_id = original_contract_details[0]['fields'].get('BuyerBuilding')
+                            if buyer_building_custom_id:
+                                contract_to_buyer_building_map[original_contract_id] = buyer_building_custom_id
+                            else:
+                                log.warning(f"Original contract {original_contract_id} does not have a BuyerBuilding. Cannot create final delivery.")
+                        else:
+                             log.warning(f"Could not fetch original contract details for {original_contract_id}. Cannot create final delivery.")
+
+
+            if not resources_for_delivery_by_contract:
+                # log.info(f"Citizen {citizen_username} at galley {current_galley_custom_id} but no resources marked 'Fetched for contract'.")
+                continue
+
+            # Create one deliver_resource_batch activity per original contract
+            for original_contract_id, resources_list in resources_for_delivery_by_contract.items():
+                if not resources_list: continue
+
+                buyer_building_custom_id = contract_to_buyer_building_map.get(original_contract_id)
+                if not buyer_building_custom_id:
+                    log.warning(f"No BuyerBuilding found for contract {original_contract_id} for citizen {citizen_username}. Skipping this batch.")
+                    continue
+
+                buyer_building_record_list = tables['buildings'].all(formula=f"{{BuildingId}}='{_escape_airtable_value(buyer_building_custom_id)}'", max_records=1)
+                if not buyer_building_record_list:
+                    log.warning(f"BuyerBuilding {buyer_building_custom_id} for contract {original_contract_id} not found. Skipping delivery for {citizen_username}.")
+                    continue
+                
+                buyer_building_record = buyer_building_record_list[0]
+                buyer_building_airtable_id = buyer_building_record['id']
+                buyer_building_pos = _get_building_position_coords(buyer_building_record)
+
+                if not buyer_building_pos:
+                    log.warning(f"BuyerBuilding {buyer_building_custom_id} has no position. Skipping delivery for {citizen_username}.")
+                    continue
+
+                path_to_buyer = get_path_between_points(citizen_current_pos, buyer_building_pos)
+                if path_to_buyer and path_to_buyer.get('success'):
+                    from .resource_fetching_activity_creator import try_create as try_create_deliver_batch_placeholder # Using this structure
+                    
+                    # We need a proper deliver_resource_batch creator or inline logic
+                    # For now, adapting resource_fetching_activity_creator structure
+                    # This should be a call to a dedicated deliver_resource_batch_creator if it existed
+                    # Or inline the creation logic:
+                    
+                    activity_id_str_final = f"deliver_final_{citizen_custom_id}_{uuid.uuid4()}"
+                    start_date_iso = path_to_buyer.get('timing', {}).get('startDate', now_utc_dt.isoformat())
+                    end_date_iso = path_to_buyer.get('timing', {}).get('endDate')
+                    if not end_date_iso:
+                        end_date_iso = (now_utc_dt + datetime.timedelta(hours=1)).isoformat() # Default 1hr
+
+                    final_delivery_payload = {
+                        "ActivityId": activity_id_str_final,
+                        "Type": "deliver_resource_batch",
+                        "Citizen": citizen_username,
+                        "FromBuilding": at_galley_airtable_id, # From the galley
+                        "ToBuilding": buyer_building_airtable_id, # To the buyer's building
+                        "Resources": json.dumps(resources_list),
+                        "ContractId": original_contract_id, # CRITICAL: This is the Original Custom Contract ID
+                        "Path": json.dumps(path_to_buyer.get('path', [])),
+                        "Transporter": path_to_buyer.get('transporter'),
+                        "CreatedAt": now_utc_dt.isoformat(),
+                        "StartDate": start_date_iso,
+                        "EndDate": end_date_iso,
+                        "Notes": f"🚢 Delivering resources from galley {current_galley_custom_id} to {buyer_building_custom_id} for contract {original_contract_id}."
+                    }
+                    try:
+                        created_activity = tables['activities'].create(final_delivery_payload)
+                        if created_activity and created_activity.get('id'):
+                            log.info(f"Created final deliver_resource_batch activity {created_activity['id']} for {citizen_username} from galley {current_galley_custom_id} to {buyer_building_custom_id}.")
+                            activities_created_count += 1
+                            citizens_assigned_delivery.append(citizen_record) # Mark citizen as assigned
+                            # Break from this citizen's resource processing for now, they have a task.
+                            # More complex logic could batch multiple contract deliveries if path is similar.
+                            break 
+                        else:
+                            log.error(f"Failed to create final deliver_resource_batch for {citizen_username}.")
+                    except Exception as e_create_final:
+                        log.error(f"Error creating final deliver_resource_batch for {citizen_username}: {e_create_final}")
+                else:
+                    log.warning(f"Pathfinding from galley {current_galley_custom_id} to buyer building {buyer_building_custom_id} failed for {citizen_username}.")
+            
+            if citizen_record in citizens_assigned_delivery and citizen_record in citizens_pool : # If assigned, remove from pool
+                 citizens_pool.remove(citizen_record)
+
+
+    except Exception as e:
+        log.error(f"Error in process_final_deliveries_from_galley: {e}")
+    
+    log.info(f"Created {activities_created_count} final delivery activities from galleys.")
+    return activities_created_count
 
 
 def process_galley_unloading_activities(tables: Dict[str, Table], idle_citizens: List[Dict], now_utc_dt: datetime.datetime) -> int:
