@@ -170,7 +170,8 @@ def _escape_airtable_value(value: str) -> str:
 def get_concluded_unprocessed_activities(tables: Dict[str, Table]) -> List[Dict]:
     """Fetch activities that have ended and are not yet processed."""
     now_iso = datetime.now(timezone.utc).isoformat()
-    formula = f"AND({{EndDate}} <= '{now_iso}', OR({{Status}} = BLANK(), {{Status}} != 'processed', {{Status}} != 'failed'))"
+    # Corrected formula to exclude activities already 'processed' or 'failed'
+    formula = f"AND({{EndDate}} <= '{now_iso}', NOT(OR({{Status}} = 'processed', {{Status}} = 'failed')))"
     try:
         activities = tables['activities'].all(formula=formula)
         log.info(f"{LogColors.OKBLUE}Found {len(activities)} concluded and unprocessed activities.{LogColors.ENDC}")
