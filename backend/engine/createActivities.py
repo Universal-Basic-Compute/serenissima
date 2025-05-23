@@ -1241,7 +1241,7 @@ def process_final_deliveries_from_galley(tables: Dict[str, Table], citizens_pool
 
             # Citizen is at a galley. Check resources they are carrying.
             # Resources are owned by the ultimate_buyer_username, Asset is citizen_username
-            carried_res_formula = f"AND({{Asset}}='{_escape_airtable_value(citizen_username)}', {{AssetType}}='citizen', {{Owner}}!='Italia')"
+            carried_res_formula = f"AND({{Asset}}='{_escape_airtable_value(citizen_username)}', {{AssetType}}='citizen')"
             
             try:
                 carried_resources_records = tables['resources'].all(formula=carried_res_formula)

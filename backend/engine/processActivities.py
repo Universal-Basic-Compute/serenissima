@@ -5,7 +5,7 @@ Process Concluded Activities script for La Serenissima.
 This script:
 1. Fetches all activities that are concluded (EndDate is in the past) and not yet processed.
 2. For "deliver_resource_batch" activities:
-   - Transfers resources from the delivery citizen (owned by "Italia") to the target building.
+   - Transfers resources from the delivery citizen (owned by the merchant) to the target building.
    - Checks storage capacity of the target building.
    - Updates or creates resource records in the target building for its operator/owner.
    - Processes financial transactions based on the original contracts in the batch.
