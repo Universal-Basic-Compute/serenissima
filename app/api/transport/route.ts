@@ -1,42 +1,6 @@
 import { NextResponse } from 'next/server';
 import { transportService } from '@/lib/services/TransportService';
 
-export async function GET(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    
-    // Get start and end points from query parameters
-    const startLat = parseFloat(searchParams.get('startLat') || '');
-    const startLng = parseFloat(searchParams.get('startLng') || '');
-    const endLat = parseFloat(searchParams.get('endLat') || '');
-    const endLng = parseFloat(searchParams.get('endLng') || '');
-    
-    // Get optional startDate parameter
-    const startDateParam = searchParams.get('startDate');
-    const startDate = startDateParam ? new Date(startDateParam) : new Date();
-    
-    // Validate coordinates
-    if (isNaN(startLat) || isNaN(startLng) || isNaN(endLat) || isNaN(endLng)) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid coordinates. Please provide valid startLat, startLng, endLat, and endLng parameters.' },
-        { status: 400 }
-      );
-    }
-    
-    // Validate startDate if provided
-    if (startDateParam && isNaN(startDate.getTime())) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid startDate. Please provide a valid date string.' },
-        { status: 400 }
-      );
-    }
-    
-    const startPoint = { lat: startLat, lng: startLng };
-    const endPoint = { lat: endLat, lng: endLng };
-    
-    // Find the path using the transport service
-    const result = await transportService.findPath(startPoint, endPoint);
-    
 // Define speeds
 const WALKING_SPEED_MPS = 1.4; // meters per second
 const GONDOLA_SPEED_MPS = WALKING_SPEED_MPS * 2; // Gondolas are twice as fast
@@ -142,6 +106,102 @@ function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
   const distance = R * c;
   
   return distance;
+}
+
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    
+    // Get start and end points from query parameters
+    const startLat = parseFloat(searchParams.get('startLat') || '');
+    const startLng = parseFloat(searchParams.get('startLng') || '');
+    const endLat = parseFloat(searchParams.get('endLat') || '');
+    const endLng = parseFloat(searchParams.get('endLng') || '');
+    
+    // Get optional startDate parameter
+    const startDateParam = searchParams.get('startDate');
+    const startDate = startDateParam ? new Date(startDateParam) : new Date();
+    
+    // Validate coordinates
+    if (isNaN(startLat) || isNaN(startLng) || isNaN(endLat) || isNaN(endLng)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid coordinates. Please provide valid startLat, startLng, endLat, and endLng parameters.' },
+        { status: 400 }
+      );
+    }
+    
+    // Validate startDate if provided
+    if (startDateParam && isNaN(startDate.getTime())) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid startDate. Please provide a valid date string.' },
+        { status: 400 }
+      );
+    }
+    
+    const startPoint = { lat: startLat, lng: startLng };
+    const endPoint = { lat: endLat, lng: endLng };
+    
+    // Find the path using the transport service
+    const result = await transportService.findPath(startPoint, endPoint);
+
+    // If path was found successfully, add timing and journey information
+    if (result.success && result.path) {
+      const distance = calculatePathDistance(result.path);
+      const travelTimeSeconds = calculatePathTravelTime(result.path);
+      
+      const transportStartDate = startDateParam ? new Date(startDateParam) : new Date();
+      const endDate = new Date(transportStartDate.getTime() + (travelTimeSeconds * 1000));
+      
+      result.timing = {
+        startDate: transportStartDate.toISOString(),
+        endDate: endDate.toISOString(),
+        durationSeconds: travelTimeSeconds,
+        distanceMeters: distance
+      };
+      
+      const journey = extractJourneyFromPath(result.path);
+      result.journey = journey;
+
+      // Determine transporter if gondola is used (similar to POST)
+      let transporter = null;
+      const usesGondola = result.path.some((p: any) => p.transportMode === 'gondola');
+
+      if (usesGondola) {
+        for (const point of result.path) {
+          if (point.type === 'dock' && point.nodeId) {
+            try {
+              const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
+                              (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+              const buildingUrl = new URL(`/api/buildings/${encodeURIComponent(point.nodeId)}`, baseUrl);
+              const buildingResponse = await fetch(buildingUrl.toString());
+
+              if (buildingResponse.ok) {
+                const buildingData = await buildingResponse.json();
+                if (buildingData.building && buildingData.building.runBy) {
+                  transporter = buildingData.building.runBy;
+                  console.log(`Identified transporter ${transporter} from dock ${point.nodeId} for GET request`);
+                  break; 
+                }
+              } else {
+                console.warn(`Failed to fetch building details for dock ${point.nodeId} (GET request): ${buildingResponse.status}`);
+              }
+            } catch (e) {
+              console.error(`Error fetching building details for dock ${point.nodeId} (GET request):`, e);
+            }
+          }
+        }
+      }
+      result.transporter = transporter;
+    }
+    
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error('Error in GET transport route:', error);
+    return NextResponse.json(
+      { success: false, error: 'An error occurred while processing the GET request' },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(request: Request) {
