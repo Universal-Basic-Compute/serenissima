@@ -14,10 +14,9 @@ const base = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID!);
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { buildingId: string } }
+  { params: { buildingId } }: { params: { buildingId: string } }
 ) {
   try {
-    const { buildingId } = params;
     if (!buildingId) {
       return NextResponse.json({ success: false, error: 'Building ID is required' }, { status: 400 });
     }
@@ -93,7 +92,7 @@ export async function PATCH(
     return NextResponse.json({ success: true, bridge: responseBuilding });
 
   } catch (error) {
-    console.error(`Error updating bridge ${params.buildingId} orientation:`, error);
+    console.error(`Error updating bridge ${buildingId} orientation:`, error); // Changed params.buildingId to buildingId
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
     return NextResponse.json({ success: false, error: 'Failed to update bridge orientation', details: errorMessage }, { status: 500 });
   }
