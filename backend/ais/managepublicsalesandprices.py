@@ -806,6 +806,8 @@ def create_admin_notification(tables: Dict[str, Table], ai_sales_and_price_resul
             "Content": message,
             "CreatedAt": now_iso,
             "ReadAt": None, # Mark as unread
+            "Asset": "system_report",
+            "AssetType": "report",
             "Details": json.dumps({
                 "ai_sales_and_price_results": ai_sales_and_price_results,
                 "timestamp": now_iso

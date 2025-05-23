@@ -726,6 +726,8 @@ def create_admin_notification(tables, ai_import_results: Dict[str, Dict]) -> Non
             "Content": message,
             "CreatedAt": now,
             "ReadAt": None,
+            "Asset": "system_report",
+            "AssetType": "report",
             "Details": json.dumps({
                 "ai_import_results": ai_import_results,
                 "timestamp": now
