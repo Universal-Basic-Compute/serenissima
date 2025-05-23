@@ -117,7 +117,7 @@ export async function GET(request: Request) {
         name: buildingData.name,
         category: buildingData.category || pathParts[0] || 'Uncategorized',
         subcategory: buildingData.subcategory || pathParts[1] || 'General',
-        tier: buildingData.tier || 1,
+        buildTier: buildingData.buildTier || 5,
         pointType: buildingData.pointType || null,
         constructionCosts: buildingData.constructionCosts || null,
         maintenanceCost: buildingData.maintenanceCost || 0,
