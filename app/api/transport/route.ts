@@ -37,15 +37,74 @@ export async function GET(request: Request) {
     // Find the path using the transport service
     const result = await transportService.findPath(startPoint, endPoint);
     
+// Define speeds
+const WALKING_SPEED_MPS = 1.4; // meters per second
+const GONDOLA_SPEED_MPS = WALKING_SPEED_MPS * 2; // Gondolas are twice as fast
+
+// Helper function to calculate travel time considering different transport modes
+function calculatePathTravelTime(path: {lat: number, lng: number, transportMode?: string}[]): number {
+  let totalTravelTimeSeconds = 0;
+  if (!path || path.length < 2) {
+    return 0;
+  }
+
+  for (let i = 1; i < path.length; i++) {
+    const point1 = path[i - 1];
+    const point2 = path[i];
+    
+    const segmentDistance = haversineDistance(point1.lat, point1.lng, point2.lat, point2.lng);
+    // Assume point2.transportMode indicates the mode used to travel from point1 to point2
+    const mode = point2.transportMode; 
+    const speed = (mode === 'gondola') ? GONDOLA_SPEED_MPS : WALKING_SPEED_MPS;
+    
+    if (speed > 0) {
+      totalTravelTimeSeconds += segmentDistance / speed;
+    }
+  }
+  return totalTravelTimeSeconds;
+}
+
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    
+    // Get start and end points from query parameters
+    const startLat = parseFloat(searchParams.get('startLat') || '');
+    const startLng = parseFloat(searchParams.get('startLng') || '');
+    const endLat = parseFloat(searchParams.get('endLat') || '');
+    const endLng = parseFloat(searchParams.get('endLng') || '');
+    
+    // Get optional startDate parameter
+    const startDateParam = searchParams.get('startDate');
+    const startDate = startDateParam ? new Date(startDateParam) : new Date();
+    
+    // Validate coordinates
+    if (isNaN(startLat) || isNaN(startLng) || isNaN(endLat) || isNaN(endLng)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid coordinates. Please provide valid startLat, startLng, endLat, and endLng parameters.' },
+        { status: 400 }
+      );
+    }
+    
+    // Validate startDate if provided
+    if (startDateParam && isNaN(startDate.getTime())) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid startDate. Please provide a valid date string.' },
+        { status: 400 }
+      );
+    }
+    
+    const startPoint = { lat: startLat, lng: startLng };
+    const endPoint = { lat: endLat, lng: endLng };
+    
+    // Find the path using the transport service
+    const result = await transportService.findPath(startPoint, endPoint);
+    
     // If path was found successfully, calculate the endDate and determine transporter
     if (result.success && result.path) {
       // Calculate the distance of the path
       const distance = calculatePathDistance(result.path);
-      
-      // Calculate travel time based on distance (assume average walking speed of 5 km/h)
-      // 5 km/h = 5000 m/h = 1.4 m/s
-      const averageSpeedMetersPerSecond = 1.4; // This might need adjustment if gondolas have different speeds
-      const travelTimeSeconds = distance / averageSpeedMetersPerSecond;
+      const travelTimeSeconds = calculatePathTravelTime(result.path);
       
       // Calculate endDate by adding travel time to startDate
       const endDate = new Date(startDate.getTime() + (travelTimeSeconds * 1000));
@@ -230,11 +289,7 @@ export async function POST(request: Request) {
     if (result.success && result.path) {
       // Calculate the distance of the path
       const distance = calculatePathDistance(result.path);
-      
-      // Calculate travel time based on distance (assume average walking speed of 5 km/h)
-      // 5 km/h = 5000 m/h = 1.4 m/s
-      const averageSpeedMetersPerSecond = 1.4; // This might need adjustment if gondolas have different speeds
-      const travelTimeSeconds = distance / averageSpeedMetersPerSecond;
+      const travelTimeSeconds = calculatePathTravelTime(result.path);
       
       // Calculate endDate by adding travel time to startDate
       const endDate = new Date(transportStartDate.getTime() + (travelTimeSeconds * 1000));
