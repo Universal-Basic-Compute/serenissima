@@ -301,6 +301,9 @@ const renderDetailedBuildingView = (
     productionInformation, canImport 
   } = building;
 
+  // Note: The `onBuild` prop is available in the outer BuildingCreationPanel's scope.
+  // We'll call it via (BuildingCreationPanel as any).handleBuildClick(building) as before.
+
   const renderResourceList = (items: string[] | undefined, title: string) => {
     if (!items || items.length === 0) return null;
     return (
@@ -324,8 +327,9 @@ const renderDetailedBuildingView = (
   };
 
   return (
-    <div className="bg-amber-50 p-6 rounded-lg shadow-inner text-sm">
-      <div className="flex justify-between items-center mb-6 pb-3 border-b border-amber-300">
+    // Make this root div a flex column that tries to take full height
+    <div className="bg-amber-50 p-6 rounded-lg shadow-inner text-sm flex flex-col h-full">
+      <div className="flex justify-between items-center mb-6 pb-3 border-b border-amber-300 flex-shrink-0">
         <h3 className="text-3xl font-serif text-amber-800">{name}</h3>
         <button 
           onClick={() => (BuildingCreationPanel as any).handleBackToGridClick()}
@@ -335,9 +339,10 @@ const renderDetailedBuildingView = (
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Make the grid container grow and handle overflow for its children */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1 min-h-0">
         {/* Left Column: Image & Basic Info */}
-        <div className="md:col-span-1 space-y-3">
+        <div className="md:col-span-1 space-y-3 overflow-y-auto"> {/* Allow individual column scroll if needed */}
           <img
             src={(BuildingCreationPanel as any).getBuildingImagePath(type)}
             alt={name}
@@ -351,7 +356,7 @@ const renderDetailedBuildingView = (
         </div>
 
         {/* Middle Column: Costs & Description */}
-        <div className="md:col-span-1 space-y-4">
+        <div className="md:col-span-1 space-y-4 overflow-y-auto"> {/* Allow individual column scroll if needed */}
           <div>
             <h4 className="text-lg font-semibold font-serif text-amber-700 mb-2">Description:</h4>
             <p className="text-amber-800 leading-relaxed">{shortDescription || 'No description available.'}</p>
@@ -385,8 +390,8 @@ const renderDetailedBuildingView = (
           <p><strong className="text-amber-700">Can Import Resources:</strong> {canImport ? 'Yes' : 'No'}</p>
         </div>
         
-        {/* Right Column: Production Info */}
-        <div className="md:col-span-1 space-y-4">
+        {/* Right Column: Production Info - Make this column scrollable */}
+        <div className="md:col-span-1 space-y-4 overflow-y-auto">
           {productionInformation && (
             <div>
               <h4 className="text-lg font-semibold font-serif text-amber-700 mb-2">Production Information:</h4>
@@ -438,9 +443,10 @@ const renderDetailedBuildingView = (
         </div>
       </div>
       
-      <div className="mt-8 pt-4 border-t border-amber-300 text-center">
+      {/* Build button section - flex-shrink-0 to prevent it from shrinking */}
+      <div className="mt-8 pt-4 border-t border-amber-300 text-center flex-shrink-0">
         <button
-          onClick={() => (BuildingCreationPanel as any).handleBuildClick(building)} // Accessing via panel instance
+          onClick={() => (BuildingCreationPanel as any).handleBuildClick(building)}
           className="px-6 py-2 bg-green-600 text-white text-lg rounded hover:bg-green-700 transition-colors"
         >
           Build {name} for ⚜️ {formatNumberWithSpaces(constructionCosts?.ducats)}
