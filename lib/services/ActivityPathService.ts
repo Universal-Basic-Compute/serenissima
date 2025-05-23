@@ -7,6 +7,7 @@ export interface ActivityPath {
   type: string;
   startTime: string;
   endTime?: string;
+  notes?: string | null; // Add notes field
 }
 
 export class ActivityPathService {
@@ -100,7 +101,8 @@ export class ActivityPathService {
                   path: validPath, // Use the validated path
                   type: activity.Type || 'unknown',
                   startTime: activity.StartDate || activity.CreatedAt,
-                  endTime: activity.EndDate
+                  endTime: activity.EndDate,
+                  notes: activity.Notes || null // Extract Notes field
                 };
                 
                 pathsMap[citizenId].push(activityPath);

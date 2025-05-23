@@ -169,7 +169,28 @@ const CitizenMarkers: React.FC<CitizenMarkersProps> = ({
     
     // Update the hover state service with the citizen data
     // The service will handle sanitizing the citizen object
-    hoverStateService.setHoveredCitizen(citizen);
+    
+    // Find the most recent activity notes for this citizen
+    const citizenIdForNotes = citizen.username || citizen.citizenid || citizen.CitizenId || citizen.id;
+    const citizenPaths = activityPaths[citizenIdForNotes] || [];
+    let latestNotes: string | null = null;
+    
+    if (citizenPaths.length > 0) {
+      // Sort paths by startTime descending to get the most recent first
+      const sortedPaths = [...citizenPaths].sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
+      const mostRecentPathWithNotes = sortedPaths.find(p => p.notes && p.notes.trim() !== '');
+      if (mostRecentPathWithNotes) {
+        latestNotes = mostRecentPathWithNotes.notes;
+      }
+    }
+    
+    // Add activityNotes to the citizen object for the tooltip
+    const citizenWithNotes = {
+      ...citizen,
+      activityNotes: latestNotes
+    };
+    
+    hoverStateService.setHoveredCitizen(citizenWithNotes);
   };
   
   // Add a function to handle mouse leave
