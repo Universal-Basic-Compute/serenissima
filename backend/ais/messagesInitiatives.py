@@ -180,12 +180,17 @@ def _get_problems_data(tables: Dict[str, Table], username1: str, username2: str,
         # Cette formule OR est généralement correcte, mais si {Citizen} est un champ de lien multiple,
         # la comparaison directe peut être problématique.
         # Utiliser FIND pour plus de robustesse
-        formula = (
-            f"OR("
-            f"FIND('{safe_username1}', ARRAYJOIN({{Citizen}})) > 0,"
-            f"FIND('{safe_username2}', ARRAYJOIN({{Citizen}})) > 0"
-            f")"
-        )
+        conditions = []
+        if safe_username1:
+            conditions.append(f"FIND('{safe_username1}', ARRAYJOIN({{Citizen}})) > 0")
+        if safe_username2:
+            conditions.append(f"FIND('{safe_username2}', ARRAYJOIN({{Citizen}})) > 0")
+
+        if not conditions:
+            print(f"Les deux noms d'utilisateur pour la recherche de problèmes sont vides. Retour d'une liste vide.")
+            return []
+            
+        formula = f"OR({', '.join(conditions)})"
         records = tables["problems"].all(formula=formula, sort=[('-CreatedAt', 'desc')], max_records=limit)
         return [{'id': r['id'], 'fields': r['fields']} for r in records]
     except Exception as e:
