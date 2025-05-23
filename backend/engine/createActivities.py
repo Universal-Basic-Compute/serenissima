@@ -186,7 +186,9 @@ def get_building_type_info(building_type: str) -> Optional[Dict]:
 def get_building_resources(tables, building_id: str) -> Dict[str, float]:
     """Get all resources in a building, returned as a dictionary of resource_type -> count."""
     try:
-        formula = f"{{BuildingId}}='{building_id}'"
+        # Resources associated with a building now use Asset and AssetType
+        escaped_building_id = _escape_airtable_value(building_id)
+        formula = f"AND({{Asset}}='{escaped_building_id}', {{AssetType}}='building')"
         resources = tables['resources'].all(formula=formula)
         
         # Convert to dictionary for easier lookup
