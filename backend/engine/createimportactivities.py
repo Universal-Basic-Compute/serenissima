@@ -570,7 +570,8 @@ def generate_new_citizen(tables: Dict[str, Table], dry_run: bool = False) -> Opt
 
 def create_delivery_activity(tables, citizen: Dict, galley_building_id: str,
                              resources_in_galley_manifest: List[Dict[str, Any]],
-                             original_contract_ids: List[str]) -> Optional[Dict]:
+                             original_contract_ids: List[str],
+                             start_position_override: Optional[Dict[str, float]] = None) -> Optional[Dict]:
     """Create a single delivery activity for the merchant galley."""
     if not resources_in_galley_manifest or not galley_building_id:
         log.warning(f"No resources or galley_building_id to create activity for galley {galley_building_id}")
@@ -585,9 +586,9 @@ def create_delivery_activity(tables, citizen: Dict, galley_building_id: str,
             log.error("Missing Username in citizen record for galley delivery activity")
             return None
 
-        # Conceptual start for a galley arriving from sea
-        # This might need to be adjusted based on map boundaries or a fixed "sea entry point"
-        start_position = {"lat": 45.40, "lng": 12.45} # Example: South-East of Venice in the lagoon
+        # Use provided start_position_override or default
+        start_position = start_position_override if start_position_override else {"lat": 45.40, "lng": 12.45}
+        log.info(f"Galley delivery activity for {galley_building_id} will use start_position: {start_position}")
         
         galley_building_record = tables['buildings'].all(formula=f"{{BuildingId}}='{_escape_airtable_value(galley_building_id)}'", max_records=1)
         if not galley_building_record:
@@ -718,266 +719,254 @@ def process_imports(dry_run: bool = False, night_mode: bool = False):
         return
 
     # Get active import contracts
-    all_active_import_contracts = get_active_contracts(tables)
-    if not all_active_import_contracts:
+    all_active_import_contracts_master_list = get_active_contracts(tables)
+    if not all_active_import_contracts_master_list:
         log.info("No active import contracts found, exiting.")
         return
 
-    # Find the best public dock
-    public_docks = get_public_docks(tables)
-    if not public_docks:
+    # Sort contracts by CreatedAt to process older ones first
+    all_active_import_contracts_master_list.sort(key=lambda x: x['fields'].get('CreatedAt', ''))
+    
+    available_public_docks = get_public_docks(tables)
+    if not available_public_docks:
         log.error("No public_docks found. Cannot determine galley location. Exiting.")
         return
     
-    best_dock = select_best_dock(public_docks)
-    if not best_dock:
-        log.error("Could not select a best public_dock. Exiting.")
-        return
+    # Shuffle docks to vary selection if multiple are "best" or equally good
+    random.shuffle(available_public_docks)
+    
+    # Keep track of used docks in this run to avoid reusing the same one immediately
+    used_dock_ids_this_run = set()
+    galley_departure_point_variation_counter = 0
+
+    while all_active_import_contracts_master_list:
+        log.info(f"--- Starting new galley batch. {len(all_active_import_contracts_master_list)} contracts remaining. ---")
+
+        # Select a dock that hasn't been used in this run yet
+        current_best_dock = None
+        # Try to find an unused dock with highest wages
+        temp_docks_for_selection = [d for d in available_public_docks if d['id'] not in used_dock_ids_this_run]
+        if not temp_docks_for_selection: # All docks used once, reset and pick best from all
+            log.info("All available docks used once in this run. Resetting and selecting best available.")
+            used_dock_ids_this_run.clear()
+            temp_docks_for_selection = list(available_public_docks)
+
+        current_best_dock = select_best_dock(temp_docks_for_selection)
+
+        if not current_best_dock:
+            log.error("Could not select a public_dock for the current batch. Exiting.")
+            break 
         
-    galley_water_coords = get_dock_water_coordinates(best_dock, polygons_data)
-    if not galley_water_coords:
-        log.error(f"Could not determine water coordinates for dock {best_dock['fields'].get('BuildingId', best_dock['id'])}. Exiting.")
-        return
-        
-    galley_building_id = f"water_{galley_water_coords['lat']}_{galley_water_coords['lng']}"
-    
-    # Select a merchant for this import operation
-    selected_merchant_record = select_import_merchant(tables)
-    if not selected_merchant_record:
-        log.error("No available merchant to handle imports. Exiting.")
-        return
-    selected_merchant_username = selected_merchant_record['fields'].get('Username')
-
-    # Create or get the merchant galley building, owned by the selected merchant
-    merchant_galley_building = create_or_get_merchant_galley(tables, galley_building_id, galley_water_coords, selected_merchant_username, dry_run)
-    if not merchant_galley_building:
-        log.error(f"Failed to create or get merchant galley building {galley_building_id} for merchant {selected_merchant_username}. Exiting.")
-        return
-
-    # Aggregate resources from contracts, respecting the 1000 unit cap for the galley
-    # The galley's storageCapacity should ideally come from its building_type definition
-    galley_capacity = 1000.0 
-    # Try to get actual capacity from building_types
-    galley_def = building_types.get("merchant_galley", {})
-    if galley_def and galley_def.get('productionInformation') and 'storageCapacity' in galley_def['productionInformation']:
-        galley_capacity = float(galley_def['productionInformation']['storageCapacity'])
-        log.info(f"Merchant galley capacity set to: {galley_capacity} from definition.")
-    else:
-        log.warning(f"Merchant galley type definition or its storageCapacity not found. Defaulting to {galley_capacity}.")
-
-
-    batched_resources_for_galley: List[Dict[str, Any]] = [] # For RESOURCES table: {'Type': str, 'Amount': float}
-    final_galley_manifest_for_activity: List[Dict[str, Any]] = [] # For Activity.Resources: {'ResourceId': str, 'Amount': float}
-    
-    involved_original_contracts_info: List[Dict[str, Any]] = [] 
-    # For transactions & notes: {'contract_id': str, 'buyer': str, 'resource_type': str, 'amount': float, 'cost': float, 'original_buyer_building': str}
-    
-    current_galley_load = 0.0
-    processed_contract_airtable_ids = set()
-
-    # Sort contracts by CreatedAt to process older ones first
-    all_active_import_contracts.sort(key=lambda x: x['fields'].get('CreatedAt', ''))
-
-    for contract_record in all_active_import_contracts:
-        if current_galley_load >= galley_capacity:
-            log.info(f"Galley reached capacity ({current_galley_load}/{galley_capacity}). Stopping contract aggregation for this run.")
+        used_dock_ids_this_run.add(current_best_dock['id'])
+        log.info(f"Selected dock {current_best_dock['fields'].get('BuildingId', current_best_dock['id'])} for current galley batch.")
+            
+        galley_water_coords = get_dock_water_coordinates(current_best_dock, polygons_data)
+        if not galley_water_coords:
+            log.error(f"Could not determine water coordinates for selected dock {current_best_dock['fields'].get('BuildingId', current_best_dock['id'])}. Skipping this batch.")
+            all_active_import_contracts_master_list.clear() # Avoid infinite loop if dock data is bad
             break
-
-        fields = contract_record['fields']
-        contract_airtable_id = contract_record['id']
-        contract_custom_id = fields.get('ContractId', contract_airtable_id)
-        buyer_username = fields.get('Buyer')
-        resource_type = fields.get('ResourceType')
-        hourly_amount = float(fields.get('HourlyAmount', 0))
-        price_per_resource = float(fields.get('PricePerResource', 0))
-        original_buyer_building_id = fields.get('BuyerBuilding') # Custom ID of final destination
-
-        if not all([buyer_username, resource_type, original_buyer_building_id]) or hourly_amount <= 0 or price_per_resource < 0:
-            log.warning(f"Contract {contract_custom_id} has invalid/missing data. Skipping.")
-            continue
-
-        amount_to_take_from_contract = hourly_amount
-        if current_galley_load + hourly_amount > galley_capacity:
-            amount_to_take_from_contract = galley_capacity - current_galley_load
-            log.info(f"Contract {contract_custom_id} for {hourly_amount} {resource_type} exceeds galley capacity. Taking partial amount: {amount_to_take_from_contract}")
-        
-        if amount_to_take_from_contract <= 0.001: # Epsilon for float
-            continue # No space left for this resource from this contract
-
-        cost_for_this_part = price_per_resource * amount_to_take_from_contract
-        
-        # Check buyer balance before adding to batch
-        buyer_balance = get_citizen_balance(tables, buyer_username)
-        if buyer_balance < cost_for_this_part:
-            log.warning(f"Buyer {buyer_username} has insufficient funds ({buyer_balance:,.2f}) for contract {contract_custom_id} part (cost: {cost_for_this_part:,.2f}). Skipping this contract for now.")
-            continue # Skip this contract, try next one
-
-        # Add to batch
-        current_galley_load += amount_to_take_from_contract
-        processed_contract_airtable_ids.add(contract_airtable_id)
-
-        involved_original_contracts_info.append({
-            'contract_id': contract_custom_id, # Store custom ID
-            'buyer': buyer_username,
-            'resource_type': resource_type,
-            'amount': amount_to_take_from_contract,
-            'cost': cost_for_this_part,
-            'original_buyer_building': original_buyer_building_id
-        })
-
-        # Aggregate for galley's manifest (for activity and resource creation)
-        found_in_batch = False
-        for item in batched_resources_for_galley:
-            if item['Type'] == resource_type:
-                item['Amount'] += amount_to_take_from_contract
-                found_in_batch = True
-                break
-        if not found_in_batch:
-            batched_resources_for_galley.append({'Type': resource_type, 'Amount': amount_to_take_from_contract})
-
-    if not involved_original_contracts_info:
-        log.info("No contracts could be processed for the galley batch (due to capacity, funds, or no contracts). Exiting.")
-        return
-
-    # Prepare manifest for activity's "Resources" field
-    final_galley_manifest_for_activity = [{'ResourceId': item['Type'], 'Amount': item['Amount']} for item in batched_resources_for_galley]
-    
-    log.info(f"Galley batch: {len(batched_resources_for_galley)} resource types, total volume: {current_galley_load:.2f}. Involving {len(involved_original_contracts_info)} contract parts.")
-
-    if dry_run:
-        log.info(f"🧪 **[DRY RUN]** Would process import batch for galley {galley_building_id} at {galley_water_coords}.")
-        log.info(f"  [DRY RUN] Galley manifest: {json.dumps(final_galley_manifest_for_activity)}")
-        for contract_info_dry_run in involved_original_contracts_info:
-            # Payment is deferred, but original contract would be updated
-            log.info(f"  [DRY RUN] Would update contract {contract_info_dry_run['contract_id']} with Seller={selected_merchant_username}, SellerBuilding={galley_building_id}, Transporter={selected_merchant_username}.")
-        for res_item_dry_run in batched_resources_for_galley:
-            log.info(f"  [DRY RUN] Would create/update resource {res_item_dry_run['Type']} (Amount: {res_item_dry_run['Amount']:.2f}) in galley {galley_building_id}, owned by {selected_merchant_username}.")
-        log.info(f"  [DRY RUN] Would find/generate citizen and create one delivery activity to galley {galley_building_id} (acting for {selected_merchant_username}).")
-        log.info(f"🚢 Import processing complete (DRY RUN).")
-        return
-
-    # --- Perform Actual Operations ---
-
-    # --- Perform Actual Operations ---
-
-    # 1. Update Original Contracts with Merchant Details
-    # Only update contracts that were actually processed and included in this galley's batch.
-    log.info(f"Updating {len(processed_contract_airtable_ids)} specific original contracts with merchant {selected_merchant_username} and galley {galley_building_id} as SellerBuilding.")
-    for contract_airtable_id_to_update in processed_contract_airtable_ids:
-        try:
-            # Fetch the contract to get its custom ID for logging, if needed
-            contract_record_for_log = tables['contracts'].get(contract_airtable_id_to_update)
-            contract_custom_id_log = contract_record_for_log['fields'].get('ContractId', contract_airtable_id_to_update) if contract_record_for_log else contract_airtable_id_to_update
             
-            update_payload_contract = {
-                "Seller": selected_merchant_username,
-                "SellerBuilding": galley_building_id, # Custom ID of the galley
-                # "Transporter" field on the original contract remains NULL or as is.
-                # It refers to the transporter from the galley to the buyer, not the merchant importing.
-                # "Status": "processing_by_merchant" # Removed as 'Status' field does not exist
-            }
-            tables['contracts'].update(contract_airtable_id_to_update, update_payload_contract)
-            log.info(f"Updated contract {contract_custom_id_log} (Airtable ID: {contract_airtable_id_to_update}) with Seller='{selected_merchant_username}', SellerBuilding='{galley_building_id}'.")
-        except Exception as e_update_contract:
-            log.error(f"Error updating contract (Airtable ID: {contract_airtable_id_to_update}) with merchant details: {e_update_contract}")
-            # Decide if this is critical enough to stop the whole batch. For now, log and continue.
+        galley_building_id = f"water_{galley_water_coords['lat']}_{galley_water_coords['lng']}_{galley_departure_point_variation_counter}" # Add counter for uniqueness if coords are same
 
-    # 2. Create/Update Resources in the Galley Building (Owned by the selected merchant)
-    galley_position_str = merchant_galley_building['fields'].get('Position', '{}')
-    for res_item in batched_resources_for_galley:
-        res_type_id = res_item['Type']
-        res_amount = res_item['Amount']
-        res_def = resource_types.get(res_type_id, {})
+        # Select a merchant for this import operation
+        selected_merchant_record = select_import_merchant(tables)
+        if not selected_merchant_record:
+            log.error("No available merchant to handle imports for this batch. Exiting.")
+            break
+        selected_merchant_username = selected_merchant_record['fields'].get('Username')
+
+        # Create or get the merchant galley building
+        merchant_galley_building = create_or_get_merchant_galley(tables, galley_building_id, galley_water_coords, selected_merchant_username, dry_run)
+        if not merchant_galley_building:
+            log.error(f"Failed to create/get merchant galley {galley_building_id} for merchant {selected_merchant_username}. Skipping batch.")
+            # Potentially remove this merchant from a list of available merchants for this run if selection is iterative
+            continue # Try next batch with potentially different merchant/dock
+
+        galley_capacity = 1000.0
+        galley_def = building_types.get("merchant_galley", {})
+        if galley_def and galley_def.get('productionInformation') and 'storageCapacity' in galley_def['productionInformation']:
+            galley_capacity = float(galley_def['productionInformation']['storageCapacity'])
+        log.info(f"Merchant galley {galley_building_id} capacity: {galley_capacity}")
+
+        batched_resources_for_galley: List[Dict[str, Any]] = []
+        final_galley_manifest_for_activity: List[Dict[str, Any]] = []
+        involved_original_contracts_info: List[Dict[str, Any]] = []
+        current_galley_load = 0.0
+        processed_contract_airtable_ids_for_this_batch = set()
+        contracts_for_next_iteration = []
+
+        for contract_record in all_active_import_contracts_master_list:
+            if current_galley_load >= galley_capacity:
+                contracts_for_next_iteration.append(contract_record) # Save for next galley
+                continue
+
+            fields = contract_record['fields']
+            contract_airtable_id = contract_record['id']
+            contract_custom_id = fields.get('ContractId', contract_airtable_id)
+            buyer_username = fields.get('Buyer')
+            resource_type = fields.get('ResourceType')
+            hourly_amount = float(fields.get('HourlyAmount', 0))
+            price_per_resource = float(fields.get('PricePerResource', 0))
+            original_buyer_building_id = fields.get('BuyerBuilding')
+
+            if not all([buyer_username, resource_type, original_buyer_building_id]) or hourly_amount <= 0 or price_per_resource < 0:
+                log.warning(f"Contract {contract_custom_id} has invalid data. Skipping.")
+                continue # This contract is problematic, don't add to next iteration either
+
+            amount_to_take_from_contract = hourly_amount
+            if current_galley_load + hourly_amount > galley_capacity:
+                amount_to_take_from_contract = galley_capacity - current_galley_load
+            
+            if amount_to_take_from_contract <= 0.001:
+                contracts_for_next_iteration.append(contract_record) # No space, save for next galley
+                continue
+
+            cost_for_this_part = price_per_resource * amount_to_take_from_contract
+            buyer_balance = get_citizen_balance(tables, buyer_username)
+            if buyer_balance < cost_for_this_part:
+                log.warning(f"Buyer {buyer_username} (Balance: {buyer_balance:,.2f}) insufficient for contract {contract_custom_id} part (Cost: {cost_for_this_part:,.2f}). Saving for later.")
+                contracts_for_next_iteration.append(contract_record) # Save for next galley (buyer might get funds)
+                continue
+
+            current_galley_load += amount_to_take_from_contract
+            processed_contract_airtable_ids_for_this_batch.add(contract_airtable_id)
+            involved_original_contracts_info.append({
+                'contract_id': contract_custom_id, 'buyer': buyer_username, 'resource_type': resource_type,
+                'amount': amount_to_take_from_contract, 'cost': cost_for_this_part,
+                'original_buyer_building': original_buyer_building_id
+            })
+
+            found_in_batch = False
+            for item in batched_resources_for_galley:
+                if item['Type'] == resource_type:
+                    item['Amount'] += amount_to_take_from_contract
+                    found_in_batch = True; break
+            if not found_in_batch:
+                batched_resources_for_galley.append({'Type': resource_type, 'Amount': amount_to_take_from_contract})
         
-        # Resources in a building: Asset=BuildingId, AssetType='building', Owner=MerchantUsername
-        formula = f"AND({{Type}}='{_escape_airtable_value(res_type_id)}', {{Asset}}='{_escape_airtable_value(galley_building_id)}', {{AssetType}}='building', {{Owner}}='{_escape_airtable_value(selected_merchant_username)}')"
-        try:
-            existing_galley_res = tables["resources"].all(formula=formula, max_records=1)
-            if existing_galley_res:
-                tables["resources"].update(existing_galley_res[0]["id"], {"Count": res_amount})
-                log.info(f"Updated resource {res_type_id} (Amount: {res_amount:.2f}) in galley {galley_building_id} for merchant {selected_merchant_username}.")
+        all_active_import_contracts_master_list = contracts_for_next_iteration # Update list for next loop
+
+        if not involved_original_contracts_info:
+            log.info(f"No contracts processed for galley {galley_building_id} in this batch. Moving to next batch or finishing.")
+            if not all_active_import_contracts_master_list: # If no more contracts for future batches
+                break # Exit the while loop
             else:
-                new_res_payload = {
-                    "ResourceId": f"resource-{uuid.uuid4()}",
-                    "Type": res_type_id,
-                    "Name": res_def.get('name', res_type_id),
-                    "Asset": galley_building_id,
-                    "AssetType": "building",
-                    "Owner": selected_merchant_username, # Owned by the selected merchant
-                    "Count": res_amount,
-                    # "Position": galley_position_str, # Removed as 'Position' field does not exist on RESOURCES table
-                    "CreatedAt": datetime.now(timezone.utc).isoformat()
-                }
-                tables["resources"].create(new_res_payload)
-                log.info(f"Created resource {res_type_id} (Amount: {res_amount:.2f}) in galley {galley_building_id} for merchant {selected_merchant_username}.")
-        except Exception as e_res_galley:
-            log.error(f"Error creating/updating resource {res_type_id} in galley {galley_building_id} for merchant {selected_merchant_username}: {e_res_galley}. Stopping.")
-            return
+                galley_departure_point_variation_counter +=1 # Increment for next potential galley
+                continue # Try to form another batch
 
-    # 3. Find/Generate Citizen for Galley Piloting Activity
-    delivery_citizen = find_available_citizen(tables)
-    if not delivery_citizen:
-        log.info(f"No available citizen for galley delivery, generating new one.")
-        delivery_citizen = generate_new_citizen(tables, dry_run=dry_run) # dry_run is False here
-        if not delivery_citizen:
-            log.error(f"Failed to generate new citizen for galley delivery. Stopping.")
-            return
-            
-    try:
-        tables['citizens'].update(delivery_citizen['id'], {"InVenice": True})
-        log.info(f"Set InVenice=True for delivery citizen {delivery_citizen['fields'].get('Username')}.")
-    except Exception as e_inv:
-        log.error(f"Failed to set InVenice=True for citizen {delivery_citizen['fields'].get('Username')}: {e_inv}")
-        # Continue, but this is an issue.
+        final_galley_manifest_for_activity = [{'ResourceId': item['Type'], 'Amount': item['Amount']} for item in batched_resources_for_galley]
+        log.info(f"Galley {galley_building_id} batch: {len(batched_resources_for_galley)} types, volume: {current_galley_load:.2f}. {len(involved_original_contracts_info)} contract parts.")
 
-    # 4. Create Single Delivery Activity (Galley Piloting)
-    original_contract_custom_ids_for_notes = [info['contract_id'] for info in involved_original_contracts_info]
-    
-    # Modify notes for the galley piloting activity
-    piloting_activity_notes = (f"🚢 Piloting merchant galley (for merchant {selected_merchant_username}) "
-                               f"with imported resources to {galley_building_id}. "
-                               f"Original Contract IDs: {', '.join(original_contract_custom_ids_for_notes)}")
+        if dry_run:
+            log.info(f"🧪 **[DRY RUN]** Would process import batch for galley {galley_building_id} at {galley_water_coords} (Merchant: {selected_merchant_username}).")
+            log.info(f"  [DRY RUN] Galley manifest: {json.dumps(final_galley_manifest_for_activity)}")
+            for contract_info_dry_run in involved_original_contracts_info:
+                log.info(f"  [DRY RUN] Would update contract {contract_info_dry_run['contract_id']} with Seller={selected_merchant_username}, SellerBuilding={galley_building_id}.")
+            for res_item_dry_run in batched_resources_for_galley:
+                log.info(f"  [DRY RUN] Would create/update resource {res_item_dry_run['Type']} (Amount: {res_item_dry_run['Amount']:.2f}) in galley {galley_building_id}, owned by {selected_merchant_username}.")
+            log.info(f"  [DRY RUN] Would find/generate citizen and create one delivery activity to galley {galley_building_id}.")
+            galley_departure_point_variation_counter +=1
+            continue # Next iteration of the while loop for dry run
 
-    # Call create_delivery_activity, ensuring the notes are updated
-    # The create_delivery_activity function itself needs to be flexible with its notes or we update notes here.
-    # For now, let's assume create_delivery_activity uses the passed notes.
-    # We need to ensure the `create_delivery_activity` function uses the `original_contract_ids` parameter for the notes.
-    # Let's adjust the call slightly if the function signature for notes is different.
-    # The current signature is: create_delivery_activity(tables, citizen, galley_building_id, resources_in_galley_manifest, original_contract_ids)
-    # The last parameter `original_contract_ids` is used in the notes string construction within that function.
-    
-    activity_created = create_delivery_activity(
-        tables, 
-        delivery_citizen, 
-        galley_building_id, 
-        final_galley_manifest_for_activity, 
-        original_contract_custom_ids_for_notes # This list of IDs will be used in the notes
-    )
-
-    if activity_created:
-        log.info(f"✅ Successfully created galley piloting activity {activity_created['id']} to {galley_building_id} (for merchant {selected_merchant_username}).")
-        arrival_time_iso = activity_created['fields'].get('EndDate')
-
-        # Update the galley's ConstructionDate and PendingDeliveriesData
-        if arrival_time_iso and not dry_run:
-            update_payload_for_galley = {
-                "IsConstructed": False, 
-                "ConstructionDate": arrival_time_iso, 
-                "PendingDeliveriesData": json.dumps(involved_original_contracts_info)
-                # Owner and RunBy are already set to the merchant during galley creation/retrieval
-            }
+        # --- Actual Operations for this Galley Batch ---
+        log.info(f"Updating {len(processed_contract_airtable_ids_for_this_batch)} original contracts for galley {galley_building_id} (Merchant: {selected_merchant_username}).")
+        for contract_airtable_id_to_update in processed_contract_airtable_ids_for_this_batch:
             try:
-                tables['buildings'].update(merchant_galley_building['id'], update_payload_for_galley)
-                log.info(f"Updated galley {galley_building_id} (Airtable ID: {merchant_galley_building['id']}) with IsConstructed=False, ConstructionDate={arrival_time_iso}, and PendingDeliveriesData.")
-            except Exception as e_update_galley:
-                log.error(f"Error updating galley {galley_building_id} with arrival data: {e_update_galley}")
-        elif dry_run:
-            log.info(f"[DRY RUN] Would update galley {galley_building_id} with IsConstructed=False, ConstructionDate={arrival_time_iso}, and PendingDeliveriesData: {json.dumps(involved_original_contracts_info)}")
+                contract_record_for_log = tables['contracts'].get(contract_airtable_id_to_update)
+                contract_custom_id_log = contract_record_for_log['fields'].get('ContractId', contract_airtable_id_to_update) if contract_record_for_log else contract_airtable_id_to_update
+                update_payload_contract = {"Seller": selected_merchant_username, "SellerBuilding": galley_building_id}
+                tables['contracts'].update(contract_airtable_id_to_update, update_payload_contract)
+                log.info(f"Updated contract {contract_custom_id_log} (Airtable ID: {contract_airtable_id_to_update}) with Seller='{selected_merchant_username}', SellerBuilding='{galley_building_id}'.")
+            except Exception as e_update_contract:
+                log.error(f"Error updating contract (Airtable ID: {contract_airtable_id_to_update}): {e_update_contract}")
 
-    else:
-        log.error(f"Failed to create galley piloting activity to {galley_building_id} for merchant {selected_merchant_username}.")
+        for res_item in batched_resources_for_galley:
+            res_type_id, res_amount = res_item['Type'], res_item['Amount']
+            res_def = resource_types.get(res_type_id, {})
+            formula = f"AND({{Type}}='{_escape_airtable_value(res_type_id)}', {{Asset}}='{_escape_airtable_value(galley_building_id)}', {{AssetType}}='building', {{Owner}}='{_escape_airtable_value(selected_merchant_username)}')"
+            try:
+                existing_galley_res = tables["resources"].all(formula=formula, max_records=1)
+                if existing_galley_res:
+                    tables["resources"].update(existing_galley_res[0]["id"], {"Count": res_amount})
+                else:
+                    new_res_payload = {
+                        "ResourceId": f"resource-{uuid.uuid4()}", "Type": res_type_id, "Name": res_def.get('name', res_type_id),
+                        "Asset": galley_building_id, "AssetType": "building", "Owner": selected_merchant_username,
+                        "Count": res_amount, "CreatedAt": datetime.now(timezone.utc).isoformat()
+                    }
+                    tables["resources"].create(new_res_payload)
+                log.info(f"Processed resource {res_type_id} (Amount: {res_amount:.2f}) in galley {galley_building_id} for merchant {selected_merchant_username}.")
+            except Exception as e_res_galley:
+                log.error(f"Error creating/updating resource {res_type_id} in galley {galley_building_id}: {e_res_galley}. This batch might be incomplete.")
+                # This is a critical error for this batch, but we might continue to next batch.
 
-    log.info(f"🚢 Import processing complete for merchant {selected_merchant_username}. Galley {galley_building_id} dispatch initiated.")
+        delivery_citizen = find_available_citizen(tables)
+        if not delivery_citizen:
+            log.info("No available citizen for galley delivery, generating new one.")
+            delivery_citizen = generate_new_citizen(tables, dry_run=dry_run)
+            if not delivery_citizen:
+                log.error("Failed to generate new citizen for galley delivery. Skipping activity for this batch.")
+                galley_departure_point_variation_counter +=1
+                continue # Try next batch
+
+        try:
+            tables['citizens'].update(delivery_citizen['id'], {"InVenice": True})
+            log.info(f"Set InVenice=True for delivery citizen {delivery_citizen['fields'].get('Username')}.")
+        except Exception as e_inv:
+            log.error(f"Failed to set InVenice=True for citizen {delivery_citizen['fields'].get('Username')}: {e_inv}")
+
+        original_contract_custom_ids_for_notes = [info['contract_id'] for info in involved_original_contracts_info]
+        
+        # Vary departure point slightly for each galley
+        departure_offset_lat = (galley_departure_point_variation_counter % 5 - 2) * 0.001 # e.g., -0.002 to +0.002
+        departure_offset_lng = (galley_departure_point_variation_counter // 5 % 5 - 2) * 0.001
+        
+        # Base sea entry point, adjust if needed
+        base_sea_entry_lat, base_sea_entry_lng = 45.40, 12.45 
+        current_departure_point = {
+            "lat": base_sea_entry_lat + departure_offset_lat,
+            "lng": base_sea_entry_lng + departure_offset_lng
+        }
+        log.info(f"Galley {galley_building_id} will depart from varied sea point: {current_departure_point}")
+
+        # Override start_position in create_delivery_activity if it uses a fixed one
+        # The create_delivery_activity function needs to accept a start_position parameter
+        # For now, we assume it can be influenced or we modify it to accept one.
+        # The current create_delivery_activity uses a fixed start_position. We'll need to adjust it.
+        # Let's assume create_delivery_activity is modified to take start_position.
+        # If not, this logic needs to be integrated into it or path_data needs to be pre-generated with this start.
+        
+        # Re-generating path_data with the new start_position for this specific galley
+        # This is a simplified path_data generation for the example.
+        # In a real scenario, you'd call the transport API with current_departure_point.
+        # For now, we'll pass the varied start_position to create_delivery_activity and assume it uses it.
+        
+        activity_created = create_delivery_activity(
+            tables, delivery_citizen, galley_building_id, 
+            final_galley_manifest_for_activity, 
+            original_contract_custom_ids_for_notes,
+            current_departure_point # Pass the varied departure point
+        )
+
+        if activity_created:
+            log.info(f"✅ Galley piloting activity {activity_created['id']} created for {galley_building_id} (Merchant: {selected_merchant_username}).")
+            arrival_time_iso = activity_created['fields'].get('EndDate')
+            if arrival_time_iso and not dry_run: # Redundant dry_run check, but safe
+                update_payload_for_galley = {
+                    "IsConstructed": False, "ConstructionDate": arrival_time_iso,
+                    "PendingDeliveriesData": json.dumps(involved_original_contracts_info)
+                }
+                try:
+                    tables['buildings'].update(merchant_galley_building['id'], update_payload_for_galley)
+                    log.info(f"Updated galley {galley_building_id} with arrival data.")
+                except Exception as e_update_galley:
+                    log.error(f"Error updating galley {galley_building_id} with arrival data: {e_update_galley}")
+        else:
+            log.error(f"Failed to create galley piloting activity for {galley_building_id}.")
+        
+        galley_departure_point_variation_counter +=1 # Increment for next galley's departure point
+
+    log.info(f"🚢 Import processing complete. All contracts processed or remaining contracts list is empty.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process import contracts into a central galley.")
